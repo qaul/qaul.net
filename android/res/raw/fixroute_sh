@@ -1,0 +1,25 @@
+while true; do
+r=0
+w=0
+while read l; do
+    	case "$l" in *rmnet*) 
+		r=1
+	esac;
+       	case "$l" in *$1*)
+		case "$l" in *$2*) 
+			case "$l" in *$3*)
+				w=1
+			esac;
+		esac;
+	esac;
+done << EOF
+$(/system/bin/ip route show table gprs)
+EOF
+
+case "$r" in *1*)
+	case "$w" in *0*)
+		/system/bin/ip route add table gprs $2 dev $1 proto kernel scope link src $3 
+	esac;
+esac;
+sleep 2
+done

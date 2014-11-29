@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+	<!--[if gte IE 8]><meta http-equiv="X-UA-Compatible" content="IE=8"/><![endif]-->
+	<!--[if gte IE 7]><meta http-equiv="X-UA-Compatible" content="IE=7"/><![endif]-->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>qaul.net</title>
+	<link rel="stylesheet" type="text/css" href="jquery.mobile.min.css" />
+	<link rel="stylesheet" type="text/css" href="qaul.css"/> 
+	<link rel="stylesheet" type="text/css" href="qaul_presentation.css"/> 
+	<script type="text/javascript" src="jquery.min.js"></script>
+	<script type="text/javascript" src="jquery-jsonp.min.js"></script>
+	<script type="text/javascript" src="jquery.validate.min.js"></script>
+	<script type="text/javascript" src="jquery.progressbar.min.js"></script>
+	<script type="text/javascript" src="jquery.i18n.min.js"></script>
+	<script type="text/javascript" src="jquery.mobile.min.js"></script>
+	<script type="text/javascript" src="string2byte.js"></script>
+	<script type="text/javascript" src="qaul.js"></script>
+</head>
+<body>
+
+<div data-role="page" id="page_loading" data-theme="d">
+	<div data-role="content">
+		&nbsp;
+	</div>
+</div>
+
+<div data-role="page" id="page_config_locale" data-theme="d">
+	<div data-role="content" >
+		<p>
+			<form action="locale" method="post" id="locale_form">
+				<fieldset data-role="controlgroup">
+					<legend>&nbsp;</legend>
+					<input type="radio" name="l" id="locale_en" value="en" checked="checked"/>
+					<label for="locale_en">English</label>
+			
+					<input type="radio" name="l" id="locale_es" value="es"/>
+					<label for="locale_es">Español</label>
+
+					<input type="radio" name="l" id="locale_ar" value="ar"/>
+					<label for="locale_ar">العربية</label>
+			
+					<input type="radio" name="l" id="locale_fr" value="fr"/>
+					<label for="locale_fr">Français</label>
+<!--
+					<input type="radio" name="l" id="locale_ja" value="ja"/>
+					<label for="locale_ja">日本語</label>
+-->
+					<input type="radio" name="l" id="locale_de" value="de"/>
+					<label for="locale_de">Deutsch</label>
+
+					<input type="radio" name="l" id="locale_tr" value="tr"/>
+					<label for="locale_tr">Türkçe</label>
+
+					<input type="radio" name="l" id="locale_nl" value="nl"/>
+					<label for="locale_nl">Nederlands</label>
+
+					<input type="radio" name="l" id="locale_el" value="el"/>
+					<label for="locale_el">ελληνικά</label>
+				</fieldset>
+				<input class="submit" type="submit" value="OK" id="locale_submit" data-icon="arrow-r" data-iconpos="right"/>
+			</form>
+		</p>
+		<p class="c_init"><a href="#page_pref" data-role="button" data-icon="arrow-l" data-direction="reverse" class="i18n">Back</a></p>
+	</div>
+</div>
+
+<div data-role="page" id="page_config_name" data-theme="d">
+	<div data-role="content" >
+		<p>
+			<form action="chat" method="post" id="name_form">
+				<label for="name_name" class="i18n">Choose a user name</label>
+				<input type="text" name="n" id="name_name" class="required nospaces userlen"/>
+				<input class="submit i18n" type="submit" value="Save" id="name_submit"/>
+			</form>
+		</p>
+		<p class="c_init"><a href="#page_pref" data-role="button" data-icon="arrow-l" data-direction="reverse" class="i18n">Back</a></p>
+	</div>
+</div>
+
+<div data-role="page" id="page_chat" data-theme="d">
+	<div data-role="content" >
+		<p>
+			<form action="chat" method="post" id="chat_form">
+				<input type="hidden" name="n" id="chat_name" value="undefined"/> 
+				<input type="text" name="m" id="chat_msg" class="required chatlen"/>
+				<input class="submit i18n" type="submit" value="Send" id="chat_submit"/>
+			</form>
+		</p>
+		<div id="chat">&nbsp;</div>
+	</div>
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
+		<div data-role="navbar" data-theme="c">
+			<ul>
+				<li><a href="#page_chat" onclick="javascript:get_msgs();" data-theme="b" data-transition="none" class="i_chat">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_users" onclick="javascript:get_users();" data-transition="none" class="i_users">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_file" onclick="javascript:file_update();" data-transition="none" class="i_filesharing">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_pref" data-transition="none" class="i_prefs">&nbsp;</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<div data-role="page" id="page_users" data-theme="d">
+	<div data-role="content" >
+		<ul data-role="listview" data-inset="true" id="favorites">
+			<li id="favorites_divider" data-role="list-divider" class="i18n">Favorites / Friends</li>
+		</ul>
+		<br/>
+		<ul data-role="listview" data-inset="true" id="users" data-theme="d" data-filter="true" data-filter-placeholder="Filter items">
+			<li id="users_divider" data-role="list-divider" class="i18n">Other Users</li>
+		</ul>
+	</div>
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page_chat" onclick="javascript:get_msgs();" data-transition="none" class="i_chat">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_users" onclick="javascript:get_users();" data-theme="b" data-transition="none" class="i_users">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_file" onclick="javascript:file_update();" data-transition="none" class="i_filesharing">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_pref" data-transition="none" class="i_prefs">&nbsp;<span class="ui-li-count"></span></a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<div data-role="page" id="page_pref" data-theme="d">
+	<div data-role="content" >
+		<h1>À propos de qaul.net</h1>
+		<h3>
+		qaul.net met en oeuvre un principe de communication redondant, ouvert, dans lequel les ordinateurs sans fil et les appareils mobiles peuvent former directement un réseau spontané. La messagerie de texte, le partage de fichiers et les appels vocaux deviennent indépendants des réseaux d’opérateurs téléphoniques et d’Internet. qaul.net peut se propager comme un virus, et être librement modifié par une communauté Open Source.
+		</h3><h3>
+		En ces temps de ruptures de communication en Egypte, en Birmanie ou au Tibet, et de massives pannes électriques causées par des catastrophes naturelles, qaul.net a relevé le défi de l'examen critique des voies de communication existantes, tout en explorant simultanément de nouveaux horizons. 
+		</h3>
+		<p><img src="info/images/about_viral.png" style="width:100%;"/></p>
+		<p>
+		Le programme se transmet comme un virus: d’utilisateur à utilisateur. Quand un nouvel utilisateur découvre un accès wifi qaul.net, il peut télécharger le logiciel à partir de cette connexion. Après installation, il peut l'utiliser immédiatement, et le transmettre à d'autres.
+		</p>
+		<p>
+		qaul.net relie directement différents appareils sans fil sur le réseau maillé, il fonctionne donc sans un fournisseur de service mobile ou du serveur.
+		</p>
+		<h1>Comment utiliser qaul.net</h1>
+		<p>
+		Au démarrage, qaul.net configure automatiquement votre appareil et le réseau.
+		</p>
+		<p>
+		qaul.net propose de nombreux services:
+		</p>
+		<p><img src="info/images/howto_123.png" style="width:100%;"/></p>
+		<table class="description" width="100%">
+		<tr>
+		<td width="33%">
+		<p style="text-align:center;">Session de chat</p>
+		</td>
+		<td width="33%">
+		<p style="text-align:center;">Messagerie privée</p>
+		</td>
+		<td width="34%">
+		<p style="text-align:center;">Appels vocaux</p>
+		</td>
+		</tr>
+		</table>
+	</div>
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page_chat" onclick="javascript:get_msgs();" data-transition="none" class="i_chat">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_users" onclick="javascript:get_users();" data-transition="none" class="i_users">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_file" onclick="javascript:file_update();" data-transition="none" class="i_filesharing">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_pref" data-theme="b" data-transition="none" class="i_prefs">&nbsp;<span class="ui-li-count"></span></a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<div data-role="page" id="page_file" data-theme="d">
+	<div data-role="content" >
+		<!--<p><a href="javascript:show_addfile_page()" id="file_addbutton" data-role="button" data-icon="plus" class="i18n">Add File</a></p>-->
+		<div id="page_file_list"></div>
+	</div>
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page_chat" onclick="javascript:get_msgs();" data-transition="none" class="i_chat">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_users" onclick="javascript:get_users();" data-transition="none" class="i_users">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_file" onclick="javascript:file_update();" data-theme="b" data-transition="none" class="i_filesharing">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_pref" data-transition="none" class="i_prefs">&nbsp;<span class="ui-li-count"></span></a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<div data-role="page" id="page_file_add" data-theme="d">
+	<div data-role="header" data-position="fixed" data-theme="d">
+		<h1 class="i18n">Add File</h1>
+		<a href="#page_file" data-icon="arrow-l" data-direction="reverse" class="i18n">Back</a>
+	</div>
+	<div data-role="content" >
+		<p>
+			<div id="file_add_filename"></div>
+			<form action="file_add.json" method="post" id="file_add_form">
+				<input type="hidden" name="p" id="file_add_path" value=""/>
+				<label for="file_add_msg" class="i18n">File description</label>
+				<input type="text" name="m" id="file_add_msg" class="required filedesclen"/>
+				<input type="checkbox" checked="checked" name="a" value="1" id="file_add_advertise"/>
+				<label for="file_add_advertise" class="i18n">Advertise file</label>
+				<input type="submit" value="Add File" id="file_add_submit" class="i18n submit"/>
+			</form>
+		</p>
+	</div>
+</div>
+
+<div data-role="page" id="page_user" data-theme="d">
+	<div data-role="header" data-position="fixed" data-theme="d">
+		<div class="qaul_header">
+			<a href="javascript:user_goback()" data-role="button" data-icon="arrow-l" data-inline="true" data-direction="reverse" class="i18n" style="float:left;">Back</a>
+			<img src="images/i_conn0_30.png" style="float:right;width:50px;"/>
+			<h1 id="page_user_name" user_id="" style="text-align:center;">username</h1>
+		</div>
+	</div>
+	<div data-role="content" id="page_user_content">
+		<div id="page_user_tab_chat">
+			<div data-role="navbar">
+				<ul>
+					<li><a onclick="javascript:user_changetochat('chat')" data-theme="b"><img src="images/i_chat_32.png"/></a></li>
+					<li><a onclick="javascript:user_changetofiles('files')" class="page_user_tab_blue"><img src="images/i_file_32.png"/></a></li>
+					<li><a onclick="javascript:call_start()" class="page_user_tab_blue"><img src="images/i_call_32.png"/></a></li>
+				</ul>
+			</div>
+			<p id="page_user_send">
+				<form action="user_chat" method="post" id="user_chat_form">
+					<input type="hidden" name="n" id="user_chat_name" value="undefined"/>
+					<input type="hidden" name="ip" id="user_chat_ip" value="undefined"/>
+					<input type="text" name="m" id="user_chat_msg" class="required chatlen"/>
+					<input type="submit" value="Send Private Message" id="user_chat_submit" class="i18n submit"/>
+				</form>
+			</p>
+			<div id="page_user_queue"></div>
+			<div id="page_user_msgs"></div>
+		</div>
+		<div id="page_user_tab_files">
+			<div data-role="navbar">
+				<ul>
+					<li><a onclick="javascript:user_changetochat('chat')" class="page_user_tab_blue"><img src="images/i_chat_32.png"/></a></li>
+					<li><a onclick="javascript:user_changetofiles('files')" data-theme="b"><img src="images/i_file_32.png"/></a></li>
+					<li><a onclick="javascript:call_start()" class="page_user_tab_blue"><img src="images/i_call_32.png"/></a></li>
+				</ul>
+			</div>
+			<div id="page_user_files"></div>
+		</div>
+	</div>
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page_chat" onclick="javascript:get_msgs();" data-transition="none" class="i_chat">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_users" onclick="javascript:get_users();" data-theme="b" data-transition="none" class="i_users">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_file" onclick="javascript:file_update();" data-transition="none" class="i_filesharing">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_pref" data-transition="none" class="i_prefs">&nbsp;<span class="ui-li-count"></span></a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<div data-role="page" id="page_tag" data-theme="d">
+	<div data-role="header" data-position="fixed" data-theme="d">
+		<h1 id="page_tag_name">#tag</h1>
+		<a href="javascript:user_goback()" data-icon="arrow-l" data-direction="reverse" class="i18n">Back</a>
+	</div>
+	<div data-role="content" id="page_tag_content">
+		<p>
+			<form action="chat" method="post" id="tag_chat_form" class="validate">
+				<input type="hidden" name="n" id="tag_chat_name" value="undefined"/>
+				<input type="text" name="m" id="tag_chat_msg" class="required chatlen"/>
+				<input class="submit i18n" type="submit" value="Send" id="tag_chat_submit"/>
+			</form>
+		</p>
+		<div id="page_tag_msgs"></div>
+	</div>
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page_chat" onclick="javascript:get_msgs();" data-theme="b" data-transition="none" class="i_chat">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_users" onclick="javascript:get_users();" data-transition="none" class="i_users">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_file" onclick="javascript:file_update();" data-transition="none" class="i_filesharing">&nbsp;<span class="ui-li-count"></span></a></li>
+				<!--<li><a href="#page_pref" data-transition="none" class="i_prefs">&nbsp;<span class="ui-li-count"></span></a></li>-->
+			</ul>
+		</div>
+	</div>
+</div>
+
+<div data-role="page" id="page_call" data-theme="d">
+	<div id="page_call_header" data-role="header" data-position="fixed" data-theme="d">
+		<h1 id="page_call_title"><img src="images/i_call_sign_32.png"/></h1>
+	</div>
+	<div data-role="content" id="page_call_content">
+		<h2 id="call_user">User</h2>
+		<p id="call_info">calling</p>
+		<p id="call_buttons">
+		</p>
+	</div>
+</div>
+
+<div data-role="page" id="page_iphone" data-theme="d">
+	<div data-role="content">
+		<p class="i18n">Please turn on your wifi account and select the network: <strong>qaul.net</strong></p>
+		<p class="i18n">Then click <strong>next</strong></p>
+		<p><a href="javascript:set_wifiset()" data-role="button" data-icon="arrow-r" data-iconpos="right" class="i18n">Next</a></p>
+	</div>
+</div>
+
+<div data-role="page" id="page_restart" data-theme="d">
+	<div data-role="content">
+		<p class="qaul_center"><br/><img src="images/i_reboot_64.png"/><br/><br/></p>
+		<h2 class="i18n qaul_center">This configuration requires a restart</h2>
+		<h2 class="i18n qaul_center">Please restart qaul.net</h2>
+		<p class="c_quit"><a href="javascript:quit_qaul()" data-role="button" class="i18n">Quit qaul.net</a></p>
+	</div>
+</div>
+
+<div data-role="page" id="page_goodbye" data-theme="d">
+	<div data-role="content">
+		<h1 class="i18n">Goodbye</h1>
+	</div>
+</div>
+
+<div data-role="page" id="page_dialog">
+	<div data-role="header" data-position="fixed" data-theme="d">
+		<h1 id="page_dialog_title" class="i18n">&nbsp;</h1>
+	</div>
+	<div data-role="content" id="page_dialog_content">
+		<p class="i18n">User not reachable</p>
+		<p class="i18n">Please try again</p>
+	</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+{
+"Name of this Language":"Français",
+
+"OK":"OK",
+"Save":"Enregistrer",
+"Send":"Envoyer",
+"Delete":"Supprimer",
+"Back":"Retour",
+"Next":"Continuer",
+
+"Favorites / Friends":"Favoris / Amis",
+"Other Users":"Autres utilisateurs",
+"Filter items":"Filtrer les entrées",
+
+"Chat":"Chat",
+"File Sharing":"Partage de fichiers",
+"Send Private Message":"Envoyer un message privé",
+"User Discovery":"Liste de contacts",
+
+"File description":"Description du fichier",
+"Advertise file":"Faire connaître le fichier",
+"Add File":"Ajouter un fichier",
+"%s has no shared files":"%s n'a pas de fichier partagés",
+
+"Choose a user name":"Choisissez un nom d'utilisateur",
+"Quit qaul.net":"Quitter qaul.net",
+
+"Information":"Information",
+"About qaul.net":"A propos de qaul.net",
+"How To's":"Instructions",
+"License":"License",
+"Configuration":"Configuration",
+"Change Language":"Changer la langue",
+"Change User Name":"Changer le nom d'utilisateur",
+"Change Network Interface":"Changer l'interface du réseau",
+"Show Network":"Topologie du réseau",
+
+"Select network interface manually":"Choisir l'interface du réseau manuellement",
+"On":"Oui",
+"Off":"Non",
+
+"Connecting":"Connexion",
+"Ringing":"Sonne",
+"Is calling":"Appelle",
+"Establishing connection":"Etablissement de la connexion", 
+"Connected":"Connecté",
+"Call ended":"La conversation est terminée",
+"Is busy":"Occupé",
+"Not reachable":"injoignable",
+"You called %s":"Vous avez appelé %s",
+"Incoming call from %s":"Appel entrant de %s",
+
+"This field is required":"Ce champ est requis",
+"Spaces are not allowed in the user name":"Les espaces ne sont pas permis dans les noms d'utilisateur",
+"User name is too long":"Le nom d'utilisateur est trop long",
+"Message is too long":"Le message est trop long",
+"Description is too long":"Le commentaire est trop long",
+
+"An Error Occurred":"Une erreur est survenue",
+"Couldn't send message":"Le message n'a pas pu être envoyé",
+"User not reachable":"L'utilisateur ne peut pas être atteint",
+"No WIFI Interface Found":"Pas d'interface WIFI trouvée",
+"Please try again":"Réessayez encore",
+
+"Join qaul.net":"Rejoins qaul.net",
+"Download and install the qaul.net software on your device":"Téléchargez et installez le logiciel qaul.net sur votre dispositif",
+
+"Goodbye":"Au revoir",
+
+"Your configuration has been saved":"Votre configuration a été enregistrée",
+"You need to restart qaul.net to activate it":"Redémarrez qaul.net pour l'activer"
+}

@@ -1,0 +1,76 @@
+{
+"Name of this Language":"Ελληνικά",
+
+"OK":"OK",
+"Save":"Αποθήκευση",
+"Send":"Αποστολή",
+"Delete":"Διαγραφή",
+"Back":"Πίσω",
+"Next":"Next",
+
+"Favorites / Friends":"Αγαπημένα / Φίλοι",
+"Other Users":"Άλλοι χρήστες",
+"Filter items":"Φιλτράρισμα στοιχείων",
+
+"Chat":"Αποστολή μηνύματος",
+"File Sharing":"Κοινή χρήση αρχείων",
+"Files":"Αρχεία",
+"Send Private Message":"Αποστολή προσωπικού μηνύματος",
+"User Discovery":"Λίστα επαφών",
+
+"File description":"Περιγραφή αρχείου",
+"Advertise file":"Διαφήμιση αρχείου",
+"Add File":"Προσθήκη αρχείου",
+"%s has no shared files":"%s hat keine öffentlichen Dateien.",
+
+"Choose a user name":"Επιλογή ονόματος χρήστη",
+"Quit qaul.net":"Κλείσιμο qaul.net",
+
+"Information":"Πληροφορίες",
+"About qaul.net":"Πληροφορίες σχετικά με το λογισμικό qaul.net",
+"How To's":"Πώς να",
+"License":"Άδεια",
+"Configuration":"Διαμόρφωση",
+"Change Language":"Αλλαγή Γλώσσας",
+"Change User Name":"Αλλαγή ονόματος χρήστη",
+"Change Network Interface":"Change Network Interface",
+"Show Network":"Show Network",
+
+"Select network interface manually":"Select network interface manually",
+"On":"On",
+"Off":"Off",
+
+"Connecting":"Σύνδεση",
+"Ringing":"Klingeln",
+"Is calling":"Καλεί",
+"Establishing connection":"Δημιουργία σύνδεσης",
+"Connected":"Συνδεδεμένο",
+"Call ended":"Η κλήση τερματίστηκε",
+"Is busy":"Απασχολημένο",
+"Not reachable":"Μη Διαθέσιμος",
+"End Call":"Τερματισμος κλήσης",
+"Accept Call":"Αποδοχή κλήσης",
+"Reject Call":"Απόρριψη κλήσης",
+"You called %s":"%s Καλέσατε",
+"Incoming call from %s":"Εισερχόμενη κλήση από %s",
+
+"This field is required":"Απαιτείται",
+"Spaces are not allowed in the user name":"Το όνομα του χρήστη δεν πρέπει να περιέχει κενά",
+"User name is too long":"Το όνομα του χρήστη είναι πολύ μεγάλο",
+"Message is too long":"Το μήνυμα είναι πολύ μεγάλο",
+"Description is too long":"Η περιγραφή είναι πολύ μεγάλη",
+
+"An Error Occurred":"Κάποιο πρόβλημα παρουσιάστηκε",
+"Couldn't send message":"Αποστολή μηνύματος απέτυχε",
+"User not reachable":"Ο χρήστης είναι μη διαθέσιμος",
+"No WIFI Interface Found":"Δεν βρέθηκε WIFI διασύνδεση",
+"Please try again":"Παρακαλώ προσπαθήστε ξανά",
+
+"Join qaul.net":"Συμμετοχή στο qaul.net",
+"Download and install the qaul.net software on your device":"Κατεβάστε και εγκαταστήστε το λογισμικό qaul.net στη συσκευή σας",
+
+"Goodbye":"",
+
+"Your configuration has been saved":"Your configuration has been saved",
+"You need to restart qaul.net to activate it":"You need to restart qaul.net to activate it"
+}

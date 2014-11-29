@@ -1,0 +1,8 @@
+{"profile":{"name":"Custom Profile","homepage":"","info":""},
+"ip":{"edit":"true","generate":"false","value":""},
+"mask":{"edit":"true","value":""},
+"broadcast":{"edit":"true","value":""},
+"channel":{"edit":"true","value":""},
+"ssid":{"edit":"true","value":""},
+"bssid":{"edit":"true","value":""}
+}

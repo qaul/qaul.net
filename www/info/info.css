@@ -1,0 +1,24 @@
+.qaul_info {
+	max-width:600px;
+	margin:0 auto;
+}
+
+table.description {
+	margin:0;
+	padding:0;
+}
+.description td {
+	width:300px;
+	margin:0;
+	padding:0;
+	vertical-align:top;
+}
+
+img.info {
+	max-width:100%;
+}
+
+.ui-bar-d {
+	background-color:#ffffff;
+	opacity: 0.9
+}

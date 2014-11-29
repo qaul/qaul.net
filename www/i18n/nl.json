@@ -1,0 +1,72 @@
+{
+"Name of this Language":"Nederlands",
+
+"OK":"OK",
+"Save":"opslaan",
+"Send":"versturen",
+"Delete":"verwijderen",
+"Back":"terug",
+"Next":"Next",
+
+"Favorites / Friends":"favorieten / vrienden",
+"Other Users":"andere gebruikers",
+"Filter items":"items filteren",
+
+"Chat":"chat",
+"File Sharing":"file sharing",
+"Send Private Message":"privé bericht versturen",
+"User Discovery":"contact lijst",
+
+"File description":"descriptie van het bestand",
+"Advertise file":"bestand openbaar maken",
+"Add File":"bestand toevoegen",
+"%s has no shared files":"%s heeft geen openbare bestanden",
+
+"Choose a user name":"kies een gebruikersnaam",
+"Quit qaul.net":"qaul.net afsluiten",
+
+"Information":"informatie",
+"About qaul.net":"over qaul.net",
+"How To's":"instructies",
+"License":"licentie",
+"Configuration":"configuratie",
+"Change Language":"taal wijzigen",
+"Change User Name":"gebruikersnaam wijzigen",
+"Change Network Interface":"Change Network Interface",
+"Show Network":"Show Network",
+
+"Select network interface manually":"Select network interface manually",
+"On":"On",
+"Off":"Off",
+
+"Connecting":"aansluiten",
+"Ringing":"bellen",
+"Is calling":"opbellen",
+"Establishing connection":"verbinding toestand brengen",
+"Connected":"aangesloten",
+"Call ended":"gesprek beeindigd",
+"Is busy":"in gesprek",
+"Not reachable":"niet bereikbaar",
+"You called %s":"Jij hebt %s gebeld",
+"Incoming call from %s":"inkomend gesprek van %s",
+
+"This field is required":"schrijf iets",
+"Spaces are not allowed in the user name":"spatie binnen gebruikersnaam niet toegestaan",
+"User name is too long":"gebruikersnaam toe lang",
+"Message is too long":"bericht toe lang",
+"Description is too long":"descriptie toe lang",
+
+"An Error Occurred":"er is een fout opgetreden",
+"Couldn't send message":"bericht konde niet verstuurd worden",
+"User not reachable":"gebruiker niet bereikbaar",
+"No WIFI Interface Found":"er konde geen WIFI interface gevonden worden",
+"Please try again":"nog eens proberen alstublieft",
+
+"Join qaul.net":"doe mee bij qaul.net",
+"Download and install the qaul.net software on your device":"download en installeer qaul.net software op jou apparaat",
+
+"Goodbye":"tot ziens!",
+
+"Your configuration has been saved":"Your configuration has been saved",
+"You need to restart qaul.net to activate it":"You need to restart qaul.net to activate it"
+}

@@ -1,0 +1,10 @@
+#!/system/bin/sh
+
+LOCAL_DIR=/data/data/net.qaul.qaul
+
+# start iptables
+/system/bin/iptables -t nat -I PREROUTING 1 -i $1 -p tcp -d $2 --dport 80 -j REDIRECT --to-port 8081
+/system/bin/iptables -t nat -I PREROUTING 1 -i $1 -p udp -d $2 --dport 53 -j REDIRECT --to-port 8053
+
+# start port forwarding
+/data/data/net.qaul.qaul/bin/socat UDP4-RECVFROM:67,fork UDP4-SENDTO:localhost:8067 &

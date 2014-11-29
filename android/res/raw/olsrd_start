@@ -1,0 +1,9 @@
+#!/system/bin/sh
+
+# kill olsrd in case it should already be running
+killall olsrd
+
+# start olsrd
+LOCAL_DIR=/data/data/net.qaul.qaul
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LOCAL_DIR/bin
+$LOCAL_DIR/bin/olsrd -i $1 -f $LOCAL_DIR/bin/olsrd.conf -d 0 -nofork &

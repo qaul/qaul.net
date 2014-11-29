@@ -1,0 +1,8 @@
+{"profile":{"name":"Freifunk Berlin","homepage":"http://berlin.freifunk.net","info":""},
+"ip":{"edit":"true","generate":"true","pattern":"10.104.0.0/16"},
+"mask":{"edit":"true","value":"24"},
+"broadcast":{"edit":"true","value":"10.255.255.255"},
+"channel":{"edit":"true","value":"13"},
+"ssid":{"edit":"true","value":"ch13.freifunk.net"},
+"bssid":{"edit":"true","value":"D2:CA:FF:EE:BA:BE"}
+}

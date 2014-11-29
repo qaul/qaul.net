@@ -1,0 +1,39 @@
+diff --git a/pjlib/include/pj/config_site.h b/pjlib/include/pj/config_site.h
+new file mode 100644
+index 0000000..64e562c
+--- /dev/null
++++ b/pjlib/include/pj/config_site.h
+@@ -0,0 +1,5 @@
++
++#define PJ_CONFIG_ANDROID 1
++#define PJ_IS_LITTLE_ENDIAN 1
++#define PJ_IS_BIG_ENDIAN 0
++#include <pj/config_site_sample.h>
+diff --git a/configure-android.orig b/configure-android
+index 3743247..5e7bba8 100755
+--- a/configure-android.orig
++++ b/configure-android
+@@ -29,12 +29,12 @@ if test "$*" = "--help" -o "$*" = "-h"; then
+   echo "                   IGNORE_CFLAGS=\"\-M\|\-f*stack\|\-f*alias\""
+   echo "                   Only used when --use-ndk-cflags is specified."
+   echo ""
+-  exit 0
++  exit 1
+ fi
+ 
+ if test "x${ANDROID_NDK_ROOT}" = "x"; then
+   echo "$F error: ANDROID_NDK_ROOT must be specified"
+-  exit 0
++  exit 1
+ fi
+ 
+ #if test "$1" = "--simulator"; then
+diff --git a/third_party/build/os-auto.mak.in.orig b/third_party/build/os-auto.mak.in
+index 8be9597..c07fc6c 100644
+--- a/third_party/build/os-auto.mak.in.orig
++++ b/third_party/build/os-auto.mak.in
+@@ -1,3 +1,4 @@
++DIRS += milenage
+ 
+ ifneq (@ac_no_gsm_codec@,1)
+ ifeq (@ac_external_gsm@,1)

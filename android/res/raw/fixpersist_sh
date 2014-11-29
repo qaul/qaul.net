@@ -1,0 +1,16 @@
+#!/system/bin/sh
+while true; do
+	sleep 2
+	/data/data/net.qaul.qaul/bin/iwconfig $1 | while read l; do 
+		case "$l" in *ESSID*) 
+			case "$l" in *\"$2\"*)
+				break;
+			esac;
+			/data/data/net.qaul.qaul/bin/iwconfig $1 mode Ad-Hoc
+			/data/data/net.qaul.qaul/bin/iwconfig $1 essid $2
+			/data/data/net.qaul.qaul/bin/iwconfig $1 channel $3
+			break; 
+		esac; 
+		break;
+	done
+done

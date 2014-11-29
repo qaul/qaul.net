@@ -1,0 +1,72 @@
+{
+"Name of this Language":"Türkçe",
+
+"OK":"Tamam",
+"Save":"Kaydet",
+"Send":"Gönder",
+"Delete":"Sil",
+"Back":"Geri",
+"Next":"Next",
+
+"Favorites / Friends":"Favoriler / Arkadaşlar",
+"Other Users":"Diğer Kullanıcılar",
+"Filter items":"Maddeleri Filtrele",
+
+"Chat":"Sohbet",
+"File Sharing":"Dosya Paylaşımı",
+"Send Private Message":"Kişisel Mesaj Gönder",
+"User Discovery":"Kullanıcı Keşfi",
+
+"File description":"Dosya açıklaması",
+"Advertise file":"Dosyayı duyur",
+"Add File":"Dosya Ekle",
+"%s has no shared files":"%s herhangi bir paylaşılmış dosyaya sahip değil",
+
+"Choose a user name":"Kullanıcı ismi seç",
+"Quit qaul.net":"Programı kapa",
+
+"Information":"Bilgi",
+"About qaul.net":"qaul.net hakkında",
+"How To's":"Nasıl?",
+"License":"Lisans",
+"Configuration":"Ayarlar",
+"Change Language":"Dili Değiştir",
+"Change User Name":"Kullanıcı İsmini Değiştir",
+"Change Network Interface":"Change Network Interface",
+"Show Network":"Show Network",
+
+"Select network interface manually":"Select network interface manually",
+"On":"On",
+"Off":"Off",
+
+"Connecting":"Bağlanıyor",
+"Ringing":"Çalıyor",
+"Is calling":"Arıyor",
+"Establishing connection":"Bağlantı kuruluyor",
+"Connected":"Bağlantı kuruldu",
+"Call ended":"Çağrı sonlandı",
+"Is busy":"Meşgul",
+"Not reachable":"Ulaşılamıyor",
+"You called %s":"%s arandı",
+"Incoming call from %s":"%s sizi arıyor",
+
+"This field is required":"Bu alanı boş bırakamazsınız",
+"Spaces are not allowed in the user name":"Kullanıcı isminde boşluk kullanmayınız",
+"User name is too long":"Kullanıcı ismi çok uzun",
+"Message is too long":"Mesaj çok uzun",
+"Description is too long":"Açıklama çok uzun",
+
+"An Error Occurred":"Bir hata oluştu",
+"Couldn't send message":"Mesaj gönderilemiyor",
+"User not reachable":"Kullanıcıya ulaşılamıyor",
+"No WIFI Interface Found":"Kablosuz ağ birimi bulunamadı",
+"Please try again":"Lütfen tekrar deneyiniz",
+
+"Join qaul.net":"qaul.net'e katıl",
+"Download and install the qaul.net software on your device":"qaul.net'i indir ve cihazına yükle",
+
+"Goodbye":"Güle Güle!",
+
+"Your configuration has been saved":"Your configuration has been saved",
+"You need to restart qaul.net to activate it":"You need to restart qaul.net to activate it"
+}

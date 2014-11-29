@@ -1,0 +1,74 @@
+{
+"Name of this Language":"བོད་ཡིག།",
+
+"OK":"འགྲིགས།",
+"Save":"མཛོད་ཁང་དུ་འཇུག་པ།",
+"Send":"གཏོང།",
+"Delete":"སྤོ་བ།",
+"Back":"ཕྱིར་ལོག།",
+"Next":"རྗེས་མ།",
+
+"Favorites / Friends":"སྤྱན་གསལ་དང་གྲོགས་པོ།",
+"Other Users":"བེད་སྤྱོད་གཏོང་མཁན་གཞན་དག།",
+"Filter items":"དེབ་འགོད་ཚགས།",
+
+"Chat":"ཁ་བདར་གློད།",
+"File Sharing":"ཡིག་སྣོད་བགོ་བཤའ་རྒྱག།",
+"Send Private Message":"ལན་སྒེར་གཏོང།",
+"Contact List":"ཐུག་འཕྲད་གྱི་ཐོ།",
+"User Discovery":"བེད་སྤྱོད་གཏོང་མཁན་གསར་དུ་རྙེད་པ།",
+
+"File description":"File description",
+"Advertise file":"Advertise file",
+"Add File":"Add File",
+"%s has no shared files":"%s has no shared files",
+
+"Choose a user name":"Choose a user name",
+"Quit qaul.net":"Quit qaul.net",
+
+"Information":"Information",
+"About qaul.net":"About qaul.net",
+"How To's":"How To's",
+"License":"License",
+"Configuration":"Configuration",
+"Change Language":"Change Language",
+"Change User Name":"Change User Name",
+"Change Network Interface":"Change Network Interface",
+"Show Network":"Show Network",
+
+"Select network interface manually":"Select network interface manually",
+"On":"On",
+"Off":"Off",
+
+"Connecting":"Connecting",
+"Ringing":"Ringing",
+"Is calling":"Is calling",
+"Establishing connection":"Establishing connection",
+"Connected":"Connected",
+"Call ended":"Call ended",
+"Is busy":"Is busy",
+"Not reachable":"Not reachable",
+"You called %s":"You called %s",
+"Incoming call from %s":"Incoming call from %s",
+
+"Please write something":"Please write something",
+"This field is required":"This field is required",
+"Spaces are not allowed in the user name":"Spaces are not allowed in the user name",
+"User name is too long":"User name is too long",
+"Message is too long":"Message is too long",
+"Description is too long":"Description is too long",
+
+"An Error Occurred":"An Error Occurred",
+"Couldn't send message":"Couldn't send message",
+"User not reachable":"User not reachable",
+"No WIFI Interface Found":"No WIFI Interface Found",
+"Please try again":"Please try again",
+
+"Join qaul.net":"Join qaul.net",
+"Download and install the qaul.net software on your device":"Download and install the qaul.net software on your device",
+
+"Goodbye":"Goodbye",
+
+"Your configuration has been saved":"Your configuration has been saved",
+"You need to restart qaul.net to activate it":"You need to restart qaul.net to activate it"
+}

@@ -1,0 +1,98 @@
+{
+"Name of this Language":"Deutsch",
+
+"OK":"OK",
+"Save":"Speichern",
+"Send":"Senden",
+"Delete":"Löschen",
+"Back":"Zurück",
+"Next":"Weiter",
+"On":"Ja",
+"Off":"Nein",
+
+"Favorites / Friends":"Favoriten / Freunde",
+"Other Users":"Andere Benutzer",
+"Filter items":"Einträge filtern",
+
+"Chat":"Chat",
+"File Sharing":"File Sharing",
+"Send Private Message":"Private Mitteilung senden",
+"User Discovery":"Kontaktliste",
+
+"File description":"Beschreibung der Datei",
+"Advertise file":"Datei bekannt machen",
+"Add File":"Datei hinzufügen",
+"%s has no shared files":"%s hat keine öffentlichen Dateien.",
+
+"Choose a user name":"Wähle einen Benutzernamen",
+"Quit qaul.net":"Programm beenden",
+
+"Information":"Information",
+"About qaul.net":"Über qaul.net",
+"How To's":"Anleitungen",
+"License":"Lizenz",
+"Configuration":"Konfiguration",
+"Change Language":"Sprache ändern",
+"Change User Name":"Benutzername ändern",
+"Share Internet Connection":"Internetverbindung teilen",
+"Configure Custom Network":"Community-Netzwerk konfigurieren",
+"Configure File Sharing":"File-Sharing konfigurieren",
+"Change Network Interface":"Netzwerk-Interface ändern",
+"Show Network":"Netzwerktopologie anzeigen",
+
+"Share Your Internet Connection":"Teile deine Internetverbindung",
+"Select a network interface with Internet connection.":"Wähle ein Netzwerk-Interface welches über eine Internetverbindung verfügt",
+
+"Select Network Profile":"Wähle ein Netzwerkprofil",
+"custom":"Benutzerdefiniert",
+"qaul.net is completely self configuring.":"qaul.net ist komplett selbst konfigurierend.",
+"IP Address":"IP Adresse",
+"Network Mask":"Netzwerkmaske",
+"Broadcast Address":"Broadcast-Adresse",
+"Wifi Channel":"Wifi-Kanal",
+"SSID (Network Name)":"SSID (Netzwerkname)",
+"BSSID (Cell-ID)":"BSSID (Zellen ID)",
+
+"Automatically Download Advertised Files":"Dateien automatisch herunterladen",
+"Max Download Space":"Maximaler Speicherplatz für Downloads",
+"Only Download Files Smaller Than":"Nur Dateien herunterladen, die kleiner sind als",
+"unlimited":"Keine Begrenzung",
+
+"Select network interface manually":"Netzwerk Interface manuell wählen",
+
+"Connecting":"Verbinden",
+"Ringing":"Klingeln",
+"Is calling":"Ruft an",
+"Establishing connection":"Verbindung aufbauen",
+"Connected":"Verbunden",
+"Call ended":"Das Gespräch wurde beendet",
+"Is busy":"Besetzt",
+"Not reachable":"Nicht erreichbar",
+"You called %s":"%s wurde angerufen",
+"Incoming call from %s":"Eingehender Anruf von %s",
+
+"Please write something":"Bitte etwas schreiben",
+"This field is required":"Bitte etwas schreiben",
+"Spaces are not allowed in the user name":"Es sind keine Leerschläge im Benutzernamen erlaubt",
+"User name is too long":"Der Benutzername ist zu lang",
+"Message is too long":"Die Mitteilung ist zu lang",
+"Description is too long":"Die Beschreibung ist zu lang",
+
+"An Error Occurred":"Leider ist ein Fehler aufgetreten",
+"Couldn't send message":"Die Mitteilung konnte nicht versandt werden",
+"User not reachable":"Der Benutzer ist nicht erreichbar",
+"No WIFI Interface Found":"Es wurde keine WIFI-Schnittstelle gefunden",
+"Please try again":"Versuchen Sie es erneut",
+
+"Join qaul.net":"Mach mit beim qaul.net",
+"Download and install the qaul.net software on your device":"Installiere die qaul.net software auf deinem Gerät",
+
+"Goodbye":"Auf Wiedersehen",
+
+"Your configuration has been saved":"Die Konfiguration wurde gespeichert",
+"You need to restart qaul.net to activate it":"Das Programm muss neu gestartet werden um die Änderungen zu aktivieren",
+
+"This qaul.net web client has only limited functionality.":"Dieses qaul.net web Interface hat nur eine limitierte Funktionalität.",
+"To send private messages, make voice calls, and share files, please download and install the qaul.net app for your operating system.":"Bitte downloade und installiere die qaul.net-App um private Mitteilungen zu senden, Anrufe zu tätigen und File-Sharing zu betreiben.",
+"Download qaul.net app":"Die qaul.net-App downloaden."
+}

@@ -1,0 +1,73 @@
+{
+"Name of this Language":"Italiano",
+
+"OK":"OK",
+"Save":"Salva",
+"Send":"Invia",
+"Delete":"Cancella",
+"Back":"Indietro",
+"Next":"Next",
+
+"Favorites / Friends":"Favoriti / Amici",
+"Other Users":"Altri utenti",
+"Filter items":"Filtra lista",
+
+"Chat":"Chat",
+"File Sharing":"File Sharing",
+"Send Private Message":"Invio SMS",
+"User Discovery":"Trova utenti",
+
+"File description":"Descrizione file",
+"Advertise file":"Mostra file",
+"Add File":"Aggiungi file",
+"%s has no shared files":"%s non ha file condivisi.",
+
+"Choose a user name":"Scegli nome utente",
+"Quit qaul.net":"Chiudi qaul.net",
+
+"Information":"Informazione",
+"About qaul.net":"Info su qaul.net",
+"How To's":"Guida",
+"License":"Licenza",
+"Configuration":"Configurazione",
+"Change Language":"Cambia lingua",
+"Change User Name":"Cambia nome utente",
+"Change Network Interface":"Change Network Interface",
+"Show Network":"Show Network",
+
+"Select network interface manually":"Select network interface manually",
+"On":"On",
+"Off":"Off",
+
+"Connecting":"Collegamento",
+"Ringing":"Squillo",
+"Is calling":"Sta chiamando",
+"Establishing connection":"Connessione in corso",
+"Connected":"Collegato",
+"Call ended":"Chiamata finita",
+"Is busy":"Occupato",
+"Not reachable":"Nonraggiungibile",
+"You called %s":"Hai chiamato %s",
+"Incoming call from %s":"Chiamata da %s",
+
+"Please write something":"Prego scrivi qualcosa",
+"This field is required":"Campo obbligatorio",
+"Spaces are not allowed in the user name":"Gli spazi non sono permessi nel nome utente",
+"User name is too long":"Nome utente troppo lungo",
+"Message is too long":"Messaggio troppo lungo",
+"Description is too long":"Descrizione troppo lunga",
+
+"An Error Occurred":"Notifica errore",
+"Couldn't send message":"Impossibile spedire messaggio",
+"User not reachable":"Utente non raggiungibile",
+"No WIFI Interface Found":"Nessuna interfaccia WIFI trovata",
+"Please try again":"Riprovare prego",
+
+"Join qaul.net":"Collegati a qaul.net",
+"Download and install the qaul.net software on your device":"Scarica e installa qaul.net software sul tuo dispositivo",
+
+"Goodbye":"Arrivederci",
+
+"Your configuration has been saved":"La tua configurazione è stata salvata",
+"You need to restart qaul.net to activate it":"Per attivare il programma deve essere riavviato"
+}

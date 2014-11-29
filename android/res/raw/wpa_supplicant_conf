@@ -1,0 +1,14 @@
+update_config=0
+ctrl_interface=/data/local/tmp/wpa_supplicant
+eapol_version=1
+ap_scan=2
+fast_reauth=0
+network={
+ssid="AndroidTether"
+scan_ssid=1
+mode=1
+key_mgmt=NONE
+group=WEP104
+auth_alg=SHARED
+wep_key0="abcdefghijklm"
+}
