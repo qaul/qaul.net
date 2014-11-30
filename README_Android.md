@@ -31,7 +31,8 @@ add sdk to path if not done by installer
 
 ### Needed extra libraries
 
-create dir for extra libs
+create directory for extra libs
+
 cd into it
 
 	adb pull /system/lib/libcutils.so
@@ -39,12 +40,22 @@ cd into it
 	adb pull /system/bin/ifconfig
 	adb pull /system/bin/iptables
 
-get the sources: git clone https://github.com/WachterJud/qaul.net.git
+## get the source
 
-mkdir build
-cd build
+Download the source from <insert source here> or
+get the sources from github: git clone https://github.com/WachterJud/qaul.net.git
 
-cmake ../qaul-ng/ -DPORT=Android -DNDK_ROOT=/home/saces/projekt/tools/android-ndk-r10c -DEXTRALIB_PATH=/home/saces/tmp/flummi
+## build
+
+    mkdir builddir
+    cd builddir
+
+    cmake ../path/to/source -DPORT=Android -DNDK_ROOT=/path/to/ndk -DEXTRALIB_PATH=/path/to/extra/lib
+    make
 
 find the apk in android/bin
 
+## Eclipse
+
+- Import Existing Project
+- Do NOT copy files.
