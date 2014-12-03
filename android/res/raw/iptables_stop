@@ -1,0 +1,10 @@
+#!/system/bin/sh
+
+LOCAL_DIR=/data/data/net.qaul.qaul
+
+# stop iptables
+/system/bin/iptables -t nat -D PREROUTING 1
+/system/bin/iptables -t nat -D PREROUTING 1
+
+# start port forwarding
+killall socat

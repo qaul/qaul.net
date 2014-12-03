@@ -1,0 +1,6 @@
+#!/system/bin/sh
+
+# start port forwarding
+/data/data/net.qaul.qaul/bin/socat UDP4-RECVFROM:67,fork UDP4-SENDTO:localhost:8067 &
+/data/data/net.qaul.qaul/bin/socat UDP4-RECVFROM:53,fork UDP4-SENDTO:localhost:8053 &
+/data/data/net.qaul.qaul/bin/socat TCP4-Listen:80,fork,reuseaddr TCP4:localhost:8081 &

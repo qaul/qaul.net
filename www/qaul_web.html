@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+	<!--[if gte IE 8]><meta http-equiv="X-UA-Compatible" content="IE=8"/><![endif]-->
+	<!--[if gte IE 7]><meta http-equiv="X-UA-Compatible" content="IE=7"/><![endif]-->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>qaul.net</title>
+	<link rel="stylesheet" type="text/css" href="jquery.mobile.min.css" />
+	<link rel="stylesheet" type="text/css" href="qaul.css"/>
+	<link rel="stylesheet" type="text/css" href="qaul_web.css"/> 
+	<link rel="stylesheet" type="text/css" href="info/info.css"/> 
+	<script type="text/javascript" src="jquery.min.js"></script>
+	<script type="text/javascript" src="jquery.jsonp.min.js"></script>
+	<script type="text/javascript" src="jquery.validate.min.js"></script>
+	<script type="text/javascript" src="jquery.progressbar.min.js"></script>
+	<script type="text/javascript" src="jquery.i18n.min.js"></script>
+	<script type="text/javascript" src="jquery.mobile.min.js"></script>
+	<script type="text/javascript" src="string2byte.js"></script>
+	<script type="text/javascript" src="qaul_web.js"></script>
+</head>
+<body>
+
+<div data-role="page" id="page_loading" data-theme="a">
+	<div data-role="content">
+		&nbsp;
+	</div>
+</div>
+
+<div data-role="page" id="page_config_locale" data-theme="a">
+	<div data-role="content" >
+		<p>
+			<form action="locale" method="post" id="locale_form">
+				<fieldset data-role="controlgroup">
+					<legend>&nbsp;</legend>
+					<input type="radio" name="l" id="locale_en" value="en" checked="checked"/>
+					<label for="locale_en">English</label>
+<!--
+					<input type="radio" name="l" id="locale_cn" value="cn"/>
+					<label for="locale_cn">中文</label>
+-->			
+					<input type="radio" name="l" id="locale_es" value="es"/>
+					<label for="locale_es">Español</label>
+
+					<input type="radio" name="l" id="locale_ar" value="ar"/>
+					<label for="locale_ar">العربية</label>
+			
+					<input type="radio" name="l" id="locale_fr" value="fr"/>
+					<label for="locale_fr">Français</label>
+<!--
+					<input type="radio" name="l" id="locale_ja" value="ja"/>
+					<label for="locale_ja">日本語</label>
+-->
+					<input type="radio" name="l" id="locale_de" value="de"/>
+					<label for="locale_de">Deutsch</label>
+
+					<input type="radio" name="l" id="locale_tr" value="tr"/>
+					<label for="locale_tr">Türkçe</label>
+					
+					<input type="radio" name="l" id="locale_it" value="it"/>
+					<label for="locale_it">Italiano</label>
+
+					<input type="radio" name="l" id="locale_nl" value="nl"/>
+					<label for="locale_nl">Nederlands</label>
+
+					<input type="radio" name="l" id="locale_el" value="el"/>
+					<label for="locale_el">ελληνικά</label>
+				</fieldset>
+				<input class="submit" type="submit" value="OK" id="locale_submit" data-icon="arrow-r" data-iconpos="right"/>
+			</form>
+		</p>
+		<p class="c_init"><a href="#page_pref" data-role="button" data-icon="arrow-l" data-direction="reverse" class="i18n">Back</a></p>
+	</div>
+</div>
+
+<div data-role="page" id="page_config_name" data-theme="a">
+	<div data-role="content" >
+		<p>
+			<form action="chat" method="post" id="name_form">
+				<label for="name_name" class="i18n">Choose a user name</label>
+				<input type="text" name="n" id="name_name" class="required nospaces userlen"/>
+				<input class="submit i18n" type="submit" value="Save" id="name_submit"/>
+			</form>
+		</p>
+		<p class="c_init"><a href="#page_pref" data-role="button" data-icon="arrow-l" data-direction="reverse" class="i18n">Back</a></p>
+	</div>
+</div>
+
+<div data-role="page" id="page_chat" data-theme="a">
+	<div data-role="content" >
+		<p>
+			<form action="chat" method="post" id="chat_form">
+				<input type="hidden" name="n" id="chat_name" value="undefined"/> 
+				<input type="text" name="m" id="chat_msg" class="required chatlen"/>
+				<input class="submit i18n" type="submit" value="Send" id="chat_submit"/>
+			</form>
+		</p>
+		<div id="chat">&nbsp;</div>
+	</div>
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
+		<div data-role="navbar" data-theme="c">
+			<ul>
+				<li><a href="#page_chat" onclick="javascript:web_getmsgs();" data-theme="b" data-transition="none" class="i_chat">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_users" onclick="javascript:web_getusers();" data-transition="none" class="i_users">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_file" onclick="javascript:web_getfiles();" data-transition="none" class="i_filesharing">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_pref" data-transition="none" class="i_prefs">&nbsp;</a></li>
+			</ul>
+		</div>
+	</div>
+	<div data-role="popup" id="popup_chat" data-transition="popup" class="ui-content">
+		<p class="i18n">This qaul.net web client has only limited functionality.</p>
+		<p class="i18n">To send private messages, make voice calls, and upload files, please download and install the qaul.net app for your operating system.</p>
+		<p><a href="/index.html" target="_blank" class="i18n">Download qaul.net app</a></p>
+	</div>
+</div>
+
+<div data-role="page" id="page_users" data-theme="a">
+	<div data-role="content" >
+		<ul data-role="listview" data-inset="true" id="favorites">
+			<li id="favorites_divider" data-role="list-divider" class="i18n">Favorites / Friends</li>
+		</ul>
+		<br/>
+		<ul data-role="listview" data-inset="true" id="users" data-theme="a" data-filter="true" data-filter-placeholder="Filter items">
+			<li id="users_divider" data-role="list-divider" class="i18n">Other Users</li>
+		</ul>
+		
+	</div>
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page_chat" onclick="javascript:web_getmsgs();" data-transition="none" class="i_chat">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_users" onclick="javascript:web_getusers();" data-theme="b" data-transition="none" class="i_users">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_file" onclick="javascript:web_getfiles();" data-transition="none" class="i_filesharing">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_pref" data-transition="none" class="i_prefs">&nbsp;<span class="ui-li-count"></span></a></li>
+			</ul>
+		</div>
+	</div>
+	<div data-role="popup" id="popup_users" data-transition="popup" class="ui-content">
+		<p class="i18n">This qaul.net web client has only limited functionality.</p>
+		<p class="i18n">To send private messages, make voice calls, and upload files, please download and install the qaul.net app for your operating system.</p>
+		<p><a href="/index.html" target="_blank" class="i18n">Download qaul.net app</a></p>
+	</div>
+</div>
+
+<div data-role="page" id="page_pref" data-theme="a">
+	<div data-role="content" >
+		<h2 id="page_pref_name">User</h2>
+		<ul data-role="listview" data-inset="true">
+			<li data-role="list-divider" class="i18n">Configuration</li>
+			<li><a href="qaul_web.html" target="_top" data-transition="none" class="i18n">Change Language</a></li>
+			<li><a href="#page_config_name" data-transition="none" class="i18n">Change User Name</a></li>
+		</ul>
+		<ul data-role="listview" data-inset="true">
+			<li data-role="list-divider" class="i18n">Information</li>
+			<li data-icon="info"><a href="info/about.html" data-transition="none" class="i18n">About qaul.net</a></li>
+			<li data-icon="info"><a href="info/howto.html" data-transition="none" class="i18n">How To's</a></li>
+			<li data-icon="info"><a href="info/license.html" data-transition="none" class="i18n">License</a></li>
+			<li data-icon="info"><a href="#popup_pref" data-rel="popup" data-transition="none" class="i18n">Show Network</a></li>
+		</ul>
+	</div>
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page_chat" onclick="javascript:web_getmsgs();" data-transition="none" class="i_chat">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_users" onclick="javascript:web_getusers();" data-transition="none" class="i_users">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_file" onclick="javascript:web_getfiles();" data-transition="none" class="i_filesharing">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_pref" data-theme="b" data-transition="none" class="i_prefs">&nbsp;<span class="ui-li-count"></span></a></li>
+			</ul>
+		</div>
+	</div>
+	<div data-role="popup" id="popup_pref" data-transition="popup" class="ui-content">
+		<p class="i18n">This qaul.net web client has only limited functionality.</p>
+		<p class="i18n">To send private messages, make voice calls, and upload files, please download and install the qaul.net app for your operating system.</p>
+		<p><a href="/index.html" target="_blank" class="i18n">Download qaul.net app</a></p>
+	</div>
+</div>
+
+<div data-role="page" id="page_file" data-theme="a">
+	<div data-role="content" >
+		<p><a href="#popup_file" data-rel="popup" id="file_addbutton" data-role="button" data-icon="plus" class="i18n">Add File</a></p>
+		<div id="page_file_list"></div>
+	</div>
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page_chat" onclick="javascript:web_getmsgs();" data-transition="none" class="i_chat">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_users" onclick="javascript:web_getusers();" data-transition="none" class="i_users">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_file" onclick="javascript:web_getfiles();" data-theme="b" data-transition="none" class="i_filesharing">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_pref" data-transition="none" class="i_prefs">&nbsp;<span class="ui-li-count"></span></a></li>
+			</ul>
+		</div>
+	</div>
+	
+	<div data-role="popup" id="popup_file" data-transition="popup" class="ui-content">
+		<p class="i18n">This qaul.net web client has only limited functionality.</p>
+		<p class="i18n">To send private messages, make voice calls, and upload files, please download and install the qaul.net app for your operating system.</p>
+		<p><a href="/index.html" target="_blank" class="i18n">Download qaul.net app</a></p>
+	</div>
+</div>
+
+<div data-role="page" id="page_web_info">
+	<div data-role="header" data-position="fixed" data-theme="a">
+		<h1 id="page_dialog_title" class="i18n">&nbsp;</h1>
+	</div>
+	<div data-role="content" id="page_dialog_content">
+		<p class="i18n">This qaul.net web client has only limited functionality.</p>
+		<p class="i18n">To send private messages, make voice calls, and share files, please download and install the qaul.net app for your operating system.</p>
+		<p><a href="/index.html" target="_blank" class="i18n">Download qaul.net app</a></p>
+	</div>
+</div>
+
+</body>
+</html>

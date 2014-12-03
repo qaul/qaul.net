@@ -1,0 +1,8 @@
+{"profile":{"name":"Freifunk Leipzig","homepage":"http://leipzig.freifunk.net","info":""},
+"ip":{"edit":"true","generate":"true","pattern":"10.61.0.0/16"},
+"mask":{"edit":"true","value":"32"},
+"broadcast":{"edit":"true","value":"255.255.255.255"},
+"channel":{"edit":"true","value":"1"},
+"ssid":{"edit":"true","value":"leipzig.freifunk.net"},
+"bssid":{"edit":"true","value":"02:CA:FF:EE:BA:BE"}
+}

@@ -1,0 +1,12 @@
+Hna4
+{
+}
+Hna6
+{
+}
+
+LoadPlugin "olsrd_qaul.so.0.1"
+{
+
+}
+

@@ -1,0 +1,8 @@
+{"profile":{"name":"qaul.net - TOOLS FOR THE NEXT REVOLUTION","homepage":"http://qaul.net","info":""},
+"ip":{"edit":"hidden","generate":"true","pattern":"10.0.0.0/24"},
+"mask":{"edit":"hidden","value":"24"},
+"broadcast":{"edit":"hidden","value":"10.255.255.255"},
+"channel":{"edit":"hidden","value":"11"},
+"ssid":{"edit":"hidden","value":"qaul.net"},
+"bssid":{"edit":"hidden","value":"02:11:87:88:D6:FF"}
+}

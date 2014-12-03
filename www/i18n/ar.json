@@ -1,0 +1,72 @@
+{
+"Name of this Language":"العربية",
+
+"OK":"موافق",
+"Save":"حفظ",
+"Send":"ارسال",
+"Delete":"حذف",
+"Back":"الى الخلف",
+"Next":"Next",
+
+"Favorites / Friends":"الاصدقاء المفضلين",
+"Other Users":"مستخدمين اخرين",
+"Filter items":"تصفية العناصر",
+
+"Chat":"دردشة",
+"File Sharing":"مشاركة ملف",
+"Send Private Message":"ارسال رسالة خاصة",
+"User Discovery":"استكشاف المستخدم",
+
+"File description":"وصف الملف",
+"Advertise file":"اعلان ملف",
+"Add File":"اضف ملف",
+"%s has no shared files":"%s لايمتلك ملفات للمشاركة",
+
+"Choose a user name":"اختر اسم مستخدم",
+"Quit qaul.net":"الخروج من البرنامج",
+
+"Information":"معلومات",
+"About qaul.net":"حول qaul.net",
+"How To's":"تعليمات",
+"License":"الرخصة",
+"Configuration":"الاعدادات",
+"Change Language":"تبديل اللغة",
+"Change User Name":"تبديل اسم المستخدم",
+"Change Network Interface":"Change Network Interface",
+"Show Network":"Show Network",
+
+"Select network interface manually":"Select network interface manually",
+"On":"On",
+"Off":"Off",
+
+"Connecting":"جاري الاتصال",
+"Ringing":"جاري الطلب",
+"Is calling":"يتصل بك",
+"Establishing connection":"بدء الاتصال",
+"Connected":"تم الاتصال",
+"Call ended":"تم انهاء المكالمة",
+"Is busy":"مشغول",
+"Not reachable":"لايمكن الوصول",
+"You called %s":"%s قمت بالاتصال بـ",
+"Incoming call from %s":"مكالمة واردة من %s",
+
+"This field is required":"هذا الحقل ضروري",
+"Spaces are not allowed in the user name":"من غير المسموح ترك فراغات في اسم المستخدم",
+"User name is too long":"اسم المستخدم طويل",
+"Message is too long":"الرسالة طويلة جداً",
+"Description is too long":"الوصف طويل جداً",
+
+"An Error Occurred":"حصل خطأ",
+"Couldn't send message":"لا يمكن ارسال الرسالة",
+"User not reachable":"لايمكن الوصول للمستخدم",
+"No WIFI Interface Found":"لايوجد جهاز وايرليز WiFi لكي يتم استخدامه",
+"Please try again":"الرجاء المحاولة مرة اخرى",
+
+"Join qaul.net":"انضم الينا qaul.net",
+"Download and install the qaul.net software on your device":"قم بتحميل و تنصيب برنامج قول على جهازك qaul.net",
+
+"Goodbye":"الى اللقاء",
+
+"Your configuration has been saved":"Your configuration has been saved",
+"You need to restart qaul.net to activate it":"You need to restart qaul.net to activate it"
+}
