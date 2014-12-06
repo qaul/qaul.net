@@ -1,21 +1,26 @@
-commit fc847e7a1558ace1ac16f527a549b50d90a68552
-Author: saces <saces@saces.de>
-Date:   Wed Nov 19 00:35:02 2014 +0100
-
-    diffinger
-
-diff --git a/Makefile b/Makefile
-index 02cc2e2..90b7966 100644
---- a/Makefile
+diff --git a/Makefile.orig b/Makefile
+index 02cc2e2..3676b3c 100644
+--- a/Makefile.orig
 +++ b/Makefile
-@@ -215,7 +215,7 @@ ifeq ($(OS),win32)
- SUBDIRS := dot_draw httpinfo jsoninfo mini pgraph secure txtinfo
+@@ -209,15 +209,15 @@ rpm:
+ 
+ # This is quite ugly but at least it works
+ ifeq ($(OS),linux)
+-SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo mdns mini nameservice p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog
++SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo mdns mini nameservice p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog olsrd_qaul
+ else
+ ifeq ($(OS),win32)
+-SUBDIRS := dot_draw httpinfo jsoninfo mini pgraph secure txtinfo
++SUBDIRS := dot_draw httpinfo jsoninfo mini pgraph secure txtinfo olsrd_qaul
  else
  ifeq ($(OS),android)
 -SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo mdns mini nameservice p2pd pgraph pud secure sgwdynspeed txtinfo watchdog
 +SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo jsoninfo mdns mini nameservice p2pd pgraph pud secure sgwdynspeed txtinfo watchdog olsrd_qaul
  else
- SUBDIRS := dot_draw httpinfo jsoninfo mini nameservice pgraph secure txtinfo watchdog
+-SUBDIRS := dot_draw httpinfo jsoninfo mini nameservice pgraph secure txtinfo watchdog
++SUBDIRS := dot_draw httpinfo jsoninfo mini nameservice pgraph secure txtinfo watchdog olsrd_qaul
+ endif
+ endif
  endif
 diff --git a/lib/olsrd_qaul/Makefile b/lib/olsrd_qaul/Makefile
 new file mode 100644
