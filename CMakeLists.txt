@@ -9,7 +9,7 @@ ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 include (ExternalProject)
 
 # The version number.
-set (Qaul_VERSION_MAJOR O)
+set (Qaul_VERSION_MAJOR 0)
 set (Qaul_VERSION_MINOR 0)
 set (Qaul_VERSION_PATCH 0)
 
