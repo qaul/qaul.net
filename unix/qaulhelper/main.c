@@ -222,7 +222,7 @@ int main (int argc, const char * argv[])
 #endif // WITHOUT_NETWORKMANAGER
         else
         {
-            printf("unknown command ...\n");
+            printf("unknown command '%s'\n", argv[1]);
             printf("execute qaulhelper without arguments to see help instructions.\n");
         }
     }
