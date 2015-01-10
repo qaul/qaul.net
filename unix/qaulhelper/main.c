@@ -331,7 +331,7 @@ int stop_olsrd (int argc, const char * argv[])
         waitpid(pid1, &status, 0);
 
     printf("olsrd stopped\n");
-	return 0;
+    return 0;
 }
 
 int start_portforwarding (int argc, const char * argv[])

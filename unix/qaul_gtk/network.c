@@ -238,10 +238,10 @@ static int networkmanager_dbus_send(DBusMessage** msg, DBusConnection* dbus_conn
  * structure to retrieve a dbus property.
  */
 typedef struct networkmanager_property {
-	char* 	dbus_path;
+	char*	dbus_path;
 	char*	dbus_interface;
 	char*	dbus_property_name;
-	int		value_int;
+	int	value_int;
 	char*	value_string;
 	int 	value_string_len;
 } networkmanager_property;
