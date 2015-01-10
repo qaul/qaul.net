@@ -491,6 +491,7 @@ static int networkmanager_device_properties(DBusConnection* dbus_connection, qau
 		device_property.dbus_interface = "org.freedesktop.NetworkManager.Device.Wireless";
 	else if(device->type == 1)
 		device_property.dbus_interface = "org.freedesktop.NetworkManager.Device.Wired";
+	else device_property.dbus_interface = "";
 
 	// retrieve Hardware address property only for known device types
 	if(device->type == 1 || device->type == 2)
