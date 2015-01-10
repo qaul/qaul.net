@@ -54,7 +54,7 @@ target_include_directories(qaul-gtk PRIVATE ${DBUS1_INCLUDE_DIRS} ${WEBKIT_INCLU
 set(PJSIPTYPE x86_64-unknown-linux-gnu)
 
 target_link_libraries(qaul-gtk ${DBUS1_LIBRARIES} ${WEBKIT_LIBRARIES}
-    pthread dl m
+    pthread dl m uuid avcodec opencore-amrnb
     ${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
     ${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
     ${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
