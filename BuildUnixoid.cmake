@@ -1,58 +1,19 @@
-# -----------------------------------------------------------------------------
-# Determine the operating system
-# -----------------------------------------------------------------------------
-#if (UNIX)
-#  if (APPLE)
-#    set(Q_OS_MAC_OS_X 1)
-#  else ()
-#    set(Q_OS_UNIX 1)
-#  endif ()
-#elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
-#  set(Q_OS_WINDOWS 1)
-#else ()
-#  message(FATAL_ERROR "Unknown OS '${CMAKE_SYSTEM_NAME}'")
-#endif ()
 
+find_package (PkgConfig)
+pkg_check_modules (DBUS1 REQUIRED dbus-1)
 
-# mandatory stuff
-#find_package (PkgConfig)
-#pkg_check_modules (DBUS1 REQUIRED dbus-1)
-#pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
+if (${PORT} STREQUAL "GTK")
+    pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
+endif ()
 
-#
-# configure a header file to pass some of the CMake settings
-# to the source code
-#if (${PORT} STREQUAL "Android")
-#    message(FATAL_ERROR "Dont know how to build '${PORT}'")
-#elseif (${PORT} STREQUAL "OpenWrt")
-#    message(FATAL_ERROR "Dont know how to build '${PORT}'")
-#elseif (${PORT} STREQUAL "GTK")
-#    message(FATAL_ERROR "Dont know how to build '${PORT}'")
-#elseif (${PORT} STREQUAL "QT")
-#    message(FATAL_ERROR "Dont know how to build '${PORT}'")
-#else ()
-#    message(FATAL_ERROR "Dont know how to build '${PORT}'")
-#endif ()
+add_subdirectory (unix/qaulhelper)
+add_subdirectory (unix/qaul_gtk)
 
-#message(FATAL_ERROR "Dont know how to build '${PORT}'")
-#set (OLSRD_SRCDIR ${PROJECT_SOURCE_DIR}/../olsrd-0.6.6.2)
+INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/www DESTINATION ${CMAKE_INSTALL_PREFIX} )
+INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/unix/distfiles/etc DESTINATION ${CMAKE_INSTALL_PREFIX} )
 
-#ExternalProject_Add(oslrd
-#  SOURCE_DIR ${OLSRD_SRCDIR}
-#  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/olsrd/
-#  CONFIGURE_COMMAND ""
-#  BUILD_COMMAND make -I${OLSRD_SRCDIR} -f ${OLSRD_SRCDIR}/Makefile TOPDIR=${OLSRD_SRCDIR}
-#  INSTALL_COMMAND make install PREFIX=${CMAKE_CURRENT_BINARY_DIR}
-#)
+install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/olsrd DESTINATION bin
+	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-#ExternalProject_Add(oslrd_plugin
-#  SOURCE_DIR ${PROJECT_SOURCE_DIR}/../olsrd-0.6.6.2/lib/olsrd_qaul/
-#  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/olsrd/
-#  CONFIGURE_COMMAND ""
-#  BUILD_COMMAND make
-#  INSTALL_COMMAND make install PREFIX=${CMAKE_CURRENT_BINARY_DIR}
-#)
-
-# Add sub-directories
-#add_subdirectory (qaulhelper)
-#add_subdirectory (third_party)
+install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/lib/olsrd_qaul/olsrd_qaul.so.0.1 DESTINATION lib
+	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)

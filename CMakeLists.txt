@@ -1,17 +1,18 @@
 cmake_minimum_required (VERSION 2.8)
 
+project (Qaul)
+
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
         SET(CMAKE_INSTALL_PREFIX "/opt/qaul" CACHE PATH "Qaul.Net install prefix" FORCE)
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
-project (Qaul)
-
 include (ExternalProject)
 
 # The version number.
-set (Qaul_VERSION_MAJOR O)
+set (Qaul_VERSION_MAJOR 0)
 set (Qaul_VERSION_MINOR 0)
 set (Qaul_VERSION_PATCH 0)
+set (Qaul_VERSION_SUFFIX Qaul-NG_Proto)
 
 # What to build
 set(ALL_PORTS Android OpenWrt GTK QT Windows MacOS MacOSX iOS)
@@ -21,8 +22,6 @@ list(FIND ALL_PORTS ${PORT} RET)
 if (${RET} EQUAL -1)
   message(FATAL_ERROR "Please choose which Qaul port to build (one of ${ALL_PORTS})")
 endif ()
-
-string(TOLOWER ${PORT} Q_PORT_DIR)
 
 # -----------------------------------------------------------------------------
 # Determine the operating system
@@ -38,13 +37,6 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
 else ()
   message(FATAL_ERROR "Unknown OS '${CMAKE_SYSTEM_NAME}'")
 endif ()
-
-
-# mandatory stuff
-#find_package (PkgConfig)
-#pkg_check_modules (DBUS1 REQUIRED dbus-1)
-#pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
-
 
 # configure a header file to pass some of the CMake settings
 # to the source code

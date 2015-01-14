@@ -2,19 +2,20 @@
 ExternalProject_Add(pjsip
     DEPENDS dl_pjsip
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/pjsip
-    URL "${ARCHIVE_DIR}/${PJSIP_FILENAME}"
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
+    URL ${ARCHIVE_DIR}/${PJSIP_FILENAME}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ./aconfigure --prefix=${CMAKE_INSTALL_PREFIX} --disable-ffmpeg --disable-ssl --disable-video
+    BUILD_COMMAND make dep COMMAND make
     INSTALL_COMMAND ""
 )
 
-ExternalProject_Add(oslrd
+ExternalProject_Add(olsr
     DEPENDS dl_olsr
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/olsrd
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/olsr
     URL ${ARCHIVE_DIR}/${OLSR_FILENAME}
-    #URL http://www.olsr.org/releases/0.6/olsrd-0.6.7.1.tar.gz
-    #DOWNLOAD_DIR ${PROJECT_SOURCE_DIR}/archives
+    BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/olsr.patch
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
+    BUILD_COMMAND make DEBUG=0 olsrd libs
     INSTALL_COMMAND ""
 )
