@@ -54,7 +54,10 @@ target_include_directories(qaul-gtk PRIVATE ${DBUS1_INCLUDE_DIRS} ${WEBKIT_INCLU
 set(PJSIPTYPE x86_64-unknown-linux-gnu)
 
 target_link_libraries(qaul-gtk ${DBUS1_LIBRARIES} ${WEBKIT_LIBRARIES}
-    pthread dl m uuid avcodec opencore-amrnb
+    # pthread dl m uuid avcodec opencore-amrnb
+    # TODO: please check if libraries are present and do not include them accordingly
+    #       see issue https://github.com/WachterJud/qaul.net-ng/issues/5
+    pthread dl m
     ${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
     ${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
     ${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
