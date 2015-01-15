@@ -1,9 +1,10 @@
-diff --git a/socat_buildscript_for_android.sh.orig b/socat_buildscript_for_android.sh
-index 464af43..e520be6 100755
---- a/socat_buildscript_for_android.sh.orig
-+++ b/socat_buildscript_for_android.sh
+diff --git a/socat_buildscript_for_android.sh b/socat_buildscript_for_android.sh.orig
+index 464af43..236e801 100755
+--- a/socat_buildscript_for_android.sh
++++ b/socat_buildscript_for_android.sh.orig
 @@ -1,7 +1,7 @@
- #!/bin/sh
+-#!/bin/sh
++#!/bin/bash
  
  # Customize these parameters according to your environment
 -ANDROID_NDK="${HOME}/bin/android-ndk-r6b"

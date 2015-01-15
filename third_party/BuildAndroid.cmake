@@ -38,7 +38,7 @@ ExternalProject_Add(socat
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/socat
     URL ${ARCHIVE_DIR}/${SOCAT_FILENAME}
     BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/socat.patch
+    PATCH_COMMAND patch --ignore-whitespace -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/socat.patch
     CONFIGURE_COMMAND ""
     BUILD_COMMAND autoconf COMMAND ANDROID_NDK=${NDK_ROOT} ANDROID_PLATFORM=android-${NDK_LEVEL} ./socat_buildscript_for_android.sh
     COMMAND ${CMAKE_COMMAND} -DSRC=<BINARY_DIR>/out/socat -DDEST=${CMAKE_BINARY_DIR}/android/res/raw -P ${CMAKE_SOURCE_DIR}/FileCopy.cmake
