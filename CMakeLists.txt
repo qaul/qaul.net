@@ -23,6 +23,10 @@ if (${RET} EQUAL -1)
   message(FATAL_ERROR "Please choose which Qaul port to build (one of ${ALL_PORTS})")
 endif ()
 
+# What package to build
+set(ALL_PKGFORMAT AUTO NSIS TGZ RPM DEB)
+set(PKGFORMAT "AUTO" CACHE STRING "select what type of package should be build (one of ${ALL_PKGFORMAT})")
+
 # -----------------------------------------------------------------------------
 # Determine the operating system
 # -----------------------------------------------------------------------------
