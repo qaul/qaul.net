@@ -1,3 +1,17 @@
+# CMake Related
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+QaulConfig.h
+
+# Build Folders
+third_party/olsr/
+third_party/pjsip/
+third_party/socat/
+third_party/wt/
+
+# Android 
 android/bin/
 android/build.xml
 android/gen/
@@ -13,12 +27,6 @@ android/res/raw/olsrd_qaul_so_0_1
 android/res/raw/socat
 android/res/raw/tether
 android/res/raw/wificonfig
-CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-Makefile
-QaulConfig.h
-third_party/olsr/
-third_party/pjsip/
-third_party/socat/
-third_party/wt/
+
+# IDE Settings
+/.project
