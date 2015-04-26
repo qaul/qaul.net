@@ -40,12 +40,12 @@ cd into it
 	adb pull /system/bin/ifconfig
 	adb pull /system/bin/iptables
 
-## get the source
+## Get the source
 
 Download the source from <insert source here> or
 get the sources from github: git clone https://github.com/WachterJud/qaul.net.git
 
-## build
+## Build
 
     mkdir builddir
     cd builddir
