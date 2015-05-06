@@ -66,6 +66,8 @@ extern "C" {
 #define MAX_HEADER_LEN       1024
 #define MAX_JSON_LEN         1024
 
+#define QAUL_WEB_THREADS        5
+
 /**
  * qaul file sharing constants
  */

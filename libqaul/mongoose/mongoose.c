@@ -14,6 +14,8 @@
 //
 // Alternatively, you can license this library under a commercial
 // license, as set out in <http://cesanta.com/>.
+//
+// $Date: 2014-09-16 06:47:40 UTC $
 
 #ifdef NOEMBED_NET_SKELETON
 #include "net_skeleton.h"
@@ -34,11 +36,13 @@
 //
 // Alternatively, you can license this software under a commercial
 // license, as set out in <http://cesanta.com/>.
+//
+// $Date: 2014-09-28 05:04:41 UTC $
 
 #ifndef NS_SKELETON_HEADER_INCLUDED
 #define NS_SKELETON_HEADER_INCLUDED
 
-#define NS_SKELETON_VERSION "1.1"
+#define NS_SKELETON_VERSION "2.1.0"
 
 #undef UNICODE                  // Use ANSI WinAPI functions
 #undef _UNICODE                 // Use multibyte encoding on Windows
@@ -49,7 +53,9 @@
 #define _XOPEN_SOURCE 600       // For flockfile() on Linux
 #define __STDC_FORMAT_MACROS    // <inttypes.h> wants this for C++
 #define __STDC_LIMIT_MACROS     // C++ wants that for INT64_MAX
+#ifndef _LARGEFILE_SOURCE
 #define _LARGEFILE_SOURCE       // Enable fseeko() and ftello() functions
+#endif
 #define _FILE_OFFSET_BITS 64    // Enable 64-bit file offsets
 
 #ifdef _MSC_VER
@@ -60,6 +66,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <assert.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -101,6 +108,10 @@ typedef unsigned short uint16_t;
 typedef unsigned __int64 uint64_t;
 typedef __int64   int64_t;
 typedef SOCKET sock_t;
+typedef struct _stati64 ns_stat_t;
+#ifndef S_ISDIR
+#define S_ISDIR(x) ((x) & _S_IFDIR)
+#endif
 #else
 #include <errno.h>
 #include <fcntl.h>
@@ -117,6 +128,7 @@ typedef SOCKET sock_t;
 #define INVALID_SOCKET (-1)
 #define to64(x) strtoll(x, NULL, 10)
 typedef int sock_t;
+typedef struct stat ns_stat_t;
 #endif
 
 #ifdef NS_ENABLE_DEBUG
@@ -126,7 +138,9 @@ typedef int sock_t;
 #define DBG(x)
 #endif
 
+#ifndef ARRAY_SIZE
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
+#endif
 
 #ifdef NS_ENABLE_SSL
 #ifdef __APPLE__
@@ -152,6 +166,12 @@ union socket_address {
 #endif
 };
 
+// Describes chunk of memory
+struct ns_str {
+  const char *p;
+  size_t len;
+};
+
 // IO buffers interface
 struct iobuf {
   char *buf;
@@ -163,75 +183,77 @@ void iobuf_init(struct iobuf *, size_t initial_size);
 void iobuf_free(struct iobuf *);
 size_t iobuf_append(struct iobuf *, const void *data, size_t data_size);
 void iobuf_remove(struct iobuf *, size_t data_size);
-
-// Net skeleton interface
-// Events. Meaning of event parameter (evp) is given in the comment.
-enum ns_event {
-  NS_POLL,     // Sent to each connection on each call to ns_server_poll()
-  NS_ACCEPT,   // New connection accept()-ed. union socket_address *remote_addr
-  NS_CONNECT,  // connect() succeeded or failed. int *success_status
-  NS_RECV,     // Data has benn received. int *num_bytes
-  NS_SEND,     // Data has been written to a socket. int *num_bytes
-  NS_CLOSE     // Connection is closed. NULL
-};
+void iobuf_resize(struct iobuf *, size_t new_size);
 
 // Callback function (event handler) prototype, must be defined by user.
 // Net skeleton will call event handler, passing events defined above.
 struct ns_connection;
-typedef void (*ns_callback_t)(struct ns_connection *, enum ns_event, void *evp);
+typedef void (*ns_callback_t)(struct ns_connection *, int event_num, void *evp);
 
-struct ns_server {
-  void *server_data;
-  sock_t listening_sock;
+// Events. Meaning of event parameter (evp) is given in the comment.
+#define NS_POLL    0  // Sent to each connection on each call to ns_mgr_poll()
+#define NS_ACCEPT  1  // New connection accept()-ed. union socket_address *addr
+#define NS_CONNECT 2  // connect() succeeded or failed. int *success_status
+#define NS_RECV    3  // Data has benn received. int *num_bytes
+#define NS_SEND    4  // Data has been written to a socket. int *num_bytes
+#define NS_CLOSE   5  // Connection is closed. NULL
+
+
+struct ns_mgr {
   struct ns_connection *active_connections;
-  ns_callback_t callback;
-  SSL_CTX *ssl_ctx;
-  SSL_CTX *client_ssl_ctx;
-  sock_t ctl[2];
+  const char *hexdump_file;         // Debug hexdump file path
+  sock_t ctl[2];                    // Socketpair for mg_wakeup()
+  void *user_data;                  // User data
 };
 
+
 struct ns_connection {
-  struct ns_connection *prev, *next;
-  struct ns_server *server;
-  sock_t sock;
-  union socket_address sa;
-  struct iobuf recv_iobuf;
-  struct iobuf send_iobuf;
+  struct ns_connection *next, *prev;  // ns_mgr::active_connections linkage
+  struct ns_connection *listener;     // Set only for accept()-ed connections
+  struct ns_mgr *mgr;
+
+  sock_t sock;                // Socket
+  union socket_address sa;    // Peer address
+  struct iobuf recv_iobuf;    // Received data
+  struct iobuf send_iobuf;    // Data scheduled for sending
   SSL *ssl;
-  void *connection_data;
-  time_t last_io_time;
+  SSL_CTX *ssl_ctx;
+  void *user_data;            // User-specific data
+  void *proto_data;           // Application protocol-specific data
+  time_t last_io_time;        // Timestamp of the last socket IO
+  ns_callback_t callback;     // Event handler function
+
   unsigned int flags;
 #define NSF_FINISHED_SENDING_DATA   (1 << 0)
 #define NSF_BUFFER_BUT_DONT_SEND    (1 << 1)
 #define NSF_SSL_HANDSHAKE_DONE      (1 << 2)
 #define NSF_CONNECTING              (1 << 3)
 #define NSF_CLOSE_IMMEDIATELY       (1 << 4)
-#define NSF_ACCEPTED                (1 << 5)
-#define NSF_WANT_READ               (1 << 6)
-#define NSF_WANT_WRITE              (1 << 7)
+#define NSF_WANT_READ               (1 << 5)
+#define NSF_WANT_WRITE              (1 << 6)
+#define NSF_LISTENING               (1 << 7)
+#define NSF_UDP                     (1 << 8)
 
-#define NSF_USER_1                  (1 << 26)
-#define NSF_USER_2                  (1 << 27)
-#define NSF_USER_3                  (1 << 28)
-#define NSF_USER_4                  (1 << 29)
-#define NSF_USER_5                  (1 << 30)
-#define NSF_USER_6                  (1 << 31)
+#define NSF_USER_1                  (1 << 20)
+#define NSF_USER_2                  (1 << 21)
+#define NSF_USER_3                  (1 << 22)
+#define NSF_USER_4                  (1 << 23)
+#define NSF_USER_5                  (1 << 24)
+#define NSF_USER_6                  (1 << 25)
 };
 
-void ns_server_init(struct ns_server *, void *server_data, ns_callback_t);
-void ns_server_free(struct ns_server *);
-int ns_server_poll(struct ns_server *, int milli);
-void ns_server_wakeup(struct ns_server *);
-void ns_server_wakeup_ex(struct ns_server *, ns_callback_t, void *, size_t);
-void ns_iterate(struct ns_server *, ns_callback_t cb, void *param);
-struct ns_connection *ns_next(struct ns_server *, struct ns_connection *);
-struct ns_connection *ns_add_sock(struct ns_server *, sock_t sock, void *p);
+void ns_mgr_init(struct ns_mgr *, void *user_data);
+void ns_mgr_free(struct ns_mgr *);
+time_t ns_mgr_poll(struct ns_mgr *, int milli);
+void ns_broadcast(struct ns_mgr *, ns_callback_t, void *, size_t);
 
-int ns_bind(struct ns_server *, const char *addr);
-int ns_set_ssl_cert(struct ns_server *, const char *ssl_cert);
-int ns_set_ssl_ca_cert(struct ns_server *, const char *ssl_ca_cert);
-struct ns_connection *ns_connect(struct ns_server *, const char *host,
-                                 int port, int ssl, void *connection_param);
+struct ns_connection *ns_next(struct ns_mgr *, struct ns_connection *);
+struct ns_connection *ns_add_sock(struct ns_mgr *, sock_t,
+                                  ns_callback_t, void *);
+struct ns_connection *ns_bind(struct ns_mgr *, const char *,
+                              ns_callback_t, void *);
+struct ns_connection *ns_connect(struct ns_mgr *, const char *,
+                                 ns_callback_t, void *);
 
 int ns_send(struct ns_connection *, const void *buf, int len);
 int ns_printf(struct ns_connection *, const char *fmt, ...);
@@ -244,6 +266,8 @@ int ns_socketpair2(sock_t [2], int sock_type);  // SOCK_STREAM or SOCK_DGRAM
 void ns_set_close_on_exec(sock_t);
 void ns_sock_to_str(sock_t sock, char *buf, size_t len, int flags);
 int ns_hexdump(const void *buf, int len, char *dst, int dst_len);
+int ns_avprintf(char **buf, size_t size, const char *fmt, va_list ap);
+int ns_resolve(const char *domain_name, char *ip_addr_buf, size_t buf_len);
 
 #ifdef __cplusplus
 }
@@ -265,6 +289,8 @@ int ns_hexdump(const void *buf, int len, char *dst, int dst_len);
 //
 // Alternatively, you can license this software under a commercial
 // license, as set out in <http://cesanta.com/>.
+//
+// $Date: 2014-09-28 05:04:41 UTC $
 
 
 #ifndef NS_MALLOC
@@ -279,18 +305,27 @@ int ns_hexdump(const void *buf, int len, char *dst, int dst_len);
 #define NS_FREE free
 #endif
 
+#define NS_UDP_RECEIVE_BUFFER_SIZE  2000
+#define NS_VPRINTF_BUFFER_SIZE      500
+
 struct ctl_msg {
   ns_callback_t callback;
   char message[1024 * 8];
 };
 
-void iobuf_init(struct iobuf *iobuf, size_t size) {
+void iobuf_resize(struct iobuf *io, size_t new_size) {
+  char *p;
+  if ((new_size > io->size || (new_size < io->size && new_size >= io->len)) &&
+      (p = (char *) NS_REALLOC(io->buf, new_size)) != NULL) {
+    io->size = new_size;
+    io->buf = p;
+  }
+}
+
+void iobuf_init(struct iobuf *iobuf, size_t initial_size) {
   iobuf->len = iobuf->size = 0;
   iobuf->buf = NULL;
-
-  if (size > 0 && (iobuf->buf = (char *) NS_MALLOC(size)) != NULL) {
-    iobuf->size = size;
-  }
+  iobuf_resize(iobuf, initial_size);
 }
 
 void iobuf_free(struct iobuf *iobuf) {
@@ -329,6 +364,16 @@ void iobuf_remove(struct iobuf *io, size_t n) {
   }
 }
 
+static size_t ns_out(struct ns_connection *nc, const void *buf, size_t len) {
+  if (nc->flags & NSF_UDP) {
+    long n = sendto(nc->sock, buf, len, 0, &nc->sa.sa, sizeof(nc->sa.sin));
+    DBG(("%p %d send %ld (%d %s)", nc, nc->sock, n, errno, strerror(errno)));
+    return n < 0 ? 0 : n;
+  } else {
+    return iobuf_append(&nc->send_iobuf, buf, len);
+  }
+}
+
 #ifndef NS_DISABLE_THREADS
 void *ns_start_thread(void *(*f)(void *), void *p) {
 #ifdef _WIN32
@@ -352,15 +397,15 @@ void *ns_start_thread(void *(*f)(void *), void *p) {
 }
 #endif  // NS_DISABLE_THREADS
 
-static void ns_add_conn(struct ns_server *server, struct ns_connection *c) {
-  c->next = server->active_connections;
-  server->active_connections = c;
+static void ns_add_conn(struct ns_mgr *mgr, struct ns_connection *c) {
+  c->next = mgr->active_connections;
+  mgr->active_connections = c;
   c->prev = NULL;
   if (c->next != NULL) c->next->prev = c;
 }
 
 static void ns_remove_conn(struct ns_connection *conn) {
-  if (conn->prev == NULL) conn->server->active_connections = conn->next;
+  if (conn->prev == NULL) conn->mgr->active_connections = conn->next;
   if (conn->prev) conn->prev->next = conn->next;
   if (conn->next) conn->next->prev = conn->prev;
 }
@@ -368,7 +413,7 @@ static void ns_remove_conn(struct ns_connection *conn) {
 // Print message to buffer. If buffer is large enough to hold the message,
 // return buffer. If buffer is to small, allocate large enough buffer on heap,
 // and return allocated buffer.
-static int ns_avprintf(char **buf, size_t size, const char *fmt, va_list ap) {
+int ns_avprintf(char **buf, size_t size, const char *fmt, va_list ap) {
   va_list ap_copy;
   int len;
 
@@ -403,12 +448,12 @@ static int ns_avprintf(char **buf, size_t size, const char *fmt, va_list ap) {
   return len;
 }
 
-int ns_vprintf(struct ns_connection *conn, const char *fmt, va_list ap) {
-  char mem[2000], *buf = mem;
+int ns_vprintf(struct ns_connection *nc, const char *fmt, va_list ap) {
+  char mem[NS_VPRINTF_BUFFER_SIZE], *buf = mem;
   int len;
 
   if ((len = ns_avprintf(&buf, sizeof(mem), fmt, ap)) > 0) {
-    iobuf_append(&conn->send_iobuf, buf, len);
+    ns_out(nc, buf, len);
   }
   if (buf != mem && buf != NULL) {
     free(buf);
@@ -426,14 +471,41 @@ int ns_printf(struct ns_connection *conn, const char *fmt, ...) {
   return len;
 }
 
-static void ns_call(struct ns_connection *conn, enum ns_event ev, void *p) {
-  if (conn->server->callback) conn->server->callback(conn, ev, p);
+static void hexdump(struct ns_connection *nc, const char *path,
+                    int num_bytes, int ev) {
+  const struct iobuf *io = ev == NS_SEND ? &nc->send_iobuf : &nc->recv_iobuf;
+  FILE *fp;
+  char *buf, src[60], dst[60];
+  int buf_size = num_bytes * 5 + 100;
+
+  if ((fp = fopen(path, "a")) != NULL) {
+    ns_sock_to_str(nc->sock, src, sizeof(src), 3);
+    ns_sock_to_str(nc->sock, dst, sizeof(dst), 7);
+    fprintf(fp, "%lu %p %s %s %s %d\n", (unsigned long) time(NULL),
+            nc->user_data, src,
+            ev == NS_RECV ? "<-" : ev == NS_SEND ? "->" :
+            ev == NS_ACCEPT ? "<A" : ev == NS_CONNECT ? "C>" : "XX",
+            dst, num_bytes);
+    if (num_bytes > 0 && (buf = (char *) NS_MALLOC(buf_size)) != NULL) {
+      ns_hexdump(io->buf + (ev == NS_SEND ? 0 : io->len) -
+        (ev == NS_SEND ? 0 : num_bytes), num_bytes, buf, buf_size);
+      fprintf(fp, "%s", buf);
+      free(buf);
+    }
+    fclose(fp);
+  }
 }
 
-static void ns_close_conn(struct ns_connection *conn) {
-  DBG(("%p %d", conn, conn->flags));
-  ns_call(conn, NS_CLOSE, NULL);
-  ns_remove_conn(conn);
+static void ns_call(struct ns_connection *nc, int ev, void *p) {
+  if (nc->mgr->hexdump_file != NULL && ev != NS_POLL) {
+    int len = (ev == NS_RECV || ev == NS_SEND) ? * (int *) p : 0;
+    hexdump(nc, nc->mgr->hexdump_file, len, ev);
+  }
+
+  nc->callback(nc, ev, p);
+}
+
+static void ns_destroy_conn(struct ns_connection *conn) {
   closesocket(conn->sock);
   iobuf_free(&conn->recv_iobuf);
   iobuf_free(&conn->send_iobuf);
@@ -441,8 +513,18 @@ static void ns_close_conn(struct ns_connection *conn) {
   if (conn->ssl != NULL) {
     SSL_free(conn->ssl);
   }
+  if (conn->ssl_ctx != NULL) {
+    SSL_CTX_free(conn->ssl_ctx);
+  }
 #endif
   NS_FREE(conn);
+}
+
+static void ns_close_conn(struct ns_connection *conn) {
+  DBG(("%p %d", conn, conn->flags));
+  ns_call(conn, NS_CLOSE, NULL);
+  ns_remove_conn(conn);
+  ns_destroy_conn(conn);
 }
 
 void ns_set_close_on_exec(sock_t sock) {
@@ -505,10 +587,31 @@ int ns_socketpair(sock_t sp[2]) {
 }
 #endif  // NS_DISABLE_SOCKETPAIR
 
-// Valid listening port spec is: [ip_address:]port, e.g. "80", "127.0.0.1:3128"
-static int ns_parse_port_string(const char *str, union socket_address *sa) {
+// TODO(lsm): use non-blocking resolver
+static int ns_resolve2(const char *host, struct in_addr *ina) {
+  struct hostent *he;
+  if ((he = gethostbyname(host)) == NULL) {
+    DBG(("gethostbyname(%s) failed: %s", host, strerror(errno)));
+  } else {
+    memcpy(ina, he->h_addr_list[0], sizeof(*ina));
+    return 1;
+  }
+  return 0;
+}
+
+// Resolve FDQN "host", store IP address in the "ip".
+// Return > 0 (IP address length) on success.
+int ns_resolve(const char *host, char *buf, size_t n) {
+  struct in_addr ad;
+  return ns_resolve2(host, &ad) ? snprintf(buf, n, "%s", inet_ntoa(ad)) : 0;
+}
+
+// Address format: [PROTO://][IP_ADDRESS:]PORT[:CERT][:CA_CERT]
+static int ns_parse_address(const char *str, union socket_address *sa,
+                            int *proto, int *use_ssl, char *cert, char *ca) {
   unsigned int a, b, c, d, port;
-  int len = 0;
+  int n = 0, len = 0;
+  char host[200];
 #ifdef NS_ENABLE_IPV6
   char buf[100];
 #endif
@@ -519,36 +622,57 @@ static int ns_parse_port_string(const char *str, union socket_address *sa) {
   memset(sa, 0, sizeof(*sa));
   sa->sin.sin_family = AF_INET;
 
+  *proto = SOCK_STREAM;
+  *use_ssl = 0;
+  cert[0] = ca[0] = '\0';
+
+  if (memcmp(str, "ssl://", 6) == 0) {
+    str += 6;
+    *use_ssl = 1;
+  } else if (memcmp(str, "udp://", 6) == 0) {
+    str += 6;
+    *proto = SOCK_DGRAM;
+  } else if (memcmp(str, "tcp://", 6) == 0) {
+    str += 6;
+  }
+
   if (sscanf(str, "%u.%u.%u.%u:%u%n", &a, &b, &c, &d, &port, &len) == 5) {
     // Bind to a specific IPv4 address, e.g. 192.168.1.5:8080
     sa->sin.sin_addr.s_addr = htonl((a << 24) | (b << 16) | (c << 8) | d);
     sa->sin.sin_port = htons((uint16_t) port);
 #ifdef NS_ENABLE_IPV6
-  } else if (sscanf(str, "[%49[^]]]:%u%n", buf, &port, &len) == 2 &&
+  } else if (sscanf(str, "[%99[^]]]:%u%n", buf, &port, &len) == 2 &&
              inet_pton(AF_INET6, buf, &sa->sin6.sin6_addr)) {
     // IPv6 address, e.g. [3ffe:2a00:100:7031::1]:8080
     sa->sin6.sin6_family = AF_INET6;
     sa->sin6.sin6_port = htons((uint16_t) port);
 #endif
+  } else if (sscanf(str, "%199[^ :]:%u%n", host, &port, &len) == 2) {
+    sa->sin.sin_port = htons((uint16_t) port);
+    ns_resolve2(host, &sa->sin.sin_addr);
   } else if (sscanf(str, "%u%n", &port, &len) == 1) {
     // If only port is specified, bind to IPv4, INADDR_ANY
     sa->sin.sin_port = htons((uint16_t) port);
-  } else {
-    port = 0;   // Parsing failure. Make port invalid.
   }
 
-  return port <= 0xffff && str[len] == '\0';
+  if (*use_ssl && (sscanf(str + len, ":%99[^:]:%99[^:]%n", cert, ca, &n) == 2 ||
+                   sscanf(str + len, ":%99[^:]%n", cert, &n) == 1)) {
+    len += n;
+  }
+
+  return port < 0xffff && str[len] == '\0' ? len : 0;
 }
 
 // 'sa' must be an initialized address to bind to
-static sock_t ns_open_listening_socket(union socket_address *sa) {
-  socklen_t len = sizeof(*sa);
+static sock_t ns_open_listening_socket(union socket_address *sa, int proto) {
+  socklen_t sa_len = (sa->sa.sa_family == AF_INET) ?
+    sizeof(sa->sin) : sizeof(sa->sin6);
   sock_t sock = INVALID_SOCKET;
 #ifndef _WIN32
   int on = 1;
 #endif
 
-  if ((sock = socket(sa->sa.sa_family, SOCK_STREAM, 6)) != INVALID_SOCKET &&
+  if ((sock = socket(sa->sa.sa_family, proto, 0)) != INVALID_SOCKET &&
 #ifndef _WIN32
       // SO_RESUSEADDR is not enabled on Windows because the semantics of
       // SO_REUSEADDR on UNIX and Windows is different. On Windows,
@@ -558,12 +682,11 @@ static sock_t ns_open_listening_socket(union socket_address *sa) {
       // scenarios. Therefore, SO_REUSEADDR was disabled on Windows.
       !setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *) &on, sizeof(on)) &&
 #endif
-      !bind(sock, &sa->sa, sa->sa.sa_family == AF_INET ?
-            sizeof(sa->sin) : sizeof(sa->sin6)) &&
-      !listen(sock, SOMAXCONN)) {
+      !bind(sock, &sa->sa, sa_len) &&
+      (proto == SOCK_DGRAM || listen(sock, SOMAXCONN) == 0)) {
     ns_set_non_blocking_mode(sock);
     // In case port was set to 0, get the real port number
-    (void) getsockname(sock, &sa->sa, &len);
+    (void) getsockname(sock, &sa->sa, &sa_len);
   } else if (sock != INVALID_SOCKET) {
     closesocket(sock);
     sock = INVALID_SOCKET;
@@ -572,79 +695,101 @@ static sock_t ns_open_listening_socket(union socket_address *sa) {
   return sock;
 }
 
-// Certificate generation script is at
-// https://github.com/cesanta/net_skeleton/blob/master/examples/gen_certs.sh
-int ns_set_ssl_ca_cert(struct ns_server *server, const char *cert) {
 #ifdef NS_ENABLE_SSL
-  STACK_OF(X509_NAME) *list = SSL_load_client_CA_file(cert);
-  if (cert != NULL && server->ssl_ctx != NULL && list != NULL) {
-    SSL_CTX_set_client_CA_list(server->ssl_ctx, list);
-    SSL_CTX_set_verify(server->ssl_ctx, SSL_VERIFY_PEER |
-                       SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
+// Certificate generation script is at
+// https://github.com/cesanta/net_skeleton/blob/master/scripts/gen_certs.sh
+
+static int ns_use_ca_cert(SSL_CTX *ctx, const char *cert) {
+  if (ctx == NULL) {
+    return -1;
+  } else if (cert == NULL || cert[0] == '\0') {
     return 0;
   }
-#endif
-  return server != NULL && cert == NULL ? 0 : -1;
+  SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, 0);
+  return SSL_CTX_load_verify_locations(ctx, cert, NULL) == 1 ? 0 : -2;
 }
 
-int ns_set_ssl_cert(struct ns_server *server, const char *cert) {
-#ifdef NS_ENABLE_SSL
-  if (cert != NULL &&
-      (server->ssl_ctx = SSL_CTX_new(SSLv23_server_method())) == NULL) {
+static int ns_use_cert(SSL_CTX *ctx, const char *pem_file) {
+  if (ctx == NULL) {
     return -1;
-  } else if (SSL_CTX_use_certificate_file(server->ssl_ctx, cert, 1) == 0 ||
-             SSL_CTX_use_PrivateKey_file(server->ssl_ctx, cert, 1) == 0) {
+  } else if (pem_file == NULL || pem_file[0] == '\0') {
+    return 0;
+  } else if (SSL_CTX_use_certificate_file(ctx, pem_file, 1) == 0 ||
+             SSL_CTX_use_PrivateKey_file(ctx, pem_file, 1) == 0) {
     return -2;
   } else {
-    SSL_CTX_use_certificate_chain_file(server->ssl_ctx, cert);
+    SSL_CTX_set_mode(ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
+    SSL_CTX_use_certificate_chain_file(ctx, pem_file);
     return 0;
   }
-#endif
-  return server != NULL && cert == NULL ? 0 : -3;
 }
+#endif  // NS_ENABLE_SSL
 
-int ns_bind(struct ns_server *server, const char *str) {
+struct ns_connection *ns_bind(struct ns_mgr *srv, const char *str,
+                              ns_callback_t callback, void *user_data) {
   union socket_address sa;
-  ns_parse_port_string(str, &sa);
-  if (server->listening_sock != INVALID_SOCKET) {
-    closesocket(server->listening_sock);
+  struct ns_connection *nc = NULL;
+  int use_ssl, proto;
+  char cert[100], ca_cert[100];
+  sock_t sock;
+
+  ns_parse_address(str, &sa, &proto, &use_ssl, cert, ca_cert);
+  if (use_ssl && cert[0] == '\0') return NULL;
+
+  if ((sock = ns_open_listening_socket(&sa, proto)) == INVALID_SOCKET) {
+  } else if ((nc = ns_add_sock(srv, sock, callback, NULL)) == NULL) {
+    closesocket(sock);
+  } else {
+    nc->sa = sa;
+    nc->flags |= NSF_LISTENING;
+    nc->user_data = user_data;
+    nc->callback = callback;
+
+    if (proto == SOCK_DGRAM) {
+      nc->flags |= NSF_UDP;
+    }
+
+#ifdef NS_ENABLE_SSL
+    if (use_ssl) {
+      nc->ssl_ctx = SSL_CTX_new(SSLv23_server_method());
+      if (ns_use_cert(nc->ssl_ctx, cert) != 0 ||
+          ns_use_ca_cert(nc->ssl_ctx, ca_cert) != 0) {
+        ns_close_conn(nc);
+        nc = NULL;
+      }
+    }
+#endif
+
+    DBG(("%p sock %d/%d ssl %p %p", nc, sock, proto, nc->ssl_ctx, nc->ssl));
   }
-  server->listening_sock = ns_open_listening_socket(&sa);
-  return server->listening_sock == INVALID_SOCKET ? -1 :
-  (int) ntohs(sa.sin.sin_port);
+
+  return nc;
 }
 
-
-static struct ns_connection *accept_conn(struct ns_server *server) {
+static struct ns_connection *accept_conn(struct ns_connection *ls) {
   struct ns_connection *c = NULL;
   union socket_address sa;
   socklen_t len = sizeof(sa);
   sock_t sock = INVALID_SOCKET;
 
   // NOTE(lsm): on Windows, sock is always > FD_SETSIZE
-  if ((sock = accept(server->listening_sock, &sa.sa, &len)) == INVALID_SOCKET) {
-  } else if ((c = (struct ns_connection *) NS_MALLOC(sizeof(*c))) == NULL ||
-             memset(c, 0, sizeof(*c)) == NULL) {
+  if ((sock = accept(ls->sock, &sa.sa, &len)) == INVALID_SOCKET) {
+  } else if ((c = ns_add_sock(ls->mgr, sock, ls->callback,
+              ls->user_data)) == NULL) {
     closesocket(sock);
 #ifdef NS_ENABLE_SSL
-  } else if (server->ssl_ctx != NULL &&
-             ((c->ssl = SSL_new(server->ssl_ctx)) == NULL ||
+  } else if (ls->ssl_ctx != NULL &&
+             ((c->ssl = SSL_new(ls->ssl_ctx)) == NULL ||
               SSL_set_fd(c->ssl, sock) != 1)) {
     DBG(("SSL error"));
-    closesocket(sock);
-    free(c);
+    ns_close_conn(c);
     c = NULL;
 #endif
   } else {
-    ns_set_close_on_exec(sock);
-    ns_set_non_blocking_mode(sock);
-    c->server = server;
-    c->sock = sock;
-    c->flags |= NSF_ACCEPTED;
-
-    ns_add_conn(server, c);
+    c->listener = ls;
+    c->proto_data = ls->proto_data;
     ns_call(c, NS_ACCEPT, &sa);
-    DBG(("%p %d %p %p", c, c->sock, c->ssl, server->ssl_ctx));
+    DBG(("%p %d %p %p", c, c->sock, c->ssl_ctx, c->ssl));
   }
 
   return c;
@@ -681,7 +826,7 @@ void ns_sock_to_str(sock_t sock, char *buf, size_t len, int flags) {
       // Only Windoze Vista (and newer) have inet_ntop()
       strncpy(buf, inet_ntoa(sa.sin.sin_addr), len);
 #else
-      inet_ntop(sa.sa.sa_family, (void *) &sa.sin.sin_addr, buf, len);
+      inet_ntop(sa.sa.sa_family, (void *) &sa.sin.sin_addr, buf,(socklen_t)len);
 #endif
     }
     if (flags & 2) {
@@ -783,7 +928,7 @@ static void ns_read_from_socket(struct ns_connection *conn) {
   } else
 #endif
   {
-    while ((n = recv(conn->sock, buf, sizeof(buf), 0)) > 0) {
+    while ((n = (int) recv(conn->sock, buf, sizeof(buf), 0)) > 0) {
       DBG(("%p %d <- %d bytes (PLAIN)", conn, conn->flags, n));
       iobuf_append(&conn->recv_iobuf, buf, n);
       ns_call(conn, NS_RECV, &n);
@@ -812,7 +957,7 @@ static void ns_write_to_socket(struct ns_connection *conn) {
     }
   } else
 #endif
-  { n = send(conn->sock, io->buf, io->len, 0); }
+  { n = (int) send(conn->sock, io->buf, io->len, 0); }
 
   DBG(("%p %d -> %d bytes", conn, conn->flags, n));
 
@@ -822,14 +967,36 @@ static void ns_write_to_socket(struct ns_connection *conn) {
   } else if (n > 0) {
     iobuf_remove(io, n);
   }
-
-  if (io->len == 0 && (conn->flags & NSF_FINISHED_SENDING_DATA)) {
-    conn->flags |= NSF_CLOSE_IMMEDIATELY;
-  }
 }
 
 int ns_send(struct ns_connection *conn, const void *buf, int len) {
-  return iobuf_append(&conn->send_iobuf, buf, len);
+  return (int) ns_out(conn, buf, len);
+}
+
+static void ns_handle_udp(struct ns_connection *ls) {
+  struct ns_connection nc;
+  char buf[NS_UDP_RECEIVE_BUFFER_SIZE];
+  int n;
+  socklen_t s_len = sizeof(nc.sa);
+
+  memset(&nc, 0, sizeof(nc));
+  n = recvfrom(ls->sock, buf, sizeof(buf), 0, &nc.sa.sa, &s_len);
+  if (n <= 0) {
+    DBG(("%p recvfrom: %s", ls, strerror(errno)));
+  } else {
+    nc.mgr = ls->mgr;
+    nc.recv_iobuf.buf = buf;
+    nc.recv_iobuf.len = nc.recv_iobuf.size = n;
+    nc.sock = ls->sock;
+    nc.callback = ls->callback;
+    nc.user_data = ls->user_data;
+    nc.proto_data = ls->proto_data;
+    nc.mgr = ls->mgr;
+    nc.listener = ls;
+    nc.flags = NSF_UDP;
+    DBG(("%p %d bytes received", ls, n));
+    ns_call(&nc, NS_RECV, &n);
+  }
 }
 
 static void ns_add_to_set(sock_t sock, fd_set *set, sock_t *max_fd) {
@@ -841,25 +1008,22 @@ static void ns_add_to_set(sock_t sock, fd_set *set, sock_t *max_fd) {
   }
 }
 
-int ns_server_poll(struct ns_server *server, int milli) {
+time_t ns_mgr_poll(struct ns_mgr *mgr, int milli) {
   struct ns_connection *conn, *tmp_conn;
   struct timeval tv;
   fd_set read_set, write_set;
-  int num_active_connections = 0;
   sock_t max_fd = INVALID_SOCKET;
   time_t current_time = time(NULL);
 
-  if (server->listening_sock == INVALID_SOCKET &&
-      server->active_connections == NULL) return 0;
-
   FD_ZERO(&read_set);
   FD_ZERO(&write_set);
-  ns_add_to_set(server->listening_sock, &read_set, &max_fd);
-  ns_add_to_set(server->ctl[1], &read_set, &max_fd);
+  ns_add_to_set(mgr->ctl[1], &read_set, &max_fd);
 
-  for (conn = server->active_connections; conn != NULL; conn = tmp_conn) {
+  for (conn = mgr->active_connections; conn != NULL; conn = tmp_conn) {
     tmp_conn = conn->next;
-    ns_call(conn, NS_POLL, &current_time);
+    if (!(conn->flags & (NSF_LISTENING | NSF_CONNECTING))) {
+      ns_call(conn, NS_POLL, &current_time);
+    }
     if (!(conn->flags & NSF_WANT_WRITE)) {
       //DBG(("%p read_set", conn));
       ns_add_to_set(conn->sock, &read_set, &max_fd);
@@ -882,35 +1046,39 @@ int ns_server_poll(struct ns_server *server, int milli) {
     // select() might have been waiting for a long time, reset current_time
     // now to prevent last_io_time being set to the past.
     current_time = time(NULL);
-    
-    // Accept new connections
-    if (server->listening_sock != INVALID_SOCKET &&
-        FD_ISSET(server->listening_sock, &read_set)) {
-      // We're not looping here, and accepting just one connection at
-      // a time. The reason is that eCos does not respect non-blocking
-      // flag on a listening socket and hangs in a loop.
-      if ((conn = accept_conn(server)) != NULL) {
-        conn->last_io_time = current_time;
-      }
-    }
 
     // Read wakeup messages
-    if (server->ctl[1] != INVALID_SOCKET &&
-        FD_ISSET(server->ctl[1], &read_set)) {
+    if (mgr->ctl[1] != INVALID_SOCKET &&
+        FD_ISSET(mgr->ctl[1], &read_set)) {
       struct ctl_msg ctl_msg;
-      int len = recv(server->ctl[1], (char *) &ctl_msg, sizeof(ctl_msg), 0);
-      send(server->ctl[1], ctl_msg.message, 1, 0);
+      int len = (int) recv(mgr->ctl[1], (char *) &ctl_msg, sizeof(ctl_msg), 0);
+      send(mgr->ctl[1], ctl_msg.message, 1, 0);
       if (len >= (int) sizeof(ctl_msg.callback) && ctl_msg.callback != NULL) {
-        ns_iterate(server, ctl_msg.callback, ctl_msg.message);
+        struct ns_connection *c;
+        for (c = ns_next(mgr, NULL); c != NULL; c = ns_next(mgr, c)) {
+          ctl_msg.callback(c, NS_POLL, ctl_msg.message);
+        }
       }
     }
 
-    for (conn = server->active_connections; conn != NULL; conn = tmp_conn) {
+    for (conn = mgr->active_connections; conn != NULL; conn = tmp_conn) {
       tmp_conn = conn->next;
       if (FD_ISSET(conn->sock, &read_set)) {
-        conn->last_io_time = current_time;
-        ns_read_from_socket(conn);
+        if (conn->flags & NSF_LISTENING) {
+          if (conn->flags & NSF_UDP) {
+            ns_handle_udp(conn);
+          } else {
+            // We're not looping here, and accepting just one connection at
+            // a time. The reason is that eCos does not respect non-blocking
+            // flag on a listening socket and hangs in a loop.
+            accept_conn(conn);
+          }
+        } else {
+          conn->last_io_time = current_time;
+          ns_read_from_socket(conn);
+        }
       }
+
       if (FD_ISSET(conn->sock, &write_set)) {
         if (conn->flags & NSF_CONNECTING) {
           ns_read_from_socket(conn);
@@ -922,77 +1090,72 @@ int ns_server_poll(struct ns_server *server, int milli) {
     }
   }
 
-  for (conn = server->active_connections; conn != NULL; conn = tmp_conn) {
+  for (conn = mgr->active_connections; conn != NULL; conn = tmp_conn) {
     tmp_conn = conn->next;
-    num_active_connections++;
-    if (conn->flags & NSF_CLOSE_IMMEDIATELY) {
+    if ((conn->flags & NSF_CLOSE_IMMEDIATELY) ||
+        (conn->send_iobuf.len == 0 &&
+          (conn->flags & NSF_FINISHED_SENDING_DATA))) {
       ns_close_conn(conn);
     }
   }
-  //DBG(("%d active connections", num_active_connections));
 
-  return num_active_connections;
+  return current_time;
 }
 
-struct ns_connection *ns_connect(struct ns_server *server, const char *host,
-                                 int port, int use_ssl, void *param) {
+struct ns_connection *ns_connect(struct ns_mgr *mgr, const char *address,
+                                 ns_callback_t callback, void *user_data) {
   sock_t sock = INVALID_SOCKET;
-  struct sockaddr_in sin;
-  struct hostent *he = NULL;
-  struct ns_connection *conn = NULL;
-  int connect_ret_val;
+  struct ns_connection *nc = NULL;
+  union socket_address sa;
+  char cert[100], ca_cert[100];
+  int rc, use_ssl, proto;
 
-  (void) use_ssl;
-
-  if (host == NULL || (he = gethostbyname(host)) == NULL ||
-      (sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
-    DBG(("gethostbyname(%s) failed: %s", host, strerror(errno)));
+  ns_parse_address(address, &sa, &proto, &use_ssl, cert, ca_cert);
+  if ((sock = socket(AF_INET, proto, 0)) == INVALID_SOCKET) {
     return NULL;
   }
-
-  sin.sin_family = AF_INET;
-  sin.sin_port = htons((uint16_t) port);
-  sin.sin_addr = * (struct in_addr *) he->h_addr_list[0];
   ns_set_non_blocking_mode(sock);
+  rc = (proto == SOCK_DGRAM) ? 0 : connect(sock, &sa.sa, sizeof(sa.sin));
 
-  connect_ret_val = connect(sock, (struct sockaddr *) &sin, sizeof(sin));
-  if (ns_is_error(connect_ret_val)) {
+  if (rc != 0 && ns_is_error(rc)) {
     closesocket(sock);
     return NULL;
-  } else if ((conn = (struct ns_connection *)
-              NS_MALLOC(sizeof(*conn))) == NULL) {
+  } else if ((nc = ns_add_sock(mgr, sock, callback, user_data)) == NULL) {
     closesocket(sock);
     return NULL;
   }
 
-  memset(conn, 0, sizeof(*conn));
-  conn->server = server;
-  conn->sock = sock;
-  conn->connection_data = param;
-  conn->flags = NSF_CONNECTING;
-  conn->last_io_time = time(NULL);
+  nc->sa = sa;   // Important, cause UDP conns will use sendto()
+  nc->flags = (proto == SOCK_DGRAM) ? NSF_UDP : NSF_CONNECTING;
 
 #ifdef NS_ENABLE_SSL
-  if (use_ssl &&
-      (conn->ssl = SSL_new(server->client_ssl_ctx)) != NULL) {
-    SSL_set_fd(conn->ssl, sock);
+  if (use_ssl) {
+    if ((nc->ssl_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL ||
+        ns_use_cert(nc->ssl_ctx, cert) != 0 ||
+        ns_use_ca_cert(nc->ssl_ctx, ca_cert) != 0 ||
+        (nc->ssl = SSL_new(nc->ssl_ctx)) == NULL) {
+      ns_close_conn(nc);
+      return NULL;
+    } else {
+      SSL_set_fd(nc->ssl, sock);
+    }
   }
 #endif
 
-  ns_add_conn(server, conn);
-  DBG(("%p %s:%d %d %p", conn, host, port, conn->sock, conn->ssl));
-
-  return conn;
+  return nc;
 }
 
-struct ns_connection *ns_add_sock(struct ns_server *s, sock_t sock, void *p) {
+struct ns_connection *ns_add_sock(struct ns_mgr *s, sock_t sock,
+                                  ns_callback_t callback, void *user_data) {
   struct ns_connection *conn;
   if ((conn = (struct ns_connection *) NS_MALLOC(sizeof(*conn))) != NULL) {
     memset(conn, 0, sizeof(*conn));
     ns_set_non_blocking_mode(sock);
+    ns_set_close_on_exec(sock);
     conn->sock = sock;
-    conn->connection_data = p;
-    conn->server = s;
+    conn->user_data = user_data;
+    conn->callback = callback;
+    conn->mgr = s;
     conn->last_io_time = time(NULL);
     ns_add_conn(s, conn);
     DBG(("%p %d", conn, sock));
@@ -1000,41 +1163,26 @@ struct ns_connection *ns_add_sock(struct ns_server *s, sock_t sock, void *p) {
   return conn;
 }
 
-struct ns_connection *ns_next(struct ns_server *s, struct ns_connection *conn) {
+struct ns_connection *ns_next(struct ns_mgr *s, struct ns_connection *conn) {
   return conn == NULL ? s->active_connections : conn->next;
 }
 
-void ns_iterate(struct ns_server *server, ns_callback_t cb, void *param) {
-  struct ns_connection *conn, *tmp_conn;
-
-  for (conn = server->active_connections; conn != NULL; conn = tmp_conn) {
-    tmp_conn = conn->next;
-    cb(conn, NS_POLL, param);
-  }
-}
-
-void ns_server_wakeup_ex(struct ns_server *server, ns_callback_t cb,
-                         void *data, size_t len) {
+void ns_broadcast(struct ns_mgr *mgr, ns_callback_t cb,void *data, size_t len) {
   struct ctl_msg ctl_msg;
-  if (server->ctl[0] != INVALID_SOCKET && data != NULL &&
+  if (mgr->ctl[0] != INVALID_SOCKET && data != NULL &&
       len < sizeof(ctl_msg.message)) {
     ctl_msg.callback = cb;
     memcpy(ctl_msg.message, data, len);
-    send(server->ctl[0], (char *) &ctl_msg,
+    send(mgr->ctl[0], (char *) &ctl_msg,
          offsetof(struct ctl_msg, message) + len, 0);
-    recv(server->ctl[0], (char *) &len, 1, 0);
+    recv(mgr->ctl[0], (char *) &len, 1, 0);
   }
 }
 
-void ns_server_wakeup(struct ns_server *server) {
-  ns_server_wakeup_ex(server, NULL, (void *) "", 0);
-}
-
-void ns_server_init(struct ns_server *s, void *server_data, ns_callback_t cb) {
+void ns_mgr_init(struct ns_mgr *s, void *user_data) {
   memset(s, 0, sizeof(*s));
-  s->listening_sock = s->ctl[0] = s->ctl[1] = INVALID_SOCKET;
-  s->server_data = server_data;
-  s->callback = cb;
+  s->ctl[0] = s->ctl[1] = INVALID_SOCKET;
+  s->user_data = user_data;
 
 #ifdef _WIN32
   { WSADATA data; WSAStartup(MAKEWORD(2, 2), &data); }
@@ -1051,34 +1199,26 @@ void ns_server_init(struct ns_server *s, void *server_data, ns_callback_t cb) {
 #endif
 
 #ifdef NS_ENABLE_SSL
-  SSL_library_init();
-  s->client_ssl_ctx = SSL_CTX_new(SSLv23_client_method());
+  {static int init_done; if (!init_done) { SSL_library_init(); init_done++; }}
 #endif
 }
 
-void ns_server_free(struct ns_server *s) {
+void ns_mgr_free(struct ns_mgr *s) {
   struct ns_connection *conn, *tmp_conn;
 
   DBG(("%p", s));
   if (s == NULL) return;
   // Do one last poll, see https://github.com/cesanta/mongoose/issues/286
-  ns_server_poll(s, 0);
+  ns_mgr_poll(s, 0);
 
-  if (s->listening_sock != INVALID_SOCKET) closesocket(s->listening_sock);
   if (s->ctl[0] != INVALID_SOCKET) closesocket(s->ctl[0]);
   if (s->ctl[1] != INVALID_SOCKET) closesocket(s->ctl[1]);
-  s->listening_sock = s->ctl[0] = s->ctl[1] = INVALID_SOCKET;
+  s->ctl[0] = s->ctl[1] = INVALID_SOCKET;
 
   for (conn = s->active_connections; conn != NULL; conn = tmp_conn) {
     tmp_conn = conn->next;
     ns_close_conn(conn);
   }
-
-#ifdef NS_ENABLE_SSL
-  if (s->ssl_ctx != NULL) SSL_CTX_free(s->ssl_ctx);
-  if (s->client_ssl_ctx != NULL) SSL_CTX_free(s->client_ssl_ctx);
-  s->ssl_ctx = s->client_ssl_ctx = NULL;
-#endif
 }
 // net_skeleton end
 #endif  // NOEMBED_NET_SKELETON
@@ -1105,7 +1245,8 @@ void ns_server_free(struct ns_server *s) {
 #endif
 #define stat(x, y) mg_stat((x), (y))
 #define fopen(x, y) mg_fopen((x), (y))
-#define open(x, y) mg_open((x), (y))
+#define open(x, y, z) mg_open((x), (y), (z))
+#define close(x) _close(x)
 #define lseek(x, y, z) _lseeki64((x), (y), (z))
 #define popen(x, y) _popen((x), (y))
 #define pclose(x) _pclose(x)
@@ -1115,15 +1256,19 @@ void ns_server_free(struct ns_server *s) {
 #define STR(x) STRX(x)
 #define __func__ __FILE__ ":" STR(__LINE__)
 #endif
-#define INT64_FMT  "I64d"
-#define stat(x, y) mg_stat((x), (y))
-#define fopen(x, y) mg_fopen((x), (y))
-#define open(x, y) mg_open((x), (y))
+/* MINGW has adopted the MSVC formatting for 64-bit ints as of gcc 4.4 till 4.8*/
+#if (defined(__MINGW32__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4 && __GNUC_MINOR__ < 8))) || defined(_MSC_VER)
+#define INT64_FMT   "I64d"
+#else
+#define INT64_FMT   "lld"
+#endif
 #define flockfile(x)      ((void) (x))
 #define funlockfile(x)    ((void) (x))
 typedef struct _stati64 file_stat_t;
 typedef HANDLE process_id_t;
+
 #else                    ////////////// UNIX specific defines and includes
+
 #include <dirent.h>
 #include <dlfcn.h>
 #include <inttypes.h>
@@ -1159,10 +1304,10 @@ typedef pid_t process_id_t;
 #endif
 
 #ifndef MONGOOSE_IDLE_TIMEOUT_SECONDS
-#define MONGOOSE_IDLE_TIMEOUT_SECONDS 30
+#define MONGOOSE_IDLE_TIMEOUT_SECONDS 300
 #endif
 
-#ifdef MONGOOSE_NO_SOCKETPAIR
+#ifdef NS_DISABLE_SOCKETPAIR
 #define MONGOOSE_NO_CGI
 #endif
 
@@ -1223,11 +1368,6 @@ enum {
 #ifndef MONGOOSE_NO_SSI
   SSI_PATTERN,
 #endif
-#ifdef NS_ENABLE_SSL
-  SSL_CERTIFICATE,
-  SSL_CA_CERTIFICATE,
-  SSL_MITM_CERTS,
-#endif
   URL_REWRITES,
   NUM_OPTIONS
 };
@@ -1257,7 +1397,7 @@ static const char *static_config_options[] = {
 #ifndef MONGOOSE_NO_FILESYSTEM
   "hide_files_patterns", NULL,
   "hexdump_file", NULL,
-  "index_files","index.html,index.htm,index.shtml,index.cgi,index.php,index.lp",
+  "index_files","index.html,index.htm,index.shtml,index.cgi,index.php",
 #endif
   "listening_port", NULL,
 #ifndef _WIN32
@@ -1266,17 +1406,12 @@ static const char *static_config_options[] = {
 #ifndef MONGOOSE_NO_SSI
   "ssi_pattern", "**.shtml$|**.shtm$",
 #endif
-#ifdef NS_ENABLE_SSL
-  "ssl_certificate", NULL,
-  "ssl_ca_certificate", NULL,
-  "ssl_mitm_certs", NULL,
-#endif
   "url_rewrites", NULL,
   NULL
 };
 
 struct mg_server {
-  struct ns_server ns_server;
+  struct ns_mgr ns_mgr;
   union socket_address lsa;   // Listening socket address
   mg_handler_t event_handler;
   char *config_options[NUM_OPTIONS];
@@ -1296,6 +1431,7 @@ enum endpoint_type {
 #define MG_LONG_RUNNING NSF_USER_2
 #define MG_CGI_CONN NSF_USER_3
 #define MG_PROXY_CONN NSF_USER_4
+#define MG_PROXY_DONT_PARSE NSF_USER_5
 
 struct connection {
   struct ns_connection *ns_conn;  // NOTE(lsm): main.c depends on this order
@@ -1305,7 +1441,7 @@ struct connection {
   enum endpoint_type endpoint_type;
   char *path_info;
   char *request;
-  int64_t num_bytes_sent; // Total number of bytes sent
+  int64_t num_bytes_recv; // Total number of bytes received
   int64_t cl;             // Reply content length, for Range support
   int request_len;  // Request length, including last \r\n after last header
 };
@@ -1315,6 +1451,7 @@ struct connection {
 
 static void open_local_endpoint(struct connection *conn, int skip_user);
 static void close_local_endpoint(struct connection *conn);
+static void mg_ev_handler(struct ns_connection *nc, int ev, void *p);
 
 static const struct {
   const char *extension;
@@ -1377,6 +1514,34 @@ void *mg_start_thread(void *(*f)(void *), void *p) {
 }
 #endif  // MONGOOSE_NO_THREADS
 
+#ifndef MONGOOSE_NO_MMAP
+#ifdef _WIN32
+static void *mmap(void *addr, int64_t len, int prot, int flags, int fd,
+                  int offset) {
+  HANDLE fh = (HANDLE) _get_osfhandle(fd);
+  HANDLE mh = CreateFileMapping(fh, 0, PAGE_READONLY, 0, 0, 0);
+  void *p = MapViewOfFile(mh, FILE_MAP_READ, 0, 0, (size_t) len);
+  CloseHandle(mh);
+  return p;
+}
+#define munmap(x, y)  UnmapViewOfFile(x)
+#define MAP_FAILED NULL
+#define MAP_PRIVATE 0
+#define PROT_READ 0
+#else
+#include <sys/mman.h>
+#endif
+
+void *mg_mmap(FILE *fp, size_t size) {
+  void *p = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fileno(fp), 0);
+  return p == MAP_FAILED ? NULL : p;
+}
+
+void mg_munmap(void *p, size_t size) {
+  munmap(p, size);
+}
+#endif  // MONGOOSE_NO_MMAP
+
 #if defined(_WIN32) && !defined(MONGOOSE_NO_FILESYSTEM)
 // Encode 'path' which is assumed UTF-8 string, into UNICODE string.
 // wbuf and wbuf_len is a target buffer and its length.
@@ -1415,10 +1580,10 @@ static FILE *mg_fopen(const char *path, const char *mode) {
   return _wfopen(wpath, wmode);
 }
 
-static int mg_open(const char *path, int flag) {
+static int mg_open(const char *path, int flag, int mode) {
   wchar_t wpath[MAX_PATH_SIZE];
   to_wchar(path, wpath, ARRAY_SIZE(wpath));
-  return _wopen(wpath, flag);
+  return _wopen(wpath, flag, mode);
 }
 #endif // _WIN32 && !MONGOOSE_NO_FILESYSTEM
 
@@ -1544,23 +1709,72 @@ static void parse_http_headers(char **buf, struct mg_connection *ri) {
 
 static const char *status_code_to_str(int status_code) {
   switch (status_code) {
+
+    case 100: return "Continue";
+    case 101: return "Switching Protocols";
+    case 102: return "Processing";
+
     case 200: return "OK";
     case 201: return "Created";
+    case 202: return "Accepted";
+    case 203: return "Non-Authoritative Information";
     case 204: return "No Content";
+    case 205: return "Reset Content";
+    case 206: return "Partial Content";
+    case 207: return "Multi-Status";
+    case 208: return "Already Reported";
+    case 226: return "IM Used";
+
+    case 300: return "Multiple Choices";
     case 301: return "Moved Permanently";
     case 302: return "Found";
+    case 303: return "See Other";
     case 304: return "Not Modified";
+    case 305: return "Use Proxy";
+    case 306: return "Switch Proxy";
+    case 307: return "Temporary Redirect";
+    case 308: return "Permanent Redirect";
+
     case 400: return "Bad Request";
+    case 401: return "Unauthorized";
+    case 402: return "Payment Required";
     case 403: return "Forbidden";
     case 404: return "Not Found";
     case 405: return "Method Not Allowed";
+    case 406: return "Not Acceptable";
+    case 407: return "Proxy Authentication Required";
+    case 408: return "Request Timeout";
     case 409: return "Conflict";
+    case 410: return "Gone";
     case 411: return "Length Required";
-    case 413: return "Request Entity Too Large";
+    case 412: return "Precondition Failed";
+    case 413: return "Payload Too Large";
+    case 414: return "URI Too Long";
     case 415: return "Unsupported Media Type";
+    case 416: return "Requested Range Not Satisfiable";
+    case 417: return "Expectation Failed";
+    case 418: return "I\'m a teapot";
+    case 422: return "Unprocessable Entity";
     case 423: return "Locked";
-    case 500: return "Server Error";
+    case 424: return "Failed Dependency";
+    case 426: return "Upgrade Required";
+    case 428: return "Precondition Required";
+    case 429: return "Too Many Requests";
+    case 431: return "Request Header Fields Too Large";
+    case 451: return "Unavailable For Legal Reasons";
+
+    case 500: return "Internal Server Error";
     case 501: return "Not Implemented";
+    case 502: return "Bad Gateway";
+    case 503: return "Service Unavailable";
+    case 504: return "Gateway Timeout";
+    case 505: return "HTTP Version Not Supported";
+    case 506: return "Variant Also Negotiates";
+    case 507: return "Insufficient Storage";
+    case 508: return "Loop Detected";
+    case 510: return "Not Extended";
+    case 511: return "Network Authentication Required";
+
     default:  return "Server Error";
   }
 }
@@ -1722,14 +1936,17 @@ static void abs_path(const char *utf8_path, char *abs_path, size_t len) {
 static process_id_t start_process(char *interp, const char *cmd,
                                   const char *env, const char *envp[],
                                   const char *dir, sock_t sock) {
-  STARTUPINFOW si = {0};
-  PROCESS_INFORMATION pi = {0};
+  STARTUPINFOW si;
+  PROCESS_INFORMATION pi;
   HANDLE a[2], b[2], me = GetCurrentProcess();
   wchar_t wcmd[MAX_PATH_SIZE], full_dir[MAX_PATH_SIZE];
   char buf[MAX_PATH_SIZE], buf4[MAX_PATH_SIZE], buf5[MAX_PATH_SIZE],
        cmdline[MAX_PATH_SIZE], *p;
   DWORD flags = DUPLICATE_CLOSE_SOURCE | DUPLICATE_SAME_ACCESS;
   FILE *fp;
+
+  memset(&si, 0, sizeof(si));
+  memset(&pi, 0, sizeof(pi));
 
   si.cb = sizeof(si);
   si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
@@ -1747,7 +1964,7 @@ static process_id_t start_process(char *interp, const char *cmd,
     buf[sizeof(buf) - 1] = '\0';
     if (buf[0] == '#' && buf[1] == '!') {
       interp = buf + 2;
-      for (p = interp + strlen(interp);
+      for (p = interp + strlen(interp) - 1;
            isspace(* (uint8_t *) p) && p > interp; p--) *p = '\0';
     }
     fclose(fp);
@@ -1774,12 +1991,11 @@ static process_id_t start_process(char *interp, const char *cmd,
   }
   DBG(("CGI command: [%ls] -> %p", wcmd, pi.hProcess));
 
+  // Not closing a[0] and b[1] because we've used DUPLICATE_CLOSE_SOURCE
   CloseHandle(si.hStdOutput);
   CloseHandle(si.hStdInput);
-  CloseHandle(a[0]);
-  CloseHandle(b[1]);
-  CloseHandle(pi.hThread);
-  CloseHandle(pi.hProcess);
+  //CloseHandle(pi.hThread);
+  //CloseHandle(pi.hProcess);
 
   return pi.hProcess;
 }
@@ -1997,10 +2213,10 @@ static void open_cgi_endpoint(struct connection *conn, const char *prog) {
   } while (fds[0] == INVALID_SOCKET);
 
   if (start_process(conn->server->config_options[CGI_INTERPRETER],
-                    prog, blk.buf, blk.vars, dir, fds[1]) > 0) {
+                    prog, blk.buf, blk.vars, dir, fds[1]) != 0) {
     conn->endpoint_type = EP_CGI;
-    conn->endpoint.nc = ns_add_sock(&conn->server->ns_server,
-                                          fds[0], conn);
+    conn->endpoint.nc = ns_add_sock(&conn->server->ns_mgr, fds[0],
+                                    mg_ev_handler, conn);
     conn->endpoint.nc->flags |= MG_CGI_CONN;
     ns_send(conn->ns_conn, cgi_status, sizeof(cgi_status) - 1);
     conn->mg_conn.status_code = 200;
@@ -2019,7 +2235,7 @@ static void open_cgi_endpoint(struct connection *conn, const char *prog) {
 }
 
 static void on_cgi_data(struct ns_connection *nc) {
-  struct connection *conn = (struct connection *) nc->connection_data;
+  struct connection *conn = (struct connection *) nc->user_data;
   const char *status = "500";
   struct mg_connection c;
 
@@ -2193,6 +2409,8 @@ static int parse_http_message(char *buf, int len, struct mg_connection *ri) {
   } else {
     if (is_request) {
       ri->http_version += 5;
+    } else {
+      ri->status_code = atoi(ri->uri);
     }
     parse_http_headers(&buf, ri);
 
@@ -2487,6 +2705,14 @@ static uint32_t blk0(union char64long16 *block, int i) {
   }
   return block->l[i];
 }
+
+/* Avoid redefine warning (ARM /usr/include/sys/ucontext.h define R0~R4) */
+#undef blk
+#undef R0
+#undef R1
+#undef R2
+#undef R3
+#undef R4
 
 #define blk(i) (block->l[i&15] = rol(block->l[(i+13)&15]^block->l[(i+8)&15] \
     ^block->l[(i+2)&15]^block->l[i&15],1))
@@ -2965,8 +3191,8 @@ static void gmt_time_string(char *buf, size_t buf_len, time_t *t) {
 }
 
 static void open_file_endpoint(struct connection *conn, const char *path,
-                               file_stat_t *st) {
-  char date[64], lm[64], etag[64], range[64], headers[500];
+                               file_stat_t *st, const char *extra_headers) {
+  char date[64], lm[64], etag[64], range[64], headers[1000];
   const char *msg = "OK", *hdr;
   time_t curtime = time(NULL);
   int64_t r1, r2;
@@ -3010,11 +3236,12 @@ static void open_file_endpoint(struct connection *conn, const char *path,
                   "Content-Length: %" INT64_FMT "\r\n"
                   "Connection: %s\r\n"
                   "Accept-Ranges: bytes\r\n"
-                  "%s%s\r\n",
+                  "%s%s%s\r\n",
                   conn->mg_conn.status_code, msg, date, lm, etag,
                   (int) mime_vec.len, mime_vec.ptr, conn->cl,
                   suggest_connection_header(&conn->mg_conn),
-                  range, MONGOOSE_USE_EXTRA_HTTP_HEADERS);
+                  range, extra_headers == NULL ? "" : extra_headers,
+                  MONGOOSE_USE_EXTRA_HTTP_HEADERS);
   ns_send(conn->ns_conn, headers, n);
 
   if (!strcmp(conn->mg_conn.request_method, "HEAD")) {
@@ -3023,18 +3250,22 @@ static void open_file_endpoint(struct connection *conn, const char *path,
     conn->endpoint_type = EP_NONE;
   }
 }
+
+void mg_send_file_data(struct mg_connection *c, int fd) {
+  struct connection *conn = MG_CONN_2_CONN(c);
+  conn->endpoint_type = EP_FILE;
+  conn->endpoint.fd = fd;
+  ns_set_close_on_exec(conn->endpoint.fd);
+}
 #endif  // MONGOOSE_NO_FILESYSTEM
 
 static void call_request_handler_if_data_is_buffered(struct connection *conn) {
-  struct iobuf *loc = &conn->ns_conn->recv_iobuf;
-  struct mg_connection *c = &conn->mg_conn;
-
 #ifndef MONGOOSE_NO_WEBSOCKET
   if (conn->mg_conn.is_websocket) {
     do { } while (deliver_websocket_frame(conn));
   } else
 #endif
-  if ((size_t) loc->len >= c->content_len &&
+  if (conn->num_bytes_recv >= (conn->cl + conn->request_len) &&
       call_request_handler(conn) == MG_FALSE) {
     open_local_endpoint(conn, 1);
   }
@@ -3173,7 +3404,7 @@ int mg_url_encode(const char *src, size_t s_len, char *dst, size_t dst_len) {
   static const char *hex = "0123456789abcdef";
   size_t i = 0, j = 0;
 
-  for (i = j = 0; dst_len > 0 && i < s_len && j < dst_len - 1; i++, j++) {
+  for (i = j = 0; dst_len > 0 && i < s_len && j + 2 < dst_len - 1; i++, j++) {
     if (isalnum(* (const unsigned char *) (src + i)) ||
         strchr(dont_escape, * (const unsigned char *) (src + i)) != NULL) {
       dst[j] = src[i];
@@ -3310,8 +3541,12 @@ static void handle_propfind(struct connection *conn, const char *path,
     "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
     "<d:multistatus xmlns:d='DAV:'>\n";
   static const char footer[] = "</d:multistatus>";
-  const char *depth = mg_get_header(&conn->mg_conn, "Depth"),
-        *list_dir = conn->server->config_options[ENABLE_DIRECTORY_LISTING];
+  const char *depth = mg_get_header(&conn->mg_conn, "Depth");
+#ifdef MONGOOSE_NO_DIRECTORY_LISTING
+  const char *list_dir = "no";
+#else
+  const char *list_dir = conn->server->config_options[ENABLE_DIRECTORY_LISTING];
+#endif
 
   conn->mg_conn.status_code = 207;
 
@@ -3438,14 +3673,8 @@ static void handle_put(struct connection *conn, const char *path) {
     send_http_error(conn, 500, "put_dir: %s", strerror(errno));
   } else if (cl_hdr == NULL) {
     send_http_error(conn, 411, NULL);
-#ifdef _WIN32
-    //On Windows, open() is a macro with 2 params
   } else if ((conn->endpoint.fd =
-              open(path, O_RDWR | O_CREAT | O_TRUNC)) < 0) {
-#else
-  } else if ((conn->endpoint.fd =
-              open(path, O_RDWR | O_CREAT | O_TRUNC, 0644)) < 0) {
-#endif
+              open(path, O_RDWR | O_CREAT | O_TRUNC | O_BINARY, 0644)) < 0) {
     send_http_error(conn, 500, "open(%s): %s", path, strerror(errno));
   } else {
     DBG(("PUT [%s] %lu", path, (unsigned long) conn->ns_conn->recv_iobuf.len));
@@ -3466,7 +3695,7 @@ static void handle_put(struct connection *conn, const char *path) {
 
 static void forward_put_data(struct connection *conn) {
   struct iobuf *io = &conn->ns_conn->recv_iobuf;
-  size_t k = conn->cl < (int64_t) io->len ? conn->cl : io->len;   // To write
+  size_t k = conn->cl < (int64_t) io->len ? conn->cl : (int64_t) io->len;   // To write
   int n = write(conn->endpoint.fd, io->buf, k);   // Write them!
   if (n > 0) {
     iobuf_remove(io, n);
@@ -3501,7 +3730,7 @@ void mg_send_digest_auth_request(struct mg_connection *c) {
 
 // Use the global passwords file, if specified by auth_gpass option,
 // or search for .htpasswd in the requested directory.
-static FILE *open_auth_file(struct connection *conn, const char *path, 
+static FILE *open_auth_file(struct connection *conn, const char *path,
                             int is_directory) {
   char name[MAX_PATH_SIZE];
   const char *p, *gpass = conn->server->config_options[GLOBAL_AUTH_FILE];
@@ -3800,7 +4029,7 @@ int mg_authorize_digest(struct mg_connection *c, FILE *fp) {
 
 
 // Return 1 if request is authorised, 0 otherwise.
-static int is_authorized(struct connection *conn, const char *path, 
+static int is_authorized(struct connection *conn, const char *path,
                          int is_directory) {
   FILE *fp;
   int authorized = MG_TRUE;
@@ -4035,18 +4264,20 @@ static void handle_ssi_request(struct connection *conn, const char *path) {
 static void proxy_request(struct ns_connection *pc, struct mg_connection *c) {
   int i, sent_close_header = 0;
 
-  ns_printf(pc, "%s %s HTTP/%s\r\n", c->request_method, c->uri,
+  ns_printf(pc, "%s %s%s%s HTTP/%s\r\n", c->request_method, c->uri,
+            c->query_string ? "?" : "",
+            c->query_string ? c->query_string : "",
             c->http_version);
   for (i = 0; i < c->num_headers; i++) {
     if (mg_strcasecmp(c->http_headers[i].name, "Connection") == 0) {
       // Force connection close, cause we don't parse proxy replies
       // therefore we don't know message boundaries
-      //ns_printf(pc, "%s: %s\r\n", "Connection", "close");
+      ns_printf(pc, "%s: %s\r\n", "Connection", "close");
       sent_close_header = 1;
-    //} else {
-    }
+    } else {
       ns_printf(pc, "%s: %s\r\n", c->http_headers[i].name,
                 c->http_headers[i].value);
+    }
   }
   if (!sent_close_header) {
     ns_printf(pc, "%s: %s\r\n", "Connection", "close");
@@ -4060,11 +4291,9 @@ static void proxy_request(struct ns_connection *pc, struct mg_connection *c) {
 int mg_terminate_ssl(struct mg_connection *c, const char *cert) {
   static const char ok[] = "HTTP/1.0 200 OK\r\n\r\n";
   struct connection *conn = MG_CONN_2_CONN(c);
-  int n;
   SSL_CTX *ctx;
 
   DBG(("%p MITM", conn));
-  SSL_library_init();
   if ((ctx = SSL_CTX_new(SSLv23_server_method())) == NULL) return 0;
 
   SSL_CTX_use_certificate_file(ctx, cert, 1);
@@ -4072,8 +4301,9 @@ int mg_terminate_ssl(struct mg_connection *c, const char *cert) {
   SSL_CTX_use_certificate_chain_file(ctx, cert);
 
   // When clear-text reply is pushed to client, switch to SSL mode.
-  n = send(conn->ns_conn->sock, ok, sizeof(ok) - 1, 0);
-  DBG(("%p %lu %d SEND", c, (unsigned long)sizeof(ok) - 1, n));
+  // TODO(lsm): check for send() failure
+  send(conn->ns_conn->sock, ok, sizeof(ok) - 1, 0);
+  //DBG(("%p %lu %d SEND", c, (unsigned long) sizeof(ok) - 1, n));
   conn->ns_conn->send_iobuf.len = 0;
   conn->endpoint_type = EP_USER;  // To keep-alive in close_local_endpoint()
   close_local_endpoint(conn);     // Clean up current CONNECT request
@@ -4085,12 +4315,40 @@ int mg_terminate_ssl(struct mg_connection *c, const char *cert) {
 }
 #endif
 
+int mg_forward(struct mg_connection *c, const char *addr) {
+  static const char ok[] = "HTTP/1.1 200 OK\r\n\r\n";
+  struct connection *conn = MG_CONN_2_CONN(c);
+  struct ns_connection *pc;
+
+  if ((pc = ns_connect(&conn->server->ns_mgr, addr,
+      mg_ev_handler, conn)) == NULL) {
+    conn->ns_conn->flags |= NSF_CLOSE_IMMEDIATELY;
+    return 0;
+  }
+
+  // Interlink two connections
+  pc->flags |= MG_PROXY_CONN;
+  conn->endpoint_type = EP_PROXY;
+  conn->endpoint.nc = pc;
+  DBG(("%p [%s] [%s] -> %p %p", conn, c->uri, addr, pc, conn->ns_conn->ssl));
+
+  if (strcmp(c->request_method, "CONNECT") == 0) {
+    // For CONNECT request, reply with 200 OK. Tunnel is established.
+    // TODO(lsm): check for send() failure
+    (void) send(conn->ns_conn->sock, ok, sizeof(ok) - 1, 0);
+  } else {
+    // Strip "http://host:port" part from the URI
+    if (memcmp(c->uri, "http://", 7) == 0) c->uri += 7;
+    while (*c->uri != '\0' && *c->uri != '/') c->uri++;
+    proxy_request(pc, c);
+  }
+  return 1;
+}
+
 static void proxify_connection(struct connection *conn) {
-  char proto[10], host[500], cert[500];
+  char proto[10], host[500], cert[500], addr[1000];
   unsigned short port = 80;
   struct mg_connection *c = &conn->mg_conn;
-  struct ns_server *server = &conn->server->ns_server;
-  struct ns_connection *pc = NULL;
   int n = 0;
   const char *url = c->uri;
 
@@ -4101,51 +4359,17 @@ static void proxify_connection(struct connection *conn) {
     n = 0;
   }
 
-#ifdef NS_ENABLE_SSL
-  // Find out whether we should be in the MITM mode
-  {
-    const char *certs = conn->server->config_options[SSL_MITM_CERTS];
-    int host_len = strlen(host);
-    struct vec a, b;
-
-    while (conn->ns_conn->ssl == NULL && port != 80 &&
-           (certs = next_option(certs, &a, &b)) != NULL) {
-      if (a.len != host_len || mg_strncasecmp(a.ptr, host, a.len)) continue;
-      snprintf(cert, sizeof(cert), "%.*s", b.len, b.ptr);
-      mg_terminate_ssl(&conn->mg_conn, cert);
-      return;
-    }
-  }
-#endif
-
-  if (n > 0 &&
-      (pc = ns_connect(server, host, port, conn->ns_conn->ssl != NULL,
-                       conn)) != NULL) {
-    // Interlink two connections
-    pc->flags |= MG_PROXY_CONN;
-    conn->endpoint_type = EP_PROXY;
-    conn->endpoint.nc = pc;
-    DBG(("%p [%s] -> %p %p", conn, c->uri, pc, conn->ns_conn->ssl));
-
-    if (strcmp(c->request_method, "CONNECT") == 0) {
-      // For CONNECT request, reply with 200 OK. Tunnel is established.
-      mg_printf(c, "%s", "HTTP/1.1 200 OK\r\n\r\n");
-      conn->request_len = 0;
-      free(conn->request);
-      conn->request = NULL;
-    } else {
-      // For other methods, forward the request to the target host.
-      c->uri += n;
-      proxy_request(pc, c);
-    }
-  } else {
+  snprintf(addr, sizeof(addr), "%s://%s:%hu",
+           conn->ns_conn->ssl != NULL ? "ssl" : "tcp", host, port);
+  if (n <= 0 || !mg_forward(c, addr)) {
     conn->ns_conn->flags |= NSF_CLOSE_IMMEDIATELY;
   }
 }
 
 #ifndef MONGOOSE_NO_FILESYSTEM
-void mg_send_file_internal(struct mg_connection *c, const char *file_name, 
-                           file_stat_t *st, int exists) {
+void mg_send_file_internal(struct mg_connection *c, const char *file_name,
+                           file_stat_t *st, int exists,
+                           const char *extra_headers) {
   struct connection *conn = MG_CONN_2_CONN(c);
   char path[MAX_PATH_SIZE];
   const int is_directory = S_ISDIR(st->st_mode);
@@ -4161,7 +4385,7 @@ void mg_send_file_internal(struct mg_connection *c, const char *file_name,
 #endif
 
   mg_snprintf(path, sizeof(path), "%s", file_name);
-  
+
   if (!exists || must_hide_file(conn, path)) {
     send_http_error(conn, 404, NULL);
   } else if (is_directory &&
@@ -4194,18 +4418,19 @@ void mg_send_file_internal(struct mg_connection *c, const char *file_name,
 #endif
   } else if (is_not_modified(conn, st)) {
     send_http_error(conn, 304, NULL);
-  } else if ((conn->endpoint.fd = open(path, O_RDONLY | O_BINARY)) != -1) {
+  } else if ((conn->endpoint.fd = open(path, O_RDONLY | O_BINARY, 0)) != -1) {
     // O_BINARY is required for Windows, otherwise in default text mode
     // two bytes \r\n will be read as one.
-    open_file_endpoint(conn, path, st);
+    open_file_endpoint(conn, path, st, extra_headers);
   } else {
     send_http_error(conn, 404, NULL);
   }
 }
-void mg_send_file(struct mg_connection *c, const char *file_name) {
+void mg_send_file(struct mg_connection *c, const char *file_name,
+                  const char *extra_headers) {
   file_stat_t st;
   const int exists = stat(file_name, &st) == 0;
-  mg_send_file_internal(c, file_name, &st, exists);
+  mg_send_file_internal(c, file_name, &st, exists, extra_headers);
 }
 #endif  // !MONGOOSE_NO_FILESYSTEM
 
@@ -4253,12 +4478,12 @@ static void open_local_endpoint(struct connection *conn, int skip_user) {
     }
     return;
   }
-  
+
   if (!strcmp(conn->mg_conn.request_method, "OPTIONS")) {
     send_options(conn);
     return;
   }
-  
+
 #ifdef MONGOOSE_NO_FILESYSTEM
   send_http_error(conn, 404, NULL);
 #else
@@ -4269,7 +4494,7 @@ static void open_local_endpoint(struct connection *conn, int skip_user) {
   } else if (conn->server->config_options[DOCUMENT_ROOT] == NULL) {
     send_http_error(conn, 404, NULL);
 #ifndef MONGOOSE_NO_AUTH
-  } else if ((!is_dav_request(conn) && !is_authorized(conn, path, 
+  } else if ((!is_dav_request(conn) && !is_authorized(conn, path,
                exists && S_ISDIR(st.st_mode))) ||
              (is_dav_request(conn) && !is_authorized_for_dav(conn))) {
     mg_send_digest_auth_request(&conn->mg_conn);
@@ -4288,7 +4513,7 @@ static void open_local_endpoint(struct connection *conn, int skip_user) {
     handle_put(conn, path);
 #endif
   } else {
-    mg_send_file_internal(&conn->mg_conn, path, &st, exists);
+    mg_send_file_internal(&conn->mg_conn, path, &st, exists, NULL);
   }
 #endif  // MONGOOSE_NO_FILESYSTEM
 }
@@ -4334,7 +4559,7 @@ static void try_parse(struct connection *conn) {
 }
 
 static void do_proxy(struct connection *conn) {
-  if (conn->request_len == 0) {
+  if (0 && conn->request_len == 0) {
     try_parse(conn);
     DBG(("%p parsing -> %d", conn, conn->request_len));
     if (conn->request_len > 0 && call_user(conn, MG_REQUEST) == MG_FALSE) {
@@ -4350,14 +4575,15 @@ static void do_proxy(struct connection *conn) {
 
 static void on_recv_data(struct connection *conn) {
   struct iobuf *io = &conn->ns_conn->recv_iobuf;
+  int n;
 
-  if (conn->endpoint_type == EP_PROXY && conn->endpoint.nc != NULL) {
-    do_proxy(conn);
+  if (conn->endpoint_type == EP_PROXY) {
+    if (conn->endpoint.nc != NULL) do_proxy(conn);
     return;
   }
 
   try_parse(conn);
-  DBG(("%p %d %lu %d", conn, conn->request_len, (unsigned long)io->len, 
+  DBG(("%p %d %lu %d", conn, conn->request_len, (unsigned long)io->len,
        conn->ns_conn->flags));
   if (conn->request_len < 0 ||
       (conn->request_len > 0 && !is_valid_uri(conn->mg_conn.uri))) {
@@ -4382,6 +4608,14 @@ static void on_recv_data(struct connection *conn) {
   }
 #endif
   if (conn->endpoint_type == EP_USER) {
+    conn->mg_conn.content = io->buf;
+    conn->mg_conn.content_len = io->len;
+    n = call_user(conn, MG_RECV);
+    if (n < 0) {
+      conn->ns_conn->flags |= NSF_FINISHED_SENDING_DATA;
+    } else if ((size_t) n <= io->len) {
+      iobuf_remove(io, n);
+    }
     call_request_handler_if_data_is_buffered(conn);
   }
 #ifndef MONGOOSE_NO_DAV
@@ -4403,7 +4637,7 @@ static void call_http_client_handler(struct connection *conn) {
   }
   iobuf_remove(&conn->ns_conn->recv_iobuf, conn->mg_conn.content_len);
   conn->mg_conn.status_code = 0;
-  conn->cl = conn->num_bytes_sent = conn->request_len = 0;
+  conn->cl = conn->num_bytes_recv = conn->request_len = 0;
   free(conn->request);
   conn->request = NULL;
 }
@@ -4421,12 +4655,11 @@ static void process_response(struct connection *conn) {
   }
 }
 
-struct mg_connection *mg_connect(struct mg_server *server, const char *host,
-                                 int port, int use_ssl) {
+struct mg_connection *mg_connect(struct mg_server *server, const char *addr) {
   struct ns_connection *nsconn;
   struct connection *conn;
 
-  nsconn = ns_connect(&server->ns_server, host, port, use_ssl, NULL);
+  nsconn = ns_connect(&server->ns_mgr, addr, mg_ev_handler, NULL);
   if (nsconn == NULL) return 0;
 
   if ((conn = (struct connection *) calloc(1, sizeof(*conn))) == NULL) {
@@ -4436,12 +4669,12 @@ struct mg_connection *mg_connect(struct mg_server *server, const char *host,
 
   // Interlink two structs
   conn->ns_conn = nsconn;
-  nsconn->connection_data = conn;
+  nsconn->user_data = conn;
 
   conn->server = server;
   conn->endpoint_type = EP_CLIENT;
   //conn->handler = handler;
-  conn->mg_conn.server_param = server->ns_server.server_data;
+  conn->mg_conn.server_param = server->ns_mgr.user_data;
   conn->ns_conn->flags = NSF_CONNECTING;
 
   return &conn->mg_conn;
@@ -4472,12 +4705,12 @@ static void log_access(const struct connection *conn, const char *path) {
   flockfile(fp);
   mg_parse_header(mg_get_header(&conn->mg_conn, "Authorization"), "username",
                   user, sizeof(user));
-  fprintf(fp, "%s - %s [%s] \"%s %s%s%s HTTP/%s\" %d %" INT64_FMT,
+  fprintf(fp, "%s - %s [%s] \"%s %s%s%s HTTP/%s\" %d 0",
           c->remote_ip, user[0] == '\0' ? "-" : user, date,
           c->request_method ? c->request_method : "-",
           c->uri ? c->uri : "-", c->query_string ? "?" : "",
           c->query_string ? c->query_string : "",
-          c->http_version, c->status_code, conn->num_bytes_sent);
+          c->http_version, c->status_code);
   log_header(c, "Referer", fp);
   log_header(c, "User-Agent", fp);
   fputc('\n', fp);
@@ -4506,7 +4739,7 @@ static void close_local_endpoint(struct connection *conn) {
       if (conn->endpoint.nc != NULL) {
         DBG(("%p %p %p :-)", conn, conn->ns_conn, conn->endpoint.nc));
         conn->endpoint.nc->flags |= NSF_CLOSE_IMMEDIATELY;
-        conn->endpoint.nc->connection_data = NULL;
+        conn->endpoint.nc->user_data = NULL;
       }
       break;
     default: break;
@@ -4523,16 +4756,20 @@ static void close_local_endpoint(struct connection *conn) {
   iobuf_free(&conn->ns_conn->recv_iobuf);
   free(conn->request);
   free(conn->path_info);
+  conn->endpoint.nc = NULL;
+  conn->request = conn->path_info = NULL;
 
   conn->endpoint_type = EP_NONE;
-  conn->cl = conn->num_bytes_sent = conn->request_len = 0;
+  conn->cl = conn->num_bytes_recv = conn->request_len = 0;
   conn->ns_conn->flags &= ~(NSF_FINISHED_SENDING_DATA |
                             NSF_BUFFER_BUT_DONT_SEND | NSF_CLOSE_IMMEDIATELY |
                             MG_HEADERS_SENT | MG_LONG_RUNNING);
-  c->num_headers = c->status_code = c->is_websocket = c->content_len = 0;
-  conn->endpoint.nc = NULL;
+
+  // Do not memset() the whole structure, as some of the fields
+  // (IP addresses & ports, server_param) must survive. Nullify the rest.
   c->request_method = c->uri = c->http_version = c->query_string = NULL;
-  conn->request = conn->path_info = NULL;
+  c->num_headers = c->status_code = c->is_websocket = c->content_len = 0;
+  c->connection_param = c->callback_param = NULL;
 
   if (keep_alive) {
     on_recv_data(conn);  // Can call us recursively if pipelining is used
@@ -4566,7 +4803,7 @@ static void transfer_file_data(struct connection *conn) {
 }
 
 int mg_poll_server(struct mg_server *server, int milliseconds) {
-  return ns_server_poll(&server->ns_server, milliseconds);
+  return ns_mgr_poll(&server->ns_mgr, milliseconds);
 }
 
 void mg_destroy_server(struct mg_server **server) {
@@ -4574,7 +4811,7 @@ void mg_destroy_server(struct mg_server **server) {
     struct mg_server *s = *server;
     int i;
 
-    ns_server_free(&s->ns_server);
+    ns_mgr_free(&s->ns_mgr);
     for (i = 0; i < (int) ARRAY_SIZE(s->config_options); i++) {
       free(s->config_options[i]);  // It is OK to free(NULL)
     }
@@ -4583,34 +4820,14 @@ void mg_destroy_server(struct mg_server **server) {
   }
 }
 
-struct mg_iterator {
-  mg_handler_t cb;
-  void *param;
-};
-
-static void iter(struct ns_connection *nsconn, enum ns_event ev, void *param) {
-  if (ev == NS_POLL) {
-    struct mg_iterator *it = (struct mg_iterator *) param;
-    struct connection *c = (struct connection *) nsconn->connection_data;
-    if (c != NULL) c->mg_conn.callback_param = it->param;
-    it->cb(&c->mg_conn, MG_POLL);
-  }
-}
-
 struct mg_connection *mg_next(struct mg_server *s, struct mg_connection *c) {
-  struct connection *conn = MG_CONN_2_CONN(c);
-  struct ns_connection *nc = ns_next(&s->ns_server,
-                                     c == NULL ? NULL : conn->ns_conn);
-    
-  return nc == NULL ? NULL :
-    & ((struct connection *) nc->connection_data)->mg_conn;
-}
-
-// Apply function to all active connections.
-void mg_iterate_over_connections(struct mg_server *server, mg_handler_t cb,
-  void *param) {
-  struct mg_iterator it = { cb, param };
-  ns_iterate(&server->ns_server, iter, &it);
+  struct ns_connection *nc = ns_next(&s->ns_mgr, c == NULL ? NULL :
+                                     MG_CONN_2_CONN(c)->ns_conn);
+  if (nc != NULL && nc->user_data != NULL) {
+    return & ((struct connection *) nc->user_data)->mg_conn;
+  } else {
+    return NULL;
+  }
 }
 
 static int get_var(const char *data, size_t data_len, const char *name,
@@ -4719,6 +4936,19 @@ const char **mg_get_valid_option_names(void) {
   return static_config_options;
 }
 
+void mg_copy_listeners(struct mg_server *s, struct mg_server *to) {
+  struct ns_connection *c;
+  for (c = ns_next(&s->ns_mgr, NULL); c != NULL; c = ns_next(&s->ns_mgr, c)) {
+    struct ns_connection *tmp;
+    if ((c->flags & NSF_LISTENING) &&
+        (tmp = (struct ns_connection *) malloc(sizeof(*tmp))) != NULL) {
+      memcpy(tmp, c, sizeof(*tmp));
+      tmp->mgr = &to->ns_mgr;
+      ns_add_conn(tmp->mgr, tmp);
+    }
+  }
+}
+
 static int get_option_index(const char *name) {
   int i;
 
@@ -4768,15 +4998,24 @@ const char *mg_set_option(struct mg_server *server, const char *name,
   DBG(("%s [%s]", name, *v));
 
   if (ind == LISTENING_PORT) {
-    int port = ns_bind(&server->ns_server, value);
-    if (port < 0) {
-      error_msg = "Cannot bind to port";
-    } else {
-      char buf[100];
-      ns_sock_to_str(server->ns_server.listening_sock, buf, sizeof(buf), 2);
-      free(*v);
-      *v = mg_strdup(buf);
+    struct vec vec;
+    while ((value = next_option(value, &vec, NULL)) != NULL) {
+      struct ns_connection *c = ns_bind(&server->ns_mgr, vec.ptr,
+                                        mg_ev_handler, NULL);
+      if (c== NULL) {
+        error_msg = "Cannot bind to port";
+        break;
+      } else {
+        char buf[100];
+        ns_sock_to_str(c->sock, buf, sizeof(buf), 2);
+        free(*v);
+        *v = mg_strdup(buf);
+      }
     }
+#ifndef MONGOOSE_NO_FILESYSTEM
+  } else if (ind == HEXDUMP_FILE) {
+    server->ns_mgr.hexdump_file = *v;
+#endif
 #ifndef _WIN32
   } else if (ind == RUN_AS_USER) {
     struct passwd *pw;
@@ -4788,28 +5027,13 @@ const char *mg_set_option(struct mg_server *server, const char *name,
       error_msg = "setuid() failed";
     }
 #endif
-#ifdef NS_ENABLE_SSL
-  } else if (ind == SSL_CERTIFICATE) {
-    int res = ns_set_ssl_cert(&server->ns_server, value);
-    if (res == -2) {
-      error_msg = "Cannot load PEM";
-    } else if (res == -3) {
-      error_msg = "SSL not enabled";
-    } else if (res == -1) {
-      error_msg = "SSL_CTX_new() failed";
-    }
-  } else if (ind == SSL_CA_CERTIFICATE) {
-    if (ns_set_ssl_ca_cert(&server->ns_server, value) != 0) {
-       error_msg = "Error setting CA cert";
-     }
-#endif
   }
 
   return error_msg;
 }
 
 static void set_ips(struct ns_connection *nc, int is_rem) {
-  struct connection *conn = (struct connection *) nc->connection_data;
+  struct connection *conn = (struct connection *) nc->user_data;
   struct mg_connection *c = &conn->mg_conn;
   char buf[100];
 
@@ -4821,7 +5045,7 @@ static void set_ips(struct ns_connection *nc, int is_rem) {
 }
 
 static void on_accept(struct ns_connection *nc, union socket_address *sa) {
-  struct mg_server *server = (struct mg_server *) nc->server;
+  struct mg_server *server = (struct mg_server *) nc->mgr;
   struct connection *conn;
 
   if (!check_acl(server->config_options[ACCESS_CONTROL_LIST],
@@ -4830,55 +5054,39 @@ static void on_accept(struct ns_connection *nc, union socket_address *sa) {
     nc->flags |= NSF_CLOSE_IMMEDIATELY;
   } else {
     // Circularly link two connection structures
-    nc->connection_data = conn;
+    nc->user_data = conn;
     conn->ns_conn = nc;
 
     // Initialize the rest of connection attributes
     conn->server = server;
-    conn->mg_conn.server_param = nc->server->server_data;
+    conn->mg_conn.server_param = nc->mgr->user_data;
     set_ips(nc, 1);
     set_ips(nc, 0);
   }
 }
 
-#ifndef MONGOOSE_NO_FILESYSTEM
-static void hexdump(struct ns_connection *nc, const char *path,
-                    int num_bytes, int is_sent) {
-  const struct iobuf *io = is_sent ? &nc->send_iobuf : &nc->recv_iobuf;
-  FILE *fp;
-  char *buf, src[60], dst[60];
-  int buf_size = num_bytes * 5 + 100;
+static void process_udp(struct ns_connection *nc) {
+  struct iobuf *io = &nc->recv_iobuf;
+  struct connection conn;
 
-  if (path != NULL && (fp = fopen(path, "a")) != NULL) {
-    ns_sock_to_str(nc->sock, src, sizeof(src), 3);
-    ns_sock_to_str(nc->sock, dst, sizeof(dst), 7);
-    fprintf(fp, "%lu %p %s %s %s %d\n", (unsigned long) time(NULL),
-            nc->connection_data, src,
-            is_sent == 0 ? "<-" : is_sent == 1 ? "->" :
-            is_sent == 2 ? "<A" : "C>", dst, num_bytes);
-    if (num_bytes > 0 && (buf = (char *) malloc(buf_size)) != NULL) {
-      ns_hexdump(io->buf + (is_sent ? 0 : io->len) - (is_sent ? 0 : num_bytes),
-                 num_bytes, buf, buf_size);
-      fprintf(fp, "%s", buf);
-      free(buf);
-    }
-    fclose(fp);
-  }
+  memset(&conn, 0, sizeof(conn));
+  conn.ns_conn = nc;
+  conn.server = (struct mg_server *) nc->mgr;
+  conn.request_len = parse_http_message(io->buf, io->len, &conn.mg_conn);
+  on_recv_data(&conn);
+  //ns_printf(nc, "%s", "HTTP/1.0 200 OK\r\n\r\n");
 }
-#endif
 
-static void mg_ev_handler(struct ns_connection *nc, enum ns_event ev, void *p) {
-  struct connection *conn = (struct connection *) nc->connection_data;
-#ifndef MONGOOSE_NO_FILESYSTEM
-  struct mg_server *server = (struct mg_server *) nc->server;
-#endif
+static void mg_ev_handler(struct ns_connection *nc, int ev, void *p) {
+  struct connection *conn = (struct connection *) nc->user_data;
 
   // Send NS event to the handler. Note that call_user won't send an event
   // if conn == NULL. Therefore, repeat this for NS_ACCEPT event as well.
 #ifdef MONGOOSE_SEND_NS_EVENTS
   {
-    struct connection *conn = (struct connection *) nc->connection_data;
-    if (conn != NULL) conn->mg_conn.callback_param = p;
+    struct connection *conn = (struct connection *) nc->user_data;
+    void *param[2] = { nc, p };
+    if (conn != NULL) conn->mg_conn.callback_param = param;
     call_user(conn, (enum mg_event) ev);
   }
 #endif
@@ -4886,26 +5094,21 @@ static void mg_ev_handler(struct ns_connection *nc, enum ns_event ev, void *p) {
   switch (ev) {
     case NS_ACCEPT:
       on_accept(nc, (union socket_address *) p);
-#ifndef MONGOOSE_NO_FILESYSTEM
-      hexdump(nc, server->config_options[HEXDUMP_FILE], 0, 2);
-#endif
 #ifdef MONGOOSE_SEND_NS_EVENTS
       {
-        struct connection *conn = (struct connection *) nc->connection_data;
-        if (conn != NULL) conn->mg_conn.callback_param = p;
+        struct connection *conn = (struct connection *) nc->user_data;
+        void *param[2] = { nc, p };
+        if (conn != NULL) conn->mg_conn.callback_param = param;
         call_user(conn, (enum mg_event) ev);
       }
 #endif
       break;
 
     case NS_CONNECT:
-      if (nc->connection_data != NULL) {
+      if (nc->user_data != NULL) {
         set_ips(nc, 1);
         set_ips(nc, 0);
       }
-#ifndef MONGOOSE_NO_FILESYSTEM
-      hexdump(nc, server->config_options[HEXDUMP_FILE], 0, 3);
-#endif
       conn->mg_conn.status_code = * (int *) p;
       if (conn->mg_conn.status_code != 0 ||
           (!(nc->flags & MG_PROXY_CONN) &&
@@ -4915,10 +5118,13 @@ static void mg_ev_handler(struct ns_connection *nc, enum ns_event ev, void *p) {
       break;
 
     case NS_RECV:
-#ifndef MONGOOSE_NO_FILESYSTEM
-      hexdump(nc, server->config_options[HEXDUMP_FILE], * (int *) p, 0);
-#endif
-      if (nc->flags & NSF_ACCEPTED) {
+      if (conn != NULL) {
+        conn->num_bytes_recv += * (int *) p;
+      }
+
+      if (nc->flags & NSF_UDP) {
+        process_udp(nc);
+      } else if (nc->listener != NULL) {
         on_recv_data(conn);
 #ifndef MONGOOSE_NO_CGI
       } else if (nc->flags & MG_CGI_CONN) {
@@ -4934,13 +5140,10 @@ static void mg_ev_handler(struct ns_connection *nc, enum ns_event ev, void *p) {
       break;
 
     case NS_SEND:
-#ifndef MONGOOSE_NO_FILESYSTEM
-      hexdump(nc, server->config_options[HEXDUMP_FILE], * (int *) p, 1);
-#endif
       break;
 
     case NS_CLOSE:
-      nc->connection_data = NULL;
+      nc->user_data = NULL;
       if (nc->flags & (MG_CGI_CONN | MG_PROXY_CONN)) {
         DBG(("%p %p closing cgi/proxy conn", conn, nc));
         if (conn && conn->ns_conn) {
@@ -4985,7 +5188,8 @@ static void mg_ev_handler(struct ns_connection *nc, enum ns_event ev, void *p) {
           ping_idle_websocket_connection(conn, current_time);
         }
 
-        if (nc->last_io_time + MONGOOSE_IDLE_TIMEOUT_SECONDS < current_time) {
+        if (nc->listener != NULL &&
+            nc->last_io_time + MONGOOSE_IDLE_TIMEOUT_SECONDS < current_time) {
           mg_ev_handler(nc, NS_CLOSE, NULL);
           nc->flags |= NSF_CLOSE_IMMEDIATELY;
         }
@@ -4997,9 +5201,9 @@ static void mg_ev_handler(struct ns_connection *nc, enum ns_event ev, void *p) {
   }
 }
 
-static void iter2(struct ns_connection *nc, enum ns_event ev, void *param) {
+static void iter2(struct ns_connection *nc, int ev, void *param) {
   mg_handler_t func = NULL;
-  struct connection *conn = (struct connection *) nc->connection_data;
+  struct connection *conn = (struct connection *) nc->user_data;
   const char *msg = (const char *) param;
   int n;
   (void) ev;
@@ -5024,22 +5228,11 @@ void mg_wakeup_server_ex(struct mg_server *server, mg_handler_t cb,
   va_end(ap);
 
   // "len + 1" is to include terminating \0 in the message
-  ns_server_wakeup_ex(&server->ns_server, iter2, buf, len + 1);
+  ns_broadcast(&server->ns_mgr, iter2, buf, len + 1);
 }
 
 void mg_wakeup_server(struct mg_server *server) {
-  ns_server_wakeup_ex(&server->ns_server, NULL, (void *) "", 0);
-}
-
-void mg_set_listening_socket(struct mg_server *server, int sock) {
-  if (server->ns_server.listening_sock != INVALID_SOCKET) {
-    closesocket(server->ns_server.listening_sock);
-  }
-  server->ns_server.listening_sock = (sock_t) sock;
-}
-
-int mg_get_listening_socket(struct mg_server *server) {
-  return server->ns_server.listening_sock;
+  ns_broadcast(&server->ns_mgr, NULL, (void *) "", 0);
 }
 
 const char *mg_get_option(const struct mg_server *server, const char *name) {
@@ -5050,7 +5243,7 @@ const char *mg_get_option(const struct mg_server *server, const char *name) {
 
 struct mg_server *mg_create_server(void *server_data, mg_handler_t handler) {
   struct mg_server *server = (struct mg_server *) calloc(1, sizeof(*server));
-  ns_server_init(&server->ns_server, server_data, mg_ev_handler);
+  ns_mgr_init(&server->ns_mgr, server_data);
   set_default_option_values(server->config_options);
   server->event_handler = handler;
   return server;

@@ -433,6 +433,25 @@ int Qaullib_WwwEvent_handler(struct mg_connection *conn, enum mg_event event)
 	{
 		processed = 1;
 	}
+	else if (event == MG_HTTP_ERROR)
+	{
+		if(qaul_web_localip_set == 1 &&
+			strncmp(qaul_web_localip, conn->remote_ip, sizeof(qaul_web_localip)) == 0
+			)
+		{
+			// do nothing
+		}
+		else
+		{
+			// redirect to splash page
+			conn->status_code = 303;
+		    mg_printf(conn, "HTTP/1.1 303 See Other\r\n"
+		              "Location: %s\r\n\r\n", "http://start.qaul/");
+		    mg_printf(conn, "<a href=\"%s\">qaul.net &gt;&gt;</a>", "http://start.qaul/");
+
+			processed = 1;
+		}
+	}
 	else
 	{
 		processed = 0;
