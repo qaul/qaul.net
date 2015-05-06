@@ -27,15 +27,28 @@ function draw_network(data)
 	// search nodes from links
 	// calculate link quality
 	links.forEach(function(link) {
-	  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, type: "ip"});
-	  link.target = nodes[link.target] || (nodes[link.target] = {name: link.target, type: "ip"});
-	  
-	  if(link.lq < 2)
-	  	link.type = "good";
-	  else if(link.lq < 5)
-	  	link.type = "ok";
-	  else
-	  	link.type = "bad";
+		if(typeof nodes[link.source] !== "undefined")
+		{
+			nodes[link.source].ip = link.source;
+			link.source = nodes[link.source];
+		}
+		else 
+			nodes[link.source] = {name: link.source, ip: link.source, type: "ip"};
+		
+		if(typeof nodes[link.target] !== "undefined")
+		{
+			nodes[link.target].ip = link.target;
+			link.target = nodes[link.target];
+		}
+		else
+			nodes[link.target] = {name: link.target, ip: link.target, type: "ip"};
+
+		if(link.lq < 2)
+			link.type = "good";
+		else if(link.lq < 5)
+			link.type = "ok";
+		else
+			link.type = "bad";
 	});
 
 	width = $(window).width();
@@ -88,14 +101,50 @@ function draw_network(data)
 	  .enter().append("circle")
 		.attr("r", 10)
 		.call(force.drag);
-
+	
+	// add description link
 	text = svg.append("g").selectAll("text")
 		.data(force.nodes())
-	  .enter().append("text")
+	  .enter().append("svg:a")
+		.attr("xlink:href", function(d){ return "http://" +d.ip })
+		.attr("target","_blank")
+
+	text.append("svg:rect")
+		.attr("x", 15)
+		.attr("y",  function(d){
+				if(d.type == "name")
+					return "0.52em";
+				else
+					return "-0.33em";
+			})
+		.attr("fill", "black")
+		.attr("opacity", 0.1)
+		.attr("width", "4em")
+		.attr("height", "0.6em");
+
+	text.append("svg:text")
 		.attr("x", 15)
 		.attr("y", ".31em")
+		.attr("fill", "black")
 		.attr("class", function(d){ return d.type; })
-		.text(function(d) { return d.name; });
+		.text(function(d){ 
+				if(d.type == "name") 
+					return d.name; 
+				else
+					return "";
+			});
+
+	text.append("svg:text")
+		.attr("x", 15)
+		.attr("y",  function(d){
+				if(d.type == "name")
+					return "1.57em";
+				else
+					return "0.31em";
+			})
+		.attr("fill", "black")
+		.attr("class", "ip")
+		.text(function(d) { return d.ip; });
 }
 
 // Use elliptical arc path segments to doubly-encode directionality.
