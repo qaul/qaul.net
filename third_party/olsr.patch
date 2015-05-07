@@ -93,7 +93,7 @@ diff --git a/lib/olsrd_qaul/qaul_olsrd_plugin.c b/lib/olsrd_qaul/qaul_olsrd_plug
 new file mode 100644
 index 0000000..b071127
 --- /dev/null
-+++ b/lib/olsrd_qaul/olsrd_plugin.c
++++ b/lib/olsrd_qaul/qaul_olsrd_plugin.c
 @@ -0,0 +1,133 @@
 +/*
 + * qaul.net is free software
@@ -329,7 +329,7 @@ index 0000000..dc35751
 +// ------------------------------------------------------------
 +// generic message procession
 +// ------------------------------------------------------------
-+bool qaul_qaulmsg_parser(union olsr_message *m, struct interface *in_if __attribute__ ((unused)), union olsr_ip_addr *ipaddr __attribute__ ((unused)))
++bool qaul_qaulmsg_parser(union olsr_message *m, struct interface_olsr *in_if __attribute__ ((unused)), union olsr_ip_addr *ipaddr __attribute__ ((unused)))
 +{
 +	union olsr_ip_addr originator;
 +	uint16_t seqno;
@@ -372,7 +372,7 @@ index 0000000..dc35751
 +	// send buffer: huge
 +	char buffer[1024];
 +	union olsr_message *message = (union olsr_message *)buffer;
-+	struct interface *ifn;
++	struct interface_olsr *ifn;
 +	int my_timeout, mysize;
 +
 +	my_timeout = 30;
@@ -491,7 +491,7 @@ index 0000000..b151af7
 +int  qaul_msg_init(void);
 +void qaul_chat_autosend(void *foo __attribute__ ((unused)));
 +
-+bool qaul_qaulmsg_parser(union olsr_message *m, struct interface *in_if __attribute__ ((unused)), union olsr_ip_addr *ipaddr __attribute__ ((unused)));
++bool qaul_qaulmsg_parser(union olsr_message *m, struct interface_olsr *in_if __attribute__ ((unused)), union olsr_ip_addr *ipaddr __attribute__ ((unused)));
 +void qaul_qaulmsg_send_all(union olsr_message *mymsg);
 +
 +
