@@ -9,6 +9,17 @@ ExternalProject_Add(pjsip
     INSTALL_COMMAND ""
 )
 
+ExternalProject_Add(portfwd
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/portfw
+    CVS_REPOSITORY :pserver:anonymous@portfwd.cvs.sf.net:/cvsroot/portfwd
+    CVS_MODULE portfwd
+    BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/portfwd.patch
+    CONFIGURE_COMMAND "./bootstrap" COMMAND "./configure"
+    BUILD_COMMAND make
+    INSTALL_COMMAND ""
+)
+
 ExternalProject_Add(olsr
     DEPENDS dl_olsr
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/olsr

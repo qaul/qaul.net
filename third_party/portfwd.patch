@@ -1,0 +1,13 @@
+diff --git a/configure.in.orig b/configure.in
+index 50aa22d..e284f74 100644
+--- a/configure.in.orig
++++ b/configure.in
+@@ -60,7 +60,7 @@ echo "Transparent proxy support is NOT present in kernel",
+ echo "Transparent proxy support disabled by cross-compiling"
+ )
+ 
+-LIBS="$LIBS $LEXLIB"
++dnl LIBS="$LIBS $LEXLIB"
+ AC_SUBST(LIBS)
+ 
+ REAL_CC=$CC
