@@ -10,6 +10,7 @@ third_party/olsr/
 third_party/pjsip/
 third_party/socat/
 third_party/wt/
+build/
 
 # Android 
 android/bin/
