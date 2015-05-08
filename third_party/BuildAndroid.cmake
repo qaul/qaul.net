@@ -24,10 +24,10 @@ ExternalProject_Add(olsr
     INSTALL_COMMAND ""
 )
 
-set (SOCAT_VERSION "1.7.2.4")
+set (SOCAT_VERSION "1.7.3.0")
 set (SOCAT_FILENAME "socat-${SOCAT_VERSION}.tar.bz2")
 set (SOCAT_URL "http://www.dest-unreach.org/socat/download/${SOCAT_FILENAME}")
-set (SOCAT_MD5 "69b8155dd442a6f24e28ef5407d868eb")
+set (SOCAT_MD5 "b607edb65bc6c57f4a43f06247504274")
 
 add_custom_target(dl_socat
     COMMAND ${CMAKE_COMMAND} -DDL_URL=${SOCAT_URL} -DDL_FILENAME=${ARCHIVE_DIR}/${SOCAT_FILENAME} -DDL_MD5=${SOCAT_MD5} -P ${CMAKE_CURRENT_SOURCE_DIR}/download.cmake 
@@ -40,7 +40,7 @@ ExternalProject_Add(socat
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch --ignore-whitespace -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/socat.patch
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND autoconf COMMAND ANDROID_NDK=${NDK_ROOT} ANDROID_PLATFORM=android-${NDK_LEVEL} ./socat_buildscript_for_android.sh
+    BUILD_COMMAND autoconf COMMAND ANDROID_NDK=${NDK_ROOT} ANDROID_TOOLCHAIN=arm-linux-androideabi-4.6 ANDROID_PLATFORM=android-${NDK_LEVEL} ./socat_buildscript_for_android.sh
     COMMAND ${CMAKE_COMMAND} -DSRC=<BINARY_DIR>/out/socat -DDEST=${CMAKE_BINARY_DIR}/android/res/raw -P ${CMAKE_SOURCE_DIR}/FileCopy.cmake
     INSTALL_COMMAND ""
 )
