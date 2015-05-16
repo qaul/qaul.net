@@ -115,97 +115,97 @@ include $(BUILD_SHARED_LIBRARY)
 # include externally built libraries
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pjsip
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjsip/lib/libpjsip-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjsip/lib/libpjsip-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/pjsip/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pjsip-simple
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjsip/lib/libpjsip-simple-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjsip/lib/libpjsip-simple-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/pjsip/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pjsip-ua
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjsip/lib/libpjsip-ua-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjsip/lib/libpjsip-ua-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/pjsip/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pjsua
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjsip/lib/libpjsua-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjsip/lib/libpjsua-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/pjsip/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pjmedia-videodev
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjmedia/lib/libpjmedia-videodev-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjmedia/lib/libpjmedia-videodev-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/pjmedia/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pjmedia-codec 
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjmedia/lib/libpjmedia-codec-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjmedia/lib/libpjmedia-codec-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/pjmedia/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pjmedia
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjmedia/lib/libpjmedia-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjmedia/lib/libpjmedia-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/pjmedia/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pjmedia-audiodev
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjmedia/lib/libpjmedia-audiodev-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjmedia/lib/libpjmedia-audiodev-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/pjmedia/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pjlib-util
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjlib-util/lib/libpjlib-util-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjlib-util/lib/libpjlib-util-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/pjlib-util/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := speex
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libspeex-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libspeex-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/third_party/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := ilbccodec
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libilbccodec-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libilbccodec-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/third_party/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := resample
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libresample-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libresample-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/third_party/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := milenage
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libmilenage-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libmilenage-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/third_party/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := gsmcodec
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libgsmcodec-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libgsmcodec-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/third_party/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := g7221codec
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libg7221codec-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libg7221codec-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/third_party/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := srtp
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libsrtp-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libsrtp-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/third_party/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pjnath
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjnath/lib/libpjnath-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjnath/lib/libpjnath-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/pjnath/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pj
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjlib/lib/libpj-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjlib/lib/libpj-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/pjlib/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pjsdp
-LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjmedia/lib/libpjsdp-arm-unknown-linux-androideabi.a
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjmedia/lib/libpjsdp-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/pjmedia/include
 include $(PREBUILT_STATIC_LIBRARY)
 

@@ -49,9 +49,7 @@ target_include_directories(qaul-gtk PRIVATE ${DBUS1_INCLUDE_DIRS} ${WEBKIT_INCLU
     ${PJBASE}third_party/srtp/include
 )
 
-#TODO system detection uname -m
-#target_compile_options(qaul-gtk PRIVATE -DPJSIPTYPE=x86_64-unknown-linux-gnu)
-set(PJSIPTYPE x86_64-unknown-linux-gnu)
+set(PJSIPTYPE qaul)
 
 target_link_libraries(qaul-gtk ${DBUS1_LIBRARIES} ${WEBKIT_LIBRARIES}
     # pthread dl m uuid avcodec opencore-amrnb
