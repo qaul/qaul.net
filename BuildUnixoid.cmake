@@ -2,6 +2,8 @@
 find_package (PkgConfig)
 pkg_check_modules (DBUS1 REQUIRED dbus-1)
 
+find_package (Autotools REQUIRED)
+
 if (${PORT} STREQUAL "GTK")
     pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
 endif ()
