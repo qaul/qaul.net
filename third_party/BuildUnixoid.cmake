@@ -11,9 +11,9 @@ ExternalProject_Add(pjsip
 )
 
 ExternalProject_Add(portfwd
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/portfw
-    CVS_REPOSITORY :pserver:anonymous@portfwd.cvs.sf.net:/cvsroot/portfwd
-    CVS_MODULE portfwd
+    DEPENDS dl_portfwd
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/portfwd
+    URL ${ARCHIVE_DIR}/${PORTFWD_FILENAME}
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/portfwd.patch
     CONFIGURE_COMMAND "./bootstrap" COMMAND "./configure"
