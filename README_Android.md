@@ -1,23 +1,40 @@
+Android Instructions
+====================
 
-# Android Instructions
-
-It should work on all ARM android devices starting from Android 2.3 Gingerbread
-(due to before unsupported pthread functions in pjsip). 
-The Android device needs to be rooted.
+Compatibility
+-------------
 
 qaul.net was tested on the following devices:
 
-| Device | 2.3 | 4.0 | CM9 |
-| --- | --- | --- | --- |
-| Samsung Galaxy S2 | Y | N | N |
-| HTC Sensation | ? | Y | Y |
+| Device            | 2.3 | 4.x | CM9 |
+| ----------------- | --- | --- | --- |
+| Samsung Galaxy S2 | Y   | N   | N   |
+| HTC Sensation     | ?   | Y   | Y   |
+| fairphone         | ?   | Y   | ?   |
 
 Legend:
+
 * Y = it works
 * N = it doesn't work yet
 * ? = it wasn't tested yet
 
-## Prerequisites
+
+Problems & Solutions:
+
+* qaul.net needs the IBSS/Ad-hoc wifi mode. This Wifi-Standard mode was 
+  removed by google. 
+  * On Android < 4.x IBSS mode can be activated via the wext (wireless 
+    extensions). 
+    Some vendors ship also their 4.x devices with wext.
+  * On Android >= 4 IBSS mode can be activated on some devices via 
+    wpa_supplicant.
+* qaul.net needs ARM and Android > 2.3 Gingerbread
+  (due to before unsupported pthread functions in pjsip). 
+* The Android device needs to be rooted.
+
+
+Prerequisites
+-------------
 
 ### Android SDK/NDK
 
@@ -40,12 +57,16 @@ cd into it
 	adb pull /system/bin/ifconfig
 	adb pull /system/bin/iptables
 
-## Get the source
+
+Get the source
+--------------
 
 Download the source from <insert source here> or
 get the sources from github: git clone https://github.com/WachterJud/qaul.net.git
 
-## Build
+
+Build
+-----
 
     mkdir builddir
     cd builddir
@@ -55,7 +76,10 @@ get the sources from github: git clone https://github.com/WachterJud/qaul.net.gi
 
 find the apk in android/bin
 
-## Eclipse
+
+Eclipse
+-------
 
 - Import Existing Project
 - Do NOT copy files.
+
