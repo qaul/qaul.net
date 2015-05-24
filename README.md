@@ -8,6 +8,8 @@ Qual.net is an ad-hoc wireless mesh-network suite that harnesses the power of ev
 
 ## Build Instructions
 
+Links platform-specific instructions can be found below.
+
 ### Android
 
 For building the **Android** version see [README_Android.md](README_Android.md).
