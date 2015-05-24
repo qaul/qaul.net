@@ -4,7 +4,7 @@ Android Instructions
 Compatibility
 -------------
 
-qaul.net was tested on the following devices:
+Qaul.net was tested on the following devices:
 
 | Device            | 2.3 | 4.x | CM9 |
 | ----------------- | --- | --- | --- |
@@ -41,16 +41,17 @@ Prerequisites
 For building the Android version of Qaul.net you will need both the Source
 Develpment Kit *and* the Native Development Kit
 
-get NDK https://developer.android.com/tools/sdk/ndk/index.html
+Get the NDK https://developer.android.com/tools/sdk/ndk/index.html
 
-get SDK https://developer.android.com/sdk/index.html
-add sdk to path if not done by installer
+Get the SDK https://developer.android.com/sdk/index.html
+
+Add `sdk` to `path` if the installer had not done it automatically.
 
 ### Needed extra libraries
 
-create directory for extra libs
+1. Create directory for extra libs
 
-cd into it
+2. `cd` into it
 
 	adb pull /system/lib/libcutils.so
 	adb pull /system/lib/libwpa_client.so
@@ -74,7 +75,7 @@ Build
     cmake ../path/to/source -DPORT=Android -DNDK_ROOT=/path/to/ndk -DEXTRALIB_PATH=/path/to/extra/lib
     make
 
-find the apk in android/bin
+You will find the newly built apk in `android/bin`.
 
 
 Eclipse
