@@ -7,6 +7,8 @@ Qaul.net _**N**ext **G**eneration_
 
 ## Build Instructions
 
+Links platform-specific instructions can be found below.
+
 ### Android
 
 For building the **Android** version see [README_Android.md](README_Android.md).
