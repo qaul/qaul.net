@@ -1,10 +1,12 @@
 Android Instructions
 ====================
 
+This page contains all the instructions on building Qual.net on the Android platform.
+
 Compatibility
 -------------
 
-qaul.net was tested on the following devices:
+Qaul.net was tested on the following devices:
 
 | Device            | 2.3 | 4.x | CM9 |
 | ----------------- | --- | --- | --- |
@@ -35,6 +37,8 @@ Problems & Solutions:
 
 Prerequisites
 -------------
+
+Below are all the required tools and files you will need in order to build Qual.net.
 
 ### Android SDK/NDK
 
