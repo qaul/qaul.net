@@ -146,10 +146,10 @@ action() == "start" && (
     # set DNS servers
     #    
    log("set DNS servers");
-   log(run_program("setprop net.rmnet0.dns1 77.67.33.81"), "setprop net.rmnet0.dns1 77.67.33.81");
-   log(run_program("setprop net.rmnet0.dns2 213.136.78.232"), "setprop net.rmnet0.dns2 213.136.78.232");
-   log(run_program("setprop net.dns1 77.67.33.81"), "setprop net.dns1 77.67.33.81");
-   log(run_program("setprop net.dns2 213.136.78.232"), "setprop net.dns2 213.136.78.232");
+   log(run_program("setprop net.rmnet0.dns1 5.45.96.220"), "setprop net.rmnet0.dns1 5.45.96.220");
+   log(run_program("setprop net.rmnet0.dns2 185.82.22.133"), "setprop net.rmnet0.dns2 185.82.22.133");
+   log(run_program("setprop net.dns1 5.45.96.220"), "setprop net.dns1 5.45.96.220");
+   log(run_program("setprop net.dns2 185.82.22.133"), "setprop net.dns2 185.82.22.133");
 	
   log("Tethering now running");
 );

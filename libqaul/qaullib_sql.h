@@ -156,8 +156,8 @@ static struct qaul_populate_config_struct qaul_populate_config[MAX_POPULATE_CONF
 	{"wifi.bssid",           CONFIG_TYPE_STR, "02:11:87:88:D6:FF", 0},
 	{"net.interface.manual", CONFIG_TYPE_INT, "",                  0},
 	{"net.interface.name",   CONFIG_TYPE_STR, "",                  0},
-	{"net.ns1",              CONFIG_TYPE_STR, "77.67.33.81",       0},
-	{"net.ns2",              CONFIG_TYPE_STR, "213.136.78.232",    0}
+	{"net.ns1",              CONFIG_TYPE_STR, "5.45.96.220",       0},
+	{"net.ns2",              CONFIG_TYPE_STR, "185.82.22.133",     0}
 };
 
 /********************************************//**

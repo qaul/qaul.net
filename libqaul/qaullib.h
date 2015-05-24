@@ -274,14 +274,14 @@ const char* Qaullib_GetIP(void);
 /**
  * get NS1 (DNS name server 1)
  *
- * @retval string of NS1 e.g. "213.136.78.232"
+ * @retval string of NS1 e.g. "5.45.96.220"
  */
 const char* Qaullib_GetNetNs1(void);
 
 /**
  * get NS2 (DNS name server 2)
  *
- * @retval string of NS2 e.g. "77.67.33.81"
+ * @retval string of NS2 e.g. "185.82.22.133"
  */
 const char* Qaullib_GetNetNs2(void);
 

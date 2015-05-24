@@ -950,7 +950,7 @@ const char* Qaullib_GetNetNs1(void)
 	{
 		return qaul_net_ns1;
 	}
-	return "77.67.33.81";
+	return "5.45.96.220";
 }
 
 const char* Qaullib_GetNetNs2(void)
@@ -959,7 +959,7 @@ const char* Qaullib_GetNetNs2(void)
 	{
 		return qaul_net_ns2;
 	}
-	return "77.67.33.81";
+	return "185.82.22.133";
 }
 
 const char* Qaullib_GetWifiSsid(void)
