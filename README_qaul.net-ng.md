@@ -1,23 +1,23 @@
 This Repository is for the Future Version of qaul.net
 =====================================================
 
-qaul.net-ng implements a new CMAKE based build system for all platforms.
-qaul.net-ng is the working develpment branch. This branch will be 
+Qaul.net-ng implements a new CMAKE-based build system for all platforms.
+Qaul.net-ng is the working develpment branch. This branch will be 
 transfered to master, once the transformation is completed.
 
 
 Work Status
 -----------
 
-* Linux
-  * fully working
-  * Working on the following Linux distributions: Debian
+* GNU/Linux
+  * Fully working
+  * Working on the following Linux distributions: `Debian`
 * OSX 
-  * work in progress
+  * Currently a _work in progress_.
 * Windows
-  * work in progress
+  * Currently a _work in progress_.
 * Android
-  * fully working
-  * development to support wpa_supplicant on Cyanogenmod in progress.
+  * Fully working
+  * Development to support `wpa_supplicant` on `CyanogenMod` in progress.
 * iOS
-  * not started yet
+  * This section of the project has not been initiated yet.
