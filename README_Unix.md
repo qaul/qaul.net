@@ -3,12 +3,12 @@
 
 ## Prerequisites
 
-## get the source
+### Get the source
 
 Download the source from <insert source here> or
 get the sources from github: git clone https://github.com/WachterJud/qaul.net.git
 
-## build
+## Build
 
     mkdir builddir
     cd builddir
@@ -16,5 +16,5 @@ get the sources from github: git clone https://github.com/WachterJud/qaul.net.gi
     cmake ../path/to/source -DPORT=GTK
     make package
 
-find the package in your builddir, you may want install it?
+find the package in your `builddir`, you may want install it?
 

@@ -81,5 +81,5 @@ Eclipse
 -------
 
 - Import Existing Project
-- Do NOT copy files.
+- Do **NOT** copy files.
 
