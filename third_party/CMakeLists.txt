@@ -1,15 +1,24 @@
 
 set (ARCHIVE_DIR ${PROJECT_SOURCE_DIR}/archives)
 
-set (PJSIP_VERSION "2.3")
+set (PJSIP_VERSION "2.4")
 set (PJSIP_FILENAME "pjproject-${PJSIP_VERSION}.tar.bz2")
-set (PJSIP_URL "http://www.pjsip.org/release/2.3/${PJSIP_FILENAME}")
-set (PJSIP_MD5 "8440e43242c439ae5ec30b5b85005fce")
+set (PJSIP_URL "http://www.pjsip.org/release/${PJSIP_VERSION}/${PJSIP_FILENAME}")
+set (PJSIP_MD5 "39629ca3fcedbdc7dbd8c5a707060095")
 
-set (OLSR_VERSION "0.6.7.1")
+set (OLSR_VERSION "0.6.8")
 set (OLSR_FILENAME "olsrd-${OLSR_VERSION}.tar.bz2")
 set (OLSR_URL "http://www.olsr.org/releases/0.6/${OLSR_FILENAME}")
-set (OLSR_MD5 "d4411d4ed94b399a3778b8036dee1214")
+set (OLSR_MD5 "feabdd611391dcb30af5795e834cc258")
+
+
+set (PORTFWD_FILENAME "master.zip")
+set (PORTFWD_URL "http://github.com/WachterJud/portfwd/archive/${PORTFWD_FILENAME}")
+set (PORTFWD_MD5 "db3850fd47f1fc9a21e530faf65cdc6f")
+
+add_custom_target(dl_portfwd
+    COMMAND ${CMAKE_COMMAND} -DDL_URL=${PORTFWD_URL} -DDL_FILENAME=${ARCHIVE_DIR}/${PORTFWD_FILENAME} -DDL_MD5=${PORTFWD_MD5} -P ${CMAKE_CURRENT_SOURCE_DIR}/download.cmake 
+)
 
 add_custom_target(dl_pjsip
     COMMAND ${CMAKE_COMMAND} -DDL_URL=${PJSIP_URL} -DDL_FILENAME=${ARCHIVE_DIR}/${PJSIP_FILENAME} -DDL_MD5=${PJSIP_MD5} -P ${CMAKE_CURRENT_SOURCE_DIR}/download.cmake 
@@ -23,6 +32,8 @@ if (${PORT} STREQUAL "Android")
     include(BuildAndroid.cmake)
 elseif (${PORT} STREQUAL "OpenWrt")
     include(BuildOpenWrt.cmake)
+elseif (${PORT} STREQUAL "Windows")
+    include(BuildWindows.cmake)
 else ()
     include(BuildUnixoid.cmake)
 endif ()

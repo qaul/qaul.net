@@ -10,17 +10,6 @@ ExternalProject_Add(pjsip
     INSTALL_COMMAND ""
 )
 
-ExternalProject_Add(portfwd
-    DEPENDS dl_portfwd
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/portfwd
-    URL ${ARCHIVE_DIR}/${PORTFWD_FILENAME}
-    BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/portfwd.patch
-    CONFIGURE_COMMAND "./bootstrap" COMMAND "./configure"
-    BUILD_COMMAND make
-    INSTALL_COMMAND ""
-)
-
 ExternalProject_Add(olsr
     DEPENDS dl_olsr
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/olsr
@@ -28,6 +17,6 @@ ExternalProject_Add(olsr
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/olsr.patch
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND make DEBUG=0 olsrd libs
+    BUILD_COMMAND CC=i686-w64-mingw32-gcc make DEBUG=0 OS=win32 olsrd.exe libs
     INSTALL_COMMAND ""
 )

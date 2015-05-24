@@ -1,51 +1,73 @@
+Android Instructions
+====================
 
-# Android Instructions
+Compatibility
+-------------
 
-It should work on all ARM android devices starting from Android 2.3 Gingerbread
-(due to before unsupported pthread functions in pjsip). 
-The Android device needs to be rooted.
+Qaul.net was tested on the following devices:
 
-qaul.net was tested on the following devices:
-
-| Device | 2.3 | 4.0 | CM9 |
-| --- | --- | --- | --- |
-| Samsung Galaxy S2 | Y | N | N |
-| HTC Sensation | ? | Y | Y |
+| Device            | 2.3 | 4.x | CM9 |
+| ----------------- | --- | --- | --- |
+| Samsung Galaxy S2 | Y   | N   | N   |
+| HTC Sensation     | ?   | Y   | Y   |
+| fairphone         | ?   | Y   | ?   |
 
 Legend:
+
 * Y = it works
 * N = it doesn't work yet
 * ? = it wasn't tested yet
 
-## Prerequisites
+
+Problems & Solutions:
+
+* qaul.net needs the IBSS/Ad-hoc wifi mode. This Wifi-Standard mode was 
+  removed by google. 
+  * On Android < 4.x IBSS mode can be activated via the wext (wireless 
+    extensions). 
+    Some vendors ship also their 4.x devices with wext.
+  * On Android >= 4 IBSS mode can be activated on some devices via 
+    wpa_supplicant.
+* qaul.net needs ARM and Android > 2.3 Gingerbread
+  (due to before unsupported pthread functions in pjsip). 
+* The Android device needs to be rooted.
+
+
+Prerequisites
+-------------
 
 ### Android SDK/NDK
 
 For building the Android version of Qaul.net you will need both the Source
 Develpment Kit *and* the Native Development Kit
 
-get NDK https://developer.android.com/tools/sdk/ndk/index.html
+Get the NDK https://developer.android.com/tools/sdk/ndk/index.html
 
-get SDK https://developer.android.com/sdk/index.html
-add sdk to path if not done by installer
+Get the SDK https://developer.android.com/sdk/index.html
+
+Add `sdk` to `path` if the installer had not done it automatically.
 
 ### Needed extra libraries
 
-create directory for extra libs
+1. Create directory for extra libs
 
-cd into it
+2. `cd` into it
 
 	adb pull /system/lib/libcutils.so
 	adb pull /system/lib/libwpa_client.so
 	adb pull /system/bin/ifconfig
 	adb pull /system/bin/iptables
 
-## get the source
+
+Get the source
+--------------
 
 Download the source from <insert source here> or
 get the sources from github: git clone https://github.com/WachterJud/qaul.net.git
 
-## build
+
+Build
+-----
 
     mkdir builddir
     cd builddir
@@ -53,9 +75,12 @@ get the sources from github: git clone https://github.com/WachterJud/qaul.net.gi
     cmake ../path/to/source -DPORT=Android -DNDK_ROOT=/path/to/ndk -DEXTRALIB_PATH=/path/to/extra/lib
     make
 
-find the apk in android/bin
+You will find the newly built apk in `android/bin`.
 
-## Eclipse
+
+Eclipse
+-------
 
 - Import Existing Project
-- Do NOT copy files.
+- Do **NOT** copy files.
+

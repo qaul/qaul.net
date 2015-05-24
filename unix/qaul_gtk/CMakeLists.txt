@@ -1,6 +1,10 @@
 
 find_package(ALSA REQUIRED)
 
+pkg_check_modules (UUID uuid)
+pkg_check_modules (OPENCORE_AMRNB opencore-amrnb)
+pkg_check_modules (OPENCORE_AMRWB opencore-amrwb)
+
 set (LIBQAULDIR ${CMAKE_SOURCE_DIR}/libqaul)
 set (PJBASE ${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip)
 
@@ -49,14 +53,21 @@ target_include_directories(qaul-gtk PRIVATE ${DBUS1_INCLUDE_DIRS} ${WEBKIT_INCLU
     ${PJBASE}third_party/srtp/include
 )
 
-#TODO system detection uname -m
-#target_compile_options(qaul-gtk PRIVATE -DPJSIPTYPE=x86_64-unknown-linux-gnu)
-set(PJSIPTYPE x86_64-unknown-linux-gnu)
+set(PJSIPTYPE qaul)
+
+if (UUID_FOUND)
+    target_link_libraries(qaul-gtk ${UUID_LIBRARIES})
+endif (UUID_FOUND)
+
+if (OPENCORE_AMRNB_FOUND)
+    target_link_libraries(qaul-gtk ${OPENCORE_AMRNB_LIBRARIES})
+endif (OPENCORE_AMRNB_FOUND)
+
+if (OPENCORE_AMRWB_FOUND)
+    target_link_libraries(qaul-gtk ${OPENCORE_AMRWB_LIBRARIES})
+endif (OPENCORE_AMRWB_FOUND)
 
 target_link_libraries(qaul-gtk ${DBUS1_LIBRARIES} ${WEBKIT_LIBRARIES}
-    # pthread dl m uuid avcodec opencore-amrnb
-    # TODO: please check if libraries are present and do not include them accordingly
-    #       see issue https://github.com/WachterJud/qaul.net-ng/issues/5
     pthread dl m
     ${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
     ${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a

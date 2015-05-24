@@ -6,6 +6,8 @@ IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
         SET(CMAKE_INSTALL_PREFIX "/opt/qaul" CACHE PATH "Qaul.Net install prefix" FORCE)
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
 include (ExternalProject)
 
 # The version number.
@@ -64,6 +66,8 @@ elseif (${PORT} STREQUAL "OpenWrt")
     include(BuildOpenWrt.cmake)
 elseif (${PORT} STREQUAL "OSX")
     include(BuildOSX.cmake)
+elseif (${PORT} STREQUAL "Windows")
+    include(BuildWindows.cmake)
 else ()
     message(FATAL_ERROR "Dont know how to build '${PORT}'")
 endif ()
