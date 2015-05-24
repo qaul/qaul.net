@@ -15,7 +15,7 @@ set (Qaul_VERSION_PATCH 0)
 set (Qaul_VERSION_SUFFIX Qaul-NG_Proto)
 
 # What to build
-set(ALL_PORTS Android OpenWrt GTK QT Windows MacOS MacOSX iOS)
+set(ALL_PORTS Android OpenWrt GTK QT Windows OSX iOS)
 set(PORT "NOPORT" CACHE STRING "choose which Qaul port to build (one of ${ALL_PORTS})")
 
 list(FIND ALL_PORTS ${PORT} RET)
@@ -62,6 +62,8 @@ elseif (${PORT} STREQUAL "Android")
     include(BuildAndroid.cmake)
 elseif (${PORT} STREQUAL "OpenWrt")
     include(BuildOpenWrt.cmake)
+elseif (${PORT} STREQUAL "OSX")
+    include(BuildOSX.cmake)
 else ()
     message(FATAL_ERROR "Dont know how to build '${PORT}'")
 endif ()
