@@ -15,3 +15,9 @@ For building the **Android** version see [README_Android.md](README_Android.md).
 ### Unix (Linux/BSD/Mac)
 
 For building a **Unix** version see [README_Unix.md](README_Unix.md).
+
+## License
+
+Qual.net is licensed under the [GNU General Public License version 3](https://github.com/WachterJud/qaul.net-ng/blob/qaul-ng/Licenses/GPLv3.txt).
+
+For all the other external code's licenses used in this project please visit the [License dirctory](https://github.com/WachterJud/qaul.net-ng/tree/qaul-ng/Licenses).
