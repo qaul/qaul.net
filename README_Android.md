@@ -4,7 +4,7 @@ Android Instructions
 Compatibility
 -------------
 
-Qaul.net was tested on the following devices:
+quul.net has been tested on the following devices:
 
 | Device            | 2.3 | 4.x | CM9 |
 | ----------------- | --- | --- | --- |
