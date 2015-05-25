@@ -8,7 +8,7 @@ power of everyday devices such as computers and smartphone to create a
 **Democratic**, **Non-Centralized**, **Mesh Network** on which users can 
 share files, have voice chats and send each other messages, however the 
 power of qaul.net allows and endless feature set as anyone can run any 
-LAN-based application over the network. Qaul.net removes the dependence 
+LAN-based application over the network. qaul.net removes the dependence 
 on the centralized services such as the Internet and cellular networks 
 and creates a network that anyone can be part of and share freely with 
 no censorship what so ever.
