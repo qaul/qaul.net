@@ -18,7 +18,7 @@ Build Instructions
 
 ### Android
 
-For instructions on building the **Android** version of Qual.net see 
+For instructions on building the **Android** version of qaul.net see 
 [README_Android.md](README_Android.md).
 
 
