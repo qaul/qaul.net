@@ -33,7 +33,28 @@ endif()
 
 SET(CPACK_SET_DESTDIR ON)
 
-SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "qaul.net community <contact@qaul.net>") #required
+
+############################
+# CPACK Installer
+############################
+# Configure Debian Installer
+SET(CPACK_DEBIAN_PACKAGE_MAINTAINER  "qaul.net community <contact@qaul.net>")
+SET(CPACK_DEBIAN_PACKAGE_NAME        "qaul.net ${VERSION_SUFFIX}")
+SET(CPACK_DEBIAN_PACKAGE_VERSION     "${CPACK_PACKAGE_VERSION}${CPACK_PACKAGE_REVISION}")
+SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "tools for the next revolution
+ independent WIFI mesh network,
+ text messaging, chat,
+ file sharing,
+ VoIP, voice calls,
+ olsr")
+SET(CPACK_DEBIAN_PACKAGE_PRIORITY    "optional")
+SET(CPACK_DEBIAN_PACKAGE_SECTION     "web")
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS     "libwebkit-3.0-0")
+#SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}-${CPACK_DEBIAN_PACKAGE_VERSION}_${CMAKE_SYSTEM_PROCESSOR}")
+SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE    "http://qaul.net")
+
+# add qaul to applications menu 
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/unix/distfiles/share/qaul.desktop DESTINATION /usr/share/applications/)
 
 # All install must be done before this
 INCLUDE(CPack)
