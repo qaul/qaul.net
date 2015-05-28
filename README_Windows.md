@@ -13,7 +13,7 @@ https://www.git-scm.com/download/win
  
 ### MinGW
 
-For building the Windows version of Qaul.net you will need a recent MinGW installed.
+For building the Windows version of qaul.net you will need a recent MinGW installed.
 
 1. Get the latest version of **MingGW** from http://sourceforge.net/projects/mingw-w64/ or http://mingw-w64.yaxm.org.
 

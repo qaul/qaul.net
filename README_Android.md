@@ -38,7 +38,7 @@ Prerequisites
 
 ### Android SDK/NDK
 
-For building the Android version of Qaul.net you will need both the Source
+For building the Android version of qaul.net you will need both the Source
 Develpment Kit *and* the Native Development Kit
 
 Get the NDK https://developer.android.com/tools/sdk/ndk/index.html
