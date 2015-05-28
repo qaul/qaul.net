@@ -11,10 +11,10 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include (ExternalProject)
 
 # The version number.
-set (Qaul_VERSION_MAJOR 0)
+set (Qaul_VERSION_MAJOR 1)
 set (Qaul_VERSION_MINOR 0)
 set (Qaul_VERSION_PATCH 0)
-set (Qaul_VERSION_SUFFIX Qaul-NG_Proto)
+set (Qaul_VERSION_SUFFIX "beta4")
 
 # What to build
 set(ALL_PORTS Android OpenWrt GTK QT Windows OSX iOS)
