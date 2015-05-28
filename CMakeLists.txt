@@ -1,9 +1,9 @@
 cmake_minimum_required (VERSION 2.8)
 
-project (Qaul)
+project (qaul)
 
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-        SET(CMAKE_INSTALL_PREFIX "/opt/qaul" CACHE PATH "Qaul.Net install prefix" FORCE)
+        SET(CMAKE_INSTALL_PREFIX "/opt/qaul" CACHE PATH "qaul.net install prefix" FORCE)
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")

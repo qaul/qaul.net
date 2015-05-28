@@ -33,7 +33,7 @@ endif()
 
 SET(CPACK_SET_DESTDIR ON)
 
-SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "David Doria") #required
+SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "qaul.net community <contact@qaul.net>") #required
 
 # All install must be done before this
 INCLUDE(CPack)
