@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=qaul.net – قول
+Version=1.0b4
+Exec=qaul
+Comment=
+Icon=/opt/qaul/qaul_app_icon.png
+Type=Application
+Terminal=false
+StartupNotify=true
+Encoding=UTF-8
+Categories=Internet;Network;
+
