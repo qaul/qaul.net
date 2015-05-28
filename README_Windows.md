@@ -1,11 +1,11 @@
 
 # Windows Instructions
 
-This page contains all the instructions on building Qual.net on the **Windows** platform.
+This page contains all the instructions on building qaul.net on the **Windows** platform.
 
 ## Prerequisites
 
-Below are all the required tools and files you will need in order to build Qual.net.
+Below are all the required tools and files you will need in order to build qauls.net.
 
 ### Git
 

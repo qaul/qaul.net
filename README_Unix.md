@@ -1,6 +1,6 @@
 # Unix Instructions
 
-This page contains all the instructions on building Qual.net on Unix and Unix-like platform.
+This page contains all the instructions on building qaul.net on Unix and Unix-like platform.
 
 ## Prerequisites
 
