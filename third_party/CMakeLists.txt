@@ -12,9 +12,9 @@ set (OLSR_URL "http://www.olsr.org/releases/0.6/${OLSR_FILENAME}")
 set (OLSR_MD5 "feabdd611391dcb30af5795e834cc258")
 
 
-set (PORTFWD_FILENAME "master.zip")
+set (PORTFWD_FILENAME "master.tar.gz")
 set (PORTFWD_URL "http://github.com/WachterJud/portfwd/archive/${PORTFWD_FILENAME}")
-set (PORTFWD_MD5 "db3850fd47f1fc9a21e530faf65cdc6f")
+set (PORTFWD_MD5 "21385143f85a2a0512804a1cafa145b1")
 
 add_custom_target(dl_portfwd
     COMMAND ${CMAKE_COMMAND} -DDL_URL=${PORTFWD_URL} -DDL_FILENAME=${ARCHIVE_DIR}/${PORTFWD_FILENAME} -DDL_MD5=${PORTFWD_MD5} -P ${CMAKE_CURRENT_SOURCE_DIR}/download.cmake 
