@@ -53,6 +53,9 @@ SET(CPACK_DEBIAN_PACKAGE_DEPENDS     "libwebkit-3.0-0")
 #SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}-${CPACK_DEBIAN_PACKAGE_VERSION}_${CMAKE_SYSTEM_PROCESSOR}")
 SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE    "http://qaul.net")
 
+# copy application icon
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/unix/distfiles/share/qaul_app_icon.png DESTINATION /opt/qaul/)
+
 # add qaul to applications menu 
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/unix/distfiles/share/qaul.desktop DESTINATION /usr/share/applications/)
 
