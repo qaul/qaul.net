@@ -29,6 +29,9 @@ endif ()
 set(ALL_PKGFORMAT AUTO NSIS TGZ RPM DEB)
 set(PKGFORMAT "AUTO" CACHE STRING "select what type of package should be build (one of ${ALL_PKGFORMAT})")
 
+# Cpack general Installer settings
+set(CPACK_RESOURCE_FILE_LICENSE ${PROJECT_SOURCE_DIR}/Licenses/qaul.net_license.txt)
+
 # -----------------------------------------------------------------------------
 # Determine the operating system
 # -----------------------------------------------------------------------------
