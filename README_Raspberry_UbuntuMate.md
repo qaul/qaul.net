@@ -23,7 +23,7 @@ Download and Build
 	cd build
 	
 	# generate make files
-	cmake .. -DPORT=GTK
+	cmake .. -DPORT=GTK -DCPACK_INSTALL_PREFIX="/opt/qaul"
 	
 	# make and install qaul.net
 	make
