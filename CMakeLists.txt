@@ -31,6 +31,11 @@ set(PKGFORMAT "AUTO" CACHE STRING "select what type of package should be build (
 
 # Cpack general Installer settings
 set(CPACK_RESOURCE_FILE_LICENSE ${PROJECT_SOURCE_DIR}/Licenses/qaul.net_license.txt)
+set(CPACK_PACKAGE_VENDOR "qaul.net community")
+set(CPACK_PACKAGE_VERSION_MAJOR ${Qaul_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${Qaul_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${Qaul_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION_SUFFIX ${Qaul_VERSION_SUFFIX})
 
 # -----------------------------------------------------------------------------
 # Determine the operating system
