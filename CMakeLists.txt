@@ -18,11 +18,11 @@ set (Qaul_VERSION_SUFFIX "beta4")
 
 # What to build
 set(ALL_PORTS Android OpenWrt GTK QT Windows OSX iOS)
-set(PORT "NOPORT" CACHE STRING "choose which Qaul port to build (one of ${ALL_PORTS})")
+set(PORT "NOPORT" CACHE STRING "choose which qaul port to build (one of ${ALL_PORTS})")
 
 list(FIND ALL_PORTS ${PORT} RET)
 if (${RET} EQUAL -1)
-  message(FATAL_ERROR "Please choose which Qaul port to build (one of ${ALL_PORTS})")
+  message(FATAL_ERROR "Please choose which qaul port to build (one of ${ALL_PORTS})")
 endif ()
 
 # What package to build
