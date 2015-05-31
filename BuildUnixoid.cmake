@@ -33,6 +33,11 @@ endif()
 
 SET(CPACK_SET_DESTDIR ON)
 
+SET(CPACK_SOURCE_IGNORE_FILES
+"~$"
+"^${PROJECT_SOURCE_DIR}/archives/[^\\\\.]"
+"^${PROJECT_SOURCE_DIR}/build/"
+)
 
 ############################
 # CPACK Installer
