@@ -1,10 +1,10 @@
 
 set (ARCHIVE_DIR ${PROJECT_SOURCE_DIR}/archives)
 
-set (PJSIP_VERSION "2.3")
+set (PJSIP_VERSION "2.4")
 set (PJSIP_FILENAME "pjproject-${PJSIP_VERSION}.tar.bz2")
 set (PJSIP_URL "http://www.pjsip.org/release/${PJSIP_VERSION}/${PJSIP_FILENAME}")
-set (PJSIP_MD5 "8440e43242c439ae5ec30b5b85005fce")
+set (PJSIP_MD5 "39629ca3fcedbdc7dbd8c5a707060095")
 
 set (OLSR_VERSION "0.6.8")
 set (OLSR_FILENAME "olsrd-${OLSR_VERSION}.tar.bz2")
@@ -34,6 +34,8 @@ elseif (${PORT} STREQUAL "OpenWrt")
     include(BuildOpenWrt.cmake)
 elseif (${PORT} STREQUAL "Windows")
     include(BuildWindows.cmake)
+elseif (${PORT} STREQUAL "OSX")
+    include(BuildOSX.cmake)
 else ()
     include(BuildUnixoid.cmake)
 endif ()

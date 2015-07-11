@@ -53,7 +53,7 @@ target_include_directories(qaul PRIVATE ${DBUS1_INCLUDE_DIRS} ${WEBKIT_INCLUDE_D
 
 #TODO system detection uname -m
 #target_compile_options(qaul-gtk PRIVATE -DPJSIPTYPE=x86_64-unknown-linux-gnu)
-set(PJSIPTYPE x86_64-apple-darwin12.6.0)
+set(PJSIPTYPE qaul)
 
 target_link_libraries(qaul 
     # pthread dl m uuid avcodec opencore-amrnb
@@ -71,7 +71,7 @@ target_link_libraries(qaul
     ${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
     ${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
-    ${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
+#    ${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libportaudio-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
