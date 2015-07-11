@@ -8,7 +8,7 @@ if(NOT EXTRALIB_PATH)
 endif()
 
 if(NOT NDK_LEVEL)
-    message(STATUS "The Target Android version not spezified (-DNDK_LEVEL=X), default is version 9.")
+    message(STATUS "Use default Android Target version 9 (-DNDK_LEVEL=9).")
     set(NDK_LEVEL 9)
 endif()
 

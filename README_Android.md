@@ -46,7 +46,7 @@ Build
 
 
 	# build the qaul.net Android app
-	cmake ../ -DPORT=Android -DNDK_ROOT=/path/to/ndk -DEXTRALIB_PATH=./
+	cmake ../ -DPORT=Android -DNDK_ROOT=/absolute/path/to/ndk -DEXTRALIB_PATH=/absolute/path/to/libraries
 	make
 
 
