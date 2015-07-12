@@ -28,6 +28,8 @@ add_custom_target(dl_olsr
     COMMAND ${CMAKE_COMMAND} -DDL_URL=${OLSR_URL} -DDL_FILENAME=${ARCHIVE_DIR}/${OLSR_FILENAME} -DDL_MD5=${OLSR_MD5} -P ${CMAKE_CURRENT_SOURCE_DIR}/download.cmake 
 )
 
+option(Raspberry "Raspberry" 0)
+
 if (${PORT} STREQUAL "Android")
     include(BuildAndroid.cmake)
 elseif (${PORT} STREQUAL "OpenWrt")
@@ -36,6 +38,8 @@ elseif (${PORT} STREQUAL "Windows")
     include(BuildWindows.cmake)
 elseif (${PORT} STREQUAL "OSX")
     include(BuildOSX.cmake)
+elseif (Raspberry)
+    include(BuildRaspberry.cmake)
 else ()
     include(BuildUnixoid.cmake)
 endif ()

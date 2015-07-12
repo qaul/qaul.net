@@ -23,28 +23,11 @@ Download and Build
 	cd build
 	
 	# generate make files
-	cmake .. -DPORT=GTK -DCPACK_INSTALL_PREFIX="/opt/qaul"
+	cmake .. -DPORT=GTK -DRaspberry=1 -DCPACK_INSTALL_PREFIX="/opt/qaul"
 	
 	# make and install qaul.net
 	make
 	sudo make install
-
-
-#### Troubleshooting - Patching Needed
-
-The endianness needs to be specified on this platform. The following lines 
-need to be put in to the file
-third_party/pjsip/src/pjsip/pjlib/include/pj/config_site.h 
-(in the local build folder).
-
-	#define PJ_IS_LITTLE_ENDIAN 1 
-	#define PJ_IS_BIG_ENDIAN 0
-
-
-The olsrd plugin 'olsrd_httpinfo.so.0.1' failed linking. Don't compile it.
-
-	rm -R third_party/olsr/src/olsr/lib/httpinfo
-	cp -R third_party/olsr/src/olsr/lib/txtinfo third_party/olsr/src/olsr/lib/httpinfo
 
 
 Run qaul.net GUI client
