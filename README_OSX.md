@@ -1,9 +1,8 @@
 Build qaul.net on Mac OSX
 =========================
 
-This tutorial describes all the steps to build qaul.net-ng on a Debian 
-Linux derivate. 
-It has been tested on the following versions:
+This tutorial describes all the steps to build qaul.net-ng on Mac OSX>
+It has been tested on the following versions of Mac OSX:
 
 * OSX 10.8 (Snow Leopard)
 
