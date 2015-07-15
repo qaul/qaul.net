@@ -34,5 +34,5 @@ Legend:
 
 * Y = it works
 * N = it doesn't work yet
-* ? = it wasn't tested yet
+* ? = it hasn't been tested yet
 
