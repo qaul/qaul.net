@@ -14,12 +14,14 @@ set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
 set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${CPACK_PACKAGE_VERSION})
 set(MACOSX_BUNDLE_BUNDLE_VERSION ${CPACK_PACKAGE_VERSION})
 set(MACOSX_BUNDLE_COPYRIGHT "qaul.net is free software, licensed under GPLv3")
-# These variables are specific to our plist and are NOT standard CMake variables
 set(MACOSX_BUNDLE_NSMAIN_NIB_FILE "MainMenu")
 set(MACOSX_BUNDLE_NSPRINCIPAL_CLASS "NSApplication")
 
 set(MACOSX_RESOURCE_FILES ${PROJECT_SOURCE_DIR}/distfiles/osx/qaul.icns) 
-set_source_files_properties(${MACOSX_RESOURCE_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources) 
+set_source_files_properties(${MACOSX_RESOURCE_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+set(MACOSX_MENU_FILES ${PROJECT_SOURCE_DIR}/unix/qaul_osx/en.lproj/MainMenu.xib ${PROJECT_SOURCE_DIR}/unix/qaul_osx/en.lproj/InfoPlist.strings) 
+set_source_files_properties(${MACOSX_MENU_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/en.lproj)
+
 
 add_executable(qaul MACOSX_BUNDLE
 	main.m
@@ -51,7 +53,8 @@ add_executable(qaul MACOSX_BUNDLE
 #    ${LIBQAULDIR}/polarssl/sha1.c
 #    ${LIBQAULDIR}/olsrd/mantissa.c
 #    ${LIBQAULDIR}/olsrd/hashing.c
-	${PROJECT_SOURCE_DIR}/distfiles/osx/qaul.icns
+	${MACOSX_RESOURCE_FILES}
+	${MACOSX_MENU_FILES}
 )
 
 add_dependencies(qaul pjsip)
