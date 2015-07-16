@@ -23,7 +23,7 @@ set(MACOSX_MENU_FILES ${PROJECT_SOURCE_DIR}/unix/qaul_osx/en.lproj/MainMenu.xib 
 set_source_files_properties(${MACOSX_MENU_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/en.lproj)
 
 
-add_executable(qaul MACOSX_BUNDLE
+add_executable(${PROJECT_NAME} MACOSX_BUNDLE
 	main.m
 #	main.c network.c
 #    ${LIBQAULDIR}/qaullib.c
@@ -100,6 +100,9 @@ target_link_libraries(qaul
     ${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
     ${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
     ${ALSA_LIBRARIES}
+#    -framework AppKit
 )
 
-install (TARGETS qaul DESTINATION bin)
+file(COPY ${PROJECT_SOURCE_DIR}/www DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources)
+
+#install (TARGETS qaul DESTINATION bin)
