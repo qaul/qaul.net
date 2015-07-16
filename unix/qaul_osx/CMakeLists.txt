@@ -4,7 +4,24 @@
 set (LIBQAULDIR ${CMAKE_SOURCE_DIR}/libqaul)
 set (PJBASE ${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip)
 
-add_executable(qaul 
+# Set the OS X Bundle specific CMake variables which will be used to populate the plist for
+# the application bundle
+set(MACOSX_BUNDLE_INFO_STRING "${PROJECT_NAME}")
+set(MACOSX_BUNDLE_ICON_FILE qaul.icns)
+set(MACOSX_BUNDLE_GUI_IDENTIFIER "net.qaul.qaul")
+set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_NAME} Version ${CPACK_PACKAGE_VERSION}")
+set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
+set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${CPACK_PACKAGE_VERSION})
+set(MACOSX_BUNDLE_BUNDLE_VERSION ${CPACK_PACKAGE_VERSION})
+set(MACOSX_BUNDLE_COPYRIGHT "qaul.net is free software, licensed under GPLv3")
+# These variables are specific to our plist and are NOT standard CMake variables
+set(MACOSX_BUNDLE_NSMAIN_NIB_FILE "MainMenu")
+set(MACOSX_BUNDLE_NSPRINCIPAL_CLASS "NSApplication")
+
+set(MACOSX_RESOURCE_FILES ${PROJECT_SOURCE_DIR}/distfiles/osx/qaul.icns) 
+set_source_files_properties(${MACOSX_RESOURCE_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources) 
+
+add_executable(qaul MACOSX_BUNDLE
 	main.m
 #	main.c network.c
 #    ${LIBQAULDIR}/qaullib.c
@@ -34,6 +51,7 @@ add_executable(qaul
 #    ${LIBQAULDIR}/polarssl/sha1.c
 #    ${LIBQAULDIR}/olsrd/mantissa.c
 #    ${LIBQAULDIR}/olsrd/hashing.c
+	${PROJECT_SOURCE_DIR}/distfiles/osx/qaul.icns
 )
 
 add_dependencies(qaul pjsip)
