@@ -1,4 +1,4 @@
-![http://qaul.net/](http://qaul.net/img/qaul-net.png)
+![http://qaul.net/](doc/qaul-net.png)
 
 qaul.net Next Generation
 ========================
