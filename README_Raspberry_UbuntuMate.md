@@ -1,4 +1,4 @@
-Build qaul.net-ng on Raspberry Pi running Ubuntu Mate
+Build qaul.net-ng on Raspberry Pi 2 running Ubuntu Mate
 ======================================================
 
 Prerequesites
