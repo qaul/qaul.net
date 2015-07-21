@@ -18,14 +18,14 @@ Build Instructions
 ------------------
 
 There Are specific instructions for each System qaul.net-ng has been 
-tested on. Feel free to add new ports!
+tested on in the [documentation folder](doc). Feel free to add new ports!
 
-* Android [README_Android.md](README_Android.md)
+* Android [doc/Android.md](doc/Android.md)
 * Linux
-  * Debian, Ubuntu, Mint [README_Linux_Debian.md](README_Linux_Debian.md)
-  * All other Linux distributions [README_Linux.md](README_Linux.md)
+  * Debian, Ubuntu, Mint [doc/Linux_Debian.md](doc/Linux_Debian.md)
+  * All other Linux distributions [doc/Linux.md](doc/Linux.md)
 * Raspberry
-  * Ubuntu Mate [README_Raspberry_UbuntuMate.md](README_Raspberry_UbuntuMate.md)
+  * Ubuntu Mate [doc/UbuntuMate.md](doc/UbuntuMate.md)
 
 
 License
