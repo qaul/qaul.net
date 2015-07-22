@@ -23,7 +23,7 @@ install(FILES ${PROJECT_BINARY_DIR}/third_party/portfwd/src/portfwd/src/portfwd 
 install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/lib/olsrd_qaul/olsrd_qaul.so.0.1 DESTINATION lib
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-include(PacketFormatGuesser.cmake)
+include(cmake/PacketFormatGuesser.cmake)
 
 if(PKGFORMAT MATCHES "AUTO")
   SET(CPACK_GENERATOR ${SPECIFIC_SYSTEM_PREFERED_CPACK_GENERATOR})
