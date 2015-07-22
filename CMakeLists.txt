@@ -57,13 +57,13 @@ endif ()
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
-  "${PROJECT_SOURCE_DIR}/QaulConfig.h.in"
-  "${PROJECT_BINARY_DIR}/QaulConfig.h"
+  "${PROJECT_SOURCE_DIR}/include/QaulConfig.h.in"
+  "${PROJECT_BINARY_DIR}/include/QaulConfig.h"
   )
 
 # add the binary tree to the search path for include files
 # so that we will find QaulConfig.h
-include_directories ("${PROJECT_BINARY_DIR}")
+include_directories ("${PROJECT_BINARY_DIR}/include")
 
 set(UNIXOID_PORTS GTK QT)
 
