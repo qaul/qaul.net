@@ -3,6 +3,7 @@
  * licensed under GPL (version 3)
  */
 
+#import <AppKit/NSApplication.h>
 #import <Foundation/Foundation.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 

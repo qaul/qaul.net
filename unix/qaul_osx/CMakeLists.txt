@@ -25,41 +25,42 @@ set_source_files_properties(${MACOSX_MENU_FILES} PROPERTIES MACOSX_PACKAGE_LOCAT
 
 add_executable(${PROJECT_NAME} MACOSX_BUNDLE
 	main.m
-#	main.c network.c
-#    ${LIBQAULDIR}/qaullib.c
-#    ${LIBQAULDIR}/qaullib_ipc.c
-#    ${LIBQAULDIR}/qaullib_webserver.c
-#    ${LIBQAULDIR}/qaullib_voip.c
-#    ${LIBQAULDIR}/qaullib_webclient.c
-#    ${LIBQAULDIR}/qaullib_threads.c
-#    ${LIBQAULDIR}/qaullib_user.c
-#    ${LIBQAULDIR}/qaullib_user_LL.c
-#    ${LIBQAULDIR}/qaullib_topo_LL.c
-#    ${LIBQAULDIR}/qaullib_appevent_LL.c
-#    ${LIBQAULDIR}/qaullib_messaging.c
-#    ${LIBQAULDIR}/qaullib_msg_LL.c
-#    ${LIBQAULDIR}/qaullib_validate.c
-#    ${LIBQAULDIR}/qaullib_filesharing.c
-#    ${LIBQAULDIR}/qaullib_file_LL.c
-#    ${LIBQAULDIR}/qaullib_exediscovery.c
-#    ${LIBQAULDIR}/qaullib_crypto.c
-#    ${LIBQAULDIR}/qaullib_udp_communication.c
-#    ${LIBQAULDIR}/captive/qaullib_captive.c
-#    ${LIBQAULDIR}/captive/qaullib_captive_dhcp.c
-#    ${LIBQAULDIR}/captive/qaullib_captive_dns.c
-#    ${LIBQAULDIR}/mongoose/mongoose.c
-#    ${LIBQAULDIR}/sqlite/sqlite3.c
-#    ${LIBQAULDIR}/urlcode/urlcode.c
-#    ${LIBQAULDIR}/polarssl/sha1.c
-#    ${LIBQAULDIR}/olsrd/mantissa.c
-#    ${LIBQAULDIR}/olsrd/hashing.c
+	AppDelegate.h AppDelegate.m
+	QaulConfigWifi.h QaulConfigWifi.m
+    ${LIBQAULDIR}/qaullib.c
+    ${LIBQAULDIR}/qaullib_ipc.c
+    ${LIBQAULDIR}/qaullib_webserver.c
+    ${LIBQAULDIR}/qaullib_voip.c
+    ${LIBQAULDIR}/qaullib_webclient.c
+    ${LIBQAULDIR}/qaullib_threads.c
+    ${LIBQAULDIR}/qaullib_user.c
+    ${LIBQAULDIR}/qaullib_user_LL.c
+    ${LIBQAULDIR}/qaullib_topo_LL.c
+    ${LIBQAULDIR}/qaullib_appevent_LL.c
+    ${LIBQAULDIR}/qaullib_messaging.c
+    ${LIBQAULDIR}/qaullib_msg_LL.c
+    ${LIBQAULDIR}/qaullib_validate.c
+    ${LIBQAULDIR}/qaullib_filesharing.c
+    ${LIBQAULDIR}/qaullib_file_LL.c
+    ${LIBQAULDIR}/qaullib_exediscovery.c
+    ${LIBQAULDIR}/qaullib_crypto.c
+    ${LIBQAULDIR}/qaullib_udp_communication.c
+    ${LIBQAULDIR}/captive/qaullib_captive.c
+    ${LIBQAULDIR}/captive/qaullib_captive_dhcp.c
+    ${LIBQAULDIR}/captive/qaullib_captive_dns.c
+    ${LIBQAULDIR}/mongoose/mongoose.c
+    ${LIBQAULDIR}/sqlite/sqlite3.c
+    ${LIBQAULDIR}/urlcode/urlcode.c
+    ${LIBQAULDIR}/polarssl/sha1.c
+    ${LIBQAULDIR}/olsrd/mantissa.c
+    ${LIBQAULDIR}/olsrd/hashing.c
 	${MACOSX_RESOURCE_FILES}
 	${MACOSX_MENU_FILES}
 )
 
 add_dependencies(qaul pjsip)
 
-target_include_directories(qaul PRIVATE ${DBUS1_INCLUDE_DIRS} ${WEBKIT_INCLUDE_DIRS}
+target_include_directories(qaul PRIVATE
     ${PJBASE}/pjlib/include
     ${PJBASE}/pjlib-util/include
     ${PJBASE}/pjmedia/include
@@ -70,11 +71,23 @@ target_include_directories(qaul PRIVATE ${DBUS1_INCLUDE_DIRS} ${WEBKIT_INCLUDE_D
     ${PJBASE}third_party/speex/include
     ${PJBASE}third_party/srtp/crypto/include
     ${PJBASE}third_party/srtp/include
+    ${LIBQAULDIR}
 )
 
 #TODO system detection uname -m
 #target_compile_options(qaul-gtk PRIVATE -DPJSIPTYPE=x86_64-unknown-linux-gnu)
 set(PJSIPTYPE qaul)
+
+find_library(COREDATA CoreData)
+find_library(FOUNDATION Foundation)
+find_library(APPKIT AppKit)
+find_library(COCOA Cocoa)
+find_library(WEBKIT WebKit)
+find_library(COREAUDIO CoreAudio)
+find_library(AUDIOUNIT AudioUnit)
+find_library(AUDIOTOOLBOX AudioToolbox)
+find_library(COREWLAN CoreWLAN)
+find_library(SYSTEMCONFIGURATION SystemConfiguration)
 
 target_link_libraries(qaul 
     # pthread dl m uuid avcodec opencore-amrnb
@@ -100,7 +113,11 @@ target_link_libraries(qaul
     ${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
     ${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
     ${ALSA_LIBRARIES}
-#    -framework AppKit
+    # OSX libraries
+	${COREDATA} ${FOUNDATION}
+	${APPKIT} ${COCOA}
+	${WEBKIT}
+	${COREAUDIO} ${AUDIOUNIT} ${AUDIOTOOLBOX} ${COREWLAN} ${SYSTEMCONFIGURATION}
 )
 
 file(COPY ${PROJECT_SOURCE_DIR}/www DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources)
