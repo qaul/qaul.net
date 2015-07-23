@@ -14,12 +14,19 @@ set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
 set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${CPACK_PACKAGE_VERSION})
 set(MACOSX_BUNDLE_BUNDLE_VERSION ${CPACK_PACKAGE_VERSION})
 set(MACOSX_BUNDLE_COPYRIGHT "qaul.net is free software, licensed under GPLv3")
+
+# for menu .xib file
 set(MACOSX_BUNDLE_NSMAIN_NIB_FILE "MainMenu")
 set(MACOSX_BUNDLE_NSPRINCIPAL_CLASS "NSApplication")
 
+FIND_PROGRAM(IBTOOL ibtool HINTS "/usr/bin" "${OSX_DEVELOPER_ROOT}/usr/bin")
+IF (${IBTOOL} STREQUAL "IBTOOL-NOTFOUND")
+	MESSAGE(SEND_ERROR "ibtool not found. It is needed to compile the .xib file.")
+ENDIF()
+
 set(MACOSX_RESOURCE_FILES ${PROJECT_SOURCE_DIR}/distfiles/osx/qaul.icns) 
 set_source_files_properties(${MACOSX_RESOURCE_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-set(MACOSX_MENU_FILES ${PROJECT_SOURCE_DIR}/unix/qaul_osx/en.lproj/MainMenu.xib ${PROJECT_SOURCE_DIR}/unix/qaul_osx/en.lproj/InfoPlist.strings) 
+set(MACOSX_MENU_FILES ${PROJECT_SOURCE_DIR}/unix/qaul_osx/en.lproj/InfoPlist.strings) 
 set_source_files_properties(${MACOSX_MENU_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/en.lproj)
 
 
@@ -120,6 +127,23 @@ target_link_libraries(qaul
 	${COREAUDIO} ${AUDIOUNIT} ${AUDIOTOOLBOX} ${COREWLAN} ${SYSTEMCONFIGURATION}
 )
 
+# Set a custom Info.plist file template.
+set_target_properties(${PROJECT_NAME} PROPERTIES
+	MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/unix/qaul_osx/Info-CMake.plist
+)
+
 file(COPY ${PROJECT_SOURCE_DIR}/www DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources)
+
+# compile app GUI
+ADD_CUSTOM_COMMAND (
+	TARGET ${PROJECT_NAME}
+	POST_BUILD 
+	COMMENT "Build qaul GUI .nib file"
+	COMMAND ${IBTOOL} --errors --warnings --notices
+	--output-format human-readable-text 
+	--compile ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources/en.lproj/MainMenu.nib 
+	${PROJECT_SOURCE_DIR}/unix/qaul_osx/en.lproj/MainMenu.xib
+)
+
 
 #install (TARGETS qaul DESTINATION bin)
