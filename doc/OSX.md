@@ -32,9 +32,13 @@ Build
     cd build
 	
 	# build qaul.net
-    cmake ../ -DPORT=OSX -G "Unix Makefiles"
-    make package
+    cmake ../ -DPORT=OSX -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/Library/qaul.net"
+    make
+    sudo make install
 
 
-You will find the package in your `build` directory
+You can start the qaul app by double clicking the app in your Applications folder.
+To start qaul from the terminal execute the following:
 
+	# start qaul from the terminal to see the log messages
+	/Applications/qaul.app/Contents/MacOS/qaul

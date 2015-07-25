@@ -4,6 +4,7 @@
  */
 
 #import "QaulConfigWifi.h"
+#include <QaulConfig.h>
 
 // ----------------------------------------------
 // definitions
@@ -54,7 +55,7 @@
 		networksetupPath=[NSString stringWithFormat:@"/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Support/networksetup"];	
 	
 	airportPath = [NSString stringWithFormat:@"/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"];
-	qaulhelperPath = [NSString stringWithFormat:@"/Library/qaul.net/qaulhelper"];
+	qaulhelperPath = [NSString stringWithFormat:@"%s/bin/qaulhelper",QAUL_ROOT_PATH];
 }
 
 - (BOOL)runTask:(NSString*)path arguments:(NSArray*)arguments
