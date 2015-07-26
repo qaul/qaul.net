@@ -9,28 +9,25 @@ transfered to master, once the transformation is completed.
 Work Status
 -----------
 
-* Linux
+* [Linux](Linux.md)
   * Fully working
-  * Working on the following Linux distributions: Debian, Ubuntu, 
-    Linux Mint
-* OSX 
+  * Working on the following Linux distributions: [Debian, Ubuntu, 
+    Linux Mint](Linux_Debian.md)
+  * Raspberry
+    * Working on [Ubuntu Mate](Raspberry_UbuntuMate.md) on Raspberry Pi 2.
+    * TODO: there should be a server version that runs headless on all Raspberries.
+* [OSX](OSX.md)
+  * Can be built and installed.
+  * TODO: build an OSX installer via cmake/cpack
+  * TODO: build Xcode project files via cmake
+* [Windows](Windows.md)
   * Currently a _work in progress_.
-* Windows
-  * Currently a _work in progress_.
-* Android
+* [Android](Android.md)
   * Fully working
   * Development to support `wpa_supplicant` on `CyanogenMod` in progress.
+  * Supported Devices can be checked in the [Android Devices](Android_Devices.md) file.
 * iOS
   * This section of the project has not been initiated yet.
-
-
-Documentation
--------------
-
-To build qaul.net-ng on your operating system, read the specific 
-instructions.
-
-* Linux
-  * README_Linux_Debian.md for Debian, Ubuntu, Linux Mint
-* README_Android.md for Android
+* OpenWRT
+  * This section of the project has not been initiated yet.
 

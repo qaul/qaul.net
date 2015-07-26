@@ -20,10 +20,13 @@ Build Instructions
 There Are specific instructions for each System qaul.net-ng has been 
 tested on in the [documentation folder](doc). Feel free to add new ports!
 
-* Android [doc/Android.md](doc/Android.md)
+* Android 
+  * Build Android [doc/Android.md](doc/Android.md)
+  * Supported Devices [doc/Android_Devices.md](doc/Android_Devices.md)
 * Linux
   * Debian, Ubuntu, Mint [doc/Linux_Debian.md](doc/Linux_Debian.md)
   * All other Linux distributions [doc/Linux.md](doc/Linux.md)
+* OSX [doc/OSX.md](doc/OSX.md)
 * Raspberry
   * Ubuntu Mate [doc/Raspberry_UbuntuMate.md](doc/Raspberry_UbuntuMate.md)
 

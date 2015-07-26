@@ -1,8 +1,8 @@
 Build qaul.net on Mac OSX
 =========================
 
-This tutorial describes all the steps to build qaul.net-ng on Mac OSX>
-It has been tested on the following versions of Mac OSX:
+This tutorial describes all the steps to build qaul.net-ng on Mac OSX. qaul.net works on
+Mac OSX > 10.5. This Tutorial has been tested on the following versions of Mac OSX:
 
 * OSX 10.8 (Snow Leopard)
 
