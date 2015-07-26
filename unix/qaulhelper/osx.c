@@ -57,22 +57,25 @@ int start_olsrd (int argc, const char * argv[])
 {
     pid_t pid1;
     int status, fd;
-    char s[256];
+    char s[256], p[256];
     printf("start olsrd\n");
     
     if(argc >= 4)
     {
         // validate arguments
         if(strncmp(argv[3], "yes", 3)==0)
-            sprintf(s,"/Library/qaul.net/olsrd_osx_gw.conf");
+            sprintf(s,"%s/etc/olsrd_osx_gw.conf", QAUL_ROOT_PATH);
         else
-            sprintf(s,"/Library/qaul.net/olsrd_osx.conf");
+            sprintf(s,"%s/etc/olsrd_osx.conf", QAUL_ROOT_PATH);
         
         if (validate_interface(argv[3]) == 0)
         {
             printf("argument 2 not valid\n");
             return 0;
         }
+        
+        // set olsrd binary path
+        sprintf(p,"%s/bin/olsrd", QAUL_ROOT_PATH);
         
         // become root
         setuid(0);
@@ -88,7 +91,7 @@ int start_olsrd (int argc, const char * argv[])
             dup2(fd, STDERR_FILENO);
             close(fd);
             // execute program
-            execl("/Library/qaul.net/olsrd", "olsrd", "-f", s, "-i", argv[3], "-d", "0", (char*)0);
+            execl(p, "olsrd", "-f", s, "-i", argv[3], "-d", "0", (char*)0);
         }
         else
             waitpid(pid1, &status, 0);
@@ -127,6 +130,7 @@ int start_portforwarding (int argc, const char * argv[])
 {
     pid_t pid0, pid1, pid2, pid3;
     int fd, status;
+    char p[256];
     printf("start portforwarding\n");
     
     if(argc >= 3)
@@ -137,6 +141,9 @@ int start_portforwarding (int argc, const char * argv[])
             printf("argument 1 not valid\n");
             return 0;
         }
+        
+        // set socat binary path
+        sprintf(p,"%s/bin/socat", QAUL_ROOT_PATH);
         
         // become root
         setuid(0);
@@ -190,7 +197,7 @@ int start_portforwarding (int argc, const char * argv[])
             dup2(fd, STDERR_FILENO);
             close(fd);
             // execute program
-            execl("/Library/qaul.net/socat", "socat", "UDP4-RECVFROM:53,fork", "UDP4-SENDTO:localhost:8053", (char*)0);
+            execl(p, "socat", "UDP4-RECVFROM:53,fork", "UDP4-SENDTO:localhost:8053", (char*)0);
         }
         else
             printf("udp port 53 forwarded\n");
@@ -207,7 +214,7 @@ int start_portforwarding (int argc, const char * argv[])
             dup2(fd, STDERR_FILENO);
             close(fd);
             // execute program
-            execl("/Library/qaul.net/socat", "socat", "UDP4-RECVFROM:67,fork", "UDP4-SENDTO:localhost:8067", (char*)0);
+            execl(p, "socat", "UDP4-RECVFROM:67,fork", "UDP4-SENDTO:localhost:8067", (char*)0);
         }
         else
             printf("udp port 67 forwarded\n");
