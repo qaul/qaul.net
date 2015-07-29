@@ -8,8 +8,26 @@ if (${PORT} STREQUAL "GTK")
     pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
 endif ()
 
+if (${PORT} STREQUAL "QT5")
+    # Find includes in corresponding build directories
+    set(CMAKE_INCLUDE_CURRENT_DIR ON)
+    # Instruct CMake to run moc automatically when needed.
+    set(CMAKE_AUTOMOC ON)
+
+    # Find the QtWidgets library
+    find_package(Qt5Widgets REQUIRED)
+    find_package(Qt5WebKit REQUIRED)
+endif ()
+
+
 add_subdirectory (unix/qaulhelper)
-add_subdirectory (unix/qaul_gtk)
+
+if (${PORT} STREQUAL "GTK")
+    add_subdirectory (unix/qaul_gtk)
+endif ()
+if (${PORT} STREQUAL "QT5")
+    add_subdirectory (unix/qaul_qt5)
+endif ()
 
 INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/www DESTINATION ${CMAKE_INSTALL_PREFIX} )
 INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/unix/distfiles/etc DESTINATION ${CMAKE_INSTALL_PREFIX} )
