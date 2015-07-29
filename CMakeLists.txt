@@ -17,7 +17,7 @@ set (Qaul_VERSION_PATCH 0)
 set (Qaul_VERSION_SUFFIX "beta4")
 
 # What to build
-set(ALL_PORTS Android OpenWrt GTK QT Windows OSX iOS)
+set(ALL_PORTS Android OpenWrt GTK QT5 Windows OSX iOS)
 set(PORT "NOPORT" CACHE STRING "choose which qaul port to build (one of ${ALL_PORTS})")
 
 list(FIND ALL_PORTS ${PORT} RET)
@@ -65,7 +65,7 @@ configure_file (
 # so that we will find QaulConfig.h
 include_directories ("${PROJECT_BINARY_DIR}/include")
 
-set(UNIXOID_PORTS GTK QT)
+set(UNIXOID_PORTS GTK QT5)
 
 list(FIND UNIXOID_PORTS ${PORT} RET)
 if (NOT ${RET} EQUAL -1)
