@@ -13,7 +13,7 @@
 int main (int argc, const char * argv[])
 {
 	// set OS specific  interface names for help messages
-#ifdef QAUL_PORT_GTK
+#if defined(QAUL_PORT_GTK) || defined(QAUL_PORT_QT5)
 	const char Help_InterfaceName[] = "wlan0";
 #endif // QAUL_PORT_GTK
 #ifdef QAUL_PORT_OSX
