@@ -19,6 +19,16 @@ Develpment Kit *and* the Native Development Kit
 Add `sdk` to `path` if the installer had not done it automatically.
 
 
+### ant
+
+The program ant needs to be installed
+
+* Linux
+
+	# install ant
+	sudo apt-get install ant
+
+
 Get the source
 --------------
 
@@ -51,6 +61,10 @@ Build
 
 
 You will find the newly built apk in `android/bin`.
+
+    # install your app from the command line
+    # make sure your phone is connected
+    adb install android/bin/QaulActivity-debug.apk
 
 
 Eclipse
