@@ -17,12 +17,46 @@ set (Qaul_VERSION_PATCH 0)
 set (Qaul_VERSION_SUFFIX "beta4")
 
 # What to build
-set(ALL_PORTS Android OpenWrt GTK QT5 Windows OSX iOS)
-set(PORT "NOPORT" CACHE STRING "choose which qaul port to build (one of ${ALL_PORTS})")
+# Determine the operating system
+set (ALL_PORTS ANDROID OPENWRT WINDOWS OSX IOS LINUX)
+STRING (TOUPPER "${PORT}" PORT)
+set (PORT "AUTO" CACHE STRING "choose which qaul port to build (one of ${ALL_PORTS})")
+
+if (${PORT} STREQUAL "AUTO")
+  if (UNIX)
+    if (APPLE)
+      set (PORT "OSX")
+    else ()
+      set (PORT "LINUX")
+    endif ()
+  elseif (CMAKE_SYSTEM_NAME MATCHES "WINDOWS")
+    set (PORT WINDOWS)
+  else ()
+    message(FATAL_ERROR "Unknown OS '${CMAKE_SYSTEM_NAME}'")
+  endif ()
+endif ()
 
 list(FIND ALL_PORTS ${PORT} RET)
 if (${RET} EQUAL -1)
   message(FATAL_ERROR "Please choose which qaul port to build (one of ${ALL_PORTS})")
+endif ()
+
+# determine the GUI
+set(ALL_GUIS NONE NATIVE GTK QT5)
+STRING (TOUPPER "${GUI}" GUI)
+set(GUI "NATIVE" CACHE STRING "choose which qaul gui to build (one of ${ALL_GUIS})")
+
+if (${GUI} STREQUAL "NATIVE")
+  if (${PORT} STREQUAL "WINDOWS")
+    set (GUI QT5)
+  elseif ("${PORT}" STREQUAL "LINUX")
+    set (GUI GTK)
+  endif ()
+endif ()
+
+list(FIND ALL_GUIS ${GUI} RET)
+if (${RET} EQUAL -1)
+  message(FATAL_ERROR "Please choose which qaul gui to build (one of ${ALL_GUIS})")
 endif ()
 
 # What package to build
@@ -38,48 +72,38 @@ set(CPACK_PACKAGE_VERSION_PATCH ${Qaul_VERSION_PATCH})
 set(CPACK_PACKAGE_VERSION_SUFFIX ${Qaul_VERSION_SUFFIX})
 set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${CPACK_PACKAGE_VERSION_SUFFIX})
 
-
-# -----------------------------------------------------------------------------
-# Determine the operating system
-# -----------------------------------------------------------------------------
-if (UNIX)
-  if (APPLE)
-    set(Q_OS_MAC_OS_X 1)
-  else ()
-    set(Q_OS_UNIX 1)
-  endif ()
-elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
-  set(Q_OS_WINDOWS 1)
-else ()
-  message(FATAL_ERROR "Unknown OS '${CMAKE_SYSTEM_NAME}'")
-endif ()
-
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
   "${PROJECT_SOURCE_DIR}/include/QaulConfig.h.in"
   "${PROJECT_BINARY_DIR}/include/QaulConfig.h"
-  )
+)
 
 # add the binary tree to the search path for include files
 # so that we will find QaulConfig.h
 include_directories ("${PROJECT_BINARY_DIR}/include")
 
-set(UNIXOID_PORTS GTK QT5)
-
-list(FIND UNIXOID_PORTS ${PORT} RET)
-if (NOT ${RET} EQUAL -1)
+if (${PORT} STREQUAL "LINUX")
     include(cmake/BuildUnixoid.cmake)
-elseif (${PORT} STREQUAL "Android")
+elseif (${PORT} STREQUAL "ANDROID")
     include(cmake/BuildAndroid.cmake)
-elseif (${PORT} STREQUAL "OpenWrt")
+elseif (${PORT} STREQUAL "OPENWRT")
     include(cmake/BuildOpenWrt.cmake)
 elseif (${PORT} STREQUAL "OSX")
     include(cmake/BuildOSX.cmake)
-elseif (${PORT} STREQUAL "Windows")
+elseif (${PORT} STREQUAL "WINDOWS")
     include(cmake/BuildWindows.cmake)
 else ()
     message(FATAL_ERROR "Dont know how to build '${PORT}'")
 endif ()
 
 add_subdirectory (third_party)
+
+# final status summary report
+
+message(STATUS "#############################################")
+message(STATUS "  Qaul seems to be successfully configured.")
+message(STATUS "    Building for platform: ${PORT}")
+message(STATUS "    Building GUI: ${GUI}")
+message(STATUS "    Arm/Raspberry patches enabled: ${Raspberry}")
+message(STATUS "#############################################")

@@ -4,11 +4,11 @@ pkg_check_modules (DBUS1 REQUIRED dbus-1)
 
 find_package (Autotools REQUIRED)
 
-if (${PORT} STREQUAL "GTK")
+if (${GUI} STREQUAL "GTK")
     pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
 endif ()
 
-if (${PORT} STREQUAL "QT5")
+if (${GUI} STREQUAL "QT5")
     # Find includes in corresponding build directories
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
     # Instruct CMake to run moc automatically when needed.
@@ -19,13 +19,12 @@ if (${PORT} STREQUAL "QT5")
     find_package(Qt5WebKit REQUIRED)
 endif ()
 
-
 add_subdirectory (unix/qaulhelper)
 
-if (${PORT} STREQUAL "GTK")
+if (${GUI} STREQUAL "GTK")
     add_subdirectory (unix/qaul_gtk)
 endif ()
-if (${PORT} STREQUAL "QT5")
+if (${GUI} STREQUAL "QT5")
     add_subdirectory (unix/qaul_qt5)
 endif ()
 

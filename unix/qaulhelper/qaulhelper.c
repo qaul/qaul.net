@@ -13,12 +13,13 @@
 int main (int argc, const char * argv[])
 {
 	// set OS specific  interface names for help messages
-#if defined(QAUL_PORT_GTK) || defined(QAUL_PORT_QT5)
+#ifdef QAUL_PORT_LINUX
 	const char Help_InterfaceName[] = "wlan0";
-#endif // QAUL_PORT_GTK
-#ifdef QAUL_PORT_OSX
+#elif defined QAUL_PORT_OSX
 	const char Help_InterfaceName[] = "en1";
-#endif // QAUL_PORT_GTK
+#else
+	#error Something to fix
+#endif
 
     if (argc > 1)
     {
@@ -125,10 +126,10 @@ int main (int argc, const char * argv[])
         printf("  qaulhelper startolsrd yes %s\n", Help_InterfaceName);
         printf("  qaulhelper stopolsrd\n");
         printf("  qaulhelper stopolsrd\n");
-#ifdef QAUL_PORT_GTK
+#ifdef QAUL_PORT_LINUX
         printf("  qaulhelper startportforwarding <INTERFACE> <IP>\n");
         printf("  qaulhelper startportforwarding %s 10.213.28.55\n", Help_InterfaceName);
-#endif // QAUL_PORT_GTK
+#endif // QAUL_PORT_LINUX
 #ifdef QAUL_PORT_OSX
         printf("  qaulhelper startportforwarding <INTERFACE>\n");
         printf("  qaulhelper startportforwarding %s\n", Help_InterfaceName);

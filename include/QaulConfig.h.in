@@ -11,3 +11,4 @@
 // what are we building for?
 
 #define QAUL_PORT_@PORT@ 1
+#define QAUL_GUI_@GUI@ 1
