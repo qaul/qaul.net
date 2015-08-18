@@ -93,6 +93,8 @@ configure_file (
 # so that we will find QaulConfig.h
 include_directories ("${PROJECT_BINARY_DIR}/include")
 
+add_subdirectory (third_party)
+
 if (${PORT} STREQUAL "LINUX")
     include(cmake/BuildUnixoid.cmake)
 elseif (${PORT} STREQUAL "ANDROID")
@@ -107,7 +109,6 @@ else ()
     message(FATAL_ERROR "Dont know how to build '${PORT}'")
 endif ()
 
-add_subdirectory (third_party)
 
 # final status summary report
 message(STATUS "#############################################")
