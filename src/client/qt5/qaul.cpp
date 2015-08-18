@@ -1,6 +1,6 @@
 #include "qaul.h"
 #include "ui_qaul.h"
-#include "../../libqaul/qaullib.h"
+#include "../../../libqaul/qaullib.h"
 
 #include <QDebug>
 #include <QByteArray>

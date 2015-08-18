@@ -1,10 +1,10 @@
 
-# find_package(ALSA REQUIRED)
-
-# pkg_check_modules (UUID uuid)
-# pkg_check_modules (OPENCORE_AMRNB opencore-amrnb)
-# pkg_check_modules (OPENCORE_AMRWB opencore-amrwb)
-
+if (${PORT} STREQUAL "LINUX")
+  find_package(ALSA REQUIRED)
+  pkg_check_modules (UUID uuid)
+  pkg_check_modules (OPENCORE_AMRNB opencore-amrnb)
+  pkg_check_modules (OPENCORE_AMRWB opencore-amrwb)
+endif ()
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -21,9 +21,15 @@ set (PJBASE ${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip)
 
 qt5_wrap_ui(UI_HEADERS ${CMAKE_SOURCE_DIR}/src/client/qt5/qaul.ui)
 
+if (${PORT} STREQUAL "WINDOWS")
+  set (EXTRA_SOURCES
+    ${LIBQAULDIR}/win32/functions.c
+    ${LIBQAULDIR}/win32/pthread.c
+  )
+endif ()
+
 add_executable(qaul-qt5 main.cpp qaul.cpp
     ${UI_HEADERS}
-#     network.c
     ${LIBQAULDIR}/qaullib.c
     ${LIBQAULDIR}/qaullib_ipc.c
     ${LIBQAULDIR}/qaullib_webserver.c
@@ -51,8 +57,7 @@ add_executable(qaul-qt5 main.cpp qaul.cpp
     ${LIBQAULDIR}/polarssl/sha1.c
     ${LIBQAULDIR}/olsrd/mantissa.c
     ${LIBQAULDIR}/olsrd/hashing.c
-    ${LIBQAULDIR}/win32/functions.c
-    ${LIBQAULDIR}/win32/pthread.c
+    ${EXTRA_SOURCES}
 )
 
 qt5_use_modules(qaul-qt5 Widgets)
@@ -88,7 +93,6 @@ if (OPENCORE_AMRWB_FOUND)
 endif (OPENCORE_AMRWB_FOUND)
 
 target_link_libraries(qaul-qt5 ${DBUS1_LIBRARIES} 
-# Qt5::Widgets QT5::WebKit
     pthread dl m
     ${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
     ${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
@@ -108,8 +112,12 @@ target_link_libraries(qaul-qt5 ${DBUS1_LIBRARIES}
     ${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
     ${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
-    # ${ALSA_LIBRARIES}
 )
+
+if (${PORT} STREQUAL "LINUX")
+	target_link_libraries(qaul-qt5 ${ALSA_LIBRARIES})
+endif ()
+
 
 if (${PORT} STREQUAL "WINDOWS")
     target_link_libraries(qaul-qt5 ws2_32 wsock32 winmm)
