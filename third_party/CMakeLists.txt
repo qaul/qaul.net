@@ -11,7 +11,6 @@ set (OLSR_FILENAME "olsrd-${OLSR_VERSION}.tar.bz2")
 set (OLSR_URL "http://www.olsr.org/releases/0.6/${OLSR_FILENAME}")
 set (OLSR_MD5 "feabdd611391dcb30af5795e834cc258")
 
-
 set (PORTFWD_FILENAME "master.tar.gz")
 set (PORTFWD_URL "http://github.com/WachterJud/portfwd/archive/${PORTFWD_FILENAME}")
 set (PORTFWD_MD5 "21385143f85a2a0512804a1cafa145b1")
