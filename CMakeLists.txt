@@ -54,6 +54,15 @@ if (${GUI} STREQUAL "NATIVE")
   endif ()
 endif ()
 
+# set the name for the ui executable
+if (${GUI} STREQUAL "GTK")
+    set (GUINAME "qaul-gtk")
+elseif (${GUI} STREQUAL "QT5")
+    set (GUINAME "qaul-qt5")
+else ()
+    set (GUINAME "qaul")
+endif ()
+
 list(FIND ALL_GUIS ${GUI} RET)
 if (${RET} EQUAL -1)
   message(FATAL_ERROR "Please choose which qaul gui to build (one of ${ALL_GUIS})")
@@ -100,10 +109,10 @@ endif ()
 add_subdirectory (third_party)
 
 # final status summary report
-
 message(STATUS "#############################################")
 message(STATUS "  Qaul seems to be successfully configured.")
 message(STATUS "    Building for platform: ${PORT}")
 message(STATUS "    Building GUI: ${GUI}")
 message(STATUS "    Arm/Raspberry patches enabled: ${Raspberry}")
+message(STATUS "    Qaul executable: ${GUINAME}")
 message(STATUS "#############################################")
