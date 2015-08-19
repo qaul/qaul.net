@@ -94,6 +94,7 @@ configure_file (
 include_directories ("${PROJECT_BINARY_DIR}/include")
 
 add_subdirectory (third_party)
+add_subdirectory (src/libqaul)
 
 if (${PORT} STREQUAL "LINUX")
     include(cmake/BuildUnixoid.cmake)
