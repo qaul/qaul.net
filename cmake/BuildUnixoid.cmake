@@ -4,7 +4,7 @@ pkg_check_modules (DBUS1 REQUIRED dbus-1)
 
 find_package (Autotools REQUIRED)
 
-add_subdirectory (unix/qaulhelper)
+add_subdirectory (src/qaulhelper)
 
 INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/www DESTINATION ${CMAKE_INSTALL_PREFIX} )
 INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/unix/distfiles/etc DESTINATION ${CMAKE_INSTALL_PREFIX} )
