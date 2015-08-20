@@ -4,10 +4,6 @@ pkg_check_modules (DBUS1 REQUIRED dbus-1)
 
 find_package (Autotools REQUIRED)
 
-if (${GUI} STREQUAL "GTK")
-    pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
-endif ()
-
 add_subdirectory (unix/qaulhelper)
 
 INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/www DESTINATION ${CMAKE_INSTALL_PREFIX} )

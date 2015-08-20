@@ -1,6 +1,7 @@
 
 find_package(ALSA REQUIRED)
 
+pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
 pkg_check_modules (UUID uuid)
 pkg_check_modules (OPENCORE_AMRNB opencore-amrnb)
 pkg_check_modules (OPENCORE_AMRWB opencore-amrwb)

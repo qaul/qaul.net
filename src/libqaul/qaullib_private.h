@@ -83,7 +83,7 @@ int qaul_new_msg;
 int ipc_connected;
 int qaul_loading_wait;
 int qaul_conf_quit;
-int qaul_conf_debug;
+//int qaul_conf_debug;
 int qaul_conf_voip;
 int qaul_conf_ios;
 int qaul_conf_wifi_set;

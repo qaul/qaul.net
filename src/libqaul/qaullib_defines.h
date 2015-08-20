@@ -26,7 +26,7 @@ extern "C" {
 #define MAX_PAGE_LEN         20
 #define MAX_LOCALE_LEN        6
 #define MAX_VARCHAR_LEN     255
-#define MAX_URL_LEN         512
+//#define MAX_URL_LEN         512
 #define MAX_TIME_LEN         20
 #define MAX_SSID_LEN         32
 #define MAX_BSSID_LEN        17

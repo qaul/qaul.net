@@ -29,6 +29,9 @@ extern "C" {
 
 #define QAUL_CHECK_WIFI_SET     1
 
+int qaul_conf_debug;
+#define MAX_URL_LEN         512
+
 /**
  * configuration procedure in the qaul
  *
