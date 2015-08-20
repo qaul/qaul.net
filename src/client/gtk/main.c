@@ -8,8 +8,11 @@
 #include <stdio.h> // defines FILENAME_MAX
 #include <stdlib.h>
 #include <unistd.h>
-#include "../../libqaul/qaullib.h"
-#include "../../libqaul/qaullib_private.h"
+#include <sys/stat.h>
+#include <string.h>
+#include <glib.h>
+#include <glib/gstdio.h>
+#include "qaullib.h"
 #include "network.h"
 
 #include <gtk/gtk.h>

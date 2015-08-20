@@ -10,10 +10,6 @@ endif ()
 
 add_subdirectory (unix/qaulhelper)
 
-if (${GUI} STREQUAL "GTK")
-    add_subdirectory (unix/qaul_gtk)
-endif ()
-
 INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/www DESTINATION ${CMAKE_INSTALL_PREFIX} )
 INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/unix/distfiles/etc DESTINATION ${CMAKE_INSTALL_PREFIX} )
 
