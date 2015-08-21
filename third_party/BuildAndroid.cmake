@@ -31,7 +31,7 @@ set (SOCAT_URL "http://www.dest-unreach.org/socat/download/${SOCAT_FILENAME}")
 set (SOCAT_MD5 "b607edb65bc6c57f4a43f06247504274")
 
 add_custom_target(dl_socat
-    COMMAND ${CMAKE_COMMAND} -DDL_URL=${SOCAT_URL} -DDL_FILENAME=${ARCHIVE_DIR}/${SOCAT_FILENAME} -DDL_MD5=${SOCAT_MD5} -P ${CMAKE_CURRENT_SOURCE_DIR}/download.cmake 
+    COMMAND ${CMAKE_COMMAND} -DDL_URL=${SOCAT_URL} -DDL_FILENAME=${ARCHIVE_DIR}/${SOCAT_FILENAME} -DDL_MD5=${SOCAT_MD5} -P ${CMAKE_CURRENT_SOURCE_DIR}/download.cmake
 )
 
 ExternalProject_Add(socat

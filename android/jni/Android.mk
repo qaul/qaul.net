@@ -78,6 +78,8 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 #LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../libqaul
 LOCAL_EXPORT_C_INCLUDES := $(LIBQAUL_INCLUDE)
 LOCAL_CFLAGS := \
+	-I$(LIBQI1) \
+	-I$(LIBQI2) \
 	-I$(PJSIP_PATH)/pjsip/include \
 	-I$(PJSIP_PATH)/pjlib/include \
 	-I$(PJSIP_PATH)/pjlib-util/include \

@@ -4,8 +4,8 @@
  */
 
 #include "net_qaul_qaul_NativeQaul.h"
-#include "../../libqaul/qaullib.h"
-#include "../../libqaul/qaullib_threads.h"
+#include "qaullib.h"
+#include "qaullib_threads.h"
 #include <android/log.h>
 
 // global variables we need to call java

@@ -93,9 +93,6 @@ configure_file (
 # so that we will find QaulConfig.h
 include_directories ("${PROJECT_BINARY_DIR}/include")
 
-add_subdirectory (third_party)
-add_subdirectory (src/libqaul)
-
 if (${PORT} STREQUAL "LINUX")
     include(cmake/BuildUnixoid.cmake)
 elseif (${PORT} STREQUAL "ANDROID")
@@ -108,6 +105,12 @@ elseif (${PORT} STREQUAL "WINDOWS")
     include(cmake/BuildWindows.cmake)
 else ()
     message(FATAL_ERROR "Dont know how to build '${PORT}'")
+endif ()
+
+add_subdirectory (third_party)
+
+if (NOT ${PORT} STREQUAL "ANDROID")
+    add_subdirectory (src/libqaul)
 endif ()
 
 if (${GUI} STREQUAL "NATIVE")
