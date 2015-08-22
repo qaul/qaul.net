@@ -129,7 +129,7 @@ target_link_libraries(qaul
 
 # Set a custom Info.plist file template.
 set_target_properties(${PROJECT_NAME} PROPERTIES
-	MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/unix/qaul_osx/Info-CMake.plist
+	MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/client/osx/Info-CMake.plist
 )
 
 file(COPY ${PROJECT_SOURCE_DIR}/www DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources)

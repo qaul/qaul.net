@@ -1,8 +1,8 @@
 
 find_package (Autotools REQUIRED)
 
-add_subdirectory (unix/qaulhelper)
-add_subdirectory (unix/qaul_osx)
+add_subdirectory (src/qaulhelper)
+add_subdirectory (src/client/osx)
 
 INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/distfiles/osx/etc DESTINATION ${CMAKE_INSTALL_PREFIX} )
 
@@ -26,7 +26,7 @@ endif()
 SET(CPACK_SET_DESTDIR ON)
 
 SET(CPACK_BUNDLE_NAME qaul)
-SET(CPACK_BUNDLE_PLIST ${PROJECT_SOURCE_DIR}/unix/qaul_osx/Info.plist)
+SET(CPACK_BUNDLE_PLIST ${PROJECT_SOURCE_DIR}/src/client/osx/Info.plist)
 SET(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/distfiles/osx/qaul.icns)
 
 # All install must be done before this
