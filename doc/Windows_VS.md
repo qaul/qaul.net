@@ -5,7 +5,7 @@ This page contains all the instructions on building qaul.net on the **Windows** 
 
 ## Prerequisites
 
-Below are all the required tools and files you will need in order to build qauls.net.
+Below are all the required tools and files you will need in order to build qaul.net.
 
 ### Git
 
@@ -22,12 +22,12 @@ For building the Windows version of qaul.net you will need a recent MinGW instal
 ### Get the source
 
 Download the source from <insert source here> or
-get the sources from github: git clone https://github.com/WachterJud/qaul.net.git
+get the sources from github: git clone https://github.com/WachterJud/qaul.net-ng.git
 
 ## Build
 
     mkdir builddir
     cd builddir
 
-    cmake ../path/to/source -G "MSYS Makefiles" -DPORT=Windows
+    cmake .. -G "MSYS Makefiles" -DPORT=Windows -GUI=Native
     make
