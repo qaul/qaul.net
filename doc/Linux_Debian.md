@@ -32,7 +32,7 @@ Download and Build
 	cd build
 	
 	# generate make files
-	cmake .. -DPORT=GTK
+	cmake ..
 	
 	# make and install qaul.net
 	make
