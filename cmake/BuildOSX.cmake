@@ -2,7 +2,6 @@
 find_package (Autotools REQUIRED)
 
 add_subdirectory (src/qaulhelper)
-add_subdirectory (src/client/osx)
 
 INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/distfiles/osx/etc DESTINATION ${CMAKE_INSTALL_PREFIX} )
 

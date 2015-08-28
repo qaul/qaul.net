@@ -1,7 +1,7 @@
 
 #find_package(ALSA REQUIRED)
 
-set (LIBQAULDIR ${CMAKE_SOURCE_DIR}/libqaul)
+set (LIBQAULDIR ${CMAKE_SOURCE_DIR}/src/libqaul)
 set (PJBASE ${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip)
 
 # Set the OS X Bundle specific CMake variables which will be used to populate the plist for
@@ -26,7 +26,7 @@ ENDIF()
 
 set(MACOSX_RESOURCE_FILES ${PROJECT_SOURCE_DIR}/distfiles/osx/qaul.icns) 
 set_source_files_properties(${MACOSX_RESOURCE_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-set(MACOSX_MENU_FILES ${PROJECT_SOURCE_DIR}/unix/qaul_osx/en.lproj/InfoPlist.strings) 
+set(MACOSX_MENU_FILES ${PROJECT_SOURCE_DIR}/src/client/osx/en.lproj/InfoPlist.strings) 
 set_source_files_properties(${MACOSX_MENU_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/en.lproj)
 
 
@@ -79,6 +79,7 @@ target_include_directories(qaul PRIVATE
     ${PJBASE}third_party/srtp/crypto/include
     ${PJBASE}third_party/srtp/include
     ${LIBQAULDIR}
+    ${LIBQAULDIR}/include
 )
 
 #TODO system detection uname -m
@@ -142,7 +143,7 @@ ADD_CUSTOM_COMMAND (
 	COMMAND ${IBTOOL} --errors --warnings --notices
 	--output-format human-readable-text 
 	--compile ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources/en.lproj/MainMenu.nib 
-	${PROJECT_SOURCE_DIR}/unix/qaul_osx/en.lproj/MainMenu.xib
+	${PROJECT_SOURCE_DIR}/src/client/osx/en.lproj/MainMenu.xib
 )
 
 
