@@ -1,5 +1,4 @@
 
-find_package(ALSA REQUIRED)
 
 pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
 pkg_check_modules (UUID uuid)
@@ -23,9 +22,8 @@ if (OPENCORE_AMRWB_FOUND)
 endif (OPENCORE_AMRWB_FOUND)
 
 target_link_libraries(qaul-gtk ${DBUS1_LIBRARIES} ${WEBKIT_LIBRARIES}
-    pthread dl m
+    pthread
     libqaul
-    ${ALSA_LIBRARIES}
 )
 
 install (TARGETS qaul-gtk DESTINATION bin)

@@ -1,4 +1,8 @@
 
+if (${PORT} STREQUAL "LINUX")
+	find_package(ALSA REQUIRED)
+endif ()
+
 set (PJBASE ${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip)
 set (PJSIPTYPE qaul)
 
@@ -77,6 +81,10 @@ target_link_libraries(libqaul LINK_PUBLIC
     ${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
     ${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
 )
+
+if (${PORT} STREQUAL "LINUX")
+    target_link_libraries(libqaul LINK_PUBLIC dl m ${ALSA_LIBRARIES})
+endif ()
 
 if (${PORT} STREQUAL "WINDOWS")
     target_link_libraries(libqaul LINK_PUBLIC ws2_32 wsock32 winmm)
