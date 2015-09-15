@@ -584,7 +584,7 @@ void Qaullib_UserCreateIdIpStr(char *ipstr, char *username, unsigned char *id)
 }
 
 // ------------------------------------------------------------
-Qaullib_UserCheckWebUserName(char *username)
+int Qaullib_UserCheckWebUserName(char *username)
 {
 	int namelen;
 
