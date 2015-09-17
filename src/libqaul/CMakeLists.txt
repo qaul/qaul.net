@@ -44,6 +44,9 @@ ADD_LIBRARY (libqaul STATIC
     ${WIN_SOURCES}
 )
 
+# since the name starts with 'lib' dont add it again
+set_target_properties (libqaul PROPERTIES PREFIX "")
+
 add_dependencies(libqaul pjsip)
 
 target_include_directories (libqaul PUBLIC include)
