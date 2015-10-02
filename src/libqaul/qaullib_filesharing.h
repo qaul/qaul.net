@@ -194,6 +194,7 @@ void Qaullib_FileDB2LL(void);
  */
 int Qaullib_VerifyDownload(struct qaul_file_LL_item *file_item);
 
+int Qaullib_FileAdd2DB(struct qaul_file_LL_item *file_item);
 
 #ifdef __cplusplus
 }

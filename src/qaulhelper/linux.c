@@ -35,6 +35,7 @@
  */
 
 #include "qaulhelper.h"
+#include <sys/wait.h>
 
 
 int start_olsrd (int argc, const char * argv[])

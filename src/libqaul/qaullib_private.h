@@ -252,6 +252,7 @@ void Qaullib_SetLocale(const char* locale);
  */
 int Qaullib_Timestamp2Isostr(char *isostr, int timestamp, int buffer_size);
 
+int Qaullib_DbGetConfigValueInt(const char* key);
 
 #ifdef __cplusplus
 }

@@ -8,6 +8,7 @@
 #endif
 
 #include "qaullib_private.h"
+#include "qaullib_crypto.h"
 
 
 // ------------------------------------------------------------

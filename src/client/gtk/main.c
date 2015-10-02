@@ -8,6 +8,7 @@
 #include <stdio.h> // defines FILENAME_MAX
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <string.h>
 #include <glib.h>
@@ -77,6 +78,7 @@ int main(int argc, char *argv[])
 	network_interface_found = 0;
 
 	// initialize glib types
+	// TODO this is only needed for GLib prior 2.36
 	g_type_init();
 
 	// set paths

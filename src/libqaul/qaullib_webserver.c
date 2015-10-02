@@ -8,6 +8,8 @@
 #include "urlcode/urlcode.h"
 
 #include <math.h>
+#include "qaullib_crypto.h"
+#include "qaullib_file_LL.h"
 
 // ------------------------------------------------------------
 // static declarations

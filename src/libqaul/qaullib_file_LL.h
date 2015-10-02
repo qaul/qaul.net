@@ -191,6 +191,8 @@ void Qaullib_Filediscovery_LL_EmptyList (struct qaul_file_LL_item *file);
  */
 void Qaullib_Filediscovery_LL_DeleteItem (struct qaul_filediscovery_LL_item *item);
 
+int Qaullib_File_LL_NextNodeGuiPriv (struct qaul_file_LL_node *node);
+int  Qaullib_Filediscovery_LL_SearchIp (struct qaul_file_LL_item *file, union olsr_ip_addr *ip, struct qaul_filediscovery_LL_item *discovery_item);
 
 #ifdef __cplusplus
 }
