@@ -16,6 +16,7 @@ ExternalProject_Add(olsr
     URL ${ARCHIVE_DIR}/${OLSR_FILENAME}
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/olsr.patch
+    COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/olsr_OSX10.10.patch
     CONFIGURE_COMMAND ""
     BUILD_COMMAND make DEBUG=0 olsrd libs
     INSTALL_COMMAND ""
