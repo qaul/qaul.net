@@ -26,11 +26,22 @@
 #else
 #define IS_OSX_10_7_OR_HIGHER 1
 #endif
+
+#ifndef NSAppKitVersionNumber10_8
+#define NSAppKitVersionNumber10_8 1187
+#else
+#define IS_OSX_10_9_OR_HIGHER 1
+#endif
 // ----------------------------------------------
 
+#ifdef IS_OSX_10_9_OR_HIGHER
+#import "patchedSystemHeaders/CoreWLAN.h"
+#else
 #ifdef IS_OSX_10_6_OR_HIGHER
 #import <CoreWLAN/CoreWLAN.h>
 #endif
+#endif
+
 
 @implementation QaulConfigWifi
 
