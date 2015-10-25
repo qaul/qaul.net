@@ -36,5 +36,9 @@
 	<string>${MACOSX_BUNDLE_NSMAIN_NIB_FILE}</string>
 	<key>NSPrincipalClass</key>
 	<string>${MACOSX_BUNDLE_NSPRINCIPAL_CLASS}</string>
+	<key>NSAppTransportSecurity</key>  
+	<dict>  
+          <key>NSAllowsArbitraryLoads</key><true/>  
+	</dict>
 </dict>
 </plist>
