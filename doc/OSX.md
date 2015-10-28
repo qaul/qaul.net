@@ -34,6 +34,11 @@ Build
 	# build qaul.net
     cmake ../ -DPORT=OSX -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/Library/qaul.net"
     make
+    
+    # generate a DMG installer image
+    ./make_dmg.sh
+    
+    # install qaul.net on your local system
     sudo make install
 
 

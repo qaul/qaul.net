@@ -3,12 +3,15 @@ find_package (Autotools REQUIRED)
 
 add_subdirectory (src/qaulhelper)
 
+configure_file("${PROJECT_SOURCE_DIR}/distfiles/osx/installer/make_dmg.sh.in" "${PROJECT_BINARY_DIR}/make_dmg.sh")
+configure_file("${PROJECT_SOURCE_DIR}/distfiles/osx/installer/qaul.xml.in" "${PROJECT_BINARY_DIR}/qaul.xml")
+
 INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/distfiles/osx/etc DESTINATION ${CMAKE_INSTALL_PREFIX} )
 
 INSTALL(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/olsrd DESTINATION bin
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-install(FILES ${PROJECT_BINARY_DIR}/third_party/socat/src/socat/socat DESTINATION bin
+INSTALL(FILES ${PROJECT_BINARY_DIR}/third_party/socat/src/socat/socat DESTINATION bin
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 INSTALL(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/lib/olsrd_qaul/olsrd_qaul.so.0.1 DESTINATION lib
