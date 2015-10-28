@@ -4,7 +4,11 @@ Build qaul.net on Mac OSX
 This tutorial describes all the steps to build qaul.net-ng on Mac OSX. qaul.net works on
 Mac OSX > 10.5. This Tutorial has been tested on the following versions of Mac OSX:
 
-* OSX 10.8 (Snow Leopard)
+* OSX 10.6 (Snow Leopard)
+* OSX 10.8 (Mountain Lion)
+* OSX 10.11 (El Capitan)
+
+The qaul.net software is running on OSX >= 10.5 (OSX 10.5 needs a special build).
 
 
 Prerequisites
@@ -12,8 +16,14 @@ Prerequisites
 
 The following tools need to be installed
 
-* XCode (download from app store)
+* XCode 
+  * download and install from app store
 * cmake (install via macports)
+  * download macports from https://www.macports.org/
+  * install programs via terminal:
+
+	# install cmake
+	sudo port install cmake
 
 
 Get the source
@@ -38,7 +48,7 @@ Build
     # generate a DMG installer image
     ./make_dmg.sh
     
-    # install qaul.net on your local system
+    # install qaul.net build on your local system
     sudo make install
 
 
