@@ -42,7 +42,7 @@ Build
     cd build
 	
 	# build qaul.net
-    cmake ../ -DPORT=OSX -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/Library/qaul.net"
+    cmake ../ -DCMAKE_INSTALL_PREFIX="/Library/qaul.net"
     make
     
     # generate a DMG installer image
