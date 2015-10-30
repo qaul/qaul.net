@@ -94,7 +94,7 @@ configure_file (
 include_directories ("${PROJECT_BINARY_DIR}/include")
 
 if (${PORT} STREQUAL "LINUX")
-    include(cmake/BuildUnixoid.cmake)
+    include(cmake/BuildLinux.cmake)
 elseif (${PORT} STREQUAL "ANDROID")
     include(cmake/BuildAndroid.cmake)
 elseif (${PORT} STREQUAL "OPENWRT")
