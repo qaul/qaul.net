@@ -42,7 +42,7 @@ Build
     cd build
 	
 	# build qaul.net
-    cmake ../ -DCMAKE_INSTALL_PREFIX="/Library/qaul.net"
+    cmake ../
     make
     
     # generate a DMG installer image
