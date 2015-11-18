@@ -52,14 +52,16 @@ endif ()
 # determine the GUI
 set(ALL_GUIS NONE NATIVE GTK QT5)
 STRING (TOUPPER "${GUI}" GUI)
-set(GUI "NATIVE" CACHE STRING "choose which qaul gui to build (one of ${ALL_GUIS})")
+set(GUI "DEFAULT" CACHE STRING "choose which qaul gui to build (one of ${ALL_GUIS})")
 
-# readjust 'native'/defaults for some platforms
-if (${GUI} STREQUAL "NATIVE")
+# readjust defaults
+if (${GUI} STREQUAL "DEFAULT")
   if (${PORT} STREQUAL "WINDOWS")
     set (GUI QT5)
   elseif ("${PORT}" STREQUAL "LINUX")
     set (GUI GTK)
+  else ()
+    set (GUI NATIVE)
   endif ()
 endif ()
 
