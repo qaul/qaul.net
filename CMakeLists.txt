@@ -2,9 +2,13 @@ cmake_minimum_required (VERSION 2.8.11)
 
 project (qaul)
 
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-        SET(CMAKE_INSTALL_PREFIX "/opt/qaul" CACHE PATH "qaul.net install prefix" FORCE)
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+	if (APPLE)
+		set (CMAKE_INSTALL_PREFIX "/Library/qaul.net" CACHE PATH "qaul.net install prefix" FORCE)
+	else ()
+		set (CMAKE_INSTALL_PREFIX "/opt/qaul" CACHE PATH "qaul.net install prefix" FORCE)
+	endif ()
+endif (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
