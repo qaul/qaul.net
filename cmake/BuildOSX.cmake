@@ -1,6 +1,3 @@
-
-find_package (Autotools REQUIRED)
-
 add_subdirectory (src/qaulhelper)
 
 configure_file("${PROJECT_SOURCE_DIR}/distfiles/osx/installer/make_dmg.sh.in" "${PROJECT_BINARY_DIR}/make_dmg.sh")
