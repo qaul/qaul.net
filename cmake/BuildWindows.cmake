@@ -9,6 +9,12 @@ install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/olsrd DESTINATION 
 install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/lib/olsrd_qaul/olsrd_qaul.so.0.1 DESTINATION lib
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
+# genarate the CMakeLists.txt for the native build
+configure_file (
+  "${PROJECT_SOURCE_DIR}/src/client/win/CMakeLists.txt.in"
+  "${PROJECT_BINARY_DIR}/src/client/win/CMakeLists.txt"
+)
+
 include(cmake/PacketFormatGuesser.cmake)
 
 if(PKGFORMAT MATCHES "AUTO")

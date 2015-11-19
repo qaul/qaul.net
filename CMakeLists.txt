@@ -127,7 +127,7 @@ if (${GUI} STREQUAL "NATIVE")
     if (${PORT} STREQUAL "OSX")
 	add_subdirectory (src/client/osx)
     elseif (${PORT} STREQUAL "WINDOWS")
-	add_subdirectory (src/client/win)
+	# add_subdirectory (src/client/win)
     elseif (${PORT} STREQUAL "ANDROID")
 	# have its own
     else ()

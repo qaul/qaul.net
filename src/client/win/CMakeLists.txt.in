@@ -1,3 +1,6 @@
+cmake_minimum_required (VERSION 2.8.11)
+
+project (qaul)
 
 set (LIBQAULDIR ${CMAKE_SOURCE_DIR}/libqaul)
 set (PJBASE ${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip)
