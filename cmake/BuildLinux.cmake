@@ -60,7 +60,7 @@ SET(CPACK_PACKAGE_FILE_NAME          "${CMAKE_PROJECT_NAME}_${CPACK_PACKAGE_VERS
 SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE    "http://qaul.net")
 
 # copy application icon
-INSTALL(FILES ${PROJECT_SOURCE_DIR}/distfiles/linux/share/qaul_app_icon.png DESTINATION /opt/qaul/)
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/distfiles/linux/share/qaul_app_icon.png DESTINATION share)
 
 # add qaul to applications menu 
 INSTALL(FILES ${PROJECT_BINARY_DIR}/distfiles/linux/share/qaul.desktop DESTINATION /usr/share/applications/)

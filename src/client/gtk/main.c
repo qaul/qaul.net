@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
     qaulMainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(qaulMainWindow), 400, 592);
     gtk_window_set_title(GTK_WINDOW(qaulMainWindow), "qaul.net - قول");
-    sprintf(qaulTmpPath, "%s/qaul_app_icon.png", QAUL_ROOT_PATH);
+    sprintf(qaulTmpPath, "%s/share/qaul_app_icon.png", QAUL_ROOT_PATH);
     gtk_window_set_icon(GTK_WINDOW(qaulMainWindow), create_pixbuf(qaulTmpPath));
 
     // Create a browser instance
