@@ -36,6 +36,7 @@
 
 #include "qaulhelper.h"
 #include <sys/wait.h>
+#include "QaulConfig.h"
 
 
 int start_olsrd (int argc, const char * argv[])
@@ -49,9 +50,9 @@ int start_olsrd (int argc, const char * argv[])
     {
         // validate arguments
         if(strncmp(argv[3], "yes", 3)==0)
-            sprintf(s,"/opt/qaul/etc/olsrd_linux_gw.conf");
+            snprintf(s, 255, "%s/etc/olsrd_linux_gw.conf", QAUL_ROOT_PATH);
         else
-            sprintf(s,"/opt/qaul/etc/olsrd_linux.conf");
+            snprintf(s, 255, "%s/etc/olsrd_linux.conf", QAUL_ROOT_PATH);
 
         if (validate_interface(argv[3]) == 0)
         {
@@ -73,7 +74,7 @@ int start_olsrd (int argc, const char * argv[])
             dup2(fd, STDERR_FILENO);
             close(fd);
             // execute program
-            execl("/opt/qaul/bin/olsrd", "olsrd", "-f", s, "-i", argv[3], "-d", "0", (char*)0);
+            execl(QAUL_ROOT_PATH"/bin/olsrd", "olsrd", "-f", s, "-i", argv[3], "-d", "0", (char*)0);
         }
         else
             waitpid(pid1, &status, 0);
