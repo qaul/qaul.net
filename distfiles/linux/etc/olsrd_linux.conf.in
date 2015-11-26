@@ -7,7 +7,7 @@ Hna6
 {
 }
 
-LoadPlugin "/opt/qaul/lib/olsrd_qaul.so.0.1"
+LoadPlugin "@CMAKE_INSTALL_PREFIX@/lib/olsrd_qaul.so.0.1"
 {
 }
 
