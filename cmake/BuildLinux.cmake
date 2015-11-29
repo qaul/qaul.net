@@ -18,26 +18,26 @@ configure_file (
 
 configure_file (
   "${PROJECT_SOURCE_DIR}/distfiles/linux/bin/qaul.in"
-  "${PROJECT_BINARY_DIR}/distfiles/linux/bin/qaul"
+  "${PROJECT_BINARY_DIR}/distfiles/linux/bin/${GUINAME}"
 )
 
 if (NOT ${Qaul_BINDIR} STREQUAL "NONE")
-  install(FILES ${PROJECT_BINARY_DIR}/distfiles/linux/bin/qaul DESTINATION ${Qaul_BINDIR}
+  install(FILES ${PROJECT_BINARY_DIR}/distfiles/linux/bin/${GUINAME} DESTINATION ${Qaul_BINDIR}
 	  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif()
 
-INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/www DESTINATION ${CMAKE_INSTALL_PREFIX} )
-INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/distfiles/linux/etc DESTINATION ${CMAKE_INSTALL_PREFIX}
+INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/www DESTINATION lib/qaul )
+INSTALL( DIRECTORY ${PROJECT_SOURCE_DIR}/distfiles/linux/etc DESTINATION lib/qaul
          PATTERN "*.in" EXCLUDE )
-INSTALL( DIRECTORY ${PROJECT_BINARY_DIR}/distfiles/linux/etc DESTINATION ${CMAKE_INSTALL_PREFIX} )
+INSTALL( DIRECTORY ${PROJECT_BINARY_DIR}/distfiles/linux/etc DESTINATION lib/qaul )
 
-install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/olsrd DESTINATION bin
+install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/olsrd DESTINATION lib/qaul/bin
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-install(FILES ${PROJECT_BINARY_DIR}/third_party/portfwd/src/portfwd/src/portfwd DESTINATION bin
+install(FILES ${PROJECT_BINARY_DIR}/third_party/portfwd/src/portfwd/src/portfwd DESTINATION lib/qaul/bin
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/lib/olsrd_qaul/olsrd_qaul.so.0.1 DESTINATION lib
+install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/lib/olsrd_qaul/olsrd_qaul.so.0.1 DESTINATION lib/qaul/lib
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 include(cmake/PacketFormatGuesser.cmake)

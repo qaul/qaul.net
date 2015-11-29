@@ -176,7 +176,7 @@ int start_portforwarding (int argc, const char * argv[])
             dup2(fd, STDERR_FILENO);
             close(fd);
             // execute program
-            execl("/opt/qaul/bin/portfwd", "portfwd", "-c", "/opt/qaul/etc/portfwd.conf", (char*)0);
+            execl(QAUL_ROOT_PATH"/lib/qaul/bin/portfwd", "portfwd", "-c", QAUL_ROOT_PATH"/lib/qaul/etc/portfwd.conf", (char*)0);
         }
         else
             printf("udp port 67 forwarded\n");
