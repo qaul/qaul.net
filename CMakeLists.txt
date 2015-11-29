@@ -21,6 +21,9 @@ set (Qaul_VERSION_PATCH 0)
 set (Qaul_VERSION_SUFFIX "beta4")
 set (Qaul_VERSION "${Qaul_VERSION_MAJOR}.${Qaul_VERSION_MINOR}.${Qaul_VERSION_PATCH}.${Qaul_VERSION_SUFFIX}")
 
+# install configuration
+set (Qaul_BINDIR "NONE" CACHE STRING "if set a wrapper shell script will be installed here")
+
 # What to build
 # Determine the operating system
 set (ALL_PORTS ANDROID OPENWRT WINDOWS OSX IOS LINUX)
