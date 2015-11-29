@@ -23,6 +23,7 @@ set (Qaul_VERSION "${Qaul_VERSION_MAJOR}.${Qaul_VERSION_MINOR}.${Qaul_VERSION_PA
 
 # install configuration
 set (Qaul_DESKTOPDIR "/usr/share/applications" CACHE STRING "choose install location for the .desktop file")
+set (Qaul_ICONDIR "${CMAKE_INSTALL_PREFIX}/share/icons/qaul" CACHE STRING "choose install location for the aplication icon file(s)")
 set (Qaul_BINDIR "NONE" CACHE STRING "if set a wrapper shell script will be installed here")
 
 # What to build
