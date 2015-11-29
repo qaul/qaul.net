@@ -5,8 +5,6 @@ project (qaul)
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if (APPLE)
 		set (CMAKE_INSTALL_PREFIX "/Library/qaul.net" CACHE PATH "qaul.net install prefix" FORCE)
-	else ()
-		set (CMAKE_INSTALL_PREFIX "/opt/qaul" CACHE PATH "qaul.net install prefix" FORCE)
 	endif ()
 endif (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
