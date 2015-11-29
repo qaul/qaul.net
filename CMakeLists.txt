@@ -22,6 +22,7 @@ set (Qaul_VERSION_SUFFIX "beta4")
 set (Qaul_VERSION "${Qaul_VERSION_MAJOR}.${Qaul_VERSION_MINOR}.${Qaul_VERSION_PATCH}.${Qaul_VERSION_SUFFIX}")
 
 # install configuration
+set (Qaul_DESKTOPDIR "/usr/share/applications" CACHE STRING "choose install location for the .desktop file")
 set (Qaul_BINDIR "NONE" CACHE STRING "if set a wrapper shell script will be installed here")
 
 # What to build

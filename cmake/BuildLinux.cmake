@@ -80,7 +80,7 @@ SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE    "http://qaul.net")
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/distfiles/linux/share/qaul_app_icon.png DESTINATION share)
 
 # add qaul to applications menu 
-INSTALL(FILES ${PROJECT_BINARY_DIR}/distfiles/linux/share/qaul.desktop DESTINATION /usr/share/applications/)
+INSTALL(FILES ${PROJECT_BINARY_DIR}/distfiles/linux/share/qaul.desktop DESTINATION ${Qaul_DESKTOPDIR})
 
 # All install must be done before this
 INCLUDE(CPack)
