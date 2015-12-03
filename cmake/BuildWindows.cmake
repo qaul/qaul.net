@@ -13,6 +13,7 @@ install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/lib/olsrd_qaul/ols
 configure_file (
   "${PROJECT_SOURCE_DIR}/src/client/win/CMakeLists.txt.in"
   "${PROJECT_BINARY_DIR}/src/client/win/CMakeLists.txt"
+  @ONLY
 )
 
 include(cmake/PacketFormatGuesser.cmake)
