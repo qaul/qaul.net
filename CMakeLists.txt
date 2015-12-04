@@ -74,6 +74,10 @@ else ()
     set (GUINAME "qaul")
 endif ()
 
+if (${PORT} STREQUAL "WINDOWS")
+  set (GUINAME "${GUINAME}.exe")
+endif ()
+
 list(FIND ALL_GUIS ${GUI} RET)
 if (${RET} EQUAL -1)
   message(FATAL_ERROR "Please choose which qaul gui to build (one of ${ALL_GUIS})")
