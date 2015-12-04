@@ -4,8 +4,10 @@ project (qaul)
 
 # define paths
 set(LIBQAUL_SRC @CMAKE_SOURCE_DIR@/src/libqaul)
-set(LIBQAUL_LINK @CMAKE_BINARY_DIR@/src/libqaul)
+set(LIBQAUL_BUILD @CMAKE_BINARY_DIR@/src/libqaul)
 set(QAULWIN_SRC @CMAKE_SOURCE_DIR@/src/client/win/src)
+set(QAUL_SRC @CMAKE_SOURCE_DIR@)
+set(QAUL_BUILD @CMAKE_BINARY_DIR@)
 
 # set /clr flag for compiler
 STRING(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
@@ -19,18 +21,22 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 message("cxx Flags: " ${CMAKE_CXX_FLAGS})
 
 # path to liblibqaul.dll.a directory
-link_directories(${LIBQAUL_LINK})
+link_directories(${LIBQAUL_BUILD})
 
 # add source files
 file(GLOB QAULTARGET_FILES
 	"${QAULWIN_SRC}/*.cpp"
 	"${QAULWIN_SRC}/*.h"
+	"${QAULWIN_SRC}/*.resx"
+	"${QAULWIN_SRC}/*.rc"
+	"${QAULWIN_SRC}/*.ico"
 )
 
 # add target
 add_executable(qaul 
-	\${QAULTARGET_FILES}
+	${QAULTARGET_FILES}
 )
+set_property(TARGET qaul PROPERTY VS_GLOBAL_KEYWORD "ManagedCProj")
 set_property(TARGET qaul PROPERTY VS_DOTNET_REFERENCES 
 	"System"
 	"System.Windows.Forms"
@@ -46,5 +52,20 @@ target_include_directories(qaul PRIVATE
 target_link_libraries(qaul
 )
 
+# copy libraries and files into build directory
+add_custom_command(TARGET qaul POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"${LIBQAUL_BUILD}/libqaul.dll"
+		"$<TARGET_FILE_DIR:qaul>"
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+		"${QAUL_SRC}/www"
+		"$<TARGET_FILE_DIR:qaul>/www"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"${QAUL_BUILD}/third_party/olsr/src/olsr/olsrd.exe"
+		"$<TARGET_FILE_DIR:qaul>"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"${QAUL_BUILD}/third_party/olsr/src/olsr/lib/olsrd_qaul/olsrd_qaul.dll"
+		"$<TARGET_FILE_DIR:qaul>"
+)
 
 install(TARGETS qaul DESTINATION bin)
