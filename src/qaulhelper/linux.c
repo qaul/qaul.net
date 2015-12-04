@@ -50,9 +50,9 @@ int start_olsrd (int argc, const char * argv[])
     {
         // validate arguments
         if(strncmp(argv[3], "yes", 3)==0)
-            snprintf(s, 255, "%s/etc/olsrd_linux_gw.conf", QAUL_ROOT_PATH);
+            snprintf(s, 255, "%s/lib/qaul/etc/olsrd_linux_gw.conf", QAUL_ROOT_PATH);
         else
-            snprintf(s, 255, "%s/etc/olsrd_linux.conf", QAUL_ROOT_PATH);
+            snprintf(s, 255, "%s/lib/qaul/etc/olsrd_linux.conf", QAUL_ROOT_PATH);
 
         if (validate_interface(argv[3]) == 0)
         {
@@ -74,7 +74,7 @@ int start_olsrd (int argc, const char * argv[])
             dup2(fd, STDERR_FILENO);
             close(fd);
             // execute program
-            execl(QAUL_ROOT_PATH"/bin/olsrd", "olsrd", "-f", s, "-i", argv[3], "-d", "0", (char*)0);
+            execl(QAUL_ROOT_PATH"/lib/qaul/bin/olsrd", "olsrd", "-f", s, "-i", argv[3], "-d", "0", (char*)0);
         }
         else
             waitpid(pid1, &status, 0);
