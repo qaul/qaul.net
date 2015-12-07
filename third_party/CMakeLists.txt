@@ -6,10 +6,10 @@ set (PJSIP_FILENAME "pjproject-${PJSIP_VERSION}.tar.bz2")
 set (PJSIP_URL "http://www.pjsip.org/release/${PJSIP_VERSION}/${PJSIP_FILENAME}")
 set (PJSIP_MD5 "f58b3485977b3a700256203a554b3869")
 
-set (OLSR_VERSION "0.6.8")
+set (OLSR_VERSION "0.6.8.1")
 set (OLSR_FILENAME "olsrd-${OLSR_VERSION}.tar.bz2")
 set (OLSR_URL "http://www.olsr.org/releases/0.6/${OLSR_FILENAME}")
-set (OLSR_MD5 "feabdd611391dcb30af5795e834cc258")
+set (OLSR_MD5 "8cfc977be7e10224ccbb0f943675b7fa")
 
 set (PORTFWD_FILENAME "master.tar.gz")
 set (PORTFWD_URL "http://github.com/WachterJud/portfwd/archive/${PORTFWD_FILENAME}")
