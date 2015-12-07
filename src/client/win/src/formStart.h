@@ -184,7 +184,7 @@ namespace qaul {
 			this->ForeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(187)), static_cast<System::Int32>(static_cast<System::Byte>(187)), 
 				static_cast<System::Int32>(static_cast<System::Byte>(187)));
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedSingle;
-			this->Icon = (cli::safe_cast<System::Drawing::Icon^  >(resources->GetObject(L"$this.Icon")));
+			//this->Icon = (cli::safe_cast<System::Drawing::Icon^  >(resources->GetObject(L"$this.Icon")));
 			this->Margin = System::Windows::Forms::Padding(3, 4, 3, 4);
 			this->Name = L"formStart";
 			this->Text = L"qaul.net – قول";
