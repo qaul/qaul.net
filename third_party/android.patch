@@ -10,24 +10,18 @@ index 0000000..64e562c
 +#define PJ_IS_BIG_ENDIAN 0
 +#include <pj/config_site_sample.h>
 diff --git a/configure-android.orig b/configure-android
-index 3743247..5e7bba8 100755
+index 53a96bb..5a20100 100755
 --- a/configure-android.orig
 +++ b/configure-android
-@@ -29,12 +29,12 @@ if test "$*" = "--help" -o "$*" = "-h"; then
-   echo "                   IGNORE_CFLAGS=\"\-M\|\-f*stack\|\-f*alias\""
-   echo "                   Only used when --use-ndk-cflags is specified."
-   echo ""
+@@ -34,7 +34,7 @@ fi
+ 
+ if test "x${ANDROID_NDK_ROOT}" = "x" || test ! -e ${ANDROID_NDK_ROOT}; then
+   echo "$F error: ANDROID_NDK_ROOT env var is not specified or invalid"
 -  exit 0
 +  exit 1
  fi
  
- if test "x${ANDROID_NDK_ROOT}" = "x"; then
-   echo "$F error: ANDROID_NDK_ROOT must be specified"
--  exit 0
-+  exit 1
- fi
- 
- #if test "$1" = "--simulator"; then
+ if test "x$APP_PLATFORM" = "x"; then
 diff --git a/third_party/build/os-auto.mak.in.orig b/third_party/build/os-auto.mak.in
 index 8be9597..c07fc6c 100644
 --- a/third_party/build/os-auto.mak.in.orig

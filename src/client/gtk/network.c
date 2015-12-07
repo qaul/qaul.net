@@ -22,7 +22,10 @@
  */
 
 #include "network.h"
+#include <stdlib.h>
 #include <string.h>  // strncpy()
+#include <arpa/inet.h>
+#include <time.h>
 
 
 /**

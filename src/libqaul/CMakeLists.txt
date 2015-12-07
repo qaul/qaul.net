@@ -7,13 +7,19 @@ set (PJBASE ${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip)
 set (PJSIPTYPE qaul)
 
 if (${PORT} STREQUAL "WINDOWS")
+  set (LIBTYPE SHARED)
+else ()
+  set (LIBTYPE STATIC)
+endif ()
+
+if (${PORT} STREQUAL "WINDOWS")
   set (WIN_SOURCES
     win32/functions.c
     win32/pthread.c
   )
 endif ()
 
-ADD_LIBRARY (libqaul STATIC
+ADD_LIBRARY (libqaul ${LIBTYPE}
     qaullib.c
     qaullib_ipc.c
     qaullib_webserver.c

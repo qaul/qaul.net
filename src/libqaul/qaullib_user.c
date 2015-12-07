@@ -5,6 +5,7 @@
 
 #include "qaullib_private.h"
 #include "qaullib_crypto.h"
+#include "polarssl/polarssl/sha1.h"
 
 
 void Qaullib_UserInit(void)

@@ -1,10 +1,10 @@
 
 set (ARCHIVE_DIR ${PROJECT_SOURCE_DIR}/archives)
 
-set (PJSIP_VERSION "2.4")
+set (PJSIP_VERSION "2.4.5")
 set (PJSIP_FILENAME "pjproject-${PJSIP_VERSION}.tar.bz2")
 set (PJSIP_URL "http://www.pjsip.org/release/${PJSIP_VERSION}/${PJSIP_FILENAME}")
-set (PJSIP_MD5 "39629ca3fcedbdc7dbd8c5a707060095")
+set (PJSIP_MD5 "f58b3485977b3a700256203a554b3869")
 
 set (OLSR_VERSION "0.6.8")
 set (OLSR_FILENAME "olsrd-${OLSR_VERSION}.tar.bz2")
@@ -41,7 +41,7 @@ elseif (${PORT} STREQUAL "LINUX")
     if (Raspberry)
 	include(BuildRaspberry.cmake)
     else ()
-	include(BuildUnixoid.cmake)
+	include(BuildLinux.cmake)
     endif ()
 else ()
     message(FATAL_ERROR "Unknown PORT ${PORT}.")

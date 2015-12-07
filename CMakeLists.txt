@@ -2,9 +2,11 @@ cmake_minimum_required (VERSION 2.8.11)
 
 project (qaul)
 
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-        SET(CMAKE_INSTALL_PREFIX "/opt/qaul" CACHE PATH "qaul.net install prefix" FORCE)
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+	if (APPLE)
+		set (CMAKE_INSTALL_PREFIX "/Library/qaul.net" CACHE PATH "qaul.net install prefix" FORCE)
+	endif ()
+endif (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
@@ -15,6 +17,12 @@ set (Qaul_VERSION_MAJOR 1)
 set (Qaul_VERSION_MINOR 0)
 set (Qaul_VERSION_PATCH 0)
 set (Qaul_VERSION_SUFFIX "beta4")
+set (Qaul_VERSION "${Qaul_VERSION_MAJOR}.${Qaul_VERSION_MINOR}.${Qaul_VERSION_PATCH}.${Qaul_VERSION_SUFFIX}")
+
+# install configuration
+set (Qaul_DESKTOPDIR "/usr/share/applications" CACHE STRING "choose install location for the .desktop file")
+set (Qaul_ICONDIR "${CMAKE_INSTALL_PREFIX}/lib/qaul/icons" CACHE STRING "choose install location for the aplication icon file(s)")
+set (Qaul_BINDIR "NONE" CACHE STRING "if set a wrapper shell script will be installed here")
 
 # What to build
 # Determine the operating system
@@ -44,14 +52,14 @@ endif ()
 # determine the GUI
 set(ALL_GUIS NONE NATIVE GTK QT5)
 STRING (TOUPPER "${GUI}" GUI)
-set(GUI "NATIVE" CACHE STRING "choose which qaul gui to build (one of ${ALL_GUIS})")
+set(GUI "DEFAULT" CACHE STRING "choose which qaul gui to build (one of ${ALL_GUIS})")
 
-# readjust 'native'/defaults for some platforms
-if (${GUI} STREQUAL "NATIVE")
-  if (${PORT} STREQUAL "WINDOWS")
-    set (GUI QT5)
-  elseif ("${PORT}" STREQUAL "LINUX")
+# readjust defaults
+if (${GUI} STREQUAL "DEFAULT")
+  if ("${PORT}" STREQUAL "LINUX")
     set (GUI GTK)
+  else ()
+    set (GUI NATIVE)
   endif ()
 endif ()
 
@@ -60,8 +68,14 @@ if (${GUI} STREQUAL "GTK")
     set (GUINAME "qaul-gtk")
 elseif (${GUI} STREQUAL "QT5")
     set (GUINAME "qaul-qt5")
+elseif (${GUI} STREQUAL "NONE")
+    set (GUINAME "qaul-cli")
 else ()
     set (GUINAME "qaul")
+endif ()
+
+if (${PORT} STREQUAL "WINDOWS")
+  set (GUINAME "${GUINAME}.exe")
 endif ()
 
 list(FIND ALL_GUIS ${GUI} RET)
@@ -94,7 +108,7 @@ configure_file (
 include_directories ("${PROJECT_BINARY_DIR}/include")
 
 if (${PORT} STREQUAL "LINUX")
-    include(cmake/BuildUnixoid.cmake)
+    include(cmake/BuildLinux.cmake)
 elseif (${PORT} STREQUAL "ANDROID")
     include(cmake/BuildAndroid.cmake)
 elseif (${PORT} STREQUAL "OPENWRT")
@@ -117,7 +131,7 @@ if (${GUI} STREQUAL "NATIVE")
     if (${PORT} STREQUAL "OSX")
 	add_subdirectory (src/client/osx)
     elseif (${PORT} STREQUAL "WINDOWS")
-	add_subdirectory (src/client/win)
+	# add_subdirectory (src/client/win)
     elseif (${PORT} STREQUAL "ANDROID")
 	# have its own
     else ()

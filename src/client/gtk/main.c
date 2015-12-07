@@ -8,6 +8,7 @@
 #include <stdio.h> // defines FILENAME_MAX
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <string.h>
 #include <glib.h>
@@ -77,6 +78,7 @@ int main(int argc, char *argv[])
 	network_interface_found = 0;
 
 	// initialize glib types
+	// TODO this is only needed for GLib prior 2.36
 	g_type_init();
 
 	// set paths
@@ -97,7 +99,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Update user folder to qaul.net version %s\n", QAUL_VERSION);
 		// copy www folder
-		sprintf(qaulTmpPath, "%s/www", QAUL_ROOT_PATH);
+		sprintf(qaulTmpPath, "%s/lib/qaul/www", QAUL_ROOT_PATH);
 		sprintf(qaulTmpPath2, "%s/www", qaulUserPath);
 		if(!qaul_copyDirectory(qaulTmpPath, qaulTmpPath2))
 			printf("qaul copy directory error. source: %s target: %s\n", qaulTmpPath, qaulTmpPath2);
@@ -135,7 +137,7 @@ int main(int argc, char *argv[])
     qaulMainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(qaulMainWindow), 400, 592);
     gtk_window_set_title(GTK_WINDOW(qaulMainWindow), "qaul.net - قول");
-    sprintf(qaulTmpPath, "%s/qaul_app_icon.png", QAUL_ROOT_PATH);
+    sprintf(qaulTmpPath, "%s/lib/qaul/icons/qaul_app_icon.png", QAUL_ROOT_PATH);
     gtk_window_set_icon(GTK_WINDOW(qaulMainWindow), create_pixbuf(qaulTmpPath));
 
     // Create a browser instance
@@ -467,28 +469,28 @@ gboolean qaul_configure(gpointer data)
 void qaul_olsrdStart(void)
 {
 	char command[255];
-	sprintf(command, "%s/bin/qaulhelper startolsrd no %s", QAUL_ROOT_PATH, network_device.interface);
+	sprintf(command, "%s/lib/qaul/bin/qaulhelper startolsrd no %s", QAUL_ROOT_PATH, network_device.interface);
 	system(command);
 }
 
 void qaul_olsrdStop(void)
 {
 	char command[255];
-	sprintf(command, "%s/bin/qaulhelper stopolsrd", QAUL_ROOT_PATH);
+	sprintf(command, "%s/lib/qaul/bin/qaulhelper stopolsrd", QAUL_ROOT_PATH);
 	system(command);
 }
 
 void qaul_startPortForwarding(void)
 {
 	char command[255];
-	sprintf(command, "%s/bin/qaulhelper startportforwarding %s %s", QAUL_ROOT_PATH, network_device.interface, network_settings.ipv4_address);
+	sprintf(command, "%s/lib/qaul/bin/qaulhelper startportforwarding %s %s", QAUL_ROOT_PATH, network_device.interface, network_settings.ipv4_address);
 	system(command);
 }
 
 void qaul_stopPortForwarding(void)
 {
 	char command[255];
-	sprintf(command, "%s/bin/qaulhelper stopportforwarding", QAUL_ROOT_PATH);
+	sprintf(command, "%s/lib/qaul/bin/qaulhelper stopportforwarding", QAUL_ROOT_PATH);
 	system(command);
 }
 
