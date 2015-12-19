@@ -66,6 +66,9 @@ add_custom_command(TARGET qaul POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		"${QAUL_BUILD}/third_party/olsr/src/olsr/lib/olsrd_qaul/olsrd_qaul.dll"
 		"$<TARGET_FILE_DIR:qaul>"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"${QAUL_SRC}/distfiles/win/olsrd_win.conf"
+		"$<TARGET_FILE_DIR:qaul>"
 )
 
 install(TARGETS qaul DESTINATION bin)
