@@ -9,6 +9,9 @@ set(QAULWIN_SRC @CMAKE_SOURCE_DIR@/src/client/win/src)
 set(QAUL_SRC @CMAKE_SOURCE_DIR@)
 set(QAUL_BUILD @CMAKE_BINARY_DIR@)
 
+# set path to mingw install location
+get_filename_component(MINGW_PATH @CMAKE_CXX_COMPILER@ PATH)
+
 # set /clr flag for compiler
 STRING(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 STRING(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
@@ -68,6 +71,12 @@ add_custom_command(TARGET qaul POST_BUILD
 		"$<TARGET_FILE_DIR:qaul>"
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		"${QAUL_SRC}/distfiles/win/olsrd_win.conf"
+		"$<TARGET_FILE_DIR:qaul>"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"${MINGW_PATH}/libgcc_s_dw2-1.dll"
+		"$<TARGET_FILE_DIR:qaul>"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"${MINGW_PATH}/libwinpthread-1.dll"
 		"$<TARGET_FILE_DIR:qaul>"
 )
 
