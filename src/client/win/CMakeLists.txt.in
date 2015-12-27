@@ -47,7 +47,7 @@ set_property(TARGET qaul PROPERTY VS_DOTNET_REFERENCES
 	"System.Drawing"
 )
 set_property(TARGET qaul PROPERTY LINK_FLAGS 
-	"/FORCE:MULTIPLE"
+	"/FORCE:MULTIPLE /level='requireAdministrator' /uiAccess='false'"
 )
 # Hide console window on startup when built for RELEASE
 set_property(TARGET qaul PROPERTY LINK_FLAGS_RELEASE
