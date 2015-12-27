@@ -63,7 +63,8 @@ Build qaul libraries, executables and Visual Studio project file using MinGW
 
 Open the Solution in Visual Studio, build and run it.
 
-* Make the qaul project your start up project in Visual Studio:
+* To be able to run qaul.net from within Visual Studio, define the qaul project 
+  your start up project in Visual Studio:
   Right-click on the qaul project icon and select "Set as StartUp Project".
 
 
