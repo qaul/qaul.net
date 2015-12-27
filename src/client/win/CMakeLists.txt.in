@@ -43,7 +43,7 @@ set_property(TARGET qaul PROPERTY VS_GLOBAL_KEYWORD "ManagedCProj")
 set_property(TARGET qaul PROPERTY VS_DOTNET_REFERENCES 
 	"System"
 	"System.Windows.Forms"
-	"System.data"
+	"System.Data"
 	"System.Drawing"
 )
 set_property(TARGET qaul PROPERTY LINK_FLAGS 
@@ -82,6 +82,12 @@ add_custom_command(TARGET qaul POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		"${MINGW_PATH}/libwinpthread-1.dll"
 		"$<TARGET_FILE_DIR:qaul>"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"${QAULWIN_SRC}/app.ico"
+		"$<TARGET_FILE_DIR:qaul>"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"${QAULWIN_SRC}/app.ico"
+		"$<TARGET_FILE_DIR:qaul>/.."
 )
 
 install(TARGETS qaul DESTINATION bin)
