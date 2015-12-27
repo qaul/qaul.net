@@ -59,3 +59,22 @@ Build qaul libraries, executables and Visual Studio project file using MinGW
 	mkdir build
 	cd build
 	cmake .. -G "Visual Studio 12 2013"
+
+
+Open the Solution in Visual Studio, build and run it.
+
+* Make the qaul project your start up project in Visual Studio:
+  Right-click on the qaul project icon and select "Set as StartUp Project".
+
+
+Build qaul.net executable form command line. 
+
+* Download and install the Microsoft Build Tools that contain MSBuild
+
+	# CLI build commands for the MinGW32 Shell
+	# Build debug version
+	MSBuild.exe qaul.vcxproj -p:Configuration=Debug
+	# Build release version
+	MSBuild.exe qaul.vcxproj -p:Configuration=Release
+
+
