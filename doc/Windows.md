@@ -61,10 +61,17 @@ Build qaul libraries, executables and Visual Studio project file using MinGW
 	cd src/client/win
 	mkdir build
 	cd build
-	cmake .. -G "Visual Studio 12 2013"
+	# depending on your Visual Studio version use one of the following
+	# commands
+	# for Visual Studio 2013 run:
+	## cmake .. -G "Visual Studio 12 2013"
+	# for Visual Studio 2010 run:
+	## cmake .. -G "Visual Studio 10 2010"
+	# or just let cmake guess your Visual Studio version and run:
+	cmake ..
 
 
-Open the Solution in Visual Studio, build and run it.
+Open the Microsoft Visual Studio Solution qaul.sln in Visual Studio.
 
 * To be able to run qaul.net from within Visual Studio, set the qaul project 
   as your start up project in Visual Studio:
@@ -97,3 +104,4 @@ To create the installer invoke the following command.
 
 	cpack -C Release
 
+>>>>>>> 11ac936b026dfe9fbb119eb663e143f05e393d50
