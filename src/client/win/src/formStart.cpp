@@ -20,8 +20,6 @@
 #include <winerror.h> //for HRESULT
 
 
-#define COMMAND_BUFFER_SIZE 5000
-#define WORKING_BUFFER_SIZE 15000
 #define MAX_TRIES 3
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
@@ -930,9 +928,11 @@ bool formStart::StartPortforward(void)
     si.cb = sizeof(si);
     ZeroMemory( &pi, sizeof(pi) );
 
+	System::String^ ip = Marshal::PtrToStringAnsi((IntPtr)(char *)Qaullib_GetIP());
+	pin_ptr<const TCHAR> ipTchar = PtrToStringChars(ip);
+
 	TCHAR cCmdBuf[COMMAND_BUFFER_SIZE];
-	pin_ptr<const TCHAR> tcResourcePath = PtrToStringChars(qaulResourcePath);
-	_stprintf_s(cCmdBuf, COMMAND_BUFFER_SIZE, _T("\"%s\\socat.exe\" \"TCP4-Listen:80,fork,reuseaddr\" \"TCP4:localhost:8081\""), tcResourcePath);
+	_stprintf_s(cCmdBuf, COMMAND_BUFFER_SIZE, _T("\"netsh\" \"interface\" \"portproxy\" \"add\" \"v4tov4\" \"listenport=80\" \"listenaddress=%s\" \"connectport=8081\" \"connectaddress=127.0.0.1\" "), ipTchar);
 	System::String^ strCmd = gcnew System::String(cCmdBuf);
 	Debug::WriteLine(System::String::Format("port forward cmd: {0}", strCmd));
 
@@ -959,9 +959,8 @@ bool formStart::StopPortforward(void)
     ZeroMemory( &pi, sizeof(pi) );
 
 	TCHAR cCmdBuf[COMMAND_BUFFER_SIZE];
-	pin_ptr<const TCHAR> tcResourcePath = PtrToStringChars(qaulResourcePath);
-	_stprintf_s(cCmdBuf, COMMAND_BUFFER_SIZE, _T("Taskkill /IM socat.exe /F"));
-
+	_stprintf_s(cCmdBuf, COMMAND_BUFFER_SIZE, _T("netsh interface portproxy delete v4tov4 \"listenport=80\" "));
+	
 	if(!CreateProcess(NULL, cCmdBuf, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP|CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
 	{
 		Debug::WriteLine(System::String::Format("Port Forward Kill Error 2: {0}",GetLastError()));
@@ -1187,41 +1186,6 @@ bool formStart::ConfigureFirewall(void)
 
 	Debug::WriteLine(L"ConfigureFirewall 4");
 
-	_stprintf_s(cCmdBuf, COMMAND_BUFFER_SIZE, _T("netsh advfirewall firewall add rule name=\"qaul\" dir=in action=allow enable=yes program=\"%s\\socat.exe\""), tcResourcePath);
-	System::String^ strCmd = gcnew System::String(cCmdBuf);
-	Debug::WriteLine(System::String::Format("add firewall rule: {0}", strCmd));
-
-	if(!CreateProcess(NULL, cCmdBuf, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP|CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
-	{
-		Debug::WriteLine(System::String::Format("firewall configuration error: {0}",GetLastError()));
-	}
-	else
-	{
-		Debug::WriteLine(L"wait for process");
-		// Wait until child process exits.
-		WaitForSingleObject( pi.hProcess, 1000 );
-		// Close process and thread handles. 
-		CloseHandle( pi.hProcess );
-		CloseHandle( pi.hThread );	
-	}
-
-	_stprintf_s(cCmdBuf, COMMAND_BUFFER_SIZE, _T("netsh advfirewall firewall add rule name=\"qaul\" dir=out action=allow enable=yes program=\"%s\\socat.exe\""), tcResourcePath);
-	System::String^ strCmd2 = gcnew System::String(cCmdBuf);
-	Debug::WriteLine(System::String::Format("add firewall rule: {0}", strCmd2));
-
-	if(!CreateProcess(NULL, cCmdBuf, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP|CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
-	{
-		Debug::WriteLine(System::String::Format("firewall configuration error: {0}",GetLastError()));
-	}
-	else
-	{
-		Debug::WriteLine(L"wait for process");
-		// Wait until child process exits.
-		WaitForSingleObject( pi.hProcess, 1000 );
-		// Close process and thread handles. 
-		CloseHandle( pi.hProcess );
-		CloseHandle( pi.hThread );	
-	}
 
 	_stprintf_s(cCmdBuf, COMMAND_BUFFER_SIZE, _T("netsh advfirewall firewall add rule name=\"qaul\" dir=in action=allow enable=yes program=\"%s\\olsrd.exe\""), tcResourcePath);
 	System::String^ strCmd3 = gcnew System::String(cCmdBuf);

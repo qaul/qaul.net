@@ -30,8 +30,11 @@ The following tools need to be installed
 	# install needed programs
 	pacman -S mingw-w64-i686-gcc mingw-w64-i686-cmake make patch bison 
 
-* Microsoft Visual Studio	
-	
+* Microsoft Visual Studio
+* MSBuild (for builds via command line interface)
+* NSIS - Nullsoft Scriptable Install System
+  * Download NSIS installer: http://nsis.sourceforge.net
+
 
 Get the source
 --------------
@@ -72,10 +75,25 @@ Build qaul.net executable form command line.
 
 * Download and install the Microsoft Build Tools that contain MSBuild
 
+	##########################################
+	# Build qaul.net with MSBuild
+	##########################################
 	# CLI build commands for the MinGW32 Shell
 	# Build debug version
 	MSBuild.exe qaul.vcxproj -p:Configuration=Debug
 	# Build release version
 	MSBuild.exe qaul.vcxproj -p:Configuration=Release
+	
+	##########################################
+	# Build qaul.net with cmake (via MSBuild)
+	##########################################
+	cmake --build . --target qaul --config Release
 
+
+Create Windows Installer
+------------------------
+
+To create the installer invoke the following command.
+
+	cpack -C Release
 

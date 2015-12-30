@@ -85,9 +85,41 @@ add_custom_command(TARGET qaul POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		"${QAULWIN_SRC}/app.ico"
 		"$<TARGET_FILE_DIR:qaul>"
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		"${QAULWIN_SRC}/app.ico"
-		"$<TARGET_FILE_DIR:qaul>/.."
 )
 
-install(TARGETS qaul DESTINATION bin)
+
+install(TARGETS 
+	qaul 
+	DESTINATION bin
+)
+install(DIRECTORY
+	"${QAUL_SRC}/www"
+	DESTINATION bin
+)
+install(FILES 
+	"${LIBQAUL_BUILD}/libqaul.dll"
+	"${QAUL_BUILD}/third_party/olsr/src/olsr/olsrd.exe"
+	"${QAUL_BUILD}/third_party/olsr/src/olsr/lib/olsrd_qaul/olsrd_qaul.dll"
+	"${QAUL_SRC}/distfiles/win/olsrd_win.conf"
+	"${MINGW_PATH}/libgcc_s_dw2-1.dll"
+	"${MINGW_PATH}/libwinpthread-1.dll"
+	"${QAULWIN_SRC}/app.ico"
+	DESTINATION bin
+)
+
+set(CPACK_GENERATOR NSIS)
+set(CPACK_PACKAGE_NAME "qaul.net")
+set(CPACK_PACKAGE_VENDOR "qaul.net community")
+set(CPACK_PACKAGE_CONTACT "contact@qaul.net")
+set(CPACK_PACKAGE_VERSION @CPACK_PACKAGE_VERSION@)
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "tools for the next revolution")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "qaul.net")
+set(CPACK_PACKAGE_EXECUTABLES "qaul" "qaul.net")
+set(CPACK_PACKAGE_ICON "${QAUL_SRC}/distfiles/win\\\\installer-icon.bmp")
+set(CPACK_NSIS_MUI_ICON "${QAULWIN_SRC}/app.ico")
+set(CPACK_NSIS_MUI_UNIICON "${QAULWIN_SRC}/app.ico")
+set(CPACK_NSIS_HELP_LINK "http://www.qaul.net")
+set(CPACK_NSIS_MODIFY_PATH ON)
+set(CPACK_RESOURCE_FILE_LICENSE "${QAUL_SRC}/Licenses/qaul.net_license.txt")
+
+include(CPack)

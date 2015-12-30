@@ -9,12 +9,17 @@
 #include <tchar.h>
 #include <windows.h> // must not be included when using afxdlgs.h
 #include <string>
+#include <vcclr.h>
 
 #include "qaulHelpers.h"
 
 // add libqaul
 #include <qaullib.h>
 #pragma comment(lib, "liblibqaul.dll.a")
+
+// define qaul values
+#define COMMAND_BUFFER_SIZE 5000
+#define WORKING_BUFFER_SIZE 15000
 
 
 namespace qaul {
@@ -185,7 +190,11 @@ namespace qaul {
 				static_cast<System::Int32>(static_cast<System::Byte>(187)));
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedSingle;
 			//this->Icon = (cli::safe_cast<System::Drawing::Icon^  >(resources->GetObject(L"$this.Icon")));
-			System::Drawing::Icon ^ qaulIcon = gcnew System::Drawing::Icon(L"app.ico");
+			TCHAR cCmdBuf[COMMAND_BUFFER_SIZE];
+			pin_ptr<const TCHAR> tcResourcePath = PtrToStringChars(qaulResourcePath);
+			_stprintf_s(cCmdBuf, COMMAND_BUFFER_SIZE, _T("%s\\app.ico"), tcResourcePath);
+			System::String^ strCmd = gcnew System::String(cCmdBuf);
+			System::Drawing::Icon ^ qaulIcon = gcnew System::Drawing::Icon(strCmd);
 			this->Icon = qaulIcon;
 			this->Margin = System::Windows::Forms::Padding(3, 4, 3, 4);
 			this->Name = L"formStart";
