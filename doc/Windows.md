@@ -104,4 +104,3 @@ To create the installer invoke the following command.
 
 	cpack -C Release
 
->>>>>>> 11ac936b026dfe9fbb119eb663e143f05e393d50
