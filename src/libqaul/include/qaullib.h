@@ -103,10 +103,10 @@ int qaul_conf_debug;
 /**
  * initialize qaullib
  * invoke this function once at the beginning, before any other qaullib function
- * @a resourcePath is the absolute path to the directory containing the olsrd and netcat executables
- * and the www folder
+ * @a resourcePath is the absolute path to the directory containing the the www folder
+ * @a homePath is the absolute path to the qaul home directory, containing the database etc.
  */
-void Qaullib_Init(const char* resourcePath);
+void Qaullib_Init(const char* homePath, const char* resourcePath);
 
 /**
  * configure qaullib

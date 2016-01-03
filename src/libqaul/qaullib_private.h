@@ -74,6 +74,8 @@ struct mg_server *qaul_webserver_instance;
 sqlite3 *db;
 char dbPath[MAX_PATH_LEN +1];
 char webPath[MAX_PATH_LEN +1];
+char filesPath[MAX_PATH_LEN +1];
+char webUrlRewrites[MAX_PATH_LEN +1];
 char qaullib_AppEventOpenPath[MAX_PATH_LEN +1];
 int qaul_gui_pagename_set;
 char qaullib_GuiPageName[MAX_PAGE_LEN +1];

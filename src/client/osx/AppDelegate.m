@@ -57,18 +57,18 @@
     
     qaulApplicationPath = [[NSBundle mainBundle] resourcePath];
     NSLog(@"CopyFilesAtFirstStartup");
-    NSLog(@"qaulResourcePath: %@, qaulApplicationPath: %@", qaulResourcePath, qaulApplicationPath);    
+    NSLog(@"qaulHomePath: %@, qaulApplicationPath: %@", qaulHomePath, qaulApplicationPath);    
     
 	// check if data base exists
-	if(![filemgr fileExistsAtPath:[NSString stringWithFormat:@"%@/qaullib.db", qaulResourcePath]])
+	if(![filemgr fileExistsAtPath:[NSString stringWithFormat:@"%@/qaullib.db", qaulHomePath]])
 	{
         NSLog(@"First startup: copy files to document directory");
         
         // create resource folder
-        if (![filemgr createDirectoryAtPath:qaulResourcePath withIntermediateDirectories:NO attributes:nil error:&dError])
-            NSLog(@"Create qaulResourcePath directory error: %@", dError);
+        if (![filemgr createDirectoryAtPath:qaulHomePath withIntermediateDirectories:NO attributes:nil error:&dError])
+            NSLog(@"Create qaulHomePath directory error: %@", dError);
         
-		if(![filemgr copyItemAtPath:[NSString stringWithFormat:@"%@/www", qaulApplicationPath] toPath:[NSString stringWithFormat:@"%@/www", qaulResourcePath] error:&dError])
+		if(![filemgr copyItemAtPath:[NSString stringWithFormat:@"%@/www/files", qaulApplicationPath] toPath:[NSString stringWithFormat:@"%@/files", qaulHomePath] error:&dError])
 			NSLog(@"Error: %@", dError);
 		else
 			NSLog(@"Sucessfully copied");
@@ -145,13 +145,15 @@
 	// check if it was initialized
 	if(qaulStarted == 0)
 	{
+        // set paths
+        qaulResourcePath = [[NSBundle mainBundle] resourcePath];
+        qaulHomePath = [NSString stringWithFormat:@"%@/qaul.net", [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0]];
         // copy files at first startup
-        qaulResourcePath = [NSString stringWithFormat:@"%@/qaul.net", [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0]];
         [self copyFilesAtFirstStartup];
         
 		// init qaullib
 		NSLog(@"initialize app");		
-		Qaullib_Init([qaulResourcePath UTF8String]);
+		Qaullib_Init([qaulHomePath UTF8String],[qaulResourcePath UTF8String]);
 		
         // set Configuration
         Qaullib_SetConf(QAUL_CONF_INTERFACE);

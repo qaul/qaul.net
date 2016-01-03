@@ -39,10 +39,6 @@ public class QaulApplication extends Application {
 
 	public static final String MSG_TAG = "QaulApplication";
 	
-	public final String DEFAULT_PASSPHRASE = "abcdefghijklm";
-	public final String DEFAULT_LANNETWORK = "10.0.0.0/8";
-	public final String DEFAULT_ENCSETUP   = "wpa_supplicant";
-	
 	// Devices-Information
 	//public String deviceType = Configuration.DEVICE_GENERIC; 
 	//public String interfaceDriver = Configuration.DRIVER_WEXT; 
@@ -163,11 +159,11 @@ public class QaulApplication extends Application {
         // check if this is the first time this app is started
         // copy all files
         Log.i(MSG_TAG, "check if data exists");
-        File wwwPath = new File(dataPathString +"/www");
-        if(!wwwPath.exists()) 
+        File filesPath = new File(dataPathString +"/files");
+        if(!filesPath.exists()) 
         {
         	Log.i(MSG_TAG, "copy all files to data directory");
-        	qaulCopyFileOrDir("");
+        	qaulCopyFilesDir("files");
         }
         
         // initialize the library
@@ -368,7 +364,39 @@ public class QaulApplication extends Application {
 			qaulStarted = 60;
 		}
 	}
-    
+
+    private void qaulCopyFilesDir(String path) 
+    {
+        AssetManager assetManager = this.getAssets();
+        String assets[] = null;
+        try {
+            Log.i(MSG_TAG, "qaulcopyFilesDir() " +path);
+            assets = assetManager.list("www/" +path);
+            if (assets.length == 0) {
+            	qaulCopyFilesFile(path);
+            } else {
+                String fullPath =  dataPathString +"/" + path;
+                Log.i(MSG_TAG, "path="+fullPath);
+                File dir = new File(fullPath);
+                if (!dir.exists() && !path.startsWith("images") && !path.startsWith("sounds") && !path.startsWith("webkit"))
+                    if (!dir.mkdirs());
+                        Log.i(MSG_TAG, "could not create dir "+fullPath);
+                for (int i = 0; i < assets.length; ++i) {
+                    String p;
+                    if (path.equals(""))
+                        p = "";
+                    else 
+                        p = path + "/";
+
+                    if (!path.startsWith("images") && !path.startsWith("sounds") && !path.startsWith("webkit"))
+                    	qaulCopyFilesDir( p + assets[i]);
+                }
+            }
+        } catch (IOException ex) {
+            Log.e(MSG_TAG, "I/O Exception", ex);
+        }
+    }
+
     private void qaulCopyFileOrDir(String path) 
     {
         AssetManager assetManager = this.getAssets();
@@ -398,6 +426,38 @@ public class QaulApplication extends Application {
             }
         } catch (IOException ex) {
             Log.e(MSG_TAG, "I/O Exception", ex);
+        }
+    }
+
+    private void qaulCopyFilesFile(String filename) 
+    {
+        AssetManager assetManager = this.getAssets();
+
+        InputStream in = null;
+        OutputStream out = null;
+        String newFileName = null;
+        try {
+            Log.i(MSG_TAG, "copyFile() "+filename);
+            in = assetManager.open("www/" +filename);
+            if (filename.endsWith(".jpg")) // extension was added to avoid compression on APK file
+                newFileName = dataPathString +"/" + filename.substring(0, filename.length()-4);
+            else
+                newFileName = dataPathString +"/" + filename;
+            out = new FileOutputStream(newFileName);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            in.close();
+            in = null;
+            out.flush();
+            out.close();
+            out = null;
+        } catch (Exception e) {
+            Log.e(MSG_TAG, "Exception in copyFile() of "+newFileName);
+            Log.e(MSG_TAG, "Exception in copyFile() "+e.toString());
         }
     }
 
@@ -637,7 +697,7 @@ public class QaulApplication extends Application {
 
     	// qaul: start configuration
         Log.i(MSG_TAG, "before qaulStartHandler");
-    	qaulStartHandler.postDelayed(qaulStartDelayed, 20000);
+    	qaulStartHandler.postDelayed(qaulStartDelayed, 3000);
         Log.i(MSG_TAG, "after qaulStartHandler");
 	}
 
@@ -655,8 +715,6 @@ public class QaulApplication extends Application {
 		
 		boolean encEnabled = this.settings.getBoolean("encpref", false);
         String txpower = this.settings.getString("txpowerpref", "disabled");
-        String wepkey = this.settings.getString("passphrasepref", DEFAULT_PASSPHRASE);
-        String wepsetupMethod = this.settings.getString("encsetuppref", DEFAULT_ENCSETUP);
         
         this.tethercfg.read();
         
@@ -715,43 +773,6 @@ public class QaulApplication extends Application {
 		this.tethercfg.put("wifi.interface", this.coretask.getProp("wifi.interface"));
 
 		this.tethercfg.put("wifi.txpower", txpower);
-
-//		// TODO encryption setup
-//		// wepEncryption
-//		if (encEnabled) {
-//			this.tethercfg.put("wifi.encryption", "wep");
-//			// Storing wep-key
-//			this.tethercfg.put("wifi.encryption.key", wepkey);
-//
-//			// Getting encryption-method if setup-method on auto 
-//			if (wepsetupMethod.equals("auto")) {
-//				wepsetupMethod = Configuration.getEncryptionAutoMethod(deviceType);
-//			}
-//			// Setting setup-mode
-//			this.tethercfg.put("wifi.setup", wepsetupMethod);
-//			// Prepare wpa_supplicant-config if wpa_supplicant selected
-//			if (wepsetupMethod.equals("wpa_supplicant")) {
-//				// Install wpa_supplicant.conf-template
-//				if (this.wpasupplicant.exists() == false) {
-//					this.installWpaSupplicantConfig();
-//				}
-//				
-//				// Update wpa_supplicant.conf
-//				Hashtable<String,String> values = new Hashtable<String,String>();
-//				values.put("ssid", "\"" +nativeQaul.getWifiIbss() +"\"");
-//				values.put("wep_key0", "\"" +this.settings.getString("passphrasepref", DEFAULT_PASSPHRASE) +"\"");
-//				this.wpasupplicant.write(values);
-//			}
-//        }
-//		else {
-//			this.tethercfg.put("wifi.encryption", "open");
-//			this.tethercfg.put("wifi.encryption.key", "none");
-//			
-//			// Make sure to remove wpa_supplicant.conf
-//			if (this.wpasupplicant.exists()) {
-//				this.wpasupplicant.remove();
-//			}			
-//		}
 		
 		// configure wifi as open
 		this.tethercfg.put("wifi.encryption", "open");

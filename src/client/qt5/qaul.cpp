@@ -14,9 +14,10 @@ Qaul::Qaul(QWidget *parent) :
     ui(new Ui::Qaul)
 { 
     QDir myDir;
-    QString qaulLocalDirectory = QDir::homePath();
-    qaulLocalDirectory += "/.qaul";
-    qDebug() << "Local path: " << qaulLocalDirectory;
+    QString qaulHomeDirectory = QDir::homePath();
+    qaulHomeDirectory += "/.qaul";
+    qDebug() << "Local path: " << qaulHomeDirectory;
+    QString qaulResourceDirectory = QApplication::applicationDirPath();
 
     // create ~/.qaul directory
     if(!myDir.exists(qaulLocalDirectory))
@@ -26,15 +27,15 @@ Qaul::Qaul(QWidget *parent) :
         {
             qDebug() << "Local path created";
 
-            // copy www folder into ~/.qaul directory
-            this->QaulCopyDir(QApplication::applicationDirPath() +"/www", qaulLocalDirectory +"/www");
+            // copy files folder into ~/.qaul directory
+            this->QaulCopyDir(QApplication::applicationDirPath() +"/www/files", qaulLocalDirectory +"/files");
             //QaulCopyDir(const QString &srcPath, const QString &dstPath)
         }
     }
 
     // initialize library
     //QString qpath = QApplication::applicationDirPath();
-    Qaullib_Init(qaulLocalDirectory.toLocal8Bit().data());
+    Qaullib_Init(qaulHomeDirectory.toLocal8Bit().data(), qaulResourceDirectory.toLocal8Bit().data());
 
     // set download folder
     QString qaulDownloadDirectory = QDir::homePath();
