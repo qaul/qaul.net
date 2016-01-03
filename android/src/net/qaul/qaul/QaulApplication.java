@@ -247,18 +247,31 @@ public class QaulApplication extends Application {
 		if(qaulStarted == 20)
 		{
 	        Log.i(MSG_TAG, "qaulConfigure 20");
-			if(startTether()) 
-			{
-				Log.d(MSG_TAG, "wifi successfully configured");
-				this.showStartNotification();
-			}
-			else 
-			{
-				// TODO: show error screen
-				Log.e(MSG_TAG, "wifi configuration error");
-			}
-			
-			qaulStarted = 29;
+	        
+	        // try if the java API to configure IBSS is present
+	        // (this method currently onyl works on some phones with cyanogen mod)
+	        if(startWifiConfigCyanogen())
+	        {
+	        	Log.i(MSG_TAG, "Wifi configured via cyanogen: startWifiConfigCyanogen()");
+	        	qaulStarted = 30;
+	        }
+	        else
+	        {
+	        	Log.i(MSG_TAG, "Wifi cyanogen method not present: startWifiConfigCyanogen()");
+	        	
+	        	if(startTether()) 
+				{
+					Log.d(MSG_TAG, "wifi successfully configured");
+					this.showStartNotification();
+				}
+				else 
+				{
+					// TODO: show error screen
+					Log.e(MSG_TAG, "wifi configuration error");
+				}
+				
+				qaulStarted = 29;	        	
+	        }
 		}
 
 		// wait for wifi to start
@@ -745,6 +758,50 @@ public class QaulApplication extends Application {
 //		}
 		
 		Log.d(MSG_TAG, "Creation of configuration-files took ==> "+(System.currentTimeMillis()-startStamp)+" milliseconds.");
+	}
+	
+	// configure Wifi accoring to the new 
+	// java API in cyanogen mod
+	public boolean startWifiConfigCyanogen()
+	{
+		boolean status;
+		
+		/* We use WifiConfigurationNew which provides a way to access
+		 * the Ad-hoc mode and static IP configuration options which are
+		 * not part of the standard API yet */
+		WifiConfigurationNew wifiConfig = new WifiConfigurationNew();
+
+		/* Set the SSID and security as normal */
+		wifiConfig.SSID = "\"qaul.net\"";
+		wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
+
+		/* Use reflection until API is official */
+		wifiConfig.setIsIBSS(true);
+		wifiConfig.setFrequency(2462);
+
+		/* Use reflection to configure static IP addresses */
+		wifiConfig.setIpAssignment("STATIC");
+		wifiConfig.setIpAddress(InetAddress.getByName("10.0.0.2"), 24);
+		wifiConfig.setGateway(InetAddress.getByName("10.0.0.1"));
+		wifiConfig.setDNS(InetAddress.getByName("8.8.8.8"));
+
+		/* Add, enable and save network as normal */
+		int id = mWifiManager.addNetwork(wifiConfig);
+		if (id < 0)
+		{
+			Log.i(MSG_TAG, "Failed to add Ad-hoc network");
+			status = false;
+		}
+		else
+		{
+			Log.i(MSG_TAG, "Ad-hoc network added");
+			
+			mWifiManager.enableNetwork(id, true);
+			mWifiManager.saveConfiguration();
+			status = true;
+		}
+		
+		return status;
 	}
 	
 	// Start/Stop Tethering
