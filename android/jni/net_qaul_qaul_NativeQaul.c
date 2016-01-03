@@ -40,11 +40,13 @@ void *Qaullib_CheckerThread(void)
 
 // ---------------------------------------------------------------------------
 JNIEXPORT void JNICALL Java_net_qaul_qaul_NativeQaul_libInit
-  (JNIEnv *env, jobject obj, jstring resourcePath)
+  (JNIEnv *env, jobject obj, jstring homePath, jstring resourcePath)
 {
-	const char *myPath;
-	myPath = (*env)->GetStringUTFChars(env, resourcePath, 0);
-	Qaullib_Init(myPath);
+	const char *resourcePath;
+	const char *homePath;
+	resourcePath = (*env)->GetStringUTFChars(env, resourcePath, 0);
+	homePath = (*env)->GetStringUTFChars(env, homePath, 0);
+	Qaullib_Init(homePath, resourcePath);
 
 	// configure qaullib
 	Qaullib_SetConfQuit();

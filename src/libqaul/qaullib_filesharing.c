@@ -611,9 +611,7 @@ static void Qaullib_FileUpdateSize(struct qaul_file_LL_item *file_item, int size
 // ------------------------------------------------------------
 void Qaullib_FileCreatePath(char *filepath, char *hash, char *suffix)
 {
-	strcpy(filepath, webPath);
-    strcat(filepath, PATH_SEPARATOR);
-    strcat(filepath, "files");
+	strcpy(filepath, filesPath);
     strcat(filepath, PATH_SEPARATOR);
     strcat(filepath, hash);
     if(strlen(suffix))

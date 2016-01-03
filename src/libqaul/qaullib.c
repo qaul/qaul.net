@@ -6,7 +6,7 @@
 #include "qaullib_private.h"
 
 // ------------------------------------------------------------
-void Qaullib_Init(const char* resourcePath)
+void Qaullib_Init(const char* homePath, const char* resourcePath)
 {
 	int rc, i, dbExists;
 
@@ -62,7 +62,8 @@ void Qaullib_Init(const char* resourcePath)
 	// -------------------------------------------------
 
 	printf("Qaullib_Init:\n");
-	printf("path: %s\n", resourcePath);
+	printf("resource path: %s\n", resourcePath);
+	printf("home path: %s\n", homePath);
 
 	// set webserver path
 	strcpy(webPath, resourcePath);
@@ -73,12 +74,24 @@ void Qaullib_Init(const char* resourcePath)
 #endif
 
 	// set db path
-	strcpy(dbPath, resourcePath);
+	strcpy(dbPath, homePath);
 #ifdef WIN32
 	strcat(dbPath, "\\qaullib.db");
 #else
 	strcat(dbPath, "/qaullib.db");
 #endif
+
+	// set files path
+	strcpy(filesPath, homePath);
+#ifdef WIN32
+	strcat(filesPath, "\\files\\");
+#else
+	strcat(filesRewrites, "/files/");
+#endif
+
+	// set url rewrites
+	strcpy(webUrlRewrites, "/files/=");
+	strcat(webUrlRewrites, filesPath);
 
 	// check if db exists
 	dbExists = Qaullib_FileExists(dbPath);
@@ -287,6 +300,8 @@ int Qaullib_WebserverStart(void)
 	qaul_webserver_instance = mg_create_server(NULL, (mg_handler_t) Qaullib_WwwEvent_handler);
 	mg_set_option(qaul_webserver_instance, "listening_port", CHAT_PORT);
 	mg_set_option(qaul_webserver_instance, "document_root", webPath);
+	// set rewrites for sub directories
+	mg_set_option(qaul_webserver_instance, "url_rewrites", webUrlRewrites);
 	//mg_set_option(qaul_webserver_instance, "num_threads", "60");
 
 	mg_start_thread(Qaullib_Www_Server, qaul_webserver_instance);

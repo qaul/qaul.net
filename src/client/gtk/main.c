@@ -67,7 +67,8 @@ gboolean qaul_timerTopology(gpointer data);
 
 int main(int argc, char *argv[])
 {
-	char qaulUserPath[MAX_PATH_LEN];
+	char qaulHomePath[MAX_PATH_LEN];
+	char qaulResourcePath[MAX_PATH_LEN];
 	char qaulTmpPath[MAX_PATH_LEN];
 	char qaulTmpPath2[MAX_PATH_LEN];
 
@@ -82,41 +83,41 @@ int main(int argc, char *argv[])
 	g_type_init();
 
 	// set paths
-	sprintf(qaulUserPath, "%s/.qaul", (char*)g_get_home_dir());
-	printf ("qaul.net home directory is %s\n", qaulUserPath);
+	sprintf(qaulHomePath, "%s/.qaul", (char*)g_get_home_dir());
+	printf ("qaul.net home directory is %s\n", qaulHomePath);
 
 	// create qaul user directory
-	if(!g_file_test(qaulUserPath, G_FILE_TEST_EXISTS))
+	if(!g_file_test(qaulHomePath, G_FILE_TEST_EXISTS))
 	{
 		// create directory
 		// http://www.gnu.org/software/libc/manual/html_node/Permission-Bits.html
-		if(g_mkdir(qaulUserPath, S_IRUSR|S_IWUSR|S_IXUSR)== -1)
-			printf("qaul.net home directory %s creation error.\n", qaulUserPath);
+		if(g_mkdir(qaulHomePath, S_IRUSR|S_IWUSR|S_IXUSR)== -1)
+			printf("qaul.net home directory %s creation error.\n", qaulHomePath);
 	}
 	// check if we have to update
-	sprintf(qaulTmpPath, "%s/%s", qaulUserPath, QAUL_VERSION);
+	sprintf(qaulTmpPath, "%s/%s", qaulHomePath, QAUL_VERSION);
 	if(!g_file_test(qaulTmpPath, G_FILE_TEST_EXISTS))
 	{
 		printf("Update user folder to qaul.net version %s\n", QAUL_VERSION);
 		// copy www folder
-		sprintf(qaulTmpPath, "%s/lib/qaul/www", QAUL_ROOT_PATH);
-		sprintf(qaulTmpPath2, "%s/www", qaulUserPath);
+		sprintf(qaulTmpPath, "%s/lib/qaul/www/files", QAUL_ROOT_PATH);
+		sprintf(qaulTmpPath2, "%s/files", qaulHomePath);
 		if(!qaul_copyDirectory(qaulTmpPath, qaulTmpPath2))
 			printf("qaul copy directory error. source: %s target: %s\n", qaulTmpPath, qaulTmpPath2);
 		// TODO: update data base
 		// remove old data base if it exists
-		sprintf(qaulTmpPath, "%s/qaullib.db", qaulUserPath);
+		sprintf(qaulTmpPath, "%s/qaullib.db", qaulHomePath);
 		if(g_file_test(qaulTmpPath, G_FILE_TEST_EXISTS))
 			if(g_remove(qaulTmpPath) == -1)
 				printf("qaul.net database %s removal error\n", qaulTmpPath);
 		// create qaul version file
-		sprintf(qaulTmpPath, "%s/%s", qaulUserPath, QAUL_VERSION);
+		sprintf(qaulTmpPath, "%s/%s", qaulHomePath, QAUL_VERSION);
 		if(!g_file_test(qaulTmpPath, G_FILE_TEST_EXISTS))
 			if(!g_creat(qaulTmpPath, S_IRUSR|S_IWUSR) == -1)
 				printf("qaul.net version file %s creation error\n", qaulTmpPath);
 	}
 
-	Qaullib_Init(qaulUserPath);
+	Qaullib_Init(qaulHomePath, qaulResourcePath);
 	// set configuration
 	Qaullib_SetConf(QAUL_CONF_INTERFACE);
 	// enable debug menu

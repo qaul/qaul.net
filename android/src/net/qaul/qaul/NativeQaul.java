@@ -23,7 +23,7 @@ public class NativeQaul
 		}
 	}
 
-	public native void libInit(String resourcePath);
+	public native void libInit(String homePath, String resourcePath);
 	public native void libExit();
 	
 	public native int webserverStart();

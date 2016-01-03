@@ -16,6 +16,7 @@
     IBOutlet id start_name;
 	NSString *username;
 	NSString *qaulResourcePath;
+	NSString *qaulHomePath;
 	int qaulStarted;
 	
 	// wifi config
