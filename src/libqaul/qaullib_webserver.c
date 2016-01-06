@@ -950,10 +950,10 @@ static void Qaullib_WwwGetTopology(struct mg_connection *conn)
 
 			// FIXME: ipv6
 			mg_printf_data(conn,
-					"{\"source\":\"%s\",\"target\":\"%s\",\"lq\":\"%d\"}",
+					"{\"source\":\"%s\",\"target\":\"%s\",\"lq\":\"%i\"}",
 					inet_ntop(AF_INET, &qaul_topo_LL_first->src_ip.v4.s_addr, (char *)&ipbuf, sizeof(ipbuf)),
 					inet_ntop(AF_INET, &qaul_topo_LL_first->dest_ip.v4.s_addr, (char *)&dest_ipbuf, sizeof(dest_ipbuf)),
-					qaul_topo_LL_first->lq
+					(int)(qaul_topo_LL_first->lq *1)
 					);
 
 			// delete this item

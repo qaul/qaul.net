@@ -192,7 +192,7 @@ struct qaul_node_msg
 {
 	union olsr_ip_addr ip;
 	union olsr_ip_addr gateway;
-	uint32_t lq;
+	float			   lq;
 };
 
 struct qaul_userhello_msg

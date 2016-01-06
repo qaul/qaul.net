@@ -1,3 +1,6 @@
+// remove javascript notification
+$("#notification").remove();
+
 var links, nodes, width, height, force, svg, path, circle, text;
 
 // load nodes
@@ -32,8 +35,11 @@ function draw_network(data)
 			nodes[link.source].ip = link.source;
 			link.source = nodes[link.source];
 		}
-		else 
+		else
+		{
 			nodes[link.source] = {name: link.source, ip: link.source, type: "ip"};
+			link.source = nodes[link.source];
+		}
 		
 		if(typeof nodes[link.target] !== "undefined")
 		{
@@ -41,7 +47,10 @@ function draw_network(data)
 			link.target = nodes[link.target];
 		}
 		else
+		{
 			nodes[link.target] = {name: link.target, ip: link.target, type: "ip"};
+			link.target = nodes[link.target];
+		}
 
 		if(link.lq < 2)
 			link.type = "good";

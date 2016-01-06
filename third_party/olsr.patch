@@ -1169,7 +1169,7 @@ index 0000000..f3895b3
 +{
 +	union olsr_ip_addr ip;
 +	union olsr_ip_addr gateway;
-+	uint32_t           lq;
++	float           lq;
 +};
 +
 +/*
@@ -1224,7 +1224,7 @@ index 0000000..c0d885c
 +			  linkcost = (float)tc_edge->cost / 1024;
 +			  memcpy(&node->ip, &tc_edge->T_dest_addr, sizeof(union olsr_ip_addr));
 +			  memcpy(&node->gateway, &tc->addr, sizeof(union olsr_ip_addr));
-+			  memcpy(&node->lq, &linkcost, sizeof(uint32_t));
++			  memcpy(&node->lq, &linkcost, sizeof(float));
 +
 +			  // send the message
 +			  qaul_ipc_msg2gui(m);
@@ -1261,7 +1261,7 @@ index 0000000..c0d885c
 +			  linkcost = (float)tc_edge->cost / 1024;
 +			  memcpy(&node->ip, &tc->addr, sizeof(union olsr_ip_addr));
 +			  memcpy(&node->gateway, &tc_edge->T_dest_addr, sizeof(union olsr_ip_addr));
-+			  memcpy(&node->lq, &linkcost, sizeof(uint32_t));
++			  memcpy(&node->lq, &linkcost, sizeof(float));
 +
 +			  // send the message
 +			  qaul_ipc_msg2gui(m);
