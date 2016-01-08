@@ -153,7 +153,7 @@ char qaul_web_localip[MAX_IP_LEN +1];
 int Qaullib_WwwEvent_handler(struct mg_connection *conn, enum mg_event event)
 {
 	char requestaddr[MAX_IP_LEN +1];
-	int processed;
+	int processed;http://127.0.0.1:8081/network.html
 
 	processed = 0;
 
@@ -445,13 +445,26 @@ int Qaullib_WwwEvent_handler(struct mg_connection *conn, enum mg_event event)
 		}
 		else
 		{
-			// redirect to splash page
-			conn->status_code = 303;
-		    mg_printf(conn, "HTTP/1.1 303 See Other\r\n"
-		              "Location: %s\r\n\r\n", "http://start.qaul/");
-		    mg_printf(conn, "<a href=\"%s\">qaul.net &gt;&gt;</a>", "http://start.qaul/");
+			// TODO: only redirect if host is not in the .qaul domain or IP address does not start
+			//       with 10.XXX
+			//
+			// To get Host http header use: mg_get_header(conn, "Host")
 
-			processed = 1;
+			// don't redirect when status is 304
+			if(conn->status_code == 304)
+			{
+				// do nothing
+			}
+			else
+			{
+				// redirect to splash page
+				conn->status_code = 303;
+				mg_printf(conn, "HTTP/1.1 303 See Other\r\n"
+						  "Location: %s\r\n\r\n", "http://start.qaul/");
+				mg_printf(conn, "<a href=\"%s\">qaul.net &gt;&gt;</a>", "http://start.qaul/");
+
+				processed = 1;
+			}
 		}
 	}
 	else
