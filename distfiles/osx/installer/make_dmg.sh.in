@@ -30,6 +30,7 @@ cp $SOURCEDIR/distfiles/osx/installer/osx_installer.png $BUILDDIR/tmp_dmg/.backg
 
 # build resource package
 pkgbuild --root $BUILDDIR/tmp_install --install-location / --version $BUILDVERSION --identifier net.qaul.qaul $BUILDDIR/tmp_pkg/qaul.pkg
+cp $BUILDDIR/tmp_pkg/qaul.pkg $BUILDDIR/
 
 # build installer package
 productbuild --distribution $BUILDDIR/qaul.xml --resources $BUILDDIR/tmp_pkg --package-path $BUILDDIR/tmp_pkg/qaul.pkg $BUILDDIR/tmp_dmg/qaul.net_installer.pkg
@@ -39,3 +40,4 @@ hdiutil create -volname "qaul.net OSX installer" -srcfolder $BUILDDIR/tmp_dmg -o
 
 # remove temporary directories
 rm -Rf $BUILDDIR/tmp_*
+rm $BUILDDIR/qaul.pkg
