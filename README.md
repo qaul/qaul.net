@@ -27,6 +27,7 @@ tested on in the [documentation folder](doc). Feel free to add new ports!
   * Debian, Ubuntu, Mint [doc/Linux_Debian.md](doc/Linux_Debian.md)
   * All other Linux distributions [doc/Linux.md](doc/Linux.md)
 * OSX [doc/OSX.md](doc/OSX.md)
+* Windows [doc/Windows.md](doc/Windows.md)
 * Raspberry Pi
   * Ubuntu Mate [doc/Raspberry_UbuntuMate.md](doc/Raspberry_UbuntuMate.md)
 
