@@ -57,3 +57,23 @@ To start qaul from the terminal execute the following:
 
 	# start qaul from the terminal to see the log messages
 	/Applications/qaul.app/Contents/MacOS/qaul
+
+
+Remove and Re-Install qaul
+--------------------------
+
+To remove or reinstall the qaul application do the following:
+
+	# remove the installed application and files
+	## delete the app folder
+	sudo rm -R /Applications/qaul.app
+	## delete the libraries and helper files
+	sudo rm -R /Library/qaul.net
+	## delete the user data folder
+	rm -R ~/Library/qaul.net
+	
+	# rebuild the application LaunchServices
+	/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
+
+
+Now you can re-install the app via the installer.
