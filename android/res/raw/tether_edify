@@ -61,8 +61,8 @@ action() == "start" && (
 	      sleep("3");
 
 	      # Bring up wifi interface
-	      log(run_program("/data/data/net.qaul.qaul/bin/ifconfig " + getcfg("wifi.interface") + " " + getcfg("ip.address") + " netmask " + getcfg("ip.netmask")) &&
-	                  run_program("/data/data/net.qaul.qaul/bin/ifconfig " + getcfg("wifi.interface") + " up"),  "Activating WiFi interface");
+	      log(run_program("/system/bin/ifconfig " + getcfg("wifi.interface") + " " + getcfg("ip.address") + " netmask " + getcfg("ip.netmask")) &&
+	                  run_program("/system/bin/ifconfig " + getcfg("wifi.interface") + " up"),  "Activating WiFi interface");
 	      log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " mode ad-hoc"), "Setting ad-hoc mode");
 	      log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " essid " + getcfg("wifi.essid")), "Setting essid");
 	      log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " channel " + getcfg("wifi.channel")), "Setting channel");
@@ -83,8 +83,8 @@ action() == "start" && (
 		log(load_wifi(), "Loading WiFi driver");
 		  
 		# Bring up wifi interface
-		log(run_program("/data/data/net.qaul.qaul/bin/ifconfig " + getcfg("wifi.interface") + " " + getcfg("ip.address") + " netmask " + getcfg("ip.netmask")) &&
-			run_program("/data/data/net.qaul.qaul/bin/ifconfig " + getcfg("wifi.interface") + " up"),  "Activating WiFi interface");
+		log(run_program("/system/bin/ifconfig " + getcfg("wifi.interface") + " " + getcfg("ip.address") + " netmask " + getcfg("ip.netmask")) &&
+			run_program("/system/bin/ifconfig " + getcfg("wifi.interface") + " up"),  "Activating WiFi interface");
 		log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " mode ad-hoc"), "Setting ad-hoc mode");
 		log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " essid " + getcfg("wifi.essid")), "Setting essid");
 		log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " channel " + getcfg("wifi.channel")), "Setting channel");
@@ -165,7 +165,7 @@ action() == "stop" &&
   # Wifi mode, bring interface down, kill dnsmasq/wpa_supplicant, remove module.
   #
     kill_process("wpa_supplicant");
-    run_program("/data/data/net.qaul.qaul/bin/ifconfig " +  getcfg("wifi.interface") + " down");
+    run_program("/system/bin/ifconfig " +  getcfg("wifi.interface") + " down");
     
     getcfg("device.type") == "generic" && (
       unload_wifi();

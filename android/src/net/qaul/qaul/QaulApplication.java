@@ -971,8 +971,8 @@ public class QaulApplication extends Application {
 		    	}
 		    	// iptables & portforwarding
 		    	if (message == null) {
-		        	Log.d(MSG_TAG, String.format("installFiles.Runnable() %s", QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/iptables"));
-			    	message = QaulApplication.this.copyFile(QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/iptables", "0755", R.raw.iptables);
+//		        	Log.d(MSG_TAG, String.format("installFiles.Runnable() %s", QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/iptables"));
+//			    	message = QaulApplication.this.copyFile(QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/iptables", "0755", R.raw.iptables);
 		        	Log.d(MSG_TAG, String.format("copy configuration %s", QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/iptables_start.sh"));
 			    	message = QaulApplication.this.copyFile(QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/iptables_start.sh", "0755", R.raw.iptables_start);
 		        	Log.d(MSG_TAG, String.format("copy configuration %s", QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/iptables_stop.sh"));
@@ -982,11 +982,11 @@ public class QaulApplication extends Application {
 		        	Log.d(MSG_TAG, String.format("installFiles.Runnable() %s", QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/socat_start.sh"));
 			    	message = QaulApplication.this.copyFile(QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/socat_start.sh", "0755", R.raw.socat_start);
 		    	}
-		    	// ifconfig
-		    	if (message == null) {
-		        	Log.d(MSG_TAG, String.format("installFiles.Runnable() %s", QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/ifconfig"));
-			    	message = QaulApplication.this.copyFile(QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/ifconfig", "0755", R.raw.ifconfig);
-		    	}	
+//		    	// ifconfig
+//		    	if (message == null) {
+//		        	Log.d(MSG_TAG, String.format("installFiles.Runnable() %s", QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/ifconfig"));
+//			    	message = QaulApplication.this.copyFile(QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/ifconfig", "0755", R.raw.ifconfig);
+//		    	}	
 		    	// iwconfig
 		    	if (message == null) {
 		        	Log.d(MSG_TAG, String.format("installFiles.Runnable() %s", QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/iwconfig"));
