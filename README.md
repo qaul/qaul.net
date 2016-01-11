@@ -1,7 +1,7 @@
 ![http://qaul.net/](doc/qaul-net.png)
 
-qaul.net Next Generation
-========================
+qaul.net
+========
 
 **qaul.net** is an ad-hoc wireless mesh-network suite that harnesses the 
 power of everyday devices such as computers and smartphone to create a 
