@@ -11,7 +11,7 @@ Prerequisites
 ### Android SDK/NDK
 
 For building the Android version of qaul.net you will need both the Source
-Develpment Kit *and* the Native Development Kit
+Development Kit *and* the Native Development Kit
 
 * Get the NDK https://developer.android.com/tools/sdk/ndk/index.html
 * Get the SDK https://developer.android.com/sdk/index.html
@@ -23,9 +23,7 @@ Add `sdk` to `path` if the installer had not done it automatically.
 
 The program ant needs to be installed
 
-* Linux
-
-	# install ant
+	# install ant on Debian / Ubuntu Linux
 	sudo apt-get install ant
 
 
@@ -63,7 +61,7 @@ Build
 You will find the newly built apk in `android/bin`.
 
     # install your app from the command line
-    # make sure your phone is connected
+    # make sure your phone is connected and debugging mode is activated
     adb install android/bin/QaulActivity-debug.apk
 
 
