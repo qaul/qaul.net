@@ -1,14 +1,14 @@
-INSERT INTO "config" ('key','type','value') VALUES('exe.4',1,'b2da1ecc9564d455ca3454bb3aff07d755590fea');
-INSERT INTO "file" ('type','hash','suffix','description','size','status','created_at') VALUES(4,'b2da1ecc9564d455ca3454bb3aff07d755590fea','dmg','OSX 10.6 - 10.9',9024497,5,1404555928);
+INSERT INTO "config" ('key','type','value') VALUES('exe.4',1,'eaca90ba73ad706bdef46254e030f99657e995bb');
+INSERT INTO "file" ('type','hash','suffix','description','size','status','created_at') VALUES(4,'eaca90ba73ad706bdef46254e030f99657e995bb','dmg','OSX 10.6 - 10.11',4572486,5,1452474598);
 
-INSERT INTO "config" ('key','type','value') VALUES('exe.8',1,'f7024c06cdc74a847ee6a53b83d6270c8f09d2e4');
-INSERT INTO "file" ('type','hash','suffix','description','size','status','created_at') VALUES(4,'f7024c06cdc74a847ee6a53b83d6270c8f09d2e4','exe','Windows 7 / 8',5089108,5,1405091497);
+INSERT INTO "config" ('key','type','value') VALUES('exe.8',1,'c9ed719e9f0c7cb94fa0968d25a34cbfe57be888');
+INSERT INTO "file" ('type','hash','suffix','description','size','status','created_at') VALUES(4,'c9ed719e9f0c7cb94fa0968d25a34cbfe57be888','exe','Windows 7 / 8 / 10',3358883,5,1452474625);
 
-INSERT INTO "config" ('key','type','value') VALUES('exe.16',1,'78f6362772319c2a0211a517480e30d6f138d5df');
-INSERT INTO "file" ('type','hash','suffix','description','size','status','created_at') VALUES(4,'78f6362772319c2a0211a517480e30d6f138d5df','apk','Android',3087953,5,1389912303);
+INSERT INTO "config" ('key','type','value') VALUES('exe.16',1,'a212f35aa009727a0b7449b6853bb11562225057');
+INSERT INTO "file" ('type','hash','suffix','description','size','status','created_at') VALUES(4,'a212f35aa009727a0b7449b6853bb11562225057','apk','Android',3446130,5,1452534179);
 
-INSERT INTO "config" ('key','type','value') VALUES('exe.64',1,'d1b974b08282d60a9d5a2af3363b1f3821203358');
-INSERT INTO "file" ('type','hash','suffix','description','size','status','created_at') VALUES(4,'d1b974b08282d60a9d5a2af3363b1f3821203358','deb','ubuntu & debian 32 Bit',2632370,5,1403784804);
+INSERT INTO "config" ('key','type','value') VALUES('exe.64',1,'f5bdc7e4792365145133c5f8ad51055d8c1203e9');
+INSERT INTO "file" ('type','hash','suffix','description','size','status','created_at') VALUES(4,'f5bdc7e4792365145133c5f8ad51055d8c1203e9','deb','Ubuntu & Debian 32 Bit',3143826,5,1452474677);
 
-INSERT INTO "config" ('key','type','value') VALUES('exe.128',1,'73a4c8c8340418e68d47c122b610103d3f05fa6f');
-INSERT INTO "file" ('type','hash','suffix','description','size','status','created_at') VALUES(4,'73a4c8c8340418e68d47c122b610103d3f05fa6f','deb','ubuntu & debian 64 Bit',2683868,5,1403784798);
+INSERT INTO "config" ('key','type','value') VALUES('exe.128',1,'fbb6d6923587b09d3735730099dee7f8dfe4b271');
+INSERT INTO "file" ('type','hash','suffix','description','size','status','created_at') VALUES(4,'fbb6d6923587b09d3735730099dee7f8dfe4b271','deb','Ubuntu & Debian 64 Bit',3124088,5,1452474703);
