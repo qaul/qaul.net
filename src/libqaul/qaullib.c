@@ -86,7 +86,7 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 #ifdef WIN32
 	strcat(filesPath, "\\files\\");
 #else
-	strcat(filesRewrites, "/files/");
+	strcat(filesPath, "/files/");
 #endif
 
 	// set url rewrites
