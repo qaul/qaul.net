@@ -85,6 +85,8 @@ int main(int argc, char *argv[])
 	// set paths
 	sprintf(qaulHomePath, "%s/.qaul", (char*)g_get_home_dir());
 	printf ("qaul.net home directory is %s\n", qaulHomePath);
+	sprintf(qaulResourcePath, "%s/lib/qaul", QAUL_ROOT_PATH);
+	printf ("qaul.net resource directory is %s\n", qaulResourcePath);
 
 	// create qaul user directory
 	if(!g_file_test(qaulHomePath, G_FILE_TEST_EXISTS))
@@ -100,7 +102,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Update user folder to qaul.net version %s\n", QAUL_VERSION);
 		// copy www folder
-		sprintf(qaulTmpPath, "%s/lib/qaul/www/files", QAUL_ROOT_PATH);
+		sprintf(qaulTmpPath, "%s/www/files", qaulResourcePath);
 		sprintf(qaulTmpPath2, "%s/files", qaulHomePath);
 		if(!qaul_copyDirectory(qaulTmpPath, qaulTmpPath2))
 			printf("qaul copy directory error. source: %s target: %s\n", qaulTmpPath, qaulTmpPath2);
