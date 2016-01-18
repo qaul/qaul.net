@@ -270,6 +270,11 @@ int Qaullib_GetWifiChannel(void);
 /**
  * get IP
  *
+ * This function returns the IP.
+ * If the IP is unknown, it gets the IP from the data base.
+ * If there is no IP configured yet, it generates an IP
+ * and writes it into the data base.
+ *
  * @retval string of IP e.g. "10.33.234.12"
  */
 const char* Qaullib_GetIP(void);

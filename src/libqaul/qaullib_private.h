@@ -192,14 +192,6 @@ int Qaullib_StringDbUnprotect(char *unprotected_string, char *protected_string, 
 void Qaullib_SetProtocol(int protocol);
 
 /**
- * set @a IP address
- *
- * @retval 1 success
- * @retval 0 error
- */
-int Qaullib_SetIP(const char* IP);
-
-/**
  * create an @a IP
  */
 void Qaullib_CreateIP(char* IP);

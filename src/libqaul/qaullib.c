@@ -848,36 +848,22 @@ const char* Qaullib_GetIP(void)
 	qaul_ip_version = AF_INET;
 	qaul_ip_size = sizeof(struct in_addr);
 
-	// check if username is in Database
-	if (Qaullib_DbGetConfigValue("ip", qaul_ip_str))
+	// get IP from data base
+	if (Qaullib_DbGetConfigValue("ip", qaul_ip_str) == 0)
 	{
-		// create ip bin
-		// FIXME: ipv6
-		inet_pton(AF_INET, qaul_ip_str, &qaul_ip_addr.v4);
-
-		qaul_ip_set = 1;
-		// return string
-		return qaul_ip_str;
+		// create new IP if not in data base
+		Qaullib_CreateIP(qaul_ip_str);
+		// write IP into data base
+		Qaullib_DbSetConfigValue("ip", qaul_ip_str);
 	}
 
-	// create new IP
-	Qaullib_CreateIP(qaul_ip_str);
-	// write IP into config
-	Qaullib_SetIP(qaul_ip_str);
-	// return IP
-	return qaul_ip_str;
-}
-
-int Qaullib_SetIP(const char* IP)
-{
-	Qaullib_DbSetConfigValue("ip", IP);
-	strcpy(qaul_ip_str, IP);
 	// create ip bin
 	// FIXME: ipv6
 	inet_pton(AF_INET, qaul_ip_str, &qaul_ip_addr.v4);
 
 	qaul_ip_set = 1;
-	return 1;
+	// return string
+	return qaul_ip_str;
 }
 
 void Qaullib_CreateIP(char* IP)
