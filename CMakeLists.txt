@@ -16,7 +16,7 @@ include (ExternalProject)
 set (Qaul_VERSION_MAJOR 1)
 set (Qaul_VERSION_MINOR 0)
 set (Qaul_VERSION_PATCH 0)
-set (Qaul_VERSION_SUFFIX "beta5")
+set (Qaul_VERSION_SUFFIX "beta4")
 set (Qaul_VERSION "${Qaul_VERSION_MAJOR}.${Qaul_VERSION_MINOR}.${Qaul_VERSION_PATCH}.${Qaul_VERSION_SUFFIX}")
 
 # install configuration

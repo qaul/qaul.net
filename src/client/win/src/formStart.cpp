@@ -16,8 +16,9 @@
 #include <objbase.h>
 #include <wtypes.h>
 #include <iphlpapi.h>
-#include <shlobj.h>//for knownFolder
-#include <winerror.h> //for HRESULT
+#include <shlobj.h>   // for knownFolder
+#include <winerror.h> // for HRESULT
+#include <filesystem> // for CopyDirectory
 
 
 #define MAX_TRIES 3
@@ -38,13 +39,19 @@ using namespace System::Runtime::InteropServices;
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "comdlg32.lib") // needed for GetOpenFileName() function
 #pragma comment(lib, "Shell32.lib")  // needed for ShellExecute() function
-#pragma comment(lib, "comsuppw")     // needed for known folder id�s
+#pragma comment(lib, "comsuppw")     // needed for known folder id's
 
 namespace qaul
 {
 void formStart::InitializeQaul(void)
 {
-    qaulStartCounter = 0;
+	HRESULT hr;
+	LPWSTR appLocalPath = NULL;
+	std::string qaulHomePathString("\?");
+	LPWSTR qaulDownloadPath = NULL;
+	std::string qaulDownloadPathString("\?");
+
+	qaulStartCounter = 0;
 	qaulIpcCounter = 0;
 	qaulTestError = false;
 	qaulInterfaceManual = false;
@@ -52,20 +59,76 @@ void formStart::InitializeQaul(void)
 	// configure firewall
 	ConfigureFirewall();
 
+	// set Path for qaul home directory
+	hr = SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_CREATE, NULL, &appLocalPath);
+	if (SUCCEEDED(hr))
+	{
+		cvtLPW2stdstring(qaulHomePathString, appLocalPath, CP_ACP);
+		qaulHomePathString = qaulHomePathString + "\\qaul.net";
+	}
+
+	// check if home folder exists
+	std::wstring tmpStr1(appLocalPath);
+	std::wstring tmpStr2 = tmpStr1 + L"\\qaul.net";
+	LPCWSTR qaulHomePath = tmpStr2.c_str();
+
+	Debug::WriteLine(L"formStart::InitializeQaul");
+
+	if (GetFileAttributes(qaulHomePath) == INVALID_FILE_ATTRIBUTES)
+	{
+		Debug::WriteLine(L"formStart::InitializeQaul create folder");
+
+		// create folder
+		CreateDirectory(qaulHomePath, NULL);
+
+		Debug::WriteLine(L"formStart::InitializeQaul copy folder files");
+
+		// TODO: copy "files" folder to qaul home directory
+		// TEMP_WORKAROUND: manually create folder "files"
+		std::wstring qaulFilesPathString = std::wstring(qaulHomePath) + L"\\files";
+		LPCWSTR qaulFilesPath = qaulFilesPathString.c_str();
+		CreateDirectory(qaulFilesPath, NULL);
+		/*
+		// copy folder "files"
+		std::wstring tmpResourcePath;
+		MarshalClrStringToWstring(qaulResourcePath, tmpResourcePath);
+		std::wstring qaulFilesOrigString = tmpResourcePath + L"\\www\\files";
+		LPCWSTR qaulFilesOrig = qaulFilesOrigString.c_str();
+		//std::wstring qaulFilesDestString = std::wstring(qaulHomePath) + L"\\files";
+		std::wstring qaulFilesDestString = std::wstring(qaulHomePath);
+		LPCWSTR qaulFilesDest = qaulFilesDestString.c_str();
+
+		PIDLIST_ABSOLUTE copyOrigIDL = SHSimpleIDListFromPath(qaulFilesOrig);
+		IShellItem* copyOrigItem;
+		hr = SHCreateItemFromIDList(copyOrigIDL, IID_PPV_ARGS(&copyOrigItem));
+		PIDLIST_ABSOLUTE copyDestIDL = SHSimpleIDListFromPath(qaulHomePath);
+		IShellItem* copyDestItem;
+		hr = SHCreateItemFromIDList(copyDestIDL, IID_PPV_ARGS(&copyDestItem));
+		IFileOperation *pfo;
+		hr = CoCreateInstance(CLSID_FileOperation, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pfo));
+		hr = pfo->SetOperationFlags(FOF_NO_UI);
+		hr = pfo->CopyItem(copyOrigItem, copyDestItem, NULL, NULL);
+		hr = pfo->PerformOperations();
+		if (NULL != copyDestItem)
+			copyDestItem->Release();
+		copyOrigItem->Release();
+		hr = pfo->Release();
+		*/
+		Debug::WriteLine(L"formStart::InitializeQaul folder copied");
+	}
+
+
 	// initialize qaullib
-	Qaullib_Init((char*)(void*)Marshal::StringToHGlobalAnsi(qaulResourcePath));
+	Qaullib_Init(qaulHomePathString.c_str(), (char*)(void*)Marshal::StringToHGlobalAnsi(qaulResourcePath));
 	Debug::WriteLine(L"Qaullib_Init initialized");
 	
 	// set qaullib configuration options
 	Qaullib_SetConf(QAUL_CONF_INTERFACE);
 
 	// set path to download folder
-	HRESULT hr;
-	LPWSTR qaulDownloadPath = NULL;
 	hr = SHGetKnownFolderPath(FOLDERID_Downloads, 0, NULL, &qaulDownloadPath);
 	if(SUCCEEDED(hr))
 	{
-		std::string qaulDownloadPathString("\?");
 		cvtLPW2stdstring(qaulDownloadPathString, qaulDownloadPath, CP_ACP);
 		Qaullib_SetConfDownloadFolder(qaulDownloadPathString.c_str());
 	}
@@ -1399,6 +1462,18 @@ void formStart::backgroundWorkerStart_RunWorkerCompleted( Object^ /*sender*/, Ru
 {
 	qaulStartCounter++;
 	QaulStarting();
+}
+
+
+/**
+ * Marshalling helper functions
+ */
+void formStart::MarshalClrStringToWstring(String ^ s, std::wstring& os)
+{
+	using namespace Runtime::InteropServices;
+	const wchar_t* chars = (const wchar_t*)(Marshal::StringToHGlobalUni(s)).ToPointer();
+	os = chars;
+	Marshal::FreeHGlobal(IntPtr((void*)chars));
 }
 
 }
