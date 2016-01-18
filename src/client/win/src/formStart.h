@@ -107,7 +107,7 @@ namespace qaul {
 			osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 			if(osvi.dwMajorVersion < 6) isXP = true; // is XP
 			
-			// set resource Path
+			// set Paths
 			qaulResourcePath = Application::StartupPath::get();
 			Debug::WriteLine(System::String::Format("ExecutablePath: {0} ",qaulResourcePath));
 
@@ -158,6 +158,12 @@ namespace qaul {
 	System::ComponentModel::BackgroundWorker^ backgroundWorkerStart;
 	void backgroundWorkerStart_DoWork( Object^ sender, DoWorkEventArgs^ e );
 	void backgroundWorkerStart_RunWorkerCompleted( Object^ /*sender*/, RunWorkerCompletedEventArgs^ e );
+
+
+	/**
+	 * Marshalling helper function
+	 */
+	void formStart::MarshalClrStringToWstring(String ^ s, std::wstring& os);
 
 	// ----------------------------------------------
 	protected: 
