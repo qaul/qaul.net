@@ -84,10 +84,12 @@ void formStart::InitializeQaul(void)
 		Debug::WriteLine(L"formStart::InitializeQaul copy folder files");
 
 		// TODO: copy "files" folder to qaul home directory
+		/*
 		// TEMP_WORKAROUND: manually create folder "files"
 		std::wstring qaulFilesPathString = std::wstring(qaulHomePath) + L"\\files";
 		LPCWSTR qaulFilesPath = qaulFilesPathString.c_str();
 		CreateDirectory(qaulFilesPath, NULL);
+		*/
 		/*
 		// copy folder "files"
 		std::wstring tmpResourcePath;
@@ -119,7 +121,9 @@ void formStart::InitializeQaul(void)
 
 
 	// initialize qaullib
-	Qaullib_Init(qaulHomePathString.c_str(), (char*)(void*)Marshal::StringToHGlobalAnsi(qaulResourcePath));
+	// TODO: move qaullib data base and files folder to user space
+	//Qaullib_Init(qaulHomePathString.c_str(), (char*)(void*)Marshal::StringToHGlobalAnsi(qaulResourcePath));
+	Qaullib_Init((char*)(void*)Marshal::StringToHGlobalAnsi(qaulResourcePath), (char*)(void*)Marshal::StringToHGlobalAnsi(qaulResourcePath));
 	Debug::WriteLine(L"Qaullib_Init initialized");
 	
 	// set qaullib configuration options
