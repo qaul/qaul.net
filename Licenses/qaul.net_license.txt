@@ -2,10 +2,10 @@ qaul.net License
 -----------------
 
 qaul.net was written by and is part of the Art project qaul.net: 
-http://www.qaul.net 
+https://qaul.net 
 
 qaul.net is free software, licensed under the GPL license (Version 3).
-You can download it from the Internet: http://www.qaul.net
+You can download it from the Internet: https://qaul.net/download
 
 
 CREDITS

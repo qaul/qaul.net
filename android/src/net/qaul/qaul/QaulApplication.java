@@ -163,13 +163,13 @@ public class QaulApplication extends Application {
         if(!filesPath.exists()) 
         {
         	Log.i(MSG_TAG, "copy all files to data directory");
-        	qaulCopyFilesDir("files");
+        	qaulCopyFileOrDir("");
         }
         
         // initialize the library
         nativeQaul = new NativeQaul();
         Log.i(MSG_TAG, String.format("Files directory is: %s", dataPathString));
-        nativeQaul.libInit(dataPath.toString());
+        nativeQaul.libInit(dataPath.toString(), dataPath.toString());
         // start web server
         nativeQaul.webserverStart();
         
@@ -364,39 +364,7 @@ public class QaulApplication extends Application {
 			qaulStarted = 60;
 		}
 	}
-
-    private void qaulCopyFilesDir(String path) 
-    {
-        AssetManager assetManager = this.getAssets();
-        String assets[] = null;
-        try {
-            Log.i(MSG_TAG, "qaulcopyFilesDir() " +path);
-            assets = assetManager.list("www/" +path);
-            if (assets.length == 0) {
-            	qaulCopyFilesFile(path);
-            } else {
-                String fullPath =  dataPathString +"/" + path;
-                Log.i(MSG_TAG, "path="+fullPath);
-                File dir = new File(fullPath);
-                if (!dir.exists() && !path.startsWith("images") && !path.startsWith("sounds") && !path.startsWith("webkit"))
-                    if (!dir.mkdirs());
-                        Log.i(MSG_TAG, "could not create dir "+fullPath);
-                for (int i = 0; i < assets.length; ++i) {
-                    String p;
-                    if (path.equals(""))
-                        p = "";
-                    else 
-                        p = path + "/";
-
-                    if (!path.startsWith("images") && !path.startsWith("sounds") && !path.startsWith("webkit"))
-                    	qaulCopyFilesDir( p + assets[i]);
-                }
-            }
-        } catch (IOException ex) {
-            Log.e(MSG_TAG, "I/O Exception", ex);
-        }
-    }
-
+    
     private void qaulCopyFileOrDir(String path) 
     {
         AssetManager assetManager = this.getAssets();
@@ -426,38 +394,6 @@ public class QaulApplication extends Application {
             }
         } catch (IOException ex) {
             Log.e(MSG_TAG, "I/O Exception", ex);
-        }
-    }
-
-    private void qaulCopyFilesFile(String filename) 
-    {
-        AssetManager assetManager = this.getAssets();
-
-        InputStream in = null;
-        OutputStream out = null;
-        String newFileName = null;
-        try {
-            Log.i(MSG_TAG, "copyFile() "+filename);
-            in = assetManager.open("www/" +filename);
-            if (filename.endsWith(".jpg")) // extension was added to avoid compression on APK file
-                newFileName = dataPathString +"/" + filename.substring(0, filename.length()-4);
-            else
-                newFileName = dataPathString +"/" + filename;
-            out = new FileOutputStream(newFileName);
-
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-            in.close();
-            in = null;
-            out.flush();
-            out.close();
-            out = null;
-        } catch (Exception e) {
-            Log.e(MSG_TAG, "Exception in copyFile() of "+newFileName);
-            Log.e(MSG_TAG, "Exception in copyFile() "+e.toString());
         }
     }
 

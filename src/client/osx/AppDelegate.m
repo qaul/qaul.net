@@ -68,7 +68,7 @@
         if (![filemgr createDirectoryAtPath:qaulHomePath withIntermediateDirectories:NO attributes:nil error:&dError])
             NSLog(@"Create qaulHomePath directory error: %@", dError);
         
-		if(![filemgr copyItemAtPath:[NSString stringWithFormat:@"%@/www/files", qaulApplicationPath] toPath:[NSString stringWithFormat:@"%@/files", qaulHomePath] error:&dError])
+		if(![filemgr copyItemAtPath:[NSString stringWithFormat:@"%@/files", qaulApplicationPath] toPath:[NSString stringWithFormat:@"%@/files", qaulHomePath] error:&dError])
 			NSLog(@"Error: %@", dError);
 		else
 			NSLog(@"Sucessfully copied");

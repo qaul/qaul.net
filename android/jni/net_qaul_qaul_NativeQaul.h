@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     net_qaul_qaul_NativeQaul
  * Method:    libInit
- * Signature: (Ljava/lang/String;)V
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_net_qaul_qaul_NativeQaul_libInit
-  (JNIEnv *, jobject, jstring);
+  (JNIEnv *, jobject, jstring, jstring);
 
 /*
  * Class:     net_qaul_qaul_NativeQaul

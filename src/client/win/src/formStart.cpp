@@ -94,7 +94,7 @@ void formStart::InitializeQaul(void)
 		// copy folder "files"
 		std::wstring tmpResourcePath;
 		MarshalClrStringToWstring(qaulResourcePath, tmpResourcePath);
-		std::wstring qaulFilesOrigString = tmpResourcePath + L"\\www\\files";
+		std::wstring qaulFilesOrigString = tmpResourcePath + L"\\files";
 		LPCWSTR qaulFilesOrig = qaulFilesOrigString.c_str();
 		//std::wstring qaulFilesDestString = std::wstring(qaulHomePath) + L"\\files";
 		std::wstring qaulFilesDestString = std::wstring(qaulHomePath);

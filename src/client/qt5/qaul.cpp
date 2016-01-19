@@ -28,7 +28,7 @@ Qaul::Qaul(QWidget *parent) :
             qDebug() << "Local path created";
 
             // copy files folder into ~/.qaul directory
-            this->QaulCopyDir(QApplication::applicationDirPath() +"/www/files", qaulLocalDirectory +"/files");
+            this->QaulCopyDir(QApplication::applicationDirPath() +"GUI/files", qaulLocalDirectory +"/files");
             //QaulCopyDir(const QString &srcPath, const QString &dstPath)
         }
     }

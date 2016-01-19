@@ -65,10 +65,10 @@ add_custom_command(TARGET qaul POST_BUILD
 		"${LIBQAUL_BUILD}/libqaul.dll"
 		"$<TARGET_FILE_DIR:qaul>"
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
-		"${QAUL_SRC}/www"
+		"${QAUL_SRC}/GUI/www"
 		"$<TARGET_FILE_DIR:qaul>/www"
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
-		"${QAUL_SRC}/www/files"
+		"${QAUL_SRC}/GUI/files"
 		"$<TARGET_FILE_DIR:qaul>/files"
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		"${QAUL_BUILD}/third_party/olsr/src/olsr/olsrd.exe"
@@ -97,7 +97,7 @@ install(TARGETS
 )
 install(DIRECTORY
 	"${QAUL_SRC}/www"
-	"${QAUL_SRC}/www/files"
+	"${QAUL_SRC}/files"
 	DESTINATION bin
 )
 install(FILES 
@@ -122,7 +122,7 @@ set(CPACK_PACKAGE_EXECUTABLES "qaul" "qaul.net")
 set(CPACK_PACKAGE_ICON "${QAUL_SRC}/distfiles/win\\\\installer-icon.bmp")
 set(CPACK_NSIS_MUI_ICON "${QAULWIN_SRC}/app.ico")
 set(CPACK_NSIS_MUI_UNIICON "${QAULWIN_SRC}/app.ico")
-set(CPACK_NSIS_HELP_LINK "http://www.qaul.net")
+set(CPACK_NSIS_HELP_LINK "http://qaul.net")
 set(CPACK_NSIS_MODIFY_PATH ON)
 set(CPACK_RESOURCE_FILE_LICENSE "${QAUL_SRC}/Licenses/qaul.net_license.txt")
 

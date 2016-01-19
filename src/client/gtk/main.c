@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Update user folder to qaul.net version %s\n", QAUL_VERSION);
 		// copy www folder
-		sprintf(qaulTmpPath, "%s/www/files", qaulResourcePath);
+		sprintf(qaulTmpPath, "%s/files", qaulResourcePath);
 		sprintf(qaulTmpPath2, "%s/files", qaulHomePath);
 		if(!qaul_copyDirectory(qaulTmpPath, qaulTmpPath2))
 			printf("qaul copy directory error. source: %s target: %s\n", qaulTmpPath, qaulTmpPath2);

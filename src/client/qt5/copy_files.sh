@@ -16,5 +16,6 @@ cp ../usr_share_qaul/portfwd.conf ./
 cp ../usr_share_qaul/tail ./
 
 # web
-cp -R ../../www ./
+cp -R ../../GUI/www ./
+cp -R ../../GUI/files ./
 
