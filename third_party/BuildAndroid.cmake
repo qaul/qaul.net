@@ -22,6 +22,7 @@ ExternalProject_Add(olsr
     COMMAND ${CMAKE_COMMAND} -DSRC=<BINARY_DIR>/olsrd -DDEST=${CMAKE_BINARY_DIR}/android/res/raw -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
     COMMAND ${CMAKE_COMMAND} -DSRC=<BINARY_DIR>/lib/olsrd_qaul/olsrd_qaul.so.0.1 -DDEST=${CMAKE_BINARY_DIR}/android/res/raw/ -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
     COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_BINARY_DIR}/android/res/raw/olsrd_qaul.so.0.1 -DDEST=${CMAKE_BINARY_DIR}/android/res/raw/olsrd_qaul_so_0_1 -P ${CMAKE_SOURCE_DIR}/cmake/FileRename.cmake
+    COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_BINARY_DIR}/android/res/raw/olsrd_dyn_gw.so.0.5 -DDEST=${CMAKE_BINARY_DIR}/android/res/raw/olsrd_dyn_gw_so_0_5 -P ${CMAKE_SOURCE_DIR}/cmake/FileRename.cmake
     INSTALL_COMMAND ""
 )
 

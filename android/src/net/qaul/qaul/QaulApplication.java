@@ -952,6 +952,8 @@ public class QaulApplication extends Application {
 			    	message = QaulApplication.this.copyFile(QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/olsrd.conf", "0755", R.raw.olsrd_conf);
 		        	Log.d(MSG_TAG, String.format("copy configuration %s", QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/olsrd_qaul.so.0.1"));
 			    	message = QaulApplication.this.copyFile(QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/olsrd_qaul.so.0.1", "0755", R.raw.olsrd_qaul_so_0_1);
+		        	Log.d(MSG_TAG, String.format("copy configuration %s", QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/olsrd_dyn_gw.so.0.5"));
+		        	message = QaulApplication.this.copyFile(QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/olsrd_dyn_gw.so.0.5", "0755", R.raw.olsrd_dyn_gw_so_0_5);
 		        	Log.d(MSG_TAG, String.format("installFiles.Runnable() %s", QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/olsrd"));
 			    	message = QaulApplication.this.copyFile(QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/olsrd", "0755", R.raw.olsrd);
 		        	Log.d(MSG_TAG, String.format("copy configuration %s", QaulApplication.this.coretask.DATA_FILE_PATH+"/bin/olsrd_start.sh"));
