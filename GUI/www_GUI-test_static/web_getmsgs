@@ -1,0 +1,11 @@
+{"name":"myuser",
+"messages":[
+{"id":24,"type":13,"name":"user","ip":"127.0.0.1","msg":{"connected":1},"time":"2012-02-02T19:59:42Z"},
+{"id":23,"type":3,"name":"user","ip":"127.0.0.1","msg":{"connected":0},"time":"2012-02-02T19:59:42Z"},
+{"id":24,"type":1,"name":"user","ip":"127.0.0.1","msg":"@name smilies :-) ;-) :-@ :-D :-P #public #received","time":"2012-02-02T19:59:42Z"},
+{"id":25,"type":2,"name":"user2","ip":"127.0.0.1","msg":"private message: sad :-( astonished :-o cool 8-) embarrassed :-/ confused :-| me@yahoo.com #private #received","time":"2012-02-02T19:59:42Z"},
+{"id":26,"type":11,"name":"otheruser","ip":"127.0.0.1","msg":"@user a message contains 140 characters max. http://qaul.net #public #sent","time":"2012-02-02T19:59:42Z"},
+{"id":27,"type":12,"name":"user","ip":"127.0.0.1","msg":"important message #important #private #sent","time":"2012-02-02T19:59:42Z"},
+{"id":24,"type":13,"name":"user","ip":"127.0.0.1","msg":{"connected":0},"time":"2012-02-02T19:59:42Z"},
+{"id":28,"type":1,"name":"user","ip":"127.0.0.1","msg":"2fd4e1c67a2d28fced849ee1bb76e7391b93eb12.jpg great picture :-) #public #received","time":"2012-02-02T19:59:42Z"}
+]}

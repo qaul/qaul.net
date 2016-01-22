@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+	<!--[if gte IE 8]><meta http-equiv="X-UA-Compatible" content="IE=8"/><![endif]-->
+	<!--[if gte IE 7]><meta http-equiv="X-UA-Compatible" content="IE=7"/><![endif]-->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>qaul.net</title>
+	<link rel="stylesheet" type="text/css" href="jquery.mobile.min.css" />
+	<link rel="stylesheet" type="text/css" href="qaul.css"/> 
+	<script type="text/javascript" src="jquery.min.js"></script>
+	<script type="text/javascript" src="jquery-jsonp.min.js"></script>
+	<script type="text/javascript" src="jquery.validate.min.js"></script>
+	<script type="text/javascript" src="jquery.progressbar.min.js"></script>
+	<script type="text/javascript" src="jquery.i18n.min.js"></script>
+	<script type="text/javascript" src="jquery.mobile.min.js"></script>
+	<script type="text/javascript" src="string2byte.js"></script>
+	<script type="text/javascript">
+		function debugScreenSize(w, h)
+		{
+			window.open("qaul.html", w +"_" +h, "width="+w +",height="+h +",status=no,location=no");
+		}
+	</script>
+</head>
+<body>
+
+<div data-role="page" data-theme="d">
+	<div data-role="content">
+		<h2 data-icon="arrow-r">Test Screen Sizes</h2>
+		<p><a onclick="debugScreenSize(400,592)" data-role="button">Desktop (400 x 592)</a></p>
+		<h3>phones</h3>
+		<p>Xperia mini pro (320 x 480) <a onclick="debugScreenSize(320,480)" data-role="button" data-inline="true" data-mini="true">portrait</a> <a onclick="debugScreenSize(480,400)" data-role="button" data-inline="true" data-mini="true">landscape</a></p>
+		<p>Nokia N97 (360 x 640) <a onclick="debugScreenSize(360,640)" data-role="button" data-inline="true" data-mini="true">portrait</a> <a onclick="debugScreenSize(640,360)" data-role="button" data-inline="true" data-mini="true">landscape</a></p>
+		<p>iPhone 3G/3GS, iPod (320 x 480, 164ppi) <a onclick="debugScreenSize(320,480)" data-role="button" data-inline="true" data-mini="true">portrait</a> <a onclick="debugScreenSize(480,320)" data-role="button" data-inline="true" data-mini="true">landscape</a></p>
+		<p>iPhone 4/4S (640 x 960, 326ppi) <a onclick="debugScreenSize(640,960)" data-role="button" data-inline="true" data-mini="true">portrait</a> <a onclick="debugScreenSize(960,640)" data-role="button" data-inline="true" data-mini="true">landscape</a></p>
+		<p>Galaxy S, Galaxy S2, N900 (480 x 800, 266ppi) <a onclick="debugScreenSize(480,800)" data-role="button" data-inline="true" data-mini="true">portrait</a> <a onclick="debugScreenSize(800,480)" data-role="button" data-inline="true" data-mini="true">landscape</a></p>
+		<h3>tablets</h3>
+		<p>iPad (768 x 1024) <a onclick="debugScreenSize(768,1024)" data-role="button" data-inline="true" data-mini="true">portrait</a> <a onclick="debugScreenSize(1024,768)" data-role="button" data-inline="true" data-mini="true">landscape</a></p>
+	</div>
+</div>
+
+</body>
+</html>

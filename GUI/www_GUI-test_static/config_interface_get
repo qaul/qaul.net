@@ -1,0 +1,7 @@
+{"manual":0,
+"selected":"en1",
+"interfaces":[
+{"name":"en0","ui_name":"Ethernet","type":0},
+{"name":"en1","ui_name":"Wi-Fi","type":1},
+{"name":"en20","ui_name":"Wi-Fi USB Stick","type":0}
+]}

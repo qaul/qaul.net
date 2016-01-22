@@ -1,0 +1,8 @@
+{"users":[
+{"name":"otheruser","ip":"10.0.0.2","id":"usera3ee5e6b4b0d3255bfef002","lq":2,"add":1},
+{"name":"thirduser","ip":"10.0.0.3","id":"usera3ee5e6b4b0d3255bfef003","lq":3,"add":0},
+{"name":"otheruser","ip":"10.95.0.4","id":"usera3ee5e6b4b0d3255bfef004","lq":4,"add":1},
+{"name":"light[WEB]","ip":"10.95.0.5","id":"usera3ee5e6b4b0d3255bfef005","lq":3,"add":1},
+{"name":"other[WEB]","ip":"10.95.0.6","id":"usera3ee5e6b4b0d3255bfef006","lq":4,"add":1},
+{"name":"myself[WEB]","ip":"10.95.0.7","id":"usera3ee5e6b4b0d3255bfef007","lq":1,"add":1}
+]}
