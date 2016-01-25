@@ -96,8 +96,8 @@ install(TARGETS
 	DESTINATION bin
 )
 install(DIRECTORY
-	"${QAUL_SRC}/www"
-	"${QAUL_SRC}/files"
+	"${QAUL_SRC}/GUI/www"
+	"${QAUL_SRC}/GUI/files"
 	DESTINATION bin
 )
 install(FILES 
