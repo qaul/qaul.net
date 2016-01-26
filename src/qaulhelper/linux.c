@@ -15,10 +15,10 @@
  *   qaulhelper startportforwarding wlan0 10.213.28.55
  *   qaulhelper stopportforwarding
  *   qaulhelper stopportforwarding
- *   qaulhelper startgateway <INTERFACE>
- *   qaulhelper startgateway wlan0
- *   qaulhelper stopgateway
- *   qaulhelper stopgateway
+ *   qaulhelper startgateway <INTERFACE OUT> <INTERFACE OUT>
+ *   qaulhelper startgateway eth0 wlan0
+ *   qaulhelper stopgateway <INTERFACE OUT> <INTERFACE IN>
+ *   qaulhelper stopgateway eth0 wlan0
  *   qaulhelper startnetworkmanager
  *   qaulhelper startnetworkmanager
  *   qaulhelper stopnetworkmanager
@@ -49,7 +49,7 @@ int start_olsrd (int argc, const char * argv[])
     if(argc >= 4)
     {
         // validate arguments
-        if(strncmp(argv[3], "yes", 3)==0)
+        if(strncmp(argv[2], "yes", 3)==0)
             snprintf(s, 255, "%s/lib/qaul/etc/olsrd_linux_gw.conf", QAUL_ROOT_PATH);
         else
             snprintf(s, 255, "%s/lib/qaul/etc/olsrd_linux.conf", QAUL_ROOT_PATH);
@@ -123,6 +123,11 @@ int start_portforwarding (int argc, const char * argv[])
             printf("argument 1 not valid\n");
             return 0;
         }
+        if (validate_ip(argv[3]) == 0)
+        {
+            printf("argument 2 not valid\n");
+            return 0;
+        }
 
         // become root
         setuid(0);
@@ -133,7 +138,7 @@ int start_portforwarding (int argc, const char * argv[])
             printf("fork for pid1 failed\n");
         else if(pid1 == 0)
         {
-            // redirect standart output and error to /dev/null
+            // redirect standard output and error to /dev/null
             // the program otherwise often didn't return correctly
             fd = open("/dev/null", O_WRONLY | O_CREAT | O_APPEND);
             dup2(fd, STDOUT_FILENO);
@@ -151,7 +156,7 @@ int start_portforwarding (int argc, const char * argv[])
             printf("fork for pid2 failed\n");
         else if(pid2 == 0)
         {
-            // redirect standart output and error to /dev/null
+            // redirect standard output and error to /dev/null
             // the program otherwise often didn't return correctly
             fd = open("/dev/null", O_WRONLY | O_CREAT | O_APPEND);
             dup2(fd, STDOUT_FILENO);
@@ -169,7 +174,7 @@ int start_portforwarding (int argc, const char * argv[])
             printf("fork for pid3 failed\n");
         else if(pid3 == 0)
         {
-            // redirect standart output and error to /dev/null
+            // redirect standard output and error to /dev/null
             // the program otherwise often didn't return correctly
             fd = open("/dev/null", O_WRONLY | O_CREAT | O_APPEND);
             dup2(fd, STDOUT_FILENO);
@@ -222,11 +227,11 @@ int stop_portforwarding (int argc, const char * argv[])
 
 int start_gateway (int argc, const char * argv[])
 {
-    pid_t pid1, pid2, pid3;
+    pid_t pid1, pid2, pid3, pid4;
     int fd, status;
     printf("start gateway\n");
 
-    if(argc >= 3)
+    if(argc >= 4)
     {
         // validate arguments
         if (validate_interface(argv[2]) == 0)
@@ -234,66 +239,85 @@ int start_gateway (int argc, const char * argv[])
             printf("argument 1 not valid\n");
             return 0;
         }
+        if (validate_interface(argv[3]) == 0)
+        {
+            printf("argument 2 not valid\n");
+            return 0;
+        }
 
-        // NOTE: don't do that withsetuid, for that the user
-        //       has to enter password for this service
-        //
-        // become root
-        //setuid(0);
+        setuid(0);
 
-        // set gateway variable
+        // allow forwarding
         pid1 = fork();
         if (pid1 < 0)
             printf("fork for pid1 failed\n");
         else if(pid1 == 0)
         {
-            // redirect standart output and error to /dev/null
+            // redirect standard output and error to /dev/null
             // the program otherwise often didn't return correctly
             fd = open("/dev/null", O_WRONLY | O_CREAT | O_APPEND);
             dup2(fd, STDOUT_FILENO);
             dup2(fd, STDERR_FILENO);
             close(fd);
             // execute program
-            execl("/usr/sbin/sysctl", "sysctl", "-w", "net.inet.ip.forwarding=1", (char*)0);
+            execl("/sbin/sysctl", "sysctl", "-w", "net.ipv4.ip_forward=1", (char*)0);
         }
         else
             waitpid(pid1, &status, 0);
 
-        // start natd
+        // set NAT and mask IP
         pid2 = fork();
         if (pid2 < 0)
             printf("fork for pid2 failed\n");
         else if(pid2 == 0)
         {
-            // redirect standart output and error to /dev/null
+            // redirect standard output and error to /dev/null
             // the program otherwise often didn't return correctly
             fd = open("/dev/null", O_WRONLY | O_CREAT | O_APPEND);
             dup2(fd, STDOUT_FILENO);
             dup2(fd, STDERR_FILENO);
             close(fd);
             // execute program
-            execl("/usr/sbin/natd", "natd", "-interface", argv[2], (char*)0);
+            execl("/sbin/iptables", "iptables", "-t", "nat", "-A", "POSTROUTING", "-o", argv[2], "-j", "MASQUERADE", (char*)0);
         }
         else
             waitpid(pid2, &status, 0);
 
-        // set
+        // allow established connections
         pid3 = fork();
         if (pid3 < 0)
             printf("fork for pid3 failed\n");
         else if(pid3 == 0)
         {
-            // redirect standart output and error to /dev/null
+            // redirect standard output and error to /dev/null
             // the program otherwise often didn't return correctly
             fd = open("/dev/null", O_WRONLY | O_CREAT | O_APPEND);
             dup2(fd, STDOUT_FILENO);
             dup2(fd, STDERR_FILENO);
             close(fd);
             // execute program
-            execl("/sbin/ipfw", "ipfw", "add", "1055", "divert", "natd", "all", "from", "any", "to", "any", "via", argv[2], (char*)0);
+            execl("/sbin/iptables", "iptables", "-A", "FORWARD", "-i", argv[2], "-o", argv[3], "-m", "state", "--state", "RELATED,ESTABLISHED", "-j", "ACCEPT", (char*)0);
         }
         else
-            printf("NAT activated\n");
+        	waitpid(pid3, &status, 0);
+
+        // allow outgoing connections
+        pid4 = fork();
+        if (pid4 < 0)
+            printf("fork for pid4 failed\n");
+        else if(pid4 == 0)
+        {
+            // redirect standard output and error to /dev/null
+            // the program otherwise often didn't return correctly
+            fd = open("/dev/null", O_WRONLY | O_CREAT | O_APPEND);
+            dup2(fd, STDOUT_FILENO);
+            dup2(fd, STDERR_FILENO);
+            close(fd);
+            // execute program
+            execl("/sbin/iptables", "iptables", "-A", "FORWARD", "-i", argv[3], "-o", argv[2], "-j", "ACCEPT", (char*)0);
+        }
+        else
+            printf("Internet sharing activated\n");
 
         printf("gateway started\n");
     }
@@ -305,31 +329,85 @@ int start_gateway (int argc, const char * argv[])
 
 int stop_gateway (int argc, const char * argv[])
 {
-    pid_t pid1, pid2;
+    pid_t pid1, pid2, pid3;
+    int fd, status;
     printf("stop gateway\n");
 
-    // become root
-    setuid(0);
+    if(argc >= 4)
+    {
+        // validate arguments
+        if (validate_interface(argv[2]) == 0)
+        {
+            printf("argument 1 not valid\n");
+            return 0;
+        }
+        if (validate_interface(argv[3]) == 0)
+        {
+            printf("argument 2 not valid\n");
+            return 0;
+        }
 
-    // remove firewall rules
-    pid1 = fork();
-    if (pid1 < 0)
-        printf("fork for pid1 failed\n");
-    else if(pid1 == 0)
-        execl("/sbin/ipfw", "ipfw", "delete", "1055", (char*)0);
+        setuid(0);
+
+        // delete NAT
+        pid1 = fork();
+        if (pid1 < 0)
+            printf("fork for pid1 failed\n");
+        else if(pid1 == 0)
+        {
+            // redirect standard output and error to /dev/null
+            // the program otherwise often didn't return correctly
+            fd = open("/dev/null", O_WRONLY | O_CREAT | O_APPEND);
+            dup2(fd, STDOUT_FILENO);
+            dup2(fd, STDERR_FILENO);
+            close(fd);
+            // execute program
+            execl("/sbin/iptables", "iptables", "-t", "nat", "-D", "POSTROUTING", "-o", argv[2], "-j", "MASQUERADE", (char*)0);
+        }
+        else
+            waitpid(pid1, &status, 0);
+
+        // delete incoming rule
+        pid2 = fork();
+        if (pid2 < 0)
+            printf("fork for pid2 failed\n");
+        else if(pid2 == 0)
+        {
+            // redirect standard output and error to /dev/null
+            // the program otherwise often didn't return correctly
+            fd = open("/dev/null", O_WRONLY | O_CREAT | O_APPEND);
+            dup2(fd, STDOUT_FILENO);
+            dup2(fd, STDERR_FILENO);
+            close(fd);
+            // execute program
+            execl("/sbin/iptables", "iptables", "-D", "FORWARD", "-i", argv[2], "-o", argv[3], "-m", "state", "--state", "RELATED,ESTABLISHED", "-j", "ACCEPT", (char*)0);
+        }
+        else
+        	waitpid(pid2, &status, 0);
+
+        // delete outgoing rule
+        pid3 = fork();
+        if (pid3 < 0)
+            printf("fork for pid3 failed\n");
+        else if(pid3 == 0)
+        {
+            // redirect standard output and error to /dev/null
+            // the program otherwise often didn't return correctly
+            fd = open("/dev/null", O_WRONLY | O_CREAT | O_APPEND);
+            dup2(fd, STDOUT_FILENO);
+            dup2(fd, STDERR_FILENO);
+            close(fd);
+            // execute program
+            execl("/sbin/iptables", "iptables", "-D", "FORWARD", "-i", argv[3], "-o", argv[2], "-j", "ACCEPT", (char*)0);
+        }
+        else
+            printf("Internet sharing deactivated\n");
+
+        printf("gateway stopped\n");
+    }
     else
-        printf("firewall rules removed\n");
+        printf("missing argument\n");
 
-    // stop port forwarding
-    pid2 = fork();
-    if (pid2 < 0)
-        printf("fork for pid2 failed\n");
-    else if(pid2 == 0)
-        execl("/usr/bin/killall", "killall", "natd", (char*)0);
-    else
-        printf("natd stopped\n");
-
-    printf("gateway stopped\n");
     return 0;
 }
 

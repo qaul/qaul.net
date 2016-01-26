@@ -34,7 +34,7 @@ static void Qaullib_WwwConfigInterfaceGet(struct mg_connection *conn);
 static void Qaullib_WwwConfigInterfaceSet(struct mg_connection *conn);
 
 /**
- * request interface configuration for internet sharing
+ * request interface configuration for Internet sharing
  */
 static void Qaullib_WwwConfigInternetLoading(struct mg_connection *conn);
 
@@ -609,6 +609,7 @@ static void Qaullib_WwwConfigInternetLoading(struct mg_connection *conn)
 		qaul_interface_configuring = 1;
 		Qaullib_Appevent_LL_Add(QAUL_EVENT_GETINTERFACES);
 	}
+	qaul_internet_configuring = 1;
 
 	// send header
 	mg_send_status(conn, 200);
@@ -627,14 +628,13 @@ static void Qaullib_WwwConfigInternetGet(struct mg_connection *conn)
 	mg_printf_data(conn, "{");
 
 	// configuration method
-	mg_printf_data(conn, "\"share\":%i,", Qaullib_GetConfInt("internet.share"));
+	mg_printf_data(conn, "\"share\":%i,", Qaullib_IsGateway());
 
 	// interface used by qaul
 	mg_printf_data(conn, "\"used\":\"%s\",", Qaullib_GetInterface());
 
 	// selected interfaces
-	Qaullib_GetConfString("internet.interface", qaul_internet_interface);
-	mg_printf_data(conn, "\"selected\":\"%s\",", qaul_internet_interface);
+	mg_printf_data(conn, "\"selected\":\"%s\",", Qaullib_GetGatewayInterface());
 
 	// interfaces
 	mg_printf_data(conn, "\"interfaces\":[");
@@ -662,11 +662,15 @@ static void Qaullib_WwwConfigInternetSet(struct mg_connection *conn)
 		memcpy(&qaul_internet_interface[255], "\0", 1);
 		Qaullib_DbSetConfigValue("internet.interface", qaul_internet_interface);
 
+		Qaullib_Appevent_LL_Add(QAUL_EVENT_GATEWAY_START);
+
 		if(QAUL_DEBUG)
 			printf("share Internet via %s\n", qaul_internet_interface);
 	}
 	else
 	{
+		Qaullib_Appevent_LL_Add(QAUL_EVENT_GATEWAY_STOP);
+
 		if(QAUL_DEBUG)
 			printf("don't share Internet\n");
 	}
@@ -2077,8 +2081,13 @@ static void Qaullib_WwwLoading(struct mg_connection *conn)
 		// wait until interface is configured
 		if(qaul_interface_configuring == 2)
 		{
-			mg_printf_data(conn, "\"change\":1,\"page\":\"#page_config_interface\"");
+			if(qaul_internet_configuring)
+				mg_printf_data(conn, "\"change\":1,\"page\":\"#page_config_internet\"");
+			else
+				mg_printf_data(conn, "\"change\":1,\"page\":\"#page_config_interface\"");
+
 			qaul_interface_configuring = 0;
+			qaul_internet_configuring = 0;
 		}
 		else
 		{

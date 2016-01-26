@@ -17,6 +17,11 @@ configure_file (
 )
 
 configure_file (
+  "${PROJECT_SOURCE_DIR}/distfiles/linux/etc/olsrd_linux_gw.conf.in"
+  "${PROJECT_BINARY_DIR}/distfiles/linux/etc/olsrd_linux_gw.conf"
+)
+
+configure_file (
   "${PROJECT_SOURCE_DIR}/distfiles/linux/bin/qaul.in"
   "${PROJECT_BINARY_DIR}/distfiles/linux/bin/${GUINAME}"
 )

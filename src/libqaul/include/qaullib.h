@@ -17,6 +17,8 @@ extern "C" {
 #define QAUL_EVENT_NOTIFY     103
 #define QAUL_EVENT_RING       104
 #define QAUL_EVENT_GETINTERFACES 105
+#define QAUL_EVENT_GATEWAY_START 106
+#define QAUL_EVENT_GATEWAY_STOP  107
 
 #define QAUL_ERROR_NOWIFI       1
 #define QAUL_ERROR_NOROOT       2
@@ -297,7 +299,7 @@ const char* Qaullib_GetNetNs2(void);
  * check if the interface is set manually
  *
  * @retval 1 interface is set manually
- * @retval 0 interface is set autmatically
+ * @retval 0 interface is set automatically
  */
 int Qaullib_GetInterfaceManual(void);
 
@@ -314,9 +316,29 @@ void Qaullib_SetInterfaceManual(int value);
 const char* Qaullib_GetInterface(void);
 
 /**
+ * set network interface @name
+ */
+void Qaullib_SetInterface(const char* name);
+
+/**
  * set @json string of all available interfaces for the GUI
  */
 void Qaullib_SetInterfaceJson(const char *json);
+
+/**
+ * check if this computer is configured as a gateway to the Internet
+ *
+ * @retval 1 gateway is configured
+ * @retval 0 no gateway
+ */
+int Qaullib_IsGateway(void);
+
+/**
+ * get Internet gateway interface name
+ *
+ * @retval string of Internet gateway interface name e.g. "eth0"
+ */
+const char* Qaullib_GetGatewayInterface(void);
 
 
 /**

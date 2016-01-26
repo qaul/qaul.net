@@ -14,9 +14,11 @@ int main (int argc, const char * argv[])
 {
 	// set OS specific  interface names for help messages
 #ifdef QAUL_PORT_LINUX
-	const char Help_InterfaceName[] = "wlan0";
+	const char Help_InterfaceWifi[] = "wlan0";
+	const char Help_InterfaceEther[] = "eth0";
 #elif defined QAUL_PORT_OSX
-	const char Help_InterfaceName[] = "en1";
+	const char Help_InterfaceWifi[] = "en1";
+	const char Help_InterfaceEther[] = "en0";
 #else
 	#error Something to fix
 #endif
@@ -123,36 +125,44 @@ int main (int argc, const char * argv[])
         printf("qaulhelper executes helper functions for qaul.net\n\n");
         printf("usage:\n");
         printf("  qaulhelper startolsrd <ISGATEWAY yes|no> <INTERFACE>\n");
-        printf("  qaulhelper startolsrd yes %s\n", Help_InterfaceName);
+        printf("  qaulhelper startolsrd yes %s\n", Help_InterfaceWifi);
         printf("  qaulhelper stopolsrd\n");
         printf("  qaulhelper stopolsrd\n");
 #ifdef QAUL_PORT_LINUX
         printf("  qaulhelper startportforwarding <INTERFACE> <IP>\n");
-        printf("  qaulhelper startportforwarding %s 10.213.28.55\n", Help_InterfaceName);
+        printf("  qaulhelper startportforwarding %s 10.213.28.55\n", Help_InterfaceWifi);
 #endif // QAUL_PORT_LINUX
 #ifdef QAUL_PORT_OSX
         printf("  qaulhelper startportforwarding <INTERFACE>\n");
-        printf("  qaulhelper startportforwarding %s\n", Help_InterfaceName);
+        printf("  qaulhelper startportforwarding %s\n", Help_InterfaceWifi);
 #endif // QAUL_PORT_OSX
         printf("  qaulhelper stopportforwarding\n");
         printf("  qaulhelper stopportforwarding\n");
-        printf("  qaulhelper startgateway <INTERFACE>\n");
-        printf("  qaulhelper startgateway %s\n", Help_InterfaceName);
+#ifdef QAUL_PORT_LINUX
+        printf("  qaulhelper startgateway <INTERFACE OUT> <INTERFACE IN>\n");
+        printf("  qaulhelper startgateway %s %s\n", Help_InterfaceEther, Help_InterfaceWifi);
+        printf("  qaulhelper stopgateway <INTERFACE OUT> <INTERFACE IN>\n");
+        printf("  qaulhelper stopgateway %s %s\n", Help_InterfaceEther, Help_InterfaceWifi);
+#endif // QAUL_PORT_LINUX
+#ifdef QAUL_PORT_OSX
+        printf("  qaulhelper startgateway <INTERFACE OUT>\n");
+        printf("  qaulhelper startgateway %s\n", Help_InterfaceEther);
         printf("  qaulhelper stopgateway\n");
         printf("  qaulhelper stopgateway\n");
+#endif // QAUL_PORT_OSX
 #ifdef WITHOUT_NETWORKMANAGER
         printf("  qaulhelper startnetworkmanager\n");
         printf("  qaulhelper startnetworkmanager\n");
         printf("  qaulhelper stopnetworkmanager\n");
         printf("  qaulhelper stopnetworkmanager\n");
         printf("  qaulhelper enablewifi <INTERFACE>\n");
-        printf("  qaulhelper enablewifi %s\n", Help_InterfaceName);
+        printf("  qaulhelper enablewifi %s\n", Help_InterfaceWifi);
         printf("  qaulhelper configurewifi <INTERFACE> <ESSID> <CHANNEL> [<BSSID>]\n");
-        printf("  qaulhelper configurewifi %s qaul.net 11 02:11:87:88:D6:FF\n", Help_InterfaceName);
+        printf("  qaulhelper configurewifi %s qaul.net 11 02:11:87:88:D6:FF\n", Help_InterfaceWifi);
         printf("  qaulhelper setip <INTERFACE> <IP> <SUBNET> <BROADCAST>\n");
-        printf("  qaulhelper setip %s 10.213.28.55 8 10.255.255.255\n", Help_InterfaceName);
+        printf("  qaulhelper setip %s 10.213.28.55 8 10.255.255.255\n", Help_InterfaceWifi);
         printf("  qaulhelper setdns <INTERFACE>\n");
-        printf("  qaulhelper setdns %s\n", Help_InterfaceName);
+        printf("  qaulhelper setdns %s\n", Help_InterfaceWifi);
 #endif // WITHOUT_NETWORKMANAGER
 #ifdef QAUL_PORT_OSX
         printf("  qaulhelper enablewifi <OSXVERSION> <INTERFACE>\n");

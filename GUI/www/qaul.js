@@ -1837,7 +1837,7 @@ function config_internet_load_data()
 function config_internet_data_loaded(data)
 {
 	// toggle flipswitch
-	if(data.autodownload == 1)
+	if(data.share == 1)
 	{
 		$("#c_internet_share").val('1').flipswitch('refresh');
 		$("#c_internet_interface").show();

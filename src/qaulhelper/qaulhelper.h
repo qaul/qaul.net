@@ -9,7 +9,7 @@
  * For this executable the suid bit needs to be set, to be
  * callable from userspace. This is done by the qaul.net installer.
  * The path of the installed qaulhelper binary is:
- *   Linux: /opt/qaul/bin/qaulhelper
+ *   Linux: /usr/local/lib/qaul/bin/qaulhelper
  *   OSX:   /Library/qaul.net/bin/qaulhelper
  *
  * To set the suid bit manually for testing, open a Terminal, navigate

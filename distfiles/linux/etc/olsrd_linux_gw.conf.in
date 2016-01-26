@@ -1,0 +1,24 @@
+AllowNoInt yes
+
+Hna4
+{
+}
+Hna6
+{
+}
+
+LoadPlugin "@CMAKE_INSTALL_PREFIX@/lib/qaul/lib/olsrd_qaul.so.0.1"
+{
+}
+
+LoadPlugin "@CMAKE_INSTALL_PREFIX@/lib/qaul/lib/olsrd_dyn_gw.so.0.5"
+{
+   PlParam     "Interval"   "5"
+   PlParam     "Ping"       "5.45.96.220"
+   PlParam     "Ping"       "185.82.22.133"
+}
+
+InterfaceDefaults
+{
+    Ip4Broadcast 255.255.255.255
+}

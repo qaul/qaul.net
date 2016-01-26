@@ -636,7 +636,7 @@ int set_dns (int argc, const char * argv[])
 
 int start_gateway (int argc, const char * argv[])
 {
-    pid_t pid1, pid2, pid3;
+    pid_t pid1, pid2, pid3, pid4;
     int fd, status;
     printf("start gateway\n");
     
@@ -649,11 +649,11 @@ int start_gateway (int argc, const char * argv[])
             return 0;
         }
         
-        // NOTE: don't do that withsetuid, for that the user 
+        // NOTE: don't do that with setuid, for that the user
         //       has to enter password for this service
         //
         // become root
-        //setuid(0);
+        setuid(0);
         
         // set gateway variable
         pid1 = fork();
@@ -672,12 +672,21 @@ int start_gateway (int argc, const char * argv[])
         }
         else
             waitpid(pid1, &status, 0);
-        
-        // start natd
+
+        // stop natd if it is already running
         pid2 = fork();
         if (pid2 < 0)
             printf("fork for pid2 failed\n");
         else if(pid2 == 0)
+            execl("/usr/bin/killall", "killall", "natd", (char*)0);
+        else
+            printf("natd stopped\n");
+
+        // start natd
+        pid3 = fork();
+        if (pid3 < 0)
+            printf("fork for pid2 failed\n");
+        else if(pid3 == 0)
         {
             // redirect standard output and error to /dev/null
             // the program otherwise often didn't return correctly
@@ -689,13 +698,13 @@ int start_gateway (int argc, const char * argv[])
             execl("/usr/sbin/natd", "natd", "-interface", argv[2], (char*)0);
         }
         else
-            waitpid(pid2, &status, 0);
+            waitpid(pid3, &status, 0);
         
         // set 
-        pid3 = fork();
-        if (pid3 < 0)
+        pid4 = fork();
+        if (pid4 < 0)
             printf("fork for pid3 failed\n");
-        else if(pid3 == 0)
+        else if(pid4 == 0)
         {
             // redirect standard output and error to /dev/null
             // the program otherwise often didn't return correctly

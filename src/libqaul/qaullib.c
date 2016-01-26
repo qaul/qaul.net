@@ -42,6 +42,7 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	qaul_conf_filedownloadfolder_set = 0;
 	sprintf(qaullib_AppEventOpenURL, "http://%s:%s/", IPC_ADDR, CHAT_PORT);
 	qaul_interface_configuring = 0;
+	qaul_internet_configuring = 0;
 
 	// -------------------------------------------------
 	// create buffers for socket communication
@@ -1010,6 +1011,11 @@ const char* Qaullib_GetInterface(void)
 	return "";
 }
 
+void Qaullib_SetInterface(const char* name)
+{
+	Qaullib_DbSetConfigValue("net.interface.name", name);
+}
+
 void Qaullib_SetInterfaceJson(const char *json)
 {
 	if(QAUL_DEBUG)
@@ -1028,6 +1034,18 @@ void Qaullib_SetInterfaceJson(const char *json)
 
 	qaul_interface_configuring = 2;
 }
+
+int Qaullib_IsGateway(void)
+{
+	return Qaullib_GetConfInt("internet.share");
+}
+
+const char* Qaullib_GetGatewayInterface(void)
+{
+	Qaullib_GetConfString("internet.interface", qaul_internet_interface);
+	return qaul_internet_interface;
+}
+
 
 // ------------------------------------------------------------
 void Qaullib_ConfigurationFinished(void)

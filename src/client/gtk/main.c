@@ -54,6 +54,8 @@ void qaul_olsrdStart(void);
 void qaul_olsrdStop(void);
 void qaul_startPortForwarding(void);
 void qaul_stopPortForwarding(void);
+void qaul_startGateway(void);
+void qaul_stopGateway(void);
 
 /// timers
 gint qaulTimerEvents;
@@ -122,6 +124,8 @@ int main(int argc, char *argv[])
 	Qaullib_Init(qaulHomePath, qaulResourcePath);
 	// set configuration
 	Qaullib_SetConf(QAUL_CONF_INTERFACE);
+	Qaullib_SetConf(QAUL_CONF_INTERNET);
+
 	// enable debug menu
 	qaul_conf_debug = 1;
 
@@ -292,6 +296,8 @@ void qaul_onquit(void)
 		// stop services
 		printf("[quit] qaul_stopPortForwarding\n");
 		qaul_stopPortForwarding();
+		printf("[quit] qaul_stopInternetSharing\n");
+		qaul_stopGateway();
 		printf("[quit] qaul_olsrdStop\n");
 		qaul_olsrdStop();
 
@@ -353,7 +359,10 @@ gboolean qaul_configure(gpointer data)
     	else
     	{
     		if(qaul_network_find_wifi(network_dbus_connection, &network_device))
+    		{
+    			Qaullib_SetInterface(network_device.interface);
     			network_interface_found = 1;
+    		}
     		else
     			printf("[configure] no wifi interface found\n");
     	}
@@ -438,6 +447,8 @@ gboolean qaul_configure(gpointer data)
 
         // configure firewall
         qaul_startPortForwarding();
+        if(Qaullib_IsGateway())
+        	qaul_startGateway();
 
         qaulConfigureCounter = 50;
     }
@@ -472,7 +483,10 @@ gboolean qaul_configure(gpointer data)
 void qaul_olsrdStart(void)
 {
 	char command[255];
-	sprintf(command, "%s/lib/qaul/bin/qaulhelper startolsrd no %s", QAUL_ROOT_PATH, network_device.interface);
+	if(Qaullib_IsGateway())
+		sprintf(command, "%s/lib/qaul/bin/qaulhelper startolsrd yes %s", QAUL_ROOT_PATH, network_device.interface);
+	else
+		sprintf(command, "%s/lib/qaul/bin/qaulhelper startolsrd no %s", QAUL_ROOT_PATH, network_device.interface);
 	system(command);
 }
 
@@ -494,6 +508,20 @@ void qaul_stopPortForwarding(void)
 {
 	char command[255];
 	sprintf(command, "%s/lib/qaul/bin/qaulhelper stopportforwarding", QAUL_ROOT_PATH);
+	system(command);
+}
+
+void qaul_startGateway(void)
+{
+	char command[255];
+	sprintf(command, "%s/lib/qaul/bin/qaulhelper startgateway %s %s", QAUL_ROOT_PATH, Qaullib_GetGatewayInterface(), Qaullib_GetInterface());
+	system(command);
+}
+
+void qaul_stopGateway(void)
+{
+	char command[255];
+	sprintf(command, "%s/lib/qaul/bin/qaulhelper stopgateway %s %s", QAUL_ROOT_PATH, Qaullib_GetGatewayInterface(), Qaullib_GetInterface());
 	system(command);
 }
 
@@ -595,6 +623,22 @@ gboolean qaul_timerEvent(gpointer data)
             	// set Interfaces
             	Qaullib_SetInterfaceJson(network_json_txt);
             }
+        }
+        else if(myEvent == QAUL_EVENT_GATEWAY_START)
+        {
+        	// configure firewall
+        	qaul_startGateway();
+        	// restart olsrd
+        	qaul_olsrdStop();
+        	qaul_olsrdStart();
+        }
+        else if(myEvent == QAUL_EVENT_GATEWAY_STOP)
+        {
+        	// configure firewall
+        	qaul_stopGateway();
+        	// restart olsrd
+        	qaul_olsrdStop();
+        	qaul_olsrdStart();
         }
     }
 
