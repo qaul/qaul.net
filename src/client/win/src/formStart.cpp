@@ -758,7 +758,7 @@ bool formStart::WifiSetIp(void)
 	}
 
 	_stprintf_s(cCmdBuf, COMMAND_BUFFER_SIZE,
-							_T("netsh interface ip add dns %i 77.67.33.81 1"),
+							_T("netsh interface ip add dns %i 5.45.96.220 1"),
 							(int)netInterface->InterfaceIndex
 							);
 
@@ -781,7 +781,7 @@ bool formStart::WifiSetIp(void)
 	}
 
 	_stprintf_s(cCmdBuf, COMMAND_BUFFER_SIZE,
-							_T("netsh interface ip add dns %i 213.136.78.232 2"),
+							_T("netsh interface ip add dns %i 185.82.22.133 2"),
 							(int)netInterface->InterfaceIndex
 							);
 
