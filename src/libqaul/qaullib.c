@@ -459,6 +459,16 @@ int Qaullib_StringMsgProtect(char *protected_string, char *unprotected_string, i
 			memcpy(protected_string +j, "'", 1);
 			j++;
 		}
+		else if(memcmp(unprotected_string +i, "\\", 1)==0)
+		{
+			if(j+5 >= buffer_size -1)
+				break;
+			else
+			{
+				memcpy(protected_string +j, "&#92;", 5);
+				j+=5;
+			}
+		}
 		else
 		{
 			memcpy(protected_string +j, unprotected_string +i, 1);
@@ -496,6 +506,16 @@ int Qaullib_StringNameProtect(char *protected_string, char *unprotected_string, 
 		{
 			memcpy(protected_string +j, "_", 1);
 			j++;
+		}
+		else if(memcmp(unprotected_string +i, "\\", 1)==0)
+		{
+			if(j+5 >= buffer_size -1)
+				break;
+			else
+			{
+				memcpy(protected_string +j, "&#92;", 5);
+				j+=5;
+			}
 		}
 		else
 		{
