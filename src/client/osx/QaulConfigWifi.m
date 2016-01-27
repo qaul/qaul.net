@@ -214,30 +214,54 @@
 	return created;
 }
 
-- (BOOL)startOlsrd:(SCNetworkInterfaceRef)interface
+- (BOOL)startOlsrd:(int)isGateway interface:(NSString*)interface;
 {
+	BOOL success;
 	[self setPaths];
-    NSLog(@"qaulhelper startolsrd %@ %@", @"no", SCNetworkInterfaceGetBSDName(interface));
-    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"startolsrd", @"no", SCNetworkInterfaceGetBSDName(interface), nil]];
+	
+	if(isGateway)
+	{
+	    NSLog(@"qaulhelper startolsrd %@ %@", @"yes", interface);
+    	success = [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"startolsrd", @"yes", interface, nil]];	
+	}
+	else
+	{
+    	NSLog(@"qaulhelper startolsrd %@ %@", @"no", interface);
+    	success = [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"startolsrd", @"no", interface, nil]];
+    }
+    
+    return success;
 }
 
 - (BOOL)stopOlsrd
 {
 	[self setPaths];
-    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"stopolsrd",nil]];
+    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"stopolsrd", nil]];
 }
 
-- (BOOL)startPortForwarding:(SCNetworkInterfaceRef)interface
+- (BOOL)startPortForwarding:(NSString*)interface
 {
 	[self setPaths];
     NSLog(@"start port forwarding");
-    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"startportforwarding",SCNetworkInterfaceGetBSDName(interface),nil]];
+    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"startportforwarding", interface,nil]];
 }
 
 - (BOOL)stopPortForwarding
 {
 	[self setPaths];
-    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"stopportforwarding",nil]];
+    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"stopportforwarding", nil]];
+}
+
+- (BOOL)startGateway:(NSString*)gateway
+{
+	[self setPaths];
+    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"startgateway", gateway, nil]];
+}
+
+- (BOOL)stopGateway
+{
+	[self setPaths];
+    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"stopgateway", nil]];
 }
 
 - (BOOL)createNetworkProfile

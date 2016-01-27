@@ -22,10 +22,12 @@
 - (BOOL)setAddress:(NSString*)address service:(SCNetworkServiceRef)service;
 - (BOOL)setDhcp:(SCNetworkServiceRef)service interface:(SCNetworkInterfaceRef)interface;
 - (BOOL)connect2network:(NSString*)name channel:(int)channel interface:(SCNetworkInterfaceRef)interface service:(SCNetworkServiceRef)service;
-- (BOOL)startOlsrd:(SCNetworkInterfaceRef)interface;
+- (BOOL)startOlsrd:(int)isGateway interface:(NSString*)interface;
 - (BOOL)stopOlsrd;
-- (BOOL)startPortForwarding:(SCNetworkInterfaceRef)interface;
+- (BOOL)startPortForwarding:(NSString*)interface;
 - (BOOL)stopPortForwarding;
+- (BOOL)startGateway:(NSString*)gateway;
+- (BOOL)stopGateway;
 - (BOOL)createNetworkProfile;
 - (BOOL)deleteNetworkProfile;
 

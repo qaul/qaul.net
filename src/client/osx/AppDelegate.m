@@ -120,6 +120,9 @@
 	// stop portforwarding 
 	if(![qaulConfigWifi stopPortForwarding]) 
 		NSLog(@"portforwarding not removed");
+	// stop gateway
+	if(Qaullib_IsGateway())
+		[qaulConfigWifi stopGateway];
 	
 	usleep(50000);
 	// stop wifi
@@ -155,8 +158,10 @@
 		NSLog(@"initialize app");		
 		Qaullib_Init([qaulHomePath UTF8String],[qaulResourcePath UTF8String]);
 		
-        // set Configuration
+        // set configuration
         Qaullib_SetConf(QAUL_CONF_INTERFACE);
+        // set QAUL_CONF_INTERNET to show GUI option
+        //Qaullib_SetConf(QAUL_CONF_INTERNET);
 		
 		// set Download path
 		NSString *downloadPath = [NSHomeDirectory() stringByAppendingPathComponent:@"/Downloads"];
@@ -321,9 +326,11 @@
                     else
                         NSLog(@"SCNetworkServiceEnabled");
                     
-                    // get Service Name
+                    // get service name
                     qaulServiceName = SCNetworkServiceGetName(qaulServiceId);
                     NSLog(@"service name: %@, interface: %@", qaulServiceName, SCNetworkInterfaceGetBSDName(inter));
+                    // save service name
+                    Qaullib_SetInterface([[NSString stringWithFormat:@"%@", SCNetworkInterfaceGetBSDName(inter)] UTF8String]);
                     
                     break;                
                 }            
@@ -435,7 +442,7 @@
 	// start olsrd
 	if(qaulStarted == 40)
 	{
-		success = [qaulConfigWifi startOlsrd:qaulWifiInterface];
+		success = [qaulConfigWifi startOlsrd:Qaullib_IsGateway() interface:[NSString stringWithFormat:@"%s", Qaullib_GetInterface()]];
 		if(success) 
 			NSLog(@"olsrd start success!!");
 		else 
@@ -468,7 +475,11 @@
 		Qaullib_CaptiveStart();
 		
 		// start port forwarding
-		success = [qaulConfigWifi startPortForwarding:qaulWifiInterface];
+		success = [qaulConfigWifi startPortForwarding:[NSString stringWithFormat:@"%s", Qaullib_GetInterface()]];
+		
+		// start gateway
+		if(Qaullib_IsGateway())
+			[qaulConfigWifi startGateway:[NSString stringWithFormat:@"%s", Qaullib_GetGatewayInterface()]];
         
         NSLog(@"captive portal configured");
 		
@@ -655,6 +666,24 @@
 		{
 			NSLog(@"QAUL_EVENT_GETINTERFACES received\n");
             [self createInterfaceJson];            
+		}
+		else if(appEvent == QAUL_EVENT_GATEWAY_START)
+		{
+			// restart olsrd
+			[qaulConfigWifi stopOlsrd];
+			[qaulConfigWifi startOlsrd:Qaullib_IsGateway() interface:[NSString stringWithFormat:@"%s", Qaullib_GetInterface()]];
+			
+			// start NAT
+			[qaulConfigWifi startGateway:[NSString stringWithFormat:@"%s", Qaullib_GetGatewayInterface()]];
+		}
+		else if(appEvent == QAUL_EVENT_GATEWAY_STOP)
+		{
+			// restart olsrd
+			[qaulConfigWifi stopOlsrd];
+			[qaulConfigWifi startOlsrd:Qaullib_IsGateway() interface:[NSString stringWithFormat:@"%s", Qaullib_GetInterface()]];
+			
+			// stop NAT
+			[qaulConfigWifi stopGateway];
 		}
 	}
 }

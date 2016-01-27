@@ -63,7 +63,7 @@ int start_olsrd (int argc, const char * argv[])
     if(argc >= 4)
     {
         // validate arguments
-        if(strncmp(argv[3], "yes", 3)==0)
+        if(strncmp(argv[2], "yes", 3)==0)
             sprintf(s,"%s/etc/olsrd_osx_gw.conf", QAUL_ROOT_PATH);
         else
             sprintf(s,"%s/etc/olsrd_osx.conf", QAUL_ROOT_PATH);

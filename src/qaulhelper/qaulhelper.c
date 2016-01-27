@@ -166,9 +166,9 @@ int main (int argc, const char * argv[])
 #endif // WITHOUT_NETWORKMANAGER
 #ifdef QAUL_PORT_OSX
         printf("  qaulhelper enablewifi <OSXVERSION> <INTERFACE>\n");
-        printf("  qaulhelper enablewifi 1038 %s\n", Help_InterfaceName);
+        printf("  qaulhelper enablewifi 1038 %s\n", Help_InterfaceWifi);
         printf("  qaulhelper disablewifi <OSXVERSION> <INTERFACE>\n");
-        printf("  qaulhelper disablewifi 1038 %s\n", Help_InterfaceName);
+        printf("  qaulhelper disablewifi 1038 %s\n", Help_InterfaceWifi);
         printf("  qaulhelper createnetworkprofile <POFILENAME>\n");
         printf("  qaulhelper createnetworkprofile qaul.net\n");
         printf("  qaulhelper switchnetworkprofile <POFILENAME>\n");
@@ -178,7 +178,7 @@ int main (int argc, const char * argv[])
         printf("  qaulhelper setip <SERVICENAME> <IP> <SUBNET> <ROUTER>\n");
         printf("  qaulhelper setip Wi-Fi 10.213.28.55 255.0.0.0 0.0.0.0\n");
         printf("  qaulhelper setdhcp <SERVICENAME> <INTERFACE>\n");
-        printf("  qaulhelper setdhcp Wi-Fi %s\n", Help_InterfaceName);
+        printf("  qaulhelper setdhcp Wi-Fi %s\n", Help_InterfaceWifi);
         printf("  qaulhelper setdns <SERVICENAME>\n");
         printf("  qaulhelper setdns Wi-Fi\n");
         printf("\n");
