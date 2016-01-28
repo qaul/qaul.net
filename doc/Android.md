@@ -1,7 +1,7 @@
 Android Instructions
 ====================
 
-To check wheter your Android Device is known to work with qaul.net check 
+To check whether your Android Device is known to work with qaul.net check 
 [README_Android_Devices.md]
 
 
