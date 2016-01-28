@@ -30,9 +30,9 @@ The program ant needs to be installed
 Get the source
 --------------
 
-Download the source from [https://github.com/WachterJud/qaul.net-ng](github)
+Download the source from [https://github.com/WachterJud/qaul.net](github)
 
-	git clone https://github.com/WachterJud/qaul.net-ng.git
+	git clone https://github.com/WachterJud/qaul.net.git
 
 
 

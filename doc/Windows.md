@@ -1,7 +1,7 @@
 Build qaul.net on Windows
 =========================
 
-This tutorial describes all the steps to build qaul.net-ng client on Windows. 
+This tutorial describes all the steps to build qaul.net client on Windows.
 qaul.net works on Windows 7 / 8 / 10. Windows XP is not supported.
 
 This Tutorial has been tested on the following versions of Windows:
@@ -39,9 +39,9 @@ The following tools need to be installed
 Get the source
 --------------
 
-Download the source from [github](https://github.com/WachterJud/qaul.net-ng) 
+Download the source from [github](https://github.com/WachterJud/qaul.net)
 
-	git clone https://github.com/WachterJud/qaul.net-ng.git
+	git clone https://github.com/WachterJud/qaul.net.git
 
 	
 Build

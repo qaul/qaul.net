@@ -1,5 +1,5 @@
-Build qaul.net-ng on Raspberry Pi 2 running Ubuntu Mate
-======================================================
+Build qaul.net on Raspberry Pi 2 running Ubuntu Mate
+====================================================
 
 Prerequesites
 -------------
@@ -15,10 +15,10 @@ Download and Build
 ------------------
 
 	# Download source code from github
-	git clone https://github.com/WachterJud/qaul.net-ng.git
+	git clone https://github.com/WachterJud/qaul.net.git
 	
 	# create build directory
-	cd qaul.net-ng
+	cd qaul.net
 	mkdir build
 	cd build
 	

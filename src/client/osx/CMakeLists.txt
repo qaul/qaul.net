@@ -100,7 +100,7 @@ find_library(SYSTEMCONFIGURATION SystemConfiguration)
 target_link_libraries(qaul 
     # pthread dl m uuid avcodec opencore-amrnb
     # TODO: please check if libraries are present and do not include them accordingly
-    #       see issue https://github.com/WachterJud/qaul.net-ng/issues/5
+    #       see issue https://github.com/WachterJud/qaul.net/issues/5
     pthread dl m
     ${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
     ${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a

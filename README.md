@@ -17,7 +17,7 @@ no censorship what so ever.
 Build Instructions
 ------------------
 
-There Are specific instructions for each System qaul.net-ng has been 
+There Are specific instructions for each System qaul.net has been 
 tested on in the [documentation folder](doc). Feel free to add new ports!
 
 * Android 

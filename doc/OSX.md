@@ -1,7 +1,7 @@
 Build qaul.net on Mac OSX
 =========================
 
-This tutorial describes all the steps to build qaul.net-ng on Mac OSX. qaul.net works on
+This tutorial describes all the steps to build qaul.net on Mac OSX. qaul.net works on
 Mac OSX > 10.5. This Tutorial has been tested on the following versions of Mac OSX:
 
 * OSX 10.6 (Snow Leopard)
@@ -29,15 +29,15 @@ The following tools need to be installed
 Get the source
 --------------
 
-Download the source from [github](https://github.com/WachterJud/qaul.net-ng) 
+Download the source from [github](https://github.com/WachterJud/qaul.net)
 
-	git clone https://github.com/WachterJud/qaul.net-ng.git
+	git clone https://github.com/WachterJud/qaul.net.git
 
 
 Build
 -----
 
-    # create build directory in qaul.net-ng source folder
+    # create build directory in qaul.net source folder
     mkdir build
     cd build
 	
