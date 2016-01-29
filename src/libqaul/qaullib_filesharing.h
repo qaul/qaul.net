@@ -11,7 +11,7 @@ extern "C" {
 #endif // __cplusplus
 
 /**
- * Indicates wheter advertised files shall be downloaded automatically.
+ * Indicates whether advertised files shall be downloaded automatically.
  * 0: no
  * 1: yes
  */
@@ -119,7 +119,7 @@ void Qaullib_FileStopDownload(struct qaul_file_LL_item *file_item);
 void Qaullib_FileCreatePath(char *filepath, char *hash, char *suffix);
 
 /**
- * create the @a filepath to the dowload folder for the @a file_item
+ * create the @a filepath to the download folder for the @a file_item
  * files are copied there after downloading
  */
 void Qaullib_FileCreatePathToDownloadFolder(char *filepath, struct qaul_file_LL_item *file_item);
