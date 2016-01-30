@@ -17,12 +17,17 @@ Prerequisites
 The following tools need to be installed
 
 * XCode 
-  * download and install from app store
-* cmake (install via macports)
-  * download macports from https://www.macports.org/
-  * install programs via terminal:
+  * Download and install from app store
+  * Open XCode once and accept the license
+  * Install the 'XCode Command Line Tools' via terminal
 
-	# install cmake
+	xcode-select --install
+
+* MacPorts
+  * Download and install MacPorts from https://www.macports.org/
+* Install programs from MacPorts
+  * Install via terminal:
+
 	sudo port install cmake
 
 
