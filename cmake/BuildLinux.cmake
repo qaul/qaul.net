@@ -72,8 +72,8 @@ SET(CPACK_SOURCE_IGNORE_FILES
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER  "qaul.net community <contact@qaul.net>")
 #SET(CPACK_DEBIAN_PACKAGE_NAME        "qaul.net ${VERSION_SUFFIX}")
 SET(CPACK_DEBIAN_PACKAGE_VERSION     "${CPACK_PACKAGE_VERSION}${CPACK_PACKAGE_REVISION}")
-SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "tools for the next revolution
- independent WIFI mesh network,
+SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "Wifi-mesh communication app,
+ decentralized, Internet independent,
  text messaging, chat,
  file sharing,
  VoIP, voice calls,
