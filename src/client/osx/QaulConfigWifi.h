@@ -19,7 +19,7 @@
 - (BOOL)runTask:(NSString*)path arguments:(NSArray*)arguments;
 - (BOOL)startAirport:(SCNetworkInterfaceRef)interface;
 - (BOOL)stopAirport:(SCNetworkInterfaceRef)interface;
-- (BOOL)setAddress:(NSString*)address service:(SCNetworkServiceRef)service;
+- (BOOL)setAddress:(NSString*)address service:(SCNetworkServiceRef)service mask:(NSString*)mask gateway:(NSString*)gateway;
 - (BOOL)setDhcp:(SCNetworkServiceRef)service interface:(SCNetworkInterfaceRef)interface;
 - (BOOL)connect2network:(NSString*)name channel:(int)channel interface:(SCNetworkInterfaceRef)interface service:(SCNetworkServiceRef)service;
 - (BOOL)startOlsrd:(int)isGateway interface:(NSString*)interface;

@@ -112,10 +112,10 @@
     return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"disablewifi",[NSString stringWithFormat:@"%i",(int)floor(NSAppKitVersionNumber)],SCNetworkInterfaceGetBSDName(interface),nil]];
 }
 
-- (BOOL)setAddress:(NSString*)address service:(SCNetworkServiceRef)service
+- (BOOL)setAddress:(NSString*)address service:(SCNetworkServiceRef)service mask:(NSString*)mask gateway:(NSString*)gateway
 {
 	[self setPaths];
-    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"setip",SCNetworkServiceGetName(service),address,@"255.0.0.0",@"0.0.0.0",nil]];
+    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"setip", SCNetworkServiceGetName(service), address, mask, gateway, nil]];
 }
 
 - (BOOL)setDhcp:(SCNetworkServiceRef)service interface:(SCNetworkInterfaceRef)interface

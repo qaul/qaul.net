@@ -160,8 +160,8 @@
 		
         // set configuration
         Qaullib_SetConf(QAUL_CONF_INTERFACE);
-        // set QAUL_CONF_INTERNET to show GUI option
         //Qaullib_SetConf(QAUL_CONF_INTERNET);
+        Qaullib_SetConf(QAUL_CONF_NETWORK);
 		
 		// set Download path
 		NSString *downloadPath = [NSHomeDirectory() stringByAppendingPathComponent:@"/Downloads"];
@@ -382,7 +382,7 @@
 	{
 		// set IP
 		NSString *myip = [NSString stringWithFormat:@"%s",Qaullib_GetIP()];
-		success = [qaulConfigWifi setAddress:myip service:qaulServiceId];
+		success = [qaulConfigWifi setAddress:myip service:qaulServiceId mask:[NSString stringWithFormat:@"%s", Qaullib_GetNetMaskString()] gateway:[NSString stringWithFormat:@"%s", Qaullib_GetNetGateway()]];
 		if(success)
 			NSLog(@"setAddress success!!");
 		else 
