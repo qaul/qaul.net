@@ -227,6 +227,16 @@ int Qaullib_GetNetProtocol(void);
 int Qaullib_GetNetMask(void);
 
 /**
+ * get network mask as IPv4 string
+ *
+ * translate the network mask integer into a string
+ * e.g.: 8 => "255.0.0.0"
+ *
+ * @retval	IPv4 string of network mask
+ */
+const char* Qaullib_GetNetMaskString(void);
+
+/**
  * get network broadcast address
  *
  * @retval string of broadcast address such as "10.255.255.255"

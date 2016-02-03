@@ -948,6 +948,82 @@ int Qaullib_GetNetMask(void)
 	return Qaullib_DbGetConfigValueInt("net.mask");
 }
 
+const char* Qaullib_GetNetMaskString(void)
+{
+	int mask;
+
+	mask = Qaullib_DbGetConfigValueInt("net.mask");
+
+	if (mask == 0)
+		return "0.0.0.0";
+	else if (mask == 1)
+		return "128.0.0.0";
+	else if (mask == 2)
+		return "192.0.0.0";
+	else if (mask == 3)
+		return "224.0.0.0";
+	else if (mask == 4)
+		return "240.0.0.0";
+	else if (mask == 5)
+		return "248.0.0.0";
+	else if (mask == 6)
+		return "252.0.0.0";
+	else if (mask == 7)
+		return "254.0.0.0";
+	else if (mask == 8)
+		return "255.0.0.0";
+	else if (mask == 9)
+		return "255.128.0.0";
+	else if (mask == 10)
+		return "255.192.0.0";
+	else if (mask == 11)
+		return "255.224.0.0";
+	else if (mask == 12)
+		return "255.240.0.0";
+	else if (mask == 13)
+		return "255.248.0.0";
+	else if (mask == 14)
+		return "255.252.0.0";
+	else if (mask == 15)
+		return "255.254.0.0";
+	else if (mask == 16)
+		return "255.255.0.0";
+	else if (mask == 17)
+		return "255.255.128.0";
+	else if (mask == 18)
+		return "255.255.192.0";
+	else if (mask == 19)
+		return "255.255.224.0";
+	else if (mask == 20)
+		return "255.255.240.0";
+	else if (mask == 21)
+		return "255.255.248.0";
+	else if (mask == 22)
+		return "255.255.252.0";
+	else if (mask == 23)
+		return "255.255.254.0";
+	else if (mask == 24)
+		return "255.255.255.0";
+	else if (mask == 25)
+		return "255.255.255.128";
+	else if (mask == 26)
+		return "255.255.255.192";
+	else if (mask == 27)
+		return "255.255.255.224";
+	else if (mask == 28)
+		return "255.255.255.240";
+	else if (mask == 29)
+		return "255.255.255.248";
+	else if (mask == 30)
+		return "255.255.255.252";
+	else if (mask == 31)
+		return "255.255.255.254";
+	else if (mask == 32)
+		return "255.255.255.255";
+
+	return "255.0.0.0";
+}
+
 const char* Qaullib_GetNetBroadcast(void)
 {
 	if (Qaullib_DbGetConfigValue("net.broadcast", qaul_net_broadcast))
