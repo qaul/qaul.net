@@ -80,7 +80,7 @@ endif ()
 
 list(FIND ALL_GUIS ${GUI} RET)
 if (${RET} EQUAL -1)
-  message(FATAL_ERROR "Please choose which qaul gui to build (one of ${ALL_GUIS})")
+  message(FATAL_ERROR "Please choose which qaul GUI to build (one of ${ALL_GUIS})")
 endif ()
 
 # What package to build
@@ -149,9 +149,9 @@ endif ()
 
 # final status summary report
 message(STATUS "#############################################")
-message(STATUS "  Qaul seems to be successfully configured.")
+message(STATUS "  qaul seems to be successfully configured.")
 message(STATUS "    Building for platform: ${PORT}")
 message(STATUS "    Building GUI: ${GUI}")
 message(STATUS "    Arm/Raspberry patches enabled: ${Raspberry}")
-message(STATUS "    Qaul executable: ${GUINAME}")
+message(STATUS "    qaul executable: ${GUINAME}")
 message(STATUS "#############################################")

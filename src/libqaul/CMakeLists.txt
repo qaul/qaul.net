@@ -50,7 +50,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     ${WIN_SOURCES}
 )
 
-# since the name starts with 'lib' dont add it again
+# since the name starts with 'lib' don't add it again
 set_target_properties (libqaul PROPERTIES PREFIX "")
 
 add_dependencies(libqaul pjsip)
