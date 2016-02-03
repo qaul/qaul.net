@@ -1797,7 +1797,7 @@ function config_network_send()
 		'config_network_set',
 		values,
 		function(data){
-			$.mobile.changePage($("#page_pref"));
+			$.mobile.changePage($("#page_restart"));
 	});
 }
 
