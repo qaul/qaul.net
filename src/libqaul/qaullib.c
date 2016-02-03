@@ -950,9 +950,9 @@ int Qaullib_GetNetMask(void)
 
 const char* Qaullib_GetNetBroadcast(void)
 {
-	if (Qaullib_DbGetConfigValue("wifi.ssid", qaul_net_broadcast))
+	if (Qaullib_DbGetConfigValue("net.broadcast", qaul_net_broadcast))
 	{
-		return qaul_net_ssid;
+		return qaul_net_broadcast;
 	}
 	return "";
 }
@@ -1079,18 +1079,12 @@ int Qaullib_Timestamp2Isostr(char *str_buffer, int timestamp, int str_buffer_siz
     time_t     now;
     struct tm *ts;
 
-	if(QAUL_DEBUG)
-		printf("sizes int: %lu, size time_t: %lu\n", sizeof(timestamp), sizeof(now));
-
     // convert integer to time_t
     now = 1 * timestamp;
 
     // Format and print the time, "yyyy-mm-dd hh:mm:ss"
     ts = localtime(&now);
 	strftime(str_buffer, str_buffer_size, "%Y-%m-%d %H:%M:%S", ts);
-
-	if(QAUL_DEBUG)
-		printf("str_buffer %s\n", str_buffer);
 
     return 1;
 }

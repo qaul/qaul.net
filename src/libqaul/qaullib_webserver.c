@@ -700,14 +700,15 @@ static void Qaullib_WwwConfigNetworkGet(struct mg_connection *conn)
 	mg_printf_data(conn, "\"ip\":\"%s\",", Qaullib_GetIP());
 	mg_printf_data(conn, "\"mask\":\"%i\",", Qaullib_GetNetMask());
 	mg_printf_data(conn, "\"broadcast\":\"%s\",", Qaullib_GetNetBroadcast());
+/*
 	mg_printf_data(conn, "\"gateway\":\"%s\",", Qaullib_GetNetGateway());
 
 	mg_printf_data(conn, "\"ns1\":\"%s\",", Qaullib_GetNetNs1());
 	mg_printf_data(conn, "\"ns2\":\"%s\",", Qaullib_GetNetNs2());
-
+*/
 	mg_printf_data(conn, "\"channel\":\"%i\",", Qaullib_GetWifiChannel());
-	mg_printf_data(conn, "\"ssid\":\"%s\",", Qaullib_GetInterface());
-	mg_printf_data(conn, "\"bssid\":\"%s\"", Qaullib_GetInterface());
+	mg_printf_data(conn, "\"ssid\":\"%s\",", Qaullib_GetWifiSsid());
+	mg_printf_data(conn, "\"bssid\":\"%s\"", Qaullib_GetWifiBssId());
 
 	mg_printf_data(conn, "}");
 }
@@ -750,7 +751,7 @@ static void Qaullib_WwwConfigNetworkGetProfile(struct mg_connection *conn)
 		sprintf(key, "%s.net.broadcast", profile_dbprotected);
 		Qaullib_DbGetConfigValue(key, value);
 		mg_printf_data(conn, "\"broadcast\":\"%s\",", value);
-
+/*
 		sprintf(key, "%s.net.gateway", profile_dbprotected);
 		Qaullib_DbGetConfigValue(key, value);
 		mg_printf_data(conn, "\"gateway\":\"%s\",", value);
@@ -762,7 +763,7 @@ static void Qaullib_WwwConfigNetworkGetProfile(struct mg_connection *conn)
 		sprintf(key, "%s.net.ns2", profile_dbprotected);
 		Qaullib_DbGetConfigValue(key, value);
 		mg_printf_data(conn, "\"ns2\":\"%s\",", value);
-
+*/
 		sprintf(key, "%s.wifi.channel", profile_dbprotected);
 		mg_printf_data(conn, "\"channel\":\"%i\",", Qaullib_DbGetConfigValueInt(key));
 
@@ -799,63 +800,69 @@ static void Qaullib_WwwConfigNetworkSet(struct mg_connection *conn)
 	Qaullib_DbSetConfigValue("net.profile", profile_dbprotected);
 
 	// ip
-	mg_get_var(conn, "ip", value, sizeof(MAX_IP_LEN +1));
+	mg_get_var(conn, "ip", value, MAX_IP_LEN +1);
 	Qaullib_StringDbProtect(value_dbprotected, value, sizeof(value_dbprotected));
 	sprintf(key, "%s.net.ip", profile_dbprotected);
 	Qaullib_DbSetConfigValue(key, value_dbprotected);
 	Qaullib_DbSetConfigValue("ip", value_dbprotected);
 
 	// mask
-	mg_get_var(conn, "mask", value, sizeof(MAX_INTSTR_LEN +1));
+	mg_get_var(conn, "mask", value, MAX_INTSTR_LEN +1);
 	value_int = atoi(value);
 	sprintf(key, "%s.net.mask", profile_dbprotected);
 	Qaullib_DbSetConfigValueInt(key, value_int);
-	Qaullib_DbSetConfigValue("net.mask", value_dbprotected);
+	Qaullib_DbSetConfigValueInt("net.mask", value_int);
 
 	// broadcast
-	mg_get_var(conn, "broadcast", value, sizeof(MAX_IP_LEN +1));
+	mg_get_var(conn, "broadcast", value, MAX_IP_LEN +1);
 	Qaullib_StringDbProtect(value_dbprotected, value, sizeof(value_dbprotected));
 	sprintf(key, "%s.net.broadcast", profile_dbprotected);
 	Qaullib_DbSetConfigValue(key, value_dbprotected);
 	Qaullib_DbSetConfigValue("net.broadcast", value_dbprotected);
 
+/*
+	// TODO: allow manual gatway definition
+	//       this could be done as a special option with the
+	//       possibility to also select between available
+	//       dynamic gateways.
+
 	// gateway
-	mg_get_var(conn, "gateway", value, sizeof(MAX_IP_LEN +1));
+	mg_get_var(conn, "gateway", value, MAX_IP_LEN +1);
 	Qaullib_StringDbProtect(value_dbprotected, value, sizeof(value_dbprotected));
 	sprintf(key, "%s.net.gateway", profile_dbprotected);
 	Qaullib_DbSetConfigValue(key, value_dbprotected);
 	Qaullib_DbSetConfigValue("net.gateway", value_dbprotected);
 
 	// ns1 DNS server
-	mg_get_var(conn, "ns1", value, sizeof(MAX_IP_LEN +1));
+	mg_get_var(conn, "ns1", value, MAX_IP_LEN +1);
 	Qaullib_StringDbProtect(value_dbprotected, value, sizeof(value_dbprotected));
 	sprintf(key, "%s.net.ns1", profile_dbprotected);
 	Qaullib_DbSetConfigValue(key, value_dbprotected);
 	Qaullib_DbSetConfigValue("net.ns1", value_dbprotected);
 
 	// ns2 DNS server
-	mg_get_var(conn, "ns2", value, sizeof(MAX_IP_LEN +1));
+	mg_get_var(conn, "ns2", value, MAX_IP_LEN +1);
 	Qaullib_StringDbProtect(value_dbprotected, value, sizeof(value_dbprotected));
 	sprintf(key, "%s.net.ns2", profile_dbprotected);
 	Qaullib_DbSetConfigValue(key, value_dbprotected);
 	Qaullib_DbSetConfigValue("net.ns2", value_dbprotected);
-
+*/
 	// wifi channel
-	mg_get_var(conn, "channel", value, sizeof(MAX_INTSTR_LEN +1));
+	mg_get_var(conn, "channel", value, MAX_INTSTR_LEN +1);
 	value_int = atoi(value);
 	sprintf(key, "%s.wifi.channel", profile_dbprotected);
 	Qaullib_DbSetConfigValueInt(key, value_int);
 	Qaullib_DbSetConfigValueInt("wifi.channel", value_int);
 
 	// wifi ssid
-	mg_get_var(conn, "ssid", value, sizeof(MAX_SSID_LEN +1));
+	mg_get_var(conn, "ssid", value, MAX_SSID_LEN +1);
 	Qaullib_StringDbProtect(value_dbprotected, value, sizeof(value_dbprotected));
 	sprintf(key, "%s.wifi.ssid", profile_dbprotected);
 	Qaullib_DbSetConfigValue(key, value_dbprotected);
 	Qaullib_DbSetConfigValue("wifi.ssid", value_dbprotected);
 
 	// wifi bssid
-	mg_get_var(conn, "bssid", value, sizeof(MAX_BSSID_LEN +1));
+	mg_get_var(conn, "bssid", value, MAX_BSSID_LEN +1);
 	Qaullib_StringDbProtect(value_dbprotected, value, sizeof(value_dbprotected));
 	sprintf(key, "%s.wifi.bssid", profile_dbprotected);
 	Qaullib_DbSetConfigValue(key, value_dbprotected);

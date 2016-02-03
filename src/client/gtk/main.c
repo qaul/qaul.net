@@ -125,6 +125,7 @@ int main(int argc, char *argv[])
 	// set configuration
 	Qaullib_SetConf(QAUL_CONF_INTERFACE);
 	Qaullib_SetConf(QAUL_CONF_INTERNET);
+	Qaullib_SetConf(QAUL_CONF_NETWORK);
 
 	// enable debug menu
 	qaul_conf_debug = 1;
