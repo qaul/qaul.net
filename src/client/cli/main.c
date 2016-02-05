@@ -35,7 +35,8 @@ int main(int argc, char *argv[])
 	cCurrentPath[sizeof(cCurrentPath) - 1] = '\0';
 	printf ("The current working directory is %s\n", cCurrentPath);
 
-	Qaullib_Init(cCurrentPath);
+	// TODO: set resource path in accordance with to platform
+	Qaullib_Init(cCurrentPath, "/usr/local/lib/qaul");
 	// enable debug menu
 	qaul_conf_debug = 1;
 

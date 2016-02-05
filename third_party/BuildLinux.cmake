@@ -1,4 +1,6 @@
 
+if (VOIP STREQUAL NO)
+else ()
 ExternalProject_Add(pjsip
     DEPENDS dl_pjsip
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/pjsip
@@ -9,6 +11,7 @@ ExternalProject_Add(pjsip
     BUILD_COMMAND make dep COMMAND make
     INSTALL_COMMAND ""
 )
+endif()
 
 ExternalProject_Add(portfwd
     DEPENDS dl_portfwd

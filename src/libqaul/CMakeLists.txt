@@ -1,10 +1,58 @@
 
-if (${PORT} STREQUAL "LINUX")
-	find_package(ALSA REQUIRED)
-endif ()
+if (VOIP STREQUAL "NO")
+	set (VOIP_SOURCES
+		qaullib_voip_dummy.c
+	)
+else ()
+	if (${PORT} STREQUAL "LINUX")
+		find_package(ALSA REQUIRED)
+	endif ()
 
-set (PJBASE ${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip)
-set (PJSIPTYPE qaul)
+	set (PJBASE ${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip)
+	set (PJSIPTYPE qaul)
+	
+	set (VOIP_SOURCES
+		qaullib_voip.c
+	)
+	
+	set (VOIP_DEPENDENCIES
+		pjsip
+	)
+	
+	set (VOIP_INCLUDE
+	    ${PJBASE}/pjlib/include
+	    ${PJBASE}/pjlib-util/include
+	    ${PJBASE}/pjmedia/include
+	    ${PJBASE}/pjnath/include
+	    ${PJBASE}/pjsip/include
+#		${PJBASE}third_party/portaudio/include
+#		${PJBASE}third_party/resample/include
+#		${PJBASE}third_party/speex/include
+#		${PJBASE}third_party/srtp/crypto/include
+#		${PJBASE}third_party/srtp/include
+	)
+
+	set (VOIP_LINK_LIBRARIES
+		${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
+		${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
+		${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
+		${PJBASE}/pjsip/lib/libpjsip-simple-${PJSIPTYPE}.a
+		${PJBASE}/pjmedia/lib/libpjmedia-codec-${PJSIPTYPE}.a
+		${PJBASE}/pjmedia/lib/libpjmedia-${PJSIPTYPE}.a
+		${PJBASE}/pjmedia/lib/libpjmedia-audiodev-${PJSIPTYPE}.a
+		${PJBASE}/pjmedia/lib/libpjmedia-videodev-${PJSIPTYPE}.a
+		${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
+		${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
+		${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
+		${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
+		${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
+		${PJBASE}/third_party/lib/libportaudio-${PJSIPTYPE}.a
+		${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
+		${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
+		${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
+		${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
+	)
+endif ()
 
 if (${PORT} STREQUAL "WINDOWS")
   set (LIBTYPE SHARED)
@@ -23,7 +71,6 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     qaullib.c
     qaullib_ipc.c
     qaullib_webserver.c
-    qaullib_voip.c
     qaullib_webclient.c
     qaullib_threads.c
     qaullib_user.c
@@ -47,52 +94,32 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     polarssl/sha1.c
     olsrd/mantissa.c
     olsrd/hashing.c
+    ${VOIP_SOURCES}
     ${WIN_SOURCES}
 )
 
 # since the name starts with 'lib' don't add it again
 set_target_properties (libqaul PROPERTIES PREFIX "")
 
-add_dependencies(libqaul pjsip)
+if (VOIP STREQUAL "NO")
+else ()
+	add_dependencies(libqaul
+		${VOIP_DEPENDENCIES}
+	)
+endif ()
 
 target_include_directories (libqaul PUBLIC include)
 
 target_include_directories (libqaul PRIVATE
-    ${PJBASE}/pjlib/include
-    ${PJBASE}/pjlib-util/include
-    ${PJBASE}/pjmedia/include
-    ${PJBASE}/pjnath/include
-    ${PJBASE}/pjsip/include
-#    ${PJBASE}third_party/portaudio/include
-#    ${PJBASE}third_party/resample/include
-#    ${PJBASE}third_party/speex/include
-#    ${PJBASE}third_party/srtp/crypto/include
-#    ${PJBASE}third_party/srtp/include
+	${VOIP_INCLUDE}
 )
 
 target_link_libraries(libqaul LINK_PUBLIC
-    ${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
-    ${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
-    ${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
-    ${PJBASE}/pjsip/lib/libpjsip-simple-${PJSIPTYPE}.a
-    ${PJBASE}/pjmedia/lib/libpjmedia-codec-${PJSIPTYPE}.a
-    ${PJBASE}/pjmedia/lib/libpjmedia-${PJSIPTYPE}.a
-    ${PJBASE}/pjmedia/lib/libpjmedia-audiodev-${PJSIPTYPE}.a
-    ${PJBASE}/pjmedia/lib/libpjmedia-videodev-${PJSIPTYPE}.a
-    ${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
-    ${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
-    ${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
-    ${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
-    ${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
-    ${PJBASE}/third_party/lib/libportaudio-${PJSIPTYPE}.a
-    ${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
-    ${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
-    ${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
-    ${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
+	${VOIP_LINK_LIBRARIES}
 )
 
 if (${PORT} STREQUAL "LINUX")
-    target_link_libraries(libqaul LINK_PUBLIC dl m ${ALSA_LIBRARIES})
+    target_link_libraries(libqaul LINK_PUBLIC dl m pthread ${ALSA_LIBRARIES})
 endif ()
 
 if (${PORT} STREQUAL "WINDOWS")
