@@ -1,0 +1,58 @@
+#!/usr/bin/env zsh
+
+# TODO configuration
+
+ISGATEWAY="no"
+
+interface="wlan0"
+
+essid="qaul.net"
+
+
+################################
+
+touch /tmp/qaul.log
+qaul-cli 2>&1 >> /tmp/qaul.log &
+
+# ip=`tail -n 20 /tmp/qaul.log | awk '/^IP:/ {print $2}'`
+ip=`awk '
+BEGIN { ip="" }
+/^IP:/ { ip=$2 }
+END { print ip }' /tmp/qaul.log`
+
+prefix=/usr/local
+[[ -r $prefix/lib/qaul/bin/qaulhelper ]] || {
+    prefix=/usr
+    [[ -r $prefix/lib/qaul/bin/qaulhelper ]] || {
+        print "Error: qaulhelper not found"
+        return 1 }
+}
+qaulhelper=$prefix//lib/qaul/bin/qaulhelper
+
+print "Devuan script setting Qaul ip: $ip"
+
+
+
+# NOTE: start olsrd manually to indicate a WAN port
+# bridge it over
+# command flow
+
+print "ifconfig $interface $ip"
+sudo ifconfig $interface down
+
+sudo ifconfig $interface ${ip}/8 up
+
+print "iwconfig $interface adhoc essid $essid"
+sudo iwconfig $interface mode ad-hoc
+sudo iwconfig $interface essid $essid
+
+
+print "start olsrd ISGATEWAY $ISGATEWAY $interface"
+$qaulhelper startolsrd $ISGATEWAY $interface &
+
+print "start port forwarding $interface $ip"
+$qaulhelper startportforwarding $interface $ip &
+
+
+# at end
+# qaulhelper stopolsrd
