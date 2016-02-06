@@ -1,7 +1,5 @@
 #!/usr/bin/env zsh
 
-
-
 # TODO configuration
 
 ISGATEWAY="no"
@@ -16,7 +14,11 @@ essid="qaul.net"
 touch /tmp/qaul.log
 qaul-cli 2>&1 >> /tmp/qaul.log &
 
-ip=`tail -n 20 /tmp/qaul.log | awk '/^IP:/ {print $2}'`
+# ip=`tail -n 20 /tmp/qaul.log | awk '/^IP:/ {print $2}'`
+ip=`awk '
+BEGIN { ip="" }
+/^IP:/ { ip=$2 }
+END { print ip }' /tmp/qaul.log`
 
 prefix=/usr/local
 [[ -r $prefix/lib/qaul/bin/qaulhelper ]] || {
@@ -35,16 +37,21 @@ print "Devuan script setting Qaul ip: $ip"
 # bridge it over
 # command flow
 
-print "iwconfig $interface adhoc essid $essid"
-sudo iwconfig $interface mode ad-hoc essid $essid
-
 print "ifconfig $interface $ip"
+sudo ifconfig $interface down
+
 sudo ifconfig $interface ${ip}/8 up
 
-print "start olsrd ISGATEWAY $ISGATEWAY $interface"
-$qaulhelper startolsrd $ISGATEWAY $interface
+print "iwconfig $interface adhoc essid $essid"
+sudo iwconfig $interface mode ad-hoc
+sudo iwconfig $interface essid $essid
 
-$qaulhelper startportforwarding $interface $ip
+
+print "start olsrd ISGATEWAY $ISGATEWAY $interface"
+$qaulhelper startolsrd $ISGATEWAY $interface &
+
+print "start port forwarding $interface $ip"
+$qaulhelper startportforwarding $interface $ip &
 
 
 # at end
