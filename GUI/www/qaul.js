@@ -1673,7 +1673,7 @@ function config_network_change()
 function config_network_template()
 {
 	$.ajax({
-		url: "community_templates/" + $("#c_network_profile").val(),
+		url: "community_templates/" + $("#c_network_profile").val() + ".json",
 		cache: false, // needed for IE
 		dataType: "json",
 		success: function(data){

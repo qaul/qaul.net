@@ -1,4 +1,5 @@
-{"profile":{"name":"Custom Profile","homepage":"","info":""},
+{
+"profile":{"name":"Custom Profile","homepage":"","info":""},
 "ip":{"edit":"true","generate":"false","value":""},
 "mask":{"edit":"true","value":""},
 "broadcast":{"edit":"true","value":""},
