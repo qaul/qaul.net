@@ -771,7 +771,7 @@ static void Qaullib_WwwConfigNetworkGetProfile(struct mg_connection *conn)
 		Qaullib_DbGetConfigValue(key, value);
 		mg_printf_data(conn, "\"ssid\":\"%s\",", value);
 
-		sprintf(key, "%s.net.bssid", profile_dbprotected);
+		sprintf(key, "%s.wifi.bssid", profile_dbprotected);
 		Qaullib_DbGetConfigValue(key, value);
 		mg_printf_data(conn, "\"bssid\":\"%s\"", value);
 	}
