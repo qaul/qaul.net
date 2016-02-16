@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	cCurrentPath[sizeof(cCurrentPath) - 1] = '\0';
 	fprintf(stderr,"The current working directory is %s\n", cCurrentPath);
 
-        snprintf(prefix,FILENAME_MAX,"%s/lib/qaul",PREFIX);
+        snprintf(prefix, FILENAME_MAX, "%s/lib/qaul", QAUL_ROOT_PATH);
 
 	Qaullib_Init(cCurrentPath, prefix);
 	// enable debug menu

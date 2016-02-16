@@ -1,4 +1,3 @@
-add_compile_options( "-DPREFIX=\"${CMAKE_INSTALL_PREFIX}\"")
 
 add_executable (qaul-cli main.c)
 
