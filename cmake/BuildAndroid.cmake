@@ -12,6 +12,11 @@ if(NOT NDK_LEVEL)
     set(NDK_LEVEL 9)
 endif()
 
+if(NOT ANDROID_EABI)
+    message(STATUS "Use default Android EABI version 4.6 (-DANDROID_EABI=\"4.6\").")
+    set(ANDROID_EABI "4.6")
+endif()
+
 add_custom_target(copy_android
     ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/android -DDEST=${CMAKE_BINARY_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
     ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/GUI/www -DDEST=${CMAKE_BINARY_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
