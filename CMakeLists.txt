@@ -127,6 +127,11 @@ if (NOT ${PORT} STREQUAL "ANDROID")
     add_subdirectory (src/libqaul)
 endif ()
 
+# on linux always build the cli client
+if (${PORT} STREQUAL "LINUX" AND NOT ${GUI} STREQUAL "CLI")
+    add_subdirectory (src/client/cli)
+endif ()
+
 if (${GUI} STREQUAL "NATIVE")
     if (${PORT} STREQUAL "OSX")
 	add_subdirectory (src/client/osx)
