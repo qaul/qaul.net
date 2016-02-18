@@ -2,8 +2,6 @@
 if (${PORT} STREQUAL "LINUX")
   find_package(ALSA REQUIRED)
   pkg_check_modules (UUID uuid)
-  pkg_check_modules (OPENCORE_AMRNB opencore-amrnb)
-  pkg_check_modules (OPENCORE_AMRWB opencore-amrwb)
 endif ()
 
 # Find includes in corresponding build directories

@@ -2,6 +2,9 @@
 find_package (PkgConfig)
 pkg_check_modules (DBUS1 REQUIRED dbus-1)
 
+pkg_check_modules (OPENCORE_AMRNB opencore-amrnb)
+pkg_check_modules (OPENCORE_AMRWB opencore-amrwb)
+
 find_package (Autotools REQUIRED)
 
 add_subdirectory (src/qaulhelper)
