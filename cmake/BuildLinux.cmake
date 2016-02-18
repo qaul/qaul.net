@@ -1,7 +1,7 @@
 
 find_package (PkgConfig)
 pkg_check_modules (DBUS1 REQUIRED dbus-1)
-
+pkg_check_modules (UUID uuid)
 pkg_check_modules (OPENCORE_AMRNB opencore-amrnb)
 pkg_check_modules (OPENCORE_AMRWB opencore-amrwb)
 

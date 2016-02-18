@@ -1,7 +1,6 @@
 
 if (${PORT} STREQUAL "LINUX")
   find_package(ALSA REQUIRED)
-  pkg_check_modules (UUID uuid)
 endif ()
 
 # Find includes in corresponding build directories

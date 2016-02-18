@@ -1,7 +1,6 @@
 
 
 pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
-pkg_check_modules (UUID uuid)
 
 add_executable (qaul-gtk main.c network.c)
 
