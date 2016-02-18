@@ -71,7 +71,10 @@ Build
 
 
 	# build the qaul.net Android app
-	cmake ../ -DPORT=ANDROID -DNDK_ROOT=/absolute/path/to/ndk -DEXTRALIB_PATH=/absolute/path/to/libraries
+	## check ANDROID_EABI version in NDK's 'toolchains' folder. The number suffix
+	## of the folder name arm-linux-androideabi-XXX is the ANDROID_EABI version.
+	## toolchains/arm-linx-androideabi-4.6 => -DANDROID_EABI="4.6"
+	cmake ../ -DPORT=ANDROID -DNDK_ROOT=/absolute/path/to/ndk -DEXTRALIB_PATH=/absolute/path/to/libraries -DANDROID_EABI="4.6"
 	make
 
 
