@@ -15,16 +15,33 @@ Development Kit *and* the Native Development Kit
 
 * Get the NDK https://developer.android.com/tools/sdk/ndk/index.html
 * Get the SDK https://developer.android.com/sdk/index.html
+  * Invoke the binary tools/android from the downloaded SDK. This starts the
+	'Android SDK Manager'. Via the 'Android SDK Manager' window install the
+	required packages:
+	* Tools > Android SDK Platform-tools
+	* Tools > Android SDK Build-tools
+	* Android 2.2 (API 8)
 
 Add `sdk` to `path` if the installer had not done it automatically.
 
 
-### ant
+### Java Development Kit (JDK)
 
-The program ant needs to be installed
+Install latest Oracle Java Development Kit (JDK)
+
+* Get the JDK http://www.oracle.com/technetwork/java/javase/downloads/index.html
+
+
+### Programs and Libraries
+
+The following programs and libraries need to be installed:
+
+* ant
+* lib32stdc++6
+* lib32z1
 
 	# install ant on Debian / Ubuntu Linux
-	sudo apt-get install ant
+	sudo apt-get install ant lib32stdc++6 lib32z1
 
 
 Get the source
