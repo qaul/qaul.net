@@ -19,6 +19,14 @@ set (Qaul_VERSION_PATCH 0)
 set (Qaul_VERSION_SUFFIX "beta5")
 set (Qaul_VERSION "${Qaul_VERSION_MAJOR}.${Qaul_VERSION_MINOR}.${Qaul_VERSION_PATCH}.${Qaul_VERSION_SUFFIX}")
 
+# build configuration
+set (LOGLEVELS LOG_NONE LOG_INFO LOG_WARN LOG_ERROR)
+set (Qaul_DEFAULT_LOGLEVEL "LOG_DEBUG" CACHE STRING "set the default log level (one of ${LOGLEVELS})")
+list (FIND LOGLEVELS ${Qaul_DEFAULT_LOGLEVEL} RET)
+if (${RET} EQUAL -1)
+	message(FATAL_ERROR "Please choose which qaul port to build (one of ${LOGLEVELS})")
+endif ()
+
 # install configuration
 set (Qaul_DESKTOPDIR "/usr/share/applications" CACHE STRING "choose install location for the .desktop file")
 set (Qaul_ICONDIR "${CMAKE_INSTALL_PREFIX}/lib/qaul/icons" CACHE STRING "choose install location for the aplication icon file(s)")
@@ -159,4 +167,5 @@ message(STATUS "    Building for platform: ${PORT}")
 message(STATUS "    Building GUI: ${GUI}")
 message(STATUS "    Arm/Raspberry patches enabled: ${Raspberry}")
 message(STATUS "    Qaul executable: ${GUINAME}")
+message(STATUS "    Default loglevel: ${Qaul_DEFAULT_LOGLEVEL}")
 message(STATUS "#############################################")

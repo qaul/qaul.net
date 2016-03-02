@@ -7,6 +7,7 @@
 #define QAUL_VERSION_SUFFIX "@Qaul_VERSION_SUFFIX@"
 #define QAUL_VERSION "@Qaul_VERSION@"
 #define QAUL_ROOT_PATH "@CMAKE_INSTALL_PREFIX@"
+#define QAUL_DEFAULT_LOGLEVEL @Qaul_DEFAULT_LOGLEVEL@
 
 // what are we building for?
 
