@@ -68,6 +68,7 @@ if (${PORT} STREQUAL "WINDOWS")
 endif ()
 
 ADD_LIBRARY (libqaul ${LIBTYPE}
+    logging.c
     qaullib.c
     qaullib_ipc.c
     qaullib_webserver.c
