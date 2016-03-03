@@ -6,6 +6,8 @@ pkg_check_modules (OPENCORE_AMRNB opencore-amrnb)
 pkg_check_modules (OPENCORE_AMRWB opencore-amrwb)
 
 find_package (Autotools REQUIRED)
+find_package (BISON REQUIRED) # olsr
+find_package (FLEX REQUIRED) # olsr
 
 add_subdirectory (src/qaulhelper)
 
