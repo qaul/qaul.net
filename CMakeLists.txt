@@ -20,11 +20,11 @@ set (Qaul_VERSION_SUFFIX "beta5")
 set (Qaul_VERSION "${Qaul_VERSION_MAJOR}.${Qaul_VERSION_MINOR}.${Qaul_VERSION_PATCH}.${Qaul_VERSION_SUFFIX}")
 
 # build configuration
-set (LOGLEVELS LOG_NONE LOG_INFO LOG_WARN LOG_ERROR)
+set (LOGLEVELS LOG_NONE LOG_ERROR LOG_WARN LOG_INFO LOG_DEBUG)
 set (Qaul_DEFAULT_LOGLEVEL "LOG_DEBUG" CACHE STRING "set the default log level (one of ${LOGLEVELS})")
 list (FIND LOGLEVELS ${Qaul_DEFAULT_LOGLEVEL} RET)
 if (${RET} EQUAL -1)
-	message(FATAL_ERROR "Please choose which qaul port to build (one of ${LOGLEVELS})")
+	message(FATAL_ERROR "Please choose which log level to include (one of ${LOGLEVELS})")
 endif ()
 
 # install configuration
