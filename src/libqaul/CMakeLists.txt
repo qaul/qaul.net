@@ -119,6 +119,14 @@ target_link_libraries(libqaul LINK_PUBLIC
 	${VOIP_LINK_LIBRARIES}
 )
 
+if (OPENCORE_AMRNB_FOUND)
+	target_link_libraries(libqaul LINK_PUBLIC ${OPENCORE_AMRNB_LIBRARIES})
+endif (OPENCORE_AMRNB_FOUND)
+
+if (OPENCORE_AMRWB_FOUND)
+	target_link_libraries(libqaul LINK_PUBLIC ${OPENCORE_AMRWB_LIBRARIES})
+endif (OPENCORE_AMRWB_FOUND)
+
 if (${PORT} STREQUAL "LINUX")
     target_link_libraries(libqaul LINK_PUBLIC dl m pthread ${ALSA_LIBRARIES})
 endif ()
