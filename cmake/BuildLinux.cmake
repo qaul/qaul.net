@@ -31,7 +31,7 @@ configure_file (
   "${PROJECT_BINARY_DIR}/distfiles/linux/bin/${GUINAME}"
 )
 
-if (NOT ${Qaul_BINDIR} STREQUAL "NONE")
+if (NOT ${QAUL_BINDIR} STREQUAL "NONE")
   install(FILES ${PROJECT_BINARY_DIR}/distfiles/linux/bin/${GUINAME} DESTINATION ${Qaul_BINDIR}
 	  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif()
@@ -91,10 +91,10 @@ SET(CPACK_PACKAGE_FILE_NAME          "${CMAKE_PROJECT_NAME}_${CPACK_PACKAGE_VERS
 SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE    "http://qaul.net")
 
 # copy application icon
-INSTALL(FILES ${PROJECT_SOURCE_DIR}/distfiles/linux/share/qaul_app_icon.png DESTINATION ${Qaul_ICONDIR})
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/distfiles/linux/share/qaul_app_icon.png DESTINATION ${QAUL_ICONDIR})
 
 # add qaul to applications menu 
-INSTALL(FILES ${PROJECT_BINARY_DIR}/distfiles/linux/share/qaul.desktop DESTINATION ${Qaul_DESKTOPDIR})
+INSTALL(FILES ${PROJECT_BINARY_DIR}/distfiles/linux/share/qaul.desktop DESTINATION ${QAUL_DESKTOPDIR})
 
 # All install must be done before this
 INCLUDE(CPack)

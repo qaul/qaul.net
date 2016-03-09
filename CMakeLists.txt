@@ -13,24 +13,24 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include (ExternalProject)
 
 # The version number.
-set (Qaul_VERSION_MAJOR 1)
-set (Qaul_VERSION_MINOR 0)
-set (Qaul_VERSION_PATCH 0)
-set (Qaul_VERSION_SUFFIX "beta5")
-set (Qaul_VERSION "${Qaul_VERSION_MAJOR}.${Qaul_VERSION_MINOR}.${Qaul_VERSION_PATCH}.${Qaul_VERSION_SUFFIX}")
+set (QAUL_VERSION_MAJOR 1)
+set (QAUL_VERSION_MINOR 0)
+set (QAUL_VERSION_PATCH 0)
+set (QAUL_VERSION_SUFFIX "beta5")
+set (QAUL_VERSION "${QAUL_VERSION_MAJOR}.${QAUL_VERSION_MINOR}.${QAUL_VERSION_PATCH}.${QAUL_VERSION_SUFFIX}")
 
 # build configuration
 set (LOGLEVELS LOG_NONE LOG_ERROR LOG_WARN LOG_INFO LOG_DEBUG)
-set (Qaul_DEFAULT_LOGLEVEL "LOG_DEBUG" CACHE STRING "set the default log level (one of ${LOGLEVELS})")
-list (FIND LOGLEVELS ${Qaul_DEFAULT_LOGLEVEL} RET)
+set (QAUL_DEFAULT_LOGLEVEL "LOG_DEBUG" CACHE STRING "set the default log level (one of ${LOGLEVELS})")
+list (FIND LOGLEVELS ${QAUL_DEFAULT_LOGLEVEL} RET)
 if (${RET} EQUAL -1)
 	message(FATAL_ERROR "Please choose which log level to include (one of ${LOGLEVELS})")
 endif ()
 
 # install configuration
-set (Qaul_DESKTOPDIR "/usr/share/applications" CACHE STRING "choose install location for the .desktop file")
-set (Qaul_ICONDIR "${CMAKE_INSTALL_PREFIX}/lib/qaul/icons" CACHE STRING "choose install location for the aplication icon file(s)")
-set (Qaul_BINDIR "NONE" CACHE STRING "if set a wrapper shell script will be installed here")
+set (QAUL_DESKTOPDIR "/usr/share/applications" CACHE STRING "choose install location for the .desktop file")
+set (QAUL_ICONDIR "${CMAKE_INSTALL_PREFIX}/lib/qaul/icons" CACHE STRING "choose install location for the aplication icon file(s)")
+set (QAUL_BINDIR "NONE" CACHE STRING "if set a wrapper shell script will be installed here")
 
 # What to build
 # Determine the operating system
@@ -98,10 +98,10 @@ set(PKGFORMAT "AUTO" CACHE STRING "select what type of package should be build (
 # Cpack general Installer settings
 set(CPACK_RESOURCE_FILE_LICENSE ${PROJECT_SOURCE_DIR}/Licenses/qaul.net_license.txt)
 set(CPACK_PACKAGE_VENDOR "qaul.net community")
-set(CPACK_PACKAGE_VERSION_MAJOR ${Qaul_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${Qaul_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${Qaul_VERSION_PATCH})
-set(CPACK_PACKAGE_VERSION_SUFFIX ${Qaul_VERSION_SUFFIX})
+set(CPACK_PACKAGE_VERSION_MAJOR ${QAUL_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${QAUL_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${QAUL_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION_SUFFIX ${QAUL_VERSION_SUFFIX})
 set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${CPACK_PACKAGE_VERSION_SUFFIX})
 
 # configure a header file to pass some of the CMake settings
@@ -167,7 +167,7 @@ message(STATUS "    Building for platform: ${PORT}")
 message(STATUS "    Building GUI: ${GUI}")
 message(STATUS "    Arm/Raspberry patches enabled: ${Raspberry}")
 message(STATUS "    Qaul executable: ${GUINAME}")
-message(STATUS "    Default loglevel: ${Qaul_DEFAULT_LOGLEVEL}")
+message(STATUS "    Default loglevel: ${QAUL_DEFAULT_LOGLEVEL}")
 message(STATUS "#############################################")
 
 message(STATUS "*****************************************************************")
