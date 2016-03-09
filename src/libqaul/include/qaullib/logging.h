@@ -55,14 +55,10 @@ const char *const LOG_LEVEL_NAMES[] = {
 	} \
 } \
 
-
-// #define log_err(M, ...) if ( LOG_ERROR <= loglevel ) { fprintf(stderr, "[%s] (%s:%d: errno: %s) " M "\n", levelname(LOG_ERROR), __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__); }
 #define ql_log_err(M, ...) if ( LOG_ERROR <= loglevel ) ql_logline(LOG_ERROR, 1, M , ##__VA_ARGS__)
 
-// #define log_warn(M, ...) if ( LOG_WARN <= loglevel ) { fprintf(stderr, "[%s] (%s:%d: errno: %s) " M "\n", levelname(LOG_WARN), __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__); }
 #define ql_log_warn(M, ...) if ( LOG_WARN <= loglevel ) ql_logline(LOG_WARN, 1, M , ##__VA_ARGS__)
 
-// #define log_info(M, ...) if ( LOG_INFO <= loglevel ) { fprintf(stderr, "[%s] (%s:%d) " M "\n", levelname(LOG_INFO), __FILE__, __LINE__, ##__VA_ARGS__); }
 #define ql_log_info(M, ...) if ( LOG_INFO <= loglevel ) ql_logline(LOG_INFO, 0, M , ##__VA_ARGS__)
 
 #define ql_check(A, M, ...) if(!(A)) { ql_log_err(M, ##__VA_ARGS__); errno=0; goto ql_error; }
