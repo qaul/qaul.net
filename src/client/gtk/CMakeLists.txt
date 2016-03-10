@@ -10,13 +10,6 @@ if (UUID_FOUND)
     target_link_libraries(qaul-gtk ${UUID_LIBRARIES})
 endif (UUID_FOUND)
 
-if (OPENCORE_AMRNB_FOUND)
-    target_link_libraries(qaul-gtk ${OPENCORE_AMRNB_LIBRARIES})
-endif (OPENCORE_AMRNB_FOUND)
-
-if (OPENCORE_AMRWB_FOUND)
-    target_link_libraries(qaul-gtk ${OPENCORE_AMRWB_LIBRARIES})
-endif (OPENCORE_AMRWB_FOUND)
 
 target_link_libraries(qaul-gtk ${DBUS1_LIBRARIES} ${WEBKIT_LIBRARIES}
     pthread

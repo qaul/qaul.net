@@ -1,13 +1,92 @@
 stages:
   - build
-  - test
   - deploy
-  - cleanup
+  - fat_build
+  - fat_deploy
+
+
+###################################################
+# Nightly Builds
+###################################################
+
+Nightly Debian 32:
+  stage: build
+  script:
+    - mkdir build; cd build; cmake ..; make package
+    - cp *.deb /artifacts/nightly/
+  only:
+    - qaul-ng
+  tags:
+    - debian8_32
+
+Nightly Debian 64:
+  stage: build
+  script:
+    - mkdir build; cd build; cmake ..; make package
+    - cp *.deb /artifacts/nightly/
+  only:
+    - qaul-ng
+  tags:
+    - debian8_64
+
+Nightly Copy OSX 10.6:
+  stage: build
+  script:
+    - mkdir build; cd build; cmake ..; make
+    - ./make_dmg.sh
+    - qaulcopynightly
+  only:
+    - qaul-ng
+  tags:
+    - osx_10.6
+
+Nightly Copy Android:
+  stage: build
+  script:
+    - PATH="$PATH:$ANDROID_SDK"
+    - mkdir build; cd build
+    - cmake ../ -DPORT=ANDROID -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
+    - make
+    - cp android/bin/QaulActivity-debug.apk /artifacts/nightly/
+  only:
+    - qaul-ng
+  tags:
+    - android
+
+Nightly Copy Windows:
+  stage: build
+  script:
+    - PATH="/mingw32/bin:$PATH"; declare -x MSYSTEM="MINGW32"; declare -x MSYSCON="mintty.exe"
+    - mkdir build; cd build; cmake .. -G "MSYS Makefiles" -DGUI=NATIVE; make
+    - cd src/client/win; mkdir build; cd build; cmake ..
+    - cmake --build . --target qaul --config Release
+    - cpack -C Release
+    - cp *.exe //VBOXSVR/artifacts/nightly/
+  only:
+    - qaul-ng
+  tags:
+    - windows
+
+Nightly Deploy:
+  stage: deploy
+  script:
+    - qaulnightlydeploy $CI_BUILD_REF
+  only:
+    - qaul-ng
+  tags:
+    - buildserver
+
+
+###################################################
+# Test Builds
+###################################################
 
 Debian 8 64-bit:
   stage: build
   script:
     - mkdir build; cd build; cmake ..; make package
+  only:
+    - dev*
   tags:
     - debian8_64
 
@@ -15,6 +94,8 @@ Debian 8 32-bit:
   stage: build
   script:
     - mkdir build; cd build; cmake ..; make package
+  only:
+    - dev*
   tags:
     - debian8_32
 
@@ -23,14 +104,32 @@ OSX 10.6:
   script:
     - mkdir build; cd build; cmake ..; make
     - ./make_dmg.sh
+  only:
+    - dev*
   tags:
     - osx_10.6
 
 Android:
   stage: build
   script:
+    - PATH="$PATH:$ANDROID_SDK"
     - mkdir build; cd build
-    - cmake ../ -DPORT=ANDROID -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES
+    - cmake ../ -DPORT=ANDROID -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
     - make
+  only:
+    - dev*
   tags:
     - android
+
+Windows:
+  stage: build
+  script:
+    - PATH="/mingw32/bin:$PATH"; declare -x MSYSTEM="MINGW32"; declare -x MSYSCON="mintty.exe"
+    - mkdir build; cd build; cmake .. -G "MSYS Makefiles" -DGUI=NATIVE; make
+    - cd src/client/win; mkdir build; cd build; cmake ..
+    - cmake --build . --target qaul --config Release
+    - cpack -C Release
+  only:
+    - dev*
+  tags:
+    - windows
