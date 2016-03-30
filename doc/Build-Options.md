@@ -32,10 +32,10 @@ General options:
     memory.
   * Default value is NO.
 * -DVOIP=YES
-  * When set to YES, the voice over IP library pjsip is not compiled and linked
+  * When set to NO, the voice over IP library pjsip is not compiled and linked
     into qaullib. This is useful, when building qaullib for servers, where voice
     over IP is not necessary.
-  * Default value is NO.
+  * Default value is YES.
 
 Android options:
 
@@ -49,7 +49,7 @@ Android options:
   * The default EABI version set is 4.6
 * -DNDK_LEVEL=9
   * Set the android API target to build for. This is necessary to build for the
-    new cyanogenmod ad-hoc java class. This option is optional. 
+    new cyanogenmod ad-hoc java class. This option is optional.
   * Default level is 9.
 
 
