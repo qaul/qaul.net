@@ -149,8 +149,7 @@ void Qaullib_Msg_LL_Add (struct qaul_msg_LL_item *item)
 	new_item->time = item->time;
 	new_item->read = item->read;
 	new_item->ipv = item->ipv;
-	strncpy(new_item->ip, item->ip, MAX_IP_LEN);
-	memcpy(&new_item->ip[MAX_IP_LEN], "\0", 1);
+	memcpy(&new_item->ip_union.v4, &item->ip_union.v4, sizeof(struct sockaddr_in));
 	new_item->prev = 0;
 	new_item->next = 0;
 
@@ -186,8 +185,7 @@ void Qaullib_Msg_LL_AddNext (struct qaul_msg_LL_item *item, struct qaul_msg_LL_n
 	new_item->time = item->time;
 	new_item->read = item->read;
 	new_item->ipv = item->ipv;
-	strncpy(new_item->ip, item->ip, MAX_IP_LEN);
-	memcpy(&new_item->ip[MAX_IP_LEN], "\0", 1);
+	memcpy(&new_item->ip_union.v4, &item->ip_union.v4, sizeof(struct sockaddr_in));
 	new_item->prev = 0;
 	new_item->next = 0;
 

@@ -3,6 +3,7 @@
  * licensed under GPL (version 3)
  */
 
+#include "qaullib.h"
 #include "qaullib_private.h"
 
 // ------------------------------------------------------------
@@ -146,6 +147,9 @@ void Qaullib_Exit(void) //destructor
 	}
 	else printf("ipc not connected\n");
 
+	// close web server
+	Ql_Www_ServerStop(&ql_webserver_instance);
+
 	// clean up qaullib
 	sqlite3_close(db);
 
@@ -249,15 +253,8 @@ void Qaullib_TimedSocketReceive(void)
 	// check ipc socket
 	Qaullib_IpcReceive();
 
-	// check user & file sockets
-	//Qaullib_UserCheckSockets();
-	//Qaullib_FileCheckSockets();
-
 	// check UDP sockets
 	Qaullib_UDP_CheckSocket();
-
-	// check web server
-	//mg_poll_server(qaul_webserver_instance, 1024);
 }
 
 int Qaullib_TimedCheckAppEvent(void)
@@ -294,18 +291,73 @@ const char* Qaullib_GetAppEventOpenURL(void)
 // ------------------------------------------------------------
 int Qaullib_WebserverStart(void)
 {
+	struct mg_connection *conn;
+
 	if(QAUL_DEBUG)
 		printf("Qaullib_WebserverStart \n");
 
-	//qaul_webserver_instance = mg_create_server(options, (mg_handler_t) Qaullib_WwwEvent_handler);
-	qaul_webserver_instance = mg_create_server(NULL, (mg_handler_t) Qaullib_WwwEvent_handler);
-	mg_set_option(qaul_webserver_instance, "listening_port", CHAT_PORT);
-	mg_set_option(qaul_webserver_instance, "document_root", webPath);
-	// set rewrites for sub directories
-	mg_set_option(qaul_webserver_instance, "url_rewrites", webUrlRewrites);
-	//mg_set_option(qaul_webserver_instance, "num_threads", "60");
+	mg_mgr_init(&ql_webserver_instance, NULL);
+	conn = mg_bind(&ql_webserver_instance, CHAT_PORT, (void *)Ql_WwwEvent_handler);
 
-	mg_start_thread(Qaullib_Www_Server, qaul_webserver_instance);
+	// Set up HTTP server parameters
+	mg_set_protocol_http_websocket(conn);
+	ql_webserver_options.document_root = webPath;
+	ql_webserver_options.url_rewrites = webUrlRewrites;
+
+	// register dynamic C pages here
+	// private
+	mg_register_http_endpoint(conn, "/getmsgs.json", 		Ql_WwwGetMsgs);
+	mg_register_http_endpoint(conn, "/getevents.json", 		Ql_WwwGetEvents);
+	mg_register_http_endpoint(conn, "/getusers.json", 		Ql_WwwGetUsers);
+	mg_register_http_endpoint(conn, "/sendmsg", 			Ql_WwwSendMsg);
+	mg_register_http_endpoint(conn, "/getname.json", 		Ql_WwwGetName);
+	mg_register_http_endpoint(conn, "/call_event", 			Ql_WwwCallEvent);
+	mg_register_http_endpoint(conn, "/call_start", 			Ql_WwwCallStart);
+	mg_register_http_endpoint(conn, "/call_end", 			Ql_WwwCallEnd);
+	mg_register_http_endpoint(conn, "/call_accept", 		Ql_WwwCallAccept);
+	mg_register_http_endpoint(conn, "/file_list.json", 		Ql_WwwFileList);
+	mg_register_http_endpoint(conn, "/file_add.json", 		Ql_WwwFileAdd);
+	mg_register_http_endpoint(conn, "/file_pick.json", 		Ql_WwwFilePick);
+	mg_register_http_endpoint(conn, "/file_pickcheck.json", Ql_WwwFilePickCheck);
+	mg_register_http_endpoint(conn, "/file_open.json", 		Ql_WwwFileOpen);
+	mg_register_http_endpoint(conn, "/file_delete.json", 	Ql_WwwFileDelete);
+	mg_register_http_endpoint(conn, "/file_schedule.json", 	Ql_WwwFileSchedule);
+	mg_register_http_endpoint(conn, "/fav_get.json", 		Ql_WwwFavoriteGet);
+	mg_register_http_endpoint(conn, "/fav_add.json", 		Ql_WwwFavoriteAdd);
+	mg_register_http_endpoint(conn, "/fav_del.json", 		Ql_WwwFavoriteDelete);
+	mg_register_http_endpoint(conn, "/getconfig.json", 		Ql_WwwGetConfig);
+	mg_register_http_endpoint(conn, "/setlocale", 			Ql_WwwSetLocale);
+	mg_register_http_endpoint(conn, "/setname", 			Ql_WwwSetName);
+	mg_register_http_endpoint(conn, "/setpagename", 		Ql_WwwSetPageName);
+	mg_register_http_endpoint(conn, "/setopenurl.json", 	Ql_WwwSetOpenUrl);
+	mg_register_http_endpoint(conn, "/config_interface_loading", Ql_WwwConfigInterfaceLoading);
+	mg_register_http_endpoint(conn, "/config_interface_get", Ql_WwwConfigInterfaceGet);
+	mg_register_http_endpoint(conn, "/config_interface_set", Ql_WwwConfigInterfaceSet);
+	mg_register_http_endpoint(conn, "/config_internet_loading", Ql_WwwConfigInternetLoading);
+	mg_register_http_endpoint(conn, "/config_internet_get", Ql_WwwConfigInternetGet);
+	mg_register_http_endpoint(conn, "/config_internet_set", Ql_WwwConfigInternetSet);
+	mg_register_http_endpoint(conn, "/config_network_get", 	Ql_WwwConfigNetworkGet);
+	mg_register_http_endpoint(conn, "/config_network_profile", Ql_WwwConfigNetworkGetProfile);
+	mg_register_http_endpoint(conn, "/config_network_set", 	Ql_WwwConfigNetworkSet);
+	mg_register_http_endpoint(conn, "/config_files_get", 	Ql_WwwConfigFilesGet);
+	mg_register_http_endpoint(conn, "/config_files_set", 	Ql_WwwConfigFilesSet);
+	mg_register_http_endpoint(conn, "/gettopology.json", 	Ql_WwwGetTopology);
+	mg_register_http_endpoint(conn, "/set_wifiset.json", 	Ql_WwwSetWifiSet);
+	mg_register_http_endpoint(conn, "/quit", 				Ql_WwwQuit);
+	mg_register_http_endpoint(conn, "/loading.json", 		Ql_WwwLoading);
+	// public
+	mg_register_http_endpoint(conn, "/pub_users", 			Ql_WwwPubUsers);
+	mg_register_http_endpoint(conn, "/pub_msg", 			Ql_WwwPubMsg);
+	mg_register_http_endpoint(conn, "/pub_info.json", 		Ql_WwwPubInfo);
+	mg_register_http_endpoint(conn, "/pub_filechunk", 		Ql_WwwPubFilechunk);
+	mg_register_http_endpoint(conn, "/web_getmsgs", 		Ql_WwwWebGetMsgs);
+	mg_register_http_endpoint(conn, "/web_sendmsg", 		Ql_WwwWebSendMsg);
+	mg_register_http_endpoint(conn, "/web_getusers", 		Ql_WwwWebGetUsers);
+	mg_register_http_endpoint(conn, "/web_getfiles", 		Ql_WwwWebGetFiles);
+	mg_register_http_endpoint(conn, "/ext_binaries.json", 	Ql_WwwExtBinaries);
+
+
+	mg_start_thread(Ql_Www_Server, &ql_webserver_instance);
 
 	return 1;
 }

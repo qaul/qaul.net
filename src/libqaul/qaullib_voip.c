@@ -91,7 +91,6 @@ static void Qaullib_VoipLogCall(void)
 		// set ip
 		// todo: ipv6
 		msg_item.ipv = 4;
-		strncpy(msg_item.ip, qaul_voip_call.ip, sizeof(msg_item.ip));
 		inet_aton(qaul_voip_call.ip, &msg_item.ip_union.v4);
 
 	  	// save message

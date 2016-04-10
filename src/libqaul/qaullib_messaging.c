@@ -84,7 +84,7 @@ int Qaullib_MsgDB2LL(struct qaul_msg_LL_node *node, const char *stmt)
 			}
 			else if(strcmp(sqlite3_column_name(ppStmt,jj), "ip") == 0)
 			{
-				sprintf(myitem.ip, "%s", sqlite3_column_text(ppStmt, jj));
+				inet_pton(AF_INET, sqlite3_column_text(ppStmt, jj), &myitem.ip_union.v4.s_addr);
 			}
 			else if(strcmp(sqlite3_column_name(ppStmt,jj), "time") == 0)
 			{
@@ -128,7 +128,6 @@ int Qaullib_MsgAdd(struct qaul_msg_LL_item *item)
 	msg_item.time = item->time;
 	msg_item.read = item->read;
 	msg_item.ipv = item->ipv;
-	strncpy(msg_item.ip, item->ip, sizeof(msg_item.ip));
 	memcpy(&msg_item.ip_union, &item->ip_union, sizeof(msg_item.ip_union));
 
 	// add to DB
@@ -368,6 +367,7 @@ static int Qaullib_MsgAdd2DB(struct qaul_msg_LL_item *item)
 	char *error_exec;
 	char msg_dbprotected[2*MAX_MESSAGE_LEN +1];
 	char name_dbprotected[2*MAX_USER_LEN +1];
+	char ipbuf[MAX(INET6_ADDRSTRLEN, INET_ADDRSTRLEN)];
 
 	error_exec = NULL;
 	stmt = buffer;
@@ -385,7 +385,7 @@ static int Qaullib_MsgAdd2DB(struct qaul_msg_LL_item *item)
 			item->type,
 			name_dbprotected,
 			msg_dbprotected,
-			item->ip,
+			inet_ntop(AF_INET, &item->ip_union.v4.s_addr, (char *)&ipbuf, sizeof(ipbuf)),
 			item->ipv,
 			item->time,
 			item->read

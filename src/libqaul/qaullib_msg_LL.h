@@ -29,7 +29,6 @@ struct qaul_msg_LL_item {
     int  read;                                /// 1 if message has been read by the GUI,
     										  /// 0 if message has not been read
     int  ipv;                                 /// IP version protocol: 4 | 6
-    char ip[MAX_IP_LEN +1];                   /// IP string
     union olsr_ip_addr ip_union;              /// IP union
 };
 

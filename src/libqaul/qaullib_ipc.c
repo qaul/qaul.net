@@ -247,7 +247,6 @@ void Qaullib_IpcEvaluateChat(union olsr_message *msg)
 	// set ip
 	// todo: ipv6
 	msg_item.ipv = 4;
-	strncpy(msg_item.ip, inet_ntop(AF_INET, &msg->v4.originator, (char *)&ipbuf, sizeof(ipbuf)), sizeof(msg_item.ip));
 	memcpy(&msg_item.ip_union.v4, &msg->v4.originator, sizeof(msg_item.ip_union.v4));
 
   	// save Message
