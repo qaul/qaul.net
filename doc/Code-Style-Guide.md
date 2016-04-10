@@ -5,7 +5,7 @@ Naming Conventions
 ------------------
 
 * Functions: start with an upper case character
-  * qaullib prefix:     QL_ (TODO: rename existing functions accordingly )
+  * qaullib prefix:     Ql_ (TODO: rename existing functions accordingly )
 * Variables: start with an lower case character
   * qaullib prefix for public:  ql_ (TODO: rename existing variables accordingly)
 
@@ -17,7 +17,7 @@ Use tabs to indent code.
 Code according to the example:
 
 ´´´
-int QL_FunctionName(int param, int otherparam)
+int Ql_FunctionName(int param, int otherparam)
 {
   int variable_name
 
@@ -70,8 +70,8 @@ example template for a header file:
  * example template that explains the formatting and use of comments in qaul.net
  *
  * functions in the public API
- *   void QL_FunctionInThePublicAPI(void);
- *   void QL_OtherFunctionInThePublicAPI(int commandId);
+ *   void Ql_FunctionInThePublicAPI(void);
+ *   void Ql_OtherFunctionInThePublicAPI(int commandId);
  * @see include/qaullib.h
  */
 
@@ -81,7 +81,7 @@ example template for a header file:
  * @retval 1 example was succesful
  * @retval 0 example failed
  */
-int QL_FunctionName(int param, int otherparam);
+int Ql_FunctionName(int param, int otherparam);
 ´´´
 
 
