@@ -86,7 +86,7 @@ Debian 8 64-bit:
   script:
     - mkdir build; cd build; cmake ..; make package
   only:
-    - dev*
+    - test
   tags:
     - debian8_64
 
@@ -95,7 +95,7 @@ Debian 8 32-bit:
   script:
     - mkdir build; cd build; cmake ..; make package
   only:
-    - dev*
+    - test
   tags:
     - debian8_32
 
@@ -105,7 +105,7 @@ OSX 10.6:
     - mkdir build; cd build; cmake ..; make
     - ./make_dmg.sh
   only:
-    - dev*
+    - test
   tags:
     - osx_10.6
 
@@ -117,7 +117,7 @@ Android:
     - cmake ../ -DPORT=ANDROID -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
     - make
   only:
-    - dev*
+    - test
   tags:
     - android
 
@@ -130,6 +130,6 @@ Windows:
     - cmake --build . --target qaul --config Release
     - cpack -C Release
   only:
-    - dev*
+    - test
   tags:
     - windows
