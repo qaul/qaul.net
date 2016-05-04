@@ -6,8 +6,4 @@ target_link_libraries(qaul-cli
     libqaul
 )
 
-if (UUID_FOUND)
-    target_link_libraries(qaul-cli ${UUID_LIBRARIES})
-endif (UUID_FOUND)
-
 install (TARGETS qaul-cli DESTINATION bin)

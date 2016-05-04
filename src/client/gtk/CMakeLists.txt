@@ -6,11 +6,6 @@ add_executable (qaul-gtk main.c network.c)
 
 target_include_directories(qaul-gtk PRIVATE ${DBUS1_INCLUDE_DIRS} ${WEBKIT_INCLUDE_DIRS})
 
-if (UUID_FOUND)
-    target_link_libraries(qaul-gtk ${UUID_LIBRARIES})
-endif (UUID_FOUND)
-
-
 target_link_libraries(qaul-gtk ${DBUS1_LIBRARIES} ${WEBKIT_LIBRARIES}
     pthread
     libqaul

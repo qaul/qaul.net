@@ -119,6 +119,10 @@ target_link_libraries(libqaul LINK_PUBLIC
 	${VOIP_LINK_LIBRARIES}
 )
 
+if (UUID_FOUND)
+    target_link_libraries(libqaul ${UUID_LIBRARIES})
+endif (UUID_FOUND)
+
 if (OPENCORE_AMRNB_FOUND)
 	target_link_libraries(libqaul LINK_PUBLIC ${OPENCORE_AMRNB_LIBRARIES})
 endif (OPENCORE_AMRNB_FOUND)
