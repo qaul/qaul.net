@@ -1,3 +1,8 @@
+/*
+ * qaul.net is free software
+ * licensed under GPL (version 3)
+ */
+
 #ifndef _LOGGING_H
 #define _LOGGING_H
 
