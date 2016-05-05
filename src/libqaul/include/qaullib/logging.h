@@ -12,11 +12,10 @@
 #include <sys/time.h>
 #include <time.h>
 
+#include "qaullib/externc.h"
 #include "QaulConfig.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+BEGIN_EXTERN_C
 
 enum elog_level {
     LOG_NONE = 0,
@@ -74,8 +73,6 @@ const char *const LOG_LEVEL_NAMES[] = {
 
 #define ql_check_debug(A, M, ...) if(!(A)) { ql_debug(M, ##__VA_ARGS__); errno=0; goto error; }
 
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+END_EXTERN_C
 
 #endif // _LOGGING_H
