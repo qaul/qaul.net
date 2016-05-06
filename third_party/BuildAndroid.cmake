@@ -17,6 +17,7 @@ ExternalProject_Add(olsr
     URL ${ARCHIVE_DIR}/${OLSR_FILENAME}
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/olsr.patch
+    COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/src/olsrd_qaul -DDEST=${CMAKE_CURRENT_BINARY_DIR}/olsr/src/olsr/lib -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
     CONFIGURE_COMMAND ""
     BUILD_COMMAND make NDK_BASE=${NDK_ROOT} NDK_PLATFORM_LEVEL=${NDK_LEVEL} OS=android DEBUG=0 olsrd libs
     COMMAND ${CMAKE_COMMAND} -DSRC=<BINARY_DIR>/olsrd -DDEST=${CMAKE_BINARY_DIR}/android/res/raw -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
