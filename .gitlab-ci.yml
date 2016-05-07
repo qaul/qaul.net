@@ -84,7 +84,7 @@ Nightly Deploy:
 Debian 8 64-bit:
   stage: build
   script:
-    - mkdir build; cd build; cmake ..; make package
+    - mkdir build; cd build; cmake ..; make package VERBOSE=1
   except:
     - master
     - qaul-ng
@@ -94,7 +94,7 @@ Debian 8 64-bit:
 Debian 8 32-bit:
   stage: build
   script:
-    - mkdir build; cd build; cmake ..; make package
+    - mkdir build; cd build; cmake ..; make package VERBOSE=1
   except:
     - master
     - qaul-ng
@@ -104,7 +104,7 @@ Debian 8 32-bit:
 OSX 10.6:
   stage: build
   script:
-    - mkdir build; cd build; cmake ..; make
+    - mkdir build; cd build; cmake ..; make VERBOSE=1
     - ./make_dmg.sh
   except:
     - master
@@ -118,7 +118,7 @@ Android:
     - PATH="$PATH:$ANDROID_SDK"
     - mkdir build; cd build
     - cmake ../ -DPORT=ANDROID -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
-    - make
+    - make VERBOSE=1
   except:
     - master
     - qaul-ng
@@ -129,7 +129,7 @@ Windows:
   stage: build
   script:
     - PATH="/mingw32/bin:$PATH"; declare -x MSYSTEM="MINGW32"; declare -x MSYSCON="mintty.exe"
-    - mkdir build; cd build; cmake .. -G "MSYS Makefiles" -DGUI=NATIVE; make
+    - mkdir build; cd build; cmake .. -G "MSYS Makefiles" -DGUI=NATIVE; make VERBOSE=1
     - cd src/client/win; mkdir build; cd build; cmake ..
     - cmake --build . --target qaul --config Release
     - cpack -C Release
