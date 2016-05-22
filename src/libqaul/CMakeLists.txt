@@ -120,7 +120,7 @@ target_link_libraries(libqaul LINK_PUBLIC
 )
 
 if (UUID_FOUND)
-    target_link_libraries(libqaul ${UUID_LIBRARIES})
+    target_link_libraries(libqaul LINK_PRIVATE ${UUID_LIBRARIES})
 endif (UUID_FOUND)
 
 if (OPENCORE_AMRNB_FOUND)
