@@ -75,19 +75,21 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/qaullib_topo_LL.c \
 	$(LIBQAUL_SRC)/qaullib_msg_LL.c \
 	$(LIBQAUL_SRC)/qaullib_validate.c
-#LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../libqaul
 LOCAL_EXPORT_C_INCLUDES := $(LIBQAUL_INCLUDE)
+LOCAL_C_INCLUDES := \
+	$(LIBQAUL_SRC)/include \
+	$(LIBQAUL_SRC)/mbedtls/include \
+	$(QAULCONFIG_INCLUDE)
 LOCAL_CFLAGS := \
-	-I$(LIBQI1) \
-	-I$(LIBQI2) \
+	-I$(LIBQAUL_SRC) \
+	-I$(LIBQAUL_SRC)/include \
+	-I$(LIBQAUL_SRC)/mbedtls/include \
+	-I$(QAULCONFIG_INCLUDE)\
 	-I$(PJSIP_PATH)/pjsip/include \
 	-I$(PJSIP_PATH)/pjlib/include \
 	-I$(PJSIP_PATH)/pjlib-util/include \
 	-I$(PJSIP_PATH)/pjmedia/include \
-	-I$(PJSIP_PATH)/pjnath/include \
-	-I$(LIBQAUL_INCLUDE) \
-	-I$(LIBQAUL_SRC)/mbedtls/include \
-	-I$(QAUL_CONFIG)
+	-I$(PJSIP_PATH)/pjnath/include
 LOCAL_STATIC_LIBRARIES := \
     pjsua \
     pjsip-ua \
