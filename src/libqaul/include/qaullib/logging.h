@@ -27,6 +27,7 @@ enum elog_level {
 
 typedef enum elog_level loglevel_t;
 
+#ifdef LOGGER_IMPLEMENTATION
 loglevel_t loglevel = QAUL_DEFAULT_LOGLEVEL;
 
 const char *const LOG_LEVEL_NAMES[] = {
@@ -36,6 +37,10 @@ const char *const LOG_LEVEL_NAMES[] = {
     "INFO",
     "DEBUG"
 };
+#else
+extern loglevel_t loglevel;
+extern const char *const LOG_LEVEL_NAMES[];
+#endif
 
 #define Ql_levelname(M) LOG_LEVEL_NAMES[M]
 
@@ -72,6 +77,9 @@ const char *const LOG_LEVEL_NAMES[] = {
 #define Ql_check_mem(A) Ql_check((A), "Out of memory.")
 
 #define Ql_check_debug(A, M, ...) if(!(A)) { ql_debug(M, ##__VA_ARGS__); errno=0; goto Ql_error; }
+
+loglevel_t getLogLevel(void);
+loglevel_t setLogLevel(loglevel_t newloglevel);
 
 END_EXTERN_C
 

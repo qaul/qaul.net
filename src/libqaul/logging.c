@@ -3,5 +3,18 @@
  * licensed under GPL (version 3)
  */
 
+#define LOGGER_IMPLEMENTATION
+
 #include "qaullib/logging.h"
 
+loglevel_t getLogLevel(void) {
+    return loglevel;
+}
+
+// returns the previos loglevel
+loglevel_t setLogLevel(loglevel_t newloglevel) {
+    if (loglevel == newloglevel) return loglevel;
+    loglevel_t oldLogLevel = loglevel;
+    loglevel = newloglevel;
+    return oldLogLevel;
+}
