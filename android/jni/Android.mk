@@ -85,7 +85,9 @@ LOCAL_CFLAGS := \
 	-I$(PJSIP_PATH)/pjlib-util/include \
 	-I$(PJSIP_PATH)/pjmedia/include \
 	-I$(PJSIP_PATH)/pjnath/include \
-	-I$(LIBQAUL_INCLUDE)
+	-I$(LIBQAUL_INCLUDE) \
+	-I$(LIBQAUL_SRC)/mbedtls/include \
+	-I$(QAUL_CONFIG)
 LOCAL_STATIC_LIBRARIES := \
     pjsua \
     pjsip-ua \
