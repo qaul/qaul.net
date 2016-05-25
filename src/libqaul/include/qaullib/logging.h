@@ -3,6 +3,27 @@
  * licensed under GPL (version 3)
  */
 
+/**
+ * Logging macros for qaul.net.
+ *
+ * The following log levels:
+ * 	DEBUG
+ * 	INFO
+ * 	WARN
+ * 	ERROR
+ *
+ * The logging messages can be excluded during compile time and if present
+ * switched on at program startup.
+ * Default log level is WARN.
+ *
+ * Use the logging macros as follows:
+ *
+ * Ql_log_debug("My debug log message");
+ * Ql_log_info("My info log message");
+ * Ql_log_warn("My warn log message");
+ * Ql_log_error("My error log message");
+ */
+
 #ifndef _LOGGING_H
 #define _LOGGING_H
 
@@ -40,9 +61,9 @@ const char *const LOG_LEVEL_NAMES[] = {
 #define Ql_levelname(M) LOG_LEVEL_NAMES[M]
 
 #ifdef NDEBUG
-#define Ql_debug(M, ...)
+#define Ql_log_debug(M, ...)
 #else
-#define Ql_debug(M, ...) Ql_logline(LOG_DEBUG, 0, M, ##__VA_ARGS__)
+#define Ql_log_debug(M, ...) Ql_logline(LOG_DEBUG, 0, M, ##__VA_ARGS__)
 #endif
 
 #define Ql_clean_errno() (errno == 0 ? "None" : strerror(errno))
