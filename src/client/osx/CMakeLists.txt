@@ -58,7 +58,7 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
     ${LIBQAULDIR}/mongoose/mongoose.c
     ${LIBQAULDIR}/sqlite/sqlite3.c
     ${LIBQAULDIR}/urlcode/urlcode.c
-    ${LIBQAULDIR}/polarssl/sha1.c
+    ${LIBQAULDIR}/mbedtls/sha1.c
     ${LIBQAULDIR}/olsrd/mantissa.c
     ${LIBQAULDIR}/olsrd/hashing.c
 	${MACOSX_RESOURCE_FILES}

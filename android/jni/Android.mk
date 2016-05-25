@@ -67,7 +67,7 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/mongoose/mongoose.c \
 	$(LIBQAUL_SRC)/sqlite/sqlite3.c \
 	$(LIBQAUL_SRC)/urlcode/urlcode.c \
-	$(LIBQAUL_SRC)/polarssl/sha1.c \
+	$(LIBQAUL_SRC)/mbedtls/sha1.c \
 	$(LIBQAUL_SRC)/olsrd/mantissa.c \
 	$(LIBQAUL_SRC)/olsrd/hashing.c \
 	$(LIBQAUL_SRC)/qaullib_appevent_LL.c \
