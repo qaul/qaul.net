@@ -80,6 +80,7 @@ target_include_directories(qaul PRIVATE
     ${PJBASE}third_party/srtp/include
     ${LIBQAULDIR}
     ${LIBQAULDIR}/include
+    ${LIBQAULDIR}/mbedtls/include
 )
 
 #TODO system detection uname -m

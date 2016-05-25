@@ -5,7 +5,7 @@
 
 #include "qaullib_private.h"
 #include "qaullib_crypto.h"
-#include "mbedtls/include/mbedtls/sha1.h"
+#include "mbedtls/sha1.h"
 
 
 void Qaullib_UserInit(void)
