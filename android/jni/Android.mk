@@ -49,6 +49,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libqaul
 LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/qaullib.c \
+	$(LIBQAUL_SRC)/logging.c \
 	$(LIBQAUL_SRC)/qaullib_ipc.c \
 	$(LIBQAUL_SRC)/qaullib_webserver.c \
 	$(LIBQAUL_SRC)/qaullib_voip.c \

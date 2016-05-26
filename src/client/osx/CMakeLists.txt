@@ -35,6 +35,7 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
 	AppDelegate.h AppDelegate.m
 	QaulConfigWifi.h QaulConfigWifi.m
     ${LIBQAULDIR}/qaullib.c
+    ${LIBQAULDIR}/logging.c
     ${LIBQAULDIR}/qaullib_ipc.c
     ${LIBQAULDIR}/qaullib_webserver.c
     ${LIBQAULDIR}/qaullib_voip.c
