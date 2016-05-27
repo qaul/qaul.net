@@ -46,7 +46,6 @@ else ()
 		${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
 		${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
 		${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
-		${PJBASE}/third_party/lib/libportaudio-${PJSIPTYPE}.a
 		${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
 		${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
 		${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
