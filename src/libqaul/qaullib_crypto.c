@@ -18,7 +18,7 @@ int Ql_sha1_file(char *filepath, unsigned char *hash)
 	mbedtls_sha1_context ctx;
     unsigned char buf[1024];
 
-    Ql_debug("Ql_sha1_file %s", filepath);
+    Ql_log_debug("Ql_sha1_file %s", filepath);
 
     ret = 1;
     if((f = fopen(filepath, "rb")) == NULL)
@@ -56,7 +56,7 @@ int Ql_HashToString(unsigned char *hash, char *string)
 {
 	int i;
 
-	Ql_debug("Ql_HashToString");
+	Ql_log_debug("Ql_HashToString");
 
 	// FIXME: big-endian / little-endian
 	for(i=0;i<MAX_HASH_LEN;i++)
