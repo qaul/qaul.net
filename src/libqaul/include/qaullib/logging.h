@@ -146,9 +146,9 @@ extern const char *const LOG_LEVEL_NAMES[];
 	} \
 } \
 
-#define Ql_check(A, M, ...) if(!(A)) { Ql_log_err(M, ##__VA_ARGS__); errno=0; goto Ql_error; }
+#define Ql_check(A, M, ...) if(!(A)) { Ql_log_error(M, ##__VA_ARGS__); errno=0; goto Ql_error; }
 
-#define Ql_sentinel(M, ...)  { Ql_log_err(M, ##__VA_ARGS__); errno=0; goto Ql_error; }
+#define Ql_sentinel(M, ...)  { Ql_log_error(M, ##__VA_ARGS__); errno=0; goto Ql_error; }
 
 #define Ql_check_mem(A) Ql_check((A), "Out of memory.")
 

@@ -23,7 +23,7 @@ int Ql_sha1_file(char *filepath, unsigned char *hash)
     ret = 1;
     if((f = fopen(filepath, "rb")) == NULL)
     {
-    	Ql_log_err("Ql_sha1_file failed to open file: %s\n", filepath);
+    	Ql_log_error("Ql_sha1_file failed to open file: %s\n", filepath);
     	return 0;
     }
 
@@ -37,7 +37,7 @@ int Ql_sha1_file(char *filepath, unsigned char *hash)
 
     if(ferror(f) != 0)
     {
-    	Ql_log_err("Ql_sha1_file file error on file: %s\n", filepath);
+    	Ql_log_error("Ql_sha1_file file error on file: %s\n", filepath);
     	ret = 0;
         goto cleanup;
     }
