@@ -107,7 +107,14 @@ function init_start()
 		if (typeof(Storage) !== "undefined")
 			localStorage.setItem("locale", $("input[name='l']:checked").val());
 		
-		$.mobile.changePage($("#page_config_name"));
+		if(web_init)
+		{
+			$.mobile.changePage($("#page_pref"));
+			location.reload();
+		}
+		else
+			$.mobile.changePage($("#page_config_name"));
+		
 		return false;
 	});
 	
@@ -118,7 +125,14 @@ function init_start()
 			if(typeof(Storage) !== "undefined")
 				localStorage.setItem("username", $("#name_name").val());
 			
-			$.mobile.changePage($("#page_chat"));
+			if(web_init)
+				$.mobile.changePage($("#page_pref"));
+			else
+			{
+				web_init();
+				$.mobile.changePage($("#page_chat"));
+			}
+			
 			updatetimer();
 		}
 	});
@@ -911,6 +925,12 @@ function isoDateString(d)
 // ======================================================
 // web client functions
 // ------------------------------------------------------
+function web_init()
+{
+	web_init = true;
+	$(".c_init").show();
+}
+
 function web_getfiles()
 {
 	var path = "web_getfiles";
@@ -1030,6 +1050,7 @@ function web_check_settings()
 			set_locale(localStorage.getItem("locale"));
 			set_username(localStorage.getItem("username"));
 			
+			web_init();
 			$.mobile.changePage($("#page_chat"));
 		}
 		else
