@@ -76,9 +76,9 @@ example template for a header file:
  */
 
 /**
- * Example function needing @param and @otherparam for example reason
+ * Example function needing @a param and @a otherparam for example reason
  *
- * @retval 1 example was succesful
+ * @retval 1 example was successful
  * @retval 0 example failed
  */
 int Ql_FunctionName(int param, int otherparam);
@@ -88,7 +88,7 @@ int Ql_FunctionName(int param, int otherparam);
 Licensing
 ---------
 
-All code comitted to qaul.net must be under GPLv3 license.
+All code pushed to qaul.net must be under GPLv3 license.
 Every file shall start with the qaul.net GPLv3 license declaration.
 
 example:

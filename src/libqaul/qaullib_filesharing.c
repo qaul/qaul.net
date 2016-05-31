@@ -8,8 +8,7 @@
 #endif
 
 #include "qaullib_private.h"
-#include "polarssl/polarssl/config.h"
-#include "polarssl/polarssl/sha1.h"
+#include "mbedtls/sha1.h"
 #include "qaullib_crypto.h"
 
 /**
@@ -258,7 +257,7 @@ int Qaullib_FileCopyNew(char *path, struct qaul_file_LL_item *file)
 	if(!Qaullib_FileCreateHashStr(path, file->hashstr))
 		return 0;
     // create hash from hashstr
-	Qaullib_StringToHash(file->hashstr, file->hash);
+	Ql_StringToHash(file->hashstr, file->hash);
 	// extract the suffix
     Qaullib_FileGetSuffix(path, file->suffix);
     // create destination filename
@@ -476,8 +475,8 @@ void Qaullib_FileDB2LL(void)
 			else if(strcmp(sqlite3_column_name(ppStmt,jj), "hash") == 0)
 			{
 				sprintf(myitem.hashstr, "%s", sqlite3_column_text(ppStmt, jj));
-				if(!Qaullib_StringToHash(myitem.hashstr, myitem.hash))
-					printf("ERROR: Qaullib_StringToHash conversion failed! \n");
+				if(!Ql_StringToHash(myitem.hashstr, myitem.hash))
+					printf("ERROR: Ql_StringToHash conversion failed! \n");
 			}
 			else if(strcmp(sqlite3_column_name(ppStmt,jj), "size") == 0)
 			{
@@ -647,7 +646,7 @@ int Qaullib_FileAvailable(char *hashstr, char *suffix, struct qaul_file_LL_item 
 		printf("Qaullib_FileAvailable\n");
 
 	// convert hashstr to hash
-	if(Qaullib_StringToHash(hashstr, hash))
+	if(Ql_StringToHash(hashstr, hash))
 	{
 		// loop through file list
 		if(Qaullib_File_LL_HashSearch(hash, &found_file_item))
@@ -1012,7 +1011,7 @@ static int Qaullib_FileCreateHashStr(char *filename, char *hashstr)
     if(!Qaullib_HashCreate(filename, local_hash))
     	return 0;
     // convert binary to hex encoding
-    if(!Qaullib_HashToString(local_hash, hashstr))
+    if(!Ql_HashToString(local_hash, hashstr))
     	return 0;
 
     return 1;
@@ -1025,15 +1024,9 @@ static int Qaullib_HashCreate(char *filename, unsigned char *hash)
 {
 	int ret;
 
-	ret = polarssl_sha1_file( filename, hash );
-	if(ret == 1)
-		fprintf( stderr, "[qaullib] failed to open: %s\n", filename );
-	if(ret == 2)
-		fprintf( stderr, "[qaullib] failed to open: %s\n", filename );
-	if(ret != 0)
-		return 0;
+	ret = Ql_sha1_file(filename, hash);
 
-	return 1;
+	return ret;
 }
 
 // ------------------------------------------------------------
@@ -1053,7 +1046,7 @@ int Qaullib_VerifyDownload(struct qaul_file_LL_item *file_item)
 			return 1;
 		else
 		{
-			Qaullib_HashToString(local_hash, filepath);
+			Ql_HashToString(local_hash, filepath);
 			printf("Qaullib_VerifyDownload hash comparison failed [%s] != [%s] \n", file_item->hashstr, filepath);
 		}
 	}

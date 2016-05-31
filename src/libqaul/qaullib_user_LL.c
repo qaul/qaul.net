@@ -90,7 +90,7 @@ struct qaul_user_LL_item* Qaullib_User_LL_Add (union olsr_ip_addr *ip, unsigned 
 	if(id != 0)
 	{
 		memcpy(new_item->id, id, sizeof(new_item->id));
-		Qaullib_HashToString(id, new_item->idstr);
+		Ql_HashToString(id, new_item->idstr);
 	}
 	else
 	{

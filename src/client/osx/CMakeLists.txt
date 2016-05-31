@@ -35,6 +35,7 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
 	AppDelegate.h AppDelegate.m
 	QaulConfigWifi.h QaulConfigWifi.m
     ${LIBQAULDIR}/qaullib.c
+    ${LIBQAULDIR}/logging.c
     ${LIBQAULDIR}/qaullib_ipc.c
     ${LIBQAULDIR}/qaullib_webserver.c
     ${LIBQAULDIR}/qaullib_voip.c
@@ -58,7 +59,7 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
     ${LIBQAULDIR}/mongoose/mongoose.c
     ${LIBQAULDIR}/sqlite/sqlite3.c
     ${LIBQAULDIR}/urlcode/urlcode.c
-    ${LIBQAULDIR}/polarssl/sha1.c
+    ${LIBQAULDIR}/mbedtls/sha1.c
     ${LIBQAULDIR}/olsrd/mantissa.c
     ${LIBQAULDIR}/olsrd/hashing.c
 	${MACOSX_RESOURCE_FILES}
@@ -80,6 +81,7 @@ target_include_directories(qaul PRIVATE
     ${PJBASE}third_party/srtp/include
     ${LIBQAULDIR}
     ${LIBQAULDIR}/include
+    ${LIBQAULDIR}/mbedtls/include
 )
 
 #TODO system detection uname -m
@@ -115,7 +117,6 @@ target_link_libraries(qaul
     ${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
 #    ${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
-    ${PJBASE}/third_party/lib/libportaudio-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a

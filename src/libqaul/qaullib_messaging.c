@@ -178,7 +178,7 @@ int Qaullib_MsgCheckFile(struct qaul_msg_LL_item *item)
 		file_item.created_at = (int)timestamp;
 		file_item.downloaded = 0;
 		file_item.downloaded_chunk = 0;
-		Qaullib_StringToHash(file_item.hashstr, file_item.hash);
+		Ql_StringToHash(file_item.hashstr, file_item.hash);
 
 		// todo: deprecated, to be removed
 		strncpy(file_item.adv_name, item->name, sizeof(file_item.adv_name));
