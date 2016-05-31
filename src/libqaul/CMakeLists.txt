@@ -46,7 +46,6 @@ else ()
 		${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
 		${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
 		${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
-		${PJBASE}/third_party/lib/libportaudio-${PJSIPTYPE}.a
 		${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
 		${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
 		${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
@@ -92,7 +91,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     mongoose/mongoose.c
     sqlite/sqlite3.c
     urlcode/urlcode.c
-    polarssl/sha1.c
+    mbedtls/sha1.c
     olsrd/mantissa.c
     olsrd/hashing.c
     ${VOIP_SOURCES}
@@ -112,6 +111,7 @@ endif ()
 target_include_directories (libqaul PUBLIC include)
 
 target_include_directories (libqaul PRIVATE
+	mbedtls/include
 	${VOIP_INCLUDE}
 )
 
@@ -120,7 +120,7 @@ target_link_libraries(libqaul LINK_PUBLIC
 )
 
 if (UUID_FOUND)
-    target_link_libraries(libqaul ${UUID_LIBRARIES})
+    target_link_libraries(libqaul LINK_PRIVATE ${UUID_LIBRARIES})
 endif (UUID_FOUND)
 
 if (OPENCORE_AMRNB_FOUND)

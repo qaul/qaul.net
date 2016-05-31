@@ -1597,7 +1597,7 @@ void Ql_WwwFileOpen(struct mg_connection *conn, int event, void *event_data)
 	memcpy(&hashstr[MAX_HASHSTR_LEN], "\0", 1);
 
 	// get file
-	if(Qaullib_StringToHash(hashstr, hash))
+	if(Ql_StringToHash(hashstr, hash))
 	{
 		// check if file is in file sharing
 		if(
@@ -1669,7 +1669,7 @@ void Ql_WwwFileDelete(struct mg_connection *conn, int event, void *event_data)
 	printf("hashstr %s\n", local_hashstr);
 	// delete file
 	// todo: delete file (by hash)
-	if(Qaullib_StringToHash(local_hashstr, local_hash))
+	if(Ql_StringToHash(local_hashstr, local_hash))
 	{
 		if(Qaullib_File_LL_HashSearch(local_hash, &file_item))
 		{
@@ -1711,7 +1711,7 @@ void Ql_WwwFileSchedule(struct mg_connection *conn, int event, void *event_data)
 
 	// get hash
 	mg_get_http_var(&hm->body, "hash", file_item.hashstr, sizeof(file_item.hashstr));
-	Qaullib_StringToHash(file_item.hashstr, file_item.hash);
+	Ql_StringToHash(file_item.hashstr, file_item.hash);
 	// get suffix
 	mg_get_http_var(&hm->body, "suffix", file_item.suffix, sizeof(file_item.suffix));
 	// get description
