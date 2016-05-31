@@ -49,6 +49,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libqaul
 LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/qaullib.c \
+	$(LIBQAUL_SRC)/logging.c \
 	$(LIBQAUL_SRC)/qaullib_ipc.c \
 	$(LIBQAUL_SRC)/qaullib_webserver.c \
 	$(LIBQAUL_SRC)/qaullib_voip.c \
@@ -67,7 +68,7 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/mongoose/mongoose.c \
 	$(LIBQAUL_SRC)/sqlite/sqlite3.c \
 	$(LIBQAUL_SRC)/urlcode/urlcode.c \
-	$(LIBQAUL_SRC)/polarssl/sha1.c \
+	$(LIBQAUL_SRC)/mbedtls/sha1.c \
 	$(LIBQAUL_SRC)/olsrd/mantissa.c \
 	$(LIBQAUL_SRC)/olsrd/hashing.c \
 	$(LIBQAUL_SRC)/qaullib_appevent_LL.c \
@@ -75,17 +76,21 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/qaullib_topo_LL.c \
 	$(LIBQAUL_SRC)/qaullib_msg_LL.c \
 	$(LIBQAUL_SRC)/qaullib_validate.c
-#LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../libqaul
 LOCAL_EXPORT_C_INCLUDES := $(LIBQAUL_INCLUDE)
+LOCAL_C_INCLUDES := \
+	$(LIBQAUL_SRC)/include \
+	$(LIBQAUL_SRC)/mbedtls/include \
+	$(QAULCONFIG_INCLUDE)
 LOCAL_CFLAGS := \
-	-I$(LIBQI1) \
-	-I$(LIBQI2) \
+	-I$(LIBQAUL_SRC) \
+	-I$(LIBQAUL_SRC)/include \
+	-I$(LIBQAUL_SRC)/mbedtls/include \
+	-I$(QAULCONFIG_INCLUDE)\
 	-I$(PJSIP_PATH)/pjsip/include \
 	-I$(PJSIP_PATH)/pjlib/include \
 	-I$(PJSIP_PATH)/pjlib-util/include \
 	-I$(PJSIP_PATH)/pjmedia/include \
-	-I$(PJSIP_PATH)/pjnath/include \
-	-I$(LIBQAUL_INCLUDE)
+	-I$(PJSIP_PATH)/pjnath/include
 LOCAL_STATIC_LIBRARIES := \
     pjsua \
     pjsip-ua \

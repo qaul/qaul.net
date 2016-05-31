@@ -5,15 +5,58 @@
 
 #include "qaullib_private.h"
 #include "qaullib_crypto.h"
+#include "mbedtls/sha1.h"
+#include "qaullib/logging.h"
 
 
 // ------------------------------------------------------------
-int Qaullib_HashToString(unsigned char *hash, char *string)
+int Ql_sha1_file(char *filepath, unsigned char *hash)
+{
+    int ret;
+    FILE *f;
+    size_t n;
+	mbedtls_sha1_context ctx;
+    unsigned char buf[1024];
+
+    Ql_log_debug("Ql_sha1_file %s", filepath);
+
+    ret = 1;
+    if((f = fopen(filepath, "rb")) == NULL)
+    {
+    	Ql_log_error("Ql_sha1_file failed to open file: %s\n", filepath);
+    	return 0;
+    }
+
+	mbedtls_sha1_init(&ctx);
+	mbedtls_sha1_starts(&ctx);
+
+    while((n = fread(buf, 1, sizeof(buf), f)) > 0)
+    {
+    	mbedtls_sha1_update(&ctx, buf, n);
+    }
+
+    if(ferror(f) != 0)
+    {
+    	Ql_log_error("Ql_sha1_file file error on file: %s\n", filepath);
+    	ret = 0;
+        goto cleanup;
+    }
+
+	mbedtls_sha1_finish(&ctx, hash);
+
+cleanup:
+    fclose(f);
+    mbedtls_sha1_free(&ctx);
+
+	return ret;
+}
+
+// ------------------------------------------------------------
+int Ql_HashToString(unsigned char *hash, char *string)
 {
 	int i;
 
-	if(QAUL_DEBUG)
-		printf("Qaullib_HashToString\n");
+	Ql_log_debug("Ql_HashToString");
 
 	// FIXME: big-endian / little-endian
 	for(i=0;i<MAX_HASH_LEN;i++)
@@ -24,7 +67,7 @@ int Qaullib_HashToString(unsigned char *hash, char *string)
 }
 
 // ------------------------------------------------------------
-int Qaullib_StringToHash(char *string, unsigned char *hash)
+int Ql_StringToHash(char *string, unsigned char *hash)
 {
 	int i, j;
 	uint8_t mybyte;

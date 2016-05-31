@@ -8,9 +8,7 @@
 /* **********************
  * end of changes by qaul.net
  * **********************/
-#ifdef __AVR__
-#include "avrsupport.h"
-#endif
+
 /*
  * Copyright (c) 2004-2013 Sergey Lyubka
  * Copyright (c) 2013-2015 Cesanta Software Limited
@@ -30,10 +28,10 @@
  * license, as set out in <https://www.cesanta.com/license>.
  */
 
-#ifndef _MG_COMMON_H_
-#define _MG_COMMON_H_
+#ifndef CS_MONGOOSE_SRC_COMMON_H_
+#define CS_MONGOOSE_SRC_COMMON_H_
 
-#define MG_VERSION "6.2"
+#define MG_VERSION "6.4"
 
 /* Local tweaks, applied before any of Mongoose's own headers. */
 #ifdef MG_LOCALS
@@ -45,6 +43,8 @@
 #endif
 #if defined(MG_DISABLE_STDIO) && !defined(CS_DISABLE_STDIO)
 #define CS_DISABLE_STDIO
+#elif defined(CS_DISABLE_STDIO) && !defined(MG_DISABLE_STDIO)
+#define MG_DISABLE_STDIO
 #endif
 
 /* All of the below features depend on filesystem access, disable them. */
@@ -73,9 +73,9 @@
 #endif /* MG_NO_BSD_SOCKETS */
 
 
-#endif /* _MG_COMMON_H_ */
-#ifndef _CS_PLATFORM_H_
-#define _CS_PLATFORM_H_
+#endif /* CS_MONGOOSE_SRC_COMMON_H_ */
+#ifndef CS_COMMON_PLATFORM_H_
+#define CS_COMMON_PLATFORM_H_
 
 /*
  * For the "custom" platform, includes and dependencies can be
@@ -86,11 +86,17 @@
 #define CS_P_WINDOWS 2
 #define CS_P_ESP_LWIP 3
 #define CS_P_CC3200 4
+#define CS_P_MSP432 5
 
 /* If not specified explicitly, we guess platform by defines. */
 #ifndef CS_PLATFORM
 
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(TARGET_IS_MSP432P4XX) || defined(__MSP432P401R__)
+
+#define CS_PLATFORM CS_P_MSP432
+#elif defined(cc3200)
+#define CS_PLATFORM CS_P_CC3200
+#elif defined(__unix__) || defined(__APPLE__)
 #define CS_PLATFORM CS_P_UNIX
 #elif defined(_WIN32)
 #define CS_PLATFORM CS_P_WINDOWS
@@ -121,9 +127,9 @@
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 #endif
 
-#endif /* _CS_PLATFORM_H_ */
-#ifndef _CS_PLATFORM_WINDOWS_H_
-#define _CS_PLATFORM_WINDOWS_H_
+#endif /* CS_COMMON_PLATFORM_H_ */
+#ifndef CS_COMMON_PLATFORMS_PLATFORM_WINDOWS_H_
+#define CS_COMMON_PLATFORMS_PLATFORM_WINDOWS_H_
 #if CS_PLATFORM == CS_P_WINDOWS
 
 /*
@@ -144,8 +150,10 @@
 #endif
 
 #include <assert.h>
+#include <direct.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <io.h>
 #include <limits.h>
 #include <signal.h>
 #include <stddef.h>
@@ -153,15 +161,17 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <direct.h>
-#include <io.h>
 
 #define random() rand()
 #ifdef _MSC_VER
 #pragma comment(lib, "ws2_32.lib") /* Linking with winsock library */
 #endif
+
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <windows.h>
 #include <process.h>
+
 #ifndef EINPROGRESS
 #define EINPROGRESS WSAEINPROGRESS
 #endif
@@ -246,10 +256,22 @@ struct dirent *readdir(DIR *dir);
 #endif
 #endif
 
+#ifndef MG_MAX_HTTP_REQUEST_SIZE
+#define MG_MAX_HTTP_REQUEST_SIZE 8192
+#endif
+
+#ifndef MG_MAX_HTTP_SEND_MBUF
+#define MG_MAX_HTTP_SEND_MBUF 4096
+#endif
+
+#ifndef MG_MAX_HTTP_HEADERS
+#define MG_MAX_HTTP_HEADERS 40
+#endif
+
 #endif /* CS_PLATFORM == CS_P_WINDOWS */
-#endif /* _CS_PLATFORM_WINDOWS_H_ */
-#ifndef _CS_PLATFORM_UNIX_H_
-#define _CS_PLATFORM_UNIX_H_
+#endif /* CS_COMMON_PLATFORMS_PLATFORM_WINDOWS_H_ */
+#ifndef CS_COMMON_PLATFORMS_PLATFORM_UNIX_H_
+#define CS_COMMON_PLATFORMS_PLATFORM_UNIX_H_
 #if CS_PLATFORM == CS_P_UNIX
 
 #ifndef _XOPEN_SOURCE
@@ -329,15 +351,26 @@ typedef struct stat cs_stat_t;
 
 #define closesocket(x) close(x)
 
+#ifndef MG_MAX_HTTP_REQUEST_SIZE
+#define MG_MAX_HTTP_REQUEST_SIZE 8192
+#endif
+
+#ifndef MG_MAX_HTTP_SEND_MBUF
+#define MG_MAX_HTTP_SEND_MBUF 4096
+#endif
+
+#ifndef MG_MAX_HTTP_HEADERS
+#define MG_MAX_HTTP_HEADERS 40
+#endif
+
 #endif /* CS_PLATFORM == CS_P_UNIX */
-#endif /* _CS_PLATFORM_UNIX_H_ */
-#ifndef _CS_PLATFORM_ESP_LWIP_H_
-#define _CS_PLATFORM_ESP_LWIP_H_
+#endif /* CS_COMMON_PLATFORMS_PLATFORM_UNIX_H_ */
+#ifndef CS_COMMON_PLATFORMS_PLATFORM_ESP_LWIP_H_
+#define CS_COMMON_PLATFORMS_PLATFORM_ESP_LWIP_H_
 #if CS_PLATFORM == CS_P_ESP_LWIP
 
 #include <assert.h>
 #include <ctype.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
 #include <string.h>
@@ -349,6 +382,10 @@ typedef struct stat cs_stat_t;
 #include <lwip/inet.h>
 #include <lwip/netdb.h>
 #include <lwip/dns.h>
+
+#ifndef LWIP_PROVIDE_ERRNO
+#include <errno.h>
+#endif
 
 #define LWIP_TIMEVAL_PRIVATE 0
 
@@ -374,158 +411,44 @@ typedef struct stat cs_stat_t;
 #define INT64_X_FMT PRIx64
 #define __cdecl
 
+unsigned long os_random(void);
+#define random os_random
+
 #endif /* CS_PLATFORM == CS_P_ESP_LWIP */
-#endif /* _CS_PLATFORM_ESP_LWIP_H_ */
+#endif /* CS_COMMON_PLATFORMS_PLATFORM_ESP_LWIP_H_ */
 /*
  * Copyright (c) 2014-2016 Cesanta Software Limited
  * All rights reserved
  */
 
-#ifndef _CS_PLATFORM_CC3200_H_
-#define _CS_PLATFORM_CC3200_H_
+#ifndef CS_COMMON_PLATFORMS_PLATFORM_CC3200_H_
+#define CS_COMMON_PLATFORMS_PLATFORM_CC3200_H_
 #if CS_PLATFORM == CS_P_CC3200
 
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <inttypes.h>
 #include <stdint.h>
+#include <string.h>
 #include <time.h>
 
-#include <simplelink.h>
+#ifndef __TI_COMPILER_VERSION__
+#include <fcntl.h>
+#include <sys/time.h>
+#endif
 
-#define SOMAXCONN 8
+#define MG_SOCKET_SIMPLELINK 1
+#define MG_DISABLE_SOCKETPAIR 1
+#define MG_DISABLE_SYNC_RESOLVER 1
+#define MG_DISABLE_POPEN 1
+#define MG_DISABLE_CGI 1
+/* Only SPIFFS supports directories, SLFS does not. */
+#ifndef CC3200_FS_SPIFFS
+#define MG_DISABLE_DAV 1
+#define MG_DISABLE_DIRECTORY_LISTING 1
+#endif
 
-/* Undefine a bunch of conflicting symbols so we can use SDK defs verbatim. */
-
-#undef FD_CLR
-#undef FD_SET
-#undef FD_ZERO
-#undef FD_ISSET
-#undef FD_SETSIZE
-#undef fd_set
-
-#undef EACCES
-#undef EBADF
-#undef EAGAIN
-#undef EWOULDBLOCK
-#undef ENOMEM
-#undef EFAULT
-#undef EINVAL
-#undef EDESTADDRREQ
-#undef EPROTOTYPE
-#undef ENOPROTOOPT
-#undef EPROTONOSUPPORT
-#undef EOPNOTSUPP
-#undef EAFNOSUPPORT
-#undef EAFNOSUPPORT
-#undef EADDRINUSE
-#undef EADDRNOTAVAIL
-#undef ENETUNREACH
-#undef ENOBUFS
-#undef EISCONN
-#undef ENOTCONN
-#undef ETIMEDOUT
-#undef ECONNREFUSED
-
-/* The following comes from $SDK/simplelink/include/socket.h */
-/* clang-format off */
-#define FD_SETSIZE                          SL_FD_SETSIZE
-
-#define SOCK_STREAM                         SL_SOCK_STREAM
-#define SOCK_DGRAM                          SL_SOCK_DGRAM
-#define SOCK_RAW                            SL_SOCK_RAW
-#define IPPROTO_TCP                         SL_IPPROTO_TCP
-#define IPPROTO_UDP                         SL_IPPROTO_UDP
-#define IPPROTO_RAW                         SL_IPPROTO_RAW
-
-#define AF_INET                             SL_AF_INET
-#define AF_INET6                            SL_AF_INET6
-#define AF_INET6_EUI_48                     SL_AF_INET6_EUI_48
-#define AF_RF                               SL_AF_RF
-#define AF_PACKET                           SL_AF_PACKET
-
-#define PF_INET                             SL_PF_INET
-#define PF_INET6                            SL_PF_INET6
-
-#define INADDR_ANY                          SL_INADDR_ANY
-#define ERROR                               SL_SOC_ERROR
-#define INEXE                               SL_INEXE
-#define EBADF                               SL_EBADF
-#define ENSOCK                              SL_ENSOCK
-#define EAGAIN                              SL_EAGAIN
-#define EWOULDBLOCK                         SL_EWOULDBLOCK
-#define ENOMEM                              SL_ENOMEM
-#define EACCES                              SL_EACCES
-#define EFAULT                              SL_EFAULT
-#define EINVAL                              SL_EINVAL
-#define EDESTADDRREQ                        SL_EDESTADDRREQ
-#define EPROTOTYPE                          SL_EPROTOTYPE
-#define ENOPROTOOPT                         SL_ENOPROTOOPT
-#define EPROTONOSUPPORT                     SL_EPROTONOSUPPORT
-#define ESOCKTNOSUPPORT                     SL_ESOCKTNOSUPPORT
-#define EOPNOTSUPP                          SL_EOPNOTSUPP
-#define EAFNOSUPPORT                        SL_EAFNOSUPPORT
-#define EADDRINUSE                          SL_EADDRINUSE
-#define EADDRNOTAVAIL                       SL_EADDRNOTAVAIL
-#define ENETUNREACH                         SL_ENETUNREACH
-#define ENOBUFS                             SL_ENOBUFS
-#define EOBUFF                              SL_EOBUFF
-#define EISCONN                             SL_EISCONN
-#define ENOTCONN                            SL_ENOTCONN
-#define ETIMEDOUT                           SL_ETIMEDOUT
-#define ECONNREFUSED                        SL_ECONNREFUSED
-
-#define SOL_SOCKET                          SL_SOL_SOCKET
-#define IPPROTO_IP                          SL_IPPROTO_IP
-#define SO_KEEPALIVE                        SL_SO_KEEPALIVE
-
-#define SO_RCVTIMEO                         SL_SO_RCVTIMEO
-#define SO_NONBLOCKING                      SL_SO_NONBLOCKING
-
-#define IP_MULTICAST_IF                     SL_IP_MULTICAST_IF
-#define IP_MULTICAST_TTL                    SL_IP_MULTICAST_TTL
-#define IP_ADD_MEMBERSHIP                   SL_IP_ADD_MEMBERSHIP
-#define IP_DROP_MEMBERSHIP                  SL_IP_DROP_MEMBERSHIP
-
-#define socklen_t                           SlSocklen_t
-#define timeval                             SlTimeval_t
-#define sockaddr                            SlSockAddr_t
-#define in6_addr                            SlIn6Addr_t
-#define sockaddr_in6                        SlSockAddrIn6_t
-#define in_addr                             SlInAddr_t
-#define sockaddr_in                         SlSockAddrIn_t
-
-#define MSG_DONTWAIT                        SL_MSG_DONTWAIT
-
-#define FD_SET                              SL_FD_SET
-#define FD_CLR                              SL_FD_CLR
-#define FD_ISSET                            SL_FD_ISSET
-#define FD_ZERO                             SL_FD_ZERO
-#define fd_set                              SlFdSet_t
-
-#define socket                              sl_Socket
-#define close                               sl_Close
-#define accept                              sl_Accept
-#define bind                                sl_Bind
-#define listen                              sl_Listen
-#define connect                             sl_Connect
-#define select                              sl_Select
-#define setsockopt                          sl_SetSockOpt
-#define getsockopt                          sl_GetSockOpt
-#define recv                                sl_Recv
-#define recvfrom                            sl_RecvFrom
-#define write                               sl_Write
-#define send                                sl_Send
-#define sendto                              sl_SendTo
-/* rojer: gethostbyname() and sl_NetAppDnsGetHostByName are NOT compatible. */
-/* #define gethostbyname                    sl_NetAppDnsGetHostByName */
-#define htonl                               sl_Htonl
-#define ntohl                               sl_Ntohl
-#define htons                               sl_Htons
-#define ntohs                               sl_Ntohs
-/* clang-format on */
 
 typedef int sock_t;
 #define INVALID_SOCKET (-1)
@@ -537,39 +460,289 @@ typedef struct stat cs_stat_t;
 #define INT64_X_FMT PRIx64
 #define __cdecl
 
-#define closesocket(x) close(x)
+#define fileno(x) -1
 
 /* Some functions we implement for Mongoose. */
 
-const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
-char *inet_ntoa(struct in_addr in);
-int inet_pton(int af, const char *src, void *dst);
-
-void cc3200_set_non_blocking_mode(int fd);
-
-struct hostent {
-  char *h_name;       /* official name of host */
-  char **h_aliases;   /* alias list */
-  int h_addrtype;     /* host address type */
-  int h_length;       /* length of address */
-  char **h_addr_list; /* list of addresses */
-};
-struct hostent *gethostbyname(const char *name);
-
-struct timeval;
+#ifdef __TI_COMPILER_VERSION__
+struct SlTimeval_t;
+#define timeval SlTimeval_t
 int gettimeofday(struct timeval *t, void *tz);
+#endif
 
 long int random(void);
 
+/* TI's libc does not have stat & friends, add them. */
+#ifdef __TI_COMPILER_VERSION__
+
+#include <file.h>
+
+typedef unsigned int mode_t;
+typedef size_t _off_t;
+typedef long ssize_t;
+
+struct stat {
+  int st_ino;
+  mode_t st_mode;
+  int st_nlink;
+  time_t st_mtime;
+  off_t st_size;
+};
+
+int _stat(const char *pathname, struct stat *st);
+#define stat(a, b) _stat(a, b)
+
+#define __S_IFMT 0170000
+
+#define __S_IFDIR 0040000
+#define __S_IFCHR 0020000
+#define __S_IFREG 0100000
+
+#define __S_ISTYPE(mode, mask) (((mode) &__S_IFMT) == (mask))
+
+#define S_IFDIR __S_IFDIR
+#define S_IFCHR __S_IFCHR
+#define S_IFREG __S_IFREG
+#define S_ISDIR(mode) __S_ISTYPE((mode), __S_IFDIR)
+#define S_ISREG(mode) __S_ISTYPE((mode), __S_IFREG)
+
+/* As of 5.2.7, TI compiler does not support va_copy() yet. */
+#define va_copy(apc, ap) ((apc) = (ap))
+
+#endif /* __TI_COMPILER_VERSION__ */
+
+#ifdef CC3200_FS_SPIFFS
+#include <common/spiffs/spiffs.h>
+
+typedef struct {
+  spiffs_DIR dh;
+  struct spiffs_dirent de;
+} DIR;
+
+#define d_name name
+#define dirent spiffs_dirent
+
+DIR *opendir(const char *dir_name);
+int closedir(DIR *dir);
+struct dirent *readdir(DIR *dir);
+#endif /* CC3200_FS_SPIFFS */
+
+#ifdef CC3200_FS_SLFS
+#define MG_FS_SLFS
+#endif
+
 #endif /* CS_PLATFORM == CS_P_CC3200 */
-#endif /* _CS_PLATFORM_CC3200_H_ */
+#endif /* CS_COMMON_PLATFORMS_PLATFORM_CC3200_H_ */
 /*
  * Copyright (c) 2014-2016 Cesanta Software Limited
  * All rights reserved
  */
 
-#ifndef _CS_DBG_H_
-#define _CS_DBG_H_
+#ifndef CS_COMMON_PLATFORMS_PLATFORM_MSP432_H_
+#define CS_COMMON_PLATFORMS_PLATFORM_MSP432_H_
+#if CS_PLATFORM == CS_P_MSP432
+
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <inttypes.h>
+#include <stdint.h>
+#include <string.h>
+#include <time.h>
+
+#ifndef __TI_COMPILER_VERSION__
+#include <fcntl.h>
+#include <sys/time.h>
+#endif
+
+#define MG_SOCKET_SIMPLELINK 1
+#define MG_DISABLE_SOCKETPAIR 1
+#define MG_DISABLE_SYNC_RESOLVER 1
+#define MG_DISABLE_POPEN 1
+#define MG_DISABLE_CGI 1
+#define MG_DISABLE_DAV 1
+#define MG_DISABLE_DIRECTORY_LISTING 1
+
+
+typedef int sock_t;
+#define INVALID_SOCKET (-1)
+#define SIZE_T_FMT "u"
+typedef struct stat cs_stat_t;
+#define DIRSEP '/'
+#define to64(x) strtoll(x, NULL, 10)
+#define INT64_FMT PRId64
+#define INT64_X_FMT PRIx64
+#define __cdecl
+
+#define fileno(x) -1
+
+/* Some functions we implement for Mongoose. */
+
+#ifdef __TI_COMPILER_VERSION__
+struct SlTimeval_t;
+#define timeval SlTimeval_t
+int gettimeofday(struct timeval *t, void *tz);
+#endif
+
+long int random(void);
+
+/* TI's libc does not have stat & friends, add them. */
+#ifdef __TI_COMPILER_VERSION__
+
+#include <file.h>
+
+typedef unsigned int mode_t;
+typedef size_t _off_t;
+typedef long ssize_t;
+
+struct stat {
+  int st_ino;
+  mode_t st_mode;
+  int st_nlink;
+  time_t st_mtime;
+  off_t st_size;
+};
+
+int _stat(const char *pathname, struct stat *st);
+#define stat(a, b) _stat(a, b)
+
+#define __S_IFMT 0170000
+
+#define __S_IFDIR 0040000
+#define __S_IFCHR 0020000
+#define __S_IFREG 0100000
+
+#define __S_ISTYPE(mode, mask) (((mode) &__S_IFMT) == (mask))
+
+#define S_IFDIR __S_IFDIR
+#define S_IFCHR __S_IFCHR
+#define S_IFREG __S_IFREG
+#define S_ISDIR(mode) __S_ISTYPE((mode), __S_IFDIR)
+#define S_ISREG(mode) __S_ISTYPE((mode), __S_IFREG)
+
+/* As of 5.2.7, TI compiler does not support va_copy() yet. */
+#define va_copy(apc, ap) ((apc) = (ap))
+
+#endif /* __TI_COMPILER_VERSION__ */
+
+#endif /* CS_PLATFORM == CS_P_MSP432 */
+#endif /* CS_COMMON_PLATFORMS_PLATFORM_MSP432_H_ */
+/*
+ * Copyright (c) 2014-2016 Cesanta Software Limited
+ * All rights reserved
+ */
+
+#ifndef CS_COMMON_PLATFORMS_SIMPLELINK_CS_SIMPLELINK_H_
+#define CS_COMMON_PLATFORMS_SIMPLELINK_CS_SIMPLELINK_H_
+
+/* If simplelink.h is already included, all bets are off. */
+#if defined(MG_SOCKET_SIMPLELINK) && !defined(__SIMPLELINK_H__)
+
+#include <stdbool.h>
+
+#ifndef __TI_COMPILER_VERSION__
+#undef __CONCAT
+#undef FD_CLR
+#undef FD_ISSET
+#undef FD_SET
+#undef FD_SETSIZE
+#undef FD_ZERO
+#undef fd_set
+#endif
+
+/* We want to disable SL_INC_STD_BSD_API_NAMING, so we include user.h ourselves
+ * and undef it. */
+#define PROVISIONING_API_H_
+#include <simplelink/user.h>
+#undef PROVISIONING_API_H_
+#undef SL_INC_STD_BSD_API_NAMING
+
+#include <simplelink/include/simplelink.h>
+
+/* Now define only the subset of the BSD API that we use.
+ * Notably, close(), read() and write() are not defined. */
+#define AF_INET SL_AF_INET
+
+#define socklen_t SlSocklen_t
+#define sockaddr SlSockAddr_t
+#define sockaddr_in SlSockAddrIn_t
+#define in_addr SlInAddr_t
+
+#define SOCK_STREAM SL_SOCK_STREAM
+#define SOCK_DGRAM SL_SOCK_DGRAM
+
+#define FD_SET SL_FD_SET
+#define FD_CLR SL_FD_CLR
+#define FD_ISSET SL_FD_ISSET
+#define FD_ZERO SL_FD_ZERO
+#define fd_set SlFdSet_t
+
+#define htonl sl_Htonl
+#define ntohl sl_Ntohl
+#define htons sl_Htons
+#define ntohs sl_Ntohs
+
+#define accept sl_Accept
+#define closesocket sl_Close
+#define bind sl_Bind
+#define connect sl_Connect
+#define listen sl_Listen
+#define recv sl_Recv
+#define recvfrom sl_RecvFrom
+#define send sl_Send
+#define sendto sl_SendTo
+#define socket sl_Socket
+
+#define select(nfds, rfds, wfds, efds, tout) \
+  sl_Select((nfds), (rfds), (wfds), (efds), (struct SlTimeval_t *)(tout))
+
+#ifndef EACCES
+#define EACCES SL_EACCES
+#endif
+#ifndef EAFNOSUPPORT
+#define EAFNOSUPPORT SL_EAFNOSUPPORT
+#endif
+#ifndef EAGAIN
+#define EAGAIN SL_EAGAIN
+#endif
+#ifndef EBADF
+#define EBADF SL_EBADF
+#endif
+#ifndef EINVAL
+#define EINVAL SL_EINVAL
+#endif
+#ifndef ENOMEM
+#define ENOMEM SL_ENOMEM
+#endif
+#ifndef EWOULDBLOCK
+#define EWOULDBLOCK SL_EWOULDBLOCK
+#endif
+
+#define SOMAXCONN 8
+
+const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
+char *inet_ntoa(struct in_addr in);
+int inet_pton(int af, const char *src, void *dst);
+
+struct mg_mgr;
+
+typedef void (*mg_init_cb)(struct mg_mgr *mgr);
+bool mg_start_task(int priority, int stack_size, mg_init_cb mg_init);
+
+void mg_run_in_task(void (*cb)(struct mg_mgr *mgr, void *arg), void *cb_arg);
+
+int sl_fs_init();
+
+#endif /* defined(MG_SOCKET_SIMPLELINK) && !defined(__SIMPLELINK_H__) */
+
+#endif /* CS_COMMON_PLATFORMS_SIMPLELINK_CS_SIMPLELINK_H_ */
+/*
+ * Copyright (c) 2014-2016 Cesanta Software Limited
+ * All rights reserved
+ */
+
+#ifndef CS_COMMON_CS_DBG_H_
+#define CS_COMMON_CS_DBG_H_
 
 enum cs_log_level {
   LL_NONE = -1,
@@ -583,29 +756,30 @@ enum cs_log_level {
   _LL_MAX = 5,
 };
 
-extern enum cs_log_level s_cs_log_level;
 void cs_log_set_level(enum cs_log_level level);
 
 #ifndef CS_DISABLE_STDIO
 
-#ifdef CS_LOG_TS_DIFF
-extern double cs_log_ts;
-#endif
+#include <stdio.h>
 
+void cs_log_set_file(FILE *file);
+
+extern enum cs_log_level cs_log_level;
+void cs_log_print_prefix(const char *func);
 void cs_log_printf(const char *fmt, ...);
 
-#define LOG(l, x)                        \
-  if (s_cs_log_level >= l) {             \
-    fprintf(stderr, "%-20s ", __func__); \
-    cs_log_printf x;                     \
+#define LOG(l, x)                  \
+  if (cs_log_level >= l) {         \
+    cs_log_print_prefix(__func__); \
+    cs_log_printf x;               \
   }
 
 #ifndef CS_NDEBUG
 
-#define DBG(x)                              \
-  if (s_cs_log_level >= LL_VERBOSE_DEBUG) { \
-    fprintf(stderr, "%-20s ", __func__);    \
-    cs_log_printf x;                        \
+#define DBG(x)                            \
+  if (cs_log_level >= LL_VERBOSE_DEBUG) { \
+    cs_log_print_prefix(__func__);        \
+    cs_log_printf x;                      \
   }
 
 #else /* NDEBUG */
@@ -621,19 +795,19 @@ void cs_log_printf(const char *fmt, ...);
 
 #endif
 
-#endif /* _CS_DBG_H_ */
+#endif /* CS_COMMON_CS_DBG_H_ */
 /*
  * Copyright (c) 2014-2016 Cesanta Software Limited
  * All rights reserved
  */
 
-#ifndef _CS_TIME_H_
-#define _CS_TIME_H_
+#ifndef CS_COMMON_CS_TIME_H_
+#define CS_COMMON_CS_TIME_H_
 
 /* Sub-second granularity time(). */
 double cs_time();
 
-#endif /* _CS_TIME_H_ */
+#endif /* CS_COMMON_CS_TIME_H_ */
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
@@ -648,8 +822,8 @@ double cs_time();
  * needed.
  */
 
-#ifndef MBUF_H_INCLUDED
-#define MBUF_H_INCLUDED
+#ifndef CS_COMMON_MBUF_H_
+#define CS_COMMON_MBUF_H_
 
 #if defined(__cplusplus)
 extern "C" {
@@ -711,14 +885,16 @@ void mbuf_trim(struct mbuf *);
 }
 #endif /* __cplusplus */
 
-#endif /* MBUF_H_INCLUDED */
+#endif /* CS_COMMON_MBUF_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
-#if !defined(MG_SHA1_HEADER_INCLUDED) && !defined(DISABLE_SHA1)
-#define MG_SHA1_HEADER_INCLUDED
+#ifndef CS_COMMON_SHA1_H_
+#define CS_COMMON_SHA1_H_
+
+#ifndef DISABLE_SHA1
 
 
 #ifdef __cplusplus
@@ -740,14 +916,17 @@ void cs_hmac_sha1(const unsigned char *key, size_t key_len,
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* MG_SHA1_HEADER_INCLUDED */
+
+#endif /* DISABLE_SHA1 */
+
+#endif /* CS_COMMON_SHA1_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
-#ifndef MD5_HEADER_DEFINED
-#define MD5_HEADER_DEFINED
+#ifndef CS_COMMON_MD5_H_
+#define CS_COMMON_MD5_H_
 
 
 #ifdef __cplusplus
@@ -784,14 +963,16 @@ void cs_to_hex(char *to, const unsigned char *p, size_t len);
 }
 #endif /* __cplusplus */
 
-#endif
+#endif /* CS_COMMON_MD5_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
  */
 
-#if !defined(BASE64_H_INCLUDED) && !defined(DISABLE_BASE64)
-#define BASE64_H_INCLUDED
+#ifndef CS_COMMON_BASE64_H_
+#define CS_COMMON_BASE64_H_
+
+#ifndef DISABLE_BASE64
 
 #include <stdio.h>
 
@@ -821,14 +1002,17 @@ int cs_base64_decode(const unsigned char *s, int len, char *dst);
 #ifdef __cplusplus
 }
 #endif
-#endif
+
+#endif /* DISABLE_BASE64 */
+
+#endif /* CS_COMMON_BASE64_H_ */
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
  */
 
-#ifndef STR_UTIL_H
-#define STR_UTIL_H
+#ifndef CS_COMMON_STR_UTIL_H_
+#define CS_COMMON_STR_UTIL_H_
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -837,6 +1021,7 @@ int cs_base64_decode(const unsigned char *s, int len, char *dst);
 extern "C" {
 #endif
 
+size_t c_strnlen(const char *s, size_t maxlen);
 int c_snprintf(char *buf, size_t buf_size, const char *format, ...);
 int c_vsnprintf(char *buf, size_t buf_size, const char *format, va_list ap);
 /*
@@ -845,20 +1030,11 @@ int c_vsnprintf(char *buf, size_t buf_size, const char *format, va_list ap);
  */
 const char *c_strnstr(const char *s, const char *find, size_t slen);
 
-#if (!(defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 700) &&           \
-     !(defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200809L) &&   \
-     !(defined(__DARWIN_C_LEVEL) && __DARWIN_C_LEVEL >= 200809L) && \
-     !defined(RTOS_SDK)) &&                                         \
-     !(defined(_MSC_VER) && _MSC_VER >= 1600 /* MSVC2013+ has strnlen */)
-#define _MG_PROVIDE_STRNLEN
-size_t strnlen(const char *s, size_t maxlen);
-#endif
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* CS_COMMON_STR_UTIL_H_ */
 /*
  * Copyright (c) 2004-2013 Sergey Lyubka <valenok@gmail.com>
  * Copyright (c) 2013 Cesanta Software Limited
@@ -878,8 +1054,8 @@ size_t strnlen(const char *s, size_t maxlen);
  * license, as set out in <http://cesanta.com/products.html>.
  */
 
-#ifndef FROZEN_HEADER_INCLUDED
-#define FROZEN_HEADER_INCLUDED
+#ifndef CS_MONGOOSE_DEPS_FROZEN_FROZEN_H_
+#define CS_MONGOOSE_DEPS_FROZEN_FROZEN_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -926,14 +1102,14 @@ int json_emit_va(char *buf, int buf_len, const char *fmt, va_list);
 }
 #endif /* __cplusplus */
 
-#endif /* FROZEN_HEADER_INCLUDED */
+#endif /* CS_MONGOOSE_DEPS_FROZEN_FROZEN_H_ */
 /*
  * Copyright (c) 2014-2016 Cesanta Software Limited
  * All rights reserved
  */
 
-#ifndef DIRENT_H_INCLUDED
-#define DIRENT_H_INCLUDED
+#ifndef CS_COMMON_CS_DIRENT_H_
+#define CS_COMMON_CS_DIRENT_H_
 
 #ifdef CS_ENABLE_SPIFFS
 
@@ -958,7 +1134,7 @@ int closedir(DIR *dir);
 struct dirent *readdir(DIR *dir);
 #endif
 
-#endif
+#endif /* CS_COMMON_CS_DIRENT_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -986,8 +1162,8 @@ struct dirent *readdir(DIR *dir);
  * event managers handled by different threads.
  */
 
-#ifndef MG_NET_HEADER_INCLUDED
-#define MG_NET_HEADER_INCLUDED
+#ifndef CS_MONGOOSE_SRC_NET_H_
+#define CS_MONGOOSE_SRC_NET_H_
 
 #ifdef MG_ENABLE_JAVASCRIPT
 #define EXCLUDE_COMMON
@@ -1037,11 +1213,12 @@ struct mg_str {
   size_t len;    /* Memory chunk length */
 };
 
+struct mg_connection;
+
 /*
  * Callback function (event handler) prototype, must be defined by user.
  * Mongoose calls event handler, passing events defined below.
  */
-struct mg_connection;
 typedef void (*mg_event_handler_t)(struct mg_connection *, int ev, void *);
 
 /* Events. Meaning of event parameter (evp) is given in the comment. */
@@ -1177,17 +1354,17 @@ void mg_broadcast(struct mg_mgr *, mg_event_handler_t func, void *, size_t);
  * of active connections, or `NULL` if there is no more connections. Below
  * is the iteration idiom:
  *
- * [source,c]
- * ----
+ * ```c
  * for (c = mg_next(srv, NULL); c != NULL; c = mg_next(srv, c)) {
  *   // Do something with connection `c`
  * }
- * ----
+ * ```
  */
 struct mg_connection *mg_next(struct mg_mgr *, struct mg_connection *);
 
 /*
- * Optional parameters to mg_add_sock_opt()
+ * Optional parameters to `mg_add_sock_opt()`.
+ *
  * `flags` is an initial `struct mg_connection::flags` bitmask to set,
  * see `MG_F_*` flags definitions.
  */
@@ -1216,7 +1393,8 @@ struct mg_connection *mg_add_sock_opt(struct mg_mgr *, sock_t,
                                       struct mg_add_sock_opts);
 
 /*
- * Optional parameters to mg_bind_opt()
+ * Optional parameters to `mg_bind_opt()`.
+ *
  * `flags` is an initial `struct mg_connection::flags` bitmask to set,
  * see `MG_F_*` flags definitions.
  */
@@ -1259,7 +1437,7 @@ struct mg_connection *mg_bind_opt(struct mg_mgr *mgr, const char *address,
                                   mg_event_handler_t handler,
                                   struct mg_bind_opts opts);
 
-/* Optional parameters to mg_connect_opt() */
+/* Optional parameters to `mg_connect_opt()` */
 struct mg_connect_opts {
   void *user_data;           /* Initial value for connection's user_data */
   unsigned int flags;        /* Extra connection flags */
@@ -1314,8 +1492,7 @@ struct mg_connection *mg_connect(struct mg_mgr *mgr, const char *address,
  * reason (e.g. with `ECONNREFUSED` or `ENETUNREACH`), then `MG_EV_CONNECT`
  * event report failure. Code example below:
  *
- * [source,c]
- * ----
+ * ```c
  * static void ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
  *   int connect_status;
  *
@@ -1335,7 +1512,7 @@ struct mg_connection *mg_connect(struct mg_mgr *mgr, const char *address,
  *
  *   ...
  *   mg_connect(mgr, "my_site.com:80", ev_handler);
- * ----
+ * ```
  */
 struct mg_connection *mg_connect_opt(struct mg_mgr *mgr, const char *address,
                                      mg_event_handler_t handler,
@@ -1478,14 +1655,14 @@ double mg_time();
 }
 #endif /* __cplusplus */
 
-#endif /* MG_NET_HEADER_INCLUDED */
+#endif /* CS_MONGOOSE_SRC_NET_H_ */
 /*
  * Copyright (c) 2014-2016 Cesanta Software Limited
  * All rights reserved
  */
 
-#ifndef MG_NET_IF_HEADER_INCLUDED
-#define MG_NET_IF_HEADER_INCLUDED
+#ifndef CS_MONGOOSE_SRC_NET_IF_H_
+#define CS_MONGOOSE_SRC_NET_IF_H_
 
 /*
  * Internal async networking core interface.
@@ -1555,7 +1732,10 @@ void mg_close_conn(struct mg_connection *nc);
 void mg_if_get_conn_addr(struct mg_connection *nc, int remote,
                          union socket_address *sa);
 
-#endif /* MG_NET_IF_HEADER_INCLUDED */
+/* Associate a socket to a connection. */
+void mg_sock_set(struct mg_connection *nc, sock_t sock);
+
+#endif /* CS_MONGOOSE_SRC_NET_IF_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -1565,8 +1745,8 @@ void mg_if_get_conn_addr(struct mg_connection *nc, int remote,
  * === URI
  */
 
-#ifndef MG_URI_HEADER_DEFINED
-#define MG_URI_HEADER_DEFINED
+#ifndef CS_MONGOOSE_SRC_URI_H_
+#define CS_MONGOOSE_SRC_URI_H_
 
 
 #ifdef __cplusplus
@@ -1606,7 +1786,7 @@ int mg_normalize_uri_path(const struct mg_str *in, struct mg_str *out);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* MG_URI_HEADER_DEFINED */
+#endif /* CS_MONGOOSE_SRC_URI_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -1616,8 +1796,8 @@ int mg_normalize_uri_path(const struct mg_str *in, struct mg_str *out);
  * === Utilities
  */
 
-#ifndef MG_UTIL_HEADER_DEFINED
-#define MG_UTIL_HEADER_DEFINED
+#ifndef CS_MONGOOSE_SRC_UTIL_H_
+#define CS_MONGOOSE_SRC_UTIL_H_
 
 #include <stdio.h>
 
@@ -1820,12 +2000,11 @@ const char *mg_next_comma_list_entry(const char *list, struct mg_str *val,
  * Match is case-insensitive. Return number of bytes matched, or -1 if no match.
  */
 int mg_match_prefix(const char *pattern, int pattern_len, const char *str);
-int mg_match_prefix_n(const char *pattern, int pattern_len, const char *str,
-                      int str_len);
+int mg_match_prefix_n(const struct mg_str pattern, const struct mg_str str);
 
 /*
  * A helper function for creating mg_str struct from plain C string.
- * NULL is allowed and becomes {NULL, 0}.
+ * `NULL` is allowed and becomes `{NULL, 0}`.
  */
 struct mg_str mg_mk_str(const char *s);
 
@@ -1836,7 +2015,7 @@ struct mg_str mg_mk_str(const char *s);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* MG_UTIL_HEADER_DEFINED */
+#endif /* CS_MONGOOSE_SRC_UTIL_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -1846,8 +2025,8 @@ struct mg_str mg_mk_str(const char *s);
  * === HTTP + Websocket
  */
 
-#ifndef MG_HTTP_HEADER_DEFINED
-#define MG_HTTP_HEADER_DEFINED
+#ifndef CS_MONGOOSE_SRC_HTTP_H_
+#define CS_MONGOOSE_SRC_HTTP_H_
 
 
 #ifdef __cplusplus
@@ -1855,23 +2034,23 @@ extern "C" {
 #endif /* __cplusplus */
 
 #ifndef MG_MAX_HTTP_HEADERS
-#define MG_MAX_HTTP_HEADERS 40
+#define MG_MAX_HTTP_HEADERS 20
 #endif
 
 #ifndef MG_MAX_HTTP_REQUEST_SIZE
-#define MG_MAX_HTTP_REQUEST_SIZE 8192
+#define MG_MAX_HTTP_REQUEST_SIZE 1024
 #endif
 
 #ifndef MG_MAX_PATH
 #ifdef PATH_MAX
 #define MG_MAX_PATH PATH_MAX
 #else
-#define MG_MAX_PATH 1024
+#define MG_MAX_PATH 256
 #endif
 #endif
 
 #ifndef MG_MAX_HTTP_SEND_MBUF
-#define MG_MAX_HTTP_SEND_MBUF 4096
+#define MG_MAX_HTTP_SEND_MBUF 1024
 #endif
 
 #ifndef MG_WEBSOCKET_PING_INTERVAL_SECONDS
@@ -1921,17 +2100,20 @@ struct http_message {
   struct mg_str body; /* Zero-length for requests with no body */
 };
 
+/* WebSocket message */
 struct websocket_message {
   unsigned char *data;
   size_t size;
   unsigned char flags;
 };
 
+/* HTTP multipart part */
 struct mg_http_multipart_part {
   const char *file_name;
   const char *var_name;
   struct mg_str data;
   int status; /* <0 on error */
+  void *user_data;
 };
 
 /* HTTP and websocket events. void *ev_data is described in a comment. */
@@ -2039,20 +2221,31 @@ void mg_send_websocket_handshake2(struct mg_connection *nc, const char *path,
  *
  * Examples:
  *
- * [source,c]
- * ----
+ * ```c
  *   nc1 = mg_connect_ws(mgr, ev_handler_1, "ws://echo.websocket.org", NULL,
  *                       NULL);
  *   nc2 = mg_connect_ws(mgr, ev_handler_1, "wss://echo.websocket.org", NULL,
  *                       NULL);
  *   nc3 = mg_connect_ws(mgr, ev_handler_1, "ws://api.cesanta.com",
  *                       "clubby.cesanta.com", NULL);
- * ----
+ * ```
  */
 struct mg_connection *mg_connect_ws(struct mg_mgr *mgr,
                                     mg_event_handler_t event_handler,
                                     const char *url, const char *protocol,
                                     const char *extra_headers);
+
+/*
+ * Helper function that creates an outbound WebSocket connection
+ *
+ * Mostly identical to mg_connect_ws, but allows to provide extra parameters
+ * (for example, SSL parameters
+ */
+struct mg_connection *mg_connect_ws_opt(struct mg_mgr *mgr,
+                                        mg_event_handler_t ev_handler,
+                                        struct mg_connect_opts opts,
+                                        const char *url, const char *protocol,
+                                        const char *extra_headers);
 
 /*
  * Send websocket frame to the remote end.
@@ -2225,6 +2418,7 @@ int mg_http_parse_header(struct mg_str *hdr, const char *var_name, char *buf,
  *
  * Usage example:
  *
+ * ```c
  *    static void ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
  *      switch(ev) {
  *        case MG_EV_HTTP_REQUEST: {
@@ -2246,7 +2440,7 @@ int mg_http_parse_header(struct mg_str *hdr, const char *var_name, char *buf,
  *          }
  *        }
  *        break;
- *
+ * ```
  */
 size_t mg_parse_multipart(const char *buf, size_t buf_len, char *var_name,
                           size_t var_name_len, char *file_name,
@@ -2282,6 +2476,7 @@ int mg_http_create_digest_auth_header(char *buf, size_t buf_len,
                                       const char *method, const char *uri,
                                       const char *auth_domain, const char *user,
                                       const char *passwd);
+
 /*
  * Helper function that creates outbound HTTP connection.
  *
@@ -2296,8 +2491,7 @@ int mg_http_create_digest_auth_header(char *buf, size_t buf_len,
  *
  * Examples:
  *
- * [source,c]
- * ----
+ * ```c
  *   nc1 = mg_connect_http(mgr, ev_handler_1, "http://www.google.com", NULL,
  *                         NULL);
  *   nc2 = mg_connect_http(mgr, ev_handler_1, "https://github.com", NULL, NULL);
@@ -2305,7 +2499,7 @@ int mg_http_create_digest_auth_header(char *buf, size_t buf_len,
  *       mgr, ev_handler_1, "my_server:8000/form_submit/",
  *       "Content-Type: application/x-www-form-urlencoded\r\n",
  *       "var_1=value_1&var_2=value_2");
- * ----
+ * ```
  */
 struct mg_connection *mg_connect_http(struct mg_mgr *mgr,
                                       mg_event_handler_t event_handler,
@@ -2313,6 +2507,18 @@ struct mg_connection *mg_connect_http(struct mg_mgr *mgr,
                                       const char *extra_headers,
                                       const char *post_data);
 
+/*
+ * Helper function that creates outbound HTTP connection.
+ *
+ * Mostly identical to mg_connect_http, but allows to provide extra parameters
+ * (for example, SSL parameters
+ */
+struct mg_connection *mg_connect_http_opt(struct mg_mgr *mgr,
+                                          mg_event_handler_t ev_handler,
+                                          struct mg_connect_opts opts,
+                                          const char *url,
+                                          const char *extra_headers,
+                                          const char *post_data);
 /*
  * This structure defines how `mg_serve_http()` works.
  * Best practice is to set only required settings, and leave the rest as NULL.
@@ -2417,9 +2623,7 @@ struct mg_serve_http_opts {
  *
  * Example code snippet:
  *
- * [source,c]
- * .web_server.c
- * ----
+ * ```c
  * static void ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
  *   struct http_message *hm = (struct http_message *) ev_data;
  *   struct mg_serve_http_opts opts = { .document_root = "/var/www" };  // C99
@@ -2432,7 +2636,7 @@ struct mg_serve_http_opts {
  *       break;
  *   }
  * }
- * ----
+ * ```
  */
 void mg_serve_http(struct mg_connection *nc, struct http_message *hm,
                    struct mg_serve_http_opts opts);
@@ -2444,9 +2648,7 @@ void mg_serve_http(struct mg_connection *nc, struct http_message *hm,
  *
  * Example code snippet:
  *
- * [source,c]
- * .web_server.c
- * ----
+ * ```c
  * static void handle_hello1(struct mg_connection *nc, int ev, void *ev_data) {
  *   (void) ev; (void) ev_data;
  *   mg_printf(nc, "HTTP/1.0 200 OK\r\n\r\n[I am Hello1]");
@@ -2464,15 +2666,56 @@ void mg_serve_http(struct mg_connection *nc, struct http_message *hm,
  *   mg_register_http_endpoint(nc, "/hello1", handle_hello1);
  *   mg_register_http_endpoint(nc, "/hello1/hello2", handle_hello2);
  * }
- * ----
+ * ```
  */
-
 void mg_register_http_endpoint(struct mg_connection *nc, const char *uri_path,
                                mg_event_handler_t handler);
+
+#ifdef MG_ENABLE_HTTP_STREAMING_MULTIPART
+
+/* Callback prototype for `mg_file_upload_handler()`. */
+typedef struct mg_str (*mg_fu_fname_fn)(struct mg_connection *nc,
+                                        struct mg_str fname);
+
+/*
+ * File upload handler.
+ * This handler can be used to implement file uploads with minimum code.
+ * This handler will process MG_EV_HTTP_PART_* events and store file data into
+ * a local file.
+ * `local_name_fn` will be invoked with whatever name was provided by the client
+ * and will expect the name of the local file to open. Return value of NULL will
+ * abort file upload (client will get a "403 Forbidden" response). If non-null,
+ * the returned string must be heap-allocated and will be freed by the caller.
+ * Exception: it is ok to return the same string verbatim.
+ *
+ * Example:
+ *
+ * ```c
+ * struct mg_str upload_fname(struct mg_connection *nc, struct mg_str fname) {
+ *   // Just return the same filename. Do not actually do this except in test!
+ *   // fname is user-controlled and needs to be sanitized.
+ *   return fname;
+ * }
+ * void ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
+ *   switch (ev) {
+ *     ...
+ *     case MG_EV_HTTP_PART_BEGIN:
+ *     case MG_EV_HTTP_PART_DATA:
+ *     case MG_EV_HTTP_PART_END:
+ *       mg_file_upload_handler(nc, ev, ev_data, upload_fname);
+ *       break;
+ *   }
+ * }
+ * ```
+ */
+void mg_file_upload_handler(struct mg_connection *nc, int ev, void *ev_data,
+                            mg_fu_fname_fn local_name_fn);
+#endif /* MG_ENABLE_HTTP_STREAMING_MULTIPART */
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* MG_HTTP_HEADER_DEFINED */
+#endif /* CS_MONGOOSE_SRC_HTTP_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -2482,8 +2725,8 @@ void mg_register_http_endpoint(struct mg_connection *nc, const char *uri_path,
  * === JSON-RPC
  */
 
-#ifndef MG_JSON_RPC_HEADER_DEFINED
-#define MG_JSON_RPC_HEADER_DEFINED
+#ifndef CS_MONGOOSE_SRC_JSON_RPC_H_
+#define CS_MONGOOSE_SRC_JSON_RPC_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -2524,9 +2767,9 @@ struct mg_rpc_error {
  * where parsing has finished. On failure, a negative number is
  * returned, one of:
  *
- *  - #define JSON_STRING_INVALID           -1
- *  - #define JSON_STRING_INCOMPLETE        -2
- *  - #define JSON_TOKEN_ARRAY_TOO_SMALL    -3
+ * - `#define JSON_STRING_INVALID           -1`
+ * - `#define JSON_STRING_INCOMPLETE        -2`
+ * - `#define JSON_TOKEN_ARRAY_TOO_SMALL    -3`
  */
 int mg_rpc_parse_reply(const char *buf, int len, struct json_token *toks,
                        int max_toks, struct mg_rpc_reply *,
@@ -2580,12 +2823,12 @@ int mg_rpc_create_error(char *buf, int len, struct mg_rpc_request *req,
  * can be larger then `len` that indicates an overflow. See
  * JSON_RPC_*_ERROR definitions for standard error values:
  *
- * - #define JSON_RPC_PARSE_ERROR (-32700)
- * - #define JSON_RPC_INVALID_REQUEST_ERROR (-32600)
- * - #define JSON_RPC_METHOD_NOT_FOUND_ERROR (-32601)
- * - #define JSON_RPC_INVALID_PARAMS_ERROR (-32602)
- * - #define JSON_RPC_INTERNAL_ERROR (-32603)
- * - #define JSON_RPC_SERVER_ERROR (-32000)
+ * - `#define JSON_RPC_PARSE_ERROR (-32700)`
+ * - `#define JSON_RPC_INVALID_REQUEST_ERROR (-32600)`
+ * - `#define JSON_RPC_METHOD_NOT_FOUND_ERROR (-32601)`
+ * - `#define JSON_RPC_INVALID_PARAMS_ERROR (-32602)`
+ * - `#define JSON_RPC_INTERNAL_ERROR (-32603)`
+ * - `#define JSON_RPC_SERVER_ERROR (-32000)`
  */
 int mg_rpc_create_std_error(char *buf, int len, struct mg_rpc_request *req,
                             int code);
@@ -2610,7 +2853,7 @@ int mg_rpc_dispatch(const char *buf, int, char *dst, int dst_len,
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* MG_JSON_RPC_HEADER_DEFINED */
+#endif /* CS_MONGOOSE_SRC_JSON_RPC_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -2632,8 +2875,8 @@ int mg_rpc_dispatch(const char *buf, int, char *dst, int dst_len,
  * === MQTT
  */
 
-#ifndef MG_MQTT_HEADER_INCLUDED
-#define MG_MQTT_HEADER_INCLUDED
+#ifndef CS_MONGOOSE_SRC_MQTT_H_
+#define CS_MONGOOSE_SRC_MQTT_H_
 
 
 struct mg_mqtt_message {
@@ -2805,7 +3048,7 @@ int mg_mqtt_next_subscribe_topic(struct mg_mqtt_message *msg,
 }
 #endif /* __cplusplus */
 
-#endif /* MG_MQTT_HEADER_INCLUDED */
+#endif /* CS_MONGOOSE_SRC_MQTT_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -2827,8 +3070,8 @@ int mg_mqtt_next_subscribe_topic(struct mg_mqtt_message *msg,
  * === MQTT Broker
  */
 
-#ifndef MG_MQTT_BROKER_HEADER_INCLUDED
-#define MG_MQTT_BROKER_HEADER_INCLUDED
+#ifndef CS_MONGOOSE_SRC_MQTT_BROKER_H_
+#define CS_MONGOOSE_SRC_MQTT_BROKER_H_
 
 #ifdef MG_ENABLE_MQTT_BROKER
 
@@ -2868,15 +3111,14 @@ void mg_mqtt_broker_init(struct mg_mqtt_broker *brk, void *user_data);
  *
  * Basic usage:
  *
- * [source,c]
- * -----
+ * ```c
  * mg_mqtt_broker_init(&brk, NULL);
  *
  * if ((nc = mg_bind(&mgr, address, mg_mqtt_broker)) == NULL) {
  *   // fail;
  * }
  * nc->user_data = &brk;
- * -----
+ * ```
  *
  * New incoming connections will receive a `mg_mqtt_session` structure
  * in the connection `user_data`. The original `user_data` will be stored
@@ -2891,10 +3133,12 @@ void mg_mqtt_broker(struct mg_connection *brk, int ev, void *data);
 /*
  * Iterate over all mqtt sessions connections. Example:
  *
- *    struct mg_mqtt_session *s;
- *    for (s = mg_mqtt_next(brk, NULL); s != NULL; s = mg_mqtt_next(brk, s)) {
- *       // Do something
- *    }
+ * ```c
+ * struct mg_mqtt_session *s;
+ * for (s = mg_mqtt_next(brk, NULL); s != NULL; s = mg_mqtt_next(brk, s)) {
+ *   // Do something
+ * }
+ * ```
  */
 struct mg_mqtt_session *mg_mqtt_next(struct mg_mqtt_broker *brk,
                                      struct mg_mqtt_session *s);
@@ -2904,7 +3148,7 @@ struct mg_mqtt_session *mg_mqtt_next(struct mg_mqtt_broker *brk,
 #endif /* __cplusplus */
 
 #endif /* MG_ENABLE_MQTT_BROKER */
-#endif /* MG_MQTT_HEADER_INCLUDED */
+#endif /* CS_MONGOOSE_SRC_MQTT_BROKER_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -2914,8 +3158,8 @@ struct mg_mqtt_session *mg_mqtt_next(struct mg_mqtt_broker *brk,
  * === DNS
  */
 
-#ifndef MG_DNS_HEADER_DEFINED
-#define MG_DNS_HEADER_DEFINED
+#ifndef CS_MONGOOSE_SRC_DNS_H_
+#define CS_MONGOOSE_SRC_DNS_H_
 
 
 #ifdef __cplusplus
@@ -3049,7 +3293,7 @@ size_t mg_dns_uncompress_name(struct mg_dns_message *msg, struct mg_str *name,
  * `ev_data` pointing to the parsed `struct mg_dns_message`.
  *
  * See
- * https://github.com/cesanta/mongoose/tree/master/examples/captive_dns_server[captive_dns_server]
+ * [captive_dns_server](https://github.com/cesanta/mongoose/tree/master/examples/captive_dns_server)
  * example on how to handle DNS request and send DNS reply.
  */
 void mg_set_protocol_dns(struct mg_connection *nc);
@@ -3057,7 +3301,7 @@ void mg_set_protocol_dns(struct mg_connection *nc);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* MG_HTTP_HEADER_DEFINED */
+#endif /* CS_MONGOOSE_SRC_DNS_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -3069,8 +3313,8 @@ void mg_set_protocol_dns(struct mg_connection *nc);
  * Disabled by default; enable with `-DMG_ENABLE_DNS_SERVER`.
  */
 
-#ifndef MG_DNS_SERVER_HEADER_DEFINED
-#define MG_DNS_SERVER_HEADER_DEFINED
+#ifndef CS_MONGOOSE_SRC_DNS_SERVER_H_
+#define CS_MONGOOSE_SRC_DNS_SERVER_H_
 
 #ifdef MG_ENABLE_DNS_SERVER
 
@@ -3104,8 +3348,7 @@ struct mg_dns_reply {
  *
  * Example:
  *
- * [source,c]
- * -----
+ * ```c
  * reply = mg_dns_create_reply(&nc->send_mbuf, msg);
  * for (i = 0; i < msg->num_questions; i++) {
  *   rr = &msg->questions[i];
@@ -3114,7 +3357,7 @@ struct mg_dns_reply {
  *   }
  * }
  * mg_dns_send_reply(nc, &reply);
- * -----
+ * ```
  */
 struct mg_dns_reply mg_dns_create_reply(struct mbuf *io,
                                         struct mg_dns_message *msg);
@@ -3151,7 +3394,7 @@ void mg_dns_send_reply(struct mg_connection *nc, struct mg_dns_reply *r);
 #endif /* __cplusplus */
 
 #endif /* MG_ENABLE_DNS_SERVER */
-#endif /* MG_HTTP_HEADER_DEFINED */
+#endif /* CS_MONGOOSE_SRC_DNS_SERVER_H_ */
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
@@ -3161,8 +3404,8 @@ void mg_dns_send_reply(struct mg_connection *nc, struct mg_dns_reply *r);
  * === Asynchronouns DNS resolver
  */
 
-#ifndef MG_RESOLV_HEADER_DEFINED
-#define MG_RESOLV_HEADER_DEFINED
+#ifndef CS_MONGOOSE_SRC_RESOLV_H_
+#define CS_MONGOOSE_SRC_RESOLV_H_
 
 
 #ifdef __cplusplus
@@ -3228,7 +3471,7 @@ int mg_resolve_from_hosts_file(const char *host, union socket_address *usa);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* MG_RESOLV_HEADER_DEFINED */
+#endif /* CS_MONGOOSE_SRC_RESOLV_H_ */
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
@@ -3251,15 +3494,17 @@ int mg_resolve_from_hosts_file(const char *host, union socket_address *usa);
  *
  * CoAP message format:
  *
- *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
- *    |Ver| T | TKL | Code | Message ID | Token (if any, TKL bytes) ...
- *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
- *    | Options (if any) ...            |1 1 1 1 1 1 1 1| Payload (if any) ...
- *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+ * ```
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+ * |Ver| T | TKL | Code | Message ID | Token (if any, TKL bytes) ...
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+ * | Options (if any) ...            |1 1 1 1 1 1 1 1| Payload (if any) ...
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+ * ```
  */
 
-#ifndef MG_COAP_HEADER_INCLUDED
-#define MG_COAP_HEADER_INCLUDED
+#ifndef CS_MONGOOSE_SRC_COAP_H_
+#define CS_MONGOOSE_SRC_COAP_H_
 
 #ifdef MG_ENABLE_COAP
 
@@ -3344,11 +3589,11 @@ void mg_coap_free_options(struct mg_coap_message *cm);
  * and send it into `nc` connection.
  * Return 0 on success. On error, it is a bitmask:
  *
- * - #define MG_COAP_ERROR 0x10000
- * - #define MG_COAP_FORMAT_ERROR (MG_COAP_ERROR | 0x20000)
- * - #define MG_COAP_IGNORE (MG_COAP_ERROR | 0x40000)
- * - #define MG_COAP_NOT_ENOUGH_DATA (MG_COAP_ERROR | 0x80000)
- * - #define MG_COAP_NETWORK_ERROR (MG_COAP_ERROR | 0x100000)
+ * - `#define MG_COAP_ERROR 0x10000`
+ * - `#define MG_COAP_FORMAT_ERROR (MG_COAP_ERROR | 0x20000)`
+ * - `#define MG_COAP_IGNORE (MG_COAP_ERROR | 0x40000)`
+ * - `#define MG_COAP_NOT_ENOUGH_DATA (MG_COAP_ERROR | 0x80000)`
+ * - `#define MG_COAP_NETWORK_ERROR (MG_COAP_ERROR | 0x100000)`
  */
 uint32_t mg_coap_send_message(struct mg_connection *nc,
                               struct mg_coap_message *cm);
@@ -3390,4 +3635,4 @@ uint32_t mg_coap_compose(struct mg_coap_message *cm, struct mbuf *io);
 
 #endif /* MG_ENABLE_COAP */
 
-#endif /* MG_COAP_HEADER_INCLUDED */
+#endif /* CS_MONGOOSE_SRC_COAP_H_ */
