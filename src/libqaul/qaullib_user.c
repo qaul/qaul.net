@@ -5,7 +5,7 @@
 
 #include "qaullib_private.h"
 #include "qaullib_crypto.h"
-#include "polarssl/polarssl/sha1.h"
+#include "mbedtls/sha1.h"
 
 
 void Qaullib_UserInit(void)
@@ -103,7 +103,7 @@ int Qaullib_UserCheckUser(union olsr_ip_addr *ip, char *name)
 
 			// set id
 			memcpy(user->id, id, sizeof(user->id));
-			Qaullib_HashToString(id, user->idstr);
+			Ql_HashToString(id, user->idstr);
 
 			// hide empty users
 			if(strlen(user->name) > 0)
@@ -388,7 +388,7 @@ void Qaullib_UserAdd(union olsr_ip_addr *ip, char *name, char *iconhash, char *s
 
 	// set id
 	memcpy(myuseritem->id, id, sizeof(myuseritem->id));
-	Qaullib_HashToString(id, myuseritem->idstr);
+	Ql_HashToString(id, myuseritem->idstr);
 
 	if(user_isweb)
 		myuseritem->type = QAUL_USERTYPE_WEB_KNOWN;
@@ -421,7 +421,7 @@ void Qaullib_UserFavoriteAdd(char *name, char *ipstr, char *uidstr)
 	}
 
 	// create id hash
-	Qaullib_StringToHash(uidstr, myid);
+	Ql_StringToHash(uidstr, myid);
 
 	// change it at user LL
 	if( Qaullib_User_LL_IdSearch (&myip, myid, &myitem) == 1 )
@@ -457,7 +457,7 @@ void Qaullib_UserFavoriteRemove(char *ipstr, char *uidstr)
 	}
 
 	// create id hash
-	Qaullib_StringToHash(uidstr, myid);
+	Ql_StringToHash(uidstr, myid);
 
 	// change it at user LL
 	if( Qaullib_User_LL_IdSearch (&myip, myid, &myitem) == 1 )
@@ -518,7 +518,7 @@ void Qaullib_UserFavoritesDB2LL(void)
 		}
 
 		// string to id
-		Qaullib_StringToHash(myidstr, myid);
+		Ql_StringToHash(myidstr, myid);
 
 		// add item
 		myitem = Qaullib_User_LL_Add(&myip, myid);
@@ -581,7 +581,7 @@ void Qaullib_UserCreateIdIpStr(char *ipstr, char *username, unsigned char *id)
 	// copy strings together
 	snprintf(inputstr, sizeof(inputstr), "%s%s", ipstr, username);
 
-	polarssl_sha1(inputstr, sizeof(inputstr), id);
+	mbedtls_sha1(inputstr, sizeof(inputstr), id);
 }
 
 // ------------------------------------------------------------

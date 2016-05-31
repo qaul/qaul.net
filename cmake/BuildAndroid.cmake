@@ -23,7 +23,13 @@ add_custom_target(copy_android
     ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/GUI/files -DDEST=${CMAKE_BINARY_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
 )
 
-add_custom_target(AndroidJNI NDK_PROJECT_PATH=${CMAKE_BINARY_DIR}/android ${NDK_ROOT}/ndk-build -C ${CMAKE_BINARY_DIR}/android PJSIP_PATH=${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip EXTRALIB_PATH=${EXTRALIB_PATH} LIBQI1=${CMAKE_SOURCE_DIR}/src/libqaul LIBQI2=${CMAKE_SOURCE_DIR}/src/libqaul/include LIBQAUL_SRC=${CMAKE_SOURCE_DIR}/src/libqaul
+add_custom_target(AndroidJNI
+                  NDK_PROJECT_PATH=${CMAKE_BINARY_DIR}/android ${NDK_ROOT}/ndk-build -C ${CMAKE_BINARY_DIR}/android
+                  PJSIP_PATH=${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip
+                  EXTRALIB_PATH=${EXTRALIB_PATH}
+                  LIBQAUL_SRC=${CMAKE_SOURCE_DIR}/src/libqaul
+                  QAULCONFIG_INCLUDE=${CMAKE_BINARY_DIR}/include
+
                   COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_BINARY_DIR}/android/libs/armeabi/wificonfig -DDEST=${CMAKE_BINARY_DIR}/android/res/raw -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
                   COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_BINARY_DIR}/android/libs/armeabi/tether -DDEST=${CMAKE_BINARY_DIR}/android/res/raw -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
                   COMMAND ${CMAKE_COMMAND} -DSRC=${EXTRALIB_PATH}/ifconfig -DDEST=${CMAKE_BINARY_DIR}/android/res/raw -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake

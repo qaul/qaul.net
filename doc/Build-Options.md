@@ -19,8 +19,8 @@ General options:
 * -DQAUL_LOG_DEFAULTLEVEL=LOGLEVEL
   * Sets the default log level.
   * The following log levels exist:
-    LOG_NONE, LOG_ERROR, LOG_WARN, LOG_INFO, LOG_DEBUG
-  * This option is optional. The default log level is LOG_DEBUG.
+    NONE, ERROR, WARN, INFO, DEBUG
+  * This option is optional. The default log level is DEBUG.
 * -DQAUL_LOG_ENABLE=YES
   * When this option is set to NO, it does not compile any logging into the
     qaullib binary. This is useful when compiling for embedded systems

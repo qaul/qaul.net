@@ -43,7 +43,7 @@ void Qaullib_ExeInit(void)
 		if(Qaullib_DbGetConfigValue(key, qaul_exe_array[i].hashstr))
 		{
 			// create hash from hash string
-			Qaullib_StringToHash(qaul_exe_array[i].hashstr, qaul_exe_array[i].hash);
+			Ql_StringToHash(qaul_exe_array[i].hashstr, qaul_exe_array[i].hash);
 
 			// get missing values from linked list
 			if(Qaullib_File_LL_HashSearch (qaul_exe_array[i].hash, &file_item))
@@ -163,7 +163,7 @@ void Qaullib_ExeProcessAvailableMsg(struct qaul_exeavailable_msg *msg)
 				memcpy(&file_item.suffix[MAX_SUFFIX_LEN], "\0", 1);
 
 				memcpy(file_item.hash, msg->hash, MAX_HASH_LEN);
-				Qaullib_HashToString(msg->hash, file_item.hashstr);
+				Ql_HashToString(msg->hash, file_item.hashstr);
 
 				// TODO: change all this to trusted users
 				memcpy(&file_item.adv_name[0], "\0", 1);
