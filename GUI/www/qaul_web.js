@@ -1053,6 +1053,7 @@ function web_check_settings()
 			
 			web_init();
 			$.mobile.changePage($("#page_chat"));
+			updatetimer();
 		}
 		else
 			$.mobile.changePage($("#page_config_locale"));
