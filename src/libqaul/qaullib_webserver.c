@@ -3,13 +3,13 @@
  * licensed under GPL (version 3)
  */
 
+#include <math.h>
 #include "qaullib.h"
 #include "qaullib_private.h"
 #include "urlcode/urlcode.h"
-
-#include <math.h>
 #include "qaullib_crypto.h"
 #include "qaullib_file_LL.h"
+#include "qaullib/logging.h"
 
 // ------------------------------------------------------------
 // static declarations
@@ -2149,19 +2149,18 @@ void Ql_WwwWebSendMsg(struct mg_connection *conn, int event, void *event_data)
 	unsigned char userid[MAX_HASH_LEN];
 	struct http_message *hm = (struct http_message *) event_data;
 
-	if(QAUL_DEBUG)
-		printf("Ql_WwwWebSendMsg\n");
+	Ql_log_debug("Ql_WwwWebSendMsg");
 
 	// fill in data
 	msg_item.id = 0;
 	msg_item.type = QAUL_MSGTYPE_PUBLIC_IN;
 
 	// get msg
-	mg_get_http_var(&hm->query_string, "m", local_msg, sizeof(local_msg));
+	mg_get_http_var(&hm->body, "m", local_msg, sizeof(local_msg));
 	Qaullib_StringMsgProtect(msg_item.msg, local_msg, sizeof(msg_item.msg));
 
 	// get name
-	mg_get_http_var(&hm->query_string, "n", local_name, sizeof(local_name));
+	mg_get_http_var(&hm->body, "n", local_name, sizeof(local_name));
 	Qaullib_StringNameProtect(msg_item.name, local_name, sizeof(msg_item.name));
 
 	// check if name is web name, add [WEB] otherwise
