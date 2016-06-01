@@ -29,6 +29,7 @@ var qauluserevent = 0;
 var qaulmessageevent = 0;
 var qaulinitialized = false;
 var chat_initialized = false;
+var web_initialized = false;
 var is_chrome = false;
 var call_page_origin = "page_chat";
 var user_page_origin = "page_users";
@@ -107,7 +108,7 @@ function init_start()
 		if (typeof(Storage) !== "undefined")
 			localStorage.setItem("locale", $("input[name='l']:checked").val());
 		
-		if(web_init)
+		if(web_initialized)
 		{
 			$.mobile.changePage($("#page_pref"));
 			location.reload();
@@ -125,7 +126,7 @@ function init_start()
 			if(typeof(Storage) !== "undefined")
 				localStorage.setItem("username", $("#name_name").val());
 			
-			if(web_init)
+			if(web_initialized)
 				$.mobile.changePage($("#page_pref"));
 			else
 			{
@@ -927,7 +928,7 @@ function isoDateString(d)
 // ------------------------------------------------------
 function web_init()
 {
-	web_init = true;
+	web_initialized = true;
 	$(".c_init").show();
 }
 
