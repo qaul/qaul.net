@@ -152,7 +152,6 @@
  * platform function
  */
 //#define MBEDTLS_PLATFORM_EXIT_ALT
-//#define MBEDTLS_PLATFORM_TIME_ALT
 //#define MBEDTLS_PLATFORM_FPRINTF_ALT
 //#define MBEDTLS_PLATFORM_PRINTF_ALT
 //#define MBEDTLS_PLATFORM_SNPRINTF_ALT
@@ -1059,7 +1058,7 @@
  *
  * Comment this macro to disable support for SSL 3.0
  */
-//#define MBEDTLS_SSL_PROTO_SSL3
+#define MBEDTLS_SSL_PROTO_SSL3
 
 /**
  * \def MBEDTLS_SSL_PROTO_TLS1
@@ -1898,19 +1897,11 @@
 /**
  * \def MBEDTLS_NET_C
  *
- * Enable the TCP and UDP over IPv6/IPv4 networking routines.
- *
- * \note This module only works on POSIX/Unix (including Linux, BSD and OS X)
- * and Windows. For other platforms, you'll want to disable it, and write your
- * own networking callbacks to be passed to \c mbedtls_ssl_set_bio().
- *
- * \note See also our Knowledge Base article about porting to a new
- * environment:
- * https://tls.mbed.org/kb/how-to/how-do-i-port-mbed-tls-to-a-new-environment-OS
+ * Enable the TCP/IP networking routines.
  *
  * Module:  library/net.c
  *
- * This module provides networking routines.
+ * This module provides TCP/IP networking routines.
  */
 #define MBEDTLS_NET_C
 
@@ -2256,8 +2247,7 @@
  * By default mbed TLS assumes it is used in a non-threaded environment or that
  * contexts are not shared between threads. If you do intend to use contexts
  * between threads, you will need to enable this layer to prevent race
- * conditions. See also our Knowledge Base article about threading:
- * https://tls.mbed.org/kb/development/thread-safety-and-multi-threading
+ * conditions.
  *
  * Module:  library/threading.c
  *
@@ -2274,18 +2264,7 @@
 /**
  * \def MBEDTLS_TIMING_C
  *
- * Enable the semi-portable timing interface.
- *
- * \note The provided implementation only works on POSIX/Unix (including Linux,
- * BSD and OS X) and Windows. On other platforms, you can either disable that
- * module and provide your own implementations of the callbacks needed by
- * \c mbedtls_ssl_set_timer_cb() for DTLS, or leave it enabled and provide
- * your own implementation of the whole module by setting
- * \c MBEDTLS_TIMING_ALT in the current file.
- *
- * \note See also our Knowledge Base article about porting to a new
- * environment:
- * https://tls.mbed.org/kb/how-to/how-do-i-port-mbed-tls-to-a-new-environment-OS
+ * Enable the portable timing interface.
  *
  * Module:  library/timing.c
  * Caller:  library/havege.c
@@ -2466,21 +2445,16 @@
 //#define MBEDTLS_PLATFORM_STD_CALLOC        calloc /**< Default allocator to use, can be undefined */
 //#define MBEDTLS_PLATFORM_STD_FREE            free /**< Default free to use, can be undefined */
 //#define MBEDTLS_PLATFORM_STD_EXIT            exit /**< Default exit to use, can be undefined */
-//#define MBEDTLS_PLATFORM_STD_TIME            time /**< Default time to use, can be undefined */
 //#define MBEDTLS_PLATFORM_STD_FPRINTF      fprintf /**< Default fprintf to use, can be undefined */
 //#define MBEDTLS_PLATFORM_STD_PRINTF        printf /**< Default printf to use, can be undefined */
 /* Note: your snprintf must correclty zero-terminate the buffer! */
 //#define MBEDTLS_PLATFORM_STD_SNPRINTF    snprintf /**< Default snprintf to use, can be undefined */
-//#define MBEDTLS_PLATFORM_STD_EXIT_SUCCESS       0 /**< Default exit value to use, can be undefined */
-//#define MBEDTLS_PLATFORM_STD_EXIT_FAILURE       1 /**< Default exit value to use, can be undefined */
 
 /* To Use Function Macros MBEDTLS_PLATFORM_C must be enabled */
 /* MBEDTLS_PLATFORM_XXX_MACRO and MBEDTLS_PLATFORM_XXX_ALT cannot both be defined */
 //#define MBEDTLS_PLATFORM_CALLOC_MACRO        calloc /**< Default allocator macro to use, can be undefined */
 //#define MBEDTLS_PLATFORM_FREE_MACRO            free /**< Default free macro to use, can be undefined */
 //#define MBEDTLS_PLATFORM_EXIT_MACRO            exit /**< Default exit macro to use, can be undefined */
-//#define MBEDTLS_PLATFORM_TIME_MACRO            time /**< Default time macro to use, can be undefined */
-//#define MBEDTLS_PLATFORM_TIME_TYPE_MACRO       time_t /**< Default time macro to use, can be undefined */
 //#define MBEDTLS_PLATFORM_FPRINTF_MACRO      fprintf /**< Default fprintf macro to use, can be undefined */
 //#define MBEDTLS_PLATFORM_PRINTF_MACRO        printf /**< Default printf macro to use, can be undefined */
 /* Note: your snprintf must correclty zero-terminate the buffer! */

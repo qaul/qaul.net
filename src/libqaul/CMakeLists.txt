@@ -66,6 +66,9 @@ if (${PORT} STREQUAL "WINDOWS")
   )
 endif ()
 
+# Adds the entirety of mbedtls with it's own CMakeFiles.txt tree
+add_subdirectory(mbedtls)
+
 ADD_LIBRARY (libqaul ${LIBTYPE}
     logging.c
     qaullib.c
@@ -83,16 +86,21 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     qaullib_filesharing.c
     qaullib_file_LL.c
     qaullib_exediscovery.c
-    qaullib_crypto.c
     qaullib_udp_communication.c
-	crypto/qcry_context.c
+
+    # crypto things
+    crypto/qcry_context.c
+    qcry_wrapper.c
+    qaullib_crypto.c
+
+    # Utility shizzle
     captive/qaullib_captive.c
     captive/qaullib_captive_dhcp.c
     captive/qaullib_captive_dns.c
     mongoose/mongoose.c
     sqlite/sqlite3.c
     urlcode/urlcode.c
-    mbedtls/sha1.c
+    # mbedtls/sha1.c
     olsrd/mantissa.c
     olsrd/hashing.c
     ${VOIP_SOURCES}
