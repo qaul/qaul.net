@@ -5,9 +5,9 @@
       <sourceFolder url="file://$MODULE_DIR$/third_party/BuildLinux.cmake" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/third_party/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/distfiles/linux/share/qaul.desktop.in" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/distfiles/linux/etc/olsrd_linux.conf.in" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/distfiles/linux/etc/olsrd_linux_gw.conf.in" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/distfiles/linux/bin/qaul.in" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/distfiles/linux/etc/olsrd_linux_gw.conf.in" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/distfiles/linux/etc/olsrd_linux.conf.in" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/client/cli/main.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/client/cli/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/client/gtk/network.h" isTestSource="false" />
@@ -18,96 +18,92 @@
       <sourceFolder url="file://$MODULE_DIR$/src/client/dbg/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_topo_LL.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_udp_communication.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_udp_communication.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/entropy.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/x509_crl.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ecjpake.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/pkcs11.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/pkwrite.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/camellia.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/asn1write.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/md4.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/certs.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ssl_tls.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/blowfish.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/x509_create.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/pkcs12.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/aes.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/md_wrap.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/md5.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ssl_cli.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/entropy_poll.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ssl_cookie.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/net.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ecdh.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/version.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/aesni.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ecp.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/memory_buffer_alloc.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ecdsa.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/xtea.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/pkparse.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/base64.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/asn1parse.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/bignum.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/cipher.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/debug.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/rsa.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/hmac_drbg.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/gcm.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/md.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/threading.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/sha1.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ctr_drbg.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/x509.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/havege.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/version_features.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/pk.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/pk_wrap.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/sha256.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/pkcs5.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ssl_srv.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ssl_ciphersuites.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ssl_cache.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ccm.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/timing.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/oid.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/padlock.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/x509write_crt.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/cipher_wrap.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/x509write_csr.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/x509_crt.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/des.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/x509_csr.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/arc4.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ssl_ticket.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/md2.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/error.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/sha512.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/platform.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/dhm.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ecp_curves.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/pem.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/ripemd160.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_messaging.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/include/CMakeLists.txt" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/CMakeLists.txt" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/timing.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/x509_crl.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/pkcs11.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/pkwrite.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/camellia.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/asn1write.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/md4.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/certs.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ssl_tls.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/blowfish.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/pkcs12.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/aes.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/md_wrap.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/md5.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ssl_cli.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/pk.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ssl_cookie.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/net.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ecdh.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/version.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/aesni.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ecp.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/memory_buffer_alloc.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ecjpake.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ctr_drbg.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/pkparse.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/base64.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/asn1parse.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/bignum.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/pk_wrap.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/cipher.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/debug.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/rsa.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/hmac_drbg.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/gcm.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/md.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/xtea.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/threading.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/sha1.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/entropy_poll.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/x509.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/havege.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/version_features.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ecdsa.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ccm.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/cipher_wrap.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/sha256.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/x509write_csr.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/pkcs5.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ssl_srv.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ssl_ciphersuites.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ssl_cache.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/x509_create.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/oid.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/padlock.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/x509write_crt.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/entropy.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/x509_crt.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/des.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/x509_csr.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/arc4.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ssl_ticket.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/md2.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/error.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/sha512.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/platform.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/dhm.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ecp_curves.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/pem.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/src/ripemd160.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mbedtls/CMakeLists.txt" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_msg_LL.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/sqlite/sqlite3.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/sqlite/sqlite3.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/captive/qaullib_captive_dns.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/captive/qaullib_captive.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/captive/qaullib_captive_dhcp.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/captive/qaullib_captive.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/captive/qaullib_captive_dns.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/captive/qaullib_captive.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qcry_wrapper.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mongoose/mongoose.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/mongoose/mongoose.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_exediscovery.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_user_LL.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_messaging.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_msg_LL.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_threads.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_topo_LL.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_udp_communication.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_user.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_crypto.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_threads.c" isTestSource="false" />
@@ -128,7 +124,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/olsrd/mantissa.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/olsrd/hashing.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/olsrd/mantissa.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_msg_LL.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_msg_LL.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_ipc.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_user_LL.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_validate.h" isTestSource="false" />
@@ -141,6 +137,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_filesharing.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_ipc.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_messaging.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_voip.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/libqaul/qaullib_file_LL.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/qaulhelper/CMakeLists.txt" isTestSource="false" />
