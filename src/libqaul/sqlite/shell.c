@@ -2290,7 +2290,7 @@ static void sql_trace_callback(void *pArg, const char *z){
 
 /*
 ** A no-op routine that runs with the ".breakpoint" doc-command.  This is
-** a useful spot to set a debugger breakpoint.
+** a useful spot to set a dbg breakpoint.
 */
 static void test_breakpoint(void){
   static int nCall = 0;

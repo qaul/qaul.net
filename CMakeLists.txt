@@ -78,6 +78,8 @@ elseif (${GUI} STREQUAL "QT5")
     set (GUINAME "qaul-qt5")
 elseif (${GUI} STREQUAL "CLI")
     set (GUINAME "qaul-cli")
+elseif (${GUI} STREQUAL "DBG")
+    set (GUINAME "qaul-dbg")
 else ()
     set (GUINAME "qaul")
 endif ()
@@ -159,6 +161,8 @@ elseif (${GUI} STREQUAL "QT5")
 else ()
     message(FATAL_ERROR "Dont know how to build ui '${GUI}'")
 endif ()
+
+add_subdirectory (src/client/dbg)
 
 # final status summary report
 message(STATUS "#############################################")
