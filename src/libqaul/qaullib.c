@@ -6,6 +6,8 @@
 #include "qaullib.h"
 #include "qaullib_private.h"
 
+#include "crypto/qcry_context.h"
+
 // ------------------------------------------------------------
 void Qaullib_Init(const char* homePath, const char* resourcePath)
 {
@@ -44,6 +46,10 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	sprintf(qaullib_AppEventOpenURL, "http://%s:%s/", IPC_ADDR, CHAT_PORT);
 	qaul_interface_configuring = 0;
 	qaul_internet_configuring = 0;
+
+    char *username, *foobar;
+
+	int val = qcry_context_init(username, foobar);
 
 	// -------------------------------------------------
 	// create buffers for socket communication

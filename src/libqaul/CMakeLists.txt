@@ -85,6 +85,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     qaullib_exediscovery.c
     qaullib_crypto.c
     qaullib_udp_communication.c
+	crypto/qcry_context.c
     captive/qaullib_captive.c
     captive/qaullib_captive_dhcp.c
     captive/qaullib_captive_dns.c
