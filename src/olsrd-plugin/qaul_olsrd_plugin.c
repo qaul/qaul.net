@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../src/olsrd_plugin.h"
+#include "olsrd_plugin.h"
 
 #include "qaul_olsrd_plugin.h"
 #include "qaul_msg.h"

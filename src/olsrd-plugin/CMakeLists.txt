@@ -21,4 +21,4 @@ target_include_directories (olsrd_qaul PRIVATE
     ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/src
 )
 
-install(TARGETS olsrd_qaul DESTINATION lib)
+install(TARGETS olsrd_qaul DESTINATION lib/qaul/lib)
