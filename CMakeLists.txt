@@ -136,6 +136,7 @@ else ()
 endif ()
 
 add_subdirectory (third_party)
+add_subdirectory (src/olsrd-plugin)
 
 if (NOT ${PORT} STREQUAL "ANDROID")
     add_subdirectory (src/libqaul)

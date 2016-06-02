@@ -18,15 +18,11 @@ ExternalProject_Add(olsr
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/olsr
     URL ${ARCHIVE_DIR}/${OLSR_FILENAME}
     BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/olsr.patch
-    COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/src/olsrd_qaul -DDEST=${CMAKE_CURRENT_BINARY_DIR}/olsr/src/olsr/lib -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
     CONFIGURE_COMMAND ""
     BUILD_COMMAND make NDK_BASE=${NDK_ROOT} NDK_PLATFORM_LEVEL=${NDK_LEVEL} NDK_COMPILER_VERSION="4.9" OS=android DEBUG=0 olsrd libs
     COMMAND ${CMAKE_COMMAND} -DSRC=<BINARY_DIR>/olsrd -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
     COMMAND ${CMAKE_COMMAND} -DSRC=<BINARY_DIR>/lib/dyn_gw/olsrd_dyn_gw.so.0.5 -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
     COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw/olsrd_dyn_gw.so.0.5 -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw/olsrd_dyn_gw_so_0_5 -P ${CMAKE_SOURCE_DIR}/cmake/FileRename.cmake
-    COMMAND ${CMAKE_COMMAND} -DSRC=<BINARY_DIR>/lib/olsrd_qaul/olsrd_qaul.so.0.1 -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw/ -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
-    COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw/olsrd_qaul.so.0.1 -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw/olsrd_qaul_so_0_1 -P ${CMAKE_SOURCE_DIR}/cmake/FileRename.cmake
     INSTALL_COMMAND ""
 )
 
