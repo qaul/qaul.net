@@ -10,6 +10,11 @@
 
 #include "qcry_helper.h"
 
+#define QCRY_KEYS_KL_AES 256
+#define QCRY_KEYS_KL_ECC 192
+#define QCRY_KEYS_KL_RSA 4096
+
+
 /** Struct that includes the entropy and random seed generators for key
  * generation. This context can be kept between different accesses but should
  * be flushed from time to time (much scientific measurement of time).
@@ -38,6 +43,8 @@ int qcry_keys_init_all(qcry_keys_context *context, short pr, short mseed, short 
  * all errors will be ignored.
  */
 int qcry_keys_gen(qcry_keys_context *context, short type, unsigned char *buf);
+
+int qcry_keys_gen_m(qcry_keys_context *context, short type, unsigned char *(*buf));
 
 /** Frees a key context and all neccessary sub-data */
 int qcry_keys_free(qcry_keys_context *context);

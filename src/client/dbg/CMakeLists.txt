@@ -1,4 +1,4 @@
-add_executable (qaul-dbg main.c)
+add_executable (qaul-dbg q_debug.c)
 
 target_include_directories(qaul-dbg PRIVATE ${DBUS1_INCLUDE_DIRS} ${WEBKIT_INCLUDE_DIRS})
 
