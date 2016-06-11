@@ -88,6 +88,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
 
         qaullib_crypto.c
         crypto/qcry_context.c
+        crypto/qcry_keys.c
         qcry_wrapper.c
 
         qaullib_udp_communication.c
