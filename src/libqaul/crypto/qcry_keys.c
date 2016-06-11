@@ -1,0 +1,109 @@
+#include <printf.h>
+#include <memory.h>
+#include "qcry_keys.h"
+#include "malloc.h"
+
+/** Define the key lengths used for crypto on libqaul */
+#define QCRY_KEYS_KL_AES 256
+#define QCRY_KEYS_KL_ECC 192
+#define QCRY_KEYS_KL_RSA 4096
+
+
+/** Returns the length of a required key buffer as an unsigned integer.
+ *  Returns insanely large number if buffer type not known
+ */
+unsigned int key_length_by_type(short type)
+{
+    switch (type){
+        case QCRY_KEYS_AES: return QCRY_KEYS_KL_AES;
+        case QCRY_KEYS_ECC: return QCRY_KEYS_KL_ECC;
+        case QCRY_KEYS_RSA: return QCRY_KEYS_KL_RSA;
+        default:            return -1;
+    }
+}
+
+
+int qcry_keys_init(qcry_keys_context *context)
+{
+    if (context == NULL) return QCRY_STATUS_INVALID_PARAMS;
+    qcry_keys_init_all(context, QCRY_KEYS_PREST_ON, 0, QCRY_KEYS_PERM_OFF, QCRY_KEYS_QUIET_OFF);
+}
+
+int qcry_keys_init_all(qcry_keys_context *context, short pr, short mseed, short perm, short quiet)
+{
+    if (context == NULL) return QCRY_STATUS_INVALID_PARAMS;
+    int ret;
+
+    /** Go and initialise the contexts */
+    mbedtls_ctr_drbg_init(&context->rand);
+    mbedtls_entropy_init(&context->entropy);
+
+    /*********************************************************
+     * Actually check parameters for accuracy and then fill them in
+     *
+     * Past this point the context needs to be a well defined state!
+     *********************************************************/
+    if (perm == QCRY_KEYS_PERM_OFF || perm == QCRY_KEYS_PERM_ON) {
+        context->perm = perm;
+    } else {
+        return QCRY_STATUS_INVALID_PARAMS;
+    }
+
+    if (quiet == QCRY_KEYS_QUIET_OFF || quiet == QCRY_KEYS_QUIET_ON) {
+        context->quiet = quiet;
+    } else {
+        return QCRY_STATUS_INVALID_PARAMS;
+    }
+
+    if (quiet == QCRY_KEYS_PREST_OFF || quiet == QCRY_KEYS_PREST_ON) {
+        context->pr = pr;
+    } else {
+        return QCRY_STATUS_INVALID_PARAMS;
+    }
+
+    /** This doesn't matter for now! */
+    context->mseed = 0;
+
+    /** Setup seed with sane defaults or user params */
+    if (context->mseed == 0) {
+        ret = mbedtls_ctr_drbg_seed(&context->rand, mbedtls_entropy_func, &context->entropy,
+                                    (const unsigned char *) "LIBQAUL_RAND", 32);
+        if (ret != 0) return QCRY_STATUS_SEED_FAILED;
+    } else {
+        printf("The function (mseed) has not been implemented yet...\n");
+    }
+
+    /** Set prediction resistance according to context */
+    if (context->pr) mbedtls_ctr_drbg_set_prediction_resistance(&context->rand, MBEDTLS_CTR_DRBG_PR_ON);
+    else mbedtls_ctr_drbg_set_prediction_resistance(&context->rand, MBEDTLS_CTR_DRBG_PR_OFF);
+
+    /** We're done... */
+    return QCRY_STATUS_OK;
+}
+
+int qcry_keys_gen(qcry_keys_context *context, short type, unsigned char *buf)
+{
+    int ret = 0;
+    int buf_size = key_length_by_type(type);
+
+    if(context == NULL) return QCRY_STATUS_INVALID_PARAMS;
+    if(&context->rand == NULL) return QCRY_STATUS_INVALID;
+    if(sizeof(buf) != buf_size) return QCRY_STATUS_BUFFER_TOO_SMALL;
+
+    /** At this point we should be ready for some randomness :) */
+    ret = mbedtls_ctr_drbg_random(&context->rand, buf, buf_size);
+    if(ret != 0) return QCRY_STATUS_KEYGEN_FAILED;
+
+    /** If everything went well return positive */
+    return QCRY_STATUS_OK;
+}
+
+int qcry_keys_free(qcry_keys_context *context)
+{
+    if(context == NULL) return QCRY_STATUS_INVALID_PARAMS;
+    mbedtls_ctr_drbg_free(&context->rand);
+    mbedtls_entropy_free(&context->entropy);
+    memset((void*) context, 0, sizeof(qcry_keys_context));
+
+    return QCRY_STATUS_OK;
+}

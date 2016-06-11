@@ -8,19 +8,7 @@
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 
-/**
- * Describes a key. Is used to generate different lengths
- * and patterns of keys for various crypto processes in libqaul.
- *
- * Not all of them may be in use. Do not ignore warnings thrown by
- * functions that take qcry_key_t as parameter as they might give
- * indication of the void-ness of a key type.
- */
-typedef enum {
-    AES,
-    ECC, /* Main cryptographic workhorse */
-    RSA
-} qcry_key_t;
+#include "qcry_helper.h"
 
 /** Struct that includes the entropy and random seed generators for key
  * generation. This context can be kept between different accesses but should
@@ -35,17 +23,23 @@ typedef struct {
     mbedtls_entropy_context     entropy;
     mbedtls_ctr_drbg_context    rand;
     short                       pr, mseed, perm, quiet;
-} qcry_key_context;
+} qcry_keys_context;
 
-int qcry_key_init(qcry_key_context *context);
+/** Initialises a context with "sane default" settings */
+int qcry_keys_init(qcry_keys_context *context);
+
+int qcry_keys_init_all(qcry_keys_context *context, short pr, short mseed, short perm, short quiet);
 
 /**
- * Function that creates a key based on a few parameters passed in
+ * Function that creates a key ased on a few parameters passed in
  * by the key context and key type. Fills an output buffer with data.
  *
  * Will return != 0 if buffer is too small. If "quiet" flag is set on context
  * all errors will be ignored.
  */
-int qcry_key_gen(qcry_key_context *context, qcry_key_t *type, unsigned char *buf);
+int qcry_keys_gen(qcry_keys_context *context, short type, unsigned char *buf);
+
+/** Frees a key context and all neccessary sub-data */
+int qcry_keys_free(qcry_keys_context *context);
 
 #endif //QAUL_QCRY_KEYS_H
