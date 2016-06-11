@@ -3,12 +3,6 @@
 #include "qcry_keys.h"
 #include "malloc.h"
 
-/** Define the key lengths used for crypto on libqaul */
-#define QCRY_KEYS_KL_AES 256
-#define QCRY_KEYS_KL_ECC 192
-#define QCRY_KEYS_KL_RSA 4096
-
-
 /** Returns the length of a required key buffer as an unsigned integer.
  *  Returns insanely large number if buffer type not known
  */
@@ -25,13 +19,13 @@ unsigned int key_length_by_type(short type)
 
 int qcry_keys_init(qcry_keys_context *context)
 {
-    if (context == NULL) return QCRY_STATUS_INVALID_PARAMS;
+    // if (context) return QCRY_STATUS_INVALID_PARAMS;
     qcry_keys_init_all(context, QCRY_KEYS_PREST_ON, 0, QCRY_KEYS_PERM_OFF, QCRY_KEYS_QUIET_OFF);
 }
 
 int qcry_keys_init_all(qcry_keys_context *context, short pr, short mseed, short perm, short quiet)
 {
-    if (context == NULL) return QCRY_STATUS_INVALID_PARAMS;
+    // if (context) return QCRY_STATUS_INVALID_PARAMS;
     int ret;
 
     /** Go and initialise the contexts */
@@ -55,7 +49,7 @@ int qcry_keys_init_all(qcry_keys_context *context, short pr, short mseed, short 
         return QCRY_STATUS_INVALID_PARAMS;
     }
 
-    if (quiet == QCRY_KEYS_PREST_OFF || quiet == QCRY_KEYS_PREST_ON) {
+    if (pr == QCRY_KEYS_PREST_OFF || pr == QCRY_KEYS_PREST_ON) {
         context->pr = pr;
     } else {
         return QCRY_STATUS_INVALID_PARAMS;
@@ -66,8 +60,7 @@ int qcry_keys_init_all(qcry_keys_context *context, short pr, short mseed, short 
 
     /** Setup seed with sane defaults or user params */
     if (context->mseed == 0) {
-        ret = mbedtls_ctr_drbg_seed(&context->rand, mbedtls_entropy_func, &context->entropy,
-                                    (const unsigned char *) "LIBQAUL_RAND", 32);
+        ret = mbedtls_ctr_drbg_seed(&context->rand, mbedtls_entropy_func, &context->entropy, (const unsigned char *) "RANDOM_GEN", 10 );
         if (ret != 0) return QCRY_STATUS_SEED_FAILED;
     } else {
         printf("The function (mseed) has not been implemented yet...\n");
@@ -86,13 +79,36 @@ int qcry_keys_gen(qcry_keys_context *context, short type, unsigned char *buf)
     int ret = 0;
     int buf_size = key_length_by_type(type);
 
-    if(context == NULL) return QCRY_STATUS_INVALID_PARAMS;
-    if(&context->rand == NULL) return QCRY_STATUS_INVALID;
+    //if(context == NULL) return QCRY_STATUS_INVALID_PARAMS;
+    //if(context->rand) return QCRY_STATUS_INVALID;
     if(sizeof(buf) != buf_size) return QCRY_STATUS_BUFFER_TOO_SMALL;
 
     /** At this point we should be ready for some randomness :) */
     ret = mbedtls_ctr_drbg_random(&context->rand, buf, buf_size);
     if(ret != 0) return QCRY_STATUS_KEYGEN_FAILED;
+
+    /** If everything went well return positive */
+    return QCRY_STATUS_OK;
+}
+
+int qcry_keys_gen_m(qcry_keys_context *context, short type, unsigned char *(*buf))
+{
+    int ret = 0;
+    int buf_size = key_length_by_type(type);
+
+    //if(context) return QCRY_STATUS_INVALID_PARAMS;
+    //if(context->rand) return QCRY_STATUS_INVALID;
+
+    *buf = (unsigned char*) malloc(sizeof(unsigned char) * buf_size);
+    if(buf == NULL) return QCRY_STATUS_BUFFER_TOO_SMALL;
+
+    unsigned char tmp[buf_size];
+
+    /** At this point we should be ready for some randomness :) */
+    ret = mbedtls_ctr_drbg_random(&context->rand, tmp, (size_t) buf_size);
+    if(ret != 0) return QCRY_STATUS_KEYGEN_FAILED;
+
+    memcpy(buf, tmp, buf_size);
 
     /** If everything went well return positive */
     return QCRY_STATUS_OK;
