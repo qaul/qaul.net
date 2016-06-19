@@ -5,11 +5,12 @@
 #ifndef QAUL_QCRY_KEYS_H
 #define QAUL_QCRY_KEYS_H
 
+#include "qcry_helper.h"
+
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 
-#include "qcry_helper.h"
-
+// TODO: These fields are depreciated now!
 #define QCRY_KEYS_KL_AES 256
 #define QCRY_KEYS_KL_ECC 192
 #define QCRY_KEYS_KL_RSA 4096

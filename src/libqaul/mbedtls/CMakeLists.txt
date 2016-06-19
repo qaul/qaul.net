@@ -52,7 +52,7 @@ ADD_LIBRARY (mbedtls STATIC
     sha512.c
     ssl_cache.c
     ssl_ciphersuites.c
-    ssl_cli.c
+    # ssl_cli.c
     ssl_cookie.c
     ssl_srv.c
     ssl_ticket.c

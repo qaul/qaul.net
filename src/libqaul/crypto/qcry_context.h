@@ -6,23 +6,26 @@
 #ifndef _QCRY_CONTEXT_
 #define _QCRY_CONTEXT_
 
-#include <mbedtls/aes.h>
-#include "qcry_helper.h"
+#include "mbedtls/aes.h"
 #include "mbedtls/pk.h"
+#include "mbedtls/ctr_drbg.h"
+
+#include "qcry_helper.h"
 
 /** Describes the context in which a crypto context is held */
 typedef enum {
-    RSA_ECDSA = 0,
-    ECC_ECDSA = 1,
+    PK_RSA = 0,
+    ECDSA = 1,
     AES256 = 2
-
 } qcry_ciph_t;
 
 /* Data required to do public key crypto*/
 typedef struct {
-    unsigned char       *usr_key_pub;
-    unsigned char       *fp;
-    short               mgno;
+    unsigned char   *usr_key_pub;
+    unsigned char   *fp;
+
+    int             key_len;
+    short           mgno;
 } qcry_pk_target;
 
 /* Data required to do sym key crypto*/
@@ -32,17 +35,17 @@ typedef struct {
 
 /** Combined structure to hold unionised data */
 typedef struct {
-    union data
+    union d
     {
         qcry_sk_taret   *sk;
         qcry_pk_target  *pk;
-    } data;
+    } d;
 
-    union mbed_ctx {
-        mbedtls_pk_context  *pk_ctx;
-        mbedtls_aes_context *sk_ctx;
-    } mbed_ctx;
-
+    union ctx {
+        mbedtls_pk_context  *pk;
+        mbedtls_aes_context *sk;
+    } ctx;
+    short               mgno;
 } qcry_trgt_t;
 
 
@@ -62,30 +65,42 @@ typedef struct {
     qcry_trgt_t         **trgts;
     unsigned int        usd_trgt;
     unsigned int        max_trgt;
+    
+    /* Seeds and entropy contexts */
+    mbedtls_ctr_drbg_context    *ctr_drbg;
 } qcry_usr_ctx;
 
+/** Used to check if initialisation was done on a context */
 #define CHECK_SANE \
     if(ctx->mgno != 3) return QCRY_STATUS_CTX_INVALID;
 
-#define CHECK_KEYS \
-    if(!(ctx->ciph_t == AES256 && ctx->usr_key_pri) || \
-        !((ctx->ciph_t == RSA_ECDSA || ctx->ciph_t == ECC_ECDSA) && (ctx->usr_key_pub && ctx->usr_key_pri))) { \
-            return QCRY_STATUS_INVALID_KEYS; \
-        }
+/* Used to check if initialisation was done on a target */
+#define CHECK_TARGET(ctx, trgt_no)  \
+    { if(ctx->trgts[trgt_no]->mgno != MAGICK_NO) return QCRY_STATUS_INVALID_TARGET; }
 
+/* Helper macro to remove a target and all its allocated child heap memory */
 #define CLEAR_TARGET(ciph_t, trgt) \
     { if(ciph_t == AES256) { \
-        mbedtls_aes_free(trgt->mbed_ctx.sk_ctx); \
-        free(trgt->mbed_ctx.sk_ctx); \
-        free(trgt->data.sk->sh_key_pri); \
-        free(trgt->data.sk); \
+        mbedtls_aes_free(trgt->ctx.sk); \
+        free(trgt->ctx.sk); \
+        free(trgt->d.sk->sh_key_pri); \
+        free(trgt->d.sk); \
     } else { \
-        mbedtls_pk_free(trgt->mbed_ctx.pk_ctx); \
-        free(trgt->mbed_ctx.pk_ctx); \
-        free(trgt->data.pk->usr_key_pub); \
-        free(trgt->data.pk->fp); \
-        free(trgt->data.pk); } \
+        mbedtls_pk_free(trgt->ctx.pk); \
+        free(trgt->ctx.pk); \
+        free(trgt->d.pk->usr_key_pub); \
+        free(trgt->d.pk->fp); \
+        free(trgt->d.pk); } \
     free(trgt); }
+
+
+// TODO: Change this into a macro!
+static int QCRY_KEY_LEN[] = { 2048, 192, 256 };
+
+//#define CHECK_KEYLEN(type, key) { \
+//    size_t len = strlen(key); \
+//    if(len != QCRY_KEY_LEN[type] return QCRY_STATUS_INVALID_KEYS ) }
+
 
 /**
  * Initialises context for a username and a cipher type
@@ -106,9 +121,15 @@ int qcry_context_add_trgt(qcry_usr_ctx *ctx, const qcry_trgt_t *trgt, qcry_ciph_
 
 int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int *trgt_no);
 
-int qcry_encrypt_ictx(qcry_usr_ctx *ctx, const char *msg, size_t ilen, unsigned char *(*ciph));
-
-int qcry_decrypt_ictx(qcry_usr_ctx *ctx, const char *ciph, size_t ilen, unsigned char *(*msg));
+/**
+ * Use this function to encrypt messages against a target. This requires an initialised
+ *  context and target to be present for the crypto to work.
+ *
+ *  A buffer MAY be allocated before usage but will usually want to be created and checked for you.
+ *
+ */
+int qcry_encrypt_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, size_t ilen, unsigned char *(*ciph));
+int qcry_decrypt_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *ciph, size_t ilen, unsigned char *(*msg));
 
 #endif // _QCRY_CONTEXT_
 

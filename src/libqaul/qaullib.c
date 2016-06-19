@@ -49,7 +49,9 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 
     char *username, *foobar;
 
-	int val = qcry_context_init(username, foobar);
+	qcry_usr_ctx ctx;
+    int val = qcry_context_init(&ctx, username, PK_RSA);
+    printf("QCRY_INIT responds with: %d", val);
 
 	// -------------------------------------------------
 	// create buffers for socket communication
