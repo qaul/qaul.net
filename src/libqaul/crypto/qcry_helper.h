@@ -12,17 +12,17 @@ extern "C" {
 
 /** ALL CONSTANT DEFINITIONS FOR THE QCRY NAMESPACE */
 #define QCRY_STATUS_OK                  0
-#define QCRY_STATUS_GEN_ERROR           1
+#define QCRY_STATUS_ERROR               1
+#define QCRY_STATUS_FATAL               2
 #define QCRY_STATUS_KEYGEN_FAILED       6
-#define QCRY_STATUS_ENTROPY_FAILED      8
-#define QCRY_STATUS_RCRT_FAILED         10
 #define QCRY_STATUS_BFR_TOO_SMALL       12
 #define QCRY_STATUS_INVALID_PARAMS      14
 #define QCRY_STATUS_SEED_FAILED         16
 #define QCRY_STATUS_CTX_INVALID         18
-#define QCRY_STATUS_INVALID             20
+#define QCRY_STATUS_INVALID_TARGET      20
 #define QCRY_STATUS_INVALID_KEYS        21
 #define QCRY_STATUS_MALLOC_FAIL         22
+#define QCRY_STATUS_KEY_BUSY            24
 
 
 /* Flags used by the key generators */
@@ -37,8 +37,35 @@ extern "C" {
 #define QCRY_KEYS_PERM_OFF        415
 #define QCRY_CIPH_CBC             425
 
-
+/* Generic helper macros for all crypto code */
 #define QCRY_KEY_LEN { 2048, 192, 256 }
+#define MAGICK_NO   3
+#define MIN_BFR_S   4
+#define MAX_TIMEOUT 500
+#define TIME_SLEEP  50
+
+/**
+ * This macro checks if a buffer is full and should be increased in size.
+ * Additionally it checks if a buffer is WAY too big for it's occupancy and
+ * shrinks it. This macro should get used whenever things are
+ * stored or removed from list buffers
+ */
+#define CHECK_BUFFER(type, bfr, max_s, curr_s) \
+    { if(curr_s >= max_s) { \
+        max_s *= 2; type *tmp = calloc(sizeof(type), max_s); \
+        if(!tmp) return QCRY_STATUS_MALLOC_FAIL; \
+        memcpy(tmp, bfr, sizeof(type) * curr_s); \
+        free(bfr); \
+        bfr = tmp; \
+    } else if(curr_s * 3<= max_s) { max_s /= 2 ; \
+    if(max_s < MIN_BFR_S) max_s = MIN_BFR_S; \
+        type *tmp = calloc(sizeof(type), max_s); \
+        if(!tmp) return QCRY_STATUS_MALLOC_FAIL; \
+        memcpy(tmp, bfr, \
+        sizeof(type) * curr_s); \
+        free(bfr); \
+        bfr = tmp; } \
+    }
 
 /**
  * create @a string from @a hash

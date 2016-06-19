@@ -74,11 +74,18 @@ typedef struct {
         }
 
 #define CLEAR_TARGET(ciph_t, trgt) \
-    { if(ciph_t == AES256) { mbedtls_aes_free(trgt->mbed_ctx.sk_ctx); \
-        free(trgt->mbed_ctx.sk_ctx); free(trgt->data.sk->sh_key_pri); \
-    free(trgt->data.sk); } else { mbedtls_pk_free(trgt->mbed_ctx.pk_ctx); \
-        free(trgt->mbed_ctx.pk_ctx); free(trgt->data.pk->usr_key_pub); \
-        free(trgt->data.pk->fp); free(trgt->data.pk); } free(trgt); }
+    { if(ciph_t == AES256) { \
+        mbedtls_aes_free(trgt->mbed_ctx.sk_ctx); \
+        free(trgt->mbed_ctx.sk_ctx); \
+        free(trgt->data.sk->sh_key_pri); \
+        free(trgt->data.sk); \
+    } else { \
+        mbedtls_pk_free(trgt->mbed_ctx.pk_ctx); \
+        free(trgt->mbed_ctx.pk_ctx); \
+        free(trgt->data.pk->usr_key_pub); \
+        free(trgt->data.pk->fp); \
+        free(trgt->data.pk); } \
+    free(trgt); }
 
 /**
  * Initialises context for a username and a cipher type
