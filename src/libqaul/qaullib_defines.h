@@ -129,7 +129,6 @@ struct qaul_exeavailable_msg
 	uint32_t filesize;
 };
 
-
 /********************************************//**
  * qaul olsr Messages
  *
