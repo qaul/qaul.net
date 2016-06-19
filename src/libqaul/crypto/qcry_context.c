@@ -12,9 +12,9 @@ int qcry_context_init(qcry_usr_ctx *ctx, unsigned char *usr_name, qcry_ciph_t ci
     ctx->ciph_t = ciph_t;
 
     /* Prepare space for future crypto targets */
-    ctx->trgts = (qcry_trgt_t*) calloc(sizeof(qcry_trgt_t), TRGT_C);
+    ctx->trgts = (qcry_trgt_t*) calloc(sizeof(qcry_trgt_t), MIN_BFR_S);
     ctx->usd_trgt = 0;
-    ctx->max_trgt = TRGT_C;
+    ctx->max_trgt = MIN_BFR_S;
 
     /* Signal we're done */
     ctx->mgno = MAGICK_NO;
@@ -64,9 +64,14 @@ int qcry_context_add_trgt(qcry_usr_ctx *ctx, const qcry_trgt_t *trgt, qcry_ciph_
 
     /* Check the key length for our target */
     size_t pri_len;
-    if(ciph_t == AES256) pri_len = strlen(trgt->data.sk->sh_key_pri);
-    else                 pri_len = strlen(trgt->data.pk->usr_key_pub);
-    if(QCRY_KEY_LEN[pri_len] != ciph_t) return QCRY_STATUS_INVALID_TARGET;
+    if(ciph_t == AES256) {
+        pri_len = strlen(trgt->d.sk->sh_key_pri);
+    } else {
+        pri_len = strlen(trgt->d.pk->usr_key_pub);
+        if(trgt->d.pk->key_len == 0) pri_len = -1;
+    }
+
+    if(pri_len != QCRY_KEY_LEN[ciph_t]) return QCRY_STATUS_INVALID_TARGET;
 
     /* Increases the target buffer if needs be */
     CHECK_BUFFER(qcry_trgt_t* , ctx->trgts, ctx->max_trgt, ctx->usd_trgt)
@@ -77,14 +82,15 @@ int qcry_context_add_trgt(qcry_usr_ctx *ctx, const qcry_trgt_t *trgt, qcry_ciph_
     *trgt_no = ctx->usd_trgt;
 
     if(ciph_t == AES256) {
-        ctx->trgts[ctx->usd_trgt]->mbed_ctx.sk_ctx = (mbedtls_aes_context*) malloc(sizeof(mbedtls_aes_context));
-        mbedtls_aes_init(ctx->trgts[ctx->usd_trgt]->mbed_ctx.sk_ctx);
+        ctx->trgts[ctx->usd_trgt]->ctx.sk = (mbedtls_aes_context*) malloc(sizeof(mbedtls_aes_context));
+        mbedtls_aes_init(ctx->trgts[ctx->usd_trgt]->ctx.sk);
     } else {
-        ctx->trgts[ctx->usd_trgt]->mbed_ctx.pk_ctx = (mbedtls_pk_context*) malloc(sizeof(mbedtls_pk_context));
-        mbedtls_pk_init(ctx->trgts[ctx->usd_trgt]->mbed_ctx.pk_ctx);
+        ctx->trgts[ctx->usd_trgt]->ctx.pk = (mbedtls_pk_context*) malloc(sizeof(mbedtls_pk_context));
+        mbedtls_pk_init(ctx->trgts[ctx->usd_trgt]->ctx.pk);
     }
 
-    /* Signal back all clear */
+    /* Set "magic" number and return all clear */
+    ctx->trgts[ctx->usd_trgt]->mgno = MAGICK_NO;
     return QCRY_STATUS_OK;
 }
 
@@ -99,4 +105,28 @@ int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int *trgt_no)
     CHECK_BUFFER(qcry_trgt_t* , ctx->trgts, ctx->max_trgt, ctx->usd_trgt)
 
     return QCRY_STATUS_OK;
+}
+
+int qcry_encrypt_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, size_t msg_len, unsigned char *(*ciph))
+{
+    /* Check our context is sane */
+    CHECK_SANE
+
+    /* Check our target is sane */
+    CHECK_TARGET(ctx, trgt_no);
+
+    /* Store pointer to target we're working with directly */
+    qcry_trgt_t *trgt = ctx->trgts[trgt_no];
+
+    if(ctx->ciph_t == AES256) {
+
+    } else if(ctx->ciph_t == PK_RSA) {
+        mbedtls_pk_parse_public_key(trgt->ctx.pk, trgt->d.pk->usr_key_pub, trgt->d.pk->key_len);
+        size_t out_len = mbedtls_pk_get_len(trgt->ctx.pk);
+
+        mbedtls_pk_encrypt( trgt->ctx.pk, msg, msg_len, *ciph, &out_len, sizeof(*ciph), mbedtls_ctr_drbg_random, ctx->ctr_drbg);
+
+    } else {
+        return QCRY_STATUS_NOT_IMPLEMENTED;
+    }
 }

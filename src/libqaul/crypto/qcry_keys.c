@@ -81,7 +81,7 @@ int qcry_keys_gen(qcry_keys_context *context, short type, unsigned char *buf)
 
     //if(context == NULL) return QCRY_STATUS_INVALID_PARAMS;
     //if(context->rand) return QCRY_STATUS_INVALID;
-    if(sizeof(buf) != buf_size) return QCRY_STATUS_BUFFER_TOO_SMALL;
+    if(sizeof(buf) != buf_size) return QCRY_STATUS_BFR_TOO_SMALL;
 
     /** At this point we should be ready for some randomness :) */
     ret = mbedtls_ctr_drbg_random(&context->rand, buf, buf_size);
@@ -100,7 +100,7 @@ int qcry_keys_gen_m(qcry_keys_context *context, short type, unsigned char *(*buf
     //if(context->rand) return QCRY_STATUS_INVALID;
 
     *buf = (unsigned char*) malloc(sizeof(unsigned char) * buf_size);
-    if(buf == NULL) return QCRY_STATUS_BUFFER_TOO_SMALL;
+    if(buf == NULL) return QCRY_STATUS_BFR_TOO_SMALL;
 
     unsigned char tmp[buf_size];
 

@@ -6,24 +6,28 @@
 #ifndef _QCRY_HELPER_
 #define _QCRY_HELPER_
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
+/***************** QCRY ERROR CODES *****************/
 
-/** ALL CONSTANT DEFINITIONS FOR THE QCRY NAMESPACE */
 #define QCRY_STATUS_OK                  0
 #define QCRY_STATUS_ERROR               1
 #define QCRY_STATUS_FATAL               2
-#define QCRY_STATUS_KEYGEN_FAILED       6
-#define QCRY_STATUS_BFR_TOO_SMALL       12
-#define QCRY_STATUS_INVALID_PARAMS      14
-#define QCRY_STATUS_SEED_FAILED         16
-#define QCRY_STATUS_CTX_INVALID         18
-#define QCRY_STATUS_INVALID_TARGET      20
+
+#define QCRY_STATUS_NOT_IMPLEMENTED     3
+
+#define QCRY_STATUS_KEYGEN_FAILED       4
+#define QCRY_STATUS_BFR_TOO_SMALL       10
+#define QCRY_STATUS_INVALID_PARAMS      12
+
+#define QCRY_STATUS_SEED_FAILED         14
+#define QCRY_STATUS_CTX_INVALID         16
+#define QCRY_STATUS_INVALID_TARGET      18
+#define QCRY_STATUS_INVALID_KEYS        19
+
 #define QCRY_STATUS_INVALID_KEYS        21
 #define QCRY_STATUS_MALLOC_FAIL         22
 #define QCRY_STATUS_KEY_BUSY            24
 
+/***************** QCRY ERROR CODES *****************/
 
 /* Flags used by the key generators */
 #define QCRY_KEYS_AES             100
@@ -38,7 +42,7 @@ extern "C" {
 #define QCRY_CIPH_CBC             425
 
 /* Generic helper macros for all crypto code */
-#define QCRY_KEY_LEN { 2048, 192, 256 }
+
 #define MAGICK_NO   3
 #define MIN_BFR_S   4
 #define MAX_TIMEOUT 500
@@ -82,9 +86,5 @@ int QCry_HashToString(unsigned char *hash, char *string);
  * @retval 0 on error
  */
 int QCry_StringToHash(char *string, unsigned char *hash);
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif
