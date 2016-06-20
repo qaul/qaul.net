@@ -347,7 +347,7 @@ void Qaullib_UserAddInfo(struct qaul_userinfo_msg *userinfo)
 						userinfo->suffix);
 }
 
-void Qaullib_UserAdd(union olsr_ip_addr *ip, char *name, char *iconhash, char *suffix)
+void Qaullib_UserAdd(union olsr_ip_addr *ip, const char *name, const char *fingerprint)
 {
 	struct qaul_user_LL_item *myuseritem;
 	unsigned char id[MAX_HASH_LEN];
