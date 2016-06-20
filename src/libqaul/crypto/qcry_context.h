@@ -110,12 +110,12 @@ int qcry_context_init(qcry_usr_ctx *ctx, unsigned char *usr_name, qcry_ciph_t ci
 /**
  * Attaches a private key to a context. The key is validated and length matched
  */
-int qcry_context_prik_attach(qcry_usr_ctx *ctx, const unsigned char *usr_key_pri);
+int qcry_context_prk_attach(qcry_usr_ctx *ctx, const unsigned char *usr_key_pri);
 
 /**
  * Detaches a private key from a context for whatever reason.
  */
-int qcry_context_prik_detach(qcry_usr_ctx *ctx);
+int qcry_context_prk_detach(qcry_usr_ctx *ctx);
 
 int qcry_context_add_trgt(qcry_usr_ctx *ctx, const qcry_trgt_t *trgt, qcry_ciph_t ciph_t, unsigned int *trgt_no);
 
