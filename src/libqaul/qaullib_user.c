@@ -341,10 +341,7 @@ void Qaullib_UserCheckSockets(void)
 
 void Qaullib_UserAddInfo(struct qaul_userinfo_msg *userinfo)
 {
-	Qaullib_UserAdd(	&userinfo->ip,
-						userinfo->name,
-						userinfo->icon,
-						userinfo->suffix);
+	Qaullib_UserAdd(&userinfo->ip, userinfo->name, NULL);
 }
 
 void Qaullib_UserAdd(union olsr_ip_addr *ip, const char *name, const char *fingerprint)

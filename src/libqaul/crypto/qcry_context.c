@@ -21,7 +21,7 @@ int qcry_context_init(qcry_usr_ctx *ctx, unsigned char *usr_name, qcry_ciph_t ci
     return QCRY_STATUS_OK;
 }
 
-int qcry_context_prik_attach(qcry_usr_ctx *ctx, const unsigned char *usr_key_pri)
+int qcry_context_prk_attach(qcry_usr_ctx *ctx, const unsigned char *usr_key_pri)
 {
     CHECK_SANE
 
@@ -39,7 +39,7 @@ int qcry_context_prik_attach(qcry_usr_ctx *ctx, const unsigned char *usr_key_pri
     return QCRY_STATUS_OK;
 }
 
-int qcry_context_prik_detach(qcry_usr_ctx *ctx)
+int qcry_context_prk_detach(qcry_usr_ctx *ctx)
 {
     CHECK_SANE
 
