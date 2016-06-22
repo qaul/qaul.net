@@ -86,10 +86,12 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
         qaullib_file_LL.c
         qaullib_exediscovery.c
 
+        # Crypto modules
         qaullib_crypto.c
-        crypto/qcry_context.c
-        crypto/qcry_keys.c
         qcry_wrapper.c
+        crypto/qcry_context.c
+        crypto/qcry_arbiter.c
+        crypto/qcry_keys.c
 
         qaullib_udp_communication.c
         captive/qaullib_captive.c

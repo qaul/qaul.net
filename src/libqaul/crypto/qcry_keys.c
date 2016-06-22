@@ -1,6 +1,6 @@
+#include "qaullib_cryptography.h"
 #include <printf.h>
 #include <memory.h>
-#include "qcry_keys.h"
 #include "malloc.h"
 
 /** Returns the length of a required key buffer as an unsigned integer.
