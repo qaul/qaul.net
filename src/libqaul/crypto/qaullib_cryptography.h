@@ -265,6 +265,7 @@ int qcry_arbit_stop(qcry_arbit_ctx *ctx, qcry_arbit_token *token);
 
 
 // TODO: These fields are depreciated now!
+// TODO: Add key sizes to names
 #define QCRY_KEYS_KL_AES 256
 #define QCRY_KEYS_KL_ECC 192
 #define QCRY_KEYS_KL_RSA 4096
