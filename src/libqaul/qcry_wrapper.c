@@ -1,6 +1,5 @@
 #include <qaullib/qcry_wrapper.h>
 #include "crypto/qaullib_cryptography.h"
-#include "crypto/qcry_keys.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -9,15 +8,23 @@
 int qcry_devel_init() {
     int ret = 0, i, k;
     unsigned char key[QCRY_KEYS_KL_AES];
+//
+//    qcry_keys_context context;
+//    qcry_keys_init(&context);
+//
+//    printf("Context init...done\n");
+//
+////    ret = mbedtls_ctr_drbg_random(&context.rand, key, QCRY_KEYS_KL_AES);
+//
+//    printf("Our key buffer: %s of size %d", key, sizeof(key));
 
-    qcry_keys_context context;
-    qcry_keys_init(&context);
+    qcry_keys_context ctx;
+    qcry_keys_init(&ctx);
 
-    printf("Context init...done\n");
+    unsigned char *buffer;
+    qcry_keys_gen_m(&ctx, QCRY_KEYS_RSA, &buffer);
 
-//    ret = mbedtls_ctr_drbg_random(&context.rand, key, QCRY_KEYS_KL_AES);
-
-    printf("Our key buffer: %s of size %d", key, sizeof(key));
+    printf("Our key buffer is: %s", buffer);
 
 //    qcry_keys_context context;
 //    ret = qcry_keys_init(&context);
