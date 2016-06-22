@@ -140,6 +140,4 @@ void Qaullib_User_LL_InitNodeWithIP(struct qaul_user_LL_node *node, union olsr_i
  */
 int  Qaullib_User_LL_NextNode (struct qaul_user_LL_node *node);
 
-
-
 #endif //QAUL_QAULLIB_USR_TABLE_H_H

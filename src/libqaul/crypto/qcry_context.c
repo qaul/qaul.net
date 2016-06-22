@@ -1,9 +1,8 @@
-#include "qcry_context.h"
+#include "qaullib_cryptography.h"
 
 #include <memory.h>
 #include <malloc.h>
 #include <zconf.h>
-
 
 int qcry_context_init(qcry_usr_ctx *ctx, unsigned char *usr_name, qcry_ciph_t ciph_t)
 {

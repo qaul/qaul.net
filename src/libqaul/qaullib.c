@@ -6,7 +6,7 @@
 #include "qaullib.h"
 #include "qaullib_private.h"
 
-#include "crypto/qcry_context.h"
+#include "crypto/qaullib_cryptography.h"
 
 // ------------------------------------------------------------
 void Qaullib_Init(const char* homePath, const char* resourcePath)
@@ -47,11 +47,13 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	qaul_interface_configuring = 0;
 	qaul_internet_configuring = 0;
 
-    char *username, *foobar;
+    char *username = "spacekookie";
 
 	qcry_usr_ctx ctx;
     int val = qcry_context_init(&ctx, username, PK_RSA);
-    printf("QCRY_INIT responds with: %d", val);
+    printf("QCRY_INIT responds with: %d\n", val);
+
+    // qcry_context_free(&ctx);
 
 	// -------------------------------------------------
 	// create buffers for socket communication
