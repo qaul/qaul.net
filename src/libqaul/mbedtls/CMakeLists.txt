@@ -70,3 +70,7 @@ ADD_LIBRARY (mbedtls STATIC
     x509write_csr.c
     xtea.c
 )
+
+target_include_directories (mbedtls PRIVATE
+    include
+)
