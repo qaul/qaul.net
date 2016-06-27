@@ -1,8 +1,14 @@
-#include "qaullib_cryptography.h"
+/*
+ * qaul.net is free software
+ * licensed under GPL (version 3)
+ */
 
+
+#include <stdlib.h>
 #include <memory.h>
-#include <malloc.h>
 #include <zconf.h>
+
+#include "qcry_context.h"
 
 int qcry_context_init(qcry_usr_ctx *ctx, unsigned char *usr_name, qcry_ciph_t ciph_t)
 {

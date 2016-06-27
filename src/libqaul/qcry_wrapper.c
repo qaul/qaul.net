@@ -1,9 +1,16 @@
-#include <qaullib/qcry_wrapper.h>
-#include "crypto/qaullib_cryptography.h"
+/*
+ * qaul.net is free software
+ * licensed under GPL (version 3)
+ */
 
+
+#include <qaullib/qcry_wrapper.h>
 #include <stdio.h>
 #include <string.h>
-#include <mbedtls/platform.h>
+
+#include "crypto/qcry_arbiter.h"
+#include "crypto/qcry_keys.h"
+#include "crypto/qcry_helper.h"
 
 int qcry_devel_init() {
     int ret = 0, i, k;
