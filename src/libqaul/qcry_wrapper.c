@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "crypto/qcry_arbiter.h"
+#include "qaullib/qcry_arbiter.h"
 #include "crypto/qcry_keys.h"
 #include "crypto/qcry_helper.h"
 

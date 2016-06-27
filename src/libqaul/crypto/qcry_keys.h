@@ -6,6 +6,9 @@
 #ifndef QAUL_QCRY_KEYS_H
 #define QAUL_QCRY_KEYS_H
 
+#include <mbedtls/ctr_drbg.h>
+#include <mbedtls/entropy.h>
+
 /************************************************************************************************
 ***
 ***

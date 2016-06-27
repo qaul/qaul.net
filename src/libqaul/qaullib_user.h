@@ -18,7 +18,7 @@
 extern "C" {
 #endif // __cplusplus
 
-#include "crypto/qcry_arbiter.h"
+#include "qaullib/qcry_arbiter.h"
 
 
 /**
