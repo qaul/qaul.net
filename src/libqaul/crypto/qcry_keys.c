@@ -1,7 +1,13 @@
-#include "qaullib_cryptography.h"
-#include <printf.h>
-#include <memory.h>
-#include "malloc.h"
+/*
+ * qaul.net is free software
+ * licensed under GPL (version 3)
+ */
+
+#include <stdlib.h>
+#include <mbedtls/ctr_drbg.h>
+#include <mbedtls/entropy.h>
+#include "qcry_keys.h"
+#include "qcry_helper.h"
 
 /** Returns the length of a required key buffer as an unsigned integer.
  *  Returns insanely large number if buffer type not known

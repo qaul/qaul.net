@@ -1,6 +1,6 @@
-//
-// Created by spacekookie on 20/06/16.
-//
+/*
+ * qaul.net is free software
+ * licensed under GPL (version 3)
+ */
 
-#include "qaullib_cryptography.h"
-
+#include "qcry_arbiter.h"
