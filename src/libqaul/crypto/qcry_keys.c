@@ -4,8 +4,9 @@
  */
 
 #include <stdlib.h>
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
+#include <stdio.h>
+#include <memory.h>
+
 #include "qcry_keys.h"
 #include "qcry_helper.h"
 

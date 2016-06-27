@@ -300,6 +300,7 @@ void Qaullib_IpcEvaluateUserhello(union olsr_message *msg)
 	union olsr_ip_addr ip;
 	memcpy(&ip.v4, &msg->v4.originator, sizeof(msg->v4.originator));
 
+	// TODO: Add fingerprint information to messages
 	Qaullib_UserAdd(&ip, msg->v4.message.userhello.name, msg->v4.message.userhello.icon);
 	//	msg->v4.message.userhello.icon,
 	//	msg->v4.message.userhello.suffix);
