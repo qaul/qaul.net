@@ -7,8 +7,8 @@
 struct qcry_disp_ctx{
 
     /** **/
-    static struct qcry_usr_ctx  **usr_ctx;
-    size_t                      users, max;
+    struct qcry_usr_ctx     **usr_ctx;
+    size_t                  users, max;
 
     /** Concurrency data **/
 } qcry_disp_ctx;

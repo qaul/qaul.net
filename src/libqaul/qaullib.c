@@ -9,7 +9,7 @@
 #include "qaullib/qcry_arbiter.h"
 
 /** Static reference to the arbiter */
-static qcry_arbit_ctx *qcry_arbit;
+static struct qcry_arbit_ctx *qcry_arbit;
 
 // ------------------------------------------------------------
 void Qaullib_Init(const char* homePath, const char* resourcePath)
@@ -50,12 +50,13 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	qaul_interface_configuring = 0;
 	qaul_internet_configuring = 0;
 
-    char *username = "spacekookie";
 
 	// ----------------------------------------------------------
 
+	char *username = "spacekookie";
+
 	/** Do quick initialisation of crypto module */
-	qcry_arbit = (qcry_arbit_ctx*) malloc(sizeof(qcry_arbit_ctx) * 1);
+	qcry_arbit = (struct qcry_arbit_ctx*) malloc(sizeof(struct qcry_arbit_ctx) * 1);
 	int val = qcry_arbit_init(qcry_arbit, 1);
 	printf("QCRY_INIT responds with: %d\n", val);
 
