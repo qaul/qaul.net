@@ -59,7 +59,7 @@ typedef struct {
 } qcry_trgt_t;
 
 
-typedef struct {
+typedef struct qcry_usr_ctx {
 
     /* Store private key and key context */
     unsigned char       *usr_key_pri;
