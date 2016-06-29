@@ -5,8 +5,7 @@
 
 #include "qaullib.h"
 #include "qaullib_private.h"
-
-#include "qaullib/qcry_arbiter.h"
+#include <qaullib/qcry_arbiter.h>
 
 /** Static reference to the arbiter */
 static struct qcry_arbit_ctx *qcry_arbit;

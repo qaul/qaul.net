@@ -91,6 +91,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
         qcry_wrapper.c
         crypto/qcry_context.c
         crypto/qcry_arbiter.c
+        crypto/qcry_dispatcher.c
         crypto/qcry_keys.c
 
         qaullib_udp_communication.c

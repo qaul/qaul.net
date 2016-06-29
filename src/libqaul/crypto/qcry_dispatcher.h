@@ -11,6 +11,7 @@ struct qcry_disp_ctx{
     size_t                  users, max;
 
     /** Concurrency data **/
+
 } qcry_disp_ctx;
 
 #endif //QAUL_QCRY_DISPATCHER_H

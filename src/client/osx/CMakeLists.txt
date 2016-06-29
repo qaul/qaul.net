@@ -51,8 +51,16 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
     ${LIBQAULDIR}/qaullib_filesharing.c
     ${LIBQAULDIR}/qaullib_file_LL.c
     ${LIBQAULDIR}/qaullib_exediscovery.c
-    ${LIBQAULDIR}/qaullib_crypto.c
-    ${LIBQAULDIR}/qaullib_udp_communication.c
+
+	# Crypto modules
+	qaullib_crypto.c
+	qcry_wrapper.c
+	crypto/qcry_context.c
+	crypto/qcry_arbiter.c
+	crypto/qcry_dispatcher.c
+	crypto/qcry_keys.c
+
+	${LIBQAULDIR}/qaullib_udp_communication.c
     ${LIBQAULDIR}/captive/qaullib_captive.c
     ${LIBQAULDIR}/captive/qaullib_captive_dhcp.c
     ${LIBQAULDIR}/captive/qaullib_captive_dns.c
