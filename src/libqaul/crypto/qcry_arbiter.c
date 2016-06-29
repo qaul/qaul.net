@@ -7,35 +7,69 @@
 #include <stdlib.h>
 
 #include <qaullib/qcry_arbiter.h>
-#include "qcry_dispatcher.h"
 #include "qcry_helper.h"
+#include "qcry_context.h"
+#include "qcry_helper.h"
+#include "qcry_keys.h"
 
-/**
- ** Static reference to a single dispatcher which is thread safe and allows
- **     for multi threaded access to all crypto functions
- **/
-static struct qcry_disp_ctx *dispatcher;
+/***********
+ *
+ * Static data required for arbiter to do it's work. Instead of passing a context around
+ * the libary a static context is used to store data about multi users. Tokens are used
+ * to identity user sessions and different threads to prevent race conditions.
+ *
+ * This API is completely tread safe. Therefore calling lower level functions (for example
+ * key gens or context functions) can and will lead to race conditions. DO NOT DO THAT!
+ *
+ */
 
-int qcry_arbit_init(struct qcry_arbit_ctx *ctx, unsigned int max_concurrent)
+/** Maps session tokens to contexts. One context can be referenced multiple times */
+typedef struct {
+    struct qcry_arbit_token *token;
+    qcry_usr_ctx            *ctx;
+} arbit_bind_item;
+
+typedef struct {
+
+    /** Multi-User contexts */
+    arbit_bind_item     **bind_lst;
+    size_t              users, max;
+
+    /** Key generator context */
+    qcry_keys_context   *keys;
+} qcry_arbit_ctx ;
+
+/** Static reference to our main arbiter context **/
+static qcry_arbit_ctx *arbiter;
+
+qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token)
 {
-    /** Make sure our context is clean */
-    memset(ctx, 0, sizeof(qcry_arbit_ctx));
-    if(!dispatcher) {
-        dispatcher = (struct qcry_disp_ctx*) malloc(sizeof(struct qcry_disp_ctx));
+    int i;
+    for(i = 0; i <= arbiter->users; i++)
+    {
+        /** Check if the token is exactly the same TODO: Turn this into MACRO */
+        if(arbiter->bind_lst[i]->token->sess_id == token->sess_id
+                && arbiter->bind_lst[i]->token->token == token->token)
+        {
+            return arbiter->bind_lst[i]->ctx;
+        }
     }
 
-    /** Check it again if it worked **/
-    if(!dispatcher) {
-        return QCRY_STATUS_MALLOC_FAIL;
-    }
+    /** If we couldn't find anything the token wasn't valid **/
+    return NULL;
+}
 
-    /** Set metadata and return */
-    ctx->max_conc = max_concurrent;
-    ctx->magno = MAGICK_NO;
+
+int qcry_arbit_init(unsigned int max_concurrent)
+{
+    /** Cleanly allocate memory */
+    arbiter = (qcry_arbit_ctx*) calloc(sizeof(qcry_arbit_ctx), 1);
+
+
     return QCRY_STATUS_OK;
 }
 
-int qcry_arbit_free(struct qcry_arbit_ctx *ctx)
+int qcry_arbit_free()
 {
     return QCRY_STATUS_OK;
 }

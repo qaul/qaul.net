@@ -21,14 +21,7 @@
 #define QAUL_KEYS_RSA4096   (1 << 2)
 #define QAUL_KEYS_ECDSA     (1 << 3)
 
-struct qcry_arbit_ctx {
-    void            *dispatcher;
-
-    unsigned int    max_conc;
-    short           magno;
-} qcry_arbit_ctx;
-
-typedef struct {
+struct qcry_arbit_token {
     unsigned int        *sess_id;
     unsigned char       token[128];
 } qcry_arbit_token;
@@ -41,8 +34,8 @@ typedef struct {
  * @param ctx: Context to populate with this procedure
  * @param max_concurrent: Highest number of concurrent jobs allowed
  */
-int qcry_arbit_init(struct qcry_arbit_ctx *ctx, unsigned int max_concurrent);
-int qcry_arbit_free(struct qcry_arbit_ctx *ctx);
+int qcry_arbit_init(unsigned int max_concurrent);
+int qcry_arbit_free();
 
 /**
  * Creates a local user context with a username, passphrase and keytype.
