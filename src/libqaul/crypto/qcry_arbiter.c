@@ -29,6 +29,7 @@ int qcry_arbit_init(struct qcry_arbit_ctx *ctx, unsigned int max_concurrent)
         return QCRY_STATUS_MALLOC_FAIL;
     }
 
+    /** Set metadata and return */
     ctx->max_conc = max_concurrent;
     ctx->magno = MAGICK_NO;
     return QCRY_STATUS_OK;
@@ -36,7 +37,7 @@ int qcry_arbit_init(struct qcry_arbit_ctx *ctx, unsigned int max_concurrent)
 
 int qcry_arbit_free(struct qcry_arbit_ctx *ctx)
 {
-  return QCRY_STATUS_OK;
+    return QCRY_STATUS_OK;
 }
 
 /**
