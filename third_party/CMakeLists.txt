@@ -1,4 +1,32 @@
 
+set(ExternalProjectCMakeArgs
+	-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+	-DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/external/mbedtls
+)
+
+if (${PORT} STREQUAL "ANDROID")
+set(ExternalProjectCMakeArgs
+	${ExternalProjectCMakeArgs}
+	-DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake
+	-DANDROID_TOOLCHAIN=gcc
+	-DANDROID_ARM_MODE=arm
+)
+endif ()
+
+ExternalProject_Add(mbedtls
+	#UPDATE_DISCONNECTED 1
+	GIT_SUBMODULES mbedtls
+	PREFIX ${CMAKE_CURRENT_BINARY_DIR}/mbedtls
+	DOWNLOAD_COMMAND git submodule update
+	DOWNLOAD_DIR ${PROJECT_SOURCE_DIR}
+	SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/mbedtls
+	BINARY_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-build
+	STAMP_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-stamp
+	TMP_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-tmp
+	INSTALL_DIR ${PROJECT_BINARY_DIR}/external
+	CMAKE_ARGS ${ExternalProjectCMakeArgs}
+)
+
 set (ARCHIVE_DIR ${PROJECT_SOURCE_DIR}/archives)
 
 set (PJSIP_CONFIGURE_OPTIONS "--disable-opus")
