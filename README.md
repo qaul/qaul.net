@@ -32,6 +32,22 @@ tested on in the [documentation folder](doc). Feel free to add new ports!
   * Ubuntu Mate [doc/Raspberry_UbuntuMate.md](doc/Raspberry_UbuntuMate.md)
 
 
+Binary Downloads
+----------------
+
+* [Latest stable](https://qaul.net/download)
+* [Nightly builds](https://qaul.net/binaries/nightly/)
+* [Old versions](https://qaul.net/binaries/)
+
+
+Documentation
+-------------
+
+* [Documentation folder](doc/)
+* [Software architecture](https://github.com/WachterJud/qaul.net/wiki/SoftwareArchitecture)
+* [HTML5 GUI development](doc/GUI.md)
+
+
 License
 -------
 
