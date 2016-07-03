@@ -21,7 +21,7 @@ qaul.net has the following features:
 * Sharing your Internet connection (via a given interface) to the whole mesh
 * Custom network settings (to setup your own **personal** mesh)
 * Viewing of the whole mesh as a diagram
-* Ability to run `olsr` (the mesh routing procotol) on any interface (wifi, ethernet, smoke signals)
+* Ability to run `olsr` (the mesh routing procotol) on any interface (wifi, ethernet)
 
 
 Build Instructions
