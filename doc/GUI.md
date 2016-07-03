@@ -4,7 +4,7 @@ GUI - Graphic User Interface
 The qaul.net GUI is a HTML GUI, that runs in a `WebView`. The GUI uses the 
 [jQuery Mobile](http://jquerymobile.com/) framework.
 
-When qaul.net application is running one can access the GUI via web 
+When qaul.net application is running one can access the GUI via web a
 browser on port 8081: 
 [http://localhost:8081/qaul.html](http://localhost:8081/qaul.html)
 
@@ -34,7 +34,7 @@ All GUI files are located in the directory
 The whole GUI is all in a single web page: 
 [GUI/www/qaul.html](GUI/www/qaul.html).
 
-To test and develop the GUI it is good practice to copy all files from the www directory
+To test and develop the GUI it is good practice to copy all files from the `www/` directory
 to your local web directory. To test the user interface on your local 
 web server copy the test files from 
 [GUI/www_GUI-test_static](GUI/www_GUI-test_static) 
@@ -43,4 +43,4 @@ to your the web directory.
     cp GUI/www /PathToYourLocalWebDirectory
     cp GUI/www_GUI-test_static /PathToYourLocalWebDirectory
 
-Now invoke the page `qaul.html` in your web browser. 
+Now go to the page `qaul.html` in your web browser. 
