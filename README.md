@@ -4,7 +4,7 @@ qaul.net
 ========
 
 **qaul.net** is an ad-hoc wireless mesh-network suite that harnesses the 
-power of everyday devices such as computers and smartphone to create a 
+power of everyday devices such as computers and smartphones to create a 
 **Democratic**, **Non-Centralized**, **Mesh Network** on which users can 
 share files, have voice chats and send each other messages, however the 
 power of qaul.net allows and endless feature set as anyone can run any 
