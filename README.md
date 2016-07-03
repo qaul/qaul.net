@@ -13,6 +13,16 @@ on the centralized services such as the Internet and cellular networks
 and creates a network that anyone can be part of and share freely with 
 no censorship what so ever.
 
+qaul.net has the following features:
+
+* File sharing (both private and public)
+* Voice calling
+* Text messaging (both private and public)
+* Sharing your Internet connection (via a given interface) to the whole mesh
+* Custom network settings (to setup your own **personal** mesh)
+* Viewing of the whole mesh as a diagram
+* Ability to run `olsr` (the mesh routing procotol) on any interface (wifi, ethernet, smoke signals)
+
 
 Build Instructions
 ------------------
