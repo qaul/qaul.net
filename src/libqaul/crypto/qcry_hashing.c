@@ -67,8 +67,16 @@ int qcry_hashing_init(struct qcry_hash_ctx *ctx, unsigned int hash, const char *
 
 int qcry_hashing_free(struct qcry_hash_ctx *ctx)
 {
-    free(ctx->salt);
+    CHECK_SANE
+
+    /* Free memory and hash backend */
     free(ctx->curr_bfr);
+    free(ctx->salt);
+    mbedtls_sha512_free(ctx->md_ctx);
+
+    /* Forcibly write over it */
+    memset(ctx, 0, sizeof(struct qcry_hash_ctx));
+    return QCRY_STATUS_OK;
 }
 
 /** Append a message to the buffer **/
@@ -112,13 +120,68 @@ int qcry_hashing_append(struct qcry_hash_ctx *ctx, const char *msg)
 /** Read the current state of the buffer **/
 const char *qcry_hashing_buffer(struct qcry_hash_ctx *ctx)
 {
+    /** Check sane macro can't apply because we want to return string */
     if(ctx->mgno != 3) return NULL;
     return ctx->curr_bfr;
 }
 
 /** Build the buffer to a hash and encode it into a return buffer */
-int qcry_hashing_build(struct qcry_hash_ctx *ctx, unsigned char *(*buffer))
+int qcry_hashing_build(struct qcry_hash_ctx *ctx, unsigned int encoding, unsigned char *(*buffer))
 {
+    CHECK_SANE
+    int err_no = 0;
+
+    /* Cut down buffer size to required only */
+    const char *tmpsrc = calloc(sizeof(char), ctx->bfr_occ);
+    memcpy(tmpsrc, ctx->curr_bfr, ctx->bfr_occ);
+
+    /** Provide a buffer output for any hash function */
+    char output[256];
+
+    /** Use the apropriate function depending on what hash function we require **/
+    switch(ctx->hash) {
+        case QCRY_HASH_SHA512:
+            /* Start hash transaction */
+            mbedtls_sha512_starts((mbedtls_sha512_context*) ctx->md_ctx, 0);
+
+            /* Append our buffer */
+            mbedtls_sha512_update((mbedtls_sha512_context*) ctx->md_ctx, tmpsrc, ctx->bfr_occ);
+
+            /* Finish transaction and write into buffer */
+            mbedtls_sha512_finish((mbedtls_sha512_context*) ctx->md_ctx, output);
+            break;
+
+        case QCRY_HASH_SHA256:
+            mbedtls_sha256_starts((mbedtls_sha256_context*) ctx->md_ctx, 0);
+
+            /* Append our buffer */
+            mbedtls_sha256_update((mbedtls_sha256_context*) ctx->md_ctx, tmpsrc, ctx->bfr_occ);
+
+            /* Finish transaction and write into buffer */
+            mbedtls_sha256_finish((mbedtls_sha256_context*) ctx->md_ctx, output);
+            break;
+
+        default:
+            err_no = QCRY_STATUS_CTX_INVALID;
+            goto failed;
+    }
+
+    /** Select output encoding and process buffer **/
+    switch(ctx->encoding) {
+        case QCRY_HASH_BASE64:
+
+            break;
+
+        default:
+            err_no = QCRY_STATUS_CTX_INVALID;
+            goto failed;
+    }
+
+    /* Free temp buffer */
+    free(tmpsrc);
+
+    failed:
+    return (err_no != 0) ? err_no : QCRY_STATUS_ERROR;
 
 }
 

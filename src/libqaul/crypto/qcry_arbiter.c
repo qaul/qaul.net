@@ -43,11 +43,11 @@ typedef struct {
 static qcry_arbit_ctx *arbiter;
 
 /** Inline macro that's used to verify that the arbiter context we're operating on is valid **/
-#define CHECK_SANE(to_return) if(arbiter == NULL || arbiter->keys == NULL || arbiter->max < 0) return to_return;
+#define SANE_ARBIT(to_return) if(arbiter == NULL || arbiter->keys == NULL || arbiter->max < 0) return to_return;
 
 qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token)
 {
-    CHECK_SANE(NULL)
+    SANE_ARBIT(NULL)
 
     int i;
     for(i = 0; i <= arbiter->users; i++)
@@ -90,7 +90,7 @@ int qcry_arbit_init(unsigned int max_concurrent)
 
 int qcry_arbit_free()
 {
-    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
     int retval;
 
     /** Free key generator */
@@ -112,16 +112,15 @@ int qcry_arbit_free()
  */
 int qcry_arbit_usrcreate(char *(*fingerprint), const char *username, const char *passphrase, unsigned int key_type)
 {
-    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
 
     char fp = *fingerprint;
-    fp =
 
     return QCRY_STATUS_OK;
 }
 int qcry_arbit_usrdestroy(const char *fingerprint)
 {
-    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
 
     return QCRY_STATUS_OK;
 }
@@ -133,7 +132,7 @@ int qcry_arbit_usrdestroy(const char *fingerprint)
  */
 int qcry_arbit_save(const char *finterprint, struct qcry_arbit_token *token)
 {
-    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
 
     return QCRY_STATUS_OK;
 }
@@ -147,7 +146,7 @@ int qcry_arbit_save(const char *finterprint, struct qcry_arbit_token *token)
  */
 int qcry_arbit_restore(const char *username, const char *passphrase)
 {
-    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
 
     return QCRY_STATUS_OK;
 }
@@ -159,7 +158,7 @@ int qcry_arbit_restore(const char *username, const char *passphrase)
  */
 int qcry_arbit_start(const char *fp_self, const char *fp_trgt, struct qcry_arbit_token *(*token))
 {
-    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
 
     return QCRY_STATUS_OK;
 }
@@ -169,7 +168,7 @@ int qcry_arbit_start(const char *fp_self, const char *fp_trgt, struct qcry_arbit
  */
 int qcry_arbit_stop(struct qcry_arbit_token *token)
 {
-    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
 
     return QCRY_STATUS_OK;
 }
@@ -177,21 +176,21 @@ int qcry_arbit_stop(struct qcry_arbit_token *token)
 
 int qcry_arbit_sendmsg(struct qcry_arbit_token *token, char *(*encrypted), const char *plain)
 {
-    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
 
     return QCRY_STATUS_OK;
 }
 
 int qcry_arbit_parsemsg(struct qcry_arbit_token *token, char *(*parsed), const char *encrypted)
 {
-    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
 
     return QCRY_STATUS_OK;
 }
 
 int qcry_arbit_signmsg(struct qcry_arbit_token *token, char *(*sgn_buffer), const char *message)
 {
-    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
 
     return QCRY_STATUS_OK;
 }
@@ -206,9 +205,7 @@ int qcry_arbit_signmsg(struct qcry_arbit_token *token, char *(*sgn_buffer), cons
  */
 int qcry_arbit_verify(struct qcry_arbit_token *token, const char *message, const char *signature)
 {
-    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
 
     return QCRY_STATUS_OK;
 }
-
-
