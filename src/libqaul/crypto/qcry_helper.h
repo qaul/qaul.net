@@ -21,7 +21,6 @@
 #define QCRY_STATUS_SEED_FAILED         14
 #define QCRY_STATUS_CTX_INVALID         16
 #define QCRY_STATUS_INVALID_TARGET      18
-#define QCRY_STATUS_INVALID_KEYS        19
 
 #define QCRY_STATUS_INVALID_KEYS        21
 #define QCRY_STATUS_MALLOC_FAIL         22
@@ -87,6 +86,26 @@ int QCry_HashToString(unsigned char *hash, char *string);
  */
 int QCry_StringToHash(char *string, unsigned char *hash);
 
+
+/***
+ *
+ *
+ *
+ *
+ * BASE 64 ENCODERS FOR HASHES!
+ *
+ *
+ *
+ *
+ */
+
+int qcry_base64_enclength(int str_len);
+
+int qcry_base64_encode(char *buffer, const char *src, int src_len);
+
+int qcry_base64_declen(const char *encoded);
+
+int qcry_base64_decode(char *buffer, const char *encoded, int enc_len);
 
 
 #endif //QAUL_QCRY_HELPER_H

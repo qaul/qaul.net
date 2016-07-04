@@ -92,6 +92,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
         crypto/qcry_context.c
         crypto/qcry_arbiter.c
         crypto/qcry_hashing.c
+        crypto/qcry_helper.c
         crypto/qcry_keys.c
 
         qaullib_udp_communication.c
