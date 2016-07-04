@@ -42,8 +42,13 @@ typedef struct {
 /** Static reference to our main arbiter context **/
 static qcry_arbit_ctx *arbiter;
 
+/** Inline macro that's used to verify that the arbiter context we're operating on is valid **/
+#define CHECK_SANE(to_return) if(arbiter == NULL || arbiter->keys == NULL || arbiter->max < 0) return to_return;
+
 qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token)
 {
+    CHECK_SANE(NULL)
+
     int i;
     for(i = 0; i <= arbiter->users; i++)
     {
@@ -65,12 +70,40 @@ int qcry_arbit_init(unsigned int max_concurrent)
     /** Cleanly allocate memory */
     arbiter = (qcry_arbit_ctx*) calloc(sizeof(qcry_arbit_ctx), 1);
 
+    /** Initialise our keygenerator context */
+    arbiter->keys = (qcry_keys_context*) malloc(sizeof(qcry_keys_context));
+    if(arbiter->keys == NULL)
+        return QCRY_STATUS_MALLOC_FAIL;
+    qcry_keys_init(arbiter->keys);
 
+    /** Initialise our context and token lists */
+    arbiter->bind_lst = (arbit_bind_item**) calloc(sizeof(arbit_bind_item*), MIN_BFR_S);
+    if(arbiter->bind_lst == NULL)
+        return QCRY_STATUS_MALLOC_FAIL;
+
+    arbiter->max = MIN_BFR_S;
+    arbiter->users = 0;
+
+    /** Then return all OK */
     return QCRY_STATUS_OK;
 }
 
 int qcry_arbit_free()
 {
+    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+    int retval;
+
+    /** Free key generator */
+    retval = qcry_keys_free(arbiter->keys);
+    if(!retval)
+        return QCRY_STATUS_ERROR;
+
+    int i;
+    for(i = 0; i <= arbiter->users; i++)
+    {
+        // qcry_context_free()
+    }
+
     return QCRY_STATUS_OK;
 }
 
@@ -79,11 +112,18 @@ int qcry_arbit_free()
  */
 int qcry_arbit_usrcreate(char *(*fingerprint), const char *username, const char *passphrase, unsigned int key_type)
 {
-  return QCRY_STATUS_OK;
+    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+
+    char fp = *fingerprint;
+    fp =
+
+    return QCRY_STATUS_OK;
 }
 int qcry_arbit_usrdestroy(const char *fingerprint)
 {
-  return QCRY_STATUS_OK;
+    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+
+    return QCRY_STATUS_OK;
 }
 
 /**
@@ -91,9 +131,11 @@ int qcry_arbit_usrdestroy(const char *fingerprint)
  * including keys and sensitive data in an encrypted blob on the disk.
  * Passphrase needs to have been created in before.
  */
-int qcry_arbit_save(const char *finterprint, qcry_arbit_token *token)
+int qcry_arbit_save(const char *finterprint, struct qcry_arbit_token *token)
 {
-  return QCRY_STATUS_OK;
+    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+
+    return QCRY_STATUS_OK;
 }
 
 /**
@@ -105,7 +147,9 @@ int qcry_arbit_save(const char *finterprint, qcry_arbit_token *token)
  */
 int qcry_arbit_restore(const char *username, const char *passphrase)
 {
-  return QCRY_STATUS_OK;
+    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+
+    return QCRY_STATUS_OK;
 }
 
 /**
@@ -113,33 +157,43 @@ int qcry_arbit_restore(const char *username, const char *passphrase)
  * Fingerprints are used in the crypto engine to identify keys and outside the crypto module to map
  * users to routing data
  */
-int qcry_arbit_start(struct qcry_arbit_ctx *ctx, const char *fp_self, const char *fp_trgt, qcry_arbit_token *(*token))
+int qcry_arbit_start(const char *fp_self, const char *fp_trgt, struct qcry_arbit_token *(*token))
 {
-  return QCRY_STATUS_OK;
+    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+
+    return QCRY_STATUS_OK;
 }
 
 /**
  * Stops a session with a token.
  */
-int qcry_arbit_stop(struct qcry_arbit_ctx *ctx, qcry_arbit_token *token)
+int qcry_arbit_stop(struct qcry_arbit_token *token)
 {
-  return QCRY_STATUS_OK;
+    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+
+    return QCRY_STATUS_OK;
 }
 
 
-int qcry_arbit_sendmsg(struct qcry_arbit_ctx *ctx, qcry_arbit_token *token, char *(*encrypted), const char *plain)
+int qcry_arbit_sendmsg(struct qcry_arbit_token *token, char *(*encrypted), const char *plain)
 {
-  return QCRY_STATUS_OK;
+    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+
+    return QCRY_STATUS_OK;
 }
 
-int qcry_arbit_parsemsg(struct qcry_arbit_ctx *ctx, qcry_arbit_token *token, char *(*parsed), const char *encrypted)
+int qcry_arbit_parsemsg(struct qcry_arbit_token *token, char *(*parsed), const char *encrypted)
 {
-  return QCRY_STATUS_OK;
+    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+
+    return QCRY_STATUS_OK;
 }
 
-int qcry_arbit_signmsg(struct qcry_arbit_ctx *ctx, qcry_arbit_token *token, char *(*sgn_buffer), const char *message)
+int qcry_arbit_signmsg(struct qcry_arbit_token *token, char *(*sgn_buffer), const char *message)
 {
-  return QCRY_STATUS_OK;
+    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+
+    return QCRY_STATUS_OK;
 }
 
 /**
@@ -150,9 +204,11 @@ int qcry_arbit_signmsg(struct qcry_arbit_ctx *ctx, qcry_arbit_token *token, char
  * Returns -1 if signature was faulty
  * Returns 1...255 for runtime errors
  */
-int qcry_arbit_verify(struct qcry_arbit_ctx *ctx, qcry_arbit_token *token, const char *message, const char *signature)
+int qcry_arbit_verify(struct qcry_arbit_token *token, const char *message, const char *signature)
 {
-  return QCRY_STATUS_OK;
+    CHECK_SANE(QCRY_STATUS_CTX_INVALID)
+
+    return QCRY_STATUS_OK;
 }
 
 

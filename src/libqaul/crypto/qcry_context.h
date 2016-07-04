@@ -58,7 +58,16 @@ typedef struct {
     short               mgno;
 } qcry_trgt_t;
 
-
+/**
+ * A context that stores data for a [1] - [1] communication. Includes private key for <self>
+ * as well as public key for target. This will be extended to work against multiple targets.
+ *
+ * Contexts aren't usually very long-lived and swap in and out of existance all the time.
+ * Don't expect to store long-term data in a user context for exactly this reason.
+ *
+ * Contexts themselves aren't tread safe and need to be protected by the arbiter API. Under normal
+ * circumstances the code for this should never be exposed to the outside world.
+ */
 typedef struct qcry_usr_ctx {
 
     /* Store private key and key context */
@@ -116,6 +125,8 @@ static int QCRY_KEY_LEN[] = { 2048, 192, 256 };
  * Initialises context for a username and a cipher type
  */
 int qcry_context_init(qcry_usr_ctx *ctx, unsigned char *usr_name, qcry_ciph_t ciph_t);
+int qcry_context_free(qcry_usr_ctx *ctx);
+
 
 /**
  * Attaches a private key to a context. The key is validated and length matched
