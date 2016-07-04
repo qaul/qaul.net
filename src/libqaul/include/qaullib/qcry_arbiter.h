@@ -24,7 +24,7 @@
 struct qcry_arbit_token {
     unsigned int        *sess_id;
     unsigned char       token[128];
-} qcry_arbit_token;
+};
 
 /**
  * Called during initisation. Sets up crypto stack, allocates memory, etc.
@@ -48,7 +48,7 @@ int qcry_arbit_usrdestroy(const char *fingerprint);
  * including keys and sensitive data in an encrypted blob on the disk.
  * Passphrase needs to have been created in before.
  */
-int qcry_arbit_save(const char *finterprint, qcry_arbit_token *token);
+int qcry_arbit_save(const char *finterprint,  struct qcry_arbit_token *token);
 
 /**
  * This function takes a user identifier (username) and their private passphrase to restore
@@ -64,19 +64,19 @@ int qcry_arbit_restore(const char *username, const char *passphrase);
  * Fingerprints are used in the crypto engine to identify keys and outside the crypto module to map
  * users to routing data
  */
-int qcry_arbit_start(struct qcry_arbit_ctx *ctx, const char *fp_self, const char *fp_trgt, qcry_arbit_token *(*token));
+int qcry_arbit_start(const char *fp_self, const char *fp_trgt, struct qcry_arbit_token *(*token));
 
 /**
  * Stops a session with a token.
  */
-int qcry_arbit_stop(struct qcry_arbit_ctx *ctx, qcry_arbit_token *token);
+int qcry_arbit_stop(struct qcry_arbit_token *token);
 
 
-int qcry_arbit_sendmsg(struct qcry_arbit_ctx *ctx, qcry_arbit_token *token, char *(*encrypted), const char *plain);
+int qcry_arbit_sendmsg(struct qcry_arbit_token *token, char *(*encrypted), const char *plain);
 
-int qcry_arbit_parsemsg(struct qcry_arbit_ctx *ctx, qcry_arbit_token *token, char *(*parsed), const char *encrypted);
+int qcry_arbit_parsemsg(struct qcry_arbit_token *token, char *(*parsed), const char *encrypted);
 
-int qcry_arbit_signmsg(struct qcry_arbit_ctx *ctx, qcry_arbit_token *token, char *(*sgn_buffer), const char *message);
+int qcry_arbit_signmsg(struct qcry_arbit_token *token, char *(*sgn_buffer), const char *message);
 
 /**
  * Verify the validity of a signature on a message cryptographically. Provide the session token and an active context
@@ -86,6 +86,6 @@ int qcry_arbit_signmsg(struct qcry_arbit_ctx *ctx, qcry_arbit_token *token, char
  * Returns -1 if signature was faulty
  * Returns 1...255 for runtime errors
  */
-int qcry_arbit_verify(struct qcry_arbit_ctx *ctx, qcry_arbit_token *token, const char *message, const char *signature);
+int qcry_arbit_verify(struct qcry_arbit_token *token, const char *message, const char *signature);
 
 #endif //QAUL_QCRY_ARBITER_H

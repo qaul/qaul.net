@@ -55,9 +55,8 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	char *username = "spacekookie";
 
 	/** Do quick initialisation of crypto module */
-	qcry_arbit = (struct qcry_arbit_ctx*) malloc(sizeof(struct qcry_arbit_ctx) * 1);
-	int val = qcry_arbit_init(qcry_arbit, 1);
-	printf("QCRY_INIT responds with: %d\n", val);
+	int val = qcry_arbit_init(1);
+	printf("QCRY_ARBIT_INIT responds with: %d\n", val);
 
 	// -------------------------------------------------
 	// create buffers for socket communication
