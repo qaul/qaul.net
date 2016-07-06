@@ -32,7 +32,7 @@ quul.net has been tested on the following devices:
 
 Legend:
 
-* Y = it works
-* N = it doesn't work yet
-* ? = it hasn't been tested yet
+* **Y** = it works
+* **N** = it doesn't work yet
+* **?** = it hasn't been tested yet
 
