@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 	qaul_conf_debug = 1;
 
 	if(!Qaullib_WebserverStart())
-		printf("Webserver startup failed\n");
+		printf("Webserver startup failed!\n");
 
 	// initialize dbus connection
 	qaul_dbus_init(&network_dbus_connection);
@@ -365,7 +365,7 @@ gboolean qaul_configure(gpointer data)
     			network_interface_found = 1;
     		}
     		else
-    			printf("[configure] no wifi interface found\n");
+    			printf("[configure] No WiFi interface found\n");
     	}
 
     	// TODO: enable wifi
@@ -378,7 +378,7 @@ gboolean qaul_configure(gpointer data)
     {
         if(network_interface_found)
         {
-        	printf("[configure] network interface %s\n", network_device.interface);
+        	printf("[configure] Network interface %s\n", network_device.interface);
 
         	// get network configuration
         	strncpy(network_settings.ipv4_address, Qaullib_GetIP(), sizeof(network_settings.ipv4_address));
@@ -392,16 +392,16 @@ gboolean qaul_configure(gpointer data)
         	// add network configuration
         	if(qaul_network_settings_add(network_dbus_connection, &network_settings, &network_device))
         	{
-        		printf("[configure] network connection setting added: %s\n", network_settings.dbus_connection_path);
+        		printf("[configure] Network connection setting added: %s\n", network_settings.dbus_connection_path);
 
         		// activate configuration
         		if(qaul_network_connection_activate(network_dbus_connection, &network_settings, &network_device))
-        			printf("[configure] network connection activated: %s\n", network_settings.dbus_active_connection_path);
+        			printf("[configure] Network connection activated: %s\n", network_settings.dbus_active_connection_path);
         		else
-        			printf("[configure] network connection not activated\n");
+        			printf("[configure] Network connection not activated\n");
         	}
         	else
-        		printf("[configure] network connection settings not added\n");
+        		printf("[configure] Network connection settings not added\n");
         }
 
     	qaulConfigureCounter = 29;
@@ -472,7 +472,7 @@ gboolean qaul_configure(gpointer data)
     // end configuration
 	if(qaulConfigureCounter == 60)
 	{
-		printf("[configure] finished \n");
+		printf("[configure] Finished\n");
 		return FALSE;
 	}
 
