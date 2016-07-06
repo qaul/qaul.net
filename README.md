@@ -27,7 +27,7 @@ qaul.net has the following features:
 Build Instructions
 ------------------
 
-There Are specific instructions for each System qaul.net has been 
+There are specific instructions for each system qaul.net has been 
 tested on in the [documentation folder](doc). Feel free to add new ports!
 
 * Android 
