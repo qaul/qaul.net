@@ -58,7 +58,7 @@ Every function shall be documented before it's declaration (in the header file).
 Every header file shall start with an explanation of what this module does.
 Try to write self explanatory code with meaningful function and variable names.
 
-example template for a header file:
+Example template for a header file:
 
 ```
 /*
