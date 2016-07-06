@@ -4,7 +4,7 @@ Build qaul.net on Windows
 This tutorial describes all the steps to build qaul.net client on Windows.
 qaul.net works on Windows 7 / 8 / 10. Windows XP is not supported.
 
-This Tutorial has been tested on the following versions of Windows:
+This tutorial has been tested on the following versions of Windows:
 
 * Windows 7
 
@@ -12,7 +12,7 @@ This Tutorial has been tested on the following versions of Windows:
 Prerequisites
 -------------
 
-The following tools need to be installed
+The following tools need to be installed:
 
 * Git (version control)
   * Download git for Windows: https://www.git-scm.com/download/win
@@ -103,4 +103,3 @@ Create Windows Installer
 To create the installer invoke the following command.
 
 	cpack -C Release
-
