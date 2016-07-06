@@ -12,7 +12,7 @@ Web Interface
 -------------
 
 To configure the qaul.net application via web interface, simply 
-start the application and open http://localhost:8081/qaul.html
+start the application and open [http://localhost:8081/qaul.html](http://localhost:8081/qaul.html)
 in your web browser.
 
 
@@ -33,7 +33,7 @@ The configuration options are to find in the data base table 'config'.
 SQL via CLI
 -----------
 
-Start the qaul.net application at least once for that the data base
+Start the qaul.net application at least once for that the database
 file is generated.
 
 Install the sqlite3 command line interface program:
