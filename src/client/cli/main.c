@@ -58,20 +58,20 @@ int main(int argc, char *argv[])
 		if(username_flag == 0)
 		{
 			username_flag = 1;
-			fprintf(stderr,"waiting until user name is set ...\n");
-			fprintf(stderr,"open web browser with http://localhost:8081/qaul.html to set it ...\n");
+			fprintf(stderr,"Waiting until a username is set ...\n");
+			fprintf(stderr,"Open http://localhost:8081/qaul.html in your web browser to set it ...\n");
 		}
 		sleep(1);
 	}
-	fprintf(stderr,"user name successfully set!\n");
+	fprintf(stderr,"Username successfully set!\n");
 
 	if(!Qaullib_IpcConnect())
-		fprintf(stderr,"Ipc connection failed\n");
+		fprintf(stderr,"Ipc connection failed!\n");
 	Qaullib_SetConfVoIP();
 	if(!Qaullib_UDP_StartServer())
-		fprintf(stderr,"UDP server failed\n");
+		fprintf(stderr,"UDP server failed!\n");
 	if(!Qaullib_CaptiveStart())
-		fprintf(stderr,"Captive portal failed\n");
+		fprintf(stderr,"Captive portal failed!\n");
 	Qaullib_ConfigurationFinished();
 
 	// test config
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 	int socketCounter = 0;
 	int ipcCounter = 0;
 
-	fprintf(stderr,"kill app to exit!\n");
+	fprintf(stderr,"Kill app to exit!\n");
 
 	// main loop
 	while (1) {
