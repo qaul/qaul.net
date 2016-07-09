@@ -45,9 +45,9 @@ tested on in the [documentation folder](doc). Feel free to add new ports!
 Binary Downloads
 ----------------
 
-* [Latest stable](https://qaul.net/download)
-* [Nightly builds](https://qaul.net/binaries/nightly/)
-* [Old versions](https://qaul.net/binaries/)
+* [Latest stable](https://qaul.net/download) - Latest stable builds
+* [Nightly builds](https://qaul.net/binaries/nightly/) - Built whenever commits to `qaul-ng` are made
+* [Old versions](https://qaul.net/binaries/) - Older versions of the qaul.net software
 
 
 Documentation
