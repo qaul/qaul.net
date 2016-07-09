@@ -22,7 +22,7 @@ qaul.net has the following features:
 * Custom network settings (to setup your own **personal** mesh)
 * Viewing of the whole mesh as a diagram
 * Ability to run `olsr` (the mesh routing procotol) on any interface (wifi, ethernet)
-
+* And because this is a mesh-**network** you can run any service you want on your node and it will be available on the network (Web server, Mail server, FTP server etc.)
 
 Build Instructions
 ------------------
