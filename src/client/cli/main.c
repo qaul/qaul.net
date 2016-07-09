@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 	Qaullib_ConfigurationFinished();
 
 	// test config
-	fprintf(stderr,"IP: %s\n", Qaullib_GetIP());
+	fprintf(stderr,"Your IP: %s\n", Qaullib_GetIP());
 	fprintf(stderr,"Qaul started\n");
 
 	// loop variables
