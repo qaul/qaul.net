@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 	fprintf(stderr," config started\n");
 	fprintf(stderr,"----------------------------------------------------\n");
 	// The invoking of Qaullib_GetIP() is mandatory to load the IP.
-	fprintf(stderr,"IP: %s\n", Qaullib_GetIP());
+	fprintf(stderr,"IP: %s\n\n", Qaullib_GetIP());
 
 	// wait until user name is set
 	int username_flag = 0;
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 		{
 			username_flag = 1;
 			fprintf(stderr,"Waiting until a username is set ...\n");
-			fprintf(stderr,"Open http://localhost:8081/qaul.html in your web browser to set it ...\n");
+			fprintf(stderr,"Open http://localhost:8081/qaul.html in your web browser to set it ...\n\n");
 		}
 		sleep(1);
 	}
