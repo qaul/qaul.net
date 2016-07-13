@@ -2403,8 +2403,9 @@ void Ql_WwwExtBinaries(struct mg_connection *conn, int event, void *event_data)
 void Ql_WwwCryGetInfo(struct mg_connection *conn, int event, void *event_data)
 {
 	printf("This is something fun happening!\n");
+	// TODO: Get list of available users and return them
 }
 void Ql_WwwCryInitialise(struct mg_connection *conn, int event, void *event_data)
 {
-
+	// TODO: Get data from json message and initialise new user
 }
