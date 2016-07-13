@@ -124,7 +124,7 @@ static int QCRY_KEY_LEN[] = { 2048, 192, 256 };
 /**
  * Initialises context for a username and a cipher type
  */
-int qcry_context_init(qcry_usr_ctx *ctx, unsigned char *usr_name, qcry_ciph_t ciph_t);
+int qcry_context_init(qcry_usr_ctx *ctx, const char *usr_name, qcry_ciph_t ciph_t);
 int qcry_context_free(qcry_usr_ctx *ctx);
 
 
@@ -132,6 +132,8 @@ int qcry_context_free(qcry_usr_ctx *ctx);
  * Attaches a private key to a context. The key is validated and length matched
  */
 int qcry_context_prk_attach(qcry_usr_ctx *ctx, const unsigned char *usr_key_pri);
+
+int qcry_context_get_finterprint(qcry_usr_ctx *ctx, unsigned char *(*fingerprint));
 
 /**
  * Detaches a private key from a context for whatever reason.

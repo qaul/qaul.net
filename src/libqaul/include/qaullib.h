@@ -431,6 +431,10 @@ const char* Qaullib_GetAppEventOpenURL(void);
  */
 void Qaullib_FilePicked(int check, const char* path);
 
+// Some functions required to interact with the static crypto state
+// in qaullib.c
+
+
 /**
  * invoke this function before exiting qaul
  */

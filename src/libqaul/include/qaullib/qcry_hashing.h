@@ -37,6 +37,9 @@ int qcry_hashing_append(struct qcry_hash_ctx *ctx, const char *msg);
 /** Read the current state of the buffer. Can return NULL. Should only be used for debugging! **/
 const char *qcry_hashing_buffer(struct qcry_hash_ctx *ctx);
 
+/** Returns the length for the selected hash function digest */
+size_t qcry_hashing_getlen(unsigned int hash);
+
 /** Build the buffer to a hash and encode it into a return buffer */
 int qcry_hashing_build(struct qcry_hash_ctx *ctx, unsigned int encoding, unsigned char *(*buffer));
 

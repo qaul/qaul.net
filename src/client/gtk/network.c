@@ -904,7 +904,7 @@ int qaul_network_connection_deactivate(DBusConnection* dbus_connection, qaul_dbu
 }
 
 /**
- * add connection settings to network manager
+ * Add connection settings to network manager
  */
 int qaul_network_settings_add(DBusConnection* dbus_connection, qaul_dbus_connection_settings* settings, qaul_dbus_device_properties* device)
 {

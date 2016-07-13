@@ -79,6 +79,11 @@ int qcry_hashing_free(struct qcry_hash_ctx *ctx)
     return QCRY_STATUS_OK;
 }
 
+size_t qcry_hashing_getlen(unsigned int hash)
+{
+    return 256;
+}
+
 /** Append a message to the buffer **/
 int qcry_hashing_append(struct qcry_hash_ctx *ctx, const char *msg)
 {
