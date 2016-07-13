@@ -21,8 +21,11 @@
 #define QAUL_KEYS_RSA4096   (1 << 2)
 #define QAUL_KEYS_ECDSA     (1 << 3)
 
+// Don't allow for more than one access at atime
+#define QAUL_CONC_LOCK      1
+
 struct qcry_arbit_token {
-    unsigned int        *sess_id;
+    unsigned int        sess_id;
     unsigned char       token[128];
 };
 
@@ -40,8 +43,11 @@ int qcry_arbit_free();
 /**
  * Creates a local user context with a username, passphrase and keytype.
  */
-int qcry_arbit_usrcreate(char *(*fingerprint), const char *username, const char *passphrase, unsigned int key_type);
+int qcry_arbit_usrcreate(const char *username, const char *passphrase, unsigned int key_type);
 int qcry_arbit_usrdestroy(const char *fingerprint);
+
+/** Get data about user */
+int qcry_arbit_getusrinfo(const char *(*fingerprint), const char *username);
 
 /**
  * Opposite of #{qcry_arbit_restore}. This function will take an identity and save it's context

@@ -57,6 +57,12 @@ int qcry_keys_gen(qcry_keys_context *context, short type, unsigned char *buf);
 
 int qcry_keys_gen_m(qcry_keys_context *context, short type, unsigned char *(*buf));
 
+/**
+ * A function that lets you generate arbitrary lengths of random data.
+ * Very useful for token creation.
+ */
+int qcry_keys_gen_r(qcry_keys_context *context, unsigned int length, unsigned char *(*buf));
+
 /** Frees a key context and all neccessary sub-data */
 int qcry_keys_free(qcry_keys_context *context);
 
