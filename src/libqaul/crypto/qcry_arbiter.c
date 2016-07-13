@@ -41,10 +41,12 @@ typedef struct {
 
 /** Static reference to our main arbiter context **/
 static qcry_arbit_ctx *arbiter;
+static unsigned int session_ctr;
 
 /** Inline macro that's used to verify that the arbiter context we're operating on is valid **/
 #define SANE_ARBIT(to_return) if(arbiter == NULL || arbiter->keys == NULL || arbiter->max < 0) return to_return;
 
+// Private utility function
 qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token)
 {
     SANE_ARBIT(NULL)
@@ -62,6 +64,15 @@ qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token)
 
     /** If we couldn't find anything the token wasn't valid **/
     return NULL;
+}
+
+unsigned char *create_token()
+{
+    unsigned char *buffer;
+    qcry_keys_gen_r(arbiter->keys, 256, &buffer);
+
+    /** Don't forget to free the pointer again! */
+    return buffer;
 }
 
 
@@ -84,6 +95,9 @@ int qcry_arbit_init(unsigned int max_concurrent)
     arbiter->max = MIN_BFR_S;
     arbiter->users = 0;
 
+    /** Set session counter to 0 */
+    session_ctr = 0x0;
+
     /** Then return all OK */
     return QCRY_STATUS_OK;
 }
@@ -101,7 +115,7 @@ int qcry_arbit_free()
     int i;
     for(i = 0; i <= arbiter->users; i++)
     {
-        // qcry_context_free()
+        qcry_context_free(arbiter->bind_lst[i]->ctx);
     }
 
     return QCRY_STATUS_OK;
@@ -110,14 +124,32 @@ int qcry_arbit_free()
 /**
  * Creates a local user context with a username, passphrase and keytype.
  */
-int qcry_arbit_usrcreate(char *(*fingerprint), const char *username, const char *passphrase, unsigned int key_type)
+int qcry_arbit_usrcreate(const char *username, const char *passphrase, unsigned int key_type)
 {
     SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
 
-    char fp = *fingerprint;
+    char *fingerprint;
+
+    /** First allocate space for our new user in the arbiter context */
+    arbit_bind_item *item = (arbit_bind_item*) calloc(sizeof(arbit_bind_item), 1);
+    item->ctx = (qcry_usr_ctx*) malloc(sizeof(qcry_usr_ctx));
+
+    item->token = (struct qcry_arbit_token*) calloc(sizeof(struct qcry_arbit_token), 1);
+    item->token->sess_id = (int) session_ctr++;
+
+    /** Copy token and release old pointer */
+    unsigned char *token = create_token();
+    memcpy(item->token->token, token, 256);
+    free(token);
 
     return QCRY_STATUS_OK;
 }
+
+int qcry_arbit_getusrinfo(const char *(*fingerprint), const char *username)
+{
+
+}
+
 int qcry_arbit_usrdestroy(const char *fingerprint)
 {
     SANE_ARBIT(QCRY_STATUS_CTX_INVALID)

@@ -121,6 +121,23 @@ int qcry_keys_gen_m(qcry_keys_context *context, short type, unsigned char *(*buf
     return QCRY_STATUS_OK;
 }
 
+int qcry_keys_gen_r(qcry_keys_context *context, unsigned int length, unsigned char *(*buf))
+{
+    int ret = 0;
+
+    *buf = (unsigned char*) malloc(sizeof(unsigned char) * length);
+    if(buf == NULL)
+        return QCRY_STATUS_MALLOC_FAIL;
+
+    unsigned char tmp[length];
+    ret = mbedtls_ctr_drbg_random(&context->rand, tmp, (size_t) length);
+    if(ret != 0)
+        return QCRY_STATUS_KEYGEN_FAILED;
+
+    memcpy(buf, tmp, length);
+    return QCRY_STATUS_OK;
+}
+
 int qcry_keys_free(qcry_keys_context *context)
 {
     if(context == NULL) return QCRY_STATUS_INVALID_PARAMS;
