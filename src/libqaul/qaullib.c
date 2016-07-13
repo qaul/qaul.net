@@ -368,7 +368,8 @@ int Qaullib_WebserverStart(void)
 	mg_register_http_endpoint(conn, "/web_getusers", 		Ql_WwwWebGetUsers);
 	mg_register_http_endpoint(conn, "/web_getfiles", 		Ql_WwwWebGetFiles);
 	mg_register_http_endpoint(conn, "/ext_binaries.json", 	Ql_WwwExtBinaries);
-
+	// Crypto interfaces
+	mg_register_http_endpoint(conn, "/crygetinfo", 			Ql_WwwCryGetInfo);
 
 	mg_start_thread(Ql_Www_Server, &ql_webserver_instance);
 

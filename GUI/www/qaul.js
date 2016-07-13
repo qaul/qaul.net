@@ -293,6 +293,16 @@ function init_start()
 	}
 	
 	qaul_initialized = true;
+
+	// Try to make a crypto call?
+	$.ajax({
+		url: "crygetinfo",
+		cache: false, // needed for IE
+		dataType: "json",
+		success: function(data){
+		}
+	});
+
 	init_config();
 }
 
