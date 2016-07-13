@@ -128,11 +128,17 @@ int qcry_arbit_usrcreate(const char *username, const char *passphrase, unsigned 
 {
     SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
 
+    int ret;
     char *fingerprint;
 
     /** First allocate space for our new user in the arbiter context */
     arbit_bind_item *item = (arbit_bind_item*) calloc(sizeof(arbit_bind_item), 1);
     item->ctx = (qcry_usr_ctx*) malloc(sizeof(qcry_usr_ctx));
+    ret = qcry_context_init(item->ctx, username, PK_RSA);
+    if(ret != 0) {
+        printf("Context init failed with code %d, ret);
+        return QCRY_STATUS_CTX_INVALID;
+    }
 
     item->token = (struct qcry_arbit_token*) calloc(sizeof(struct qcry_arbit_token), 1);
     item->token->sess_id = (int) session_ctr++;
@@ -141,6 +147,17 @@ int qcry_arbit_usrcreate(const char *username, const char *passphrase, unsigned 
     unsigned char *token = create_token();
     memcpy(item->token->token, token, 256);
     free(token);
+
+    /** Generate a primary user key */
+    unsigned char *pri_k;
+    ret = qcry_keys_gen_m(arbiter->keys, QCRY_KEYS_KL_RSA, &pri_k);
+    if(ret != 0)
+        return QCRY_STATUS_KEYGEN_FAILED;
+
+    /** Then attach our private key to the user context */
+    qcry_context_prk_attach(item->ctx, pri_k);
+
+
 
     return QCRY_STATUS_OK;
 }

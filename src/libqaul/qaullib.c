@@ -52,11 +52,13 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 
 	// ----------------------------------------------------------
 
-	char *username = "spacekookie";
+	/** Quickly prepare the arbiter for init process */
+	int val = qcry_arbit_init(QAUL_CONC_LOCK);
+	printf("Arbiter initialised: %d\n", val);
 
-	/** Do quick initialisation of crypto module */
-	int val = qcry_arbit_init(1);
-	printf("QCRY_ARBIT_INIT responds with: %d\n", val);
+	// TODO: Check existing user files and init with them instead
+
+	qcry_arbit_usrcreate()
 
 	// -------------------------------------------------
 	// create buffers for socket communication
@@ -159,6 +161,9 @@ void Qaullib_Exit(void) //destructor
 		Qaullib_IpcClose();
 	}
 	else printf("ipc not connected\n");
+
+	// Make sure we properly free all crypto data before we terminate
+	qcry_arbit_free();
 
 	// close web server
 	Ql_Www_ServerStop(&ql_webserver_instance);

@@ -9,8 +9,9 @@
 #include <zconf.h>
 
 #include "qcry_context.h"
+#include <qaullib/qcry_hashing.h>
 
-int qcry_context_init(qcry_usr_ctx *ctx, unsigned char *usr_name, qcry_ciph_t ciph_t)
+int qcry_context_init(qcry_usr_ctx *ctx, const char *usr_name, qcry_ciph_t ciph_t)
 {
     memset(ctx, 0, sizeof(qcry_usr_ctx));
     ctx->usr_name = usr_name;
@@ -44,11 +45,29 @@ int qcry_context_prk_attach(qcry_usr_ctx *ctx, const unsigned char *usr_key_pri)
     return QCRY_STATUS_OK;
 }
 
+int qcry_context_get_finterprint(qcry_usr_ctx *ctx, unsigned char *(*fingerprint))
+{
+    CHECK_SANE
+
+    /** Prepare hashing context */
+    int ret;
+    struct qcry_hash_ctx *hash;
+    ret = qcry_hashing_init(hash, QCRY_HASH_SHA512, NULL);
+    if(ret != 0)
+        return QCRY_STATUS_ERROR;
+
+    ret = qcry_hashing_append(hash, ctx->usr_key_pri);
+    ret = qcry_hashing_build(hash, QCRY_HASH_BASE64, fingerprint);
+    ret = qcry_hashing_free(hash);
+
+    return QCRY_STATUS_OK;
+}
+
 int qcry_context_prk_detach(qcry_usr_ctx *ctx)
 {
     CHECK_SANE
 
-    int ctr_t;
+    int ctr_t = 0;
     while(ctx->use_ctr != 0) {
         ctr_t += TIME_SLEEP;
         sleep(TIME_SLEEP);
