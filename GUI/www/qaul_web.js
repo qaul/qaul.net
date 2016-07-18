@@ -1103,8 +1103,13 @@ function web_file_add()
 
     // create a formdata object
     var data = new FormData();
+    data.append('n', user_name);
     data.append('m', $('#file_add_msg').val());
-    data.append('f', $('#file_add_file').val());
+    var file_upload = $('#file_add_file')[0].files[0];
+    if(file_upload)
+    {
+        data.append('f', file_upload);
+    }
 
 	// from http://stackoverflow.com/questions/15668339/can-onprogress-functionality-be-added-to-jquery-ajax-by-using-xhrfields
 	$.ajax({
