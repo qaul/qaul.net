@@ -99,6 +99,14 @@ int Qaullib_FileCopyNew(char *path, struct qaul_file_LL_item *file);
 int Qaullib_FileCopyToDownloadFolder(struct qaul_file_LL_item *file);
 
 /**
+ * writes the suffix of the @a filename into @a suffix
+ *
+ * @retval 1 success
+ * @retval 0 error
+ */
+int Qaullib_FileGetSuffix(char *filename, char *suffix);
+
+/**
  * check if any file needs to be downloaded
  */
 void Qaullib_FileCheckScheduled(void);

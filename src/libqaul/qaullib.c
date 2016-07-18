@@ -354,6 +354,7 @@ int Qaullib_WebserverStart(void)
 	mg_register_http_endpoint(conn, "/web_sendmsg", 		Ql_WwwWebSendMsg);
 	mg_register_http_endpoint(conn, "/web_getusers", 		Ql_WwwWebGetUsers);
 	mg_register_http_endpoint(conn, "/web_getfiles", 		Ql_WwwWebGetFiles);
+	mg_register_http_endpoint(conn, "/web_file_upload", 	Ql_WwwWebFileUpload);
 	mg_register_http_endpoint(conn, "/ext_binaries.json", 	Ql_WwwExtBinaries);
 
 

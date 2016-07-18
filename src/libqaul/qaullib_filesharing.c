@@ -12,14 +12,6 @@
 #include "qaullib_crypto.h"
 
 /**
- * writes the suffix of the @a filename into @a suffix
- *
- * @retval 1 success
- * @retval 0 error
- */
-static int Qaullib_FileGetSuffix(char *filename, char *suffix);
-
-/**
  * creates the hash of the file in @a filename and writes it into @a hashstr
  *
  * @retval 1 success
@@ -958,11 +950,11 @@ int Qaullib_FileCopy(const char* origin, const char* destiny)
 
     if( in == NULL || out == NULL )
     {
-        perror( "An error occured while opening files!!!" ) ;
+        perror( "An error occurred while opening files!!!" ) ;
         in = out = 0 ;
         return 0;
     }
-    else    // add this else clause
+    else
     {
         while( (len = fread( buffer, 1, BUFSIZ, in)) > 0 )
         {
@@ -977,7 +969,7 @@ int Qaullib_FileCopy(const char* origin, const char* destiny)
 }
 
 // ------------------------------------------------------------
-static int Qaullib_FileGetSuffix(char *filename, char *suffix)
+int Qaullib_FileGetSuffix(char *filename, char *suffix)
 {
 	if(QAUL_DEBUG)
 		printf("Qaullib_FileGetSuffix\n");

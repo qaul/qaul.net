@@ -14,9 +14,6 @@ int Ql_sha1_file(char *filepath, unsigned char *hash)
 {
     int ret;
     FILE *f;
-    size_t n;
-	mbedtls_sha1_context ctx;
-    unsigned char buf[1024];
 
     Ql_log_debug("Ql_sha1_file %s", filepath);
 
@@ -27,17 +24,35 @@ int Ql_sha1_file(char *filepath, unsigned char *hash)
     	return 0;
     }
 
+    ret = Ql_sha1_filepointer(f, hash);
+
+    fclose(f);
+
+	return ret;
+}
+
+// ------------------------------------------------------------
+int Ql_sha1_filepointer(char *filepointer, unsigned char *hash)
+{
+    int ret;
+    size_t n;
+	mbedtls_sha1_context ctx;
+    unsigned char buf[1024];
+
+    Ql_log_debug("Ql_sha1_filepointer");
+
+    ret = 1;
 	mbedtls_sha1_init(&ctx);
 	mbedtls_sha1_starts(&ctx);
 
-    while((n = fread(buf, 1, sizeof(buf), f)) > 0)
+    while((n = fread(buf, 1, sizeof(buf), filepointer)) > 0)
     {
     	mbedtls_sha1_update(&ctx, buf, n);
     }
 
-    if(ferror(f) != 0)
+    if(ferror(filepointer) != 0)
     {
-    	Ql_log_error("Ql_sha1_file file error on file: %s\n", filepath);
+    	Ql_log_error("Ql_sha1_file file error on filepointer\n");
     	ret = 0;
         goto cleanup;
     }
@@ -45,7 +60,6 @@ int Ql_sha1_file(char *filepath, unsigned char *hash)
 	mbedtls_sha1_finish(&ctx, hash);
 
 cleanup:
-    fclose(f);
     mbedtls_sha1_free(&ctx);
 
 	return ret;
