@@ -22,13 +22,15 @@ The following tools need to be installed:
   * Open MinGW Shell 'C:/msys2/ming32_shell'
   * Install needed programs from the mingw32_shell
 
+```
 	# update your installation
 	pacman -Sy
 	pacman -Su
 	## close and reopen mingw32_shell after update
-	
+
 	# install needed programs
 	pacman -S mingw-w64-i686-gcc mingw-w64-i686-cmake make patch bison 
+```
 
 * Microsoft Visual Studio
 * MSBuild (for builds via command line interface)
@@ -82,6 +84,7 @@ Build qaul.net executable form command line.
 
 * Download and install the Microsoft Build Tools that contain MSBuild
 
+```
 	##########################################
 	# Build qaul.net with MSBuild
 	##########################################
@@ -95,6 +98,7 @@ Build qaul.net executable form command line.
 	# Build qaul.net with cmake (via MSBuild)
 	##########################################
 	cmake --build . --target qaul --config Release
+```
 
 
 Create Windows Installer
