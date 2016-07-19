@@ -20,7 +20,7 @@ int Ql_sha1_file(char *filepath, unsigned char *hash)
     ret = 1;
     if((f = fopen(filepath, "rb")) == NULL)
     {
-    	Ql_log_error("Ql_sha1_file failed to open file: %s\n", filepath);
+    	Ql_log_error("Ql_sha1_file failed to open file: %s", filepath);
     	return 0;
     }
 
@@ -32,7 +32,7 @@ int Ql_sha1_file(char *filepath, unsigned char *hash)
 }
 
 // ------------------------------------------------------------
-int Ql_sha1_filepointer(char *filepointer, unsigned char *hash)
+int Ql_sha1_filepointer(FILE *filepointer, unsigned char *hash)
 {
     int ret;
     size_t n;
@@ -52,7 +52,7 @@ int Ql_sha1_filepointer(char *filepointer, unsigned char *hash)
 
     if(ferror(filepointer) != 0)
     {
-    	Ql_log_error("Ql_sha1_file file error on filepointer\n");
+    	Ql_log_error("Ql_sha1_file file error on filepointer");
     	ret = 0;
         goto cleanup;
     }
