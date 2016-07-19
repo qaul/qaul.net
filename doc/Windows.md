@@ -23,13 +23,13 @@ The following tools need to be installed:
   * Install needed programs from the mingw32_shell
 
 ```
-	# update your installation
-	pacman -Sy
-	pacman -Su
-	## close and reopen mingw32_shell after update
+# update your installation
+pacman -Sy
+pacman -Su
+## close and reopen mingw32_shell after update
 
-	# install needed programs
-	pacman -S mingw-w64-i686-gcc mingw-w64-i686-cmake make patch bison 
+# install needed programs
+pacman -S mingw-w64-i686-gcc mingw-w64-i686-cmake make patch bison 
 ```
 
 * Microsoft Visual Studio
@@ -80,24 +80,24 @@ Open the Microsoft Visual Studio Solution qaul.sln in Visual Studio.
   Right-click on the qaul project icon and select "Set as StartUp Project".
 
 
-Build qaul.net executable form command line. 
+Build qaul.net executable from command line. 
 
 * Download and install the Microsoft Build Tools that contain MSBuild
 
 ```
-	##########################################
-	# Build qaul.net with MSBuild
-	##########################################
-	# CLI build commands for the MinGW32 Shell
-	# Build debug version
-	MSBuild.exe qaul.vcxproj -p:Configuration=Debug
-	# Build release version
-	MSBuild.exe qaul.vcxproj -p:Configuration=Release
-	
-	##########################################
-	# Build qaul.net with cmake (via MSBuild)
-	##########################################
-	cmake --build . --target qaul --config Release
+##########################################
+# Build qaul.net with MSBuild
+##########################################
+# CLI build commands for the MinGW32 Shell
+# Build debug version
+MSBuild.exe qaul.vcxproj -p:Configuration=Debug
+# Build release version
+MSBuild.exe qaul.vcxproj -p:Configuration=Release
+
+##########################################
+# Build qaul.net with cmake (via MSBuild)
+##########################################
+cmake --build . --target qaul --config Release
 ```
 
 
