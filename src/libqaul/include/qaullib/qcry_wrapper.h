@@ -14,7 +14,7 @@
 #ifndef QAUL_QCRY_WRAPPER_H
 #define QAUL_QCRY_WRAPPER_H
 
-int qcry_devel_init();
+int qcry_devel_init(int argc, char *argv[]);
 
 int qcry_devel_makeuser(char *username);
 
