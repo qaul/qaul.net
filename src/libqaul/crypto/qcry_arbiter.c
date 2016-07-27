@@ -115,7 +115,7 @@ int qcry_arbit_free()
     int i;
     for(i = 0; i <= arbiter->users; i++)
     {
-        qcry_context_free(arbiter->bind_lst[i]->ctx);
+        // qcry_context_free(arbiter->bind_lst[i]->ctx);
     }
 
     return QCRY_STATUS_OK;
@@ -136,7 +136,7 @@ int qcry_arbit_usrcreate(const char *username, const char *passphrase, unsigned 
     item->ctx = (qcry_usr_ctx*) malloc(sizeof(qcry_usr_ctx));
     ret = qcry_context_init(item->ctx, username, PK_RSA);
     if(ret != 0) {
-        printf("Context init failed with code %d, ret);
+        printf("Context init failed with code %d", ret);
         return QCRY_STATUS_CTX_INVALID;
     }
 
