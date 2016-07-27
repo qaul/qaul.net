@@ -1,6 +1,8 @@
 #ifndef QAUL_QCRY_HASHING_H
 #define QAUL_QCRY_HASHING_H
 
+#include <stdlib.h>
+
 struct qcry_hash_ctx {
     /** Things the user should set */
     unsigned short          hash;

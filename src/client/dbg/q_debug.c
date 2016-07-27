@@ -11,7 +11,7 @@ int main(int argn, char **argv)
 {
     printf("============= QAUL.NET DEBUGGER PROFESSIONAL 2016 =============\n");
     /** Init our crypto shizzle */
-    qcry_devel_init();
+    qcry_devel_init(argn, argv);
 
     return 0;
 }
