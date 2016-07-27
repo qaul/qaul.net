@@ -101,6 +101,34 @@ int dev_random_entropy_poll(void *data, unsigned char *output, size_t len, size_
  */
 int write_private_key(mbedtls_pk_context *key, const char *output_file)
 {
+    /** A block to write the publc key! */
+//    {
+//        int ret;
+//        FILE *f;
+//        unsigned char output_buf[16000];
+//        unsigned char *c = output_buf;
+//        size_t len = 0;
+//
+//        memset(output_buf, 0, 16000);
+//        ret = mbedtls_pk_write_pubkey_pem(key, output_buf, 16000);
+//
+//        if(ret != 0) return(ret);
+//        len = strlen((char *) output_buf);
+//
+//        c = output_buf + sizeof(output_buf) - len - 1;
+//
+//        if((f = fopen(output_file, "w")) == NULL)
+//            return(-1);
+//
+//        if(fwrite(c, 1, len, f) != len)
+//        {
+//            fclose(f);
+//            return(-1);
+//        }
+//
+//        fclose(f);
+//    }
+
     int ret;
     FILE *f;
     size_t buf_s = 16000;
@@ -375,6 +403,55 @@ int qcry_generate_key() {
     printf("ERROR!\n");
     mbedtls_ctr_drbg_free(&ctr_drbg);
 }
+
+int verify_msg(mbedtls_pk_context *key, const char *signfile)
+{
+    int ret = 1;
+    FILE *f;
+    size_t i;
+    unsigned char hash[32];
+    unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
+    char filename[512];
+
+    ret = 1;
+    mbedtls_snprintf( filename, sizeof(filename), "%s", signfile );
+
+    if((f = fopen(filename, "rb")) == NULL )
+    {
+        mbedtls_printf( "\n  ! Could not open %s\n\n", filename );
+        goto exit;
+    }
+
+    /** Validate size and then close stream */
+    i = fread( buf, 1, sizeof(buf), f );
+    fclose(f);
+
+
+    /*
+     * Compute the SHA-256 hash of the input file and
+     * verify the signature
+     */
+    mbedtls_printf( "\n  . Verifying the SHA-256 signature" );
+    fflush( stdout );
+
+    if( ( ret = mbedtls_md_file(mbedtls_md_info_from_type( MBEDTLS_MD_SHA256 ), signfile, hash ) ) != 0 )
+    {
+        mbedtls_printf( " failed\n  ! Could not open or read %s\n\n", signfile );
+        goto exit;
+    }
+
+    if((ret = mbedtls_pk_verify(key, MBEDTLS_MD_SHA256, hash, 0, buf, i ) ) != 0)
+    {
+        mbedtls_printf( " failed\n  ! mbedtls_pk_verify returned -0x%04x\n", -ret );
+        goto exit;
+    }
+
+    mbedtls_printf( "\n  . OK (the signature is valid)\n\n" );
+
+    exit:
+    return ret;
+}
+
 
 int qcry_sign_with_key() {
 

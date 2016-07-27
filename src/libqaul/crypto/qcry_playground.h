@@ -24,6 +24,8 @@ int qcry_generate_key();
 
 int sign_msg(mbedtls_pk_context *key, const char *msgfile);
 
+int verify_msg(mbedtls_pk_context *key, const char *signfile);
+
 int qcry_sign_with_key();
 
 #endif //QAUL_QCRY_PLAYGROUND_H
