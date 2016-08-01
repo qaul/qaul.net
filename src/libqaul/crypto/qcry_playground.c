@@ -83,7 +83,12 @@ int dev_random_entropy_poll(void *data, unsigned char *output, size_t len, size_
 
 #endif /* !_WIN32 */
 
-
+int qcry_key_destroy(mbedtls_pk_context *key)
+{
+    mbedtls_pk_free(key);
+    free(key);
+    return 0;
+}
 /**********************************************************************************************/
 /**********************************************************************************************/
 /**********************************************************************************************/
@@ -168,17 +173,17 @@ int qcry_key_write(mbedtls_pk_context *key, const char *path, const char *userna
     return 0;
 }
 
-int qcry_key_generate(mbedtls_pk_context **k, const char *pers)
+int qcry_key_generate(mbedtls_pk_context **pri, const char *pers)
 {
     int ret = 0;
 
     /* Temp buffers */
-    mbedtls_pk_context tmp_ctx;
+    mbedtls_pk_context tmp_pri;
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctr_drbg;
 
     /** Setup core state for key generation */
-    mbedtls_pk_init(&tmp_ctx);
+    mbedtls_pk_init(&tmp_pri);
     mbedtls_ctr_drbg_init(&ctr_drbg);
 
     /* Set some state variables */
@@ -200,8 +205,8 @@ int qcry_key_generate(mbedtls_pk_context **k, const char *pers)
     /*********************************************/
 
     printf("Generating private key...");
-    ret = mbedtls_pk_setup(&tmp_ctx, mbedtls_pk_info_from_type(type));
-    ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(tmp_ctx), mbedtls_ctr_drbg_random, &ctr_drbg, rsa_keysize, 65537);
+    ret = mbedtls_pk_setup(&tmp_pri, mbedtls_pk_info_from_type(type));
+    ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(tmp_pri), mbedtls_ctr_drbg_random, &ctr_drbg, rsa_keysize, 65537);
 
     if (ret != 0) {
         printf(" failed!\nmbedtls_ctr_drbg_seed returned %d\n", ret);
@@ -209,8 +214,8 @@ int qcry_key_generate(mbedtls_pk_context **k, const char *pers)
     }
 
     /** Malloc the apropriate space we need and memcpy */
-    (*k) = (mbedtls_pk_context *) malloc(sizeof(mbedtls_pk_context));
-    memcpy(*k, &tmp_ctx, sizeof(mbedtls_pk_context));
+    (*pri) = (mbedtls_pk_context *) malloc(sizeof(mbedtls_pk_context));
+    memcpy(*pri, &tmp_pri, sizeof(mbedtls_pk_context));
 
     /*********************************************/
 
@@ -219,13 +224,14 @@ int qcry_key_generate(mbedtls_pk_context **k, const char *pers)
     return ret;
 }
 
-int qcry_key_load(mbedtls_pk_context **key, const char *path, const char *username)
+int qcry_key_load(mbedtls_pk_context **pub, mbedtls_pk_context **pri, const char *path, const char *username)
 {
     int ret = 0;
 
     /* Initialise a PK context on the stack to work with */
-    mbedtls_pk_context tmp;
-    mbedtls_pk_init(&tmp);
+    mbedtls_pk_context tmp_pub, tmp_pri;
+    mbedtls_pk_init(&tmp_pub);
+    mbedtls_pk_init(&tmp_pri);
 
     /*****************/
     size_t p_s = strlen(path);
@@ -247,7 +253,7 @@ int qcry_key_load(mbedtls_pk_context **key, const char *path, const char *userna
     strcpy(new_filename, write_path);
     strcat(new_filename, ".key");
 
-    ret = mbedtls_pk_parse_keyfile(&tmp, new_filename, NULL);
+    ret = mbedtls_pk_parse_keyfile(&tmp_pri, new_filename, NULL);
     if(ret) {
         printf("An error occured while parsing private key file: %d!", ret);
         goto cleanup;
@@ -266,21 +272,25 @@ int qcry_key_load(mbedtls_pk_context **key, const char *path, const char *userna
         strcpy(new_filename, write_path);
         strcat(new_filename, ".pub");
 
-        ret = mbedtls_pk_parse_public_keyfile(&tmp, new_filename);
-        ret = 0;
-//        if(ret != 0) {
-//            printf("An error occured while parsing public key file: %d!", ret);
-//            goto cleanup;
-//        }
+
+
+        ret = mbedtls_pk_parse_public_keyfile(&tmp_pub, new_filename);
+        if(ret != 0) {
+            printf("An error occured while parsing public key file: %d!", ret);
+            goto cleanup;
+        }
     }
 
     /******** Now go and copy the context into a new malloced instance ********/
 
-    (*key) = (mbedtls_pk_context*) malloc(sizeof(mbedtls_pk_context));
-    memcpy((*key), &tmp, sizeof(mbedtls_pk_context));
+    (*pub) = (mbedtls_pk_context*) malloc(sizeof(mbedtls_pk_context));
+    memcpy((*pub), &tmp_pub, sizeof(mbedtls_pk_context));
+
+    (*pri) = (mbedtls_pk_context*) malloc(sizeof(mbedtls_pk_context));
+    memcpy((*pri), &tmp_pri, sizeof(mbedtls_pk_context));
 
     cleanup:
-    mbedtls_pk_free(&tmp);
+    mbedtls_pk_free(&tmp_pub);
     return ret;
 }
 
@@ -361,7 +371,7 @@ int sign_msg(mbedtls_pk_context *key, const char *msgfile)
     return(ret);
 }
 
-int verify_msg(mbedtls_pk_context *k, const char *signfile)
+int verify_msg(mbedtls_pk_context *key, const char *signfile)
 {
     int ret = 1;
     FILE *f;
@@ -369,24 +379,13 @@ int verify_msg(mbedtls_pk_context *k, const char *signfile)
     unsigned char hash[32];
     unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
     char filename[512];
-    mbedtls_pk_context pk;
-
-    char *publickeyname = "/home/spacekookie/.qaul/00_spacekookie.pub";
-
-    fflush( stdout );
-
-    if( ( ret = mbedtls_pk_parse_public_keyfile( &pk, publickeyname ) ) != 0 )
-    {
-        mbedtls_printf( " failed\n  ! mbedtls_pk_parse_public_keyfile returned -0x%04x\n", -ret );
-        goto exit;
-    }
 
     ret = 1;
-    mbedtls_snprintf( filename, sizeof(filename), "%s", signfile );
+    mbedtls_snprintf(filename, sizeof(filename), "%s", signfile);
 
     if((f = fopen(filename, "rb")) == NULL )
     {
-        mbedtls_printf( "\n  ! Could not open %s\n\n", filename );
+        mbedtls_printf("\n  ! Could not open %s\n\n", filename);
         goto exit;
     }
 
@@ -408,7 +407,7 @@ int verify_msg(mbedtls_pk_context *k, const char *signfile)
         goto exit;
     }
 
-    if((ret = mbedtls_pk_verify(&pk, MBEDTLS_MD_SHA256, hash, 0, buf, i ) ) != 0)
+    if((ret = mbedtls_pk_verify(key, MBEDTLS_MD_SHA256, hash, 0, buf, i ) ) != 0)
     {
         mbedtls_printf( " failed\n  ! mbedtls_pk_verify returned -0x%04x\n", -ret );
         goto exit;
