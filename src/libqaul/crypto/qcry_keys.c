@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <memory.h>
+#include <mbedtls/platform.h>
 
 #include "qcry_keys.h"
 #include "qcry_helper.h"
@@ -135,6 +136,38 @@ int qcry_keys_gen_r(qcry_keys_context *context, unsigned int length, unsigned ch
         return QCRY_STATUS_KEYGEN_FAILED;
 
     memcpy(buf, tmp, length);
+    return QCRY_STATUS_OK;
+}
+
+int qcry_keys_rsagen(qcry_keys_context *context, mbedtls_pk_context *(*key))
+{
+    int ret = 0;
+
+    /** Some stack variables to work with */
+    mbedtls_pk_context tmp_ctx;
+    int type = MBEDTLS_PK_RSA;
+    unsigned int rsa_keysize = key_length_by_type(QCRY_KEYS_RSA);
+
+    /*********************************************/
+
+    ret = mbedtls_pk_setup(&tmp_ctx, mbedtls_pk_info_from_type(type));
+    
+
+    ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(tmp_ctx), mbedtls_ctr_drbg_random, &context->rand, rsa_keysize, 65537);
+
+    if (ret != 0) {
+        printf(" failed\nmbedtls_pk_setup returned -0x%04x", -ret);
+        goto exit;
+    }
+
+    /*********************************************/
+
+    /** Malloc the apropriate space we need and memcpy */
+    (*key) = (mbedtls_pk_context *) malloc(sizeof(mbedtls_pk_context));
+    memcpy(*key, &tmp_ctx, sizeof(mbedtls_pk_context));
+
+    exit:
+
     return QCRY_STATUS_OK;
 }
 

@@ -8,6 +8,7 @@
 
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
+#include <mbedtls/pk.h>
 
 /************************************************************************************************
 ***
@@ -47,19 +48,51 @@ int qcry_keys_init(qcry_keys_context *context);
 int qcry_keys_init_all(qcry_keys_context *context, short pr, short mseed, short perm, short quiet);
 
 /**
- * Function that creates a key ased on a few parameters passed in
+ * This special function will generate RSA keys from a specified key generator context. The context
+ * is required for the entropy source and random seed generation. The provided reference will
+ * be malloced so don't forget to free it again when you're done with it!
+ *
+ * @param context A valid key generation context
+ * @param key A reference to a pointer to store the rsa context in
+ * @return
+ */
+int qcry_keys_rsagen(qcry_keys_context *context, mbedtls_pk_context *(*key));
+
+/**
+* Function that creates a key ased on a few parameters passed in
  * by the key context and key type. Fills an output buffer with data.
  *
  * Will return != 0 if buffer is too small. If "quiet" flag is set on context
  * all errors will be ignored.
+ *
+ * @param context
+ * @param type
+ * @param buf
+ * @return
  */
 int qcry_keys_gen(qcry_keys_context *context, short type, unsigned char *buf);
 
+/**
+ * Same as qcry_keys_gen with the difference that it mallocs memory for you.
+ * Don't forget to free memory again!
+ *
+ * @param context
+ * @param type
+ * @param buf
+ * @return
+ */
 int qcry_keys_gen_m(qcry_keys_context *context, short type, unsigned char *(*buf));
 
 /**
  * A function that lets you generate arbitrary lengths of random data.
  * Very useful for token creation.
+ *
+ * Don't forget to free memory again!
+ *
+ * @param context
+ * @param length
+ * @param buf
+ * @return
  */
 int qcry_keys_gen_r(qcry_keys_context *context, unsigned int length, unsigned char *(*buf));
 

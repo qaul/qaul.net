@@ -94,6 +94,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
         crypto/qcry_hashing.c
         crypto/qcry_helper.c
         crypto/qcry_keys.c
+        crypto/qcry_playground.c
 
         qaullib_udp_communication.c
         captive/qaullib_captive.c

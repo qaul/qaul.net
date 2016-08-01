@@ -49,17 +49,6 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	qaul_interface_configuring = 0;
 	qaul_internet_configuring = 0;
 
-
-	// ----------------------------------------------------------
-
-	/** Quickly prepare the arbiter for init process */
-	int val = qcry_arbit_init(QAUL_CONC_LOCK);
-	printf("Arbiter initialised: %d\n", val);
-
-	// TODO: Check existing user files and init with them instead
-
-	qcry_arbit_usrcreate()
-
 	// -------------------------------------------------
 	// create buffers for socket communication
 	for(i=0; i<MAX_USER_CONNECTIONS; i++)
@@ -106,7 +95,25 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	strcat(filesPath, "/files/");
 #endif
 
-	// set url rewrites
+
+    // ----------------------------------------------------------
+    /**
+     * Crypto initialisation is done via a default username and reading
+     * key files from the homepath. Thus this init block needs to be called
+     * _after_ we know where we store all of our config files.
+     */
+
+    /** Quickly prepare the arbiter for init process */
+    int val = qcry_arbit_init(QAUL_CONC_LOCK);
+    printf("Arbiter initialised: %d\n", val);
+
+    // TODO: Check existing user files and init with them instead
+
+    // qcry_arbit_usrcreate();
+
+    // ----------------------------------------------------------
+
+    // set url rewrites
 	strcpy(webUrlRewrites, "/files/=");
 	strcat(webUrlRewrites, filesPath);
 
