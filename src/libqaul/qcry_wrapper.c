@@ -17,7 +17,6 @@
 int fooooooo(int argc, char *argv[]);
 
 int qcry_devel_init(int argc, char *argv[]) {
-    // fooooooo(argc, argv);
 
     int ret;
 
@@ -29,12 +28,12 @@ int qcry_devel_init(int argc, char *argv[]) {
     printf((ret == 0) ? "[KEYGEN]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d", ret);
 
     /** Sign a message file */
-    ret = sign_msg(key, "/home/spacekookie/message.txt");
-    printf((ret == 0) ? "[SIGN]: ALL CLEAR\n" : "[SIGN]: AN ERROR OCCURED WITH CODE %d", ret);
-
-    /** Then sign an arbitrary msg with them */
-    ret = verify_msg(&key, "/home/spacekookie/message.txt.sig");
-    printf((ret == 0) ? "[VERIFY]: ALL CLEAR\n" : "[VERIFY]: AN ERROR OCCURED WITH CODE %d", ret);
+//    ret = sign_msg(key, "/home/spacekookie/message.txt");
+//    printf((ret == 0) ? "[SIGN]: ALL CLEAR\n" : "[SIGN]: AN ERROR OCCURED WITH CODE %d", ret);
+//
+//    /** Then sign an arbitrary msg with them */
+//    ret = verify_msg(&key, "/home/spacekookie/message.txt.sig");
+//    printf((ret == 0) ? "[VERIFY]: ALL CLEAR\n" : "[VERIFY]: AN ERROR OCCURED WITH CODE %d", ret);
 
 //    qcry_keys_context context;
 //    qcry_keys_init(&context);

@@ -40,14 +40,6 @@
 #define DFL_FILENAME                "keyfile.key"
 #define DFL_USE_DEV_RANDOM          0
 
-struct options {
-    int type;
-    int rsa_keysize;
-    int ec_curve;
-    const char *filename;
-    int use_dev_random;
-} opt;
-
 /**
  * A function that provides better entropy for key generation if it's available for a specific platform
  * i.e. Linux
@@ -99,35 +91,38 @@ int dev_random_entropy_poll(void *data, unsigned char *output, size_t len, size_
 /**
  * Writing private key to specific path
  */
-int write_private_key(mbedtls_pk_context *key, const char *output_file)
+int write_keys(mbedtls_pk_context *key, const char *output_file)
 {
     /** A block to write the publc key! */
-//    {
-//        int ret;
-//        FILE *f;
-//        unsigned char output_buf[16000];
-//        unsigned char *c = output_buf;
-//        size_t len = 0;
-//
-//        memset(output_buf, 0, 16000);
-//        ret = mbedtls_pk_write_pubkey_pem(key, output_buf, 16000);
-//
-//        if(ret != 0) return(ret);
-//        len = strlen((char *) output_buf);
-//
-//        c = output_buf + sizeof(output_buf) - len - 1;
-//
-//        if((f = fopen(output_file, "w")) == NULL)
-//            return(-1);
-//
-//        if(fwrite(c, 1, len, f) != len)
-//        {
-//            fclose(f);
-//            return(-1);
-//        }
-//
-//        fclose(f);
-//    }
+    {
+        int ret;
+        FILE *f;
+        unsigned char output_buf[16000];
+        unsigned char *c = output_buf;
+        size_t len = 0;
+
+        memset(output_buf, 0, 16000);
+        ret = mbedtls_pk_write_pubkey_pem(key, output_buf, 16000);
+        if(ret != 0) return(ret);
+
+        /** Get the exact length of what we're supposed to write */
+        len = strlen((char *) output_buf);
+
+        char fiiile[strlen(output_file) + strlen(".pub")];
+        strcpy(fiiile, output_file);
+        strcat(fiiile, ".pub");
+
+        if((f = fopen(fiiile, "w")) == NULL)
+            return(-1);
+
+        if(fwrite(c, 1, len, f) != len)
+        {
+            fclose(f);
+            return(-1);
+        }
+
+        fclose(f);
+    }
 
     int ret;
     FILE *f;
@@ -144,7 +139,11 @@ int write_private_key(mbedtls_pk_context *key, const char *output_file)
 
     len = strlen((char *) output_buf);
 
-    if ((f = fopen(output_file, "wb")) == NULL)
+    char fiiile[strlen(output_file) + strlen(".key")];
+    strcpy(fiiile, output_file);
+    strcat(fiiile, ".key");
+
+    if ((f = fopen(fiiile, "wb")) == NULL)
         return (-1);
 
     if (fwrite(c, 1, len, f) != len) {
@@ -159,10 +158,7 @@ int write_private_key(mbedtls_pk_context *key, const char *output_file)
 int qcry_key_generate(mbedtls_pk_context **k)
 {
     int ret = 0;
-    char buf[1024];
-    int i;
-    char *p, *q;
-    const char *pers = "gen_key";
+    const char *pers = "qaul.net_generated_keys"; // Should be username or MAC Address
 
     /* Temp buffers */
     mbedtls_pk_context tmp_ctx;
@@ -172,12 +168,10 @@ int qcry_key_generate(mbedtls_pk_context **k)
     /** Setup core state for key generation */
     mbedtls_pk_init(&tmp_ctx);
     mbedtls_ctr_drbg_init(&ctr_drbg);
-    memset(buf, 0, sizeof(buf));
+//    memset(buf, 0, sizeof(buf));
 
-    /** Set sane defaults for key gen */
-    opt.type = DFL_TYPE;
-    opt.rsa_keysize = DFL_RSA_KEYSIZE;
-    opt.use_dev_random = DFL_USE_DEV_RANDOM;
+    int type = DFL_TYPE;
+    int rsa_keysize = DFL_RSA_KEYSIZE;
 
     /*********************************************/
 
@@ -185,6 +179,7 @@ int qcry_key_generate(mbedtls_pk_context **k)
     printf("Seeding random number generators...\n");
     mbedtls_entropy_init(&entropy);
     ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char *) pers, strlen(pers));
+
 
     if (ret != 0) {
         mbedtls_printf(" failed\n  ! mbedtls_ctr_drbg_seed returned -0x%04x\n", -ret);
@@ -194,8 +189,8 @@ int qcry_key_generate(mbedtls_pk_context **k)
     /*********************************************/
 
     printf("Generating private key...");
-    ret = mbedtls_pk_setup(&tmp_ctx, mbedtls_pk_info_from_type(opt.type));
-    ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(tmp_ctx), mbedtls_ctr_drbg_random, &ctr_drbg, opt.rsa_keysize, 65537);
+    ret = mbedtls_pk_setup(&tmp_ctx, mbedtls_pk_info_from_type(type));
+    ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(tmp_ctx), mbedtls_ctr_drbg_random, &ctr_drbg, rsa_keysize, 65537);
 
     if (ret != 0) {
         printf(" failed\nmbedtls_pk_setup returned -0x%04x", -ret);
@@ -209,21 +204,11 @@ int qcry_key_generate(mbedtls_pk_context **k)
     (*k) = (mbedtls_pk_context *) malloc(sizeof(mbedtls_pk_context));
     memcpy(*k, &tmp_ctx, sizeof(mbedtls_pk_context));
 
-//    mbedtls_rsa_context *rsa = mbedtls_pk_rsa(tmp_ctx);
-//    mbedtls_mpi_write_file("N:  ", &rsa->N, 16, NULL);
-//    mbedtls_mpi_write_file("E:  ", &rsa->E, 16, NULL);
-//    mbedtls_mpi_write_file("D:  ", &rsa->D, 16, NULL);
-//    mbedtls_mpi_write_file("P:  ", &rsa->P, 16, NULL);
-//    mbedtls_mpi_write_file("Q:  ", &rsa->Q, 16, NULL);
-//    mbedtls_mpi_write_file("DP: ", &rsa->DP, 16, NULL);
-//    mbedtls_mpi_write_file("DQ:  ", &rsa->DQ, 16, NULL);
-//    mbedtls_mpi_write_file("QP:  ", &rsa->QP, 16, NULL);
-//
-//    ret = write_private_key(&tmp_ctx, opt.filename);
-//    if (ret != 0) {
-//        mbedtls_printf(" failed\n");
-//        goto exit;
-//    }
+    ret = write_keys(&tmp_ctx, "/home/spacekookie/.qaul/01_spacekookie");
+    if (ret != 0) {
+        mbedtls_printf(" failed\n");
+        goto exit;
+    }
 
     /*********************************************/
 
@@ -312,99 +297,10 @@ int sign_msg(mbedtls_pk_context *key, const char *msgfile)
     exit:
     mbedtls_ctr_drbg_free( &ctr_drbg );
     mbedtls_entropy_free( &entropy );
-
-#if defined(MBEDTLS_ERROR_C)
-    if( ret != 0 )
-    {
-        mbedtls_strerror( ret, (char *) buf, sizeof(buf) );
-        mbedtls_printf( "  !  Last error was: %s\n", buf );
-    }
-#endif
-
-#if defined(_WIN32)
-    mbedtls_printf( "  + Press Enter to exit this program.\n" );
-    fflush( stdout ); getchar();
-#endif
-
-    return( ret );
+    return(ret);
 }
 
-
-int qcry_generate_key() {
-    int ret = 0;
-    mbedtls_pk_context key;
-    char buf[1024];
-    int i;
-    char *p, *q;
-    const char *pers = "gen_key";
-    mbedtls_entropy_context entropy;
-    mbedtls_ctr_drbg_context ctr_drbg;
-
-    /** Setup core state for key generation */
-    mbedtls_pk_init(&key);
-    mbedtls_ctr_drbg_init(&ctr_drbg);
-    memset(buf, 0, sizeof(buf));
-
-    /** Set key generation values */
-    opt.type = DFL_TYPE;
-    opt.rsa_keysize = DFL_RSA_KEYSIZE;
-    opt.ec_curve = DFL_EC_CURVE;
-    opt.filename = "/home/spacekookie/.qaul/00_spacekookie.key";
-    opt.use_dev_random = DFL_USE_DEV_RANDOM;
-
-    /*********************************************/
-
-    /** Prepare key generation procedure */
-    printf("Seeding random number generators...\n");
-    mbedtls_entropy_init(&entropy);
-    ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char *) pers, strlen(pers));
-
-    if (ret != 0) {
-        mbedtls_printf(" failed\n  ! mbedtls_ctr_drbg_seed returned -0x%04x\n", -ret);
-        goto exit;
-    }
-
-    /*********************************************/
-
-    printf("Generating private key...");
-    ret = mbedtls_pk_setup(&key, mbedtls_pk_info_from_type(opt.type));
-    ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(key), mbedtls_ctr_drbg_random, &ctr_drbg, opt.rsa_keysize, 65537);
-
-    if (ret != 0) {
-        printf(" failed\nmbedtls_pk_setup returned -0x%04x", -ret);
-        goto exit;
-    }
-
-    mbedtls_printf(" ok\n==> Key information:\n");
-    /*********************************************/
-
-    /** Encode the key and save it somewhere */
-    mbedtls_rsa_context *rsa = mbedtls_pk_rsa(key);
-    mbedtls_mpi_write_file("N:  ", &rsa->N, 16, NULL);
-    mbedtls_mpi_write_file("E:  ", &rsa->E, 16, NULL);
-    mbedtls_mpi_write_file("D:  ", &rsa->D, 16, NULL);
-    mbedtls_mpi_write_file("P:  ", &rsa->P, 16, NULL);
-    mbedtls_mpi_write_file("Q:  ", &rsa->Q, 16, NULL);
-    mbedtls_mpi_write_file("DP: ", &rsa->DP, 16, NULL);
-    mbedtls_mpi_write_file("DQ:  ", &rsa->DQ, 16, NULL);
-    mbedtls_mpi_write_file("QP:  ", &rsa->QP, 16, NULL);
-
-    ret = write_private_key(&key, opt.filename);
-    if (ret != 0) {
-        mbedtls_printf(" failed\n");
-        goto exit;
-    }
-
-    /*********************************************/
-
-    return 0;
-
-    exit:
-    printf("ERROR!\n");
-    mbedtls_ctr_drbg_free(&ctr_drbg);
-}
-
-int verify_msg(mbedtls_pk_context *key, const char *signfile)
+int verify_msg(mbedtls_pk_context *k, const char *signfile)
 {
     int ret = 1;
     FILE *f;
@@ -412,6 +308,17 @@ int verify_msg(mbedtls_pk_context *key, const char *signfile)
     unsigned char hash[32];
     unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
     char filename[512];
+    mbedtls_pk_context pk;
+
+    char *publickeyname = "/home/spacekookie/.qaul/00_spacekookie.pub";
+
+    fflush( stdout );
+
+    if( ( ret = mbedtls_pk_parse_public_keyfile( &pk, publickeyname ) ) != 0 )
+    {
+        mbedtls_printf( " failed\n  ! mbedtls_pk_parse_public_keyfile returned -0x%04x\n", -ret );
+        goto exit;
+    }
 
     ret = 1;
     mbedtls_snprintf( filename, sizeof(filename), "%s", signfile );
@@ -440,7 +347,7 @@ int verify_msg(mbedtls_pk_context *key, const char *signfile)
         goto exit;
     }
 
-    if((ret = mbedtls_pk_verify(key, MBEDTLS_MD_SHA256, hash, 0, buf, i ) ) != 0)
+    if((ret = mbedtls_pk_verify(&pk, MBEDTLS_MD_SHA256, hash, 0, buf, i ) ) != 0)
     {
         mbedtls_printf( " failed\n  ! mbedtls_pk_verify returned -0x%04x\n", -ret );
         goto exit;
