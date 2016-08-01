@@ -24,13 +24,19 @@ int qcry_devel_init(int argc, char *argv[]) {
     mbedtls_pk_context *key;
 
     /* Side effect: saves keys to disk! */
-    ret = qcry_key_generate(&key);
-    printf((ret == 0) ? "[KEYGEN]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d", ret);
+    ret = qcry_key_generate(&key, "qaul net is awesome!");
+
+//    ret = qcry_key_load(&key, "/home/spacekookie/.qaul", "spacekookie");
+    printf((ret == 0) ? "[KEYGEN]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
+
+//    qcry_key_write(key, "/home/spacekookie/.qaul", "spacekookie");
+
+    printf("\n=======================\n\n");
 
     /** Sign a message file */
-//    ret = sign_msg(key, "/home/spacekookie/message.txt");
-//    printf((ret == 0) ? "[SIGN]: ALL CLEAR\n" : "[SIGN]: AN ERROR OCCURED WITH CODE %d", ret);
-//
+    ret = sign_msg(key, "/home/spacekookie/message.txt");
+    printf((ret == 0) ? "[SIGN]: ALL CLEAR\n" : "[SIGN]: AN ERROR OCCURED WITH CODE %d", ret);
+
 //    /** Then sign an arbitrary msg with them */
 //    ret = verify_msg(&key, "/home/spacekookie/message.txt.sig");
 //    printf((ret == 0) ? "[VERIFY]: ALL CLEAR\n" : "[VERIFY]: AN ERROR OCCURED WITH CODE %d", ret);
