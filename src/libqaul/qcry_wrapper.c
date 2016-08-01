@@ -16,42 +16,163 @@
 // Forward declaration to make it easier to work with this monster function
 int fooooooo(int argc, char *argv[]);
 
-int qcry_devel_init(int argc, char *argv[]) {
-    fooooo(argc,argv);
+int context_init(mbedtls_pk_context *key)
+{
+    mbedtls_pk_init(key);
+    return 0;
+}
 
-//    int ret;
+int load_key(mbedtls_pk_context *pub, char *keyfile)
+{
+    int ret;
+    mbedtls_printf( "\n  . Reading public key from '%s'", keyfile);
+    fflush( stdout );
+
+    if( ( ret = mbedtls_pk_parse_public_keyfile(pub, keyfile) ) != 0 )
+    {
+        mbedtls_printf( " failed\n  ! mbedtls_pk_parse_public_keyfile returned -0x%04x\n", -ret );
+        return 55;
+    }
+
+    return 0;
+}
+
+int verify(mbedtls_pk_context *pub, char *msgfile)
+{
+    int ret = 0;
+
+    FILE *f;
+    size_t i;
+    unsigned char hash[32];
+    unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
+    char filename[512];
+
+    /*
+     * Extract the signature from the file
+     */
+    ret = 1;
+    mbedtls_snprintf( filename, sizeof(filename), "%s.sig", msgfile);
+
+    if( ( f = fopen( filename, "rb" ) ) == NULL )
+    {
+        mbedtls_printf( "\n  ! Could not open %s\n\n", filename );
+        goto exit;
+    }
+
+
+    i = fread( buf, 1, sizeof(buf), f );
+
+    fclose( f );
+
+    /*
+     * Compute the SHA-256 hash of the input file and
+     * verify the signature
+     */
+    mbedtls_printf( "\n  . Verifying the SHA-256 signature" );
+    fflush( stdout );
+
+    if( ( ret = mbedtls_md_file(
+            mbedtls_md_info_from_type( MBEDTLS_MD_SHA256 ),
+            msgfile, hash ) ) != 0 )
+    {
+        mbedtls_printf( " failed\n  ! Could not open or read %s\n\n", msgfile);
+        goto exit;
+    }
+
+    if( ( ret = mbedtls_pk_verify(pub, MBEDTLS_MD_SHA256, hash, 0,
+                                   buf, i ) ) != 0 )
+    {
+        mbedtls_printf( " failed\n  ! mbedtls_pk_verify returned -0x%04x\n", -ret );
+        goto exit;
+    }
+
+    mbedtls_printf( "\n  . OK (the signature is valid)\n\n" );
+
+    ret = 0;
+
+    exit:
+    return 0;
+}
+
+int qcry_devel_init(int argc, char *argv[])
+{
+    int ret = 1;
+    mbedtls_pk_context pub;
+
+
+    char *keyfile = "/home/spacekookie/Downloads/mbedtls-2.3.0/build/programs/pkey/00_keyfile.pub";
+    char *msgfile = "/home/spacekookie/message.txt";
+
+    context_init(&pub);
+
+    load_key(&pub, keyfile);
+
+    verify(&pub, msgfile);
+
 //    mbedtls_pk_context *tmp;
+
+//    const char *path = "/home/spacekookie/Downloads/mbedtls-2.3.0/build/programs/pkey";
+//    const char *user = "keyfile";
 //
-//    const char *path = "/home/spacekookie/.qaul";
-//    const char *user = "spacekookie";
-//
-//    ret = qcry_key_generate(&tmp, "Qaul.net is the secret!");
-//    printf((ret == 0) ? "[KEYGEN]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
-//
-//    ret = qcry_key_write(tmp, path, user);
-//    printf((ret == 0) ? "[WRITE]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
-//
-//    ret = qcry_key_destroy(tmp);
-//    printf((ret == 0) ? "[DESTROY]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
-//
-//    /*********************************************************************/
+//    const char *pub_usr = "/home/spacekookie/Downloads/mbedtls-2.3.0/build/programs/pkey/00_keyfile.pub";
+////
+////    ret = qcry_key_generate(&tmp, "Qaul.net is the secret!");
+////    printf((ret == 0) ? "[KEYGEN]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
+////
+////    ret = qcry_key_write(tmp, path, user);
+////    printf((ret == 0) ? "[WRITE]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
+////
+////    ret = qcry_key_destroy(tmp);
+////    printf((ret == 0) ? "[DESTROY]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
+////
+////    /*********************************************************************/
 //    /*** Reading in the keys to get a split context ***/
-//    mbedtls_pk_context *pub, *pri;
+//    mbedtls_pk_context pub, *pri;
+//    mbedtls_pk_init(&pub);
 //
-//    ret = qcry_key_load(&pub, &pri, path, user);
-//    printf((ret == 0) ? "[LOAD]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
+////    ret = qcry_key_load(&pub, &pri, path, user);
+////    printf((ret == 0) ? "[LOAD]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
 //
 //    printf("\n=======================\n\n");
 //
 //    /** Sign a message file */
+//
+//
 //    ret = sign_msg(pri, "/home/spacekookie/message.txt");
 //    printf((ret == 0) ? "[SIGN]: ALL CLEAR\n" : "[SIGN]: AN ERROR OCCURED WITH CODE %d", ret);
 //
+//    printf("Reading public key file: %s\n", pub_usr);
+//
+//    ret = mbedtls_pk_parse_public_keyfile(&pub, pub_usr);
+//    if(ret != 0) {
+//        printf("An error occured while parsing public key file: %d!", ret);
+//    }
+//
 //    /** Then sign an arbitrary msg with them */
-//    ret = verify_msg(pub, "/home/spacekookie/message.txt.sig");
+//    ret = verify_msg(&pub, "/home/spacekookie/message.txt");
 //    printf((ret == 0) ? "[VERIFY]: ALL CLEAR\n" : "[VERIFY]: AN ERROR OCCURED WITH CODE %d", ret);
 }
 
+/*
+ *  Public key-based signature verification program
+ *
+ *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
+ *  SPDX-License-Identifier: Apache-2.0
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may
+ *  not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *  This file is part of mbed TLS (https://tls.mbed.org)
+ */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"
@@ -63,372 +184,103 @@ int qcry_devel_init(int argc, char *argv[]) {
 #include "mbedtls/platform.h"
 #else
 #include <stdio.h>
+#define mbedtls_snprintf   snprintf
 #define mbedtls_printf     printf
 #endif
 
-#if defined(MBEDTLS_PK_WRITE_C) && defined(MBEDTLS_FS_IO)
+#if !defined(MBEDTLS_BIGNUM_C) || !defined(MBEDTLS_MD_C) || \
+    !defined(MBEDTLS_SHA256_C) || !defined(MBEDTLS_PK_PARSE_C) ||   \
+    !defined(MBEDTLS_FS_IO)
+int main( void )
+{
+    mbedtls_printf("MBEDTLS_BIGNUM_C and/or MBEDTLS_MD_C and/or "
+           "MBEDTLS_SHA256_C and/or MBEDTLS_PK_PARSE_C and/or "
+           "MBEDTLS_FS_IO not defined.\n");
+    return( 0 );
+}
+#else
+
 #include "mbedtls/error.h"
+#include "mbedtls/md.h"
 #include "mbedtls/pk.h"
-#include "mbedtls/error.h"
 
 #include <stdio.h>
 #include <string.h>
-#endif
-
-#if defined(MBEDTLS_PEM_WRITE_C)
-#define USAGE_OUT \
-    "    output_file=%%s      default: keyfile.pem\n"   \
-    "    output_format=pem|der default: pem\n"
-#else
-#define USAGE_OUT \
-    "    output_file=%%s      default: keyfile.der\n"   \
-    "    output_format=der     default: der\n"
-#endif
-
-#if defined(MBEDTLS_PEM_WRITE_C)
-#define DFL_OUTPUT_FILENAME     "keyfile.pem"
-#define DFL_OUTPUT_FORMAT       OUTPUT_FORMAT_PEM
-#else
-#define DFL_OUTPUT_FILENAME     "keyfile.der"
-#define DFL_OUTPUT_FORMAT       OUTPUT_FORMAT_DER
-#endif
-
-#define DFL_MODE                MODE_NONE
-#define DFL_FILENAME            "keyfile.key"
-#define DFL_DEBUG_LEVEL         0
-#define DFL_OUTPUT_MODE         OUTPUT_MODE_NONE
-
-#define MODE_NONE               0
-#define MODE_PRIVATE            1
-#define MODE_PUBLIC             2
-
-#define OUTPUT_MODE_NONE               0
-#define OUTPUT_MODE_PRIVATE            1
-#define OUTPUT_MODE_PUBLIC             2
-
-#define OUTPUT_FORMAT_PEM              0
-#define OUTPUT_FORMAT_DER              1
-
-#define USAGE \
-    "\n usage: key_app param=<>...\n"                   \
-    "\n acceptable parameters:\n"                       \
-    "    mode=private|public default: none\n"           \
-    "    filename=%%s         default: keyfile.key\n"   \
-    "    output_mode=private|public default: none\n"    \
-    USAGE_OUT                                           \
-    "\n"
-
-#if !defined(MBEDTLS_PK_WRITE_C) || !defined(MBEDTLS_FS_IO)
-int fooooo( int argc, char *argv[] )
-{
-    mbedtls_printf( "MBEDTLS_PK_WRITE_C and/or MBEDTLS_FS_IO not defined.\n" );
-    return( 0 );
-}
-#else
-/*
- * global options
- */
-struct options
-{
-    int mode;                   /* the mode to run the application in   */
-    const char *filename;       /* filename of the key file             */
-    int output_mode;            /* the output mode to use               */
-    const char *output_file;    /* where to store the constructed key file  */
-    int output_format;          /* the output format to use             */
-} opt;
-
-static int write_public_key( mbedtls_pk_context *key, const char *output_file )
-{
-    int ret;
-    FILE *f;
-    unsigned char output_buf[16000];
-    unsigned char *c = output_buf;
-    size_t len = 0;
-
-    memset(output_buf, 0, 16000);
-
-#if defined(MBEDTLS_PEM_WRITE_C)
-    if( opt.output_format == OUTPUT_FORMAT_PEM )
-    {
-        if( ( ret = mbedtls_pk_write_pubkey_pem( key, output_buf, 16000 ) ) != 0 )
-            return( ret );
-
-        len = strlen( (char *) output_buf );
-    }
-    else
-#endif
-    {
-        if( ( ret = mbedtls_pk_write_pubkey_der( key, output_buf, 16000 ) ) < 0 )
-            return( ret );
-
-        len = ret;
-        c = output_buf + sizeof(output_buf) - len - 1;
-    }
-
-    if( ( f = fopen( output_file, "w" ) ) == NULL )
-        return( -1 );
-
-    if( fwrite( c, 1, len, f ) != len )
-    {
-        fclose( f );
-        return( -1 );
-    }
-
-    fclose( f );
-
-    return( 0 );
-}
-
-static int write_private_key( mbedtls_pk_context *key, const char *output_file )
-{
-    int ret;
-    FILE *f;
-    unsigned char output_buf[16000];
-    unsigned char *c = output_buf;
-    size_t len = 0;
-
-    memset(output_buf, 0, 16000);
-
-#if defined(MBEDTLS_PEM_WRITE_C)
-    if( opt.output_format == OUTPUT_FORMAT_PEM )
-    {
-        if( ( ret = mbedtls_pk_write_key_pem( key, output_buf, 16000 ) ) != 0 )
-            return( ret );
-
-        len = strlen( (char *) output_buf );
-    }
-    else
-#endif
-    {
-        if( ( ret = mbedtls_pk_write_key_der( key, output_buf, 16000 ) ) < 0 )
-            return( ret );
-
-        len = ret;
-        c = output_buf + sizeof(output_buf) - len - 1;
-    }
-
-    if( ( f = fopen( output_file, "w" ) ) == NULL )
-        return( -1 );
-
-    if( fwrite( c, 1, len, f ) != len )
-    {
-        fclose( f );
-        return( -1 );
-    }
-
-    fclose( f );
-
-    return( 0 );
-}
 
 int fooooo( int argc, char *argv[] )
 {
-    int ret = 0;
-    mbedtls_pk_context key;
-    char buf[1024];
-    int i;
-    char *p, *q;
+    FILE *f;
+    int ret = 1;
+    size_t i;
+    mbedtls_pk_context pk;
+    unsigned char hash[32];
+    unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
+    char filename[512];
+
+    mbedtls_pk_init(&pk);
+
+    mbedtls_printf( "\n  . Reading public key from '%s'", argv[1] );
+    fflush( stdout );
+
+    if( ( ret = mbedtls_pk_parse_public_keyfile( &pk, argv[1] ) ) != 0 )
+    {
+        mbedtls_printf( " failed\n  ! mbedtls_pk_parse_public_keyfile returned -0x%04x\n", -ret );
+        goto exit;
+    }
 
     /*
-     * Set to sane values
+     * Extract the signature from the file
      */
-    mbedtls_pk_init( &key );
-    memset( buf, 0, sizeof( buf ) );
+    ret = 1;
+    mbedtls_snprintf( filename, sizeof(filename), "%s.sig", argv[2] );
 
-    if( argc == 0 )
+    if( ( f = fopen( filename, "rb" ) ) == NULL )
     {
-        usage:
-        ret = 1;
-        mbedtls_printf( USAGE );
+        mbedtls_printf( "\n  ! Could not open %s\n\n", filename );
         goto exit;
     }
 
-    opt.mode                = DFL_MODE;
-    opt.filename            = DFL_FILENAME;
-    opt.output_mode         = DFL_OUTPUT_MODE;
-    opt.output_file         = DFL_OUTPUT_FILENAME;
-    opt.output_format       = DFL_OUTPUT_FORMAT;
 
-    for( i = 1; i < argc; i++ )
+    i = fread( buf, 1, sizeof(buf), f );
+
+    fclose( f );
+
+    /*
+     * Compute the SHA-256 hash of the input file and
+     * verify the signature
+     */
+    mbedtls_printf( "\n  . Verifying the SHA-256 signature" );
+    fflush( stdout );
+
+    if( ( ret = mbedtls_md_file(
+            mbedtls_md_info_from_type( MBEDTLS_MD_SHA256 ),
+            argv[2], hash ) ) != 0 )
     {
-        p = argv[i];
-        if( ( q = strchr( p, '=' ) ) == NULL )
-            goto usage;
-        *q++ = '\0';
-
-        if( strcmp( p, "mode" ) == 0 )
-        {
-            if( strcmp( q, "private" ) == 0 )
-                opt.mode = MODE_PRIVATE;
-            else if( strcmp( q, "public" ) == 0 )
-                opt.mode = MODE_PUBLIC;
-            else
-                goto usage;
-        }
-        else if( strcmp( p, "output_mode" ) == 0 )
-        {
-            if( strcmp( q, "private" ) == 0 )
-                opt.output_mode = OUTPUT_MODE_PRIVATE;
-            else if( strcmp( q, "public" ) == 0 )
-                opt.output_mode = OUTPUT_MODE_PUBLIC;
-            else
-                goto usage;
-        }
-        else if( strcmp( p, "output_format" ) == 0 )
-        {
-#if defined(MBEDTLS_PEM_WRITE_C)
-            if( strcmp( q, "pem" ) == 0 )
-                opt.output_format = OUTPUT_FORMAT_PEM;
-            else
-#endif
-            if( strcmp( q, "der" ) == 0 )
-                opt.output_format = OUTPUT_FORMAT_DER;
-            else
-                goto usage;
-        }
-        else if( strcmp( p, "filename" ) == 0 )
-            opt.filename = q;
-        else if( strcmp( p, "output_file" ) == 0 )
-            opt.output_file = q;
-        else
-            goto usage;
-    }
-
-    if( opt.mode == MODE_NONE && opt.output_mode != OUTPUT_MODE_NONE )
-    {
-        mbedtls_printf( "\nCannot output a key without reading one.\n");
+        mbedtls_printf( " failed\n  ! Could not open or read %s\n\n", argv[2] );
         goto exit;
     }
 
-    if( opt.mode == MODE_PUBLIC && opt.output_mode == OUTPUT_MODE_PRIVATE )
+    if( ( ret = mbedtls_pk_verify( &pk, MBEDTLS_MD_SHA256, hash, 0,
+                                   buf, i ) ) != 0 )
     {
-        mbedtls_printf( "\nCannot output a private key from a public key.\n");
+        mbedtls_printf( " failed\n  ! mbedtls_pk_verify returned -0x%04x\n", -ret );
         goto exit;
     }
 
-    if( opt.mode == MODE_PRIVATE )
-    {
-        /*
-         * 1.1. Load the key
-         */
-        mbedtls_printf( "\n  . Loading the private key ..." );
-        fflush( stdout );
+    mbedtls_printf( "\n  . OK (the signature is valid)\n\n" );
 
-        ret = mbedtls_pk_parse_keyfile( &key, opt.filename, NULL );
-
-        if( ret != 0 )
-        {
-            mbedtls_strerror( ret, (char *) buf, sizeof(buf) );
-            mbedtls_printf( " failed\n  !  mbedtls_pk_parse_keyfile returned -0x%04x - %s\n\n", -ret, buf );
-            goto exit;
-        }
-
-        mbedtls_printf( " ok\n" );
-
-        /*
-         * 1.2 Print the key
-         */
-        mbedtls_printf( "  . Key information    ...\n" );
-
-#if defined(MBEDTLS_RSA_C)
-        if( mbedtls_pk_get_type( &key ) == MBEDTLS_PK_RSA )
-        {
-            mbedtls_rsa_context *rsa = mbedtls_pk_rsa( key );
-            mbedtls_mpi_write_file( "N:  ",  &rsa->N,  16, NULL );
-            mbedtls_mpi_write_file( "E:  ",  &rsa->E,  16, NULL );
-            mbedtls_mpi_write_file( "D:  ",  &rsa->D,  16, NULL );
-            mbedtls_mpi_write_file( "P:  ",  &rsa->P,  16, NULL );
-            mbedtls_mpi_write_file( "Q:  ",  &rsa->Q,  16, NULL );
-            mbedtls_mpi_write_file( "DP: ",  &rsa->DP, 16, NULL );
-            mbedtls_mpi_write_file( "DQ:  ", &rsa->DQ, 16, NULL );
-            mbedtls_mpi_write_file( "QP:  ", &rsa->QP, 16, NULL );
-        }
-        else
-#endif
-#if defined(MBEDTLS_ECP_C)
-        if( mbedtls_pk_get_type( &key ) == MBEDTLS_PK_ECKEY )
-        {
-            mbedtls_ecp_keypair *ecp = mbedtls_pk_ec( key );
-            mbedtls_mpi_write_file( "Q(X): ", &ecp->Q.X, 16, NULL );
-            mbedtls_mpi_write_file( "Q(Y): ", &ecp->Q.Y, 16, NULL );
-            mbedtls_mpi_write_file( "Q(Z): ", &ecp->Q.Z, 16, NULL );
-            mbedtls_mpi_write_file( "D   : ", &ecp->d  , 16, NULL );
-        }
-        else
-#endif
-            mbedtls_printf("key type not supported yet\n");
-
-    }
-    else if( opt.mode == MODE_PUBLIC )
-    {
-        /*
-         * 1.1. Load the key
-         */
-        mbedtls_printf( "\n  . Loading the public key ..." );
-        fflush( stdout );
-
-        ret = mbedtls_pk_parse_public_keyfile( &key, opt.filename );
-
-        if( ret != 0 )
-        {
-            mbedtls_strerror( ret, (char *) buf, sizeof(buf) );
-            mbedtls_printf( " failed\n  !  mbedtls_pk_parse_public_key returned -0x%04x - %s\n\n", -ret, buf );
-            goto exit;
-        }
-
-        mbedtls_printf( " ok\n" );
-
-        /*
-         * 1.2 Print the key
-         */
-        mbedtls_printf( "  . Key information    ...\n" );
-
-#if defined(MBEDTLS_RSA_C)
-        if( mbedtls_pk_get_type( &key ) == MBEDTLS_PK_RSA )
-        {
-            mbedtls_rsa_context *rsa = mbedtls_pk_rsa( key );
-            mbedtls_mpi_write_file( "N: ", &rsa->N, 16, NULL );
-            mbedtls_mpi_write_file( "E: ", &rsa->E, 16, NULL );
-        }
-        else
-#endif
-#if defined(MBEDTLS_ECP_C)
-        if( mbedtls_pk_get_type( &key ) == MBEDTLS_PK_ECKEY )
-        {
-            mbedtls_ecp_keypair *ecp = mbedtls_pk_ec( key );
-            mbedtls_mpi_write_file( "Q(X): ", &ecp->Q.X, 16, NULL );
-            mbedtls_mpi_write_file( "Q(Y): ", &ecp->Q.Y, 16, NULL );
-            mbedtls_mpi_write_file( "Q(Z): ", &ecp->Q.Z, 16, NULL );
-        }
-        else
-#endif
-            mbedtls_printf("key type not supported yet\n");
-    }
-    else
-        goto usage;
-
-    if( opt.output_mode == OUTPUT_MODE_PUBLIC )
-    {
-        write_public_key( &key, opt.output_file );
-    }
-    if( opt.output_mode == OUTPUT_MODE_PRIVATE )
-    {
-        write_private_key( &key, opt.output_file );
-    }
+    ret = 0;
 
     exit:
+    mbedtls_pk_free( &pk );
 
-    if( ret != 0 && ret != 1)
+#if defined(MBEDTLS_ERROR_C)
+    if( ret != 0 )
     {
-#ifdef MBEDTLS_ERROR_C
-        mbedtls_strerror( ret, buf, sizeof( buf ) );
-        mbedtls_printf( " - %s\n", buf );
-#else
-        mbedtls_printf("\n");
-#endif
+        mbedtls_strerror( ret, (char *) buf, sizeof(buf) );
+        mbedtls_printf( "  !  Last error was: %s\n", buf );
     }
-
-    mbedtls_pk_free( &key );
+#endif
 
 #if defined(_WIN32)
     mbedtls_printf( "  + Press Enter to exit this program.\n" );
@@ -437,4 +289,5 @@ int fooooo( int argc, char *argv[] )
 
     return( ret );
 }
-#endif /* MBEDTLS_PK_WRITE_C && MBEDTLS_FS_IO */
+#endif /* MBEDTLS_BIGNUM_C && MBEDTLS_SHA256_C &&
+          MBEDTLS_PK_PARSE_C && MBEDTLS_FS_IO */
