@@ -17,8 +17,14 @@
 #include <mbedtls/error.h>
 #include <mbedtls/platform.h>
 
+/** Generates a new PK context for this user */
+int qcry_key_generate(mbedtls_pk_context **k, const char *pers);
 
-int qcry_key_generate(mbedtls_pk_context **key);
+/** Saves a PK context into a public and private key file */
+int qcry_key_write(mbedtls_pk_context *key, const char *path, const char *username);
+
+/** Loads a key from disk into a PK context */
+int qcry_key_load(mbedtls_pk_context **key, const char *path, const char *username);
 
 int qcry_generate_key();
 

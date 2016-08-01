@@ -88,62 +88,72 @@ int dev_random_entropy_poll(void *data, unsigned char *output, size_t len, size_
 /**********************************************************************************************/
 /**********************************************************************************************/
 
-/**
- * Writing private key to specific path
- */
-int write_keys(mbedtls_pk_context *key, const char *output_file)
+
+int qcry_key_write(mbedtls_pk_context *key, const char *path, const char *username)
 {
-    /** A block to write the publc key! */
-    {
-        int ret;
-        FILE *f;
-        unsigned char output_buf[16000];
-        unsigned char *c = output_buf;
-        size_t len = 0;
+    size_t p_s = strlen(path);
+    size_t u_s = strlen(username);
 
-        memset(output_buf, 0, 16000);
-        ret = mbedtls_pk_write_pubkey_pem(key, output_buf, 16000);
-        if(ret != 0) return(ret);
+    /* Create an array and make sure it's REALLY empty */
+    char write_path[p_s + u_s + 4];
+    memset(write_path, 0, p_s + u_s + 4);
 
-        /** Get the exact length of what we're supposed to write */
-        len = strlen((char *) output_buf);
+    /* Copy the path into it and add a slash between folder and user if required */
+    strcpy(write_path, path);
+    if(strcmp(&path[p_s - 1], "/") != 0) strcat(write_path, "/");
+    strcat(write_path, "00_"); // TODO: Get number of keys from somewhere?
+    strcat(write_path, username);
 
-        char fiiile[strlen(output_file) + strlen(".pub")];
-        strcpy(fiiile, output_file);
-        strcat(fiiile, ".pub");
-
-        if((f = fopen(fiiile, "w")) == NULL)
-            return(-1);
-
-        if(fwrite(c, 1, len, f) != len)
-        {
-            fclose(f);
-            return(-1);
-        }
-
-        fclose(f);
-    }
+    /***************** PREPARE KEY WRITE *****************/
 
     int ret;
     FILE *f;
     size_t buf_s = 16000;
     unsigned char output_buf[buf_s];
     unsigned char *c = output_buf;
+    char new_filename[strlen(write_path) + strlen(".ext")];
+
     size_t len = 0;
 
-    /** Manually clearing buffer  */
-    memset(output_buf, 0, buf_s);
+    /***************** WRITE PUBLIC KEY *****************/
 
-    if ((ret = mbedtls_pk_write_key_pem(key, output_buf, buf_s)) != 0)
-        return (ret);
+    /** Clear Buffer and write into it  */
+    memset(output_buf, 0, buf_s);
+    ret = mbedtls_pk_write_pubkey_pem(key, output_buf, 16000);
+    if(ret != 0) return(ret);
+
+    /** Get the exact length of what we're supposed to write */
+    len = strlen((char *) output_buf);
+
+    memset(new_filename, 0, sizeof(new_filename));
+    strcpy(new_filename, write_path);
+    strcat(new_filename, ".pub");
+
+    if((f = fopen(new_filename, "w")) == NULL)
+        return -1;
+
+    if(fwrite(c, 1, len, f) != len)
+    {
+        fclose(f);
+        return -1;
+    }
+
+    fclose(f);
+
+    /***************** WRITE PRIVATE KEY *****************/
+
+    /** Clear Buffer and write into it  */
+    memset(output_buf, 0, buf_s);
+    ret = mbedtls_pk_write_key_pem(key, output_buf, buf_s);
+    if(ret != 0) return(ret);
 
     len = strlen((char *) output_buf);
 
-    char fiiile[strlen(output_file) + strlen(".key")];
-    strcpy(fiiile, output_file);
-    strcat(fiiile, ".key");
+    memset(new_filename, 0, sizeof(new_filename));
+    strcpy(new_filename, write_path);
+    strcat(new_filename, ".key");
 
-    if ((f = fopen(fiiile, "wb")) == NULL)
+    if ((f = fopen(new_filename, "wb")) == NULL)
         return (-1);
 
     if (fwrite(c, 1, len, f) != len) {
@@ -152,13 +162,15 @@ int write_keys(mbedtls_pk_context *key, const char *output_file)
     }
 
     fclose(f);
+
+    /***************** RETURN SUCCESS :) *****************/
+
     return 0;
 }
 
-int qcry_key_generate(mbedtls_pk_context **k)
+int qcry_key_generate(mbedtls_pk_context **k, const char *pers)
 {
     int ret = 0;
-    const char *pers = "qaul.net_generated_keys"; // Should be username or MAC Address
 
     /* Temp buffers */
     mbedtls_pk_context tmp_ctx;
@@ -168,8 +180,8 @@ int qcry_key_generate(mbedtls_pk_context **k)
     /** Setup core state for key generation */
     mbedtls_pk_init(&tmp_ctx);
     mbedtls_ctr_drbg_init(&ctr_drbg);
-//    memset(buf, 0, sizeof(buf));
 
+    /* Set some state variables */
     int type = DFL_TYPE;
     int rsa_keysize = DFL_RSA_KEYSIZE;
 
@@ -180,9 +192,8 @@ int qcry_key_generate(mbedtls_pk_context **k)
     mbedtls_entropy_init(&entropy);
     ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char *) pers, strlen(pers));
 
-
     if (ret != 0) {
-        mbedtls_printf(" failed\n  ! mbedtls_ctr_drbg_seed returned -0x%04x\n", -ret);
+        printf(" failed!\nmbedtls_ctr_drbg_seed returned %d\n", ret);
         goto exit;
     }
 
@@ -193,22 +204,13 @@ int qcry_key_generate(mbedtls_pk_context **k)
     ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(tmp_ctx), mbedtls_ctr_drbg_random, &ctr_drbg, rsa_keysize, 65537);
 
     if (ret != 0) {
-        printf(" failed\nmbedtls_pk_setup returned -0x%04x", -ret);
+        printf(" failed!\nmbedtls_ctr_drbg_seed returned %d\n", ret);
         goto exit;
     }
-
-    mbedtls_printf(" ok\n==> Key information:\n");
-    /*********************************************/
 
     /** Malloc the apropriate space we need and memcpy */
     (*k) = (mbedtls_pk_context *) malloc(sizeof(mbedtls_pk_context));
     memcpy(*k, &tmp_ctx, sizeof(mbedtls_pk_context));
-
-    ret = write_keys(&tmp_ctx, "/home/spacekookie/.qaul/01_spacekookie");
-    if (ret != 0) {
-        mbedtls_printf(" failed\n");
-        goto exit;
-    }
 
     /*********************************************/
 
@@ -217,10 +219,69 @@ int qcry_key_generate(mbedtls_pk_context **k)
     return ret;
 }
 
-int read_private_key(mbedtls_pk_context **key, const char *input_file)
+int qcry_key_load(mbedtls_pk_context **key, const char *path, const char *username)
 {
+    int ret = 0;
 
-    return 0;
+    /* Initialise a PK context on the stack to work with */
+    mbedtls_pk_context tmp;
+    mbedtls_pk_init(&tmp);
+
+    /*****************/
+    size_t p_s = strlen(path);
+    size_t u_s = strlen(username);
+
+    /* Create an array and make sure it's REALLY empty */
+    char write_path[p_s + u_s + 4];
+    memset(write_path, 0, p_s + u_s + 4);
+
+
+    /* Copy the path into it and add a slash between folder and user if required */
+    strcpy(write_path, path);
+    if(strcmp(&path[p_s - 1], "/") != 0) strcat(write_path, "/");
+    strcat(write_path, "00_"); // TODO: Get number of keys from somewhere?
+    strcat(write_path, username);
+
+    char new_filename[strlen(write_path) + strlen(".ext")];
+    memset(new_filename, 0, sizeof(new_filename));
+    strcpy(new_filename, write_path);
+    strcat(new_filename, ".key");
+
+    ret = mbedtls_pk_parse_keyfile(&tmp, new_filename, NULL);
+    if(ret) {
+        printf("An error occured while parsing private key file: %d!", ret);
+        goto cleanup;
+    }
+
+
+    /************ PARSE PUBLIC KEY FILE *************/
+    {
+        strcpy(write_path, path);
+        if(strcmp(&path[p_s - 1], "/") != 0) strcat(write_path, "/");
+        strcat(write_path, "00_"); // TODO: Get number of keys from somewhere?
+        strcat(write_path, username);
+
+        char new_filename[strlen(write_path) + strlen(".ext")];
+        memset(new_filename, 0, sizeof(new_filename));
+        strcpy(new_filename, write_path);
+        strcat(new_filename, ".pub");
+
+        ret = mbedtls_pk_parse_public_keyfile(&tmp, new_filename);
+        ret = 0;
+//        if(ret != 0) {
+//            printf("An error occured while parsing public key file: %d!", ret);
+//            goto cleanup;
+//        }
+    }
+
+    /******** Now go and copy the context into a new malloced instance ********/
+
+    (*key) = (mbedtls_pk_context*) malloc(sizeof(mbedtls_pk_context));
+    memcpy((*key), &tmp, sizeof(mbedtls_pk_context));
+
+    cleanup:
+    mbedtls_pk_free(&tmp);
+    return ret;
 }
 
 int sign_msg(mbedtls_pk_context *key, const char *msgfile)
