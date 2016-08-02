@@ -31,6 +31,8 @@ int qcry_key_load(mbedtls_pk_context **pub, mbedtls_pk_context **pri, const char
 int qcry_generate_key();
 
 int sign_msg(mbedtls_pk_context *pri, const char *msgfile);
+//int sign_msg(mbedtls_pk_context *pri, const char *message, char *(*signature), size_t *sign_len);
+
 
 int verify_msg(mbedtls_pk_context *pub, const char *signfile);
 
