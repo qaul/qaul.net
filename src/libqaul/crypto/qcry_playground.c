@@ -41,8 +41,8 @@
 #define DFL_USE_DEV_RANDOM          0
 
 /**
- * A function that provides better entropy for key generation if it's available for a specific platform
- * i.e. Linux
+ * A function that provides better entropy for key generation if it's available
+ * for a specific platform i.e. Linux
  *
  * @param data
  * @param output
@@ -198,7 +198,7 @@ int qcry_key_generate(mbedtls_pk_context **pri, const char *pers)
     ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char *) pers, strlen(pers));
 
     if (ret != 0) {
-        printf(" failed!\nmbedtls_ctr_drbg_seed returned %d\n", ret);
+        printf(" failed!\n\tmbedtls_ctr_drbg_seed returned %d\n", ret);
         goto exit;
     }
 
@@ -224,336 +224,217 @@ int qcry_key_generate(mbedtls_pk_context **pri, const char *pers)
     return ret;
 }
 
+/**
+ * NEW AND IMPROVED! Now actually works! :)
+ *
+ * @param pub Pointer to reference future public key
+ * @param pri Pointer to reference future private key
+ * @param path Path to the keystore (usually ~/.qaul/keys/)
+ * @param username Username the keys belong to
+ *
+ * @return Status code for errors
+ */
 int qcry_key_load(mbedtls_pk_context **pub, mbedtls_pk_context **pri, const char *path, const char *username)
 {
     int ret = 0;
 
-    /* Initialise a PK context on the stack to work with */
-    mbedtls_pk_context tmp_pub, tmp_pri;
-    mbedtls_pk_init(&tmp_pub);
-    mbedtls_pk_init(&tmp_pri);
-
-    /*****************/
-    size_t p_s = strlen(path);
-    size_t u_s = strlen(username);
-
-    /* Create an array and make sure it's REALLY empty */
-    char write_path[p_s + u_s + 4];
-    memset(write_path, 0, p_s + u_s + 4);
-
-
-    /* Copy the path into it and add a slash between folder and user if required */
-    strcpy(write_path, path);
-    if(strcmp(&path[p_s - 1], "/") != 0) strcat(write_path, "/");
-    strcat(write_path, "00_"); // TODO: Get number of keys from somewhere?
-    strcat(write_path, username);
-
-    char new_filename[strlen(write_path) + strlen(".ext")];
-    memset(new_filename, 0, sizeof(new_filename));
-    strcpy(new_filename, write_path);
-    strcat(new_filename, ".key");
-
-    ret = mbedtls_pk_parse_keyfile(&tmp_pri, new_filename, NULL);
-    if(ret) {
-        printf("An error occured while parsing private key file: %d!", ret);
+    /*** Malloc space for the pub and pri key values on heap ***/
+    (*pub) = (mbedtls_pk_context*) calloc(sizeof(mbedtls_pk_context),  1);
+    if(*pub == NULL) {
+        ret = EXIT_FAILURE;
         goto cleanup;
     }
 
-
-    /************ PARSE PUBLIC KEY FILE *************/
-    {
-        strcpy(write_path, path);
-        if(strcmp(&path[p_s - 1], "/") != 0) strcat(write_path, "/");
-        strcat(write_path, "00_"); // TODO: Get number of keys from somewhere?
-        strcat(write_path, username);
-
-        char new_filename[strlen(write_path) + strlen(".ext")];
-        memset(new_filename, 0, sizeof(new_filename));
-        strcpy(new_filename, write_path);
-        strcat(new_filename, ".pub");
-
-        ret = mbedtls_pk_parse_public_keyfile(&tmp_pub, new_filename);
-        if(ret != 0) {
-            printf("An error occured while parsing public key file: %d!", ret);
-            goto cleanup;
-        }
+    (*pri) = (mbedtls_pk_context*) calloc(sizeof(mbedtls_pk_context), 1);
+    if(*pri == NULL) {
+        ret = EXIT_FAILURE;
+        goto cleanup;
     }
 
-    /******** Now go and copy the context into a new malloced instance ********/
+    /*** Initialise the key contexts properly ***/
+    mbedtls_pk_init(*pub);
+    mbedtls_pk_init(*pri);
 
-    (*pub) = (mbedtls_pk_context*) malloc(sizeof(mbedtls_pk_context));
-    memcpy((*pub), &tmp_pub, sizeof(mbedtls_pk_context));
+    /*** Construct the required file names ***/
+    char pri_pth[512];
+    char pub_pth[512];
 
-    (*pri) = (mbedtls_pk_context*) malloc(sizeof(mbedtls_pk_context));
-    memcpy((*pri), &tmp_pri, sizeof(mbedtls_pk_context));
+    size_t p_s = strlen(path);
+    size_t u_s = strlen(username);
+
+    /** Build private key path **/
+    if(strcmp(&path[p_s - 1], "/") != 0)    mbedtls_snprintf(pri_pth, sizeof(pri_pth), "%s/00_%s.key", path, username);
+    else                                    mbedtls_snprintf(pri_pth, sizeof(pri_pth), "%s00_%s.key", path, username);
+
+    /* Build public key path */
+    if(strcmp(&path[p_s - 1], "/") != 0)    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s/00_%s.pub", path, username);
+    else                                    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s00_%s.pub", path, username);
+
+    /*** Read keys off disk and initialise the contexts ***/
+    mbedtls_printf("Parsing public key...");
+    fflush(stdout);
+
+    ret = mbedtls_pk_parse_public_keyfile(*pub, pub_pth);
+    if(ret != 0) {
+        mbedtls_printf("FAILED! mbedtls_pk_parse_public_keyfile returned -0x%04x\n", -ret);
+        goto cleanup;
+    }
+    mbedtls_printf("OK\n");
+
+    mbedtls_printf("Parsing private key...");
+    fflush(stdout);
+
+    ret = mbedtls_pk_parse_keyfile(*pri, pri_pth, "" );
+    if(ret != 0) {
+        mbedtls_printf("\"FAILED! mbedtls_pk_parse_keyfile returned -0x%04x\n", -ret);
+        goto cleanup;
+    }
+    mbedtls_printf("OK\n");
+
+    printf("== Keys loaded successfully ==\n\n");
+    return 0;
 
     cleanup:
-    mbedtls_pk_free(&tmp_pub);
+    mbedtls_pk_free(*pub);
+    mbedtls_pk_free(*pri);
     return ret;
 }
 
-int sign_msg(mbedtls_pk_context *key, const char *msgfile)
+int sign_msg(mbedtls_pk_context *pri, const char *msgfile)
 {
     FILE *f;
     int ret = 1;
-    mbedtls_entropy_context entropy;
-    mbedtls_ctr_drbg_context ctr_drbg;
+
     unsigned char hash[32];
     unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
-    char filename[512];
+
+    char sig_name[512];
     const char *pers = "mbedtls_pk_sign";
     size_t olen = 0;
+
+    /*** Setup entropy and random number generators for hashing ***/
+    mbedtls_entropy_context entropy;
+    mbedtls_ctr_drbg_context ctr_drbg;
 
     mbedtls_entropy_init(&entropy);
     mbedtls_ctr_drbg_init(&ctr_drbg);
 
-    mbedtls_printf( "\n  . Seeding the random number generator..." );
-    fflush( stdout );
+    mbedtls_printf("Seeding the random number generator...");
+    fflush(stdout);
 
-    if( ( ret = mbedtls_ctr_drbg_seed( &ctr_drbg, mbedtls_entropy_func, &entropy,
-                                       (const unsigned char *) pers,
-                                       strlen( pers ) ) ) != 0 )
-    {
-        mbedtls_printf( " failed\n  ! mbedtls_ctr_drbg_seed returned -0x%04x\n", -ret );
+    ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char *) pers, strlen(pers));
+    if(ret != 0) {
+        mbedtls_printf("FAILED\n\tmbedtls_ctr_drbg_seed returned -0x%04x\n", -ret);
         goto exit;
     }
+    mbedtls_printf("OK\n");
 
-    /*
-     * Compute the SHA-256 hash of the input file,
-     * then calculate the signature of the hash.
-     */
-    mbedtls_printf("\n  . Generating the SHA-256 signature");
-    fflush( stdout );
+    /*** (For now) Read input file from disk ***/
+     mbedtls_printf("Reading messagefile...");
+    fflush(stdout);
 
-    if( ( ret = mbedtls_md_file(
-            mbedtls_md_info_from_type( MBEDTLS_MD_SHA256 ),
-            msgfile, hash ) ) != 0 )
-    {
-        mbedtls_printf( " failed\n  ! Could not open or read %s\n\n", msgfile);
+    ret = mbedtls_md_file(mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), msgfile, hash);
+    if(ret != 0) {
+        mbedtls_printf("FAILED\n\tCould not open or read %s\n", msgfile);
         goto exit;
     }
+    mbedtls_printf("OK\n");
 
-    if( ( ret = mbedtls_pk_sign( key, MBEDTLS_MD_SHA256, hash, 0, buf, &olen,
-                                 mbedtls_ctr_drbg_random, &ctr_drbg ) ) != 0 )
-    {
-        mbedtls_printf( " failed\n  ! mbedtls_pk_sign returned -0x%04x\n", -ret );
+    /*** Compute SHA-256 Digest of our message ***/
+    mbedtls_printf("Computing SHA-256 Digest...");
+    fflush(stdout);
+
+    ret = mbedtls_pk_sign(pri, MBEDTLS_MD_SHA256, hash, 0, buf, &olen, mbedtls_ctr_drbg_random, &ctr_drbg);
+    if(ret != 0) {
+        mbedtls_printf("FAILED\n\tmbedtls_pk_sign returned -0x%04x\n", -ret);
         goto exit;
     }
+    mbedtls_printf("OK\n");
 
-    /*
-     * Write the signature into <filename>.sig
-     */
-    mbedtls_snprintf( filename, sizeof(filename), "%s.sig", msgfile);
+    /*** Go ahead and write the signature to disk ***/
+    mbedtls_snprintf(sig_name, sizeof(sig_name), "%s.sig", msgfile);
 
-    if( ( f = fopen( filename, "wb+" ) ) == NULL )
-    {
+    mbedtls_printf("Writing signature file...");
+    if((f = fopen(sig_name, "wb+" ) ) == NULL ) {
         ret = 1;
-        mbedtls_printf( " failed\n  ! Could not create %s\n\n", filename );
+        mbedtls_printf("FAILED\n\tCould not create %s\n", sig_name);
         goto exit;
     }
 
-    if( fwrite( buf, 1, olen, f ) != olen )
-    {
-        mbedtls_printf( "failed\n  ! fwrite failed\n\n" );
-        fclose( f );
+    if(fwrite(buf, 1, olen, f) != olen) {
+        mbedtls_printf("FAILED\n\tfwrite returned bad dump length!\n");
+        fclose(f);
         goto exit;
     }
 
-    fclose( f );
+    mbedtls_printf("OK\n");
 
-    mbedtls_printf( "\n  . Done (created \"%s\")\n\n", filename );
+    /*** Cleanup ***/
+    fclose(f);
+    ret = 0;
+    printf("== Signature written successfully ==\n\n");
 
     exit:
-    mbedtls_ctr_drbg_free( &ctr_drbg );
-    mbedtls_entropy_free( &entropy );
-
-    if( ret != 0 )
-    {
-        mbedtls_strerror( ret, (char *) buf, sizeof(buf) );
-        mbedtls_printf( "  !  Last error was: %s\n", buf );
-    }
-
-    return( ret );
-
-//    FILE *f;
-//    int ret = 1;
-//    mbedtls_entropy_context entropy;
-//    mbedtls_ctr_drbg_context ctr_drbg;
-//    unsigned char hash[32];
-//    unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
-//    char filename[512];
-//    const char *pers = "mbedtls_pk_sign";
-//    size_t olen = 0;
-//
-//    mbedtls_entropy_init( &entropy );
-//    mbedtls_ctr_drbg_init( &ctr_drbg );
-//
-//    mbedtls_printf( "\n  . Seeding the random number generator..." );
-//    fflush( stdout );
-//
-//    if( ( ret = mbedtls_ctr_drbg_seed( &ctr_drbg, mbedtls_entropy_func, &entropy,
-//                                       (const unsigned char *) pers,
-//                                       strlen( pers ) ) ) != 0 )
-//    {
-//        mbedtls_printf( " failed\n  ! mbedtls_ctr_drbg_seed returned -0x%04x\n", -ret );
-//        goto exit;
-//    }
-//
-//    /*
-//     * Compute the SHA-256 hash of the input file,
-//     * then calculate the signature of the hash.
-//     */
-//    mbedtls_printf( "\n  . Generating the SHA-256 signature" );
-//    fflush( stdout );
-//
-//    if( ( ret = mbedtls_md_file(
-//            mbedtls_md_info_from_type( MBEDTLS_MD_SHA256 ),
-//            msgfile, hash ) ) != 0 )
-//    {
-//        mbedtls_printf( " failed\n  ! Could not open or read %s\n\n", msgfile);
-//        goto exit;
-//    }
-//
-//    if( ( ret = mbedtls_pk_sign(key, MBEDTLS_MD_SHA256, hash, 0, buf, &olen,
-//                                 mbedtls_ctr_drbg_random, &ctr_drbg ) ) != 0 )
-//    {
-//        mbedtls_printf( " failed\n  ! mbedtls_pk_sign returned -0x%04x\n", -ret );
-//        goto exit;
-//    }
-//
-//    /*
-//     * Write the signature into <filename>.sig
-//     */
-//    mbedtls_snprintf( filename, sizeof(filename), "%s.sig", msgfile);
-//
-//    if( ( f = fopen( filename, "wb+" ) ) == NULL )
-//    {
-//        ret = 1;
-//        mbedtls_printf( " failed\n  ! Could not create %s\n\n", filename );
-//        goto exit;
-//    }
-//
-//    if( fwrite( buf, 1, olen, f ) != olen )
-//    {
-//        mbedtls_printf( "failed\n  ! fwrite failed\n\n" );
-//        fclose( f );
-//        goto exit;
-//    }
-//
-//    fclose( f );
-//
-//    mbedtls_printf( "\n  . Done (created \"%s\")\n\n", filename );
-//
-//    exit:
-//    mbedtls_ctr_drbg_free( &ctr_drbg );
-//    mbedtls_entropy_free( &entropy );
-//    return(ret);
+    return ret;
 }
 
-int verify_msg(mbedtls_pk_context *key, const char *signfile)
+int verify_msg(mbedtls_pk_context *pub, const char *msgfile)
 {
+    /*** Prapre are few variables we might need ***/
 
+    int ret = 0;
     FILE *f;
-    int ret = 1;
     size_t i;
+
     unsigned char hash[32];
     unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
+
     char filename[512];
+    mbedtls_snprintf(filename, sizeof(filename), "%s.sig", msgfile);
 
-    /*
-     * Extract the signature from the file
-     */
-    ret = 1;
-    mbedtls_snprintf(filename, sizeof(filename), "%s.sig", signfile);
+    /*** Read the signature file in from disk ***/
+    mbedtls_printf("Reading signature file...");
+    fflush(stdout);
 
-    if((f = fopen(filename, "rb")) == NULL)
+    if((f = fopen( filename, "rb")) == NULL)
     {
-        mbedtls_printf( "\n  ! Could not open %s\n\n", filename );
+        ret = 1;
+        mbedtls_printf("FAILED!\n\tCould not open %s\n\n", filename);
         goto exit;
     }
+    mbedtls_printf("OK\n");
 
-
+    /* Cleanup first buffer */
     i = fread(buf, 1, sizeof(buf), f);
     fclose(f);
 
-    /*
-     * Compute the SHA-256 hash of the input file and
-     * verify the signature
-     */
-    mbedtls_printf( "\n  . Verifying the SHA-256 signature" );
-    fflush( stdout );
+    /*** Compute SHA-256 Digest of our message ***/
+    mbedtls_printf("Computing SHA-256 Digest...");
+    fflush(stdout);
 
-    if((ret = mbedtls_md_file(
-            mbedtls_md_info_from_type( MBEDTLS_MD_SHA256 ),
-            signfile, hash)) != 0)
-    {
-        mbedtls_printf( " failed\n  ! Could not open or read %s\n\n", signfile);
+    ret = mbedtls_md_file(mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), msgfile, hash);
+    if(ret != 0) {
+        mbedtls_printf("FAILED!\n\tCould not open or read %s\n", msgfile);
         goto exit;
     }
+    mbedtls_printf("OK\n");
 
-    if((ret = mbedtls_pk_verify(key, MBEDTLS_MD_SHA256, hash, 0, buf, i)) != 0)
-    {
-        mbedtls_printf( " failed\n  ! mbedtls_pk_verify returned -0x%04x\n", -ret );
+    /*** Verify signature and JIT hash ***/
+    mbedtls_printf("Verifying message integrety...");
+    fflush(stdout);
+
+    ret = mbedtls_pk_verify(pub, MBEDTLS_MD_SHA256, hash, 0, buf, i);
+    if(ret != 0) {
+        mbedtls_printf("FAILED!\n\tTHIS MESSAGE HAS BEEN TEMPERED WITH. DO NOT TRUST!\n", -ret);
         goto exit;
     }
+    mbedtls_printf("OK\n");
 
-    mbedtls_printf("\n  . OK (the signature is valid)\n\n");
     ret = 0;
+    printf("== The message signature is valid ==\n\n");
 
     exit:
-
-    if( ret != 0 )
-    {
-        mbedtls_strerror( ret, (char *) buf, sizeof(buf) );
-        mbedtls_printf( "  !  Last error was: %s\n", buf );
-    }
-
-    return( ret );
-
-//    int ret = 1;
-//    FILE *f;
-//    size_t i;
-//    unsigned char hash[32];
-//    unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
-//    char filename[512];
-//
-//    ret = 1;
-//    mbedtls_snprintf(filename, sizeof(filename), "%s", signfile);
-//
-//    if((f = fopen(filename, "rb")) == NULL )
-//    {
-//        mbedtls_printf("\n  ! Could not open %s\n\n", filename);
-//        goto exit;
-//    }
-//
-//    /** Validate size and then close stream */
-//    i = fread( buf, 1, sizeof(buf), f );
-//    fclose(f);
-//
-//
-//    /*
-//     * Compute the SHA-256 hash of the input file and
-//     * verify the signature
-//     */
-//    mbedtls_printf( "\n  . Verifying the SHA-256 signature" );
-//    fflush( stdout );
-//
-//    if( ( ret = mbedtls_md_file(mbedtls_md_info_from_type( MBEDTLS_MD_SHA256 ), signfile, hash ) ) != 0 )
-//    {
-//        mbedtls_printf( " failed\n  ! Could not open or read %s\n\n", signfile );
-//        goto exit;
-//    }
-//
-//    if((ret = mbedtls_pk_verify(key, MBEDTLS_MD_SHA256, hash, 0, buf, i ) ) != 0)
-//    {
-//        mbedtls_printf( " failed\n  ! mbedtls_pk_verify returned -0x%04x\n", -ret );
-//        goto exit;
-//    }
-//
-//    mbedtls_printf( "\n  . OK (the signature is valid)\n\n" );
-//
-//    exit:
-//    return ret;
+    return ret;
 }
 
 
