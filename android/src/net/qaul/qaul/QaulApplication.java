@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 
 import android.app.Application;
 import android.app.Notification;
@@ -24,6 +25,8 @@ import android.content.res.AssetManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+//import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Message;
@@ -36,7 +39,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class QaulApplication extends Application {
-
 	public static final String MSG_TAG = "QaulApplication";
 	
 	// Devices-Information
@@ -47,7 +49,9 @@ public class QaulApplication extends Application {
 	public boolean startupCheckPerformed = false;
 
 	// WifiManager
-	private WifiManager wifiManager;
+	private WifiManager mWifiManager;
+    private WifiManagerNew mWifiManagerNew;
+    private WifiConfigurationNew wifiConfig;
 	
 	// PowerManagement
 	private PowerManager powerManager = null;
@@ -502,13 +506,13 @@ public class QaulApplication extends Application {
 		this.notificationManager.cancelAll();
 		
 		// switch wifi on and off to disable wifi
-		wifiManager.setWifiEnabled(true);
+		mWifiManager.setWifiEnabled(true);
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			// nothing
 		}
-		wifiManager.setWifiEnabled(false);
+		mWifiManager.setWifiEnabled(false);
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
@@ -623,7 +627,8 @@ public class QaulApplication extends Application {
         this.preferenceEditor = settings.edit();
 		
         // init wifiManager
-        wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE); 
+        mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE); 
+        mWifiManagerNew = new WifiManagerNew(mWifiManager);
         
         // Supplicant config
         this.wpasupplicant = this.coretask.new WpaSupplicant();
@@ -874,9 +879,9 @@ public class QaulApplication extends Application {
     
     // Wifi
     public void disableWifi() {
-    	if (this.wifiManager.isWifiEnabled()) {
+    	if (this.mWifiManager.isWifiEnabled()) {
     		origWifiState = true;
-    		this.wifiManager.setWifiEnabled(false);
+    		this.mWifiManager.setWifiEnabled(false);
     		Log.d(MSG_TAG, "Wifi disabled!");
         	// Waiting for interface-shutdown
     		try {
@@ -890,7 +895,7 @@ public class QaulApplication extends Application {
     public void enableWifi() {
     	if (origWifiState) {
         	// Waiting for interface-restart
-    		this.wifiManager.setWifiEnabled(true);
+    		this.mWifiManager.setWifiEnabled(true);
     		try {
     			Thread.sleep(5000);
     		} catch (InterruptedException e) {
