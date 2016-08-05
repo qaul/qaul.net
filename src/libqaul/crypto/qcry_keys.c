@@ -139,36 +139,55 @@ int qcry_keys_gen_r(qcry_keys_context *context, unsigned int length, unsigned ch
     return QCRY_STATUS_OK;
 }
 
-int qcry_keys_rsagen(qcry_keys_context *context, mbedtls_pk_context *(*key))
+int qcry_keys_rsagen(mbedtls_pk_context *(*pri), mbedtls_pk_context *(*pub), const char *pers)
 {
     int ret = 0;
 
-    /** Some stack variables to work with */
-    mbedtls_pk_context tmp_ctx;
+    /* Temp buffers */
+    mbedtls_pk_context tmp_pri;
+    mbedtls_entropy_context entropy;
+    mbedtls_ctr_drbg_context ctr_drbg;
+
+    /** Setup core state for key generation */
+    mbedtls_pk_init(&tmp_pri);
+    mbedtls_ctr_drbg_init(&ctr_drbg);
+
+    /* Set some state variables */
     int type = MBEDTLS_PK_RSA;
-    unsigned int rsa_keysize = key_length_by_type(QCRY_KEYS_RSA);
+    int rsa_keysize = QCRY_KEYS_KL_RSA;
 
     /*********************************************/
 
-    ret = mbedtls_pk_setup(&tmp_ctx, mbedtls_pk_info_from_type(type));
-    
-
-    ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(tmp_ctx), mbedtls_ctr_drbg_random, &context->rand, rsa_keysize, 65537);
+    /** Prepare key generation procedure */
+    printf("Seeding random number generators...\n");
+    mbedtls_entropy_init(&entropy);
+    ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char *) pers, strlen(pers));
 
     if (ret != 0) {
-        printf(" failed\nmbedtls_pk_setup returned -0x%04x", -ret);
+        printf(" failed!\n\tmbedtls_ctr_drbg_seed returned %d\n", ret);
         goto exit;
     }
 
     /*********************************************/
 
+    printf("Generating private key...");
+    ret = mbedtls_pk_setup(&tmp_pri, mbedtls_pk_info_from_type(type));
+    ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(tmp_pri), mbedtls_ctr_drbg_random, &ctr_drbg, rsa_keysize, 65537);
+
+    if (ret != 0) {
+        printf(" failed!\nmbedtls_ctr_drbg_seed returned %d\n", ret);
+        goto exit;
+    }
+
     /** Malloc the apropriate space we need and memcpy */
-    (*key) = (mbedtls_pk_context *) malloc(sizeof(mbedtls_pk_context));
-    memcpy(*key, &tmp_ctx, sizeof(mbedtls_pk_context));
+    (*pri) = (mbedtls_pk_context *) malloc(sizeof(mbedtls_pk_context));
+    memcpy(*pri, &tmp_pri, sizeof(mbedtls_pk_context));
+
+    /*********************************************/
 
     exit:
-
-    return QCRY_STATUS_OK;
+    mbedtls_ctr_drbg_free(&ctr_drbg);
+    return ret;
 }
 
 int qcry_keys_free(qcry_keys_context *context)
