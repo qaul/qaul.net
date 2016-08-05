@@ -31,10 +31,10 @@ int qcry_base64_enclength(int str_len)
 
 int qcry_base64_encode(char *buffer, const char *src, int src_len)
 {
-    int nbytesdecoded;
+    long nbytesdecoded;
     register const unsigned char *bufin;
     register unsigned char *bufout;
-    register int nprbytes;
+    long nprbytes;
 
     bufin = (const unsigned char *) src;
     while (pr2six[*(bufin++)] <= 63);
