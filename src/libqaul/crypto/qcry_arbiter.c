@@ -27,16 +27,16 @@
 typedef struct {
     struct qcry_arbit_token *token;
     qcry_usr_ctx            *ctx;
-} arbit_bind_item;
+} arbiter_user;
 
 typedef struct {
 
     /** Multi-User contexts */
-    arbit_bind_item     **bind_lst;
+    arbiter_user        **usr_list;
     size_t              users, max;
 
     /** Key generator context */
-    qcry_keys_context   *keys;
+    qcry_keys_context   *keygen;
 } qcry_arbit_ctx ;
 
 /** Static reference to our main arbiter context **/
@@ -44,7 +44,7 @@ static qcry_arbit_ctx *arbiter;
 static unsigned int session_ctr;
 
 /** Inline macro that's used to verify that the arbiter context we're operating on is valid **/
-#define SANE_ARBIT(to_return) if(arbiter == NULL || arbiter->keys == NULL || arbiter->max < 0) return to_return;
+#define SANE_ARBIT(to_return) if(arbiter == NULL || arbiter->keygen == NULL || arbiter->max < 0) return to_return;
 
 // Private utility function
 qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token)
@@ -55,10 +55,10 @@ qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token)
     for(i = 0; i <= arbiter->users; i++)
     {
         /** Check if the token is exactly the same TODO: Turn this into MACRO */
-        if(arbiter->bind_lst[i]->token->sess_id == token->sess_id
-                && arbiter->bind_lst[i]->token->token == token->token)
+        if(arbiter->usr_list[i]->token->sess_id == token->sess_id
+                && arbiter->usr_list[i]->token->token == token->token)
         {
-            return arbiter->bind_lst[i]->ctx;
+            return arbiter->usr_list[i]->ctx;
         }
     }
 
@@ -66,10 +66,11 @@ qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token)
     return NULL;
 }
 
+
 unsigned char *create_token()
 {
     unsigned char *buffer;
-    qcry_keys_gen_r(arbiter->keys, 256, &buffer);
+    qcry_keys_gen_r(arbiter->keygen, 256, &buffer);
 
     /** Don't forget to free the pointer again! */
     return buffer;
@@ -82,14 +83,14 @@ int qcry_arbit_init(unsigned int max_concurrent)
     arbiter = (qcry_arbit_ctx*) calloc(sizeof(qcry_arbit_ctx), 1);
 
     /** Initialise our keygenerator context */
-    arbiter->keys = (qcry_keys_context*) malloc(sizeof(qcry_keys_context));
-    if(arbiter->keys == NULL)
+    arbiter->keygen = (qcry_keys_context*) malloc(sizeof(qcry_keys_context));
+    if(arbiter->keygen == NULL)
         return QCRY_STATUS_MALLOC_FAIL;
-    qcry_keys_init(arbiter->keys);
+    qcry_keys_init(arbiter->keygen);
 
     /** Initialise our context and token lists */
-    arbiter->bind_lst = (arbit_bind_item**) calloc(sizeof(arbit_bind_item*), MIN_BFR_S);
-    if(arbiter->bind_lst == NULL)
+    arbiter->usr_list = (arbiter_user**) calloc(sizeof(arbiter_user*), MIN_BFR_S);
+    if(arbiter->usr_list == NULL)
         return QCRY_STATUS_MALLOC_FAIL;
 
     arbiter->max = MIN_BFR_S;
@@ -104,18 +105,18 @@ int qcry_arbit_init(unsigned int max_concurrent)
 
 int qcry_arbit_free()
 {
-    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
     int retval;
 
     /** Free key generator */
-    retval = qcry_keys_free(arbiter->keys);
+    retval = qcry_keys_free(arbiter->keygen);
     if(!retval)
         return QCRY_STATUS_ERROR;
 
     int i;
     for(i = 0; i <= arbiter->users; i++)
     {
-        // qcry_context_free(arbiter->bind_lst[i]->ctx);
+        // qcry_context_free(arbiter->usr_list[i]->ctx);
     }
 
     return QCRY_STATUS_OK;
@@ -126,18 +127,19 @@ int qcry_arbit_free()
  */
 int qcry_arbit_usrcreate(const char *username, const char *passphrase, unsigned int key_type)
 {
-    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
 
     int ret;
     char *fingerprint;
 
     /** First allocate space for our new user in the arbiter context */
-    arbit_bind_item *item = (arbit_bind_item*) calloc(sizeof(arbit_bind_item), 1);
+    arbiter_user *item = (arbiter_user*) calloc(sizeof(arbiter_user), 1);
     item->ctx = (qcry_usr_ctx*) malloc(sizeof(qcry_usr_ctx));
+
     ret = qcry_context_init(item->ctx, username, PK_RSA);
     if(ret != 0) {
         printf("Context init failed with code %d", ret);
-        return QCRY_STATUS_CTX_INVALID;
+        return QCRY_STATUS_INVALID_CTX;
     }
 
     item->token = (struct qcry_arbit_token*) calloc(sizeof(struct qcry_arbit_token), 1);
@@ -150,7 +152,7 @@ int qcry_arbit_usrcreate(const char *username, const char *passphrase, unsigned 
 
     /** Generate a primary user key */
     unsigned char *pri_k;
-    ret = qcry_keys_gen_m(arbiter->keys, QCRY_KEYS_KL_RSA, &pri_k);
+    ret = qcry_keys_gen_m(arbiter->keygen, QCRY_KEYS_KL_RSA, &pri_k);
     if(ret != 0)
         return QCRY_STATUS_KEYGEN_FAILED;
 
@@ -169,7 +171,7 @@ int qcry_arbit_getusrinfo(const char *(*fingerprint), const char *username)
 
 int qcry_arbit_usrdestroy(const char *fingerprint)
 {
-    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
 
     return QCRY_STATUS_OK;
 }
@@ -181,7 +183,7 @@ int qcry_arbit_usrdestroy(const char *fingerprint)
  */
 int qcry_arbit_save(const char *finterprint, struct qcry_arbit_token *token)
 {
-    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
 
     return QCRY_STATUS_OK;
 }
@@ -195,7 +197,7 @@ int qcry_arbit_save(const char *finterprint, struct qcry_arbit_token *token)
  */
 int qcry_arbit_restore(const char *username, const char *passphrase)
 {
-    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
 
     return QCRY_STATUS_OK;
 }
@@ -207,7 +209,7 @@ int qcry_arbit_restore(const char *username, const char *passphrase)
  */
 int qcry_arbit_start(const char *fp_self, const char *fp_trgt, struct qcry_arbit_token *(*token))
 {
-    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
 
     return QCRY_STATUS_OK;
 }
@@ -217,29 +219,28 @@ int qcry_arbit_start(const char *fp_self, const char *fp_trgt, struct qcry_arbit
  */
 int qcry_arbit_stop(struct qcry_arbit_token *token)
 {
-    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
 
     return QCRY_STATUS_OK;
 }
 
-
 int qcry_arbit_sendmsg(struct qcry_arbit_token *token, char *(*encrypted), const char *plain)
 {
-    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
 
     return QCRY_STATUS_OK;
 }
 
 int qcry_arbit_parsemsg(struct qcry_arbit_token *token, char *(*parsed), const char *encrypted)
 {
-    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
 
     return QCRY_STATUS_OK;
 }
 
 int qcry_arbit_signmsg(struct qcry_arbit_token *token, char *(*sgn_buffer), const char *message)
 {
-    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
 
     return QCRY_STATUS_OK;
 }
@@ -254,7 +255,7 @@ int qcry_arbit_signmsg(struct qcry_arbit_token *token, char *(*sgn_buffer), cons
  */
 int qcry_arbit_verify(struct qcry_arbit_token *token, const char *message, const char *signature)
 {
-    SANE_ARBIT(QCRY_STATUS_CTX_INVALID)
+    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
 
     return QCRY_STATUS_OK;
 }
