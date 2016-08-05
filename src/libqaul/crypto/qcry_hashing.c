@@ -1,27 +1,34 @@
 #include <qaullib/qcry_hashing.h>
 #include <memory.h>
 #include <stdlib.h>
+
 #include <mbedtls/sha512.h>
 #include <mbedtls/sha256.h>
+#include <mbedtls/base64.h>
+#include <mbedtls/platform.h>
+
 #include "qcry_helper.h"
 #include "qcry_context.h"
 
 int qcry_hashing_init(struct qcry_hash_ctx *ctx, unsigned int hash, const char *salt)
 {
-    int err_no = 0;
+    int err_no = QCRY_STATUS_MALLOC_FAIL; // Default error
 
     memset(ctx, 0, sizeof(struct qcry_hash_ctx));
     ctx->hash = hash;
 
     /* Copy our salt */
-    ctx->salt = malloc(sizeof(char) * strlen(salt));
-    if(!ctx->salt)
-        goto failed;
-    strcpy(ctx->salt, salt);
+    if(salt != NULL) {
+        ctx->salt = malloc((sizeof(char) * strlen(salt)) + 1);
+        if(!ctx->salt)
+            goto failed;
+        strcpy(ctx->salt, salt);
+    }
 
     /* Initialise a default buffer size */
     ctx->bfr_s = MIN_BFR_S;
     ctx->bfr_occ = 0;
+
     ctx->curr_bfr = (char*) calloc(sizeof(char), ctx->bfr_s);
     if(!ctx->curr_bfr)
         goto failed;
@@ -56,12 +63,12 @@ int qcry_hashing_init(struct qcry_hash_ctx *ctx, unsigned int hash, const char *
 
     /* Set magic number and return */
     ctx->mgno = MAGICK_NO;
-    return QCRY_STATUS_OK;
+    err_no = QCRY_STATUS_OK;
 
     /* If errors occur we need to recover the damage */
     failed:
-    free(ctx->salt);
-    free(ctx->curr_bfr);
+    if(err_no != 0) free(ctx->salt);
+    if(err_no != 0) free(ctx->curr_bfr);
     return (err_no != 0) ? err_no : QCRY_STATUS_MALLOC_FAIL;
 }
 
@@ -89,7 +96,7 @@ int qcry_hashing_append(struct qcry_hash_ctx *ctx, const char *msg)
 {
     CHECK_SANE
 
-    int prev_s = ctx->bfr_s;
+    size_t prev_s = ctx->bfr_s;
 
     /* Check that our buffer is big enough to handle new data */
     if(ctx->bfr_s < strlen(msg)) {
@@ -101,6 +108,7 @@ int qcry_hashing_append(struct qcry_hash_ctx *ctx, const char *msg)
 
         /* Make a new clean buffer */
         char *tmp = (char*) calloc(sizeof(char), ctx->bfr_s);
+        if(tmp == NULL) return QCRY_STATUS_MALLOC_FAIL;
 
         /* Prepend the salt if it's the first block and we have one */
         if(prev_s == 0 && ctx->salt) {
@@ -120,6 +128,8 @@ int qcry_hashing_append(struct qcry_hash_ctx *ctx, const char *msg)
     /** Append our message and increase the occupancy counter */
     ctx->bfr_occ += strlen(msg);
     strcat(ctx->curr_bfr, msg);
+
+    return QCRY_STATUS_OK;
 }
 
 /** Read the current state of the buffer **/
@@ -131,17 +141,23 @@ const char *qcry_hashing_buffer(struct qcry_hash_ctx *ctx)
 }
 
 /** Build the buffer to a hash and encode it into a return buffer */
-int qcry_hashing_build(struct qcry_hash_ctx *ctx, unsigned int encoding, unsigned char *(*buffer))
+int qcry_hashing_build(struct qcry_hash_ctx *ctx, unsigned int encoding, char *(*buffer))
 {
     CHECK_SANE
-    int err_no = 0;
 
     /* Cut down buffer size to required only */
-    const char *tmpsrc = calloc(sizeof(char), ctx->bfr_occ);
+    unsigned char *tmpsrc = calloc(sizeof(unsigned char), ctx->bfr_occ);
     memcpy(tmpsrc, ctx->curr_bfr, ctx->bfr_occ);
 
+    size_t hash_len;
+    switch(ctx->hash) {
+        case QCRY_HASH_SHA256: hash_len = QCRY_SHA256_LENGTH; break;
+        case QCRY_HASH_SHA512: hash_len = QCRY_SHA512_LENGTH; break;
+        default: return QCRY_STATUS_INVALID_CTX;
+    }
+
     /** Provide a buffer output for any hash function */
-    char output[256];
+    unsigned char *output = (unsigned char*) malloc(sizeof(unsigned char) * hash_len);
 
     /** Use the apropriate function depending on what hash function we require **/
     switch(ctx->hash) {
@@ -167,26 +183,52 @@ int qcry_hashing_build(struct qcry_hash_ctx *ctx, unsigned int encoding, unsigne
             break;
 
         default:
-            err_no = QCRY_STATUS_CTX_INVALID;
+            ret = QCRY_STATUS_INVALID_CTX;
             goto failed;
     }
 
     /** Select output encoding and process buffer **/
-    switch(ctx->encoding) {
+    switch(encoding) {
         case QCRY_HASH_BASE64:
+            {
+                /* Determine base64 size and malloc buffer for return */
+                int base64_len = qcry_base64_enclength((int) hash_len);
+                (*buffer) = (char*) calloc(sizeof(char), (unsigned int) base64_len);
+
+                /* Call the mbedtls base64 function becase Apple sucks */
+                size_t bw;
+                mbedtls_base64_encode((unsigned char*) *buffer,
+                                      (unsigned int) base64_len,
+                                      &bw, output, hash_len);
+
+                printf("Hash in base64 is: %s\n", *buffer);
+            }
 
             break;
 
         default:
-            err_no = QCRY_STATUS_CTX_INVALID;
+            ret = QCRY_STATUS_INVALID_CTX;
             goto failed;
     }
 
-    /* Free temp buffer */
-    free(tmpsrc);
 
     failed:
-    return (err_no != 0) ? err_no : QCRY_STATUS_ERROR;
+
+    /* Free temp buffer */
+    free(tmpsrc);
+    free(output);
+    return (ret != 0) ? ret : QCRY_STATUS_ERROR;
 
 }
 
+int qcry_hashing_clear(struct qcry_hash_ctx *ctx)
+{
+    free(ctx->curr_bfr);
+    ctx->bfr_s = MIN_BFR_S;
+    ctx->bfr_occ = 0;
+
+    ctx->curr_bfr = (char*) calloc(sizeof(char), ctx->bfr_s);
+    if(!ctx->curr_bfr) return QCRY_STATUS_MALLOC_FAIL;
+
+    return QCRY_STATUS_OK;
+}
