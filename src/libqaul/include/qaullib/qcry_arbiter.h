@@ -89,8 +89,8 @@ int qcry_arbit_signmsg(struct qcry_arbit_token *token, char *(*sgn_buffer), cons
  * as well as a message and the elegid signature to verify the pair.
  *
  * Returns 0 if signature could be verified.
- * Returns -1 if signature was faulty
- * Returns 1...255 for runtime errors
+ * Returns 1 if signature was faulty
+ * Returns -1...-255 for runtime errors
  */
 int qcry_arbit_verify(struct qcry_arbit_token *token, const char *message, const char *signature);
 

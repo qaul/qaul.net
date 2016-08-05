@@ -4,6 +4,7 @@
 
 #ifndef QAUL_QCRY_CONTEXT_H
 #define QAUL_QCRY_CONTEXT_H
+
 /************************************************************************
  ***
  ***
@@ -19,66 +20,58 @@
 #include <mbedtls/aes.h>
 #include <mbedtls/pk.h>
 #include <mbedtls/ctr_drbg.h>
+#include <qaullib/qcry_hashing.h>
 
 #include "qcry_helper.h"
 
 /** Describes the context in which a crypto context is held */
 typedef enum {
-    PK_RSA = 0,
-    ECDSA = 1,
-    AES256 = 2
+    PK_RSA  = (1 << 1),
+    ECDSA   = (1 << 2),
+    AES256  = (1 << 3)
 } qcry_ciph_t;
 
-/* Data required to do public key crypto*/
+
+/**
+ * A target for communication or verification. Contains every bit
+ * of information that can be known about another user on the
+ * network at THAT time.
+ *
+ * The types field is a bitset that can be used to select multiple ciphers
+ */
 typedef struct {
-    unsigned char   *usr_key_pub;
-    unsigned char   *fp;
 
-    int             key_len;
-    short           mgno;
-} qcry_pk_target;
+    /* Some basic identify information */
+    const char              *username;
+    const char              *fingerprint;
+    mbedtls_pk_context      *public;
 
-/* Data required to do sym key crypto*/
-typedef struct {
-    unsigned char      *sh_key_pri;
-} qcry_sk_taret;
-
-/** Combined structure to hold unionised data */
-typedef struct {
-    union d
-    {
-        qcry_sk_taret   *sk;
-        qcry_pk_target  *pk;
-    } d;
-
-    union ctx {
-        mbedtls_pk_context  *pk;
-        mbedtls_aes_context *sk;
-    } ctx;
-    short               mgno;
+    /* Some target metadata */
+    mbedtls_aes_context     *symm;
+    qcry_ciph_t             types;
+    short                   mgno;
 } qcry_trgt_t;
 
 /**
- * A context that stores data for a [1] - [1] communication. Includes private key for <self>
- * as well as public key for target. This will be extended to work against multiple targets.
+ * A user context contains all the identify information required for
+ * successful communication and verification to other users on the
+ * network.
  *
- * Contexts aren't usually very long-lived and swap in and out of existance all the time.
- * Don't expect to store long-term data in a user context for exactly this reason.
- *
- * Contexts themselves aren't tread safe and need to be protected by the arbiter API. Under normal
- * circumstances the code for this should never be exposed to the outside world.
+ * In addition to identify information and cipher metadata it also
+ * contains'a list of "targets". A target is a recipient or a source
+ * of communication and is thus always connected to a public key and
+ * sometimes a symmetric cipher that can be used to encrypt long data.
  */
 typedef struct qcry_usr_ctx {
-
-    /* Store private key and key context */
-    unsigned char       *usr_key_pri;
-    unsigned int        use_ctr;
-    qcry_ciph_t         ciph_t;
-
-    /* Metadata about a uesr */
-    unsigned char       *usr_name;
-    unsigned char       *usr_fp;
     short               mgno;
+
+    /* Store identify information */
+    const char          *username;
+    char                *fingerprint;
+    time_t              birthdate;
+    mbedtls_pk_context  *private, *public;
+    qcry_ciph_t         ciph_t;
+    unsigned int        ciph_len;
 
     /* Target data for this context */
     qcry_trgt_t         **trgts;
@@ -89,28 +82,24 @@ typedef struct qcry_usr_ctx {
     mbedtls_ctr_drbg_context    *ctr_drbg;
 } qcry_usr_ctx;
 
-/** Used to check if initialisation was done on a context */
-#define CHECK_SANE \
-    if(ctx->mgno != 3) return QCRY_STATUS_CTX_INVALID;
-
 /* Used to check if initialisation was done on a target */
-#define CHECK_TARGET(ctx, trgt_no)  \
-    { if(ctx->trgts[trgt_no]->mgno != MAGICK_NO) return QCRY_STATUS_INVALID_TARGET; }
+//#define CHECK_TARGET(ctx, trgt_no)  \
+//    { if(ctx->trgts[trgt_no]->mgno != MAGICK_NO) return QCRY_STATUS_INVALID_TARGET; }
 
 /* Helper macro to remove a target and all its allocated child heap memory */
-#define CLEAR_TARGET(ciph_t, trgt) \
-    { if(ciph_t == AES256) { \
-        mbedtls_aes_free(trgt->ctx.sk); \
-        free(trgt->ctx.sk); \
-        free(trgt->d.sk->sh_key_pri); \
-        free(trgt->d.sk); \
-    } else { \
-        mbedtls_pk_free(trgt->ctx.pk); \
-        free(trgt->ctx.pk); \
-        free(trgt->d.pk->usr_key_pub); \
-        free(trgt->d.pk->fp); \
-        free(trgt->d.pk); } \
-    free(trgt); }
+//#define CLEAR_TARGET(ciph_t, trgt) \
+//    { if(ciph_t == AES256) { \
+//        mbedtls_aes_free(trgt->ctx.sk); \
+//        free(trgt->ctx.sk); \
+//        free(trgt->d.sk->sh_key_pri); \
+//        free(trgt->d.sk); \
+//    } else { \
+//        mbedtls_pk_free(trgt->ctx.pk); \
+//        free(trgt->ctx.pk); \
+//        free(trgt->d.pk->usr_key_pub); \
+//        free(trgt->d.pk->fp); \
+//        free(trgt->d.pk); } \
+//    free(trgt); }
 
 
 // TODO: Change this into a macro!
@@ -127,11 +116,17 @@ static int QCRY_KEY_LEN[] = { 2048, 192, 256 };
 int qcry_context_init(qcry_usr_ctx *ctx, const char *usr_name, qcry_ciph_t ciph_t);
 int qcry_context_free(qcry_usr_ctx *ctx);
 
-
 /**
- * Attaches a private key to a context. The key is validated and length matched
+ * Attaches a key-pair to this user context which makes it actually operational.
+ * If previous key-pairs were already present (for whatever reason) they will
+ * be FREED from their suffering in memory!
+ *
+ * @param ctx
+ * @param pub
+ * @param pri
+ * @return
  */
-int qcry_context_prk_attach(qcry_usr_ctx *ctx, const unsigned char *usr_key_pri);
+int qcry_context_attach(qcry_usr_ctx *ctx, mbedtls_pk_context *pub, mbedtls_pk_context *pri);
 
 int qcry_context_get_finterprint(qcry_usr_ctx *ctx, unsigned char *(*fingerprint));
 
