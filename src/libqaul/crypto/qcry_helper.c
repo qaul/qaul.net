@@ -26,7 +26,7 @@ static const char base64[] =
 
 int qcry_base64_enclength(int str_len)
 {
-    return (( + 2) / 3 * 4) + 1;
+    return ((str_len + 2) / 3 * 4) + 1;
 }
 
 int qcry_base64_encode(char *buffer, const char *src, int src_len)
