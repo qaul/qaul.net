@@ -19,7 +19,7 @@
 #define QCRY_STATUS_INVALID_PARAMS      12
 
 #define QCRY_STATUS_SEED_FAILED         14
-#define QCRY_STATUS_CTX_INVALID         16
+#define QCRY_STATUS_INVALID_CTX         16
 #define QCRY_STATUS_INVALID_TARGET      18
 
 #define QCRY_STATUS_INVALID_KEYS        21
@@ -46,6 +46,10 @@
 #define MIN_BFR_S   4
 #define MAX_TIMEOUT 500
 #define TIME_SLEEP  50
+
+#define CHECK_SANE \
+    if(ctx->mgno != MAGICK_NO) return QCRY_STATUS_INVALID_CTX; \
+    int ret = 0;
 
 /**
  * This macro checks if a buffer is full and should be increased in size.
