@@ -90,6 +90,7 @@ public class QaulApplication extends Application {
     NativeQaul nativeQaul;
     static String dataPathString;
     int qaulStarted = -1;
+    int qaulWifiMethod = 0;
     
     // these are crashing the app ... use a different setup
     // timers & events
@@ -257,6 +258,10 @@ public class QaulApplication extends Application {
 	        if(startWifiConfigCyanogen())
 	        {
 	        	Log.i(MSG_TAG, "Wifi configured via cyanogen: startWifiConfigCyanogen()");
+	        	qaulWifiMethod = 1;
+	        	// create tether configuration file
+	        	updateConfiguration();
+	        	
 	        	qaulStarted = 30;
 	        }
 	        else
@@ -265,7 +270,7 @@ public class QaulApplication extends Application {
 	        	
 	        	if(startTether()) 
 				{
-					Log.d(MSG_TAG, "wifi successfully configured");
+	        		Log.d(MSG_TAG, "wifi successfully configured");
 					this.showStartNotification();
 				}
 				else 
@@ -273,6 +278,7 @@ public class QaulApplication extends Application {
 					// TODO: show error screen
 					Log.e(MSG_TAG, "wifi configuration error");
 				}
+        		qaulWifiMethod = 2;
 				
 				qaulStarted = 29;	        	
 	        }
@@ -501,23 +507,27 @@ public class QaulApplication extends Application {
     		this.coretask.runRootCommand("killall socat");
     	}
 		// Stopping Tether
-		this.stopTether();
+    	if(qaulWifiMethod == 2)
+    	{
+    		this.stopTether();
+    		
+    		// switch wifi on and off to disable wifi
+    		mWifiManager.setWifiEnabled(true);
+    		try {
+    			Thread.sleep(500);
+    		} catch (InterruptedException e) {
+    			// nothing
+    		}
+    		mWifiManager.setWifiEnabled(false);
+    		try {
+    			Thread.sleep(500);
+    		} catch (InterruptedException e) {
+    			// nothing
+    		}
+    	}
+    	
 		// Remove all notifications
 		this.notificationManager.cancelAll();
-		
-		// switch wifi on and off to disable wifi
-		mWifiManager.setWifiEnabled(true);
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			// nothing
-		}
-		mWifiManager.setWifiEnabled(false);
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			// nothing
-		}
 		
 		// kill this process
 		System.exit(0);
@@ -769,44 +779,50 @@ public class QaulApplication extends Application {
 	// java API in cyanogen mod
 	public boolean startWifiConfigCyanogen()
 	{
-		boolean status;
-		
-		/* We use WifiConfigurationNew which provides a way to access
-		 * the Ad-hoc mode and static IP configuration options which are
-		 * not part of the standard API yet */
-		WifiConfigurationNew wifiConfig = new WifiConfigurationNew();
-
-		/* Set the SSID and security as normal */
-		wifiConfig.SSID = "\"qaul.net\"";
-		wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
-
-		/* Use reflection until API is official */
-		wifiConfig.setIsIBSS(true);
-		wifiConfig.setFrequency(2462);
-
-		/* Use reflection to configure static IP addresses */
-		wifiConfig.setIpAssignment("STATIC");
-		wifiConfig.setIpAddress(InetAddress.getByName("10.0.0.2"), 24);
-		wifiConfig.setGateway(InetAddress.getByName("10.0.0.1"));
-		wifiConfig.setDNS(InetAddress.getByName("8.8.8.8"));
-
-		/* Add, enable and save network as normal */
-		int id = mWifiManager.addNetwork(wifiConfig);
-		if (id < 0)
-		{
-			Log.i(MSG_TAG, "Failed to add Ad-hoc network");
-			status = false;
-		}
-		else
-		{
-			Log.i(MSG_TAG, "Ad-hoc network added");
+		try{
+			boolean status = false;
 			
-			mWifiManager.enableNetwork(id, true);
-			mWifiManager.saveConfiguration();
-			status = true;
-		}
-		
-		return status;
+			/* We use WifiConfigurationNew which provides a way to access
+			 * the Ad-hoc mode and static IP configuration options which are
+			 * not part of the standard API yet */
+			WifiConfigurationNew wifiConfig = new WifiConfigurationNew();
+	
+			/* Set the SSID and security as normal */
+			wifiConfig.SSID = "\"qaul.net\"";
+			wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
+	
+			/* Use reflection until API is official */
+			wifiConfig.setIsIBSS(true);
+			wifiConfig.setFrequency(2462);
+	
+			/* Use reflection to configure static IP addresses */
+			wifiConfig.setIpAssignment("STATIC");
+			wifiConfig.setIpAddress(InetAddress.getByName("10.0.0.2"), 24);
+			wifiConfig.setGateway(InetAddress.getByName("10.0.0.1"));
+			wifiConfig.setDNS(InetAddress.getByName("8.8.8.8"));
+	
+			/* Add, enable and save network as normal */
+			int id = mWifiManager.addNetwork(wifiConfig);
+			if (id < 0)
+			{
+				Log.i(MSG_TAG, "Failed to add Ad-hoc network");
+				status = false;
+			}
+			else
+			{
+				Log.i(MSG_TAG, "Ad-hoc network added");
+				
+				mWifiManager.enableNetwork(id, true);
+				mWifiManager.saveConfiguration();
+				status = true;
+			}
+			
+			return status;
+		} catch (Exception e) {
+            Log.i(MSG_TAG, "Wifi configuration failed!");
+            e.printStackTrace();
+            return false;
+        }
 	}
 	
 	// Start/Stop Tethering
