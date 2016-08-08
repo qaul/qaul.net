@@ -52,12 +52,12 @@ int qcry_keys_init_all(qcry_keys_context *context, short pr, short mseed, short 
  * is required for the entropy source and random seed generation. The provided reference will
  * be malloced so don't forget to free it again when you're done with it!
  *
- * @param pri Private key part
- * @param pub Public key part
+ * @param ctx The key generator context
+ * @param mul Combined key part that needs to be written to disk in two parts
  * @param pers A personal seed
  * @return
  */
-int qcry_keys_rsagen(mbedtls_pk_context *(*pri), mbedtls_pk_context *(*pub), const char *pers);
+int qcry_keys_rsagen(qcry_keys_context *ctx, mbedtls_pk_context *(*mul), const char *pers);
 
 /**
 * Function that creates a key ased on a few parameters passed in

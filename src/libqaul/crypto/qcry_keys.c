@@ -139,7 +139,7 @@ int qcry_keys_gen_r(qcry_keys_context *context, unsigned int length, unsigned ch
     return QCRY_STATUS_OK;
 }
 
-int qcry_keys_rsagen(mbedtls_pk_context *(*pri), mbedtls_pk_context *(*pub), const char *pers)
+int qcry_keys_rsagen(qcry_keys_context *ctx, mbedtls_pk_context *(*mul), const char *pers)
 {
     int ret = 0;
 
@@ -159,29 +159,36 @@ int qcry_keys_rsagen(mbedtls_pk_context *(*pri), mbedtls_pk_context *(*pub), con
     /*********************************************/
 
     /** Prepare key generation procedure */
-    printf("Seeding random number generators...\n");
+    printf("Seeding random number generators...");
     mbedtls_entropy_init(&entropy);
     ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char *) pers, strlen(pers));
 
     if (ret != 0) {
-        printf(" failed!\n\tmbedtls_ctr_drbg_seed returned %d\n", ret);
+        printf("FAILED!\n\tmbedtls_ctr_drbg_seed returned %d\n", ret);
         goto exit;
     }
+    printf("OK\n");
 
     /*********************************************/
 
     printf("Generating private key...");
     ret = mbedtls_pk_setup(&tmp_pri, mbedtls_pk_info_from_type(type));
-    ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(tmp_pri), mbedtls_ctr_drbg_random, &ctr_drbg, rsa_keysize, 65537);
-
     if (ret != 0) {
-        printf(" failed!\nmbedtls_ctr_drbg_seed returned %d\n", ret);
+        printf("FAILED!\nmbedtls_pk_setup returned %d\n", ret);
         goto exit;
     }
 
+    ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(tmp_pri), mbedtls_ctr_drbg_random, &ctr_drbg, rsa_keysize, 65537);
+
+    if (ret != 0) {
+        printf("FAILED!\nmbedtls_ctr_drbg_seed returned %d\n", ret);
+        goto exit;
+    }
+    printf("OK\n");
+
     /** Malloc the apropriate space we need and memcpy */
-    (*pri) = (mbedtls_pk_context *) malloc(sizeof(mbedtls_pk_context));
-    memcpy(*pri, &tmp_pri, sizeof(mbedtls_pk_context));
+    (*mul) = (mbedtls_pk_context *) malloc(sizeof(mbedtls_pk_context));
+    memcpy(*mul, &tmp_pri, sizeof(mbedtls_pk_context));
 
     /*********************************************/
 
