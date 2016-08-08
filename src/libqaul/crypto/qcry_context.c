@@ -69,7 +69,7 @@ int qcry_context_attach(qcry_usr_ctx *ctx, mbedtls_pk_context *pub, mbedtls_pk_c
     /* Write private key into text buffer */
     size_t buffer_s = 16000;
     unsigned char pri_buf[buffer_s];
-    ret = mbedtls_pk_write_pubkey_pem(pri, pri_buf, buffer_s);
+    ret = mbedtls_pk_write_key_pem(pri, pri_buf, buffer_s);
     if(ret != 0) return QCRY_STATUS_INVALID_KEYS;
 
     /* Prepare some data */

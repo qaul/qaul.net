@@ -37,7 +37,7 @@ struct qcry_arbit_token {
  * @param ctx: Context to populate with this procedure
  * @param max_concurrent: Highest number of concurrent jobs allowed
  */
-int qcry_arbit_init(unsigned int max_concurrent);
+int qcry_arbit_init(unsigned int max_concurrent, const char *path);
 int qcry_arbit_free();
 
 /**
