@@ -18,7 +18,7 @@ typedef struct key_entry {
 qcry_ks_ctx *keystore;
 
 /* Forward decloare load function for public keys */
-int load_keypair(mbedtls_pk_context **pub, const char *path, const char *username);
+int load_pubkey(mbedtls_pk_context **pub, const char *path, const char *fingerprint);
 
 #define CHECK_SANE \
     if( !(keystore->keylist != NULL && keystore->max > 0 && keystore->key_path) ) \
@@ -26,25 +26,43 @@ int load_keypair(mbedtls_pk_context **pub, const char *path, const char *usernam
 
 int qcry_ks_init(const char *path, const char **fingerprints, int prints)
 {
+    int ret;
     keystore = (qcry_ks_ctx*) calloc(sizeof(qcry_ks_ctx), 1);
+    if(keystore == NULL) return QCRY_STATUS_MALLOC_FAIL;
 
     size_t len = strlen(path) + 1;
     keystore->key_path = (char*) malloc(sizeof(char) * len);
+    if(keystore->key_path == NULL) return QCRY_STATUS_MALLOC_FAIL;
+
     strcpy(keystore->key_path, path);
 
     /* Prepare some space for keys */
     keystore->keylist = (struct key_entry**) malloc(MIN_BFR_S * sizeof(struct key_entry*));
+    if(keystore->keylist == NULL) return QCRY_STATUS_MALLOC_FAIL;
+
     memset(keystore->keylist, 0, MIN_BFR_S * sizeof(struct key_entry*));
     keystore->keys = 0;
     keystore->max = 8;
 
-    /* Go and load all the keys */
-    int i;
-    for(i = 0; i < prints; i++) {
+    /* Check that fingerprints exists */
+    if(fingerprints == NULL) goto exit;
 
+    /* Go and load all the keys */
+    for(int i = 0; i < prints; i++) {
+
+        /* Get the fingerprint pointer for easier handling */
+        const char *fp = fingerprints[i];
+
+        /* Load the apropriate key from the keystore */
+        mbedtls_pk_context *pub;
+        load_pubkey(&pub, keystore->key_path, fp);
+
+        /* Save the fingerprint in our collection */
+        ret = qcry_ks_save(pub, fp);
+        if(ret != 0) return ret;
     }
 
-
+    exit:
     return QCRY_STATUS_OK;
 }
 
@@ -59,14 +77,19 @@ int qcry_ks_save(mbedtls_pk_context *pub, const char *fingerprint)
     entry->pf = (char*) malloc(sizeof(char) * len);
     strcpy(entry->pf, fingerprint);
 
+    /* Check if we have to increase our buffer */
+    if(keystore->keys >= keystore->max) {
+        realloc(keystore->keylist, keystore->max += 5); // Make it 5 bigger. Why 5? Dunno
+        if(keystore->keylist == NULL) return QCRY_STATUS_MALLOC_FAIL;
+    }
+
+    keystore->keylist[keystore->keys++] = entry;
     return QCRY_STATUS_OK;
 }
 
 int qcry_ks_getkey(mbedtls_pk_context *(*pub), const char *fingerprint)
 {
     CHECK_SANE
-
-
 
     for(int i = 0; i < keystore->keys; i++) {
         if(strcmp(keystore->keylist[i]->pf, fingerprint) == 0) {
@@ -96,7 +119,7 @@ int qcry_ks_free()
 /*******************************************************************/
 
 
-int load_keypair(mbedtls_pk_context **pub, const char *path, const char *fp)
+int load_pubkey(mbedtls_pk_context **pub, const char *path, const char *fp)
 {
     int ret = 0;
 
@@ -107,22 +130,19 @@ int load_keypair(mbedtls_pk_context **pub, const char *path, const char *fp)
         goto cleanup;
     }
 
-    /*** Initialise the key contexts properly ***/
-    mbedtls_pk_init(*pub);
-
-    /*** Construct the required file names ***/
-    char pri_pth[512];
+    /* Prepare path variables */
+    size_t p_s = strlen(path);
     char pub_pth[512];
 
-    size_t p_s = strlen(path);
-    size_t u_s = strlen(fp);
+    /* Init new key context */
+    mbedtls_pk_init(*pub);
 
     /* Build public key path */
-    if(strcmp(&path[p_s - 1], "/") != 0)    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s/00_%s.pub", path, fp);
-    else                                    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s00_%s.pub", path, fp);
+    if(strcmp(&path[p_s - 1], "/") != 0)    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s/%s.pub", path, fp);
+    else                                    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s%s.pub", path, fp);
 
     /*** Read keys off disk and initialise the contexts ***/
-    mbedtls_printf("Parsing public key %s...", fp);
+    mbedtls_printf("[KEYSTORE] Parsing key for %s...", fp);
     fflush(stdout);
 
     ret = mbedtls_pk_parse_public_keyfile(*pub, pub_pth);
