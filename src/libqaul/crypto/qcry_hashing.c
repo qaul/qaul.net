@@ -69,7 +69,7 @@ int qcry_hashing_init(struct qcry_hash_ctx *ctx, unsigned int hash, const char *
     failed:
     if(err_no != 0) free(ctx->salt);
     if(err_no != 0) free(ctx->curr_bfr);
-    return (err_no != 0) ? err_no : QCRY_STATUS_MALLOC_FAIL;
+    return (err_no != 0) ? err_no : QCRY_STATUS_OK;
 }
 
 int qcry_hashing_free(struct qcry_hash_ctx *ctx)
@@ -217,7 +217,7 @@ int qcry_hashing_build(struct qcry_hash_ctx *ctx, unsigned int encoding, char *(
     /* Free temp buffer */
     free(tmpsrc);
     free(output);
-    return (ret != 0) ? ret : QCRY_STATUS_ERROR;
+    return (ret != 0) ? ret : QCRY_STATUS_OK;
 
 }
 
