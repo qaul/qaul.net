@@ -95,34 +95,39 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	strcat(filesPath, "/files/");
 #endif
 
-	/*************************************************************
-	 *
-	 * Crypto initialisation is done by reading the default username
-	 * from libqaul and checking if it a key exists for this user.
-	 *
-	 * If it does, the user context is allocated and prepared.
-	 *
-	 * If it does not, a new user context is created
-	 *
-	 *************************************************************/
+	{
+		/*************************************************************
+		*
+		* Crypto initialisation is done by reading the default username
+		* from libqaul and checking if it a key exists for this user.
+		*
+		* If it does, the user context is allocated and prepared.
+		*
+		* If it does not, a new user context is created
+		*
+		*************************************************************/
 
-	int ret = qcry_arbit_init(QAUL_CONC_LOCK);
-	if(ret != 0) printf("A critical error (#%d) occured when initialising crypto arbiter!\n", ret);
+		int ret = qcry_arbit_init(QAUL_CONC_LOCK, "/home/spacekookie/.qaul"); //FIXME: Get proper path
+		if(ret != 0) printf("A critical error (#%d) occured when initialising crypto arbiter!\n", ret);
 
-	// TODO: Check existing user files and init with them instead
-	bool usr_exists = false;
+		// TODO: Check existing user files and init with them instead
+		bool usr_exists = false;
 
-	char *username = "spacekookie";
-	char *passphrase = "foobar32";
+		char *username = "spacekookie";
+		char *passphrase = "foobar32";
 
-	if(usr_exists) {
-		ret = qcry_arbit_restore(username, passphrase);
-		printf("QCRY_ARBIT_RESTORE returned %d\n", ret);
+		if(usr_exists) {
+			ret = qcry_arbit_restore(username, passphrase);
+			printf("QCRY_ARBIT_RESTORE returned %d\n", ret);
 
-	} else {
-		ret = qcry_arbit_usrcreate(username, passphrase, QAUL_KEYS_RSA4096);
-		printf("QCRY_ARBIT_USRCREATE returned %d\n", ret);
+		} else {
+			ret = qcry_arbit_usrcreate(username, passphrase, QAUL_KEYS_RSA4096);
+			printf("QCRY_ARBIT_USRCREATE returned %d\n", ret);
+		}
+
+		////////////////////////////////////////////////////////////////////////
 	}
+
 
 
 

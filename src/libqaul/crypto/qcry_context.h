@@ -21,6 +21,7 @@
 #include <mbedtls/pk.h>
 #include <mbedtls/ctr_drbg.h>
 #include <qaullib/qcry_hashing.h>
+#include <stdbool.h>
 
 #include "qcry_helper.h"
 
@@ -138,6 +139,10 @@ int qcry_context_prk_detach(qcry_usr_ctx *ctx);
 int qcry_context_add_trgt(qcry_usr_ctx *ctx, const qcry_trgt_t *trgt, qcry_ciph_t ciph_t, unsigned int *trgt_no);
 
 int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int *trgt_no);
+
+
+int qcry_sign_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, size_t ilen, unsigned char *(*sign));
+int qcry_verify_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *ciph, size_t ilen, bool *ok);
 
 /**
  * Use this function to encrypt messages against a target. This requires an initialised
