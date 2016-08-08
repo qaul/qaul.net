@@ -43,18 +43,20 @@ int qcry_arbit_free();
 /**
  * Creates a local user context with a username, passphrase and keytype.
  */
-int qcry_arbit_usrcreate(const char *username, const char *passphrase, unsigned int key_type);
-int qcry_arbit_usrdestroy(const char *fingerprint);
+int qcry_arbit_usrcreate(int *usrno, const char *username, const char *passphrase, unsigned int key_type);
+int qcry_arbit_usrdestroy(int usrno);
 
 /** Get data about user */
-int qcry_arbit_getusrinfo(const char *(*fingerprint), const char *username);
+int qcry_arbit_getusrinfo(const char *(*fingerprint), int usrno);
 
 /**
  * Opposite of #{qcry_arbit_restore}. This function will take an identity and save it's context
  * including keys and sensitive data in an encrypted blob on the disk.
  * Passphrase needs to have been created in before.
  */
-int qcry_arbit_save(const char *finterprint,  struct qcry_arbit_token *token);
+int qcry_arbit_save(const char *finterprint,  int usrno);
+
+int qcry_arbit_target(int usrno, )
 
 /**
  * This function takes a user identifier (username) and their private passphrase to restore
@@ -63,35 +65,14 @@ int qcry_arbit_save(const char *finterprint,  struct qcry_arbit_token *token);
  * @param username: Username space to unlock
  * @param passphrase: A passphrase used to encrypt the keys
  */
-int qcry_arbit_restore(const char *username, const char *passphrase);
+int qcry_arbit_restore(int *usrno, const char *username, const char *passphrase);
 
-/**
- * Starts a "session" between a local user (as a fingerprint) and a remote user (as a fingerprint).
- * Fingerprints are used in the crypto engine to identify keys and outside the crypto module to map
- * users to routing data
- */
-int qcry_arbit_start(const char *fp_self, const char *fp_trgt, struct qcry_arbit_token *(*token));
+int qcry_arbit_sendmsg(int usrno, char *(*encrypted), const char *plain);
 
-/**
- * Stops a session with a token.
- */
-int qcry_arbit_stop(struct qcry_arbit_token *token);
+int qcry_arbit_parsemsg(int usrno, char *(*parsed), const char *encrypted);
 
+int qcry_arbit_signmsg(int usrno, char *(*sgn_buffer), const char *message);
 
-int qcry_arbit_sendmsg(struct qcry_arbit_token *token, char *(*encrypted), const char *plain);
-
-int qcry_arbit_parsemsg(struct qcry_arbit_token *token, char *(*parsed), const char *encrypted);
-
-int qcry_arbit_signmsg(struct qcry_arbit_token *token, char *(*sgn_buffer), const char *message);
-
-/**
- * Verify the validity of a signature on a message cryptographically. Provide the session token and an active context
- * as well as a message and the elegid signature to verify the pair.
- *
- * Returns 0 if signature could be verified.
- * Returns 1 if signature was faulty
- * Returns -1...-255 for runtime errors
- */
-int qcry_arbit_verify(struct qcry_arbit_token *token, const char *message, const char *signature);
+int qcry_arbit_verify(int usrno, int trgtno, const char *message, const char *signature);
 
 #endif //QAUL_QCRY_ARBITER_H
