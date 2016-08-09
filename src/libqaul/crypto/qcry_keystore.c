@@ -11,7 +11,8 @@
 #include "qcry_helper.h"
 
 typedef struct key_entry {
-    char                *pf;
+    char                *username; // Not vital but nice to know
+    char                *fp;
     mbedtls_pk_context  *pub;
 };
 
@@ -58,7 +59,7 @@ int qcry_ks_init(const char *path, struct qcry_usr_id **known, int entries)
         load_pubkey(&pub, keystore->key_path, id->username);
 
         /* Save the fingerprint in our collection */
-        ret = qcry_ks_save(pub, id->fingerprint);
+        ret = qcry_ks_save(pub, id->fingerprint, id->username);
         if(ret != 0) return ret;
     }
 
@@ -66,16 +67,24 @@ int qcry_ks_init(const char *path, struct qcry_usr_id **known, int entries)
     return QCRY_STATUS_OK;
 }
 
-int qcry_ks_save(mbedtls_pk_context *pub, const char *fingerprint)
+int qcry_ks_save(mbedtls_pk_context *pub, const char *fingerprint, const char *username)
 {
     CHECK_SANE
 
     struct key_entry *entry = (struct key_entry*) malloc(sizeof(struct key_entry) * 1);
     entry->pub = pub;
 
-    size_t len = strlen(fingerprint) + 1;
-    entry->pf = (char*) malloc(sizeof(char) * len);
-    strcpy(entry->pf, fingerprint);
+    /* Allocate and copy fingerprint */
+    size_t fplen = strlen(fingerprint) + 1;
+    entry->fp = (char*) malloc(sizeof(char) * fplen);
+    if(entry->fp == NULL) return QCRY_STATUS_MALLOC_FAIL;
+    strcpy(entry->fp, fingerprint);
+
+    /* Allocate and copy username */
+    size_t usrlen = strlen(username) + 1;
+    entry->username = (char*) malloc(sizeof(char) * usrlen);
+    if(entry->username == NULL) return QCRY_STATUS_MALLOC_FAIL;
+    strcpy(entry->username, username);
 
     /* Check if we have to increase our buffer */
     if(keystore->keys >= keystore->max) {
@@ -85,6 +94,33 @@ int qcry_ks_save(mbedtls_pk_context *pub, const char *fingerprint)
 
     /* Safely asign the new key entry to our list :) */
     keystore->keylist[keystore->keys++] = entry;
+    return QCRY_STATUS_OK;
+}
+
+int qcry_ks_getusername(char *(*username), const char *fingerprint)
+{
+    CHECK_SANE
+
+    /*
+     * Write some predictable data into the pointer to check
+     * for if we can't find a key to match this request
+     */
+    (*username) = NULL;
+
+    /* Loop through our collection of known public keys */
+    for(int i = 0; i < keystore->keys; i++) {
+
+        /* Compare the fingerprints for a match */
+        if(strcmp(keystore->keylist[i]->fp, fingerprint) == 0) {
+
+            /* Assign the pointer and goto end of function */
+            (*username) = keystore->keylist[i]->username;
+            goto exit;
+        }
+    }
+
+    /* Exit label for a default return code of 0 */
+    exit:
     return QCRY_STATUS_OK;
 }
 
@@ -102,7 +138,7 @@ int qcry_ks_getkey(mbedtls_pk_context *(*pub), const char *fingerprint)
     for(int i = 0; i < keystore->keys; i++) {
 
         /* Compare the fingerprints for a match */
-        if(strcmp(keystore->keylist[i]->pf, fingerprint) == 0) {
+        if(strcmp(keystore->keylist[i]->fp, fingerprint) == 0) {
 
             /* Assign the pointer and goto end of function */
             (*pub) = keystore->keylist[i]->pub;
@@ -122,7 +158,7 @@ int qcry_ks_free()
     /* Make sure all keys on disk exist */
     for(int i = 0; i < keystore->keys; i++) {
         mbedtls_pk_free(keystore->keylist[i]->pub);
-        free((keystore->keylist[i]->pf));
+        free((keystore->keylist[i]->fp));
     }
 
     free(keystore->key_path);

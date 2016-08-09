@@ -41,9 +41,11 @@ typedef struct qcry_ks_ctx {
 
 int qcry_ks_init(const char *path, struct qcry_usr_id **known, int entries);
 
-int qcry_ks_save(mbedtls_pk_context *pub, const char *fingerprint);
+int qcry_ks_save(mbedtls_pk_context *pub, const char *fingerprint, const char *username);
 
 int qcry_ks_getkey(mbedtls_pk_context *(*pub), const char *fingerprint);
+
+int qcry_ks_getusername(char *(*username), const char *fingerprint);
 
 int qcry_ks_free();
 
