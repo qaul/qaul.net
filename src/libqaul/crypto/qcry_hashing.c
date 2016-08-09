@@ -195,13 +195,14 @@ int qcry_hashing_build(struct qcry_hash_ctx *ctx, unsigned int encoding, char *(
                 int base64_len = qcry_base64_enclength((int) hash_len);
                 (*buffer) = (char*) calloc(sizeof(char), (unsigned int) base64_len);
 
-                /* Call the mbedtls base64 function becase Apple sucks */
+                /* Call the mbedtls base64 function */
                 size_t bw;
-                mbedtls_base64_encode((unsigned char*) *buffer,
+                ret = mbedtls_base64_encode((unsigned char*) *buffer,
                                       (unsigned int) base64_len,
-                                      &bw, output, hash_len);
+                                      &bw, output, hash_len + 1); // Consider \0 !
 
-                printf("Hash in base64 is: %s\n", *buffer);
+                if(ret != 0)
+                    return QCRY_STATUS_ENCODE_FAILED;
             }
 
             break;
