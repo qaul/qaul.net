@@ -5,7 +5,7 @@
 
 #include "qaullib.h"
 #include "qaullib_private.h"
-#include <qaullib/qcry_arbiter.h>
+#include "crypto/qcry_arbiter.h"
 
 /** Static reference to the arbiter */
 static struct qcry_arbit_ctx *qcry_arbit;
@@ -113,15 +113,16 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 		// TODO: Check existing user files and init with them instead
 		bool usr_exists = false;
 
+		int usr_no;
 		char *username = "spacekookie";
 		char *passphrase = "foobar32";
 
 		if(usr_exists) {
-			ret = qcry_arbit_restore(username, passphrase);
+			ret = qcry_arbit_restore(&usr_no, username, passphrase);
 			printf("QCRY_ARBIT_RESTORE returned %d\n", ret);
 
 		} else {
-			ret = qcry_arbit_usrcreate(username, passphrase, QAUL_KEYS_RSA4096);
+			ret = qcry_arbit_usrcreate(&usr_no, username, passphrase, QAUL_KEYS_RSA4096);
 			printf("QCRY_ARBIT_USRCREATE returned %d\n", ret);
 		}
 
