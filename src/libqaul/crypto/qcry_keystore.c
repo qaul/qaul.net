@@ -24,7 +24,7 @@ int load_pubkey(mbedtls_pk_context **pub, const char *path, const char *fingerpr
     if( !(keystore->keylist != NULL && keystore->max > 0 && keystore->key_path) ) \
         return QCRY_STATUS_INVALID_CTX;
 
-int qcry_ks_init(const char *path, const char **fingerprints, int prints)
+int qcry_ks_init(const char *path, struct qcry_usr_id **known, int entries)
 {
     int ret;
     keystore = (qcry_ks_ctx*) calloc(sizeof(qcry_ks_ctx), 1);
@@ -45,20 +45,20 @@ int qcry_ks_init(const char *path, const char **fingerprints, int prints)
     keystore->max = 8;
 
     /* Check that fingerprints exists */
-    if(fingerprints == NULL) goto exit;
+    if(known == NULL) goto exit;
 
     /* Go and load all the keys */
-    for(int i = 0; i < prints; i++) {
+    for(int i = 0; i < entries; i++) {
 
         /* Get the fingerprint pointer for easier handling */
-        const char *fp = fingerprints[i];
+        struct qcry_usr_id *id = known[i];
 
         /* Load the apropriate key from the keystore */
         mbedtls_pk_context *pub;
-        load_pubkey(&pub, keystore->key_path, fp);
+        load_pubkey(&pub, keystore->key_path, id->username);
 
         /* Save the fingerprint in our collection */
-        ret = qcry_ks_save(pub, fp);
+        ret = qcry_ks_save(pub, id->fingerprint);
         if(ret != 0) return ret;
     }
 
@@ -83,6 +83,7 @@ int qcry_ks_save(mbedtls_pk_context *pub, const char *fingerprint)
         if(keystore->keylist == NULL) return QCRY_STATUS_MALLOC_FAIL;
     }
 
+    /* Safely asign the new key entry to our list :) */
     keystore->keylist[keystore->keys++] = entry;
     return QCRY_STATUS_OK;
 }
@@ -91,13 +92,26 @@ int qcry_ks_getkey(mbedtls_pk_context *(*pub), const char *fingerprint)
 {
     CHECK_SANE
 
+    /*
+     * Write some predictable data into the pointer to check
+     * for if we can't find a key to match this request
+     */
+    (*pub) = NULL;
+
+    /* Loop through our collection of known public keys */
     for(int i = 0; i < keystore->keys; i++) {
+
+        /* Compare the fingerprints for a match */
         if(strcmp(keystore->keylist[i]->pf, fingerprint) == 0) {
+
+            /* Assign the pointer and goto end of function */
             (*pub) = keystore->keylist[i]->pub;
-            break;
+            goto exit;
         }
     }
 
+    /* Exit label for a default return code of 0 */
+    exit:
     return QCRY_STATUS_OK;
 }
 
@@ -116,7 +130,7 @@ int qcry_ks_free()
 }
 
 
-/*******************************************************************/
+/************ PRIVATE UTILITY FUNCTIONS BELOW ************/
 
 
 int load_pubkey(mbedtls_pk_context **pub, const char *path, const char *fp)
@@ -137,7 +151,7 @@ int load_pubkey(mbedtls_pk_context **pub, const char *path, const char *fp)
     /* Init new key context */
     mbedtls_pk_init(*pub);
 
-    /* Build public key path */
+    /* Build public key path (according to slashy-ness) */
     if(strcmp(&path[p_s - 1], "/") != 0)    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s/%s.pub", path, fp);
     else                                    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s%s.pub", path, fp);
 
