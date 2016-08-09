@@ -66,7 +66,7 @@ unsigned char *create_token();
 
 /*****************************************************************************/
 
-int qcry_arbit_init(unsigned int max_concurrent, const char *path)
+int qcry_arbit_init(unsigned int max_concurrent, const char *path, struct qcry_usr_id **known_keys)
 {
     /** Cleanly allocate memory */
     arbiter = (qcry_arbit_ctx*) calloc(sizeof(qcry_arbit_ctx), 1);
@@ -102,8 +102,7 @@ int qcry_arbit_init(unsigned int max_concurrent, const char *path)
     else
         mbedtls_snprintf(keystore_path, sizeof(keystore_path), "%s%s", path, "keystore");
 
-    // TODO: Get list of known fingerprints from a database!
-     qcry_ks_init(keystore_path, NULL, 0);
+     qcry_ks_init(keystore_path, (struct qcry_usr_id**) known_keys, 0);
 
     /** Then return all OK */
     return QCRY_STATUS_OK;
@@ -151,7 +150,7 @@ int qcry_arbit_usrcreate(int *user_number, const char *username, const char *pas
     /** Initialise the user context for use with RSA keys */
     ret = qcry_context_init(item->ctx, username, PK_RSA);
     if(ret != 0) {
-        printf("Context init failed with code %d", ret);
+        printf("Context init failed with code %d\n", ret);
         return QCRY_STATUS_INVALID_CTX;
     }
 
@@ -449,6 +448,7 @@ int init_key_write(mbedtls_pk_context *key, const char *path, const char *userna
         return QCRY_STATUS_ERROR;
 
     printf("Keypair stashing...");
+    fflush(stdout);
     size_t p_s = strlen(path);
     size_t u_s = strlen(username);
 

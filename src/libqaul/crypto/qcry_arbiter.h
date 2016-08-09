@@ -7,6 +7,8 @@
 #ifndef QAUL_QCRY_ARBITER_H
 #define QAUL_QCRY_ARBITER_H
 
+#include "qcry_keystore.h"
+
 /************************************************************************************************
  *** Comprehensive API to interact with the qaul.net crypto code. Every request needs to be done
  *** under a certain context with a certain token passed in. Requests will then be arbited for their
@@ -40,7 +42,7 @@ struct qcry_arbit_token {
  * @param ctx: Context to populate with this procedure
  * @param max_concurrent: Highest number of concurrent jobs allowed
  */
-int qcry_arbit_init(unsigned int max_concurrent, const char *path);
+int qcry_arbit_init(unsigned int max_concurrent, const char *path, struct qcry_usr_id **known_keys);
 int qcry_arbit_free();
 
 /**
