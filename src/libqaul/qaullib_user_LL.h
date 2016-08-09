@@ -24,6 +24,7 @@ struct qaul_user_LL_item {
 	time_t             time;                  /// time when last seen
 	float              lq;                    /// link quality
 	char               name[MAX_USER_LEN +1]; /// user name
+    char               fp[64];                /// user key fingerprint
 	char               icon[MAX_FILENAME_LEN +1]; /// icon name
 	int                type;                  /// type of user: see user types
 	int                changed;               /// changes for GUI notifications: see user changed

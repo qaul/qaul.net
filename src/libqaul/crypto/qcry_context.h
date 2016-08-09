@@ -81,6 +81,7 @@ typedef struct qcry_usr_ctx {
 
     /* Seeds and entropy contexts */
     mbedtls_ctr_drbg_context    *ctr_drbg;
+    mbedtls_entropy_context     *entropy;
 } qcry_usr_ctx;
 
 /* Used to check if initialisation was done on a target */
@@ -131,27 +132,28 @@ int qcry_context_attach(qcry_usr_ctx *ctx, mbedtls_pk_context *pub, mbedtls_pk_c
 
 int qcry_context_get_finterprint(qcry_usr_ctx *ctx, unsigned char *(*fingerprint));
 
-/**
- * Detaches a private key from a context for whatever reason.
- */
-int qcry_context_prk_detach(qcry_usr_ctx *ctx);
-
-int qcry_context_add_trgt(qcry_usr_ctx *ctx, const qcry_trgt_t *trgt, qcry_ciph_t ciph_t, unsigned int *trgt_no);
+int qcry_context_add_trgt(qcry_usr_ctx *ctx, qcry_trgt_t *trgt, qcry_ciph_t ciph_t);
 
 int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int *trgt_no);
 
+int qcry_context_signmsg(qcry_usr_ctx *ctx, const char *msg, unsigned char *(*sign));
 
-int qcry_sign_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, size_t ilen, unsigned char *(*sign));
-int qcry_verify_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *ciph, size_t ilen, bool *ok);
+int qcry_context_verifymsg(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, const char *sign, bool *ok);
 
 /**
- * Use this function to encrypt messages against a target. This requires an initialised
- *  context and target to be present for the crypto to work.
+ * Small utility to create a target with a fingerprint safely.
+ * So far this function will only create targets for public key
+ * cryptography.
  *
- *  A buffer MAY be allocated before usage but will usually want to be created and checked for you.
- *
+ * @param trgt
+ * @param fingerprint
+ * @return
  */
-int qcry_encrypt_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, size_t ilen, unsigned char *(*ciph));
-int qcry_decrypt_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *ciph, size_t ilen, unsigned char *(*msg));
+int qcry_context_mktarget(qcry_trgt_t *(*trgt), const char *fingerprint);
+
+//int qcry_sign_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, size_t ilen, unsigned char *(*sign));
+//int qcry_verify_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *ciph, size_t ilen, bool *ok);
+//int qcry_encrypt_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, size_t ilen, unsigned char *(*ciph));
+//int qcry_decrypt_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *ciph, size_t ilen, unsigned char *(*msg));
 
 #endif //QAUL_QCRY_CONTEXT_H

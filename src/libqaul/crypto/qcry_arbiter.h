@@ -56,7 +56,20 @@ int qcry_arbit_getusrinfo(const char *(*fingerprint), int usrno);
  */
 int qcry_arbit_save(const char *finterprint,  int usrno);
 
-int qcry_arbit_target(int usrno, )
+/**
+ * This function adds the key context of the provided finterprint
+ * to the target list of the provided user giving quick access to all
+ * relevant data when doing encrypted or signed messaging.
+ *
+ * In addition to an added speed benefit, this function also provides
+ * memory localisation between users to ensure that two identities can't
+ * accidentally bleed data into each other.
+ *
+ * @param userno
+ * @param fingerprint
+ * @return
+ */
+int qcry_arbit_addtarget(int userno, const char *fingerprint);
 
 /**
  * This function takes a user identifier (username) and their private passphrase to restore
@@ -67,12 +80,11 @@ int qcry_arbit_target(int usrno, )
  */
 int qcry_arbit_restore(int *usrno, const char *username, const char *passphrase);
 
-int qcry_arbit_sendmsg(int usrno, char *(*encrypted), const char *plain);
-
-int qcry_arbit_parsemsg(int usrno, char *(*parsed), const char *encrypted);
-
 int qcry_arbit_signmsg(int usrno, char *(*sgn_buffer), const char *message);
 
 int qcry_arbit_verify(int usrno, int trgtno, const char *message, const char *signature);
+
+//int qcry_arbit_sendmsg(int usrno, char *(*encrypted), const char *plain);
+//int qcry_arbit_parsemsg(int usrno, char *(*parsed), const char *encrypted);
 
 #endif //QAUL_QCRY_ARBITER_H

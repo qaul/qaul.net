@@ -63,7 +63,7 @@ if (${PORT} STREQUAL "WINDOWS")
     set (WIN_SOURCES
             win32/functions.c
             win32/pthread.c
-            )
+            crypto/qcry_keystore.h crypto/qcry_keystore.c)
 endif ()
 
 add_subdirectory(mbedtls)
@@ -94,6 +94,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
         crypto/qcry_hashing.c
         crypto/qcry_helper.c
         crypto/qcry_keys.c
+        crypto/qcry_keystore.c
         crypto/qcry_playground.c
 
         qaullib_udp_communication.c
@@ -107,8 +108,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
         olsrd/mantissa.c
         olsrd/hashing.c
         ${VOIP_SOURCES}
-        ${WIN_SOURCES}
-        )
+        ${WIN_SOURCES})
 
 # since the name starts with 'lib' don't add it again
 set_target_properties (libqaul PROPERTIES PREFIX "")
