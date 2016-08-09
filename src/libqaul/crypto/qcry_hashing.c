@@ -17,9 +17,10 @@ int qcry_hashing_init(struct qcry_hash_ctx *ctx, unsigned int hash, const char *
     memset(ctx, 0, sizeof(struct qcry_hash_ctx));
     ctx->hash = hash;
 
-    /* Copy our salt */
+    /* Copy our salt if one exists */
     if(salt != NULL) {
-        ctx->salt = malloc((sizeof(char) * strlen(salt)) + 1);
+        size_t salt_len = strlen(salt) + 1;
+        ctx->salt = (char*) malloc(sizeof(char) * salt_len);
         if(!ctx->salt)
             goto failed;
         strcpy(ctx->salt, salt);
@@ -61,14 +62,17 @@ int qcry_hashing_init(struct qcry_hash_ctx *ctx, unsigned int hash, const char *
             goto failed;
     }
 
-    /* Set magic number and return */
+    /* Set magic number and prep for return */
     ctx->mgno = MAGICK_NO;
     err_no = QCRY_STATUS_OK;
 
     /* If errors occur we need to recover the damage */
     failed:
-    if(err_no != 0) free(ctx->salt);
-    if(err_no != 0) free(ctx->curr_bfr);
+    if(err_no != 0)
+        free(ctx->salt);
+    if(err_no != 0)
+        free(ctx->curr_bfr);
+
     return (err_no != 0) ? err_no : QCRY_STATUS_OK;
 }
 
@@ -79,10 +83,19 @@ int qcry_hashing_free(struct qcry_hash_ctx *ctx)
     /* Free memory and hash backend */
     free(ctx->curr_bfr);
     free(ctx->salt);
-    mbedtls_sha512_free(ctx->md_ctx);
+    switch(ctx->hash) {
+        case QCRY_HASH_SHA512:
+            mbedtls_sha512_free((mbedtls_sha512_context*) ctx->md_ctx);
+            break;
 
-    /* Forcibly write over it */
-    memset(ctx, 0, sizeof(struct qcry_hash_ctx));
+        case QCRY_HASH_SHA256:
+            mbedtls_sha256_free((mbedtls_sha256_context*) ctx->md_ctx);
+            break;
+
+        default:
+            return QCRY_STATUS_INVALID_CTX;
+    }
+
     return QCRY_STATUS_OK;
 }
 
