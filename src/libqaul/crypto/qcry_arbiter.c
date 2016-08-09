@@ -49,8 +49,8 @@ static unsigned int session_ctr;
 
 /** Inline macro that's used to verify that the arbiter context we're operating on is valid **/
 #define SANE_ARBIT int ret; if(arbiter == NULL || arbiter->keygen == NULL || arbiter->max < 0) return QCRY_STATUS_INVALID_CTX;
-#define USER_OK if(usrno >= arbiter->users) return QCRY_STATUS_INVALID_USERNO;
-#define TARGET_OK if(trgtno >= arbiter->usr_list[usrno]->ctx->usd_trgt) return QCRY_STATUS_INVALID_TARGET;
+#define USER_OK if(usrno > arbiter->users) return QCRY_STATUS_INVALID_USERNO;
+#define TARGET_OK if(trgtno > arbiter->usr_list[usrno]->ctx->usd_trgt) return QCRY_STATUS_INVALID_TARGET;
 
 /************* FORWARD DECLARED PRIVATE UTILITY FUNCTINS BELOW **************/
 int init_key_write(mbedtls_pk_context *key, const char *path, const char *username, const char *passphrase);
@@ -63,19 +63,6 @@ qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token);
 qcry_usr_ctx *get_ctx_with_username(const char *username);
 
 unsigned char *create_token();
-
-#define ARBIT_USER_ADD(user) \
-    int usr_no;\
-    if(arbiter->users >= arbiter->max) { \
-        /* This means we need to increase the user buffer size */ \
-        arbiter->max += 2; \
-        arbiter_user **tmp = (arbiter_user**) malloc(sizeof(arbiter_user*) * arbiter->max); \
-        memcpy(tmp, arbiter->usr_list, sizeof(arbiter_user*) * arbiter->users); \
-        free(arbiter->usr_list); \
-        arbiter->usr_list = tmp; \
-    } \
-    usr_no = arbiter->users++; \
-    arbiter->usr_list[usr_no] = user;
 
 /*****************************************************************************/
 
@@ -99,29 +86,23 @@ int qcry_arbit_init(unsigned int max_concurrent, const char *path)
     arbiter->users = 0;
 
     /* Save our config path ourselves */
-    size_t path_len = strlen(path) + sizeof(char); // Include space for \0
+    size_t path_len = strlen(path) + 1; // Include space for \0
     arbiter->path = (char*) malloc(path_len * sizeof(char));
     strcpy(arbiter->path, path);
 
     /** Set session counter to 0 */
-    session_ctr = 0x0;
+    session_ctr = 0;
 
     /** Load keys from disk into keystore **/
     char keystore_path[512];
     size_t p_s = strlen(path);
 
     if(strcmp(&path[p_s - 1], "/") != 0)
-        mbedtls_snprintf(keystore_path, sizeof(keystore_path), "%s/%s.pub", path, "keystore");
+        mbedtls_snprintf(keystore_path, sizeof(keystore_path), "%s/%s", path, "keystore");
     else
-        mbedtls_snprintf(keystore_path, sizeof(keystore_path), "%s%s.pub", path, "keystore");
+        mbedtls_snprintf(keystore_path, sizeof(keystore_path), "%s%s", path, "keystore");
 
     // TODO: Get list of known fingerprints from a database!
-    unsigned int prints = 10;
-    const char **fingerprints = (const char**) malloc(sizeof(const char*) * prints);
-    for(int i = 0; i < prints; i++) {
-        fingerprints[i] = (char*) malloc(sizeof(char) * 45);
-    }
-
      qcry_ks_init(keystore_path, NULL, 0);
 
     /** Then return all OK */
@@ -159,8 +140,13 @@ int qcry_arbit_usrcreate(int *user_number, const char *username, const char *pas
     char *fingerprint;
 
     /** First allocate space for our new user in the arbiter context */
-    arbiter_user *item = (arbiter_user*) calloc(sizeof(arbiter_user), 1);
+    arbiter_user *item = (arbiter_user*) malloc(sizeof(arbiter_user));
+    if(item == NULL)
+        return QCRY_STATUS_MALLOC_FAIL;
+
     item->ctx = (qcry_usr_ctx*) malloc(sizeof(qcry_usr_ctx));
+    if(item->ctx == NULL)
+        return QCRY_STATUS_MALLOC_FAIL;
 
     /** Initialise the user context for use with RSA keys */
     ret = qcry_context_init(item->ctx, username, PK_RSA);
@@ -169,8 +155,16 @@ int qcry_arbit_usrcreate(int *user_number, const char *username, const char *pas
         return QCRY_STATUS_INVALID_CTX;
     }
 
-    ARBIT_USER_ADD(item)
-    *user_number = usr_no;
+    if(arbiter->users >= arbiter->max) {
+        /* This means we need to increase the user buffer size */
+
+        arbiter->max += 2;
+        arbiter->usr_list = (arbiter_user**) realloc(arbiter->usr_list, sizeof(arbiter_user) * arbiter->max);
+    }
+
+    /* Now we can add the user safely */
+    *user_number = (int) arbiter->users++;
+    arbiter->usr_list[*user_number] = item;
 
     mbedtls_pk_context *comb;
     ret = qcry_keys_rsagen(arbiter->keygen, &comb, username);
@@ -188,7 +182,6 @@ int qcry_arbit_usrcreate(int *user_number, const char *username, const char *pas
 
     /* Free combined key - we will never need it again */
     mbedtls_pk_free(comb);
-    free(comb);
 
     /** Load split key contexts */
     mbedtls_pk_context *pri, *pub;
@@ -202,18 +195,47 @@ int qcry_arbit_usrcreate(int *user_number, const char *username, const char *pas
     ret = qcry_context_attach(item->ctx, pub, pri);
     if(ret != 0) {
         printf("Initialising user context FAILED! > %d <\n", ret);
-        return QCRY_STATUS_INVALID_CTX;
+        return ret;
     }
 
     // If we made it this far we can accept :)
     return QCRY_STATUS_OK;
 }
 
-int qcry_arbit_getusrinfo(const char *(*fingerprint), int usrno)
+int qcry_arbit_getusrinfo(char *(*buffer), int usrno, int type)
 {
     SANE_ARBIT
 
-    (*fingerprint) = arbiter->usr_list[usrno]->ctx->fingerprint;
+    USER_OK
+
+    switch(type) {
+        case QAUL_FINGERPRINT:
+            (*buffer) = arbiter->usr_list[usrno]->ctx->fingerprint;
+            return QCRY_STATUS_OK;
+
+        case QAUL_PUBKEY:
+            {
+                size_t buf_s = 16000;
+                unsigned char output_buf[buf_s];
+                memset(output_buf, 0, buf_s);
+
+                /* Write public key part to buffer */
+                mbedtls_pk_context *pub = arbiter->usr_list[usrno]->ctx->public;
+                ret = mbedtls_pk_write_pubkey_pem(pub, output_buf, 16000);
+                if(ret != 0)
+                    return QCRY_STATUS_INVALID_KEYS;
+
+                /* Allocate some memory for our buffer and copy the key */
+                (*buffer) = (char*) calloc(sizeof(char), strlen((char *) output_buf) + 1); // Consider \0 !
+                strcpy((char *) *buffer, (char *)output_buf);
+            }
+            return QCRY_STATUS_OK;
+
+        default:
+            (*buffer) = NULL;
+            return QCRY_STATUS_INVALID_PARAMS;
+    }
+
     return QCRY_STATUS_OK;
 }
 
@@ -259,7 +281,16 @@ int qcry_arbit_restore(int *usrno, const char *username, const char *passphrase)
         return QCRY_STATUS_INVALID_CTX;
     }
 
-    ARBIT_USER_ADD(item)
+    if(arbiter->users >= arbiter->max) {
+        /* This means we need to increase the user buffer size */
+
+        arbiter->max += 2;
+        arbiter->usr_list = (arbiter_user**) realloc(arbiter->usr_list, sizeof(arbiter_user) * arbiter->max);
+    }
+
+    /* Now we can add the user safely */
+    *usrno = (int) arbiter->users++;
+    arbiter->usr_list[*usrno] = item;
 
     mbedtls_pk_context *pri, *pub;
     ret = load_keypair(&pub, &pri, arbiter->path, username, passphrase);
@@ -289,7 +320,11 @@ int qcry_arbit_signmsg(int usrno, char *(*sgn_buffer), const char *message)
 int qcry_arbit_verify(int usrno, int trgtno, const char *message, const char *signature)
 {
     /* Make sure our environment is sane */
-    SANE_ARBIT USER_OK TARGET_OK
+    SANE_ARBIT
+
+    USER_OK
+
+    TARGET_OK
 
     /* Store usr locally for easy handling */
     arbiter_user *usr = arbiter->usr_list[usrno];
@@ -336,6 +371,24 @@ int qcry_arbit_addtarget(int usrno, const char *fingerprint)
 
     /* Signal ok */
     return QCRY_STATUS_OK;
+}
+
+int qcry_arbit_addkey(const char *keybody, size_t key_len, const char *fingerprint, const char *username)
+{
+    SANE_ARBIT
+
+    /* Allocate memory for a new key */
+    mbedtls_pk_context *ctx = (mbedtls_pk_context*) malloc(sizeof(mbedtls_pk_context));
+    mbedtls_pk_init(ctx);
+
+    /* Parse the key from the buffer provided */
+    ret = mbedtls_pk_parse_public_key(ctx, (unsigned char*) keybody, key_len);
+    if(ret != 0)
+        return QCRY_STATUS_INVALID_KEYS;
+
+    /* Then simply add the key to our collection */
+    ret = qcry_ks_save(ctx, fingerprint, username);
+    return ret;
 }
 
 

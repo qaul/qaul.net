@@ -24,6 +24,9 @@
 // Don't allow for more than one access at atime
 #define QAUL_CONC_LOCK      1
 
+#define QAUL_FINGERPRINT    1
+#define QAUL_PUBKEY         2
+
 struct qcry_arbit_token {
     unsigned int        sess_id;
     unsigned char       token[128];
@@ -47,7 +50,7 @@ int qcry_arbit_usrcreate(int *usrno, const char *username, const char *passphras
 int qcry_arbit_usrdestroy(int usrno);
 
 /** Get data about user */
-int qcry_arbit_getusrinfo(const char *(*fingerprint), int usrno);
+int qcry_arbit_getusrinfo(char *(*buffer), int usrno, int type);
 
 /**
  * Opposite of #{qcry_arbit_restore}. This function will take an identity and save it's context
@@ -70,6 +73,24 @@ int qcry_arbit_save(const char *finterprint,  int usrno);
  * @return
  */
 int qcry_arbit_addtarget(int userno, const char *fingerprint);
+
+/**
+ * This function should be used to add a new key fresh off the TCP socket
+ * to the crypto keystore.
+ *
+ * As such it just takes a plain text encoded buffer that should contain the key
+ * body with all the markers and headers. Do not submit a modified keyfile body!
+ *
+ * This keyfile will then be mapped against a fingerprint and username for
+ * convenience
+ *
+ * @param keybody
+ * @param key_len
+ * @param fingerprint
+ * @param username
+ * @return
+ */
+int qcry_arbit_addkey(const char *keybody, size_t key_len, const char *fingerprint, const char *username);
 
 /**
  * This function takes a user identifier (username) and their private passphrase to restore
