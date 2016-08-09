@@ -21,10 +21,17 @@
 #define QCRY_STATUS_SEED_FAILED         14
 #define QCRY_STATUS_INVALID_CTX         16
 #define QCRY_STATUS_INVALID_TARGET      18
+#define QCRY_STATUS_INVALID_USERNO      19
 
 #define QCRY_STATUS_INVALID_KEYS        21
 #define QCRY_STATUS_MALLOC_FAIL         22
 #define QCRY_STATUS_KEY_BUSY            24
+
+#define QCRY_STORE_NOTFOUND             30
+#define QCRY_STORE_EXISTS               31
+
+#define QCRY_STATUS_SIGN_OK             0
+#define QCRY_STATUS_SIGN_BOGUS          40
 
 /***************** QCRY ERROR CODES *****************/
 
@@ -98,7 +105,7 @@ int QCry_StringToHash(char *string, unsigned char *hash);
  *
  * BASE 64 ENCODERS FOR HASHES!
  *
- *
+ * These have been depreciated. Use mbedtls_base64 instead!
  *
  *
  */
