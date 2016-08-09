@@ -149,20 +149,24 @@ int qcry_context_attach(qcry_usr_ctx *ctx, mbedtls_pk_context *pub, mbedtls_pk_c
     ctx->public = pub;
     ctx->private = pri;
 
-    /* Write private key into text buffer */
+    /******* Calculating Fingerprint for this context *******/
+
     size_t buffer_s = 16000;
     unsigned char pri_buf[buffer_s];
     ret = mbedtls_pk_write_key_pem(pri, pri_buf, buffer_s);
     if(ret != 0) return QCRY_STATUS_INVALID_KEYS;
 
-    /* Prepare some data */
-    char *tmp_buf = (char*) malloc(buffer_s);
+    /* Copy the required keylength into a heap buffer */
+    size_t keylen = strlen((char*) pri_buf) + 1; // Consider phlebas (\0) !
+    char *tmp_buf = (char*) malloc(sizeof(char) * keylen);
 
+    /* Check our memory space is valid and copy key into it */
     if(tmp_buf == NULL) return QCRY_STATUS_MALLOC_FAIL;
-    memcpy(tmp_buf, pri_buf, buffer_s);
+    strcpy(tmp_buf, (char*) pri_buf);
 
-    /* Compute your own fingerprint */
-    struct qcry_hash_ctx hash;
+    /*** Fingerprint is SHA256 digest of private key ***/
+
+    struct qcry_hash_ctx hash; // Keep on stack for speed
 
     ret = qcry_hashing_init(&hash, QCRY_HASH_SHA256, ctx->username);
     if(ret) goto exit;
@@ -179,6 +183,7 @@ int qcry_context_attach(qcry_usr_ctx *ctx, mbedtls_pk_context *pub, mbedtls_pk_c
     /* Free our resources */
     memset(pri_buf, 0, buffer_s);
     qcry_hashing_free(&hash);
+
     free(tmp_buf);
 
     /* Return success :) */
@@ -334,7 +339,8 @@ int qcry_context_add_trgt(qcry_usr_ctx *ctx, qcry_trgt_t *trgt, qcry_ciph_t ciph
 
     /* Make sure we have enough space allocated for another target */
     if(ctx->usd_trgt >= ctx->max_trgt) {
-        realloc(ctx->trgts, ctx->max_trgt + 10);
+        ctx->max_trgt += 10;
+        ctx->trgts = (qcry_trgt_t**) realloc(ctx->trgts, sizeof(qcry_trgt_t*) * ctx->max_trgt);
         if(ctx->trgts == NULL)
             return QCRY_STATUS_MALLOC_FAIL;
     }

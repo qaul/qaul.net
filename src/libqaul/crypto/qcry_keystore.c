@@ -88,7 +88,8 @@ int qcry_ks_save(mbedtls_pk_context *pub, const char *fingerprint, const char *u
 
     /* Check if we have to increase our buffer */
     if(keystore->keys >= keystore->max) {
-        realloc(keystore->keylist, keystore->max += 5); // Make it 5 bigger. Why 5? Dunno
+        keystore->max += 5;
+        keystore->keylist = (struct key_entry**) realloc(keystore->keylist, sizeof(struct key_entry) * keystore->max); // Make it 5 bigger. Why 5? Dunno
         if(keystore->keylist == NULL) return QCRY_STATUS_MALLOC_FAIL;
     }
 
