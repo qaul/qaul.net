@@ -18,6 +18,7 @@
 #define QCRY_STATUS_BFR_TOO_SMALL       10
 #define QCRY_STATUS_INVALID_PARAMS      12
 
+#define QCRY_STATUS_TARGET_EXISTS       13
 #define QCRY_STATUS_SEED_FAILED         14
 #define QCRY_STATUS_INVALID_CTX         16
 #define QCRY_STATUS_INVALID_TARGET      18
@@ -27,8 +28,11 @@
 #define QCRY_STATUS_MALLOC_FAIL         22
 #define QCRY_STATUS_KEY_BUSY            24
 
-#define QCRY_STORE_NOTFOUND             30
-#define QCRY_STORE_EXISTS               31
+#define QCRY_STATUS_DECODE_FAILED       28
+#define QCRY_STATUS_ENCODE_FAILED       29
+
+#define QCRY_STATUS_KS_NOTFOUND         30
+#define QCRY_STATUS_KS_EXISTS           31
 
 #define QCRY_STATUS_SIGN_OK             0
 #define QCRY_STATUS_SIGN_BOGUS          40
@@ -53,6 +57,8 @@
 #define MIN_BFR_S   4
 #define MAX_TIMEOUT 500
 #define TIME_SLEEP  50
+
+#define QAUL_MAX_MSG_LENGTH 140 // In bytes - Twitter style
 
 #define CHECK_SANE \
     if(ctx->mgno != MAGICK_NO) return QCRY_STATUS_INVALID_CTX; \
