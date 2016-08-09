@@ -7,203 +7,150 @@
 #include <qaullib/qcry_wrapper.h>
 #include <stdio.h>
 #include <string.h>
+#include <mbedtls/md5.h>
+#include <qaullib/qcry_hashing.h>
+#include <mbedtls/base64.h>
 
-#include "qaullib/qcry_arbiter.h"
+#include "crypto/qcry_arbiter.h"
 #include "crypto/qcry_keys.h"
 #include "crypto/qcry_helper.h"
 #include "crypto/qcry_playground.h"
 
-// Forward declaration to make it easier to work with this monster function
-int fooooooo(int argc, char *argv[]);
-
-int context_init(mbedtls_pk_context *key)
+int load_only_public_file(mbedtls_pk_context **pub, const char *path, const char *username)
 {
-    mbedtls_pk_init(key);
+    printf("Unicorns are attacking this library blob!\n");
+    int ret = 0;
+
+    /*** Malloc space for the pub and pri key values on heap ***/
+    mbedtls_pk_context *tmp = *pub;
+    tmp = (mbedtls_pk_context*) malloc(sizeof(mbedtls_pk_context));
+    if(tmp == NULL) {
+        ret = EXIT_FAILURE;
+        goto cleanup;
+    }
+
+    /*** Initialise the key contexts properly ***/
+    mbedtls_pk_init(tmp);
+
+    /*** Construct the required file names ***/
+    char pri_pth[512];
+    char pub_pth[512];
+
+    size_t p_s = strlen(path);
+    size_t u_s = strlen(username);
+
+    /* Build public key path */
+    if(strcmp(&path[p_s - 1], "/") != 0)    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s/00_%s.pub", path, username);
+    else                                    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s00_%s.pub", path, username);
+
+    /*** Read keys off disk and initialise the contexts ***/
+    mbedtls_printf("Parsing public key...");
+    fflush(stdout);
+
+    ret = mbedtls_pk_parse_public_keyfile(tmp, pub_pth);
+    if(ret != 0) {
+        mbedtls_printf("FAILED! mbedtls_pk_parse_public_keyfile returned -0x%04x\n", -ret);
+        goto cleanup;
+    }
+    mbedtls_printf("OK\n");
+
+
+    printf("== Keys loaded successfully ==\n\n");
+    *pub = tmp;
     return 0;
-}
 
-int load_key(mbedtls_pk_context *pub, mbedtls_pk_context *pri, char *keyfile)
-{
-    int ret;
-    char private[512];
-    char public[512];
-
-    mbedtls_snprintf( private, sizeof(private), "%s.key", keyfile);
-    mbedtls_snprintf( public, sizeof(public), "%s.pub", keyfile);
-
-    mbedtls_printf( "\n  . Reading public key from '%s'", public);
-    fflush( stdout );
-
-    if( ( ret = mbedtls_pk_parse_public_keyfile(pub, public) ) != 0 )
-    {
-        mbedtls_printf( " failed\n  ! mbedtls_pk_parse_public_keyfile returned -0x%04x\n", -ret );
-        return 55;
-    }
-
-    mbedtls_printf( "\n  . Reading private key from '%s'",private);
-    fflush( stdout );
-
-    if( ( ret = mbedtls_pk_parse_keyfile(pri, private, "" ) ) != 0 )
-    {
-        ret = 1;
-        mbedtls_printf( " failed\n  ! mbedtls_pk_parse_keyfile returned -0x%04x\n", -ret );
-    }
-
-    return 0;
-}
-
-int sign(mbedtls_pk_context *pri, char *message, size_t msg_len, char *msgfile)
-{
-    FILE *f;
-    int ret = 1;
-
-    unsigned char hash[32];
-    unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
-//    unsigned char buf2[MBEDTLS_MPI_MAX_SIZE];
-
-    char sig_name[512];
-    const char *pers = "mbedtls_pk_sign";
-    size_t olen = 0;
-
-    /*** Setup entropy and random number generators for hashing ***/
-    mbedtls_entropy_context entropy;
-    mbedtls_ctr_drbg_context ctr_drbg;
-
-    mbedtls_entropy_init(&entropy);
-    mbedtls_ctr_drbg_init(&ctr_drbg);
-
-    mbedtls_printf("Seeding the random number generator...");
-    fflush(stdout);
-
-    ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char *) pers, strlen(pers));
-    if(ret != 0) {
-        mbedtls_printf("FAILED\n\tmbedtls_ctr_drbg_seed returned -0x%04x\n", -ret);
-        goto exit;
-    }
-    mbedtls_printf("OK\n");
-
-    /*** (For now) Read input file from disk ***/
-    mbedtls_printf("Reading messagefile...");
-    fflush(stdout);
-
-    ret = mbedtls_md_file(mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), msgfile, hash);
-    if(ret != 0) {
-        mbedtls_printf("FAILED\n\tCould not open or read %s\n", msgfile);
-        goto exit;
-    }
-    mbedtls_printf("OK\n");
-
-    /** Copy our message into the buffer */
-//    strcpy(buf2, message);
-
-    /*** Compute SHA-256 Digest of our message ***/
-    mbedtls_printf("Computing SHA-256 Digest...");
-    fflush(stdout);
-
-    ret = mbedtls_pk_sign(pri, MBEDTLS_MD_SHA256, hash, 0, buf, &olen, mbedtls_ctr_drbg_random, &ctr_drbg);
-    if(ret != 0) {
-        mbedtls_printf("FAILED\n\tmbedtls_pk_sign returned -0x%04x\n", -ret);
-        goto exit;
-    }
-    mbedtls_printf("OK\n");
-
-
-
-    /*** Go ahead and write the signature to disk ***/
-    mbedtls_snprintf(sig_name, sizeof(sig_name), "%s.sig", "");
-
-    mbedtls_printf("Writing signature file...");
-    if((f = fopen(sig_name, "wb+" ) ) == NULL ) {
-        ret = 1;
-        mbedtls_printf("FAILED\n\tCould not create %s\n", sig_name);
-        goto exit;
-    }
-
-    if(fwrite(buf, 1, olen, f) != olen) {
-        mbedtls_printf("FAILED\n\tfwrite returned bad dump length!\n");
-        fclose(f);
-        goto exit;
-    }
-
-    mbedtls_printf("OK\n");
-
-    /*** Cleanup ***/
-    fclose(f);
-    ret = 0;
-    printf("== Signature written successfully ==\n\n");
-
-    exit:
+    cleanup:
+    mbedtls_pk_free(tmp);
     return ret;
 }
 
+void l_public(char **pubkey)
+{
+    mbedtls_pk_context *pub_target;
+    load_only_public_file(&pub_target, "/home/spacekookie/.qaul/keystore/", "spacekookie");
+
+    size_t buf_s = 16000;
+    unsigned char output_buf[buf_s];
+
+    int ret = mbedtls_pk_write_pubkey_pem(pub_target, output_buf, 16000);
+
+    /* Allocate some memory for our buffer and copy the key */
+    (*pubkey) = (char*) calloc(sizeof(char), strlen((char *) output_buf) + 1); // Consider \0 !
+    strcpy((char *) *pubkey, (char *)output_buf);
+
+    printf("Public key:\n\n%s", *pubkey);
+}
+
+#define ASSERT \
+    printf("Return: %d\n", ret); \
+    if(ret != 0) goto end;
+
+#define TEST(msg) \
+    printf("Return %s: %d\n", #msg, ret); if(ret != 0) goto end;
 
 int qcry_devel_init(int argc, char *argv[])
 {
-    int ret = 1;
-    mbedtls_pk_context *pub, *pri;
-
-
-    char *key_path = "/home/spacekookie/Downloads/mbedtls-2.3.0/build/programs/pkey/";
+    char *key_path = "/home/spacekookie/.qaul/";
     char *msgfile = "/home/spacekookie/message.txt";
-    char *username = "keyfile";
+    char *name_kookie = "spacekookie";
+    char *name_jane = "janethemaine";
 
-    char *message = "This is my message!";
     char *signature;
-    size_t sign_len;
+    char *message = "This is my message that is really cool and will definately fit in all of my buffers!";
 
-    /* Load the keys */
-    ret = qcry_key_load(&pub, &pri, key_path, username);
+    qcry_arbit_init(1, key_path);
 
-    /* Sign our message */
-//    sign_msg(pri, msgfile);
+    int ret;
+    int kookie;
+    ret = qcry_arbit_usrcreate(&kookie, name_kookie, "mypassphrase", QCRY_KEYS_RSA);
+    TEST("CREATE")
 
-//    load_key(&pub, &pri, keyfile);
+    int jane;
+    ret = qcry_arbit_usrcreate(&jane, name_jane, "mypassphrase", QCRY_KEYS_RSA);
+    TEST("CREATE")
 
-    sign(pri, message, sizeof(message) + 1, msgfile);
+    char *kookie_fp;
+    qcry_arbit_getusrinfo(&kookie_fp, kookie, QAUL_FINGERPRINT);
 
-    ret = verify_msg(pub, msgfile);
-    return ret;
+    char *jane_fp;
+    qcry_arbit_getusrinfo(&jane_fp, jane, QAUL_FINGERPRINT);
 
-//    mbedtls_pk_context *tmp;
 
-//    const char *path = "/home/spacekookie/Downloads/mbedtls-2.3.0/build/programs/pkey";
-//    const char *user = "keyfile";
+    { // Manually add keys
+
+        char *kookiekey;
+        qcry_arbit_getusrinfo(&kookiekey, kookie, QAUL_PUBKEY);
+
+        char *janekey;
+        qcry_arbit_getusrinfo(&janekey, jane, QAUL_PUBKEY);
+
+        ret = qcry_arbit_addkey(kookiekey, strlen(kookiekey) + 1, kookie_fp, name_kookie);
+        TEST("ADD KEY")
+
+        ret = qcry_arbit_addkey(janekey, strlen(janekey) + 1, jane_fp, name_jane);
+        TEST("ADD KEY")
+    };
+
+    ret = qcry_arbit_signmsg(jane, &signature, message);
+    TEST("SIGN")
+
+    printf("Signature: %s\n", signature);
+
+    ret = qcry_arbit_addtarget(kookie, jane_fp);
+    TEST("ADD TARGET")
+
+    ret = qcry_arbit_verify(kookie, 0, message, signature);
+    printf("Signature: %s\n", (ret == 0) ? "GOOD" : "BOGUS! DO NOT TRUST!");
+
+//    char *signature;
+//    ret = qcry_arbit_signmsg(usrno, &signature, message);
 //
-//    const char *pub_usr = "/home/spacekookie/Downloads/mbedtls-2.3.0/build/programs/pkey/00_keyfile.pub";
-////
-////    ret = qcry_key_generate(&tmp, "Qaul.net is the secret!");
-////    printf((ret == 0) ? "[KEYGEN]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
-////
-////    ret = qcry_key_write(tmp, path, user);
-////    printf((ret == 0) ? "[WRITE]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
-////
-////    ret = qcry_key_destroy(tmp);
-////    printf((ret == 0) ? "[DESTROY]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
-////
-////    /*********************************************************************/
-//    /*** Reading in the keys to get a split context ***/
-//    mbedtls_pk_context pub, *pri;
-//    mbedtls_pk_init(&pub);
-//
-////    ret = qcry_key_load(&pub, &pri, path, user);
-////    printf((ret == 0) ? "[LOAD]: ALL CLEAR\n" : "[KEYGEN]: AN ERROR OCCURED WITH CODE %d\n", ret);
-//
-//    printf("\n=======================\n\n");
-//
-//    /** Sign a message file */
-//
-//
-//    ret = sign_msg(pri, "/home/spacekookie/message.txt");
-//    printf((ret == 0) ? "[SIGN]: ALL CLEAR\n" : "[SIGN]: AN ERROR OCCURED WITH CODE %d", ret);
-//
-//    printf("Reading public key file: %s\n", pub_usr);
-//
-//    ret = mbedtls_pk_parse_public_keyfile(&pub, pub_usr);
-//    if(ret != 0) {
-//        printf("An error occured while parsing public key file: %d!", ret);
+//    ret = qcry_arbit_verify(target, usrno, message, signature);
+//    if(ret == 0) {
+//        printf("Message was signed properly!\n");
+//    } else {
+//        printf("Signature is BOGUS! Do not trust!\n");
 //    }
-//
-//    /** Then sign an arbitrary msg with them */
-//    ret = verify_msg(&pub, "/home/spacekookie/message.txt");
-//    printf((ret == 0) ? "[VERIFY]: ALL CLEAR\n" : "[VERIFY]: AN ERROR OCCURED WITH CODE %d", ret);
+    end:
+    return ret;
 }
