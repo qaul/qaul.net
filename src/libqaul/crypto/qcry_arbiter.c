@@ -6,12 +6,13 @@
 #include <memory.h>
 #include <stdlib.h>
 
-#include <qaullib/qcry_arbiter.h>
+#include "qcry_arbiter.h"
 #include <mbedtls/platform.h>
 #include "qcry_helper.h"
 #include "qcry_context.h"
 #include "qcry_helper.h"
 #include "qcry_keys.h"
+#include "qcry_keystore.h"
 
 /***********
  *
@@ -47,17 +48,34 @@ static qcry_arbit_ctx *arbiter;
 static unsigned int session_ctr;
 
 /** Inline macro that's used to verify that the arbiter context we're operating on is valid **/
-#define SANE_ARBIT(to_return) if(arbiter == NULL || arbiter->keygen == NULL || arbiter->max < 0) return to_return;
+#define SANE_ARBIT int ret; if(arbiter == NULL || arbiter->keygen == NULL || arbiter->max < 0) return QCRY_STATUS_INVALID_CTX;
+#define USER_OK if(usrno >= arbiter->users) return QCRY_STATUS_INVALID_USERNO;
+#define TARGET_OK if(trgtno >= arbiter->usr_list[usrno]->ctx->usd_trgt) return QCRY_STATUS_INVALID_TARGET;
 
 /************* FORWARD DECLARED PRIVATE UTILITY FUNCTINS BELOW **************/
 int init_key_write(mbedtls_pk_context *key, const char *path, const char *username, const char *passphrase);
 
 int load_keypair(mbedtls_pk_context **pub, mbedtls_pk_context **pri,
-                  const char *path, const char *username, const char *passphrase);
+                 const char *path, const char *username, const char *passphrase);
 
 qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token);
 
+qcry_usr_ctx *get_ctx_with_username(const char *username);
+
 unsigned char *create_token();
+
+#define ARBIT_USER_ADD(user) \
+    int usr_no;\
+    if(arbiter->users >= arbiter->max) { \
+        /* This means we need to increase the user buffer size */ \
+        arbiter->max += 2; \
+        arbiter_user **tmp = (arbiter_user**) malloc(sizeof(arbiter_user*) * arbiter->max); \
+        memcpy(tmp, arbiter->usr_list, sizeof(arbiter_user*) * arbiter->users); \
+        free(arbiter->usr_list); \
+        arbiter->usr_list = tmp; \
+    } \
+    usr_no = arbiter->users++; \
+    arbiter->usr_list[usr_no] = user;
 
 /*****************************************************************************/
 
@@ -88,24 +106,44 @@ int qcry_arbit_init(unsigned int max_concurrent, const char *path)
     /** Set session counter to 0 */
     session_ctr = 0x0;
 
+    /** Load keys from disk into keystore **/
+    char keystore_path[512];
+    size_t p_s = strlen(path);
+
+    if(strcmp(&path[p_s - 1], "/") != 0)
+        mbedtls_snprintf(keystore_path, sizeof(keystore_path), "%s/%s.pub", path, "keystore");
+    else
+        mbedtls_snprintf(keystore_path, sizeof(keystore_path), "%s%s.pub", path, "keystore");
+
+    // TODO: Get list of known fingerprints from a database!
+    unsigned int prints = 10;
+    const char **fingerprints = (const char**) malloc(sizeof(const char*) * prints);
+    for(int i = 0; i < prints; i++) {
+        fingerprints[i] = (char*) malloc(sizeof(char) * 45);
+    }
+
+     qcry_ks_init(keystore_path, NULL, 0);
+
     /** Then return all OK */
     return QCRY_STATUS_OK;
 }
 
 int qcry_arbit_free()
 {
-    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
+    SANE_ARBIT
     int retval;
+
+    /* Make sure the key store is freed */
+    retval = qcry_ks_free();
+    if(!retval) return QCRY_STATUS_ERROR;
 
     /** Free key generator */
     retval = qcry_keys_free(arbiter->keygen);
-    if(!retval)
-        return QCRY_STATUS_ERROR;
+    if(!retval) return QCRY_STATUS_ERROR;
 
     int i;
-    for(i = 0; i <= arbiter->users; i++)
-    {
-        // qcry_context_free(arbiter->usr_list[i]->ctx);
+    for(i = 0; i <= arbiter->users; i++) {
+        qcry_context_free(arbiter->usr_list[i]->ctx);
     }
 
     return QCRY_STATUS_OK;
@@ -114,11 +152,10 @@ int qcry_arbit_free()
 /**
  * Creates a local user context with a username, passphrase and keytype.
  */
-int qcry_arbit_usrcreate(const char *username, const char *passphrase, unsigned int key_type)
+int qcry_arbit_usrcreate(int *user_number, const char *username, const char *passphrase, unsigned int key_type)
 {
-    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
+    SANE_ARBIT
 
-    int ret;
     char *fingerprint;
 
     /** First allocate space for our new user in the arbiter context */
@@ -132,14 +169,8 @@ int qcry_arbit_usrcreate(const char *username, const char *passphrase, unsigned 
         return QCRY_STATUS_INVALID_CTX;
     }
 
-    /** Create a token and a session ID for this user */
-//    item->token = (struct qcry_arbit_token*) calloc(sizeof(struct qcry_arbit_token), 1);
-//    item->token->sess_id = (int) session_ctr++;
-//
-//    /** Copy token and release old pointer */
-//    unsigned char *token = create_token();
-//    memcpy(item->token->token, token, 256);
-//    free(token);
+    ARBIT_USER_ADD(item)
+    *user_number = usr_no;
 
     mbedtls_pk_context *comb;
     ret = qcry_keys_rsagen(arbiter->keygen, &comb, username);
@@ -178,28 +209,32 @@ int qcry_arbit_usrcreate(const char *username, const char *passphrase, unsigned 
     return QCRY_STATUS_OK;
 }
 
-int qcry_arbit_getusrinfo(const char *(*fingerprint), const char *username)
+int qcry_arbit_getusrinfo(const char *(*fingerprint), int usrno)
 {
+    SANE_ARBIT
 
-}
-
-int qcry_arbit_usrdestroy(const char *fingerprint)
-{
-    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
-
+    (*fingerprint) = arbiter->usr_list[usrno]->ctx->fingerprint;
     return QCRY_STATUS_OK;
 }
 
+int qcry_arbit_usrdestroy(int usrno)
+{
+    SANE_ARBIT
+
+    return QCRY_STATUS_NOT_IMPLEMENTED;
+}
+
 /**
+ *
  * Opposite of #{qcry_arbit_restore}. This function will take an identity and save it's context
  * including keys and sensitive data in an encrypted blob on the disk.
  * Passphrase needs to have been created in before.
  */
-int qcry_arbit_save(const char *finterprint, struct qcry_arbit_token *token)
+int qcry_arbit_save(const char *finterprint,  int usrno)
 {
-    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
+    SANE_ARBIT
 
-    return QCRY_STATUS_OK;
+    return QCRY_STATUS_NOT_IMPLEMENTED;
 }
 
 /**
@@ -209,77 +244,125 @@ int qcry_arbit_save(const char *finterprint, struct qcry_arbit_token *token)
  * @param username: Username space to unlock
  * @param passphrase: A passphrase used to encrypt the keys
  */
-int qcry_arbit_restore(const char *username, const char *passphrase)
+int qcry_arbit_restore(int *usrno, const char *username, const char *passphrase)
 {
-    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
+    SANE_ARBIT
+
+    /** First allocate space for our new user in the arbiter context */
+    arbiter_user *item = (arbiter_user*) calloc(sizeof(arbiter_user), 1);
+    item->ctx = (qcry_usr_ctx*) malloc(sizeof(qcry_usr_ctx));
+
+    /** Initialise the user context for use with RSA keys */
+    ret = qcry_context_init(item->ctx, username, PK_RSA);
+    if(ret != 0) {
+        printf("Context init failed with code %d", ret);
+        return QCRY_STATUS_INVALID_CTX;
+    }
+
+    ARBIT_USER_ADD(item)
+
+    mbedtls_pk_context *pri, *pub;
+    ret = load_keypair(&pub, &pri, arbiter->path, username, passphrase);
+
 
     return QCRY_STATUS_OK;
 }
 
-/**
- * Starts a "session" between a local user (as a fingerprint) and a remote user (as a fingerprint).
- * Fingerprints are used in the crypto engine to identify keys and outside the crypto module to map
- * users to routing data
- */
-int qcry_arbit_start(const char *fp_self, const char *fp_trgt, struct qcry_arbit_token *(*token))
+int qcry_arbit_signmsg(int usrno, char *(*sgn_buffer), const char *message)
 {
-    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
+    /* Make sure our environment is sane */
+    SANE_ARBIT USER_OK
+
+    /* Store usr locally for easy handling */
+    arbiter_user *usr = arbiter->usr_list[usrno];
+
+    /* Call the context handle for sign message */
+    ret = qcry_context_signmsg(usr->ctx, message, (unsigned char**) sgn_buffer);
+    if(ret != 0) {
+        printf("An error occured while signing the message: %d\n", ret);
+        return ret;
+    }
 
     return QCRY_STATUS_OK;
 }
 
-/**
- * Stops a session with a token.
- */
-int qcry_arbit_stop(struct qcry_arbit_token *token)
+int qcry_arbit_verify(int usrno, int trgtno, const char *message, const char *signature)
 {
-    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
+    /* Make sure our environment is sane */
+    SANE_ARBIT USER_OK TARGET_OK
 
-    return QCRY_STATUS_OK;
+    /* Store usr locally for easy handling */
+    arbiter_user *usr = arbiter->usr_list[usrno];
+    bool ok = false;
+
+    ret = qcry_context_verifymsg(usr->ctx, (unsigned int) trgtno, message, signature, &ok);
+    if(ret != 0) {
+        printf("An error occured while checking a signature: %d!\n", ret);
+        return ret;
+    }
+
+    /** Check if our signature was OK and return an apropriate code back to the developer **/
+    return ok ? QCRY_STATUS_OK : QCRY_STATUS_SIGN_BOGUS;
 }
 
-int qcry_arbit_sendmsg(struct qcry_arbit_token *token, char *(*encrypted), const char *plain)
+int qcry_arbit_addtarget(int usrno, const char *fingerprint)
 {
-    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
+    /* Make sure our environment is sane */
+    SANE_ARBIT USER_OK
 
-    return QCRY_STATUS_OK;
-}
+    /* Store usr locally for easy handling */
+    arbiter_user *usr = arbiter->usr_list[usrno];
 
-int qcry_arbit_parsemsg(struct qcry_arbit_token *token, char *(*parsed), const char *encrypted)
-{
-    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
+    /* We need to check if the target already exists */
+    int tused = usr->ctx->usd_trgt;
+    qcry_trgt_t **targets = usr->ctx->trgts;
+    for(int i = 0; i < tused; i++) {
+        qcry_trgt_t *t = targets[i];
 
-    return QCRY_STATUS_OK;
-}
+        /* No need to add again if exists */
+        if(strcmp(t->fingerprint, fingerprint) == 0) {
+            return QCRY_STATUS_TARGET_EXISTS;
+        }
+    }
 
-int qcry_arbit_signmsg(struct qcry_arbit_token *token, char *(*sgn_buffer), const char *message)
-{
-    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
+    /* If we reached this point it means the target didn't yet exist. Safely add it */
+    qcry_trgt_t *t;
+    ret = qcry_context_mktarget(&t, fingerprint);
+    if(ret != 0) return ret;
 
-    return QCRY_STATUS_OK;
-}
+    /* Attach our new target to the user context */
+    ret = qcry_context_add_trgt(usr->ctx, t, PK_RSA);
+    if(ret != 0) return ret;
 
-/**
- * Verify the validity of a signature on a message cryptographically. Provide the session token and an active context
- * as well as a message and the elegid signature to verify the pair.
- *
- * Returns 0 if signature could be verified.
- * Returns -1 if signature was faulty
- * Returns 1...255 for runtime errors
- */
-int qcry_arbit_verify(struct qcry_arbit_token *token, const char *message, const char *signature)
-{
-    SANE_ARBIT(QCRY_STATUS_INVALID_CTX)
-
+    /* Signal ok */
     return QCRY_STATUS_OK;
 }
 
 
 /*************************** PRIVATE UTILITY FUNCTIONS BELOW **************************/
 
+qcry_usr_ctx *get_ctx_with_username(const char *username)
+{
+    SANE_ARBIT
+
+    int i;
+    for(i = 0; i <= arbiter->users; i++)
+    {
+        /** Check if the token is exactly the same TODO: Turn this into MACRO */
+        if(strcmp(arbiter->usr_list[i]->ctx->username, username) == 0)
+        {
+            return arbiter->usr_list[i]->ctx;
+        }
+    }
+
+    /** If we couldn't find anything the token wasn't valid **/
+    return NULL;
+}
+
 qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token)
 {
-    SANE_ARBIT(NULL)
+    if(arbiter == NULL || arbiter->keygen == NULL || arbiter->max < 0)
+        goto exit;
 
     int i;
     for(i = 0; i <= arbiter->users; i++)
@@ -293,6 +376,7 @@ qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token)
     }
 
     /** If we couldn't find anything the token wasn't valid **/
+    exit:
     return NULL;
 }
 
@@ -308,6 +392,8 @@ unsigned char *create_token()
 // FIXME: Encrypt the private key !!!
 int init_key_write(mbedtls_pk_context *key, const char *path, const char *username, const char *passphrase)
 {
+    if(key == NULL)
+        return QCRY_STATUS_ERROR;
 
     printf("Keypair stashing...");
     size_t p_s = strlen(path);
@@ -353,8 +439,7 @@ int init_key_write(mbedtls_pk_context *key, const char *path, const char *userna
         return -1;
     }
 
-    if(fwrite(c, 1, len, f) != len)
-    {
+    if(fwrite(c, 1, len, f) != len) {
         printf("FAILED\n");
         fclose(f);
         return -1;
@@ -405,7 +490,7 @@ int init_key_write(mbedtls_pk_context *key, const char *path, const char *userna
  */
 // FIXME: CAN'T LOAD ENCRYPTED PRIVATE KEYS YET!
 int load_keypair(mbedtls_pk_context **pub, mbedtls_pk_context **pri,
-                  const char *path, const char *username, const char *passphrase)
+                 const char *path, const char *username, const char *passphrase)
 {
     int ret = 0;
 
@@ -434,12 +519,16 @@ int load_keypair(mbedtls_pk_context **pub, mbedtls_pk_context **pri,
     size_t u_s = strlen(username);
 
     /** Build private key path **/
-    if(strcmp(&path[p_s - 1], "/") != 0)    mbedtls_snprintf(pri_pth, sizeof(pri_pth), "%s/00_%s.key", path, username);
-    else                                    mbedtls_snprintf(pri_pth, sizeof(pri_pth), "%s00_%s.key", path, username);
+    if(strcmp(&path[p_s - 1], "/") != 0)
+        mbedtls_snprintf(pri_pth, sizeof(pri_pth), "%s/00_%s.key", path, username);
+    else
+        mbedtls_snprintf(pri_pth, sizeof(pri_pth), "%s00_%s.key", path, username);
 
     /* Build public key path */
-    if(strcmp(&path[p_s - 1], "/") != 0)    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s/00_%s.pub", path, username);
-    else                                    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s00_%s.pub", path, username);
+    if(strcmp(&path[p_s - 1], "/") != 0)
+        mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s/00_%s.pub", path, username);
+    else
+        mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s00_%s.pub", path, username);
 
     /*** Read keys off disk and initialise the contexts ***/
     mbedtls_printf("Parsing public key...");

@@ -10,9 +10,14 @@
 
 #include "qcry_context.h"
 #include "qcry_keys.h"
+#include "qcry_keystore.h"
 #include <qaullib/qcry_hashing.h>
 #include <mbedtls/pk.h>
 #include <mbedtls/pk_internal.h>
+#include <mbedtls/platform.h>
+#include <mbedtls/base64.h>
+#include <mbedtls/md_internal.h>
+#include <mbedtls/md.h>
 
 //////////////////////////// SOME HELPFUL MACROS ////////////////////////////
 
@@ -32,20 +37,51 @@ int qcry_context_init(qcry_usr_ctx *ctx, const char *usr_name, qcry_ciph_t ciph_
     /* Zero out so we are clean */
     memset(ctx, 0, sizeof(qcry_usr_ctx));
 
+    int ret;
+
     /* Set some basic identity metadata */
     ctx->username = usr_name;
     ctx->birthdate = NULL;
     ctx->ciph_t = ciph_t;
 
     switch(ciph_t) {
-        case PK_RSA: ctx->ciph_len = QCRY_KEYS_KL_RSA; break;
-        case ECDSA: ctx->ciph_len = QCRY_KEYS_KL_ECC; break;
-        case AES256: ctx->ciph_len = QCRY_KEYS_KL_AES; break;
-        default: return QCRY_STATUS_INVALID_PARAMS;
+        case PK_RSA:
+            ctx->ciph_len = QCRY_KEYS_KL_RSA;
+            break;
+        case ECDSA:
+            ctx->ciph_len = QCRY_KEYS_KL_ECC;
+            break;
+        case AES256:
+            ctx->ciph_len = QCRY_KEYS_KL_AES;
+            break;
+        default:
+            return QCRY_STATUS_INVALID_PARAMS;
     }
+
+    /* Setup entropy and random number generators */
+    ctx->ctr_drbg = (mbedtls_ctr_drbg_context*) malloc(sizeof(mbedtls_ctr_drbg_context));
+    if(ctx->ctr_drbg == NULL)
+        return QCRY_STATUS_MALLOC_FAIL;
+
+    ctx->entropy = (mbedtls_entropy_context*) malloc(sizeof(mbedtls_entropy_context));
+    if(ctx->entropy == NULL)
+        return QCRY_STATUS_MALLOC_FAIL;
+
+    mbedtls_ctr_drbg_init(ctx->ctr_drbg);
+    mbedtls_entropy_init(ctx->entropy);
+
+    /* Seed the random number generator for a user-by-user basis */
+    ret = mbedtls_ctr_drbg_seed(ctx->ctr_drbg, mbedtls_entropy_func,
+                                ctx->entropy, (unsigned char *) ctx->username,
+                                strlen(ctx->username));
+    if(ret != 0)
+        return QCRY_STATUS_SEED_FAILED;
 
     /* Make sure we have some space for targets */
     ctx->trgts = (qcry_trgt_t**) calloc(sizeof(qcry_trgt_t*), MIN_BFR_S);
+    if(ctx->trgts == NULL)
+        return QCRY_STATUS_MALLOC_FAIL;
+
     ctx->max_trgt = MIN_BFR_S;
     ctx->usd_trgt = 0;
 
@@ -53,6 +89,53 @@ int qcry_context_init(qcry_usr_ctx *ctx, const char *usr_name, qcry_ciph_t ciph_
     ctx->mgno = MAGICK_NO;
 
     /* Return success :) */
+    return QCRY_STATUS_OK;
+}
+
+int qcry_context_free(qcry_usr_ctx *ctx)
+{
+    return QCRY_STATUS_OK;
+}
+
+int qcry_context_mktarget(qcry_trgt_t *(*t), const char *fingerprint)
+{
+    /* Allocate some memory for us to use */
+    *t = (qcry_trgt_t*) malloc(sizeof(qcry_trgt_t));
+    if(*t == NULL)
+        return QCRY_STATUS_MALLOC_FAIL;
+    memset(*t, 0, sizeof(qcry_trgt_t));
+
+    /* Get the known public key for this target */
+    mbedtls_pk_context *pub;
+    qcry_ks_getkey(&pub, fingerprint);
+    if(pub == NULL)
+        return QCRY_STATUS_KS_NOTFOUND;
+
+    /* Get username information from keystore */
+    char *username;
+    qcry_ks_getusername(&username, fingerprint);
+    if(username == NULL)
+        return QCRY_STATUS_KS_NOTFOUND;
+
+    /* Copy the fingerprint into memory WE can control */
+    size_t fplen = strlen(fingerprint) + 1;
+    char *fp = (char*) malloc(sizeof(char) * fplen);
+    strcpy(fp, fingerprint);
+
+    /* Copy the username into memory WE can control */
+    size_t usrlen = strlen(fingerprint) + 1;
+    char *user = (char*) malloc(sizeof(char) * usrlen);
+    strcpy(user, username);
+
+    /* Populate! */
+    (*t)->fingerprint = fp;
+    (*t)->username = user;
+    (*t)->public = pub;
+    (*t)->types = PK_RSA;
+
+    /* Such magic! */
+    (*t)->mgno = MAGICK_NO;
+
     return QCRY_STATUS_OK;
 }
 
@@ -114,76 +197,168 @@ int qcry_context_get_finterprint(qcry_usr_ctx *ctx, unsigned char *(*fingerprint
     }
 }
 
-int qcry_context_prk_detach(qcry_usr_ctx *ctx)
+int qcry_context_signmsg(qcry_usr_ctx *ctx, const char *msg, unsigned char *(*sign))
 {
-//    CHECK_SANE
-//
-//    int ctr_t = 0;
-//    while(ctx->use_ctr != 0) {
-//        ctr_t += TIME_SLEEP;
-//        sleep(TIME_SLEEP);
-//
-//        if(ctr_t >= MAX_TIMEOUT) {
-//            return QCRY_STATUS_KEY_BUSY;
-//        }
-//    }
-//
-//    /* Then simply free the key */
-//    free(ctx->usr_key_pri);
-//    return QCRY_STATUS_OK;
+    CHECK_SANE
+
+    /* Creating a few variables to use */
+    unsigned char hash_buf[32];
+    unsigned char sign_buf[1024];
+    size_t olen = 0;
+
+    /* Hash the message to sign it */
+    mbedtls_md_context_t md_ctx;
+    const mbedtls_md_info_t *md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+
+    /* Do mbedtls hashing manually! */
+    mbedtls_md_init(&md_ctx);
+    ret = mbedtls_md_setup(&md_ctx, md_info, 0);
+    if(ret != 0)
+        return QCRY_STATUS_ERROR;
+
+    /* Star the md handle for our context */
+    ret = mbedtls_md_starts(&md_ctx);
+    if(ret != 0)
+        return QCRY_STATUS_ERROR;
+
+    /* Update the md handle once with the entire message */
+    ret = mbedtls_md_update(&md_ctx, (unsigned char*) msg, strlen((char *) msg) + 1); // Consider \0 !
+    if(ret != 0)
+        return QCRY_STATUS_ERROR;
+
+    /* Throw output in stack buffer */
+    ret = mbedtls_md_finish(&md_ctx, hash_buf);
+    if(ret != 0)
+        return QCRY_STATUS_ERROR;
+
+    /* Clean up our resources afterwards */
+    mbedtls_md_free(&md_ctx);
+
+    /*** Create signature for hashed message ***/
+    ret = mbedtls_pk_sign(ctx->private, MBEDTLS_MD_SHA256,
+                          hash_buf, 32, sign_buf, &olen,
+                          mbedtls_ctr_drbg_random, ctx->ctr_drbg);
+    if(ret != 0)
+        return QCRY_STATUS_ERROR;
+
+    /*** base64 encode the signature ***/
+    unsigned char base64_buf[1024];
+    size_t bw;
+
+    ret = mbedtls_base64_encode(base64_buf, 1024, &bw, (unsigned char*) sign_buf, olen + 1); // Consider \0 !
+    if(ret != 0)
+        return QCRY_STATUS_ENCODE_FAILED;
+
+    /*** Finally allocate enough memory on reference pointer ***/
+    (*sign) = (unsigned char*) calloc(sizeof(unsigned char), bw);
+    strcpy((char*) (*sign), (char*) base64_buf);
+
+    return QCRY_STATUS_OK;
 }
 
-int qcry_context_add_trgt(qcry_usr_ctx *ctx, const qcry_trgt_t *trgt, qcry_ciph_t ciph_t, unsigned int *trgt_no)
+int qcry_context_verifymsg(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, const char *sign, bool *ok)
 {
-//    CHECK_SANE
-//
-//    /* Check the key length for our target */
-//    size_t pri_len;
-//    if(ciph_t == AES256) {
-//        pri_len = strlen(trgt->d.sk->sh_key_pri);
-//    } else {
-//        pri_len = strlen(trgt->d.pk->usr_key_pub);
-//        if(trgt->d.pk->key_len == 0) pri_len = -1;
-//    }
-//
-//    if(pri_len != QCRY_KEY_LEN[ciph_t]) return QCRY_STATUS_INVALID_TARGET;
-//
-//    /* Increases the target buffer if needs be */
-//    CHECK_BUFFER(qcry_trgt_t* , ctx->trgts, ctx->max_trgt, ctx->usd_trgt)
-//
-//    /* Copy in target data from const source */
-//    ctx->usd_trgt++;
-//    memcpy(ctx->trgts[ctx->usd_trgt], trgt, sizeof(qcry_trgt_t));
-//    *trgt_no = ctx->usd_trgt;
-//
-//    if(ciph_t == AES256) {
-//        ctx->trgts[ctx->usd_trgt]->ctx.sk = (mbedtls_aes_context*) malloc(sizeof(mbedtls_aes_context));
-//        mbedtls_aes_init(ctx->trgts[ctx->usd_trgt]->ctx.sk);
-//    } else {
-//        ctx->trgts[ctx->usd_trgt]->ctx.pk = (mbedtls_pk_context*) malloc(sizeof(mbedtls_pk_context));
-//        mbedtls_pk_init(ctx->trgts[ctx->usd_trgt]->ctx.pk);
-//    }
-//
-//    /* Set "magic" number and return all clear */
-//    ctx->trgts[ctx->usd_trgt]->mgno = MAGICK_NO;
-//    return QCRY_STATUS_OK;
+    CHECK_SANE
+
+    /* Check the target is valid */
+    if(ctx->usd_trgt < trgt_no)
+        return QCRY_STATUS_INVALID_TARGET;
+
+    /* Check message length - Consider \0 term */
+    if(strlen(msg) >= QAUL_MAX_MSG_LENGTH) {
+        printf("[FATAL] Message to sign too long!\n");
+        return QCRY_STATUS_FATAL;
+    }
+
+    /* Always asume the worst */
+    *ok = false;
+
+    /*** Prapre are few variables we might need ***/
+    qcry_trgt_t *t = ctx->trgts[trgt_no];
+    mbedtls_pk_context *pub = t->public;
+
+    /* Buffer for plain, decoded signature and hashed msg */
+    unsigned char msg_buf[QAUL_MAX_MSG_LENGTH];
+    unsigned char sign_buf[1024];
+    unsigned char msg_hash[32];
+    size_t bw;
+
+    /* Undo base64 encoding on signature! */
+    ret = mbedtls_base64_decode(sign_buf, 1024, &bw, (unsigned char*) sign, strlen((char*) sign));
+    if(ret != 0)
+        return QCRY_STATUS_DECODE_FAILED;
+
+    /* Copy message and signature into stack buffers */
+    strcpy((char*) msg_buf, msg);
+
+    /* Hash the input message for comparison */
+    mbedtls_md_context_t md_ctx;
+    const mbedtls_md_info_t *md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+
+    /* Do mbedtls hashing manually! */
+    mbedtls_md_init(&md_ctx);
+    ret = mbedtls_md_setup(&md_ctx, md_info, 0);
+    if(ret != 0)
+        return QCRY_STATUS_ERROR;
+
+    /* Star the md handle for our context */
+    ret = mbedtls_md_starts(&md_ctx);
+    if(ret != 0)
+        return QCRY_STATUS_ERROR;
+
+    /* Update the md handle once with the entire message */
+    ret = mbedtls_md_update(&md_ctx, msg_buf, strlen((char *) msg_buf) + 1); // Consider \0 !
+    if(ret != 0)
+        return QCRY_STATUS_ERROR;
+
+    /* Throw output in stack buffer */
+    ret = mbedtls_md_finish(&md_ctx, msg_hash);
+    if(ret != 0)
+        return QCRY_STATUS_ERROR;
+
+    /* Clean up our resources afterwards */
+    mbedtls_md_free(&md_ctx);
+
+    /*** Now we can compare our decoded signature and our just-made message hash ***/
+
+    ret = mbedtls_pk_verify(pub, MBEDTLS_MD_SHA256, msg_hash, 32, sign_buf, bw);
+
+    /* Set our OK flag and return */
+    *ok = (ret == 0) ? true : false;
+    return ret;
+}
+
+int qcry_context_add_trgt(qcry_usr_ctx *ctx, qcry_trgt_t *trgt, qcry_ciph_t ciph_t)
+{
+    CHECK_SANE
+
+    /* Make sure we have enough space allocated for another target */
+    if(ctx->usd_trgt >= ctx->max_trgt) {
+        realloc(ctx->trgts, ctx->max_trgt + 10);
+        if(ctx->trgts == NULL)
+            return QCRY_STATUS_MALLOC_FAIL;
+    }
+
+    /* Safely add our target */
+    ctx->trgts[ctx->usd_trgt++] = trgt;
+
+    return QCRY_STATUS_OK;
 }
 
 int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int *trgt_no)
 {
-//    CHECK_SANE
-//
-//    if(!ctx->trgts[*trgt_no]) return QCRY_STATUS_INVALID_TARGET;
-//
-//    /* Clear target memory and resize buffer if needed */
-//    CLEAR_TARGET(ctx->ciph_t, ctx->trgts[*trgt_no])
-//    CHECK_BUFFER(qcry_trgt_t* , ctx->trgts, ctx->max_trgt, ctx->usd_trgt)
-//
-//    return QCRY_STATUS_OK;
+    CHECK_SANE
+
+    if(!ctx->trgts[*trgt_no]) return QCRY_STATUS_INVALID_TARGET;
+
+    // TODO: Add this code
+
+    return QCRY_STATUS_OK;
 }
 
-int qcry_encrypt_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, size_t msg_len, unsigned char *(*ciph))
-{
+//int qcry_encrypt_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg,
+// size_t msg_len, unsigned char *(*ciph))
+//{
 //    /* Check our context is sane */
 //    CHECK_SANE
 //
@@ -199,9 +374,10 @@ int qcry_encrypt_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char 
 //        mbedtls_pk_parse_public_key(trgt->ctx.pk, trgt->d.pk->usr_key_pub, trgt->d.pk->key_len);
 //        size_t out_len = mbedtls_pk_get_len(trgt->ctx.pk);
 //
-//        mbedtls_pk_encrypt( trgt->ctx.pk, msg, msg_len, *ciph, &out_len, sizeof(*ciph), mbedtls_ctr_drbg_random, ctx->ctr_drbg);
+//        mbedtls_pk_encrypt( trgt->ctx.pk, msg, msg_len, *ciph, &out_len, sizeof(*ciph),
+// mbedtls_ctr_drbg_random, ctx->ctr_drbg);
 //
 //    } else {
 //        return QCRY_STATUS_NOT_IMPLEMENTED;
 //    }
-}
+//}
