@@ -172,6 +172,7 @@ int qcry_keys_rsagen(qcry_keys_context *ctx, mbedtls_pk_context *(*mul), const c
     /*********************************************/
 
     printf("Generating private key...");
+    fflush(stdout);
     ret = mbedtls_pk_setup(&tmp_pri, mbedtls_pk_info_from_type(type));
     if (ret != 0) {
         printf("FAILED!\nmbedtls_pk_setup returned %d\n", ret);

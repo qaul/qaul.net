@@ -5,141 +5,74 @@
 
 
 #include <qaullib/qcry_wrapper.h>
-#include <stdio.h>
-#include <string.h>
-#include <mbedtls/md5.h>
-#include <qaullib/qcry_hashing.h>
-#include <mbedtls/base64.h>
 
 #include "crypto/qcry_arbiter.h"
-#include "crypto/qcry_keys.h"
 #include "crypto/qcry_helper.h"
-#include "crypto/qcry_playground.h"
 
-int load_only_public_file(mbedtls_pk_context **pub, const char *path, const char *username)
-{
-    printf("Unicorns are attacking this library blob!\n");
-    int ret = 0;
-
-    /*** Malloc space for the pub and pri key values on heap ***/
-    mbedtls_pk_context *tmp = *pub;
-    tmp = (mbedtls_pk_context*) malloc(sizeof(mbedtls_pk_context));
-    if(tmp == NULL) {
-        ret = EXIT_FAILURE;
-        goto cleanup;
-    }
-
-    /*** Initialise the key contexts properly ***/
-    mbedtls_pk_init(tmp);
-
-    /*** Construct the required file names ***/
-    char pri_pth[512];
-    char pub_pth[512];
-
-    size_t p_s = strlen(path);
-    size_t u_s = strlen(username);
-
-    /* Build public key path */
-    if(strcmp(&path[p_s - 1], "/") != 0)    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s/00_%s.pub", path, username);
-    else                                    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s00_%s.pub", path, username);
-
-    /*** Read keys off disk and initialise the contexts ***/
-    mbedtls_printf("Parsing public key...");
-    fflush(stdout);
-
-    ret = mbedtls_pk_parse_public_keyfile(tmp, pub_pth);
-    if(ret != 0) {
-        mbedtls_printf("FAILED! mbedtls_pk_parse_public_keyfile returned -0x%04x\n", -ret);
-        goto cleanup;
-    }
-    mbedtls_printf("OK\n");
-
-
-    printf("== Keys loaded successfully ==\n\n");
-    *pub = tmp;
-    return 0;
-
-    cleanup:
-    mbedtls_pk_free(tmp);
-    return ret;
-}
-
-void l_public(char **pubkey)
-{
-    mbedtls_pk_context *pub_target;
-    load_only_public_file(&pub_target, "/home/spacekookie/.qaul/keystore/", "spacekookie");
-
-    size_t buf_s = 16000;
-    unsigned char output_buf[buf_s];
-
-    int ret = mbedtls_pk_write_pubkey_pem(pub_target, output_buf, 16000);
-
-    /* Allocate some memory for our buffer and copy the key */
-    (*pubkey) = (char*) calloc(sizeof(char), strlen((char *) output_buf) + 1); // Consider \0 !
-    strcpy((char *) *pubkey, (char *)output_buf);
-
-    printf("Public key:\n\n%s", *pubkey);
-}
-
-#define ASSERT \
-    printf("Return: %d\n", ret); \
-    if(ret != 0) goto end;
+#include <stdio.h>
+#include <string.h>
 
 #define TEST(msg) \
     printf("Return %s: %d\n", #msg, ret); if(ret != 0) goto end;
 
 int qcry_devel_init(int argc, char *argv[])
 {
-    char *key_path = "/home/spacekookie/.qaul/";
-    char *msgfile = "/home/spacekookie/message.txt";
-    char *name_kookie = "spacekookie";
-    char *name_jane = "janethemaine";
+    char *cfg_path = "/home/spacekookie/.qaul/";
 
+    char *message = "This is a message with less than 140 symbols #TwitterStyle. You're great! I'd love to hang out";
+    char *fakemessage = "I hate you! I will tell you horrible and hurtful things in a minute!";
     char *signature;
-    char *message = "This is my message that is really cool and will definately fit in all of my buffers!";
-
-    qcry_arbit_init(1, key_path);
 
     int ret;
-    int kookie;
-    ret = qcry_arbit_usrcreate(&kookie, name_kookie, "mypassphrase", QCRY_KEYS_RSA);
+    int kookie, jane;
+
+    ret = qcry_arbit_init(1, cfg_path, NULL); // TODO: Give all known fingerprints/ public keys
+    TEST("INIT")
+
+    ret = qcry_arbit_usrcreate(&kookie, "spacekookie", "mypassphrase", QCRY_KEYS_RSA);
+
     TEST("CREATE")
 
-    int jane;
-    ret = qcry_arbit_usrcreate(&jane, name_jane, "mypassphrase", QCRY_KEYS_RSA);
+    ret = qcry_arbit_usrcreate(&jane, "janethemaine", "mypassphrase", QCRY_KEYS_RSA);
     TEST("CREATE")
 
     char *kookie_fp;
-    qcry_arbit_getusrinfo(&kookie_fp, kookie, QAUL_FINGERPRINT);
+    char *kookiekey;
 
     char *jane_fp;
-    qcry_arbit_getusrinfo(&jane_fp, jane, QAUL_FINGERPRINT);
+    char *janekey;
 
 
     { // Manually add keys
-
-        char *kookiekey;
+        qcry_arbit_getusrinfo(&kookie_fp, kookie, QAUL_FINGERPRINT);
         qcry_arbit_getusrinfo(&kookiekey, kookie, QAUL_PUBKEY);
 
-        char *janekey;
+        qcry_arbit_getusrinfo(&jane_fp, jane, QAUL_FINGERPRINT);
         qcry_arbit_getusrinfo(&janekey, jane, QAUL_PUBKEY);
 
-        ret = qcry_arbit_addkey(kookiekey, strlen(kookiekey) + 1, kookie_fp, name_kookie);
+        ret = qcry_arbit_addkey(kookiekey, strlen(kookiekey) + 1, kookie_fp, "spacekookie");
         TEST("ADD KEY")
 
-        ret = qcry_arbit_addkey(janekey, strlen(janekey) + 1, jane_fp, name_jane);
+        ret = qcry_arbit_addkey(janekey, strlen(janekey) + 1, jane_fp, "janethemaine");
         TEST("ADD KEY")
     };
+
+    /******************* ON JANES COMPUTER *******************/
 
     ret = qcry_arbit_signmsg(jane, &signature, message);
     TEST("SIGN")
 
-    printf("Signature: %s\n", signature);
+    printf("Signature: %s\n", signature); // Send message and signature over network
+
+    /******************* ON SPACEKOOKIES COMPUTER *******************/
 
     ret = qcry_arbit_addtarget(kookie, jane_fp);
     TEST("ADD TARGET")
 
     ret = qcry_arbit_verify(kookie, 0, message, signature);
+    printf("Signature: %s\n", (ret == 0) ? "GOOD" : "BOGUS! DO NOT TRUST!");
+
+    ret = qcry_arbit_verify(kookie, 0, fakemessage, signature);
     printf("Signature: %s\n", (ret == 0) ? "GOOD" : "BOGUS! DO NOT TRUST!");
 
 //    char *signature;

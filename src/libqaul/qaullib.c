@@ -107,7 +107,7 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 		*
 		*************************************************************/
 
-		int ret = qcry_arbit_init(QAUL_CONC_LOCK, "/home/spacekookie/.qaul"); //FIXME: Get proper path
+		int ret = qcry_arbit_init(QAUL_CONC_LOCK, "/home/spacekookie/.qaul", NULL); //FIXME: Get proper path
 		if(ret != 0) printf("A critical error (#%d) occured when initialising crypto arbiter!\n", ret);
 
 		// TODO: Check existing user files and init with them instead

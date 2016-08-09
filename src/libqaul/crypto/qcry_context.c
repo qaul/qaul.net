@@ -227,7 +227,7 @@ int qcry_context_signmsg(qcry_usr_ctx *ctx, const char *msg, unsigned char *(*si
         return QCRY_STATUS_ERROR;
 
     /* Update the md handle once with the entire message */
-    ret = mbedtls_md_update(&md_ctx, (unsigned char*) msg, strlen((char *) msg) + 1); // Consider \0 !
+    ret = mbedtls_md_update(&md_ctx, (unsigned char*) msg, strlen((char *) msg)); // Consider \0 !
     if(ret != 0)
         return QCRY_STATUS_ERROR;
 
@@ -246,17 +246,19 @@ int qcry_context_signmsg(qcry_usr_ctx *ctx, const char *msg, unsigned char *(*si
     if(ret != 0)
         return QCRY_STATUS_ERROR;
 
+    (*sign) = (unsigned char*) calloc(sizeof(unsigned char), olen);
+    strcpy((char*) (*sign), (char*) sign_buf);
+
     /*** base64 encode the signature ***/
-    unsigned char base64_buf[1024];
-    size_t bw;
+//    unsigned char base64_buf[1024];
+//    size_t bw;
+//
+//    ret = mbedtls_base64_encode(base64_buf, 1024, &bw, (unsigned char*) sign_buf, olen + 1); // Consider \0 !
+//    if(ret != 0)
+//        return QCRY_STATUS_ENCODE_FAILED;
+//
+//    /*** Finally allocate enough memory on reference pointer ***/
 
-    ret = mbedtls_base64_encode(base64_buf, 1024, &bw, (unsigned char*) sign_buf, olen + 1); // Consider \0 !
-    if(ret != 0)
-        return QCRY_STATUS_ENCODE_FAILED;
-
-    /*** Finally allocate enough memory on reference pointer ***/
-    (*sign) = (unsigned char*) calloc(sizeof(unsigned char), bw);
-    strcpy((char*) (*sign), (char*) base64_buf);
 
     return QCRY_STATUS_OK;
 }
@@ -289,12 +291,17 @@ int qcry_context_verifymsg(qcry_usr_ctx *ctx, const unsigned int trgt_no, const 
     size_t bw;
 
     /* Undo base64 encoding on signature! */
-    ret = mbedtls_base64_decode(sign_buf, 1024, &bw, (unsigned char*) sign, strlen((char*) sign));
-    if(ret != 0)
-        return QCRY_STATUS_DECODE_FAILED;
+//    ret = mbedtls_base64_decode(sign_buf, 1024, &bw, (unsigned char*) sign, strlen((char*) sign));
+//    if(ret != 0)
+//        return QCRY_STATUS_DECODE_FAILED;
+    memcpy((char*) sign_buf, (char *) sign, 512);
 
     /* Copy message and signature into stack buffers */
     strcpy((char*) msg_buf, msg);
+//
+//    for(int i = 0; i < strlen((char*) sign_buf) + 1; i++)
+//        printf("%x", sign_buf[i] & 0xff);
+//    printf("\n");
 
     /* Hash the input message for comparison */
     mbedtls_md_context_t md_ctx;
@@ -312,7 +319,7 @@ int qcry_context_verifymsg(qcry_usr_ctx *ctx, const unsigned int trgt_no, const 
         return QCRY_STATUS_ERROR;
 
     /* Update the md handle once with the entire message */
-    ret = mbedtls_md_update(&md_ctx, msg_buf, strlen((char *) msg_buf) + 1); // Consider \0 !
+    ret = mbedtls_md_update(&md_ctx, msg_buf, strlen((char *) msg_buf)); // Consider \0 !
     if(ret != 0)
         return QCRY_STATUS_ERROR;
 
@@ -323,6 +330,10 @@ int qcry_context_verifymsg(qcry_usr_ctx *ctx, const unsigned int trgt_no, const 
 
     /* Clean up our resources afterwards */
     mbedtls_md_free(&md_ctx);
+
+//    for(int i = 0; i < strlen((char*) msg_hash) + 1; i++)
+//        printf("%x", msg_hash[i] & 0xff);
+//    printf("\n");
 
     /*** Now we can compare our decoded signature and our just-made message hash ***/
 
@@ -361,29 +372,3 @@ int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int *trgt_no)
 
     return QCRY_STATUS_OK;
 }
-
-//int qcry_encrypt_trgt(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg,
-// size_t msg_len, unsigned char *(*ciph))
-//{
-//    /* Check our context is sane */
-//    CHECK_SANE
-//
-//    /* Check our target is sane */
-//    CHECK_TARGET(ctx, trgt_no);
-//
-//    /* Store pointer to target we're working with directly */
-//    qcry_trgt_t *trgt = ctx->trgts[trgt_no];
-//
-//    if(ctx->ciph_t == AES256) {
-//
-//    } else if(ctx->ciph_t == PK_RSA) {
-//        mbedtls_pk_parse_public_key(trgt->ctx.pk, trgt->d.pk->usr_key_pub, trgt->d.pk->key_len);
-//        size_t out_len = mbedtls_pk_get_len(trgt->ctx.pk);
-//
-//        mbedtls_pk_encrypt( trgt->ctx.pk, msg, msg_len, *ciph, &out_len, sizeof(*ciph),
-// mbedtls_ctr_drbg_random, ctx->ctr_drbg);
-//
-//    } else {
-//        return QCRY_STATUS_NOT_IMPLEMENTED;
-//    }
-//}
