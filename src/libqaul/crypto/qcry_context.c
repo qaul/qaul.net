@@ -207,17 +207,13 @@ int qcry_context_signmsg(qcry_usr_ctx *ctx, const char *msg, unsigned char *(*si
     CHECK_SANE
 
     /* Creating a few variables to use */
-    unsigned char hash_buf[32];
-    unsigned char sign_buf[1024];
+    unsigned char hash_buf[QAUL_SIGN_HASH_LEN];
+    unsigned char sign_buf[QAUL_SIGNATURE_LEN];
     size_t olen = 0;
 
     /* Hash the message to sign it */
     mbedtls_md_context_t md_ctx;
     const mbedtls_md_info_t *md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-
-    /****************************************************/
-
-    size_t n;
 
     mbedtls_md_init( &md_ctx );
     ret = mbedtls_md_setup( &md_ctx, md_info, 0 );
@@ -226,6 +222,7 @@ int qcry_context_signmsg(qcry_usr_ctx *ctx, const char *msg, unsigned char *(*si
         goto cleanup;
     }
 
+    /** Compute SHA-256 digest of message for signature */
     md_info->starts_func(md_ctx.md_ctx);
     md_info->update_func(md_ctx.md_ctx, (const unsigned char*) msg, strlen(msg) + 1);
     md_info->finish_func(md_ctx.md_ctx, hash_buf);
@@ -233,55 +230,24 @@ int qcry_context_signmsg(qcry_usr_ctx *ctx, const char *msg, unsigned char *(*si
     cleanup:
     mbedtls_md_free(&md_ctx);
 
-    /****************************************************/
+    /** Compute signature with message digest and private key */
+    ret = mbedtls_pk_sign(ctx->private, MBEDTLS_MD_SHA256,
+                          hash_buf, 0, sign_buf, &olen,
+                          mbedtls_ctr_drbg_random, ctx->ctr_drbg);
 
-    ret = mbedtls_pk_sign(ctx->private, MBEDTLS_MD_SHA256, hash_buf, 0, sign_buf, &olen, mbedtls_ctr_drbg_random, ctx->ctr_drbg);
+    if(olen != QAUL_SIGNATURE_LEN)
+        printf("[WARNING] Signature length doesn't match for message '%s'...Misalignment probable!", msg);
 
-    //    /* Do mbedtls hashing manually! */
-    //    mbedtls_md_init(&md_ctx);
-    //    ret = mbedtls_md_setup(&md_ctx, md_info, 0);
-    //    if(ret != 0)
-    //        return QCRY_STATUS_ERROR;
-    //
-    //    /* Star the md handle for our context */
-    //    ret = mbedtls_md_starts(&md_ctx);
-    //    if(ret != 0)
-    //        return QCRY_STATUS_ERROR;
-    //
-    //    /* Update the md handle once with the entire message */
-    //    ret = mbedtls_md_update(&md_ctx, (unsigned char*) msg, strlen((char *) msg)); // Consider \0 !
-    //    if(ret != 0)
-    //        return QCRY_STATUS_ERROR;
-    //
-    //    /* Throw output in stack buffer */
-    //    ret = mbedtls_md_finish(&md_ctx, hash_buf);
-    //    if(ret != 0)
-    //        return QCRY_STATUS_ERROR;
-    //
-    //    /* Clean up our resources afterwards */
-    //    mbedtls_md_free(&md_ctx);
-
-    /*** Create signature for hashed message ***/
-    //    ret = mbedtls_pk_sign(ctx->private, MBEDTLS_MD_SHA256,
-    //                          hash_buf, 32, sign_buf, &olen,
-    //                          mbedtls_ctr_drbg_random, ctx->ctr_drbg);
     if(ret != 0)
         return QCRY_STATUS_ERROR;
 
+    /** Finally allocate some memory for the signature */
     (*sign) = (unsigned char*) calloc(sizeof(unsigned char), olen);
-    printf("Signature length: %d\n", (int) olen);
+    if(*sign == NULL)
+        return QCRY_STATUS_MALLOC_FAIL;
+
+    /* Copy signature to public and return */
     memcpy(*sign, sign_buf, olen);
-
-    /*** base64 encode the signature ***/
-//    unsigned char base64_buf[1024];
-//    size_t bw;
-//
-//    ret = mbedtls_base64_encode(base64_buf, 1024, &bw, (unsigned char*) sign_buf, olen + 1); // Consider \0 !
-//    if(ret != 0)
-//        return QCRY_STATUS_ENCODE_FAILED;
-//
-//    /*** Finally allocate enough memory on reference pointer ***/
-
     return QCRY_STATUS_OK;
 }
 
@@ -307,15 +273,11 @@ int qcry_context_verifymsg(qcry_usr_ctx *ctx, const unsigned int trgt_no, const 
     mbedtls_pk_context *pub = t->public;
 
     /* Buffer for plain, decoded signature and hashed msg */
-    unsigned char msg_buf[QAUL_MAX_MSG_LENGTH];
-    unsigned char sign_buf[1024];
-    unsigned char msg_hash[32];                 // Space to hash the message into again
-    size_t bw;
+    unsigned char msg_hash[QAUL_SIGN_HASH_LEN];
 
     /*******************************************************************/
     mbedtls_md_context_t md_ctx;
     const mbedtls_md_info_t *md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-    size_t n;
 
     mbedtls_md_init( &md_ctx );
     ret = mbedtls_md_setup( &md_ctx, md_info, 0 );
@@ -334,8 +296,7 @@ int qcry_context_verifymsg(qcry_usr_ctx *ctx, const unsigned int trgt_no, const 
     /**********************************************************************/
 
     /*** Now we can compare our decoded signature and our just-made message hash ***/
-    ret = mbedtls_pk_verify(pub, MBEDTLS_MD_SHA256, msg_hash, 32, (const unsigned char*) sign, 512);
-//    ret = mbedtls_pk_verify(pub, MBEDTLS_MD_SHA256, msg_hash, 32, sign_buf, bw);
+    ret = mbedtls_pk_verify(pub, MBEDTLS_MD_SHA256, msg_hash, QAUL_SIGN_HASH_LEN, sign, QAUL_SIGNATURE_LEN);
 
     /* Set our OK flag and return */
     *ok = (ret == 0) ? true : false;
