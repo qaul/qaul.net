@@ -443,7 +443,7 @@ function set_username(name)
 {
 	user_name = name;
 	$("#chat_name").val(user_name);
-	$("#page_pref_name").text(user_name);
+	$("#page_pref_name").text("You: " + user_name);
 }
 
 function set_wifiset()
@@ -1524,7 +1524,7 @@ function send_name()
 	// send user name
 	$.post(
 			'setname',
-			{"n": $("#name_name").val(), "e":1},
+			{ "n": $("#name_name").val(), "p": $("#name_passwd").val(), "e":1 },
 			function(data){
 				// update username
 				set_username($("#name_name").val());

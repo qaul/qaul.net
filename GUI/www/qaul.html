@@ -78,6 +78,8 @@
 			<form action="chat" method="post" id="name_form">
 				<label for="name_name" class="i18n">Choose a user name</label>
 				<input type="text" name="n" id="name_name" class="required nospaces userlen"/>
+				<label for="name_name" class="i18n">And passphrase to secure your keys</label>
+				<input type="password" name="p" id="name_passwd" class="required nospaces"/>
 				<input class="submit i18n" type="submit" value="Save" id="name_submit"/>
 			</form>
 		</p>
@@ -330,13 +332,6 @@
 </div>
 
 <div data-role="page" id="page_userprofile" data-theme="a">
-	<div data-role="content" >
-
-		<div class="ui-block-a"><img src="images/tmp_usricons.png" width="64" height="64"></div>
-		<h1>Username</h1>
-		<p>oiajsmre4898349i5cjq4if898xwp98W</p>
-	</div>
-
 	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
 		<div data-role="navbar">
 			<ul>
@@ -351,20 +346,6 @@
 
 <div data-role="page" id="page_users" data-theme="a">
 	<div data-role="content" >
-		<div class="container">
-
-			<!-- Image Block -->
-			<div class="ui-grid-c">
-
-				<div class="ui-block-a"><a href="#page_userprofile"><img src="images/tmp_usricons.png" width="64" height="64"></a></div>
-
-				<div class="ui-block-b">
-					<h2>Username</h2>
-					<p>oiajsmre4898349i5cjq4if898xwp98W</p>
-				</div>
-			</div>
-		</div>
-
 		<ul data-role="listview" data-inset="true" id="favorites">
 			<li id="favorites_divider" data-role="list-divider" class="i18n">Favorites / Friends</li>
 		</ul>
