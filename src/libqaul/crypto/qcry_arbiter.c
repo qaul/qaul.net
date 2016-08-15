@@ -27,6 +27,7 @@
 
 /** Maps session tokens to contexts. One context can be referenced multiple times */
 typedef struct {
+    int                     *user_no;
     struct qcry_arbit_token *token;
     qcry_usr_ctx            *ctx;
 } arbiter_user;
@@ -50,7 +51,7 @@ static unsigned int session_ctr;
 /** Inline macro that's used to verify that the arbiter context we're operating on is valid **/
 #define SANE_ARBIT int ret; if(arbiter == NULL || arbiter->keygen == NULL || arbiter->max < 0) return QCRY_STATUS_INVALID_CTX;
 #define USER_OK if(usrno > arbiter->users) return QCRY_STATUS_INVALID_USERNO;
-#define TARGET_OK if(trgtno > arbiter->usr_list[usrno]->ctx->usd_trgt) return QCRY_STATUS_INVALID_TARGET;
+#define TARGET_OK if(target_no > arbiter->usr_list[usrno]->ctx->usd_trgt || target_no < 0) return QCRY_STATUS_INVALID_TARGET;
 
 /************* FORWARD DECLARED PRIVATE UTILITY FUNCTINS BELOW **************/
 int init_key_write(mbedtls_pk_context *key, const char *path, const char *username, const char *passphrase);
@@ -316,7 +317,7 @@ int qcry_arbit_signmsg(int usrno, unsigned char *(*sgn_buffer), const char *mess
     return QCRY_STATUS_OK;
 }
 
-int qcry_arbit_verify(int usrno, int trgtno, const char *message, const unsigned char *signature)
+int qcry_arbit_verify(int usrno, int target_no, const char *message, const unsigned char *signature)
 {
     /* Make sure our environment is sane */
     SANE_ARBIT
@@ -329,7 +330,7 @@ int qcry_arbit_verify(int usrno, int trgtno, const char *message, const unsigned
     arbiter_user *usr = arbiter->usr_list[usrno];
     bool ok = false;
 
-    ret = qcry_context_verifymsg(usr->ctx, (unsigned int) trgtno, message, signature, &ok);
+    ret = qcry_context_verifymsg(usr->ctx, (unsigned int) target_no, message, signature, &ok);
     if(ret != 0) {
         printf("An error occured while checking a signature: %d!\n", ret);
         return ret;
@@ -339,7 +340,7 @@ int qcry_arbit_verify(int usrno, int trgtno, const char *message, const unsigned
     return ok ? QCRY_STATUS_OK : QCRY_STATUS_SIGN_BOGUS;
 }
 
-int qcry_arbit_addtarget(int usrno, const char *fingerprint)
+int qcry_arbit_start(int usrno, const char *fingerprint)
 {
     /* Make sure our environment is sane */
     SANE_ARBIT USER_OK
@@ -370,6 +371,33 @@ int qcry_arbit_addtarget(int usrno, const char *fingerprint)
 
     /* Signal ok */
     return QCRY_STATUS_OK;
+}
+
+int qcry_arbit_stop(int usrno, const char *fingerprint)
+{
+    /* Make sure our environment is sane */
+    SANE_ARBIT USER_OK
+
+    arbiter_user *user = arbiter->usr_list[usrno];
+    int target_no = -1;
+
+    /* Try to find fingerprint */
+    for(int i = 0; i < user->ctx->usd_trgt; i++) {
+
+        /* If the fingerprints match ... */
+        if(strcpy((char*) user->ctx->trgts[i]->fingerprint, fingerprint) == 0) {
+            target_no = i;
+
+            /* If target is sane --> Cleanup */
+            TARGET_OK goto rem_target;
+        }
+    }
+
+    rem_target:
+    ret = qcry_context_remove_trgt(user->ctx, (unsigned int) target_no);
+
+    /* Return with confidence :) */
+    return ret;
 }
 
 int qcry_arbit_addkey(const char *keybody, size_t key_len, const char *fingerprint, const char *username)

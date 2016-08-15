@@ -74,7 +74,18 @@ int qcry_arbit_save(const char *finterprint,  int usrno);
  * @param fingerprint
  * @return
  */
-int qcry_arbit_addtarget(int userno, const char *fingerprint);
+int qcry_arbit_start(int usrno, const char *fingerprint);
+
+/**
+ * This function is the inverse of #{qcry_arbit_start}. It stops communication
+ * with a "target" to free up memory and potentially speed up operation for
+ * other nodes.
+ *
+ * @param userno
+ * @param fingerprint
+ * @return
+ */
+int qcry_arbit_stop(int usrno, const char *fingerprint);
 
 /**
  * This function should be used to add a new key fresh off the TCP socket

@@ -219,16 +219,13 @@ int qcry_context_signmsg(qcry_usr_ctx *ctx, const char *msg, unsigned char *(*si
     ret = mbedtls_md_setup( &md_ctx, md_info, 0 );
     if(ret != 0) {
         printf("An error occured setting up digest environment: %d!\n", ret);
-        goto cleanup;
+        goto exit;
     }
 
     /** Compute SHA-256 digest of message for signature */
     md_info->starts_func(md_ctx.md_ctx);
     md_info->update_func(md_ctx.md_ctx, (const unsigned char*) msg, strlen(msg) + 1);
     md_info->finish_func(md_ctx.md_ctx, hash_buf);
-
-    cleanup:
-    mbedtls_md_free(&md_ctx);
 
     /** Compute signature with message digest and private key */
     ret = mbedtls_pk_sign(ctx->private, MBEDTLS_MD_SHA256,
@@ -248,7 +245,10 @@ int qcry_context_signmsg(qcry_usr_ctx *ctx, const char *msg, unsigned char *(*si
 
     /* Copy signature to public and return */
     memcpy(*sign, sign_buf, olen);
-    return QCRY_STATUS_OK;
+
+    exit:
+    mbedtls_md_free(&md_ctx);
+    return ret;
 }
 
 int qcry_context_verifymsg(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, const unsigned char *sign, bool *ok)
@@ -283,23 +283,22 @@ int qcry_context_verifymsg(qcry_usr_ctx *ctx, const unsigned int trgt_no, const 
     ret = mbedtls_md_setup( &md_ctx, md_info, 0 );
     if(ret != 0) {
         printf("An error occured setting up digest environment: %d!\n", ret);
-        goto cleanup;
+        goto exit;
     }
 
+    /** Compute SHA-256 digest of message for verification */
     md_info->starts_func(md_ctx.md_ctx);
     md_info->update_func(md_ctx.md_ctx, (const unsigned char*) msg, strlen(msg) + 1);
     md_info->finish_func(md_ctx.md_ctx, msg_hash);
 
-    cleanup:
-    mbedtls_md_free(&md_ctx);
-
-    /**********************************************************************/
-
-    /*** Now we can compare our decoded signature and our just-made message hash ***/
+    /* Verify message signature from public key and self-computed SHA-256 digest */
     ret = mbedtls_pk_verify(pub, MBEDTLS_MD_SHA256, msg_hash, QAUL_SIGN_HASH_LEN, sign, QAUL_SIGNATURE_LEN);
 
     /* Set our OK flag and return */
     *ok = (ret == 0) ? true : false;
+
+    exit:
+    mbedtls_md_free(&md_ctx);
     return ret;
 }
 
@@ -321,13 +320,50 @@ int qcry_context_add_trgt(qcry_usr_ctx *ctx, qcry_trgt_t *trgt, qcry_ciph_t ciph
     return QCRY_STATUS_OK;
 }
 
-int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int *trgt_no)
+int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int trgt_no)
 {
     CHECK_SANE
 
-    if(!ctx->trgts[*trgt_no]) return QCRY_STATUS_INVALID_TARGET;
+    if(trgt_no < 0)
+        return QCRY_STATUS_INVALID_TARGET;
 
-    // TODO: Add this code
+    if(!ctx->trgts[trgt_no])
+        return QCRY_STATUS_INVALID_TARGET;
 
+    /** Removing the target is easy ... */
+    qcry_trgt_t *target = ctx->trgts[trgt_no];
+    free((char*) target->fingerprint);
+    free((char*) target->username);
+    free(target);
+
+    /** Sanitising the datastructure is hard ... */
+    ctx->trgts[trgt_no] = NULL;
+    ctx->usd_trgt--;
+
+    /** Iterate over all targets to find empty (NULL) spaces **/
+    for(int index = 0; index < ctx->usd_trgt; index++) {
+
+        /* Check if the current space is NULL (as we marked it before) */
+        if(ctx->trgts[index] == NULL) {
+
+            /* If it is, check if the next space is NULL */
+            if(ctx->trgts[index + 1] == NULL) {
+
+                /*
+                 * If it is as well, we have reached the end of the array and are
+                 * done because: [A, B, C, NULL, NULL, ...]
+                 */
+                goto exit;
+
+            } else {
+
+                /* Otherwise, we move the item up by one */
+                ctx->trgts[index] = ctx->trgts[index + 1];
+                ctx->trgts[index + 1] = NULL;
+            }
+        }
+    }
+
+    exit:
     return QCRY_STATUS_OK;
 }
