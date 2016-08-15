@@ -56,6 +56,7 @@ extern "C" {
 #include "qaullib_ipc.h"
 #include "qaullib_voip.h"
 #include "qaullib_udp_communication.h"
+#include "crypto/qcry_helper.h"
 
 #ifndef WIN32
 #include <unistd.h>             // close()
@@ -110,7 +111,11 @@ union olsr_message *qaul_in_msg;
  * configuration variables
  ***********************************************/
 char qaul_username[MAX_USER_LEN +1];
+char qaul_fingerprint[QAUL_FP_LEN];
 int qaul_username_set;
+int qaul_fingerprint_set;
+
+
 // ip
 int qaul_ip_version;                // IP version 4/6
 int qaul_ip_size;

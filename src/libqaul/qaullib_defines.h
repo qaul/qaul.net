@@ -102,6 +102,8 @@ extern "C" {
 #define QAUL_MSGTYPE_VOIP_IN         3
 #define QAUL_MSGTYPE_VOIP_OUT       13
 
+#define MAX_FP_LEN	      			64
+#define MAX_SIGNATURE_LEN			1024
 
 struct qaul_userinfo_msg
 {
@@ -153,7 +155,9 @@ struct qaul_exeavailable_msg
 #define QAUL_EXEAVAILABLE_MESSAGE_TYPE  229
 #define QAUL_EXEAVAILABLE_PARSER_TYPE   QAUL_EXEAVAILABLE_MESSAGE_TYPE
 #define QAUL_IPCMESHTOPO_MESSAGE_TYPE   230
-
+#define QAUL_USERHI_CRY_MESSAGE_TYPE	231
+#define QAUL_SIGNED_CHAT_MESSAGE_TYPE	232
+#define QAUL_ENCRYPT_CHAT_MESSAGE_TYPE	233
 
 /**
  * IPC messages
@@ -168,6 +172,22 @@ struct qaul_chat_msg
 {
   char name[MAX_USER_LEN];
   char msg[MAX_MESSAGE_LEN];
+};
+
+struct qaul_signedchat_msg
+{
+	char name[MAX_USER_LEN];
+	char msg[MAX_MESSAGE_LEN];
+	char fp[MAX_FP_LEN];
+	char signature[MAX_SIGNATURE_LEN];
+};
+
+struct qaul_cryptedchat_msg
+{
+	int ciph_t;
+	char name[MAX_USER_LEN];
+	char msg[MAX_MESSAGE_LEN];
+	char fp[MAX_FP_LEN];
 };
 
 /**
@@ -199,6 +219,12 @@ struct qaul_userhello_msg
 	char name[MAX_USER_LEN];
 	char icon[MAX_HASH_LEN];
 	char suffix[MAX_SUFFIX_LEN];
+};
+
+struct qaul_cryuser_msg
+{
+	char name[MAX_USER_LEN];
+	char fp[MAX_FP_LEN];
 };
 
 struct qaul_filechunk_msg
@@ -304,6 +330,9 @@ union olsr_msg_union {
     struct qaul_ipc_msg          ipc;
     struct qaul_node_msg         node;
     struct qaul_userhello_msg    userhello;
+	struct qaul_cryuser_msg		 cryuserhello;
+	struct qaul_signedchat_msg	 signedchat;
+	struct qaul_cryptedchat_msg	 encryptchat;
     struct qaul_filediscover_msg filediscover;
     struct qaul_exediscover_msg  exediscover;
 };
@@ -342,6 +371,9 @@ union qaul_inbuf
 	struct qaul_userinfo_msg      userinfo;
 	struct qaul_filechunk_msg     filechunk;
 	struct qaul_userhello_msg     userhello;
+	struct qaul_cryuser_msg		  cryuserhello;
+	struct qaul_signedchat_msg	  signedchat;
+	struct qaul_cryptedchat_msg	  encryptchat;
 	struct qaul_filediscover_msg  filediscover;
 	struct qaul_exediscover_msg   exediscover;
 };
