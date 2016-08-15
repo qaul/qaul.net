@@ -50,6 +50,7 @@ extern "C" {
 #endif
 
 #define MAX_USER_LEN           20
+#define MAX_PASSPHRASE_LEN	 1024
 #define MAX_MESSAGE_LEN       140
 #define MAX_FILENAME_LEN       46
 #define MAX_IP_LEN             40

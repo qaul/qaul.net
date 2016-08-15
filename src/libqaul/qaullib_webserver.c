@@ -113,8 +113,9 @@ void Ql_WwwEvent_handler(struct mg_connection *conn, int event, void *event_data
 // ------------------------------------------------------------
 void Ql_WwwSetName(struct mg_connection *conn, int event, void *event_data)
 {
-	char username[3*MAX_USER_LEN +1];
-	char protected_username[MAX_USER_LEN +1];
+	char username[3 * MAX_USER_LEN + 1];
+	char passphrase[MAX_PASSPHRASE_LEN + 1];
+	char protected_username[MAX_USER_LEN + 1];
 	struct http_message *hm = (struct http_message *) event_data;
 
 	if(Ql_Www_IsLocalIP(conn) == 0)
@@ -132,6 +133,10 @@ void Ql_WwwSetName(struct mg_connection *conn, int event, void *event_data)
 		Qaullib_SetUsername(protected_username);
 	}
 
+	/** After handling the UI request, we create a new crypto user**/
+	int ret = qcry_arbit_usrcreate(&qaul_currusrno, username, NULL, QCRY_KEYS_RSA);
+	printf("Creating new crypto user...%s!\n", (ret == 0) ? "OK" : "FAILED");
+
 	// send header
 	mg_printf(conn, "HTTP/1.1 200 OK\r\n"
 	             	"Content-Type: application/json; charset=utf-8\r\n"
@@ -139,6 +144,7 @@ void Ql_WwwSetName(struct mg_connection *conn, int event, void *event_data)
 
 	mg_printf(conn, "{}");
 	conn->flags |= MG_F_SEND_AND_CLOSE;
+
 }
 
 // ------------------------------------------------------------

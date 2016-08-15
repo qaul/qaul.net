@@ -21,6 +21,7 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	ipc_connected = 0;
 	qaul_username_set = 0;
     qaul_fingerprint_set = 0;
+	qaul_currusrno = -1;
 	qaul_locale_set = 0;
 	qaul_ip_set = 0;
 	qaul_gui_pagename_set = 0;
@@ -124,7 +125,9 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 		Qaullib_FilePopulate();
 	}
 
-    //TODO: Initialise arbiter here because we know who we know
+	// Intialise crypto arbiter with our contact book TODO: Implement contact book
+    int ret = qcry_arbit_init(QAUL_CONC_LOCK, homePath, NULL);
+	printf("Initialising CRYPTO ARBITER...%s!\n", ret ? "FAILED" : "OK");
 
 	// initialize linked lists
 	Qaullib_UserInit();
