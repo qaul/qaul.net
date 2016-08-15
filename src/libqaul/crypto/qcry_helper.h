@@ -57,6 +57,7 @@
 #define MIN_BFR_S   4
 #define MAX_TIMEOUT 500
 #define TIME_SLEEP  50
+#define QAUL_FP_LEN 64
 
 #define QAUL_MAX_MSG_LENGTH 140 // In bytes - Twitter style
 

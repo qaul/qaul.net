@@ -21,7 +21,7 @@ int qcry_devel_init(int argc, char *argv[])
 
     char *message = "This is a message with less than 140 symbols #TwitterStyle. You're great! I'd love to hang out";
     char *fakemessage = "I hate you! I will tell you horrible and hurtful things in a minute!";
-    char *signature;
+    unsigned char *signature;
 
     int ret;
     int kookie, jane;
@@ -62,8 +62,6 @@ int qcry_devel_init(int argc, char *argv[])
     ret = qcry_arbit_signmsg(jane, &signature, message);
     TEST("SIGN")
 
-    printf("Signature: %s\n", signature); // Send message and signature over network
-
     /******************* ON SPACEKOOKIES COMPUTER *******************/
 
     ret = qcry_arbit_addtarget(kookie, jane_fp);
@@ -72,8 +70,8 @@ int qcry_devel_init(int argc, char *argv[])
     ret = qcry_arbit_verify(kookie, 0, message, signature);
     printf("Signature: %s\n", (ret == 0) ? "GOOD" : "BOGUS! DO NOT TRUST!");
 
-    ret = qcry_arbit_verify(kookie, 0, fakemessage, signature);
-    printf("Signature: %s\n", (ret == 0) ? "GOOD" : "BOGUS! DO NOT TRUST!");
+//    ret = qcry_arbit_verify(kookie, 0, fakemessage, signature);
+//    printf("Signature: %s\n", (ret == 0) ? "GOOD" : "BOGUS! DO NOT TRUST!");
 
 //    char *signature;
 //    ret = qcry_arbit_signmsg(usrno, &signature, message);
@@ -87,3 +85,48 @@ int qcry_devel_init(int argc, char *argv[])
     end:
     return ret;
 }
+
+///*
+// * 	{
+//		/*************************************************************
+//		*
+//		* Crypto initialisation is done by reading the default username
+//		* from libqaul and checking if it a key exists for this user.
+//		*
+//		* If it does, the user context is allocated and prepared.
+//		*
+//		* If it does not, a new user context is created
+//		*
+//		*************************************************************/
+//
+//int ret = qcry_arbit_init(QAUL_CONC_LOCK, "/home/spacekookie/.qaul", NULL); //FIXME: Get proper path
+//if(ret != 0) printf("A critical error (#%d) occured when initialising crypto arbiter!\n", ret);
+//
+//// TODO: Check existing user files and init with them instead
+//bool usr_exists = false;
+//
+//int usr_no;
+//char *username = "spacekookie";
+//char *passphrase = "foobar32";
+//
+//if(usr_exists) {
+//ret = qcry_arbit_restore(&usr_no, username, passphrase);
+//printf("QCRY_ARBIT_RESTORE returned %d\n", ret);
+//
+//} else {
+//ret = qcry_arbit_usrcreate(&usr_no, username, passphrase, QAUL_KEYS_RSA4096);
+//printf("QCRY_ARBIT_USRCREATE returned %d\n", ret);
+//}
+//
+//////////////////////////////////////////////////////////////////////////
+//}
+//
+//
+//
+//
+//// qcry_arbit_usrcreate();
+//
+//// ----------------------------------------------------------
+//
+//
+//*/

@@ -298,7 +298,7 @@ int qcry_arbit_restore(int *usrno, const char *username, const char *passphrase)
     return QCRY_STATUS_OK;
 }
 
-int qcry_arbit_signmsg(int usrno, char *(*sgn_buffer), const char *message)
+int qcry_arbit_signmsg(int usrno, unsigned char *(*sgn_buffer), const char *message)
 {
     /* Make sure our environment is sane */
     SANE_ARBIT USER_OK
@@ -307,7 +307,7 @@ int qcry_arbit_signmsg(int usrno, char *(*sgn_buffer), const char *message)
     arbiter_user *usr = arbiter->usr_list[usrno];
 
     /* Call the context handle for sign message */
-    ret = qcry_context_signmsg(usr->ctx, message, (unsigned char**) sgn_buffer);
+    ret = qcry_context_signmsg(usr->ctx, message, sgn_buffer);
     if(ret != 0) {
         printf("An error occured while signing the message: %d\n", ret);
         return ret;
@@ -316,7 +316,7 @@ int qcry_arbit_signmsg(int usrno, char *(*sgn_buffer), const char *message)
     return QCRY_STATUS_OK;
 }
 
-int qcry_arbit_verify(int usrno, int trgtno, const char *message, const char *signature)
+int qcry_arbit_verify(int usrno, int trgtno, const char *message, const unsigned char *signature)
 {
     /* Make sure our environment is sane */
     SANE_ARBIT

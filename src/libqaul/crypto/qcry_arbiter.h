@@ -103,9 +103,9 @@ int qcry_arbit_addkey(const char *keybody, size_t key_len, const char *fingerpri
  */
 int qcry_arbit_restore(int *usrno, const char *username, const char *passphrase);
 
-int qcry_arbit_signmsg(int usrno, char *(*sgn_buffer), const char *message);
+int qcry_arbit_signmsg(int usrno, unsigned char *(*sgn_buffer), const char *message);
 
-int qcry_arbit_verify(int usrno, int trgtno, const char *message, const char *signature);
+int qcry_arbit_verify(int usrno, int trgtno, const char *message, const unsigned char *signature);
 
 //int qcry_arbit_sendmsg(int usrno, char *(*encrypted), const char *plain);
 //int qcry_arbit_parsemsg(int usrno, char *(*parsed), const char *encrypted);
