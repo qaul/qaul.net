@@ -134,7 +134,7 @@ int qcry_context_get_finterprint(qcry_usr_ctx *ctx, unsigned char *(*fingerprint
 
 int qcry_context_add_trgt(qcry_usr_ctx *ctx, qcry_trgt_t *trgt, qcry_ciph_t ciph_t);
 
-int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int *trgt_no);
+int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int trgt_no);
 
 int qcry_context_signmsg(qcry_usr_ctx *ctx, const char *msg, unsigned char *(*sign));
 
