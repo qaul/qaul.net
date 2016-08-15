@@ -110,11 +110,13 @@ union olsr_message *qaul_in_msg;
 /********************************************//**
  * configuration variables
  ***********************************************/
+
+// Crypto module
+int qaul_currusrno;
 char qaul_username[MAX_USER_LEN +1];
 char qaul_fingerprint[QAUL_FP_LEN];
 int qaul_username_set;
 int qaul_fingerprint_set;
-
 
 // ip
 int qaul_ip_version;                // IP version 4/6
