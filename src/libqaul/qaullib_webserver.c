@@ -126,6 +126,11 @@ void Ql_WwwSetName(struct mg_connection *conn, int event, void *event_data)
 	printf("user name len: %i\n", (int)strlen(username));
 	memcpy(&username[MAX_USER_LEN], "\0", 1);
 
+    // Fetch passphrase
+    mg_get_http_var(&hm->body, "p", passphrase, sizeof(passphrase));
+    printf("user name len: %i\n", (int) strlen(passphrase));
+    memcpy(&passphrase[MAX_PASSPHRASE_LEN], "\0", 1);
+
 	if(Qaullib_StringNameProtect(protected_username, username, sizeof(protected_username)) > 0)
 	{
 		printf("save user name len %i: ", (int)strlen(protected_username));
@@ -1810,6 +1815,7 @@ void Ql_WwwPubUsers(struct mg_connection *conn, int event, void *event_data)
 // ------------------------------------------------------------
 void Ql_WwwPubMsg(struct mg_connection *conn, int event, void *event_data)
 {
+//    char msg_signature[QAUL_MAX_SIGN_LEN];
 	char encoded_msg[3*MAX_MESSAGE_LEN +1];
 	char encoded_name[3*MAX_USER_LEN +1];
 	char *local_msg;
@@ -1847,6 +1853,9 @@ void Ql_WwwPubMsg(struct mg_connection *conn, int event, void *event_data)
 	// todo: ipv6
 	msg_item.ipv = 4;
 	msg_item.ip_union.v4 = conn->sa.sin.sin_addr;
+
+    // Sign message with current private key
+//    qcry_arbit_signmsg(qaul_currusrno, )
 
   	// save Message
 	Qaullib_MsgAdd(&msg_item);
