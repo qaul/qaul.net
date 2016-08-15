@@ -87,6 +87,11 @@ void Qaullib_IpcSend(union olsr_message *msg);
  */
 void Qaullib_IpcSendUserhello(void);
 
+/**
+ * Send user hello message for the secure era
+ * Includes the fingerprint of the current user
+ */
+void Qaullib_IpcSendCryUserhello(void);
 
 #ifdef __cplusplus
 }

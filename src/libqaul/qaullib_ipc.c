@@ -92,7 +92,9 @@ int Qaullib_IpcConnect(void)
     ipc_connected = 1;
 
     // send user hello message
-    Qaullib_IpcSendUserhello();
+	Qaullib_IpcSendCryUserhello();
+	else
+    	Qaullib_IpcSendUserhello();
 
     return 1;
   }
@@ -445,5 +447,33 @@ void Qaullib_IpcSendUserhello(void)
 	m->v4.olsr_msgsize = htons(size);
 
 	// send package
+	Qaullib_IpcSend(m);
+}
+
+void Qaullib_IpcSendCryUserhello(void)
+{
+	char buffer[1024];
+	int size;
+	union olsr_message *m = (union olsr_message *) buffer;
+	printf("Sending user hello message with fingerprint!\n");
+
+	/* Set the origin to 0 */
+	memset(&m->v4.originator, 0, sizeof(m->v4.originator));
+
+	/* Set the message type */
+	m->v4.olsr_msgtype = QAUL_USERHI_CRY_MESSAGE_TYPE;
+
+	/* Set the username */
+	memcpy(&m->v4.message.cryuserhello.name, qaul_username, MAX_USER_LEN);
+
+	/* Set the fingerprint */
+	memcpy(&m->v4.message.cryuserhello.fp, qaul_fingerprint, MAX_FP_LEN);
+
+	/* Calculate required size for message */
+	size = sizeof(struct qaul_cryuser_msg);
+	size += sizeof(struct olsrmsg);
+
+	/* Change size to network std and send message away */
+	m->v4.olsr_msgsize = htons((uint16_t) size);
 	Qaullib_IpcSend(m);
 }
