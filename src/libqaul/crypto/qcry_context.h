@@ -138,7 +138,7 @@ int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int *trgt_no);
 
 int qcry_context_signmsg(qcry_usr_ctx *ctx, const char *msg, unsigned char *(*sign));
 
-int qcry_context_verifymsg(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, const char *sign, bool *ok);
+int qcry_context_verifymsg(qcry_usr_ctx *ctx, const unsigned int trgt_no, const char *msg, const unsigned char *sign, bool *ok);
 
 /**
  * Small utility to create a target with a fingerprint safely.

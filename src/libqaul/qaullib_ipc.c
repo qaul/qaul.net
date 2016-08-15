@@ -92,7 +92,8 @@ int Qaullib_IpcConnect(void)
     ipc_connected = 1;
 
     // send user hello message
-	Qaullib_IpcSendCryUserhello();
+    if(qaul_fingerprint_set)
+	    Qaullib_IpcSendCryUserhello();
 	else
     	Qaullib_IpcSendUserhello();
 

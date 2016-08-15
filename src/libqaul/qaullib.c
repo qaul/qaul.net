@@ -20,6 +20,7 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	qaul_new_msg = 0;
 	ipc_connected = 0;
 	qaul_username_set = 0;
+    qaul_fingerprint_set = 0;
 	qaul_locale_set = 0;
 	qaul_ip_set = 0;
 	qaul_gui_pagename_set = 0;
@@ -95,47 +96,6 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	strcat(filesPath, "/files/");
 #endif
 
-	{
-		/*************************************************************
-		*
-		* Crypto initialisation is done by reading the default username
-		* from libqaul and checking if it a key exists for this user.
-		*
-		* If it does, the user context is allocated and prepared.
-		*
-		* If it does not, a new user context is created
-		*
-		*************************************************************/
-
-		int ret = qcry_arbit_init(QAUL_CONC_LOCK, "/home/spacekookie/.qaul", NULL); //FIXME: Get proper path
-		if(ret != 0) printf("A critical error (#%d) occured when initialising crypto arbiter!\n", ret);
-
-		// TODO: Check existing user files and init with them instead
-		bool usr_exists = false;
-
-		int usr_no;
-		char *username = "spacekookie";
-		char *passphrase = "foobar32";
-
-		if(usr_exists) {
-			ret = qcry_arbit_restore(&usr_no, username, passphrase);
-			printf("QCRY_ARBIT_RESTORE returned %d\n", ret);
-
-		} else {
-			ret = qcry_arbit_usrcreate(&usr_no, username, passphrase, QAUL_KEYS_RSA4096);
-			printf("QCRY_ARBIT_USRCREATE returned %d\n", ret);
-		}
-
-		////////////////////////////////////////////////////////////////////////
-	}
-
-
-
-
-    // qcry_arbit_usrcreate();
-
-    // ----------------------------------------------------------
-
     // set url rewrites
 	strcpy(webUrlRewrites, "/files/=");
 	strcat(webUrlRewrites, filesPath);
@@ -163,6 +123,8 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 		Qaullib_DbPopulateConfig();
 		Qaullib_FilePopulate();
 	}
+
+    //TODO: Initialise arbiter here because we know who we know
 
 	// initialize linked lists
 	Qaullib_UserInit();
