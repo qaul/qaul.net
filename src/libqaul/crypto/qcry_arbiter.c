@@ -59,12 +59,6 @@ int init_key_write(mbedtls_pk_context *key, const char *path, const char *userna
 int load_keypair(mbedtls_pk_context **pub, mbedtls_pk_context **pri,
                  const char *path, const char *username, const char *passphrase);
 
-qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token);
-
-qcry_usr_ctx *get_ctx_with_username(const char *username);
-
-unsigned char *create_token();
-
 /*****************************************************************************/
 
 int qcry_arbit_init(unsigned int max_concurrent, const char *path, struct qcry_usr_id **known_keys)
@@ -421,53 +415,6 @@ int qcry_arbit_addkey(const char *keybody, size_t key_len, const char *fingerpri
 
 /*************************** PRIVATE UTILITY FUNCTIONS BELOW **************************/
 
-qcry_usr_ctx *get_ctx_with_username(const char *username)
-{
-    SANE_ARBIT
-
-    int i;
-    for(i = 0; i <= arbiter->users; i++)
-    {
-        /** Check if the token is exactly the same TODO: Turn this into MACRO */
-        if(strcmp(arbiter->usr_list[i]->ctx->username, username) == 0)
-        {
-            return arbiter->usr_list[i]->ctx;
-        }
-    }
-
-    /** If we couldn't find anything the token wasn't valid **/
-    return NULL;
-}
-
-qcry_usr_ctx *get_ctx_with_token(struct qcry_arbit_token *token)
-{
-    if(arbiter == NULL || arbiter->keygen == NULL || arbiter->max < 0)
-        goto exit;
-
-    int i;
-    for(i = 0; i <= arbiter->users; i++)
-    {
-        /** Check if the token is exactly the same TODO: Turn this into MACRO */
-        if(arbiter->usr_list[i]->token->sess_id == token->sess_id
-           && arbiter->usr_list[i]->token->token == token->token)
-        {
-            return arbiter->usr_list[i]->ctx;
-        }
-    }
-
-    /** If we couldn't find anything the token wasn't valid **/
-    exit:
-    return NULL;
-}
-
-unsigned char *create_token()
-{
-    unsigned char *buffer;
-    qcry_keys_gen_r(arbiter->keygen, 256, &buffer);
-
-    /** Don't forget to free the pointer again! */
-    return buffer;
-}
 
 // FIXME: Encrypt the private key !!!
 int init_key_write(mbedtls_pk_context *key, const char *path, const char *username, const char *passphrase)
