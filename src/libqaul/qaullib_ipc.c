@@ -4,6 +4,7 @@
  */
 
 #include "qaullib_private.h"
+#include "crypto/qcry_keys.h"
 
 #ifdef WIN32
 #define close(x) closesocket(x)
@@ -195,6 +196,9 @@ void Qaullib_IpcEvaluateMessage(union olsr_message *msg)
 		case QAUL_CHAT_MESSAGE_TYPE:
 			Qaullib_IpcEvaluateChat(msg);
 			break;
+        case QAUL_SIGNED_CHAT_MESSAGE_TYPE:
+            break;
+
 		case QAUL_IPCCOM_MESSAGE_TYPE:
 			Qaullib_IpcEvaluateCom(msg);
 			break;
@@ -207,6 +211,9 @@ void Qaullib_IpcEvaluateMessage(union olsr_message *msg)
 		case QAUL_USERHELLO_MESSAGE_TYPE:
 			Qaullib_IpcEvaluateUserhello(msg);
 			break;
+        case QAUL_USERHI_CRY_MESSAGE_TYPE:
+            Qaullib_IpcEvaluateUserhelloCrypto(msg);
+            break;
 		case QAUL_FILEDISCOVER_MESSAGE_TYPE:
 			Qaullib_IpcEvaluateFilediscover(msg);
 			break;
@@ -223,10 +230,10 @@ void Qaullib_IpcEvaluateMessage(union olsr_message *msg)
 void Qaullib_IpcEvaluateChat(union olsr_message *msg)
 {
 	char ipbuf[MAX(INET6_ADDRSTRLEN, INET_ADDRSTRLEN)];
-	char chat_msg[MAX_MESSAGE_LEN +1];
-	char chat_user[MAX_USER_LEN +1];
-	time_t timestamp;
-	struct qaul_msg_LL_item msg_item;
+	char chat_msg[MAX_MESSAGE_LEN  + 1];
+	char chat_user[MAX_USER_LEN  + 1];
+    time_t timestamp;
+    struct qaul_msg_LL_item msg_item;
 
 	// fill in values
 	msg_item.id = 0;
@@ -254,6 +261,49 @@ void Qaullib_IpcEvaluateChat(union olsr_message *msg)
 
   	// save Message
 	Qaullib_MsgAdd(&msg_item);
+}
+
+void Qaullib_IpcEvaluateSignedChat(union olsr_message *msg) {
+
+    char ipbuf[MAX(INET6_ADDRSTRLEN, INET_ADDRSTRLEN)];
+    char chat_msg[MAX_MESSAGE_LEN  + 1];
+    char chat_user[MAX_USER_LEN  + 1];
+    char fingerprint[QAUL_FINGERPRINT];
+    time_t timestamp;
+    struct qaul_msg_LL_item msg_item;
+
+    // fill in values
+    msg_item.id = 0;
+    msg_item.type = QAUL_MSGTYPE_PUBLIC_IN;
+
+    // get msg
+    memcpy(&msg_item.msg, msg->v4.message.signedchat.msg, MAX_MESSAGE_LEN);
+    memcpy(&msg_item.msg[MAX_MESSAGE_LEN], "\0", 1);
+
+    // get name
+    memcpy(&msg_item.name, msg->v4.message.signedchat.name, MAX_USER_LEN);
+    memcpy(&msg_item.name[MAX_USER_LEN], "\0", 1);
+
+    // get fingerprint
+    memcpy(&msg_item.fingerprint, msg->v4.message.signedchat.fp, QAUL_FINGERPRINT);
+
+    // get signature
+    memcpy(&msg_item.signature, msg->v4.message.signedchat.signature, QAUL_SIGNATURE_LEN);
+
+    // set time
+    time(&timestamp);
+    msg_item.time = (int)timestamp;
+
+    // set read
+    msg_item.read = 0;
+
+    // set ip
+    // todo: ipv6
+    msg_item.ipv = 4;
+    memcpy(&msg_item.ip_union.v4, &msg->v4.originator, sizeof(msg_item.ip_union.v4));
+
+    // save Message
+    Qaullib_MsgAdd(&msg_item);
 }
 
 // ------------------------------------------------------------
@@ -307,6 +357,22 @@ void Qaullib_IpcEvaluateUserhello(union olsr_message *msg)
 	Qaullib_UserAdd(&ip, msg->v4.message.userhello.name, msg->v4.message.userhello.icon);
 	//	msg->v4.message.userhello.icon,
 	//	msg->v4.message.userhello.suffix);
+}
+
+void Qaullib_IpcEvaluateUserhelloCrypto(union olsr_message *msg)
+{
+    if(QAUL_DEBUG)
+        printf("Qaullib_IpcEvaluateUserhello()\n");
+    // todo: ipv6
+    union olsr_ip_addr ip;
+    memcpy(&ip.v4, &msg->v4.originator, sizeof(msg->v4.originator));
+
+    Qaullib_UserAdd(&ip, msg->v4.message.cryuserhello.name, msg->v4.message.cryuserhello.fp);
+
+    char pubkey[QAUL_PUBKEY_LEN];
+    memcpy(pubkey, msg->v4.message.cryuserhello.publickey, QAUL_PUBKEY_LEN);
+
+    qcry_arbit_addkey(pubkey, QCRY_KEYS_KL_RSA, msg->v4.message.cryuserhello.fp, msg->v4.message.cryuserhello.name);
 }
 
 // ------------------------------------------------------------

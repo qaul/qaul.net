@@ -62,6 +62,7 @@
 #define QAUL_MAX_MSG_LENGTH     1024    // Overkill
 #define QAUL_SIGN_HASH_LEN      32      // SHA-256
 #define QAUL_SIGNATURE_LEN      512     // Defined by how RSA works
+#define QAUL_PUBKEY_LEN         16000
 
 #define CHECK_SANE \
     if(ctx->mgno != MAGICK_NO) return QCRY_STATUS_INVALID_CTX; \
