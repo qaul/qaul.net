@@ -39,6 +39,12 @@ void Qaullib_IpcEvaluateMessage(union olsr_message *msg);
  */
 void Qaullib_IpcEvaluateChat(union olsr_message *msg);
 
+
+/**
+ * process signed chat message
+ */
+void Qaullib_IpcEvaluateSignedChat(union olsr_message *msg);
+
 /**
  * check message type of @a msg
  */
@@ -60,6 +66,13 @@ void Qaullib_IpcEvaluateMeshtopo(union olsr_message *msg);
  * fill in new user name to user LL
  */
 void Qaullib_IpcEvaluateUserhello(union olsr_message *msg);
+
+/**
+ * process user crypto hello message (contains public key)
+ *
+ * fill in new user name to user LL
+ */
+void Qaullib_IpcEvaluateUserhelloCrypto(union olsr_message *msg);
 
 /**
  * process file discover message

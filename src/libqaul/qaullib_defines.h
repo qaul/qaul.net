@@ -225,6 +225,7 @@ struct qaul_userhello_msg
 struct qaul_cryuser_msg
 {
 	char name[MAX_USER_LEN];
+	char publickey[QAUL_PUBKEY_LEN];
 	char fp[MAX_FP_LEN];
 };
 
