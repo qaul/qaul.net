@@ -385,7 +385,7 @@ int qcry_arbit_stop(int usrno, const char *fingerprint)
     for(int i = 0; i < user->ctx->usd_trgt; i++) {
 
         /* If the fingerprints match ... */
-        if(strcpy((char*) user->ctx->trgts[i]->fingerprint, fingerprint) == 0) {
+        if(strcmp((char*) user->ctx->trgts[i]->fingerprint, fingerprint) == 0) {
             target_no = i;
 
             /* If target is sane --> Cleanup */
