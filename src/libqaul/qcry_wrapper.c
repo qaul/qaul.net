@@ -64,24 +64,15 @@ int qcry_devel_init(int argc, char *argv[])
 
     /******************* ON SPACEKOOKIES COMPUTER *******************/
 
-    ret = qcry_arbit_addtarget(kookie, jane_fp);
-    TEST("ADD TARGET")
+    ret = qcry_arbit_start(kookie, jane_fp);
+    TEST("START")
 
     ret = qcry_arbit_verify(kookie, 0, message, signature);
     printf("Signature: %s\n", (ret == 0) ? "GOOD" : "BOGUS! DO NOT TRUST!");
 
-//    ret = qcry_arbit_verify(kookie, 0, fakemessage, signature);
-//    printf("Signature: %s\n", (ret == 0) ? "GOOD" : "BOGUS! DO NOT TRUST!");
+    ret = qcry_arbit_stop(kookie, jane_fp);
+    TEST("STOP")
 
-//    char *signature;
-//    ret = qcry_arbit_signmsg(usrno, &signature, message);
-//
-//    ret = qcry_arbit_verify(target, usrno, message, signature);
-//    if(ret == 0) {
-//        printf("Message was signed properly!\n");
-//    } else {
-//        printf("Signature is BOGUS! Do not trust!\n");
-//    }
     end:
     return ret;
 }

@@ -372,6 +372,7 @@ void Qaullib_IpcEvaluateUserhelloCrypto(union olsr_message *msg)
     char pubkey[QAUL_PUBKEY_LEN];
     memcpy(pubkey, msg->v4.message.cryuserhello.publickey, QAUL_PUBKEY_LEN);
 
+    /** Add the key we just got from this user to the keystore, bound against the fingerprint */
     qcry_arbit_addkey(pubkey, QCRY_KEYS_KL_RSA, msg->v4.message.cryuserhello.fp, msg->v4.message.cryuserhello.name);
 }
 
