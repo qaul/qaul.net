@@ -190,17 +190,6 @@ int qcry_context_attach(qcry_usr_ctx *ctx, mbedtls_pk_context *pub, mbedtls_pk_c
     return ret;
 }
 
-int qcry_context_get_finterprint(qcry_usr_ctx *ctx, unsigned char *(*fingerprint))
-{
-    CHECK_SANE
-
-    if(ctx->fingerprint) {
-        (*fingerprint) = (unsigned char*) ctx->fingerprint;
-        return QCRY_STATUS_OK;
-    } else {
-        return QCRY_STATUS_INVALID_CTX;
-    }
-}
 
 int qcry_context_signmsg(qcry_usr_ctx *ctx, const char *msg, unsigned char *(*sign))
 {

@@ -130,8 +130,6 @@ int qcry_context_free(qcry_usr_ctx *ctx);
  */
 int qcry_context_attach(qcry_usr_ctx *ctx, mbedtls_pk_context *pub, mbedtls_pk_context *pri);
 
-int qcry_context_get_finterprint(qcry_usr_ctx *ctx, unsigned char *(*fingerprint));
-
 int qcry_context_add_trgt(qcry_usr_ctx *ctx, qcry_trgt_t *trgt, qcry_ciph_t ciph_t);
 
 int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int trgt_no);
