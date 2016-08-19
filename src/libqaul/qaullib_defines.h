@@ -15,6 +15,8 @@ extern "C" {
 #include <limits.h>  // for PATH_MAX
 #endif
 
+#include "crypto/qcry_helper.h"
+
 #define TIMEOUT_LASTRECEIVED 20
 #define TIMEOUT_CONNECTED   600
 
