@@ -275,9 +275,8 @@ int qcry_arbit_restore(int *usrno, const char *username, const char *passphrase)
         return QCRY_STATUS_INVALID_CTX;
     }
 
+    /* Check if we have to increase the user buffer size */
     if(arbiter->users >= arbiter->max) {
-        /* This means we need to increase the user buffer size */
-
         arbiter->max += 2;
         arbiter->usr_list = (arbiter_user**) realloc(arbiter->usr_list, sizeof(arbiter_user) * arbiter->max);
     }
@@ -286,6 +285,7 @@ int qcry_arbit_restore(int *usrno, const char *username, const char *passphrase)
     *usrno = (int) arbiter->users++;
     arbiter->usr_list[*usrno] = item;
 
+    /* Attempt to load keypair off disk */
     mbedtls_pk_context *pri, *pub;
     ret = load_keypair(&pub, &pri, arbiter->path, username, passphrase);
     if(ret) {
@@ -298,7 +298,7 @@ int qcry_arbit_restore(int *usrno, const char *username, const char *passphrase)
         printf("Failed to attach keypair to new user context!\n");
         return ret;
     }
-    
+
     return QCRY_STATUS_OK;
 }
 
@@ -328,6 +328,11 @@ int qcry_arbit_verify(int usrno, int target_no, const char *message, const unsig
     USER_OK
 
     TARGET_OK
+
+    if(strlen(message) >= QAUL_MAX_MSG_LENGTH) {
+        printf("Message provided exceeds maximum signable message!\n");
+        return QCRY_STATUS_INVALID_PARAMS;
+    }
 
     /* Store usr locally for easy handling */
     arbiter_user *usr = arbiter->usr_list[usrno];
