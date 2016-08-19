@@ -92,11 +92,9 @@ int Qaullib_IpcConnect(void)
 #endif
     ipc_connected = 1;
 
-    // send user hello message
-    if(qaul_fingerprint_set)
-	    Qaullib_IpcSendCryUserhello();
-	else
-    	Qaullib_IpcSendUserhello();
+    // Send both cry-user (new) and user-hello (old) message
+	Qaullib_IpcSendCryUserhello();
+	Qaullib_IpcSendUserhello();
 
     return 1;
   }
@@ -353,10 +351,8 @@ void Qaullib_IpcEvaluateUserhello(union olsr_message *msg)
 	union olsr_ip_addr ip;
 	memcpy(&ip.v4, &msg->v4.originator, sizeof(msg->v4.originator));
 
-	// TODO: Add fingerprint information to messages
-	Qaullib_UserAdd(&ip, msg->v4.message.userhello.name, msg->v4.message.userhello.icon);
-	//	msg->v4.message.userhello.icon,
-	//	msg->v4.message.userhello.suffix);
+	// Add a user to the collection with a NULL fingerprint
+	Qaullib_UserAdd(&ip, msg->v4.message.userhello.name, NULL);
 }
 
 void Qaullib_IpcEvaluateUserhelloCrypto(union olsr_message *msg)

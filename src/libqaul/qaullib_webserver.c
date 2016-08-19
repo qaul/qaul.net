@@ -128,7 +128,7 @@ void Ql_WwwSetName(struct mg_connection *conn, int event, void *event_data)
 
     // Fetch passphrase
     mg_get_http_var(&hm->body, "p", passphrase, sizeof(passphrase));
-    printf("user name len: %i\n", (int) strlen(passphrase));
+    printf("passphrase len: %i\n", (int) strlen(passphrase));
     memcpy(&passphrase[MAX_PASSPHRASE_LEN], "\0", 1);
 
 	if(Qaullib_StringNameProtect(protected_username, username, sizeof(protected_username)) > 0)
@@ -139,7 +139,7 @@ void Ql_WwwSetName(struct mg_connection *conn, int event, void *event_data)
 	}
 
 	/** After handling the UI request, we create a new crypto user**/
-	int ret = qcry_arbit_usrcreate(&qaul_currusrno, username, NULL, QCRY_KEYS_RSA);
+	int ret = qcry_arbit_usrcreate(&qaul_currusrno, username, passphrase, QCRY_KEYS_RSA);
 	printf("Creating new crypto user...%s!\n", (ret == 0) ? "OK" : "FAILED");
 
 	// send header
