@@ -18,11 +18,6 @@
  ***
  ************************************************************************************************/
 
-/** Define flags for our key sizes */
-#define QAUL_KEYS_AES256    (1 << 1)
-#define QAUL_KEYS_RSA4096   (1 << 2)
-#define QAUL_KEYS_ECDSA     (1 << 3)
-
 // Don't allow for more than one access at atime
 #define QAUL_CONC_LOCK      1
 
@@ -118,7 +113,7 @@ int qcry_arbit_signmsg(int usrno, unsigned char *(*sgn_buffer), const char *mess
 
 int qcry_arbit_verify(int usrno, int trgtno, const char *message, const unsigned char *signature);
 
-//int qcry_arbit_sendmsg(int usrno, char *(*encrypted), const char *plain);
+//int qcry_arbit_sendmsg(int usrno, int trgtno, char *(*encrypted), const char *plain);
 //int qcry_arbit_parsemsg(int usrno, char *(*parsed), const char *encrypted);
 
 #endif //QAUL_QCRY_ARBITER_H

@@ -288,8 +288,17 @@ int qcry_arbit_restore(int *usrno, const char *username, const char *passphrase)
 
     mbedtls_pk_context *pri, *pub;
     ret = load_keypair(&pub, &pri, arbiter->path, username, passphrase);
+    if(ret) {
+        printf("Failed to load keypair for user %s\n", username);
+        return ret;
+    }
 
-
+    ret = qcry_context_attach(item->ctx, pub, pri);
+    if(ret) {
+        printf("Failed to attach keypair to new user context!\n");
+        return ret;
+    }
+    
     return QCRY_STATUS_OK;
 }
 
