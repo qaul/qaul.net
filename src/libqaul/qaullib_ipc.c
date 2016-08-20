@@ -195,8 +195,8 @@ void Qaullib_IpcEvaluateMessage(union olsr_message *msg)
 			Qaullib_IpcEvaluateChat(msg);
 			break;
         case QAUL_SIGNED_CHAT_MESSAGE_TYPE:
+			Qaullib_IpcEvaluateSignedChat(msg);
             break;
-
 		case QAUL_IPCCOM_MESSAGE_TYPE:
 			Qaullib_IpcEvaluateCom(msg);
 			break;

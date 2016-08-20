@@ -152,17 +152,17 @@ int qcry_context_attach(qcry_usr_ctx *ctx, mbedtls_pk_context *pub, mbedtls_pk_c
     /******* Calculating Fingerprint for this context *******/
 
     size_t buffer_s = 16000;
-    unsigned char pri_buf[buffer_s];
-    ret = mbedtls_pk_write_key_pem(pri, pri_buf, buffer_s);
+    unsigned char pub_buf[buffer_s];
+    ret = mbedtls_pk_write_pubkey_pem(pub, pub_buf, buffer_s);
     if(ret != 0) return QCRY_STATUS_INVALID_KEYS;
 
     /* Copy the required keylength into a heap buffer */
-    size_t keylen = strlen((char*) pri_buf) + 1; // Consider phlebas (\0) !
+    size_t keylen = strlen((char*) pub_buf) + 1; // Consider phlebas (\0) !
     char *tmp_buf = (char*) malloc(sizeof(char) * keylen);
 
     /* Check our memory space is valid and copy key into it */
     if(tmp_buf == NULL) return QCRY_STATUS_MALLOC_FAIL;
-    strcpy(tmp_buf, (char*) pri_buf);
+    strcpy(tmp_buf, (char*) pub_buf);
 
     /*** Fingerprint is SHA256 digest of private key ***/
 
@@ -181,7 +181,7 @@ int qcry_context_attach(qcry_usr_ctx *ctx, mbedtls_pk_context *pub, mbedtls_pk_c
     exit:
 
     /* Free our resources */
-    memset(pri_buf, 0, buffer_s);
+    memset(pub_buf, 0, buffer_s);
     qcry_hashing_free(&hash);
 
     free(tmp_buf);

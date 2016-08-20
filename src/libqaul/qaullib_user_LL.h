@@ -16,7 +16,6 @@ extern "C" {
  * to the hash of their ip address.
  * (The hash is created from the last octet of the ip address.)
  */
-
 struct qaul_user_LL_item {
 	struct qaul_user_LL_item *next;           /// next node
 	struct qaul_user_LL_item *prev;           /// previous node
@@ -71,6 +70,8 @@ void Qaullib_User_LL_Init (void);
  */
 struct qaul_user_LL_item* Qaullib_User_LL_Add (union olsr_ip_addr *ip, unsigned char *id);
 
+struct qaul_user_LL_item* Qaullib_User_LL_AddFp (union olsr_ip_addr *ip, unsigned char *id, char *fp);
+
 /**
  * delete @a item from list
  */
@@ -91,6 +92,10 @@ void Qaullib_User_LL_Clean (void);
  * @retval 0 ip does not exist
  */
 int  Qaullib_User_LL_IpExists (union olsr_ip_addr *ip);
+
+int  Qaullib_User_LL_FpExists (char *fp);
+
+int Qaullib_User_LL_GetIpFromFp(union olsr_ip_addr **ip, char *fingerprint);
 
 /**
  * loops through the list and checks if @a ip entry of a real user
@@ -120,6 +125,8 @@ void Qaullib_User_LL_IpTouch (union olsr_ip_addr *ip, float linkcost);
  */
 int  Qaullib_User_LL_IdSearch (union olsr_ip_addr *ip, unsigned char *id, struct qaul_user_LL_item **item);
 
+int  Qaullib_User_LL_FpSearch (union olsr_ip_addr *ip, char *fp, struct qaul_user_LL_item **item);
+
 /**
  * initializes a @a node with the first entry of the user table
  */
@@ -129,6 +136,15 @@ void Qaullib_User_LL_InitNode (struct qaul_user_LL_node *node);
  * initializes a @a node of the user table according to the @a ip
  */
 void Qaullib_User_LL_InitNodeWithIP(struct qaul_user_LL_node *node, union olsr_ip_addr *ip);
+
+
+/**
+ * Initialises a new node that also has the fingerprint data attached to it
+ * @param node
+ * @param ip
+ * @param fingerprint
+ */
+void Qaullib_User_LL_InitNodeWithFp(struct qaul_user_LL_node *node, char *fp);
 
 /**
  * checks if there is a next item in the user table
