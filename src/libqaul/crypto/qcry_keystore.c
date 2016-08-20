@@ -49,7 +49,8 @@ int qcry_ks_init(const char *path, struct qcry_usr_id **known, int entries)
     if(known == NULL) goto exit;
 
     /* Go and load all the keys */
-    for(int i = 0; i < entries; i++) {
+    int i;
+    for(i = 0; i < entries; i++) {
 
         /* Get the fingerprint pointer for easier handling */
         struct qcry_usr_id *id = known[i];
@@ -109,7 +110,8 @@ int qcry_ks_getusername(char *(*username), const char *fingerprint)
     (*username) = NULL;
 
     /* Loop through our collection of known public keys */
-    for(int i = 0; i < keystore->keys; i++) {
+    int i;
+    for(i = 0; i < keystore->keys; i++) {
 
         /* Compare the fingerprints for a match */
         if(strcmp(keystore->keylist[i]->fp, fingerprint) == 0) {
@@ -136,7 +138,8 @@ int qcry_ks_getkey(mbedtls_pk_context *(*pub), const char *fingerprint)
     (*pub) = NULL;
 
     /* Loop through our collection of known public keys */
-    for(int i = 0; i < keystore->keys; i++) {
+    int i;
+    for(i = 0; i < keystore->keys; i++) {
 
         /* Compare the fingerprints for a match */
         if(strcmp(keystore->keylist[i]->fp, fingerprint) == 0) {
@@ -157,7 +160,8 @@ int qcry_ks_free()
     CHECK_SANE
 
     /* Make sure all keys on disk exist */
-    for(int i = 0; i < keystore->keys; i++) {
+    int i;
+    for(i = 0; i < keystore->keys; i++) {
         mbedtls_pk_free(keystore->keylist[i]->pub);
         free((keystore->keylist[i]->fp));
     }
