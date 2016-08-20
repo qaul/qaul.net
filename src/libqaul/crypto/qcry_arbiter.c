@@ -359,7 +359,9 @@ int qcry_arbit_start(int usrno, const char *fingerprint)
     /* We need to check if the target already exists */
     int tused = usr->ctx->usd_trgt;
     qcry_trgt_t **targets = usr->ctx->trgts;
-    for(int i = 0; i < tused; i++) {
+
+    int i;
+    for(i = 0; i < tused; i++) {
         qcry_trgt_t *t = targets[i];
 
         /* No need to add again if exists */
@@ -390,7 +392,8 @@ int qcry_arbit_stop(int usrno, const char *fingerprint)
     int target_no = -1;
 
     /* Try to find fingerprint */
-    for(int i = 0; i < user->ctx->usd_trgt; i++) {
+    int i;
+    for(i = 0; i < user->ctx->usd_trgt; i++) {
 
         /* If the fingerprints match ... */
         if(strcmp((char*) user->ctx->trgts[i]->fingerprint, fingerprint) == 0) {
