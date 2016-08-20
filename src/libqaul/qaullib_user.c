@@ -344,7 +344,7 @@ void Qaullib_UserAddInfo(struct qaul_userinfo_msg *userinfo)
 	Qaullib_UserAdd(&userinfo->ip, userinfo->name, NULL);
 }
 
-void Qaullib_UserAdd(union olsr_ip_addr *ip, const char *name, const char *fingerprint)
+void Qaullib_UserAdd(union olsr_ip_addr *ip, char *name, char *fp)
 {
 	struct qaul_user_LL_item *myuseritem;
 	unsigned char id[MAX_HASH_LEN];
@@ -358,7 +358,10 @@ void Qaullib_UserAdd(union olsr_ip_addr *ip, const char *name, const char *finge
 
 	// check if user exists
 	user_exists = Qaullib_User_LL_IdSearch(ip, id, &myuseritem);
-
+	if(user_exists == 0) {
+		// Check for fingerprint next
+		user_exists = Qaullib_User_LL_FpSearch(ip, fp, &myuseritem);
+	}
 
 	if (user_exists == 1)
 	{
@@ -375,7 +378,7 @@ void Qaullib_UserAdd(union olsr_ip_addr *ip, const char *name, const char *finge
 	else
 	{
 		// create the user if it doesn't exist
-		myuseritem = Qaullib_User_LL_Add (ip, id);
+		myuseritem = Qaullib_User_LL_AddFp(ip, id, fp);
 		// set user to cached
 		myuseritem->changed = QAUL_USERCHANGED_CACHED;
 	}

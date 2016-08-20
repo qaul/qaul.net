@@ -84,7 +84,6 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
         qaullib_filesharing.c
         qaullib_file_LL.c
         qaullib_exediscovery.c
-        # qaullib_usr_store.c
 
         # Crypto module
         qaullib_crypto.c
@@ -95,6 +94,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
         crypto/qcry_helper.c
         crypto/qcry_keys.c
         crypto/qcry_keystore.c
+
 
         qaullib_udp_communication.c
         captive/qaullib_captive.c

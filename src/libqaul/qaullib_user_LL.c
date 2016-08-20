@@ -40,6 +40,13 @@ void Qaullib_User_LL_InitNodeWithIP(struct qaul_user_LL_node *node, union olsr_i
 	node->item = &Qaul_user_LL_table[node->index];
 }
 
+void Qaullib_User_LL_InitNodeWithFp(struct qaul_user_LL_node *node, char *fp)
+{
+	memcpy(node->item->fp, fp, QAUL_FP_LEN);
+    // TODO: Leave IP empty?
+    node->item = &Qaul_user_LL_table[node->index];
+}
+
 int Qaullib_User_LL_NextNode (struct qaul_user_LL_node *node)
 {
 	for(; node->index < HASHSIZE;)
@@ -85,6 +92,56 @@ struct qaul_user_LL_item* Qaullib_User_LL_Add (union olsr_ip_addr *ip, unsigned 
 	new_item->lq = 10.1;
 	new_item->favorite = 0;
 	memcpy((char *)&new_item->ip, ip, sizeof(union olsr_ip_addr));
+
+	// set hash
+	if(id != 0)
+	{
+		memcpy(new_item->id, id, sizeof(new_item->id));
+		Ql_HashToString(id, new_item->idstr);
+	}
+	else
+	{
+		memset(new_item->id, 0, sizeof(new_item->id));
+		memset(new_item->idstr, 0, sizeof(new_item->id));
+	}
+
+	// lock
+	pthread_mutex_lock( &qaullib_mutex_userLL );
+	// create links
+	new_item->prev = &Qaul_user_LL_table[hash];
+	new_item->next = Qaul_user_LL_table[hash].next;
+
+	Qaul_user_LL_table[hash].next = new_item;
+	new_item->next->prev = new_item;
+	qaul_user_LL_count++;
+
+	// unlock
+	pthread_mutex_unlock( &qaullib_mutex_userLL );
+
+	return new_item;
+}
+
+
+struct qaul_user_LL_item* Qaullib_User_LL_AddFp (union olsr_ip_addr *ip, unsigned char *id, char *fp)
+{
+	struct qaul_user_LL_item *new_item;
+	new_item = (struct qaul_user_LL_item *)malloc(sizeof(struct qaul_user_LL_item));
+
+	if(QAUL_DEBUG)
+		printf("Qaullib_User_LL_AddFp\n");
+
+	// get index
+	uint32_t hash = olsr_ip_hashing(ip);
+
+	// fill in content
+	qaul_user_LL_id++;
+	new_item->time = time(NULL);
+	new_item->type = QAUL_USERTYPE_UNCHECKED;
+	new_item->changed = QAUL_USERCHANGED_UNCHANGED;
+	new_item->lq = 10.1;
+	new_item->favorite = 0;
+	memcpy((char *)&new_item->ip, ip, sizeof(union olsr_ip_addr));
+	memcpy(new_item->fp, fp, QAUL_FP_LEN);
 
 	// set hash
 	if(id != 0)
@@ -196,6 +253,42 @@ int Qaullib_User_LL_IpExists (union olsr_ip_addr *ip)
 	return 0;
 }
 
+int  Qaullib_User_LL_FpExists (char *fp)
+{
+	struct qaul_user_LL_node mynode;
+	Qaullib_User_LL_InitNodeWithFp(&mynode, fp);
+
+	if(QAUL_DEBUG)
+		printf("Qaullib_User_LL_FpExists\n");
+
+	while(Qaullib_User_LL_NextItem(&mynode))
+	{
+		if(memcmp(&mynode.item->fp, fp, QAUL_FP_LEN) == 0)
+		{
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int Qaullib_User_LL_GetIpFromFp(union olsr_ip_addr **ip, char *fp)
+{
+    struct qaul_user_LL_node mynode;
+    Qaullib_User_LL_InitNodeWithFp(&mynode, fp);
+
+    if(QAUL_DEBUG)
+        printf("Qaullib_User_LL_FpExists\n");
+
+    while(Qaullib_User_LL_NextItem(&mynode))
+    {
+        if(memcmp(&mynode.item->fp, fp, QAUL_FP_LEN) == 0)
+        {
+            /* Assign the value of the IP so we can use it later */
+            *ip = &mynode.item->ip;
+        }
+    }
+    return 0;
+}
 
 // ------------------------------------------------------------
 int Qaullib_User_LL_IpGetFirst (union olsr_ip_addr *ip, struct qaul_user_LL_item **item)
@@ -318,4 +411,36 @@ int Qaullib_User_LL_IdSearch (union olsr_ip_addr *ip, unsigned char *id, struct 
 	return ipFound;
 }
 
+int  Qaullib_User_LL_FpSearch (union olsr_ip_addr *ip, char *fp, struct qaul_user_LL_item **item)
+{
+    int ipFound;
+    struct qaul_user_LL_node mynode;
 
+    ipFound = -1;
+
+    if(QAUL_DEBUG)
+    printf("Qaullib_User_LL_IdSearch\n");
+
+    Qaullib_User_LL_InitNodeWithFp(&mynode, fp);
+    while(Qaullib_User_LL_NextItem(&mynode))
+    {
+        if(memcmp(&mynode.item->ip, ip, qaul_ip_size) == 0)
+        {
+            if(memcmp(&mynode.item->fp, fp, QAUL_FP_LEN) == 0)
+            {
+                *item = mynode.item;
+                return 1;
+            }
+            else if(
+                    mynode.item->type < QAUL_USERTYPE_KNOWN &&
+                    mynode.item->type != QAUL_USERTYPE_WEB_HIDDEN
+                    )
+            {
+                *item = mynode.item;
+                ipFound = 0;
+            }
+        }
+    }
+
+    return ipFound;
+}

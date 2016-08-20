@@ -12,6 +12,7 @@ extern "C" {
 
 #include "qaullib_defines.h"
 #include "crypto/qcry_helper.h"
+#include "crypto/qcry_arbiter.h"
 
 /**
  * The message linked list contains all recently received messages.

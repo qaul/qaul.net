@@ -18,8 +18,7 @@
 extern "C" {
 #endif // __cplusplus
 
-#include "crypto/qcry_arbiter.h"
-
+#include "qaullib_defines.h"
 
 /**
  * user connection structure
@@ -34,7 +33,7 @@ struct qaul_user_connection
 typedef struct {
     struct qaul_user_connection     userconnections[MAX_USER_CONNECTIONS];
     char                            *username;
-    struct qcry_arbit_token         *token;
+    unsigned char					fp[QAUL_FP_LEN];
     union olsr_ip_addr              *ip;
 } qaul_cry_user;
 
@@ -109,7 +108,7 @@ void Qaullib_UserAddInfo(struct qaul_userinfo_msg *userinfo);
  * this function adds names to the user entries in the user LL
  * it creates new entries if a user does not exist yet
  */
-void Qaullib_UserAdd(union olsr_ip_addr *ip, const char *name, const char *fingerprint);
+void Qaullib_UserAdd(union olsr_ip_addr *ip, char *name, char *fingerprint);
 
 /**
  * add a favorite
