@@ -330,7 +330,8 @@ int qcry_context_remove_trgt(qcry_usr_ctx *ctx, unsigned int trgt_no)
     ctx->usd_trgt--;
 
     /** Iterate over all targets to find empty (NULL) spaces **/
-    for(int index = 0; index < ctx->usd_trgt; index++) {
+    int index;
+    for(index = 0; index < ctx->usd_trgt; index++) {
 
         /* Check if the current space is NULL (as we marked it before) */
         if(ctx->trgts[index] == NULL) {
