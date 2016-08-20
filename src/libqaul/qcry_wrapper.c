@@ -11,14 +11,21 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <wordexp.h>
 
 #define TEST(msg) \
     printf("Return %s: %d\n", #msg, ret); if(ret != 0) goto end;
 
 int qcry_devel_init(int argc, char *argv[])
 {
-    char *cfg_path = "/home/spacekookie/.qaul/";
 
+    char *cfg_path = "~/.qaul/";
+
+    /* Expand the vault location path */
+    wordexp_t exp;
+    wordexp(cfg_path, &exp, 0);
+    char *exp_path = exp.we_wordv[0];
+    
     char *message = "This is a message with less than 140 symbols #TwitterStyle. You're great! I'd love to hang out";
     char *fakemessage = "I hate you! I will tell you horrible and hurtful things in a minute!";
     unsigned char *signature;
@@ -26,7 +33,7 @@ int qcry_devel_init(int argc, char *argv[])
     int ret;
     int kookie, jane;
 
-    ret = qcry_arbit_init(1, cfg_path, NULL); // TODO: Give all known fingerprints/ public keys
+    ret = qcry_arbit_init(1, exp_path, NULL); // TODO: Give all known fingerprints/ public keys
     TEST("INIT")
 
     ret = qcry_arbit_usrcreate(&kookie, "spacekookie", "mypassphrase", QCRY_KEYS_RSA);
