@@ -12,12 +12,12 @@
 // ------------------------------------------------------------
 int Ql_sha1_file(char *filepath, unsigned char *hash)
 {
-    int ret;
+    int ret = 1;
     FILE *f;
 
     Ql_log_debug("Ql_sha1_file %s", filepath);
 
-    ret = 1;
+    //ret = 1;
     if((f = fopen(filepath, "rb")) == NULL)
     {
     	Ql_log_error("Ql_sha1_file failed to open file: %s", filepath);
