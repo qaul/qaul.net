@@ -10,14 +10,14 @@ Wifi mesh network via the GUI:
 "Preferences Tab > Configure Custom Network"
 
 Every community configuration is defined in a single JSON file in the 
-folder [GUI/www/community-templates](GUI/www/community-templates)
+folder [GUI/www/community-templates](.)
 
 
 JSON Structure Explanation
 --------------------------
 
 Use an existing community profile as the bases for your community template e.g.
-[GUI/www/community-templates/qaul.json](GUI/www/community-templates/qaul.json)
+[GUI/www/community-templates/qaul.json](qaul.json)
 
 
 * profile:
@@ -50,11 +50,13 @@ The possible values are:
 How to add a Community Template
 -------------------------------
 
-1) Create a new json file and name it after your community e.g. 
-   [GUI/www/community-templates/your-community.json](GUI/www/community-templates/custom.json)
-2) Fill in the values
-3) Add your file as an option to the file 
-   [GUI/www/community-templates/your-community.json](GUI/www/community-templates/custom.json)
-4) Create a pull request on Github to get your template included in 
+1. Create a new json file and name it after your community e.g. 
+   [GUI/www/community-templates/your-community.json](custom.json)
+2. Fill in the values
+3. Add your file as an option tag to the file 
+   [GUI/www/qaul.html](../qaul.html) in 
+   `<select name="profile" id="c_network_profile">` e.g. 
+   `<option value="yourCommunity">Your Wifi Community Name</option>`
+4. Create a pull request on Github to get your template included in 
    qaul.net
 
