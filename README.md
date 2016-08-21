@@ -56,6 +56,7 @@ Documentation
 * [Documentation folder](doc/)
 * [Software architecture](https://github.com/WachterJud/qaul.net/wiki/SoftwareArchitecture)
 * [HTML5 GUI development](doc/GUI.md)
+* [Add a configuration template for your wifi mesh community](GUI/www/community-templates/)
 
 
 License
