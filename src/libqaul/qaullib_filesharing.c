@@ -10,6 +10,7 @@
 #include "qaullib_private.h"
 #include "mbedtls/sha1.h"
 #include "qaullib_crypto.h"
+#include <sys/stat.h>
 
 /**
  * creates the hash of the file in @a filename and writes it into @a hashstr
@@ -234,6 +235,90 @@ int Qaullib_FileAdd2DB(struct qaul_file_LL_item *file_item)
 	}
 
 	return 1;
+}
+
+// ------------------------------------------------------------
+int Qaullib_FileCopyDirectory(const char* origin, const char* destiny)
+{
+    int success = 1;
+    char path_orig[MAX_PATH_LEN +1], path_dest[MAX_PATH_LEN +1];
+    char *endPtr_orig = path_orig;
+    char *endPtr_dest = path_dest;
+    struct dirent *e;
+    struct stat info;
+	DIR *dir = opendir(origin);
+	// zero path strings
+	path_orig[MAX_PATH_LEN] = '\0';
+	path_dest[MAX_PATH_LEN] = '\0';
+
+	// check if destiny directory exists, create it otherwise
+	if(!stat(destiny, &info))
+	{
+		// check if this file is a directory
+		if(!(info.st_mode & S_IFDIR))
+		{
+			printf("ERROR: %s is not a directory", destiny);
+			return 0;
+		}
+	}
+	else
+	{
+		// destination folder not found, create it!
+#if defined(_WIN32)
+		if(_mkdir(destiny) != 0)
+#else
+		if(mkdir(destiny, 0700) != 0)
+#endif
+		{
+			// directory couln't be created
+			printf("ERROR: directory %s couln't be created", destiny);
+			return 0;
+		}
+	}
+
+    if(dir)
+    {
+        strncpy(path_orig, origin, MAX_PATH_LEN);
+        strncpy(path_dest, destiny, MAX_PATH_LEN);
+        endPtr_orig += strlen(origin);
+        endPtr_dest += strlen(destiny);
+
+        while((e = readdir(dir)) != NULL)
+        {
+            // copy the current filename to the end of the path, overwriting it with each loop.
+            strcpy(endPtr_orig, e->d_name);
+            strcpy(endPtr_dest, e->d_name);
+
+            // stat returns 0 on success
+            if(!stat(path_orig, &info))
+            {
+                //if(S_ISDIR(info.st_mode)) // this seems not to exist on some windows systems
+            	if(info.st_mode & S_IFDIR)
+                {
+                    if(Qaullib_FileCopyDirectory(path_orig, path_dest) == 0)
+                    {
+                		printf("ERROR: couldn't copy directory from %s to %s\n", path_orig, path_dest);
+                		success = 0;
+                    }
+                }
+                else if(S_ISREG(info.st_mode))
+                {
+                	if(Qaullib_FileCopy(path_orig, path_dest) == 0)
+                	{
+                		printf("ERROR: couldn't copy file from %s to %s\n", path_orig, path_dest);
+                		success = 0;
+                	}
+                }
+            }
+        }
+    }
+    else
+    {
+    	printf("ERROR: coulnd't open directory %s", origin);
+    	success = 0;
+    }
+
+    return success;
 }
 
 // ------------------------------------------------------------
