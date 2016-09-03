@@ -54,19 +54,8 @@ int start_portforwarding (int argc, const char * argv[]);
  */
 int stop_portforwarding (int argc, const char * argv[]);
 
-#ifdef WITHOUT_NETWORKMANAGER
 
-/**
- * start network manager
- */
-int start_networkmanager (int argc, const char * argv[]);
-
-/**
- * stop network manager
- */
-int stop_networkmanager (int argc, const char * argv[]);
-
-#endif // WITHOUT_NETWORKMANAGER
+#ifdef QAUL_PORT_OSX
 
 /**
  * enable wifi
@@ -78,10 +67,18 @@ int enable_wifi (int argc, const char * argv[]);
  */
 int disable_wifi (int argc, const char * argv[]);
 
+#endif // QAUL_PORT_OSX
+
+
+#ifdef QAUL_PORT_LINUX
+
 /**
  * configure wifi, create or join IBSS
  */
 int configure_wifi (int argc, const char * argv[]);
+
+#endif // QAUL_PORT_LINUX
+
 
 /**
  * configure static IP

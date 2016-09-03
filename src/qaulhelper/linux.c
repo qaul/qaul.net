@@ -19,12 +19,6 @@
  *   qaulhelper startgateway eth0 wlan0
  *   qaulhelper stopgateway <INTERFACE OUT> <INTERFACE IN>
  *   qaulhelper stopgateway eth0 wlan0
- *   qaulhelper startnetworkmanager
- *   qaulhelper startnetworkmanager
- *   qaulhelper stopnetworkmanager
- *   qaulhelper stopnetworkmanager
- *   qaulhelper enablewifi <INTERFACE>
- *   qaulhelper enablewifi wlan0
  *   qaulhelper configurewifi <INTERFACE> <ESSID> <CHANNEL> [<BSSID>]
  *   qaulhelper configurewifi wlan0 qaul.net 11 02:11:87:88:D6:FF
  *   qaulhelper setip <INTERFACE> <IP> <SUBNET> <BROADCAST>
@@ -411,90 +405,6 @@ int stop_gateway (int argc, const char * argv[])
     return 0;
 }
 
-#ifdef WITHOUT_NETWORKMANAGER
-
-int start_networkmanager (int argc, const char * argv[])
-{
-    pid_t pid1;
-    int status;
-    printf("start network manager\n");
-
-	// become root
-	setuid(0);
-
-	// start network manager
-	pid1 = fork();
-	if (pid1 < 0)
-		printf("fork for pid1 failed\n");
-	else if(pid1 == 0)
-        execl("/usr/bin/service", "service", "network-manager", "start", (char*)0);
-	else
-		waitpid(pid1, &status, 0);
-
-	printf("network manager started\n");
-
-    return 0;
-}
-
-int stop_networkmanager (int argc, const char * argv[])
-{
-    pid_t pid1;
-    int status;
-    printf("stop network manager\n");
-
-    // become root
-    setuid(0);
-
-    // network manager
-    pid1 = fork();
-    if (pid1 < 0)
-        printf("fork for pid2 failed\n");
-    else if(pid1 == 0)
-        execl("/usr/bin/service", "service", "network-manager", "stop", (char*)0);
-    else
-        waitpid(pid1, &status, 0);
-
-    printf("network manager stopped\n");
-	return 0;
-}
-
-int enable_wifi (int argc, const char * argv[])
-{
-    pid_t pid1, pid2;
-    int status;
-    printf("enable wifi\n");
-
-	// become root
-	setuid(0);
-
-	// deblock wifi
-	pid1 = fork();
-	if (pid1 < 0)
-		printf("fork for pid1 failed\n");
-	else if(pid1 == 0)
-	{
-		execl("rfkill", "unblock", "all", (char*)0);
-	}
-	else
-		waitpid(pid1, &status, 0);
-
-	// enable wifi
-	pid2 = fork();
-	if (pid2 < 0)
-		printf("fork for pid1 failed\n");
-	else if(pid2 == 0)
-	{
-		execl("nmcli", "nm", "wifi", "on", (char*)0);
-	}
-	else
-		waitpid(pid2, &status, 0);
-
-
-	printf("wifi enabled\n");
-
-	return 0;
-}
-
 int configure_wifi (int argc, const char * argv[])
 {
     pid_t pid1, pid2, pid3, pid4, pid5, pid6;
@@ -720,5 +630,3 @@ int set_dns (int argc, const char * argv[])
 
     return 0;
 }
-
-#endif // WITHOUT_NETWORKMANAGER

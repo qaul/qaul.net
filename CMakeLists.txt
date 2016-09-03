@@ -160,6 +160,13 @@ else ()
     message(FATAL_ERROR "Dont know how to build ui '${GUI}'")
 endif ()
 
+
+# build qauld the qaul.net daemon 
+if (${PORT} STREQUAL "LINUX")
+    add_subdirectory (src/daemon/linux)
+endif ()
+
+
 # final status summary report
 message(STATUS "#############################################")
 message(STATUS "  qaul seems to be successfully configured.")

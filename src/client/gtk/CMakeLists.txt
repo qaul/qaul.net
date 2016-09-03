@@ -2,7 +2,13 @@
 
 pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
 
-add_executable (qaul-gtk main.c network.c)
+add_executable (qaul-gtk 
+	main.c
+	configure.c
+	configure_nm.c
+	configure_cli.c
+	networkmanager_configuration.c
+)
 
 target_include_directories(qaul-gtk PRIVATE ${DBUS1_INCLUDE_DIRS} ${WEBKIT_INCLUDE_DIRS})
 

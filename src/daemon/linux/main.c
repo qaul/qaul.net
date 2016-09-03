@@ -3,10 +3,20 @@
  * licensed under GPL (version 3)
  */
 
+#ifdef WIN32
+#include <windows.h>
+#else
+#endif
+
 #include <stdio.h> // defines FILENAME_MAX
 #include <stdlib.h>
-#include <unistd.h>
-#define GetCurrentDir getcwd
+#ifdef WINDOWS
+    #include <direct.h>
+    #define GetCurrentDir _getcwd
+#else
+    #include <unistd.h>
+    #define GetCurrentDir getcwd
+ #endif
 
 #include "qaullib.h"
 #include <QaulConfig.h>

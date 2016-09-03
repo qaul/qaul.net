@@ -21,11 +21,12 @@
  * react if network manager wants to change network
  */
 
-#include "network.h"
 #include <stdlib.h>
 #include <string.h>  // strncpy()
 #include <arpa/inet.h>
 #include <time.h>
+
+#include "networkmanager_configuration.h"
 
 
 /**
@@ -167,9 +168,6 @@ static dbus_bool_t qaul_dbus_append_device_mac(DBusMessageIter* iter, qaul_dbus_
 	return TRUE;
 }
 
-/**
- * initialize dbus connection
- */
 int qaul_dbus_init(DBusConnection** dbus_connection)
 {
 	DBusError error;
@@ -244,7 +242,7 @@ typedef struct networkmanager_property {
 	char*	dbus_path;
 	char*	dbus_interface;
 	char*	dbus_property_name;
-	int	value_int;
+	int		value_int;
 	char*	value_string;
 	int 	value_string_len;
 } networkmanager_property;
@@ -523,12 +521,19 @@ static int networkmanager_device_properties(DBusConnection* dbus_connection, qau
 	return 1;
 }
 
-/**
- * Retrieve @a device properties of the device with @a interface_name
- *
- * @retval 1 device found, properties set
- * @retval 0 device not found, properties not set
- */
+
+int qaul_dbus_test_networkmanager(void)
+{
+	DBusMessage* msg;
+
+	// check if network manager is present
+	msg = networkmanager_dbus_method_call("GetDevices");
+	if(msg == NULL)
+		return 0;
+
+	return 1;
+}
+
 int qaul_network_device_get_by_interface(const char* interface_name, DBusConnection* dbus_connection, qaul_dbus_device_properties* device)
 {
 	DBusMessage* msg;
@@ -591,15 +596,6 @@ int qaul_network_device_get_by_interface(const char* interface_name, DBusConnect
 	return 0;
 }
 
-/**
- * Retrieve dbus path to network @a device by @a interface_name of the IP interface
- *
- * @retval 1 success
- * @retval 0 error
- *
- * https://developer.gnome.org/NetworkManager/unstable/spec.html
- * GetDeviceByIpIface("wlan0")
- */
 int qaul_network_device_get_by_ipName(const char* interface_name, DBusConnection* dbus_connection, qaul_dbus_device_properties* device)
 {
 	DBusMessage* msg;
@@ -629,22 +625,7 @@ int qaul_network_device_get_by_ipName(const char* interface_name, DBusConnection
 	return 1;
 }
 
-/**
- * Write a Json configuration to @a json_txt of available network devices.
- * Only Wifi and Ethernet devices are represented as the other device cannot be
- * configured at the moment. @a json_txt needs to be a pointer ot a char buffer
- * of the size MAX_JSON_LEN +1.
- *
- * @retval 1 success
- * @retval 2 error
- *
- * https://developer.gnome.org/NetworkManager/unstable/spec.html
- * GetDevices() → ao
- *
- * Dbus messages:
- * http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html
- * DBUS_EXPORT int dbus_message_iter_get_arg_type(DBusMessageIter * iter)
- */
+
 int qaul_network_devices_json(DBusConnection* dbus_connection, char* json_txt)
 {
 	DBusMessage* msg;
@@ -740,12 +721,7 @@ int qaul_network_devices_json(DBusConnection* dbus_connection, char* json_txt)
 	return 1;
 }
 
-/**
- * find the first wifi device
- *
- * @retval 1 wifi device found, properties set
- * @retval 0 no wifi device found, properties not set
- */
+
 int qaul_network_find_wifi(DBusConnection* dbus_connection, qaul_dbus_device_properties* device)
 {
 	DBusMessage* msg;
@@ -808,15 +784,7 @@ int qaul_network_find_wifi(DBusConnection* dbus_connection, qaul_dbus_device_pro
 	return 0;
 }
 
-/**
- * activate network connection
- *
- * The path to the access point can be given as accesspoint_path,
- * if it shall choose automatically use "/"
- *
- * https://developer.gnome.org/NetworkManager/unstable/spec.html
- * ActivateConnection ( o: connection, o: device, o: specific_object ) -> o
- */
+
 int qaul_network_connection_activate(DBusConnection* dbus_connection, qaul_dbus_connection_settings* settings, qaul_dbus_device_properties* device)
 {
 	DBusMessage* msg;
@@ -867,12 +835,6 @@ int qaul_network_connection_activate(DBusConnection* dbus_connection, qaul_dbus_
 	return 1;
 }
 
-/**
- * deactivate network connection
- *
- * https://developer.gnome.org/NetworkManager/unstable/spec.html
- * DeactivateConnection ( o: active_connection ) → nothing
- */
 int qaul_network_connection_deactivate(DBusConnection* dbus_connection, qaul_dbus_connection_settings* settings)
 {
 	DBusMessage* msg;
@@ -903,10 +865,7 @@ int qaul_network_connection_deactivate(DBusConnection* dbus_connection, qaul_dbu
 	return 1;
 }
 
-/**
- * add connection settings to network manager
- */
-int qaul_network_settings_add(DBusConnection* dbus_connection, qaul_dbus_connection_settings* settings, qaul_dbus_device_properties* device)
+int qaul_network_settings_add(DBusConnection* dbus_connection, qaul_dbus_connection_settings* settings, qaul_network_settings* network, qaul_dbus_device_properties* device)
 {
 	DBusMessage* msg;
 	DBusMessageIter iter;
@@ -975,7 +934,7 @@ int qaul_network_settings_add(DBusConnection* dbus_connection, qaul_dbus_connect
 		const char* wlan = connection_values[1];
 		const char* wlan_keys[]   = {"ssid", "mode", "band", "channel"};
 		const char* wlan_values[] = {NULL,  "adhoc", "bg"};
-		wlan_channel_ui32 = settings->wifi_channel +0;
+		wlan_channel_ui32 = network->wifi_channel +0;
 
 		if(!(
 			   dbus_message_iter_open_container(&iter_array[0], DBUS_TYPE_DICT_ENTRY, NULL, &iter_array[1])
@@ -990,7 +949,7 @@ int qaul_network_settings_add(DBusConnection* dbus_connection, qaul_dbus_connect
 			&& dbus_message_iter_append_basic(&iter_array[3], DBUS_TYPE_STRING, &wlan_keys[0])
 			&& dbus_message_iter_open_container(&iter_array[3], DBUS_TYPE_VARIANT, "ay", &iter_array[4])
 			&& dbus_message_iter_open_container(&iter_array[4], DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &iter_array[5])
-			&& qaul_dbus_append_ssid(&iter_array[5], settings->wifi_ssid)
+			&& qaul_dbus_append_ssid(&iter_array[5], network->wifi_ssid)
 			&& dbus_message_iter_close_container(&iter_array[4], &iter_array[5])
 			&& dbus_message_iter_close_container(&iter_array[3], &iter_array[4])
 			&& dbus_message_iter_close_container(&iter_array[2], &iter_array[3])
@@ -1038,14 +997,14 @@ int qaul_network_settings_add(DBusConnection* dbus_connection, qaul_dbus_connect
 	const char* ipv4_addresses = "addresses";
 	dbus_uint32_t ipv4_address_ip;
 	dbus_uint32_t ipv4_address_gateway;
-	inet_pton(AF_INET, settings->ipv4_address, &ipv4_address_ip);
-	inet_pton(AF_INET, settings->ipv4_gateway, &ipv4_address_gateway);
-	dbus_uint32_t ipv4_address_netmask = settings->ipv4_netmask +0;
+	inet_pton(AF_INET, network->ipv4_address, &ipv4_address_ip);
+	inet_pton(AF_INET, network->ipv4_gateway, &ipv4_address_gateway);
+	dbus_uint32_t ipv4_address_netmask = network->ipv4_netmask +0;
 	const char* ipv4_dns = "dns";
 	dbus_uint32_t ipv4_dns_ip1;
 	dbus_uint32_t ipv4_dns_ip2;
-	inet_pton(AF_INET, settings->ipv4_dns1, &ipv4_dns_ip1);
-	inet_pton(AF_INET, settings->ipv4_dns2, &ipv4_dns_ip2);
+	inet_pton(AF_INET, network->ipv4_dns1, &ipv4_dns_ip1);
+	inet_pton(AF_INET, network->ipv4_dns2, &ipv4_dns_ip2);
 
 	if(!(
 		// append IP settings
@@ -1136,16 +1095,6 @@ int qaul_network_settings_add(DBusConnection* dbus_connection, qaul_dbus_connect
 	return 1;
 }
 
-/**
- * delete network @a settings via network manager over @a dbus_connection .
- *
- * @retval 1 success
- * @retval 0 error
- *
- * https://developer.gnome.org/NetworkManager/unstable/spec.html
- * org.freedesktop.NetworkManager.Settings.Connection
- * Delete ( ) → nothing
- */
 int qaul_network_settings_delete(DBusConnection* dbus_connection, qaul_dbus_connection_settings* settings)
 {
 	DBusMessage* msg;
