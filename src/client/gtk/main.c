@@ -328,7 +328,10 @@ gboolean qaul_configure(gpointer data)
     // get network interface
     if(qaulConfigureCounter == 20)
     {
-        // check if interface has been configured manually
+        // decide which configuration method to choose
+    	qaul_defineConfigurationMethod();
+
+    	// check if interface has been configured manually
     	if(Qaullib_GetInterfaceManual())
     	{
     		printf("[configure] interface manually configured\n");
