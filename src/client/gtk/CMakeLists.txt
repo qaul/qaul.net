@@ -4,6 +4,7 @@ pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
 
 add_executable (qaul-gtk 
 	main.c
+	qaul_configure.c
 	configure.c
 	configure_nm.c
 	configure_cli.c
