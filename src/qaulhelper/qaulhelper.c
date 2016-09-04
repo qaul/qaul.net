@@ -130,14 +130,12 @@ int main (int argc, const char * argv[])
         printf("  qaulhelper stopgateway\n");
         printf("  qaulhelper stopgateway\n");
 #endif // QAUL_PORT_OSX
-#ifdef WITHOUT_NETWORKMANAGER
         printf("  qaulhelper configurewifi <INTERFACE> <ESSID> <CHANNEL> [<BSSID>]\n");
         printf("  qaulhelper configurewifi %s qaul.net 11 02:11:87:88:D6:FF\n", Help_InterfaceWifi);
         printf("  qaulhelper setip <INTERFACE> <IP> <SUBNET> <BROADCAST>\n");
         printf("  qaulhelper setip %s 10.213.28.55 8 10.255.255.255\n", Help_InterfaceWifi);
         printf("  qaulhelper setdns <INTERFACE>\n");
         printf("  qaulhelper setdns %s\n", Help_InterfaceWifi);
-#endif // WITHOUT_NETWORKMANAGER
 #ifdef QAUL_PORT_OSX
         printf("  qaulhelper enablewifi <OSXVERSION> <INTERFACE>\n");
         printf("  qaulhelper enablewifi 1038 %s\n", Help_InterfaceWifi);

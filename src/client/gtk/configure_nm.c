@@ -3,6 +3,8 @@
  * licensed under GPL (version 3)
  */
 
+#include <string.h>
+
 #include "configure.h"
 #include "configure_nm.h"
 #include "networkmanager_configuration.h"
@@ -30,7 +32,16 @@ int qaul_initNetworkManager(void)
 
 int qaul_findWifiInterface_nm(qaul_network_settings* network)
 {
-	return qaul_network_find_wifi(network_dbus_connection, &network_device);
+	int success;
+
+	success = qaul_network_find_wifi(network_dbus_connection, &network_device);
+	if(success)
+	{
+		strncpy(network->interface_name, network_device.interface, sizeof(network->interface_name));
+		network->interface_name[sizeof(network->interface_name)-1] = '\0';
+	}
+
+	return success;
 }
 
 int qaul_findNetworkInterface_nm(const char* interface_name)

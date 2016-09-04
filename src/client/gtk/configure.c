@@ -14,6 +14,8 @@
 
 void qaul_defineConfigurationMethod(void)
 {
+	printf("qaul_defineConfigurationMethod\n" );
+
 	// check if network manager is running
 	if(qaul_initNetworkManager())
 		network_settings.method = NETWORK_MANAGER;
@@ -24,6 +26,8 @@ void qaul_defineConfigurationMethod(void)
 int qaul_findWifiInterface(qaul_network_settings* settings)
 {
 	int success;
+
+	printf("qaul_findWifiInterface\n" );
 
 	if(settings->method == NETWORK_MANAGER)
 		success = qaul_findWifiInterface_nm(settings);
@@ -37,6 +41,8 @@ int qaul_findNetworkInterface(const char* interface_name)
 {
 	int success;
 
+	printf("qaul_findNetworkInterface\n" );
+
 	if(network_settings.method == NETWORK_MANAGER)
 		success = qaul_findNetworkInterface_nm(interface_name);
 	else
@@ -49,6 +55,8 @@ int qaul_getInterfacesJson(char* json_txt)
 {
 	int success;
 
+	printf("qaul_getInterfacesJson\n" );
+
 	if(network_settings.method == NETWORK_MANAGER)
 		success = qaul_getInterfacesJson_nm(json_txt);
 	else
@@ -59,6 +67,8 @@ int qaul_getInterfacesJson(char* json_txt)
 
 void qaul_networkStart(void)
 {
+	printf("qaul_networkStart\n" );
+
 	if(network_settings.method == NETWORK_MANAGER)
 		qaul_networkStart_nm();
 	else
@@ -67,6 +77,8 @@ void qaul_networkStart(void)
 
 void qaul_networkStop(void)
 {
+	printf("qaul_networkStop\n" );
+
 	if(network_settings.method == NETWORK_MANAGER)
 		qaul_networkStop_nm();
 	else
@@ -76,11 +88,16 @@ void qaul_networkStop(void)
 void qaul_olsrdStart(void)
 {
 	char command[255];
+
+	printf("qaul_olsrdStart\n");
+
 	if(Qaullib_IsGateway())
 		sprintf(command, "%s/lib/qaul/bin/qaulhelper startolsrd yes %s", QAUL_ROOT_PATH, network_settings.interface_name);
 	else
 		sprintf(command, "%s/lib/qaul/bin/qaulhelper startolsrd no %s", QAUL_ROOT_PATH, network_settings.interface_name);
 	system(command);
+
+	printf("command: %s\n", command);
 }
 
 void qaul_olsrdStop(void)
