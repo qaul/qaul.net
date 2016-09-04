@@ -39,6 +39,7 @@ tested on in the [documentation folder](doc). Feel free to add new ports!
 * OSX [doc/OSX.md](doc/OSX.md)
 * Windows [doc/Windows.md](doc/Windows.md)
 * Raspberry Pi
+  * Raspbian [doc/Raspberry_Raspbian.md](doc/Raspberry_Raspbian.md)
   * Ubuntu Mate [doc/Raspberry_UbuntuMate.md](doc/Raspberry_UbuntuMate.md)
 
 
