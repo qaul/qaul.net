@@ -23,7 +23,6 @@
 #include "qaul_configure.h"
 #include "configure.h"
 #include "networkmanager_configuration.h"
-#include "main.h"
 
 
 #define MAX_PATH_LEN   PATH_MAX

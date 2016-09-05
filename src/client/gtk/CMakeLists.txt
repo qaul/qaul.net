@@ -11,9 +11,14 @@ add_executable (qaul-gtk
 	networkmanager_configuration.c
 )
 
-target_include_directories(qaul-gtk PRIVATE ${DBUS1_INCLUDE_DIRS} ${WEBKIT_INCLUDE_DIRS})
+target_include_directories(qaul-gtk PRIVATE
+	${DBUS1_INCLUDE_DIRS}
+	${WEBKIT_INCLUDE_DIRS}
+)
 
-target_link_libraries(qaul-gtk ${DBUS1_LIBRARIES} ${WEBKIT_LIBRARIES}
+target_link_libraries(qaul-gtk
+	${DBUS1_LIBRARIES}
+	${WEBKIT_LIBRARIES}
     pthread
     libqaul
 )
