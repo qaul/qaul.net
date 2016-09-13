@@ -80,7 +80,7 @@ int qaul_configure(void)
         	strncpy(network_settings.ipv4_dns2, "185.82.22.133", sizeof(network_settings.ipv4_dns2));
         	network_settings.wifi_channel = Qaullib_GetConfInt("wifi.channel");
         	Qaullib_GetConfString("wifi.ssid", network_settings.wifi_ssid);
-
+		
         	// start network
         	qaul_networkStart();
         }

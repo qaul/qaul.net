@@ -160,18 +160,19 @@ int qaul_findWifiInterface_cli(qaul_network_settings* network)
 		printf("%s", line);
 
 		// find: \t\tInterface wlan0
-		if(strncmp(line, "\t\t", 2) == 0)
+		if(strncmp(line, "\t", 1) == 0)
 		{
-			if(strncmp(&line[2], "\t", 1) != 0)
+			if(strncmp(&line[1], "\t", 1) != 0)
 			{
 				// find last
-				for(last_space = strlen(line)-1; last_space < 1; last_space--)
+				for(last_space = strlen(line)-1; last_space > 1; last_space--)
 				{
 					if(strncmp(&line[last_space], " ", 1) == 0)
 					{
 						// save interface name
 						last_space++;
-						strncpy(network->interface_name, &line[last_space], strlen(line)-last_space+1);
+						strncpy(network->interface_name, &line[last_space], strlen(line)-last_space-1);
+						strncpy(&network->interface_name[strlen(line)-last_space-1], "\0", 1);
 						success = 1;
 						break;
 					}
@@ -342,7 +343,7 @@ int qaul_getInterfacesJson_cli(char* json_txt)
 void qaul_networkStart_cli(void)
 {
 	char command[255];
-
+	
 	printf("qaul_networkStart_cli\n");
 
 	// configure wifi
@@ -350,7 +351,7 @@ void qaul_networkStart_cli(void)
 	// qaulhelper configurewifi wlan0 qaul.net 11 02:11:87:88:D6:FF
 	if(qaul_interfaceIsWifi_cli(network_settings.interface_name))
 	{
-		sprintf(command, "%s/lib/qaul/bin/qaulhelper configurewifi %s %s %i", QAUL_ROOT_PATH, network_settings.interface_name, network_settings.wifi_channel, network_settings.wifi_ssid);
+		sprintf(command, "%s/lib/qaul/bin/qaulhelper configurewifi %s %s %i", QAUL_ROOT_PATH, network_settings.interface_name, network_settings.wifi_ssid, network_settings.wifi_channel);
 		system(command);
 	}
 
