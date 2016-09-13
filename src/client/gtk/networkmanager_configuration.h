@@ -73,7 +73,7 @@ int qaul_dbus_init(DBusConnection** dbus_connection);
  * @retval 1 network manager is active
  * @retval 0 network manager is not usable
  */
-int qaul_dbus_test_networkmanager(void);
+int qaul_dbus_test_networkmanager(DBusConnection* dbus_connection);
 
 /**
  * add connection settings to network manager

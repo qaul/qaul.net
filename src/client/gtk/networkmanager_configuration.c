@@ -174,8 +174,15 @@ int qaul_dbus_init(DBusConnection** dbus_connection)
 
 	dbus_error_init(&error);
 	*dbus_connection = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
-
-	if (dbus_error_is_set(&error))
+	
+	// check if dbus_connection has been set
+	if(*dbus_connection == NULL)
+	{
+		printf("qaul_dbus_init: no dbus connection\n");
+		return 0;
+	}
+	
+	if(dbus_error_is_set(&error))
 	{
 		printf("qaul_dbus_init error: %s\n", error.message);
 		dbus_error_free(&error);
@@ -522,14 +529,33 @@ static int networkmanager_device_properties(DBusConnection* dbus_connection, qau
 }
 
 
-int qaul_dbus_test_networkmanager(void)
+int qaul_dbus_test_networkmanager(DBusConnection* dbus_connection)
 {
 	DBusMessage* msg;
+	DBusMessageIter iter, iter_array;
 
 	// check if network manager is present
 	msg = networkmanager_dbus_method_call("GetDevices");
 	if(msg == NULL)
+	{
+		printf("qaul_dbus_test_networkmanager networkmanager_dbus_method_call error\n");
 		return 0;
+	}
+
+	dbus_message_iter_init_append(msg, &iter);
+	if(!networkmanager_dbus_send(&msg, dbus_connection))
+	{
+		printf("qaul_dbus_test_networkmanager networkmanager_dbus_send error\n");
+		return 0;
+	}
+	if(!dbus_message_iter_init(msg, &iter)
+		|| dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_ARRAY)
+	{
+		printf("qaul_dbus_test_networkmanager dbus_message_iter_init | DBUS_TYPE_ARRAY error\n");
+		dbus_message_unref(msg);
+		return 0;
+	}
+
 
 	return 1;
 }

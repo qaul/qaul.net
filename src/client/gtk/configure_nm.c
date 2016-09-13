@@ -24,7 +24,7 @@ int qaul_initNetworkManager(void)
 		return 0;
 
 	// check if network manager is present
-	if(qaul_dbus_test_networkmanager() == 0)
+	if(qaul_dbus_test_networkmanager(network_dbus_connection) == 0)
 		return 0;
 
 	return 1;
