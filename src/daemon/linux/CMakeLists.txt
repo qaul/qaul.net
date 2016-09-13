@@ -1,11 +1,11 @@
 
 add_executable (qauld
 	main.c
-	qaul_configure.c
-	configure.c
-	configure_nm.c
-	configure_cli.c
-	networkmanager_configuration.c
+	../../client/gtk/qaul_configure.c
+	../../client/gtk/configure.c
+	../../client/gtk/configure_nm.c
+	../../client/gtk/configure_cli.c
+	../../client/gtk/networkmanager_configuration.c
 )
 
 target_include_directories(qauld PRIVATE 

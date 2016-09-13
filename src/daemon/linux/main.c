@@ -10,7 +10,7 @@
 
 #include "qaullib.h"
 #include <QaulConfig.h>
-#include "qaul_configure.h"
+#include "../../client/gtk/qaul_configure.h"
 
 // ------------------------------------------------------------
 int main(int argc, char *argv[])

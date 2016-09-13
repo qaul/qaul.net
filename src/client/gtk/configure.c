@@ -18,9 +18,15 @@ void qaul_defineConfigurationMethod(void)
 
 	// check if network manager is running
 	if(qaul_initNetworkManager())
+	{
+		printf("qaul_defineConfigurationMethod == NETWORK_MANAGER\n" );
 		network_settings.method = NETWORK_MANAGER;
+	}
 	else
+	{
+		printf("qaul_defineConfigurationMethod == CLI\n" );
 		network_settings.method = CLI;
+	}
 }
 
 int qaul_findWifiInterface(qaul_network_settings* settings)
