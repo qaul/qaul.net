@@ -370,6 +370,8 @@ void qaul_networkStart_cli(void)
 
 void qaul_networkStop_cli(void)
 {
+	char command[255];
+
 	// set Interface to DHCP ?
 	
 	// remove DNS
