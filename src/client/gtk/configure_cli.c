@@ -22,14 +22,15 @@
 static int qaul_interfaceIsWifi_cli(const char* interface_name)
 {
 	FILE *fp;
-	char line[1024];
+	char line[1024], command[255];
 	int success, lines;
 
 	success = 0;
 	lines = 0;
 
 	// Open the command for reading
-	fp = popen("/sbin/iw dev", "r");
+	sprintf(command, "/sbin/iw %s info", interface_name);
+	fp = popen(command, "r");
 	if (fp == NULL)
 	{
 		printf("Failed to run command\n" );
@@ -244,20 +245,25 @@ static int qaul_extractNetworkInterface_cli(const char* line, char* interface_na
 		start = 3;
 	else if(strncmp(&line[2], ": ", 2) == 0)
 		start = 4;
-
+	
 	if(start > 0)
 	{
 		// find last
 		for(len = 0; start + len < strlen(line); len++)
 		{
-			if(strncmp(&line[start +len], ":", 1) != NULL)
+			if(strncmp(&line[start +len], ":", 1)==0)
+			{
 				break;
+			}
 		}
-
+		
 		if(len > 0 && len < IFNAMSIZ)
 		{
-			strncpy(interface_name, &line[start], len-1);
+			strncpy(interface_name, &line[start], len);
+			strncpy(&interface_name[len], "\0", len);
 			success = 1;
+			
+			printf("interface_name: %s\n", interface_name);
 		}
 	}
 
@@ -267,28 +273,27 @@ static int qaul_extractNetworkInterface_cli(const char* line, char* interface_na
 int qaul_getInterfacesJson_cli(char* json_txt)
 {
 	FILE *fp;
-	char line[1024], command[256], interface_name[IFNAMSIZ];
+	char line[1024], interface_name[IFNAMSIZ];
 	int success, type, json_pos, i;
 
 	success = 0;
 	i = 0;
-
-	// create command = 0
-	snprintf(command, sizeof(command)-1, "/bin/ip link show %s", interface_name);
-
+	
+	printf("qaul_getInterfacesJson_cli\n");
+	
 	// Open the command for reading
-	fp = popen(command, "r");
+	fp = popen("/bin/ip link show", "r");
 	if (fp == NULL)
 	{
-		printf("command failed: %s\n", command);
+		printf("command failed: /bin/ip link show\n");
 		return success;
 	}
 
 	// process output one line at a time
 	while (fgets(line, sizeof(line)-1, fp) != NULL)
 	{
-		printf("%s", line);
-
+		success = 1;
+		
 		if(qaul_extractNetworkInterface_cli(line, interface_name))
 		{
 			// check the interface type
