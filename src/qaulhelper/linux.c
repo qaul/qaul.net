@@ -409,7 +409,6 @@ int configure_wifi (int argc, const char * argv[])
 {
     pid_t pid1, pid2, pid3, pid4, pid5, pid6;
     int status;
-    char s[256];
     printf("create or join ibss\n");
 
     if(argc >= 5)
@@ -481,8 +480,7 @@ int configure_wifi (int argc, const char * argv[])
             printf("fork for pid4 failed\n");
         else if(pid4 == 0)
         {
-            sprintf(s, "'%s'", argv[3]);
-            execl("/sbin/iwconfig", "iwconfig", argv[2], "essid", s, (char*)0);
+            execl("/sbin/iwconfig", "iwconfig", argv[2], "essid", argv[3], (char*)0);
         }
         else
             waitpid(pid4, &status, 0);
