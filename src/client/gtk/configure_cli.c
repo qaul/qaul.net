@@ -371,4 +371,8 @@ void qaul_networkStart_cli(void)
 void qaul_networkStop_cli(void)
 {
 	// set Interface to DHCP ?
+	
+	// remove DNS
+	sprintf(command, "%s/lib/qaul/bin/qaulhelper removedns %s", QAUL_ROOT_PATH, network_settings.interface_name);
+	system(command);	
 }

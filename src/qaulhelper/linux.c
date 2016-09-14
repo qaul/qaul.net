@@ -433,6 +433,8 @@ int configure_wifi (int argc, const char * argv[])
 
         // become root
         setuid(0);
+        
+        printf("arv %s %s %s\n", argv[2], argv[3], argv[4]);
 
         // take wifi interface down
         pid1 = fork();
@@ -453,7 +455,7 @@ int configure_wifi (int argc, const char * argv[])
             printf("fork for pid2 failed\n");
         else if(pid2 == 0)
         {
-            execl("/sbin/iwconfig", argv[2], "mode", "ad-hoc", (char*)0);
+            execl("/sbin/iwconfig", "iwconfig", argv[2], "mode", "ad-hoc", (char*)0);
         }
         else
             waitpid(pid2, &status, 0);
@@ -466,7 +468,7 @@ int configure_wifi (int argc, const char * argv[])
             printf("fork for pid3 failed\n");
         else if(pid3 == 0)
         {
-            execl("/sbin/iwconfig", argv[2], "channel", argv[4], (char*)0);
+            execl("/sbin/iwconfig", "iwconfig", argv[2], "channel", argv[4], (char*)0);
         }
         else
             waitpid(pid3, &status, 0);
@@ -480,7 +482,7 @@ int configure_wifi (int argc, const char * argv[])
         else if(pid4 == 0)
         {
             sprintf(s, "'%s'", argv[3]);
-            execl("/sbin/iwconfig", argv[2], "essid", s, (char*)0);
+            execl("/sbin/iwconfig", "iwconfig", argv[2], "essid", s, (char*)0);
         }
         else
             waitpid(pid4, &status, 0);
@@ -503,7 +505,7 @@ int configure_wifi (int argc, const char * argv[])
 				printf("fork for pid5 failed\n");
 			else if(pid5 == 0)
 			{
-				execl("/sbin/iwconfig", argv[2], "ap", argv[5], (char*)0);
+				execl("/sbin/iwconfig", "iwconfig", argv[2], "ap", argv[5], (char*)0);
 			}
 			else
 				waitpid(pid5, &status, 0);
@@ -586,47 +588,50 @@ int set_ip (int argc, const char * argv[])
 
 int set_dns (int argc, const char * argv[])
 {
-    pid_t pid1, pid2, pid3;
+    pid_t pid1;
     int status;
     printf("set DNS\n");
 
 	// set root rights
 	setuid(0);
 
-	// remove tail
+	// set dns via resolvconf
 	pid1 = fork();
 	if (pid1 < 0)
 		printf("fork for pid1 failed\n");
 	else if(pid1 == 0)
 	{
-		execl("/bin/rm", "rm", "/etc/resolvconf/resolv.conf.d/tail", (char*)0);
+		execl("/sbin/resolvconf", "resolvconf", "-a", argv[2], "<", QAUL_ROOT_PATH"/lib/qaul/etc/tail", (char*)0);
 	}
 	else
 		waitpid(pid1, &status, 0);
 
-	// set dns
-	pid2 = fork();
-	if (pid2 < 0)
-		printf("fork for pid2 failed\n");
-	else if(pid2 == 0)
-	{
-		execl("/bin/cp", "/opt/qaul/etc/tail", "/etc/resolvconf/resolv.conf.d/tail", (char*)0);
-	}
-	else
-		waitpid(pid2, &status, 0);
-
-	// reload resolv file
-	pid3 = fork();
-	if (pid3 < 0)
-		printf("fork for pid3 failed\n");
-	else if(pid3 == 0)
-	{
-		execl("/sbin/resolvconf", "resolvconf", "-u", (char*)0);
-	}
-	else
-		waitpid(pid3, &status, 0);
-
 	printf("DNS set\n");
+
+    return 0;
+}
+
+int remove_dns (int argc, const char * argv[])
+{
+    pid_t pid1;
+    int status;
+    printf("remove DNS\n");
+
+	// set root rights
+	setuid(0);
+
+	// set dns via resolvconf
+	pid1 = fork();
+	if (pid1 < 0)
+		printf("fork for pid1 failed\n");
+	else if(pid1 == 0)
+	{
+		execl("/sbin/resolvconf", "resolvconf", "-d", argv[2], (char*)0);
+	}
+	else
+		waitpid(pid1, &status, 0);
+
+	printf("DNS removed\n");
 
     return 0;
 }

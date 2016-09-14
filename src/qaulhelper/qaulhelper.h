@@ -90,6 +90,17 @@ int set_ip (int argc, const char * argv[]);
  */
 int set_dns (int argc, const char * argv[]);
 
+
+#ifdef QAUL_PORT_LINUX
+
+/**
+ * remove dns servers
+ */
+int remove_dns (int argc, const char * argv[]);
+
+#endif // QAUL_PORT_LINUX
+
+
 /**
  * start gateway
  *

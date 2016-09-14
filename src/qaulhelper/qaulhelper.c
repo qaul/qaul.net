@@ -93,6 +93,12 @@ int main (int argc, const char * argv[])
         {
             set_dns(argc, argv);
         }
+#ifdef QAUL_PORT_LINUX
+        else if(strncmp(argv[1], "removedns", 6) == 0)
+        {
+            set_dns(argc, argv);
+        }
+#endif // QAUL_PORT_LINUX
         else
         {
             printf("unknown command '%s'\n", argv[1]);
@@ -136,6 +142,10 @@ int main (int argc, const char * argv[])
         printf("  qaulhelper setip %s 10.213.28.55 8 10.255.255.255\n", Help_InterfaceWifi);
         printf("  qaulhelper setdns <INTERFACE>\n");
         printf("  qaulhelper setdns %s\n", Help_InterfaceWifi);
+#ifdef QAUL_PORT_LINUX
+        printf("  qaulhelper removedns <INTERFACE>\n");
+        printf("  qaulhelper removedns %s\n", Help_InterfaceWifi);
+#endif // QAUL_PORT_LINUX
 #ifdef QAUL_PORT_OSX
         printf("  qaulhelper enablewifi <OSXVERSION> <INTERFACE>\n");
         printf("  qaulhelper enablewifi 1038 %s\n", Help_InterfaceWifi);
