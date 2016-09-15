@@ -279,6 +279,9 @@ int qaul_getInterfacesJson_cli(char* json_txt)
 	success = 0;
 	i = 0;
 	
+	// reset json interfaces list
+	strncpy(json_txt, "\0", 1);
+	
 	printf("qaul_getInterfacesJson_cli\n");
 	
 	// Open the command for reading
