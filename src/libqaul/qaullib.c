@@ -360,6 +360,9 @@ int Qaullib_WebserverStart(void)
 	mg_register_http_endpoint(conn, "/web_getfiles", 		Ql_WwwWebGetFiles);
 	mg_register_http_endpoint(conn, "/web_file_upload", 	Ql_WwwWebFileUpload);
 	mg_register_http_endpoint(conn, "/ext_binaries.json", 	Ql_WwwExtBinaries);
+	// OSX captive portal check
+	// if it doesn't find this page, OSX wont be able to download the installers from the captive portal
+	mg_register_http_endpoint(conn, "/hotspot-detect.html", Ql_WwwOsxCaptivePortalDetection);
 
 
 	mg_start_thread(Ql_Www_Server, &ql_webserver_instance);

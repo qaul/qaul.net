@@ -2671,3 +2671,18 @@ void Ql_WwwExtBinaries(struct mg_connection *conn, int event, void *event_data)
 
 	conn->flags |= MG_F_SEND_AND_CLOSE;
 }
+
+// ------------------------------------------------------------
+void Ql_WwwOsxCaptivePortalDetection(struct mg_connection *conn, int event, void *event_data)
+{
+	printf("Ql_WwwOsxCaptivePortalDetection\n");
+
+	// send header
+	mg_printf(conn, "HTTP/1.1 200 OK\r\n"
+	             	"Content-Type: text/html\r\n"
+					"\r\n");
+
+	mg_printf(conn, "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>");
+
+	conn->flags |= MG_F_SEND_AND_CLOSE;
+}
