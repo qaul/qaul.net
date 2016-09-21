@@ -112,7 +112,7 @@ int Qaullib_FileCopyToDownloadFolder(struct qaul_file_LL_item *file);
  * @retval 1 success
  * @retval 0 error
  */
-int Qaullib_FileGetSuffix(char *filename, char *suffix);
+int Qaullib_FileGetSuffix(const char *filename, char *suffix);
 
 /**
  * check if any file needs to be downloaded

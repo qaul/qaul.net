@@ -11,6 +11,7 @@
 #include "mbedtls/sha1.h"
 #include "qaullib_crypto.h"
 #include <sys/stat.h>
+#include <dirent.h>
 
 /**
  * creates the hash of the file in @a filename and writes it into @a hashstr
@@ -1054,7 +1055,7 @@ int Qaullib_FileCopy(const char* origin, const char* destiny)
 }
 
 // ------------------------------------------------------------
-int Qaullib_FileGetSuffix(char *filename, char *suffix)
+int Qaullib_FileGetSuffix(const char *filename, char *suffix)
 {
 	if(QAUL_DEBUG)
 		printf("Qaullib_FileGetSuffix\n");
