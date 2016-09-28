@@ -59,8 +59,8 @@ Nightly Copy Windows:
     - PATH="/mingw32/bin:$PATH"; declare -x MSYSTEM="MINGW32"; declare -x MSYSCON="mintty.exe"
     - mkdir build; cd build; cmake .. -G "MSYS Makefiles" -DGUI=NATIVE; make
     - cd src/client/win; mkdir build; cd build; cmake ..
-    - cmake --build . --target qaul --config Release
-    - cpack -C Release
+    - cmake --build . --target qaul --config Debug
+    - cpack -C Debug
     - cp *.exe //VBOXSVR/artifacts/nightly/
   only:
     - qaul-ng
