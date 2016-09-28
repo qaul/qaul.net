@@ -141,7 +141,11 @@ void Qaullib_Exit(void) //destructor
 	{
 		// send exit message to olsrd
 		Qaullib_IpcSendCom(0);
+#ifdef WIN32
+		Sleep(200);
+#else
 		usleep(200000);
+#endif // WIN32
 		printf("Qaullib exit message sent\n");
 		Qaullib_IpcClose();
 	}
