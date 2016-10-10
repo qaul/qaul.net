@@ -5,6 +5,7 @@ endif ()
 
 add_executable (qauld
 	main.c
+	cli_options.c
 	../../client/gtk/qaul_configure.c
 	../../client/gtk/configure.c
 	../../client/gtk/configure_nm.c
