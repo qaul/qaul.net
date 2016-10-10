@@ -537,7 +537,7 @@ void Ql_WwwConfigNetworkSet(struct mg_connection *conn, int event, void *event_d
 	Qaullib_DbSetConfigValue("net.broadcast", value_dbprotected);
 
 /*
-	// TODO: allow manual gatway definition
+	// TODO: allow manual gateway definition
 	//       this could be done as a special option with the
 	//       possibility to also select between available
 	//       dynamic gateways.
