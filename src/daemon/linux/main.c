@@ -6,11 +6,13 @@
 #include <stdio.h> // defines FILENAME_MAX
 #include <stdlib.h>
 #include <unistd.h>
+#include <getopt.h>
 #define GetCurrentDir getcwd
 
 #include "qaullib.h"
 #include <QaulConfig.h>
 #include "../../client/gtk/qaul_configure.h"
+#include "cli_options.h"
 
 // ------------------------------------------------------------
 int main(int argc, char *argv[])
@@ -29,6 +31,9 @@ int main(int argc, char *argv[])
         snprintf(prefix, FILENAME_MAX, "%s/lib/qaul", QAUL_ROOT_PATH);
 
 	Qaullib_Init(cCurrentPath, prefix);
+
+	// parse cli options
+	qaul_cli_options(argc, argv);
 
 	// set configuration
 	Qaullib_SetConf(QAUL_CONF_INTERFACE);
