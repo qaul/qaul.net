@@ -3,10 +3,10 @@ set (ARCHIVE_DIR ${PROJECT_SOURCE_DIR}/archives)
 
 set (PJSIP_CONFIGURE_OPTIONS "--disable-opus")
 
-set (PJSIP_VERSION "2.5")
+set (PJSIP_VERSION "2.5.5")
 set (PJSIP_FILENAME "pjproject-${PJSIP_VERSION}.tar.bz2")
 set (PJSIP_URL "http://www.pjsip.org/release/${PJSIP_VERSION}/${PJSIP_FILENAME}")
-set (PJSIP_MD5 "76bdc2df2bcb0c9e25da96bd496524bc")
+set (PJSIP_MD5 "183f7144b9aa238884243c0fc52ece36")
 
 set (OLSR_VERSION "0.6.8.1")
 set (OLSR_FILENAME "olsrd-${OLSR_VERSION}.tar.bz2")
