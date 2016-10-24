@@ -91,3 +91,21 @@ Eclipse
 - Import Existing Project
 - Do **NOT** copy files.
 
+
+Testing
+-------
+
+Start qaul.net app from CLI
+
+	# login to your android device
+	adb shell
+	# become super user
+	su
+	# start bash
+	bash
+	# install location of the app is: /data/data/net.qaul.qaul
+	cd /data/data/net.qaul.qaul
+	
+	# start the qaul app
+	am start -n net.qaul.qaul/net.qaul.qaul.QaulActivity
+
