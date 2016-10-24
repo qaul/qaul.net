@@ -782,25 +782,35 @@ public class QaulApplication extends Application {
 		try{
 			boolean status = false;
 			
+			Log.i(MSG_TAG, "startWifiConfigCyanogen create new configuration");
+			
 			/* We use WifiConfigurationNew which provides a way to access
 			 * the Ad-hoc mode and static IP configuration options which are
 			 * not part of the standard API yet */
 			WifiConfigurationNew wifiConfig = new WifiConfigurationNew();
 	
+			Log.i(MSG_TAG, "startWifiConfigCyanogen set SSID");
+			
 			/* Set the SSID and security as normal */
 			wifiConfig.SSID = "\"qaul.net\"";
 			wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
-	
+			
+			Log.i(MSG_TAG, "startWifiConfigCyanogen set IBSS");
+			
 			/* Use reflection until API is official */
 			wifiConfig.setIsIBSS(true);
 			wifiConfig.setFrequency(2462);
 	
+			Log.i(MSG_TAG, "startWifiConfigCyanogen set address");
+			
 			/* Use reflection to configure static IP addresses */
 			wifiConfig.setIpAssignment("STATIC");
 			wifiConfig.setIpAddress(InetAddress.getByName("10.0.0.2"), 24);
 			wifiConfig.setGateway(InetAddress.getByName("10.0.0.1"));
 			wifiConfig.setDNS(InetAddress.getByName("8.8.8.8"));
 	
+			Log.i(MSG_TAG, "startWifiConfigCyanogen save network");
+			
 			/* Add, enable and save network as normal */
 			int id = mWifiManager.addNetwork(wifiConfig);
 			if (id < 0)
