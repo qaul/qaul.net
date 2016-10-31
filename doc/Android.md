@@ -83,6 +83,9 @@ You will find the newly built apk in `android/bin`.
     # install your app from the command line
     # make sure your phone is connected and debugging mode is activated
     adb install android/bin/QaulActivity-debug.apk
+    
+    # uninstall app from your phone
+    adb uninstall net.qaul.qaul
 
 
 Eclipse
