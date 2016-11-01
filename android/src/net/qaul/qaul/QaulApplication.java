@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Vibrator;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.tether.system.Configuration;
 import android.tether.system.CoreTask;
@@ -312,8 +313,16 @@ public class QaulApplication extends Application {
 	        Log.i(MSG_TAG, "qaulConfigure 40");
 			// start olsr
 	        Log.d(MSG_TAG, "start olsrd on interface " +this.tethercfg.get("wifi.interface"));
-	        if (this.coretask.runRootCommand(this.coretask.DATA_FILE_PATH+"/bin/olsrd_start.sh "+this.tethercfg.get("wifi.interface")));
+	        if (this.coretask.runRootCommand(this.coretask.DATA_FILE_PATH+"/bin/olsrd_start.sh "+this.tethercfg.get("wifi.interface")))
+	        {
+	        	Log.i(MSG_TAG, "qaulConfigure 40 done");
 	        	qaulStarted = 49;
+	        }
+	        else
+	        {
+	        	Log.i(MSG_TAG, "qaulConfigure 40 error!");
+	        	qaulStarted = 49;
+	        }
 		}
 		
 		// wait for olsrd to start
@@ -792,23 +801,45 @@ public class QaulApplication extends Application {
 			Log.i(MSG_TAG, "startWifiConfigCyanogen set SSID");
 			
 			/* Set the SSID and security as normal */
-			wifiConfig.SSID = "\"qaul.net\"";
+			wifiConfig.SSID = nativeQaul.getWifiIbss();
 			wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
 			
 			Log.i(MSG_TAG, "startWifiConfigCyanogen set IBSS");
 			
 			/* Use reflection until API is official */
 			wifiConfig.setIsIBSS(true);
-			wifiConfig.setFrequency(2462);
+			wifiConfig.setFrequency(this.wifiChannel2Frequency(nativeQaul.getWifiChannel()));
 	
 			Log.i(MSG_TAG, "startWifiConfigCyanogen set address");
 			
 			/* Use reflection to configure static IP addresses */
-			wifiConfig.setIpAssignment("STATIC");
-			wifiConfig.setIpAddress(InetAddress.getByName("10.0.0.2"), 24);
-			wifiConfig.setGateway(InetAddress.getByName("10.0.0.1"));
-			wifiConfig.setDNS(InetAddress.getByName("8.8.8.8"));
-	
+	    	if (Build.VERSION.SDK_INT >= 21)
+	        {
+	    		Log.i(MSG_TAG, "startWifiConfigCyanogen ipconfig >= Lollipop");
+	    		
+	    		try
+				{                
+					wifiConfig.setStaticIpLollipop(
+							InetAddress.getByName(nativeQaul.getIP()), nativeQaul.getNetMask(),	// IP & Netmask
+							InetAddress.getByName(nativeQaul.getNetGateway()),					// Gateway
+			                new InetAddress[] { InetAddress.getByName("5.45.96.220"), InetAddress.getByName("185.82.22.133") } // DNS IP's
+							);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+	        }
+	    	else
+	    	{
+	    		Log.i(MSG_TAG, "startWifiConfigCyanogen ipconfig < Lollipop");
+	    		
+	    		wifiConfig.setIpAssignment("STATIC");
+				wifiConfig.setIpAddress(InetAddress.getByName(nativeQaul.getIP()), nativeQaul.getNetMask());
+				wifiConfig.setGateway(InetAddress.getByName(nativeQaul.getNetGateway()));
+				wifiConfig.setDNS(InetAddress.getByName("5.45.96.220"));
+	    	}
+	    	
 			Log.i(MSG_TAG, "startWifiConfigCyanogen save network");
 			
 			/* Add, enable and save network as normal */
@@ -1184,8 +1215,8 @@ public class QaulApplication extends Application {
         return version;
     }
 
-    /*
-     * This method checks if changing the transmit-power is supported
+    /**
+     * Check if changing the transmit-power is supported
      */
     public boolean isTransmitPowerSupported() {
     	// Only supported for the nexusone 
@@ -1193,5 +1224,226 @@ public class QaulApplication extends Application {
     		return true;
     	}
     	return false;
-    }    
+    }
+    
+    /**
+     * Convert Wifi channel number to frequency
+     */
+    public int wifiChannel2Frequency(int channel)
+    {
+    	int freq;
+    	
+    	switch (channel)
+    	{
+    		case 1: 
+    			freq = 2412;
+    			break;
+    		case 2: 
+    			freq = 2417;
+    			break;
+    		case 3: 
+    			freq = 2422;
+    			break;
+    		case 4: 
+    			freq = 2427;
+    			break;
+    		case 5: 
+    			freq = 2432;
+    			break;
+    		case 6: 
+    			freq = 2437;
+    			break;
+    		case 7: 
+    			freq = 2442;
+    			break;
+    		case 8: 
+    			freq = 2447;
+    			break;
+    		case 9: 
+    			freq = 2452;
+    			break;
+    		case 10: 
+    			freq = 2457;
+    			break;
+    		case 11: 
+    			freq = 2462;
+    			break;
+    		case 12: 
+    			freq = 2467;
+    			break;
+    		case 13: 
+    			freq = 2472;
+    			break;
+    		case 14: 
+    			freq = 2484;
+    			break;
+    		case 34:
+    			freq = 5170;
+    			break;
+    		case 36: 
+    			freq = 5180;
+    			break;
+    		case 38: 
+    			freq = 5190;
+    			break;
+    		case 40: 
+    			freq = 5200;
+    			break;
+    		case 42: 
+    			freq = 5210;
+    			break;
+    		case 44: 
+    			freq = 5220;
+    			break;
+    		case 46: 
+    			freq = 5230;
+    			break;
+    		case 48: 
+    			freq = 5240;
+    			break;
+    		case 50: 
+    			freq = 5250;
+    			break;
+    		case 52: 
+    			freq = 5260;
+    			break;
+    		case 54: 
+    			freq = 5270;
+    			break;
+    		case 56: 
+    			freq = 5280;
+    			break;
+    		case 68: 
+    			freq = 5290;
+    			break;
+    		case 60: 
+    			freq = 5300;
+    			break;
+    		case 62: 
+    			freq = 5310;
+    			break;
+    		case 64: 
+    			freq = 5320;
+    			break;
+    		case 100: 
+    			freq = 5500;
+    			break;
+    		case 102: 
+    			freq = 5510;
+    			break;
+    		case 104: 
+    			freq = 5520;
+    			break;
+    		case 106: 
+    			freq = 5530;
+    			break;
+    		case 108: 
+    			freq = 5540;
+    			break;
+    		case 110: 
+    			freq = 5550;
+    			break;
+    		case 112: 
+    			freq = 5560;
+    			break;
+    		case 114: 
+    			freq = 5570;
+    			break;
+    		case 116: 
+    			freq = 5580;
+    			break;
+    		case 118: 
+    			freq = 5590;
+    			break;
+    		case 120: 
+    			freq = 5600;
+    			break;
+    		case 122: 
+    			freq = 5610;
+    			break;
+    		case 124: 
+    			freq = 5620;
+    			break;
+    		case 126: 
+    			freq = 5630;
+    			break;
+    		case 128: 
+    			freq = 5640;
+    			break;
+    		case 132: 
+    			freq = 5660;
+    			break;
+    		case 134: 
+    			freq = 5670;
+    			break;
+    		case 136: 
+    			freq = 5680;
+    			break;
+    		case 138: 
+    			freq = 5690;
+    			break;
+    		case 140: 
+    			freq = 5700;
+    			break;
+    		case 142: 
+    			freq = 5710;
+    			break;
+    		case 144: 
+    			freq = 5720;
+    			break;
+    		case 149: 
+    			freq = 5745;
+    			break;
+    		case 151: 
+    			freq = 5755;
+    			break;
+    		case 153: 
+    			freq = 5765;
+    			break;
+    		case 155: 
+    			freq = 5775;
+    			break;
+    		case 157: 
+    			freq = 5785;
+    			break;
+    		case 159: 
+    			freq = 5795;
+    			break;
+    		case 161: 
+    			freq = 5805;
+    			break;
+    		case 165: 
+    			freq = 5825;
+    			break;
+    		case 183: 
+    			freq = 4915;
+    			break;
+    		case 184: 
+    			freq = 4920;
+    			break;
+    		case 185: 
+    			freq = 4925;
+    			break;
+    		case 187: 
+    			freq = 4935;
+    			break;
+    		case 188: 
+    			freq = 4940;
+    			break;
+    		case 189: 
+    			freq = 4945;
+    			break;
+    		case 192: 
+    			freq = 4960;
+    			break;
+    		case 196: 
+    			freq = 4980;
+    			break;
+    		default:
+    			freq = 2462;
+    			break;
+    	}
+    	
+    	return freq;
+    }
 }
