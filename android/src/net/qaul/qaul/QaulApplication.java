@@ -801,7 +801,7 @@ public class QaulApplication extends Application {
 			Log.i(MSG_TAG, "startWifiConfigCyanogen set SSID");
 			
 			/* Set the SSID and security as normal */
-			wifiConfig.SSID = nativeQaul.getWifiIbss();
+			wifiConfig.SSID = "\"" +nativeQaul.getWifiIbss() +"\"";
 			wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
 			
 			Log.i(MSG_TAG, "startWifiConfigCyanogen set IBSS");
