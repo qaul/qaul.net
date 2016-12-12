@@ -1,12 +1,14 @@
 LOCAL_PATH := $(call my-dir)
 
-PJSIP_PATH ?= $(LOCAL_PATH)
-EXTRALIB_PATH ?= $(SYSROOT)/usr/lib/
+PJSIP_PATH ?= $(LOCAL_PATH)/../../../../../third_party/pjsip/src/pjsip
+EXTRALIB_PATH ?= $(LOCAL_PATH)/../../../../../android_extra_lib
 
 JNI_PATH := $(LOCAL_PATH)
 
-LIBQAUL_SRC ?= $(../../libqaul)
+LIBQAUL_SRC ?= $(LOCAL_PATH)/../../../../../src/libqaul
 LIBQAUL_INCLUDE ?= ""
+
+QAULCONFIG_INCLUDE ?= $(LOCAL_PATH)/../../../../../include
 
 # wificonfig
 # test from MeshApp, wlan_slovenia
