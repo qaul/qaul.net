@@ -16,7 +16,12 @@ build/
 android/.gradle
 android/build
 android/local.properties
-android/proguard-project.txt
+android/app/.externalNativeBuild/
+android/app/src/main/local.properties
+android/app/src/main/build.xml
+android/app/src/main/bin
+android/app/src/main/gen
+android/app/src/main/obj
 android/app/src/main/jniLibs
 android/app/src/main/res/raw/ifconfig
 android/app/src/main/res/raw/iptables
