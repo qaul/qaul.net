@@ -13,8 +13,8 @@ if(NOT NDK_LEVEL)
 endif()
 
 if(NOT ANDROID_EABI)
-    message(STATUS "Use default Android EABI version 4.6 (-DANDROID_EABI=\"4.6\").")
-    set(ANDROID_EABI "4.6")
+    message(STATUS "Use default Android EABI version 4.9 (-DANDROID_EABI=\"4.9\").")
+    set(ANDROID_EABI "4.9")
 endif()
 
 add_custom_target(copy_android

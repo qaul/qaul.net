@@ -46,7 +46,7 @@ Android options:
   * Sets
 * -DANDROID_EABI=EABI_VERSION  
   * Sets the Android EABI version. This version
-  * The default EABI version set is 4.6
+  * The default EABI version set is 4.9
 * -DNDK_LEVEL=9
   * Set the android API target to build for. This is necessary to build for the
     new cyanogenmod ad-hoc java class. This option is optional.
