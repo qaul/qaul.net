@@ -3,6 +3,11 @@ if(NOT NDK_ROOT)
     message(FATAL_ERROR "The path to the Android NDK needs to be specified: -DNDK_ROOT=/path/to/ndk")
 endif()
 
+if(NOT SDK_ROOT)
+    message(FATAL_ERROR "The path to the Android SDK needs to be specified: -DSDK_ROOT=/path/to/sdk")
+endif()
+
+
 if(NOT EXTRALIB_PATH)
     message(FATAL_ERROR "The path to the extra libraries needs to be specified: -DEXTRALIB_PATH=/path/to/extra/lib")
 endif()
@@ -37,7 +42,7 @@ add_custom_target(AndroidJNI
                   DEPENDS olsr pjsip wt socat copy_android
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/android)
 
-add_custom_target(AndroidUPDATE android update project -t android-17 -p ${CMAKE_BINARY_DIR}/android/app/src/main
+add_custom_target(AndroidUPDATE ${SDK_ROOT}/tools/android update project -t android-17 -p ${CMAKE_BINARY_DIR}/android/app/src/main
                   DEPENDS AndroidJNI
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/android/app/src/main)
 

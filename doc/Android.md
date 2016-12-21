@@ -22,8 +22,6 @@ Development Kit (Android 2.2 API version 17) *and* the Native Development Kit (>
 	* Tools > Android SDK Build-tools
 	* Android 2.2 (API 8)
 
-Add `sdk` to `path` if the installer had not done it automatically.
-
 
 ### Java Development Kit (JDK)
 
@@ -72,7 +70,7 @@ Build from CLI.
 	## check ANDROID_EABI version in NDK's 'toolchains' folder. The number suffix
 	## of the folder name arm-linux-androideabi-XXX is the ANDROID_EABI version.
 	## toolchains/arm-linx-androideabi-4.9 => -DANDROID_EABI="4.9"
-	cmake . -DPORT=ANDROID -DNDK_ROOT=/absolute/path/to/ndk -DEXTRALIB_PATH=/absolute/path/to/android_extra_lib -DANDROID_EABI="4.9"
+	cmake . -DPORT=ANDROID -DSDK_ROOT=/absolute/path/to/sdk -DNDK_ROOT=/absolute/path/to/ndk -DEXTRALIB_PATH=/absolute/path/to/android_extra_lib -DANDROID_EABI="4.9"
 	make
 
 
