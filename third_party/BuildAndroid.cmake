@@ -51,7 +51,7 @@ ExternalProject_Add(socat
 
 set (WT_VERSION "29")
 set (WT_FILENAME "wireless_tools.${WT_VERSION}.tar.gz")
-set (WT_URL "http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/${WT_FILENAME}")
+set (WT_URL "https://hewlettpackard.github.io/wireless-tools/${WT_FILENAME}")
 set (WT_MD5 "e06c222e186f7cc013fd272d023710cb")
 
 add_custom_target(dl_wt
