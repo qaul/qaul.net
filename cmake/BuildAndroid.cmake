@@ -22,11 +22,15 @@ if(NOT ANDROID_EABI)
     set(ANDROID_EABI "4.9")
 endif()
 
-add_custom_target(copy_android
-    ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/android/app/src/main -DDEST=${CMAKE_BINARY_DIR}/android/app/src -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
-    ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/GUI/www -DDEST=${CMAKE_BINARY_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
-    ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/GUI/files -DDEST=${CMAKE_BINARY_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
-)
+if(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    set(JNIdepends olsr pjsip wt socat)
+else()
+    add_custom_target(copy_android
+	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/android/app/src/main -DDEST=${CMAKE_BINARY_DIR}/android/app/src -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
+	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/GUI/www -DDEST=${CMAKE_BINARY_DIR}/GUI -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
+	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/GUI/files -DDEST=${CMAKE_BINARY_DIR}/GUI -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake)
+    set(JNIdepends olsr pjsip wt socat copy_android)
+endif()
 
 add_custom_target(AndroidJNI
                   NDK_PROJECT_PATH=${CMAKE_BINARY_DIR}/android/app/src/main ${NDK_ROOT}/ndk-build -C ${CMAKE_BINARY_DIR}/android/app/src/main
@@ -39,7 +43,7 @@ add_custom_target(AndroidJNI
                   COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_BINARY_DIR}/android/app/src/main/libs/armeabi/tether -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
                   COMMAND ${CMAKE_COMMAND} -DSRC=${EXTRALIB_PATH}/ifconfig -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
                   COMMAND ${CMAKE_COMMAND} -DSRC=${EXTRALIB_PATH}/iptables -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
-                  DEPENDS olsr pjsip wt socat copy_android
+                  DEPENDS ${JNIdepends}
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/android)
 
 add_custom_target(AndroidUPDATE ${SDK_ROOT}/tools/android update project -t android-17 -p ${CMAKE_BINARY_DIR}/android/app/src/main
