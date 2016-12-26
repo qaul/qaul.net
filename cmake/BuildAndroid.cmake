@@ -50,6 +50,8 @@ add_custom_target(AndroidUPDATE ${SDK_ROOT}/tools/android update project -t andr
                   DEPENDS AndroidJNI
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/android/app/src/main)
 
-add_custom_target(AndroidAPK ALL ant -Dsource.dir=java debug
+add_custom_target(AndroidAPK ALL
+		  COMMAND sed -i 's/android:versionName=".*"/android:versionName=\"${QAUL_ANDROID_VERSION_NAME}\"/g\; s/android:versionCode=".*"/android:versionCode="${QAUL_ANDROID_VERSION_CODE}"/g' ${CMAKE_BINARY_DIR}/android/app/src/main/AndroidManifest.xml
+		  COMMAND ant -Dsource.dir=java debug
                   DEPENDS AndroidUPDATE
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/android/app/src/main)
