@@ -5372,7 +5372,7 @@ static void mg_http_send_file2(struct mg_connection *nc, const char *path,
 
   DBG(("%p [%s]", nc, path));
   mg_http_free_proto_data_file(&pd->file);
-  if ((pd->file.fp = fopen(path, "rb")) == NULL) {
+  if ((pd->file.fp = mg_fopen(path, "rb")) == NULL) {
     int code;
     switch (errno) {
       case EACCES:
