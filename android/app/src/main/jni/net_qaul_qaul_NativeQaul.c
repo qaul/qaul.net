@@ -7,6 +7,11 @@
 #include "qaullib.h"
 #include "qaullib_threads.h"
 #include <android/log.h>
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+#include <mg_backend_apk.h>
+#include <unistd.h>
+#include <qaullib_ipc.h>
 
 // global variables we need to call java
 JNIEnv *global_v_env;
@@ -59,8 +64,10 @@ JNIEXPORT void JNICALL Java_net_qaul_qaul_NativeQaul_libExit
 }
 
 JNIEXPORT jint JNICALL Java_net_qaul_qaul_NativeQaul_webserverStart
-  (JNIEnv *env, jobject obj)
+  (JNIEnv *env, jobject obj, jobject amgr)
 {
+	AAssetManager* mgr = AAssetManager_fromJava(env, amgr);
+	android_set_asset_manager(mgr);
 	return (jint) Qaullib_WebserverStart();
 }
 

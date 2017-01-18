@@ -26,10 +26,10 @@ JNIEXPORT void JNICALL Java_net_qaul_qaul_NativeQaul_libExit
 /*
  * Class:     net_qaul_qaul_NativeQaul
  * Method:    webserverStart
- * Signature: ()I
+ * Signature: (Landroid/content/res/AssetManager;)I
  */
 JNIEXPORT jint JNICALL Java_net_qaul_qaul_NativeQaul_webserverStart
-  (JNIEnv *, jobject);
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     net_qaul_qaul_NativeQaul
@@ -137,10 +137,10 @@ JNIEXPORT jstring JNICALL Java_net_qaul_qaul_NativeQaul_getNetGateway
 
 /*
  * Class:     net_qaul_qaul_NativeQaul
- * Method:    getWifiSsid
+ * Method:    getWifiIbss
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_net_qaul_qaul_NativeQaul_getWifiSsid
+JNIEXPORT jstring JNICALL Java_net_qaul_qaul_NativeQaul_getWifiIbss
   (JNIEnv *, jobject);
 
 /*

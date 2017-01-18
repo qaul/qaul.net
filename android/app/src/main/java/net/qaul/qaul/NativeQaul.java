@@ -5,6 +5,7 @@
 
 package net.qaul.qaul;
 
+import android.content.res.AssetManager;
 import android.util.Log;
 
 public class NativeQaul 
@@ -26,7 +27,7 @@ public class NativeQaul
 	public native void libInit(String homePath, String resourcePath);
 	public native void libExit();
 	
-	public native int webserverStart();
+	public native int webserverStart(AssetManager assetManager);
 	public native void configStart();
 	public native int captiveStart();
 	

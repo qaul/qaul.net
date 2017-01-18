@@ -77,7 +77,8 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/qaullib_messaging.c \
 	$(LIBQAUL_SRC)/qaullib_topo_LL.c \
 	$(LIBQAUL_SRC)/qaullib_msg_LL.c \
-	$(LIBQAUL_SRC)/qaullib_validate.c
+	$(LIBQAUL_SRC)/qaullib_validate.c \
+	$(LIBQAUL_SRC)/mg_backend_apk.c
 LOCAL_EXPORT_C_INCLUDES := $(LIBQAUL_INCLUDE)
 LOCAL_C_INCLUDES := \
 	$(LIBQAUL_SRC)/include \
@@ -117,7 +118,8 @@ LOCAL_STATIC_LIBRARIES := \
 # add logging for debugging
 LOCAL_LDLIBS := \
     -L$(SYSROOT)/usr/lib -llog \
-    -lOpenSLES
+    -lOpenSLES \
+    -landroid
 
 include $(BUILD_SHARED_LIBRARY)
 

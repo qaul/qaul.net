@@ -305,7 +305,11 @@ int Qaullib_WebserverStart(void)
 
 	// Set up HTTP server parameters
 	mg_set_protocol_http_websocket(conn);
+#ifdef QAUL_PORT_ANDROID
+	ql_webserver_options.document_root = "www";
+#else
 	ql_webserver_options.document_root = webPath;
+#endif
 	ql_webserver_options.url_rewrites = webUrlRewrites;
 
 	// register dynamic C pages here

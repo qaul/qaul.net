@@ -164,21 +164,21 @@ public class QaulApplication extends Application {
         
         // check if this is the first time this app is started
         // copy all files
-        Log.i(MSG_TAG, "check if data exists");
-        File filesPath = new File(dataPathString +"/files");
-        if(!filesPath.exists()) 
-        {
-        	Log.i(MSG_TAG, "copy all files to data directory");
-        	qaulCopyFileOrDir("");
-        }
+        //Log.i(MSG_TAG, "check if data exists");
+        //File filesPath = new File(dataPathString +"/files");
+        //if(!filesPath.exists())
+        //{
+        //	Log.i(MSG_TAG, "copy all files to data directory");
+        //	qaulCopyFileOrDir("files");
+        //}
         
         // initialize the library
         nativeQaul = new NativeQaul();
         Log.i(MSG_TAG, String.format("Files directory is: %s", dataPathString));
         nativeQaul.libInit(dataPath.toString(), dataPath.toString());
         // start web server
-        nativeQaul.webserverStart();
-        
+        nativeQaul.webserverStart(this.getAssets());
+
         Log.i(MSG_TAG, "qaulInitLib() web server started");
     }
 	
