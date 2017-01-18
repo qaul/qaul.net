@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "net.qaul.qaul"
-        minSdkVersion 17
+        minSdkVersion 9
         targetSdkVersion 17
 
         ndk {
