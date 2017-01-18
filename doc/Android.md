@@ -90,7 +90,7 @@ Build
 	make
 
 
-You will find the newly built apk in `android/bin`.
+You will find the newly built apk in `android/app/src/main/bin`.
 
     # install your app from the command line
     # make sure your phone is connected and debugging mode is activated
