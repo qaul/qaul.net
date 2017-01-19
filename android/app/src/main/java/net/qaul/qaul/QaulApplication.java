@@ -164,13 +164,13 @@ public class QaulApplication extends Application {
         
         // check if this is the first time this app is started
         // copy all files
-        //Log.i(MSG_TAG, "check if data exists");
-        //File filesPath = new File(dataPathString +"/files");
-        //if(!filesPath.exists())
-        //{
-        //	Log.i(MSG_TAG, "copy all files to data directory");
-        //	qaulCopyFileOrDir("files");
-        //}
+        Log.i(MSG_TAG, "check if data exists");
+        File filesPath = new File(dataPathString +"/files");
+        if(!filesPath.exists())
+        {
+        	Log.i(MSG_TAG, "copy all files to data directory");
+        	qaulCopyFileOrDir("files");
+        }
         
         // initialize the library
         nativeQaul = new NativeQaul();
