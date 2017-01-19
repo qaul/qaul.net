@@ -14,7 +14,7 @@ set (OLSR_URL "http://www.olsr.org/releases/0.6/${OLSR_FILENAME}")
 set (OLSR_MD5 "8cfc977be7e10224ccbb0f943675b7fa")
 
 set (PORTFWD_FILENAME "master.tar.gz")
-set (PORTFWD_URL "http://github.com/WachterJud/portfwd/archive/${PORTFWD_FILENAME}")
+set (PORTFWD_URL "http://github.com/qaul/portfwd/archive/${PORTFWD_FILENAME}")
 set (PORTFWD_MD5 "21385143f85a2a0512804a1cafa145b1")
 
 add_custom_target(dl_portfwd

@@ -56,9 +56,9 @@ Add the Android platform-tools to your system PATH to use adb from CLI.
 Get the source
 --------------
 
-Download the source from [https://github.com/WachterJud/qaul.net](github)
+Download the source from [https://github.com/qaul/qaul.net](github)
 
-	git clone https://github.com/WachterJud/qaul.net.git
+	git clone https://github.com/qaul/qaul.net.git
 
 
 

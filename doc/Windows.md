@@ -41,9 +41,9 @@ pacman -S mingw-w64-i686-gcc mingw-w64-i686-cmake make patch bison
 Get the source
 --------------
 
-Download the source from [github](https://github.com/WachterJud/qaul.net)
+Download the source from [github](https://github.com/qaul/qaul.net)
 
-	git clone https://github.com/WachterJud/qaul.net.git
+	git clone https://github.com/qaul/qaul.net.git
 
 	
 Build
