@@ -23,13 +23,13 @@ if(NOT ANDROID_EABI)
 endif()
 
 if(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
-    set(JNIdepends olsr pjsip wt socat)
+    set(JNIdepends mbedtls olsr pjsip wt socat)
 else()
     add_custom_target(copy_android
 	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/android/app/src/main -DDEST=${CMAKE_BINARY_DIR}/android/app/src -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
 	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/GUI/www -DDEST=${CMAKE_BINARY_DIR}/GUI -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
 	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/GUI/files -DDEST=${CMAKE_BINARY_DIR}/GUI -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake)
-    set(JNIdepends olsr pjsip wt socat copy_android)
+    set(JNIdepends mbedtls olsr pjsip wt socat copy_android)
 endif()
 
 add_custom_target(AndroidJNI

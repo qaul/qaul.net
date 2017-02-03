@@ -97,6 +97,14 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     ${WIN_SOURCES}
 )
 
+add_dependencies(libqaul mbedtls)
+
+ExternalProject_Get_Property(mbedtls install_dir)
+
+target_include_directories(libqaul PUBLIC ${install_dir}/mbedtls/include)
+
+target_link_libraries(libqaul PUBLIC ${install_dir}/mbedtls/lib/libmbedcrypto.a)
+
 # since the name starts with 'lib' don't add it again
 set_target_properties (libqaul PROPERTIES PREFIX "")
 

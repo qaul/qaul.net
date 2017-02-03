@@ -10,6 +10,8 @@ LIBQAUL_INCLUDE ?= ""
 
 QAULCONFIG_INCLUDE ?= $(LOCAL_PATH)/../../../../../include
 
+MBEDTLS_PATH ?= $(LOCAL_PATH)/../../../../../external/mbedtls
+
 # wificonfig
 # test from MeshApp, wlan_slovenia
 # -> libwpa_client.so & libcutils.so pulled from phone and put into NDK
@@ -92,6 +94,7 @@ LOCAL_CFLAGS := \
 	-I$(PJSIP_PATH)/pjmedia/include \
 	-I$(PJSIP_PATH)/pjnath/include
 LOCAL_STATIC_LIBRARIES := \
+    mbedtls \
     pjsua \
     pjsip-ua \
     pjsip-simple \
@@ -121,6 +124,11 @@ LOCAL_LDLIBS := \
 include $(BUILD_SHARED_LIBRARY)
 
 # include externally built libraries
+include $(CLEAR_VARS)
+LOCAL_MODULE            := mbedtls
+LOCAL_SRC_FILES         := $(MBEDTLS_PATH)/lib/libmbedcrypto.a
+LOCAL_EXPORT_C_INCLUDES := $(MBEDTLS_PATH)/include
+include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := pjsip
 LOCAL_SRC_FILES         := $(PJSIP_PATH)/pjsip/lib/libpjsip-qaul.a
