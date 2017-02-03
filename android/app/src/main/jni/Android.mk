@@ -113,6 +113,7 @@ LOCAL_STATIC_LIBRARIES := \
     speex \
     ilbccodec \
     g7221codec \
+    webrtc \
     pj
 
 # add logging for debugging
@@ -207,6 +208,11 @@ include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE            := srtp
 LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libsrtp-qaul.a
+LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/third_party/include
+include $(PREBUILT_STATIC_LIBRARY)
+include $(CLEAR_VARS)
+LOCAL_MODULE            := webrtc
+LOCAL_SRC_FILES         := $(PJSIP_PATH)/third_party/lib/libwebrtc-qaul.a
 LOCAL_EXPORT_C_INCLUDES := ../../pjproject_android/third_party/include
 include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)

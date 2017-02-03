@@ -49,6 +49,7 @@ else ()
 		${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
 		${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
 		${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
+		${PJBASE}/third_party/lib/libwebrtc-${PJSIPTYPE}.a
 		${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
 	)
 endif ()
