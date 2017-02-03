@@ -70,7 +70,6 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/mongoose/mongoose.c \
 	$(LIBQAUL_SRC)/sqlite/sqlite3.c \
 	$(LIBQAUL_SRC)/urlcode/urlcode.c \
-	$(LIBQAUL_SRC)/mbedtls/sha1.c \
 	$(LIBQAUL_SRC)/olsrd/mantissa.c \
 	$(LIBQAUL_SRC)/olsrd/hashing.c \
 	$(LIBQAUL_SRC)/qaullib_appevent_LL.c \
@@ -82,12 +81,10 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 LOCAL_EXPORT_C_INCLUDES := $(LIBQAUL_INCLUDE)
 LOCAL_C_INCLUDES := \
 	$(LIBQAUL_SRC)/include \
-	$(LIBQAUL_SRC)/mbedtls/include \
 	$(QAULCONFIG_INCLUDE)
 LOCAL_CFLAGS := \
 	-I$(LIBQAUL_SRC) \
 	-I$(LIBQAUL_SRC)/include \
-	-I$(LIBQAUL_SRC)/mbedtls/include \
 	-I$(QAULCONFIG_INCLUDE)\
 	-I$(PJSIP_PATH)/pjsip/include \
 	-I$(PJSIP_PATH)/pjlib/include \

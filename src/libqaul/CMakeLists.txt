@@ -91,7 +91,6 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     mongoose/mongoose.c
     sqlite/sqlite3.c
     urlcode/urlcode.c
-    mbedtls/sha1.c
     olsrd/mantissa.c
     olsrd/hashing.c
     ${VOIP_SOURCES}
@@ -111,7 +110,6 @@ endif ()
 target_include_directories (libqaul PUBLIC include)
 
 target_include_directories (libqaul PRIVATE
-	mbedtls/include
 	${VOIP_INCLUDE}
 )
 
