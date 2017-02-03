@@ -58,7 +58,7 @@ Get the source
 
 Download the source from [https://github.com/qaul/qaul.net](github)
 
-	git clone https://github.com/qaul/qaul.net.git
+	git clone --recursive https://github.com/qaul/qaul.net.git
 
 
 

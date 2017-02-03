@@ -43,7 +43,7 @@ Get the source
 
 Download the source from [github](https://github.com/qaul/qaul.net)
 
-	git clone https://github.com/qaul/qaul.net.git
+	git clone --recursive https://github.com/qaul/qaul.net.git
 
 	
 Build
