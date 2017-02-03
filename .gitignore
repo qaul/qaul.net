@@ -11,6 +11,7 @@ third_party/pjsip/
 third_party/socat/
 third_party/wt/
 build/
+external/
 
 # Android
 files
