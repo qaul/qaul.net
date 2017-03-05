@@ -1,3 +1,5 @@
+# Mongoose
+set (MONGOOSE_DIR ${CMAKE_SOURCE_DIR}/third_party/mongoose)
 
 if (VOIP STREQUAL "NO")
 	set (VOIP_SOURCES
@@ -89,7 +91,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     captive/qaullib_captive.c
     captive/qaullib_captive_dhcp.c
     captive/qaullib_captive_dns.c
-    mongoose/mongoose.c
+    qmongoose.c
     sqlite/sqlite3.c
     urlcode/urlcode.c
     olsrd/mantissa.c
@@ -119,6 +121,7 @@ endif ()
 target_include_directories (libqaul PUBLIC include)
 
 target_include_directories (libqaul PRIVATE
+	${MONGOOSE_DIR}
 	${VOIP_INCLUDE}
 )
 

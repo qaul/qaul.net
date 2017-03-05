@@ -3,7 +3,7 @@
  * licensed under GPL (version 3)
  */
 
-#include <mongoose/mongoose.h>
+#include "qmongoose.h"
 #include "mg_backend_apk.h"
 
 
