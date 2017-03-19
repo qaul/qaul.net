@@ -9,14 +9,10 @@
 
 #include "qcry_keystore.h"
 
-/************************************************************************************************
- *** Comprehensive API to interact with the qaul.net crypto code. Every request needs to be done
- *** under a certain context with a certain token passed in. Requests will then be arbited for their
- *** validity and then handled.
- ***
- *** See the function headers for more in depth documentation on how to use.
- ***
- ************************************************************************************************/
+/**
+ * Documentation is currently WIP :)
+ */
+
 
 // Don't allow for more than one access at atime
 #define QAUL_CONC_LOCK      1
