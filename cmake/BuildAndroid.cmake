@@ -26,7 +26,7 @@ if(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
     set(JNIdepends mbedtls olsr pjsip wt socat)
 else()
     add_custom_target(copy_android
-	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/android/app/src/main -DDEST=${CMAKE_BINARY_DIR}/android/app/src -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
+	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/android/ -DDEST=${CMAKE_BINARY_DIR}/android -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
 	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/GUI/www -DDEST=${CMAKE_BINARY_DIR}/GUI -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
 	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}/GUI/files -DDEST=${CMAKE_BINARY_DIR}/GUI -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake)
     set(JNIdepends mbedtls olsr pjsip wt socat copy_android)
@@ -47,12 +47,12 @@ add_custom_target(AndroidJNI
                   DEPENDS ${JNIdepends}
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/android)
 
-add_custom_target(AndroidUPDATE ${SDK_ROOT}/tools/android update project -t android-17 -p ${CMAKE_BINARY_DIR}/android/app/src/main
+add_custom_target(AndroidUPDATE
+                  COMMAND sed -i 's/android:versionName=".*"/android:versionName=\"${QAUL_ANDROID_VERSION_NAME}\"/g\; s/android:versionCode=".*"/android:versionCode="${QAUL_ANDROID_VERSION_CODE}"/g' ${CMAKE_BINARY_DIR}/android/app/src/main/AndroidManifest.xml
                   DEPENDS AndroidJNI
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/android/app/src/main)
 
 add_custom_target(AndroidAPK ALL
-		  COMMAND sed -i 's/android:versionName=".*"/android:versionName=\"${QAUL_ANDROID_VERSION_NAME}\"/g\; s/android:versionCode=".*"/android:versionCode="${QAUL_ANDROID_VERSION_CODE}"/g' ${CMAKE_BINARY_DIR}/android/app/src/main/AndroidManifest.xml
-		  COMMAND ant -Dsource.dir=java debug
+                  COMMAND ./gradlew -PCMAKE_BINARY_DIR=${CMAKE_BINARY_DIR} -PEXTRALIB_PATH=${EXTRALIB_PATH} -PCMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR} build
                   DEPENDS AndroidUPDATE
-                  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/android/app/src/main)
+                  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/android)

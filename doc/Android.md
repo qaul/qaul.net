@@ -90,12 +90,12 @@ Build
 	make
 
 
-You will find the newly built apk in `android/app/src/main/bin`.
+You will find the newly built apk in `android/app/build/outputs/apk`.
 
     # install your app from the command line
     # make sure your phone is connected and debugging mode is activated
-    adb install -r android/app/src/main/bin/QaulActivity-debug.apk
-    
+    adb install -r android/app/build/outputs/apk/qaul-debug.apk
+
     # uninstall app from your phone
     adb uninstall net.qaul.qaul
 
