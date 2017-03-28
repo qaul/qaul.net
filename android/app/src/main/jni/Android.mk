@@ -106,7 +106,7 @@ LOCAL_STATIC_LIBRARIES := \
     pjmedia-audiodev \
     pjmedia-codec \
     pjmedia \
-    pjmedia-videdev \
+    pjmedia-videodev \
     pjnath \
     pjlib-util \
     resample \
