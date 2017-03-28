@@ -2,6 +2,10 @@ cmake_minimum_required (VERSION 2.8.11)
 
 project (qaul)
 
+# TODO remove, fix warnings. If not possible, bump version to 3.x
+# somthing newish is anyways required for cross bild..
+cmake_policy(SET CMP0054 OLD)
+
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if (APPLE)
 		set (CMAKE_INSTALL_PREFIX "/Library/qaul.net" CACHE PATH "qaul.net install prefix" FORCE)
