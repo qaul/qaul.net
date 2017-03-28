@@ -95,3 +95,22 @@ FILE *mg_fopen(const char *path, const char *mode) {
 int mg_open(const char *path, int flag, int mode) { /* LCOV_EXCL_LINE */
     return open(path, flag, mode); /* LCOV_EXCL_LINE */
 }
+
+/*
+ * Reads data from the given file stream.
+ *
+ * Return value is a number of bytes readen.
+ */
+size_t mg_fread(void *ptr, size_t size, size_t count, FILE *f) {
+    return 0;
+}
+
+/*
+ * Writes data to the given file stream.
+ *
+ * Return value is a number of bytes wtitten.
+ */
+size_t mg_fwrite(const void *ptr, size_t size, size_t count, FILE *f) {
+    return 0;
+}
+

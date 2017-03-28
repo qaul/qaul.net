@@ -38,6 +38,7 @@ add_custom_target(AndroidJNI
                   EXTRALIB_PATH=${EXTRALIB_PATH}
                   LIBQAUL_SRC=${CMAKE_SOURCE_DIR}/src/libqaul
                   QAULCONFIG_INCLUDE=${CMAKE_BINARY_DIR}/include
+                  MONGOOSE_PATH=${CMAKE_SOURCE_DIR}/third_party/mongoose
 
                   COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_BINARY_DIR}/android/app/src/main/libs/armeabi/wificonfig -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
                   COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_BINARY_DIR}/android/app/src/main/libs/armeabi/tether -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake

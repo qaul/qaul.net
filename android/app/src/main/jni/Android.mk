@@ -11,6 +11,7 @@ LIBQAUL_INCLUDE ?= ""
 QAULCONFIG_INCLUDE ?= $(LOCAL_PATH)/../../../../../include
 
 MBEDTLS_PATH ?= $(LOCAL_PATH)/../../../../../external/mbedtls
+MONGOOSE_PATH ?= $(LOCAL_PATH)/../../../../../third_party/mongoose
 
 # wificonfig
 # test from MeshApp, wlan_slovenia
@@ -69,7 +70,6 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/captive/qaullib_captive.c \
 	$(LIBQAUL_SRC)/captive/qaullib_captive_dhcp.c \
 	$(LIBQAUL_SRC)/captive/qaullib_captive_dns.c \
-	$(LIBQAUL_SRC)/mongoose/mongoose.c \
 	$(LIBQAUL_SRC)/sqlite/sqlite3.c \
 	$(LIBQAUL_SRC)/urlcode/urlcode.c \
 	$(LIBQAUL_SRC)/olsrd/mantissa.c \
@@ -79,10 +79,13 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/qaullib_topo_LL.c \
 	$(LIBQAUL_SRC)/qaullib_msg_LL.c \
 	$(LIBQAUL_SRC)/qaullib_validate.c \
-	$(LIBQAUL_SRC)/mg_backend_apk.c
+	$(LIBQAUL_SRC)/mg_backend_apk.c \
+	$(LIBQAUL_SRC)/qmongoose.c
+
 LOCAL_EXPORT_C_INCLUDES := $(LIBQAUL_INCLUDE)
 LOCAL_C_INCLUDES := \
 	$(LIBQAUL_SRC)/include \
+	$(MONGOOSE_PATH) \
 	$(QAULCONFIG_INCLUDE)
 LOCAL_CFLAGS := \
 	-I$(LIBQAUL_SRC) \
