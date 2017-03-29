@@ -1,12 +1,12 @@
 
-set(ExternalProjectCMakeArgs
+set(MbedTlsCMakeArgs
 	-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
 	-DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/external/mbedtls
 )
 
 if (${PORT} STREQUAL "ANDROID")
-set(ExternalProjectCMakeArgs
-	${ExternalProjectCMakeArgs}
+set(MbedTlsCMakeArgs
+	${MbedTlsCMakeArgs}
 	-DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake
 	-DANDROID_TOOLCHAIN=gcc
 	-DANDROID_ARM_MODE=arm
@@ -24,7 +24,7 @@ ExternalProject_Add(mbedtls
 	STAMP_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-stamp
 	TMP_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-tmp
 	INSTALL_DIR ${PROJECT_BINARY_DIR}/external
-	CMAKE_ARGS ${ExternalProjectCMakeArgs}
+	CMAKE_ARGS ${MbedTlsCMakeArgs}
 )
 
 set (ARCHIVE_DIR ${PROJECT_SOURCE_DIR}/archives)
