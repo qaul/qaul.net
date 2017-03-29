@@ -14,6 +14,13 @@ set(MbedTlsCMakeArgs
 )
 endif ()
 
+if (${PORT} STREQUAL "WINDOWS")
+set(MbedTlsCMakeArgs
+	${MbedTlsCMakeArgs}
+	-DENABLE_TESTING=OFF
+)
+endif ()
+
 ExternalProject_Add(mbedtls
 	#UPDATE_DISCONNECTED 1
 	GIT_SUBMODULES mbedtls
