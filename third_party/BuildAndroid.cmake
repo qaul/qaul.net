@@ -2,7 +2,9 @@
 ExternalProject_Add(pjsip
     DEPENDS dl_pjsip
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/pjsip
-    URL ${ARCHIVE_DIR}/${PJSIP_FILENAME}
+    #URL ${ARCHIVE_DIR}/${PJSIP_FILENAME}
+    SVN_REPOSITORY http://svn.pjsip.org/repos/pjproject/trunk
+    SVN_REVISION -r5576
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/android.patch
     COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/pjsip.patch
