@@ -29,6 +29,7 @@ var qauluserevent = 0;
 var qaulmessageevent = 0;
 var qaulinitialized = false;
 var chat_initialized = false;
+var web_initialized = false;
 var is_chrome = false;
 var call_page_origin = "page_chat";
 var user_page_origin = "page_users";
@@ -104,7 +105,17 @@ function init_start()
 	// set locale
 	$("#locale_submit").click(function(){
 		set_locale($("input[name='l']:checked").val());
-		$.mobile.changePage($("#page_config_name"));
+		if (typeof(Storage) !== "undefined")
+			localStorage.setItem("locale", $("input[name='l']:checked").val());
+		
+		if(web_initialized)
+		{
+			$.mobile.changePage($("#page_pref"));
+			location.reload();
+		}
+		else
+			$.mobile.changePage($("#page_config_name"));
+		
 		return false;
 	});
 	
@@ -112,7 +123,17 @@ function init_start()
 	name_form.validate({
 		submitHandler: function(form){
 			set_username($("#name_name").val());
-			$.mobile.changePage($("#page_chat"));
+			if(typeof(Storage) !== "undefined")
+				localStorage.setItem("username", $("#name_name").val());
+			
+			if(web_initialized)
+				$.mobile.changePage($("#page_pref"));
+			else
+			{
+				web_init();
+				$.mobile.changePage($("#page_chat"));
+			}
+			
 			updatetimer();
 		}
 	});
@@ -129,7 +150,7 @@ function init_start()
 	// files
 	$("#file_add_form").validate({
 		submitHandler: function(form){
-			send_file_add();
+			web_file_add();
 		}
 	});
 	
@@ -210,20 +231,20 @@ function init_start()
 			if(e.which == 13)
 			{
 				if($("#file_add_form").valid())
-					send_file_add();
+					web_file_add();
 				e.preventDefault();
 				return false;
 			}
 		});
 		$("#file_add_submit").click(function(){
 			if($("#file_add_form").valid())
-				send_file_add();
+				web_file_add();
 			return false;
 		});
 	}
 	
 	qaul_initialized = true;
-	web_getcookie();
+	web_check_settings();
 }
 
 function qaul_translate(dictionary)
@@ -905,6 +926,12 @@ function isoDateString(d)
 // ======================================================
 // web client functions
 // ------------------------------------------------------
+function web_init()
+{
+	web_initialized = true;
+	$(".c_init").show();
+}
+
 function web_getfiles()
 {
 	var path = "web_getfiles";
@@ -1009,15 +1036,223 @@ function web_file_schedule()
 	$.mobile.changePage($("#page_file"));
 }
 
-function web_getcookie()
+function web_check_settings()
 {
-	$.mobile.changePage($("#page_config_locale"));
+	if (typeof(Storage) !== "undefined")
+	{
+		console.log('local storage locale: ' +localStorage.getItem("locale"));
+		console.log('local storage username: ' +localStorage.getItem("username"));
+		
+		if(
+			localStorage.getItem("locale") != null && 
+			localStorage.getItem("username") != null
+			)
+		{
+			set_locale(localStorage.getItem("locale"));
+			set_username(localStorage.getItem("username"));
+			
+			web_init();
+			$.mobile.changePage($("#page_chat"));
+			updatetimer();
+		}
+		else
+			$.mobile.changePage($("#page_config_locale"));
+	}
+	else
+		$.mobile.changePage($("#page_config_locale"));
 }
 
 function web_info_page()
 {
 	
 }
+
+function web_upload_bar(percentage)
+{
+	var myval = $("#file_upload_bar input").val();
+	console.log('web_upload_bar percentage (' +percentage +') myval ' +myval);
+	myval++;
+	
+	if(percentage -10 > myval)
+	{
+		myval++;
+		myval++;
+		myval++;
+		myval++;
+		myval++;
+	}
+	
+	if(percentage >= myval)
+	{
+		$("#file_upload_bar input").val(myval).slider("refresh");
+		setTimeout(function(){web_upload_bar(percentage);},10);
+	}
+}
+
+function web_file_add()
+{
+	console.log('web_file_add() start');
+
+	// show upload page and fill in values
+	$("#file_upload_bar input").val(0);
+	$('#file_upload_msg').html($('#file_add_msg').val());
+	$('#file_upload_filename').html($('#file_add_file').val());
+    $.mobile.changePage($("#page_file_upload"));
+    console.log('message: ' +$('#file_add_msg').val());
+    console.log('file name: ' +$('#file_add_file').val());
+
+    // create a formdata object
+    var data = new FormData();
+    data.append('n', user_name);
+    data.append('m', $('#file_add_msg').val());
+    var file_upload = $('#file_add_file')[0].files[0];
+    if(file_upload)
+    {
+        data.append('f', file_upload);
+    }
+
+	// from http://stackoverflow.com/questions/15668339/can-onprogress-functionality-be-added-to-jquery-ajax-by-using-xhrfields
+	$.ajax({
+		type: 'POST',
+		url: 'web_file_upload',
+		async: true,
+		data: data,
+		dataType: 'json',
+		cache: false,
+		processData: false,
+		contentType: false,
+		success: function(data, textStatus, jqXHR){
+			console.log('web_file_add ajax success');
+			// animate upload bar
+			web_upload_bar(100);
+			// change to file sharing page
+			show_page_file();
+		},
+		xhr: function(){
+			// get the native XmlHttpRequest object
+			var xhr = $.ajaxSettings.xhr();
+			// set the onprogress event handler
+			xhr.upload.onprogress = function(evt){
+					console.log('progress', evt.loaded/evt.total*100);
+					web_upload_bar(evt.loaded/evt.total*100);
+				};
+			// set the onload event handler
+			xhr.upload.onload = function(){
+					console.log('DONE!');
+				};
+			// return the customized object
+			return xhr ;
+		},
+        error: function(jqXHR, textStatus, errorThrown)
+        {
+            // Handle errors here
+            console.log('ERRORS: ' + textStatus);
+            // go back to file page
+            $.mobile.changePage($("#page_file_add"));
+            // TODO: fill in error message
+        }
+	});
+/*  
+    // upload the file
+    $.ajax({
+        url: 'web_file_upload',
+        type: 'POST',
+        data: data,
+        cache: false,
+        dataType: 'json',
+        processData: false, // Don't process the files
+        contentType: false, // Set content type to false as jQuery will tell the server its a query string request
+        success: function(data, textStatus, jqXHR)
+        {
+            if(typeof data.error === 'undefined')
+            {
+                // Success so call function to process the form
+                submitForm(event, data);
+                show_page_file();
+            }
+            else
+            {
+                // Handle errors here
+                console.log('ERRORS: ' + data.error);
+                $.mobile.changePage($("#page_file_add"));
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown)
+        {
+            // Handle errors here
+            console.log('ERRORS: ' + textStatus);
+            // go back to file page
+            $.mobile.changePage($("#page_file_add"));
+            // TODO: fill in error message
+        }
+    });
+}
+
+	$.post(
+			"web_sendmsg",
+			{ "t": 11, "m": msg.val(), "n": user_name, "e":1},
+			function(){
+				//insert_msg(chat, {id:0,type:11,name:user_name,msg:msg.val(),time:isoDateString(new Date())});
+				msg.val('');
+				web_getmsgs();
+			}
+		).error(function(){
+			// show alert
+			$.mobile.changePage($("#page_dialog"),{role:"dialog"});
+		});	
+*/
+}
+/*
+function send_file_add()
+{
+	// check if file was selected
+	if($("#file_add_path").val() == "")
+	{
+		// open file select again
+		open_filepicker();
+		return;
+	}
+	
+	// validate entries
+	var advertise = ($("#file_add_advertise").attr('checked'))? 1 : 0;
+	
+	// send it to webserver
+	$.ajax({
+			type:'POST',
+			url:"file_add.json",
+			data:{"p": $("#file_add_path").val(), "m": $("#file_add_msg").val(), "a": advertise, "e": 1},
+			cache: false, // needed for IE
+			success: function(data){
+				// TODO: insert message
+				// configure message
+				//var message = data.hash +"." +data.suffix +" " +$("#file_add_msg").val();
+				//insert_msg(chat, {id:0,type:11,name:user_name,msg:message});
+				// cleanup
+				$("#file_add_msg").val('');
+				$("#file_add_advertise").attr('checked',true).checkboxradio("refresh");
+				$("#file_add_path").val('');
+				$("#file_add_filename").empty();
+				$("#file_add_addbutton .ui-btn-text").text("choose file");
+				$("#file_add_addbutton .ui-icon").addClass("ui-icon-plus").removeClass("ui-icon-refresh");
+				
+				// go to file page
+				show_page_file();
+			},
+			dataType:"json"
+	}).error(function(){
+			show_page_file();
+	});
+}
+*/
+
+function show_addfile_page()
+{
+	// reset message field
+	$("#file_add_msg").val('');
+	// show page
+	$.mobile.changePage($("#page_file_add"));
+}
+
 
 //======================================================
 //configuration

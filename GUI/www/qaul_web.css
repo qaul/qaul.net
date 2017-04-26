@@ -1,0 +1,16 @@
+.filename {
+	margin-top:15px;
+	color:#999999;
+	font-size:smaller;
+}
+
+#file_upload_bar .ui-slider-handle {
+	display: none;
+}
+#file_upload_bar input {
+	display: none;
+}
+#file_upload_bar .ui-slider-track {
+	pointer-events: none;
+	margin: 0;
+}

@@ -1,9 +1,9 @@
 [Desktop Entry]
 Name=qaul.net – قول
-Version=@Qaul_VERSION@
+Version=@QAUL_VERSION@
 Exec=@CMAKE_INSTALL_PREFIX@/bin/qaul-gtk
-Comment=
-Icon=@Qaul_ICONDIR@/qaul_app_icon.png
+Comment=Wifi mesh communication app, with chat, VoIP, file sharing, and olsr routing
+Icon=@QAUL_ICONDIR@/qaul_app_icon.png
 Type=Application
 Terminal=false
 StartupNotify=true

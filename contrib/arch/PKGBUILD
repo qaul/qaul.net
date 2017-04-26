@@ -1,0 +1,35 @@
+_pkgname=qaul
+pkgname=$_pkgname-git
+pkgver=v1.0.0.beta5.180.g6ff9149
+pkgrel=1
+pkgdesc="Wifi mesh communication app - git version"
+arch=('i686' 'x86_64')
+url="https://qaul.net"
+license=('GPL2')
+groups=()
+depends=('alsa-lib webkitgtk')
+makedepends=('git patch make gcc bison flex automake autoconf pkg-config cmake alsa-lib webkitgtk fakeroot')
+provides=("$_pkgname")
+conflicts=("$_pkgname")
+source=("$_pkgname::git+https://github.com/qaul/qaul.net#branch=qaul-ng")
+md5sums=('SKIP')
+
+pkgver() {
+  cd "$srcdir/$_pkgname"
+  git describe --tags | sed 's|-|.|g'
+}
+
+build() {
+  cd "$srcdir/$_pkgname"
+  mkdir -p build
+  cd build
+  cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+  make
+}
+
+package() {
+  cd "$srcdir/$_pkgname/build"
+  make DESTDIR="${pkgdir}" install
+}
+
+# vim:set ts=2 sw=2 et:

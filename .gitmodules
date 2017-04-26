@@ -1,0 +1,6 @@
+[submodule "third_party/mbedtls"]
+	path = third_party/mbedtls
+	url = https://github.com/ARMmbed/mbedtls.git
+[submodule "third_party/mongoose"]
+	path = third_party/mongoose
+	url = https://github.com/cesanta/mongoose.git

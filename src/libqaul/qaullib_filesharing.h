@@ -77,6 +77,14 @@ void Qaullib_FilePopulate(void);
 int Qaullib_FileAdd(struct qaul_file_LL_item *file_item);
 
 /**
+ * copy a directory recursively from @a origin to @a destiny
+ *
+ * @retval 0 on error
+ * @retval 1 on success
+ */
+int Qaullib_FileCopyDirectory(const char* origin, const char* destiny);
+
+/**
  * copy a file from its @a origin file path to @a destiny
  *
  * @retval file size in Bytes
@@ -97,6 +105,14 @@ int Qaullib_FileCopyNew(char *path, struct qaul_file_LL_item *file);
  * copies the file to the download folder if it was set
  */
 int Qaullib_FileCopyToDownloadFolder(struct qaul_file_LL_item *file);
+
+/**
+ * writes the suffix of the @a filename into @a suffix
+ *
+ * @retval 1 success
+ * @retval 0 error
+ */
+int Qaullib_FileGetSuffix(const char *filename, char *suffix);
 
 /**
  * check if any file needs to be downloaded

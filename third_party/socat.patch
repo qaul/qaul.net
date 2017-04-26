@@ -21,7 +21,8 @@ index 464af43..b327d41 100755
  ROOT="`pwd`"
  OUT="${ROOT}/out"
  ${ANDROID_NDK}/build/tools/make-standalone-toolchain.sh \
-  --ndk-dir="${ANDROID_NDK}" \
+-  --ndk-dir="${ANDROID_NDK}" \
++ \
   --platform="${ANDROID_PLATFORM}" \
 + --toolchain="${ANDROID_TOOLCHAIN}" \
   --install-dir="${OUT}/toolchain" \

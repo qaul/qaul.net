@@ -14,7 +14,7 @@ General options:
   * The following build platforms exist: ANDROID, WINDOWS, OSX, LINUX
 * -DGUI=GUI_TOOKIT_TO_USE
   * Sets graphics user interface framework. By default cmake tries to
-    automatically figure out the toolkit to use.
+    automatically figure out what toolkit to use.
   * The following options exist: NATIVE, CLI, GTK
 * -DQAUL_LOG_DEFAULTLEVEL=LOGLEVEL
   * Sets the default log level.
@@ -22,7 +22,7 @@ General options:
     NONE, ERROR, WARN, INFO, DEBUG
   * This option is optional. The default log level is DEBUG.
 * -DQAUL_LOG_ENABLE=YES
-  * When this option is set to NO, it does not compile any logging into the
+  * When this option is set to NO, it does not compile any logging capability into the
     qaullib binary. This is useful when compiling for embedded systems
     with limited memory.
   * This option is optional. Default value is YES.
@@ -32,7 +32,7 @@ General options:
     memory.
   * Default value is NO.
 * -DVOIP=YES
-  * When set to NO, the voice over IP library pjsip is not compiled and linked
+  * When set to NO, the voice over IP library, pjsip, is not compiled and linked
     into qaullib. This is useful, when building qaullib for servers, where voice
     over IP is not necessary.
   * Default value is YES.
@@ -46,7 +46,7 @@ Android options:
   * Sets
 * -DANDROID_EABI=EABI_VERSION  
   * Sets the Android EABI version. This version
-  * The default EABI version set is 4.6
+  * The default EABI version set is 4.9
 * -DNDK_LEVEL=9
   * Set the android API target to build for. This is necessary to build for the
     new cyanogenmod ad-hoc java class. This option is optional.

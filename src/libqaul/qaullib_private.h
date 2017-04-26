@@ -48,7 +48,7 @@ extern "C" {
 #include "qaullib_messaging.h"
 #include "qaullib_threads.h"
 #include "olsrd/mantissa.h"
-#include "mongoose/mongoose.h"
+#include "qmongoose.h"
 #include "qaullib_webserver.h"
 #include "sqlite/sqlite3.h"
 #include "qaullib_sql.h"
