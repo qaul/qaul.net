@@ -3,57 +3,57 @@ set (MONGOOSE_DIR ${CMAKE_SOURCE_DIR}/third_party/mongoose)
 
 if (VOIP STREQUAL "NO")
     set (VOIP_SOURCES
-            qaullib_voip_dummy.c
-            )
+        qaullib_voip_dummy.c
+    )
 else ()
-	if (${PORT} STREQUAL "LINUX")
-		find_package(ALSA REQUIRED)
-	endif ()
+    if (${PORT} STREQUAL "LINUX")
+        find_package(ALSA REQUIRED)
+    endif ()
 
-	set (PJBASE ${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip)
-	set (PJSIPTYPE qaul)
-	
-	set (VOIP_SOURCES
-		qaullib_voip.c
-	)
-	
-	set (VOIP_DEPENDENCIES
-		pjsip
-	)
-	
-	set (VOIP_INCLUDE
-	    ${PJBASE}/pjlib/include
-	    ${PJBASE}/pjlib-util/include
-	    ${PJBASE}/pjmedia/include
-	    ${PJBASE}/pjnath/include
-	    ${PJBASE}/pjsip/include
-#		${PJBASE}third_party/portaudio/include
-#		${PJBASE}third_party/resample/include
-#		${PJBASE}third_party/speex/include
-#		${PJBASE}third_party/srtp/crypto/include
-#		${PJBASE}third_party/srtp/include
-	)
+    set (PJBASE ${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip)
+    set (PJSIPTYPE qaul)
+    
+    set (VOIP_SOURCES
+        qaullib_voip.c
+    )
+    
+    set (VOIP_DEPENDENCIES
+        pjsip
+    )
+    
+    set (VOIP_INCLUDE
+        ${PJBASE}/pjlib/include
+        ${PJBASE}/pjlib-util/include
+        ${PJBASE}/pjmedia/include
+        ${PJBASE}/pjnath/include
+        ${PJBASE}/pjsip/include
+#       ${PJBASE}third_party/portaudio/include
+#       ${PJBASE}third_party/resample/include
+#       ${PJBASE}third_party/speex/include
+#       ${PJBASE}third_party/srtp/crypto/include
+#       ${PJBASE}third_party/srtp/include
+    )
 
-	set (VOIP_LINK_LIBRARIES
-		${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
-		${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
-		${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
-		${PJBASE}/pjsip/lib/libpjsip-simple-${PJSIPTYPE}.a
-		${PJBASE}/pjmedia/lib/libpjmedia-codec-${PJSIPTYPE}.a
-		${PJBASE}/pjmedia/lib/libpjmedia-${PJSIPTYPE}.a
-		${PJBASE}/pjmedia/lib/libpjmedia-audiodev-${PJSIPTYPE}.a
-		${PJBASE}/pjmedia/lib/libpjmedia-videodev-${PJSIPTYPE}.a
-		${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
-		${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
-		${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
-		${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
-		${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
-		${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
-		${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
-		${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
-		${PJBASE}/third_party/lib/libwebrtc-${PJSIPTYPE}.a
-		${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
-	)
+    set (VOIP_LINK_LIBRARIES
+        ${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
+        ${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
+        ${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
+        ${PJBASE}/pjsip/lib/libpjsip-simple-${PJSIPTYPE}.a
+        ${PJBASE}/pjmedia/lib/libpjmedia-codec-${PJSIPTYPE}.a
+        ${PJBASE}/pjmedia/lib/libpjmedia-${PJSIPTYPE}.a
+        ${PJBASE}/pjmedia/lib/libpjmedia-audiodev-${PJSIPTYPE}.a
+        ${PJBASE}/pjmedia/lib/libpjmedia-videodev-${PJSIPTYPE}.a
+        ${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
+        ${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
+        ${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
+        ${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
+        ${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
+        ${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
+        ${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
+        ${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
+        ${PJBASE}/third_party/lib/libwebrtc-${PJSIPTYPE}.a
+        ${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
+    )
 endif ()
 
 if (${PORT} STREQUAL "WINDOWS")
@@ -66,9 +66,8 @@ if (${PORT} STREQUAL "WINDOWS")
   set (WIN_SOURCES
     win32/functions.c
     win32/pthread.c
+  )
 endif ()
-
-add_subdirectory(mbedtls)
 
 ADD_LIBRARY (libqaul ${LIBTYPE}
     logging.c
@@ -87,6 +86,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     qaullib_filesharing.c
     qaullib_file_LL.c
     qaullib_exediscovery.c
+    qaullib_crypto.c
 
     # Crypto module
     qaullib_crypto.c
@@ -97,8 +97,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     crypto/qcry_helper.c
     crypto/qcry_keys.c
     crypto/qcry_keystore.c
-
-
+    
     qaullib_udp_communication.c
     captive/qaullib_captive.c
     captive/qaullib_captive_dhcp.c
@@ -126,21 +125,19 @@ set_target_properties (libqaul PROPERTIES PREFIX "")
 if (VOIP STREQUAL "NO")
 else ()
     add_dependencies(libqaul
-            ${VOIP_DEPENDENCIES}
-            )
+        ${VOIP_DEPENDENCIES}
+    )
 endif ()
 
 target_include_directories (libqaul PUBLIC include)
 
 target_include_directories (libqaul PRIVATE
-    mbedtls/include
+    ${MONGOOSE_DIR}
     ${VOIP_INCLUDE}
-	${MONGOOSE_DIR}
 )
 
 target_link_libraries(libqaul LINK_PUBLIC
-	${VOIP_LINK_LIBRARIES}
-    mbedtls
+    ${VOIP_LINK_LIBRARIES}
 )
 
 if (UUID_FOUND)
@@ -148,11 +145,11 @@ if (UUID_FOUND)
 endif (UUID_FOUND)
 
 if (OPENCORE_AMRNB_FOUND)
-	target_link_libraries(libqaul LINK_PUBLIC ${OPENCORE_AMRNB_LIBRARIES})
+    target_link_libraries(libqaul LINK_PUBLIC ${OPENCORE_AMRNB_LIBRARIES})
 endif (OPENCORE_AMRNB_FOUND)
 
 if (OPENCORE_AMRWB_FOUND)
-	target_link_libraries(libqaul LINK_PUBLIC ${OPENCORE_AMRWB_LIBRARIES})
+    target_link_libraries(libqaul LINK_PUBLIC ${OPENCORE_AMRWB_LIBRARIES})
 endif (OPENCORE_AMRWB_FOUND)
 
 if (${PORT} STREQUAL "LINUX")
