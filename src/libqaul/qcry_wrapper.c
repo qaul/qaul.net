@@ -3,6 +3,14 @@
  * licensed under GPL (version 3)
  */
 
+/**
+ * This is a test file that is used during development to
+ * quickly expose crypto module functionality without the
+ * need of a GUI or complex workflows.
+ *
+ * This should at some point be moved to be a unit-test when
+ * we have that stuff setup...
+ */
 
 #include <qaullib/qcry_wrapper.h>
 
@@ -83,48 +91,3 @@ int qcry_devel_init(int argc, char *argv[])
     end:
     return ret;
 }
-
-///*
-// * 	{
-//		/*************************************************************
-//		*
-//		* Crypto initialisation is done by reading the default username
-//		* from libqaul and checking if it a key exists for this user.
-//		*
-//		* If it does, the user context is allocated and prepared.
-//		*
-//		* If it does not, a new user context is created
-//		*
-//		*************************************************************/
-//
-//int ret = qcry_arbit_init(QAUL_CONC_LOCK, "/home/spacekookie/.qaul", NULL); //FIXME: Get proper path
-//if(ret != 0) printf("A critical error (#%d) occured when initialising crypto arbiter!\n", ret);
-//
-//// TODO: Check existing user files and init with them instead
-//bool usr_exists = false;
-//
-//int usr_no;
-//char *username = "spacekookie";
-//char *passphrase = "foobar32";
-//
-//if(usr_exists) {
-//ret = qcry_arbit_restore(&usr_no, username, passphrase);
-//printf("QCRY_ARBIT_RESTORE returned %d\n", ret);
-//
-//} else {
-//ret = qcry_arbit_usrcreate(&usr_no, username, passphrase, QAUL_KEYS_RSA4096);
-//printf("QCRY_ARBIT_USRCREATE returned %d\n", ret);
-//}
-//
-//////////////////////////////////////////////////////////////////////////
-//}
-//
-//
-//
-//
-//// qcry_arbit_usrcreate();
-//
-//// ----------------------------------------------------------
-//
-//
-//*/
