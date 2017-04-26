@@ -3,20 +3,39 @@
  * licensed under GPL (version 3)
  */
 
+#include <math.h>
 #include "qaullib.h"
 #include "qaullib_private.h"
 #include "urlcode/urlcode.h"
-
-#include <math.h>
 #include "qaullib_crypto.h"
 #include "qaullib_file_LL.h"
+#include "qaullib/logging.h"
 
 // ------------------------------------------------------------
 // static declarations
 // ------------------------------------------------------------
 
-static int  Qaullib_WwwGetMsgsCallback(void *NotUsed, int number_of_lines, char **column_value, char **column_name);
-void Ql_WwwFile2Json(struct mg_connection *conn, struct qaul_file_LL_item *file);
+/**
+ * additional connection data for web user's file upload
+ * @see Ql_WwwWebFileUpload() function
+ */
+static struct ql_file_upload_data {
+	int  part;
+	char username[MAX_USER_LEN +1];
+	char description[MAX_DESCRIPTION_LEN +1];
+	char suffix[MAX_SUFFIX_LEN +1];
+	FILE *fp;
+	size_t bytes_written;
+};
+
+/**
+ * create a JSON object with file information of one shared @a file
+ * from the files linked list and send it via the web connection @a conn.
+ *
+ * JSON example:
+ * {"hash":"da39a3ee5e6b4b0d3255bfef95a","size":1392881004,"suffix":"mp3","adv_ip":"127.0.0.1","adv_name":"otheruser","description":"sound file","time":"2012-02-02 19:59:42","status":0}
+ */
+static void Ql_WwwFile2Json(struct mg_connection *conn, struct qaul_file_LL_item *file);
 
 /**
  * checks if the IP matches the local IP used by the user interface
@@ -2164,19 +2183,18 @@ void Ql_WwwWebSendMsg(struct mg_connection *conn, int event, void *event_data)
 	unsigned char userid[MAX_HASH_LEN];
 	struct http_message *hm = (struct http_message *) event_data;
 
-	if(QAUL_DEBUG)
-		printf("Ql_WwwWebSendMsg\n");
+	Ql_log_debug("Ql_WwwWebSendMsg");
 
 	// fill in data
 	msg_item.id = 0;
 	msg_item.type = QAUL_MSGTYPE_PUBLIC_IN;
 
 	// get msg
-	mg_get_http_var(&hm->query_string, "m", local_msg, sizeof(local_msg));
+	mg_get_http_var(&hm->body, "m", local_msg, sizeof(local_msg));
 	Qaullib_StringMsgProtect(msg_item.msg, local_msg, sizeof(msg_item.msg));
 
 	// get name
-	mg_get_http_var(&hm->query_string, "n", local_name, sizeof(local_name));
+	mg_get_http_var(&hm->body, "n", local_name, sizeof(local_name));
 	Qaullib_StringNameProtect(msg_item.name, local_name, sizeof(msg_item.name));
 
 	// check if name is web name, add [WEB] otherwise
@@ -2331,6 +2349,266 @@ void Ql_WwwWebGetFiles(struct mg_connection *conn, int event, void *event_data)
 
 
 // ------------------------------------------------------------
+void Ql_WwwWebFileUpload(struct mg_connection *conn, int event, void *event_data)
+{
+	char buffer[BUFSIZ];
+	char* stmt = buffer;
+	char *error_exec=NULL;
+	int size, len = 0, filesize = 0;
+	time_t timestamp;
+	struct qaul_file_LL_item file_item;
+	struct qaul_file_LL_item *existing_file;
+	char local_destiny[MAX_PATH_LEN +1];
+	char local_msg[MAX_MESSAGE_LEN +1];
+	union olsr_message *m = (union olsr_message *)buffer;
+	struct http_message *hm = (struct http_message *) event_data;
+
+
+	int err = 0;
+	struct ql_file_upload_data *data = (struct ql_file_upload_data *) conn->user_data;
+	struct mg_http_multipart_part *mp = (struct mg_http_multipart_part*)event_data;
+
+	Ql_log_debug("Ql_WwwWebFileUpload");
+
+	switch(event)
+	{
+		case MG_EV_HTTP_PART_BEGIN:
+		{
+			// initialize connection data structure
+			if (data == NULL)
+			{
+				data = calloc(1, sizeof(struct ql_file_upload_data));
+				data->part = 0;
+				memcpy(&data->username, "\0", 1);
+				memcpy(&data->description, "\0", 1);
+				memcpy(&data->suffix, "\0", 1);
+				data->fp = tmpfile();
+				data->bytes_written = 0;
+
+				if (data->fp == NULL)
+				{
+					Ql_log_error("failed to open file");
+
+					mg_printf(conn, "%s",
+							"HTTP/1.1 500 Failed to open a file\r\n"
+							"Content-Length: 0\r\n\r\n");
+					conn->flags |= MG_F_SEND_AND_CLOSE;
+					return;
+				}
+				conn->user_data = (void *) data;
+			}
+
+			// check which variable we are uploading
+			if(strcmp(mp->var_name,"n") == 0)
+			{
+				data->part = 1;
+			}
+			else if(strcmp(mp->var_name,"m") == 0)
+			{
+				data->part = 2;
+			}
+			else if(strcmp(mp->var_name,"f") == 0)
+			{
+				data->part = 3;
+
+				// get suffix
+			    Qaullib_FileGetSuffix(mp->file_name, data->suffix);
+			}
+			else
+			{
+				data->part = 0;
+			}
+
+			break;
+		}
+		case MG_EV_HTTP_PART_DATA:
+		{
+			if(data->part == 3)
+			{
+				Ql_log_debug("file name: %s", mp->file_name);
+
+				if (fwrite(mp->data.p, 1, mp->data.len, data->fp) != mp->data.len)
+				{
+					Ql_log_error("failed to write to file");
+
+					mg_printf(conn, "%s",
+							  "HTTP/1.1 500 Failed to write to a file\r\n"
+							  "Content-Length: 0\r\n\r\n");
+					conn->flags |= MG_F_SEND_AND_CLOSE;
+					return;
+				}
+				data->bytes_written += mp->data.len;
+			}
+			else if(data->part == 1)
+			{
+				if(mp->data.len > MAX_USER_LEN)
+				{
+					memcpy(&data->username, mp->data.p, MAX_USER_LEN);
+					memcpy(&data->username[MAX_USER_LEN], "\0", 1);
+				}
+				else
+				{
+					memcpy(&data->username, mp->data.p, mp->data.len);
+					memcpy(&data->username[mp->data.len], "\0", 1);
+				}
+			}
+			else if (data->part == 2)
+			{
+				if(mp->data.len > MAX_DESCRIPTION_LEN)
+				{
+					memcpy(&data->description, mp->data.p, MAX_DESCRIPTION_LEN);
+					memcpy(&data->description[MAX_DESCRIPTION_LEN], "\0", 1);
+				}
+				else
+				{
+					memcpy(&data->description, mp->data.p, mp->data.len);
+					memcpy(&data->description[mp->data.len], "\0", 1);
+				}
+			}
+
+			break;
+		}
+		case MG_EV_HTTP_PART_END:
+		{
+			// save file
+			if(data->part == 3)
+			{
+				// set file pointer to file start
+				rewind(data->fp);
+
+				// save description
+				strncpy(file_item.description, data->description, MAX_DESCRIPTION_LEN);
+				memcpy(&file_item.description[MAX_DESCRIPTION_LEN], "\0", 1);
+
+				// create hash
+				if(Ql_sha1_filepointer(data->fp, file_item.hash) == 0)
+				{
+					Ql_log_error("failed to create hash from uploaded file");
+				}
+				else
+				{
+					// create hash from hashstr
+					Ql_HashToString(file_item.hash, file_item.hashstr);
+
+					// copy the suffix
+				    strncpy(file_item.suffix, data->suffix, MAX_SUFFIX_LEN);
+				    memcpy(&file_item.suffix[MAX_SUFFIX_LEN], "\0", 1);
+
+				    // create destination filename
+				    Qaullib_FileCreatePath(local_destiny, file_item.hashstr, file_item.suffix);
+
+					// copy file to files folder
+				    FILE* out = fopen(local_destiny, "wb");
+
+				    if(out == NULL)
+				    {
+				        out = 0;
+				        err = 1;
+				    }
+				    else
+				    {
+				    	// set file pointer to file start
+				    	rewind(data->fp);
+
+				    	while((len = fread(buffer, 1, BUFSIZ, data->fp)) > 0)
+				        {
+				        	filesize += len;
+				        	fwrite(buffer, len, 1, out);
+				        }
+				        fclose(out);
+
+						// add file to data base
+				        file_item.size = filesize;
+						file_item.type = QAUL_FILETYPE_FILE;
+						file_item.status = QAUL_FILESTATUS_DOWNLOADED;
+						strncpy(file_item.adv_name, data->username, MAX_USER_LEN);
+						memcpy(&file_item.adv_name[MAX_USER_LEN], "\0", 1);
+
+						memset(&file_item.adv_ip, 0, sizeof(file_item.adv_ip));
+						file_item.adv_validip = 0;
+						file_item.downloaded = 0;
+						file_item.downloaded_chunk = 0;
+						time(&timestamp);
+						file_item.created_at = (int)timestamp;
+
+						// check if file already exists
+						if(Qaullib_File_LL_HashSearch(file_item.hash, &existing_file))
+						{
+							if(existing_file->status == QAUL_FILESTATUS_DELETED)
+							{
+								// delete from LL
+								Qaullib_File_LL_Delete_Item(existing_file);
+
+								// add the file again
+								Qaullib_FileAdd(&file_item);
+							}
+						}
+						else
+						{
+							Qaullib_FileAdd(&file_item);
+						}
+
+						// advertise file
+						// FIXME: make ipv6 compatible
+						// pack chat into olsr message
+						// ipv4 only at the moment
+						memset(&m->v4.originator, 0, sizeof(m->v4.originator));
+						m->v4.olsr_msgtype = QAUL_CHAT_MESSAGE_TYPE;
+						memcpy(&m->v4.message.chat.name, qaul_username, MAX_USER_LEN);
+						// create message
+						strncpy(local_msg, file_item.hashstr, sizeof(file_item.hashstr));
+						if(strlen(file_item.suffix) > 0)
+						{
+							strcat(local_msg, ".");
+							strcat(local_msg, file_item.suffix);
+						}
+						strcat(local_msg, " ");
+						strcat(local_msg, file_item.description);
+
+						memcpy(&m->v4.message.chat.msg, local_msg, MAX_MESSAGE_LEN);
+						size = sizeof( struct qaul_chat_msg);
+						size = size + sizeof(struct olsrmsg);
+						m->v4.olsr_msgsize = htons(size);
+
+						Ql_log_debug("olsr message: name: %s, msg: %s, size: %i, status: %i\n", qaul_username, local_msg, size, file_item.status);
+
+						// send package
+						Qaullib_IpcSend(m);
+				    }
+				}
+
+				// send response and close connection
+				if(err == 1)
+				{
+					mg_printf(conn,
+							"HTTP/1.1 200 OK\r\n"
+							"Content-Type: text/plain\r\n"
+							"Connection: close\r\n\r\n"
+							"{\"error\":1}");
+				}
+				else
+				{
+					mg_printf(conn,
+							"HTTP/1.1 200 OK\r\n"
+							"Content-Type: text/plain\r\n"
+							"Connection: close\r\n\r\n"
+							"{}");
+				}
+				conn->flags |= MG_F_SEND_AND_CLOSE;
+				fclose(data->fp);
+
+				// free memory
+				free(data);
+				conn->user_data = NULL;
+			}
+
+			break;
+		}
+	}
+}
+
+
+// ------------------------------------------------------------
 void Ql_WwwFile2Json(struct mg_connection *conn, struct qaul_file_LL_item *file)
 {
 	char timestr[MAX_TIME_LEN];
@@ -2423,4 +2701,19 @@ void Ql_WwwCryGetInfo(struct mg_connection *conn, int event, void *event_data)
 void Ql_WwwCryInitialise(struct mg_connection *conn, int event, void *event_data)
 {
 	// TODO: Get data from json message and initialise new user
+}
+
+// ------------------------------------------------------------
+void Ql_WwwOsxCaptivePortalDetection(struct mg_connection *conn, int event, void *event_data)
+{
+	printf("Ql_WwwOsxCaptivePortalDetection\n");
+
+	// send header
+	mg_printf(conn, "HTTP/1.1 200 OK\r\n"
+	             	"Content-Type: text/html\r\n"
+					"\r\n");
+
+	mg_printf(conn, "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>");
+
+	conn->flags |= MG_F_SEND_AND_CLOSE;
 }

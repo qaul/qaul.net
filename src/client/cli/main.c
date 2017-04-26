@@ -3,20 +3,10 @@
  * licensed under GPL (version 3)
  */
 
-#ifdef WIN32
-#include <windows.h>
-#else
-#endif
-
 #include <stdio.h> // defines FILENAME_MAX
 #include <stdlib.h>
-#ifdef WINDOWS
-    #include <direct.h>
-    #define GetCurrentDir _getcwd
-#else
-    #include <unistd.h>
-    #define GetCurrentDir getcwd
- #endif
+#include <unistd.h>
+#define GetCurrentDir getcwd
 
 #include "qaullib.h"
 #include <QaulConfig.h>
@@ -49,7 +39,7 @@ int main(int argc, char *argv[])
 	fprintf(stderr," config started\n");
 	fprintf(stderr,"----------------------------------------------------\n");
 	// The invoking of Qaullib_GetIP() is mandatory to load the IP.
-	fprintf(stderr,"IP: %s\n", Qaullib_GetIP());
+	fprintf(stderr,"IP: %s\n\n", Qaullib_GetIP());
 
 	// wait until user name is set
 	int username_flag = 0;
@@ -58,31 +48,31 @@ int main(int argc, char *argv[])
 		if(username_flag == 0)
 		{
 			username_flag = 1;
-			fprintf(stderr,"waiting until user name is set ...\n");
-			fprintf(stderr,"open web browser with http://localhost:8081/qaul.html to set it ...\n");
+			fprintf(stderr,"Waiting until a username is set ...\n");
+			fprintf(stderr,"Open http://localhost:8081/qaul.html in your web browser to set it ...\n\n");
 		}
 		sleep(1);
 	}
-	fprintf(stderr,"user name successfully set!\n");
+	fprintf(stderr,"Username successfully set!\n");
 
 	if(!Qaullib_IpcConnect())
-		fprintf(stderr,"Ipc connection failed\n");
+		fprintf(stderr,"Ipc connection failed!\n");
 	Qaullib_SetConfVoIP();
 	if(!Qaullib_UDP_StartServer())
-		fprintf(stderr,"UDP server failed\n");
+		fprintf(stderr,"UDP server failed!\n");
 	if(!Qaullib_CaptiveStart())
-		fprintf(stderr,"Captive portal failed\n");
+		fprintf(stderr,"Captive portal failed!\n");
 	Qaullib_ConfigurationFinished();
 
 	// test config
-	fprintf(stderr,"IP: %s\n", Qaullib_GetIP());
+	fprintf(stderr,"Your IP: %s\n", Qaullib_GetIP());
 	fprintf(stderr,"Qaul started\n");
 
 	// loop variables
 	int socketCounter = 0;
 	int ipcCounter = 0;
 
-	fprintf(stderr,"kill app to exit!\n");
+	fprintf(stderr,"Kill app to exit!\n");
 
 	// main loop
 	while (1) {

@@ -151,7 +151,11 @@ void Qaullib_Exit(void) //destructor
 	{
 		// send exit message to olsrd
 		Qaullib_IpcSendCom(0);
+#ifdef WIN32
+		Sleep(200);
+#else
 		usleep(200000);
+#endif // WIN32
 		printf("Qaullib exit message sent\n");
 		Qaullib_IpcClose();
 	}
@@ -314,7 +318,11 @@ int Qaullib_WebserverStart(void)
 
 	// Set up HTTP server parameters
 	mg_set_protocol_http_websocket(conn);
+#ifdef QAUL_PORT_ANDROID
+	ql_webserver_options.document_root = "www";
+#else
 	ql_webserver_options.document_root = webPath;
+#endif
 	ql_webserver_options.url_rewrites = webUrlRewrites;
 
 	// register dynamic C pages here
@@ -367,8 +375,11 @@ int Qaullib_WebserverStart(void)
 	mg_register_http_endpoint(conn, "/web_sendmsg", 		Ql_WwwWebSendMsg);
 	mg_register_http_endpoint(conn, "/web_getusers", 		Ql_WwwWebGetUsers);
 	mg_register_http_endpoint(conn, "/web_getfiles", 		Ql_WwwWebGetFiles);
+	mg_register_http_endpoint(conn, "/web_file_upload", 	Ql_WwwWebFileUpload);
 	mg_register_http_endpoint(conn, "/ext_binaries.json", 	Ql_WwwExtBinaries);
-	// Crypto interfaces
+	// OSX captive portal check
+	// if it doesn't find this page, OSX wont be able to download the installers from the captive portal
+	mg_register_http_endpoint(conn, "/hotspot-detect.html", Ql_WwwOsxCaptivePortalDetection);
 	mg_register_http_endpoint(conn, "/crygetinfo", 			Ql_WwwCryGetInfo);
 
 	mg_start_thread(Ql_Www_Server, &ql_webserver_instance);

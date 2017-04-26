@@ -19,12 +19,6 @@
  *   qaulhelper startgateway eth0 wlan0
  *   qaulhelper stopgateway <INTERFACE OUT> <INTERFACE IN>
  *   qaulhelper stopgateway eth0 wlan0
- *   qaulhelper startnetworkmanager
- *   qaulhelper startnetworkmanager
- *   qaulhelper stopnetworkmanager
- *   qaulhelper stopnetworkmanager
- *   qaulhelper enablewifi <INTERFACE>
- *   qaulhelper enablewifi wlan0
  *   qaulhelper configurewifi <INTERFACE> <ESSID> <CHANNEL> [<BSSID>]
  *   qaulhelper configurewifi wlan0 qaul.net 11 02:11:87:88:D6:FF
  *   qaulhelper setip <INTERFACE> <IP> <SUBNET> <BROADCAST>
@@ -411,95 +405,10 @@ int stop_gateway (int argc, const char * argv[])
     return 0;
 }
 
-#ifdef WITHOUT_NETWORKMANAGER
-
-int start_networkmanager (int argc, const char * argv[])
-{
-    pid_t pid1;
-    int status;
-    printf("start network manager\n");
-
-	// become root
-	setuid(0);
-
-	// start network manager
-	pid1 = fork();
-	if (pid1 < 0)
-		printf("fork for pid1 failed\n");
-	else if(pid1 == 0)
-        execl("/usr/bin/service", "service", "network-manager", "start", (char*)0);
-	else
-		waitpid(pid1, &status, 0);
-
-	printf("network manager started\n");
-
-    return 0;
-}
-
-int stop_networkmanager (int argc, const char * argv[])
-{
-    pid_t pid1;
-    int status;
-    printf("stop network manager\n");
-
-    // become root
-    setuid(0);
-
-    // network manager
-    pid1 = fork();
-    if (pid1 < 0)
-        printf("fork for pid2 failed\n");
-    else if(pid1 == 0)
-        execl("/usr/bin/service", "service", "network-manager", "stop", (char*)0);
-    else
-        waitpid(pid1, &status, 0);
-
-    printf("network manager stopped\n");
-	return 0;
-}
-
-int enable_wifi (int argc, const char * argv[])
-{
-    pid_t pid1, pid2;
-    int status;
-    printf("enable wifi\n");
-
-	// become root
-	setuid(0);
-
-	// deblock wifi
-	pid1 = fork();
-	if (pid1 < 0)
-		printf("fork for pid1 failed\n");
-	else if(pid1 == 0)
-	{
-		execl("rfkill", "unblock", "all", (char*)0);
-	}
-	else
-		waitpid(pid1, &status, 0);
-
-	// enable wifi
-	pid2 = fork();
-	if (pid2 < 0)
-		printf("fork for pid1 failed\n");
-	else if(pid2 == 0)
-	{
-		execl("nmcli", "nm", "wifi", "on", (char*)0);
-	}
-	else
-		waitpid(pid2, &status, 0);
-
-
-	printf("wifi enabled\n");
-
-	return 0;
-}
-
 int configure_wifi (int argc, const char * argv[])
 {
     pid_t pid1, pid2, pid3, pid4, pid5, pid6;
     int status;
-    char s[256];
     printf("create or join ibss\n");
 
     if(argc >= 5)
@@ -523,6 +432,8 @@ int configure_wifi (int argc, const char * argv[])
 
         // become root
         setuid(0);
+        
+        printf("arv %s %s %s\n", argv[2], argv[3], argv[4]);
 
         // take wifi interface down
         pid1 = fork();
@@ -543,7 +454,7 @@ int configure_wifi (int argc, const char * argv[])
             printf("fork for pid2 failed\n");
         else if(pid2 == 0)
         {
-            execl("/sbin/iwconfig", argv[2], "mode", "ad-hoc", (char*)0);
+            execl("/sbin/iwconfig", "iwconfig", argv[2], "mode", "ad-hoc", (char*)0);
         }
         else
             waitpid(pid2, &status, 0);
@@ -556,7 +467,7 @@ int configure_wifi (int argc, const char * argv[])
             printf("fork for pid3 failed\n");
         else if(pid3 == 0)
         {
-            execl("/sbin/iwconfig", argv[2], "channel", argv[4], (char*)0);
+            execl("/sbin/iwconfig", "iwconfig", argv[2], "channel", argv[4], (char*)0);
         }
         else
             waitpid(pid3, &status, 0);
@@ -569,8 +480,7 @@ int configure_wifi (int argc, const char * argv[])
             printf("fork for pid4 failed\n");
         else if(pid4 == 0)
         {
-            sprintf(s, "'%s'", argv[3]);
-            execl("/sbin/iwconfig", argv[2], "essid", s, (char*)0);
+            execl("/sbin/iwconfig", "iwconfig", argv[2], "essid", argv[3], (char*)0);
         }
         else
             waitpid(pid4, &status, 0);
@@ -593,7 +503,7 @@ int configure_wifi (int argc, const char * argv[])
 				printf("fork for pid5 failed\n");
 			else if(pid5 == 0)
 			{
-				execl("/sbin/iwconfig", argv[2], "ap", argv[5], (char*)0);
+				execl("/sbin/iwconfig", "iwconfig", argv[2], "ap", argv[5], (char*)0);
 			}
 			else
 				waitpid(pid5, &status, 0);
@@ -676,49 +586,50 @@ int set_ip (int argc, const char * argv[])
 
 int set_dns (int argc, const char * argv[])
 {
-    pid_t pid1, pid2, pid3;
+    pid_t pid1;
     int status;
     printf("set DNS\n");
 
 	// set root rights
 	setuid(0);
 
-	// remove tail
+	// set dns via resolvconf
 	pid1 = fork();
 	if (pid1 < 0)
 		printf("fork for pid1 failed\n");
 	else if(pid1 == 0)
 	{
-		execl("/bin/rm", "rm", "/etc/resolvconf/resolv.conf.d/tail", (char*)0);
+		execl("/sbin/resolvconf", "resolvconf", "-a", argv[2], "<", QAUL_ROOT_PATH"/lib/qaul/etc/tail", (char*)0);
 	}
 	else
 		waitpid(pid1, &status, 0);
-
-	// set dns
-	pid2 = fork();
-	if (pid2 < 0)
-		printf("fork for pid2 failed\n");
-	else if(pid2 == 0)
-	{
-		execl("/bin/cp", "/opt/qaul/etc/tail", "/etc/resolvconf/resolv.conf.d/tail", (char*)0);
-	}
-	else
-		waitpid(pid2, &status, 0);
-
-	// reload resolv file
-	pid3 = fork();
-	if (pid3 < 0)
-		printf("fork for pid3 failed\n");
-	else if(pid3 == 0)
-	{
-		execl("/sbin/resolvconf", "resolvconf", "-u", (char*)0);
-	}
-	else
-		waitpid(pid3, &status, 0);
 
 	printf("DNS set\n");
 
     return 0;
 }
 
-#endif // WITHOUT_NETWORKMANAGER
+int remove_dns (int argc, const char * argv[])
+{
+    pid_t pid1;
+    int status;
+    printf("remove DNS\n");
+
+	// set root rights
+	setuid(0);
+
+	// set dns via resolvconf
+	pid1 = fork();
+	if (pid1 < 0)
+		printf("fork for pid1 failed\n");
+	else if(pid1 == 0)
+	{
+		execl("/sbin/resolvconf", "resolvconf", "-d", argv[2], (char*)0);
+	}
+	else
+		waitpid(pid1, &status, 0);
+
+	printf("DNS removed\n");
+
+    return 0;
+}

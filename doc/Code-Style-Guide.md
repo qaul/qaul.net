@@ -16,7 +16,7 @@ Code Style
 Use tabs to indent code.
 Code according to the example:
 
-´´´
+```
 int Ql_FunctionName(int param, int otherparam)
 {
   int variable_name
@@ -36,7 +36,7 @@ int Ql_FunctionName(int param, int otherparam)
 
   return 1;
 }
-´´´
+```
 
 Editor styles:
 * Tab width: 4
@@ -58,9 +58,9 @@ Every function shall be documented before it's declaration (in the header file).
 Every header file shall start with an explanation of what this module does.
 Try to write self explanatory code with meaningful function and variable names.
 
-example template for a header file:
+Example template for a header file:
 
-´´´
+```
 /*
  * qaul.net is free software
  * licensed under GPL (version 3)
@@ -82,7 +82,7 @@ example template for a header file:
  * @retval 0 example failed
  */
 int Ql_FunctionName(int param, int otherparam);
-´´´
+```
 
 
 Licensing
@@ -93,9 +93,9 @@ Every file shall start with the qaul.net GPLv3 license declaration.
 
 example:
 
-´´´
+```
 /*
  * qaul.net is free software
  * licensed under GPL (version 3)
  */
-´´´
+```

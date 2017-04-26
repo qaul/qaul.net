@@ -74,36 +74,17 @@ int main (int argc, const char * argv[])
         {
             create_ibss(argc, argv);
         }
-        else if(strncmp(argv[1], "setip", 5) == 0)
-        {
-            set_ip(argc, argv);
-        }
         else if(strncmp(argv[1], "setdhcp", 7) == 0)
         {
             set_dhcp(argc, argv);
         }
-        else if(strncmp(argv[1], "setdns", 6) == 0)
-        {
-            set_dns(argc, argv);
-        }
 #endif // QAUL_PORT_OSX
-#ifdef WITHOUT_NETWORKMANAGER
-        else if(strncmp(argv[1], "startnetworkmanager", 19) == 0)
-        {
-            start_networkmanager(argc, argv);
-        }
-        else if(strncmp(argv[1], "stopnetworkmanager", 18) == 0)
-        {
-            stop_networkmanager(argc, argv);
-        }
-        else if(strncmp(argv[1], "enablewifi", 10) == 0)
-        {
-            enable_wifi(argc, argv);
-        }
+#ifdef QAUL_PORT_LINUX
         else if(strncmp(argv[1], "configurewifi", 10) == 0)
         {
             configure_wifi(argc, argv);
         }
+#endif // QAUL_PORT_LINUX
         else if(strncmp(argv[1], "setip", 5) == 0)
         {
             set_ip(argc, argv);
@@ -112,7 +93,12 @@ int main (int argc, const char * argv[])
         {
             set_dns(argc, argv);
         }
-#endif // WITHOUT_NETWORKMANAGER
+#ifdef QAUL_PORT_LINUX
+        else if(strncmp(argv[1], "removedns", 6) == 0)
+        {
+            set_dns(argc, argv);
+        }
+#endif // QAUL_PORT_LINUX
         else
         {
             printf("unknown command '%s'\n", argv[1]);
@@ -150,20 +136,16 @@ int main (int argc, const char * argv[])
         printf("  qaulhelper stopgateway\n");
         printf("  qaulhelper stopgateway\n");
 #endif // QAUL_PORT_OSX
-#ifdef WITHOUT_NETWORKMANAGER
-        printf("  qaulhelper startnetworkmanager\n");
-        printf("  qaulhelper startnetworkmanager\n");
-        printf("  qaulhelper stopnetworkmanager\n");
-        printf("  qaulhelper stopnetworkmanager\n");
-        printf("  qaulhelper enablewifi <INTERFACE>\n");
-        printf("  qaulhelper enablewifi %s\n", Help_InterfaceWifi);
         printf("  qaulhelper configurewifi <INTERFACE> <ESSID> <CHANNEL> [<BSSID>]\n");
         printf("  qaulhelper configurewifi %s qaul.net 11 02:11:87:88:D6:FF\n", Help_InterfaceWifi);
         printf("  qaulhelper setip <INTERFACE> <IP> <SUBNET> <BROADCAST>\n");
         printf("  qaulhelper setip %s 10.213.28.55 8 10.255.255.255\n", Help_InterfaceWifi);
         printf("  qaulhelper setdns <INTERFACE>\n");
         printf("  qaulhelper setdns %s\n", Help_InterfaceWifi);
-#endif // WITHOUT_NETWORKMANAGER
+#ifdef QAUL_PORT_LINUX
+        printf("  qaulhelper removedns <INTERFACE>\n");
+        printf("  qaulhelper removedns %s\n", Help_InterfaceWifi);
+#endif // QAUL_PORT_LINUX
 #ifdef QAUL_PORT_OSX
         printf("  qaulhelper enablewifi <OSXVERSION> <INTERFACE>\n");
         printf("  qaulhelper enablewifi 1038 %s\n", Help_InterfaceWifi);

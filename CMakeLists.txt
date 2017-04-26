@@ -2,6 +2,10 @@ cmake_minimum_required (VERSION 2.8.11)
 
 project (qaul)
 
+# TODO remove, fix warnings. If not possible, bump version to 3.x
+# somthing newish is anyways required for cross bild..
+cmake_policy(SET CMP0054 OLD)
+
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if (APPLE)
 		set (CMAKE_INSTALL_PREFIX "/Library/qaul.net" CACHE PATH "qaul.net install prefix" FORCE)
@@ -18,6 +22,8 @@ set (QAUL_VERSION_MINOR 0)
 set (QAUL_VERSION_PATCH 0)
 set (QAUL_VERSION_SUFFIX "beta5")
 set (QAUL_VERSION "${QAUL_VERSION_MAJOR}.${QAUL_VERSION_MINOR}.${QAUL_VERSION_PATCH}.${QAUL_VERSION_SUFFIX}")
+set (QAUL_ANDROID_VERSION_CODE "1" CACHE STRING "Android versions code (build number)")
+set (QAUL_ANDROID_VERSION_NAME "${QAUL_VERSION}" CACHE STRING "Android versions name (displayed version string")
 
 # build configuration
 set (LOGLEVELS LOG_NONE LOG_ERROR LOG_WARN LOG_INFO LOG_DEBUG)
@@ -132,6 +138,7 @@ else ()
 endif ()
 
 add_subdirectory (third_party)
+add_subdirectory (src/olsrd-plugin)
 
 if (NOT ${PORT} STREQUAL "ANDROID")
     add_subdirectory (src/libqaul)
@@ -164,6 +171,11 @@ endif ()
 
 add_subdirectory (src/client/dbg)
 
+# build qauld the qaul.net daemon 
+if (${PORT} STREQUAL "LINUX")
+    add_subdirectory (src/daemon/linux)
+endif ()
+
 # final status summary report
 message(STATUS "#############################################")
 message(STATUS "  qaul seems to be successfully configured.")
@@ -185,7 +197,7 @@ elseif (${PORT} STREQUAL "ANDROID")
     message(STATUS "                make")
     message(STATUS "To install your app from the command line")
     message(STATUS "Make sure your phone is connected and debugging mode is activated")
-    message(STATUS "       adb install android/bin/QaulActivity-debug.apk")
+    message(STATUS "       adb install android/app/src/main/bin/QaulActivity-debug.apk")
 elseif (${PORT} STREQUAL "OSX")
     message(STATUS "To build the project execute the command")
     message(STATUS "              make")

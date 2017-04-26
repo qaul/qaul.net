@@ -11,23 +11,31 @@ third_party/pjsip/
 third_party/socat/
 third_party/wt/
 build/
+external/
 
-# Android 
-android/bin/
-android/build.xml
-android/gen/
-android/libs/
+# Android
+files
+www
+android/.gradle
+android/build
 android/local.properties
-android/obj/
-android/proguard-project.txt
-android/res/raw/ifconfig
-android/res/raw/iptables
-android/res/raw/iwconfig
-android/res/raw/olsrd
-android/res/raw/olsrd_qaul_so_0_1
-android/res/raw/socat
-android/res/raw/tether
-android/res/raw/wificonfig
+android/app/.externalNativeBuild/
+android/app/src/main/local.properties
+android/app/src/main/build.xml
+android/app/src/main/bin
+android/app/src/main/gen
+android/app/src/main/libs
+android/app/src/main/obj
+android/app/src/main/jniLibs
+android/app/src/main/res/raw/ifconfig
+android/app/src/main/res/raw/iptables
+android/app/src/main/res/raw/iwconfig
+android/app/src/main/res/raw/olsrd
+android/app/src/main/res/raw/olsrd_dyn_gw_so*
+android/app/src/main/res/raw/olsrd_qaul_so*
+android/app/src/main/res/raw/socat
+android/app/src/main/res/raw/tether
+android/app/src/main/res/raw/wificonfig
 
 # IDE Settings
 /.project

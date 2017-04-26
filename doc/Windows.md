@@ -4,7 +4,7 @@ Build qaul.net on Windows
 This tutorial describes all the steps to build qaul.net client on Windows.
 qaul.net works on Windows 7 / 8 / 10. Windows XP is not supported.
 
-This Tutorial has been tested on the following versions of Windows:
+This tutorial has been tested on the following versions of Windows:
 
 * Windows 7
 
@@ -12,7 +12,7 @@ This Tutorial has been tested on the following versions of Windows:
 Prerequisites
 -------------
 
-The following tools need to be installed
+The following tools need to be installed:
 
 * Git (version control)
   * Download git for Windows: https://www.git-scm.com/download/win
@@ -22,13 +22,15 @@ The following tools need to be installed
   * Open MinGW Shell 'C:/msys2/ming32_shell'
   * Install needed programs from the mingw32_shell
 
-	# update your installation
-	pacman -Sy
-	pacman -Su
-	## close and reopen mingw32_shell after update
-	
-	# install needed programs
-	pacman -S mingw-w64-i686-gcc mingw-w64-i686-cmake make patch bison 
+```
+# update your installation
+pacman -Sy
+pacman -Su
+## close and reopen mingw32_shell after update
+
+# install needed programs
+pacman -S mingw-w64-i686-gcc mingw-w64-i686-cmake make patch bison 
+```
 
 * Microsoft Visual Studio
 * MSBuild (for builds via command line interface)
@@ -39,9 +41,9 @@ The following tools need to be installed
 Get the source
 --------------
 
-Download the source from [github](https://github.com/WachterJud/qaul.net)
+Download the source from [github](https://github.com/qaul/qaul.net)
 
-	git clone https://github.com/WachterJud/qaul.net.git
+	git clone --recursive https://github.com/qaul/qaul.net.git
 
 	
 Build
@@ -78,23 +80,25 @@ Open the Microsoft Visual Studio Solution qaul.sln in Visual Studio.
   Right-click on the qaul project icon and select "Set as StartUp Project".
 
 
-Build qaul.net executable form command line. 
+Build qaul.net executable from command line. 
 
 * Download and install the Microsoft Build Tools that contain MSBuild
 
-	##########################################
-	# Build qaul.net with MSBuild
-	##########################################
-	# CLI build commands for the MinGW32 Shell
-	# Build debug version
-	MSBuild.exe qaul.vcxproj -p:Configuration=Debug
-	# Build release version
-	MSBuild.exe qaul.vcxproj -p:Configuration=Release
-	
-	##########################################
-	# Build qaul.net with cmake (via MSBuild)
-	##########################################
-	cmake --build . --target qaul --config Release
+```
+##########################################
+# Build qaul.net with MSBuild
+##########################################
+# CLI build commands for the MinGW32 Shell
+# Build debug version
+MSBuild.exe qaul.vcxproj -p:Configuration=Debug
+# Build release version
+MSBuild.exe qaul.vcxproj -p:Configuration=Release
+
+##########################################
+# Build qaul.net with cmake (via MSBuild)
+##########################################
+cmake --build . --target qaul --config Release
+```
 
 
 Create Windows Installer
@@ -103,4 +107,3 @@ Create Windows Installer
 To create the installer invoke the following command.
 
 	cpack -C Release
-

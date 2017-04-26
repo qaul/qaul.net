@@ -1,0 +1,187 @@
+# This script controls actions to be taken when the tethering is started or stopped.
+# @Version=94
+# ------------------------------------------------------------------------------------
+# It uses the "edify" language, which is also used for the android OTA update scripts. 
+# See:
+# http://android.git.kernel.org/?p=platform/bootable/recovery.git;a=tree;f=edify;h=04720f8aaa9a5e0079b79f8be7f11b7f74414162;hb=HEAD
+# ------------------------------------------------------------------------------------
+
+################################################################################
+# start WIFI
+# ------------------------------------------------------------------------------
+# /data/data/net.qaul.qaul/bin/tether start 1
+################################################################################
+action() == "start" && (
+
+    ################################################################################
+    # test a device
+    ################################################################################
+    getcfg("wifi.setup") == "test" && 
+    (
+		  # Loading firmware
+		  #
+		  # check if module was loaded 
+		  ## $ /system/bin/cat /proc/modules
+		  #
+	      module_loaded(os.wifi.driver) || 
+	      
+		  # load kernel module & firmware
+		  ## $ /system/bin/insmod /system/lib/modules/bcm4329.ko firmware_path=/etc/firmware/fw_bcm4329.bin nvram_path=/system/etc/calibration
+		  ## $ /system/bin/insmod /lib/modules/dhd.ko firmware_path=/system/etc/wifi/bcm4330_sta.bin nvram_path=/system/etc/wifi/nvram_net.txt
+		  #
+		  # unload this kernel module
+		  ## $ /system/bin/rmmod bcm4329
+		  ## $ /system/bin/rmmod dhd
+		  #
+		  # on success the module is loaded (yes it is loaded)
+		  ## $ /system/bin/cat /proc/modules
+		  # on success the network interface is created (this is not the case)
+		  ## $ ls /etc/wifi
+		  # on error you can display the errors with
+		  ## $ dmesg
+		  
+	      # HTC Sensation
+	      #log(insmod("/system/lib/modules/" +os.wifi.driver +".ko", "firmware_path=" +os.wifi.firmware_path +" nvram_path=" +os.wifi.nvram_path), "Loading wifi module");
+	      # Samsung Galaxy S2 == GB
+	      #log(insmod("/lib/modules/dhd.ko", "firmware_path=/system/etc/wifi/bcm4330_sta.bin nvram_path=/system/etc/wifi/nvram_net.txt"), "Loading wifi module");
+	      # Samsung Galaxy S2 >= ICS
+	      # insmod /data/data/net.qaul.qaul/conf/dhd.ko firmware_path=/data/data/net.qaul.qaul/conf/custom_bcm4330_sta.bin nvram_path=/data/data/net.qaul.qaul/conf/custom_bcm4330_nvram_net.txt
+	      # iface_name=wlan0
+	      log(insmod("/data/data/net.qaul.qaul/conf/dhd.ko", "firmware_path=/data/data/net.qaul.qaul/conf/custom_bcm4330_sta.bin nvram_path=/data/data/net.qaul.qaul/conf/custom_bcm4330_nvram_net.txt"), "Loading wifi module");
+
+	      # -> use modprobe to load the module
+	      # insmod loads a module into kernel but does not solve dependencies
+	      
+	      
+	      sleep("3");
+	      
+	      # load wifi interface
+		  log(run_program("/system/bin/start wlan_loader"), "load wlan interface");	      
+	      
+	      sleep("3");
+
+	      # Bring up wifi interface
+	      log(run_program("/system/bin/ifconfig " + getcfg("wifi.interface") + " " + getcfg("ip.address") + " netmask " + getcfg("ip.netmask")) &&
+	                  run_program("/system/bin/ifconfig " + getcfg("wifi.interface") + " up"),  "Activating WiFi interface");
+	      log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " mode ad-hoc"), "Setting ad-hoc mode");
+	      log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " essid " + getcfg("wifi.essid")), "Setting essid");
+	      log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " channel " + getcfg("wifi.channel")), "Setting channel");
+		  getcfg("wifi.txpower") != "disabled" && (
+		      	log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " txpower " + getcfg("wifi.txpower")), "Setting transmit power");     	
+		  );      
+	      run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " commit");
+	 );
+
+    ################################################################################
+    # iwconfig
+    ################################################################################
+    getcfg("wifi.setup") == "iwconfig" && 
+    (
+		# check which driver one needs to load
+		  
+		# load generic driver
+		log(load_wifi(), "Loading WiFi driver");
+		  
+		# Bring up wifi interface
+		log(run_program("/system/bin/ifconfig " + getcfg("wifi.interface") + " " + getcfg("ip.address") + " netmask " + getcfg("ip.netmask")) &&
+			run_program("/system/bin/ifconfig " + getcfg("wifi.interface") + " up"),  "Activating WiFi interface");
+		log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " mode ad-hoc"), "Setting ad-hoc mode");
+		log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " essid " + getcfg("wifi.essid")), "Setting essid");
+		log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " channel " + getcfg("wifi.channel")), "Setting channel");
+		getcfg("wifi.txpower") != "disabled" && (
+			log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " txpower " + getcfg("wifi.txpower")), "Setting transmit power");     	
+		);      
+		run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " commit");
+    );
+        
+    ################################################################################
+    # wpa_cli (available in cyanogen mods)
+    ################################################################################
+    getcfg("wifi.setup") == "wpa_cli" && 
+    (
+      # todo: set up wifi via wpa_cli
+      # wpa_cli is available on
+      log(load_wifi(), "Loading WiFi driver");
+    );
+    
+    ################################################################################
+    # wpa_supplicant
+    ################################################################################
+    getcfg("wifi.setup") == "wpa_supplicant" && 
+    (
+      # todo: set up wifi via custom wpa_supplicant
+      log(load_wifi(), "Loading WiFi driver");
+    );
+    
+#    ################################################################################
+#    ################################################################################
+#    # WEP-Encryption
+#    ################################################################################
+#    getcfg("wifi.encryption") == "wep" && 
+#    (
+#      getcfg("wifi.setup") == "iwconfig" && (      	
+#        log(run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " key s:"+getcfg("wifi.encryption.key")+"") &&
+#          run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " key restricted"), "Activating encryption<br/>(iwconfig)");
+#        run_program("/data/data/net.qaul.qaul/bin/iwconfig " + getcfg("wifi.interface") + " commit");
+#      );
+#      getcfg("wifi.setup") == "wpa_supplicant" && (      	
+#        sleep("2");
+#		log(run_program("cd /data/local/tmp; mkdir /data/local/tmp/wpa_supplicant; wpa_supplicant -B -D" +
+#		  getcfg("wifi.driver") +
+#		  " -i" + getcfg("wifi.interface") +
+#		  " -c/data/data/net.qaul.qaul/conf/wpa_supplicant.conf"), "Activating encryption<br/>(wpa_supplicant)");
+#      );
+#    );
+
+    #
+    # Starting persist-fixer in background
+    #    
+    getcfg("tether.fix.persist") == "true" && (
+      file_exists("/data/data/net.qaul.qaul/bin/fixpersist.sh") && (
+		run_program("/data/data/net.qaul.qaul/bin/fixpersist.sh "+ getcfg("wifi.interface") +" "+ getcfg("wifi.essid") +" "+ getcfg("wifi.channel") +" & echo $! > /data/data/net.qaul.qaul/var/fixpersist.pid");
+      );
+    );
+	
+    #
+    # set DNS servers
+    #    
+   log("set DNS servers");
+   log(run_program("setprop net.rmnet0.dns1 5.45.96.220"), "setprop net.rmnet0.dns1 5.45.96.220");
+   log(run_program("setprop net.rmnet0.dns2 185.82.22.133"), "setprop net.rmnet0.dns2 185.82.22.133");
+   log(run_program("setprop net.dns1 5.45.96.220"), "setprop net.dns1 5.45.96.220");
+   log(run_program("setprop net.dns2 185.82.22.133"), "setprop net.dns2 185.82.22.133");
+	
+  log("Tethering now running");
+);
+
+################################################################################
+# stop WIFI
+# ------------------------------------------------------------------------------
+# /data/data/net.qaul.qaul/bin/tether stop 1
+################################################################################
+action() == "stop" && 
+(
+  #
+  # Wifi mode, bring interface down, kill dnsmasq/wpa_supplicant, remove module.
+  #
+    kill_process("wpa_supplicant");
+    run_program("/system/bin/ifconfig " +  getcfg("wifi.interface") + " down");
+    
+    getcfg("device.type") == "generic" && (
+      unload_wifi();
+    );
+
+	
+
+    module_loaded("bcm4329") && rmmod("bcm4329");
+    module_loaded("bcm4325") && rmmod("bcm4325");
+    module_loaded("wlan") && rmmod("wlan");
+    module_loaded("tiwlan_drv") && rmmod("tiwlan_drv");
+    module_loaded("tiap_drv") && rmmod("tiap_drv");
+    module_loaded("sdio") && rmmod("sdio");
+    module_loaded("dhd") && rmmod("dhd");
+    module_loaded("wireless") && rmmod("wireless");
+    module_loaded("ar6000") && rmmod("ar6000");
+
+  log("Tethering now stopped");
+);

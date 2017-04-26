@@ -2,7 +2,7 @@ Build qaul.net on Debian Linux
 ==============================
 
 This tutorial describes all the steps to build qaul.net on a Debian 
-Linux derivate. It has been tested on the following distributions:
+Linux distro. It has been tested on the following distributions:
 
 * Debian
 * Ubuntu
@@ -12,7 +12,7 @@ Linux derivate. It has been tested on the following distributions:
 Prerequesites
 -------------
 
-Install needed Software to download and build qaul.net from Source.
+Install needed software to download and build qaul.net from Source.
 
 	sudo apt-get install git cmake build-essential pkg-config \
 	libgtk-3-dev  libwebkitgtk-3.0-dev libdbus-1-dev autotools-dev \
@@ -24,7 +24,7 @@ Download and Build
 ------------------
 
 	# Download source code from github
-	git clone https://github.com/WachterJud/qaul.net.git
+	git clone --recursive https://github.com/qaul/qaul.net.git
 	
 	# create build directory
 	cd qaul.net
@@ -92,8 +92,3 @@ directory.
 	# you may need to delete some files created with root permissions
 	# first. You may find these files executing the follwing command:
 	## find . -user root
-	
-
-
-
-

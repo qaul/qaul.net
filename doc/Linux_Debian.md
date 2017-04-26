@@ -24,7 +24,7 @@ Download and Build
 ------------------
 
 	# Download source code from github
-	git clone https://github.com/WachterJud/qaul.net.git
+	git clone --recursive https://github.com/qaul/qaul.net.git
 	
 	# create build directory
 	cd qaul.net

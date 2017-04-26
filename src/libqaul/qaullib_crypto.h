@@ -20,6 +20,14 @@ extern "C" {
 int Ql_sha1_file(char *filepath, unsigned char *hash);
 
 /**
+ * create a sha1 @a hash from a @a filepointer.
+ *
+ * @retval 1 on success
+ * @retval 0 on error
+ */
+int Ql_sha1_filepointer(FILE *filepointer, unsigned char *hash);
+
+/**
  * create @a string from @a hash
  *
  * @retval 1 on success
