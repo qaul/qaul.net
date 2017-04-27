@@ -35,24 +35,24 @@ Code according to the example:
  */
 int qluser_something_rather(int param, int otherparam)
 {
-  int local_var;
+    int local_var;
 
-  if (local_var == value)
-    do something;
+    if(local_var == value)
+        do_something;
 
-  /** Use block comments for blocks of code */
-  if (local_var == value) {
-    do_this;
-    do_that;
+    /** Use block comments for blocks of code */
+    if(local_var == value) {
+        do_this;
+        do_that;
 
-  } else {
+    } else {
 
-    /* Or for single (complicated) lines */
-    do_another_thing;
-  }
+        /* Or for single (complicated) lines */
+        do_another_thing;
+    }
 
-  // Or use line-comments. Just be consistent within the same file
-  return 1;
+    // Or use line-comments. Just be consistent within the same file
+    return 1;
 }
 ```
 
