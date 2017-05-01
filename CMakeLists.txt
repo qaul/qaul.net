@@ -169,8 +169,6 @@ else ()
     message(FATAL_ERROR "Dont know how to build ui '${GUI}'")
 endif ()
 
-add_subdirectory (src/client/dbg)
-
 # build qauld the qaul.net daemon 
 if (${PORT} STREQUAL "LINUX")
     add_subdirectory (src/daemon/linux)
