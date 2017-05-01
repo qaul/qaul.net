@@ -1,10 +1,12 @@
 Crypto module API
-============
+=================
 
-Because there are no auto-generated API docs, here is as raw API documentation as is possible.
+This is as raw API documentation, as there is no auto-generated API 
+documentation at the moment.
 
 
-## Arbiter
+Arbiter
+-------
 
 ```C
 /**
