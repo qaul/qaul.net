@@ -1,51 +1,80 @@
 Code Style Guide
 ================
 
+The coding style conventions were changed April-May 2017 
+
 Naming Conventions
 ------------------
 
-* Functions: start with an upper case character
-  * qaullib prefix:     Ql_ (TODO: rename existing functions accordingly )
-* Variables: start with an lower case character
-  * qaullib prefix for public:  ql_ (TODO: rename existing variables accordingly)
-
+* All functions and variable names are written lower case and concatinated with `_`
+* Functions: start with `ql` which stands for QauL or QaulLib.
+  * Each module has it's own namespace identifier. For example crypto functions start with `qlcry`
+  * Try to use short (but easily readable) namespace handles. For example `qluser` instead of `qlusr`
+  * Try to avoid overly long handles such as `qlmessaging` and instead use `qlmesg`
+* Variable names should be precise in their function or value. No single letter variables
+  * Exceptions are index variables for arrays or loops
+  * Local variables have no guidelines beyond these common sense rules
+  * Global variables (fields, static state, etc.) should begin with the same namespace handle as the rest of the module
+    * Normal variables are all lowercase such as `qlcry_arbiter` or `qlmesg_local_buffer`
+    * Constant values should be defined via `#define` and use ALL-CAPS names such as `QLCRY_THREAD_LIMIT`
+* Structs and enums should use the same namespace handles as the rest of the module
+  * Structs that implement a context for something should end in `_ctx` (such as `qlcry_arbit_ctx`)
+  * Enums that make type-destinctions should end in `_t` (such as `qlcry_cipher_t`)
 
 Code Style
 ----------
 
-Use tabs to indent code.
+Use **4** spaces to indent code.
 Code according to the example:
 
 ```
-int Ql_FunctionName(int param, int otherparam)
+/**
+ * A function should ALWAYS have a standardised block comment above it that
+ * explains what it does, roughly what it's side 
+ *
+ */
+int qluser_something_rather(int param, int otherparam)
 {
-  int variable_name
+    int local_var;
 
-  if (variable_name == value)
-    do something;
+    if(local_var == value)
+        do_something;
 
-  if (variable_name == value)
-  {
-    do this;
-    do that;
-  }
-  else
-  {
-    do another thing;
-  }
+    /** Use block comments for blocks of code */
+    if(local_var == value) {
+        do_this;
+        do_that;
 
-  return 1;
+    } else {
+
+        /* Or for single (complicated) lines */
+        do_another_thing;
+    }
+
+    // Or use line-comments. Just be consistent within the same file
+    return 1;
 }
 ```
-
-Editor styles:
-* Tab width: 4
 
 
 Clustering
 ----------
 
-The functions of a functional module shall be clustered in one file.
+Files that belong to a single module should be kept in a folder. All files in this
+folder then share the same namespace prefix (such as `qlcry`) as described above.
+Modules are complex and sometimes it's better to move functionality into seperate files
+which is why they are folders and can contain multiple files.
+
+The crypto submodule for example consists of
+
+ * `qlcry_arbit`
+ * `qlcry_keygen`
+ * `qlcry_keystore`
+ * `qlcry_context`
+ * etc.
+
+Other modules should make use of a similar name-spacing scheme to make sure that code files
+don't get too long but can still be associated with the rest of their module correctly.
 
 
 Comments & Documentation
@@ -55,8 +84,7 @@ The documentation shall be as much in the code as possible. The comments shall
 be done in a [doxygen](https://en.wikipedia.org/wiki/Doxygen) compatible manner.
 
 Every function shall be documented before it's declaration (in the header file).
-Every header file shall start with an explanation of what this module does.
-Try to write self explanatory code with meaningful function and variable names.
+Every header file shall start with an explanation of what it does.
 
 Example template for a header file:
 
@@ -66,22 +94,26 @@ Example template for a header file:
  * licensed under GPL (version 3)
  */
 
-/**
- * example template that explains the formatting and use of comments in qaul.net
+/*********************************************************************************
  *
- * functions in the public API
- *   void Ql_FunctionInThePublicAPI(void);
- *   void Ql_OtherFunctionInThePublicAPI(int commandId);
- * @see include/qaullib.h
+ * Something that explains the core functionality of this file. For example
+ * I could be writing here that these functions are used to generate user-id's
+ * or something.
+ *
+ * But I shouldn't mention specific functions here, just general usecases
+ *
+ *********************************************************************************
  */
 
 /**
  * Example function needing @a param and @a otherparam for example reason
  *
- * @retval 1 example was successful
- * @retval 0 example failed
+ * @param Description of method's or function's input parameter
+ * @param ...
+ *
+ * @return Description of the return value
  */
-int Ql_FunctionName(int param, int otherparam);
+int qlstuff_submodule_function(int param, int otherparam);
 ```
 
 
