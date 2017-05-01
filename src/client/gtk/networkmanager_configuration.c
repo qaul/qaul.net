@@ -891,6 +891,9 @@ int qaul_network_connection_deactivate(DBusConnection* dbus_connection, qaul_dbu
 	return 1;
 }
 
+/**
+ * Add connection settings to network manager
+ */
 int qaul_network_settings_add(DBusConnection* dbus_connection, qaul_dbus_connection_settings* settings, qaul_network_settings* network, qaul_dbus_device_properties* device)
 {
 	DBusMessage* msg;
@@ -1121,6 +1124,16 @@ int qaul_network_settings_add(DBusConnection* dbus_connection, qaul_dbus_connect
 	return 1;
 }
 
+/**
+ * delete network @a settings via network manager over @a dbus_connection .
+ *
+ * @retval 1 success
+ * @retval 0 error
+ *
+ * https://developer.gnome.org/NetworkManager/unstable/spec.html
+ * org.freedesktop.NetworkManager.Settings.Connection
+ * Delete ( ) → nothing
+ */
 int qaul_network_settings_delete(DBusConnection* dbus_connection, qaul_dbus_connection_settings* settings)
 {
 	DBusMessage* msg;

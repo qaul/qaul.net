@@ -130,6 +130,8 @@ int Qaullib_MsgAdd(struct qaul_msg_LL_item *item)
 	msg_item.ipv = item->ipv;
 	memcpy(&msg_item.ip_union, &item->ip_union, sizeof(msg_item.ip_union));
 
+//	qcry_arbit_verify()
+
 	// add to DB
 	Qaullib_MsgAdd2DB(&msg_item);
 
