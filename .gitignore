@@ -39,3 +39,4 @@ android/app/src/main/res/raw/wificonfig
 
 # IDE Settings
 /.project
+/.idea

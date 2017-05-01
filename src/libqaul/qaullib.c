@@ -5,6 +5,10 @@
 
 #include "qaullib.h"
 #include "qaullib_private.h"
+#include "crypto/qcry_arbiter.h"
+
+/** Static reference to the arbiter */
+static struct qcry_arbit_ctx *qcry_arbit;
 
 // ------------------------------------------------------------
 void Qaullib_Init(const char* homePath, const char* resourcePath)
@@ -16,6 +20,8 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	qaul_new_msg = 0;
 	ipc_connected = 0;
 	qaul_username_set = 0;
+    qaul_fingerprint_set = 0;
+	qaul_currusrno = -1;
 	qaul_locale_set = 0;
 	qaul_ip_set = 0;
 	qaul_gui_pagename_set = 0;
@@ -91,7 +97,7 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 	strcat(filesPath, "/files/");
 #endif
 
-	// set url rewrites
+    // set url rewrites
 	strcpy(webUrlRewrites, "/files/=");
 	strcat(webUrlRewrites, filesPath);
 
@@ -118,6 +124,10 @@ void Qaullib_Init(const char* homePath, const char* resourcePath)
 		Qaullib_DbPopulateConfig();
 		Qaullib_FilePopulate();
 	}
+
+	// Intialise crypto arbiter with our contact book TODO: Implement contact book
+    int ret = qcry_arbit_init(QAUL_CONC_LOCK, homePath, NULL);
+	printf("Initialising CRYPTO ARBITER...%s!\n", ret ? "FAILED" : "OK");
 
 	// initialize linked lists
 	Qaullib_UserInit();
@@ -150,6 +160,9 @@ void Qaullib_Exit(void) //destructor
 		Qaullib_IpcClose();
 	}
 	else printf("ipc not connected\n");
+
+	// Make sure we properly free all crypto data before we terminate
+	qcry_arbit_free();
 
 	// close web server
 	Ql_Www_ServerStop(&ql_webserver_instance);
@@ -367,7 +380,7 @@ int Qaullib_WebserverStart(void)
 	// OSX captive portal check
 	// if it doesn't find this page, OSX wont be able to download the installers from the captive portal
 	mg_register_http_endpoint(conn, "/hotspot-detect.html", Ql_WwwOsxCaptivePortalDetection);
-
+	mg_register_http_endpoint(conn, "/crygetinfo", 			Ql_WwwCryGetInfo);
 
 	mg_start_thread(Ql_Www_Server, &ql_webserver_instance);
 

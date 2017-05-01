@@ -18,15 +18,24 @@
 extern "C" {
 #endif // __cplusplus
 
+#include "qaullib_defines.h"
 
 /**
  * user connection structure
  */
 struct qaul_user_connection
 {
-	struct qaul_wget_connection conn;
-	struct qaul_user_LL_item   *user;
+	struct qaul_wget_connection     conn;
+	struct qaul_user_LL_item        *user;
 };
+
+/** Structure to hold end user data. Builds the layer between crypto and routing */
+typedef struct {
+    struct qaul_user_connection     userconnections[MAX_USER_CONNECTIONS];
+    char                            *username;
+    unsigned char					fp[QAUL_FP_LEN];
+    union olsr_ip_addr              *ip;
+} qaul_cry_user;
 
 /**
  * array of user connections
@@ -99,7 +108,7 @@ void Qaullib_UserAddInfo(struct qaul_userinfo_msg *userinfo);
  * this function adds names to the user entries in the user LL
  * it creates new entries if a user does not exist yet
  */
-void Qaullib_UserAdd(union olsr_ip_addr *ip, char *name, char *iconhash, char *suffix);
+void Qaullib_UserAdd(union olsr_ip_addr *ip, char *name, char *fingerprint);
 
 /**
  * add a favorite

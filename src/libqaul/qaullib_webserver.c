@@ -132,8 +132,9 @@ void Ql_WwwEvent_handler(struct mg_connection *conn, int event, void *event_data
 // ------------------------------------------------------------
 void Ql_WwwSetName(struct mg_connection *conn, int event, void *event_data)
 {
-	char username[3*MAX_USER_LEN +1];
-	char protected_username[MAX_USER_LEN +1];
+	char username[3 * MAX_USER_LEN + 1];
+	char passphrase[MAX_PASSPHRASE_LEN + 1];
+	char protected_username[MAX_USER_LEN + 1];
 	struct http_message *hm = (struct http_message *) event_data;
 
 	if(Ql_Www_IsLocalIP(conn) == 0)
@@ -144,12 +145,21 @@ void Ql_WwwSetName(struct mg_connection *conn, int event, void *event_data)
 	printf("user name len: %i\n", (int)strlen(username));
 	memcpy(&username[MAX_USER_LEN], "\0", 1);
 
+    // Fetch passphrase
+    mg_get_http_var(&hm->body, "p", passphrase, sizeof(passphrase));
+    printf("passphrase len: %i\n", (int) strlen(passphrase));
+    memcpy(&passphrase[MAX_PASSPHRASE_LEN], "\0", 1);
+
 	if(Qaullib_StringNameProtect(protected_username, username, sizeof(protected_username)) > 0)
 	{
 		printf("save user name len %i: ", (int)strlen(protected_username));
 		printf("%s  \n", protected_username);
 		Qaullib_SetUsername(protected_username);
 	}
+
+	/** After handling the UI request, we create a new crypto user**/
+	int ret = qcry_arbit_usrcreate(&qaul_currusrno, username, passphrase, QCRY_KEYS_RSA);
+	printf("Creating new crypto user...%s!\n", (ret == 0) ? "OK" : "FAILED");
 
 	// send header
 	mg_printf(conn, "HTTP/1.1 200 OK\r\n"
@@ -158,6 +168,7 @@ void Ql_WwwSetName(struct mg_connection *conn, int event, void *event_data)
 
 	mg_printf(conn, "{}");
 	conn->flags |= MG_F_SEND_AND_CLOSE;
+
 }
 
 // ------------------------------------------------------------
@@ -1823,6 +1834,7 @@ void Ql_WwwPubUsers(struct mg_connection *conn, int event, void *event_data)
 // ------------------------------------------------------------
 void Ql_WwwPubMsg(struct mg_connection *conn, int event, void *event_data)
 {
+//    char msg_signature[QAUL_MAX_SIGN_LEN];
 	char encoded_msg[3*MAX_MESSAGE_LEN +1];
 	char encoded_name[3*MAX_USER_LEN +1];
 	char *local_msg;
@@ -1860,6 +1872,9 @@ void Ql_WwwPubMsg(struct mg_connection *conn, int event, void *event_data)
 	// todo: ipv6
 	msg_item.ipv = 4;
 	msg_item.ip_union.v4 = conn->sa.sin.sin_addr;
+
+    // Sign message with current private key
+//    qcry_arbit_signmsg(qaul_currusrno, )
 
   	// save Message
 	Qaullib_MsgAdd(&msg_item);
@@ -2670,6 +2685,22 @@ void Ql_WwwExtBinaries(struct mg_connection *conn, int event, void *event_data)
 	mg_printf(conn, "\n}");
 
 	conn->flags |= MG_F_SEND_AND_CLOSE;
+}
+
+/**
+ * Crypto access functions
+ * This might massively change.
+ *
+ * Web stuff is weird :)
+ */
+void Ql_WwwCryGetInfo(struct mg_connection *conn, int event, void *event_data)
+{
+	printf("This is something fun happening!\n");
+	// TODO: Get list of available users and return them
+}
+void Ql_WwwCryInitialise(struct mg_connection *conn, int event, void *event_data)
+{
+	// TODO: Get data from json message and initialise new user
 }
 
 // ------------------------------------------------------------

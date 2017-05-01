@@ -11,6 +11,8 @@ extern "C" {
 #endif // __cplusplus
 
 #include "qaullib_defines.h"
+#include "crypto/qcry_helper.h"
+#include "crypto/qcry_arbiter.h"
 
 /**
  * The message linked list contains all recently received messages.
@@ -20,12 +22,13 @@ extern "C" {
 struct qaul_msg_LL_item {
 	struct qaul_msg_LL_item *next;            /// next node
 	struct qaul_msg_LL_item *prev;            /// previous node
-
     int  id;                                  /// data base ID of the file entry
-    int  type;                                /// type of the file, see QAUL_MSGTYPE_XXX
-    char name[MAX_USER_LEN +1];               /// senders qaul user name
-    char msg[MAX_MESSAGE_LEN +1];             /// chat message
-    int  time;                                /// time when message was sent or received
+	int  type;                                /// type of the file, see QAUL_MSGTYPE_XXX
+	char name[MAX_USER_LEN +1];               /// senders qaul user name
+	char msg[MAX_MESSAGE_LEN +1];             /// chat message
+	char signature[QAUL_SIGNATURE_LEN];		  ///
+	char fingerprint[QAUL_FINGERPRINT];		  /// user fingerprint. Might be null
+	int  time;                                /// time when message was sent or received
     int  read;                                /// 1 if message has been read by the GUI,
     										  /// 0 if message has not been read
     int  ipv;                                 /// IP version protocol: 4 | 6

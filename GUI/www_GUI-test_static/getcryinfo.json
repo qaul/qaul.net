@@ -1,0 +1,11 @@
+{
+  "locale":"en",
+  "name":"MyUserName",
+  "is_mobile":true,
+  "msg_max":20,
+  "c_quit":true,
+  "c_debug":true,
+  "c_interface":true,
+  "c_internet":true,
+  "c_network":true
+}

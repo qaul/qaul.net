@@ -208,6 +208,16 @@ void Ql_WwwExtBinaries(struct mg_connection *conn, int event, void *event_data);
 void Ql_WwwLoading(struct mg_connection *conn, int event, void *event_data);
 
 /**
+ * Crypto access functions
+ * This might massively change.
+ *
+ * Web stuff is weird :)
+ */
+void Ql_WwwCryGetInfo(struct mg_connection *conn, int event, void *event_data);
+void Ql_WwwCryInitialise(struct mg_connection *conn, int event, void *event_data);
+void Ql_WwwCryCreateUsr(struct mg_connect *conn, int event, void *event_data);
+
+/*
  * OSX captive portal checking fix
  *
  * OSX checks for captive portals, if this page is not returned, OSX users can't download binaries
@@ -217,6 +227,7 @@ void Ql_WwwLoading(struct mg_connection *conn, int event, void *event_data);
  * http://captive.apple.com/hotspot-detect.html
  */
 void Ql_WwwOsxCaptivePortalDetection(struct mg_connection *conn, int event, void *event_data);
+
 
 #ifdef __cplusplus
 }

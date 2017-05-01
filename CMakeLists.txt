@@ -84,6 +84,8 @@ elseif (${GUI} STREQUAL "QT5")
     set (GUINAME "qaul-qt5")
 elseif (${GUI} STREQUAL "CLI")
     set (GUINAME "qaul-cli")
+elseif (${GUI} STREQUAL "DBG")
+    set (GUINAME "qaul-dbg")
 else ()
     set (GUINAME "qaul")
 endif ()
@@ -167,12 +169,12 @@ else ()
     message(FATAL_ERROR "Dont know how to build ui '${GUI}'")
 endif ()
 
+add_subdirectory (src/client/dbg)
 
 # build qauld the qaul.net daemon 
 if (${PORT} STREQUAL "LINUX")
     add_subdirectory (src/daemon/linux)
 endif ()
-
 
 # final status summary report
 message(STATUS "#############################################")
