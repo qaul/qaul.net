@@ -21,6 +21,12 @@ target_include_directories (olsrd_qaul PRIVATE
     ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/src
 )
 
+if (${PORT} STREQUAL "WINDOWS")
+    target_include_directories (olsrd_qaul PRIVATE ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/src/win32)
+    target_link_libraries(olsrd_qaul PRIVATE ${CMAKE_BINARY_DIR}/third_party/olsr/src/olsr/libolsrd.a)
+    target_link_libraries(olsrd_qaul PRIVATE ws2_32)
+endif()
+
 install(TARGETS olsrd_qaul DESTINATION lib/qaul/lib)
 
 add_custom_target(olsrd_qaul_android
