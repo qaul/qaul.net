@@ -15,7 +15,7 @@ set_target_properties (olsrd_qaul PROPERTIES PREFIX "")
 set_target_properties (olsrd_qaul PROPERTIES VERSION ${QPLUG_VERSION_STRING})
 set_target_properties (olsrd_qaul PROPERTIES LINK_FLAGS -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/version-script.txt)
 
-add_dependencies (olsrd_qaul olsr)
+add_dependencies (olsrd_qaul olsr libqaul)
 
 target_include_directories (olsrd_qaul PRIVATE
     ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/src
