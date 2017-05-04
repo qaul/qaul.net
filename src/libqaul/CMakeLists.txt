@@ -113,14 +113,13 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
 
     # Crypto module
     qaullib_crypto.c
-    qcry_wrapper.c
     crypto/qcry_context.c
     crypto/qcry_arbiter.c
     crypto/qcry_hashing.c
     crypto/qcry_helper.c
     crypto/qcry_keys.c
     crypto/qcry_keystore.c
-    
+
     qaullib_udp_communication.c
     captive/qaullib_captive.c
     captive/qaullib_captive_dhcp.c
