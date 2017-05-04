@@ -40,7 +40,7 @@ set (QAUL_BINDIR "NONE" CACHE STRING "if set a wrapper shell script will be inst
 
 # What to build
 # Determine the operating system
-set (ALL_PORTS ANDROID OPENWRT WINDOWS OSX IOS LINUX)
+set (ALL_PORTS ANDROID WINDOWS OSX IOS LINUX)
 STRING (TOUPPER "${PORT}" PORT)
 set (PORT "AUTO" CACHE STRING "choose which qaul port to build (one of ${ALL_PORTS})")
 
@@ -125,8 +125,6 @@ if (${PORT} STREQUAL "LINUX")
     include(cmake/BuildLinux.cmake)
 elseif (${PORT} STREQUAL "ANDROID")
     include(cmake/BuildAndroid.cmake)
-elseif (${PORT} STREQUAL "OPENWRT")
-    include(cmake/BuildOpenWrt.cmake)
 elseif (${PORT} STREQUAL "OSX")
     include(cmake/BuildOSX.cmake)
 elseif (${PORT} STREQUAL "WINDOWS")
