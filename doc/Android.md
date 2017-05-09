@@ -24,8 +24,7 @@ The following programs and libraries need to be installed:
 * lib32stdc++6
 * lib32z1
 
-	# install ant on Debian / Ubuntu Linux
-	sudo apt-get install ant lib32stdc++6 lib32z1
+This can be done by rinning the following command: `sudo apt-get install ant lib32stdc++6 lib32z1`
 
 
 ### Android Studio
