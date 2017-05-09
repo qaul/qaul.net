@@ -34,7 +34,7 @@ int Ql_sha1_file(char *filepath, unsigned char *hash)
 // ------------------------------------------------------------
 int Ql_sha1_filepointer(FILE *filepointer, unsigned char *hash)
 {
-    int ret;
+    int ret; 
     size_t n;
 	mbedtls_sha1_context ctx;
     unsigned char buf[1024];
@@ -68,12 +68,11 @@ cleanup:
 // ------------------------------------------------------------
 int Ql_HashToString(unsigned char *hash, char *string)
 {
-	int i;
 
 	Ql_log_debug("Ql_HashToString");
 
 	// FIXME: big-endian / little-endian
-	for(i=0;i<MAX_HASH_LEN;i++)
+	for(int i=0;i<MAX_HASH_LEN;i++)
 	{
 		sprintf(string+(i*2),"%02x",hash[i]);
 	}
@@ -83,17 +82,17 @@ int Ql_HashToString(unsigned char *hash, char *string)
 // ------------------------------------------------------------
 int Ql_StringToHash(char *string, unsigned char *hash)
 {
-	int i, j;
+	
 	uint8_t mybyte;
 
 	// fill hash with zeros
 	memset(hash, 0, MAX_HASH_LEN);
 
-	for(i=0;i<MAX_HASH_LEN;i++)
+	for(int i=0;i<MAX_HASH_LEN;i++)
 	{
 		mybyte = 0;
 
-		for(j=0;j<2;j++)
+		for(int j=0;j<2;j++)
 		{
 			if(strncmp(string+i*2+j,"0",1)==0)
 				mybyte |= 0;
