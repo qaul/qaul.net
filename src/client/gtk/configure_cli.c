@@ -5,6 +5,7 @@
 
 //#include <regex.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <QaulConfig.h>
@@ -260,7 +261,7 @@ static int qaul_extractNetworkInterface_cli(const char* line, char* interface_na
 		if(len > 0 && len < IFNAMSIZ)
 		{
 			strncpy(interface_name, &line[start], len);
-			strncpy(&interface_name[len], "\0", len);
+			strncpy(&interface_name[len], "\0", 1);
 			success = 1;
 			
 			printf("interface_name: %s\n", interface_name);

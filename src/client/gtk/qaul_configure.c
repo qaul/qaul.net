@@ -42,7 +42,11 @@ int qaul_configure(void)
     	{
     		printf("[configure] interface manually configured\n");
     		if(qaul_findNetworkInterface(Qaullib_GetInterface()))
+    		{
     			network_interface_found = 1;
+    			strncpy(network_settings.interface_name, Qaullib_GetInterface(), sizeof(network_settings.interface_name));
+    			strncpy(&network_settings.interface_name[sizeof(network_settings.interface_name)], "\0", 1);
+    		}
     		else
     			printf("[configure] manually configured interface \"%s\" not found\n", Qaullib_GetInterface());
     	}
