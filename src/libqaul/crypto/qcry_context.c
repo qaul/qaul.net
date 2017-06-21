@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 #include <memory.h>
-#include <zconf.h>
 
 #include "qcry_context.h"
 #include "qcry_keys.h"
