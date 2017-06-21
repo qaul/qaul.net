@@ -22,6 +22,7 @@
 #include <mbedtls/ctr_drbg.h>
 #include <qaullib/qcry_hashing.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "qcry_helper.h"
 
