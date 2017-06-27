@@ -15,6 +15,10 @@ Download and Build
 ------------------
 
 	# Download source code from github
+	# qaul.net uses git submodules, therefore qaul.net should be cloned recursively or
+	# the submodules must be initialized and updated separately
+	## git submodule init
+	## git submodule update
 	git clone --recursive https://github.com/qaul/qaul.net.git
 	
 	# create build directory
