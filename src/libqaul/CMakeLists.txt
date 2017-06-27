@@ -34,26 +34,49 @@ else ()
 #       ${PJBASE}third_party/srtp/include
     )
 
-    set (VOIP_LINK_LIBRARIES
-        ${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
-        ${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
-        ${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
-        ${PJBASE}/pjsip/lib/libpjsip-simple-${PJSIPTYPE}.a
-        ${PJBASE}/pjmedia/lib/libpjmedia-codec-${PJSIPTYPE}.a
-        ${PJBASE}/pjmedia/lib/libpjmedia-${PJSIPTYPE}.a
-        ${PJBASE}/pjmedia/lib/libpjmedia-audiodev-${PJSIPTYPE}.a
-        ${PJBASE}/pjmedia/lib/libpjmedia-videodev-${PJSIPTYPE}.a
-        ${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
-        ${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
-        ${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
-        ${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
-        ${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
-        ${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
-        ${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
-        ${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
-        ${PJBASE}/third_party/lib/libwebrtc-${PJSIPTYPE}.a
-        ${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
-    )
+	if (Raspberry)
+		set (VOIP_LINK_LIBRARIES
+			${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
+			${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
+			${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
+			${PJBASE}/pjsip/lib/libpjsip-simple-${PJSIPTYPE}.a
+			${PJBASE}/pjmedia/lib/libpjmedia-codec-${PJSIPTYPE}.a
+			${PJBASE}/pjmedia/lib/libpjmedia-${PJSIPTYPE}.a
+			${PJBASE}/pjmedia/lib/libpjmedia-audiodev-${PJSIPTYPE}.a
+			${PJBASE}/pjmedia/lib/libpjmedia-videodev-${PJSIPTYPE}.a
+			${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
+			${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
+#			${PJBASE}/third_party/lib/libwebrtc-${PJSIPTYPE}.a
+			${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
+		)
+	else ()
+		set (VOIP_LINK_LIBRARIES
+			${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
+			${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
+			${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
+			${PJBASE}/pjsip/lib/libpjsip-simple-${PJSIPTYPE}.a
+			${PJBASE}/pjmedia/lib/libpjmedia-codec-${PJSIPTYPE}.a
+			${PJBASE}/pjmedia/lib/libpjmedia-${PJSIPTYPE}.a
+			${PJBASE}/pjmedia/lib/libpjmedia-audiodev-${PJSIPTYPE}.a
+			${PJBASE}/pjmedia/lib/libpjmedia-videodev-${PJSIPTYPE}.a
+			${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
+			${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
+			${PJBASE}/third_party/lib/libwebrtc-${PJSIPTYPE}.a
+			${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
+		)
+	endif ()
 endif ()
 
 if (${PORT} STREQUAL "WINDOWS")
