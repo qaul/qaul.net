@@ -25,6 +25,7 @@ ExternalProject_Add(portfwd
 )
 endif()
 
+if (NOT USE_SYSTEM_OLSRD)
 ExternalProject_Add(olsr
     DEPENDS dl_olsr
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/olsr
@@ -34,3 +35,4 @@ ExternalProject_Add(olsr
     BUILD_COMMAND make DEBUG=0 olsrd libs
     INSTALL_COMMAND ""
 )
+endif()
