@@ -13,6 +13,7 @@ ExternalProject_Add(pjsip
 )
 endif()
 
+if (PORTFWD)
 ExternalProject_Add(portfwd
     DEPENDS dl_portfwd
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/portfwd
@@ -23,6 +24,7 @@ ExternalProject_Add(portfwd
     BUILD_COMMAND make
     INSTALL_COMMAND ""
 )
+endif()
 
 ExternalProject_Add(olsr
     DEPENDS dl_olsr

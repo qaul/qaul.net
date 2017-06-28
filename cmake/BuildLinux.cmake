@@ -1,6 +1,7 @@
 
 find_package (PkgConfig)
 pkg_check_modules (DBUS1 REQUIRED dbus-1)
+option (PORTFWD "Build portfwd tool" ON)
 pkg_check_modules (UUID uuid)
 pkg_check_modules (OPENCORE_AMRNB opencore-amrnb)
 pkg_check_modules (OPENCORE_AMRWB opencore-amrwb)
@@ -45,8 +46,10 @@ INSTALL( DIRECTORY ${PROJECT_BINARY_DIR}/distfiles/linux/etc DESTINATION lib/qau
 install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/olsrd DESTINATION lib/qaul/bin
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
+if (PORTFWD)
 install(FILES ${PROJECT_BINARY_DIR}/third_party/portfwd/src/portfwd/src/portfwd DESTINATION lib/qaul/bin
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+endif()
 
 install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/lib/dyn_gw/olsrd_dyn_gw.so.0.5 DESTINATION lib/qaul/lib
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
