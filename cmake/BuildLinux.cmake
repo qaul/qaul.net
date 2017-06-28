@@ -1,8 +1,14 @@
 
 find_package (PkgConfig)
-pkg_check_modules (DBUS1 REQUIRED dbus-1)
+
 option (VOIP "Enable VOIP" ON)
+option (DBUS "Use DBus for IPC" ON)
 option (PORTFWD "Build portfwd tool" ON)
+
+if (DBUS)
+    pkg_check_modules (DBUS1 REQUIRED dbus-1)
+endif ()
+
 pkg_check_modules (UUID uuid)
 
 if (VOIP)
