@@ -1,11 +1,14 @@
 
 find_package (PkgConfig)
 pkg_check_modules (DBUS1 REQUIRED dbus-1)
+option (VOIP "Enable VOIP" ON)
 option (PORTFWD "Build portfwd tool" ON)
 pkg_check_modules (UUID uuid)
-pkg_check_modules (OPENCORE_AMRNB opencore-amrnb)
-pkg_check_modules (OPENCORE_AMRWB opencore-amrwb)
 
+if (VOIP)
+    pkg_check_modules (OPENCORE_AMRNB opencore-amrnb)
+    pkg_check_modules (OPENCORE_AMRWB opencore-amrwb)
+endif ()
 find_package (Autotools REQUIRED)
 find_package (BISON REQUIRED) # olsr
 find_package (FLEX REQUIRED) # olsr
