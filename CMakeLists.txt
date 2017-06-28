@@ -165,8 +165,14 @@ else ()
     message(FATAL_ERROR "Dont know how to build ui '${GUI}'")
 endif ()
 
-# build qauld the qaul.net daemon 
 if (${PORT} STREQUAL "LINUX")
+  option (LINUXDAEMON "Use Linux daemon" ON)
+else ()
+  option (LINUXDAEMON "Use Linux daemon" OFF)
+endif ()
+
+# build qauld the qaul.net daemon
+if (LINUXDAEMON)
     add_subdirectory (src/daemon/linux)
 endif ()
 
