@@ -3,6 +3,7 @@ find_package (PkgConfig)
 
 option (VOIP "Enable VOIP" ON)
 option (DBUS "Use DBus for IPC" ON)
+option (USE_SYSTEM_OLSRD "Use sytems olsrd package" OFF)
 option (PORTFWD "Build portfwd tool" ON)
 
 if (DBUS)
@@ -15,9 +16,12 @@ if (VOIP)
     pkg_check_modules (OPENCORE_AMRNB opencore-amrnb)
     pkg_check_modules (OPENCORE_AMRWB opencore-amrwb)
 endif ()
-find_package (Autotools REQUIRED)
-find_package (BISON REQUIRED) # olsr
-find_package (FLEX REQUIRED) # olsr
+
+if (NOT USE_SYSTEM_OLSRD)
+    find_package (Autotools REQUIRED)
+    find_package (BISON REQUIRED) # olsr
+    find_package (FLEX REQUIRED) # olsr
+endif ()
 
 add_subdirectory (src/qaulhelper)
 
@@ -60,8 +64,10 @@ install(FILES ${PROJECT_BINARY_DIR}/third_party/portfwd/src/portfwd/src/portfwd 
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif()
 
+if (NOT USE_SYSTEM_OLSRD)
 install(FILES ${PROJECT_BINARY_DIR}/third_party/olsr/src/olsr/lib/dyn_gw/olsrd_dyn_gw.so.0.5 DESTINATION lib/qaul/lib
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+endif()
 
 include(cmake/PacketFormatGuesser.cmake)
 
