@@ -1,11 +1,7 @@
 # Mongoose
 set (MONGOOSE_DIR ${CMAKE_SOURCE_DIR}/third_party/mongoose)
 
-if (VOIP STREQUAL "NO")
-    set (VOIP_SOURCES
-        qaullib_voip_dummy.c
-    )
-else ()
+if (VOIP)
     if (${PORT} STREQUAL "LINUX")
         find_package(ALSA REQUIRED)
     endif ()
@@ -146,8 +142,7 @@ target_link_libraries(libqaul PUBLIC ${install_dir}/mbedtls/lib/libmbedcrypto.a)
 # since the name starts with 'lib' don't add it again
 set_target_properties (libqaul PROPERTIES PREFIX "")
 
-if (VOIP STREQUAL "NO")
-else ()
+if (VOIP)
     add_dependencies(libqaul
         ${VOIP_DEPENDENCIES}
     )

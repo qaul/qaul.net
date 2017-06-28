@@ -1,6 +1,5 @@
 
-if (VOIP STREQUAL NO)
-else ()
+if (VOIP)
 ExternalProject_Add(pjsip
     DEPENDS dl_pjsip
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/pjsip
