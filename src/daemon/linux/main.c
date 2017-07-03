@@ -29,6 +29,13 @@ int main(int argc, char *argv[])
         snprintf(prefix, FILENAME_MAX, "%s/lib/qaul", QAUL_ROOT_PATH);
 
 	Qaullib_Init(cCurrentPath, prefix);
+
+	// set configuration
+	Qaullib_SetConf(QAUL_CONF_INTERFACE);
+	Qaullib_SetConf(QAUL_CONF_INTERNET);
+	Qaullib_SetConf(QAUL_CONF_NETWORK);
+	Qaullib_SetConf(QAUL_CONF_QUIT);
+
 	// enable debug menu
 	qaul_conf_debug = 1;
 
