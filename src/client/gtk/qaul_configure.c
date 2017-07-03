@@ -115,7 +115,10 @@ int qaul_configure(void)
     // start olsrd
     if(qaulConfigureCounter == 40)
     {
-        printf("[configure] start olsrd \n");
+    	printf("[configure] start olsrd \n");
+
+    	// stop already running olsrd
+    	qaul_olsrdStop();
 
         // start olsrd
         qaul_olsrdStart();
