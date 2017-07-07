@@ -209,7 +209,7 @@ void Qaullib_IpcEvaluateMessage(union olsr_message *msg)
 		case QAUL_USERHELLO_MESSAGE_TYPE:
 			Qaullib_IpcEvaluateUserhello(msg);
 			break;
-        case QAUL_USERHI_CRY_MESSAGE_TYPE:
+        case QAUL_USERHELLO_CRY_MESSAGE_TYPE:
             Qaullib_IpcEvaluateUserhelloCrypto(msg);
             break;
 		case QAUL_FILEDISCOVER_MESSAGE_TYPE:
@@ -525,7 +525,7 @@ void Qaullib_IpcSendCryUserhello(void)
 	memset(&m->v4.originator, 0, sizeof(m->v4.originator));
 
 	/* Set the message type */
-	m->v4.olsr_msgtype = QAUL_USERHI_CRY_MESSAGE_TYPE;
+	m->v4.olsr_msgtype = QAUL_USERHELLO_CRY_MESSAGE_TYPE;
 
 	/* Set the username */
 	memcpy(&m->v4.message.cryuserhello.name, qaul_username, MAX_USER_LEN);
