@@ -209,9 +209,6 @@ void Ql_WwwLoading(struct mg_connection *conn, int event, void *event_data);
 
 /**
  * Crypto access functions
- * This might massively change.
- *
- * Web stuff is weird :)
  */
 void Ql_WwwCryGetInfo(struct mg_connection *conn, int event, void *event_data);
 void Ql_WwwCryInitialise(struct mg_connection *conn, int event, void *event_data);

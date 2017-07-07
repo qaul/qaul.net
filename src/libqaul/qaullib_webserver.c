@@ -2687,17 +2687,14 @@ void Ql_WwwExtBinaries(struct mg_connection *conn, int event, void *event_data)
 	conn->flags |= MG_F_SEND_AND_CLOSE;
 }
 
-/**
- * Crypto access functions
- * This might massively change.
- *
- * Web stuff is weird :)
- */
+// ------------------------------------------------------------
 void Ql_WwwCryGetInfo(struct mg_connection *conn, int event, void *event_data)
 {
-	printf("This is something fun happening!\n");
+	printf("TODO: Get list of available users and return them\n");
 	// TODO: Get list of available users and return them
 }
+
+// ------------------------------------------------------------
 void Ql_WwwCryInitialise(struct mg_connection *conn, int event, void *event_data)
 {
 	// TODO: Get data from json message and initialise new user
