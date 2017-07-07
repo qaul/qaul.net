@@ -109,7 +109,6 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     qaullib_filesharing.c
     qaullib_file_LL.c
     qaullib_exediscovery.c
-    qaullib_crypto.c
 
     # Crypto module
     qaullib_crypto.c
