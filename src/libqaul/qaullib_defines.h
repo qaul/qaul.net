@@ -106,7 +106,7 @@ extern "C" {
 #define QAUL_MSGTYPE_VOIP_OUT       13
 
 #define MAX_FP_LEN	      			64
-#define MAX_SIGNATURE_LEN			1024
+#define MAX_SIGNATURE_LEN			512
 
 struct qaul_userinfo_msg
 {
