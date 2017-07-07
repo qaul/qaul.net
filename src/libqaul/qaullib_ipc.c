@@ -365,11 +365,11 @@ void Qaullib_IpcEvaluateUserhelloCrypto(union olsr_message *msg)
 
     Qaullib_UserAdd(&ip, msg->v4.message.cryuserhello.name, msg->v4.message.cryuserhello.fp);
 
-    char pubkey[QAUL_PUBKEY_LEN];
-    memcpy(pubkey, msg->v4.message.cryuserhello.publickey, QAUL_PUBKEY_LEN);
+    //char pubkey[QAUL_PUBKEY_LEN];
+    //memcpy(pubkey, msg->v4.message.cryuserhello.publickey, QAUL_PUBKEY_LEN);
 
-    /** Add the key we just got from this user to the keystore, bound against the fingerprint */
-    qcry_arbit_addkey(pubkey, QCRY_KEYS_KL_RSA, msg->v4.message.cryuserhello.fp, msg->v4.message.cryuserhello.name);
+    // Add the key we just got from this user to the keystore, bound against the fingerprint
+    //qcry_arbit_addkey(pubkey, QCRY_KEYS_KL_RSA, msg->v4.message.cryuserhello.fp, msg->v4.message.cryuserhello.name);
 }
 
 // ------------------------------------------------------------
