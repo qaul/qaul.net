@@ -227,7 +227,7 @@ struct qaul_userhello_msg
 struct qaul_cryuser_msg
 {
 	char name[MAX_USER_LEN];
-	char publickey[QAUL_PUBKEY_LEN];
+	//char publickey[QAUL_PUBKEY_LEN];
 	char fp[MAX_FP_LEN];
 };
 
@@ -336,7 +336,7 @@ union olsr_msg_union {
     struct qaul_userhello_msg    userhello;
 	struct qaul_cryuser_msg		 cryuserhello;
 	struct qaul_signedchat_msg	 signedchat;
-	struct qaul_cryptedchat_msg	 encryptchat;
+	//struct qaul_cryptedchat_msg	 encryptchat;
     struct qaul_filediscover_msg filediscover;
     struct qaul_exediscover_msg  exediscover;
 };
