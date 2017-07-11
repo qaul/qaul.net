@@ -9,6 +9,10 @@ else ()
 	message(FATAL_ERROR "Something to fix")
 endif ()
 
+if (Raspberry)
+	add_definitions(-DQAUL_STOP_NETWORKING)
+endif ()
+
 add_executable(qaulhelper
 	qaulhelper.c
 	validate.c

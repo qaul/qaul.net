@@ -77,6 +77,19 @@ int disable_wifi (int argc, const char * argv[]);
  */
 int configure_wifi (int argc, const char * argv[]);
 
+#ifdef QAUL_STOP_NETWORKING
+
+/**
+ * stop wpa_supplicant
+ */
+int stop_networking (int argc, const char * argv[]);
+
+/**
+ * restart networking
+ */
+int restart_networking (int argc, const char * argv[]);
+
+#endif // QAUL_STOP_NETWORKING
 #endif // QAUL_PORT_LINUX
 
 
