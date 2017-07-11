@@ -1,4 +1,8 @@
 
+if (Raspberry)
+	add_definitions(-DQAUL_STOP_NETWORKING)
+endif ()
+
 add_executable (qauld
 	main.c
 	../../client/gtk/qaul_configure.c

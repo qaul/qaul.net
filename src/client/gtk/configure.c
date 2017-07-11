@@ -4,7 +4,9 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "qaullib.h"
 #include <QaulConfig.h>
 
 #include "configure.h"

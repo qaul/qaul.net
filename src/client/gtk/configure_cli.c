@@ -14,6 +14,14 @@
 
 
 /**
+ * Convert wifi @a channel number to frequency
+ *
+ * @return wifi frequency
+ */
+static int qaul_channel2frequency(int channel);
+
+
+/**
  * Check if @a interface_name is a wifi interface
  *
  * @retval 1   wifi interface
@@ -355,12 +363,23 @@ void qaul_networkStart_cli(void)
 	
 	printf("qaul_networkStart_cli\n");
 
+
 	// configure wifi
-	// qaulhelper configurewifi <INTERFACE> <ESSID> <CHANNEL> [<BSSID>]
-	// qaulhelper configurewifi wlan0 qaul.net 11 02:11:87:88:D6:FF
 	if(qaul_interfaceIsWifi_cli(network_settings.interface_name))
 	{
-		sprintf(command, "%s/lib/qaul/bin/qaulhelper configurewifi %s %s %i", QAUL_ROOT_PATH, network_settings.interface_name, network_settings.wifi_ssid, network_settings.wifi_channel);
+#ifdef QAUL_STOP_NETWORKING
+
+		// stop wpa_supplicant if needed
+		// qaulhelper stopnetworking
+		// qaulhelper stopnetworking
+		sprintf(command, "%s/lib/qaul/bin/qaulhelper stopnetworking", QAUL_ROOT_PATH);
+		system(command);
+
+#endif // QAUL_STOP_NETWORKING
+
+		// qaulhelper configurewifi <INTERFACE> <ESSID> <FREQUENCY> [<BSSID>]
+		// qaulhelper configurewifi wlan0 qaul.net 2462 02:11:87:88:D6:FF
+		sprintf(command, "%s/lib/qaul/bin/qaulhelper configurewifi %s %s %i", QAUL_ROOT_PATH, network_settings.interface_name, network_settings.wifi_ssid, qaul_channel2frequency(network_settings.wifi_channel));
 		system(command);
 	}
 
@@ -383,7 +402,234 @@ void qaul_networkStop_cli(void)
 
 	// set Interface to DHCP ?
 	
+#ifdef QAUL_STOP_NETWORKING
+
+	// reset networking if wpa_supplicant was killed
+	sprintf(command, "%s/lib/qaul/bin/qaulhelper restartnetworking", QAUL_ROOT_PATH);
+	system(command);
+
+#endif // QAUL_STOP_NETWORKING
+
 	// remove DNS
 	sprintf(command, "%s/lib/qaul/bin/qaulhelper removedns %s", QAUL_ROOT_PATH, network_settings.interface_name);
 	system(command);	
 }
+
+static int qaul_channel2frequency(int channel)
+{
+	int freq;
+
+	switch (channel)
+	{
+		case 1:
+			freq = 2412;
+			break;
+		case 2:
+			freq = 2417;
+			break;
+		case 3:
+			freq = 2422;
+			break;
+		case 4:
+			freq = 2427;
+			break;
+		case 5:
+			freq = 2432;
+			break;
+		case 6:
+			freq = 2437;
+			break;
+		case 7:
+			freq = 2442;
+			break;
+		case 8:
+			freq = 2447;
+			break;
+		case 9:
+			freq = 2452;
+			break;
+		case 10:
+			freq = 2457;
+			break;
+		case 11:
+			freq = 2462;
+			break;
+		case 12:
+			freq = 2467;
+			break;
+		case 13:
+			freq = 2472;
+			break;
+		case 14:
+			freq = 2484;
+			break;
+		case 34:
+			freq = 5170;
+			break;
+		case 36:
+			freq = 5180;
+			break;
+		case 38:
+			freq = 5190;
+			break;
+		case 40:
+			freq = 5200;
+			break;
+		case 42:
+			freq = 5210;
+			break;
+		case 44:
+			freq = 5220;
+			break;
+		case 46:
+			freq = 5230;
+			break;
+		case 48:
+			freq = 5240;
+			break;
+		case 50:
+			freq = 5250;
+			break;
+		case 52:
+			freq = 5260;
+			break;
+		case 54:
+			freq = 5270;
+			break;
+		case 56:
+			freq = 5280;
+			break;
+		case 68:
+			freq = 5290;
+			break;
+		case 60:
+			freq = 5300;
+			break;
+		case 62:
+			freq = 5310;
+			break;
+		case 64:
+			freq = 5320;
+			break;
+		case 100:
+			freq = 5500;
+			break;
+		case 102:
+			freq = 5510;
+			break;
+		case 104:
+			freq = 5520;
+			break;
+		case 106:
+			freq = 5530;
+			break;
+		case 108:
+			freq = 5540;
+			break;
+		case 110:
+			freq = 5550;
+			break;
+		case 112:
+			freq = 5560;
+			break;
+		case 114:
+			freq = 5570;
+			break;
+		case 116:
+			freq = 5580;
+			break;
+		case 118:
+			freq = 5590;
+			break;
+		case 120:
+			freq = 5600;
+			break;
+		case 122:
+			freq = 5610;
+			break;
+		case 124:
+			freq = 5620;
+			break;
+		case 126:
+			freq = 5630;
+			break;
+		case 128:
+			freq = 5640;
+			break;
+		case 132:
+			freq = 5660;
+			break;
+		case 134:
+			freq = 5670;
+			break;
+		case 136:
+			freq = 5680;
+			break;
+		case 138:
+			freq = 5690;
+			break;
+		case 140:
+			freq = 5700;
+			break;
+		case 142:
+			freq = 5710;
+			break;
+		case 144:
+			freq = 5720;
+			break;
+		case 149:
+			freq = 5745;
+			break;
+		case 151:
+			freq = 5755;
+			break;
+		case 153:
+			freq = 5765;
+			break;
+		case 155:
+			freq = 5775;
+			break;
+		case 157:
+			freq = 5785;
+			break;
+		case 159:
+			freq = 5795;
+			break;
+		case 161:
+			freq = 5805;
+			break;
+		case 165:
+			freq = 5825;
+			break;
+		case 183:
+			freq = 4915;
+			break;
+		case 184:
+			freq = 4920;
+			break;
+		case 185:
+			freq = 4925;
+			break;
+		case 187:
+			freq = 4935;
+			break;
+		case 188:
+			freq = 4940;
+			break;
+		case 189:
+			freq = 4945;
+			break;
+		case 192:
+			freq = 4960;
+			break;
+		case 196:
+			freq = 4980;
+			break;
+		default:
+			freq = 2462;
+			break;
+	}
+
+	return freq;
+}
+
