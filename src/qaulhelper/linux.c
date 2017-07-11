@@ -525,7 +525,7 @@ int configure_wifi (int argc, const char * argv[])
 				printf("fork for pid6 failed\n");
 			else if(pid6 == 0)
 			{
-				execl("/sbin/iw", "iw", "dev", argv[2], "join", argv[3], argv[4], argv[5], (char*)0);
+				execl("/sbin/iw", "iw", "dev", argv[2], "ibss", "join", argv[3], argv[4], argv[5], (char*)0);
 			}
 			else
 				waitpid(pid6, &status, 0);
@@ -540,7 +540,7 @@ int configure_wifi (int argc, const char * argv[])
 	            printf("fork for pid6 failed\n");
 	        else if(pid6 == 0)
 	        {
-	            execl("/sbin/iw", "iw", "dev", argv[2], "join", argv[3], argv[4], (char*)0);
+	            execl("/sbin/iw", "iw", "dev", argv[2], "ibss", "join", argv[3], argv[4], (char*)0);
 	        }
 	        else
 	            waitpid(pid6, &status, 0);
