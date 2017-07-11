@@ -84,6 +84,16 @@ int main (int argc, const char * argv[])
         {
             configure_wifi(argc, argv);
         }
+#ifdef QAUL_STOP_NETWORKING
+        else if(strncmp(argv[1], "stopnetworking", 10) == 0)
+        {
+        	stop_networking(argc, argv);
+        }
+        else if(strncmp(argv[1], "restartnetworking", 10) == 0)
+        {
+        	restart_networking(argc, argv);
+        }
+#endif // QAUL_STOP_NETWORKING
 #endif // QAUL_PORT_LINUX
         else if(strncmp(argv[1], "setip", 5) == 0)
         {
@@ -129,15 +139,23 @@ int main (int argc, const char * argv[])
         printf("  qaulhelper startgateway %s %s\n", Help_InterfaceEther, Help_InterfaceWifi);
         printf("  qaulhelper stopgateway <INTERFACE OUT> <INTERFACE IN>\n");
         printf("  qaulhelper stopgateway %s %s\n", Help_InterfaceEther, Help_InterfaceWifi);
+        printf("  qaulhelper configurewifi <INTERFACE> <ESSID> <FREQENCY> [<BSSID>]\n");
+        printf("  qaulhelper configurewifi %s qaul.net 2462 02:11:87:88:D6:FF\n", Help_InterfaceWifi);
+#ifdef QAUL_STOP_NETWORKING
+        printf("  qaulhelper stopnetworking\n");
+        printf("  qaulhelper stopnetworking\n");
+        printf("  qaulhelper restartnetworking\n");
+        printf("  qaulhelper restartnetworking\n");
+#endif // QAUL_STOP_NETWORKING
 #endif // QAUL_PORT_LINUX
 #ifdef QAUL_PORT_OSX
         printf("  qaulhelper startgateway <INTERFACE OUT>\n");
         printf("  qaulhelper startgateway %s\n", Help_InterfaceEther);
         printf("  qaulhelper stopgateway\n");
         printf("  qaulhelper stopgateway\n");
-#endif // QAUL_PORT_OSX
         printf("  qaulhelper configurewifi <INTERFACE> <ESSID> <CHANNEL> [<BSSID>]\n");
         printf("  qaulhelper configurewifi %s qaul.net 11 02:11:87:88:D6:FF\n", Help_InterfaceWifi);
+#endif // QAUL_PORT_OSX
         printf("  qaulhelper setip <INTERFACE> <IP> <SUBNET> <BROADCAST>\n");
         printf("  qaulhelper setip %s 10.213.28.55 8 10.255.255.255\n", Help_InterfaceWifi);
         printf("  qaulhelper setdns <INTERFACE>\n");

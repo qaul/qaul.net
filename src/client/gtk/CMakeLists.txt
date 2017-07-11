@@ -2,6 +2,10 @@
 
 pkg_search_module (WEBKIT REQUIRED webkitgtk-3.0 webkit-1.0)
 
+if (Raspberry)
+	add_definitions(-DQAUL_STOP_NETWORKING)
+endif ()
+
 add_executable (qaul-gtk 
 	main.c
 	qaul_configure.c

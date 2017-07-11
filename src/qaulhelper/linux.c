@@ -19,8 +19,12 @@
  *   qaulhelper startgateway eth0 wlan0
  *   qaulhelper stopgateway <INTERFACE OUT> <INTERFACE IN>
  *   qaulhelper stopgateway eth0 wlan0
- *   qaulhelper configurewifi <INTERFACE> <ESSID> <CHANNEL> [<BSSID>]
- *   qaulhelper configurewifi wlan0 qaul.net 11 02:11:87:88:D6:FF
+ *   qaulhelper configurewifi <INTERFACE> <ESSID> <FREQUENCY> [<BSSID>]
+ *   qaulhelper configurewifi wlan0 qaul.net 2462 02:11:87:88:D6:FF
+ *   qaulhelper stopnetworking
+ *   qaulhelper stopnetworking
+ *   qaulhelper restartnetworking
+ *   qaulhelper restartnetworking
  *   qaulhelper setip <INTERFACE> <IP> <SUBNET> <BROADCAST>
  *   qaulhelper setip wlan0 10.213.28.55 8 10.255.255.255
  *   qaulhelper setdns <INTERFACE>
@@ -435,59 +439,77 @@ int configure_wifi (int argc, const char * argv[])
         
         printf("arv %s %s %s\n", argv[2], argv[3], argv[4]);
 
-        // take wifi interface down
+        // disconnect from any ibss network
         pid1 = fork();
         if (pid1 < 0)
             printf("fork for pid1 failed\n");
         else if(pid1 == 0)
         {
-            execl("/bin/ip", "ip", "link", "set", argv[2], "down", (char*)0);
+            execl("/sbin/iw", "iw", "dev", argv[2], "ibss", "leave", (char*)0);
         }
         else
             waitpid(pid1, &status, 0);
 
-		printf("wifi interface down\n");
+		printf("ibss disconnected\n");
 
-        // set adhoc mode
+
+        // flush IP address
         pid2 = fork();
         if (pid2 < 0)
             printf("fork for pid2 failed\n");
         else if(pid2 == 0)
         {
-            execl("/sbin/iwconfig", "iwconfig", argv[2], "mode", "ad-hoc", (char*)0);
+            execl("/bin/ip", "ip", "addr", "flush", "dev", argv[2], (char*)0);
         }
         else
             waitpid(pid2, &status, 0);
 
-        printf("adhoc mode set\n");
+		printf("ip address flushed\n");
 
-        // set channel
+
+        // take wifi interface down
         pid3 = fork();
         if (pid3 < 0)
             printf("fork for pid3 failed\n");
         else if(pid3 == 0)
         {
-            execl("/sbin/iwconfig", "iwconfig", argv[2], "channel", argv[4], (char*)0);
+            execl("/bin/ip", "ip", "link", "set", argv[2], "down", (char*)0);
         }
         else
             waitpid(pid3, &status, 0);
 
-		printf("channel set\n");
+		printf("wifi interface down\n");
 
-        // set essid
+
+		// set adhoc mode
         pid4 = fork();
         if (pid4 < 0)
             printf("fork for pid4 failed\n");
         else if(pid4 == 0)
         {
-            execl("/sbin/iwconfig", "iwconfig", argv[2], "essid", argv[3], (char*)0);
+            execl("/sbin/iw", "iw", "dev", argv[2], "set", "type", "ibss", (char*)0);
         }
         else
             waitpid(pid4, &status, 0);
 
-		printf("essid set\n");
+        printf("adhoc mode set\n");
 
-		// configure BSSID
+
+        // bring wifi interface up
+        pid5 = fork();
+        if (pid5 < 0)
+            printf("fork for pid5 failed\n");
+        else if(pid5 == 0)
+        {
+            execl("/bin/ip", "ip", "link", "set", argv[2], "up", (char*)0);
+        }
+        else
+            waitpid(pid5, &status, 0);
+
+        printf("wifi interface up\n");
+
+
+		// join network
 		if(argc >= 6)
 		{
 			// validate argument
@@ -497,38 +519,88 @@ int configure_wifi (int argc, const char * argv[])
 				return 0;
 			}
 
-			// take wifi interface down
-			pid5 = fork();
-			if (pid5 < 0)
-				printf("fork for pid5 failed\n");
-			else if(pid5 == 0)
+			// configure essid, channel & bssid
+			pid6 = fork();
+			if (pid6 < 0)
+				printf("fork for pid6 failed\n");
+			else if(pid6 == 0)
 			{
-				execl("/sbin/iwconfig", "iwconfig", argv[2], "ap", argv[5], (char*)0);
+				execl("/sbin/iw", "iw", "dev", argv[2], "join", argv[3], argv[4], argv[5], (char*)0);
 			}
 			else
-				waitpid(pid5, &status, 0);
+				waitpid(pid6, &status, 0);
 
-			printf("BSSID set\n");
+			printf("ESSID, channel & BSSID set\n");
 		}
+		else
+		{
+	        // configure essid & channel
+	        pid6 = fork();
+	        if (pid6 < 0)
+	            printf("fork for pid6 failed\n");
+	        else if(pid6 == 0)
+	        {
+	            execl("/sbin/iw", "iw", "dev", argv[2], "join", argv[3], argv[4], (char*)0);
+	        }
+	        else
+	            waitpid(pid6, &status, 0);
 
-        // bring wifi interface up
-        pid6 = fork();
-        if (pid6 < 0)
-            printf("fork for pid6 failed\n");
-        else if(pid6 == 0)
-        {
-            execl("/bin/ip", "ip", "link", "set", argv[2], "up", (char*)0);
-        }
-        else
-            waitpid(pid6, &status, 0);
-
-        printf("wifi configured\n");
+			printf("ESSID & channel set\n");
+		}
     }
     else
         printf("missing argument\n");
 
 	return 0;
 }
+
+#ifdef QAUL_STOP_NETWORKING
+
+int stop_networking (int argc, const char * argv[])
+{
+    pid_t pid1;
+    int status;
+    printf("stop networking\n");
+
+    // become root
+    setuid(0);
+
+    // kill olsrd
+    pid1 = fork();
+    if (pid1 < 0)
+        printf("fork for pid1 failed\n");
+    else if(pid1 == 0)
+    	execl("/usr/bin/killall", "killall", "wpa_supplicant", (char*)0);
+    else
+        waitpid(pid1, &status, 0);
+
+    printf("networking stopped\n");
+    return 0;
+}
+
+int restart_networking (int argc, const char * argv[])
+{
+    pid_t pid1;
+    int status;
+    printf("restart networking\n");
+
+    // become root
+    setuid(0);
+
+    // kill olsrd
+    pid1 = fork();
+    if (pid1 < 0)
+        printf("fork for pid1 failed\n");
+    else if(pid1 == 0)
+        execl("/etc/init.d/networking", "networking", "restart", (char*)0);
+    else
+        waitpid(pid1, &status, 0);
+
+    printf("networking restarted\n");
+    return 0;
+}
+
+#endif // QAUL_STOP_NETWORKING
 
 int set_ip (int argc, const char * argv[])
 {
