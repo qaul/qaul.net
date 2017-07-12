@@ -29,6 +29,8 @@ set_source_files_properties(${MACOSX_RESOURCE_FILES} PROPERTIES MACOSX_PACKAGE_L
 set(MACOSX_MENU_FILES ${PROJECT_SOURCE_DIR}/src/client/osx/en.lproj/InfoPlist.strings) 
 set_source_files_properties(${MACOSX_MENU_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/en.lproj)
 
+# Mongoose
+set (MONGOOSE_DIR ${CMAKE_SOURCE_DIR}/third_party/mongoose)
 
 add_executable(${PROJECT_NAME} MACOSX_BUNDLE
 	main.m
@@ -64,7 +66,7 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
 	${LIBQAULDIR}/captive/qaullib_captive.c
 	${LIBQAULDIR}/captive/qaullib_captive_dhcp.c
 	${LIBQAULDIR}/captive/qaullib_captive_dns.c
-	${LIBQAULDIR}/mongoose/mongoose.c
+	${LIBQAULDIR}/qmongoose.c
 	${LIBQAULDIR}/sqlite/sqlite3.c
 	${LIBQAULDIR}/urlcode/urlcode.c
 	${LIBQAULDIR}/mbedtls/sha1.c
@@ -90,6 +92,7 @@ target_include_directories(qaul PRIVATE
     ${LIBQAULDIR}
     ${LIBQAULDIR}/include
     ${LIBQAULDIR}/mbedtls/include
+    ${MONGOOSE_DIR}
 )
 
 #TODO system detection uname -m
