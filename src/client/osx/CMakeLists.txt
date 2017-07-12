@@ -56,10 +56,8 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
 
 	# Crypto modules
 	${LIBQAULDIR}/qaullib_crypto.c
-	${LIBQAULDIR}/qcry_wrapper.c
 	${LIBQAULDIR}/crypto/qcry_context.c
 	${LIBQAULDIR}/crypto/qcry_arbiter.c
-	${LIBQAULDIR}/crypto/qcry_dispatcher.c
 	${LIBQAULDIR}/crypto/qcry_keys.c
 
 	${LIBQAULDIR}/qaullib_udp_communication.c
@@ -69,14 +67,14 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
 	${LIBQAULDIR}/qmongoose.c
 	${LIBQAULDIR}/sqlite/sqlite3.c
 	${LIBQAULDIR}/urlcode/urlcode.c
-	${LIBQAULDIR}/mbedtls/sha1.c
+	#${LIBQAULDIR}/mbedtls/sha1.c
 	${LIBQAULDIR}/olsrd/mantissa.c
 	${LIBQAULDIR}/olsrd/hashing.c
 	${MACOSX_RESOURCE_FILES}
 	${MACOSX_MENU_FILES}
 )
 
-add_dependencies(qaul pjsip)
+add_dependencies(qaul libqaul pjsip)
 
 target_include_directories(qaul PRIVATE
     ${PJBASE}/pjlib/include

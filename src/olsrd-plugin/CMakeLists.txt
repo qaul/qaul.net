@@ -13,7 +13,11 @@ ADD_LIBRARY (olsrd_qaul SHARED
 
 set_target_properties (olsrd_qaul PROPERTIES PREFIX "")
 set_target_properties (olsrd_qaul PROPERTIES VERSION ${QPLUG_VERSION_STRING})
-set_target_properties (olsrd_qaul PROPERTIES LINK_FLAGS -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/version-script.txt)
+if (${PORT} STREQUAL "OSX")
+	set_target_properties (olsrd_qaul PROPERTIES LINK_FLAGS -Wl)
+else ()
+	set_target_properties (olsrd_qaul PROPERTIES LINK_FLAGS -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/version-script.txt)
+endif ()
 
 add_dependencies (olsrd_qaul olsr libqaul)
 
