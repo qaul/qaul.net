@@ -3,18 +3,29 @@ set (QPLUG_VERSION_MAJOR 0)
 set (QPLUG_VERSION_MINOR 1)
 set (QPLUG_VERSION_STRING ${QPLUG_VERSION_MAJOR}.${QPLUG_VERSION_MINOR})
 
-ADD_LIBRARY (olsrd_qaul SHARED
-    qaul_ipc.c
-    qaul_msg.c
-    qaul_msg_LL.c
-    qaul_net.c
-    qaul_olsrd_plugin.c
+if (${PORT} STREQUAL "OSX")
+	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+	set(CMAKE_C_COMPILER gcc)
+	set(CMAKE_CXX_COMPILER g++)
+	set(QPLUG_LIBRARY_TYPE MODULE)
+else()
+	set(QPLUG_LIBRARY_TYPE SHARED)
+	set_target_properties (olsrd_qaul PROPERTIES VERSION ${QPLUG_VERSION_STRING})
+endif ()
+
+ADD_LIBRARY (olsrd_qaul ${QPLUG_LIBRARY_TYPE}
+	qaul_ipc.c
+	qaul_msg.c
+	qaul_msg_LL.c
+	qaul_net.c
+	qaul_olsrd_plugin.c
 )
 
 set_target_properties (olsrd_qaul PROPERTIES PREFIX "")
-set_target_properties (olsrd_qaul PROPERTIES VERSION ${QPLUG_VERSION_STRING})
+
 if (${PORT} STREQUAL "OSX")
-	set_target_properties (olsrd_qaul PROPERTIES LINK_FLAGS -Wl)
+	set(CMAKE_SHARED_MODULE_CREATE_C_FLAGS "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS} -flat_namespace -undefined suppress")
+	set_target_properties (olsrd_qaul PROPERTIES SUFFIX ".so.${QPLUG_VERSION_STRING}")
 else ()
 	set_target_properties (olsrd_qaul PROPERTIES LINK_FLAGS -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/version-script.txt)
 endif ()
