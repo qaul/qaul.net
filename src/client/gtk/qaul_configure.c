@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "qaullib.h"
 #include "structures.h"
 #include "qaul_configure.h"
 
