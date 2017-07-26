@@ -6,8 +6,9 @@
 #include <stdio.h> // defines FILENAME_MAX
 #include <stdlib.h>
 #include <getopt.h>
+#include <string.h>
 
-#include "../../libqaul/qaullib_private.h"
+#include <qaullib.h>
 #include "cli_options.h"
 
 void qaul_cli_options(int argc, char *argv[])
