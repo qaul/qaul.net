@@ -31,8 +31,38 @@ extern "C" {
 
 #define QAUL_CHECK_WIFI_SET     1
 
-int qaul_conf_debug;
+#define MAX_USER_LEN           20
+#define MAX_PASSPHRASE_LEN	 1024
+#define MAX_MESSAGE_LEN       140
+#define MAX_FILENAME_LEN       46
+#define MAX_IP_LEN             40
+#define IPC_PORT             8112
+#define BUFFSIZE             8192
+#define IPC_ADDR      "127.0.0.1"
+#define CHAT_PORT          "8081"
+#define WEB_PORT             8081
+#define VOIP_PORT            8060
+#define UDP_PORT             8083
+#define MAX_USER_CONNECTIONS    3
+#define MAX_FILE_CONNECTIONS    5
+#define MAX_TIMESTR_SIZE       80
+#define MAX_HEADER_LEN       1024
+#define MAX_JSON_LEN         1024
+#define MAX_SUFFIX_LEN        4
+#define MAX_DESCRIPTION_LEN  80
+#define MAX_HASH_LEN         20
+#define MAX_HASHSTR_LEN      40
+#define MAX_INTSTR_LEN       10
+#define MAX_PAGE_LEN         20
+#define MAX_LOCALE_LEN        6
+#define MAX_VARCHAR_LEN     255
 #define MAX_URL_LEN         512
+#define MAX_TIME_LEN         20
+#define MAX_SSID_LEN         32
+#define MAX_BSSID_LEN        17
+#define QAUL_MAX_PROFILE_LEN      30
+
+int qaul_conf_debug;
 
 /**
  * configuration procedure in the qaul
@@ -439,6 +469,27 @@ void Qaullib_FilePicked(int check, const char* path);
  * invoke this function before exiting qaul
  */
 void Qaullib_Exit(void);
+
+
+/**
+ * Additional helper functions
+ * needed for the CLI configuration, until qaul.net has a proper
+ * client / deamon architecture
+ */
+
+/**
+ * checks and protects a user name string
+ *
+ * @retval protected string size
+ */
+int Qaullib_StringNameProtect(char *protected_string, char *unprotected_string, int buffer_size);
+
+
+/**
+ * set user name
+ */
+int Qaullib_SetUsername(char* name);
+
 
 
 #ifdef __cplusplus

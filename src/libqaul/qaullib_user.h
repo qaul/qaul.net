@@ -54,11 +54,6 @@ void Qaullib_UserInit(void);
 char* Qaullib_GetUsername(void);
 
 /**
- * set user name
- */
-int Qaullib_SetUsername(char* name);
-
-/**
  * check if Name for that ip exists
  *
  * @retval 0 user does not exist

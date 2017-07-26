@@ -169,13 +169,6 @@ int Qaullib_StringDescription2Filename(char *filename, struct qaul_file_LL_item 
 int Qaullib_StringMsgProtect(char *protected_string, char *unprotected_string, int buffer_size);
 
 /**
- * checks and protects a user name string
- *
- * @retval protected string size
- */
-int Qaullib_StringNameProtect(char *protected_string, char *unprotected_string, int buffer_size);
-
-/**
  * protects a string for that it is save to send it via Json
  *
  * @retval the size of the protected string
