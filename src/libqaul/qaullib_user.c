@@ -360,7 +360,9 @@ void Qaullib_UserAdd(union olsr_ip_addr *ip, char *name, char *fp)
 	user_exists = Qaullib_User_LL_IdSearch(ip, id, &myuseritem);
 	if(user_exists == 0) {
 		// Check for fingerprint next
-		user_exists = Qaullib_User_LL_FpSearch(ip, fp, &myuseritem);
+		// TODO: this function crashes
+		// TODO: we have to separate the network view (nodes) from the user storage
+		//user_exists = Qaullib_User_LL_FpSearch(ip, fp, &myuseritem);
 	}
 
 	if (user_exists == 1)
@@ -378,7 +380,10 @@ void Qaullib_UserAdd(union olsr_ip_addr *ip, char *name, char *fp)
 	else
 	{
 		// create the user if it doesn't exist
-		myuseritem = Qaullib_User_LL_AddFp(ip, id, fp);
+		// TODO: Qaullib_User_LL_AddFp crashes.
+		// TODO: user tables should be separated from the network view
+		//myuseritem = Qaullib_User_LL_AddFp(ip, id, fp);
+		myuseritem = Qaullib_User_LL_Add(ip, id);
 		// set user to cached
 		myuseritem->changed = QAUL_USERCHANGED_CACHED;
 	}
