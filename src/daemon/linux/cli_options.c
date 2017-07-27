@@ -10,7 +10,7 @@
 
 #include <qaullib.h>
 #include "cli_options.h"
-#include "validate.h"
+#include "qaullib/validate.h"
 
 void qaul_cli_options(int argc, char *argv[])
 {
