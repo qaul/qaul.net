@@ -125,6 +125,15 @@ void Qaullib_User_LL_IpTouch (union olsr_ip_addr *ip, float linkcost);
  */
 int  Qaullib_User_LL_IdSearch (union olsr_ip_addr *ip, unsigned char *id, struct qaul_user_LL_item **item);
 
+/**
+ * Loops through the list and checks if @a fp (a fingerprint) exists. If it can't
+ * find an entry for that fingerprint it checks if a real user without id set
+ * exists for that @a ip.
+ *
+ * @retval  1  id found
+ * @retval  0  id not found, but a real user without id found for this ip
+ * @retval -1  id not found
+ */
 int  Qaullib_User_LL_FpSearch (union olsr_ip_addr *ip, char *fp, struct qaul_user_LL_item **item);
 
 /**
