@@ -6,6 +6,7 @@
 #include "qaullib.h"
 #include "qaullib_private.h"
 #include "crypto/qcry_arbiter.h"
+#include "validate.h"
 
 /** Static reference to the arbiter */
 static struct qcry_arbit_ctx *qcry_arbit;
@@ -975,6 +976,27 @@ void Qaullib_CreateIP(char* IP)
 	sprintf(IP,"10.%i.%i.%i",rand1,rand2,rand3);
 }
 
+
+int Qaullib_SetIP(char* ip)
+{
+	char value_dbprotected[MAX_IP_LEN +1];
+
+	// validate IP
+	if(validate_ip(ip))
+	{
+		// protect string
+		Qaullib_StringDbProtect(value_dbprotected, ip, sizeof(value_dbprotected));
+		// write string to DB
+		Qaullib_DbSetConfigValue("ip", value_dbprotected);
+		// copy it to global variable
+		strncpy(qaul_ip_str, ip, sizeof(qaul_ip_str));
+		inet_pton(AF_INET, qaul_ip_str, &qaul_ip_addr.v4);
+		qaul_ip_set = 1;
+
+		return 1;
+	}
+	return 0;
+}
 
 // ------------------------------------------------------------
 int Qaullib_GetConfString(const char *key, char *value)

@@ -179,6 +179,11 @@ void Qaullib_SetConfVoIP(void);
 void Qaullib_SetConfDownloadFolder(const char *path);
 
 /**
+ * set @a locale UI language
+ */
+void Qaullib_SetLocale(const char* locale);
+
+/**
  * get configuration for @key from DB
  *
  * @retval configuration string value, "" if nothing is found
@@ -320,6 +325,14 @@ int Qaullib_GetWifiChannel(void);
  * @retval string of IP e.g. "10.33.234.12"
  */
 const char* Qaullib_GetIP(void);
+
+/**
+ * set @ip
+ *
+ * @retval 1 sucess
+ * @retval 0 error
+ */
+int Qaullib_SetIP(char* ip);
 
 /**
  * get NS1 (DNS name server 1)
