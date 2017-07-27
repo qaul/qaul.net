@@ -5,7 +5,7 @@
 
 #include "qaullib.h"
 #include "qaullib_private.h"
-#include "validate.h"
+#include "qaullib/validate.h"
 
 // ------------------------------------------------------------
 void Qaullib_Init(const char* homePath, const char* resourcePath)
