@@ -119,6 +119,9 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     crypto/qcry_keys.c
     crypto/qcry_keystore.c
 
+    # Validate input
+    validate.c
+
     qaullib_udp_communication.c
     captive/qaullib_captive.c
     captive/qaullib_captive_dhcp.c

@@ -237,11 +237,6 @@ int Qaullib_ExistsLocale(void);
 const char* Qaullib_GetLocale(void);
 
 /**
- * set @a locale UI language
- */
-void Qaullib_SetLocale(const char* locale);
-
-/**
  * convert a unix time stamp into an local ISO date format
  *
  * @retval 1 success
@@ -249,6 +244,11 @@ void Qaullib_SetLocale(const char* locale);
  */
 int Qaullib_Timestamp2Isostr(char *isostr, int timestamp, int buffer_size);
 
+/**
+ * Get the int config value for@key from the data base
+ *
+ * @retval config value integer
+ */
 int Qaullib_DbGetConfigValueInt(const char* key);
 
 #ifdef __cplusplus
