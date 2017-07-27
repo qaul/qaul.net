@@ -10,7 +10,6 @@ if (${PORT} STREQUAL "OSX")
 	set(QPLUG_LIBRARY_TYPE MODULE)
 else()
 	set(QPLUG_LIBRARY_TYPE SHARED)
-	set_target_properties (olsrd_qaul PROPERTIES VERSION ${QPLUG_VERSION_STRING})
 endif ()
 
 ADD_LIBRARY (olsrd_qaul ${QPLUG_LIBRARY_TYPE}
@@ -27,6 +26,7 @@ if (${PORT} STREQUAL "OSX")
 	set(CMAKE_SHARED_MODULE_CREATE_C_FLAGS "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS} -flat_namespace -undefined suppress")
 	set_target_properties (olsrd_qaul PROPERTIES SUFFIX ".so.${QPLUG_VERSION_STRING}")
 else ()
+	set_target_properties (olsrd_qaul PROPERTIES VERSION ${QPLUG_VERSION_STRING})
 	set_target_properties (olsrd_qaul PROPERTIES LINK_FLAGS -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/version-script.txt)
 endif ()
 
