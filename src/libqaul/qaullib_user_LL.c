@@ -42,8 +42,11 @@ void Qaullib_User_LL_InitNodeWithIP(struct qaul_user_LL_node *node, union olsr_i
 
 void Qaullib_User_LL_InitNodeWithFp(struct qaul_user_LL_node *node, char *fp)
 {
+	printf("Qaullib_User_LL_InitNodeWithFp\n");
+	// TODO: this function crashes.
+	// TODO: User storage has to be created with fingerprint as IDs in mind.
 	memcpy(node->item->fp, fp, QAUL_FP_LEN);
-    // TODO: Leave IP empty?
+	// TODO: Leave IP empty?
     node->item = &Qaul_user_LL_table[node->index];
 }
 
@@ -253,13 +256,15 @@ int Qaullib_User_LL_IpExists (union olsr_ip_addr *ip)
 	return 0;
 }
 
+// TODO: never used yet
 int  Qaullib_User_LL_FpExists (char *fp)
 {
 	struct qaul_user_LL_node mynode;
-	Qaullib_User_LL_InitNodeWithFp(&mynode, fp);
 
 	if(QAUL_DEBUG)
 		printf("Qaullib_User_LL_FpExists\n");
+
+	Qaullib_User_LL_InitNodeWithFp(&mynode, fp);
 
 	while(Qaullib_User_LL_NextItem(&mynode))
 	{
@@ -271,13 +276,15 @@ int  Qaullib_User_LL_FpExists (char *fp)
 	return 0;
 }
 
+// TODO: never used yet
 int Qaullib_User_LL_GetIpFromFp(union olsr_ip_addr **ip, char *fp)
 {
     struct qaul_user_LL_node mynode;
-    Qaullib_User_LL_InitNodeWithFp(&mynode, fp);
 
     if(QAUL_DEBUG)
-        printf("Qaullib_User_LL_FpExists\n");
+        printf("Qaullib_User_LL_GetIpFromFp\n");
+
+    Qaullib_User_LL_InitNodeWithFp(&mynode, fp);
 
     while(Qaullib_User_LL_NextItem(&mynode))
     {
@@ -419,16 +426,16 @@ int  Qaullib_User_LL_FpSearch (union olsr_ip_addr *ip, char *fp, struct qaul_use
     ipFound = -1;
 
     if(QAUL_DEBUG)
-    printf("Qaullib_User_LL_IdSearch\n");
+    	printf("Qaullib_User_LL_FpSearch\n");
 
     Qaullib_User_LL_InitNodeWithFp(&mynode, fp);
     while(Qaullib_User_LL_NextItem(&mynode))
     {
-        if(memcmp(&mynode.item->ip, ip, qaul_ip_size) == 0)
+    	if(memcmp(&mynode.item->ip, ip, qaul_ip_size) == 0)
         {
-            if(memcmp(&mynode.item->fp, fp, QAUL_FP_LEN) == 0)
+    		if(memcmp(&mynode.item->fp, fp, QAUL_FP_LEN) == 0)
             {
-                *item = mynode.item;
+    			*item = mynode.item;
                 return 1;
             }
             else if(
@@ -436,7 +443,7 @@ int  Qaullib_User_LL_FpSearch (union olsr_ip_addr *ip, char *fp, struct qaul_use
                     mynode.item->type != QAUL_USERTYPE_WEB_HIDDEN
                     )
             {
-                *item = mynode.item;
+            	*item = mynode.item;
                 ipFound = 0;
             }
         }
