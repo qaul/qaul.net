@@ -6,7 +6,7 @@
 #include "qaullib.h"
 #include "qaullib_private.h"
 #include "crypto/qcry_arbiter.h"
-#include "validate.h"
+#include "qaullib/validate.h"
 
 /** Static reference to the arbiter */
 static struct qcry_arbit_ctx *qcry_arbit;

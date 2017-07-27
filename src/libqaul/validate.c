@@ -7,7 +7,7 @@
  * This file contains all validation functions for qaullib.
  */
 
-#include "validate.h"
+#include "qaullib/validate.h"
 
 
 int validate_ip (const char* str)
