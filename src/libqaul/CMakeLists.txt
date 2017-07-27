@@ -109,7 +109,13 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     qaullib_filesharing.c
     qaullib_file_LL.c
     qaullib_exediscovery.c
+
+    # Crypto module
     qaullib_crypto.c
+
+    # Validate input
+    validate.c
+
     qaullib_udp_communication.c
     captive/qaullib_captive.c
     captive/qaullib_captive_dhcp.c
