@@ -9,6 +9,7 @@
 #include "qaullib.h"
 #include "structures.h"
 #include "qaul_configure.h"
+#include "configure.h"
 
 int username_flag;
 
