@@ -39,7 +39,7 @@ void qaul_cli_options(int argc, char *argv[])
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "am:d:f:",
+		c = getopt_long (argc, argv, "i:u:l:n:d:s:",
 						long_options, &option_index);
 
 		/* Detect the end of the options. */
