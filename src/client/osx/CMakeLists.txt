@@ -31,6 +31,8 @@ set_source_files_properties(${MACOSX_MENU_FILES} PROPERTIES MACOSX_PACKAGE_LOCAT
 
 # Mongoose
 set (MONGOOSE_DIR ${CMAKE_SOURCE_DIR}/third_party/mongoose)
+# mbedTLS
+set (MBEDTLS_DIR ${CMAKE_SOURCE_DIR}/third_party/mbedtls)
 
 add_executable(${PROJECT_NAME} MACOSX_BUNDLE
 	main.m
@@ -57,8 +59,14 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
 	# Crypto modules
 	${LIBQAULDIR}/qaullib_crypto.c
 	${LIBQAULDIR}/crypto/qcry_context.c
-	${LIBQAULDIR}/crypto/qcry_arbiter.c
-	${LIBQAULDIR}/crypto/qcry_keys.c
+    ${LIBQAULDIR}/crypto/qcry_arbiter.c
+    ${LIBQAULDIR}/crypto/qcry_hashing.c
+    ${LIBQAULDIR}/crypto/qcry_helper.c
+    ${LIBQAULDIR}/crypto/qcry_keys.c
+    ${LIBQAULDIR}/crypto/qcry_keystore.c
+
+    # Validate input
+    ${LIBQAULDIR}/validate.c
 
 	${LIBQAULDIR}/qaullib_udp_communication.c
 	${LIBQAULDIR}/captive/qaullib_captive.c
@@ -67,7 +75,6 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
 	${LIBQAULDIR}/qmongoose.c
 	${LIBQAULDIR}/sqlite/sqlite3.c
 	${LIBQAULDIR}/urlcode/urlcode.c
-	#${LIBQAULDIR}/mbedtls/sha1.c
 	${LIBQAULDIR}/olsrd/mantissa.c
 	${LIBQAULDIR}/olsrd/hashing.c
 	${MACOSX_RESOURCE_FILES}
@@ -89,8 +96,8 @@ target_include_directories(qaul PRIVATE
     ${PJBASE}third_party/srtp/include
     ${LIBQAULDIR}
     ${LIBQAULDIR}/include
-    ${LIBQAULDIR}/mbedtls/include
     ${MONGOOSE_DIR}
+    ${MBEDTLS_DIR}/include
 )
 
 #TODO system detection uname -m
@@ -124,12 +131,15 @@ target_link_libraries(qaul
     ${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
     ${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
-#    ${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
+    #${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
     ${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
+    ${PJBASE}/third_party/lib/libwebrtc-${PJSIPTYPE}.a
     ${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
+    # mbedtls
+    ${PROJECT_BINARY_DIR}/external/mbedtls/lib/libmbedcrypto.a
     ${ALSA_LIBRARIES}
     # OSX libraries
 	${COREDATA} ${FOUNDATION}
