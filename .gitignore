@@ -36,6 +36,7 @@ android/app/src/main/res/raw/olsrd_qaul_so*
 android/app/src/main/res/raw/socat
 android/app/src/main/res/raw/tether
 android/app/src/main/res/raw/wificonfig
+src/olsrd-plugin/olsrd_qaul.so*
 
 # IDE Settings
 /.project
