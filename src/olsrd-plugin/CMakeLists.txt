@@ -45,7 +45,7 @@ endif()
 install(TARGETS olsrd_qaul DESTINATION lib/qaul/lib)
 
 add_custom_target(olsrd_qaul_android
-	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_BINARY_DIR}/src/olsr-plugin/olsrd_qaul.so.0.1 -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw/ -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
+	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_BINARY_DIR}/src/olsrd-plugin/olsrd_qaul.so.0.1 -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw/ -P ${CMAKE_SOURCE_DIR}/cmake/FileCopy.cmake
 	COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw/olsrd_qaul.so.0.1 -DDEST=${CMAKE_BINARY_DIR}/android/app/src/main/res/raw/olsrd_qaul_so_0_1 -P ${CMAKE_SOURCE_DIR}/cmake/FileRename.cmake
 	DEPENDS olsrd_qaul
 )
