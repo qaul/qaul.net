@@ -52,6 +52,18 @@ Add the Android platform-tools to your system PATH to use adb from CLI.
 	export PATH="$PATH:$HOME/Android/Sdk/platform-tools
 
 
+To build socat one needs an NDK which is not newer than NDK 13b. NDK 13b 
+can be downloaded from this source: 
+https://developer.android.com/ndk/downloads/older_releases.html
+
+When building with this NDK, the folder 'sysroot' needs to be set manually
+as a symbolic link to the correct platform target
+
+	# open a terminal and cd into your NDK direktory.
+	# create a symbolic link as sysroot to your platform
+	ln -s platforms/android-9/arch-arm sysroot
+
+
 
 Get the source
 --------------
