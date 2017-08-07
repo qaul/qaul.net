@@ -86,6 +86,7 @@ Build
 	## path under Linux is:
 	##   SDK_ROOT: $HOME/Android/Sdk
 	##   NDK_ROOT: $HOME/Android/Sdk/ndk-bundle
+	export ANDROID_HOME=/absolute/path/to/sdk
 	cmake . -DPORT=ANDROID -DSDK_ROOT=/absolute/path/to/sdk -DNDK_ROOT=/absolute/path/to/ndk -DEXTRALIB_PATH=/absolute/path/to/android_extra_lib -DANDROID_EABI="4.9"
 	make
 
