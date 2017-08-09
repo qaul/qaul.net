@@ -65,7 +65,6 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/qaullib_filesharing.c \
 	$(LIBQAUL_SRC)/qaullib_file_LL.c \
 	$(LIBQAUL_SRC)/qaullib_exediscovery.c \
-	$(LIBQAUL_SRC)/qaullib_crypto.c \
 	$(LIBQAUL_SRC)/qaullib_udp_communication.c \
 	$(LIBQAUL_SRC)/captive/qaullib_captive.c \
 	$(LIBQAUL_SRC)/captive/qaullib_captive_dhcp.c \
@@ -80,7 +79,8 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/qaullib_msg_LL.c \
 	$(LIBQAUL_SRC)/qaullib_validate.c \
 	$(LIBQAUL_SRC)/mg_backend_apk.c \
-	$(LIBQAUL_SRC)/qmongoose.c
+	$(LIBQAUL_SRC)/qmongoose.c \
+	$(LIBQAUL_SRC)/qaullib_crypto.c
 
 LOCAL_EXPORT_C_INCLUDES := $(LIBQAUL_INCLUDE)
 LOCAL_C_INCLUDES := \
