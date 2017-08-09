@@ -52,17 +52,23 @@ Add the Android platform-tools to your system PATH to use adb from CLI.
 	export PATH="$PATH:$HOME/Android/Sdk/platform-tools
 
 
-To build socat one needs an NDK which is not newer than NDK 13b. NDK 13b 
-can be downloaded from this source: 
+To build qaul.net one needs the NDK version NDK 13b. NDK 13b can be 
+downloaded from the Android web site: 
 https://developer.android.com/ndk/downloads/older_releases.html
 
-When building with this NDK, the folder 'sysroot' needs to be set manually
-as a symbolic link to the correct platform target
+Ubuntu 14.04 only: 
+Ubuntu runs a CMake version which is smaller than 3.6.0. For the build to 
+succeed one needs to change one line in the file 
+$NDK_HOME/build/cmake/android.toolchain.cmake in the NDK 13b.
+Change the following line in the file 
+$NDK_HOME/build/cmake/android.toolchain.cmake
 
-	# open a terminal and cd into your NDK direktory.
-	# create a symbolic link as sysroot to your platform
-	ln -s platforms/android-9/arch-arm sysroot
+	cmake_minimum_required(VERSION 3.6.0)
 
+change the line into
+
+	#cmake_minimum_required(VERSION 3.6.0)
+	cmake_minimum_required(VERSION 3.5.0)
 
 
 Get the source
@@ -88,7 +94,11 @@ Build
 	adb pull /system/lib/libwpa_client.so android_extra_lib/
 	adb pull /system/bin/ifconfig android_extra_lib/
 	adb pull /system/bin/iptables android_extra_lib/
-
+	
+	# create the buildfolder and move into it
+	mkdir build
+	cd build
+	
 	# build the qaul.net Android app
 	## check ANDROID_EABI version in NDK's 'toolchains' folder. The number suffix
 	## of the folder name arm-linux-androideabi-XXX is the ANDROID_EABI version.
@@ -98,8 +108,7 @@ Build
 	## path under Linux is:
 	##   SDK_ROOT: $HOME/Android/Sdk
 	##   NDK_ROOT: $HOME/Android/Sdk/ndk-bundle
-	export ANDROID_HOME=/absolute/path/to/sdk
-	cmake . -DPORT=ANDROID -DSDK_ROOT=/absolute/path/to/sdk -DNDK_ROOT=/absolute/path/to/ndk -DEXTRALIB_PATH=/absolute/path/to/android_extra_lib -DANDROID_EABI="4.9"
+	cmake .. -DPORT=ANDROID -DSDK_ROOT=/absolute/path/to/sdk -DNDK_ROOT=/absolute/path/to/ndk -DEXTRALIB_PATH=/absolute/path/to/android_extra_lib -DANDROID_EABI="4.9"
 	make
 
 
