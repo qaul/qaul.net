@@ -53,6 +53,6 @@ add_custom_target(AndroidUPDATE
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/android/app/src/main)
 
 add_custom_target(AndroidAPK ALL
-                  COMMAND ./gradlew -PCMAKE_BINARY_DIR=${CMAKE_BINARY_DIR} -PEXTRALIB_PATH=${EXTRALIB_PATH} -PCMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR} build
+                  COMMAND ANDROID_HOME=${SDK_ROOT} ANDROID_NDK_HOME=${NDK_ROOT} ./gradlew -PCMAKE_BINARY_DIR=${CMAKE_BINARY_DIR} -PEXTRALIB_PATH=${EXTRALIB_PATH} -PCMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR} build
                   DEPENDS AndroidUPDATE
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/android)

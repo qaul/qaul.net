@@ -86,7 +86,8 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/crypto/qcry_hashing.c \
 	$(LIBQAUL_SRC)/crypto/qcry_helper.c \
 	$(LIBQAUL_SRC)/crypto/qcry_keys.c \
-	$(LIBQAUL_SRC)/crypto/qcry_keystore.c
+	$(LIBQAUL_SRC)/crypto/qcry_keystore.c \
+	$(LIBQAUL_SRC)/validate.c
 
 LOCAL_EXPORT_C_INCLUDES := $(LIBQAUL_INCLUDE)
 LOCAL_C_INCLUDES := \
