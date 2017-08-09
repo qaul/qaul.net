@@ -37,9 +37,48 @@ int qluser_store_initialise(const char *db_path, const char *key_path, unsigned 
  *
  * @param user Will be filled with a pointer representing the user for future operations
  * @param fp The fingerprint of this user
+ * @return Status return code
+ */
+int qluser_store_adduser(struct qluser_t *user, const char *fp);
+
+
+/** Functions to fill up user data */
+int qluser_store_add_ip(struct qluser_t *user, const char *ip);
+int qluser_store_add_username(struct qluser_t *user, const char *username);
+int qluser_store_add_pubkey(struct qluser_t *user, const char *pubkey);
+
+
+/** Functions to search users with */
+int qluser_store_getwith_ip(struct qluser_t *user, const char *ip);
+int qluser_store_getwith_fp(struct qluser_t *user, const char *fp);
+int qluser_store_getwith_username(struct qluser_t *user, const char *username);
+
+
+/** Functions to get specific data fields from a specified user */
+int qluser_store_get_ip(struct qluser_t *user, char **ip);
+int qluser_store_get_fp(struct qluser_t *user, char **fp);
+int qluser_store_get_username(struct qluser_t *user, char **username);
+int qluser_store_get_pubkey(struct qluser_t *user, char **pubkey);
+
+
+/**
+ * Remove a user from the current non-persistent user storage
+ *
+ * @param user The user to delete
  * @return
  */
-int qluser_store_adduser(struct qluser_t *user, const char *fp, const char *name);
+int qluser_store_remove(struct qluser_t *user);
+
+
+/**
+ * Remove the user from the current user storage as well as scrube
+ * all information about this user from the persistent database as
+ * well
+ *
+ * @param user The user to delete
+ * @return
+ */
+int qluser_store_removeall(struct qluser_t *user);
 
 
 /**
