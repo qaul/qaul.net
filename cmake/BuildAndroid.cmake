@@ -13,8 +13,8 @@ if(NOT EXTRALIB_PATH)
 endif()
 
 if(NOT NDK_LEVEL)
-    message(STATUS "Use default Android Target version 14 (-DNDK_LEVEL=14).")
-    set(NDK_LEVEL 14)
+    message(STATUS "Use default Android Target version 9 (-DNDK_LEVEL=9).")
+    set(NDK_LEVEL 9)
 endif()
 
 if(NOT ANDROID_EABI)
