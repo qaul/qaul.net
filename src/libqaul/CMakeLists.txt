@@ -115,6 +115,10 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     crypto/qcry_keys.c
     crypto/qcry_keystore.c
 
+	# User module
+    user/qluser_store.h
+    user/qluser_keystore.h
+
     # Validate input
     validate.c
 
