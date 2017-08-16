@@ -11,11 +11,28 @@
 #define QLUSER_STATUS_DB_INVALID        (1 << 0)
 #define QLUSER_STATUS_DB_LOCKED         (1 << 1)
 #define QLUSER_STATUS_INVALID_KEYSTORE  (1 << 2)
+#define QLUSER_STATUS_USER_NOT_FOUND    (1 << 3)
+#define QLUSER_STATUS_PUBKEY_EXISTS     (1 << 4)
+#define QLUSER_STATUS_PUBKEY_NOT_FOUND  (1 << 5)
 
 
 /** Forward declare structs */
 typedef struct qluser_t qluser_t;
 typedef struct qluser_node_t qluser_node_t;
+
+
+/** Describes the different trust levels between users */
+typedef enum qluser_trust_t {
+
+    /** No public key is known */
+    UNKNOWN,
+
+    /** TOFU: Trust on first use - but not really */
+    PARTIAL,
+
+    /** Manually verified and this user checks out */
+    VERIFIED
+};
 
 
 /**
@@ -46,12 +63,14 @@ int qluser_store_adduser(struct qluser_t *user, const char *fp);
 int qluser_store_add_ip(struct qluser_t *user, const char *ip);
 int qluser_store_add_username(struct qluser_t *user, const char *username);
 int qluser_store_add_pubkey(struct qluser_t *user, const char *pubkey);
+int qluser_store_add_trustlvl(struct qluser_t *user, const struct qluser_trust_t);
 
 
 /** Functions to search users with */
-int qluser_store_getwith_ip(struct qluser_t *user, const char *ip);
-int qluser_store_getwith_fp(struct qluser_t *user, const char *fp);
-int qluser_store_getwith_username(struct qluser_t *user, const char *username);
+// TODO: Use union for IPs
+int qluser_store_getby_ip(struct qluser_t *user);
+int qluser_store_getby_fp(struct qluser_t *user, const char *fp);
+int qluser_store_getby_username(struct qluser_t *user, const char *username);
 
 
 /** Functions to get specific data fields from a specified user */
@@ -59,6 +78,7 @@ int qluser_store_get_ip(struct qluser_t *user, char **ip);
 int qluser_store_get_fp(struct qluser_t *user, char **fp);
 int qluser_store_get_username(struct qluser_t *user, char **username);
 int qluser_store_get_pubkey(struct qluser_t *user, char **pubkey);
+int qluser_store_get_trustlvl(struct qluser_t *user, enum qluser_trust_t *trust);
 
 
 /**
@@ -71,7 +91,7 @@ int qluser_store_remove(struct qluser_t *user);
 
 
 /**
- * Remove the user from the current user storage as well as scrube
+ * Remove the user from the current user storage as well as scrub
  * all information about this user from the persistent database as
  * well
  *
