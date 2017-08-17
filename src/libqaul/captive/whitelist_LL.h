@@ -14,6 +14,9 @@ extern "C" {
 
 #define  CAPTIVE_WHITELIST_TIMEOUT 300
 
+int qaul_whitelist_init;
+
+
 /**
  * The captive linked list contains all IP's of white listed web users for
  * which the web server simulates to be connected to the Internet.
