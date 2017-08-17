@@ -97,9 +97,11 @@ void Ql_WwwEvent_handler(struct mg_connection *conn, int event, void *event_data
 	char *path = NULL;
 	struct http_message *hm = (struct http_message *) event_data;
 	redirect = 0;
+	union olsr_ip_addr ip;
 
 	if (event == MG_EV_HTTP_REQUEST)
 	{
+		// at the first call, set the GUI address
 		if(qaul_web_localip_set == 0)
 		{
 			memcpy(&qaul_web_localip.v4.s_addr, &conn->sa.sin.sin_addr, sizeof(qaul_web_localip.v4.s_addr));
@@ -111,6 +113,31 @@ void Ql_WwwEvent_handler(struct mg_connection *conn, int event, void *event_data
 		// check if captive portal redirect is needed
 		if(Ql_Www_IsLocalIP(conn) == 0)
 		{
+			// check if IP adress is whitelisted
+			memcpy(&ip.v4.s_addr, &conn->sa.sin.sin_addr, sizeof(ip.v4.s_addr));
+			if(ql_whitelist_check(&ip))
+			{
+				// check if host name is looking for a captive portal
+				// get host name
+				struct mg_str *host_hdr = mg_get_http_header(hm, "Host");
+				printf("mg_str Host: %.*s\n", (int)host_hdr->len, host_hdr->p);
+				// this is for iOS 6 & 7
+				if(qaul_whitelist_check_hostname (host_hdr->p, host_hdr->len))
+				{
+					printf("host name found\n");
+					// redirect to splash page
+					mg_printf(conn, "HTTP/1.1 200 OK\r\n"
+					             	"Content-Type: text/html\r\n"
+									"\r\n");
+
+					mg_printf(conn, "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>");
+
+					conn->flags |= MG_F_SEND_AND_CLOSE;
+					return;
+				}
+			}
+
+			// if needed, redirect to splash page
 			if( !mg_normalize_uri_path(&hm->uri, &hm->uri) ||
 				mg_uri_to_local_path(hm, &ql_webserver_options, &path, &path_info) == 0 ||
 				Qaullib_FileExists(path)==0 )

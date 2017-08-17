@@ -34,7 +34,6 @@ void ql_whitelist_add (union olsr_ip_addr *ip)
 	}
 }
 
-
 // ------------------------------------------------------------
 int ql_whitelist_check (union olsr_ip_addr *ip)
 {
@@ -44,6 +43,31 @@ int ql_whitelist_check (union olsr_ip_addr *ip)
 		return 0;
 
 	return Qaullib_Whitelist_LL_Find_ByIP(ip, &item);
+}
+
+// ------------------------------------------------------------
+int qaul_whitelist_check_hostname (const char* hostname, int len)
+{
+	if(len >= 9 && strncmp(hostname +len-9, "apple.com", 9) == 0)
+		return 1;
+	if(len >= 22 && strncmp(hostname +len-22, "akamaitechnologies.com", 22) == 0)
+		return 1;
+	if(len >= 14 && strncmp(hostname +len-14, "akamaiedge.net", 14) == 0)
+		return 1;
+	if(len >= 11 && strncmp(hostname +len-11, "edgekey.net", 11) == 0)
+		return 1;
+	if(len >= 17 && strncmp(hostname +len-17, "thinkdifferent.us", 17) == 0)
+		return 1;
+	if(len >= 10 && strncmp(hostname +len-10, "airport.us", 10) == 0)
+		return 1;
+	if(len >= 10 && strncmp(hostname +len-10, "ibook.info", 10) == 0)
+		return 1;
+	if(len >= 11 && strncmp(hostname +len-11, "itools.info", 11) == 0)
+		return 1;
+	if(len >= 19 && strncmp(hostname +len-19, "appleiphonecell.com", 19) == 0)
+		return 1;
+
+	return 0;
 }
 
 // ------------------------------------------------------------
