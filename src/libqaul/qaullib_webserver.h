@@ -215,15 +215,24 @@ void Ql_WwwCryInitialise(struct mg_connection *conn, int event, void *event_data
 void Ql_WwwCryCreateUsr(struct mg_connection *conn, int event, void *event_data);
 
 /*
- * OSX captive portal checking fix
+ * iOS/OSX captive portal checking fix
  *
  * OSX checks for captive portals, if this page is not returned, OSX users can't download binaries
  * via the captive portal.
  *
- * checked URL:
+ * checked URLs:
  * http://captive.apple.com/hotspot-detect.html
+ * /library/test/success.html
  */
-void Ql_WwwOsxCaptivePortalDetection(struct mg_connection *conn, int event, void *event_data);
+void Ql_WwwCaptivePortalDetectionOsx(struct mg_connection *conn, int event, void *event_data);
+
+/**
+ * iOS/OSX captive portal whitelisting
+ *
+ * Whitelist a specific IP address
+ */
+void Ql_WwwCaptiveWhitelist(struct mg_connection *conn, int event, void *event_data);
+
 
 
 #ifdef __cplusplus
