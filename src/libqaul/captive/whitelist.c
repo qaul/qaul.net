@@ -14,6 +14,9 @@ void ql_whitelist_add (union olsr_ip_addr *ip)
 {
 	struct qaul_whitelist_LL_item *item;
 
+	if(qaul_whitelist_init < 1)
+		return;
+
 	printf("ql_whitelist_add\n");
 
 	// check if entry exists
@@ -37,13 +40,19 @@ int ql_whitelist_check (union olsr_ip_addr *ip)
 {
 	struct qaul_whitelist_LL_item *item;
 
+	if(qaul_whitelist_init < 1)
+		return 0;
+
 	return Qaullib_Whitelist_LL_Find_ByIP(ip, &item);
 }
 
 // ------------------------------------------------------------
 void Qaullib_Whitelist_LL_Init (void)
 {
-	qaul_whitelist_LL_first = 0;
+	qaul_whitelist_LL_first = (struct qaul_whitelist_LL_item *)malloc(sizeof(struct qaul_whitelist_LL_item));
+	qaul_whitelist_LL_first->next = 0;
+	qaul_whitelist_LL_first->prev = 0;
+	qaul_whitelist_init = 1;
 }
 
 // ------------------------------------------------------------
@@ -84,17 +93,18 @@ void Qaullib_Whitelist_LL_Add (union olsr_ip_addr *ip)
 
 	// fill in content
 	new_item->ip.v4 = ip->v4;
-
 	new_item->time = time(NULL);
-
 	// lock
 	pthread_mutex_lock( &qaullib_mutex_whitelistLL );
 
 	// create links
-	new_item->next = qaul_whitelist_LL_first;
-	if(qaul_whitelist_LL_first != 0) qaul_whitelist_LL_first->prev = new_item;
-	new_item->prev = 0;
-	qaul_whitelist_LL_first = new_item;
+	new_item->prev = qaul_whitelist_LL_first;
+	new_item->next = qaul_whitelist_LL_first->next;
+	if(qaul_whitelist_LL_first->next != 0)
+	{
+		qaul_whitelist_LL_first->next->prev = new_item;
+	}
+	qaul_whitelist_LL_first->next = new_item;
 
 	// unlock
 	pthread_mutex_unlock( &qaullib_mutex_whitelistLL );
@@ -106,17 +116,18 @@ int Qaullib_Whitelist_LL_Find_ByIP (union olsr_ip_addr *ip, struct qaul_whitelis
 	struct qaul_whitelist_LL_item *myitem = qaul_whitelist_LL_first;
 	int i=0;
 
-	//printf("Qaullib_Whitelist_LL_Find_ByIP %u\n", (uint32_t)ip->v4.s_addr);
-
-	while(myitem != 0)
+	while(Qaullib_Whitelist_LL_NextItem(myitem))
 	{
+		myitem = myitem->next;
+
 		printf("Qaullib_Whitelist_LL_Find_ByIP i = %i, %u\n", i, (uint32_t)myitem->ip.v4.s_addr);
 		i++;
 		// check if older than timeout
 		if(myitem->time < time(NULL) -CAPTIVE_WHITELIST_TIMEOUT)
 		{
 			printf("Qaullib_Whitelist_LL_Find_ByIP to old, deleting\n");
-			Qaullib_Whitelist_LL_Delete(myitem);
+			myitem = myitem->prev;
+			Qaullib_Whitelist_LL_Delete(myitem->next);
 		}
 		else
 		{
@@ -128,12 +139,6 @@ int Qaullib_Whitelist_LL_Find_ByIP (union olsr_ip_addr *ip, struct qaul_whitelis
 				*item = myitem;
 				return 1;
 			}
-		}
-
-		if(!Qaullib_Whitelist_LL_NextItem(myitem))
-		{
-			myitem = 0;
-			break;
 		}
 	}
 
@@ -167,6 +172,8 @@ void Qaullib_Whitelist_LL_Clean (void)
 	// which is older than the timeout
 	while(Qaullib_Whitelist_LL_NextItem(item))
 	{
+		item = item->next;
+
 		if(item->time < time(NULL) -CAPTIVE_WHITELIST_TIMEOUT)
 		{
 			Qaullib_Whitelist_LL_Delete(item);
