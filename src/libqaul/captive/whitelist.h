@@ -24,12 +24,10 @@ extern "C" {
  * List items are deleted after a timeout.
  */
 
-
 /**
  * Add this @a ip to the white list
  */
 void ql_whitelist_add (union olsr_ip_addr *ip);
-
 
 /**
  * Check if this @a ip is white listed
@@ -38,6 +36,15 @@ void ql_whitelist_add (union olsr_ip_addr *ip);
  * @retval 0  ip not found: this @ ip is not whitelisted
  */
 int ql_whitelist_check (union olsr_ip_addr *ip);
+
+/**
+ * Check if @a hostname is in the captive portal check list.
+ * @a len is the length of the host name.
+ *
+ * @retval 1  host name is in the list
+ * @retval 0  host name is not in the list
+ */
+int qaul_whitelist_check_hostname (const char* hostname, int len);
 
 
 #ifdef __cplusplus
