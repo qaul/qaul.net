@@ -26,6 +26,10 @@ int Qaullib_CaptiveStart(void)
 	if(QAUL_DEBUG)
 		printf("Qaullib_CaptiveStart\n");
 
+	// initialize linked lists
+
+	Qaullib_Whitelist_LL_Init();
+
 	if(qaul_captive_running == 0 && qaul_exe_available == 1)
 	{
 		if(QAUL_DEBUG)

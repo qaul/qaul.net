@@ -381,8 +381,9 @@ int Qaullib_WebserverStart(void)
 	mg_register_http_endpoint(conn, "/crygetinfo", 			Ql_WwwCryGetInfo);
 	// OSX captive portal check
 	// if it doesn't find this page, OSX wont be able to download the installers from the captive portal
-	mg_register_http_endpoint(conn, "/hotspot-detect.html", Ql_WwwOsxCaptivePortalDetection);
-	mg_register_http_endpoint(conn, "/library/test/success.html", Ql_WwwOsxCaptivePortalDetection);
+	mg_register_http_endpoint(conn, "/hotspot-detect.html", Ql_WwwCaptivePortalDetectionOsx);
+	mg_register_http_endpoint(conn, "/library/test/success.html", Ql_WwwCaptivePortalDetectionOsx);
+	mg_register_http_endpoint(conn, "/whitelist", Ql_WwwCaptiveWhitelist);
 
 
 	mg_start_thread(Ql_Www_Server, &ql_webserver_instance);

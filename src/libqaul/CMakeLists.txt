@@ -121,6 +121,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     captive/qaullib_captive.c
     captive/qaullib_captive_dhcp.c
     captive/qaullib_captive_dns.c
+    captive/whitelist.c
     qmongoose.c
     sqlite/sqlite3.c
     urlcode/urlcode.c

@@ -2701,16 +2701,47 @@ void Ql_WwwCryInitialise(struct mg_connection *conn, int event, void *event_data
 }
 
 // ------------------------------------------------------------
-void Ql_WwwOsxCaptivePortalDetection(struct mg_connection *conn, int event, void *event_data)
+void Ql_WwwCaptivePortalDetectionOsx(struct mg_connection *conn, int event, void *event_data)
 {
+	union olsr_ip_addr ip;
+
 	printf("Ql_WwwOsxCaptivePortalDetection\n");
 
-	// send header
-	mg_printf(conn, "HTTP/1.1 200 OK\r\n"
-	             	"Content-Type: text/html\r\n"
-					"\r\n");
+	// check if IP adress is whitelisted
+	memcpy(&ip.v4.s_addr, &conn->sa.sin.sin_addr, sizeof(ip.v4.s_addr));
+	if(ql_whitelist_check(ip))
+	{
+		// send header
+		mg_printf(conn, "HTTP/1.1 200 OK\r\n"
+		             	"Content-Type: text/html\r\n"
+						"\r\n");
 
-	mg_printf(conn, "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>");
+		mg_printf(conn, "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>");
+
+		conn->flags |= MG_F_SEND_AND_CLOSE;
+	}
+	else
+	{
+		// otherwise proceed to redirect
+		Ql_WwwEvent_handler(conn, event, event_data);
+	}
+}
+
+// ------------------------------------------------------------
+void Ql_WwwCaptiveWhitelist(struct mg_connection *conn, int event, void *event_data)
+{
+	union olsr_ip_addr ip;
+
+	printf("Ql_WwwCaptiveWhitelist\n");
+
+	// whitelist IP address
+	memcpy(&ip.v4.s_addr, &conn->sa.sin.sin_addr, sizeof(ip.v4.s_addr));
+	ql_whitelist_add (ip);
+
+	// redirect page to destination
+	mg_printf(conn, "HTTP/1.1 303 See Other\r\n"
+					"Location: %s\r\n\r\n", "http://start.qaul:8000/live");
+	mg_printf(conn, "<a href=\"%s\">qaul.net redirect &gt;&gt;</a>", "http://start.qaul:8000/live");
 
 	conn->flags |= MG_F_SEND_AND_CLOSE;
 }
