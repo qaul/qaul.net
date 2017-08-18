@@ -12,7 +12,7 @@ extern "C" {
 
 #include "../qaullib_defines.h"
 
-#define  CAPTIVE_WHITELIST_TIMEOUT 300
+#define  CAPTIVE_WHITELIST_TIMEOUT 60
 
 int qaul_whitelist_init;
 

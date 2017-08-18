@@ -14,8 +14,8 @@ build/
 external/
 
 # Android
-files
-www
+assets/files
+assets/www
 android/.gradle
 android/build
 android/local.properties
