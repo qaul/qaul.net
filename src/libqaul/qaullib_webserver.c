@@ -121,6 +121,7 @@ void Ql_WwwEvent_handler(struct mg_connection *conn, int event, void *event_data
 				// get host name
 				struct mg_str *host_hdr = mg_get_http_header(hm, "Host");
 				printf("mg_str Host: %.*s\n", (int)host_hdr->len, host_hdr->p);
+
 				// this is for iOS 6 & 7
 				if(qaul_whitelist_check_hostname (host_hdr->p, host_hdr->len))
 				{
@@ -2766,10 +2767,12 @@ void Ql_WwwCaptiveWhitelist(struct mg_connection *conn, int event, void *event_d
 	memcpy(&ip.v4.s_addr, &conn->sa.sin.sin_addr, sizeof(ip.v4.s_addr));
 	ql_whitelist_add (ip);
 
-	// redirect page to destination
-	mg_printf(conn, "HTTP/1.1 303 See Other\r\n"
-					"Location: %s\r\n\r\n", "http://start.qaul:8000/live");
-	mg_printf(conn, "<a href=\"%s\">qaul.net redirect &gt;&gt;</a>", "http://start.qaul:8000/live");
+	// send header
+	mg_printf(conn, "HTTP/1.1 200 OK\r\n"
+	             	"Content-Type: application/json; charset=utf-8\r\n"
+					"\r\n");
+
+	mg_printf(conn, "{}");
 
 	conn->flags |= MG_F_SEND_AND_CLOSE;
 }
