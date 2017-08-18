@@ -101,7 +101,7 @@ void Qaullib_FilePopulate(void)
 	if ((file = fopen(local_destiny, "r")) == NULL)
 	{
 		if (errno == ENOENT) {
-			printf("File doesn't exist: %s \n", local_destiny);
+			printf("Qaullib_FilePopulate File doesn't exist: %s \n", local_destiny);
 		}
 		else {
 			// Check for other errors too, like EACCES and EISDIR
@@ -142,7 +142,7 @@ int Qaullib_FileExists(char *path)
 
 	if ((file = fopen(path, "r")) == NULL) {
 		if (errno == ENOENT) {
-			printf("File doesn't exist: %s \n", path);
+			printf("Qaullib_FileExists File doesn't exist: %s \n", path);
 		}
 		else {
 			// Check for other errors too, like EACCES and EISDIR
