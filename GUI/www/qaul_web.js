@@ -105,7 +105,7 @@ function init_start()
 	// set locale
 	$("#locale_submit").click(function(){
 		set_locale($("input[name='l']:checked").val());
-		if (typeof(Storage) !== "undefined")
+		if (test_localstorage() && typeof(Storage) !== "undefined")
 			localStorage.setItem("locale", $("input[name='l']:checked").val());
 		
 		if(web_initialized)
@@ -123,7 +123,7 @@ function init_start()
 	name_form.validate({
 		submitHandler: function(form){
 			set_username($("#name_name").val());
-			if(typeof(Storage) !== "undefined")
+			if (test_localstorage() && typeof(Storage) !== "undefined")
 				localStorage.setItem("username", $("#name_name").val());
 			
 			if(web_initialized)
@@ -1036,9 +1036,25 @@ function web_file_schedule()
 	$.mobile.changePage($("#page_file"));
 }
 
+function test_localstorage()
+{
+    // test if local storage feature is supported
+    var mod = 'qaul';
+    try
+    {
+        localStorage.setItem(mod, mod);
+        localStorage.removeItem(mod);
+        return true;
+    }
+    catch(e)
+    {
+        return false;
+    }
+}
+
 function web_check_settings()
 {
-	if (typeof(Storage) !== "undefined")
+	if (test_localstorage() && typeof(Storage) !== "undefined")
 	{
 		console.log('local storage locale: ' +localStorage.getItem("locale"));
 		console.log('local storage username: ' +localStorage.getItem("username"));
