@@ -69,6 +69,7 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/captive/qaullib_captive.c \
 	$(LIBQAUL_SRC)/captive/qaullib_captive_dhcp.c \
 	$(LIBQAUL_SRC)/captive/qaullib_captive_dns.c \
+	$(LIBQAUL_SRC)/captive/whitelist.c \
 	$(LIBQAUL_SRC)/sqlite/sqlite3.c \
 	$(LIBQAUL_SRC)/urlcode/urlcode.c \
 	$(LIBQAUL_SRC)/olsrd/mantissa.c \
@@ -80,7 +81,8 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/qaullib_validate.c \
 	$(LIBQAUL_SRC)/mg_backend_apk.c \
 	$(LIBQAUL_SRC)/qmongoose.c \
-	$(LIBQAUL_SRC)/qaullib_crypto.c
+	$(LIBQAUL_SRC)/qaullib_crypto.c \
+	$(LIBQAUL_SRC)/validate.c
 
 LOCAL_EXPORT_C_INCLUDES := $(LIBQAUL_INCLUDE)
 LOCAL_C_INCLUDES := \
