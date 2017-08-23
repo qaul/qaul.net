@@ -60,11 +60,13 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
     ${LIBQAULDIR}/captive/qaullib_captive.c
     ${LIBQAULDIR}/captive/qaullib_captive_dhcp.c
     ${LIBQAULDIR}/captive/qaullib_captive_dns.c
+    ${LIBQAULDIR}/captive/whitelist.c
     ${LIBQAULDIR}/qmongoose.c
     ${LIBQAULDIR}/sqlite/sqlite3.c
     ${LIBQAULDIR}/urlcode/urlcode.c
     ${LIBQAULDIR}/olsrd/mantissa.c
     ${LIBQAULDIR}/olsrd/hashing.c
+    ${LIBQAULDIR}/../qaulhelper/validate.c
 	${MACOSX_RESOURCE_FILES}
 	${MACOSX_MENU_FILES}
 )
