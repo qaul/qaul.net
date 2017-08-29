@@ -1,8 +1,9 @@
-//
-// Created by spacekookie on 09.08.17.
-//
+/*
+ * qaul.net is free software
+ * licensed under GPL (version 3)
+ */
 
-#ifndef QAUL_QLUSER_KEYSTORE_H_H
-#define QAUL_QLUSER_KEYSTORE_H_H
+#ifndef QAUL_QLUSER_KEYSTORE_H
+#define QAUL_QLUSER_KEYSTORE_H
 
-#endif //QAUL_QLUSER_KEYSTORE_H_H
+#endif //QAUL_QLUSER_KEYSTORE_H
