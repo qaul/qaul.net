@@ -19,7 +19,7 @@ typedef struct key_entry {
 qcry_ks_ctx *keystore;
 
 /* Forward decloare load function for public keys */
-int load_pubkey(mbedtls_pk_context **pub, const char *path, const char *fingerprint);
+//int load_pubkey(mbedtls_pk_context **pub, const char *path, const char *fingerprint);
 
 #define CHECK_SANE \
     if( !(keystore->keylist != NULL && keystore->max > 0 && keystore->key_path) ) \
@@ -57,7 +57,7 @@ int qcry_ks_init(const char *path, struct qcry_usr_id **known, int entries)
 
         /* Load the apropriate key from the keystore */
         mbedtls_pk_context *pub;
-        load_pubkey(&pub, keystore->key_path, id->username);
+        qcry_load_pubkey(&pub, keystore->key_path, id->username);
 
         /* Save the fingerprint in our collection */
         ret = qcry_ks_save(pub, id->fingerprint, id->username);
@@ -168,48 +168,4 @@ int qcry_ks_free()
 
     free(keystore->key_path);
     return QCRY_STATUS_OK;
-}
-
-
-/************ PRIVATE UTILITY FUNCTIONS BELOW ************/
-
-
-int load_pubkey(mbedtls_pk_context **pub, const char *path, const char *fp)
-{
-    int ret = 0;
-
-    /*** Malloc space for the pub and pri key values on heap ***/
-    (*pub) = (mbedtls_pk_context*) calloc(sizeof(mbedtls_pk_context),  1);
-    if(*pub == NULL) {
-        ret = EXIT_FAILURE;
-        goto cleanup;
-    }
-
-    /* Prepare path variables */
-    size_t p_s = strlen(path);
-    char pub_pth[512];
-
-    /* Init new key context */
-    mbedtls_pk_init(*pub);
-
-    /* Build public key path (according to slashy-ness) */
-    if(strcmp(&path[p_s - 1], "/") != 0)    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s/%s.pub", path, fp);
-    else                                    mbedtls_snprintf(pub_pth, sizeof(pub_pth), "%s%s.pub", path, fp);
-
-    /*** Read keys off disk and initialise the contexts ***/
-    mbedtls_printf("[KEYSTORE] Parsing key for %s...", fp);
-    fflush(stdout);
-
-    ret = mbedtls_pk_parse_public_keyfile(*pub, pub_pth);
-    if(ret != 0) {
-        mbedtls_printf("FAILED! mbedtls_pk_parse_public_keyfile returned 0x%04x\n", ret);
-        goto cleanup;
-    }
-
-    mbedtls_printf("OK\n");
-    return 0;
-
-    cleanup:
-    mbedtls_pk_free(*pub);
-    return ret;
 }
