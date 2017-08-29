@@ -8,6 +8,8 @@
 
 /***************** QCRY ERROR CODES *****************/
 
+#include <mbedtls/pk.h>
+
 #define QCRY_STATUS_OK                  0
 #define QCRY_STATUS_ERROR               1
 #define QCRY_STATUS_FATAL               2
@@ -127,6 +129,60 @@ int qcry_base64_encode(char *buffer, const char *src, int src_len);
 int qcry_base64_declen(const char *encoded);
 
 int qcry_base64_decode(char *buffer, const char *encoded, int enc_len);
+
+
+/**
+ * Load a public key from disk storage inside a particular path.
+ *
+ * @param pub The pubkey context that will be filled
+ * @param path The path hirarchy to load a key from
+ * @param fp Fingerprint to load (<fingerprint>.pub is the filename)
+ *
+ * @return 0 for success or different error codes
+ */
+int qcry_load_pubkey(mbedtls_pk_context **pub, const char *path, const char *fp);
+
+
+/**
+ * Inverse function of #qcry_load_pubkey(...) which stores a public key as
+ * plaintext in a file found in <path>/<fingerprint>.pub which can be loaded
+ * again later.
+ *
+ * @param pub
+ * @param path
+ * @param fp
+ * @return
+ */
+int qcry_save_pubkey(mbedtls_pk_context *pub, const char *path, const char *fp);
+
+
+/**
+ * This is a utility function that can be used to dump a public key context
+ * into a plaintext buffer. This function is called when dumping public keys
+ * to disk or when sending pubkeys over the network.
+ *
+ * A size is returned to indicate how big a buffer needs to be
+ * allocated for this particular key.
+ *
+ * @param buffer
+ * @param ksize
+ * @param key
+ * @return
+ */
+int qcry_serialise_pubkey(unsigned char **buffer, size_t *ksize, mbedtls_pk_context *key);
+
+
+/**
+ * The inverse function of #qcry_serialise_pubkey(...) which turns a plaintext
+ * buffer back into an mbedtls pubkey context. This is used when loading pubkeys
+ * from disk and also when receiving them from a networked node (foreign identities)
+ *
+ * @param key
+ * @param ksize
+ * @param buffer
+ * @return
+ */
+int qcry_deserialise_pubkey(mbedtls_pk_context **key, size_t ksize, unsigned char *buffer);
 
 
 #endif //QAUL_QCRY_HELPER_H

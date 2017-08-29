@@ -1,3 +1,10 @@
+#include "qcry_helper.h"
+
+#include <stdlib.h>
+#include <memory.h>
+#include <stdbool.h>
+#include <mbedtls/platform.h>
+
 
 /** Static const ASCII character lookup table */
 static const unsigned char pr2six[256] =
@@ -121,3 +128,64 @@ int qcry_base64_decode(char *encoded, const char *string, int enc_len)
     return p - encoded;
 }
 
+int qcry_save_pubkey(mbedtls_pk_context *pub, const char *path, const char *fp)
+{
+
+    return QCRY_STATUS_OK;
+}
+
+
+int qcry_load_pubkey(mbedtls_pk_context **pub, const char *path, const char *fp)
+{
+    int ret = 0;
+
+    /*** Malloc space for the pub and pri key values on heap ***/
+    (*pub) = (mbedtls_pk_context*) calloc(sizeof(mbedtls_pk_context),  1);
+    if(*pub == NULL) {
+        ret = EXIT_FAILURE;
+        goto cleanup;
+    }
+
+    /** Create path buffer depending on input length + "slashyness" */
+    size_t ps = strlen(path) + strlen(fp) + strlen(".pub");
+    bool slashed =  strcmp(&path[strlen(path) - 1], "/") != 0;
+    if(slashed) ps += 1;
+    char ppath[ps];
+
+    /* Either copy the path with or without an extra slash into the buffer */
+    if(slashed) mbedtls_snprintf(ppath, sizeof(ppath), "%s/%s.pub", path, fp);
+    else        mbedtls_snprintf(ppath, sizeof(ppath), "%s%s.pub", path, fp);
+
+    /*** Read keys off disk and initialise the contexts ***/
+    mbedtls_printf("[KEYSTORE] Parsing key for %s...", fp);
+    fflush(stdout);
+
+    ret = mbedtls_pk_parse_public_keyfile(*pub, ppath);
+    if(ret != 0) {
+        mbedtls_printf("FAILED! mbedtls_pk_parse_public_keyfile returned 0x%04x\n", ret);
+        goto cleanup;
+    }
+
+    mbedtls_printf("OK\n");
+
+    return QCRY_STATUS_OK;
+
+
+    cleanup:
+    mbedtls_pk_free(*pub);
+    return ret;
+}
+
+
+int qcry_serialise_pubkey(unsigned char **buffer, size_t *ksize, mbedtls_pk_context *key)
+{
+
+    return QCRY_STATUS_OK;
+}
+
+
+int qcry_deserialise_pubkey(mbedtls_pk_context **key, size_t ksize, unsigned char *buffer)
+{
+
+    return QCRY_STATUS_OK;
+}
