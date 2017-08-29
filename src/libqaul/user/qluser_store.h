@@ -4,8 +4,8 @@
  */
 
 
-#ifndef QAUL_QLUSER_STORE_H_H
-#define QAUL_QLUSER_STORE_H_H
+#ifndef QAUL_QLUSER_STORE_H
+#define QAUL_QLUSER_STORE_H
 
 #define QLUSER_STATUS_SUCCESS           0
 #define QLUSER_STATUS_DB_INVALID        (1 << 0)
@@ -43,7 +43,7 @@ typedef enum qluser_trust_t {
  * @param db_path Provide the path to the persistent user db
  * @param key_path Provide the path to the public keystore folder
  * @param flags Provide some configuration flags. See docs for details
- * @return Status return code
+ * @return Status return codesu
  */
 int qluser_store_initialise(const char *db_path, const char *key_path, unsigned int flags);
 
@@ -63,7 +63,7 @@ int qluser_store_adduser(struct qluser_t *user, const char *fp);
 int qluser_store_add_ip(struct qluser_t *user, const char *ip);
 int qluser_store_add_username(struct qluser_t *user, const char *username);
 int qluser_store_add_pubkey(struct qluser_t *user, const char *pubkey);
-int qluser_store_add_trustlvl(struct qluser_t *user, const struct qluser_trust_t);
+int qluser_store_add_trustlvl(struct qluser_t *user, enum qluser_trust_t);
 
 
 /** Functions to search users with */
@@ -87,7 +87,7 @@ int qluser_store_get_trustlvl(struct qluser_t *user, enum qluser_trust_t *trust)
  * @param user The user to delete
  * @return
  */
-int qluser_store_remove(struct qluser_t *user);
+int qluser_store_rm(struct qluser_t *user);
 
 
 /**
@@ -98,7 +98,7 @@ int qluser_store_remove(struct qluser_t *user);
  * @param user The user to delete
  * @return
  */
-int qluser_store_removeall(struct qluser_t *user);
+int qluser_store_rmall(struct qluser_t *user);
 
 
 /**
@@ -108,4 +108,4 @@ int qluser_store_removeall(struct qluser_t *user);
  */
 int qluser_store_free();
 
-#endif //QAUL_QLUSER_STORE_H_H
+#endif //QAUL_QLUSER_STORE_H
