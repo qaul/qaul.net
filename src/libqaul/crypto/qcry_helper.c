@@ -130,6 +130,43 @@ int qcry_base64_decode(char *encoded, const char *string, int enc_len)
 
 int qcry_save_pubkey(mbedtls_pk_context *pub, const char *path, const char *fp)
 {
+    int ret;
+    FILE *f;
+    size_t len = 0;
+    size_t buf_s = 16000; // FIXME: This has _got_ to be better
+    unsigned char output_buf[buf_s];
+    unsigned char *c = output_buf;
+
+    /** Create path buffer depending on input length + "slashyness" */
+    size_t ps = strlen(path) + strlen(fp) + strlen(".pub");
+    bool slashed =  strcmp(&path[strlen(path) - 1], "/") != 0;
+    if(slashed) ps += 1;
+    char ppath[ps];
+
+    /* Either copy the path with or without an extra slash into the buffer */
+    if(slashed) mbedtls_snprintf(ppath, sizeof(ppath), "%s/%s.pub", path, fp);
+    else        mbedtls_snprintf(ppath, sizeof(ppath), "%s%s.pub", path, fp);
+
+    /**************** Write public key to file ****************/
+
+    /** Clear Buffer and write into it  */
+    memset(output_buf, 0, buf_s);
+    ret = mbedtls_pk_write_pubkey_pem(pub, output_buf, buf_s);
+    if(ret != 0) return ret;
+
+    /** Write buffer to file handle */
+    if((f = fopen(ppath, "w")) == NULL) {
+        printf("FAILED\n");
+        return -1;
+    }
+
+    if(fwrite(c, 1, len, f) != len) {
+        printf("FAILED\n");
+        fclose(f);
+        return -1;
+    }
+
+    fclose(f);
 
     return QCRY_STATUS_OK;
 }
