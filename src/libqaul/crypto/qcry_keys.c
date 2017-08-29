@@ -20,10 +20,12 @@ unsigned int key_length_by_type(short type)
         case QCRY_KEYS_AES: return QCRY_KEYS_KL_AES;
         case QCRY_KEYS_ECC: return QCRY_KEYS_KL_ECC;
         case QCRY_KEYS_RSA: return QCRY_KEYS_KL_RSA;
-        default:            return -1;
+        default:            return (unsigned int) -1;
     }
 }
 
+// TODO: Refactor this module
+// TODO: Turn this into a few issues
 
 int qcry_keys_init(qcry_keys_context *context)
 {
