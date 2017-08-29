@@ -3,8 +3,7 @@ new file mode 100644
 index 0000000..a8708e5
 --- /dev/null
 +++ b/Android.mk
-@@ -0,0 +1,25 @@
-+APP_ALLOW_MISSING_DEPS:=true
+@@ -0,0 +1,24 @@
 +LOCAL_PATH:= $(call my-dir)
 +################## build iwlib ###################
 +include $(CLEAR_VARS)

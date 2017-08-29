@@ -35,6 +35,9 @@ ExternalProject_Add(mbedtls
 	CMAKE_ARGS ${MbedTlsCMakeArgs}
 )
 
+# FIXME: saces please make this pretty? :)
+add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/libcuckoo)
+
 set (ARCHIVE_DIR ${PROJECT_SOURCE_DIR}/archives)
 
 set (PJSIP_CONFIGURE_OPTIONS "--disable-opus")

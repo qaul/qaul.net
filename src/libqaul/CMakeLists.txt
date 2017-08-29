@@ -137,6 +137,9 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
 
 add_dependencies(libqaul mbedtls)
 
+# FIXME: Again, make this not suck so hard :P
+target_link_libraries(libqaul PUBLIC libcuckoo)
+
 ExternalProject_Get_Property(mbedtls install_dir)
 
 target_include_directories(libqaul PUBLIC ${install_dir}/mbedtls/include)
