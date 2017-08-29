@@ -10,6 +10,7 @@
 #include "qaullib_private.h"
 #include "mbedtls/sha1.h"
 #include "qaullib_crypto.h"
+
 #include <sys/stat.h>
 #include <dirent.h>
 
