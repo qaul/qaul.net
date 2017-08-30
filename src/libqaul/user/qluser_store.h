@@ -9,6 +9,7 @@
 
 /* Some generic error and status messages */
 #include <mbedtls/pk.h>
+#include <cuckoo.h>
 
 #define QLUSER_SUCCESS              0x0
 #define QLUSER_ERROR                0x1
@@ -31,8 +32,9 @@
 /** Holds data about a node */
 typedef struct qluser_node_t {
     union olsr_ip_addr  *ip;
-    struct qluser_t     **identities;
-    uint32_t            len, used;
+
+    // FIXME: Shadow this inside the src file instead of inside the header?
+    cuckoo_map          *ids;
 } qluser_node_t;
 
 
@@ -81,16 +83,27 @@ int qluser_store_initialise(const char *db_path, const char *key_path, unsigned 
  *
  * @param fp    The fingerprint of this user
  * @param name  The username of this user
- * @return      <0> for SUCCESS or ERROR code
+ * @return      Status return code
  */
 int qluser_store_adduser(const char *fp, const char *name);
 
 
+/**
+ * Remove a user from all storage tables, cleaning up all pre-allocated
+ * memory from the tables and qluser_t structs. It also removes the reference
+ * left in qluser_node_t and cleans it up if it was the only user on this
+ * node.
+ *
+ * @param fp    The fingerprint of the user to remove
+ * @return      Status return code
+ */
+int qluser_store_rmuser(const char *fp);
+
+
 /** Functions to fill up user data */
-int qluser_store_add_ip(struct qluser_t user, union olsr_ip_addr *ip);
-int qluser_store_add_name(struct qluser_t user, const char *name);
-int qluser_store_add_pubkey(struct qluser_t user, const char *pubkey);
-int qluser_store_add_trustlvl(struct qluser_t user, enum qluser_trust_t);
+int qluser_store_add_ip(const char *fp, union olsr_ip_addr *ip);
+int qluser_store_add_pubkey(const char *fp, const char *pubkey);
+int qluser_store_add_trustlvl(const char *fp, enum qluser_trust_t);
 
 
 /** Functions to search users with */
