@@ -105,9 +105,23 @@ void Ql_WwwEvent_handler(struct mg_connection *conn, int event, void *event_data
 		if(qaul_web_localip_set == 0)
 		{
 			memcpy(&qaul_web_localip.v4.s_addr, &conn->sa.sin.sin_addr, sizeof(qaul_web_localip.v4.s_addr));
-			printf("qaul_web_localip conn->sa.sin.sin_addr %s\n",
+			
+			// only make it permanent when /qaul.html is called
+			if (strncmp(hm->uri.p, "/qaul.html", 10) == 0)
+			{
+				printf("qaul_web_localip set /qaul.html conn->sa.sin.sin_addr %s\n",
 					inet_ntop(AF_INET, &conn->sa.sin.sin_addr, (char *)&ipbuf, sizeof(ipbuf)));
-			qaul_web_localip_set = 1;
+				qaul_web_localip_set = 1;
+			}
+			else
+			{
+				printf("qaul_web_localip not yet set conn->sa.sin.sin_addr %s ( %i ) %.*s \n",
+					inet_ntop(AF_INET, &conn->sa.sin.sin_addr, (char *)&ipbuf, sizeof(ipbuf)),
+					hm->uri.len,
+					hm->uri.len,
+					hm->uri.p
+					);
+			}
 		}
 
 		// check if captive portal redirect is needed
