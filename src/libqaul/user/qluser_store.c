@@ -5,31 +5,20 @@
 #include <memory.h>
 #include "../crypto/qcry_helper.h"
 #include "../olsrd/olsr_types.h"
-
-/** Holds data about a node */
-typedef struct qluser_node_t {
-    union olsr_ip_addr  *ip;
-    struct qluser_t     **identities;
-};
-
-/** Holds data about a user identity */
-struct qluser_t {
-    char *name;
-    const char *fp;
-    mbedtls_pk_context *pubkey;
-    struct qluser_node_t *node;
-};
+#include "../olsrd/hashing.h"
 
 
 /* Static storage context for all indexable fields */
 static cuckoo_map *fp_map = NULL, *ip_map = NULL, *n_map = NULL;
 #define INIT_MAP_SIZE 17
-#define CHECK_STORE if(fp_map == NULL || ip_map == NULL || n_map == NULL) return QLUSER_STATUS_NOT_INITIALISED;
+#define CHECK_STORE if(fp_map == NULL || ip_map == NULL || n_map == NULL) return QLUSER_NOT_INITIALISED;
+char *strhash_ip(union olsr_ip_addr *__ip);
+
 
 int qluser_store_initialise(const char *db_path, const char *key_path, unsigned int flags)
 {
     int ret;
-    if(fp_map != NULL) return QLUSER_STATUS_ALREADY_INIT;
+    if(fp_map != NULL) return QLUSER_ALREADY_INIT;
 
     // TODO: Get cflags and ms from flags & config?
     uint32_t cflags = CUCKOO_DEFAULT | CUCKOO_TABLES_THREE;
@@ -81,13 +70,12 @@ int qluser_store_initialise(const char *db_path, const char *key_path, unsigned 
         }
         closedir(dir);
     } else {
-        ret = QLUSER_STATUS_INVALID_KEYSTORE;
+        ret = QLUSER_INVALID_KEYSTORE;
         goto c3;
     }
 
-
     /* Return if we got here */
-    return QLUSER_STATUS_SUCCESS;
+    return QLUSER_SUCCESS;
 
     /* Clean up the mess we made and return failure */
     c3: cuckoo_free(n_map, CUCKOO_NO_CB);
@@ -97,17 +85,74 @@ int qluser_store_initialise(const char *db_path, const char *key_path, unsigned 
 }
 
 
-int qluser_store_adduser(struct qluser_t *user, const char *fp)
+int qluser_store_adduser(const char *fp, const char *name)
 {
     CHECK_STORE
+    int ret;
+
+    /** Check the input user struct for validity */
+    if(fp == NULL || name == NULL) return QLUSER_INVALID_PARAMS;
 
     /* Check if the user already exists */
-    if(cuckoo_contains(fp_map, fp) == 0) {
+    if(cuckoo_contains(fp_map, fp) == 0) return QLUSER_USER_EXISTS;
+
+    /* Malloc a user struct we can keep in the table forever */
+    qluser_t *user = (qluser_t*) malloc(sizeof(qluser_t));
+    if(user == NULL) return QLUSER_MALLOC_FAILED;
+    memset(user, 0, sizeof(qluser_t));
+
+    /* Fill new user struct with the data we already know */
+    user->fp = strdup(fp);
+    user->name = strdup(name);
+
+    /* Always insert fingerprint to table */
+    ret = cuckoo_insert(fp_map, fp, user);
+    if(ret) return QLUSER_INSERT_FAILED;
+
+    /* Only insert name or ip if they exist */
+    if(user->name != NULL) {
+        ret = cuckoo_insert(n_map, name, user);
+        if(ret) return QLUSER_INSERT_FAILED;
     }
 
-    cuckoo_insert(fp_map, fp, user);
-    cuckoo_insert(n_map, user->name, user);
+    return QLUSER_SUCCESS;
+}
 
-    char *ip = "<foo>";
-    cuckoo_insert(ip_map, ip, user);
+
+int qluser_store_rmuser(const char *fp)
+{
+    CHECK_STORE
+    if(fp == NULL) return QLUSER_INVALID_PARAMS;
+    int ret;
+
+    /* Check that the user exists */
+    if(cuckoo_contains(fp_map, fp) != 0) return QLUSER_USER_NOT_FOUND;
+
+}
+
+//int qluser_store_add_ip(struct qluser_t *user, union olsr_ip_addr *ip)
+//{
+//    CHECK_STORE
+//    int ret;
+//
+//    /* Make sure a user entry exists first */
+//    if(cuckoo_contains(fp_map, user->fp) != 0) {
+//        printf("Can't add an IP to a user that isn't known yet!\n");
+//        return QLUSER_USER_NOT_FOUND;
+//    }
+//
+//    /* Remove any known IP for this user */
+//    char *_ip = strhash_ip(ip);
+//    if(cuckoo_contains(ip_map, _ip) == 0) {
+//        ret = cuckoo_remove(ip_map, _ip, CUCKOO_NO_CB);
+//        if(ret) return QLUSER_INSERT_FAILED;
+//    }
+//}
+
+
+/****************************************************************************/
+
+char *strhash_ip(union olsr_ip_addr *__ip) {
+    uint32_t _ip = olsr_ip_hashing(__ip);
+    return "" + _ip;
 }
