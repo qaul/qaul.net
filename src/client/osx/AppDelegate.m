@@ -112,7 +112,9 @@
 	// TODO: stop timers
     
 	// stop library
-	Qaullib_Exit();
+	// TODO: library crashes when calling Qaullib_Exit()
+	//Qaullib_Exit();
+	//usleep(50000);
 	
 	// stop olsrd 
 	if(![qaulConfigWifi stopOlsrd]) 
@@ -188,7 +190,11 @@
 		// BUG: does not work anymore if URL is:
         //      http://127.0.0.1:8081/qaul.html
         //      it has to be "localhost"
-        NSString *myUrl = @"http://localhost:8081/qaul.html";
+        //NSString *myUrl = @"http://localhost:8081/qaul.html";
+        ///// TODO: NOW check this
+        // As of OSX 10.10 it only works with 127.0.0.1
+        /////
+        NSString *myUrl = @"http://127.0.0.1:8081/qaul.html";
         NSLog(@"set URL %@", myUrl);
 		//[qaulWebView setMainFrameURL:myUrl];
         [[qaulWebView mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:myUrl]]];

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# qaul.net is free software
+# licensed under GPL (version 3)
+
+## OSX pre install step
+echo "Running preinstall" > /tmp/my_preinstall.log
+
+# remove files from previous installation
+rm -R /Applications/qaul.app
+rm -R /Library/qaul.net
+
+# forget it has been already installed
+pkgutil --forget net.qaul.qaul
+
+# return successs
+exit 0

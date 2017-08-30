@@ -60,13 +60,17 @@
 {
 	NSLog(@"QaulConfigWifi setPaths");
     
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4) 
-		networksetupPath=[NSString stringWithFormat:@"/usr/sbin/networksetup"];
-	else 
-		networksetupPath=[NSString stringWithFormat:@"/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Support/networksetup"];	
+    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_4)
+    {
+		networksetupPath=[[NSString alloc] initWithString:@"/usr/sbin/networksetup"];
+	}
+	else
+	{
+		networksetupPath=[[NSString alloc] initWithString:@"/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Support/networksetup"];
+	}
 	
-	airportPath = [NSString stringWithFormat:@"/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"];
-	qaulhelperPath = [NSString stringWithFormat:@"%s/bin/qaulhelper",QAUL_ROOT_PATH];
+	airportPath = [[NSString alloc] initWithString:@"/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"];
+	qaulhelperPath = [[NSString alloc] initWithFormat:@"%s/bin/qaulhelper",QAUL_ROOT_PATH];
 }
 
 - (BOOL)runTask:(NSString*)path arguments:(NSArray*)arguments
@@ -100,36 +104,33 @@
 
 - (BOOL)startAirport:(SCNetworkInterfaceRef)interface
 {
-	[self setPaths];
-    NSLog(@"start airport\n");
-    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"enablewifi",[NSString stringWithFormat:@"%i",(int)floor(NSAppKitVersionNumber)],SCNetworkInterfaceGetBSDName(interface),nil]];
+    NSLog(@"start airport");
+	return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"enablewifi",[NSString stringWithFormat:@"%i",(int)floor(NSAppKitVersionNumber)],SCNetworkInterfaceGetBSDName(interface),nil]];
 }
 
 - (BOOL)stopAirport:(SCNetworkInterfaceRef)interface
 {
-	[self setPaths];
-    NSLog(@"stop airport\n");
-    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"disablewifi",[NSString stringWithFormat:@"%i",(int)floor(NSAppKitVersionNumber)],SCNetworkInterfaceGetBSDName(interface),nil]];
+    NSLog(@"stop airport");
+	return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"disablewifi",[NSString stringWithFormat:@"%i",(int)floor(NSAppKitVersionNumber)],SCNetworkInterfaceGetBSDName(interface),nil]];
 }
 
 - (BOOL)setAddress:(NSString*)address service:(SCNetworkServiceRef)service mask:(NSString*)mask gateway:(NSString*)gateway
 {
-	[self setPaths];
-    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"setip", SCNetworkServiceGetName(service), address, mask, gateway, nil]];
+	NSLog(@"set ip");
+	return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"setip", SCNetworkServiceGetName(service), address, mask, gateway, nil]];
 }
 
 - (BOOL)setDhcp:(SCNetworkServiceRef)service interface:(SCNetworkInterfaceRef)interface
 {
-	[self setPaths];
-    return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"setdhcp",SCNetworkServiceGetName(service),SCNetworkInterfaceGetBSDName(interface),nil]];
+	NSLog(@"set dhcp");
+	return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"setdhcp",SCNetworkServiceGetName(service),SCNetworkInterfaceGetBSDName(interface),nil]];
 }
 
 
 - (BOOL)connect2network:(NSString*)name channel:(int)channel interface:(SCNetworkInterfaceRef)interface service:(SCNetworkServiceRef)service
 {
-	[self setPaths];
-    NSLog(@"connect 2 network\n");
-    BOOL created;
+    NSLog(@"connect 2 network");
+	BOOL created;
 	
 	if(floor(NSAppKitVersionNumber) < NSAppKitVersionNumber10_6)
 	{
@@ -217,7 +218,6 @@
 - (BOOL)startOlsrd:(int)isGateway interface:(NSString*)interface;
 {
 	BOOL success;
-	[self setPaths];
 	
 	if(isGateway)
 	{
@@ -235,38 +235,36 @@
 
 - (BOOL)stopOlsrd
 {
-	[self setPaths];
+	NSLog(@"qaulhelper stopolsrd");
     return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"stopolsrd", nil]];
 }
 
 - (BOOL)startPortForwarding:(NSString*)interface
 {
-	[self setPaths];
-    NSLog(@"start port forwarding");
+    NSLog(@"qaulhelper startportforwarding");
     return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"startportforwarding", interface,nil]];
 }
 
 - (BOOL)stopPortForwarding
 {
-	[self setPaths];
+	NSLog(@"qaulhelper stopportforwarding");
     return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"stopportforwarding", nil]];
 }
 
 - (BOOL)startGateway:(NSString*)gateway
 {
-	[self setPaths];
+	NSLog(@"qaulhelper startgateway");
     return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"startgateway", gateway, nil]];
 }
 
 - (BOOL)stopGateway
 {
-	[self setPaths];
+	NSLog(@"qaulhelper stopgateway");
     return [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"stopgateway", nil]];
 }
 
 - (BOOL)createNetworkProfile
 {
-	[self setPaths];
     NSLog(@"createNetworkProfile");
 	
 	NSTask *task;
@@ -309,7 +307,6 @@
 
 - (BOOL)deleteNetworkProfile
 {
-	[self setPaths];
     NSLog(@"deleteNetworkProfile");
     [self runTask:qaulhelperPath arguments:[NSArray arrayWithObjects:@"switchnetworkprofile",@"new",nil]];
 	NSLog(@"deleteNetworkProfile deleted");
