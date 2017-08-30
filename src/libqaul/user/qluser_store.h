@@ -4,24 +4,47 @@
  */
 
 
-#ifndef QAUL_QLUSER_STORE_H
-#define QAUL_QLUSER_STORE_H
+#ifndef QLUSER_STORE_H
+#define QLUSER_STORE_H
 
-#define QLUSER_STATUS_SUCCESS           0
-#define QLUSER_STATUS_ERROR             1
-#define QLUSER_STATUS_ALREADY_INIT      (1 << 0)
-#define QLUSER_STATUS_DB_INVALID        (1 << 1)
-#define QLUSER_STATUS_DB_LOCKED         (1 << 2)
-#define QLUSER_STATUS_INVALID_KEYSTORE  (1 << 3)
-#define QLUSER_STATUS_USER_NOT_FOUND    (1 << 4)
-#define QLUSER_STATUS_PUBKEY_EXISTS     (1 << 5)
-#define QLUSER_STATUS_PUBKEY_NOT_FOUND  (1 << 6)
-#define QLUSER_STATUS_NOT_INITIALISED   (1 << 7)
+/* Some generic error and status messages */
+#include <mbedtls/pk.h>
+
+#define QLUSER_SUCCESS              0x0
+#define QLUSER_ERROR                0x1
+#define QLUSER_INVALID_PARAMS       0x2
+#define QLUSER_ALREADY_INIT         0x3
+#define QLUSER_DB_INVALID           0x4
+#define QLUSER_DB_LOCKED            0x5
+#define QLUSER_INVALID_KEYSTORE     0x6
+#define QLUSER_NOT_INITIALISED      0x7
+#define QLUSER_MALLOC_FAILED        0x8
+
+/* Specific insert related issues */
+#define QLUSER_INSERT_FAILED        0x20
+#define QLUSER_USER_EXISTS          0x21
+#define QLUSER_USER_NOT_FOUND       0x22
+#define QLUSER_PUBKEY_EXISTS        0x23
+#define QLUSER_PUBKEY_NOT_FOUND     0x24
 
 
-/** Forward declare structs */
-typedef struct qluser_t qluser_t;
-typedef struct qluser_node_t qluser_node_t;
+/** Holds data about a node */
+typedef struct qluser_node_t {
+    union olsr_ip_addr  *ip;
+    struct qluser_t     **identities;
+    uint32_t            len, used;
+} qluser_node_t;
+
+
+/** Holds data about a user identity */
+typedef struct qluser_t {
+    char *name;
+    const char *fp;
+
+    // TODO: Maybe change this to a char buffer that we just keep (de)serialising?
+    mbedtls_pk_context *pubkey;
+    struct qluser_node_t *node;
+} qluser_t;
 
 
 /** Describes the different trust levels between users */
@@ -52,36 +75,28 @@ int qluser_store_initialise(const char *db_path, const char *key_path, unsigned 
 
 
 /**
- * Add a new user with fingerprint username and ip into the user store. This is
- * the bare minimum of information that is required to store a user in the store
+ * This function adds the bare-bone data required into two of the lookup tables
+ * which allows future data to be added as well. To retrieve the newly created
+ * used after the insertion please use @link{qluser_store_getby_fp}
  *
- * @param user Will be filled with a pointer representing the user for future operations
- * @param fp The fingerprint of this user
- * @return Status return code
+ * @param fp    The fingerprint of this user
+ * @param name  The username of this user
+ * @return      <0> for SUCCESS or ERROR code
  */
-int qluser_store_adduser(struct qluser_t *user, const char *fp);
+int qluser_store_adduser(const char *fp, const char *name);
 
 
 /** Functions to fill up user data */
-int qluser_store_add_ip(struct qluser_t *user, const char *ip);
-int qluser_store_add_username(struct qluser_t *user, const char *username);
-int qluser_store_add_pubkey(struct qluser_t *user, const char *pubkey);
-int qluser_store_add_trustlvl(struct qluser_t *user, enum qluser_trust_t);
+int qluser_store_add_ip(struct qluser_t user, union olsr_ip_addr *ip);
+int qluser_store_add_name(struct qluser_t user, const char *name);
+int qluser_store_add_pubkey(struct qluser_t user, const char *pubkey);
+int qluser_store_add_trustlvl(struct qluser_t user, enum qluser_trust_t);
 
 
 /** Functions to search users with */
-// TODO: Use union for IPs
-int qluser_store_getby_ip(struct qluser_t *user);
 int qluser_store_getby_fp(struct qluser_t *user, const char *fp);
-int qluser_store_getby_username(struct qluser_t *user, const char *username);
-
-
-/** Functions to get specific data fields from a specified user */
-int qluser_store_get_ip(struct qluser_t *user, char **ip);
-int qluser_store_get_fp(struct qluser_t *user, char **fp);
-int qluser_store_get_username(struct qluser_t *user, char **username);
-int qluser_store_get_pubkey(struct qluser_t *user, char **pubkey);
-int qluser_store_get_trustlvl(struct qluser_t *user, enum qluser_trust_t *trust);
+int qluser_store_getby_name(struct qluser_t *user, const char *name);
+int qluser_store_getby_ip(struct qluser_t *user, union olsr_ip_addr *ip);
 
 
 /**
@@ -91,6 +106,7 @@ int qluser_store_get_trustlvl(struct qluser_t *user, enum qluser_trust_t *trust)
  * @return
  */
 int qluser_store_rm(struct qluser_t *user);
+
 
 
 /**
@@ -111,4 +127,4 @@ int qluser_store_rmall(struct qluser_t *user);
  */
 int qluser_store_free();
 
-#endif //QAUL_QLUSER_STORE_H
+#endif // QLUSER_STORE_H
