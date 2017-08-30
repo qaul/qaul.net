@@ -8,6 +8,7 @@
 #define QAUL_QLUSER_STORE_H
 
 #define QLUSER_STATUS_SUCCESS           0
+#define QLUSER_STATUS_ERROR             1
 #define QLUSER_STATUS_ALREADY_INIT      (1 << 0)
 #define QLUSER_STATUS_DB_INVALID        (1 << 1)
 #define QLUSER_STATUS_DB_LOCKED         (1 << 2)
@@ -15,6 +16,7 @@
 #define QLUSER_STATUS_USER_NOT_FOUND    (1 << 4)
 #define QLUSER_STATUS_PUBKEY_EXISTS     (1 << 5)
 #define QLUSER_STATUS_PUBKEY_NOT_FOUND  (1 << 6)
+#define QLUSER_STATUS_NOT_INITIALISED   (1 << 7)
 
 
 /** Forward declare structs */
