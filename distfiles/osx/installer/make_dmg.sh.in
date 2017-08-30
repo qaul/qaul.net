@@ -18,9 +18,11 @@ BUILDVERSION="@CPACK_PACKAGE_VERSION@"
 make install DESTDIR=$BUILDDIR/tmp_install
 
 # copy files for installer
-mkdir -p $BUILDDIR/tmp_pkg
+mkdir -p $BUILDDIR/tmp_pkg/scripts
 cp $SOURCEDIR/distfiles/osx/installer/app_icon-512.png $BUILDDIR/tmp_pkg/
 cp $SOURCEDIR/Licenses/qaul.net_license.txt $BUILDDIR/tmp_pkg/
+cp $SOURCEDIR/distfiles/osx/installer/preinstall $BUILDDIR/tmp_pkg/scripts/preinstall
+cp $SOURCEDIR/distfiles/osx/installer/postinstall $BUILDDIR/tmp_pkg/scripts/postinstall
 
 # copy files for DMG
 mkdir -p $BUILDDIR/tmp_dmg/.background
@@ -29,7 +31,7 @@ cp $SOURCEDIR/distfiles/osx/installer/DS_Store $BUILDDIR/tmp_dmg/.DS_Store
 cp $SOURCEDIR/distfiles/osx/installer/osx_installer.png $BUILDDIR/tmp_dmg/.background/
 
 # build resource package
-pkgbuild --root $BUILDDIR/tmp_install --install-location / --version $BUILDVERSION --identifier net.qaul.qaul $BUILDDIR/tmp_pkg/qaul.pkg
+pkgbuild --root $BUILDDIR/tmp_install --install-location / --version $BUILDVERSION --identifier net.qaul.qaul --scripts $BUILDDIR/tmp_pkg/scripts $BUILDDIR/tmp_pkg/qaul.pkg
 cp $BUILDDIR/tmp_pkg/qaul.pkg $BUILDDIR/
 
 # build installer package
