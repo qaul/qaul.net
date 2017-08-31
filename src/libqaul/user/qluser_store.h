@@ -111,10 +111,37 @@ int qluser_store_adduser(const char *fp, const char *name);
 int qluser_store_rmuser(const char *fp);
 
 
-/** Functions to fill up user data */
+/**
+ * Add an IP address to a user which represents a node on
+ * the network. If a user has changed nodes, the old one
+ * will be removed before
+ *
+ * @param fp    The fingerprint of the user
+ * @param ip    IP data of the node involved
+ * @return      Status return code
+ */
 int qluser_store_add_ip(const char *fp, union olsr_ip_addr *ip);
-int qluser_store_add_pubkey(const char *fp, const char *pubkey);
-int qluser_store_add_trustlvl(const char *fp, enum qluser_trust_t);
+
+
+/**
+ * Add a public key to a user that is also stored to disk in the
+ * persistent keystore for later loading. In case pubkey storage
+ * fails it will return an error code from the QCRY list which
+ * indicates what type of error occured during the write process.
+ *
+ * @param fp
+ * @param pubkey
+ * @return
+ */
+// TODO: Wrap mbdetls_pk_context in something that hides internals
+int qluser_store_add_pubkey(const char *fp, mbedtls_pk_context *pubkey);
+
+
+/** Functions to fill up user data */
+int qluser_store_set_keytrust(const char *fp, enum qluser_trust_t trust);
+int qluser_store_set_msgtrust(const char *fp, int32_t trust);
+int qluser_store_set_filetrust(const char *fp, int32_t trust);
+int qluser_store_set_ltrust(const char *fp, int32_t trust);
 
 
 /** Functions to search users with */
