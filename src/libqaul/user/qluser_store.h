@@ -131,10 +131,11 @@ int qluser_store_add_ip(const char *fp, union olsr_ip_addr *ip);
  *
  * @param fp
  * @param pubkey
+ * @param trust
  * @return
  */
 // TODO: Wrap mbdetls_pk_context in something that hides internals
-int qluser_store_add_pubkey(const char *fp, mbedtls_pk_context *pubkey);
+int qluser_store_add_pubkey(const char *fp, mbedtls_pk_context *pubkey, enum qluser_trust_t trust);
 
 
 /** Functions to fill up user data */
