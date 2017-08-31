@@ -11,6 +11,7 @@
 
 /* Static storage context for all indexable fields */
 static cuckoo_map *fp_map = NULL, *ip_map = NULL, *n_map = NULL, *node_map = NULL;
+static char *key_path, *db_path;
 
 int get_with(uint8_t t, qluser_t *user, void *idx);
 char *strhash_ip(union olsr_ip_addr *__ip);
@@ -27,6 +28,9 @@ int qluser_store_initialise(const char *db_path, const char *key_path, unsigned 
 {
     int ret;
     if(fp_map != NULL) return QLUSER_ALREADY_INIT;
+
+    db_path = strdup(db_path);
+    key_path = strdup(key_path);
 
     // TODO: Get cflags and ms from flags & config?
     uint32_t cflags = CUCKOO_DEFAULT | CUCKOO_TABLES_THREE;
@@ -239,6 +243,25 @@ int qluser_store_add_ip(const char *fp, union olsr_ip_addr *ip)
 }
 
 
+int qluser_store_add_pubkey(const char *fp, mbedtls_pk_context *pubkey)
+{
+    CHECK_STORE
+    if(cuckoo_contains(fp_map, fp) != 0) return QLUSER_USER_NOT_FOUND;
+
+    qluser_t *user;
+    int ret = cuckoo_retrieve(fp_map, fp, (void**) &user);
+    if(ret) return QLUSER_USER_NOT_FOUND;
+
+    if(user->pubkey != NULL) mbedtls_pk_free(user->pubkey);
+    user->pubkey = pubkey;
+
+    /* Store pubkey to disk? */
+    ret = qcry_save_pubkey(user->pubkey, key_path, user->fp);
+    if(ret) return ret;
+    return QLUSER_SUCCESS;
+}
+
+
 int qluser_store_getby_fp(struct qluser_t *user, const char *fp)
 {
     return get_with(MAP_FP, user, (void*) fp);
@@ -263,7 +286,6 @@ int qluser_store_getby_ip(struct qluser_t *user, union olsr_ip_addr *ip)
 
 int get_with(uint8_t t, qluser_t *user, void *idx)
 {
-
     CHECK_STORE
     qluser_t *__user;
     int ret;
