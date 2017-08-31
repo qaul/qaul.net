@@ -42,6 +42,20 @@ typedef struct qluser_node_t {
 } qluser_node_t;
 
 
+/** Describes the different trust levels between users */
+typedef enum qluser_trust_t {
+
+    /** No public key is known */
+            UNKNOWN = 0,
+
+    /** TOFU: Trust on first use - but not really */
+            PARTIAL = 1,
+
+    /** Manually verified and this user checks out */
+            VERIFIED = 2
+};
+
+
 /** Holds data about a user identity */
 typedef struct qluser_t {
     char *name;
@@ -50,21 +64,14 @@ typedef struct qluser_t {
     // TODO: Maybe change this to a char buffer that we just keep (de)serialising?
     mbedtls_pk_context *pubkey;
     struct qluser_node_t *node;
+
+    /* Store 4 different trust levels per user */
+    // TODO: Implement any of this :)
+    enum qluser_trust_t k_trust;
+    int32_t             f_trust;
+    int32_t             tl_trust;
+    int32_t             msg_trust;
 } qluser_t;
-
-
-/** Describes the different trust levels between users */
-typedef enum qluser_trust_t {
-
-    /** No public key is known */
-    UNKNOWN,
-
-    /** TOFU: Trust on first use - but not really */
-    PARTIAL,
-
-    /** Manually verified and this user checks out */
-    VERIFIED
-};
 
 
 /**
