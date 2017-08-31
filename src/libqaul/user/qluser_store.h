@@ -28,6 +28,7 @@
 #define QLUSER_REMOVE_FAILED        0x23
 #define QLUSER_PUBKEY_EXISTS        0x2A
 #define QLUSER_PUBKEY_NOT_FOUND     0x2B
+#define QLUSER_NODE_NOT_FOUND       0x3A
 
 
 /** Holds data about a node */
@@ -37,7 +38,7 @@ typedef struct qluser_node_t {
     union olsr_ip_addr  *ip;
 
     // FIXME: Shadow this inside the src file instead of inside the header?
-    cuckoo_map          *ids;
+    cuckoo_map          *ids;       // Indexed by fingerprint
 } qluser_node_t;
 
 

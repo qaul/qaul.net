@@ -11,9 +11,9 @@
 
 
 /* Static storage context for all indexable fields */
-static cuckoo_map *fp_map = NULL, *ip_map = NULL, *n_map = NULL;
+static cuckoo_map *fp_map = NULL, *ip_map = NULL, *n_map = NULL, *node_map = NULL;
 #define INIT_MAP_SIZE 17
-#define CHECK_STORE if(fp_map == NULL || ip_map == NULL || n_map == NULL) return QLUSER_NOT_INITIALISED;
+#define CHECK_STORE if(fp_map == NULL || ip_map == NULL || n_map == NULL || node_map == NULL) return QLUSER_NOT_INITIALISED;
 char *strhash_ip(union olsr_ip_addr *__ip);
 
 
@@ -35,6 +35,8 @@ int qluser_store_initialise(const char *db_path, const char *key_path, unsigned 
     ret = cuckoo_init(&n_map, ms, cflags);
     if(ret) goto c3;
 
+    ret = cuckoo_init(&node_map, ms, cflags);
+    if(ret) goto c4;
 
     /**** Load all pubkey files from key_path ****/
     DIR *dir;
@@ -80,6 +82,7 @@ int qluser_store_initialise(const char *db_path, const char *key_path, unsigned 
     return QLUSER_SUCCESS;
 
     /* Clean up the mess we made and return failure */
+    c4: cuckoo_free(node_map, CUCKOO_NO_CB);
     c3: cuckoo_free(n_map, CUCKOO_NO_CB);
     c2: cuckoo_free(ip_map, CUCKOO_NO_CB);
     c1: cuckoo_free(fp_map, CUCKOO_NO_CB);
@@ -174,8 +177,61 @@ int qluser_store_rmuser(const char *fp)
     return QLUSER_SUCCESS;
 }
 
-//int qluser_store_add_ip(struct qluser_t *user, union olsr_ip_addr *ip)
-//{
+
+int qluser_store_add_ip(const char *fp, union olsr_ip_addr *ip)
+{
+    CHECK_STORE
+    int ret;
+
+    /* Make sure a user entry exists first */
+    if(cuckoo_contains(fp_map, fp) != 0) return QLUSER_USER_NOT_FOUND;
+
+    /* Create a new node for the IP if none exists already */
+    char *__ip = strhash_ip(ip);
+    if(cuckoo_contains(node_map, __ip) != 0) {
+
+        qluser_node_t *new = (qluser_node_t*) calloc(sizeof(qluser_node_t), 1);
+        if(new == NULL) return QLUSER_MALLOC_FAILED;
+
+        ret = cuckoo_init(&new->ids, INIT_MAP_SIZE, CUCKOO_DEFAULT | CUCKOO_TABLES_THREE);
+        if(ret) goto c1;
+
+        new->ip = ip;
+        ret = cuckoo_insert(node_map, __ip, new);
+        if(ret) return QLUSER_ERROR;
+    }
+
+    /* Get the node */
+    qluser_node_t *node;
+    ret = cuckoo_retrieve(node_map, __ip, (void**) &node);
+    if(ret) return QLUSER_NODE_NOT_FOUND;
+
+    /* Get the user */
+    qluser_t *user;
+    ret = cuckoo_retrieve(fp_map, fp, (void**) &user);
+    if(ret) return QLUSER_USER_NOT_FOUND;
+
+    /* Remove any old node that user already holds */
+    if(user->node != NULL) {
+        ret = cuckoo_remove(user->node->ids, fp, CUCKOO_NO_CB);
+        if(ret) return QLUSER_ERROR;
+        user->node = NULL;
+    }
+
+    /* Add user to node and node to user  <==> */
+    ret = cuckoo_insert(node->ids, fp, user);
+    if(ret) goto c2;
+    user->node = node;
+    return QLUSER_SUCCESS;
+
+    c2:
+    cuckoo_free(node->ids, CUCKOO_NO_CB);
+    free(node);
+
+    c1: free(node);
+    return ret;
+}
+
 //    CHECK_STORE
 //    int ret;
 //
