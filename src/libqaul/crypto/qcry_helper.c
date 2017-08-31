@@ -178,10 +178,7 @@ int qcry_load_pubkey(mbedtls_pk_context **pub, const char *path, const char *fp)
 
     /*** Malloc space for the pub and pri key values on heap ***/
     (*pub) = (mbedtls_pk_context*) calloc(sizeof(mbedtls_pk_context),  1);
-    if(*pub == NULL) {
-        ret = EXIT_FAILURE;
-        goto cleanup;
-    }
+    if(*pub == NULL) return EXIT_FAILURE;
 
     /** Create path buffer depending on input length + "slashyness" */
     size_t ps = strlen(path) + strlen(fp) + strlen(".pub");
@@ -206,7 +203,6 @@ int qcry_load_pubkey(mbedtls_pk_context **pub, const char *path, const char *fp)
     mbedtls_printf("OK\n");
 
     return QCRY_STATUS_OK;
-
 
     cleanup:
     mbedtls_pk_free(*pub);
