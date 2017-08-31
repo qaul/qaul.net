@@ -25,12 +25,15 @@
 #define QLUSER_INSERT_FAILED        0x20
 #define QLUSER_USER_EXISTS          0x21
 #define QLUSER_USER_NOT_FOUND       0x22
-#define QLUSER_PUBKEY_EXISTS        0x23
-#define QLUSER_PUBKEY_NOT_FOUND     0x24
+#define QLUSER_REMOVE_FAILED        0x23
+#define QLUSER_PUBKEY_EXISTS        0x2A
+#define QLUSER_PUBKEY_NOT_FOUND     0x2B
 
 
 /** Holds data about a node */
 typedef struct qluser_node_t {
+
+    // TODO: Think about abstraction layer on IPs instead of olsr IPs
     union olsr_ip_addr  *ip;
 
     // FIXME: Shadow this inside the src file instead of inside the header?
