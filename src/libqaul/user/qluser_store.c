@@ -243,7 +243,7 @@ int qluser_store_add_ip(const char *fp, union olsr_ip_addr *ip)
 }
 
 
-int qluser_store_add_pubkey(const char *fp, mbedtls_pk_context *pubkey)
+int qluser_store_add_pubkey(const char *fp, mbedtls_pk_context *pubkey, enum qluser_trust_t trust)
 {
     CHECK_STORE
     if(cuckoo_contains(fp_map, fp) != 0) return QLUSER_USER_NOT_FOUND;
@@ -254,10 +254,33 @@ int qluser_store_add_pubkey(const char *fp, mbedtls_pk_context *pubkey)
 
     if(user->pubkey != NULL) mbedtls_pk_free(user->pubkey);
     user->pubkey = pubkey;
+    user->k_trust = trust;
 
-    /* Store pubkey to disk? */
-    ret = qcry_save_pubkey(user->pubkey, key_path, user->fp);
-    if(ret) return ret;
+    /* Only store keys that we have verified to disk */
+    if(trust == VERIFIED) {
+        ret = qcry_save_pubkey(user->pubkey, key_path, user->fp);
+        if(ret) return ret;
+    }
+
+    return QLUSER_SUCCESS;
+}
+
+
+int qluser_store_set_keytrust(const char *fp, enum qluser_trust_t trust)
+{
+    CHECK_STORE
+    if(cuckoo_contains(fp_map, fp) != 0) return QLUSER_USER_NOT_FOUND;
+
+    qluser_t *user;
+    int ret = cuckoo_retrieve(fp_map, fp, (void**) &user);
+    if(ret) return QLUSER_USER_NOT_FOUND;
+
+    /* Store new key-trust and possibly save key to disk */
+    if(user->k_trust == VERIFIED) {
+        ret = qcry_save_pubkey(user->pubkey, key_path, user->fp);
+        if(ret) return ret;
+    }
+
     return QLUSER_SUCCESS;
 }
 
