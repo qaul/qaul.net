@@ -1,6 +1,5 @@
 #include "qluser_store.h"
 
-#include <cuckoo.h>
 #include <dirent.h>
 #include <memory.h>
 #include <malloc.h>
@@ -12,9 +11,16 @@
 
 /* Static storage context for all indexable fields */
 static cuckoo_map *fp_map = NULL, *ip_map = NULL, *n_map = NULL, *node_map = NULL;
+
+int get_with(uint8_t t, qluser_t *user, void *idx);
+char *strhash_ip(union olsr_ip_addr *__ip);
+
+
 #define INIT_MAP_SIZE 17
 #define CHECK_STORE if(fp_map == NULL || ip_map == NULL || n_map == NULL || node_map == NULL) return QLUSER_NOT_INITIALISED;
-char *strhash_ip(union olsr_ip_addr *__ip);
+#define MAP_FP      0
+#define MAP_IP      1
+#define MAP_NAME    2
 
 
 int qluser_store_initialise(const char *db_path, const char *key_path, unsigned int flags)
@@ -232,25 +238,53 @@ int qluser_store_add_ip(const char *fp, union olsr_ip_addr *ip)
     return ret;
 }
 
-//    CHECK_STORE
-//    int ret;
-//
-//    /* Make sure a user entry exists first */
-//    if(cuckoo_contains(fp_map, user->fp) != 0) {
-//        printf("Can't add an IP to a user that isn't known yet!\n");
-//        return QLUSER_USER_NOT_FOUND;
-//    }
-//
-//    /* Remove any known IP for this user */
-//    char *_ip = strhash_ip(ip);
-//    if(cuckoo_contains(ip_map, _ip) == 0) {
-//        ret = cuckoo_remove(ip_map, _ip, CUCKOO_NO_CB);
-//        if(ret) return QLUSER_INSERT_FAILED;
-//    }
-//}
+
+int qluser_store_getby_fp(struct qluser_t *user, const char *fp)
+{
+    return get_with(MAP_FP, user, (void*) fp);
+}
+
+
+int qluser_store_getby_name(struct qluser_t *user, const char *name)
+{
+    return get_with(MAP_NAME, user, (void*) name);
+}
+
+
+int qluser_store_getby_ip(struct qluser_t *user, union olsr_ip_addr *ip)
+{
+    return get_with(MAP_IP, user, (void*) ip);
+}
+
 
 
 /****************************************************************************/
+
+
+int get_with(uint8_t t, qluser_t *user, void *idx)
+{
+
+    CHECK_STORE
+    qluser_t *__user;
+    int ret;
+
+    cuckoo_map *m;
+    switch(t) {
+        case MAP_FP:    m = fp_map; break;
+        case MAP_IP:    m = ip_map; break;
+        case MAP_NAME:  m = n_map;  break;
+        default:                    return QLUSER_INVALID_PARAMS;
+    }
+
+    if(cuckoo_contains(fp_map, idx) != 0) return QLUSER_USER_NOT_FOUND;
+    ret = cuckoo_retrieve(m, idx, (void**) &__user);
+    if(ret) return QLUSER_USER_NOT_FOUND;
+
+    /* Copy contents from storage */
+    memcpy(user, __user, sizeof(qluser_t));
+    return QLUSER_SUCCESS;
+}
+
 
 char *strhash_ip(union olsr_ip_addr *__ip) {
     uint32_t _ip = olsr_ip_hashing(__ip);
