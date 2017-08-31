@@ -3,6 +3,8 @@
 #include <cuckoo.h>
 #include <dirent.h>
 #include <memory.h>
+#include <malloc.h>
+
 #include "../crypto/qcry_helper.h"
 #include "../olsrd/olsr_types.h"
 #include "../olsrd/hashing.h"
@@ -128,6 +130,33 @@ int qluser_store_rmuser(const char *fp)
     /* Check that the user exists */
     if(cuckoo_contains(fp_map, fp) != 0) return QLUSER_USER_NOT_FOUND;
 
+    /* Store user reference for cleaning later */
+    qluser_t *user;
+    ret = cuckoo_retrieve(fp_map, fp, (void**) &user);
+    if(ret) return QLUSER_USER_NOT_FOUND;
+
+    /* Always delete from fp table */
+    ret = cuckoo_remove(fp_map, fp, CUCKOO_NO_CB);
+    if(ret) return QLUSER_REMOVE_FAILED;
+
+    /* Always delete from name table */
+    ret = cuckoo_remove(n_map, user->name, CUCKOO_NO_CB);
+    if(ret) return QLUSER_REMOVE_FAILED;
+
+    /* Check if the IP is filled */
+    if(user->node != NULL) {
+
+        /* Delete from ip table */
+        char *ip = strhash_ip(user->node->ip);
+        ret = cuckoo_remove(ip_map, ip, CUCKOO_NO_CB);
+        if(ret) return QLUSER_REMOVE_FAILED;
+    }
+
+    /* Only free node if we are the last user */
+    if(user->node && ) {
+        free(user->node->ip);
+
+    }
 }
 
 //int qluser_store_add_ip(struct qluser_t *user, union olsr_ip_addr *ip)
