@@ -153,10 +153,25 @@ int qluser_store_rmuser(const char *fp)
     }
 
     /* Only free node if we are the last user */
-    if(user->node && ) {
+    if(user->node && cuckoo_size(user->node->ids) <= 1) {
         free(user->node->ip);
-
+        // FIXME: We need to clean these more cleanly
+        ret = cuckoo_free(user->node->ids, CUCKOO_NO_CB);
+        if(ret) return QLUSER_REMOVE_FAILED;
+        free(user->node);
+        user->node = NULL;
     }
+
+    /* Free fp and name strings */
+    free((char*) user->fp);
+    free(user->name);
+
+    /* Free pubkey if it exists */
+    if(user->pubkey != NULL) mbedtls_pk_free(user->pubkey);
+
+    /* Free user itself and then return */
+    free(user);
+    return QLUSER_SUCCESS;
 }
 
 //int qluser_store_add_ip(struct qluser_t *user, union olsr_ip_addr *ip)
