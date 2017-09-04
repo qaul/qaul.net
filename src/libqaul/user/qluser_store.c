@@ -15,6 +15,7 @@ static char *key_path, *db_path;
 
 int get_with(uint8_t t, qluser_t *user, void *idx);
 char *strhash_ip(union olsr_ip_addr *__ip);
+void free_user(void *data);
 
 
 #define INIT_MAP_SIZE 17
@@ -188,6 +189,18 @@ int qluser_store_rmuser(const char *fp)
 }
 
 
+int qluser_store_rmuser_all(const char *fp)
+{
+    CHECK_STORE
+
+    int ret = qluser_store_rmuser(fp);
+    if(ret) return ret;
+
+    // TODO: Remove user from database
+    return QLUSER_SUCCESS;
+}
+
+
 int qluser_store_add_ip(const char *fp, union olsr_ip_addr *ip)
 {
     CHECK_STORE
@@ -303,6 +316,24 @@ int qluser_store_getby_ip(struct qluser_t *user, union olsr_ip_addr *ip)
 }
 
 
+int qluser_store_free()
+{
+    CHECK_STORE
+    int ret;
+
+    /* First clear all user structs from fp table */
+    ret = cuckoo_free(fp_map, free_user);
+    if(ret) return QLUSER_REMOVE_FAILED;
+
+    ret = cuckoo_free(ip_map, CUCKOO_NO_CB);
+    if(ret) return QLUSER_REMOVE_FAILED;
+
+    ret = cuckoo_free(n_map, CUCKOO_NO_CB);
+    if(ret) return QLUSER_REMOVE_FAILED;
+
+    return QLUSER_SUCCESS;
+}
+
 
 /****************************************************************************/
 
@@ -334,4 +365,32 @@ int get_with(uint8_t t, qluser_t *user, void *idx)
 char *strhash_ip(union olsr_ip_addr *__ip) {
     uint32_t _ip = olsr_ip_hashing(__ip);
     return "" + _ip;
+}
+
+
+void free_user(void *data)
+{
+    qluser_t *user = (qluser_t*) data;
+    int ret;
+
+    /* Only free node if we are the last user */
+    if(user->node && cuckoo_size(user->node->ids) <= 1) {
+        free(user->node->ip);
+        // FIXME: We need to clean these more cleanly
+        ret = cuckoo_free(user->node->ids, CUCKOO_NO_CB);
+        if(ret) return;
+
+        free(user->node);
+        user->node = NULL;
+    }
+
+    /* Free fp and name strings */
+    free((char*) user->fp);
+    free(user->name);
+
+    /* Free pubkey if it exists */
+    if(user->pubkey != NULL) mbedtls_pk_free(user->pubkey);
+
+    /* Free user itself and then return */
+    free(user);
 }
