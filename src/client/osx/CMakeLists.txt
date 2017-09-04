@@ -66,7 +66,7 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
     ${LIBQAULDIR}/urlcode/urlcode.c
     ${LIBQAULDIR}/olsrd/mantissa.c
     ${LIBQAULDIR}/olsrd/hashing.c
-    ${LIBQAULDIR}/../qaulhelper/validate.c
+    ${LIBQAULDIR}/validate.c
 	${MACOSX_RESOURCE_FILES}
 	${MACOSX_MENU_FILES}
 )
