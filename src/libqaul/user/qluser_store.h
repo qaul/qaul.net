@@ -152,16 +152,6 @@ int qluser_store_getby_ip(struct qluser_t *user, union olsr_ip_addr *ip);
 
 
 /**
- * Remove a user from the current non-persistent user storage
- *
- * @param user The user to delete
- * @return
- */
-int qluser_store_rm(struct qluser_t *user);
-
-
-
-/**
  * Remove the user from the current user storage as well as scrub
  * all information about this user from the persistent database as
  * well
@@ -169,7 +159,7 @@ int qluser_store_rm(struct qluser_t *user);
  * @param user The user to delete
  * @return
  */
-int qluser_store_rmall(struct qluser_t *user);
+int qluser_store_rmuser_all(const char *fp);
 
 
 /**
