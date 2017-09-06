@@ -89,7 +89,6 @@ if (${PORT} STREQUAL "WINDOWS")
 endif ()
 
 ADD_LIBRARY (libqaul ${LIBTYPE}
-    logging.c
     qaullib.c
     qaullib_ipc.c
     qaullib_webserver.c
@@ -101,7 +100,6 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     qaullib_appevent_LL.c
     qaullib_messaging.c
     qaullib_msg_LL.c
-    qaullib_validate.c
     qaullib_filesharing.c
     qaullib_file_LL.c
     qaullib_exediscovery.c
@@ -118,9 +116,6 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
 	# User module
 	user/qluser_store.c
 	user/qluser_keystore.c
-
-    # Validate input
-    validate.c
 
     qaullib_udp_communication.c
     captive/qaullib_captive.c
@@ -144,7 +139,11 @@ ExternalProject_Get_Property(mbedtls install_dir)
 
 target_include_directories(libqaul PUBLIC ${install_dir}/mbedtls/include)
 
-target_link_libraries(libqaul PUBLIC ${install_dir}/mbedtls/lib/libmbedcrypto.a)
+target_link_libraries(libqaul PUBLIC
+	libqaulutils
+	${install_dir}/mbedtls/lib/libmbedcrypto.a
+	${VOIP_LINK_LIBRARIES}
+)
 
 # since the name starts with 'lib' don't add it again
 set_target_properties (libqaul PROPERTIES PREFIX "")
@@ -160,10 +159,6 @@ target_include_directories (libqaul PUBLIC include)
 target_include_directories (libqaul PRIVATE
     ${MONGOOSE_DIR}
     ${VOIP_INCLUDE}
-)
-
-target_link_libraries(libqaul LINK_PUBLIC
-    ${VOIP_LINK_LIBRARIES}
 )
 
 if (UUID_FOUND)

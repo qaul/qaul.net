@@ -15,8 +15,11 @@ endif ()
 
 add_executable(qaulhelper
 	qaulhelper.c
-	validate.c
 	${QAULHELPER_DISTROFILE}
+)
+
+target_link_libraries(qaulhelper
+	libqaulutils
 )
 
 install (TARGETS qaulhelper DESTINATION ${QAULHELPER_DESTINATION}

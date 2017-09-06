@@ -32,8 +32,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <QaulConfig.h>
-#include "validate.h"
-
 
 /**
  * start olsrd

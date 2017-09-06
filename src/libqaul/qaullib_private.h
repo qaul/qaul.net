@@ -36,7 +36,6 @@ extern "C" {
 #include "qaullib.h"
 #include "olsrd_types.h"
 #include "qaullib_defines.h"
-#include "qaullib_validate.h"
 #include "qaullib_webclient.h"
 #include "qaullib_topo_LL.h"
 #include "qaullib_appevent_LL.h"

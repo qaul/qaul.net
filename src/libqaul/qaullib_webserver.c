@@ -9,7 +9,7 @@
 #include "urlcode/urlcode.h"
 #include "qaullib_crypto.h"
 #include "qaullib_file_LL.h"
-#include "qaullib/logging.h"
+#include "qaul/utils/logging.h"
 
 // ------------------------------------------------------------
 // static declarations

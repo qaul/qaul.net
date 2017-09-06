@@ -3,8 +3,7 @@
  * licensed under GPL (version 3)
  */
 
-#include "qaullib_private.h"
-
+#include "qaul/utils/validate.h"
 
 int Qaullib_ValidateCharASCIILetterOrNumber(char *character)
 {
@@ -167,3 +166,4 @@ int Qaullib_ValidateCharNumber(char *character)
 
 	return 0;
 }
+
