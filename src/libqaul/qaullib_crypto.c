@@ -6,7 +6,7 @@
 #include "qaullib_private.h"
 #include "qaullib_crypto.h"
 #include "mbedtls/sha1.h"
-#include "qaullib/logging.h"
+#include "qaul/utils/logging.h"
 
 
 // ------------------------------------------------------------

@@ -5,8 +5,7 @@
 
 #define LOGGER_IMPLEMENTATION
 
-#include "qaullib/logging.h"
-
+#include "qaul/utils/logging.h"
 
 loglevel_t getLogLevel(void) {
     return loglevel;

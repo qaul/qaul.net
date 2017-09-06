@@ -7,8 +7,9 @@
  * This file contains all validation functions for qaullib.
  */
 
-#include "qaullib/validate.h"
-
+#include "qaul/utils/validate.h"
+#include <stdio.h>
+#include <string.h>
 
 int validate_ip (const char* str)
 {
@@ -59,6 +60,7 @@ int validate_interface (const char* str)
     return 1;
 }
 
+/*
 int validate_service (const char* str)
 {
     int i;
@@ -81,6 +83,7 @@ int validate_service (const char* str)
     }
     return 1;
 }
+*/
 
 int validate_number (const char* str)
 {
@@ -105,7 +108,7 @@ int validate_number (const char* str)
     return 1;
 }
 
-
+/*
 int validate_path (const char* str)
 {
     int i;
@@ -137,7 +140,7 @@ int validate_path (const char* str)
 
     return 1;
 }
-
+*/
 
 int validate_essid (const char* str)
 {
@@ -167,6 +170,7 @@ int validate_essid (const char* str)
     return 1;
 }
 
+/*
 
 int validate_bssid (const char* str)
 {
@@ -203,7 +207,7 @@ int validate_bssid (const char* str)
     }
     return 1;
 }
-
+*/
 
 int validate_char_number (char mychar)
 {
@@ -290,6 +294,7 @@ int validate_char_letter (char mychar)
     return 0;
 }
 
+/*
 
 int validate_char_problematic (char mychar)
 {
@@ -338,3 +343,4 @@ int validate_char_problematic (char mychar)
 
     return 1;
 }
+*/

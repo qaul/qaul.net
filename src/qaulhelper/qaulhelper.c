@@ -8,7 +8,7 @@
  */
 
 #include "qaulhelper.h"
-
+#include "qaul/utils/validate.h"
 
 int main (int argc, const char * argv[])
 {
