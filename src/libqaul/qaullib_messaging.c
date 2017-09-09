@@ -5,7 +5,7 @@
 
 #include "qaullib_private.h"
 #include "qaullib_crypto.h"
-
+#include "qaul/utils/validate.h"
 
 /**
  * add message to data base
@@ -237,7 +237,7 @@ int Qaullib_MsgCheckFileFindHash(char *msg, struct qaul_file_LL_item *file)
 
 	for(i=0; i < msglen; i++)
 	{
-		if(pattern_count < MAX_HASHSTR_LEN && Qaullib_ValidateCharASCIILetterOrNumber(&msg[i]) == 1)
+		if(pattern_count < MAX_HASHSTR_LEN && qlutils_is_ascii_alphanum(msg[i]))
 		{
 			memcpy(&file->hashstr[pattern_count], &msg[i], 1);
 			pattern_count++;
@@ -258,7 +258,7 @@ int Qaullib_MsgCheckFileFindHash(char *msg, struct qaul_file_LL_item *file)
 				pattern_count++;
 				desc_count++;
 			}
-			else if(pattern_count <= (MAX_HASHSTR_LEN + 1 + MAX_SUFFIX_LEN) && Qaullib_ValidateCharASCIILetterOrNumber(&msg[i]) == 1)
+			else if(pattern_count <= (MAX_HASHSTR_LEN + 1 + MAX_SUFFIX_LEN) && qlutils_is_ascii_alphanum(msg[i]))
 			{
 				memcpy(&file->suffix[pattern_count -MAX_HASHSTR_LEN -1], &msg[i], 1);
 				pattern_count++;
