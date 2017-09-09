@@ -11,6 +11,30 @@
 #include <stdio.h>
 #include <string.h>
 
+/**
+ * check if the character is a number 0-9
+ *
+ * @retval 0 is not a number
+ * @retval 1 is a number
+ */
+QL_BOOL qlutils_is_ascii_digit(const char c) {
+    if(c < '0' || c > '9') {
+        return QL_FALSE;
+    }
+    return QL_TRUE;
+}
+
+QL_BOOL qlutils_is_ascii_alpha(const char c) {
+    if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+	return QL_TRUE;
+    }
+    return QL_FALSE;
+}
+
+QL_BOOL qlutils_is_ascii_alphanum(const char c) {
+    return (qlutils_is_ascii_digit(c) || qlutils_is_ascii_alpha(c));
+}
+
 int validate_ip (const char* str)
 {
     int i;
@@ -25,7 +49,7 @@ int validate_ip (const char* str)
     // check numbers and dots
     for(i=0; i<strlen(str); i++)
     {
-        if(validate_char_number(str[i]) == 0 && strncmp(&str[i], ".", 1) != 0)
+        if(!qlutils_is_ascii_digit(str[i]) && strncmp(&str[i], ".", 1) != 0)
         {
             printf("invalid character\n");
             return 0;
@@ -49,9 +73,7 @@ int validate_interface (const char* str)
     // check numbers and dots
     for(i=0; i<strlen(str); i++)
     {
-        if(validate_char_number(str[i]) == 0 &&
-           validate_char_letter(str[i]) == 0
-           )
+        if(!qlutils_is_ascii_alphanum(str[i]))
         {
             printf("invalid character\n");
             return 0;
@@ -99,7 +121,7 @@ int validate_number (const char* str)
     // check numbers and dots
     for(i=0; i<strlen(str); i++)
     {
-        if(validate_char_number(str[i]) == 0)
+        if(!qlutils_is_ascii_digit(str[i]))
         {
             printf("invalid character\n");
             return 0;
@@ -156,8 +178,7 @@ int validate_essid (const char* str)
     // check numbers and dots
     for(i=0; i<strlen(str); i++)
     {
-        if(validate_char_number(str[i]) == 0 &&
-           validate_char_letter(str[i]) == 0 &&
+        if(!qlutils_is_ascii_alphanum(str[i]) &&
            strncmp(&str[i], ".", 1) != 0 &&
            strncmp(&str[i], "-", 1) != 0 &&
            strncmp(&str[i], "_", 1) != 0
@@ -208,91 +229,6 @@ int validate_bssid (const char* str)
     return 1;
 }
 */
-
-int validate_char_number (char mychar)
-{
-    if(strncmp(&mychar, "0", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "1", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "2", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "3", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "4", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "5", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "6", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "7", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "8", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "9", 1)==0)
-        return 1;
-
-    return 0;
-}
-
-
-int validate_char_letter (char mychar)
-{
-    if(strncmp(&mychar, "a", 1)==0 || strncmp(&mychar, "A", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "b", 1)==0 || strncmp(&mychar, "B", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "c", 1)==0 || strncmp(&mychar, "C", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "d", 1)==0 || strncmp(&mychar, "D", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "e", 1)==0 || strncmp(&mychar, "E", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "f", 1)==0 || strncmp(&mychar, "F", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "g", 1)==0 || strncmp(&mychar, "G", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "h", 1)==0 || strncmp(&mychar, "H", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "i", 1)==0 || strncmp(&mychar, "I", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "j", 1)==0 || strncmp(&mychar, "J", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "k", 1)==0 || strncmp(&mychar, "K", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "l", 1)==0 || strncmp(&mychar, "L", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "m", 1)==0 || strncmp(&mychar, "M", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "n", 1)==0 || strncmp(&mychar, "N", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "o", 1)==0 || strncmp(&mychar, "O", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "p", 1)==0 || strncmp(&mychar, "P", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "q", 1)==0 || strncmp(&mychar, "Q", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "r", 1)==0 || strncmp(&mychar, "R", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "s", 1)==0 || strncmp(&mychar, "S", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "t", 1)==0 || strncmp(&mychar, "T", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "u", 1)==0 || strncmp(&mychar, "U", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "v", 1)==0 || strncmp(&mychar, "V", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "w", 1)==0 || strncmp(&mychar, "W", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "x", 1)==0 || strncmp(&mychar, "X", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "y", 1)==0 || strncmp(&mychar, "Y", 1)==0)
-        return 1;
-    if(strncmp(&mychar, "z", 1)==0 || strncmp(&mychar, "Z", 1)==0)
-        return 1;
-
-    return 0;
-}
 
 /*
 
