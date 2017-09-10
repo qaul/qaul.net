@@ -41,7 +41,7 @@ extern "C" {
  *
  * NONE  => LOG_NONE  => Nothing will be logged at all.
  * ERROR => LOG_ERROR => Log as error.
- * 						 Only ERROR will be logged.
+ *                       Only ERROR will be logged.
  * WARN  => LOG_WARN  => Log as warning.
  *                       ERROR and WARN will be logged.
  * INFO  => LOG_INFO  => Log as information.
