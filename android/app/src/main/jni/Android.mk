@@ -8,6 +8,9 @@ JNI_PATH := $(LOCAL_PATH)
 LIBQAUL_SRC ?= $(LOCAL_PATH)/../../../../../src/libqaul
 LIBQAUL_INCLUDE ?= ""
 
+LIBQAULUTILS_SRC ?= $(LOCAL_PATH)/../../../../../src/libqaulutils/src
+LIBQAULUTILS_INCLUDE ?= $(LOCAL_PATH)/../../../../../src/libqaulutils/include
+
 QAULCONFIG_INCLUDE ?= $(LOCAL_PATH)/../../../../../include
 
 MBEDTLS_PATH ?= $(LOCAL_PATH)/../../../../../external/mbedtls
@@ -53,8 +56,9 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 LOCAL_MODULE := libqaul
 LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
+	$(LIBQAULUTILS_SRC)/logging.c \
+	$(LIBQAULUTILS_SRC)/validate.c \
 	$(LIBQAUL_SRC)/qaullib.c \
-	$(LIBQAUL_SRC)/logging.c \
 	$(LIBQAUL_SRC)/qaullib_ipc.c \
 	$(LIBQAUL_SRC)/qaullib_webserver.c \
 	$(LIBQAUL_SRC)/qaullib_voip.c \
@@ -77,7 +81,6 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/qaullib_messaging.c \
 	$(LIBQAUL_SRC)/qaullib_topo_LL.c \
 	$(LIBQAUL_SRC)/qaullib_msg_LL.c \
-	$(LIBQAUL_SRC)/qaullib_validate.c \
 	$(LIBQAUL_SRC)/mg_backend_apk.c \
 	$(LIBQAUL_SRC)/qmongoose.c \
 	$(LIBQAUL_SRC)/qaullib_crypto.c \
@@ -86,14 +89,14 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/crypto/qcry_hashing.c \
 	$(LIBQAUL_SRC)/crypto/qcry_helper.c \
 	$(LIBQAUL_SRC)/crypto/qcry_keys.c \
-	$(LIBQAUL_SRC)/crypto/qcry_keystore.c \
-	$(LIBQAUL_SRC)/validate.c
+	$(LIBQAUL_SRC)/crypto/qcry_keystore.c
 
 LOCAL_EXPORT_C_INCLUDES := $(LIBQAUL_INCLUDE)
 LOCAL_C_INCLUDES := \
 	$(LIBQAUL_SRC)/include \
 	$(MONGOOSE_PATH) \
-	$(QAULCONFIG_INCLUDE)
+	$(QAULCONFIG_INCLUDE) \
+	$(LIBQAULUTILS_INCLUDE)
 LOCAL_CFLAGS := \
 	-I$(LIBQAUL_SRC) \
 	-I$(LIBQAUL_SRC)/include \
