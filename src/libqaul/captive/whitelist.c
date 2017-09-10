@@ -14,14 +14,18 @@ void ql_whitelist_add (union olsr_ip_addr *ip)
 {
 	struct qaul_whitelist_LL_item *item;
 
+	printf("ql_whitelist_add\n");
+
 	// check if entry exists
 	if(Qaullib_Whitelist_LL_Find_ByIP(ip, &item))
 	{
+		printf("ql_whitelist_add IP already whitelisted\n");
 		// update timestamp
 		item->time = time(NULL);
 	}
 	else
 	{
+		printf("ql_whitelist_add add IP\n");
 		// add list entry
 		Qaullib_Whitelist_LL_Add(ip);
 	}
@@ -50,6 +54,7 @@ int Qaullib_Whitelist_LL_NextItem (struct qaul_whitelist_LL_item *item)
 		item = item->next;
 		return 1;
 	}
+
 	return 0;
 }
 
@@ -78,7 +83,8 @@ void Qaullib_Whitelist_LL_Add (union olsr_ip_addr *ip)
 		printf("Qaullib_Whitelist_LL_Add\n");
 
 	// fill in content
-	memcpy((char *)&new_item->ip, ip, sizeof(union olsr_ip_addr));
+	new_item->ip.v4 = ip->v4;
+
 	new_item->time = time(NULL);
 
 	// lock
@@ -86,6 +92,8 @@ void Qaullib_Whitelist_LL_Add (union olsr_ip_addr *ip)
 
 	// create links
 	new_item->next = qaul_whitelist_LL_first;
+	if(qaul_whitelist_LL_first != 0) qaul_whitelist_LL_first->prev = new_item;
+	new_item->prev = 0;
 	qaul_whitelist_LL_first = new_item;
 
 	// unlock
@@ -96,22 +104,36 @@ void Qaullib_Whitelist_LL_Add (union olsr_ip_addr *ip)
 int Qaullib_Whitelist_LL_Find_ByIP (union olsr_ip_addr *ip, struct qaul_whitelist_LL_item **item)
 {
 	struct qaul_whitelist_LL_item *myitem = qaul_whitelist_LL_first;
+	int i=0;
 
-	while(Qaullib_Whitelist_LL_NextItem(myitem))
+	//printf("Qaullib_Whitelist_LL_Find_ByIP %u\n", (uint32_t)ip->v4.s_addr);
+
+	while(myitem != 0)
 	{
+		printf("Qaullib_Whitelist_LL_Find_ByIP i = %i, %u\n", i, (uint32_t)myitem->ip.v4.s_addr);
+		i++;
 		// check if older than timeout
 		if(myitem->time < time(NULL) -CAPTIVE_WHITELIST_TIMEOUT)
 		{
+			printf("Qaullib_Whitelist_LL_Find_ByIP to old, deleting\n");
 			Qaullib_Whitelist_LL_Delete(myitem);
 		}
 		else
 		{
 			// compare IP
-			if(memcmp(&myitem->ip, ip, qaul_ip_size) == 0)
+			if((uint32_t)myitem->ip.v4.s_addr == (uint32_t)ip->v4.s_addr)
+			//if(myitem->ip.v4.s_addr == ip)
 			{
+				printf("Qaullib_Whitelist_LL_Find_ByIP found\n");
 				*item = myitem;
 				return 1;
 			}
+		}
+
+		if(!Qaullib_Whitelist_LL_NextItem(myitem))
+		{
+			myitem = 0;
+			break;
 		}
 	}
 

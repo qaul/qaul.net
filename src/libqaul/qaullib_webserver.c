@@ -10,6 +10,7 @@
 #include "qaullib_crypto.h"
 #include "qaullib_file_LL.h"
 #include "qaul/utils/logging.h"
+#include "captive/whitelist.h"
 
 // ------------------------------------------------------------
 // static declarations

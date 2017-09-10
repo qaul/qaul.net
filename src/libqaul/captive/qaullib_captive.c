@@ -5,6 +5,7 @@
 
 #include "../qaullib_private.h"
 #include "qaullib_captive.h"
+#include "whitelist_LL.h"
 
 
 // ---------------------------------------------------------------------
@@ -35,8 +36,6 @@ int Qaullib_CaptiveStart(void)
 		if(QAUL_DEBUG)
 			printf("start captive portal\n");
 
-		//inet_pton(AF_INET, qaul_ip_str, &(sa.sin_addr));
-		//memcpy( &qaul_ip_captive, &(sa.sin_addr.s_addr), 4);
 		memcpy( &qaul_ip_captive, &(qaul_ip_addr.v4.s_addr), 4);
 
 		qaullib_pthread_start((qaullib_thread_func_t) Qaullib_DHCP_Server, &qaul_ip_captive);
