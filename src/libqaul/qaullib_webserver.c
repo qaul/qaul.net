@@ -2752,7 +2752,7 @@ void Ql_WwwCaptivePortalDetectionOsx(struct mg_connection *conn, int event, void
 
 	// check if IP adress is whitelisted
 	memcpy(&ip.v4.s_addr, &conn->sa.sin.sin_addr, sizeof(ip.v4.s_addr));
-	if(ql_whitelist_check(ip))
+	if(ql_whitelist_check(&ip))
 	{
 		// send header
 		mg_printf(conn, "HTTP/1.1 200 OK\r\n"
@@ -2779,7 +2779,7 @@ void Ql_WwwCaptiveWhitelist(struct mg_connection *conn, int event, void *event_d
 
 	// whitelist IP address
 	memcpy(&ip.v4.s_addr, &conn->sa.sin.sin_addr, sizeof(ip.v4.s_addr));
-	ql_whitelist_add (ip);
+	ql_whitelist_add (&ip);
 
 	// send header
 	mg_printf(conn, "HTTP/1.1 200 OK\r\n"
