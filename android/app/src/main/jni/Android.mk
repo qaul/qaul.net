@@ -73,6 +73,7 @@ LOCAL_SRC_FILES := net_qaul_qaul_NativeQaul.c \
 	$(LIBQAUL_SRC)/captive/qaullib_captive.c \
 	$(LIBQAUL_SRC)/captive/qaullib_captive_dhcp.c \
 	$(LIBQAUL_SRC)/captive/qaullib_captive_dns.c \
+	$(LIBQAUL_SRC)/captive/whitelist.c \
 	$(LIBQAUL_SRC)/sqlite/sqlite3.c \
 	$(LIBQAUL_SRC)/urlcode/urlcode.c \
 	$(LIBQAUL_SRC)/olsrd/mantissa.c \
