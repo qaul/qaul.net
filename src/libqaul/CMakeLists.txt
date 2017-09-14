@@ -132,17 +132,22 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
 )
 
 add_dependencies(libqaul mbedtls)
-
-# FIXME: Again, make this not suck so hard :P
-target_link_libraries(libqaul PUBLIC libcuckoo)
+add_dependencies(libqaul libcuckoo-static)
 
 ExternalProject_Get_Property(mbedtls install_dir)
-
+target_link_libraries(libqaul PUBLIC
+	${install_dir}/mbedtls/lib/libmbedcrypto.a
+)
 target_include_directories(libqaul PUBLIC ${install_dir}/mbedtls/include)
+
+ExternalProject_Get_Property(libcuckoo install_dir)
+target_link_libraries(libqaul PUBLIC
+	${install_dir}/libcuckoo/lib/libcuckoo.a
+)
+target_include_directories(libqaul PUBLIC ${install_dir}/libcuckoo/include)
 
 target_link_libraries(libqaul PUBLIC
 	libqaulutils
-	${install_dir}/mbedtls/lib/libmbedcrypto.a
 	${VOIP_LINK_LIBRARIES}
 )
 

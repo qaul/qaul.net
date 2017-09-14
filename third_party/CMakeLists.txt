@@ -35,8 +35,24 @@ ExternalProject_Add(mbedtls
 	CMAKE_ARGS ${MbedTlsCMakeArgs}
 )
 
-# FIXME: saces please make this pretty? :)
-add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/libcuckoo)
+set(LibCuckooCMakeArgs
+	-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+	-DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/external/libcuckoo
+)
+
+ExternalProject_Add(libcuckoo
+	#UPDATE_DISCONNECTED 1
+	GIT_SUBMODULES libcuckoo
+	PREFIX ${CMAKE_CURRENT_BINARY_DIR}/libcuckoo
+	DOWNLOAD_COMMAND git submodule update
+	DOWNLOAD_DIR ${PROJECT_SOURCE_DIR}
+	SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/libcuckoo
+	BINARY_DIR ${PROJECT_BINARY_DIR}/external/libcuckoo-build
+	STAMP_DIR ${PROJECT_BINARY_DIR}/external/libcuckoo-stamp
+	TMP_DIR ${PROJECT_BINARY_DIR}/external/libcuckoo-tmp
+	INSTALL_DIR ${PROJECT_BINARY_DIR}/external
+	CMAKE_ARGS ${LibCuckooCMakeArgs}
+)
 
 set (ARCHIVE_DIR ${PROJECT_SOURCE_DIR}/archives)
 
