@@ -4,6 +4,7 @@ CMakeCache.txt
 cmake_install.cmake
 Makefile
 QaulConfig.h
+cmake/cmake_uninstall.cmake
 
 # Build Folders
 third_party/olsr/
