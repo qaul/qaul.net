@@ -132,7 +132,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
 )
 
 add_dependencies(libqaul mbedtls)
-add_dependencies(libqaul libcuckoo-static)
+add_dependencies(libqaul libcuckoo)
 
 ExternalProject_Get_Property(mbedtls install_dir)
 target_link_libraries(libqaul PUBLIC
