@@ -180,6 +180,13 @@ if (LINUXDAEMON)
     add_subdirectory (src/daemon/linux)
 endif ()
 
+# Add uninstall target
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake"
+  IMMEDIATE @ONLY)
+add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake")
+
 # final status summary report
 message(STATUS "#############################################")
 message(STATUS "  qaul seems to be successfully configured.")
@@ -200,6 +207,8 @@ endif()
 if (${PORT} STREQUAL "LINUX")
     message(STATUS "To install the project type the command")
     message(STATUS "        sudo make install")
+    message(STATUS "To uninstall the project type the command")
+    message(STATUS "        sudo make uninstall")
 elseif (${PORT} STREQUAL "ANDROID")
     message(STATUS "To install your app from the command line")
     message(STATUS "Make sure your phone is connected and debugging mode is activated")
@@ -209,6 +218,8 @@ elseif (${PORT} STREQUAL "OSX")
     message(STATUS "        ./make_dmg.sh")
     message(STATUS "To install qaul.net build on your local system type")
     message(STATUS "        sudo make install")
+    message(STATUS "To uninstall qaul.net build from your local system type")
+    message(STATUS "        sudo make uninstall")
 elseif (${PORT} STREQUAL "WINDOWS")
     message(STATUS "To build Visual Studio project files")
     message(STATUS "        mkdir src/client/win/build")
