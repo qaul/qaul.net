@@ -6,7 +6,7 @@ ExternalProject_Add(pjsip
     URL ${ARCHIVE_DIR}/${PJSIP_FILENAME}
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 -t -N -i ${CMAKE_CURRENT_SOURCE_DIR}/pjsip.patch
-    CONFIGURE_COMMAND ./aconfigure --prefix=${CMAKE_INSTALL_PREFIX} --disable-ffmpeg --disable-ssl --disable-video ${PJSIP_CONFIGURE_OPTIONS}
+    CONFIGURE_COMMAND ./aconfigure --prefix=${CMAKE_INSTALL_PREFIX} --disable-ffmpeg --disable-ssl --disable-video --disable-libwebrtc ${PJSIP_CONFIGURE_OPTIONS}
     BUILD_COMMAND make dep COMMAND make
     INSTALL_COMMAND ""
 )
