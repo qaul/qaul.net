@@ -41,12 +41,13 @@ Download and Build
 
 #### Troubleshooting
 
-##### Debian Wheezy
+##### CMAKE Failure
 
-###### cmake failure
+cmake needs to be of a version 3.1 or higher to be able to run 
+sucessfully. 
 
-cmake needs to be of a version 2.8.11 or higher to be able to run 
-sucessfully. On debian wheezy one needs to install cmake from 
+###### Debian Wheezy and Debian Jessie
+On debian wheezy and debian jessie one needs to install cmake from 
 wheezy-backports.
 
 Add the following line to the file /etc/apt/sources.list to be able to 
@@ -62,6 +63,18 @@ Install the cmake version from backports
     # install cmake from wheezy-backports
     sudo apt-get -t wheezy-backports install cmake
 
+###### Ubuntu Trusty
+
+Install cmake from ppa
+
+	# add ppa
+	sudo add-apt-repository ppa:george-edison55/cmake-3.x
+	# install newer CMAKE
+	sudo apt-get update
+	sudo apt-get install cmake
+
+
+##### Debian Wheezy
 
 ###### Make error
 
