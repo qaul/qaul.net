@@ -1,5 +1,5 @@
 # Mongoose
-set (MONGOOSE_DIR ${CMAKE_SOURCE_DIR}/third_party/mongoose)
+set (MONGOOSE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../third_party/mongoose)
 
 if (VOIP)
     if (${PORT} STREQUAL "LINUX")

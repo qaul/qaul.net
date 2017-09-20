@@ -27,7 +27,7 @@ ExternalProject_Add(mbedtls
 	PREFIX ${CMAKE_CURRENT_BINARY_DIR}/mbedtls
 	DOWNLOAD_COMMAND git submodule update
 	DOWNLOAD_DIR ${PROJECT_SOURCE_DIR}
-	SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/mbedtls
+	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls
 	BINARY_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-build
 	STAMP_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-stamp
 	TMP_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-tmp
@@ -46,7 +46,7 @@ ExternalProject_Add(libcuckoo
 	PREFIX ${CMAKE_CURRENT_BINARY_DIR}/libcuckoo
 	DOWNLOAD_COMMAND git submodule update
 	DOWNLOAD_DIR ${PROJECT_SOURCE_DIR}
-	SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/libcuckoo
+	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libcuckoo
 	BINARY_DIR ${PROJECT_BINARY_DIR}/external/libcuckoo-build
 	STAMP_DIR ${PROJECT_BINARY_DIR}/external/libcuckoo-stamp
 	TMP_DIR ${PROJECT_BINARY_DIR}/external/libcuckoo-tmp
