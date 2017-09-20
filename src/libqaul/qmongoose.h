@@ -9,8 +9,7 @@
 // define multipart streaming for file uploads
 #define MG_ENABLE_HTTP_STREAMING_MULTIPART 1
 // implement our own virtual filesystem
-#include <QaulConfig.h>
-#ifdef QAUL_PORT_ANDROID
+#ifdef __ANDROID__
 #define MG_USER_FILE_FUNCTIONS
 #endif
 /* **********************
