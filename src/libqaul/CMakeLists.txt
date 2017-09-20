@@ -198,3 +198,6 @@ endif ()
 if (${PORT} STREQUAL "WINDOWS")
     target_link_libraries(libqaul LINK_PUBLIC ws2_32 wsock32 winmm)
 endif ()
+
+# TODO lack of api requires this :(
+target_include_directories(libqaul PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
