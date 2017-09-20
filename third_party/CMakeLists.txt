@@ -1,18 +1,25 @@
-
-set(MbedTlsCMakeArgs
-	-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-	-DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/external/mbedtls
-	-DENABLE_PROGRAMS=OFF
+set(CommonCMakeArgs
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+    -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
+    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 
 if (${PORT} STREQUAL "ANDROID")
-set(MbedTlsCMakeArgs
-	${MbedTlsCMakeArgs}
-	-DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake
-	-DANDROID_TOOLCHAIN=gcc
-	-DANDROID_ARM_MODE=arm
-)
+    set(CommonCMakeArgs
+        ${CommonCMakeArgs}
+        -DANDROID_TOOLCHAIN=${ANDROID_TOOLCHAIN}
+        -DANDROID_ARM_MODE=${ANDROID_ARM_MODE}
+        -DANDROID_ABI=${ANDROID_ABI}
+    )
 endif ()
+
+set(MbedTlsCMakeArgs
+    ${CommonCMakeArgs}
+	-DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/external/mbedtls
+	-DENABLE_PROGRAMS=OFF
+
+)
 
 if (${PORT} STREQUAL "WINDOWS")
 set(MbedTlsCMakeArgs
@@ -37,7 +44,7 @@ ExternalProject_Add(mbedtls
 )
 
 set(LibCuckooCMakeArgs
-	-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    ${CommonCMakeArgs}
 	-DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/external/libcuckoo
 )
 
