@@ -92,6 +92,13 @@ if (${PORT} STREQUAL "WINDOWS")
   )
 endif ()
 
+if (${PORT} STREQUAL "ANDROID")
+  set (ANDROIDA_SOURCES
+    mg_backend_apk.c
+  )
+endif ()
+
+
 ADD_LIBRARY (libqaul ${LIBTYPE}
     qaullib.c
     qaullib_ipc.c
@@ -133,6 +140,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     olsrd/hashing.c
     ${VOIP_SOURCES}
     ${WIN_SOURCES}
+    ${ANDROIDA_SOURCES}
 )
 
 add_dependencies(libqaul mbedtls)
