@@ -32,6 +32,7 @@ ExternalProject_Add(mbedtls
 	STAMP_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-stamp
 	TMP_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-tmp
 	INSTALL_DIR ${PROJECT_BINARY_DIR}/external
+	BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/external/mbedtls/lib/libmbedcrypto.a
 	CMAKE_ARGS ${MbedTlsCMakeArgs}
 )
 
@@ -51,6 +52,7 @@ ExternalProject_Add(libcuckoo
 	STAMP_DIR ${PROJECT_BINARY_DIR}/external/libcuckoo-stamp
 	TMP_DIR ${PROJECT_BINARY_DIR}/external/libcuckoo-tmp
 	INSTALL_DIR ${PROJECT_BINARY_DIR}/external
+	BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/external/libcuckoo/lib/libcuckoo.a
 	CMAKE_ARGS ${LibCuckooCMakeArgs}
 )
 
