@@ -73,6 +73,10 @@ if (VOIP)
 			${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
 		)
 	endif ()
+else()
+    set (VOIP_SOURCES
+        qaullib_voip_dummy.c
+    )
 endif ()
 
 if (${PORT} STREQUAL "WINDOWS")
