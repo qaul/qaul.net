@@ -33,8 +33,6 @@ extern "C" {
 #include <string.h>
 #include <sys/time.h>
 #include <time.h>
-#include "QaulConfig.h"
-
 
 /**
  * The following log levels exist:
@@ -60,6 +58,10 @@ enum elog_level {
 typedef enum elog_level loglevel_t;
 
 #ifdef LOGGER_IMPLEMENTATION
+#ifndef QAUL_DEFAULT_LOGLEVEL
+#define QAUL_DEFAULT_LOGLEVEL LOG_DEBUG
+#endif
+
 loglevel_t loglevel = QAUL_DEFAULT_LOGLEVEL;
 
 const char *const LOG_LEVEL_NAMES[] = {
