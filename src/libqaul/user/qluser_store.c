@@ -341,7 +341,7 @@ int qluser_store_free()
 int get_with(uint8_t t, qluser_t *user, void *idx)
 {
     CHECK_STORE
-    qluser_t *__user;
+    qluser_t *usr;
     int ret;
 
     cuckoo_map *m;
@@ -353,11 +353,11 @@ int get_with(uint8_t t, qluser_t *user, void *idx)
     }
 
     if(cuckoo_contains(fp_map, idx) != 0) return QLUSER_USER_NOT_FOUND;
-    ret = cuckoo_retrieve(m, idx, (void**) &__user);
+    ret = cuckoo_retrieve(m, idx, (void**) &usr);
     if(ret) return QLUSER_USER_NOT_FOUND;
 
     /* Copy contents from storage */
-    memcpy(user, __user, sizeof(qluser_t));
+    memcpy(user, usr, sizeof(qluser_t));
     return QLUSER_SUCCESS;
 }
 
