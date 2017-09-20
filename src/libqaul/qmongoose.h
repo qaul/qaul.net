@@ -19,5 +19,5 @@
 
 #include "mongoose.h"
 
-#endif // CL_MONGOOSE_H_
+#endif // QL_MONGOOSE_H_
 
