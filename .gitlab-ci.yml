@@ -138,6 +138,7 @@ Android:
   stage: build
   script:
     - PATH="$PATH:$ANDROID_SDK"
+    - export;
     - mkdir build; cd build
     - cmake ../ -DPORT=ANDROID -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
     - make VERBOSE=1
