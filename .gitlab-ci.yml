@@ -35,7 +35,7 @@ Nightly Ubuntu 16.04 64:
 Raspian Stretch:
   stage: build
   script:
-    - mkdir build; cd build; cmake ..; make package VERBOSE=1
+    - mkdir build; cd build; cmake .. -DRaspberry=1; make package VERBOSE=1
   only:
     - qaul-ng
   tags:
@@ -116,7 +116,7 @@ Linux 32-bit:
 Raspberry:
   stage: build
   script:
-    - mkdir build; cd build; cmake ..; make package VERBOSE=1
+    - mkdir build; cd build; cmake .. -DRaspberry=1; make package VERBOSE=1
   except:
     - master
     - qaul-ng
