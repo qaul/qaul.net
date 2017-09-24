@@ -12,7 +12,7 @@ stages:
 # Nightly Builds
 ###################################################
 
-Nightly Debian 32:
+Nightly Ubuntu 16.04 32-bit:
   stage: build
   script:
     - mkdir build; cd build; cmake ..; make package
@@ -20,9 +20,9 @@ Nightly Debian 32:
   only:
     - qaul-ng
   tags:
-    - debian8_32
+    - ubuntu1604_32
 
-Nightly Debian 64:
+Nightly Ubuntu 16.04 64:
   stage: build
   script:
     - mkdir build; cd build; cmake ..; make package
@@ -30,9 +30,18 @@ Nightly Debian 64:
   only:
     - qaul-ng
   tags:
-    - debian8_64
+    - ubuntu1604_64
 
-Nightly Copy OSX 10.6:
+Raspian Stretch:
+  stage: build
+  script:
+    - mkdir build; cd build; cmake .. -DRaspberry=1; make package VERBOSE=1
+  only:
+    - qaul-ng
+  tags:
+    - raspian-stretch
+
+Nightly Copy OSX:
   stage: build
   script:
     - mkdir build; cd build; cmake ..; make
@@ -41,14 +50,13 @@ Nightly Copy OSX 10.6:
   only:
     - qaul-ng
   tags:
-    - osx_10.6
+    - osx
 
 Nightly Copy Android:
   stage: build
   script:
-    - PATH="$PATH:$ANDROID_SDK"
     - mkdir build; cd build
-    - cmake ../ -DPORT=ANDROID -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
+    - cmake ../ -DPORT=ANDROID -DSDK_ROOT=$ANDROID_SDK -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
     - make
     - cp android/app/src/main/bin/QaulActivity-debug.apk /artifacts/nightly/
   only:
@@ -84,7 +92,7 @@ Nightly Deploy:
 # Test Builds
 ###################################################
 
-Debian 8 64-bit:
+Linux 64-bit:
   stage: build
   script:
     - mkdir build; cd build; cmake ..; make package VERBOSE=1
@@ -92,9 +100,9 @@ Debian 8 64-bit:
     - master
     - qaul-ng
   tags:
-    - debian8_64
+    - linux_64
 
-Debian 8 32-bit:
+Linux 32-bit:
   stage: build
   script:
     - mkdir build; cd build; cmake ..; make package VERBOSE=1
@@ -102,9 +110,19 @@ Debian 8 32-bit:
     - master
     - qaul-ng
   tags:
-    - debian8_32
+    - linux_32
 
-OSX 10.6:
+Raspberry:
+  stage: build
+  script:
+    - mkdir build; cd build; cmake .. -DRaspberry=1; make package VERBOSE=1
+  except:
+    - master
+    - qaul-ng
+  tags:
+    - raspian
+
+OSX:
   stage: build
   script:
     - mkdir build; cd build; cmake ..; make VERBOSE=1
@@ -113,14 +131,13 @@ OSX 10.6:
     - master
     - qaul-ng
   tags:
-    - osx_10.6
+    - osx
 
 Android:
   stage: build
   script:
-    - PATH="$PATH:$ANDROID_SDK"
     - mkdir build; cd build
-    - cmake ../ -DPORT=ANDROID -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
+    - cmake ../ -DPORT=ANDROID -DSDK_ROOT=$ANDROID_SDK -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
     - make VERBOSE=1
   except:
     - master
