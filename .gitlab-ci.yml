@@ -17,6 +17,10 @@ Nightly Ubuntu 16.04 32-bit:
   script:
     - mkdir build; cd build; cmake ..; make package
     #- cp *.deb /artifacts/nightly/
+  artifacts:
+    paths:
+      - "build/*.deb"
+    expire_in: 1 week
   only:
     - qaul-ng
   tags:
@@ -27,6 +31,10 @@ Nightly Ubuntu 16.04 64:
   script:
     - mkdir build; cd build; cmake ..; make package
     #- cp *.deb /artifacts/nightly/
+  artifacts:
+    paths:
+      - "build/*.deb"
+    expire_in: 1 week
   only:
     - qaul-ng
   tags:
@@ -36,6 +44,10 @@ Raspian Stretch:
   stage: build
   script:
     - mkdir build; cd build; cmake .. -DRaspberry=1; make package VERBOSE=1
+  artifacts:
+    paths:
+      - "build/*.deb"
+    expire_in: 1 week
   only:
     - qaul-ng
   tags:
@@ -47,6 +59,10 @@ Nightly Copy OSX:
     - mkdir build; cd build; cmake ..; make
     - ./make_dmg.sh
     #- qaulcopynightly
+  artifacts:
+    paths:
+      - "build/*.dmg"
+    expire_in: 1 week
   only:
     - qaul-ng
   tags:
@@ -59,24 +75,28 @@ Nightly Copy Android:
     - cmake ../ -DPORT=ANDROID -DSDK_ROOT=$ANDROID_SDK -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
     - make
     #- cp android/app/src/main/bin/QaulActivity-debug.apk /artifacts/nightly/
+  artifacts:
+    paths:
+      - build/android/app/build/outputs/apk/qaul-debug.apk
+    expire_in: 1 week
   only:
     - qaul-ng
   tags:
     - android
 
-Nightly Copy Windows:
-  stage: build
-  script:
-    - PATH="/mingw32/bin:$PATH"; declare -x MSYSTEM="MINGW32"; declare -x MSYSCON="mintty.exe"
-    - mkdir build; cd build; cmake .. -G "MSYS Makefiles" -DGUI=NATIVE; make
-    - cd src/client/win; mkdir build; cd build; cmake ..
-    - cmake --build . --target qaul --config Debug
-    - cpack -C Debug
-    #- cp *.exe //VBOXSVR/artifacts/nightly/
-  only:
-    - qaul-ng
-  tags:
-    - windows
+#Nightly Copy Windows:
+#  stage: build
+#  script:
+#    - PATH="/mingw32/bin:$PATH"; declare -x MSYSTEM="MINGW32"; declare -x MSYSCON="mintty.exe"
+#    - mkdir build; cd build; cmake .. -G "MSYS Makefiles" -DGUI=NATIVE; make
+#    - cd src/client/win; mkdir build; cd build; cmake ..
+#    - cmake --build . --target qaul --config Debug
+#    - cpack -C Debug
+#    #- cp *.exe //VBOXSVR/artifacts/nightly/
+#  only:
+#    - qaul-ng
+#  tags:
+#    - windows
 
 #Nightly Deploy:
 #  stage: deploy
@@ -96,6 +116,10 @@ Linux 64-bit:
   stage: build
   script:
     - mkdir build; cd build; cmake ..; make package VERBOSE=1
+  artifacts:
+    paths:
+      - "build/*.deb"
+    expire_in: 1 week
   except:
     - master
     - qaul-ng
@@ -106,6 +130,10 @@ Linux 32-bit:
   stage: build
   script:
     - mkdir build; cd build; cmake ..; make package VERBOSE=1
+  artifacts:
+    paths:
+      - "build/*.deb"
+    expire_in: 1 week
   except:
     - master
     - qaul-ng
@@ -116,6 +144,10 @@ Raspberry:
   stage: build
   script:
     - mkdir build; cd build; cmake .. -DRaspberry=1; make package VERBOSE=1
+  artifacts:
+    paths:
+      - "build/*.deb"
+    expire_in: 1 week
   except:
     - master
     - qaul-ng
@@ -127,6 +159,10 @@ OSX:
   script:
     - mkdir build; cd build; cmake ..; make VERBOSE=1
     - ./make_dmg.sh
+  artifacts:
+    paths:
+      - "build/*.dmg"
+    expire_in: 1 week
   except:
     - master
     - qaul-ng
@@ -139,22 +175,26 @@ Android:
     - mkdir build; cd build
     - cmake ../ -DPORT=ANDROID -DSDK_ROOT=$ANDROID_SDK -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
     - make VERBOSE=1
+  artifacts:
+    paths:
+      - build/android/app/build/outputs/apk/qaul-debug.apk
+    expire_in: 1 week
   except:
     - master
     - qaul-ng
   tags:
     - android
 
-Windows:
-  stage: build
-  script:
-    - PATH="/mingw32/bin:$PATH"; declare -x MSYSTEM="MINGW32"; declare -x MSYSCON="mintty.exe"
-    - mkdir build; cd build; cmake .. -G "MSYS Makefiles" -DGUI=NATIVE; make VERBOSE=1
-    - cd src/client/win; mkdir build; cd build; cmake ..
-    - cmake --build . --target qaul --config Release
-    - cpack -C Release
-  except:
-    - master
-    - qaul-ng
-  tags:
-    - windows
+#Windows:
+#  stage: build
+#  script:
+#    - PATH="/mingw32/bin:$PATH"; declare -x MSYSTEM="MINGW32"; declare -x MSYSCON="mintty.exe"
+#    - mkdir build; cd build; cmake .. -G "MSYS Makefiles" -DGUI=NATIVE; make VERBOSE=1
+#    - cd src/client/win; mkdir build; cd build; cmake ..
+#    - cmake --build . --target qaul --config Release
+#    - cpack -C Release
+#  except:
+#    - master
+#    - qaul-ng
+#  tags:
+#    - windows
