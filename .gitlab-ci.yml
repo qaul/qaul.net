@@ -43,7 +43,7 @@ Nightly Ubuntu 16.04 64:
 Raspian Stretch:
   stage: build
   script:
-    - mkdir build; cd build; cmake .. -DRaspberry=1; make package VERBOSE=1
+    - mkdir build; cd build; cmake .. -DRaspberry=1; make -j 8; make package VERBOSE=1
   artifacts:
     paths:
       - "build/*.deb"
@@ -143,7 +143,7 @@ Linux 32-bit:
 Raspberry:
   stage: build
   script:
-    - mkdir build; cd build; cmake .. -DRaspberry=1; make package VERBOSE=1
+    - mkdir build; cd build; cmake .. -DRaspberry=1; make -j 4; make package
   artifacts:
     paths:
       - "build/*.deb"
