@@ -14,7 +14,7 @@ static cuckoo_map *fp_map = NULL, *ip_map = NULL, *n_map = NULL, *node_map = NUL
 static char *key_path, *db_path;
 
 int get_with(uint8_t t, qluser_t *user, void *idx);
-char *strhash_ip(union olsr_ip_addr *__ip);
+char *strhash_ip(union olsr_ip_addr *ip);
 void free_user(void *data);
 
 
@@ -210,8 +210,8 @@ int qluser_store_add_ip(const char *fp, union olsr_ip_addr *ip)
     if(cuckoo_contains(fp_map, fp) != 0) return QLUSER_USER_NOT_FOUND;
 
     /* Create a new node for the IP if none exists already */
-    char *__ip = strhash_ip(ip);
-    if(cuckoo_contains(node_map, __ip) != 0) {
+    char *_ip = strhash_ip(ip);
+    if(cuckoo_contains(node_map, _ip) != 0) {
 
         qluser_node_t *new = (qluser_node_t*) calloc(sizeof(qluser_node_t), 1);
         if(new == NULL) return QLUSER_MALLOC_FAILED;
@@ -220,13 +220,13 @@ int qluser_store_add_ip(const char *fp, union olsr_ip_addr *ip)
         if(ret) goto c1;
 
         new->ip = ip;
-        ret = cuckoo_insert(node_map, __ip, new);
+        ret = cuckoo_insert(node_map, _ip, new);
         if(ret) return QLUSER_ERROR;
     }
 
     /* Get the node */
     qluser_node_t *node;
-    ret = cuckoo_retrieve(node_map, __ip, (void**) &node);
+    ret = cuckoo_retrieve(node_map, _ip, (void**) &node);
     if(ret) return QLUSER_NODE_NOT_FOUND;
 
     /* Get the user */
@@ -341,7 +341,7 @@ int qluser_store_free()
 int get_with(uint8_t t, qluser_t *user, void *idx)
 {
     CHECK_STORE
-    qluser_t *usr;
+    qluser_t *_user;
     int ret;
 
     cuckoo_map *m;
@@ -353,17 +353,17 @@ int get_with(uint8_t t, qluser_t *user, void *idx)
     }
 
     if(cuckoo_contains(fp_map, idx) != 0) return QLUSER_USER_NOT_FOUND;
-    ret = cuckoo_retrieve(m, idx, (void**) &usr);
+    ret = cuckoo_retrieve(m, idx, (void**) &_user);
     if(ret) return QLUSER_USER_NOT_FOUND;
 
     /* Copy contents from storage */
-    memcpy(user, usr, sizeof(qluser_t));
+    memcpy(user, _user, sizeof(qluser_t));
     return QLUSER_SUCCESS;
 }
 
 
-char *strhash_ip(union olsr_ip_addr *__ip) {
-    uint32_t _ip = olsr_ip_hashing(__ip);
+char *strhash_ip(union olsr_ip_addr *ip) {
+    uint32_t _ip = olsr_ip_hashing(ip);
     return "" + _ip;
 }
 
