@@ -74,7 +74,7 @@ add_custom_command(TARGET qaul POST_BUILD
 		"${QAUL_BUILD}/third_party/olsr/src/olsr/olsrd.exe"
 		"$<TARGET_FILE_DIR:qaul>"
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		"${QAUL_BUILD}/third_party/olsr/src/olsr/lib/olsrd_qaul/olsrd_qaul.dll"
+		"${QAUL_BUILD}/src/olsrd-plugin/olsrd_qaul.dll"
 		"$<TARGET_FILE_DIR:qaul>"
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		"${QAUL_SRC}/distfiles/win/olsrd_win.conf"
@@ -103,7 +103,7 @@ install(DIRECTORY
 install(FILES 
 	"${LIBQAUL_BUILD}/libqaul.dll"
 	"${QAUL_BUILD}/third_party/olsr/src/olsr/olsrd.exe"
-	"${QAUL_BUILD}/third_party/olsr/src/olsr/lib/olsrd_qaul/olsrd_qaul.dll"
+	"${QAUL_BUILD}/src/olsrd-plugin/olsrd_qaul.dll"
 	"${QAUL_SRC}/distfiles/win/olsrd_win.conf"
 	"${MINGW_PATH}/libgcc_s_dw2-1.dll"
 	"${MINGW_PATH}/libwinpthread-1.dll"
