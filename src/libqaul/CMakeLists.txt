@@ -141,6 +141,14 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     ${VOIP_SOURCES}
     ${WIN_SOURCES}
     ${ANDROIDA_SOURCES}
+
+    ### Refactored modules ###
+    include/qaul/qlcry.h
+    include/qaul/qlauth.h
+    include/qaul/qlformat.h
+
+    crypto-core/qlcry.c
+    authentication/qlauth.c
 )
 
 add_dependencies(libqaul mbedtls)
@@ -162,6 +170,8 @@ target_link_libraries(libqaul PUBLIC
 	libqaulutils
 	${VOIP_LINK_LIBRARIES}
 )
+
+target_include_directories(libqaul PRIVATE include)
 
 # since the name starts with 'lib' don't add it again
 set_target_properties (libqaul PROPERTIES PREFIX "")
