@@ -29,41 +29,14 @@
 #ifndef QAUL_QLFORMAT_H
 #define QAUL_QLFORMAT_H
 
-/**
- * A
- */
-typedef enum ql_crydata_t {
-    FINGERPRINT,
-    PUBKEY,
-};
-
-typedef enum ql_crykey_t {
-    RSA, AES256
-};
-
-typedef struct ql_pubkey {
-    enum ql_crykey_t type;
-};
-
-typedef struct ql_seckey {
-    enum ql_crykey_t type;
-};
-
-typedef struct ql_keypair {
-    enum ql_crykey_t type;
-    struct ql_pubkey *pub;
-    struct ql_seckey *sec;
-};
-
 
 /**
- * A qaul user struct
- *
- * Contains basic data that needs to be known
+ * A structure that contains user information
  */
 typedef struct ql_user {
-    const char *username;
-    const char *fingerprint;
+    char *username;
+    char *fingerprint;
+    struct ql_pubkey *pubkey;
 };
 
 
