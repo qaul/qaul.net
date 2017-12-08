@@ -3,10 +3,4 @@
  * licensed under GPL (version 3)
  */
 
-
-#ifndef QAUL_QLCRY_H
-#define QAUL_QLCRY_H
-
-
-
-#endif //QAUL_QLCRY_H
+#include <qaul/qlauth.h>
