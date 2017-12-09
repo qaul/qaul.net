@@ -7,79 +7,49 @@
 #ifndef QAUL_QLCRY_H
 #define QAUL_QLCRY_H
 
+#include <qaul/qlformat.h>
+
 
 /**
- * An enum that describes information handled
- * by the qaul crypto modules
- */
-typedef enum ql_crydata_t {
-    FINGERPRINT,
-    PUBKEY,
-};
-
-/**
- * An enum to describe different key types
- */
-typedef enum ql_crykey_t {
-    RSA, AES256
-};
-
-/**
- * A structure that contains a public key
+ * Start a new crypto session for a specific mode.
  *
- * The actual key formatting is specific to an implemetation
- * and as such shadowed to the outside. The crypto module will
- * cast the blob to whatever format is required at the time
- */
-typedef struct ql_pubkey {
-    enum ql_crykey_t type;
-    void *blob;
-};
-
-/**
- * A structure that contains a secret (private) key
+ * What needs to be considered is that only operations supported
+ * by this mode can be performed on the session.
  *
- * The actual key formatting is specific to an implemetation
- * and as such shadowed to the outside. The crypto module will
- * cast the blob to whatever format is required at the time
+ * @param ctx
+ * @param mode
+ * @return
  */
-typedef struct ql_seckey {
-    enum ql_crykey_t type;
-    void *blob;
-};
+int qlcry_start_session(qlcry_ctx *ctx, ql_cipher_t mode);
 
 /**
- * A structure that contains a complete user keypair
+ * Add a new participant to a session. Will throw an error if
+ * the provided keypair is incompatible with the selected mode
+ *
+ * @param ctx
+ * @param user
+ * @param keypair
+ * @return
  */
-typedef struct ql_keypair {
-    enum ql_crykey_t type;
-    struct ql_pubkey *pub;
-    struct ql_seckey *sec;
-};
+int ql_cry_add_participant(qlcry_ctx *ctx, ql_user *user, ql_keypair *keypair);
 
 /**
- * The context structure used for the crypto-module
+ * Remove a participant from a session again. This means 
+ * @param ctx
+ * @param user
+ * @return
  */
-typedef struct ql_cry_ctx {
-    
-};
+int ql_cry_remove_participant(qlcry_ctx *ctx, ql_user *user);
 
+int ql_cry_stop_session(qlcry_ctx *ctx);
 
+int ql_cry_sign_data(qlcry_ctx *ctx);
 
-int qlcry_start_session(struct ql_cry_ctx *ctx, struct ql_keypair *owner, struct ql_keypair *target);
+int ql_cry_verify_data(qlcry_ctx *ctx);
 
-int ql_cry_stop_session(struct ql_cry_ctx *);
+int ql_cry_encrypt_data(qlcry_ctx *ctx);
 
-//start_session
-//
-//        stop_session
-//
-//sign_data
-//
-//        verify_data
-//
-//encrypt_data
-//
-//        decrypt_data
+int ql_cry_decrypt_data(qlcry_ctx *ctx);
+
 
 #endif //QAUL_QLCRY_H
