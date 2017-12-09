@@ -29,12 +29,22 @@
 #ifndef QAUL_QLFORMAT_H
 #define QAUL_QLFORMAT_H
 
-/********************** CONSTANTS **********************/
+/********************** GENERAL **********************/
 
 // A simple value that can be checked against to make
 // sure that a struct has been properly initialised
+#include <glob.h>
+
 #define QL_MODULE_INITIALISED 0x1337;
 
+
+typedef enum ql_operation_t {
+
+    // Cryptography operations
+    ENCRYPT, DECRYPT, SIGN, VERIFY
+
+
+} ql_operation_t;
 
 
 /********************** USER MANAGEMENT **********************/
@@ -67,6 +77,7 @@ typedef enum ql_cipher_t {
     ECDSA   = (1 << 2),
     AES256  = (1 << 3)
 } ql_cipher_t;
+
 
 /**
  * Contains the key sizes for different types
@@ -106,6 +117,16 @@ typedef struct ql_keypair {
     struct ql_pubkey *pub;
     struct ql_seckey *sec;
 } ql_keypair;
+
+/**
+ * Stores the result of a cryptographic operation.
+ * Contains a reference fingerprint to associate result with a user
+ */
+typedef struct ql_crypto_result {
+    const char *fp;
+    size_t length;
+    unsigned char *data;
+} ql_crypto_result;
 
 /**
  * The context struct for a crypto session
