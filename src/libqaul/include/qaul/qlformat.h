@@ -35,6 +35,7 @@
 // sure that a struct has been properly initialised
 #include <glob.h>
 
+
 #define QL_MODULE_INITIALISED 0x1337;
 
 
@@ -58,6 +59,7 @@ typedef struct ql_user {
     char *fingerprint;
     struct ql_pubkey *pubkey;
 } ql_user;
+
 
 /**
  * Describes a piece of data attached to a user
@@ -97,6 +99,7 @@ typedef struct ql_pubkey {
     void *blob;
 } ql_pubkey;
 
+
 /**
  * A structure that contains a secret (private) key
  *
@@ -109,6 +112,7 @@ typedef struct ql_seckey {
     void *blob;
 } ql_seckey;
 
+
 /**
  * A structure that contains a complete user keypair
  */
@@ -117,6 +121,7 @@ typedef struct ql_keypair {
     struct ql_pubkey *pub;
     struct ql_seckey *sec;
 } ql_keypair;
+
 
 /**
  * Stores the result of a cryptographic operation.
@@ -127,6 +132,7 @@ typedef struct ql_crypto_result {
     size_t length;
     unsigned char *data;
 } ql_crypto_result;
+
 
 /**
  * The context struct for a crypto session
