@@ -76,9 +76,10 @@ int ql_cry_stop_session(qlcry_session_ctx *ctx);
  * in the context operation buffer
  *
  * @param ctx
+ * @param msg
  * @return
  */
-int ql_cry_sign_data(qlcry_session_ctx *ctx);
+int ql_cry_sign_data(qlcry_session_ctx *ctx, const char *msg);
 
 /**
  * Veirfy a piece of data from a remote participant. The result is stored
