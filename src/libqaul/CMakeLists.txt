@@ -149,7 +149,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
 
     crypto-core/qlcry.c
     authentication/qlauth.c
-)
+    )
 
 add_dependencies(libqaul mbedtls)
 add_dependencies(libqaul libcuckoo)

@@ -32,10 +32,9 @@ int qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner
  *
  * @param ctx
  * @param user
- * @param keypair
  * @return
  */
-int ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user, ql_keypair *keypair);
+int ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user);
 
 
 /**
