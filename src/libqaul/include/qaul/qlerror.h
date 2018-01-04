@@ -10,7 +10,8 @@
 #define QLSTATUS_SUCCESS                0
 #define QLSTATUS_ERROR                  1
 #define QLSTATUS_INVALID_PARAMETERS     2
-#define QSTATUS_MALLOC_FAILED           3
+#define QLSTATUS_MALLOC_FAILED           3
+#define QLSTATUS_NOT_INITIALISED         4
 
 
 

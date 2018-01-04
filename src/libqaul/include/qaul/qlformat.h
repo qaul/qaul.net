@@ -36,8 +36,9 @@
 #include <glob.h>
 
 
-#define QL_MODULE_INITIALISED 0x1337;
-
+#define QL_MODULE_INITIALISED 0x1337
+#define CHECK(field, ret) { if((field) == NULL) return ret; }
+#define INITIALISED(field) { if(field->initialised != QL_MODULE_INITIALISED) return QLSTATUS_NOT_INITIALISED; }
 
 typedef enum ql_operation_t {
 

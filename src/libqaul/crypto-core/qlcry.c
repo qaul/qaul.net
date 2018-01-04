@@ -15,7 +15,6 @@
 
 
 /// Some helpful macros
-#define CHECK(field) { if(field == NULL) return QLSTATUS_INVALID_PARAMETERS; }
 
 
 int qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner)
@@ -26,8 +25,8 @@ int qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner
     }
 
     /* Validate other inputs */
-    CHECK(owner)
-    CHECK(ctx)
+    CHECK(owner, QLSTATUS_INVALID_PARAMETERS)
+    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
 
     /* Zero provided ctx pointer */
     memset(ctx, 0, sizeof(qlcry_session_ctx));
@@ -37,12 +36,12 @@ int qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner
 
     /* Setup random */
     ctx->random = (mbedtls_ctr_drbg_context*) malloc(sizeof(mbedtls_ctr_drbg_context));
-    if(ctx->random == NULL) return QSTATUS_MALLOC_FAILED;
+    if(ctx->random == NULL) return QLSTATUS_NOT_INITIALISED;
     mbedtls_ctr_drbg_init(ctx->random);
 
     /* Setup entropy */
     ctx->entropy = (mbedtls_entropy_context*) malloc(sizeof(mbedtls_entropy_context));
-    if(ctx->entropy == NULL) return QSTATUS_MALLOC_FAILED;
+    if(ctx->entropy == NULL) return QLSTATUS_NOT_INITIALISED;
     mbedtls_entropy_init(ctx->entropy);
 
     /* Seed the random number generator for a user-by-user basis */
@@ -54,10 +53,48 @@ int qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner
     ctx->no_p = 0;
     ctx->array_p = 2;
     ctx->participants = (ql_user**) calloc(sizeof(ql_user*), ctx->array_p);
-    if(ctx->participants == NULL) return QSTATUS_MALLOC_FAILED;
+    if(ctx->participants == NULL) return QLSTATUS_MALLOC_FAILED;
 
     /* Save the owner information */
     ctx->owner = owner;
 
     return QLSTATUS_SUCCESS;
+}
+
+
+int ql_cry_finalise(qlcry_session_ctx *ctx)
+{
+    const int ret = QLSTATUS_NOT_INITIALISED;
+    CHECK(ctx, ret);
+    CHECK(ctx->owner, ret);
+    CHECK(ctx->random, ret);
+    CHECK(ctx->entropy, ret);
+
+    if(ctx->no_p <= 0) {
+        return ret;
+    }
+
+    if(ctx->no_p > ctx->array_p) {
+        return QLSTATUS_ERROR;
+    }
+
+    if(ctx->mode == NONE) {
+        return QLSTATUS_NOT_INITIALISED;
+    }
+
+    /* All looks good :) */
+    ctx->initialised = QL_MODULE_INITIALISED;
+    return QLSTATUS_SUCCESS;
+}
+
+
+int ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user, ql_keypair *keypair)
+{
+    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
+    CHECK(user, QLSTATUS_INVALID_PARAMETERS)
+    CHECK(keypair, QLSTATUS_INVALID_PARAMETERS)
+
+
+
+
 }
