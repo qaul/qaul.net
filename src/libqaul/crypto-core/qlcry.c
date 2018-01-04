@@ -34,6 +34,8 @@ int qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner
 
     /* Setup data */
     ctx->mode = mode;
+    ctx->buffer_length = 0;
+    ctx->buffer_type = INVALID;
 
     /* Setup random */
     ctx->random = (mbedtls_ctr_drbg_context*) malloc(sizeof(mbedtls_ctr_drbg_context));
@@ -157,4 +159,25 @@ int ql_cry_clear_buffer(qlcry_session_ctx *ctx)
 
     free(ctx->buffer);
     ctx->buffer_length = 0;
+    ctx->buffer_type = INVALID;
+}
+
+
+int ql_cry_query_buffer(qlcry_session_ctx *ctx, size_t *length, ql_operation_t *op)
+{
+    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
+    INITIALISED(ctx)
+
+    *length = ctx->buffer_length;
+    *op = ctx->buffer_type;
+    return QLSTATUS_SUCCESS;
+}
+
+
+int ql_cry_get_buffer(qlcry_session_ctx *ctx, ql_crypto_result ***buffer)
+{
+    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
+    INITIALISED(ctx)
+    *buffer = ctx->buffer;
+    return QLSTATUS_SUCCESS;
 }
