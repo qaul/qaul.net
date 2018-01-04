@@ -37,6 +37,23 @@ int qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner
  */
 int ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user, ql_keypair *keypair);
 
+
+/**
+ * This function needs to be called before actual operations are possible
+ *
+ * It checks all provided data for validity and makes sure that
+ * during operation no more errors can occur. It will set the
+ * session context with QL_MODULE_INITIALISED.
+ *
+ * If this function is not called before invoking operations an error
+ * will be thrown.
+ *
+ * @param ctx
+ * @return
+ */
+int ql_cry_finalise(qlcry_session_ctx *ctx);
+
+
 /**
  * Remove a participant from a session again.
  *
