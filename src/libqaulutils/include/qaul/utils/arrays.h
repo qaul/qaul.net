@@ -29,4 +29,21 @@
 int qlutils_resize_array(void **array, size_t type, size_t curr, size_t *max);
 
 
+/**
+ * A utility function which removes empty spaces in an array. This process
+ * is also known as linear de-fragmentation.
+ *
+ * The function does a simple (==NULL) check on each data element to determine
+ * if it's empty or not. If your valid data equals NULL, do not use this function!
+ *
+ * This function has a linear runtime of O(2 * n), allocates and frees no space.
+ *
+ * @param array
+ * @param max
+ * @return
+ */
+int qlutils_compact_array(void **array, size_t max);
+
+
+
 #endif

@@ -3,7 +3,7 @@
  * licensed under GPL (version 3)
  */
 
-#include "qaul/utils/resize.h"
+#include "qaul/utils/arrays.h"
 #include "qaul/utils/defines.h"
 #include <stdio.h>
 #include <string.h>
@@ -69,4 +69,33 @@ int qlutils_resize_array(void **array, size_t type, size_t curr, size_t *max)
     }
 
     return QL_SUCCESS;
+}
+
+
+int qlutils_compact_array(void **array, size_t max)
+{
+    if(array == NULL) return 1;
+
+    /* This array holds the item modifiers*/
+    int shifts[max];
+    memset(shifts, 0, sizeof(int) * max);
+
+    /* First find out how we will move data */
+    int acc = 0;
+    for(int i = 0; i < max; i++) {
+        void *data = array[i];
+        if(data == NULL) {
+            shifts[i + 1] = ++acc;
+        }
+    }
+
+    /* Then move the data */
+    for(int i = 0; i < max; i++) {
+        if(shifts[i] != 0) {
+            array[i - shifts[i]] = array[i];
+            array[i] = NULL;
+        }
+    }
+
+    return 0;
 }
