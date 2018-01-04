@@ -64,6 +64,18 @@ int qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner
     return QLSTATUS_SUCCESS;
 }
 
+int ql_cry_stop_session(qlcry_session_ctx *ctx)
+{
+    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
+    INITIALISED(ctx)
+
+    mbedtls_ctr_drbg_free(ctx->random);
+    mbedtls_entropy_free(ctx->entropy);
+    free(ctx->participants);
+    ql_cry_clear_buffer(ctx);
+    free(ctx);
+}
+
 
 int ql_cry_finalise(qlcry_session_ctx *ctx)
 {
