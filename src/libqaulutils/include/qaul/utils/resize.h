@@ -1,6 +1,10 @@
+/*
+ * qaul.net is free software
+ * licensed under GPL (version 3)
+ */
 
-#ifndef QAUL_QLUTILS_H
-#define QAUL_QLUTILS_H
+#ifndef QAUL_RESIZE_H
+#define QAUL_RESIZE_H
 
 #include <stdlib.h>
 
@@ -22,6 +26,7 @@
  * @param max The maximum size of the array
  * @return
  */
-int qlutils_resize_array(void **array, size_t type, size_t curr, size_t max);
+int qlutils_resize_array(void **array, size_t type, size_t curr, size_t *max);
 
-#endif //QAUL_QLUTILS_H
+
+#endif
