@@ -13,6 +13,9 @@
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
 #include <qaul/utils/arrays.h>
+#include <crypto/qcry_helper.h>
+#include <mbedtls/md_internal.h>
+#include <mbedtls/md.h>
 
 
 /// Some helpful macros
@@ -191,5 +194,61 @@ int ql_cry_get_buffer(qlcry_session_ctx *ctx, ql_crypto_result ***buffer)
     CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
     INITIALISED(ctx)
     *buffer = ctx->buffer;
+    return QLSTATUS_SUCCESS;
+}
+
+
+/**** Actual cryptography functions below ****/
+
+int ql_cry_sign_data(qlcry_session_ctx *ctx, const char *msg)
+{
+    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
+    INITIALISED(ctx)
+
+    /* Creating a few variables to use */
+    // FIXME: This should be declared elsewhere
+    unsigned char hash_buf[QAUL_SIGN_HASH_LEN];
+    unsigned char sign_buf[QAUL_SIGNATURE_LEN];
+    size_t olen = 0;
+
+    /* Hash the message to sign it */
+    mbedtls_md_context_t md_ctx;
+    const mbedtls_md_info_t *md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+
+    mbedtls_md_init( &md_ctx );
+    int ret = mbedtls_md_setup( &md_ctx, md_info, 0 );
+    if(ret != 0) {
+        printf("An error occured setting up digest environment: %d!\n", ret);
+        return ret;
+    }
+
+    /** Compute SHA-256 digest of message for signature */
+    md_info->starts_func(md_ctx.md_ctx);
+    md_info->update_func(md_ctx.md_ctx, (const unsigned char*) msg, strlen(msg) + 1);
+    md_info->finish_func(md_ctx.md_ctx, hash_buf);
+
+    mbedtls_pk_context *private = (mbedtls_pk_context*) ctx->owner->keypair->sec;
+
+    /** Compute signature with message digest and private key */
+    ret = mbedtls_pk_sign(private, MBEDTLS_MD_SHA256,
+                          hash_buf, 0, sign_buf, &olen,
+                          mbedtls_ctr_drbg_random, ctx->random);
+
+    if(olen != QAUL_SIGNATURE_LEN)
+        printf("[WARNING] Signature length doesn't match for message '%s'...Misalignment probable!", msg);
+    if(ret != 0)
+        return QCRY_STATUS_ERROR;
+
+    /* Allocate some space on the buffer to return the result */
+    ctx->buffer = calloc(1, sizeof(ql_crypto_result));
+    if(ctx->buffer == NULL) return QLSTATUS_MALLOC_FAILED;
+
+    ql_crypto_result res;
+    res.data = (unsigned char*) calloc(sizeof(unsigned char), olen);
+    if(res.data == NULL) return QCRY_STATUS_MALLOC_FAIL;
+    memcpy(res.data, sign_buf, olen);
+    memcpy((void*) res.fp, ctx->owner->fingerprint, sizeof(ctx->owner->fingerprint));
+    res.length = olen;
+
     return QLSTATUS_SUCCESS;
 }
