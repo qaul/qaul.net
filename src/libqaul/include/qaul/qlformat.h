@@ -57,7 +57,7 @@ typedef enum ql_operation_t {
 typedef struct ql_user {
     char *username;
     char *fingerprint;
-    struct ql_pubkey *pubkey;
+    struct ql_keypair *keypair;
 } ql_user;
 
 
@@ -77,7 +77,8 @@ typedef enum ql_userdata_t {
 typedef enum ql_cipher_t {
     PK_RSA  = (1 << 1),
     ECDSA   = (1 << 2),
-    AES256  = (1 << 3)
+    AES256  = (1 << 3),
+    NONE    = (1 << 4)
 } ql_cipher_t;
 
 
@@ -144,13 +145,17 @@ typedef struct ql_crypto_result {
  * @mbedtls_ctx is internally cast to whatever
  *                implementation is required
  */
-typedef struct qlcry_ctx {
+typedef struct qlcry_session_ctx {
     unsigned short initialised;
     struct ql_user *owner;
-    struct ql_user *target;
+    struct ql_user **participants;
+    size_t no_p, array_p;
     enum ql_cipher_t mode;
-    void *mbedtls_ctx;
-} qlcry_ctx;
+
+    /* crypto internals */
+    void *random;
+    void *entropy;
+} qlcry_session_ctx;
 
 
 #endif //QAUL_QLFORMAT_H

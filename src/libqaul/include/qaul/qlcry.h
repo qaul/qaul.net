@@ -14,14 +14,15 @@
 /**
  * Start a new crypto session for a specific mode.
  *
- * What needs to be considered is that only operations supported
- * by this mode can be performed on the session.
+ * Only operations supported by the mode selected can later
+ * then be involved without throwing an UNSUPPORTED error.
  *
- * @param ctx
- * @param mode
+ * @param ctx A pointer to some space where a session can be started
+ * @param mode The mode chosen for this session
+ * @param owner The user who initiates this session (home user)
  * @return
  */
-int qlcry_start_session(qlcry_ctx *ctx, ql_cipher_t mode);
+int qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner);
 
 /**
  * Add a new participant to a session. Will throw an error if
@@ -34,7 +35,7 @@ int qlcry_start_session(qlcry_ctx *ctx, ql_cipher_t mode);
  * @param keypair
  * @return
  */
-int ql_cry_add_participant(qlcry_ctx *ctx, ql_user *user, ql_keypair *keypair);
+int ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user, ql_keypair *keypair);
 
 /**
  * Remove a participant from a session again.
@@ -46,7 +47,7 @@ int ql_cry_add_participant(qlcry_ctx *ctx, ql_user *user, ql_keypair *keypair);
  * @param user
  * @return
  */
-int ql_cry_remove_participant(qlcry_ctx *ctx, ql_user *user);
+int ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user *user);
 
 /**
  * Stop the current session
@@ -54,7 +55,7 @@ int ql_cry_remove_participant(qlcry_ctx *ctx, ql_user *user);
  * @param ctx
  * @return
  */
-int ql_cry_stop_session(qlcry_ctx *ctx);
+int ql_cry_stop_session(qlcry_session_ctx *ctx);
 
 /**
  * Sign a piece of data from the owner. The result is stored
@@ -63,7 +64,7 @@ int ql_cry_stop_session(qlcry_ctx *ctx);
  * @param ctx
  * @return
  */
-int ql_cry_sign_data(qlcry_ctx *ctx);
+int ql_cry_sign_data(qlcry_session_ctx *ctx);
 
 /**
  * Veirfy a piece of data from a remote participant. The result is stored
@@ -72,7 +73,7 @@ int ql_cry_sign_data(qlcry_ctx *ctx);
  * @param ctx
  * @return
  */
-int ql_cry_verify_data(qlcry_ctx *ctx, ql_user *user);
+int ql_cry_verify_data(qlcry_session_ctx *ctx, ql_user *user);
 
 /**
  * Encrypt a piece of data for each participant in the session. The result is stored
@@ -81,7 +82,7 @@ int ql_cry_verify_data(qlcry_ctx *ctx, ql_user *user);
  * @param ctx
  * @return
  */
-int ql_cry_encrypt_data(qlcry_ctx *ctx);
+int ql_cry_encrypt_data(qlcry_session_ctx *ctx);
 
 /**
  * Decrypt a piece of data from any participant in the session. The result is stored
@@ -90,7 +91,7 @@ int ql_cry_encrypt_data(qlcry_ctx *ctx);
  * @param ctx
  * @return
  */
-int ql_cry_decrypt_data(qlcry_ctx *ctx);
+int ql_cry_decrypt_data(qlcry_session_ctx *ctx);
 
 /**
  * Query the length and type of the operation buffer.
@@ -109,7 +110,7 @@ int ql_cry_decrypt_data(qlcry_ctx *ctx);
  * @param op
  * @return
  */
-int ql_cry_query_buffer(qlcry_ctx *ctx, size_t *length, ql_operation_t *op);
+int ql_cry_query_buffer(qlcry_session_ctx *ctx, size_t *length, ql_operation_t *op);
 
 /**
  * Read out the session operational buffer. It is important to have metadata
@@ -131,6 +132,6 @@ int ql_cry_query_buffer(qlcry_ctx *ctx, size_t *length, ql_operation_t *op);
  * @param buffer
  * @return
  */
-int ql_cry_get_buffer(qlcry_ctx *ctx, ql_crypto_result ***buffer);
+int ql_cry_get_buffer(qlcry_session_ctx *ctx, ql_crypto_result ***buffer);
 
 #endif //QAUL_QLCRY_H
