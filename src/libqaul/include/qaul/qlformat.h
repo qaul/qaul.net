@@ -156,6 +156,9 @@ typedef struct qlcry_session_ctx {
     /* crypto internals */
     void *random;
     void *entropy;
+
+    ql_crypto_result **buffer;
+    size_t buffer_length;
 } qlcry_session_ctx;
 
 

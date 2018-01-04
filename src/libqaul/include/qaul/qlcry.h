@@ -148,4 +148,17 @@ int ql_cry_query_buffer(qlcry_session_ctx *ctx, size_t *length, ql_operation_t *
  */
 int ql_cry_get_buffer(qlcry_session_ctx *ctx, ql_crypto_result ***buffer);
 
+
+/**
+ * A simple helper function to clear the operation buffer of a session.
+ *
+ * Most notibly this function is invoked by [[ql_cry_add_participant]]
+ * and [[ql_cry_remove_participant]] to make sure that everybody in the
+ * session get's the same data
+ *
+ * @param ctx
+ * @return
+ */
+int ql_cry_clear_buffer(qlcry_session_ctx *ctx);
+
 #endif //QAUL_QLCRY_H

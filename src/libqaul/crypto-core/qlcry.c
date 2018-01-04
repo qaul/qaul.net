@@ -94,6 +94,9 @@ int ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user)
     CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
     CHECK(user, QLSTATUS_INVALID_PARAMETERS)
 
+    int ret = ql_cry_clear_buffer(ctx);
+    if(ret) return ret;
+
     /* Make sure the user isn't already participating */
     for(int i = 0; i < ctx->no_p; i++) {
         if(strcmp(ctx->participants[i]->fingerprint, user->fingerprint) == 0) {
@@ -121,6 +124,9 @@ int ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user *user)
     CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
     CHECK(user, QLSTATUS_INVALID_PARAMETERS)
 
+    int ret = ql_cry_clear_buffer(ctx);
+    if(ret) return ret;
+
     /* Make sure the user isn't already participating */
     for(int i = 0; i < ctx->no_p; i++) {
         if(strcmp(ctx->participants[i]->fingerprint, user->fingerprint) == 0) {
@@ -134,4 +140,21 @@ int ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user *user)
     }
 
     return QLSTATUS_INVALID_PARAMETERS;
+}
+
+
+int ql_cry_clear_buffer(qlcry_session_ctx *ctx)
+{
+    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
+    INITIALISED(ctx)
+
+    // FIXME: Use crypto_result_free
+    for(int i = 0; i < ctx->buffer_length; i++) {
+        free((void*) ctx->buffer[i]->fp);
+        free(ctx->buffer[i]->data);
+        free(ctx->buffer[i]);
+    }
+
+    free(ctx->buffer);
+    ctx->buffer_length = 0;
 }
