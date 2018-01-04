@@ -2,7 +2,7 @@
 ADD_LIBRARY (libqaulutils STATIC
     logging.c
     validate.c
-    resize.c
+        arrays.c
 )
 
 # since the name starts with 'lib' don't add it again
