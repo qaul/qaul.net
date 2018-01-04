@@ -115,7 +115,7 @@ int ql_cry_decrypt_data(qlcry_session_ctx *ctx);
  *
  * ```C
  * size_t length = 0;
- * ql_operation_t op = NULL;
+ * ql_operation_t op = INVALID;
  * ql_cry_query_buffer(session, &length, &op);
  * ```
  *

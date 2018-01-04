@@ -43,7 +43,7 @@
 typedef enum ql_operation_t {
 
     // Cryptography operations
-    ENCRYPT, DECRYPT, SIGN, VERIFY
+    ENCRYPT, DECRYPT, SIGN, VERIFY, INVALID
 
 
 } ql_operation_t;
@@ -159,6 +159,7 @@ typedef struct qlcry_session_ctx {
 
     ql_crypto_result **buffer;
     size_t buffer_length;
+    ql_operation_t buffer_type;
 } qlcry_session_ctx;
 
 
