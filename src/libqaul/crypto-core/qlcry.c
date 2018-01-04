@@ -12,7 +12,7 @@
 
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
-#include <qaul/qlutils.h>
+#include <qaul/utils/arrays.h>
 
 
 /// Some helpful macros
@@ -113,4 +113,25 @@ int ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user)
     /* Now it's safe to add the participant */
     ctx->participants[ctx->no_p++] = user;
     return QLSTATUS_SUCCESS;
+}
+
+
+int ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user *user)
+{
+    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
+    CHECK(user, QLSTATUS_INVALID_PARAMETERS)
+
+    /* Make sure the user isn't already participating */
+    for(int i = 0; i < ctx->no_p; i++) {
+        if(strcmp(ctx->participants[i]->fingerprint, user->fingerprint) == 0) {
+
+            ctx->participants[i] = NULL;
+            ctx->no_p--;
+
+            qlutils_compact_array((void**) ctx->participants, ctx->array_p);
+            return QLSTATUS_SUCCESS;
+        }
+    }
+
+    return QLSTATUS_INVALID_PARAMETERS;
 }

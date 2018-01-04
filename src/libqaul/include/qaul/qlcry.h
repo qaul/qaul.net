@@ -36,6 +36,17 @@ int qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner
  */
 int ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user);
 
+/**
+ * Remove a participant from a session again.
+ *
+ * This means that all future messages encrypted via this session
+ * will no longer be readable by the removed user.
+ *
+ * @param ctx
+ * @param user
+ * @return
+ */
+int ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user *user);
 
 /**
  * This function needs to be called before actual operations are possible
@@ -51,19 +62,6 @@ int ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user);
  * @return
  */
 int ql_cry_finalise(qlcry_session_ctx *ctx);
-
-
-/**
- * Remove a participant from a session again.
- *
- * This means that all future messages encrypted via this session
- * will no longer be readable by the removed user.
- *
- * @param ctx
- * @param user
- * @return
- */
-int ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user *user);
 
 /**
  * Stop the current session
