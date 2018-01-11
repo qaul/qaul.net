@@ -4,19 +4,11 @@
 </div>
 
 <div local-class="messages">
-  <div local-class="message">
-    <div local-class="message-name">Lux</div>
-    <div local-class="message-time">19:22</div>
-    <div local-class="message-content">Welcome to the new world</div>
-  </div>
-  <div local-class="message">
-    <div local-class="message-name">Lux</div>
-    <div local-class="message-time">19:22</div>
-    <div local-class="message-content">Welcome to the new world</div>
-  </div>
-  <div local-class="message">
-    <div local-class="message-name">Lux</div>
-    <div local-class="message-time">19:22</div>
-    <div local-class="message-content">Welcome to the new world</div>
-  </div>
+  {{#each model as |message|}}
+    <div local-class="message">
+      <div local-class="message-name">{{message.senderName}}</div>
+      <div local-class="message-time">{{moment-from-now message.timestamp}}</div>
+      <div local-class="message-content">{{message.content}}</div>
+    </div>
+  {{/each}}
 </div>
