@@ -1,0 +1,34 @@
+.input-area {
+  margin-bottom: 1rem;
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid black;
+}
+
+.message {
+  border-bottom: 1px solid black;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1.5rem 3rem;
+
+  grid-template-areas:
+    "name time"
+    "content content";
+}
+
+.message-name {
+  grid-area: name;
+}
+
+.message-time {
+  grid-area: time;
+  text-align: right;
+}
+
+.message-content {
+  padding-top: .2rem;
+  grid-area: content;
+}
