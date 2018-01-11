@@ -2,6 +2,10 @@ html {
   font-family: sans-serif;
 }
 
+body {
+  margin-bottom: 4rem;
+}
+
 a {
   color: inherit;
 }
