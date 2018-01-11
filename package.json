@@ -33,6 +33,7 @@
     "ember-css-modules": "^0.7.5",
     "ember-data": "~2.16.2",
     "ember-export-application-global": "^2.0.0",
+    "ember-font-awesome": "^4.0.0-rc.2",
     "ember-load-initializers": "^1.0.0",
     "ember-resolver": "^4.0.0",
     "ember-source": "~2.16.0",

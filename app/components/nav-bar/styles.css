@@ -1,0 +1,9 @@
+.nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  font-size: 4rem;
+  background-color: blue;
+  color: white;
+}
