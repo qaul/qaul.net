@@ -127,7 +127,7 @@ int ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user)
     }
 
     /* Make sure we have space for participants */
-    int ret = qlutils_resize_array((void**) &ctx->participants, sizeof(ql_user*), ctx->no_p, &ctx->array_p);
+    ret = qlutils_resize_array((void**) &ctx->participants, sizeof(ql_user*), ctx->no_p, &ctx->array_p);
     if(ret != QLSTATUS_SUCCESS) return ret;
 
     /* Now it's safe to add the participant */
