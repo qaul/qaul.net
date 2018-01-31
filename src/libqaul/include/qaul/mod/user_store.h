@@ -4,9 +4,10 @@
  */
 
 
-#ifndef QAUL_QLUSER_H
-#define QAUL_QLUSER_H
+#ifndef _QAUL_QLUSER_H
+#define _QAUL_QLUSER_H
 
 #include <qaul/error.h>
 
-#endif //QAUL_QLUSER_H
+
+#endif //_QAUL_QLUSER_H

@@ -4,3 +4,7 @@
  */
 
 #include <qaul/mod/auth.h>
+
+void foo() {
+    
+}

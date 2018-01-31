@@ -6,7 +6,7 @@
 #include <qaul/qaul.h>
 
 
-ql_error_t ql_initialise(struct qaul **state)
+ql_error_t ql_initialise(struct qaul **state, enum qaul_os os, const char *home, const char *resources)
 {
 
 }

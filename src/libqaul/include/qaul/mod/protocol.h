@@ -3,8 +3,8 @@
  * licensed under GPL (version 3)
  */
 
-#ifndef QAUL_QLPROTO_H
-#define QAUL_QLPROTO_H
+#ifndef _QAUL_QLPROTO_H
+#define _QAUL_QLPROTO_H
 
 #include <qaul/error.h>
 
