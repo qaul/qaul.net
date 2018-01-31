@@ -4,7 +4,6 @@
  */
 
 #include <qaul/qaul.h>
-#include <qaul/mod/core.h>
 
 
 ql_error_t ql_initialise(struct qaul **state)
