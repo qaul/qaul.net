@@ -4,8 +4,8 @@
  */
 
 
-#ifndef QAUL_QLFORMAT_H
-#define QAUL_QLFORMAT_H
+#ifndef _QAUL_QLFORMAT_H
+#define _QAUL_QLFORMAT_H
 
 /********************** GENERAL **********************/
 
@@ -24,6 +24,7 @@ typedef enum ql_operation_t {
     ENCRYPT, DECRYPT, SIGN, VERIFY, INVALID
 
 } ql_operation_t;
+
 
 /**
  * Represents a path on the filesystem

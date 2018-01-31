@@ -3,8 +3,8 @@
  * licensed under GPL (version 3)
  */
 
-#ifndef QAUL_QLNET_H
-#define QAUL_QLNET_H
+#ifndef _QAUL_QLNET_H
+#define _QAUL_QLNET_H
 
 #include <qaul/error.h>
 

@@ -4,8 +4,8 @@
  */
 
 
-#ifndef QAUL_QLFS_H
-#define QAUL_QLFS_H
+#ifndef _QAUL_QLFS_H_
+#define _QAUL_QLFS_H_
 
 #include <qaul/error.h>
 
