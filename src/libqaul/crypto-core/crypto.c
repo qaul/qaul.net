@@ -4,7 +4,7 @@
  */
 
 
-#include <qaul/qlcry.h>
+#include <qaul/mod/crypto.h>
 #include <qaul/error.h>
 
 #include <stdlib.h>
@@ -21,7 +21,7 @@
 /// Some helpful macros
 
 
-int qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner)
+ql_error_t qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner)
 {
     /* Check if a valid mode was provided */
     if(mode != (PK_RSA || ECDSA || AES256)) {

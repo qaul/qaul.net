@@ -7,7 +7,7 @@
 #ifndef QAUL_QLCRY_H
 #define QAUL_QLCRY_H
 
-#include <qaul/qlformat.h>
+#include <qaul/mod/structures.h>
 #include <qaul/error.h>
 #include <stdlib.h>
 

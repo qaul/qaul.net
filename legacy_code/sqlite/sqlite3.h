@@ -1068,7 +1068,7 @@ typedef struct sqlite3_mutex sqlite3_mutex;
 ** object once the object has been registered.
 **
 ** The zName field holds the name of the VFS module.  The name must
-** be unique across all VFS modules.
+** be unique across all VFS mod.
 **
 ** [[sqlite3_vfs.xOpen]]
 ** ^SQLite guarantees that the zFilename parameter to xOpen
