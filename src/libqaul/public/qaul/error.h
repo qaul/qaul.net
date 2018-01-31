@@ -1,6 +1,3 @@
-//
-// Created by spacekookie on 31.01.18.
-//
 
 #ifndef QAUL_ERROR_H
 #define QAUL_ERROR_H
