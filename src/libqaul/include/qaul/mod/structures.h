@@ -30,7 +30,19 @@ typedef enum ql_operation_t {
  * Represents a path on the filesystem
  */
 typedef struct ql_path {
+    enum qaul_os os;
+    char **snippets;
+    size_t num, size;
+};
 
+typedef struct ql_file {
+    const char *name;
+    const char *ext;
+};
+
+typedef struct ql_file_list {
+    struct ql_file **files;
+    size_t num, size;
 };
 
 
