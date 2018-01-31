@@ -4,7 +4,6 @@
  */
 
 #include <qaul/qaul.h>
-#include <qaul/mod/messaging.h>
 #include <qaul/mod/protocol.h>
 
 

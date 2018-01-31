@@ -1,4 +1,4 @@
-//
-// Created by spacekookie on 31.01.18.
-//
-
+/*
+ * qaul.net is free software
+ * licensed under GPL (version 3)
+ */

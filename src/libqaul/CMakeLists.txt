@@ -118,9 +118,6 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     include/qaul/mod/user_store.h
     include/qaul/mod/voip.h
 
-    include/qaul/mod/messaging.h
-    include/qaul/mod/files.h
-
     ### Global API implementations ###
     api/core.c
     api/files.c
@@ -137,14 +134,21 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     crypto-core/crypto.c
     
     ### Database module ###
-    
+    database/database.c
+
     ### Filesystem module ###
+    filesystem/filesystem.c
     
     ### Keystore module ###
+    keystore/keystore.c
     
     ### Network module ###
+    network/network.c
     
     ### Protocol module ###
+    protocol/protocol.c
+    protocol/messaging.c
+    protocol/files.c
     
     ### Userstore module ###
     userstore/userstore.c
