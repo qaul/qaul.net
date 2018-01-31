@@ -100,6 +100,12 @@ endif ()
 
 
 ADD_LIBRARY (libqaul ${LIBTYPE}
+
+    # library API (temporary)
+    public/qaul/qaul.h
+    public/qaul/query.h
+    public/qaul/error.h
+
     qaullib.c
     qaullib_ipc.c
     qaullib_webserver.c
@@ -201,3 +207,4 @@ endif ()
 
 # TODO lack of api requires this :(
 target_include_directories(libqaul PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(libqaul PUBLIC public)
