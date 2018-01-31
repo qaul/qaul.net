@@ -1,4 +1,37 @@
-//
-// Created by spacekookie on 31.01.18.
-//
+/*
+ * qaul.net is free software
+ * licensed under GPL (version 3)
+ */
 
+#include <qaul/qaul.h>
+#include <qaul/mod/config.h>
+
+
+ql_error_t ql_get_configuration(struct qaul *state, struct ql_configuration *config)
+{
+
+}
+
+
+ql_error_t ql_set_configuration(struct qaul *state, struct ql_configuration config)
+{
+
+}
+
+
+ql_error_t ql_get_network(struct qaul *state, struct ql_network *network)
+{
+
+}
+
+
+ql_error_t ql_configure_network(struct qaul *state, struct ql_network network)
+{
+
+}
+
+
+ql_error_t ql_get_binaries(struct qaul *state)
+{
+
+}
