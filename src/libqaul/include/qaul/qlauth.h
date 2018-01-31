@@ -2,15 +2,16 @@
 #define QAUL_QLAUTH_H
 
 #include <qaul/qlformat.h>
+#include <qaul/error.h>
 
-int qlauth_initialise();
+ql_error_t qlauth_initialise();
 
-int qlauth_stop();
+ql_error_t qlauth_stop();
 
-int qlauth_create_user();
+ql_error_t qlauth_create_user();
 
-int qlauth_delete_user();
+ql_error_t qlauth_delete_user();
 
-int qlauth_get_user_info(enum ql_userdata_t, void*);
+ql_error_t qlauth_get_user_info(enum ql_userdata_t, void*);
 
 #endif //QAUL_QLAUTH_H

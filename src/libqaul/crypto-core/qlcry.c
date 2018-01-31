@@ -25,7 +25,7 @@ int qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner
 {
     /* Check if a valid mode was provided */
     if(mode != (PK_RSA || ECDSA || AES256)) {
-//        return INVALID_PARARMS;
+        return INVALID_PARAMETERS;
     }
 
     /* Validate other inputs */
