@@ -4,24 +4,25 @@
  */
 
 
-#include <qaul/mod/crypto.h>
 #include <qaul/error.h>
 
-#include <stdlib.h>
-#include <string.h>
+#include <qaul/mod/crypto.h>
+#include <qaul/utils/arrays.h>
+// #include <crypto/qcry_helper.h>
 
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
-#include <qaul/utils/arrays.h>
-#include <crypto/qcry_helper.h>
 #include <mbedtls/md_internal.h>
 #include <mbedtls/md.h>
+
+#include <stdlib.h>
+#include <string.h>
 
 
 /// Some helpful macros
 
 
-ql_error_t qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner)
+ql_error_t start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner)
 {
     /* Check if a valid mode was provided */
     if(mode != (PK_RSA || ECDSA || AES256)) {
@@ -67,7 +68,7 @@ ql_error_t qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user
 //    return QLSTATUS_SUCCESS;
 }
 
-int ql_cry_stop_session(qlcry_session_ctx *ctx)
+ql_error_t ql_cry_stop_session(qlcry_session_ctx *ctx)
 {
 //    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
 //    INITIALISED(ctx)
@@ -80,7 +81,7 @@ int ql_cry_stop_session(qlcry_session_ctx *ctx)
 }
 
 
-int ql_cry_finalise(qlcry_session_ctx *ctx)
+ql_error_t ql_cry_finalise(qlcry_session_ctx *ctx)
 {
 //    const int ret = QLSTATUS_NOT_INITIALISED;
 //    CHECK(ctx, ret);
@@ -106,7 +107,7 @@ int ql_cry_finalise(qlcry_session_ctx *ctx)
 }
 
 
-int ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user)
+ql_error_t ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user)
 {
 //    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
 //    CHECK(user, QLSTATUS_INVALID_PARAMETERS)
@@ -136,7 +137,7 @@ int ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user)
 }
 
 
-int ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user *user)
+ql_error_t ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user *user)
 {
 //    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
 //    CHECK(user, QLSTATUS_INVALID_PARAMETERS)
@@ -160,7 +161,7 @@ int ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user *user)
 }
 
 
-int ql_cry_clear_buffer(qlcry_session_ctx *ctx)
+ql_error_t ql_cry_clear_buffer(qlcry_session_ctx *ctx)
 {
 //    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
 //    INITIALISED(ctx)
@@ -178,7 +179,7 @@ int ql_cry_clear_buffer(qlcry_session_ctx *ctx)
 }
 
 
-int ql_cry_query_buffer(qlcry_session_ctx *ctx, size_t *length, ql_operation_t *op)
+ql_error_t ql_cry_query_buffer(qlcry_session_ctx *ctx, size_t *length, ql_operation_t *op)
 {
 //    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
 //    INITIALISED(ctx)
@@ -189,7 +190,7 @@ int ql_cry_query_buffer(qlcry_session_ctx *ctx, size_t *length, ql_operation_t *
 }
 
 
-int ql_cry_get_buffer(qlcry_session_ctx *ctx, ql_crypto_result ***buffer)
+ql_error_t ql_cry_get_buffer(qlcry_session_ctx *ctx, ql_crypto_result ***buffer)
 {
 //    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
 //    INITIALISED(ctx)
@@ -200,7 +201,7 @@ int ql_cry_get_buffer(qlcry_session_ctx *ctx, ql_crypto_result ***buffer)
 
 /**** Actual cryptography functions below ****/
 
-int ql_cry_sign_data(qlcry_session_ctx *ctx, const char *msg)
+ql_error_t ql_cry_sign_data(qlcry_session_ctx *ctx, const char *msg)
 {
 //    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
 //    INITIALISED(ctx)
