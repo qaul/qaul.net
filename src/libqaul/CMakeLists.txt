@@ -119,13 +119,13 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     include/qaul/mod/voip.h
 
     ### Global API implementations ###
+    api/authentication.c
+    api/config.c
     api/core.c
     api/files.c
     api/messages.c
     api/users.c
-    api/files.c
     api/voip.c
-    api/config.c
 
     ### Authentication module ###
     authentication/auth.c
