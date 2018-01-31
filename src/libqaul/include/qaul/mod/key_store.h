@@ -6,4 +6,6 @@
 #ifndef QAUL_QCRY_STORE_H
 #define QAUL_QCRY_STORE_H
 
+#include <qaul/error.h>
+
 #endif //QAUL_QCRY_STORE_H

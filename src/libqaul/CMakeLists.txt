@@ -118,6 +118,9 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     include/qaul/mod/user_store.h
     include/qaul/mod/voip.h
 
+    include/qaul/mod/messaging.h
+    include/qaul/mod/files.h
+
     ### Global API implementations ###
     api/core.c
     api/files.c
