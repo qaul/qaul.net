@@ -7,4 +7,7 @@
 #ifndef QAUL_QLFS_H
 #define QAUL_QLFS_H
 
+#include <qaul/error.h>
+
+
 #endif //QAUL_QLFS_H

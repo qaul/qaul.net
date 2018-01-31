@@ -45,8 +45,14 @@ typedef enum ql_operation_t {
     // Cryptography operations
     ENCRYPT, DECRYPT, SIGN, VERIFY, INVALID
 
-
 } ql_operation_t;
+
+/**
+ * Represents a path on the filesystem
+ */
+typedef struct ql_path {
+
+};
 
 
 

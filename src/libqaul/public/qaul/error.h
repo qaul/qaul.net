@@ -1,4 +1,3 @@
-
 #ifndef QAUL_ERROR_H
 #define QAUL_ERROR_H
 
