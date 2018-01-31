@@ -9,5 +9,4 @@
 
 #include <qaul/error.h>
 
-
 #endif //QAUL_QLFS_H

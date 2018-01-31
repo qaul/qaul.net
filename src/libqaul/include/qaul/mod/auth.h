@@ -1,3 +1,9 @@
+/*
+ * qaul.net is free software
+ * licensed under GPL (version 3)
+ */
+
+
 #ifndef QAUL_QLAUTH_H
 #define QAUL_QLAUTH_H
 

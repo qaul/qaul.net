@@ -4,6 +4,8 @@
  */
 
 #include <qaul/qaul.h>
+#include <qaul/mod/messaging.h>
+#include <qaul/mod/protocol.h>
 
 
 ql_error_t ql_get_messages(struct qaul *state, struct qaul_auth_token *token, struct qaul_query *query, size_t *length, struct qaul_msg_list *list)

@@ -6,4 +6,6 @@
 #ifndef QAUL_QLPROTO_H
 #define QAUL_QLPROTO_H
 
+#include <qaul/error.h>
+
 #endif //QAUL_QLPROTO_H
