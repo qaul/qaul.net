@@ -159,13 +159,13 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     ${WIN_SOURCES}
     ${ANDROIDA_SOURCES}
 
-    ### Refactored modules ###
-    include/qaul/qlcry.h
-    include/qaul/qlauth.h
-    include/qaul/qlformat.h
+    ### Refactored mod ###
+		include/qaul/mod/crypto.h
+		include/qaul/mod/auth.h
+		include/qaul/mod/structures.h
 
-    crypto-core/qlcry.c
-    authentication/qlauth.c
+		crypto-core/crypto.c
+		authentication/auth.c
     )
 
 add_dependencies(libqaul mbedtls)

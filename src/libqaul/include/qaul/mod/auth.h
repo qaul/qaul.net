@@ -1,7 +1,7 @@
 #ifndef QAUL_QLAUTH_H
 #define QAUL_QLAUTH_H
 
-#include <qaul/qlformat.h>
+#include <qaul/mod/structures.h>
 #include <qaul/error.h>
 
 ql_error_t qlauth_initialise();

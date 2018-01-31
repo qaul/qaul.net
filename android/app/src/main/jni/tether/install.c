@@ -138,8 +138,8 @@ char* ModuleLoadedFn(const char* name, State* state, int argc, Expr* argv[]) {
     char buffer[READ_BUF_SIZE];
     char mname[READ_BUF_SIZE];
 
-    if (! (modules = fopen("/proc/modules", "r")) ) {
-      fprintf(stderr, "Can't open /proc/modules for read \n");
+    if (! (modules = fopen("/proc/mod", "r")) ) {
+      fprintf(stderr, "Can't open /proc/mod for read \n");
       return strdup("");
     }
 

@@ -3,4 +3,4 @@
  * licensed under GPL (version 3)
  */
 
-#include <qaul/qlauth.h>
+#include <qaul/mod/auth.h>

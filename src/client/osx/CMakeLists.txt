@@ -56,7 +56,7 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
     ${LIBQAULDIR}/qaullib_file_LL.c
     ${LIBQAULDIR}/qaullib_exediscovery.c
 
-	# Crypto modules
+	# Crypto mod
 	${LIBQAULDIR}/qaullib_crypto.c
 	${LIBQAULDIR}/crypto/qcry_context.c
     ${LIBQAULDIR}/crypto/qcry_arbiter.c
