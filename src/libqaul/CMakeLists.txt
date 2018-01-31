@@ -11,11 +11,11 @@ if (VOIP)
     
     set (VOIP_SOURCES
         qaullib_voip.c
-    )
+        )
     
     set (VOIP_DEPENDENCIES
         pjsip
-    )
+        )
     
     set (VOIP_INCLUDE
         ${PJBASE}/pjlib/include
@@ -23,60 +23,60 @@ if (VOIP)
         ${PJBASE}/pjmedia/include
         ${PJBASE}/pjnath/include
         ${PJBASE}/pjsip/include
-#       ${PJBASE}third_party/portaudio/include
-#       ${PJBASE}third_party/resample/include
-#       ${PJBASE}third_party/speex/include
-#       ${PJBASE}third_party/srtp/crypto/include
-#       ${PJBASE}third_party/srtp/include
-    )
+        #       ${PJBASE}third_party/portaudio/include
+        #       ${PJBASE}third_party/resample/include
+        #       ${PJBASE}third_party/speex/include
+        #       ${PJBASE}third_party/srtp/crypto/include
+        #       ${PJBASE}third_party/srtp/include
+        )
 
-	if (Raspberry)
-		set (VOIP_LINK_LIBRARIES
-			${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
-			${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
-			${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
-			${PJBASE}/pjsip/lib/libpjsip-simple-${PJSIPTYPE}.a
-			${PJBASE}/pjmedia/lib/libpjmedia-codec-${PJSIPTYPE}.a
-			${PJBASE}/pjmedia/lib/libpjmedia-${PJSIPTYPE}.a
-			${PJBASE}/pjmedia/lib/libpjmedia-audiodev-${PJSIPTYPE}.a
-			${PJBASE}/pjmedia/lib/libpjmedia-videodev-${PJSIPTYPE}.a
-			${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
-			${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
-			${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
-			${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
-			${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
-			${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
-			${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
-			${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
-#			${PJBASE}/third_party/lib/libwebrtc-${PJSIPTYPE}.a
-			${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
-		)
-	else ()
-		set (VOIP_LINK_LIBRARIES
-			${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
-			${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
-			${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
-			${PJBASE}/pjsip/lib/libpjsip-simple-${PJSIPTYPE}.a
-			${PJBASE}/pjmedia/lib/libpjmedia-codec-${PJSIPTYPE}.a
-			${PJBASE}/pjmedia/lib/libpjmedia-${PJSIPTYPE}.a
-			${PJBASE}/pjmedia/lib/libpjmedia-audiodev-${PJSIPTYPE}.a
-			${PJBASE}/pjmedia/lib/libpjmedia-videodev-${PJSIPTYPE}.a
-			${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
-			${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
-			${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
-			${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
-			${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
-			${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
-			${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
-			${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
-			#${PJBASE}/third_party/lib/libwebrtc-${PJSIPTYPE}.a
-			${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
-		)
-	endif ()
+    if (Raspberry)
+        set (VOIP_LINK_LIBRARIES
+            ${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
+            ${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
+            ${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
+            ${PJBASE}/pjsip/lib/libpjsip-simple-${PJSIPTYPE}.a
+            ${PJBASE}/pjmedia/lib/libpjmedia-codec-${PJSIPTYPE}.a
+            ${PJBASE}/pjmedia/lib/libpjmedia-${PJSIPTYPE}.a
+            ${PJBASE}/pjmedia/lib/libpjmedia-audiodev-${PJSIPTYPE}.a
+            ${PJBASE}/pjmedia/lib/libpjmedia-videodev-${PJSIPTYPE}.a
+            ${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
+            ${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
+            ${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
+            ${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
+            ${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
+            ${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
+            ${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
+            ${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
+            #${PJBASE}/third_party/lib/libwebrtc-${PJSIPTYPE}.a
+            ${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
+            )
+    else ()
+        set (VOIP_LINK_LIBRARIES
+            ${PJBASE}/pjsip/lib/libpjsua-${PJSIPTYPE}.a
+            ${PJBASE}/pjsip/lib/libpjsip-ua-${PJSIPTYPE}.a
+            ${PJBASE}/pjsip/lib/libpjsip-${PJSIPTYPE}.a
+            ${PJBASE}/pjsip/lib/libpjsip-simple-${PJSIPTYPE}.a
+            ${PJBASE}/pjmedia/lib/libpjmedia-codec-${PJSIPTYPE}.a
+            ${PJBASE}/pjmedia/lib/libpjmedia-${PJSIPTYPE}.a
+            ${PJBASE}/pjmedia/lib/libpjmedia-audiodev-${PJSIPTYPE}.a
+            ${PJBASE}/pjmedia/lib/libpjmedia-videodev-${PJSIPTYPE}.a
+            ${PJBASE}/pjnath/lib/libpjnath-${PJSIPTYPE}.a
+            ${PJBASE}/pjlib-util/lib/libpjlib-util-${PJSIPTYPE}.a
+            ${PJBASE}/third_party/lib/libg7221codec-${PJSIPTYPE}.a
+            ${PJBASE}/third_party/lib/libgsmcodec-${PJSIPTYPE}.a
+            ${PJBASE}/third_party/lib/libilbccodec-${PJSIPTYPE}.a
+            ${PJBASE}/third_party/lib/libresample-${PJSIPTYPE}.a
+            ${PJBASE}/third_party/lib/libspeex-${PJSIPTYPE}.a
+            ${PJBASE}/third_party/lib/libsrtp-${PJSIPTYPE}.a
+            #${PJBASE}/third_party/lib/libwebrtc-${PJSIPTYPE}.a
+            ${PJBASE}/pjlib/lib/libpj-${PJSIPTYPE}.a
+            )
+    endif ()
 else()
     set (VOIP_SOURCES
         qaullib_voip_dummy.c
-    )
+        )
 endif ()
 
 if (${PORT} STREQUAL "WINDOWS")
@@ -89,13 +89,13 @@ if (${PORT} STREQUAL "WINDOWS")
   set (WIN_SOURCES
     win32/functions.c
     win32/pthread.c
-  )
+    )
 endif ()
 
 if (${PORT} STREQUAL "ANDROID")
   set (ANDROIDA_SOURCES
     mg_backend_apk.c
-  )
+    )
 endif ()
 
 
@@ -106,8 +106,19 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     public/qaul/query.h
     public/qaul/error.h
 
+    ### Internal module headers ###
+    include/qaul/mod/auth.h
+    include/qaul/mod/crypto.h
+    include/qaul/mod/database.h
+    include/qaul/mod/filesystem.h
+    include/qaul/mod/key_store.h
+    include/qaul/mod/network.h
+    include/qaul/mod/protocol.h
+    include/qaul/mod/structures.h
+    include/qaul/mod/user_store.h
+    include/qaul/mod/voip.h
 
-    # Global API implementations
+    ### Global API implementations ###
     api/core.c
     api/files.c
     api/messages.c
@@ -116,77 +127,48 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     api/voip.c
     api/config.c
 
-    # Crypto module
-    qaullib_crypto.c
-    crypto/qcry_context.c
-    crypto/qcry_arbiter.c
-    crypto/qcry_hashing.c
-    crypto/qcry_helper.c
-    crypto/qcry_keys.c
-    crypto/qcry_keystore.c
+    ### Authentication module ###
+    authentication/auth.c
 
-    # User module
-    user/qluser_store.c
-    user/qluser_keystore.c
+    ### Crypto core module ###
+    crypto-core/crypto.c
+    
+    ### Database module ###
+    
+    ### Filesystem module ###
+    
+    ### Keystore module ###
+    
+    ### Network module ###
+    
+    ### Protocol module ###
+    
+    ### Userstore module ###
+    userstore/userstore.c
+    userstore/keystore.c
 
-
-    # Legacy implementations (will slowly be removed)
-    qaullib.c
-    qaullib_ipc.c
-    qaullib_webserver.c
-    qaullib_webclient.c
-    qaullib_threads.c
-    qaullib_user.c
-    qaullib_user_LL.c
-    qaullib_topo_LL.c
-    qaullib_appevent_LL.c
-    qaullib_messaging.c
-    qaullib_msg_LL.c
-    qaullib_filesharing.c
-    qaullib_file_LL.c
-    qaullib_exediscovery.c
-    qaullib_udp_communication.c
-    captive/qaullib_captive.c
-    captive/qaullib_captive_dhcp.c
-    captive/qaullib_captive_dns.c
-    captive/whitelist.c
-    qmongoose.c
-    sqlite/sqlite3.c
-    urlcode/urlcode.c
-    olsrd/mantissa.c
-    olsrd/hashing.c
-    ${VOIP_SOURCES}
-    ${WIN_SOURCES}
-    ${ANDROIDA_SOURCES}
-
-    ### Refactored mod ###
-		include/qaul/mod/crypto.h
-		include/qaul/mod/auth.h
-		include/qaul/mod/structures.h
-
-		crypto-core/crypto.c
-		authentication/auth.c
-    )
+    ### Voip module ###
+)
 
 add_dependencies(libqaul mbedtls)
 add_dependencies(libqaul libcuckoo)
 
 ExternalProject_Get_Property(mbedtls install_dir)
 target_link_libraries(libqaul PUBLIC
-	${install_dir}/mbedtls/lib/libmbedcrypto.a
-)
+    ${install_dir}/mbedtls/lib/libmbedcrypto.a
+    )
 target_include_directories(libqaul PUBLIC ${install_dir}/mbedtls/include)
 
 ExternalProject_Get_Property(libcuckoo install_dir)
 target_link_libraries(libqaul PUBLIC
-	${install_dir}/libcuckoo/lib/libcuckoo.a
-)
+    ${install_dir}/libcuckoo/lib/libcuckoo.a
+    )
 target_include_directories(libqaul PUBLIC ${install_dir}/libcuckoo/include)
 
 target_link_libraries(libqaul PUBLIC
-	libqaulutils
-	${VOIP_LINK_LIBRARIES}
-)
+    libqaulutils
+    ${VOIP_LINK_LIBRARIES}
+    )
 
 target_include_directories(libqaul PRIVATE include)
 
@@ -196,7 +178,7 @@ set_target_properties (libqaul PROPERTIES PREFIX "")
 if (VOIP)
     add_dependencies(libqaul
         ${VOIP_DEPENDENCIES}
-    )
+        )
 endif ()
 
 target_include_directories (libqaul PUBLIC include)
@@ -204,7 +186,7 @@ target_include_directories (libqaul PUBLIC include)
 target_include_directories (libqaul PRIVATE
     ${MONGOOSE_DIR}
     ${VOIP_INCLUDE}
-)
+    )
 
 if (UUID_FOUND)
     target_link_libraries(libqaul LINK_PRIVATE ${UUID_LIBRARIES})
