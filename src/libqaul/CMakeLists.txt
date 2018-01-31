@@ -106,6 +106,31 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     public/qaul/query.h
     public/qaul/error.h
 
+
+    # Global API implementations
+    api/core.c
+    api/files.c
+    api/messages.c
+    api/users.c
+    api/files.c
+    api/voip.c
+    api/config.c
+
+    # Crypto module
+    qaullib_crypto.c
+    crypto/qcry_context.c
+    crypto/qcry_arbiter.c
+    crypto/qcry_hashing.c
+    crypto/qcry_helper.c
+    crypto/qcry_keys.c
+    crypto/qcry_keystore.c
+
+    # User module
+    user/qluser_store.c
+    user/qluser_keystore.c
+
+
+    # Legacy implementations (will slowly be removed)
     qaullib.c
     qaullib_ipc.c
     qaullib_webserver.c
@@ -120,20 +145,6 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     qaullib_filesharing.c
     qaullib_file_LL.c
     qaullib_exediscovery.c
-
-    # Crypto module
-    qaullib_crypto.c
-    crypto/qcry_context.c
-    crypto/qcry_arbiter.c
-    crypto/qcry_hashing.c
-    crypto/qcry_helper.c
-    crypto/qcry_keys.c
-    crypto/qcry_keystore.c
-
-	# User module
-	user/qluser_store.c
-	user/qluser_keystore.c
-
     qaullib_udp_communication.c
     captive/qaullib_captive.c
     captive/qaullib_captive_dhcp.c
