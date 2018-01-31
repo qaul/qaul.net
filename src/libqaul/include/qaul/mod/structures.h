@@ -31,14 +31,14 @@
 
 /********************** GENERAL **********************/
 
-// A simple value that can be checked against to make
-// sure that a struct has been properly initialised
+#include <qaul/error.h>
 #include <glob.h>
 
-
+// A simple value that can be checked against to make
+// sure that a struct has been properly initialised
 #define QL_MODULE_INITIALISED 0x1337
 #define CHECK(field, ret) { if((field) == NULL) return ret; }
-#define INITIALISED(field) { if(field->initialised != QL_MODULE_INITIALISED) return QLSTATUS_NOT_INITIALISED; }
+#define INITIALISED(field) { if((field)->initialised != QL_MODULE_INITIALISED) return NOT_INITIALISED; }
 
 typedef enum ql_operation_t {
 
@@ -47,6 +47,7 @@ typedef enum ql_operation_t {
 
 
 } ql_operation_t;
+
 
 
 /********************** USER MANAGEMENT **********************/
@@ -64,6 +65,8 @@ typedef struct ql_user {
 
 /**
  * Describes a piece of data attached to a user
+ *
+ * TODO: Maybe move to qaul.h
  */
 typedef enum ql_userdata_t {
     FINGERPRINT,
@@ -161,6 +164,23 @@ typedef struct qlcry_session_ctx {
     size_t buffer_length;
     ql_operation_t buffer_type;
 } qlcry_session_ctx;
+
+/********************** QAUL CORE **********************/
+
+typedef struct qlauth_ctx {
+
+} qlauth_ctx;
+
+
+/********************** QAUL CORE **********************/
+
+
+/**
+ * Internal qaul structure that holds all other context structures
+ */
+typedef struct ql_core {
+
+} ql_core;
 
 
 #endif //QAUL_QLFORMAT_H

@@ -13,6 +13,8 @@ typedef enum ql_error_t {
     ALREADY_INITIALISED,            // The module has already been initialised
 
     INVALID_PARAMETERS,             // The provided parameters were invalid
+    INVALID_PAYLOAD,                // The provided payload was invalid
+    INVALID_DATA,                   // The provided user data was invalid
 
     USER_ALREADY_EXISTS,
     USER_DOES_NOT_EXIST,

@@ -3,6 +3,9 @@
 #include <qaul/error.h>
 #include <qaul/query.h>
 
+/**
+ *
+ */
 typedef struct qaul {
     void *inner;
     const char *home_path;
@@ -10,17 +13,17 @@ typedef struct qaul {
 } qaul;
 
 
-typedef struct ql_auth_token {};
-typedef struct ql_configuration {};
-typedef struct ql_network {};
+typedef struct qaul_auth_token {};
+typedef struct qaul_configuration {};
+typedef struct qaul_network {};
 
-typedef struct ql_user_list {};
-typedef struct ql_msg_list {};
-typedef struct ql_file_list {};
+typedef struct qaul_user_list {};
+typedef struct qaul_msg_list {};
+typedef struct qaul_file_list {};
 
-typedef struct ql_user {};
-typedef struct ql_message {};
-typedef struct ql_file {};
+typedef struct qaul_user {};
+typedef struct qaul_message {};
+typedef struct qaul_file {};
 
 
 ql_error_t ql_initialise(struct qaul **state);
