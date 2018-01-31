@@ -1,6 +1,8 @@
 
 ADD_LIBRARY (libqaulconnector STATIC
-    dummy.c
+
+    # Manages the OLSR backend
+    olsr/olsr.c
 )
 
 # since the name starts with 'lib' don't add it again

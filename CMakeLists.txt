@@ -139,8 +139,8 @@ add_subdirectory (third_party)
 add_subdirectory (src/olsrd-plugin)
 
 if (NOT ${PORT} STREQUAL "ANDROID")
-    add_subdirectory (src/libqaulutils)
-    add_subdirectory (src/libqaulconnector)
+    add_subdirectory (src/libqaul-utils)
+    add_subdirectory (src/libqaul-connector)
     add_subdirectory (src/libqaul)
 endif ()
 
