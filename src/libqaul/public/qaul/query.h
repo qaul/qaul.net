@@ -1,5 +1,6 @@
 
 #include <glob.h>
+#include <qaul/error.h>
 
 typedef enum ql_limit {
   
@@ -19,3 +20,7 @@ typedef struct ql_query {
 
   size_t max_count;
 };
+
+
+ql_error_t ql_query_create(struct ql_query *init);
+

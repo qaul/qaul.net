@@ -4,17 +4,26 @@
 #include <qaul/query.h>
 
 typedef struct qaul {
-    int bla;
+    void *inner;
+    const char *home_path;
+    const char *web_path;
 } qaul;
 
 
-typedef struct ql_auth_token {
+typedef struct ql_auth_token {};
+typedef struct ql_configuration {};
+typedef struct ql_network {};
 
-};
+typedef struct ql_user_list {};
+typedef struct ql_msg_list {};
+typedef struct ql_file_list {};
+
+typedef struct ql_user {};
+typedef struct ql_message {};
+typedef struct ql_file {};
 
 
 ql_error_t ql_initialise(struct qaul **state);
-
 ql_error_t ql_shutdown(struct qaul *state);
 
 ql_error_t ql_create_user(struct qaul *state, const char *username, const char *passphrase);
@@ -24,23 +33,22 @@ ql_error_t ql_login(struct qaul *state, const char *username, const char *passph
 ql_error_t ql_logout(struct qaul *state, struct ql_auth_token *token);
 
 /** Get libary configuration */
-ql_error_t ql_get_configuration(struct qaul *state, const char *key, void **value);
+ql_error_t ql_get_configuration(struct qaul *state, struct ql_configuration *config);
 
 /** Set library configuration */
-ql_error_t ql_set_configuration(struct qaul *state, const char *key, void *value);
+ql_error_t ql_set_configuration(struct qaul *state, struct ql_configuration config);
 
-ql_error_t ql_get_users(struct qaul *state, struct ql_auth_token *token, struct ql_query *query, size_t *length, void **data);
+ql_error_t ql_get_users(struct qaul *state, struct ql_auth_token *token, struct ql_query *query, size_t *length, struct ql_user_list *list);
 ql_error_t ql_get_user_data(struct qaul *state, struct ql_auth_token *token, const char *key, void **value);
 ql_error_t ql_set_user_data(struct qaul *state, struct ql_auth_token *token, const char *key, void *value);
 
-ql_error_t ql_get_messages(struct qaul *state, struct ql_auth_token *token, struct ql_query *query, size_t *length, void **data);
+ql_error_t ql_get_messages(struct qaul *state, struct ql_auth_token *token, struct ql_query *query, size_t *length, struct ql_msg_list *list);
 ql_error_t ql_send_message(struct qaul *state, struct ql_auth_token *token, const char *recipient, const char *message);
 
-ql_error_t ql_get_all_files(struct qaul *state, struct ql_auth_token *token, struct ql_query *query, size_t *length, void **data);
-ql_error_t ql_get_file(struct qaul *state, struct ql_auth_token *token, const char *name);
+ql_error_t ql_get_files(struct qaul *state, struct ql_auth_token *token, struct ql_query *query, size_t *length, struct ql_file_list *list);
 ql_error_t ql_get_file_meta(struct qaul *state, struct ql_auth_token *token, const char *name, void **data);
 
-ql_error_t ql_add_file(struct qaul *state, struct ql_auth_token *token, const char *id);
+ql_error_t ql_add_file(struct qaul *state, struct ql_auth_token *token, const char *id, struct ql_file file);
 ql_error_t ql_delete_file(struct qaul *state, struct ql_auth_token *token, const char *id);
 ql_error_t ql_download_file(struct qaul *state, struct ql_auth_token *token, const char *id);
 
@@ -49,28 +57,6 @@ ql_error_t ql_end_call(struct qaul *state, const char *username);
 ql_error_t ql_accept_call(struct qaul *state);
 ql_error_t ql_reject_call(struct qaul *state);
 
-ql_error_t ql_get_network(struct qaul *state);
-ql_error_t ql_configure_network(struct qaul *state);
+ql_error_t ql_get_network(struct qaul *state, struct ql_network *network);
+ql_error_t ql_configure_network(struct qaul *state, struct ql_network network);
 ql_error_t ql_get_binaries(struct qaul *state);
-
-
-/*
- * === Open problems ===
- *
- * - Keep state in a struct (Provide state in functions)
- * - Define return values for actions (global codes)
- * - Gate actions with authentication tokens
- * - Figure out how to return data
- *   - qaul.net configuration
- *   - User configuration
- *   - Message lists
- *   - File data
- *   - File metadata
- *   - Network data
- *
- * Look at what data needs to be returned/ provided to functions. Either define
- * some structs to "transport" the data from the API or (if too complex) use
- * messagepack to do the same.
- *
- *
- */
