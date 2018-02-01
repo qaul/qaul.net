@@ -7,8 +7,9 @@
 #ifndef _QAUL_QLUSER_H
 #define _QAUL_QLUSER_H
 
+#include <qaul/mod/structures.h>
 #include <qaul/error.h>
-#include <zconf.h>
+#include <stdlib.h>
 
 
 /**
@@ -21,7 +22,7 @@
  * @param flags Provide some configuration flags. See docs for details
  * @return Status return codesu
  */
-int qluser_store_initialise(const char *db_path, const char *key_path, unsigned int flags);
+ql_error_t qluser_store_initialise(const char *db_path, const char *key_path, unsigned int flags);
 
 
 /**
@@ -33,7 +34,7 @@ int qluser_store_initialise(const char *db_path, const char *key_path, unsigned 
  * @param name  The username of this user
  * @return      Status return code
  */
-int qluser_store_adduser(const char *fp, const char *name);
+ql_error_t qluser_store_adduser(const char *fp, const char *name);
 
 
 /**
@@ -45,7 +46,7 @@ int qluser_store_adduser(const char *fp, const char *name);
  * @param fp    The fingerprint of the user to remove
  * @return      Status return code
  */
-int qluser_store_rmuser(const char *fp);
+ql_error_t qluser_store_rmuser(const char *fp);
 
 
 /**
@@ -57,20 +58,20 @@ int qluser_store_rmuser(const char *fp);
  * @param ip    IP data of the node involved
  * @return      Status return code
  */
-int qluser_store_add_ip(const char *fp, union olsr_ip_addr *ip);
+ql_error_t qluser_store_add_ip(const char *fp, union olsr_ip_addr *ip);
 
 
 /** Functions to fill up user data */
-int qluser_store_set_keytrust(const char *fp, enum qluser_trust_t trust);
-int qluser_store_set_msgtrust(const char *fp, int32_t trust);
-int qluser_store_set_filetrust(const char *fp, int32_t trust);
-int qluser_store_set_ltrust(const char *fp, int32_t trust);
+ql_error_t qluser_store_set_keytrust(const char *fp, enum qluser_trust_t trust);
+ql_error_t qluser_store_set_msgtrust(const char *fp, int32_t trust);
+ql_error_t qluser_store_set_filetrust(const char *fp, int32_t trust);
+ql_error_t qluser_store_set_ltrust(const char *fp, int32_t trust);
 
 
 /** Functions to search users with */
-int qluser_store_getby_fp(struct qluser_t *user, const char *fp);
-int qluser_store_getby_name(struct qluser_t *user, const char *name);
-int qluser_store_getby_ip(struct qluser_t *user, union olsr_ip_addr *ip);
+ql_error_t qluser_store_getby_fp(struct ql_user_external *user, const char *fp);
+ql_error_t qluser_store_getby_name(struct ql_user_external *user, const char *name);
+ql_error_t qluser_store_getby_ip(struct ql_user_external *user, union olsr_ip_addr *ip);
 
 
 /**
@@ -81,7 +82,7 @@ int qluser_store_getby_ip(struct qluser_t *user, union olsr_ip_addr *ip);
  * @param user The user to delete
  * @return
  */
-int qluser_store_rmuser_all(const char *fp);
+ql_error_t qluser_store_rmuser_all(const char *fp);
 
 
 /**
@@ -89,8 +90,54 @@ int qluser_store_rmuser_all(const char *fp);
  *
  * @return Status return code
  */
-int qluser_store_free();
+ql_error_t qluser_store_free();
 
+
+/**
+ * Create a new user for a certain type
+ *
+ * The user that is created is still slightly raw and doesn't
+ * contain all information that a user might want/ could have
+ * @return
+ */
+ql_error_t qluser_create(enum qluser_t t, const char *username, const char *fp, union ql_user **user);
+
+
+/**
+ * Syncs the changes for a specific user to disk forcibly
+ *
+ * @param user
+ * @return
+ */
+ql_error_t qluser_sync(union ql_user *user);
+
+
+/**
+ * Load all data from a user from disk/ and db, initialising a new user
+ *
+ * @param fp
+ * @param user
+ * @return
+ */
+ql_error_t qluser_load(const char *fp, union ql_user **user);
+
+
+/**
+ * Destroy all data from an associated user. This deletes known
+ * keys and database entries for this user.
+ *
+ * @param user
+ * @return
+ */
+ql_error_t qluser_destroy(union ql_user *user);
+
+
+/**
+ * Free all memory associated with a user
+ * @param user
+ * @return
+ */
+ql_error_t qluser_free(union ql_user *user);
 
 
 #endif //_QAUL_QLUSER_H

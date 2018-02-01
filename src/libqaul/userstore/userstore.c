@@ -4,6 +4,7 @@
  */
 
 #include <qaul/mod/userstore.h>
+#include <qaul/mod/structures.h>
 
 //#include <dirent.h>
 //#include <memory.h>
@@ -399,3 +400,25 @@
 //     /* Free user itself and then return */
 //     free(user);
 // }
+
+
+
+/****************** USER STRUCT FUNCTIONS ******************/
+
+
+ql_error_t qluser_create(enum qluser_t t, const char *username, const char *fp, union ql_user **user)
+{
+    union ql_user *u = calloc(sizeof(union ql_user), 1);
+    switch (t){
+        case INTERNAL:
+            u->intern = calloc(sizeof(struct ql_user_internal), 1);
+            break;
+        case EXTERNAL:
+            u->ext = calloc(sizeof(struct ql_user_internal), 1);
+            break;
+    }
+
+
+
+    return SUCCESS;
+}

@@ -81,6 +81,10 @@ typedef enum qluser_trust_t {
     VERIFIED = 2
 };
 
+typedef enum qluser_t {
+    INTERNAL, EXTERNAL
+};
+
 
 /**
  * A union that either represents an internal or an
