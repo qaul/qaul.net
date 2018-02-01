@@ -7,6 +7,7 @@
 #include <qaul/utils/strings.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 char *ql_net_ip_to_string(union ql_ip ip)
 {
@@ -14,7 +15,10 @@ char *ql_net_ip_to_string(union ql_ip ip)
     memset(buffer, 0, sizeof(char) * 16);
 
     for(int i = 0; i < 4; i++) {
-        strcat(buffer, itoa(ip.v4[i], 10));
+        char str[4];
+        memset(str, 0, sizeof(char) * 4);
+        sprintf(str, "%o", ip.v4[i]);
+        strcat(buffer, str);
     }
 
     return buffer;
