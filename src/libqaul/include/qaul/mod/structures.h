@@ -10,6 +10,7 @@
 /********************** GENERAL **********************/
 
 #include <qaul/error.h>
+#include <cuckoo.h>
 #include <glob.h>
 
 // A simple value that can be checked against to make
@@ -30,7 +31,7 @@ typedef enum ql_operation_t {
  * Represents a path on the filesystem
  */
 typedef struct ql_path {
-    enum qaul_os os;
+    enum qaul_os *os;
     char **snippets;
     size_t num, size;
 };
@@ -45,30 +46,87 @@ typedef struct ql_file_list {
     size_t num, size;
 };
 
+/********************** NETWORKING **********************/
+
+/**
+ * Represents an IP address on the network
+ */
+typedef union ql_ip {
+    short   v4[4];
+    short   v6[16];
+} ql_ip;
+
+/**
+ * Represents a node on the qaul network. Additionally to the
+ * ip-address of the node it also references all users that are
+ * present on the node
+ */
+typedef struct ql_node {
+    union ql_ip *ip;
+    cuckoo_map *ids;
+} ql_node;
 
 
 /********************** USER MANAGEMENT **********************/
 
+typedef enum qluser_trust_t {
+
+    /** No public key is known */
+    UNKNOWN = 0,
+
+    /** TOFU: Trust on first use - but not really */
+    PARTIAL = 1,
+
+    /** Manually verified and this user checks out */
+    VERIFIED = 2
+};
+
 
 /**
- * A structure that contains user information
+ * A union that either represents an internal or an
+ * external user, never both
  */
-typedef struct ql_user {
-    char *username;
-    char *fingerprint;
-    struct ql_keypair *keypair;
+typedef union ql_user {
+    struct ql_user_internal *intern;
+    struct ql_user_external *ext;
 } ql_user;
 
 
+typedef struct ql_user_internal {
+    char *username;
+    char *fingerprint;
+    struct ql_keypair *keypair;
+} ql_user_internal;
+
+
+typedef struct ql_user_external {
+    char *username;
+    char *fingerprint;
+    struct ql_pubkey *pubkey;
+    enum qluser_trust_t trust;
+} ql_user_external;
+
+
 /**
- * Describes a piece of data attached to a user
- *
- * TODO: Maybe move to qaul.h
+ * The userstore context that contains a bunch of tables
+ * that are used to map all sorts of data to other sorts
+ * of data.
  */
-typedef enum ql_userdata_t {
-    FINGERPRINT,
-    PUBKEY,
-} ql_userdata_t;
+typedef struct ql_userstore {
+    /* Map fp to user */
+    cuckoo_map *fp_map;
+
+    /* Map ip to user */
+    cuckoo_map *ip_map;
+
+    /* Map name to user */
+    cuckoo_map *n_map;
+
+    /* Map node to user */
+    cuckoo_map *node_map;
+
+    const struct ql_path *keys, *db;
+} ql_userstore;
 
 
 /********************** CRYPTO CORE **********************/
@@ -148,8 +206,8 @@ typedef struct ql_crypto_result {
  */
 typedef struct qlcry_session_ctx {
     unsigned short initialised;
-    struct ql_user *owner;
-    struct ql_user **participants;
+    struct ql_user_internal *owner;
+    struct ql_user_external **participants;
     size_t no_p, array_p;
     enum ql_cipher_t mode;
 

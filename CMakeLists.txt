@@ -145,9 +145,9 @@ if (NOT ${PORT} STREQUAL "ANDROID")
 endif ()
 
 # on linux always build the cli client
-# if (${PORT} STREQUAL "LINUX" AND NOT ${GUI} STREQUAL "CLI")
-#     add_subdirectory (src/client/cli)
-# endif ()
+if (${PORT} STREQUAL "LINUX" AND NOT ${GUI} STREQUAL "CLI")
+    add_subdirectory (src/client/cli)
+endif ()
 
 # FIXME: We can include the UI thingies again later
 # if (${GUI} STREQUAL "NATIVE")
