@@ -115,7 +115,7 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     include/qaul/mod/network.h
     include/qaul/mod/protocol.h
     include/qaul/mod/structures.h
-    include/qaul/mod/user_store.h
+        include/qaul/mod/userstore.h
     include/qaul/mod/voip.h
 
     ### Global API implementations ###

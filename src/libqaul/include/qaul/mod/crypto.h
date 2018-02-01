@@ -23,7 +23,8 @@
  * @param owner The user who initiates this session (home user)
  * @return
  */
-ql_error_t qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner);
+ql_error_t qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user_internal *owner);
+
 
 /**
  * Add a new participant to a session. Will throw an error if
@@ -35,7 +36,8 @@ ql_error_t qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user
  * @param user
  * @return
  */
-ql_error_t ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user);
+ql_error_t ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user_external *user);
+
 
 /**
  * Remove a participant from a session again.
@@ -47,7 +49,8 @@ ql_error_t ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user);
  * @param user
  * @return
  */
-ql_error_t ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user *user);
+ql_error_t ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user_external *user);
+
 
 /**
  * This function needs to be called before actual operations are possible
@@ -64,6 +67,7 @@ ql_error_t ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user *user);
  */
 ql_error_t ql_cry_finalise(qlcry_session_ctx *ctx);
 
+
 /**
  * Stop the current session
  *
@@ -71,6 +75,7 @@ ql_error_t ql_cry_finalise(qlcry_session_ctx *ctx);
  * @return
  */
 ql_error_t ql_cry_stop_session(qlcry_session_ctx *ctx);
+
 
 /**
  * Sign a piece of data from the owner. The result is stored
@@ -82,6 +87,7 @@ ql_error_t ql_cry_stop_session(qlcry_session_ctx *ctx);
  */
 ql_error_t ql_cry_sign_data(qlcry_session_ctx *ctx, const char *msg);
 
+
 /**
  * Veirfy a piece of data from a remote participant. The result is stored
  * in the context operation buffer
@@ -89,7 +95,8 @@ ql_error_t ql_cry_sign_data(qlcry_session_ctx *ctx, const char *msg);
  * @param ctx
  * @return
  */
-ql_error_t ql_cry_verify_data(qlcry_session_ctx *ctx, ql_user *user);
+ql_error_t ql_cry_verify_data(qlcry_session_ctx *ctx, ql_user_external *user);
+
 
 /**
  * Encrypt a piece of data for each participant in the session. The result is stored
@@ -100,6 +107,7 @@ ql_error_t ql_cry_verify_data(qlcry_session_ctx *ctx, ql_user *user);
  */
 ql_error_t ql_cry_encrypt_data(qlcry_session_ctx *ctx);
 
+
 /**
  * Decrypt a piece of data from any participant in the session. The result is stored
  * in the context operation buffer
@@ -108,6 +116,7 @@ ql_error_t ql_cry_encrypt_data(qlcry_session_ctx *ctx);
  * @return
  */
 ql_error_t ql_cry_decrypt_data(qlcry_session_ctx *ctx);
+
 
 /**
  * Query the length and type of the operation buffer.
@@ -127,6 +136,7 @@ ql_error_t ql_cry_decrypt_data(qlcry_session_ctx *ctx);
  * @return
  */
 ql_error_t ql_cry_query_buffer(qlcry_session_ctx *ctx, size_t *length, ql_operation_t *op);
+
 
 /**
  * Read out the session operational buffer. It is important to have metadata

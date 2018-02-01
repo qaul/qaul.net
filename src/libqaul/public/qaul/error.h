@@ -14,6 +14,16 @@ typedef enum ql_error_t {
     INVALID_PARAMETERS,             // The provided parameters were invalid
     INVALID_PAYLOAD,                // The provided payload was invalid
     INVALID_DATA,                   // The provided user data was invalid
+    INVALID_DATABASE,
+    INVALID_STORE,
+    INVALID_PATH,
+
+    INSERTION_FAILED,
+    REMOVAL_FAILED,
+
+    PUBKEY_EXISTS,
+    PUBKEY_NOT_FOUND,
+    NODE_NOT_FOUND,
 
     USER_ALREADY_EXISTS,
     USER_DOES_NOT_EXIST,

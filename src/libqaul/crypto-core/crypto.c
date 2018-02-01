@@ -19,7 +19,7 @@
 
 
 
-ql_error_t start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owner)
+ql_error_t start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user_internal *owner)
 {
     /* Check if a valid mode was provided */
     if(mode != (PK_RSA || ECDSA || AES256)) {
@@ -56,7 +56,7 @@ ql_error_t start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user *owne
     /* Initialise participants array */
     ctx->no_p = 0;
     ctx->array_p = 2;
-    ctx->participants = (ql_user**) calloc(sizeof(ql_user*), ctx->array_p);
+    ctx->participants = (ql_user**) calloc(sizeof(ql_user_external*), ctx->array_p);
     if(ctx->participants == NULL) return MEMORY_ALLOCATION_FAILED;
 
     /* Save the owner information */
@@ -104,7 +104,7 @@ ql_error_t ql_cry_finalise(qlcry_session_ctx *ctx)
 }
 
 
-ql_error_t ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user)
+ql_error_t ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user_external *user)
 {
     CHECK(ctx, INVALID_PARAMETERS)
     CHECK(user, INVALID_PARAMETERS)
@@ -120,12 +120,12 @@ ql_error_t ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user)
     }
 
     /* Check if the user keypair is compatible */
-    if(ctx->mode != user->keypair->type) {
+    if(ctx->mode != user->pubkey->type) {
         return INVALID_PARAMETERS;
     }
 
     /* Make sure we have space for participants */
-    ret = qlutils_resize_array((void**) &ctx->participants, sizeof(ql_user*), ctx->no_p, &ctx->array_p);
+    ret = qlutils_resize_array((void**) &ctx->participants, sizeof(ql_user_external*), ctx->no_p, &ctx->array_p);
     if(ret != SUCCESS) return ret;
 
     /* Now it's safe to add the participant */
@@ -134,27 +134,27 @@ ql_error_t ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user *user)
 }
 
 
-ql_error_t ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user *user)
+ql_error_t ql_cry_remove_participant(qlcry_session_ctx *ctx, ql_user_external *user)
 {
-//    CHECK(ctx, QLSTATUS_INVALID_PARAMETERS)
-//    CHECK(user, QLSTATUS_INVALID_PARAMETERS)
-//
-//    int ret = ql_cry_clear_buffer(ctx);
-//    if(ret) return ret;
-//
-//    /* Make sure the user isn't already participating */
-//    for(int i = 0; i < ctx->no_p; i++) {
-//        if(strcmp(ctx->participants[i]->fingerprint, user->fingerprint) == 0) {
-//
-//            ctx->participants[i] = NULL;
-//            ctx->no_p--;
-//
-//            qlutils_compact_array((void**) ctx->participants, ctx->array_p);
-//            return QLSTATUS_SUCCESS;
-//        }
-//    }
-//
-//    return QLSTATUS_INVALID_PARAMETERS;
+    CHECK(ctx, INVALID_PARAMETERS)
+    CHECK(user, INVALID_PARAMETERS)
+
+    int ret = ql_cry_clear_buffer(ctx);
+    if(ret) return ret;
+
+    /* Make sure the user isn't already participating */
+    for(int i = 0; i < ctx->no_p; i++) {
+        if(strcmp(ctx->participants[i]->fingerprint, user->fingerprint) == 0) {
+
+            ctx->participants[i] = NULL;
+            ctx->no_p--;
+
+            qlutils_compact_array((void**) ctx->participants, ctx->array_p);
+            return SUCCESS;
+        }
+    }
+
+    return INVALID_PARAMETERS;
 }
 
 
