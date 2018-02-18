@@ -1,1 +1,14 @@
-{{outlet}}
+<div local-class="input-area">
+  Filter <input />
+</div>
+
+<div local-class="contacts">
+  {{#each users as |user|}}
+    <div local-class="user">
+      <div local-class="user-name">{{user.name}}</div>
+      <div local-class="user-fingerprint">{{user.fingerprint}}</div>
+      <div local-class="user-trust">{{user.trust}}</div>
+      <div local-class="user-timestamp">{{user.timestamp}}</div>
+    </div>
+  {{/each}}
+</div>
