@@ -16,8 +16,7 @@
   padding:0;
 }
 
-/* FIXME: .active becomes _active_jp67dt */
-.nav-bar a.active {
+.nav-bar a.my-local-class:global(.active) {
   background-color:#3388cc;
 }
 .nav-bar a:hover {
