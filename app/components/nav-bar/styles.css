@@ -16,7 +16,7 @@
   padding:0;
 }
 
-.nav-bar a.my-local-class:global(.active) {
+.nav-bar a:global(.active) {
   background-color:#3388cc;
 }
 .nav-bar a:hover {
