@@ -10,10 +10,10 @@ body  {
 	background:#ffffff;
 	font-size:1.8rem;
 	font-family:sans-serif;
-	color:#999;
+	color:#666;
 	margin:0;
 	padding:0;
-	text-align: center;
+	text-align: left;
 }
 a {
 	text-decoration:none;
@@ -134,7 +134,7 @@ input {
     width:100%;
     padding:0.3em 0.1em;
     text-indent:5px;
-    border: 0.1rem solid #e1e3e3;
+    border: 0.1rem solid #dcdcdc;
     border-radius:0.3rem;
     font-size:1.6rem;
     font-family:inherit;
@@ -144,16 +144,19 @@ input {
     margin:0.5rem 0rem 1.0rem 0rem;
 }
 button {
+  color: #363636;
+  font-weight: bold;
   font-size:1.6rem;
   font-family:inherit;
   padding:0.3em 0.5em;
-  border: 0.1rem solid #50b7ff;
+  line-height: 2em;
+  border: 0.1rem solid #dcdcdc;
   border-radius: 1.5rem;
   width: 100%;
-  background-color: #e2f3ff;
+  background-color: #f6f6f6;
 }
 button:hover {
-  background-color:#b7e1ff;
+  background-color:#ececec;
 }
 /*
 .form_box {
