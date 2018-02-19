@@ -4,33 +4,41 @@
 }
 
 .messages {
-  padding:1rem;
+  margin:1rem;
+/*
   display: flex;
   flex-direction: column;
-  border-top: 1px solid black;
+*/
 }
 
 .message {
-  border-bottom: 1px solid black;
+  padding: 0.8rem;
+  border-top: 1px dotted #989898;
+/*
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1.5rem 3rem;
-
   grid-template-areas:
     "name time"
     "content content";
+*/
 }
 
 .message-name {
-  grid-area: name;
+  /*grid-area: name;*/
+  float:left;
+  font-weight: bold;
+  color:#333;
+  margin-bottom: 0.5em;
 }
 
 .message-time {
-  grid-area: time;
+  /*grid-area: time;*/
   text-align: right;
+  font-size: smaller;
 }
 
 .message-content {
-  padding-top: .2rem;
-  grid-area: content;
+  /*grid-area: content;*/
+  clear: both;
 }
