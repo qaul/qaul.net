@@ -26,6 +26,9 @@ img {
 	border:none;
 }
 
+
+
+
 /*
 .header {
 	background-color: #f3f3f3;
@@ -53,42 +56,6 @@ img {
 }
 */
 
-/* switch list */
-/*
-.switch {
-	margin: 0 1rem;
-}
-.switch .choice {
-	border-bottom-width: 0;
-}
-.switch .choice:first-child {
-	border-radius: 1.5rem 1.5rem 0 0;
-}
-.switch .choice:last-child {
-	border-radius: 0 0 1.5rem 1.5rem;
-	border-bottom-width: 0.1;
-}
-
-.button, .toggle, .switch {
-
-}
-
-.choice.button, .choice.toggle, .switch, .switch .choice:only-child {
-	border-radius: 1.5rem;
-	margin: 1rem;
-}
-.selected {
-	color:#50b7ff;
-}
-.choice.selected {
-	border-color: #50b7ff;
-	border-width: 0.1rem;
-}
-.choice.selected:hover {
-	color:#000;
-	border-color: #000;
-}
-*/
 
 /* page loader */
 /*

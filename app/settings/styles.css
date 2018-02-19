@@ -1,0 +1,70 @@
+:global(#settings) {
+    padding: 1rem;
+}
+
+.user-icon {
+    float:left;
+}
+.user-name {
+    float:left;
+    font-weight: bold;
+    font-size: 3rem;
+    margin-right: 1rem;
+}
+.edit {
+    /*float:right;*/
+    padding:1rem;
+}
+
+
+
+/* selection panel */
+.panel {
+	/*clear: both;*/
+    margin: 3rem 0;
+}
+.panel .item.name {
+    font-weight: normal;
+    font-size: smaller;
+    background-color: #e8e8e8;
+}
+.panel .item .icon {
+    float: right;
+}
+.panel .item {
+	font-weight: bold;
+    border: solid 0.1rem #dcdcdc;
+    border-bottom-width: 0;
+    display: block;
+    color: #333;
+    padding: 0.7rem 1.2rem;
+}
+.panel .item:first-child {
+	border-radius: 1.5rem 1.5rem 0 0;
+}
+.panel .item:last-child {
+	border-radius: 0 0 1.5rem 1.5rem;
+	border-bottom-width: 0.1rem;
+}
+.panel .item:only-child {
+	border-radius: 1.5rem;
+	margin: 1rem;
+}
+.panel a.item:hover {
+    text-decoration: none;
+    background-color: ;
+    
+}
+
+
+/*
+.item.selected {
+	color:#50b7ff;
+    border-color: #50b7ff;
+	border-width: 0.1rem;
+}
+.item.selected:hover {
+	color:#000;
+	border-color: #000;
+}
+*/

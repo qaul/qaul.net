@@ -1,21 +1,23 @@
+<div id="settings">
 <div local-class="user-info">
-  <div local-class="icon"></div>
-  User Name: ABC
+  <div local-class="user-icon"></div>
+  <div local-class="user-name">MyUsername</div>
   <div local-class="edit">
     {{fa-icon "edit"}}
   </div>
 </div>
 
-<div local-class="settings">
-    <div class="cluster">Configuration</div>
-    <a href="#" onclick="alert('Change Language')">Change Language</a>
-    <a href="#" onclick="alert('Share Internet')">Share Internet</a>
-    <a href="#" onclick="alert('Add Network Interface')">Add Network Interface</a>
+<div local-class="settings panel">
+    <div local-class="name item">Configuration</div>
+    <a local-class="item" href="#" onclick="alert('Change Language')">Change Language <span local-class="icon">{{fa-icon "cog"}}</span></a>
+    <a local-class="item" href="#" onclick="alert('Share Internet')">Share Internet<span local-class="icon">{{fa-icon "cog"}}</span></a>
+    <a local-class="item" href="#" onclick="alert('Add Network Interface')">Add Network Interface<span local-class="icon">{{fa-icon "cog"}}</span></a>
 </div>
 
-<div local-class="info">
-  <div class="cluster">Information</div>
-  <a href="#" onclick="alert('About qaul.net')">About qaul.net</a>
-  <a href="#" onclick="alert('How To')">How To</a>
-  <a href="#" onclick="alert('Show Network')">Show Network</a>
+<div local-class="info panel">
+  <div local-class="name item">Information</div>
+  <a local-class="item" href="#" onclick="alert('About qaul.net')">About qaul.net<span local-class="icon">{{fa-icon "info-circle"}}</span></a>
+  <a local-class="item" href="#" onclick="alert('How To')">How To<span local-class="icon">{{fa-icon "info-circle"}}</span></a>
+  <a local-class="item" href="#" onclick="alert('Show Network')">Show Network<span local-class="icon">{{fa-icon "info-circle"}}</span></a>
+</div>
 </div>
