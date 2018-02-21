@@ -159,3 +159,9 @@ select {
     -webkit-box-sizing: border-box;
 }
 */
+
+
+:global(.page) {
+    padding: 1rem;
+}
+

@@ -1,13 +1,15 @@
+<div class="page">
 <div local-class="input-area">
-  <button onclick={{action 'submit' newFile}}>Add File</button>
+  <button onclick="#">Add File</button>
 </div>
 
 <div local-class="files">
     <div local-class="file" onclick="alert('clicked');">
       <div local-class="file-type">{{fa-icon "image"}}</div>
       <div local-class="file-ui">
-          <a href="#" onclick="alert('close');">{{fa-icon "times-circle"}}</a>
-          <a href="#" onclick="alert('open menu');">{{fa-icon "eclipse-v"}}</a>
+          <a href="#" onclick="alert('share');" local-class="share">{{fa-icon "retweet"}}</a>
+          <a href="#" onclick="alert('close');" local-class="times">{{fa-icon "times-circle"}}</a>
+          <a href="#" onclick="alert('open menu');">{{fa-icon "ellipsis-v"}}</a>
           <div local-class="progress-bar">
             <div local-class="progress"></div>
           </div>
@@ -20,13 +22,14 @@
     <div local-class="file" onclick="alert('clicked global');">
       <div local-class="file-type">{{fa-icon "film"}}</div>
       <div local-class="file-ui">
-          <a href="#" onclick="alert('close');">{{fa-icon "times-circle"}}</a>
-          <a href="#" onclick="alert('open menu');">{{fa-icon "eclipse-v"}}</a>
+          <a href="#" onclick="alert('share');" local-class="share">{{fa-icon "retweet"}}</a>
+          <a href="#" onclick="alert('close');" local-class="times">{{fa-icon "times-circle"}}</a>
+          <a href="#" onclick="alert('open menu');">{{fa-icon "ellipsis-v"}}</a>
           <div local-class="progress-bar">
             <div local-class="progress"></div>
           </div>
       </div>
-      <div local-class="file-description">This is an image file</div>
+      <div local-class="file-description">Checkout my movie</div>
       <div local-class="file-time">4588992003</div>
       <div local-class="file-size">3988499399</div>
     </div>
@@ -34,13 +37,14 @@
     <div local-class="file" onclick="alert('clicked global');">
       <div local-class="file-type">{{fa-icon "file"}}</div>
       <div local-class="file-ui">
-          <a href="#" onclick="alert('close');">{{fa-icon "times-circle"}}</a>
-          <a href="#" onclick="alert('open menu');">{{fa-icon "eclipse-v"}}</a>
+          <a href="#" onclick="alert('share');" local-class="share">{{fa-icon "retweet"}}</a>
+          <a href="#" onclick="alert('close');" local-class="times">{{fa-icon "times-circle"}}</a>
+          <a href="#" onclick="alert('open menu');">{{fa-icon "ellipsis-v"}}</a>
           <div local-class="progress-bar">
             <div local-class="progress"></div>
           </div>
       </div>
-      <div local-class="file-description">This is an image file</div>
+      <div local-class="file-description">Some file</div>
       <div local-class="file-time">4588992003</div>
       <div local-class="file-size">3988499399</div>
     </div>
@@ -48,13 +52,14 @@
     <div local-class="file" onclick="alert('clicked global');">
       <div local-class="file-type">{{fa-icon "file-pdf"}}</div>
       <div local-class="file-ui">
-          <a href="#" onclick="alert('close');">{{fa-icon "times-circle"}}</a>
-          <a href="#" onclick="alert('open menu');">{{fa-icon "eclipse-v"}}</a>
+          <a href="#" onclick="alert('share');" local-class="share">{{fa-icon "retweet"}}</a>
+          <a href="#" onclick="alert('close');" local-class="times">{{fa-icon "times-circle"}}</a>
+          <a href="#" onclick="alert('open menu');">{{fa-icon "ellipsis-v"}}</a>
           <div local-class="progress-bar">
             <div local-class="progress"></div>
           </div>
       </div>
-      <div local-class="file-description">This is an image file</div>
+      <div local-class="file-description">My PDF</div>
       <div local-class="file-time">4588992003</div>
       <div local-class="file-size">3988499399</div>
     </div>
@@ -62,14 +67,16 @@
     <div local-class="file" onclick="alert('clicked global');">
       <div local-class="file-type">{{fa-icon "music"}}</div>
       <div local-class="file-ui">
-          <a href="#" onclick="alert('close');">{{fa-icon "times-circle"}}</a>
-          <a href="#" onclick="alert('open menu');">{{fa-icon "eclipse-v"}}</a>
+          <a href="#" onclick="alert('share');" local-class="share">{{fa-icon "retweet"}}</a>
+          <a href="#" onclick="alert('close');" local-class="times">{{fa-icon "times-circle"}}</a>
+          <a href="#" onclick="alert('open menu');">{{fa-icon "ellipsis-v"}}</a>
           <div local-class="progress-bar">
             <div local-class="progress"></div>
           </div>
       </div>
-      <div local-class="file-description">This is an image file</div>
+      <div local-class="file-description">Music file</div>
       <div local-class="file-time">4588992003</div>
       <div local-class="file-size">3988499399</div>
     </div>
+</div>
 </div>
