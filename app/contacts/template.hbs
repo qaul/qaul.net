@@ -1,14 +1,56 @@
+<div class="page">
+
 <div local-class="input-area">
-  Filter <input />
+    {{input value="search"}}
+</div>
+
+<div local-class="subnavigation">
+    <a>{{fa-icon "users"}}</a>
+    <a>{{fa-icon "history"}}</a>
+    <a>{{fa-icon "lock"}}</a>
+    <a>{{fa-icon "star"}}</a>
 </div>
 
 <div local-class="contacts">
+    <div local-class="user">
+        <div local-class="user-icon">
+            <div local-class="user-avatar">
+                <div local-class="user-trust">{{fa-icon "lock"}}</div>
+                <div local-class="user-online"></div>
+            </div>
+        </div>
+       <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
+        <div local-class="user-name">UserName</div>
+     </div>
+    <div local-class="user">
+        <div local-class="user-icon">
+            <div local-class="user-avatar">
+                <div local-class="user-trust">{{fa-icon "lock"}}</div>
+                <div local-class="user-online"></div>
+            </div>
+        </div>
+       <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
+        <div local-class="user-name">UserName</div>
+     </div>
+    <div local-class="user">
+        <div local-class="user-icon">
+            <div local-class="user-avatar">
+                <div local-class="user-trust">{{fa-icon "lock"}}</div>
+                <div local-class="user-online"></div>
+            </div>
+        </div>
+       <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
+        <div local-class="user-name">UserName</div>
+     </div>
+
   {{#each users as |user|}}
     <div local-class="user">
-      <div local-class="user-name">{{user.name}}</div>
-      <div local-class="user-fingerprint">{{user.fingerprint}}</div>
-      <div local-class="user-trust">{{user.trust}}</div>
-      <div local-class="user-timestamp">{{user.timestamp}}</div>
+        <div local-class="user-icon">{{user.icon}}</div>
+        <div local-class="user-trust">{{user.trust}}</div>
+        <div local-class="user-online">{{user.online}}</div>
+        <div local-class="user-name">{{user.name}}</div>
     </div>
   {{/each}}
+</div>
+
 </div>
