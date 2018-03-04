@@ -1537,14 +1537,11 @@ function config_interface_show()
 		cache: false, // needed for IE
 		dataType: "json",
 		success: function(data) {
-			$.mobile.changePage($("#page_loading"));
-			setTimeout(function(){loadingtimer();},500);
+			setTimeout(function(){loadingtimer();},1000);
 		}
 	}).error(function(){
 		$.mobile.changePage($("#page_pref"));
 	});
-	
-	return true;
 }
 
 function config_interface_load_data()
@@ -1813,8 +1810,7 @@ function config_internet_show()
 		cache: false, // needed for IE
 		dataType: "json",
 		success: function(data) {
-			$.mobile.changePage($("#page_loading"));
-			setTimeout(function(){loadingtimer();},500);
+			setTimeout(function(){loadingtimer();},1000);
 		}
 	}).error(function(){
 		$.mobile.changePage($("#page_pref"));
