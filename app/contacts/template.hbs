@@ -19,7 +19,7 @@
                 <div local-class="user-online"></div>
             </div>
         </div>
-       <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
+        <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
         <div local-class="user-name">UserName</div>
      </div>
     <div local-class="user">
@@ -29,7 +29,7 @@
                 <div local-class="user-online"></div>
             </div>
         </div>
-       <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
+        <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
         <div local-class="user-name">UserName</div>
      </div>
     <div local-class="user">
@@ -39,15 +39,19 @@
                 <div local-class="user-online"></div>
             </div>
         </div>
-       <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
+        <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
         <div local-class="user-name">UserName</div>
      </div>
 
   {{#each users as |user|}}
     <div local-class="user">
-        <div local-class="user-icon">{{user.icon}}</div>
-        <div local-class="user-trust">{{user.trust}}</div>
-        <div local-class="user-online">{{user.online}}</div>
+         <div local-class="user-icon">
+            <div local-class="user-avatar">
+                <div local-class="user-trust">{{fa-icon "lock"}}</div>
+                <div local-class="user-online"></div>
+            </div>
+        </div>
+       <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
         <div local-class="user-name">{{user.name}}</div>
     </div>
   {{/each}}
