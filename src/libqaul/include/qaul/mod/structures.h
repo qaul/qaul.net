@@ -26,6 +26,13 @@ typedef enum ql_operation_t {
 
 } ql_operation_t;
 
+/**
+ * Represents the core configuration in memory
+ */
+typedef struct ql_config {
+
+};
+
 
 /**
  * Represents a path on the filesystem
@@ -45,6 +52,20 @@ typedef struct ql_file_list {
     struct ql_file **files;
     size_t num, size;
 };
+
+/********************** MESSAGING **********************/
+
+typedef struct ql_message {
+    union ql_user *sender;
+    union ql_user **recipients;
+    size_t number_recipients;
+
+    unsigned char *content;
+    size_t content_length;
+
+    // TODO: Add more metadata fields
+};
+
 
 /********************** NETWORKING **********************/
 
