@@ -56,7 +56,7 @@ ql_error_t init_library()
 */
 }
 
-ql_error_t update_app();
+ql_error_t update_app()
 {
 	// update
 	// TODO: check if qaul.net app needs to updated
