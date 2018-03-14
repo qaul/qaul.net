@@ -26,6 +26,14 @@ typedef enum ql_operation_t {
 
 } ql_operation_t;
 
+
+/**
+ * Represents a time
+ */
+typedef struct ql_timestamp {
+    long time;
+};
+
 /**
  * Represents the core configuration in memory
  */
@@ -256,6 +264,58 @@ typedef struct qlauth_ctx {
 
 
 /********************** DATABASES **********************/
+
+typedef enum qldb_metadata_t {
+
+    /**
+     * Reference an external user from a type
+     *
+     * In this case the `metadata` field needs to be
+     * another query set specifying a possible user query
+     */
+    USER,
+
+    /** Reference a containing hashtag in a message or file */
+    HASHTAG,
+
+    /**
+     * Reference a specific date order, i.e. when $object was last seen
+     *
+     * In this case the `metadata` field needs to be
+     * another query set as a `time` type.
+     */
+    LAST_SEEN,
+};
+
+/**
+ * Describe a query for some data
+ */
+typedef union qldb_query_t {
+
+    /** Query based on some name restraint */
+    struct name {
+        char *full;
+        char *starts_with;
+        char *ends_with;
+    };
+
+    /** Query based on some time restraint */
+    struct time {
+        struct ql_timestamp *before;
+        struct ql_timestamp *after;
+        struct ql_timestamp *between[2];
+    };
+
+    /** Query via some metadata field */
+    struct metadata {
+
+        /** Metadata type */
+        enum qldb_metadata_t type;
+
+        /** Whatever data is connected to this query */
+        const void *data;
+    };
+};
 
 /**
  * Represents a database connection on a daemon

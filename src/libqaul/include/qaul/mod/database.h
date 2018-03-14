@@ -21,6 +21,21 @@
 ql_error_t qldb_initialise(struct qldb_session_ctx **ctx, const char *path);
 
 
+ql_error_t qldb_insert_user(struct qldb_session_ctx *ctx, union ql_user *user);
+ql_error_t qldb_insert_file(struct qldb_session_ctx *ctx, struct ql_file *file);
+ql_error_t qldb_insert_message(struct qldb_session_ctx *ctx, struct ql_message *msg);
+
+
+ql_error_t qldb_delete_user(struct qldb_session_ctx *ctx, union ql_user *user);
+ql_error_t qldb_delete_file(struct qldb_session_ctx *ctx, struct ql_file *file);
+ql_error_t qldb_delete_message(struct qldb_session_ctx *ctx, struct ql_message *msg);
+
+
+ql_error_t qldb_find_user(struct qldb_session_ctx *ctx, union ql_user **users);
+ql_error_t qldb_find_file(struct qldb_session_ctx *ctx, struct ql_file **files);
+ql_error_t qldb_find_message(struct qldb_session_ctx *ctx, struct ql_message *msgs);
+
+
 /**
  * Free (and drop) the database context.
  *
