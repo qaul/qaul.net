@@ -67,6 +67,8 @@ typedef struct ql_message {
 };
 
 
+
+
 /********************** NETWORKING **********************/
 
 /**
@@ -250,6 +252,41 @@ typedef struct qlcry_session_ctx {
 typedef struct qlauth_ctx {
 
 } qlauth_ctx;
+
+
+
+/********************** DATABASES **********************/
+
+
+/**
+ * Represents the "messages" table
+ */
+typedef struct qldb_table_messages {
+    // ...
+};
+
+/**
+ * Represents the "files" table
+ */
+typedef struct qldb_table_files {
+    // ...
+};
+
+/**
+ * Represents the "users" table
+ */
+typedef struct qldb_table_users {
+    // ...
+};
+
+/**
+ * Represents a database connection on a daemon
+ */
+typedef struct qldb_session_ctx {
+    struct qldb_table_messages *messages;
+    struct qldb_table_files *files;
+    struct qldb_table_users *users;
+};
 
 
 /********************** QAUL CORE **********************/

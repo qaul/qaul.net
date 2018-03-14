@@ -115,7 +115,8 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     include/qaul/mod/network.h
     include/qaul/mod/protocol.h
     include/qaul/mod/structures.h
-        include/qaul/mod/userstore.h
+    include/qaul/mod/messaging.h
+    include/qaul/mod/userstore.h
     include/qaul/mod/voip.h
 
     ### Global API implementations ###
@@ -144,11 +145,14 @@ ADD_LIBRARY (libqaul ${LIBTYPE}
     
     ### Network module ###
     network/network.c
-    
+
+    ### Messaging subsyste ###
+    messaging/messaging.c
+
     ### Protocol module ###
     protocol/protocol.c
-    protocol/messaging.c
-    protocol/files.c
+    protocol/messaging.c  # TODO: This could just be a stateless subsystem? (see above)
+    protocol/files.c      # TODO:   Same as above
     
     ### Userstore module ###
     userstore/userstore.c
