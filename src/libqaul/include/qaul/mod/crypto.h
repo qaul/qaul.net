@@ -36,7 +36,7 @@ ql_error_t qlcry_start_session(qlcry_session_ctx *ctx, ql_cipher_t mode, ql_user
  * @param user
  * @return
  */
-ql_error_t ql_cry_add_participant(qlcry_session_ctx *ctx, ql_user_external *user);
+ql_error_t ql_cry_add_participant(qlcry_session_ctx *ctx,This has  ql_user_external *user);
 
 
 /**
