@@ -102,30 +102,118 @@ ql_error_t qldb_delete_message(struct qldb_session_ctx *ctx, struct ql_message *
 /////////// USER QUERIES ///////////
 
 
+/**
+ * Return the number of users in the database.
+ *
+ * @param ctx
+ * @param count
+ * @return
+ */
 ql_error_t qldb_find_user_count(struct qldb_session_ctx *ctx, size_t *count);
 
+/**
+ * Return a number of users from the database.
+ *
+ * Depending on the `order` flag this returns the `count` first or last
+ * items from the database.
+ *
+ * @param ctx
+ * @param count
+ * @param order
+ * @param users
+ * @return
+ */
 ql_error_t qldb_find_user_index(struct qldb_session_ctx *ctx, size_t count, enum qldb_query_order order, union ql_user **users);
 
+/**
+ * Find a set of users in the database according to a query.
+ *
+ * @param ctx
+ * @param query
+ * @param qul
+ * @param order
+ * @param users
+ * @param count
+ * @return
+ */
 ql_error_t qldb_find_user(struct qldb_session_ctx *ctx, union qldb_query_t **query, size_t qul, enum qldb_query_order order, union ql_user **users, size_t *count);
 
 
 /////////// FILE QUERIES ///////////
 
 
+/**
+ * Return the number of files in the database.
+ *
+ * @param ctx
+ * @param count
+ * @return
+ */
 ql_error_t qldb_find_files_count(struct qldb_session_ctx *ctx, size_t *count);
 
+/**
+ * Return a number of files from the database.
+ *
+ * Depending on the `order` flag this returns the `count` first or last
+ * items from the database.
+ *
+ * @param ctx
+ * @param count
+ * @param order
+ * @param files
+ * @return
+ */
 ql_error_t qldb_find_files_index(struct qldb_session_ctx *ctx, size_t count, enum qldb_query_order order, struct ql_file **files);
 
+/**
+ * Find a set of files in the database according to a query.
+ * @param ctx
+ * @param query
+ * @param qul
+ * @param order
+ * @param files
+ * @param count
+ * @return
+ */
 ql_error_t qldb_find_file(struct qldb_session_ctx *ctx, union qldb_query_t **query, size_t qul, enum qldb_query_order order, struct ql_file **files, size_t *count);
 
 
 /////////// MESSAGE QUERIES ///////////
 
 
+/**
+ * Return the number of messages in the database.
+ *
+ * @param ctx
+ * @param count
+ * @return
+ */
 ql_error_t qldb_find_message_count(struct qldb_session_ctx *ctx, size_t *count);
 
+/**
+ * Return a number of messages from the database.
+ *
+ * Depending on the `order` flag this returns the `count` first or last
+ * items from the database.
+ *
+ * @param ctx
+ * @param count
+ * @param order
+ * @param messages
+ * @return
+ */
 ql_error_t qldb_find_message_index(struct qldb_session_ctx *ctx, size_t count, enum qldb_query_order order, struct ql_message **messages);
 
+/**
+ * Find a set of messages in the database according to a query.
+ * @param ctx
+ * @param query
+ * @param qul
+ * @param order
+ * @param messages
+ * @param count
+ * @return
+ */
 ql_error_t qldb_find_message(struct qldb_session_ctx *ctx, union qldb_query_t **query, size_t qul, enum qldb_query_order order, struct ql_message **messages, size_t *count);
 
 
