@@ -312,6 +312,12 @@ struct qldb_query_by_metadata {
     const void *data;
 };
 
+/**
+ * Specify which order the query result should be put into
+ */
+typedef enum qldb_query_order {
+    ASCENDING, DESCENDING
+};
 
 /**
  * Describe a query for some data
