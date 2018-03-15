@@ -303,7 +303,7 @@ struct qldb_query_by_time {
 };
 
 /** Query via some metadata field */
-struct qldb_query_by_metadata {
+struct qldb_query_by_relation {
 
     /** Metadata type */
     enum qldb_metadata_t type;
@@ -320,12 +320,19 @@ typedef enum qldb_query_order {
 };
 
 /**
+ * Key to differentiate between different query types
+ */
+typedef enum qldb_query_t {
+    NAME, TIME, RELATION
+};
+
+/**
  * Describe a query for some data
  */
-typedef union qldb_query_t {
+typedef union qldb_query {
     struct qldb_query_by_name *name;
     struct qldb_query_by_time *time;
-    struct qldb_query_by_metadata *metadata;
+    struct qldb_query_by_relation *relation;
 };
 
 /**
