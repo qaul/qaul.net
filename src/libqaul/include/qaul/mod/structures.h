@@ -287,34 +287,39 @@ typedef enum qldb_metadata_t {
     LAST_SEEN,
 };
 
+
+/** Query based on some name restraint */
+struct qldb_query_by_name {
+    char *full;
+    char *starts_with;
+    char *ends_with;
+};
+
+/** Query based on some time restraint */
+struct qldb_query_by_time {
+    struct ql_timestamp *before;
+    struct ql_timestamp *after;
+    struct ql_timestamp *between[2];
+};
+
+/** Query via some metadata field */
+struct qldb_query_by_metadata {
+
+    /** Metadata type */
+    enum qldb_metadata_t type;
+
+    /** Whatever data is connected to this query */
+    const void *data;
+};
+
+
 /**
  * Describe a query for some data
  */
 typedef union qldb_query_t {
-
-    /** Query based on some name restraint */
-    struct name {
-        char *full;
-        char *starts_with;
-        char *ends_with;
-    };
-
-    /** Query based on some time restraint */
-    struct time {
-        struct ql_timestamp *before;
-        struct ql_timestamp *after;
-        struct ql_timestamp *between[2];
-    };
-
-    /** Query via some metadata field */
-    struct metadata {
-
-        /** Metadata type */
-        enum qldb_metadata_t type;
-
-        /** Whatever data is connected to this query */
-        const void *data;
-    };
+    struct qldb_query_by_name *name;
+    struct qldb_query_by_time *time;
+    struct qldb_query_by_metadata *metadata;
 };
 
 /**
