@@ -136,7 +136,7 @@ ql_error_t qldb_find_user_index(struct qldb_session_ctx *ctx, size_t count, enum
  * @param count
  * @return
  */
-ql_error_t qldb_find_user(struct qldb_session_ctx *ctx, union qldb_query_t **query, size_t qul, enum qldb_query_order order, union ql_user **users, size_t *count);
+ql_error_t qldb_find_user(struct qldb_session_ctx *ctx, union qldb_query **query, size_t qul, enum qldb_query_order order, union ql_user **users, size_t *count);
 
 
 /////////// FILE QUERIES ///////////
@@ -175,7 +175,7 @@ ql_error_t qldb_find_files_index(struct qldb_session_ctx *ctx, size_t count, enu
  * @param count
  * @return
  */
-ql_error_t qldb_find_file(struct qldb_session_ctx *ctx, union qldb_query_t **query, size_t qul, enum qldb_query_order order, struct ql_file **files, size_t *count);
+ql_error_t qldb_find_file(struct qldb_session_ctx *ctx, union qldb_query **query, size_t qul, enum qldb_query_order order, struct ql_file **files, size_t *count);
 
 
 /////////// MESSAGE QUERIES ///////////
@@ -214,8 +214,31 @@ ql_error_t qldb_find_message_index(struct qldb_session_ctx *ctx, size_t count, e
  * @param count
  * @return
  */
-ql_error_t qldb_find_message(struct qldb_session_ctx *ctx, union qldb_query_t **query, size_t qul, enum qldb_query_order order, struct ql_message **messages, size_t *count);
+ql_error_t qldb_find_message(struct qldb_session_ctx *ctx, union qldb_query **query, size_t qul, enum qldb_query_order order, struct ql_message **messages, size_t *count);
 
+
+/////////// QUERY CREATION UTILITIES ///////////
+
+
+/**
+ * A utility function which allocates memory for a query.
+ *
+ * Provide a specific type to allocate the correct union-size. No
+ * further type-checking is done on a query!
+ *
+ * @param type      The field-type that is queried
+ * @param query     Returns a pointer to allocated memory
+ * @return
+ */
+ql_error_t qldb_query_alloc(enum qldb_query_t type, union qldb_query **query);
+
+/**
+ * Free all memory used up by a query
+ * @param type
+ * @param query
+ * @return
+ */
+ql_error_t qldb_query_free(enum qldb_query_t type, union qldb_query *query);
 
 
 #endif //QAUL_QLDB_H
