@@ -1,5 +1,7 @@
-export default function(server) {
+import {faker} from 'ember-cli-mirage';
 
+export default function(server) {
+  faker.seed(1337);
   /*
     Seed your development database using your factories.
     This data will not be loaded in your tests.
