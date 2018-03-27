@@ -25,4 +25,5 @@ export default function() {
   */
 
   this.get('/messages');
+  this.get('/files');
 }
