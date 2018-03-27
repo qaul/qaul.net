@@ -8,4 +8,5 @@ export default function(server) {
   // server.createList('post', 10);
   server.createList('message', 10);
   server.createList('file', 10);
+  server.createList('user', 10);
 }
