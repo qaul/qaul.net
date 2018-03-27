@@ -12,6 +12,7 @@
 </div>
 
 <div local-class="contacts">
+{{!--
     <div local-class="user">
         <div local-class="user-icon">
             <div local-class="user-avatar">
@@ -42,17 +43,21 @@
         <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
         <div local-class="user-name">UserName</div>
      </div>
-
-  {{#each users as |user|}}
+--}}
+  {{#each model as |user|}}
     <div local-class="user">
          <div local-class="user-icon">
             <div local-class="user-avatar">
-                <div local-class="user-trust">{{fa-icon "lock"}}</div>
-                <div local-class="user-online"></div>
+                {{#if user.trust}}
+                    <div local-class="user-trust">{{fa-icon "lock"}}</div>
+                {{/if}}
+                {{#if user.online}}
+                    <div local-class="user-online"></div>
+                {{/if}}
             </div>
         </div>
        <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
-        <div local-class="user-name">{{user.name}}</div>
+        <div local-class="user-name">{{user.username}}</div>
     </div>
   {{/each}}
 </div>
