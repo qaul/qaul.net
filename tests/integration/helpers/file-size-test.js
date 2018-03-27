@@ -6,12 +6,15 @@ moduleForComponent('file-size', 'helper:file-size', {
   integration: true
 });
 
-// Replace this with your real tests.
-test('it renders', function(assert) {
+test('it render KiB', function(assert) {
   this.set('inputValue', '1234');
-
   this.render(hbs`{{file-size inputValue}}`);
+  assert.equal(this.$().text().trim(), '1KiB');
+});
 
-  assert.equal(this.$().text().trim(), '1234');
+test('it render KiB', function(assert) {
+  this.set('inputValue', '2700877234');
+  this.render(hbs`{{file-size inputValue}}`);
+  assert.equal(this.$().text().trim(), '2GiB');
 });
 
