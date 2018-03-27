@@ -57,7 +57,9 @@
             </div>
         </div>
        <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
-        <div local-class="user-name">{{user.username}}</div>
+      <div local-class="user-name">
+        {{#link-to 'users.user' user}}{{user.username}}{{/link-to}}
+      </div>
     </div>
   {{/each}}
 </div>
