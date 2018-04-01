@@ -1,0 +1,13 @@
+[package]
+name = "qaul-rest"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+
+[dependencies]
+rocket = "*"
+rocket_codegen = "*"
+rocket_contrib = "*"
+
+serde = "*"
+serde_derive = "*"
+serde_json = "*"
