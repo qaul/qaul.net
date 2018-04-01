@@ -167,6 +167,7 @@ ql_error_t qldb_find_files_index(struct qldb_session_ctx *ctx, size_t count, enu
 
 /**
  * Find a set of files in the database according to a query.
+ *
  * @param ctx
  * @param query
  * @param qul
@@ -206,6 +207,7 @@ ql_error_t qldb_find_message_index(struct qldb_session_ctx *ctx, size_t count, e
 
 /**
  * Find a set of messages in the database according to a query.
+ *
  * @param ctx
  * @param query
  * @param qul
@@ -234,6 +236,7 @@ ql_error_t qldb_query_alloc(enum qldb_query_t type, union qldb_query **query);
 
 /**
  * Free all memory used up by a query
+ *
  * @param type
  * @param query
  * @return
