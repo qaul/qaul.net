@@ -6,6 +6,13 @@
 //! easier to use.
 //!
 
+/// A dummy struct
+#[derive(Default, Serialize, Deserialize)]
+pub(crate) struct Dummy {
+    pub name: String,
+    pub awesome: bool,
+}
+
 /// A user inside qaul.net
 ///
 /// Not all information has to be provided in a transaction.
