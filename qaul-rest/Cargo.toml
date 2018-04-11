@@ -11,3 +11,5 @@ rocket_contrib = "*"
 serde = "*"
 serde_derive = "*"
 serde_json = "*"
+
+# libqaul = { git = "https://github.com/qaul/libqaul-rust" }
