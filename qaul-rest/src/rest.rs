@@ -238,15 +238,15 @@ fn index() -> Result<Response<'static>, Status> {
             <li> POST /users/&lt;id&gt;/logout - De-authenticate as user (hand-in token)</li>
             <li> GET /messages - Get all messages</li>
             <li> GET /messges/&lt;id&gt; - Get messages for user</li>
-            <li> PUT /messages/&lt;user&gt;> - Send message to user</li>
+            <li> PUT /messages/&lt;user&gt; - Send message to user</li>
             <li> PUT /messages - Send message to all</li>
             <li> GET /files - Get all known files</li>
             <li> GET /files/&lt;id&gt; - Get file with id</li>
             <li> GET /file/&lt;id&gt;/status - Get file status with id</li>
             <li> PUT /file - Add a new file</li>
-            <li> PUT /file/&lt;gr&gt;up> - Add a new file to specific group</li>
-            <li> PUT /voip/&lt;user&gt;> - Voip stuff</li>
-            <li> DELETE /voip/&lt;user&gt;> - Voip stuff</li>
+            <li> PUT /file/&lt;group&gt; - Add a new file to specific group</li>
+            <li> PUT /voip/&lt;user&gt; - Voip stuff</li>
+            <li> DELETE /voip/&lt;user&gt; - Voip stuff</li>
             <li> POST /voip/accept - Voip stuff</li>
             <li> POST /voip/reject - Voip stuff</li>
             <li> GET /interfaces - </li>
