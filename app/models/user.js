@@ -1,10 +1,18 @@
 import DS from 'ember-data';
 import { computed, get } from '@ember/object';
 import moment from 'moment';
+import Owner from './user';
 
-export default DS.Model.extend({
+export default Owner.extend({
+  fpToken: DS.attr('string'),
   username: DS.attr('string'),
-  trust: DS.attr('boolean'),
+  bio: DS.attr('string'),
+  trust: DS.attr('number'),
+  starred: DS.attr('boolean'),
+  // age or birthdate?
+  // avatar and token link?
+  gender: DS.attr('string'),
+
   lastSeen: DS.attr('date'),
 
   online: computed('lastSeen', {
