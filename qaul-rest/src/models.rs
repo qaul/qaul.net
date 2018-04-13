@@ -42,6 +42,8 @@ pub(crate) struct User {
     gender: Option<String>,
     /// An optional picture avatar
     avatar: Option<Vec<u8>>,
+    /// When was the user last seen
+    last_seen: Option<String>,
 }
 
 /// A wrapper around multiple users to emulate groups
