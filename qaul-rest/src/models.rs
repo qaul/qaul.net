@@ -52,8 +52,8 @@ pub(crate) struct User {
 pub(crate) struct Group {
     /// Group ID in the databsse
     id: u64,
-    /// Members in the group by their database ID
-    members: Vec<u64>,
+    /// Users that are members in this group
+    users: Vec<u64>,
 }
 
 /// A specifier if an owner type is a [[User]] or [[Group]]
