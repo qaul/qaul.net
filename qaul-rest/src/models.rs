@@ -123,7 +123,7 @@ pub(crate) struct File {
 pub(crate) struct Interface {
     id: u64,
     name: String,
-    shared: (bool, u64),
+    shared: (bool, Option<u64>),
 }
 
 /// Represents a node on the qaul network
