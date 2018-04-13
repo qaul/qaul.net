@@ -120,7 +120,7 @@ pub(crate) struct File {
 
 /// Describe a network interface available on the device
 #[derive(Default, Serialize, Deserialize)]
-pub(crate) struct NetInterface {
+pub(crate) struct Interface {
     id: u64,
     name: String,
     shared: (bool, u64),
@@ -142,7 +142,7 @@ pub(crate) struct NetworkNode {
 
 /// Represents the known network graph.
 #[derive(Default, Serialize, Deserialize)]
-pub(crate) struct NtworkGraph {
+pub(crate) struct NetowrkGraph {
     /// All nodes in the backend
     nodes: Vec<u64>,
     /// All connections between nodes
