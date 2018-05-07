@@ -8,7 +8,8 @@ module.exports = function(deployTarget) {
     gzip: {}
   };
 
-  ENV.build.outputPath = 'deploy';
+
+  ENV.build.outputPath = process.env.DEPLOY_PATH || 'deploy';
   ENV.gzip.filePattern = '\*\*/\*.{js,css,json,ico,html,svg,otf,eot,ttf,woff,woff2}';
   ENV.gzip.keep = 'true';
 
