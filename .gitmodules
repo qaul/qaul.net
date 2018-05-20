@@ -6,4 +6,4 @@
 	url = https://github.com/cesanta/mongoose.git
 [submodule "third_party/libcuckoo"]
 	path = third_party/libcuckoo
-	url = https://github.com/spacekookie/libcuckoo
+	url = https://github.com/qaul/libcuckoo.git
