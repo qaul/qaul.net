@@ -1,0 +1,8 @@
+[package]
+name = "qaul-routing-core"
+description = "A delay tolerant userspace routing protocol for qaul.net"
+license = "GPL-3.0"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+
+[dependencies]
