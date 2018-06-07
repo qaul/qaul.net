@@ -38,4 +38,5 @@ pub enum PayloadType {
     Text { encrypted: bool, text: String },
     UserList { length: u64, list: Vec<Fingerprint> },
     FileList { length: u64, list: Vec<FileMeta> },
+    External {},
 }
