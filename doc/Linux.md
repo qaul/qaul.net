@@ -7,6 +7,8 @@ Linux distro. It has been tested on the following distributions:
 * Debian
 * Ubuntu
 * Linux Mint
+* Arch Linux
+
 
 
 Prerequesites
@@ -18,7 +20,13 @@ Install needed software to download and build qaul.net from Source.
 	libgtk-3-dev  libwebkitgtk-3.0-dev libdbus-1-dev autotools-dev \
 	libasound2-dev bison flex automake
 
-
+For Arch Linux, run the following commands.
+	
+	sudo pacman -S autoconf automake git cmake pkg-config
+	gtk3 dbus bison flex dbus
+	
+	pacaur -S webkitgtk
+	
 
 Download and Build
 ------------------
