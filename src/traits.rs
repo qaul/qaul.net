@@ -3,7 +3,7 @@
 use serde::{de::DeserializeOwned, Serialize};
 use std::borrow::Cow;
 
-use ::error::RouteError;
+use ::errors::RouteError;
 
 /// A common endpoint trait that is used to emulate
 /// receivers on the network
@@ -23,13 +23,16 @@ pub trait Endpoint {
 pub trait Router {
     /// Initialise the router
     ///
-    /// It takes an Endpoint which will represent itself in the network. If
-    /// a `None` type is provided it is possible to implement an anonymous
+    /// It takes a list of Endpoint which will represent itself in the network. Different
+    /// endpoint types can co-exist, meaning that a router can connect between different
+    /// backend backplanes, to allow transparent routing.
+    /// 
+    /// If a `None` type is provided it is possible to implement an anonymous
     /// (transparent) router as well. Although that feature might not be supported
     /// by all implementations (thus, see `Result<Self, RouteError>`)
-    fn initialise<S: Router>(with: Option<impl Endpoint>) -> Result<S, RouteError>;
+    fn initialise<S: Router>(with: Option<Vec<impl Endpoint>>) -> Result<S, RouteError>;
 
-    /// Broadcast some data
+    /// Broadcast some data into the network
     fn broadcast(&mut self, data: impl Serialize) -> Result<(), RouteError>;
 
     /// Send a message to a specific endpoint (client)
