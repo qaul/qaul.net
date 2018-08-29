@@ -153,7 +153,8 @@ void Qaullib_Exit(void) //destructor
 	else printf("ipc not connected\n");
 
 	// close web server
-	Ql_Www_ServerStop(&ql_webserver_instance);
+	// this function segfaults under OSX >= 12.0
+	//Ql_Www_ServerStop(&ql_webserver_instance);
 
 	// clean up qaullib
 	sqlite3_close(db);
