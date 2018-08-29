@@ -109,12 +109,12 @@
 {
 	NSLog(@"Application should Terminate Event");
 	
-	// TODO: stop timers
+	// stop timers
+	[self stopTimer]
     
 	// stop library
-	// TODO: library crashes when calling Qaullib_Exit()
-	//Qaullib_Exit();
-	//usleep(50000);
+	Qaullib_Exit();
+	usleep(50000);
 	
 	// stop olsrd 
 	if(![qaulConfigWifi stopOlsrd]) 
