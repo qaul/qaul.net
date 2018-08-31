@@ -110,7 +110,7 @@
 	NSLog(@"Application should Terminate Event");
 	
 	// stop timers
-	[self stopTimer]
+	[self stopTimer];
     
 	// stop library
 	Qaullib_Exit();
