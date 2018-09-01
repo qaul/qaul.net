@@ -213,6 +213,7 @@ void Ql_WwwSetLocale(struct mg_connection *conn, int event, void *event_data)
 
 	// Fetch locale
 	mg_get_http_var(&hm->body, "l", qaul_locale, sizeof(qaul_locale));
+	memcpy(&qaul_locale[MAX_LOCALE_LEN], "\0", 1);
 
 	printf("save locale: %s\n", qaul_locale);
 	Qaullib_SetLocale(qaul_locale);

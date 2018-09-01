@@ -181,7 +181,7 @@ void Qaullib_SetConfDownloadFolder(const char *path);
 /**
  * set @a locale UI language
  */
-void Qaullib_SetLocale(const char* locale);
+void Qaullib_SetLocale(char* locale);
 
 /**
  * get configuration for @key from DB

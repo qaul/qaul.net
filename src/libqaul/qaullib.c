@@ -244,10 +244,13 @@ const char* Qaullib_GetLocale(void)
 	return "";
 }
 
-void Qaullib_SetLocale(const char* locale)
+void Qaullib_SetLocale(char* locale)
 {
-	Qaullib_DbSetConfigValue("locale", locale);
-	strcpy(qaul_locale, locale);
+	char namebuf[MAX_LOCALE_LEN*2 +1];
+
+	Qaullib_StringDbProtect(namebuf, locale, sizeof(namebuf));
+	Qaullib_DbSetConfigValue("locale", namebuf);
+	//strcpy(qaul_locale, locale);
 	qaul_locale_set = 1;
 }
 
