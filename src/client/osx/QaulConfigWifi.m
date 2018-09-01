@@ -32,6 +32,16 @@
 #else
 #define IS_OSX_10_9_OR_HIGHER 1
 #endif
+
+// in newer Systems NSAppKitVersionNumber is only statically defined
+#ifndef NSAppKitVersionNumber10_0
+#define IS_OSX_10_5_OR_HIGHER 1
+#define IS_OSX_10_6_OR_HIGHER 1
+#define IS_OSX_10_7_OR_HIGHER 1
+#define IS_OSX_10_7_OR_HIGHER 1
+#define IS_OSX_10_9_OR_HIGHER 1
+#endif
+
 // ----------------------------------------------
 
 #ifdef IS_OSX_10_9_OR_HIGHER
