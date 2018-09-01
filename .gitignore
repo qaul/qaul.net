@@ -41,3 +41,7 @@ src/olsrd-plugin/olsrd_qaul.so*
 
 # IDE Settings
 /.project
+.vscode
+
+# OSX
+.DS_Store
