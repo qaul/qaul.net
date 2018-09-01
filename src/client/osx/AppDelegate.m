@@ -130,12 +130,23 @@
 	// stop wifi
     if (qaulWifiInterfaceConfigurable)
     {
-        if(![qaulConfigWifi stopAirport:qaulWifiInterface])
+        // stop airport
+		if(![qaulConfigWifi stopAirport:qaulWifiInterface])
             NSLog(@"airport not stopped");
     }
 	
 	// change location
 	[qaulConfigWifi deleteNetworkProfile];
+
+	// start airport
+	if (qaulWifiInterfaceConfigurable) {
+        BOOL success = [qaulConfigWifi startAirport:qaulWifiInterface];
+        if(success)
+            NSLog(@"startAirport success!!");
+        else
+            NSLog(@"startAirport no success");
+    }
+
 	usleep(50000);
 }
 
@@ -353,7 +364,7 @@
 		// check if the Service is enabled
 		if(!qaulServiceConfigured)
 		{
-			NSLog(@"Service not activated!");
+			//NSLog(@"Service not activated!");
 			
 			// TODO: create deleted Services
 			// create it
@@ -370,16 +381,17 @@
 	// switch airport on
 	if(qaulStarted == 23)
 	{
-		NSLog(@"switch airport on");
+		// TODO: check wifi interface if connected or not
+		//NSLog(@"switch airport on");
 		// switch on airport via cli
-        if (qaulWifiInterfaceConfigurable) {
-            success = [qaulConfigWifi startAirport:qaulWifiInterface];
-            if(success)
-                NSLog(@"startAirport success!!");
-            else
-                NSLog(@"startAirport no success");
-        }
-		
+        //if (qaulWifiInterfaceConfigurable) {
+        //    success = [qaulConfigWifi startAirport:qaulWifiInterface];
+        //    if(success)
+        //        NSLog(@"startAirport success!!");
+        //    else
+        //        NSLog(@"startAirport no success");
+        //}
+
 		qaulStarted = 24;
 	}
 	
