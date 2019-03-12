@@ -1,18 +1,25 @@
-
-set(MbedTlsCMakeArgs
-	-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-	-DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/external/mbedtls
-	-DENABLE_PROGRAMS=OFF
+set(CommonCMakeArgs
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+    -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
+    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 
 if (${PORT} STREQUAL "ANDROID")
-set(MbedTlsCMakeArgs
-	${MbedTlsCMakeArgs}
-	-DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake
-	-DANDROID_TOOLCHAIN=gcc
-	-DANDROID_ARM_MODE=arm
-)
+    set(CommonCMakeArgs
+        ${CommonCMakeArgs}
+        -DANDROID_TOOLCHAIN=${ANDROID_TOOLCHAIN}
+        -DANDROID_ARM_MODE=${ANDROID_ARM_MODE}
+        -DANDROID_ABI=${ANDROID_ABI}
+    )
 endif ()
+
+set(MbedTlsCMakeArgs
+    ${CommonCMakeArgs}
+	-DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/external/mbedtls
+	-DENABLE_PROGRAMS=OFF
+
+)
 
 if (${PORT} STREQUAL "WINDOWS")
 set(MbedTlsCMakeArgs
@@ -27,12 +34,33 @@ ExternalProject_Add(mbedtls
 	PREFIX ${CMAKE_CURRENT_BINARY_DIR}/mbedtls
 	DOWNLOAD_COMMAND git submodule update
 	DOWNLOAD_DIR ${PROJECT_SOURCE_DIR}
-	SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/mbedtls
+	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls
 	BINARY_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-build
 	STAMP_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-stamp
 	TMP_DIR ${PROJECT_BINARY_DIR}/external/mbedtls-tmp
 	INSTALL_DIR ${PROJECT_BINARY_DIR}/external
+	BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/external/mbedtls/lib/libmbedcrypto.a
 	CMAKE_ARGS ${MbedTlsCMakeArgs}
+)
+
+set(LibCuckooCMakeArgs
+    ${CommonCMakeArgs}
+	-DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/external/libcuckoo
+)
+
+ExternalProject_Add(libcuckoo
+	#UPDATE_DISCONNECTED 1
+	GIT_SUBMODULES libcuckoo
+	PREFIX ${CMAKE_CURRENT_BINARY_DIR}/libcuckoo
+	DOWNLOAD_COMMAND git submodule update
+	DOWNLOAD_DIR ${PROJECT_SOURCE_DIR}
+	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libcuckoo
+	BINARY_DIR ${PROJECT_BINARY_DIR}/external/libcuckoo-build
+	STAMP_DIR ${PROJECT_BINARY_DIR}/external/libcuckoo-stamp
+	TMP_DIR ${PROJECT_BINARY_DIR}/external/libcuckoo-tmp
+	INSTALL_DIR ${PROJECT_BINARY_DIR}/external
+	BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/external/libcuckoo/lib/libcuckoo.a
+	CMAKE_ARGS ${LibCuckooCMakeArgs}
 )
 
 set (ARCHIVE_DIR ${PROJECT_SOURCE_DIR}/archives)

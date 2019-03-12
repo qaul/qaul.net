@@ -19,8 +19,9 @@ target_include_directories(qauld PRIVATE
 
 target_link_libraries(qauld
 	${DBUS1_LIBRARIES}
-    pthread
-    libqaul
+	pthread
+	libqaulutils
+	libqaul
 )
 
 install (TARGETS qauld DESTINATION bin)

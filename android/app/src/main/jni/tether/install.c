@@ -35,11 +35,11 @@
 #include "cutils/misc.h"
 #include "cutils/properties.h"
 #include <sys/system_properties.h>
-#include "edify/expr.h"
+#include "../edify/expr.h"
 #include "tether.h"
 
 //#include <hardware_legacy/wifi.h>
-#include "hardware_legacy/hardware_legacy_stub.h"
+#include "../hardware_legacy/hardware_legacy_stub.h"
 
 #define init_module(mod, len, opts) syscall(__NR_init_module, mod, len, opts)
 #define delete_module(mod, flags) syscall(__NR_delete_module, mod, flags)
@@ -138,8 +138,8 @@ char* ModuleLoadedFn(const char* name, State* state, int argc, Expr* argv[]) {
     char buffer[READ_BUF_SIZE];
     char mname[READ_BUF_SIZE];
 
-    if (! (modules = fopen("/proc/modules", "r")) ) {
-      fprintf(stderr, "Can't open /proc/modules for read \n");
+    if (! (modules = fopen("/proc/mod", "r")) ) {
+      fprintf(stderr, "Can't open /proc/mod for read \n");
       return strdup("");
     }
 

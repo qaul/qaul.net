@@ -1,6 +1,5 @@
 
-if (VOIP STREQUAL NO)
-else ()
+if (VOIP)
 ExternalProject_Add(pjsip
     DEPENDS dl_pjsip
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/pjsip
@@ -13,6 +12,7 @@ ExternalProject_Add(pjsip
 )
 endif()
 
+if (PORTFWD)
 ExternalProject_Add(portfwd
     DEPENDS dl_portfwd
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/portfwd
@@ -23,7 +23,9 @@ ExternalProject_Add(portfwd
     BUILD_COMMAND make
     INSTALL_COMMAND ""
 )
+endif()
 
+if (NOT USE_SYSTEM_OLSRD)
 ExternalProject_Add(olsr
     DEPENDS dl_olsr
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/olsr
@@ -33,3 +35,4 @@ ExternalProject_Add(olsr
     BUILD_COMMAND make DEBUG=0 olsrd libs
     INSTALL_COMMAND ""
 )
+endif()

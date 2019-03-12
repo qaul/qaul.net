@@ -113,8 +113,9 @@
 	[self stopTimer];
     
 	// stop library
-	Qaullib_Exit();
-	usleep(50000);
+	// TODO: library crashes when calling Qaullib_Exit()
+	//Qaullib_Exit();
+	//usleep(50000);
 	
 	// stop olsrd 
 	if(![qaulConfigWifi stopOlsrd]) 

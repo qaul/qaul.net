@@ -21,7 +21,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "edify/expr.h"
+#include "../edify/expr.h"
 #include "tether.h"
 #include "install.h"
 

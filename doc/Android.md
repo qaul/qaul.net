@@ -52,23 +52,17 @@ Add the Android platform-tools to your system PATH to use adb from CLI.
 	export PATH="$PATH:$HOME/Android/Sdk/platform-tools
 
 
-To build qaul.net one needs the NDK version NDK 13b. NDK 13b can be 
-downloaded from the Android web site: 
+To build socat one needs an NDK which is not newer than NDK 13b. NDK 13b 
+can be downloaded from this source: 
 https://developer.android.com/ndk/downloads/older_releases.html
 
-Ubuntu 14.04 only: 
-Ubuntu runs a CMake version which is smaller than 3.6.0. For the build to 
-succeed one needs to change one line in the file 
-$NDK_HOME/build/cmake/android.toolchain.cmake in the NDK 13b.
-Change the following line in the file 
-$NDK_HOME/build/cmake/android.toolchain.cmake
+When building with this NDK, the folder 'sysroot' needs to be set manually
+as a symbolic link to the correct platform target
 
-	cmake_minimum_required(VERSION 3.6.0)
+	# open a terminal and cd into your NDK direktory.
+	# create a symbolic link as sysroot to your platform
+	ln -s platforms/android-9/arch-arm sysroot
 
-change the line into
-
-	#cmake_minimum_required(VERSION 3.6.0)
-	cmake_minimum_required(VERSION 3.5.0)
 
 
 Get the source
@@ -108,7 +102,8 @@ Build
 	## path under Linux is:
 	##   SDK_ROOT: $HOME/Android/Sdk
 	##   NDK_ROOT: $HOME/Android/Sdk/ndk-bundle
-	cmake .. -DPORT=ANDROID -DSDK_ROOT=/absolute/path/to/sdk -DNDK_ROOT=/absolute/path/to/ndk -DEXTRALIB_PATH=/absolute/path/to/android_extra_lib -DANDROID_EABI="4.9"
+	export ANDROID_HOME=/absolute/path/to/sdk
+	cmake . -DPORT=ANDROID -DSDK_ROOT=/absolute/path/to/sdk -DNDK_ROOT=/absolute/path/to/ndk -DEXTRALIB_PATH=/absolute/path/to/android_extra_lib -DANDROID_EABI="4.9"
 	make
 
 

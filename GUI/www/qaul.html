@@ -78,6 +78,8 @@
 			<form action="chat" method="post" id="name_form">
 				<label for="name_name" class="i18n">Choose a user name</label>
 				<input type="text" name="n" id="name_name" class="required nospaces userlen"/>
+				<label for="name_name" class="i18n">And passphrase to secure your keys</label>
+				<input type="password" name="p" id="name_passwd" class="required nospaces"/>
 				<input class="submit i18n" type="submit" value="Save" id="name_submit"/>
 			</form>
 		</p>
@@ -329,6 +331,19 @@
 	</div>
 </div>
 
+<div data-role="page" id="page_userprofile" data-theme="a">
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page_chat" onclick="javascript:get_msgs();" data-transition="none" class="i_chat">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_users" onclick="javascript:get_users();" data-theme="b" data-transition="none" class="i_users">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_file" onclick="javascript:file_update();" data-transition="none" class="i_filesharing">&nbsp;<span class="ui-li-count"></span></a></li>
+				<li><a href="#page_pref" data-transition="none" class="i_prefs">&nbsp;<span class="ui-li-count"></span></a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+
 <div data-role="page" id="page_users" data-theme="a">
 	<div data-role="content" >
 		<ul data-role="listview" data-inset="true" id="favorites">
@@ -353,8 +368,10 @@
 
 <div data-role="page" id="page_pref" data-theme="a">
 	<div data-role="content" >
-		<p class="c_quit"><a href="javascript:quit_qaul()" data-role="button" class="i18n">Quit qaul.net</a></p>
 		<h2 id="page_pref_name">User</h2>
+		<ul data-role="listview" data-inset="true" id="personalities">
+			<li data-role="list-divider" class="i18n">Personalities</li>
+		</ul>
 		<ul data-role="listview" data-inset="true">
 			<li data-role="list-divider" class="i18n">Configuration</li>
 			<li><a href="#page_config_locale" data-transition="none" class="i18n">Change Language</a></li>
@@ -371,6 +388,7 @@
 			<li data-icon="info"><a href="javascript:qaul_openurl('info/license.html')" data-transition="none" class="i18n">License</a></li>
 			<li data-icon="info"><a href="javascript:qaul_openurl('network.html')" data-transition="none" class="i18n">Show Network</a></li>
 		</ul>
+		<p class="c_quit"><a href="javascript:quit_qaul()" data-role="button" class="i18n">Quit qaul.net</a></p>
 	</div>
 	<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="ui-body-d">
 		<div data-role="navbar">

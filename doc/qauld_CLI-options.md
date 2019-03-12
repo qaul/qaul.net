@@ -7,7 +7,6 @@ qauld has some CLI options to configure qaul.net from the command line.
 Options
 -------
 
-```
 --ip <IPv4>, -i <IPv4>
   Set the device IP address version 4. Usage example: -i 10.111.209.12
 --username <USERNAME>, -u <USERNAME>
@@ -31,7 +30,7 @@ Options
   storage size is reached, qaul will start deleting old and not often 
   used files from storage to make space for newly shared files.
   Usage example (10GB): -s 10000000000
-```
+  
 
 minimal setup for first start
 -----------------------------

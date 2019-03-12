@@ -18,6 +18,8 @@
 #define MAX_HASHSTR_LEN   40
 #define MAX_SUFFIX_LEN     4
 
+#define MAX_FP_LEN	      			64
+#define MAX_SIGNATURE_LEN			1024
 /**
  * message definitions
  */
@@ -36,6 +38,9 @@
 #define QAUL_EXEAVAILABLE_MESSAGE_TYPE  229
 #define QAUL_EXEAVAILABLE_PARSER_TYPE   QAUL_EXEAVAILABLE_MESSAGE_TYPE
 #define QAUL_IPCMESHTOPO_MESSAGE_TYPE   230
+#define QAUL_USERHELLO_CRY_MESSAGE_TYPE	231
+#define QAUL_SIGNED_CHAT_MESSAGE_TYPE	232
+#define QAUL_ENCRYPT_CHAT_MESSAGE_TYPE	233
 
 /**
  * IPC messages
@@ -57,6 +62,28 @@ struct qaul_userhello_msg
 	char name[MAX_USER_LEN];
 	char icon[MAX_HASH_LEN];
 	char suffix[MAX_SUFFIX_LEN];
+};
+
+struct qaul_cryuser_msg
+{
+	char name[MAX_USER_LEN];
+	char fp[MAX_FP_LEN];
+};
+
+struct qaul_signedchat_msg
+{
+	char name[MAX_USER_LEN];
+	char msg[MAX_MESSAGE_LEN];
+	char fp[MAX_FP_LEN];
+	char signature[MAX_SIGNATURE_LEN];
+};
+
+struct qaul_cryptedchat_msg
+{
+	int ciph_t;
+	char name[MAX_USER_LEN];
+	char msg[MAX_MESSAGE_LEN];
+	char fp[MAX_FP_LEN];
 };
 
 struct qaul_filediscover_msg

@@ -43,11 +43,7 @@ Nightly Ubuntu 16.04 64:
 Raspian Stretch:
   stage: build
   script:
-    - mkdir build; cd build; cmake .. -DRaspberry=1; make -j 8; make package VERBOSE=1
-  artifacts:
-    paths:
-      - "build/*.deb"
-    expire_in: 1 week
+    - mkdir build; cd build; cmake .. -DRaspberry=1; make package VERBOSE=1
   only:
     - qaul-ng
   tags:
@@ -143,11 +139,7 @@ Linux 32-bit:
 Raspberry:
   stage: build
   script:
-    - mkdir build; cd build; cmake .. -DRaspberry=1; make -j 4; make package
-  artifacts:
-    paths:
-      - "build/*.deb"
-    expire_in: 1 week
+    - mkdir build; cd build; cmake .. -DRaspberry=1; make package VERBOSE=1
   except:
     - master
     - qaul-ng
@@ -157,12 +149,23 @@ Raspberry:
 OSX:
   stage: build
   script:
-    - mkdir build; cd build; cmake ..; make VERBOSE=1
-    - ./make_dmg.sh
+    - mkdir build; cd build; cmake .. -DRaspberry=1; make -j 4; make package
   artifacts:
     paths:
-      - "build/*.dmg"
+      - "build/*.deb"
     expire_in: 1 week
+  except:
+    - master
+    - qaul-ng
+  tags:
+    - osx
+
+OSX:
+  stage: build
+  script:
+    - mkdir build; cd build
+    - cmake ../ -DPORT=ANDROID -DSDK_ROOT=$ANDROID_SDK -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
+    - make VERBOSE=1
   except:
     - master
     - qaul-ng
