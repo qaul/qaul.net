@@ -34,7 +34,6 @@
 #include <QaulConfig.h>
 #include "validate.h"
 
-
 /**
  * start olsrd
  */

@@ -21,6 +21,8 @@ android {
                 arguments "PJSIP_PATH=${CMAKE_BINARY_DIR}/third_party/pjsip/src/pjsip",
                           "EXTRALIB_PATH=${EXTRALIB_PATH}",
                           "LIBQAUL_SRC=${CMAKE_SOURCE_DIR}/src/libqaul",
+                          "LIBQAULUTILS_SRC=${CMAKE_SOURCE_DIR}/src/libqaulutils/src",
+                          "LIBQAULUTILS_INCLUDE=${CMAKE_SOURCE_DIR}/src/libqaulutils/include",
                           "QAULCONFIG_INCLUDE=${CMAKE_BINARY_DIR}/include",
                           "MONGOOSE_PATH=${CMAKE_SOURCE_DIR}/third_party/mongoose"
             }
