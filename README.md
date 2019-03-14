@@ -1,7 +1,6 @@
 ![http://qaul.net/](doc/qaul-net.png)
 
-qaul.net
-========
+# qaul.net
 
 **qaul.net** is an ad-hoc wireless mesh-network suite that harnesses the 
 power of everyday devices such as computers and smartphones to create a 
@@ -24,8 +23,7 @@ qaul.net has the following features:
 * Ability to run `olsr` (the mesh routing procotol) on any interface (wifi, ethernet)
 * And because this is a mesh-**network** you can run any service you want on your node and it will be available on the network (Web server, Mail server, SSH server, FTP server etc.)
 
-Build Instructions
-------------------
+## Build Instructions
 
 There are specific instructions for each system qaul.net has been 
 tested on in the [documentation folder](doc). Feel free to add new ports!
@@ -43,16 +41,14 @@ tested on in the [documentation folder](doc). Feel free to add new ports!
   * Ubuntu Mate [doc/Raspberry_UbuntuMate.md](doc/Raspberry_UbuntuMate.md)
 
 
-Binary Downloads
-----------------
+## Binary Downloads
 
 * [Latest stable](https://qaul.net/download) - Latest stable builds
 * [Nightly builds](https://qaul.net/binaries/nightly/) - Built whenever commits to `qaul-ng` are made
 * [Old versions](https://qaul.net/binaries/) - Older versions of the qaul.net software
 
 
-Documentation
--------------
+## Documentation
 
 * [Documentation folder](doc/)
 * [Software architecture](https://github.com/qaul/qaul.net/wiki/SoftwareArchitecture)
@@ -60,8 +56,7 @@ Documentation
 * [Add a configuration template for your wifi mesh community](GUI/www/community-templates/)
 
 
-License
--------
+## License
 
 qaul.net is free open source software licensed under the 
 [GNU General Public License version 3](Licenses/GPLv3.txt).
