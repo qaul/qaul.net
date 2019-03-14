@@ -43,3 +43,6 @@ src/olsrd-plugin/olsrd_qaul.so*
 /.project
 /.idea
 cmake-build-debug/
+
+# Rust specific
+**/target
