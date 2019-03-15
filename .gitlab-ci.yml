@@ -14,13 +14,6 @@ test:nightly:
   script:
     - cargo test --all-features --all
 
-master:
-  stage: build
-  script:
-    - cargo build
-  only:
-    - master
-
 # variables:
 #   GIT_SUBMODULE_STRATEGY: recursive
 
