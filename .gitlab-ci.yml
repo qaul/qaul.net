@@ -1,5 +1,9 @@
 # CI is currently very simple and will be improved further in the future
 
+stages:
+  - build
+  - test
+
 build:nightly:
   image: rustlang/rust:nightly
   script:
