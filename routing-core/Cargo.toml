@@ -1,13 +1,11 @@
 [package]
-name = "qaul-rest"
-version = "0.0.0"
+name = "qaul-routing-core"
+description = "A delay tolerant userspace routing protocol for qaul.net"
 license = "GPL-3.0"
+version = "0.0.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 
 [dependencies]
-actix = "0.7"
-actix-web = "0.7"
-
 serde = "1.0"
 serde_derive = "1.0"
-serde_json = "1.0"
+failure = "0.1"

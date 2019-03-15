@@ -1,10 +1,10 @@
 //!
 
-#![feature(plugin)]
-#![plugin(rocket_codegen)]
+// #![feature(plugin)]
+// #![plugin(rocket_codegen)]
 
-extern crate rocket;
-extern crate rocket_contrib;
+// extern crate rocket;
+// extern crate rocket_contrib;
 extern crate serde;
 extern crate serde_json;
 
@@ -12,9 +12,9 @@ extern crate serde_json;
 extern crate serde_derive;
 
 mod models;
-mod rest;
+// mod rest;
 
 fn main() {
     // Bootstrap REST API and launch it
-    rest::initialise().launch();
+    // rest::initialise().launch();
 }
