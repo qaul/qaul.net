@@ -10,7 +10,6 @@ test:nightly:
   script:
     - cargo test --all-features --all
 
-
 # variables:
 #   GIT_SUBMODULE_STRATEGY: recursive
 
