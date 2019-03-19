@@ -1,9 +1,0 @@
-# Qaul configuration
-    menu "Configuration"
-	depends on PACKAGE_qaul
-
-    config QAUL_MINIMAL
-	bool "Build minimal version of Qaul"
-	default n
-
-    endmenu

@@ -1,8 +1,0 @@
-{"name":"myname",
-"filecount":113,
-"files":[
-{"id":1,"hash":"da39a3ee5e6b4b0d3255bfef956","size":1992881,"suffix":"mov","adv_ip":"127.0.0.1","adv_name":"müri","description":"this message #public #received","time":"2012-02-02 19:59:42"},
-{"id":2,"hash":"da39a3ee5e6b4b0d3255bfef957","size":36000,"suffix":"jpg","adv_ip":"127.0.0.1","adv_name":"wäspi","description":"that message #private #received","time":"2012-02-02 19:59:42"},
-{"id":3,"hash":"da39a3ee5e6b4b0d3255bfef958","size":1024,"suffix":"pdf","adv_ip":"127.0.0.1","adv_name":"hörrör","description":"@yourname for you #public #sent","time":"2012-02-02 19:59:42"}
-]}
-

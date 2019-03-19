@@ -1,1 +1,0 @@
-file(RENAME ${SRC} ${DEST})

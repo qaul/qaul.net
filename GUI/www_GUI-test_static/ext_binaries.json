@@ -1,9 +1,0 @@
-{
-"name":"myuser",
-"files":[
-{"id":1,"hash":"843d59dd3145d446b41ba61cd2a1a7ece4806aba","suffix":"deb","description":"ubuntu & debian","size":1363580,"status":2,"time":"2012-06-15 10:10:46","adv_name":"","adv_ip":"","downloaded":0},
-{"id":2,"hash":"7b7b921b14669c566482be11b1b37208113e046d","suffix":"dmg","description":"OSX 10.5","size":2932966,"status":2,"time":"2012-06-15 10:10:46","adv_name":"","adv_ip":"","downloaded":0},
-{"id":3,"hash":"3f839bd0155b0b7a868a0d4a3c64ce61729a5875","suffix":"dmg","description":"OSX 10.6","size":2374419,"status":2,"time":"2012-06-15 10:10:46","adv_name":"","adv_ip":"","downloaded":0},
-{"id":4,"hash":"04372fc96b840b1dbad69dfb695791dd15e9b178","suffix":"exe","description":"Windows 7","size":2120192,"status":2,"time":"2012-06-15 10:10:46","adv_name":"","adv_ip":"","downloaded":0},
-{"id":5,"hash":"4c21bfa5701be956e6916b93aa2762ebc555f356","suffix":"apk","description":"android","size":1239891,"status":2,"time":"2012-06-15 10:10:46","adv_name":"","adv_ip":"","downloaded":0}
-]}
