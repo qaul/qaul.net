@@ -2475,10 +2475,10 @@ ember-cli-version-checker@^2.0.0, ember-cli-version-checker@^2.1.0:
     resolve "^1.3.3"
     semver "^5.3.0"
 
-ember-cli@~3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/ember-cli/-/ember-cli-3.2.0.tgz#b6429556b407d33d6f943b966056f1f6d0fefda7"
-  integrity sha512-kTYuy5V8dIjb8pgkXaI3eCGkyBab+P4mB1W2ziLc1UmGe0LyBo2xVwgSXc7bFShfXCH03iFSTL+Z1pXORNw0JQ==
+ember-cli@~3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/ember-cli/-/ember-cli-3.3.0.tgz#534ebe72453a4fb064a34077a0874ad69ea84be4"
+  integrity sha512-Iu4mOp2a3tTV+xh305XZUbZZwKjxGsdfF3yCxQ4fmtWl8B46iERyk3BJ4/ylHtmeBUiCsff4hFRJHxI9Ke/0kg==
   dependencies:
     amd-name-resolver "^1.2.0"
     babel-plugin-transform-es2015-modules-amd "^6.24.0"
@@ -2595,10 +2595,10 @@ ember-css-modules@^0.7.10:
     semver "^5.5.0"
     toposort "^1.0.6"
 
-ember-data@~3.2.0:
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/ember-data/-/ember-data-3.2.2.tgz#3687ab576370f8ceed314a87bb1e25e918b041dc"
-  integrity sha512-379oqhnxybma84PP1LMBVMw9efADpb2NYrJepVGm/rExZXbo5S44M3OiZI0/xGci9QLf6zi4RMvKdILjyKshyQ==
+ember-data@~3.3.0:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/ember-data/-/ember-data-3.3.2.tgz#136cc352a25708ef210c5b01b2e4c322e29369a1"
+  integrity sha512-hinVCpvQJaaY+LjqFP+rRsJ1eFmIvwVcDI7RRPAoPNW7qHpJn5YkjQ7N1pttWAIPYC2Bg3pfJl40EHO749HL1w==
   dependencies:
     "@ember/ordered-set" "^1.0.0"
     amd-name-resolver "0.0.7"
@@ -2785,10 +2785,10 @@ ember-source-channel-url@^1.0.1:
   dependencies:
     got "^8.0.1"
 
-ember-source@~3.2.0:
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/ember-source/-/ember-source-3.2.2.tgz#f1b899beeb838b0866a66cd327d22e567abd8a79"
-  integrity sha512-mnzfA/XaCPEblGGOIgS0UDirbo/cR2xsSYxiPCtvX2gOymX4/6JQ/cjh/7P8z+ylveMOR6BG5CHb3SLm4IdXJw==
+ember-source@~3.3.0:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/ember-source/-/ember-source-3.3.2.tgz#2cc02893166d6b91ebf091521cd49d6598477a73"
+  integrity sha512-LpU2lGSRyGrV9rqZDNgf2RcNhJ18MPVQKLt2MmrCinEWg+gLdt2ETzZWiZa7CgfA14O+KeIvtES+haujiz+tKw==
   dependencies:
     broccoli-funnel "^2.0.1"
     broccoli-merge-trees "^2.0.0"
