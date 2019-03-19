@@ -1,218 +1,30 @@
-# CI is currently very simple and will be improved further in the future
-
 stages:
-  - build
   - test
+  - build
 
-build:nightly:
-  image: rustlang/rust:nightly
+test_webgui:
+  stage: test
+  image: circleci/node:10-browsers
+  cache:
+    key: yarn
+    paths:
+      - qaul-webgui/.yarn
   script:
-    - cargo build
+    - cd qaul-webgui
+    - yarn install --pure-lockfile --cache-folder .yarn
+    - yarn run test
 
-test:nightly:
-  image: rustlang/rust:nightly
+build_webgui:
+  stage: build
+  image: node:10
+  cache:
+    key: yarn
+    paths:
+      - qaul-webgui/.yarn
   script:
-    - cargo test --all-features --all
-
-# variables:
-#   GIT_SUBMODULE_STRATEGY: recursive
-
-# stages:
-#   - build
-#   - deploy
-#   - fat_build
-#   - fat_deploy
-
-###################################################
-# Nightly Builds
-###################################################
-
-# Nightly Ubuntu 16.04 32-bit:
-#   stage: build
-#   script:
-#     - mkdir build; cd build; cmake ..; make package
-#     #- cp *.deb /artifacts/nightly/
-#   artifacts:
-#     paths:
-#       - "build/*.deb"
-#     expire_in: 1 week
-#   only:
-#     - qaul-ng
-#   tags:
-#     - ubuntu1604_32
-
-# Nightly Ubuntu 16.04 64:
-#   stage: build
-#   script:
-#     - mkdir build; cd build; cmake ..; make package
-#     #- cp *.deb /artifacts/nightly/
-#   artifacts:
-#     paths:
-#       - "build/*.deb"
-#     expire_in: 1 week
-#   only:
-#     - qaul-ng
-#   tags:
-#     - ubuntu1604_64
-
-# Raspian Stretch:
-#   stage: build
-#   script:
-#     - mkdir build; cd build; cmake .. -DRaspberry=1; make package VERBOSE=1
-#   only:
-#     - qaul-ng
-#   tags:
-#     - raspian-stretch
-
-# Nightly Copy OSX:
-#   stage: build
-#   script:
-#     - mkdir build; cd build; cmake ..; make
-#     - ./make_dmg.sh
-#     #- qaulcopynightly
-#   artifacts:
-#     paths:
-#       - "build/*.dmg"
-#     expire_in: 1 week
-#   only:
-#     - qaul-ng
-#   tags:
-#     - osx
-
-# Nightly Copy Android:
-#   stage: build
-#   script:
-#     - mkdir build; cd build
-#     - cmake ../ -DPORT=ANDROID -DSDK_ROOT=$ANDROID_SDK -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
-#     - make
-#     #- cp android/app/src/main/bin/QaulActivity-debug.apk /artifacts/nightly/
-#   artifacts:
-#     paths:
-#       - build/android/app/build/outputs/apk/qaul-debug.apk
-#     expire_in: 1 week
-#   only:
-#     - qaul-ng
-#   tags:
-#     - android
-
-#Nightly Copy Windows:
-#  stage: build
-#  script:
-#    - PATH="/mingw32/bin:$PATH"; declare -x MSYSTEM="MINGW32"; declare -x MSYSCON="mintty.exe"
-#    - mkdir build; cd build; cmake .. -G "MSYS Makefiles" -DGUI=NATIVE; make
-#    - cd src/client/win; mkdir build; cd build; cmake ..
-#    - cmake --build . --target qaul --config Debug
-#    - cpack -C Debug
-#    #- cp *.exe //VBOXSVR/artifacts/nightly/
-#  only:
-#    - qaul-ng
-#  tags:
-#    - windows
-
-#Nightly Deploy:
-#  stage: deploy
-#  script:
-#    - qaulnightlydeploy $CI_BUILD_REF
-#  only:
-#    - qaul-ng
-#  tags:
-#    - buildserver
-
-
-###################################################
-# Test Builds
-###################################################
-
-# Linux 64-bit:
-#   stage: build
-#   script:
-#     - mkdir build; cd build; cmake ..; make package VERBOSE=1
-#   artifacts:
-#     paths:
-#       - "build/*.deb"
-#     expire_in: 1 week
-#   except:
-#     - master
-#     - qaul-ng
-#   tags:
-#     - linux_64
-
-# Linux 32-bit:
-#   stage: build
-#   script:
-#     - mkdir build; cd build; cmake ..; make package VERBOSE=1
-#   artifacts:
-#     paths:
-#       - "build/*.deb"
-#     expire_in: 1 week
-#   except:
-#     - master
-#     - qaul-ng
-#   tags:
-#     - linux_32
-
-# Raspberry:
-#   stage: build
-#   script:
-#     - mkdir build; cd build; cmake .. -DRaspberry=1; make package VERBOSE=1
-#   except:
-#     - master
-#     - qaul-ng
-#   tags:
-#     - raspian
-
-# OSX:
-#   stage: build
-#   script:
-#     - mkdir build; cd build; cmake .. -DRaspberry=1; make -j 4; make package
-#   artifacts:
-#     paths:
-#       - "build/*.deb"
-#     expire_in: 1 week
-#   except:
-#     - master
-#     - qaul-ng
-#   tags:
-#     - osx
-
-# OSX:
-#   stage: build
-#   script:
-#     - mkdir build; cd build
-#     - cmake ../ -DPORT=ANDROID -DSDK_ROOT=$ANDROID_SDK -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
-#     - make VERBOSE=1
-#   except:
-#     - master
-#     - qaul-ng
-#   tags:
-#     - osx
-
-# Android:
-#   stage: build
-#   script:
-#     - mkdir build; cd build
-#     - cmake ../ -DPORT=ANDROID -DSDK_ROOT=$ANDROID_SDK -DNDK_ROOT=$ANDROID_NDK -DEXTRALIB_PATH=$ANDROID_LIBRARIES -DANDROID_EABI=$ANDROID_EABI
-#     - make VERBOSE=1
-#   artifacts:
-#     paths:
-#       - build/android/app/build/outputs/apk/qaul-debug.apk
-#     expire_in: 1 week
-#   except:
-#     - master
-#     - qaul-ng
-#   tags:
-#     - android
-
-#Windows:
-#  stage: build
-#  script:
-#    - PATH="/mingw32/bin:$PATH"; declare -x MSYSTEM="MINGW32"; declare -x MSYSCON="mintty.exe"
-#    - mkdir build; cd build; cmake .. -G "MSYS Makefiles" -DGUI=NATIVE; make VERBOSE=1
-#    - cd src/client/win; mkdir build; cd build; cmake ..
-#    - cmake --build . --target qaul --config Release
-#    - cpack -C Release
-#  except:
-#    - master
-#    - qaul-ng
-#  tags:
-#    - windows
+    - cd qaul-webgui
+    - yarn install --pure-lockfile --cache-folder .yarn
+    - yarn run build --prod
+  artifacts:
+    paths:
+      - qaul-webgui/dist/
