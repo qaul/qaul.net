@@ -1,9 +1,0 @@
-diff --git a/pjlib/include/pj/config_site.h b/pjlib/include/pj/config_site.h
-new file mode 100644
-index 0000000..c92d006
---- /dev/null
-+++ b/pjlib/include/pj/config_site.h
-@@ -0,0 +1,3 @@
-+
-+#define PJ_IS_LITTLE_ENDIAN 1
-+#define PJ_IS_BIG_ENDIAN 0
