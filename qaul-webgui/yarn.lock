@@ -1927,9 +1927,23 @@ core-js@^2.4.0, core-js@^2.5.0:
   version "2.5.4"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.4.tgz#f2c8bf181f2a80b92f360121429ce63a2f0aeae0"
 
+core-object@2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/core-object/-/core-object-2.0.6.tgz#60134b9c40ff69b27bc15e82db945e4df782961b"
+  integrity sha1-YBNLnED/abJ7wV6C25ReTfeClhs=
+  dependencies:
+    chalk "^1.1.3"
+
 core-object@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/core-object/-/core-object-1.1.0.tgz#86d63918733cf9da1a5aae729e62c0a88e66ad0a"
+
+core-object@^2.0.0, core-object@^2.0.6:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/core-object/-/core-object-2.1.1.tgz#4b7a5f1edefcb1e6d0dcb58eab1b9f90bfc666a8"
+  integrity sha1-S3pfHt78sebQ3LWOqxufkL/GZqg=
+  dependencies:
+    chalk "^1.1.3"
 
 core-object@^3.1.3:
   version "3.1.5"
@@ -1989,7 +2003,7 @@ d@1:
   dependencies:
     es5-ext "^0.10.9"
 
-dag-map@^2.0.2:
+dag-map@^2.0.1, dag-map@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/dag-map/-/dag-map-2.0.2.tgz#9714b472de82a1843de2fba9b6876938cab44c68"
 
@@ -2132,6 +2146,11 @@ dot-prop@^4.1.0:
   dependencies:
     is-obj "^1.0.0"
 
+dotenv@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-1.2.0.tgz#7cd73e16e07f057c8072147a5bc3a8677f0ab5c6"
+  integrity sha1-fNc+FuB/BXyAchR6W8OoZ38KtcY=
+
 duplexer3@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/duplexer3/-/duplexer3-0.1.4.tgz#ee01dd1cac0ed3cbc7fdbea37dc0a8f1ce002ce2"
@@ -2210,6 +2229,55 @@ ember-cli-dependency-checker@^2.0.0:
     is-git-url "^1.0.0"
     resolve "^1.5.0"
     semver "^5.3.0"
+
+ember-cli-deploy-build@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/ember-cli-deploy-build/-/ember-cli-deploy-build-1.1.1.tgz#de515b04536a569f42626ef28aea139f32ef00e8"
+  integrity sha512-q6Svm9PhEO2t5bCjsHfwkm36Cdou1eTdzvw00dU/nAHnysmai7sIqEzT7k20zawjGws7CgttZzMz6Oek5TOZ1w==
+  dependencies:
+    chalk "^1.0.0"
+    ember-cli-deploy-plugin "^0.2.1"
+    glob "^7.1.1"
+    rsvp "^3.5.0"
+
+ember-cli-deploy-gzip@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ember-cli-deploy-gzip/-/ember-cli-deploy-gzip-1.0.1.tgz#aab2e5ffb1eb120e264d2e50d7583691fe207c54"
+  integrity sha512-5tRDVfym1JTqEA6XWjWL4Cn4xCoAcaOfhwGjeSIK3IGQrOckHpHZM44TUQ/NaxXBsABBymZjXNkimIAFbkfkYA==
+  dependencies:
+    chalk "^1.1.3"
+    core-object "^2.0.6"
+    ember-cli-deploy-plugin "^0.2.6"
+    minimatch "^3.0.3"
+    rsvp "^3.5.0"
+
+ember-cli-deploy-plugin@^0.2.1, ember-cli-deploy-plugin@^0.2.6:
+  version "0.2.9"
+  resolved "https://registry.yarnpkg.com/ember-cli-deploy-plugin/-/ember-cli-deploy-plugin-0.2.9.tgz#a3d395b8adad7ef68d8bacdd0b0f4a61bcf9e651"
+  integrity sha1-o9OVuK2tfvaNi6zdCw9KYbz55lE=
+  dependencies:
+    chalk "^1.0.0"
+    core-object "2.0.6"
+    lodash.clonedeep "^4.5.0"
+
+ember-cli-deploy-progress@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/ember-cli-deploy-progress/-/ember-cli-deploy-progress-1.3.0.tgz#18663deed25b4d5397476332f25eed3c3fdf225a"
+  integrity sha1-GGY97tJbTVOXR2My8l7tPD/fIlo=
+
+ember-cli-deploy@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/ember-cli-deploy/-/ember-cli-deploy-1.0.2.tgz#9ab39188c882b57937418db5b3da6fc65b16b916"
+  integrity sha1-mrORiMiCtXk3QY21s9pvxlsWuRY=
+  dependencies:
+    chalk "^1.1.3"
+    core-object "^2.0.0"
+    dag-map "^2.0.1"
+    dotenv "^1.2.0"
+    ember-cli-deploy-progress "^1.3.0"
+    lodash "^4.0.0"
+    rsvp "^3.3.3"
+    silent-error "^1.0.0"
 
 ember-cli-eslint@^4.2.1:
   version "4.2.3"
@@ -3558,6 +3626,18 @@ glob@^7.0.3, glob@^7.0.4, glob@^7.0.5, glob@^7.1.2:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
+glob@^7.1.1:
+  version "7.1.3"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.3.tgz#3960832d3f1574108342dafd3a67b332c0969df1"
+  integrity sha512-vcfuiIxogLV4DlGBHIUOwI0IbrJ8HWPc4MU7HzviGeNho/UJDfi6B5p3sHeWIQ0KGIU0Jpxi5ZHxemQfLkkAwQ==
+  dependencies:
+    fs.realpath "^1.0.0"
+    inflight "^1.0.4"
+    inherits "2"
+    minimatch "^3.0.4"
+    once "^1.3.0"
+    path-is-absolute "^1.0.0"
+
 global-modules@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/global-modules/-/global-modules-1.0.0.tgz#6d770f0eb523ac78164d72b5e71a8877265cc3ea"
@@ -4547,7 +4627,7 @@ lodash.castarray@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.castarray/-/lodash.castarray-4.4.0.tgz#c02513515e309daddd4c24c60cfddcf5976d9115"
 
-lodash.clonedeep@^4.4.1:
+lodash.clonedeep@^4.4.1, lodash.clonedeep@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.clonedeep/-/lodash.clonedeep-4.5.0.tgz#e23f3f9c4f8fbdde872529c1071857a086e5ccef"
 
@@ -4719,6 +4799,11 @@ lodash@3.8.0:
 lodash@^3.10.0, lodash@^3.10.1:
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
+
+lodash@^4.0.0:
+  version "4.17.11"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
+  integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
 
 lodash@^4.14.0, lodash@^4.17.4, lodash@^4.3.0, lodash@^4.5.1, lodash@^4.6.1:
   version "4.17.5"
