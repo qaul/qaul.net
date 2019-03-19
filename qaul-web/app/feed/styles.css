@@ -1,0 +1,44 @@
+.input-area {
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.messages {
+  margin:1rem;
+/*
+  display: flex;
+  flex-direction: column;
+*/
+}
+
+.message {
+  padding: 0.8rem;
+  border-top: 1px dotted #989898;
+/*
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1.5rem 3rem;
+  grid-template-areas:
+    "name time"
+    "content content";
+*/
+}
+
+.message-name {
+  /*grid-area: name;*/
+  float:left;
+  font-weight: bold;
+  color:#333;
+  margin-bottom: 0.5em;
+}
+
+.message-time {
+  /*grid-area: time;*/
+  text-align: right;
+  font-size: smaller;
+}
+
+.message-content {
+  /*grid-area: content;*/
+  clear: both;
+}
