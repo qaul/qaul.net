@@ -1,9 +1,0 @@
-{
-"profile":{"name":"Freifunk Berlin (Channel 10)","homepage":"http://berlin.freifunk.net","info":""},
-"ip":{"edit":"true","generate":"true","pattern":"10.104.0.0/16"},
-"mask":{"edit":"true","value":"16"},
-"broadcast":{"edit":"true","value":"10.255.255.255"},
-"channel":{"edit":"true","value":"10"},
-"ssid":{"edit":"true","value":"ch10.freifunk.net"},
-"bssid":{"edit":"true","value":"02:CA:FF:EE:BA:BE"}
-}
