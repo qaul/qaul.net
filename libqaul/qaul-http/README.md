@@ -10,8 +10,6 @@ Open the rust web site https://rustup.rs and execute the command in a
 shell and further follow displayed steps:
 
     curl https://sh.rustup.rs -sSf | sh
-    
-
 
 Start REST API
 --------------
@@ -51,3 +49,8 @@ program in Rust:
 - // DELETE /voip/<user> - Voip stuff
 - // POST /voip/accept - Voip stuff
 - // POST /voip/reject - Voip stuff
+
+### Not yet implemented/ decided
+
+- Websockets?
+- `json:api` ? `json-ld` ?
