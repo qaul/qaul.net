@@ -1,5 +1,5 @@
 [package]
-name = "qaul-rest"
+name = "qaul-http"
 version = "0.0.0"
 license = "GPL-3.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]

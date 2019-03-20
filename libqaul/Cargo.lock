@@ -569,10 +569,6 @@ version = "0.2.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "libqaul"
-version = "0.0.0"
-
-[[package]]
 name = "linked-hash-map"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -813,19 +809,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "qaul"
+version = "0.0.0"
+dependencies = [
+ "qaul-core 0.1.0",
+ "qaul-http 0.0.0",
+ "qaul-netlink 0.1.0",
+ "qaul-platform 0.1.0",
+]
+
+[[package]]
 name = "qaul-core"
 version = "0.1.0"
 
 [[package]]
-name = "qaul-netlink"
-version = "0.1.0"
-
-[[package]]
-name = "qaul-platform"
-version = "0.1.0"
-
-[[package]]
-name = "qaul-rest"
+name = "qaul-http"
 version = "0.0.0"
 dependencies = [
  "actix 0.7.9 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -834,6 +832,14 @@ dependencies = [
  "serde_derive 1.0.89 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "qaul-netlink"
+version = "0.1.0"
+
+[[package]]
+name = "qaul-platform"
+version = "0.1.0"
 
 [[package]]
 name = "qaul-routing-core"

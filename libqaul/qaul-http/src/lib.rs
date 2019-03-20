@@ -14,7 +14,7 @@ extern crate serde_derive;
 mod models;
 // mod rest;
 
-fn main() {
+pub fn run() {
     // Bootstrap REST API and launch it
     // rest::initialise().launch();
 }
