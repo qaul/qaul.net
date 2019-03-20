@@ -1,6 +1,6 @@
 <div local-class="input-area">
-  <input onchange={{action (mut newMsg) value="target.value"}} />
-  <button onclick={{action 'submit' newMsg}}>Senden</button>
+  <input onchange={{action (mut newMsg) value="target.value"}}>
+  <button onclick={{action "submit" newMsg}}>Senden</button>
 </div>
 
 <div local-class="messages">
