@@ -1,8 +1,13 @@
 [package]
-name = "libqaul"
+name = "qaul"
 description = "qaul.net library"
 license = "GPL3"
 version = "0.0.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
+[dependencies]
+ql_core = { path = "../qaul-core", package = "qaul-core" }
+ql_http = { path = "../qaul-http", package = "qaul-http" }
+ql_netlink = { path = "../qaul-netlink", package = "qaul-netlink" }
+ql_platform = { path = "../qaul-platform", package = "qaul-platform" }
