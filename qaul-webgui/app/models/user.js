@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import { computed, get } from '@ember/object';
 import moment from 'moment';
-import Owner from './user';
+// import Owner from './user';
 
 //export default Owner.extend({
 export default DS.Model.extend({

@@ -1,67 +1,34 @@
 <div class="page">
 
-<div local-class="input-area">
+  <div local-class="input-area">
     {{input value="search"}}
-</div>
+  </div>
 
-<div local-class="subnavigation">
+  <div local-class="subnavigation">
     <a>{{fa-icon "users"}}</a>
     <a>{{fa-icon "history"}}</a>
     <a>{{fa-icon "lock"}}</a>
     <a>{{fa-icon "star"}}</a>
-</div>
+  </div>
 
-<div local-class="contacts">
-{{!--
-    <div local-class="user">
+  <div local-class="contacts">
+    {{#each model as |user|}}
+      <div local-class="user">
         <div local-class="user-icon">
-            <div local-class="user-avatar">
-                <div local-class="user-trust">{{fa-icon "lock"}}</div>
-                <div local-class="user-online"></div>
-            </div>
+          <div local-class="user-avatar">
+            {{#if user.trust}}
+              <div local-class="user-trust">{{fa-icon "lock"}}</div>
+            {{/if}}
+            {{#if user.online}}
+              <div local-class="user-online"></div>
+            {{/if}}
+          </div>
         </div>
         <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
-        <div local-class="user-name">UserName</div>
-     </div>
-    <div local-class="user">
-        <div local-class="user-icon">
-            <div local-class="user-avatar">
-                <div local-class="user-trust">{{fa-icon "lock"}}</div>
-                <div local-class="user-online"></div>
-            </div>
+        <div local-class="user-name">
+          {{#link-to "users.user" user}}{{user.username}}{{/link-to}}
         </div>
-        <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
-        <div local-class="user-name">{{t 'username'}}</div>
-     </div>
-    <div local-class="user">
-        <div local-class="user-icon">
-            <div local-class="user-avatar">
-                <div local-class="user-trust">{{fa-icon "lock"}}</div>
-                <div local-class="user-online"></div>
-            </div>
-        </div>
-        <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
-        <div local-class="user-name">UserName</div>
-     </div>
---}}
-  {{#each model as |user|}}
-    <div local-class="user">
-         <div local-class="user-icon">
-            <div local-class="user-avatar">
-                {{#if user.trust}}
-                    <div local-class="user-trust">{{fa-icon "lock"}}</div>
-                {{/if}}
-                {{#if user.online}}
-                    <div local-class="user-online"></div>
-                {{/if}}
-            </div>
-        </div>
-       <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
-      <div local-class="user-name">
-        {{#link-to 'users.user' user}}{{user.username}}{{/link-to}}
       </div>
-    </div>
-  {{/each}}
-</div>
-
+    {{/each}}
+  </div>
 </div>

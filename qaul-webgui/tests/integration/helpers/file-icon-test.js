@@ -8,10 +8,8 @@ moduleForComponent('file-icon', 'helper:file-icon', {
 
 // Replace this with your real tests.
 test('it renders', function(assert) {
-  this.set('inputValue', '1234');
+  this.render(hbs`{{file-icon 'jpeg'}}`);
 
-  this.render(hbs`{{file-icon inputValue}}`);
-
-  assert.equal(this.$().text().trim(), '1234');
+  assert.equal(this.$().text().trim(), 'image');
 });
 
