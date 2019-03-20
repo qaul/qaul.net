@@ -1,0 +1,8 @@
+[package]
+name = "libqaul"
+description = "qaul.net library"
+license = "GPL3"
+version = "0.0.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+
