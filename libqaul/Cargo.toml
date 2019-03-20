@@ -1,5 +1,19 @@
 [workspace]
 members = [
-    "routing-core",
-    "qaul-rest"
+
+  # libqaul external library
+  "qaul",
+
+  # core state logic
+  "qaul-core",
+
+  # platform wrappers
+  "qaul-platform",
+
+  # routing algorithms
+  "ratman",
+  "qaul-netlink",
+
+  # http API ship
+  "qaul-http"
 ]

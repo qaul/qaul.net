@@ -569,6 +569,10 @@ version = "0.2.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "libqaul"
+version = "0.0.0"
+
+[[package]]
 name = "linked-hash-map"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -807,6 +811,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "unicode-xid 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "qaul-core"
+version = "0.1.0"
+
+[[package]]
+name = "qaul-netlink"
+version = "0.1.0"
+
+[[package]]
+name = "qaul-platform"
+version = "0.1.0"
 
 [[package]]
 name = "qaul-rest"
