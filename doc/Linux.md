@@ -91,16 +91,6 @@ bootstrap. Add the permissions to bootstrap:
 
 	chmod +x third_party/portfwd/src/portfwd/bootstrap
 
-
-Run qaul.net GUI client
------------------------
-
-Run qaul.net GKT client from the command line
-
-	# run qaul.net GUI client form the command line	
-	/opt/qaul/bin/qaul-gtk
-
-
 Run qaul.net GUI client
 -----------------------
 
