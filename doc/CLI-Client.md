@@ -1,5 +1,5 @@
-Build qaul.net CLI client
-=========================
+Build qaul.net release-1.0.0 CLI client
+=======================================
 
 This tutorial describes all the steps and options to build qaul.net CLI client.
 This client is meant for server instances and for testing purposes. 
@@ -28,9 +28,10 @@ tutorials of the build platform.
 Get the source
 --------------
 
-Download the source from [github](https://github.com/qaul/qaul.net)
+Download the source from [github](https://github.com/qaul/qaul.net), checkout branch
+`release-1.0.0`, download and init submodules:
 
-	git clone --recursive https://github.com/qaul/qaul.net.git
+	git clone --recursive --branch release-1.0.0 https://github.com/qaul/qaul.net.git
 
 
 Build

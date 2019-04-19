@@ -1,5 +1,5 @@
-Build qaul.net on Raspberry Pi running Raspbian
-===============================================
+Build qaul.net release-1.0.0 on Raspberry Pi running Raspbian
+=============================================================
 
 Prerequesites
 -------------
@@ -14,12 +14,9 @@ Install needed software to download and build qaul.net from source.
 Download and Build
 ------------------
 
-	# Download source code from github
-	# qaul.net uses git submodules, therefore qaul.net should be cloned recursively or
-	# the submodules must be initialized and updated separately
-	## git submodule init
-	## git submodule update
-	git clone --recursive https://github.com/qaul/qaul.net.git
+	# Download the source from https://github.com/qaul/qaul.net, checkout 
+    # branch release-1.0.0, download and init submodules
+	git clone --recursive --branch release-1.0.0 https://github.com/qaul/qaul.net.git
 	
 	# create build directory
 	cd qaul.net

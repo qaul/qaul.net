@@ -1,5 +1,5 @@
-Build qaul.net on Debian Linux
-==============================
+Build qaul.net release-1.0.0 on Debian Linux
+============================================
 
 This tutorial describes all the steps to build qaul.net on a Debian 
 Linux derivate. It has been tested on the following distributions:
@@ -23,8 +23,9 @@ Install needed Software to download and build qaul.net from Source.
 Download and Build
 ------------------
 
-	# Download source code from github
-	git clone --recursive https://github.com/qaul/qaul.net.git
+	# Download the source from https://github.com/qaul/qaul.net, checkout 
+    # branch release-1.0.0, download and init submodules
+	git clone --recursive --branch release-1.0.0 https://github.com/qaul/qaul.net.git
 	
 	# create build directory
 	cd qaul.net

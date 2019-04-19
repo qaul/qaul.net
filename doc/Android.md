@@ -1,5 +1,5 @@
-Android Instructions
-====================
+Android Instructions for qaul.net release-1.0.0
+===============================================
 
 To check whether your Android Device is known to work with qaul.net check 
 [README_Android_Devices.md]
@@ -74,9 +74,10 @@ change the line into
 Get the source
 --------------
 
-Download the source from [https://github.com/qaul/qaul.net](github)
+Download the source from [github](https://github.com/qaul/qaul.net), checkout branch
+`release-1.0.0`, download and init submodules:
 
-	git clone --recursive https://github.com/qaul/qaul.net.git
+	git clone --recursive --branch release-1.0.0 https://github.com/qaul/qaul.net.git
 
 
 

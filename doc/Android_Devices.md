@@ -1,5 +1,5 @@
-Android Device Compatibility
-============================
+Android Device Compatibility of qaul.net release-1.0.0
+======================================================
 
 Requirements
 ------------

@@ -1,5 +1,5 @@
-Build qaul.net on Windows
-=========================
+Build qaul.net release-1.0.0 on Windows
+=======================================
 
 This tutorial describes all the steps to build qaul.net client on Windows.
 qaul.net works on Windows 7 / 8 / 10. Windows XP is not supported.
@@ -41,9 +41,10 @@ pacman -S mingw-w64-i686-gcc mingw-w64-i686-cmake make patch bison
 Get the source
 --------------
 
-Download the source from [github](https://github.com/qaul/qaul.net)
+Download the source from [github](https://github.com/qaul/qaul.net), checkout branch
+`release-1.0.0`, download and init submodules:
 
-	git clone --recursive https://github.com/qaul/qaul.net.git
+	git clone --recursive --branch release-1.0.0 https://github.com/qaul/qaul.net.git
 
 	
 Build
