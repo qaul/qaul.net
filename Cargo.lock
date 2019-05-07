@@ -819,6 +819,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "qaul-common"
+version = "0.1.0"
+
+[[package]]
 name = "qaul-http"
 version = "0.0.0"
 dependencies = [
@@ -970,9 +974,7 @@ dependencies = [
 name = "ratman"
 version = "0.0.0"
 dependencies = [
- "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_derive 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
+ "qaul-common 0.1.0",
 ]
 
 [[package]]
