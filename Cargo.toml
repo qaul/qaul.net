@@ -4,6 +4,7 @@ members = [
     # service userspace library
     "qaul-core",
     "qaul-core/platform",
+    "qaul-core/common",
 
     # qaul.net application library
     "qaul",
