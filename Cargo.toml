@@ -1,0 +1,22 @@
+[workspace]
+members = [
+
+    # service userspace library
+    "qaul-core",
+    "qaul-core/platform",
+
+    # qaul.net application library
+    "qaul",
+
+    # http interface
+    "qaul-http",
+
+    # decentralised routing protocol
+    "ratman",
+    "ratman/netlink",
+    "ratman/routing-core",
+    "ratman/diagnostics",
+
+    # Client specific crates
+    "clients/linux"
+]
