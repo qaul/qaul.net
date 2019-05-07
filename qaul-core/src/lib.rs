@@ -1,6 +1,6 @@
 //! A common abstraction over several network backplanes
 
-pub mod fake;
+// pub mod fake;
 
 pub enum Error {
     Failed,

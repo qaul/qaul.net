@@ -716,6 +716,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "netsim"
+version = "0.1.0"
+
+[[package]]
 name = "nodrop"
 version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -835,6 +839,10 @@ version = "0.1.0"
 
 [[package]]
 name = "qaul-platform"
+version = "0.1.0"
+
+[[package]]
+name = "qaul-sim"
 version = "0.1.0"
 
 [[package]]
