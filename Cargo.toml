@@ -17,6 +17,12 @@ members = [
     "ratman/routing-core",
     "ratman/diagnostics",
 
+    # A high-level network simulator
+    "qaul-sim",
+
+    # A _low level_ network simulator
+    "netsim",
+
     # Client specific crates
     "clients/linux"
 ]
