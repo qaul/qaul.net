@@ -1,6 +1,6 @@
 [package]
-name = "qaul-routing-core"
-description = "A delay tolerant userspace routing protocol for qaul.net"
+name = "ratman"
+description = "A fully delay tolerant, decentralised userspace routing protocol"
 license = "GPL-3.0"
 version = "0.0.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
