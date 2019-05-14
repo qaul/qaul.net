@@ -2,6 +2,13 @@ stages:
   - test
   - build
 
+# Build the Rust root on nightly
+build:nightly:
+  image: rustlang/rust:nightly
+  script:
+    - cargo build
+
+# Run test suite
 test_webgui:
   stage: test
   image: circleci/node:10-browsers
