@@ -19,10 +19,10 @@ members = [
     "ratman/diagnostics",
 
     # A high-level network simulator
-    "qaul-sim",
+    "service-sim",
 
     # A _low level_ network simulator
-    "netsim",
+    "netmod-sim",
 
     # Client specific crates
     "clients/linux"
