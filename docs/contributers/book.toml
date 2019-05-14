@@ -1,0 +1,5 @@
+[book]
+authors = ["Katharina Fey", "Mathias Jud"]
+multilingual = false
+src = "src"
+title = "Contribution Guide"
