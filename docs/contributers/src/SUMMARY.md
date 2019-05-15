@@ -9,5 +9,8 @@
     - [Routing Layer](./technical/routing/_intro.md)
         - [Routing Table](./technical/routing/routing-table.md)
         - [Network Modules](./technical/routing/netmod.md)
+    - [Services](./technical/services/_intro.md)
+    - [`libqaul`](./technical/libqaul/_intro.md)
+    - [Web GUI](./technical/webgui/_intro.md)
 - [Translations](./translations/_intro.md)
 - [Design](./design/_intro.md)
