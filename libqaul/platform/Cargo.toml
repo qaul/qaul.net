@@ -1,5 +1,6 @@
 [package]
-name = "qaul-net"
+name = "qaul-platform"
+description = "Platform specific abstraction utilities"
 version = "0.1.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
