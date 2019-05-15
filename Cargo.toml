@@ -1,22 +1,20 @@
 [workspace]
 members = [
 
-    # service userspace library
-    "qaul-core",
-    "qaul-core/platform",
-    "qaul-core/common",
-
-    # qaul.net application library
-    "qaul",
+    # qaul.net service library
+    "libqaul",
+    "libqaul/platform",
+    "libqaul/common",
 
     # http interface
-    "qaul-http",
+    # "qaul-http",
 
     # decentralised routing protocol
     "ratman",
-    "ratman/netlink",
-    "ratman/routing-core",
+    "ratman/identity",
+    "ratman/netmod",
     "ratman/diagnostics",
+    "ratman/routing-core",
 
     # A high-level network simulator
     "service-sim",
@@ -24,6 +22,7 @@ members = [
     # A _low level_ network simulator
     "netmod-sim",
 
-    # Client specific crates
-    "clients/linux"
+    # Client specific targets
+    "clients/linux",
+    "clients/linux-cli"
 ]
