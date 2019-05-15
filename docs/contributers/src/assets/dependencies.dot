@@ -18,6 +18,7 @@ digraph {
     libqaul -> "R.A.T.M.A.N."
     libqaul -> platform
     libqaul -> common
+    libqaul -> identity
 
     "qaul-http" -> libqaul
 }
