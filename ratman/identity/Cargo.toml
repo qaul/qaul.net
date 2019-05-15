@@ -1,0 +1,12 @@
+[package]
+name = "ratman-identity"
+description = "A small crate that provides an identity abstraction for RATMAN"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+
+[features]
+digest = []
+
+[dependencies]
+# sha512 = { version = "*", optional = true }
