@@ -7,17 +7,11 @@ digraph {
 
     netmod -> identity
     diagnostics -> identity
-
     "routing-core" -> identity
-    "routing-core" -> common
-
-    diagnostics -> common
-    identity -> common
-    netmod -> common
 
     libqaul -> "R.A.T.M.A.N."
     libqaul -> platform
-    libqaul -> common
+    libqaul -> "qaul-service"
     libqaul -> identity
 
     "qaul-http" -> libqaul
