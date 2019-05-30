@@ -16,9 +16,9 @@ test_webgui:
   cache:
     key: yarn
     paths:
-      - qaul-webgui/.yarn
+      - webgui/.yarn
   script:
-    - cd qaul-webgui
+    - cd webgui
     - yarn install --pure-lockfile --cache-folder .yarn
     - yarn run test
 
@@ -28,14 +28,14 @@ build_webgui:
   cache:
     key: yarn
     paths:
-      - qaul-webgui/.yarn
+      - webgui/.yarn
   script:
-    - cd qaul-webgui
+    - cd webgui
     - yarn install --pure-lockfile --cache-folder .yarn
     - yarn run build --prod
   artifacts:
     paths:
-      - qaul-webgui/dist/
+      - webgui/dist/
 
 publish_webgui:
   stage: publish
@@ -46,5 +46,5 @@ publish_webgui:
     - master
   image: andthensome/alpine-surge-bash
   script:
-    - cd qaul-webgui/dist/
+    - cd webgui/dist/
     - surge --project . --domain qaul.surge.sh
