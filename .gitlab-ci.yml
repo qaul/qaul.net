@@ -1,6 +1,7 @@
 stages:
   - test
   - build
+  - publish
 
 # Build the Rust root on nightly
 build:nightly:
@@ -35,3 +36,15 @@ build_webgui:
   artifacts:
     paths:
       - qaul-webgui/dist/
+
+publish_webgui:
+  stage: publish
+  environment:
+    name: master
+    url: http://qaul.surge.sh/
+  only:
+    - master
+  image: andthensome/alpine-surge-bash
+  script:
+    - cd qaul-webgui/dist/
+    - surge --project . --domain qaul.surge.sh
