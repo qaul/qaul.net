@@ -47,4 +47,5 @@ publish_webgui:
   image: andthensome/alpine-surge-bash
   script:
     - cd webgui/dist/
+    - cp index.html 200.html
     - surge --project . --domain qaul.surge.sh
