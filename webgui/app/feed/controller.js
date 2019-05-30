@@ -8,13 +8,13 @@ export default Controller.extend({
         }
     }),
     actions: {
-        submit(content) {
-            const store = get(this, 'store');
-            const newMsg = store.createRecord('message', {
-                senderName: 'Lux',
-                timestamp: new Date(),
-                content
-            });
+        submit(/*content*/) {
+            // const store = get(this, 'store');
+            // const newMsg = store.createRecord('message', {
+            //     senderName: 'Lux',
+            //     timestamp: new Date(),
+            //     content
+            // });
         }
     }
 });
