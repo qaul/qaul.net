@@ -1,16 +1,9 @@
 //! A common abstraction over several network backplanes
 
-// pub mod fake;
+mod auth;
+mod crypto;
+mod users;
 
-pub enum Error {
-    Failed,
-}
-
-/// An interfaces that describes a network link
-pub trait Link {
-    fn init() -> Self;
-    fn send(&mut self) -> Result<(), Error>;
-    fn receive<F>(&mut self, cb: F) -> Result<(), Error>
-    where
-        F: Fn(()) -> Result<(), Error>;
-}
+// This module defines the libqaul service API
+mod api;
+pub use api::*;
