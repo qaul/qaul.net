@@ -6,3 +6,4 @@ authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
 [dependencies]
+blake2 = "0.8"
