@@ -4,14 +4,11 @@ use blake2::{Blake2b, Digest};
 use generic_array::GenericArray;
 
 /// The actual content of a message, along with the mechanism to validate that
-/// no transmission errors occurred (message digest).
+/// no transmission errors occurred (message digest of payload type and data).
 #[derive(PartialEq, Eq, Debug)]
 pub struct Payload {
-    // TODO DESIGN: add a payload type field?
-    // Upcast to u64 so that there is no issue knowing what the length of a Payload is
-    // when sent to different platforms.
     length: u64,
-    payload: Vec<u8>,
+    data: Vec<u8>,
     digest: HashBytes
 }
 
@@ -29,12 +26,12 @@ pub enum PayloadError {
 
 impl Payload {
     /// Place a binary payload into a `Payload` metadata package.
-    pub fn pack<T: Into<Vec<u8>>>(payload: T) -> Self {
-        let payload = payload.into();
-        let digest = blake2b_digest(&payload);
+    pub fn pack<T: Into<Vec<u8>>>(data: T) -> Self {
+        let data = data.into();
+        let digest = blake2b_digest(&data);
         Self {
-            length: payload.len() as u64,
-            payload,
+            length: data.len() as u64,
+            data,
             digest
         }
     }
@@ -42,14 +39,14 @@ impl Payload {
     /// Attempt to extract a binary payload from a `Payload` metadata package.
     /// Fails if the message was corrupted in any way.
     pub fn unpack(self) -> Result<Vec<u8>, PayloadError> {
-        let digest = blake2b_digest(&self.payload); 
+        let digest = blake2b_digest(&self.data);
 
-        if self.length != self.payload.len() as u64 {
+        if self.length != self.data.len() as u64 {
             Err(PayloadError::IncorrectLengthError)
         } else if digest != self.digest {
             Err(PayloadError::InvalidDigestError)
         }  else {
-            Ok(self.payload)
+            Ok(self.data)
         }
     }
 }
