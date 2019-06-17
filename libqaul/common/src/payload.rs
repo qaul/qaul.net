@@ -1,40 +1,22 @@
 //! Types related to data being moved around and its verification.
 use crate::HashBytes;
-use blake2::VarBlake2b;
-use blake2::digest::{VariableOutput, Input};
-use subtle::Choice;
+use blake2::{Blake2b, Digest};
 use generic_array::GenericArray;
-use std::convert::AsMut;
-
-fn copy_into_array<A, T>(slice: &[T]) -> A where
-    A: Default + AsMut<[T]>,
-    T: Copy,
-{
-    let mut a = Default::default();
-    <A as AsMut<[T]>>::as_mut(&mut a).copy_from_slice(slice);
-    a
-}
 
 /// The actual content of a message, along with the mechanism to validate that
 /// no transmission errors occurred (message digest).
 #[derive(PartialEq, Eq, Debug)]
 pub struct Payload {
     // TODO DESIGN: add a payload type field?
-    // Upcast to u64 so that there is no issue knowing what the length of a Payload is when sent to different platforms,
-    // such as 32 or 128 (?)
+    // Upcast to u64 so that there is no issue knowing what the length of a Payload is
+    // when sent to different platforms.
     length: u64,
     payload: Vec<u8>,
     digest: HashBytes
 }
 
-// Compute and return the 32-bit Blake2b digest of the given data.
-fn blake2b_digest(data: &[u8]) -> HashBytes {
-    let mut hasher = VarBlake2b::new(32).expect("Could not construct hasher");
-    hasher.input(data);
-    let mut retval = HashBytes::default();
-    hasher.variable_result(|output| retval = copy_into_array(output)); 
-    retval
-}
+// Compute and return the 64-bit Blake2b digest of the given data.
+fn blake2b_digest(data: &[u8]) -> HashBytes { Blake2b::digest(data) }
 
 /// All the things that can go wrong while working with a Payload.
 #[derive(PartialEq, Eq, Debug)]
