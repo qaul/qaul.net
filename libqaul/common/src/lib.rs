@@ -1,11 +1,12 @@
 //! A small library with data types used across qaul.net
 extern crate blake2;
+extern crate generic_array;
+use generic_array::typenum::U64;
+use generic_array::GenericArray;
 mod message;
 mod payload;
 
-pub type HashBytes = [u8; 32];  // Because of the lack of type-level generics,
-                                // array functions we need are not implemented
-                                // above 32 elements.
+pub type HashBytes = GenericArray<u8, U64>;
 
 /// A cryptographically backed ID for a user on a network
 pub struct UserID {
