@@ -10,10 +10,7 @@ use crate::payload::Payload;
 pub struct Message {
     sender: UserID,
     recipient: UserID,
-    // TODO DESIGN: Include a fingerprint here?
-    // TODO DESIGN: It's probably a good idea to add a signature in addition to
-    // the error detection included in the Payload, to prevent tampering, unless
-    // that's best left up to RATMAN.
+    // TODO: Add some kind of cryptographic signing here
     service: String,
     payload: Payload,
 }
