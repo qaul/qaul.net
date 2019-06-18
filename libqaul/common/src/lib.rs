@@ -5,6 +5,9 @@ use generic_array::typenum::U64;
 use generic_array::GenericArray;
 mod message;
 mod payload;
+mod service;
+
+pub use message::Message;
 
 pub type HashBytes = GenericArray<u8, U64>;
 
