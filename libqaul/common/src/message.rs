@@ -1,6 +1,8 @@
 //! Types for representing a message to be sent between users.
-use crate::UserID;
 use crate::payload::Payload;
+use crate::UserID;
+
+pub type MsgSignature = u64;
 
 /// A `Message` to be sent from the `sender` to the `recipient`, associated
 /// with the given `service`.
@@ -10,7 +12,7 @@ use crate::payload::Payload;
 pub struct Message {
     sender: UserID,
     recipient: UserID,
-    // TODO: Add some kind of cryptographic signing here
     service: String,
     payload: Payload,
+    signature: MsgSignature,
 }
