@@ -1,13 +1,21 @@
 stages:
   - test
   - build
-  - publish
+  - deploy
 
 # Build the Rust root on nightly
 build:nightly:
   image: rustlang/rust:nightly
   script:
     - cargo build
+
+# Build doc books
+build_docs:
+  stage: deploy
+  image: nixos/nix
+  script:
+    - nix-shell -p graphviz mdbook
+    - cd docs/contributers/ && ./build.sh
 
 # Run test suite
 test_webgui:
@@ -16,9 +24,9 @@ test_webgui:
   cache:
     key: yarn
     paths:
-      - webgui/.yarn
+      - qaul-webgui/.yarn
   script:
-    - cd webgui
+    - cd qaul-webgui
     - yarn install --pure-lockfile --cache-folder .yarn
     - yarn run test
 
@@ -28,24 +36,11 @@ build_webgui:
   cache:
     key: yarn
     paths:
-      - webgui/.yarn
+      - qaul-webgui/.yarn
   script:
-    - cd webgui
+    - cd qaul-webgui
     - yarn install --pure-lockfile --cache-folder .yarn
     - yarn run build --prod
   artifacts:
     paths:
-      - webgui/dist/
-
-publish_webgui:
-  stage: publish
-  environment:
-    name: master
-    url: http://qaul.surge.sh/
-  only:
-    - master
-  image: andthensome/alpine-surge-bash
-  script:
-    - cd webgui/dist/
-    - cp index.html 200.html
-    - surge --project . --domain qaul.surge.sh
+      - qaul-webgui/dist/
