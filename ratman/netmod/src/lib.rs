@@ -16,7 +16,6 @@ mod result;
 pub use frame::Frame;
 pub use result::Result;
 
-
 // A `netmod` endpoint describes a networking interface
 // pub trait Endpoint {
 
