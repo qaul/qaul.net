@@ -9,11 +9,13 @@ use generic_array::GenericArray;
 pub struct Payload {
     length: u64,
     data: Vec<u8>,
-    digest: HashBytes
+    digest: HashBytes,
 }
 
 // Compute and return the 64-bit Blake2b digest of the given data.
-fn blake2b_digest(data: &[u8]) -> HashBytes { Blake2b::digest(data) }
+fn blake2b_digest(data: &[u8]) -> HashBytes {
+    Blake2b::digest(data)
+}
 
 /// All the things that can go wrong while working with a Payload.
 #[derive(PartialEq, Eq, Debug)]
@@ -32,7 +34,7 @@ impl Payload {
         Self {
             length: data.len() as u64,
             data,
-            digest
+            digest,
         }
     }
 
@@ -45,7 +47,7 @@ impl Payload {
             Err(PayloadError::IncorrectLengthError)
         } else if digest != self.digest {
             Err(PayloadError::InvalidDigestError)
-        }  else {
+        } else {
             Ok(self.data)
         }
     }
@@ -61,8 +63,6 @@ fn pack_and_unpack_success() {
 #[test]
 fn pack_and_unpack_bad_length() {
     let mut payload = Payload::pack(b"Hello, world!".to_vec());
-    payload.length -= 1; 
+    payload.length -= 1;
     assert_eq!(Err(PayloadError::IncorrectLengthError), payload.unpack());
 }
-
-
