@@ -24,5 +24,4 @@ pub struct Message {
     pub length: u32,
     /// Various length payload
     pub payload: Vec<u8>,
-
 }
