@@ -1,4 +1,4 @@
-![http://qaul.net/](doc/qaul-net.png)
+![http://qaul.net/](https://raw.githubusercontent.com/qaul/qaul.net/release-1.0.0/doc/qaul-net.png)
 
 # qaul.net [![pipeline status](https://gitlab.com/qaul/qaul-net/badges/master/pipeline.svg)](https://gitlab.com/qaul/qaul-net/commits/master)
 
