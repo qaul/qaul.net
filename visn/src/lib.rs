@@ -42,7 +42,7 @@
 //! };
 //! let after = new_knowledge_engine::<SystemUnderTest, SyntheticEvent, _>(resolve)
 //!     .queue_events(&[SetA("a1"), SetB("b1"), SetA("a2")])
-//!     .resolve_all(before);
+//!     .resolve_in_order(before);
 //!
 //! assert_eq!(after.a, "a2".to_string());
 //! assert_eq!(after.b, "b1".to_string());
@@ -58,10 +58,18 @@ use std::collections::VecDeque;
 /// an expected ending condition.
 ///
 
-pub trait KnowledgeEngine<S, E> {
+pub trait KnowledgeEngine<S, E>: Sized {
     fn queue_event(self, event: E) -> Self;
     fn queue_events(self, events: &[E]) -> Self;
-    fn resolve_all(self, system: S) -> S;
+    fn resolve_with<F: FnOnce(&mut dyn Iterator<Item = E>) -> &mut dyn Iterator<Item = E>>(
+        self,
+        system: S,
+        comb: F,
+    ) -> S;
+
+    fn resolve_in_order(self, system: S) -> S {
+        self.resolve_with(system, |iter| iter)
+    }
 }
 
 /// Create a new KnowledgeEngine implementation with the given resolver function.
@@ -97,11 +105,15 @@ impl<S, E: Clone> KnowledgeEngine<S, E> for KnowledgeEngineImpl<E, S> {
         }
         new
     }
-    fn resolve_all(self, system: S) -> S {
-        let mut new = self;
+    fn resolve_with<F: FnOnce(&mut dyn Iterator<Item = E>) -> &mut dyn Iterator<Item = E>>(
+        self,
+        system: S,
+        comb: F,
+    ) -> S {
         let mut system = system;
-        while let Some(event) = new.events.pop_front() {
-            system = (new.resolve)(event, system);
+        let mut events_iter = self.events.into_iter();
+        for event in comb(&mut events_iter) {
+            system = (self.resolve)(event, system);
         }
         system
     }
@@ -146,7 +158,7 @@ mod tests {
                 SetB("first b value"),
                 SetA("second a value"),
             ])
-            .resolve_all(SystemUnderTest::default());
+            .resolve_in_order(SystemUnderTest::default());
         assert_eq!(system.a, "second a value".to_string());
         assert_eq!(system.b, "first b value".to_string());
     }
