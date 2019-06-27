@@ -1,7 +1,8 @@
 [package]
 name = "libqaul"
 version = "0.1.0"
-authors = ["Katharina Fey <kookie@spacekookie.de>"]
+authors = ["Katharina Fey <kookie@spacekookie.de>",
+		   "Jess 3Jane <me@jess.coffee>"]
 edition = "2018"
 
 [dependencies]
