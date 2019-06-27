@@ -22,13 +22,12 @@
 //! developers to interact with, not including
 //! shared service state or secrets.
 
-pub mod error;
+use common::{identity::UserID, error::{Error as QaulError, Result as QaulResult}};
+
 pub mod users;
 pub mod device;
 pub mod contacts;
 pub mod data;
-
-use users::UserID;
 
 pub fn send_message(src: UserID, target: UserID, msg: Vec<u8>) {}
 

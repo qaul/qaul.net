@@ -1,10 +1,14 @@
 //! Types related to data being moved around and its verification.
-use crate::HashBytes;
+
+use crate::identity::HashBytes;
 use blake2::{Blake2b, Digest};
 use generic_array::GenericArray;
 
-/// The actual content of a message, along with the mechanism to validate that
-/// no transmission errors occurred (message digest of payload type and data).
+/// Simple encoded `message` contents
+///
+/// Additionally contains the mechanism to validate that
+/// no transmission errors occurred
+/// (message digest of payload type and data).
 #[derive(PartialEq, Eq, Debug)]
 pub struct Payload {
     length: u64,
@@ -12,7 +16,7 @@ pub struct Payload {
     digest: HashBytes,
 }
 
-// Compute and return the 64-bit Blake2b digest of the given data.
+/// Compute and return the 64-bit Blake2b digest of the given data.
 fn blake2b_digest(data: &[u8]) -> HashBytes {
     Blake2b::digest(data)
 }
@@ -20,7 +24,7 @@ fn blake2b_digest(data: &[u8]) -> HashBytes {
 /// All the things that can go wrong while working with a Payload.
 #[derive(PartialEq, Eq, Debug)]
 pub enum PayloadError {
-    /// The given payload did not match the length included in the wrapper.
+    /// The given payload did not match the length included
     IncorrectLengthError,
     /// The given payload did not match its associated message digest.
     InvalidDigestError,

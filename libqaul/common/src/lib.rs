@@ -1,21 +1,10 @@
 //! A small library with data types used across qaul.net
-extern crate blake2;
-extern crate generic_array;
-use generic_array::typenum::U64;
-use generic_array::GenericArray;
-mod message;
-mod payload;
+//!
+//! This library is included by `libqaul` directly,
+//! as well as all service layers and the service API.
 
-pub type HashBytes = GenericArray<u8, U64>;
+pub mod identity;
+pub mod message;
+pub mod payload;
+pub mod error;
 
-/// A cryptographically backed ID for a user on a network
-pub struct UserID {
-    pub seed: Vec<u8>,
-    pub inner: HashBytes,
-}
-
-impl Default for UserID {
-    fn default() -> Self {
-        unimplemented!()
-    }
-}

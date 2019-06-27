@@ -1,10 +1,10 @@
 //! Service data store access
 
-use super::{users::UserID, error::QResult};
+use common::{identity::UserID, error::{Error as QaulError, Result as QaulResult}};
 
 pub fn store(user: UserID, key: String, data: Vec<u8>) {}
 
-pub fn get(user: UserID, key: String) -> QResult<Vec<u8>> {
+pub fn get(user: UserID, key: String) -> QaulResult<Vec<u8>> {
     unimplemented!()
 }
 
