@@ -7,3 +7,5 @@ mod users;
 // This module defines the libqaul service API
 mod api;
 pub use api::*;
+
+pub use auth::Authenticator;

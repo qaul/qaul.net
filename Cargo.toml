@@ -6,6 +6,7 @@ members = [
     "libqaul/common",
     "libqaul/platform",
     "libqaul/storage",
+	"libqaul/http-api",
 
     # qaul.net main services
     "libqaul/service/messaging",
