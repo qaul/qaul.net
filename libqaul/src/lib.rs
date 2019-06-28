@@ -8,6 +8,9 @@ mod users;
 mod api;
 pub use api::*;
 
+use std::{sync::{Mutex, Arc}, collections::BTreeMap};
+use users::User;
+
 /// Primary context structure for `libqaul`
 ///
 /// Handles user state, secret storage, network state,
@@ -33,4 +36,14 @@ pub use api::*;
 /// 3. Initialise services with a `libqaul` instance reference
 /// 4. Your application is now ready for use
 #[derive(Clone)]
-pub struct Qaul {}
+pub struct Qaul {
+    users: Arc<Mutex<BTreeMap<String, User>>>,
+}
+
+impl Qaul {
+    pub fn start() -> Self {
+        Self {
+            users: Arc::new(Mutex::new(BTreeMap::new())),
+        }
+    }
+}
