@@ -16,8 +16,6 @@ members = [
     "ratman",
     "ratman/identity",
     "ratman/netmod",
-    "ratman/diagnostics",
-    "ratman/routing-core",
 
     # A high-level network simulator
     "service-sim",

@@ -103,15 +103,9 @@ version = "0.1.0"
 name = "ratman"
 version = "0.0.0"
 dependencies = [
- "ratman-diagnostics 0.1.0",
  "ratman-identity 0.1.0",
  "ratman-netmod 0.1.0",
- "ratman-routing-core 0.1.0",
 ]
-
-[[package]]
-name = "ratman-diagnostics"
-version = "0.1.0"
 
 [[package]]
 name = "ratman-identity"
@@ -123,10 +117,6 @@ version = "0.1.0"
 dependencies = [
  "ratman-identity 0.1.0",
 ]
-
-[[package]]
-name = "ratman-routing-core"
-version = "0.1.0"
 
 [[package]]
 name = "subtle"
