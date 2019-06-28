@@ -1,8 +1,8 @@
-//! RATMAN identity management
+//! `RATMAN` identity management
 //!
 //! ## Why?!
 //!
-//! Because RATMAN does routing based on higher-abstraction IDs
+//! Because `RATMAN` does routing based on higher-abstraction IDs
 //! that don't neccessarily map lineraly to an IP address
 //! (or because some networks might not _use_ IP addresses),
 //! we need to introduce an ID abstraction to do routing with.
@@ -26,7 +26,7 @@
 //!
 //! ## License
 //!
-//! This library is part of RATMAN and as such licensed under the
+//! This library is part of `RATMAN` and as such licensed under the
 //! GNU General Public License 3.0 (or later).
 //! You will have received a copy of this license
 //! with the source code of this project.
@@ -34,6 +34,7 @@
 pub const ID_LEN: usize = 12;
 
 /// A RATMAN identity
+#[derive(PartialEq, Eq, Debug)]
 pub struct Identity([u8; ID_LEN]);
 
 impl Identity {
