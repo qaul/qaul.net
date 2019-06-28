@@ -1,4 +1,5 @@
 //! Defines a basic interface for a Qaul service
+
 use crate::Message;
 use std::error::Error;
 
@@ -19,4 +20,3 @@ pub trait ServiceConnectAsync<E: Error>: ServiceConnect<E> {
     /// Check whether or not the next call to messages() will block.
     fn poll_messages(&mut self) -> Result<bool, E>;
 }
-

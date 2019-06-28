@@ -3,7 +3,6 @@ members = [
 
     # qaul.net service library
     "libqaul",
-    "libqaul/common",
     "libqaul/platform",
     "libqaul/storage",
 
