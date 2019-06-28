@@ -68,17 +68,17 @@ pub struct Message {
 /// as well as remote users from the contacts book.
 pub struct User {
     /// A users network ID
-    id: Identity,
+    pub id: Identity,
     /// A human readable display-name (like @foobar)
-    display_name: Option<String>,
+    pub display_name: Option<String>,
     /// A human's preferred call-signed ("Friends call be foo")
-    real_name: Option<String>,
+    pub real_name: Option<String>,
     /// A key-value list of things the user deems interesting
     /// about themselves. This could be stuff like "gender",
     /// "preferred languages" or whatever.
-    bio: BTreeMap<String, String>,
+    pub bio: BTreeMap<String, String>,
     /// The set of services this user runs (should never be empty!)
-    services: Vec<String>,
+    pub services: Vec<String>,
     /// A users profile picture (some people like selfies)
-    avatar: Option<Vec<u8>>,
+    pub avatar: Option<Vec<u8>>,
 }
