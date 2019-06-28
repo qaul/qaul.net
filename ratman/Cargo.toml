@@ -9,7 +9,5 @@ edition = "2018"
 [dependencies]
 
 # Sub-components
-routing-core = { path = "routing-core", package = "ratman-routing-core" }
-diagnostics = { path = "diagnostics", package = "ratman-diagnostics" }
 identity = { path = "identity", package = "ratman-identity" }
 netmod = { path = "netmod", package = "ratman-netmod"}

@@ -8,6 +8,6 @@ edition = "2018"
 [dependencies]
 
 # libqaul internal dependencies
-common = { path = "common", package = "qaul-common" }
 storage = { path = "storage", package = "qaul-storage" }
 platform = { path = "platform", package = "qaul-platform" }
+identity = { path = "../ratman/identity", package = "ratman-identity" }

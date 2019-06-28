@@ -3,7 +3,6 @@ members = [
 
     # qaul.net service library
     "libqaul",
-    "libqaul/common",
     "libqaul/platform",
     "libqaul/storage",
 	"libqaul/http-api",
@@ -17,8 +16,6 @@ members = [
     "ratman",
     "ratman/identity",
     "ratman/netmod",
-    "ratman/diagnostics",
-    "ratman/routing-core",
 
     # A high-level network simulator
     "service-sim",
