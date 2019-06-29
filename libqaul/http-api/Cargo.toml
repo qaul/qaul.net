@@ -10,7 +10,6 @@ edition = "2018"
 iron = "0.6"
 persistent = "0.4"
 
-common = { path = "../common", package = "qaul-common" }
 libqaul = { path = ".." } 
 
 [dev-dependencies]

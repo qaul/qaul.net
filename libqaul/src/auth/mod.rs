@@ -1,11 +1,12 @@
 pub struct Authenticator;
-use common::{
-    error::Result as QaulResult,
-    identity::UserID,
+use crate::{
+    error::QaulResult,
+    users::User,
+    Qaul,
 };
 
-impl Authenticator {
-    pub fn authenticate(&self, token: &str) -> QaulResult<Option<UserID>> {
+impl Qaul {
+    pub fn authenticate(&self, token: &str) -> QaulResult<Option<User>> {
         unimplemented!();
     }
 }

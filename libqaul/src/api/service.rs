@@ -1,6 +1,6 @@
 //! Defines a basic interface for a Qaul service
 
-use crate::Message;
+use super::models::Message;
 use std::error::Error;
 
 /// The interface through which communication with a service occurs
