@@ -38,10 +38,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "files"
-version = "0.1.0"
-
-[[package]]
 name = "generic-array"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -63,10 +59,6 @@ name = "linux-cli"
 version = "0.1.0"
 
 [[package]]
-name = "messaging"
-version = "0.1.0"
-
-[[package]]
 name = "netsim"
 version = "0.1.0"
 
@@ -76,8 +68,25 @@ version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "qaul-files"
+version = "0.1.0"
+dependencies = [
+ "libqaul 0.1.0",
+ "ratman-identity 0.1.0",
+]
+
+[[package]]
 name = "qaul-linux"
 version = "0.1.0"
+
+[[package]]
+name = "qaul-messaging"
+version = "0.1.0"
+dependencies = [
+ "libqaul 0.1.0",
+ "qaul-files 0.1.0",
+ "ratman-identity 0.1.0",
+]
 
 [[package]]
 name = "qaul-platform"
