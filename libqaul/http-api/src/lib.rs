@@ -3,6 +3,7 @@ use libqaul::{
     QaulResult,
 };
 use iron::{
+    error::HttpResult,
     Listening,
     typemap,
     prelude::*,
@@ -27,7 +28,7 @@ pub struct ApiServer {
 }
 
 impl ApiServer {
-    pub fn new<A: ToSocketAddrs>(qaul: Arc<Qaul>, addr: A) -> QaulResult<ApiServer> {
+    pub fn new<A: ToSocketAddrs>(qaul: Arc<Qaul>, addr: A) -> HttpResult<ApiServer> {
         let mut chain = Chain::new(not_really_a_handler);
         chain.link_before(QaulCore::new(qaul));
         chain.link_before(auth::Authenticator);
@@ -40,8 +41,8 @@ impl ApiServer {
     /// According to https://github.com/hyperium/hyper/issues/338 this _probably_
     /// does nothing, but i'm providing it in the hope that in the future
     /// some one will figure out how to shutdown a webserver without crashing it
-    pub fn close(&mut self) -> QaulResult<()> {
-        Ok(self.listening.close()?)
+    pub fn close(&mut self) -> HttpResult<()> {
+        self.listening.close()
     }
 }
 
