@@ -6,7 +6,6 @@ authors = ["Katharina Fey <kookie@spacekookie.de>",
 edition = "2018"
 
 [dependencies]
-iron = "0.6"
 
 # libqaul internal dependencies
 storage = { path = "storage", package = "qaul-storage" }

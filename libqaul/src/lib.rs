@@ -2,14 +2,7 @@
 
 mod auth;
 mod crypto;
-mod error;
 mod users;
-
-pub use error::{
-    Error as QaulError, 
-    QaulResult
-};
-pub use users::User; 
 
 // This module defines the libqaul service API
 mod api;

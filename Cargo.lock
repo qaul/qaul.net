@@ -134,7 +134,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "libqaul"
 version = "0.1.0"
 dependencies = [
- "iron 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "qaul-platform 0.1.0",
  "qaul-storage 0.1.0",
  "ratman-identity 0.1.0",
