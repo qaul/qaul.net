@@ -7,14 +7,15 @@ use iron::{
     typemap,
     prelude::*,
     status::Status,
+    middleware::BeforeMiddleware,
 };
 use persistent::Read;
-use std::net::ToSocketAddrs;
+use std::{
+    net::ToSocketAddrs,
+    sync::Arc,
+};
 
 mod auth;
-
-struct QaulCore;
-impl typemap::Key for QaulCore { type Value = Qaul; }
 
 // stand in for a real handler 
 // coming soon to a pull request near you
@@ -27,10 +28,9 @@ pub struct ApiServer {
 }
 
 impl ApiServer {
-    pub fn new<A: ToSocketAddrs>(qaul: Qaul, addr: A) -> QaulResult<ApiServer> {
+    pub fn new<A: ToSocketAddrs>(qaul: Arc<Qaul>, addr: A) -> QaulResult<ApiServer> {
         let mut chain = Chain::new(not_really_a_handler);
-        // TODO: write middleware so this isn't in a read
-        chain.link(Read::<QaulCore>::both(qaul));
+        chain.link_before(QaulCore::new(qaul));
         chain.link_before(auth::Authenticator);
 
         let listening = Iron::new(chain).http(addr)?;
@@ -43,5 +43,26 @@ impl ApiServer {
     /// some one will figure out how to shutdown a webserver without crashing it
     pub fn close(&mut self) -> QaulResult<()> {
         Ok(self.listening.close()?)
+    }
+}
+
+struct QaulCore{
+    qaul: Arc<Qaul>,
+}
+
+impl QaulCore {
+    pub fn new(qaul: Arc<Qaul>) -> QaulCore {
+        QaulCore{
+            qaul,
+        }
+    }
+}
+
+impl typemap::Key for QaulCore { type Value = Arc<Qaul>; }
+
+impl BeforeMiddleware for QaulCore {
+    fn before(&self, req: &mut Request) -> IronResult<()> {
+        req.extensions.insert::<QaulCore>(self.qaul.clone());
+        Ok(())
     }
 }

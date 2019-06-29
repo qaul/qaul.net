@@ -16,7 +16,7 @@ impl BeforeMiddleware for Authenticator {
         let user = match req.headers.get::<Authorization<Bearer>>() {
             Some(bearer) => {
                 let token = bearer.token.clone(); // Otherwise rustc will yell
-                req.get::<Read<QaulCore>>()
+                req.extensions.get::<QaulCore>()
                 .unwrap().authenticate(&token)?
             },
             None => None,
