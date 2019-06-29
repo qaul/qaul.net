@@ -9,7 +9,6 @@ use iron::{
     status::Status,
     middleware::BeforeMiddleware,
 };
-use persistent::Read;
 use std::{
     net::ToSocketAddrs,
     sync::Arc,

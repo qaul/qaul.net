@@ -6,7 +6,6 @@ use iron::{
 };
 use libqaul::User;
 use crate::QaulCore;
-use persistent::Read;
 
 pub struct Authenticator;
 impl typemap::Key for Authenticator { type Value = Option<User>; }
