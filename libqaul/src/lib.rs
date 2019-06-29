@@ -5,6 +5,8 @@ mod crypto;
 mod error;
 mod users;
 
+pub use users::User; 
+
 // This module defines the libqaul service API
 mod api;
 pub use api::*;

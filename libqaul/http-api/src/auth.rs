@@ -4,31 +4,24 @@ use iron::{
     headers::{Authorization, Bearer},
     typemap,
 };
-use common::{
-    identity::UserID,
-};
-use libqaul;
-use persistent::Write;
-
-struct CoreAuthenticator;
-impl typemap::Key for CoreAuthenticator { type Value = libqaul::Authenticator; }
+use libqaul::User;
+use crate::QaulCore;
+use persistent::Read;
 
 struct Authenticator;
-impl typemap::Key for Authenticator { type Value = Option<UserID>; }
+impl typemap::Key for Authenticator { type Value = Option<User>; }
 
 impl BeforeMiddleware for Authenticator {
     fn before(&self, req: &mut Request) -> IronResult<()> {
-        let user_id = match req.headers.get::<Authorization<Bearer>>() {
+        let user = match req.headers.get::<Authorization<Bearer>>() {
             Some(bearer) => {
                 let token = bearer.token.clone(); // Otherwise rustc will yell
-                req.get::<Write<CoreAuthenticator>>()
-                .unwrap()
-                .lock().unwrap()
-                .authenticate(&token)?
+                req.get::<Read<QaulCore>>()
+                .unwrap().authenticate(&token)?
             },
             None => None,
         };
-        req.extensions.insert::<Authenticator>(user_id);
+        req.extensions.insert::<Authenticator>(user);
 
         Ok(())
     }
