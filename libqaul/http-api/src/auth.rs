@@ -8,7 +8,7 @@ use libqaul::User;
 use crate::QaulCore;
 use persistent::Read;
 
-struct Authenticator;
+pub struct Authenticator;
 impl typemap::Key for Authenticator { type Value = Option<User>; }
 
 impl BeforeMiddleware for Authenticator {
