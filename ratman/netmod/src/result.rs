@@ -3,9 +3,17 @@
 use std::error::Error as StdError;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
+/// A collection of errors around sending data frames
 #[derive(Debug)]
 pub enum Error {
-    NotAValidEndpoint,
+    /// Some operations are not implemented by all backends
+    OperationNotSupported,
+    /// The required recipient wasn't found
+    RecipientUnknown,
+    /// The constructed frame was too large to send
+    FrameTooLarge,
+    /// The connection was lost mid-transfer
+    ConnectionLost,
 }
 
 impl Display for Error {
