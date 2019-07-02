@@ -27,7 +27,7 @@ mod service;
 pub use models::{Message, QaulError, QaulResult, SigTrust, User, UserAuth};
 
 use crate::Qaul;
-use identity::Identity;
+pub use identity::Identity;
 
 impl Qaul {
     /// Create a new user

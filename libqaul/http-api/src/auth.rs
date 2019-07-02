@@ -1,26 +1,43 @@
+use crate::QaulCore;
 use iron::{
     BeforeMiddleware,
     prelude::*,
     headers::{Authorization, Bearer},
     typemap,
 };
-use libqaul::User;
-use crate::QaulCore;
+use libqaul::{
+    Identity
+};
+use std::{
+    collections::HashMap,
+    sync::{
+        Arc,
+        Mutex,
+    },
+};
 
-pub struct Authenticator;
-impl typemap::Key for Authenticator { type Value = Option<User>; }
+#[derive(Clone)]
+pub struct Authenticator{
+    tokens: Arc<Mutex<HashMap<String, Identity>>>,
+}
+
+impl Authenticator {
+    pub fn new() -> Authenticator {
+        Authenticator {
+            tokens: Arc::new(Mutex::new(HashMap::new())),
+        }
+    }
+}
+
+impl typemap::Key for Authenticator { type Value = Option<Identity>; }
 
 impl BeforeMiddleware for Authenticator {
     fn before(&self, req: &mut Request) -> IronResult<()> {
-        let user = match req.headers.get::<Authorization<Bearer>>() {
-            Some(bearer) => {
-                let token = bearer.token.clone(); // Otherwise rustc will yell
-                req.extensions.get::<QaulCore>()
-                .unwrap().authenticate(&token)?
-            },
-            None => None,
-        };
-        req.extensions.insert::<Authenticator>(user);
+        let identity = req.headers.get::<Authorization<Bearer>>()
+            .and_then(|bearer| self.tokens.lock().unwrap()
+                      .get(&bearer.token)
+                      .map(|identity| *identity));
+        req.extensions.insert::<Authenticator>(identity);
 
         Ok(())
     }

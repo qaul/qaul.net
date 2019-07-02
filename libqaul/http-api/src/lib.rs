@@ -1,6 +1,8 @@
 use libqaul::{
     Qaul,
     QaulResult,
+    UserAuth, 
+    Identity,
 };
 use iron::{
     error::HttpResult,
@@ -16,6 +18,7 @@ use std::{
 };
 
 mod auth;
+use auth::Authenticator;
 
 // stand in for a real handler 
 // coming soon to a pull request near you
@@ -24,18 +27,24 @@ fn not_really_a_handler(_: &mut Request) -> IronResult<Response> {
 }
 
 pub struct ApiServer {
+    authenticator: Authenticator,
     listening: Listening,
 }
 
 impl ApiServer {
     pub fn new<A: ToSocketAddrs>(qaul: Arc<Qaul>, addr: A) -> HttpResult<ApiServer> {
+        let authenticator = Authenticator::new();
+
         let mut chain = Chain::new(not_really_a_handler);
         chain.link_before(QaulCore::new(qaul));
-        chain.link_before(auth::Authenticator);
+        chain.link_before(authenticator.clone());
 
         let listening = Iron::new(chain).http(addr)?;
 
-        Ok(ApiServer{ listening })
+        Ok(ApiServer{ 
+            authenticator: authenticator.clone(), 
+            listening 
+        })
     }
 
     /// According to https://github.com/hyperium/hyper/issues/338 this _probably_
