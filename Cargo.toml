@@ -19,6 +19,7 @@ members = [
 
     # A high-level network simulator
     "service-sim",
+    "visn",
 
     # A _low level_ network simulator
     "netmod-sim",

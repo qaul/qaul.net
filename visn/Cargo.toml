@@ -1,0 +1,8 @@
+[package]
+name = "visn"
+version = "0.1.0"
+authors = ["Leonora Tindall <nora@nora.codes>"]
+edition = "2018"
+
+[dependencies]
+
