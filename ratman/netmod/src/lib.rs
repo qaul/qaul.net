@@ -11,6 +11,7 @@
 //! An easy example of this is `netmod-fake` which simulates a network
 
 mod frame;
+mod payload;
 mod result;
 
 pub use frame::Frame;

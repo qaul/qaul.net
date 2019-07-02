@@ -1,8 +1,11 @@
 [package]
 name = "ratman-netmod"
 version = "0.1.0"
-authors = ["Katharina Fey <kookie@spacekookie.de>"]
+authors = ["Katharina Fey <kookie@spacekookie.de>",
+    "Leonora Tindall <nora@nora.codes>"]
 edition = "2018"
 
 [dependencies]
 identity = { path = "../identity", package = "ratman-identity" }
+blake2 = "0.8"
+generic-array = "0.12.0"
