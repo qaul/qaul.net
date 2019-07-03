@@ -2,11 +2,12 @@
 
 use qaul::{Qaul, QaulResult, UserAuth};
 use identity::Identity;
+pub use mime::Mime;
 
 /// A typed file that can be sent across the network
 pub struct File {
-    mime: String,
-    data: Vec<u8>,
+    pub mime: Mime,
+    pub data: Vec<u8>,
 }
 
 /// Filesharing service state

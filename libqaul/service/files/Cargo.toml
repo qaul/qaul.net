@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 qaul = { path = "../../", package = "libqaul" }
 identity = { path = "../../../ratman/identity", package = "ratman-identity" }
+mime = "0.3"
