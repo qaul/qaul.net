@@ -88,15 +88,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "http-api"
-version = "0.1.0"
-dependencies = [
- "iron 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "libqaul 0.1.0",
- "persistent 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "httparse"
 version = "1.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -301,6 +292,15 @@ dependencies = [
  "libqaul 0.1.0",
  "mime 0.3.13 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman-identity 0.1.0",
+]
+
+[[package]]
+name = "qaul-http"
+version = "0.1.0"
+dependencies = [
+ "iron 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libqaul 0.1.0",
+ "persistent 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

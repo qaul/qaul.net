@@ -32,4 +32,5 @@ pub use api::*;
 /// 2. `libqaul` startup (this struct, call `init()`)
 /// 3. Initialise services with a `libqaul` instance reference
 /// 4. Your application is now ready for use
+#[derive(Clone)]
 pub struct Qaul {}

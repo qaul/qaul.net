@@ -32,7 +32,7 @@ pub struct ApiServer {
 }
 
 impl ApiServer {
-    pub fn new<A: ToSocketAddrs>(qaul: Arc<Qaul>, addr: A) -> HttpResult<Self> {
+    pub fn new<A: ToSocketAddrs>(qaul: &Qaul, addr: A) -> HttpResult<Self> {
         let authenticator = Authenticator::new();
 
         let mut chain = Chain::new(not_really_a_handler);
@@ -60,8 +60,8 @@ struct QaulCore{
 }
 
 impl QaulCore {
-    pub fn new(qaul: Arc<Qaul>) -> Self {
-        Self{ qaul }
+    pub fn new(qaul: &Qaul) -> Self {
+        Self{ qaul: Arc::new(qaul.clone()) }
     }
 }
 
