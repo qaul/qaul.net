@@ -1,7 +1,7 @@
 //! User storage
 
-use rand::prelude::*;
 use identity::Identity;
+use rand::prelude::*;
 use std::collections::BTreeMap;
 
 /// User context
