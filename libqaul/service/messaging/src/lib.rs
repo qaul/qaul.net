@@ -10,10 +10,13 @@ use qaul::{Qaul, QaulResult, UserAuth};
 use identity::Identity;
 use files::File;
 
+/// A list of file-attachments
+pub type Attachments = Vec<File>;
+
 /// A plain-text message with optional attachments
 pub struct Message {
     text: String,
-    attachments: Option<Vec<Vec<u8>>>,
+    attachments: Option<Attachments>,
 }
 
 /// Messaging service state
