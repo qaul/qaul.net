@@ -34,7 +34,7 @@
 pub const ID_LEN: usize = 12;
 
 /// A RATMAN identity
-#[derive(PartialEq, Eq, Debug, Copy, Clone)]
+#[derive(Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Debug)]
 pub struct Identity([u8; ID_LEN]);
 
 impl Identity {
