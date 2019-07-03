@@ -38,10 +38,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "files"
-version = "0.1.0"
-
-[[package]]
 name = "generic-array"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -63,8 +59,12 @@ name = "linux-cli"
 version = "0.1.0"
 
 [[package]]
-name = "messaging"
-version = "0.1.0"
+name = "mime"
+version = "0.3.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "unicase 2.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "netsim"
@@ -76,8 +76,26 @@ version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "qaul-files"
+version = "0.1.0"
+dependencies = [
+ "libqaul 0.1.0",
+ "mime 0.3.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ratman-identity 0.1.0",
+]
+
+[[package]]
 name = "qaul-linux"
 version = "0.1.0"
+
+[[package]]
+name = "qaul-messaging"
+version = "0.1.0"
+dependencies = [
+ "libqaul 0.1.0",
+ "qaul-files 0.1.0",
+ "ratman-identity 0.1.0",
+]
 
 [[package]]
 name = "qaul-platform"
@@ -123,6 +141,19 @@ version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "unicase"
+version = "2.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "version_check 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "version_check"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "visn"
 version = "0.1.0"
 
@@ -132,6 +163,9 @@ version = "0.1.0"
 "checksum crypto-mac 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "4434400df11d95d556bac068ddfedd482915eb18fe8bea89bc80b6e4b1c179e5"
 "checksum digest 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "f3d0c8c8752312f9713efd397ff63acb9f85585afbf179282e720e7704954dd5"
 "checksum generic-array 0.12.3 (registry+https://github.com/rust-lang/crates.io-index)" = "c68f0274ae0e023facc3c97b2e00f076be70e254bc851d972503b328db79b2ec"
+"checksum mime 0.3.13 (registry+https://github.com/rust-lang/crates.io-index)" = "3e27ca21f40a310bd06d9031785f4801710d566c184a6e15bad4f1d9b65f9425"
 "checksum opaque-debug 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "93f5bb2e8e8dec81642920ccff6b61f1eb94fa3020c5a325c9851ff604152409"
 "checksum subtle 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "2d67a5a62ba6e01cb2192ff309324cb4875d0c451d55fe2319433abe7a05a8ee"
 "checksum typenum 1.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "612d636f949607bdf9b123b4a6f6d966dedf3ff669f7f045890d3a4a73948169"
+"checksum unicase 2.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a84e5511b2a947f3ae965dcb29b13b7b1691b6e7332cf5dbc1744138d5acb7f6"
+"checksum version_check 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "914b1a6776c4c929a602fafd8bc742e06365d4bcbe48c30f9cca5824f70dc9dd"
