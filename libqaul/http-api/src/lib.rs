@@ -61,9 +61,7 @@ struct QaulCore{
 
 impl QaulCore {
     pub fn new(qaul: Arc<Qaul>) -> QaulCore {
-        QaulCore{
-            qaul,
-        }
+        QaulCore{ qaul }
     }
 }
 
