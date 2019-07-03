@@ -1,0 +1,11 @@
+[package]
+name = "http-api"
+version = "0.1.0"
+authors = ["Jess 3Jane <me@jess.coffee>"]
+edition = "2018"
+
+[dependencies]
+iron = "0.6"
+persistent = "0.4"
+
+libqaul = { path = ".." } 
