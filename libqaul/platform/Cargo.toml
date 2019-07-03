@@ -5,4 +5,14 @@ version = "0.1.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
+[features]
+pc_linux = []
+pc_macos = []
+pc_windows = []
+pc_generic = []
+
+mobile_android = []
+mobile_ios = []
+mobile_generic = []
+
 [dependencies]

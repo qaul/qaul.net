@@ -5,9 +5,7 @@ authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
 [dependencies]
-storage = { path = "storage", package = "qaul-storage" }
 platform = { path = "platform", package = "qaul-platform" }
-
 identity = { path = "../ratman/identity", package = "ratman-identity" }
 
 rand = "0.7"
