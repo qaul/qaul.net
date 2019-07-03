@@ -8,7 +8,11 @@ mod users;
 mod api;
 pub use api::*;
 
-use std::{sync::{Mutex, Arc}, collections::BTreeMap};
+use identity::Identity;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, Mutex},
+};
 use users::User;
 
 /// Primary context structure for `libqaul`
@@ -37,7 +41,7 @@ use users::User;
 /// 4. Your application is now ready for use
 #[derive(Clone)]
 pub struct Qaul {
-    users: Arc<Mutex<BTreeMap<String, User>>>,
+    users: Arc<Mutex<BTreeMap<Identity, User>>>,
 }
 
 impl Qaul {
