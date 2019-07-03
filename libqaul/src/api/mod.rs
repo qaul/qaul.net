@@ -26,13 +26,21 @@ mod models;
 mod service;
 pub use models::{Message, QaulError, QaulResult, SigTrust, User, UserAuth};
 
-use crate::Qaul;
-pub use identity::Identity;
+use crate::{Qaul, User as _User};
+use identity::Identity;
 
 impl Qaul {
     /// Create a new user
-    pub fn user_create(&self) -> QaulResult<UserAuth> {
-        unimplemented!()
+    ///
+    /// Generates a new `Identity` and takes a passphrase that is used
+    /// to encrypt
+    pub fn user_create(&self, _pw: &str) -> QaulResult<UserAuth> {
+        let user = _User::new();
+        let id = user.id.clone();
+        let mut users = self.users.lock().unwrap();
+        users.insert(id.clone(), user);
+
+        Ok(UserAuth::Default(id))
     }
 
     /// Update an existing (logged-in) user
@@ -51,7 +59,7 @@ impl Qaul {
     }
 
     /// Log-in to an existing user
-    pub fn user_login(&self, id: Identity) -> QaulResult<UserAuth> {
+    pub fn user_login(&self, id: Identity, pw: &str) -> QaulResult<UserAuth> {
         unimplemented!()
     }
 
