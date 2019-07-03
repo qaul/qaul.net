@@ -1,7 +1,10 @@
 [package]
-name = "messaging"
+name = "qaul-messaging"
 version = "0.1.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
 [dependencies]
+qaul = { path = "../../", package = "libqaul" }
+files = { path = "../files", package = "qaul-files" }
+identity = { path = "../../../ratman/identity", package = "ratman-identity" }
