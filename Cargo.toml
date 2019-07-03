@@ -3,8 +3,9 @@ members = [
 
     # qaul.net service library
     "libqaul",
+
+    # Platform specific utilities
     "libqaul/platform",
-    "libqaul/storage",
 
     # qaul.net main services
     "libqaul/service/messaging",

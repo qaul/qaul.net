@@ -176,7 +176,6 @@ name = "libqaul"
 version = "0.1.0"
 dependencies = [
  "qaul-platform 0.1.0",
- "qaul-storage 0.1.0",
  "rand 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman-identity 0.1.0",
 ]
@@ -354,10 +353,6 @@ version = "0.1.0"
 
 [[package]]
 name = "qaul-sim"
-version = "0.1.0"
-
-[[package]]
-name = "qaul-storage"
 version = "0.1.0"
 
 [[package]]
