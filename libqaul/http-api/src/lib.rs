@@ -32,7 +32,7 @@ pub struct ApiServer {
 }
 
 impl ApiServer {
-    pub fn new<A: ToSocketAddrs>(qaul: Arc<Qaul>, addr: A) -> HttpResult<ApiServer> {
+    pub fn new<A: ToSocketAddrs>(qaul: Arc<Qaul>, addr: A) -> HttpResult<Self> {
         let authenticator = Authenticator::new();
 
         let mut chain = Chain::new(not_really_a_handler);
@@ -41,7 +41,7 @@ impl ApiServer {
 
         let listening = Iron::new(chain).http(addr)?;
 
-        Ok(ApiServer{ 
+        Ok(Self{ 
             authenticator: authenticator.clone(), 
             listening 
         })
@@ -60,8 +60,8 @@ struct QaulCore{
 }
 
 impl QaulCore {
-    pub fn new(qaul: Arc<Qaul>) -> QaulCore {
-        QaulCore{ qaul }
+    pub fn new(qaul: Arc<Qaul>) -> Self {
+        Self{ qaul }
     }
 }
 
@@ -69,7 +69,7 @@ impl typemap::Key for QaulCore { type Value = Arc<Qaul>; }
 
 impl BeforeMiddleware for QaulCore {
     fn before(&self, req: &mut Request) -> IronResult<()> {
-        req.extensions.insert::<QaulCore>(self.qaul.clone());
+        req.extensions.insert::<Self>(self.qaul.clone());
         Ok(())
     }
 }

@@ -22,8 +22,8 @@ pub struct Authenticator{
 }
 
 impl Authenticator {
-    pub fn new() -> Authenticator {
-        Authenticator {
+    pub fn new() -> Self {
+        Self {
             tokens: Arc::new(Mutex::new(HashMap::new())),
         }
     }
@@ -37,7 +37,7 @@ impl BeforeMiddleware for Authenticator {
             .and_then(|bearer| self.tokens.lock().unwrap()
                       .get(&bearer.token)
                       .map(|identity| *identity));
-        req.extensions.insert::<Authenticator>(identity);
+        req.extensions.insert::<Self>(identity);
 
         Ok(())
     }
