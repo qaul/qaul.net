@@ -11,6 +11,9 @@ members = [
     "libqaul/service/files",
     "libqaul/service/core",
 
+	# qaul.net http-api
+	"libqaul/http-api",
+
     # decentralised routing protocol
     "ratman",
     "ratman/identity",
