@@ -2,8 +2,8 @@
 
 mod auth;
 mod crypto;
-mod users;
 mod storage;
+mod users;
 
 // This module defines the libqaul service API
 mod api;
