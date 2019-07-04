@@ -1,7 +1,7 @@
 //! Networking frames
 
-use identity::Identity;
 use crate::payload::Payload;
+use identity::Identity;
 
 /// A frame represents a single packet sent over a netmod
 pub struct Frame {
@@ -16,5 +16,5 @@ pub struct Frame {
     /// Origin-verification payload signature
     pub signature: [u8; 18],
     /// The actual data being transmitted, with validation metadata
-    pub payload: Payload
+    pub payload: Payload,
 }
