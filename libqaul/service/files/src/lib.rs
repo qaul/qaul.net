@@ -1,8 +1,8 @@
 //! `qaul.net` filesharing service
 
-use qaul::{Qaul, QaulResult, UserAuth};
 use identity::Identity;
 pub use mime::Mime;
+use qaul::{Qaul, QaulResult, UserAuth};
 
 /// A typed file that can be sent across the network
 pub struct File {
