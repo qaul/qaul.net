@@ -24,9 +24,11 @@
 
 mod models;
 mod service;
-pub use models::{Message, QaulError, QaulResult, SigTrust, User, UserAuth};
+pub use models::{Message, QaulError, QaulResult, SigTrust, UserAuth};
 
-use crate::{Qaul, User as _User};
+use crate::users::UserData;
+use crate::Qaul;
+use crate::User;
 use identity::Identity;
 
 impl Qaul {
@@ -35,7 +37,7 @@ impl Qaul {
     /// Generates a new `Identity` and takes a passphrase that is used
     /// to encrypt
     pub fn user_create(&self, _pw: &str) -> QaulResult<UserAuth> {
-        let user = _User::new();
+        let user = User::new();
         let id = user.id.clone();
         let mut users = self.users.lock().unwrap();
         users.insert(id.clone(), user);
@@ -43,14 +45,40 @@ impl Qaul {
         Ok(UserAuth::Default(id))
     }
 
-    /// Update an existing (logged-in) user
-    pub fn user_update(&self, user: UserAuth) -> QaulResult<()> {
+    /// Update an existing (logged-in) user to use the given details.
+    pub fn user_update(&self, user: UserAuth, data: UserData) -> QaulResult<()> {
+        let user_id = match user {
+            UserAuth::Trusted(id, _) => id,
+            UserAuth::Default(_) => {
+                return Err(QaulError::NotAuthorised);
+            }
+        };
+
+        let mut users = self.users.lock().unwrap();
+        let mut user = match users.get_mut(&user_id) {
+            Some(v) => v,
+            None => {
+                return Err(QaulError::UnknownUser);
+            }
+        };
+
+        user.data = data;
+
         Ok(())
     }
 
     /// Get logged-in user info
     pub fn user_get(&self, user: UserAuth) -> QaulResult<User> {
-        unimplemented!()
+        let user_id = match user {
+            UserAuth::Trusted(id, _) => id,
+            UserAuth::Default(id) => id,
+        };
+
+        let users = self.users.lock().unwrap();
+        match users.get(&user_id) {
+            Some(user) => Ok(user.clone()),
+            None => Err(QaulError::UnknownUser),
+        }
     }
 
     /// Delete the currently logged-in user
