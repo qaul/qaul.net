@@ -27,6 +27,16 @@ pub enum UserAuth {
     Trusted(Identity, String),
 }
 
+impl UserAuth {
+    /// Returns an error if the UserAuth isn't Trusted.
+    pub fn require_trusted(self) -> QaulResult<(Identity, String)> {
+        match self {
+            UserAuth::Trusted(id, s) => Ok((id, s)),
+            UserAuth::Default(_) => Err(QaulError::NotAuthorised),
+        }
+    }
+}
+
 /// Signature trust information embedded into service messages
 pub enum SigTrust {
     /// A verified signature by a known contact
