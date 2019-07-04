@@ -9,7 +9,7 @@ mod users;
 mod api;
 pub use api::*;
 
-use identity::Identity;
+pub use identity::Identity;
 use std::{
     collections::BTreeMap,
     sync::{Arc, Mutex},
