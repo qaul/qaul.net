@@ -93,8 +93,12 @@ impl Qaul {
     }
 
     /// Add a new contact to a user's known contacts
-    pub fn contacts_add(&self, user: UserAuth, id: Identity) -> QaulResult<()> {
-        unimplemented!()
+    pub fn contacts_add(&self, user: UserAuth, contact: User) -> QaulResult<()> {
+        let (my_id, _) = user.trusted()?;
+        let mut users = self.users.lock().unwrap();
+        let contact_id = contact.id.clone();
+        users.insert(contact_id, contact);
+        Ok(())
     }
 
     /// Find a subset of contacts with some query
