@@ -1,13 +1,26 @@
-use iron::{
-    error::HttpResult, middleware::BeforeMiddleware, prelude::*, status::Status, typemap, Listening,
+use libqaul::{
+    Qaul,
+    QaulResult,
+    UserAuth, 
+    Identity,
 };
-use libqaul::{Identity, Qaul, QaulResult, UserAuth};
-use std::{net::ToSocketAddrs, sync::Arc};
+use iron::{
+    error::HttpResult,
+    Listening,
+    typemap,
+    prelude::*,
+    status::Status,
+    middleware::BeforeMiddleware,
+};
+use std::{
+    net::ToSocketAddrs,
+    sync::Arc,
+};
 
 mod auth;
 use auth::Authenticator;
 
-// stand in for a real handler
+// stand in for a real handler 
 // coming soon to a pull request near you
 fn not_really_a_handler(_: &mut Request) -> IronResult<Response> {
     Ok(Response::with(Status::ImATeapot))
@@ -28,9 +41,9 @@ impl ApiServer {
 
         let listening = Iron::new(chain).http(addr)?;
 
-        Ok(Self {
-            authenticator: authenticator.clone(),
-            listening,
+        Ok(Self{ 
+            authenticator: authenticator.clone(), 
+            listening 
         })
     }
 
@@ -42,21 +55,17 @@ impl ApiServer {
     }
 }
 
-struct QaulCore {
+struct QaulCore{
     qaul: Arc<Qaul>,
 }
 
 impl QaulCore {
     pub fn new(qaul: &Qaul) -> Self {
-        Self {
-            qaul: Arc::new(qaul.clone()),
-        }
+        Self{ qaul: Arc::new(qaul.clone()) }
     }
 }
 
-impl typemap::Key for QaulCore {
-    type Value = Arc<Qaul>;
-}
+impl typemap::Key for QaulCore { type Value = Arc<Qaul>; }
 
 impl BeforeMiddleware for QaulCore {
     fn before(&self, req: &mut Request) -> IronResult<()> {
@@ -64,3 +73,4 @@ impl BeforeMiddleware for QaulCore {
         Ok(())
     }
 }
+
