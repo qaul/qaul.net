@@ -29,7 +29,7 @@ pub enum UserAuth {
 
 impl UserAuth {
     /// Returns an error if the UserAuth isn't Trusted.
-    pub fn require_trusted(self) -> QaulResult<(Identity, String)> {
+    pub(crate) fn trusted(self) -> QaulResult<(Identity, String)> {
         match self {
             UserAuth::Trusted(id, s) => Ok((id, s)),
             UserAuth::Default(_) => Err(QaulError::NotAuthorised),

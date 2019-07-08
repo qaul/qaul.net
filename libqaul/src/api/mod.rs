@@ -47,7 +47,7 @@ impl Qaul {
 
     /// Update an existing (logged-in) user to use the given details.
     pub fn user_update(&self, user: UserAuth, data: UserData) -> QaulResult<()> {
-        let (user_id, _) = user.require_trusted()?;
+        let (user_id, _) = user.trusted()?;
         let mut users = self.users.lock().unwrap();
         let mut user = match users.get_mut(&user_id) {
             Some(v) => v,
@@ -63,7 +63,7 @@ impl Qaul {
 
     /// Get logged-in user info
     pub fn user_get(&self, user: UserAuth) -> QaulResult<User> {
-        let (user_id, _) = user.require_trusted()?;
+        let (user_id, _) = user.trusted()?;
         let users = self.users.lock().unwrap();
         match users.get(&user_id) {
             Some(user) => Ok(user.clone()),
@@ -73,7 +73,7 @@ impl Qaul {
 
     /// Delete the currently logged-in user
     pub fn user_delete(&self, user: UserAuth) -> QaulResult<()> {
-        let (user_id, _) = user.require_trusted()?;
+        let (user_id, _) = user.trusted()?;
         let mut users = self.users.lock().unwrap();
         if !users.contains_key(&user_id) {
             return Err(QaulError::UnknownUser);
