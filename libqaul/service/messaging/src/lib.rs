@@ -6,9 +6,9 @@
 //! It's basically decentralised e-mail.
 //! It's basically e-mail.
 
-use files::File;
-use identity::Identity;
 use qaul::{Qaul, QaulResult, UserAuth};
+use identity::Identity;
+use files::File;
 
 /// A list of file-attachments
 pub type Attachments = Vec<File>;
