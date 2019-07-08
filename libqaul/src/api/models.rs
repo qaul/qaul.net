@@ -35,6 +35,14 @@ impl UserAuth {
             UserAuth::Default(_) => Err(QaulError::NotAuthorised),
         }
     }
+
+    /// Returns the interior identity, regardless of trust status.
+    pub(crate) fn identity(self) -> Identity {
+        match self {
+            UserAuth::Trusted(id, _) => id,
+            UserAuth::Default(id) => id,
+        }
+    }
 }
 
 /// Signature trust information embedded into service messages
