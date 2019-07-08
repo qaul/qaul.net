@@ -18,6 +18,7 @@ pub enum Platform {
     None,
 }
 
+
 /// Exact type of desktop platform
 #[cfg(any(
     features = "pc_linux",

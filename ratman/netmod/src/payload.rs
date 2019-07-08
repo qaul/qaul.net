@@ -12,7 +12,7 @@ pub struct Payload {
     // Message digest used to ensure integrity
     digest: Digest,
     // The actual data being transmitted
-    data: Vec<u8>,
+    data: Vec<u8>
 }
 
 // Compute and return the 64-bit Blake2b digest of the given data.
