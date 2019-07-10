@@ -6,6 +6,7 @@ use identity::Identity;
 pub type QaulResult<T> = Result<T, QaulError>;
 
 /// Service API error wrapper
+#[derive(Debug, Clone, PartialEq)]
 pub enum QaulError {
     /// Not authorised to perform this action
     NotAuthorised,
