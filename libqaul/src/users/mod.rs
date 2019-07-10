@@ -15,15 +15,13 @@ pub struct User {
 
 /// A public representation of user information
 ///
-/// Apart from the user `id`, all fields are optional
-/// and should not be assumed set. This struct is used
-/// for both the local user (identified by `UserAuth`)
-/// as well as remote users from the contacts book.
+/// This struct is used for both the local user (identified
+/// by `UserAuth`) as well as remote users from the contacts book.
 #[derive(Default, Debug, PartialEq, Clone)]
 pub struct UserData {
     /// A human readable display-name (like @foobar)
     pub display_name: Option<String>,
-    /// A human's preferred call-signed ("Friends call be foo")
+    /// A human's preferred call-sign ("Friends call me foo")
     pub real_name: Option<String>,
     /// A key-value list of things the user deems interesting
     /// about themselves. This could be stuff like "gender",
@@ -43,5 +41,37 @@ impl User {
             id: buf.into(),
             data: Default::default(),
         }
+    }
+}
+
+impl UserData {
+    /// Create a new `UserData` with no data.
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn with_display_name<S: Into<String>>(mut self, name: S) -> Self {
+        self.display_name = Some(name.into());
+        self
+    }
+
+    pub fn with_real_name<S: Into<String>>(mut self, name: S) -> Self {
+        self.real_name = Some(name.into());
+        self
+    }
+
+    pub fn with_bio_line<S: Into<String>>(mut self, key: S, value: S) -> Self {
+        self.bio.insert(key.into(), value.into());
+        self
+    }
+
+    pub fn with_service<S: Into<String>>(mut self, service: S) -> Self {
+        self.services.push(service.into());
+        self
+    }
+
+    pub fn with_avatar_data(mut self, data: Vec<u8>) -> Self {
+        self.avatar = Some(data);
+        self
     }
 }
