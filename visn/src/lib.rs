@@ -57,17 +57,27 @@ use std::collections::VecDeque;
 /// each test needs only define a starting state, a list of events to execute, and
 /// an expected ending condition.
 ///
-
-pub trait KnowledgeEngine<S, E>: Sized {
-    fn queue_event(self, event: E) -> Self;
-    fn queue_events(self, events: &[E]) -> Self;
-    fn resolve_with<F: FnOnce(&mut dyn Iterator<Item = E>) -> &mut dyn Iterator<Item = E>>(
+/// # Types
+/// - `System`: the type of the system under test.
+/// - `Event`: the type of synthetic events.
+/// - `Return`: the type returned by the `resolve` function. Can be the same as `S`, or
+///     sometimes a `Result<S, _>`.
+pub trait KnowledgeEngine<System, Event: Clone, Return>: Sized {
+    fn queue_event(self, event: Event) -> Self;
+    fn resolve_with<F: FnOnce(&mut dyn Iterator<Item = Event>) -> &mut dyn Iterator<Item = Event>>(
         self,
-        system: S,
+        system: System,
         comb: F,
-    ) -> S;
+    ) -> Return;
 
-    fn resolve_in_order(self, system: S) -> S {
+    fn queue_events(self, events: &[Event]) -> Self {
+        let mut new = self;
+        for event in events {
+            new = new.queue_event(event.clone());
+        }
+        new
+    }
+    fn resolve_in_order(self, system: System) -> Return {
         self.resolve_with(system, |iter| iter)
     }
 }
@@ -75,10 +85,12 @@ pub trait KnowledgeEngine<S, E>: Sized {
 /// Create a new KnowledgeEngine implementation with the given resolver function.
 /// This function should translate synthetic (test) events into actual changes in the
 /// state of the system under test.
-pub fn new_knowledge_engine<S, E, R>(resolve: R) -> impl KnowledgeEngine<S, E>
+pub fn new_knowledge_engine<System, Event, F>(
+    resolve: F,
+) -> impl KnowledgeEngine<System, Event, System>
 where
-    E: Clone,
-    R: Fn(E, S) -> S + 'static,
+    Event: Clone,
+    F: Fn(Event, System) -> System + 'static,
 {
     KnowledgeEngineImpl {
         events: VecDeque::new(),
@@ -86,30 +98,50 @@ where
     }
 }
 
-struct KnowledgeEngineImpl<E, S> {
-    events: VecDeque<E>,
-    resolve: Box<dyn Fn(E, S) -> S>,
+/// Create a new KnowledgeEngine implementation with the given fallible resolver function.
+/// This function should translate synthetic (test) events into actual changes in the
+/// state of the system under test.
+///
+/// If the resolver function ever returns an Err variant, the engine will cease and return
+/// that Err.
+pub fn new_fallible_engine<System, Event, Error, F>(
+    resolve: F,
+) -> impl KnowledgeEngine<System, Event, Result<System, Error>>
+where
+    Event: Clone,
+    F: Fn(Event, System) -> Result<System, Error> + 'static,
+{
+    FallibleEngineImpl {
+        events: VecDeque::new(),
+        resolve: Box::new(resolve),
+    }
 }
 
-impl<S, E: Clone> KnowledgeEngine<S, E> for KnowledgeEngineImpl<E, S> {
-    fn queue_event(self, event: E) -> Self {
+struct KnowledgeEngineImpl<System, Event> {
+    events: VecDeque<Event>,
+    resolve: Box<dyn Fn(Event, System) -> System>,
+}
+
+struct FallibleEngineImpl<System, Event, Error> {
+    events: VecDeque<Event>,
+    resolve: Box<dyn Fn(Event, System) -> Result<System, Error>>,
+}
+
+impl<System, Event: Clone> KnowledgeEngine<System, Event, System>
+    for KnowledgeEngineImpl<System, Event>
+{
+    fn queue_event(self, event: Event) -> Self {
         let mut new = self;
         new.events.push_back(event);
         new
     }
-    fn queue_events(self, events: &[E]) -> Self {
-        let mut new = self;
-        let events = Vec::from(events);
-        for event in events.into_iter() {
-            new = new.queue_event(event);
-        }
-        new
-    }
-    fn resolve_with<F: FnOnce(&mut dyn Iterator<Item = E>) -> &mut dyn Iterator<Item = E>>(
+    fn resolve_with<
+        F: FnOnce(&mut dyn Iterator<Item = Event>) -> &mut dyn Iterator<Item = Event>,
+    >(
         self,
-        system: S,
+        system: System,
         comb: F,
-    ) -> S {
+    ) -> System {
         let mut system = system;
         let mut events_iter = self.events.into_iter();
         for event in comb(&mut events_iter) {
@@ -119,9 +151,33 @@ impl<S, E: Clone> KnowledgeEngine<S, E> for KnowledgeEngineImpl<E, S> {
     }
 }
 
+impl<System, Event: Clone, Error> KnowledgeEngine<System, Event, Result<System, Error>>
+    for FallibleEngineImpl<System, Event, Error>
+{
+    fn queue_event(self, event: Event) -> Self {
+        let mut new = self;
+        new.events.push_back(event);
+        new
+    }
+    fn resolve_with<
+        F: FnOnce(&mut dyn Iterator<Item = Event>) -> &mut dyn Iterator<Item = Event>,
+    >(
+        self,
+        system: System,
+        comb: F,
+    ) -> Result<System, Error> {
+        let mut system = system;
+        let mut events_iter = self.events.into_iter();
+        for event in comb(&mut events_iter) {
+            system = (self.resolve)(event, system)?;
+        }
+        Ok(system)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{new_knowledge_engine, KnowledgeEngine};
+    use crate::{new_knowledge_engine, new_fallible_engine, KnowledgeEngine};
 
     #[derive(Debug, Default)]
     struct SystemUnderTest {
@@ -140,13 +196,28 @@ mod tests {
     fn resolve(event: SyntheticEvent, system: SystemUnderTest) -> SystemUnderTest {
         use SyntheticEvent::*;
         let mut system = system;
-        println!("{:?}", event);
         match event {
             SetA(s) => system.a = s.into(),
             SetB(s) => system.b = s.into(),
             SetC(s) => system.c = s.into(),
         };
         system
+    }
+
+    fn fallible_resolve(
+        event: SyntheticEvent,
+        system: SystemUnderTest,
+    ) -> Result<SystemUnderTest, String> {
+        use SyntheticEvent::*;
+        let mut system = system;
+        match event {
+            SetA(s) => system.a = s.into(),
+            SetB(s) => system.b = s.into(),
+            SetC(s) => {
+                return Err(format!("Could not set C to {}.", s));
+            }
+        };
+        Ok(system)
     }
 
     #[test]
@@ -161,5 +232,19 @@ mod tests {
             .resolve_in_order(SystemUnderTest::default());
         assert_eq!(system.a, "second a value".to_string());
         assert_eq!(system.b, "first b value".to_string());
+    }
+
+    #[test]
+    fn fallible_engine_example() {
+        use SyntheticEvent::*;
+        new_fallible_engine(fallible_resolve)
+            .queue_events(&[
+                SetA("first a value"),
+                SetB("first b value"),
+                SetC("this will error"),
+                SetA("second a value"),
+            ])
+            .resolve_in_order(SystemUnderTest::default())
+            .unwrap_err();
     }
 }
