@@ -354,6 +354,10 @@ version = "0.1.0"
 [[package]]
 name = "qaul-sim"
 version = "0.1.0"
+dependencies = [
+ "libqaul 0.1.0",
+ "visn 0.1.0",
+]
 
 [[package]]
 name = "rand"
