@@ -21,6 +21,7 @@ pub enum QaulError {
 }
 
 /// A wrapper around user authentication state
+#[derive(Clone)]
 pub enum UserAuth {
     /// A user ID which has not been verified
     Default(Identity),
