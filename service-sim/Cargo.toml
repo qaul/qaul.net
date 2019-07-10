@@ -5,3 +5,7 @@ authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
 [dependencies]
+visn = { path = "../visn" }
+libqaul = { path = "../libqaul" }
+
+
