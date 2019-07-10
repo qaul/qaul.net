@@ -42,7 +42,7 @@ impl Qaul {
         let mut users = self.users.lock().unwrap();
         users.insert(id.clone(), user);
 
-        Ok(UserAuth::Default(id))
+        Ok(UserAuth::Trusted(id, "fixme".into())) // TODO: Actually generate passphrase
     }
 
     /// Update an existing (logged-in) user to use the given details.

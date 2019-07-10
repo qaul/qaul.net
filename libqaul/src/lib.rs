@@ -2,7 +2,7 @@
 
 mod auth;
 mod crypto;
-mod users;
+pub mod users;
 mod storage;
 
 // This module defines the libqaul service API
@@ -14,7 +14,7 @@ use std::{
     collections::BTreeMap,
     sync::{Arc, Mutex},
 };
-use users::User;
+use users::{User};
 
 /// Primary context structure for `libqaul`
 ///
