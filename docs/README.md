@@ -1,12 +1,14 @@
-# Documentation
+# qaul.net Documentation
 
-Welcome to the `qaul.net` documentation.
-This section is split into two parts.
+## Contributers Guide
 
-## For Users
+Would you like to participate in the development of qaul.net? Great!!!
 
-...
+The contributers guide should guide you through the steps of how
+to contribute to qaul.net .
 
-## For Contributers
+You can read the latest version online: 
+https://docs.qaul.net
 
-...
+
+You're welcome to contribute to it.
