@@ -42,7 +42,31 @@ impl Qaul {
         let mut users = self.users.lock().unwrap();
         users.insert(id.clone(), user);
 
-        Ok(UserAuth::Trusted(id, "fixme".into())) // TODO: Actually generate passphrase
+        Ok(UserAuth::Trusted(
+            id,
+            unimplemented!("Key material generation"),
+        ))
+    }
+
+    /// Inject a `UserAuth` into this `Qaul`.
+    /// This is not, in general, a sensible thing for regular applications to do, but is
+    /// necessary for testing.
+    ///
+    /// # Panics
+    /// Panics if the provided `UserAuth` describes a user that is already known to this
+    /// `Qaul` instance.
+    pub fn user_inject(&self, user: UserAuth) -> QaulResult<UserAuth> {
+        let (id, passphrase) = user.trusted()?;
+        let mut user = User::new();
+        user.id = id;
+
+        let mut users = self.users.lock().unwrap();
+        if users.contains_key(&id) {
+            panic!("The user {:?} already exists within the Qaul state.", id);
+        }
+
+        users.insert(id.clone(), user);
+        Ok(UserAuth::Trusted(id, passphrase))
     }
 
     /// Update an existing (logged-in) user to use the given details.
