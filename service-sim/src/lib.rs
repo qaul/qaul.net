@@ -1,5 +1,5 @@
 #![cfg(test)]
-use libqaul::{Qaul, QaulResult, UserAuth, UserData};
+use libqaul::{Identity, Qaul, QaulResult, UserAuth, UserData};
 use visn::{new_fallible_engine, KnowledgeEngine};
 
 #[derive(Clone)]
@@ -19,10 +19,16 @@ fn resolve(event: QaulApiEvent, system: Qaul) -> QaulResult<Qaul> {
     Ok(system)
 }
 
+fn test_auth() -> UserAuth {
+    let id: Identity = [00; 12].into();
+    let k = String::new();
+    UserAuth::Trusted(id, k)
+}
+
 fn get_system_and_auth() -> (Qaul, UserAuth) {
     let mut qaul = Qaul::start();
     let auth = qaul
-        .user_create("password")
+        .user_inject(test_auth())
         .expect("Could not create test user.");
     return (qaul, auth);
 }
