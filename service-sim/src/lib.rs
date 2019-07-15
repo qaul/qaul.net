@@ -1,6 +1,5 @@
 #![cfg(test)]
-use libqaul::users::UserData;
-use libqaul::{Qaul, QaulResult, UserAuth};
+use libqaul::{Qaul, QaulResult, UserAuth, UserData};
 use visn::{new_fallible_engine, KnowledgeEngine};
 
 #[derive(Clone)]
