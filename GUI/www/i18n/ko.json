@@ -1,0 +1,98 @@
+{
+"Name of this Language":"한국어",
+
+"OK":"오케이",
+"Save":"저장",
+"Send":"보내기",
+"Delete":"삭제",
+"Back":"뒤로가기",
+"Next":"다음",
+"On":"켜다",
+"Off":"끄다",
+
+"Favorites / Friends":"좋아하는것 / 친구들",
+"Other Users":"다른 유저들",
+"Filter items":"필터 아이템들",
+
+"Chat":"채팅",
+"File Sharing":"파일 공유",
+"사적인 메시지 공유":"",
+"User Discovery":"유저 발견",
+
+"File description":"파일 세부내용",
+"Advertise file":"파일 광고",
+"Add File":"파일 추가",
+"%s has no shared files":"%들은 공유된 파일들이 없다",
+
+"Choose a user name":"유저명을 골라주세요",
+"Quit qaul.net":"qaul.net을 중지하다",
+
+"Information":"정보",
+"About qaul.net":"qaul.net에 관하여",
+"How To's":"사용 방법",
+"License":"저작권",
+"Configuration":"설정",
+"Change Language":"언어 변경",
+"Change User Name":"유저명 변경",
+"Share Internet Connection":"인터넷 연결 공유",
+"Configure Custom Network":"커스텀 네트워크 설정",
+"Configure File Sharing":"File 공유 설정",
+"Change Network Interface":"네트워크 인터페이스 변경",
+"Show Network":"네트워크 표시",
+
+"Share Your Internet Connection":"연결된 인터넷 공유",
+"Select a network interface with Internet connection.":"인터넷 연결이 가능한 네트워크 인터페이스선택",
+
+"Select Network Profile":"네트워크 프로필 선택",
+"custom":"커스텀",
+"qaul.net is completely self configuring.":"qaul.net이 자체 설정을 완료했습니다.",
+"IP Address":"IP 주소",
+"Network Mask":"네트워크 마스크",
+"Broadcast Address":"방송 주소",
+"Wifi Channel":"와이파이 채널",
+"SSID (Network Name)":"SSID (네트워크 이름)",
+"BSSID (Cell-ID)":"BSSID (Cell-ID)",
+
+"Automatically Download Advertised Files":"자동으로 광고 파일 다운로드",
+"Max Download Space":"최대 다운로드 공간",
+"Only Download Files Smaller Than":"용량이 작은 파일만 다운로드",
+"unlimited":"무제한",
+
+"Select network interface manually":"수동으로 네트워크 인터페이스 선택",
+
+"Connecting":"연결중",
+"Ringing":"울리는",
+"Is calling":"전화 거는중",
+"Establishing connection":"연결 설정",
+"Connected":"연결완료",
+"Call ended":"통화 종료됨",
+"Is busy":"바쁘다",
+"Not reachable":"도달 할 수 없음",
+"You called %s":"%s 님으로부터 전화가 왔습니다",
+"Incoming call from %s":"%s의 수신 전화",
+
+"Please write something":"무언가를 작성 해주세요",
+"This field is required":"이 필드는 필수 항목입니다",
+"Spaces are not allowed in the user name":"공백은 사용자 이름에 허용되지 않습니다",
+"User name is too long":"사용자 이름이 너무 깁니다",
+"Message is too long":"메시지가 너무 깁니다",
+"Description is too long":"설명이 너무 깁니다",
+
+"An Error Occurred":"오류가 발생했습니다",
+"Couldn't send message":"메시지를 보낼 수 없습니다",
+"User not reachable":"사용자가 연결이 불가능함",
+"No WIFI Interface Found":"WIFI 인터페이스가 없습니다",
+"Please try again":"다시 시도하십시오",
+
+"Join qaul.net":"qual.net에 가입하십시오",
+"Download and install the qaul.net software on your device":"귀하의 디바이스에 qaul.net 소프트웨어을 다운로드 및 설치해주세요",
+
+"Goodbye":"안녕히 가십시오",
+
+"Your configuration has been saved":"당신의 설정이 저장되었습니다",
+"You need to restart qaul.net to activate it":"활성화하려면 qaul.net을 재 시작해야합니다 ",
+
+"This qaul.net web client has only limited functionality.":"qaul.net 웹 클라이언트는 기능이 제한되어 있습니다.",
+"To send private messages, make voice calls, and share files, please download and install the qaul.net app for your operating system.":"비공개 메시지를 보내고 전화를 걸로 파일 공유하려면 운영 체제에 맞는 qual.net 응용 프로그램을 다운로드하여 설치하십시오.",
+"Download qaul.net app":"qaul.net-앱 다운로드."
+}
