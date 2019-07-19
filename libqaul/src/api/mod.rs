@@ -85,9 +85,9 @@ impl Qaul {
         Ok(())
     }
 
-    /// Get logged-in user info
+    /// Get information for any user
     pub fn user_get(&self, user: UserAuth) -> QaulResult<User> {
-        let (user_id, _) = user.trusted()?;
+        let user_id = user.identity();
         let users = self.users.lock().unwrap();
         match users.get(&user_id) {
             Some(user) => Ok(user.clone()),
