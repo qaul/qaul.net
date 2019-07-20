@@ -26,7 +26,7 @@ mod models;
 mod service;
 pub use models::{Message, QaulError, QaulResult, SigTrust, UserAuth};
 
-use crate::users::UserData;
+pub use crate::users::{UserData, UserUpdate};
 use crate::Qaul;
 use crate::User;
 use identity::Identity;
@@ -70,7 +70,7 @@ impl Qaul {
     }
 
     /// Update an existing (logged-in) user to use the given details.
-    pub fn user_update(&self, user: UserAuth, data: UserData) -> QaulResult<()> {
+    pub fn user_update(&self, user: UserAuth, update: UserUpdate) -> QaulResult<User> {
         let (user_id, _) = user.trusted()?;
         let mut users = self.users.lock().unwrap();
         let mut user = match users.get_mut(&user_id) {
@@ -80,9 +80,9 @@ impl Qaul {
             }
         };
 
-        user.data = data;
+        update.apply_to(&mut user.data);
 
-        Ok(())
+        Ok(user.clone())
     }
 
     /// Get information for any user
