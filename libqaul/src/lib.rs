@@ -5,7 +5,7 @@ mod crypto;
 mod storage;
 
 mod users;
-pub use users::{User, UserData};
+pub use users::{User, UserData, UserUpdate};
 
 // This module defines the libqaul service API
 mod api;
