@@ -6,7 +6,12 @@ edition = "2018"
 license = "GPL-3.0"
 
 [dependencies]
+base64 = "0.10"
 iron = "0.6"
 persistent = "0.4"
+json-api = { git = "https://gitea.jess.coffee/jess/json-api" }
+serde_derive = "1.0"
+serde = "1.0"
 
 libqaul = { path = ".." } 
+identity = { path = "../../ratman/identity", package = "ratman-identity" }

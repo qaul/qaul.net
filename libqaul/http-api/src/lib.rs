@@ -20,6 +20,8 @@ use std::{
 mod auth;
 use auth::Authenticator;
 
+pub mod models;
+
 // stand in for a real handler 
 // coming soon to a pull request near you
 fn not_really_a_handler(_: &mut Request) -> IronResult<Response> {
