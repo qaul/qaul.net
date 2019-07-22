@@ -4,7 +4,7 @@ qaul.net is free software, licensed under the [GPL license (Version 3)](gpl-3.0.
 You can download the program from the Internet: 
 https://qaul.net
 
-The documentation & web site of qaul.net stays under the 
+The documentation & web site of qaul.net stay under the 
 [Creative Commons Attribution 4.0 International](cc-by.md) license.
 
 
