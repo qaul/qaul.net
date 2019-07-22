@@ -13,7 +13,7 @@
 //! use visn::{KnowledgeEngine, new_knowledge_engine};
 //!
 //! // This is a simplistic example of a system being tested
-//! #[derive(Debug)]
+//! #[derive(Debug, Default)]
 //! struct SystemUnderTest {
 //!     a: String,
 //!     b: String
@@ -26,6 +26,7 @@
 //!     SetB(&'static str),
 //! }
 //!
+//! // This function maps SyntheticEvent variants to real changes in the system
 //! fn resolve(event: SyntheticEvent, system: SystemUnderTest) -> SystemUnderTest {
 //!     let mut system = system;
 //!     match event {
@@ -36,16 +37,16 @@
 //! }
 //!
 //! use SyntheticEvent::*;
-//! let before = SystemUnderTest {
-//!     a: "initial value".into(),
-//!     b: "initial value".into()
-//! };
-//! let after = new_knowledge_engine::<SystemUnderTest, SyntheticEvent, _>(resolve)
+//! // Create a new knowledge engine
+//! let result = new_knowledge_engine(resolve)
+//!     // Queue up some events for the engine to execute
 //!     .queue_events(&[SetA("a1"), SetB("b1"), SetA("a2")])
-//!     .resolve_in_order(before);
+//!     // Resolve these events in order, starting from the default state and returning
+//!     // the final state of the system.
+//!     .resolve_in_order(SystemUnderTest::default);
 //!
-//! assert_eq!(after.a, "a2".to_string());
-//! assert_eq!(after.b, "b1".to_string());
+//! assert_eq!(result.a, "a2".to_string());
+//! assert_eq!(result.b, "b1".to_string());
 //! ```
 use std::collections::VecDeque;
 
@@ -60,16 +61,23 @@ use std::collections::VecDeque;
 /// # Types
 /// - `System`: the type of the system under test.
 /// - `Event`: the type of synthetic events.
-/// - `Return`: the type returned by the `resolve` function. Can be the same as `S`, or
-///     sometimes a `Result<S, _>`.
+/// - `Return`: the type returned by the `resolve` function. Can be the same as `System`,
+/// or sometimes a `Result<System, _>`.
 pub trait KnowledgeEngine<System, Event: Clone, Return>: Sized {
+    /// Add a single event to the queue of events.
     fn queue_event(self, event: Event) -> Self;
-    fn resolve_with<F: FnOnce(&mut dyn Iterator<Item = Event>) -> &mut dyn Iterator<Item = Event>>(
+    /// Resolve the queue of events using the given iterator combinator (a function taking
+    /// an iterator over events and returning another iterator over events)
+    fn resolve_with<
+        F: FnOnce(&mut dyn Iterator<Item = Event>) -> &mut dyn Iterator<Item = Event>,
+        G: Fn() -> System,
+    >(
         self,
-        system: System,
+        init: G,
         comb: F,
     ) -> Return;
 
+    /// Queue multiple events from a slice.
     fn queue_events(self, events: &[Event]) -> Self {
         let mut new = self;
         for event in events {
@@ -77,8 +85,11 @@ pub trait KnowledgeEngine<System, Event: Clone, Return>: Sized {
         }
         new
     }
-    fn resolve_in_order(self, system: System) -> Return {
-        self.resolve_with(system, |iter| iter)
+
+    /// The simplest resolution function - resolves the events on the queue in the order
+    /// in which they were added.
+    fn resolve_in_order<G: Fn() -> System>(self, init: G) -> Return {
+        self.resolve_with(init, |iter| iter)
     }
 }
 
@@ -137,12 +148,13 @@ impl<System, Event: Clone> KnowledgeEngine<System, Event, System>
     }
     fn resolve_with<
         F: FnOnce(&mut dyn Iterator<Item = Event>) -> &mut dyn Iterator<Item = Event>,
+        G: Fn() -> System,
     >(
         self,
-        system: System,
+        init: G,
         comb: F,
     ) -> System {
-        let mut system = system;
+        let mut system = init();
         let mut events_iter = self.events.into_iter();
         for event in comb(&mut events_iter) {
             system = (self.resolve)(event, system);
@@ -161,12 +173,13 @@ impl<System, Event: Clone, Error> KnowledgeEngine<System, Event, Result<System, 
     }
     fn resolve_with<
         F: FnOnce(&mut dyn Iterator<Item = Event>) -> &mut dyn Iterator<Item = Event>,
+        G: Fn() -> System,
     >(
         self,
-        system: System,
+        init: G,
         comb: F,
     ) -> Result<System, Error> {
-        let mut system = system;
+        let mut system = init();
         let mut events_iter = self.events.into_iter();
         for event in comb(&mut events_iter) {
             system = (self.resolve)(event, system)?;
@@ -177,7 +190,7 @@ impl<System, Event: Clone, Error> KnowledgeEngine<System, Event, Result<System, 
 
 #[cfg(test)]
 mod tests {
-    use crate::{new_knowledge_engine, new_fallible_engine, KnowledgeEngine};
+    use crate::{new_fallible_engine, new_knowledge_engine, KnowledgeEngine};
 
     #[derive(Debug, Default)]
     struct SystemUnderTest {
@@ -229,7 +242,7 @@ mod tests {
                 SetB("first b value"),
                 SetA("second a value"),
             ])
-            .resolve_in_order(SystemUnderTest::default());
+            .resolve_in_order(SystemUnderTest::default);
         assert_eq!(system.a, "second a value".to_string());
         assert_eq!(system.b, "first b value".to_string());
     }
@@ -244,7 +257,7 @@ mod tests {
                 SetC("this will error"),
                 SetA("second a value"),
             ])
-            .resolve_in_order(SystemUnderTest::default())
+            .resolve_in_order(SystemUnderTest::default)
             .unwrap_err();
     }
 }

@@ -25,34 +25,33 @@ fn test_auth() -> UserAuth {
     UserAuth::Trusted(id, k)
 }
 
-fn get_system_and_auth() -> (Qaul, UserAuth) {
+fn system_with_auth() -> Qaul {
     let mut qaul = Qaul::start();
-    let auth = qaul
-        .user_inject(test_auth())
+    qaul.user_inject(test_auth())
         .expect("Could not create test user.");
-    return (qaul, auth);
+    qaul
 }
 
 #[test]
 fn update_user_updates_applied_in_order() {
     use QaulApiEvent::*;
-    let (mut qaul, auth) = get_system_and_auth();
+    let auth = test_auth();
 
-    let data1 = UserData::new().with_real_name("Danny Default");
-    let data2 = UserData::new().with_real_name("Dougie D'Ifferent");
+    let update1 = UserData::new().with_real_name("Danny Default");
+    let update2 = UserData::new().with_real_name("Dougie D'Ifferent");
 
     let qaul = new_fallible_engine(resolve)
         .queue_events(&[
             UpdateUser {
                 user: auth.clone(),
-                data: data1,
+                data: update1,
             },
             UpdateUser {
                 user: auth.clone(),
-                data: data2,
+                data: update2,
             },
         ])
-        .resolve_in_order(qaul)
+        .resolve_in_order(system_with_auth)
         .expect("Resolution of events failed. Error");
 
     let user = qaul
