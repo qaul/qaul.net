@@ -11,16 +11,26 @@ use iron::{
     prelude::*,
     status::Status,
     middleware::BeforeMiddleware,
+    mime,
 };
 use std::{
     net::ToSocketAddrs,
     sync::Arc,
 };
+use lazy_static::lazy_static;
 
 mod auth;
 use auth::Authenticator;
 
 pub mod models;
+
+mod jsonapi;
+
+lazy_static! { pub static ref JSONAPI_MIME : mime::Mime = mime::Mime(
+        mime::TopLevel::Application,
+        mime::SubLevel::Ext(String::from("vnd.api+json")),
+        Vec::new()); 
+}
 
 // stand in for a real handler 
 // coming soon to a pull request near you
@@ -40,6 +50,7 @@ impl ApiServer {
         let mut chain = Chain::new(not_really_a_handler);
         chain.link_before(QaulCore::new(qaul));
         chain.link_before(authenticator.clone());
+        chain.link_before(jsonapi::JsonApi);
 
         let listening = Iron::new(chain).http(addr)?;
 
