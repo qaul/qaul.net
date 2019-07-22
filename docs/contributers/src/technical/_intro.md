@@ -51,7 +51,7 @@ This means that many `libqaul` enabled applications can share the same network a
 
 The following graphic demonstrates the concept.
 
-![](./assets/apis.svg)
+![](/assets/apis.svg)
 
 **Note:** In this (qaul.net internal) setup the `"core"` service is special.
           It acts more like an API shim than an actual service and simply exposes the `libqaul` service API
