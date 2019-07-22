@@ -48,9 +48,9 @@ impl ApiServer {
         let authenticator = Authenticator::new();
 
         let mut chain = Chain::new(not_really_a_handler);
-        chain.link_before(QaulCore::new(qaul));
-        chain.link_before(authenticator.clone());
-        chain.link_before(jsonapi::JsonApi);
+        chain.link_before(QaulCore::new(qaul)); 
+        chain.link_before(authenticator.clone()); 
+        chain.link_before(jsonapi::JsonApi); 
 
         let listening = Iron::new(chain).http(addr)?;
 
@@ -62,7 +62,7 @@ impl ApiServer {
 
     /// According to https://github.com/hyperium/hyper/issues/338 this _probably_
     /// does nothing, but i'm providing it in the hope that in the future
-    /// some one will figure out how to shutdown a webserver without crashing it
+    /// someone will figure out how to shutdown a webserver without crashing it
     pub fn close(&mut self) -> HttpResult<()> {
         self.listening.close()
     }
