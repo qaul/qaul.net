@@ -101,7 +101,7 @@ impl From<JsonApiError> for IronError {
 
 impl error::Error for JsonApiError {}
 
-pub (crate) struct JsonApi;
+pub struct JsonApi;
 impl typemap::Key for JsonApi { type Value = Document; } 
 impl BeforeMiddleware for JsonApi {
     fn before(&self, req: &mut Request) -> IronResult<()> {
