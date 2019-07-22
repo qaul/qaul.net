@@ -28,6 +28,7 @@ enum JsonApiError {
     NoAcceptableType,
     SerdeError(serde_json::Error),
     IoError(io::Error),
+    NoDocument,
 }
 
 impl JsonApiError {
@@ -37,6 +38,7 @@ impl JsonApiError {
             JsonApiError::NoAcceptableType => "Accept header had JSON:API media type but all instances included parameters in violation of https://jsonapi.org/format/#content-negotiation-servers".into(),
             JsonApiError::SerdeError(e) => format!("Error deserializing document ({})", e),
             JsonApiError::IoError(e) => format!("IO Error while parsing body ({})", e),
+            JsonApiError::NoDocument => "No document found, probably due to the content type specifiying there isn't one".into(),
         }
     }
 }
@@ -54,6 +56,8 @@ impl From<JsonApiError> for IronError {
                 "https://jsonapi.org/format/#content-negotiation-servers"),
             JsonApiError::NoAcceptableType => Some(
                 "https://jsonapi.org/format/#content-negotiation-servers"),
+            JsonApiError::NoDocument => Some(
+                "https://jsonapi.org/format/#content-negotiation-clients"),
             _ => None,
         };
         let links = if let Some(url) = about_link {
@@ -67,6 +71,7 @@ impl From<JsonApiError> for IronError {
             JsonApiError::NoAcceptableType => Status::NotAcceptable,
             JsonApiError::SerdeError(_) => Status::BadRequest,
             JsonApiError::IoError(_) => Status::InternalServerError,
+            JsonApiError::NoDocument => Status::BadRequest,
         };
 
         let title = match e {
@@ -74,6 +79,7 @@ impl From<JsonApiError> for IronError {
             JsonApiError::NoAcceptableType => Some("No Acceptable Type".into()),
             JsonApiError::SerdeError(_) => Some("Deserialization Error".into()),
             JsonApiError::IoError(_) => None,
+            JsonApiError::NoDocument => Some("No Document".into()),
         };
 
         let detail = match e {
@@ -170,5 +176,16 @@ impl BeforeMiddleware for JsonApi {
         req.extensions.insert::<Self>(doc);
 
         Ok(())
+    }
+}
+
+pub struct JsonApiGaurd;
+impl BeforeMiddleware for JsonApiGaurd {
+    fn before(&self, req: &mut Request) -> IronResult<()> {
+        match req.extensions.get::<JsonApi>() {
+            None => Err(JsonApiError::NoDocument.into()),
+            Some(_) => Ok(()),
+        }
+
     }
 }
