@@ -8,6 +8,7 @@ This guide is created with the help of the free software
 It is written by [Markdown](https://www.markdownguide.org/getting-started) files.
 Feel free to edit it.
 
+
 ## Install mdBook
 
 In order to build this guide you may want to install the free mdBook 
@@ -23,6 +24,7 @@ https://rustup.rs/
 cargo install mdbook
 ```
 
+
 ## Develop
 
 While writing and contributing to this guide
@@ -33,6 +35,7 @@ mdbook serve
 ```
 
 You can now browse your latest changes locally: http://localhost:3000
+
 
 ## Build this Guide
 
