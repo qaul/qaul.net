@@ -6,7 +6,8 @@ use iron::{
     typemap,
 };
 use libqaul::{
-    Identity
+    Identity,
+    UserAuth, 
 };
 use std::{
     collections::HashMap,
@@ -29,15 +30,15 @@ impl Authenticator {
     }
 }
 
-impl typemap::Key for Authenticator { type Value = Option<Identity>; }
+impl typemap::Key for Authenticator { type Value = UserAuth; }
 
 impl BeforeMiddleware for Authenticator {
     fn before(&self, req: &mut Request) -> IronResult<()> {
-        let identity = req.headers.get::<Authorization<Bearer>>()
-            .and_then(|bearer| self.tokens.lock().unwrap()
-                      .get(&bearer.token)
-                      .map(|identity| *identity));
-        req.extensions.insert::<Self>(identity);
+        if let Some(bearer) = req.headers.get::<Authorization<Bearer>>() {
+            if let Some(identity) = self.tokens.lock().unwrap().get(&bearer.token) {
+                req.extensions.insert::<Self>(UserAuth::Trusted(*identity, bearer.token));
+            }
+        }
 
         Ok(())
     }
