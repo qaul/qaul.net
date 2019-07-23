@@ -1,6 +1,7 @@
 use base64::{encode_config, decode_config, URL_SAFE};
 use libqaul::{
-    ApiUser,
+    User as ApiUser,
+    UserData,
     Identity,
 };
 use json_api::{ResourceObject, Attributes};
@@ -30,12 +31,12 @@ impl Attributes for User {
 impl User {
     pub fn from_service_user(user: ApiUser) -> ResourceObject<User> {
         let id = encode_config(user.id.as_ref(), URL_SAFE);
-        let avatar = user.avatar.map(|a| encode_config(&a, URL_SAFE));
+        let avatar = user.data.avatar.map(|a| encode_config(&a, URL_SAFE));
         let user = User {
-            display_name: user.display_name,
-            real_name: user.real_name,
-            bio: user.bio,
-            services: Some(user.services),
+            display_name: user.data.display_name,
+            real_name: user.data.real_name,
+            bio: user.data.bio,
+            services: Some(user.data.services),
             avatar
         };
         ResourceObject::new(id, Some(user))
@@ -56,21 +57,19 @@ impl User {
                 let services = user.services.unwrap_or_default();
                 ApiUser {
                     id,
-                    display_name: user.display_name,
-                    real_name: user.real_name,
-                    bio: user.bio,
-                    services,
-                    avatar,
+                    data: UserData {
+                        display_name: user.display_name,
+                        real_name: user.real_name,
+                        bio: user.bio,
+                        services,
+                        avatar,
+                    }
                 }
             },
             None => {
                 ApiUser {
                     id,
-                    display_name: None,
-                    real_name: None,
-                    bio: BTreeMap::new(),
-                    services: Vec::new(),
-                    avatar: None,
+                    data: Default::default(), 
                 }
             },
         })
