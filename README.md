@@ -39,8 +39,10 @@ qaul.net 2.0 will have the following features:
 
 ## Build Instructions
 
-The project is being re-written in Rust, thus using [cargo][cargo] as a build system.
+The project is being re-written in Rust, thus using [cargo][] as a build system.
 If you don't have Rust installed, you can get it [here](https://rustup.sh) or via your OS.
+
+[cargo]: https://crates.io/
 
 
 ## License
