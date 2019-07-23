@@ -13,7 +13,8 @@ use json_api::{
     Document,
     Error,
     Links,
-    Link
+    Link,
+    OptionalVec
 };
 use std::{
     error,
@@ -84,6 +85,7 @@ impl From<JsonApiError> for IronError {
 
         let detail = match e {
             JsonApiError::IoError(_) => None,
+            JsonApiError::NoDocument => Some("The content type indicates this is not a JSON:API request and this endpoint only supports JSON:API requests.".into()),
             _ => Some(e.reason()),
         };
 
@@ -183,8 +185,8 @@ pub struct JsonApiGaurd;
 impl BeforeMiddleware for JsonApiGaurd {
     fn before(&self, req: &mut Request) -> IronResult<()> {
         match req.extensions.get::<JsonApi>() {
-            None => Err(JsonApiError::NoDocument.into()),
             Some(_) => Ok(()),
+            None => Err(JsonApiError::NoDocument.into()),
         }
 
     }
