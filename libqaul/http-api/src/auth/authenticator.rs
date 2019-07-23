@@ -17,8 +17,12 @@ use std::{
     },
 };
 
+pub struct CurrentUser;
+
+impl typemap::Key for CurrentUser { type Value = UserAuth; }
+
 #[derive(Clone)]
-pub struct Authenticator{
+pub (crate) struct Authenticator{
     tokens: Arc<Mutex<HashMap<String, Identity>>>,
 }
 
@@ -30,15 +34,17 @@ impl Authenticator {
     }
 }
 
-impl typemap::Key for Authenticator { type Value = UserAuth; }
+impl typemap::Key for Authenticator { type Value = Self; }
 
 impl BeforeMiddleware for Authenticator {
     fn before(&self, req: &mut Request) -> IronResult<()> {
         if let Some(bearer) = req.headers.get::<Authorization<Bearer>>() {
             if let Some(identity) = self.tokens.lock().unwrap().get(&bearer.token) {
-                req.extensions.insert::<Self>(UserAuth::Trusted(*identity, bearer.token));
+                req.extensions.insert::<CurrentUser>(UserAuth::Trusted(*identity, bearer.token));
             }
         }
+
+        req.extensions.insert::<Authenticator>(self.clone());
 
         Ok(())
     }
