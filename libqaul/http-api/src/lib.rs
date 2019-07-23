@@ -21,6 +21,7 @@ use lazy_static::lazy_static;
 
 mod auth;
 use auth::Authenticator;
+pub use auth::CurrentUser;
 
 pub mod models;
 

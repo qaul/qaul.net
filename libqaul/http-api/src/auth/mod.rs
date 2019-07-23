@@ -1,5 +1,6 @@
 mod authenticator;
-pub use authenticator::Authenticator;
+pub use authenticator::CurrentUser; 
+pub (crate) use authenticator::Authenticator;
 
 mod login;
 pub use login::login;
