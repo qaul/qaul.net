@@ -18,6 +18,7 @@ use std::{
     sync::Arc,
 };
 use lazy_static::lazy_static;
+use router::Router;
 
 mod auth;
 use auth::Authenticator;
@@ -26,7 +27,7 @@ pub use auth::CurrentUser;
 pub mod models;
 
 mod jsonapi;
-pub use jsonapi::JsonApi;
+pub use jsonapi::{JsonApi, JsonApiGaurd};
 
 lazy_static! { pub static ref JSONAPI_MIME : mime::Mime = mime::Mime(
         mime::TopLevel::Application,
@@ -34,10 +35,8 @@ lazy_static! { pub static ref JSONAPI_MIME : mime::Mime = mime::Mime(
         Vec::new()); 
 }
 
-// stand in for a real handler 
-// coming soon to a pull request near you
-fn not_really_a_handler(_: &mut Request) -> IronResult<Response> {
-    Ok(Response::with(Status::ImATeapot))
+fn core_route_blackhole(_: &mut Request) -> IronResult<Response> {
+    Ok(Response::with(Status::MethodNotAllowed))
 }
 
 pub struct ApiServer {
@@ -47,12 +46,22 @@ pub struct ApiServer {
 
 impl ApiServer {
     pub fn new<A: ToSocketAddrs>(qaul: &Qaul, addr: A) -> HttpResult<Self> {
-        let authenticator = Authenticator::new();
+        let mut router = Router::new();
 
-        let mut chain = Chain::new(not_really_a_handler);
+        let mut login_chain = Chain::new(auth::login);
+        login_chain.link_before(JsonApiGaurd);
+        router.post("/login", login_chain, "login_post");
+        router.any("/login", core_route_blackhole, "login");
+
+        router.get("/logout", auth::logout, "logout_get");
+        router.any("/logout", core_route_blackhole, "logout");
+
+        let mut chain = Chain::new(router);
         chain.link_before(QaulCore::new(qaul)); 
-        chain.link_before(authenticator.clone()); 
         chain.link_before(jsonapi::JsonApi); 
+
+        let authenticator = Authenticator::new();
+        chain.link_before(authenticator.clone()); 
 
         let listening = Iron::new(chain).http(addr)?;
 
