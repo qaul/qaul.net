@@ -25,6 +25,7 @@ use auth::Authenticator;
 pub mod models;
 
 mod jsonapi;
+pub use jsonapi::JsonApi;
 
 lazy_static! { pub static ref JSONAPI_MIME : mime::Mime = mime::Mime(
         mime::TopLevel::Application,
