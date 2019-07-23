@@ -27,6 +27,7 @@ pub (crate) enum AuthError {
     NoSecret,
     InvalidIdentity(ConversionError),
     QaulError(QaulError),
+    NotLoggedIn,
 }
 
 impl AuthError {
@@ -39,6 +40,7 @@ impl AuthError {
             AuthError::NoSecret => "No secret provided".into(),
             AuthError::InvalidIdentity(e) => format!("Conversion Error ({})", e), 
             AuthError::QaulError(e) => format!("Qaul Error ({:?})", e),
+            AuthError::NotLoggedIn => "Not logged in".into(),
         }
     }
 
@@ -47,6 +49,7 @@ impl AuthError {
             AuthError::QaulError(QaulError::NotAuthorised) => Status::Unauthorized,
             AuthError::QaulError(QaulError::UnknownUser) => Status::NotFound,
             AuthError::QaulError(QaulError::CallbackTimeout) => Status::InternalServerError,
+            AuthError::NotLoggedIn => Status::Unauthorized,
             _ => Status::BadRequest,
         };
 
@@ -61,6 +64,7 @@ impl AuthError {
             AuthError::QaulError(QaulError::InvalidQuery) => Some("Invalid Query".into()),
             AuthError::QaulError(QaulError::InvalidPayload) => Some("Invalid Payload".into()),
             AuthError::QaulError(QaulError::CallbackTimeout) => None,
+            AuthError::NotLoggedIn => Some("Not Logged In".into()),
         };
 
         let detail = match self {
@@ -95,6 +99,7 @@ impl AuthError {
             AuthError::NoSecret => Some("/data/attributes".into()),
             AuthError::InvalidIdentity(_) => Some("/data/id".into()),
             AuthError::QaulError(_) => None,
+            AuthError::NotLoggedIn => None,
         };
 
         (
