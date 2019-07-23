@@ -23,7 +23,7 @@ impl typemap::Key for CurrentUser { type Value = UserAuth; }
 
 #[derive(Clone)]
 pub (crate) struct Authenticator{
-    tokens: Arc<Mutex<HashMap<String, Identity>>>,
+    pub tokens: Arc<Mutex<HashMap<String, Identity>>>,
 }
 
 impl Authenticator {
@@ -40,7 +40,8 @@ impl BeforeMiddleware for Authenticator {
     fn before(&self, req: &mut Request) -> IronResult<()> {
         if let Some(bearer) = req.headers.get::<Authorization<Bearer>>() {
             if let Some(identity) = self.tokens.lock().unwrap().get(&bearer.token) {
-                req.extensions.insert::<CurrentUser>(UserAuth::Trusted(*identity, bearer.token));
+                req.extensions.insert::<CurrentUser>(
+                    UserAuth::Trusted(*identity, bearer.token.clone()));
             }
         }
 

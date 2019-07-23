@@ -2,6 +2,7 @@ use crate::{
     JSONAPI_MIME,
     models::ConversionError,
 };
+use libqaul::QaulError;
 use identity::ID_LEN;
 use iron::{
     IronError,
@@ -25,6 +26,7 @@ pub (crate) enum AuthError {
     ConversionError(ObjectConversionError),
     NoSecret,
     InvalidIdentity(ConversionError),
+    QaulError(QaulError),
 }
 
 impl AuthError {
@@ -36,7 +38,75 @@ impl AuthError {
             AuthError::ConversionError(e) => format!("Error converting generic object ({})", e),
             AuthError::NoSecret => "No secret provided".into(),
             AuthError::InvalidIdentity(e) => format!("Conversion Error ({})", e), 
+            AuthError::QaulError(e) => format!("Qaul Error ({:?})", e),
         }
+    }
+
+    fn into_error(&self) -> (Error, Status) {
+        let status = match self {
+            AuthError::QaulError(QaulError::NotAuthorised) => Status::Unauthorized,
+            AuthError::QaulError(QaulError::UnknownUser) => Status::NotFound,
+            AuthError::QaulError(QaulError::CallbackTimeout) => Status::InternalServerError,
+            _ => Status::BadRequest,
+        };
+
+        let title = match self {
+            AuthError::MultipleData => Some("Multiple Data".into()),
+            AuthError::NoData => Some("No Data".into()),
+            AuthError::ConversionError(_) => Some("Object Error".into()),
+            AuthError::NoSecret => Some("No Secret".into()),
+            AuthError::InvalidIdentity(_) => Some("Invalid identity".into()),
+            AuthError::QaulError(QaulError::NotAuthorised) => Some("Not Authorized".into()),
+            AuthError::QaulError(QaulError::UnknownUser) => Some("Unknown User".into()),
+            AuthError::QaulError(QaulError::InvalidQuery) => Some("Invalid Query".into()),
+            AuthError::QaulError(QaulError::InvalidPayload) => Some("Invalid Payload".into()),
+            AuthError::QaulError(QaulError::CallbackTimeout) => None,
+        };
+
+        let detail = match self {
+            AuthError::ConversionError(ObjectConversionError::ImproperType{ expected, got }) => 
+                Some(format!("Primary data should be of type {} but is of type {} instead", 
+                             expected, got)),
+            AuthError::ConversionError(ObjectConversionError::FailedDeserialization(e)) =>
+                Some(format!("Failed to deserialize attributes of primary data: {}", e)),
+            AuthError::NoSecret => Some("A secret is required to log in and none was provided".into()),
+            AuthError::InvalidIdentity(ConversionError::Base64Decode(e)) => 
+                Some(format!("Failed to decode identity, base 64 invalid: {}", e)),
+            AuthError::InvalidIdentity(ConversionError::BadIdLength(l)) =>
+                Some(format!("Failed to decode identity, decoded identity is {} bytes long when it should be {}", l, ID_LEN)),
+            AuthError::QaulError(QaulError::NotAuthorised) => 
+                Some("Current user is not authorised to perform this action".into()),
+            AuthError::QaulError(QaulError::UnknownUser) => 
+                Some("Target user is not known to Qaul".into()),
+            AuthError::QaulError(QaulError::InvalidQuery) => None, 
+            AuthError::QaulError(QaulError::InvalidPayload) => 
+                Some("Most likely the payload is too large".into()),
+            AuthError::QaulError(QaulError::CallbackTimeout) => None,
+            _ => Some(self.detail()),
+        };
+
+        let pointer = match self {
+            AuthError::MultipleData => Some("/data".into()),
+            AuthError::NoData => Some("/".into()),
+            AuthError::ConversionError(ObjectConversionError::ImproperType{ expected: _, got: _ }) =>
+                Some("/data/type".into()),
+            AuthError::ConversionError(ObjectConversionError::FailedDeserialization(_)) => 
+                Some("/data/attributes".into()),
+            AuthError::NoSecret => Some("/data/attributes".into()),
+            AuthError::InvalidIdentity(_) => Some("/data/id".into()),
+            AuthError::QaulError(_) => None,
+        };
+
+        (
+            Error {
+                status: Some(format!("{}", status.to_u16())),
+                title,
+                detail,
+                source: pointer.map(|p| ErrorSource { pointer: Some(p), ..Default::default() }),
+                ..Default::default()
+            },
+            status
+        )
     }
 }
 
@@ -50,51 +120,10 @@ impl Display for AuthError {
 
 impl From<AuthError> for IronError {
     fn from(e: AuthError) -> IronError {
-        let status = match e {
-            _ => Status::BadRequest,
-        };
-
-        let title = match e {
-            AuthError::MultipleData => Some("Multiple Data".into()),
-            AuthError::NoData => Some("No Data".into()),
-            AuthError::ConversionError(_) => Some("Object Error".into()),
-            AuthError::NoSecret => Some("No Secret".into()),
-            AuthError::InvalidIdentity(_) => Some("Invalid identity".into()),
-        };
-
-        let detail = match e {
-            AuthError::ConversionError(ObjectConversionError::ImproperType{ expected, got }) => 
-                Some(format!("Primary data should be of type {} but is of type {} instead", 
-                             expected, got)),
-            AuthError::ConversionError(ObjectConversionError::FailedDeserialization(e)) =>
-                Some(format!("Failed to deserialize attributes of primary data: {}", e)),
-            AuthError::NoSecret => Some("A secret is required to log in and none was provided".into()),
-            AuthError::InvalidIdentity(ConversionError::Base64Decode(e)) => 
-                Some(format!("Failed to decode identity, base 64 invalid: {}", e)),
-            AuthError::InvalidIdentity(ConversionError::BadIdLength(l)) =>
-                Some(format!("Failed to decode identity, decoded identity is {} bytes long when it should be {}", l, ID_LEN)),
-            _ => Some(e.detail()),
-        };
-
-        let pointer = match e {
-            AuthError::MultipleData => Some("/data".into()),
-            AuthError::NoData => Some("/".into()),
-            AuthError::ConversionError(ObjectConversionError::ImproperType{ expected: _, got: _ }) =>
-                Some("/data/type".into()),
-            AuthError::ConversionError(ObjectConversionError::FailedDeserialization(_)) => 
-                Some("/data/attributes".into()),
-            AuthError::NoSecret => Some("/data/attributes".into()),
-            AuthError::InvalidIdentity(_) => Some("/data/id".into()),
-        };
+        let (err, status) = e.into_error();
 
         let document = Document { 
-            errors: Some(vec![Error {
-                status: Some(format!("{}", status.to_u16())),
-                title,
-                detail,
-                source: pointer.map(|p| ErrorSource { pointer: Some(p), ..Default::default() }),
-                ..Default::default()
-            }]),
+            errors: Some(vec![err]),
             ..Default::default()
         };
 
