@@ -7,7 +7,7 @@ use identity::ID_LEN;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct UserAuth {
-    secret: Option<String>,
+    pub secret: Option<String>,
 }
 
 impl Attributes for UserAuth { fn kind() -> String { "user_auth".into() } }
