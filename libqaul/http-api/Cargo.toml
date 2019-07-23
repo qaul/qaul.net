@@ -9,7 +9,7 @@ license = "GPL-3.0"
 base64 = "0.10"
 iron = "0.6"
 persistent = "0.4"
-json-api = { git = "https://gitea.jess.coffee/jess/json-api" }
+json-api = { git = "https://github.com/qaul/json-api" }
 serde_derive = "1.0"
 serde = "1.0"
 serde_json = "1.0"
