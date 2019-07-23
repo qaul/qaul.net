@@ -31,7 +31,7 @@ pub enum UserAuth {
 
 impl UserAuth {
     /// Returns an error if the UserAuth isn't Trusted.
-    pub(crate) fn trusted(self) -> QaulResult<(Identity, String)> {
+    pub fn trusted(self) -> QaulResult<(Identity, String)> {
         match self {
             UserAuth::Trusted(id, s) => Ok((id, s)),
             UserAuth::Default(_) => Err(QaulError::NotAuthorised),
@@ -39,7 +39,7 @@ impl UserAuth {
     }
 
     /// Returns the interior identity, regardless of trust status.
-    pub(crate) fn identity(self) -> Identity {
+    pub fn identity(self) -> Identity {
         match self {
             UserAuth::Trusted(id, _) => id,
             UserAuth::Default(id) => id,
