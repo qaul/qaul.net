@@ -126,13 +126,29 @@ impl Qaul {
     }
 
     /// Find a subset of contacts with some query
-    pub fn contacts_find(&self, user: UserAuth, query: String) -> QaulResult<Vec<User>> {
-        unimplemented!()
+    pub fn contacts_find<S: Into<String>>(
+        &self,
+        _user: UserAuth,
+        query: S,
+    ) -> QaulResult<Vec<User>> {
+        let users = self.users.lock().unwrap();
+        let query = query.into();
+        Ok(users
+            .iter()
+            .filter(|(_, user)| user.data.like_query(&query))
+            .map(|(_, user)| user.clone())
+            .collect())
     }
 
     /// Enumerate all contacts known by a user
-    pub fn contacts_get_all(&self, user: UserAuth) -> QaulResult<Vec<User>> {
-        unimplemented!()
+    pub fn contacts_get_all(&self, _user: UserAuth) -> QaulResult<Vec<User>> {
+        Ok(self
+            .users
+            .lock()
+            .unwrap()
+            .iter()
+            .map(|(_, user)| user.clone())
+            .collect())
     }
 
     /// Send a message to another user
