@@ -87,7 +87,7 @@ pub fn login(req: &mut Request) -> IronResult<Response> {
     // return the grant
     let obj = match grant_type {
         GrantType::Token => ResourceObject::<UserGrant>::new(token, None).into(),
-        GrantType::Cookie => Success::from_message("Successfully logged in".into()).into(),
+        GrantType::Cookie => { unimplemented!() },
     };
 
     let doc = Document {
