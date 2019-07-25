@@ -5,7 +5,7 @@ mod user;
 pub use user::User;
 
 mod user_auth;
-pub use user_auth::UserAuth;
+pub use user_auth::{UserAuth, GrantType};
 
 mod user_grant;
 pub use user_grant::UserGrant;

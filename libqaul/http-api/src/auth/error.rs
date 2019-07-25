@@ -24,7 +24,7 @@ pub (crate) enum AuthError {
     MultipleData,
     NoData,
     ConversionError(ObjectConversionError),
-    NoSecret,
+    NoAttributes,
     InvalidIdentity(ConversionError),
     QaulError(QaulError),
     NotLoggedIn,
@@ -37,7 +37,7 @@ impl AuthError {
                 "Multiple data were provided when the endpoint expects exactly one".into(),
             AuthError::NoData => "Document contains no data".into(),
             AuthError::ConversionError(e) => format!("Error converting generic object ({})", e),
-            AuthError::NoSecret => "No secret provided".into(),
+            AuthError::NoAttributes => "Object has no attributes".into(),
             AuthError::InvalidIdentity(e) => format!("Conversion Error ({})", e), 
             AuthError::QaulError(e) => format!("Qaul Error ({:?})", e),
             AuthError::NotLoggedIn => "Not logged in".into(),
@@ -57,7 +57,7 @@ impl AuthError {
             AuthError::MultipleData => Some("Multiple Data".into()),
             AuthError::NoData => Some("No Data".into()),
             AuthError::ConversionError(_) => Some("Object Error".into()),
-            AuthError::NoSecret => Some("No Secret".into()),
+            AuthError::NoAttributes => Some("No Attributes".into()),
             AuthError::InvalidIdentity(_) => Some("Invalid identity".into()),
             AuthError::QaulError(QaulError::NotAuthorised) => Some("Not Authorized".into()),
             AuthError::QaulError(QaulError::UnknownUser) => Some("Unknown User".into()),
@@ -73,7 +73,6 @@ impl AuthError {
                              expected, got)),
             AuthError::ConversionError(ObjectConversionError::FailedDeserialization(e)) =>
                 Some(format!("Failed to deserialize attributes of primary data: {}", e)),
-            AuthError::NoSecret => Some("A secret is required to log in and none was provided".into()),
             AuthError::InvalidIdentity(ConversionError::Base64Decode(e)) => 
                 Some(format!("Failed to decode identity, base 64 invalid: {}", e)),
             AuthError::InvalidIdentity(ConversionError::BadIdLength(l)) =>
@@ -96,7 +95,7 @@ impl AuthError {
                 Some("/data/type".into()),
             AuthError::ConversionError(ObjectConversionError::FailedDeserialization(_)) => 
                 Some("/data/attributes".into()),
-            AuthError::NoSecret => Some("/data/attributes".into()),
+            AuthError::NoAttributes => Some("/data".into()),
             AuthError::InvalidIdentity(_) => Some("/data/id".into()),
             AuthError::QaulError(_) => None,
             AuthError::NotLoggedIn => None,
