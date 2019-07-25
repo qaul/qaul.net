@@ -66,9 +66,7 @@ pub fn login(req: &mut Request) -> IronResult<Response> {
     // perform the login
     let (ident, token) = match qaul.user_login(identity.clone(), &secret) {
         Ok(QaulUserAuth::Trusted(ident, token)) => (ident, token),
-        Ok(QaulUserAuth::Default(_)) => {
-            unreachable!(); // this is meaningless
-        },
+        Ok(QaulUserAuth::Untrusted(_)) => { unreachable!(); },
         Err(e) => {
             return Err(AuthError::QaulError(e).into());
         },
