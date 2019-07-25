@@ -1,5 +1,6 @@
 use json_api::{ResourceObject, Attributes};
 use serde_derive::{Serialize, Deserialize};
+use chrono::{ DateTime, offset::Utc };
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct Success {
@@ -8,3 +9,14 @@ pub struct Success {
 }
 
 impl Attributes for Success { fn kind() -> String { "success".into() } }
+
+impl Success {
+    /// Will create a success message with the given message
+    /// as an attribute and the current time in milliseconds 
+    /// as a (hopefully) unique id
+    pub fn from_message(message: String) -> ResourceObject<Self> {
+        let id = format!("{}", Utc::now().timestamp_millis());
+        let attr = Some(Self { message: Some(message) } );
+        ResourceObject::new(id, attr)
+    }
+}

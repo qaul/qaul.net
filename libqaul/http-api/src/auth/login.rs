@@ -3,6 +3,8 @@ use crate::{
     models::{
         UserAuth,
         UserGrant,
+        GrantType,
+        Success,
     },
     QaulCore,
     JSONAPI_MIME,
@@ -46,7 +48,7 @@ pub fn login(req: &mut Request) -> IronResult<Response> {
     };
 
     // is the identity valid
-    let (identity, secret) = match UserAuth::into_identity(ua) {
+    let identity = match UserAuth::identity(&ua) {
         Ok(id) => id,
         Err(e) => {
             return Err(AuthError::InvalidIdentity(e).into());
@@ -54,12 +56,15 @@ pub fn login(req: &mut Request) -> IronResult<Response> {
     };
 
     // is there a secret (there has to be a secret!)
-    let secret = match secret {
+    let attr = match ua.attributes {
         Some(s) => s,
         None => { 
-            return Err(AuthError::NoSecret.into());
+            return Err(AuthError::NoAttributes.into());
         },
     };
+
+    let secret = attr.secret;
+    let grant_type = attr.grant_type;
 
     let qaul = req.extensions.get::<QaulCore>().unwrap();
 
@@ -80,21 +85,13 @@ pub fn login(req: &mut Request) -> IronResult<Response> {
     }
 
     // return the grant
-    // so you'd think the id here would be the user id right?
-    // NO
-    // that's illegal according to the JSON:API spec as it'd result in multiple
-    // resources having the same (id, type) pair and ALL objects MUST have an id
-    // so we have two options:
-    // token
-    // or something unique like time
-    // we do the second one because if we set a cookie and then return the token
-    // anyways that'd be a bit silly
-    let obj = ResourceObject::new(
-        format!("{}", Utc::now().timestamp_millis()),
-        Some(UserGrant { token }));
+    let obj = match grant_type {
+        GrantType::Token => ResourceObject::<UserGrant>::new(token, None).into(),
+        GrantType::Cookie => Success::from_message("Successfully logged in".into()).into(),
+    };
 
     let doc = Document {
-        data: OptionalVec::One(Some(obj.into())),
+        data: OptionalVec::One(Some(obj)),
         ..Default::default()
     };
 

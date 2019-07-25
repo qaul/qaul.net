@@ -3,7 +3,6 @@ use crate::{
     JSONAPI_MIME,
     models::Success,
 };
-use chrono::{ DateTime, offset::Utc };
 use libqaul::UserAuth;
 use iron::{
     prelude::*,
@@ -12,7 +11,6 @@ use iron::{
 use json_api::{
     Document,
     OptionalVec,
-    ResourceObject,
 };
 use std::convert::TryInto;
 use super::{
@@ -45,9 +43,7 @@ pub fn logout(req: &mut Request) -> IronResult<Response> {
 
     // return a little success message
     // we're a JSON:API endpoint (well, probably) so we gotta return something
-    let obj = ResourceObject::new(
-        format!("{}", Utc::now().timestamp_millis()),
-        Some(Success { message: Some("Successfully logged out".into()) }));
+    let obj = Success::from_message("Successfully logged out".into());
 
     let doc = Document {
         data: OptionalVec::One(Some(obj.into())),

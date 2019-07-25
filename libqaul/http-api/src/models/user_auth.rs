@@ -6,27 +6,28 @@ use libqaul::Identity;
 use identity::ID_LEN;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum GrantType {
+    Token,
+    Cookie,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct UserAuth {
-    pub secret: Option<String>,
+    pub secret: String,
+    pub grant_type: GrantType,
 }
 
 impl Attributes for UserAuth { fn kind() -> String { "user_auth".into() } }
 
 impl UserAuth {
-    pub fn from_identity(ident: Identity, secret: String) -> ResourceObject<UserAuth> {
-        let id = encode_config(ident.as_ref(), URL_SAFE);
-        let secret = Some(secret);
-        ResourceObject::new(id, Some(UserAuth{ secret }))
-    }
-
-    pub fn into_identity(obj: ResourceObject<UserAuth>) -> 
-    Result<(Identity, Option<String>), ConversionError> {
+    pub fn identity(obj: &ResourceObject<UserAuth>) -> 
+    Result<Identity, ConversionError> {
         let raw_id = decode_config(&obj.id, URL_SAFE)?;
         if raw_id.len() != ID_LEN {
             return Err(ConversionError::BadIdLength(raw_id.len()));
         }
         let id = Identity::truncate(&raw_id);
-        let secret = obj.attributes.and_then(|a| a.secret);
-        Ok((id, secret))
+        Ok(id)
     }
 }
