@@ -38,12 +38,10 @@ impl typemap::Key for Authenticator { type Value = Self; }
 
 impl BeforeMiddleware for Authenticator {
     fn before(&self, req: &mut Request) -> IronResult<()> {
-        if let Some(bearer) = req.headers.get::<Authorization<Bearer>>() {
-            if let Some(identity) = self.tokens.lock().unwrap().get(&bearer.token) {
-                req.extensions.insert::<CurrentUser>(
-                    UserAuth::Trusted(*identity, bearer.token.clone()));
-            }
-        }
+        req.headers.get::<Authorization<Bearer>>()
+            .and_then(|bearer| self.tokens.lock().unwrap().get(&bearer.token)
+                .map(|identity| UserAuth::Trusted(*identity, bearer.token.clone())))
+            .and_then(|ua| req.extensions.insert::<CurrentUser>(ua));
 
         req.extensions.insert::<Authenticator>(self.clone());
 
