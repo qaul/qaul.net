@@ -29,7 +29,9 @@ pub mod models;
 mod jsonapi;
 pub use jsonapi::{JsonApi, JsonApiGaurd};
 
-lazy_static! { pub static ref JSONAPI_MIME : mime::Mime = mime::Mime(
+lazy_static! { 
+    /// A static `Mime` object representing `application/vnd.api+json`
+    pub static ref JSONAPI_MIME : mime::Mime = mime::Mime(
         mime::TopLevel::Application,
         mime::SubLevel::Ext(String::from("vnd.api+json")),
         Vec::new()); 
@@ -39,6 +41,7 @@ fn core_route_blackhole(_: &mut Request) -> IronResult<Response> {
     Ok(Response::with(Status::MethodNotAllowed))
 }
 
+/// The core of the qaul.net HTTP API
 pub struct ApiServer {
     authenticator: Authenticator,
     listening: Listening,
@@ -79,12 +82,19 @@ impl ApiServer {
     }
 }
 
-struct QaulCore{
+/// Use this key to get a `Qaul` instance from the `Request` object
+///
+/// ```
+/// fn handler(req: &mut Request) -> IronResult<Response> {
+///     let qaul = req.extensions.get::<QaulCore>().unwrap();
+/// }
+/// ```
+pub struct QaulCore{
     qaul: Arc<Qaul>,
 }
 
 impl QaulCore {
-    pub fn new(qaul: &Qaul) -> Self {
+    fn new(qaul: &Qaul) -> Self {
         Self{ qaul: Arc::new(qaul.clone()) }
     }
 }

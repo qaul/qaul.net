@@ -109,8 +109,27 @@ impl From<JsonApiError> for IronError {
 
 impl error::Error for JsonApiError {}
 
+/// Use this key to get the request's `Document`
+///
+/// Will only decode documents when the `Content-Type` is 
+/// `application/vnd.api+json`. Also checks the headers as required by the 
+/// [JSON:API docs](https://jsonapi.org/format/#content-negotiation-clients).
+/// If the `Content-Type` header indicates that a JSON:API document is present
+/// and any of the header checks fail or the document fails to parse, an error
+/// will be returned to the client and processing of the message will be aborted.
+///
+///
+/// ```
+/// fn handler(req: &mut Request) -> IronResult<Response> {
+///     // Some(Document) if there was a document in the request
+///     // None otherwise
+///     let document = req.extensions.get::<JsonApi>();
+/// }
+/// ```
 pub struct JsonApi;
+
 impl typemap::Key for JsonApi { type Value = Document; } 
+
 impl BeforeMiddleware for JsonApi {
     fn before(&self, req: &mut Request) -> IronResult<()> {
         let target_sublevel = SubLevel::Ext("vnd.api+json".into());
@@ -181,6 +200,11 @@ impl BeforeMiddleware for JsonApi {
     }
 }
 
+/// Gaurds endpoints that only accept JSON:API requests
+///
+/// If a request passes through this middleware that does not
+/// contain a valid JSON:API document, the request will be aborted and
+/// an error will be returned to the client
 pub struct JsonApiGaurd;
 impl BeforeMiddleware for JsonApiGaurd {
     fn before(&self, req: &mut Request) -> IronResult<()> {

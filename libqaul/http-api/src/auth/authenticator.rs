@@ -17,6 +17,15 @@ use std::{
     },
 };
 
+/// Use this key to get the logged in user of the request
+///
+/// ```
+/// fn handler(req: &mut Request) -> IronResult<Response> {
+///     // Some(UserAuth) if an authenticated user is is requesting this endpoint
+///     // None otherwise
+///     let user = req.extensions.get::<CurrentUser>();
+/// }
+/// ```
 pub struct CurrentUser;
 
 impl typemap::Key for CurrentUser { type Value = UserAuth; }
