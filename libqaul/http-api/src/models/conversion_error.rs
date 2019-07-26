@@ -5,6 +5,7 @@ use std::{
     fmt::{Formatter, Result, Display},
 };
 
+/// The error type returned when converting a `String` to an `Identity` fails
 #[derive(Debug)]
 pub enum ConversionError {
     Base64Decode(DecodeError),
