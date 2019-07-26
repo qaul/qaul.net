@@ -5,6 +5,7 @@ use super::ConversionError;
 use libqaul::Identity;
 use identity::ID_LEN;
 
+/// The type of the requested grant
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum GrantType {
@@ -12,6 +13,7 @@ pub enum GrantType {
     Cookie,
 }
 
+/// A requested login grant
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct UserAuth {
     pub secret: String,
