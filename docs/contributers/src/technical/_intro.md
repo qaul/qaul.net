@@ -66,12 +66,13 @@ When we consider their design, we assign them "layers" for easy classification.
 |----------------------|------------------------------
 | [Routing Layer]      | Handles network abstractions, frame routing and provides an API to interact with incoming messages
 | [Service Layer]      | Provides persistent storage for users, services, cryptographic identities, trust and management functions
-| API Layer            | A few very slim API-shims that either map to HTTP or platform native IPC mechanisms (i.e. Android intents or UNIX sockets)
+| [API Layer]            | A few very slim API-shims that either map to HTTP or platform native IPC mechanisms (i.e. Android intents or UNIX sockets)
 | [Application Layer]  | An extenal network service which utilises the service API to provide different features to an application
 | [Graphics layer]     | Displaying it all to a user, probably the entry-point to the end-user application
 
 [Routing Layer]: /technical/routing/_intro.html
 [Service Layer]: /technical/libqaul/_intro.html
+[API Layer]: /technical/api/_intro.html
 [Application Layer]: /technical/services/_intro.html
 [Graphics layer]: /technical/webgui/_intro.html
 
