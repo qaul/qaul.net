@@ -28,6 +28,7 @@ pub (crate) enum AuthError {
     InvalidIdentity(ConversionError),
     QaulError(QaulError),
     NotLoggedIn,
+    InvalidToken,
 }
 
 impl AuthError {
@@ -41,6 +42,7 @@ impl AuthError {
             AuthError::InvalidIdentity(e) => format!("Conversion Error ({})", e), 
             AuthError::QaulError(e) => format!("Qaul Error ({:?})", e),
             AuthError::NotLoggedIn => "Not logged in".into(),
+            AuthError::InvalidToken => "Invalid token".into(),
         }
     }
 
@@ -65,6 +67,7 @@ impl AuthError {
             AuthError::QaulError(QaulError::InvalidPayload) => Some("Invalid Payload".into()),
             AuthError::QaulError(QaulError::CallbackTimeout) => None,
             AuthError::NotLoggedIn => Some("Not Logged In".into()),
+            AuthError::InvalidToken => Some("Invalid Token".into()),
         };
 
         let detail = match self {
@@ -85,6 +88,8 @@ impl AuthError {
             AuthError::QaulError(QaulError::InvalidPayload) => 
                 Some("Most likely the payload is too large".into()),
             AuthError::QaulError(QaulError::CallbackTimeout) => None,
+            AuthError::InvalidToken => 
+                Some("The login token provided with your request is either no longer or never was valid".into()),
             _ => Some(self.detail()),
         };
 
@@ -99,6 +104,7 @@ impl AuthError {
             AuthError::InvalidIdentity(_) => Some("/data/id".into()),
             AuthError::QaulError(_) => None,
             AuthError::NotLoggedIn => None,
+            AuthError::InvalidToken => None,
         };
 
         (
