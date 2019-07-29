@@ -6,7 +6,7 @@ The user's identity encoded in Base64 with the URL-safe character set.
 
 ## Attributes
 ### `display_name: String` _(optional)_
-A human readable display-name (like @foobar)
+A human readable display-name (like `@foobar`)
 ### `real_name: String` _(optional)_
 A human's preferred call-sign ("Friends call me foo")
 ### `bio: {String}` _(optional)_
