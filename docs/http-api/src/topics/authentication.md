@@ -40,6 +40,13 @@ If included authentication information in the request will be checked for EVERY
 request, even to endpoints that don't require authentication. These errors can
 therefore occur on any endpoint.
 
+### Invalid Token
+**Status:** 400 _Bad Request_
+
+The request contained a login token, either in an `Authoization` header or in
+a cookie, which is currently invalid.
+
+
 ## Returning a grant
 To return a grant simply visit the [`logout`](/endpoints/logout.html) endpoint.
 Be sure to do this when you're done so qaul can clean up the user's data!
