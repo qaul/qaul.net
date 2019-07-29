@@ -16,6 +16,7 @@ use std::{
         Mutex,
     },
 };
+use super::AuthError;
 
 /// Use this key to get the logged in user of the request
 ///
@@ -47,12 +48,19 @@ impl typemap::Key for Authenticator { type Value = Self; }
 
 impl BeforeMiddleware for Authenticator {
     fn before(&self, req: &mut Request) -> IronResult<()> {
-        req.headers.get::<Authorization<Bearer>>()
-            .and_then(|bearer| self.tokens.lock().unwrap().get(&bearer.token)
-                .map(|identity| UserAuth::Trusted(*identity, bearer.token.clone())))
-            .and_then(|ua| req.extensions.insert::<CurrentUser>(ua));
-
         req.extensions.insert::<Authenticator>(self.clone());
+
+        if let Some(bearer) = req.headers.get::<Authorization<Bearer>>() {
+            match self.tokens.lock().unwrap().get(&bearer.token) {
+                Some(identity) => {
+                    req.extensions.insert::<CurrentUser>(
+                        UserAuth::Trusted(*identity, bearer.token.clone()));
+                },
+                None => {
+                    return Err(AuthError::InvalidToken.into());
+                },
+            }
+        }
 
         Ok(())
     }
