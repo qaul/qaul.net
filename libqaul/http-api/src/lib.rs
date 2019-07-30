@@ -29,6 +29,9 @@ pub mod models;
 mod jsonapi;
 pub use jsonapi::{JsonApi, JsonApiGaurd};
 
+mod cookie;
+pub use crate::cookie::Cookies;
+
 lazy_static! { 
     /// A static `Mime` object representing `application/vnd.api+json`
     pub static ref JSONAPI_MIME : mime::Mime = mime::Mime(
@@ -60,6 +63,7 @@ impl ApiServer {
         router.any("/logout", core_route_blackhole, "logout");
 
         let mut chain = Chain::new(router);
+        chain.link(crate::cookie::CookieManager::new());
         chain.link_before(QaulCore::new(qaul)); 
         chain.link_before(jsonapi::JsonApi); 
 
