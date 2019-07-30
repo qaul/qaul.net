@@ -15,8 +15,6 @@ Requirements
     wpa_supplicant.
 * qaul.net needs ARM and Android > 2.3 Gingerbread
   (due to before unsupported pthread functions in pjsip). 
-* The Android device needs to be rooted.
-
 
 
 Device Compatibility List
