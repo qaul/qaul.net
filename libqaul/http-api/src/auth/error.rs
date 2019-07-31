@@ -1,6 +1,9 @@
 use crate::{
     JSONAPI_MIME,
-    models::ConversionError,
+    models::{
+        ConversionError,
+        GrantType,
+    },
 };
 use libqaul::QaulError;
 use identity::ID_LEN;
@@ -28,7 +31,8 @@ pub (crate) enum AuthError {
     InvalidIdentity(ConversionError),
     QaulError(QaulError),
     NotLoggedIn,
-    InvalidToken,
+    InvalidToken(GrantType),
+    DifferingLogins,
 }
 
 impl AuthError {
@@ -42,7 +46,11 @@ impl AuthError {
             AuthError::InvalidIdentity(e) => format!("Conversion Error ({})", e), 
             AuthError::QaulError(e) => format!("Qaul Error ({:?})", e),
             AuthError::NotLoggedIn => "Not logged in".into(),
-            AuthError::InvalidToken => "Invalid token".into(),
+            AuthError::InvalidToken(g) => match g {
+                    GrantType::Cookie => "Invalid cookie",
+                    GrantType::Token => "Invalid token",
+                }.into(),
+            AuthError::DifferingLogins => "Both an authorization header and cookie are present, both are valid, but they point to different users".into(),
         }
     }
 
@@ -67,7 +75,9 @@ impl AuthError {
             AuthError::QaulError(QaulError::InvalidPayload) => Some("Invalid Payload".into()),
             AuthError::QaulError(QaulError::CallbackTimeout) => None,
             AuthError::NotLoggedIn => Some("Not Logged In".into()),
-            AuthError::InvalidToken => Some("Invalid Token".into()),
+            AuthError::InvalidToken(GrantType::Cookie) => Some("Invalid Login Cookie".into()),
+            AuthError::InvalidToken(GrantType::Token) => Some("Invalid Login Token".into()),
+            AuthError::DifferingLogins => Some("Differing Logins".into()),
         };
 
         let detail = match self {
@@ -88,8 +98,10 @@ impl AuthError {
             AuthError::QaulError(QaulError::InvalidPayload) => 
                 Some("Most likely the payload is too large".into()),
             AuthError::QaulError(QaulError::CallbackTimeout) => None,
-            AuthError::InvalidToken => 
-                Some("The login token provided with your request is either no longer or never was valid".into()),
+            AuthError::InvalidToken(GrantType::Cookie) => 
+                Some("The 'bearer' cookie contains a token that is either no long or never was valid".into()),
+            AuthError::InvalidToken(GrantType::Token) =>
+                Some("The Authorization header contains a token that is either no longer or never was valid".into()),
             _ => Some(self.detail()),
         };
 
@@ -102,9 +114,7 @@ impl AuthError {
                 Some("/data/attributes".into()),
             AuthError::NoAttributes => Some("/data".into()),
             AuthError::InvalidIdentity(_) => Some("/data/id".into()),
-            AuthError::QaulError(_) => None,
-            AuthError::NotLoggedIn => None,
-            AuthError::InvalidToken => None,
+            _ => None,
         };
 
         (

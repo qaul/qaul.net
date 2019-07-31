@@ -1,4 +1,8 @@
-use crate::QaulCore;
+use crate::{
+    Cookies,
+    models::GrantType,
+    QaulCore,
+};
 use iron::{
     BeforeMiddleware,
     prelude::*,
@@ -50,6 +54,7 @@ impl BeforeMiddleware for Authenticator {
     fn before(&self, req: &mut Request) -> IronResult<()> {
         req.extensions.insert::<Authenticator>(self.clone());
 
+        // attempt to log in with the authorization header
         if let Some(bearer) = req.headers.get::<Authorization<Bearer>>() {
             match self.tokens.lock().unwrap().get(&bearer.token) {
                 Some(identity) => {
@@ -57,7 +62,24 @@ impl BeforeMiddleware for Authenticator {
                         UserAuth::Trusted(*identity, bearer.token.clone()));
                 },
                 None => {
-                    return Err(AuthError::InvalidToken.into());
+                    return Err(AuthError::InvalidToken(GrantType::Token).into());
+                },
+            }
+        }
+
+        // attempt to authenticate with the `bearer` cookie
+        if let Some(cookie) = req.extensions.get::<Cookies>().unwrap().get("bearer") {
+            match self.tokens.lock().unwrap().get(cookie.value()) {
+                Some(identity) => {
+                    let ua = UserAuth::Trusted(*identity, cookie.value().into());
+                    if req.extensions.get::<CurrentUser>()
+                            .map_or(false, |other_id| *other_id != ua) {
+                        return Err(AuthError::DifferingLogins.into());
+                    }
+                    req.extensions.insert::<CurrentUser>(ua);
+                },
+                None => {
+                    return Err(AuthError::InvalidToken(GrantType::Cookie).into());
                 },
             }
         }
