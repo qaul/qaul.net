@@ -2,6 +2,7 @@
 [Introduction](./intro.md)
 - [Topics](./topics/_intro.md)
 	- [Authentication](./topics/authentication.md)
+	- [Cookies](./topics/cookies.md)
 	- [JSON:API](./topics/jsonapi.md)
 - [Entities](./entities/_intro.md)
 	- [`success`](./entities/success.md)
