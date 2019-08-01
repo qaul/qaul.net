@@ -1,0 +1,13 @@
+# Summary
+[Introduction](./intro.md)
+- [Topics](./topics/_intro.md)
+	- [Authentication](./topics/authentication.md)
+	- [JSON:API](./topics/jsonapi.md)
+- [Entities](./entities/_intro.md)
+	- [`success`](./entities/success.md)
+	- [`user`](./entities/user.md)
+	- [`user_auth`](./entities/user_auth.md)
+	- [`user_grant`](./entities/user_grant.md)
+- [Endpoints](./endpoints/_intro.md)
+	- [`login`](./endpoints/login.md)
+	- [`logout`](./endpoints/logout.md)

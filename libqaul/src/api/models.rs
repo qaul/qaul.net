@@ -24,25 +24,25 @@ pub enum QaulError {
 #[derive(Clone)]
 pub enum UserAuth {
     /// A user ID which has not been verified
-    Default(Identity),
+    Untrusted(Identity),
     /// The user ID of the currently logged-in user
     Trusted(Identity, String),
 }
 
 impl UserAuth {
     /// Returns an error if the UserAuth isn't Trusted.
-    pub(crate) fn trusted(self) -> QaulResult<(Identity, String)> {
+    pub fn trusted(self) -> QaulResult<(Identity, String)> {
         match self {
             UserAuth::Trusted(id, s) => Ok((id, s)),
-            UserAuth::Default(_) => Err(QaulError::NotAuthorised),
+            UserAuth::Untrusted(_) => Err(QaulError::NotAuthorised),
         }
     }
 
     /// Returns the interior identity, regardless of trust status.
-    pub(crate) fn identity(self) -> Identity {
+    pub fn identity(self) -> Identity {
         match self {
             UserAuth::Trusted(id, _) => id,
-            UserAuth::Default(id) => id,
+            UserAuth::Untrusted(id) => id,
         }
     }
 }

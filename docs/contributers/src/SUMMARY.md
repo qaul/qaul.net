@@ -9,6 +9,8 @@
     - [Routing Layer](./technical/routing/_intro.md)
         - [Routing Table](./technical/routing/routing-table.md)
         - [Network Modules](./technical/routing/netmod.md)
+	- [API Layer](./technical/api/_intro.md)
+		- [HTTP](./technical/api/http/_intro.md)
     - [`libqaul`](./technical/libqaul/_intro.md)
     - [Web GUI](./technical/webgui/_intro.md)
 - [Translations](./translations/_intro.md)

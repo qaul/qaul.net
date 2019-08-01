@@ -3,9 +3,19 @@ name = "qaul-http"
 version = "0.1.0"
 authors = ["Jess 3Jane <me@jess.coffee>"]
 edition = "2018"
+license = "GPL-3.0"
 
 [dependencies]
+base64 = "0.10"
 iron = "0.6"
 persistent = "0.4"
+json-api = { git = "https://github.com/qaul/json-api" }
+serde_derive = "1.0"
+serde = "1.0"
+serde_json = "1.0"
+lazy_static = "1.3"
+router = "0.6"
+chrono = "0.4"
 
 libqaul = { path = ".." } 
+identity = { path = "../../ratman/identity", package = "ratman-identity" }

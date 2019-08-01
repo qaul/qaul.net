@@ -65,15 +65,36 @@ impl Identity {
 }
 
 /// Implement RAW `From` binary array
-impl From<[u8; 12]> for Identity {
-    fn from(i: [u8; 12]) -> Self {
+impl From<[u8; ID_LEN]> for Identity {
+    fn from(i: [u8; ID_LEN]) -> Self {
         Self(i)
     }
 }
 
 /// Implement RAW `From` binary (reference) array
-impl From<&[u8; 12]> for Identity {
-    fn from(i: &[u8; 12]) -> Self {
+impl From<&[u8; ID_LEN]> for Identity {
+    fn from(i: &[u8; ID_LEN]) -> Self {
         Self(i.clone())
+    }
+}
+
+/// Implement binary array `From` RAW 
+impl From<Identity> for [u8; ID_LEN] {
+    fn from(i: Identity) -> Self {
+        i.0
+    }
+}
+
+/// Implement binary array `From` RAW reference 
+impl From<&Identity> for [u8; ID_LEN] {
+    fn from(i: &Identity) -> Self {
+        i.0.clone()
+    }
+}
+
+/// Implement RAW identity to binary array reference
+impl AsRef<[u8]> for Identity {
+    fn as_ref(&self) -> &[u8] {
+        &self.0
     }
 }
