@@ -26,6 +26,8 @@ pub use auth::CurrentUser;
 
 pub mod models;
 
+mod mount;
+
 mod jsonapi;
 pub use jsonapi::{JsonApi, JsonApiGaurd};
 
