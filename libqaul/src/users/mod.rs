@@ -60,6 +60,22 @@ impl UserData {
         new
     }
 
+    /// Check if the names of this UserData are similar to the query given, in order to
+    /// facilitate searching.
+    pub fn like_query(&self, query: &str) -> bool {
+        let like_display_name = match &self.display_name {
+            None => false,
+            Some(v) => v.contains(query),
+        };
+
+        let like_real_name = match &self.real_name {
+            None => false,
+            Some(v) => v.contains(query),
+        };
+
+        like_display_name || like_real_name
+    }
+
     pub fn with_display_name<S: Into<String>>(mut self, name: S) -> Self {
         self.display_name = Some(name.into());
         self
@@ -84,4 +100,29 @@ impl UserData {
         self.avatar = Some(data);
         self
     }
+}
+
+#[test]
+fn like_query_fails_with_no_names() {
+    assert!(!UserData::new().like_query(""));
+}
+
+#[test]
+fn like_query_succeeds_with_exact() {
+    assert!(UserData::new()
+        .with_display_name("@dannydefault")
+        .like_query("@dannydefault"));
+    assert!(UserData::new()
+        .with_real_name("Danny Default")
+        .like_query("Danny Default"));
+}
+
+#[test]
+fn like_query_succeeds_with_perfect_substring() {
+    assert!(UserData::new()
+        .with_display_name("@dannydefault")
+        .like_query("danny"));
+    assert!(UserData::new()
+        .with_real_name("Danny Default")
+        .like_query("Danny"));
 }

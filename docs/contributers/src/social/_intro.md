@@ -16,8 +16,8 @@ If you don't want to or can't use zulip, we also have a [community mailing list]
 You can post questions there, show off your projects using `libqaul` or submit patches to the project!
 
 [zulip]: https://qaul.zulipchat.com
-[announcement mailing list]: ~qaul/announcements@lists.sr.ht
-[community mailing list]: ~qaul/community@lists.sr.ht
+[announcement mailing list]: https://lists.sr.ht/~qaul/announcements
+[community mailing list]: https://lists.sr.ht/~qaul/community
 
 
 ## Code of Conduct
