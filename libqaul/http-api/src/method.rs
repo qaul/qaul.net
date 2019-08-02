@@ -86,6 +86,10 @@ impl From<MethodGaurdError> for IronError {
     }
 }
 
+/// Aborts requests made with incorrect methods
+///
+/// Add this to a request chain to deny all requests that do not use the 
+/// required methods
 pub struct MethodGaurd {
     methods: Vec<Method>,
 }
