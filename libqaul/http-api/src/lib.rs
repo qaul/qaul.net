@@ -45,10 +45,6 @@ lazy_static! {
         Vec::new()); 
 }
 
-fn core_route_blackhole(_: &mut Request) -> IronResult<Response> {
-    Ok(Response::with(Status::MethodNotAllowed))
-}
-
 /// The core of the qaul.net HTTP API
 pub struct ApiServer {
     authenticator: Authenticator,
