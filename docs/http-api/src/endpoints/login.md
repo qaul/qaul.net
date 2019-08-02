@@ -1,6 +1,9 @@
 # `login`
 Allows a user to authenticate with qaul.
 
+## Methods
+- `POST`
+
 ## Arguments
 Expects a [`user_auth`](/entities/user_auth.html) entity
 
@@ -24,6 +27,12 @@ value. Check the `detail` field of the error for more information.
 The id field of the primary data failed to decode, check the 
 [`user_auth`](/entities/user_auth.html) entity for information about its contents.
 
+### Method Not Allowed
+**Status:** 405 _Method Not Allowed_
+
+This endpoint expects a `POST` request and what it was provided was not a `POST`
+request
+
 ### Multiple Data 
 **Status:** 400 _Bad Request_
 
@@ -38,6 +47,7 @@ The primary data had no attributes at all
 **Status:** 401 _Unauthorized_
 
 This likely occured because the secret is wrong
+
 ### No Data
 **Status:** 400 _Bad Request_
 
