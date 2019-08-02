@@ -114,9 +114,14 @@ impl HotPlugHandlerError {
 
     fn into_error(&self) -> (Error, Status) {
         let status = match self {
+            // TODO: Should NoPath provide a landing page?
+            // it's like you'd end up there because you don't know how the
+            // api works, we could potentially provide some guidence to the
+            // documentation
+            HotPlugHandlerError::NoPath => Status::BadRequest,
+            HotPlugHandlerError::NoService(s) => Status::NotFound,
             HotPlugHandlerError::ServiceNotAuthorized(_) => Status::Forbidden,
             HotPlugHandlerError::QaulError(_) => Status::InternalServerError,
-            _ => Status::BadRequest,
         };
 
         let title = match self {
