@@ -85,17 +85,30 @@ impl ApiServer {
         })
     }
 
-    /// According to https://github.com/hyperium/hyper/issues/338 this _probably_
-    /// does nothing, but i'm providing it in the hope that in the future
-    /// someone will figure out how to shutdown a webserver without crashing it
+    /// According to
+    /// [https://github.com/hyperium/hyper/issues/338](https://github.com/hyperium/hyper/issues/338) 
+    /// this _probably_ does nothing, but i'm providing it in the hope that in the 
+    /// future someone will figure out how to shutdown a webserver without crashing it
     pub fn close(&mut self) -> HttpResult<()> {
         self.listening.close()
     }
 
+    /// Mount a service's handler under `/{name}`
+    ///
+    /// Errors when you try to replace a core route like `/login`
+    ///
+    /// Returns `true` when a this service replaces a previous service mounted
+    /// under the same path and `false` otherwise
     pub fn mount_service<T: Handler>(&self, name: String, handler: T) -> Result<bool, HotPlugError> {
         self.mount.mount(name, handler)
     }
 
+    /// Unmount a service's handler
+    ///
+    /// Errors when you try to unmount a core route like `/login`
+    ///
+    /// Returns `true` when a service with that name existed and was unmounted, 
+    /// `false` when no service of that name was found 
     pub fn unmount_service(&self, name: &str) -> Result<bool, HotPlugError> {
         self.mount.unmount(name)
     }

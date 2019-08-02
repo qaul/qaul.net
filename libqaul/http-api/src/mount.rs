@@ -23,8 +23,10 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+/// An error generated during plugging or unplugging routes
 #[derive(Debug)]
 pub enum HotPlugError {
+    /// Method would have modified a core route
     CoreRoute,
 }
 
@@ -46,7 +48,7 @@ enum Route {
 }
 
 #[derive(Clone)]
-pub struct HotPlugMount {
+pub (crate) struct HotPlugMount {
     routes: Arc<Mutex<BTreeMap<String, Route>>>,
 }
 
