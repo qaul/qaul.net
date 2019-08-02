@@ -1,6 +1,9 @@
 # `logout`
 Logs a user out. It is important to do this so qaul can lock the user's data.
 
+## Methods
+- `GET`
+
 ## Arguments
 None
 
@@ -8,6 +11,11 @@ None
 [`success`](/entities/success.html)
 
 ## Errors
+
+### Method Not Allowed
+**Status:** 405 _Method Not Allowed_
+
+This endpoint only accepts `GET` requests and this request was of a different type
 
 ### Not Logged In
 **Status:** 401 _Unauthorized_
