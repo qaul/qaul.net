@@ -45,6 +45,7 @@ enum Route {
     Core(Arc<Box<dyn Handler>>),
 }
 
+#[derive(Clone)]
 pub struct HotPlugMount {
     routes: Arc<Mutex<BTreeMap<String, Route>>>,
 }
