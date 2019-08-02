@@ -2,7 +2,10 @@
 
 use identity::Identity;
 use rand::prelude::*;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
+
+mod updates;
+pub use updates::UserUpdate;
 
 /// A complete user, with ID and data.
 #[derive(Debug, PartialEq, Clone)]
@@ -28,7 +31,7 @@ pub struct UserData {
     /// "preferred languages" or whatever.
     pub bio: BTreeMap<String, String>,
     /// The set of services this user runs (should never be empty!)
-    pub services: Vec<String>,
+    pub services: BTreeSet<String>,
     /// A users profile picture (some people like selfies)
     pub avatar: Option<Vec<u8>>,
 }
@@ -48,6 +51,13 @@ impl UserData {
     /// Create a new `UserData` with no data.
     pub fn new() -> Self {
         Default::default()
+    }
+
+    /// Apply the given UserUpdate to this UserData, returning the modified version.
+    pub fn apply(self, update: UserUpdate) -> Self {
+        let mut new = self;
+        update.apply_to(&mut new);
+        new
     }
 
     /// Check if the names of this UserData are similar to the query given, in order to
@@ -82,7 +92,7 @@ impl UserData {
     }
 
     pub fn with_service<S: Into<String>>(mut self, service: S) -> Self {
-        self.services.push(service.into());
+        self.services.insert(service.into());
         self
     }
 
