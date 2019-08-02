@@ -10,7 +10,10 @@ use iron::{
     typemap,
     prelude::*,
     status::Status,
-    middleware::BeforeMiddleware,
+    middleware::{
+        BeforeMiddleware,
+        Handler,
+    },
     mime,
 };
 use std::{
@@ -18,7 +21,6 @@ use std::{
     sync::Arc,
 };
 use lazy_static::lazy_static;
-use router::Router;
 
 mod auth;
 use auth::Authenticator;
@@ -27,6 +29,10 @@ pub use auth::CurrentUser;
 pub mod models;
 
 mod mount;
+pub use mount::HotPlugError;
+
+mod method;
+pub use method::MethodGaurd;
 
 mod jsonapi;
 pub use jsonapi::{JsonApi, JsonApiGaurd};
@@ -46,22 +52,24 @@ fn core_route_blackhole(_: &mut Request) -> IronResult<Response> {
 /// The core of the qaul.net HTTP API
 pub struct ApiServer {
     authenticator: Authenticator,
+    mount: mount::HotPlugMount,
     listening: Listening,
 }
 
 impl ApiServer {
     pub fn new<A: ToSocketAddrs>(qaul: &Qaul, addr: A) -> HttpResult<Self> {
-        let mut router = Router::new();
+        let mount = mount::HotPlugMount::new();
 
         let mut login_chain = Chain::new(auth::login);
+        login_chain.link_before(MethodGaurd::post());
         login_chain.link_before(JsonApiGaurd);
-        router.post("/login", login_chain, "login_post");
-        router.any("/login", core_route_blackhole, "login");
+        mount.mount_core("login".into(), login_chain);
 
-        router.get("/logout", auth::logout, "logout_get");
-        router.any("/logout", core_route_blackhole, "logout");
+        let mut logout_chain = Chain::new(auth::logout);
+        logout_chain.link_before(MethodGaurd::get());
+        mount.mount_core("logout".into(), logout_chain);
 
-        let mut chain = Chain::new(router);
+        let mut chain = Chain::new(mount.clone());
         chain.link_before(QaulCore::new(qaul)); 
         chain.link_before(jsonapi::JsonApi); 
 
@@ -72,7 +80,8 @@ impl ApiServer {
 
         Ok(Self{ 
             authenticator: authenticator.clone(), 
-            listening 
+            mount,
+            listening, 
         })
     }
 
@@ -81,6 +90,14 @@ impl ApiServer {
     /// someone will figure out how to shutdown a webserver without crashing it
     pub fn close(&mut self) -> HttpResult<()> {
         self.listening.close()
+    }
+
+    pub fn mount_service<T: Handler>(&self, name: String, handler: T) -> Result<bool, HotPlugError> {
+        self.mount.mount(name, handler)
+    }
+
+    pub fn unmount_service(&self, name: &str) -> Result<bool, HotPlugError> {
+        self.mount.unmount(name)
     }
 }
 
