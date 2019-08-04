@@ -46,3 +46,6 @@ cmake-build-debug/
 
 # Rust specific
 **/target
+
+# documentation
+docs/*/book
