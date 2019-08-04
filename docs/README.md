@@ -1,14 +1,17 @@
 # qaul.net Documentation
 
-## Contributers Guide
+**This folder contains the qaul.net documentation. You can find them online under [https://docs.qaul.net](https://docs.qaul.net)**
 
-Would you like to participate in the development of qaul.net? Great!!!
-
-The contributers guide should guide you through the steps of how
-to contribute to qaul.net .
-
-You can read the latest version online: 
-https://docs.qaul.net
+**Your welcome to contribute to them!**
 
 
-You're welcome to contribute to it.
+## Guides
+
+* `contributers`: the contributers guide introduces and explains the structure of qaul.net and should guide you through the steps of how to the project.
+* `http-api`: contains the documentation of the qaul.net http-api.
+* `index`: this folder contains the overview page.
+
+
+## Build and Deploy
+
+To build and deploy, look into the `deploy.sh` script.

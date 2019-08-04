@@ -3,8 +3,10 @@
 qaul.net runs many different web services:
 
 * [qaul.net](https://qaul.net) the qaul.net web site
-* [docs.qaul.net](https://docs.qaul.net) the qaul.net contributors guide (this document)
-* [api.qaul.net](https://api.qaul.net) the qaul.net rust software API documentation (automatically created from the qaul.net code sources)
+* [docs.qaul.net](https://docs.qaul.net) the qaul.net documentations
+  * [contributers guide](https://docs.qaul.net/contributers) (this document)
+  * [http-api](https://docs.qaul.net/http-api) qaul.net REST API guide
+  * [Rust documentaiion](https://docs.qaul.net/api) the qaul.net rust software API documentation (automatically created from the qaul.net code sources)
 * [get.qaul.net](https://get.qaul.net) the qaul.net download directory for the qaul.net binaries and big content files (e.g. videos, etc.).
 
 This chapter explains how they are hosted, updated, where to look to edit and change them and who to contact when the service is not working or you would like to have access to it.
@@ -23,22 +25,12 @@ Please have a look there on how to edit and translate the web site.
 [own chapter]: /web-site
 
 
-## docs.qaul.net Contributers Guide
+## docs.qaul.net Documentation
 
-This guide is a rust markdown book.
-
-* Server: https://docs.qaul.net
-* Source repository: https://github.com/qaul.net/qaul/docs/contributers/
-* Updated: by deploy script
-* Admin contact: contact@qaul.net
-
-
-## api.qaul.net Rust API Documentation
-
-The Rust API documentation is created out of the rust source code.
+The software documentation & guides of qaul.net.
 
 * Server: https://docs.qaul.net
-* Source repository: https://github.com/qaul/qaul.net
+* Source repository: https://github.com/qaul.net/qaul/docs/
 * Updated: by deploy script
 * Admin contact: contact@qaul.net
 
