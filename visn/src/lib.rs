@@ -50,6 +50,7 @@
 //! ```
 mod fallible;
 mod infallible;
+mod arbitrary_tandem_control_iter;
 
 pub use fallible::new_fallible_engine;
 pub use infallible::new_knowledge_engine;
