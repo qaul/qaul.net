@@ -3,6 +3,7 @@
 
 use std::marker::PhantomData;
 use std::ops::Index;
+use std::slice::SliceIndex;
 
 /// An iterator that uses another iterator to control the next element in the iteration,
 /// in any arbitrary order.
@@ -13,20 +14,13 @@ use std::ops::Index;
 /// # Panics
 /// Panics if the control iterator asks to return an index outside the bounds of the
 /// data structure being controlled.
-pub struct ArbitraryTandemControlIterator<
-    'a,
-    T,
-    I: Index<usize, Output = T>,
-    C: Iterator<Item = usize>,
-> {
-    data: &'a I,
+pub struct ArbitraryTandemControlIterator<'a, T, C: Iterator<Item = usize>> {
+    data: &'a [T],
     control: C,
     _pd: PhantomData<&'a T>,
 }
 
-impl<'a, T, I: Index<usize, Output = T>, C: Iterator<Item = usize>> Iterator
-    for ArbitraryTandemControlIterator<'a, T, I, C>
-{
+impl<'a, T, C: Iterator<Item = usize>> Iterator for ArbitraryTandemControlIterator<'a, T, C> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<&'a T> {
@@ -37,10 +31,8 @@ impl<'a, T, I: Index<usize, Output = T>, C: Iterator<Item = usize>> Iterator
     }
 }
 
-impl<'a, T, I: Index<usize, Output = T>, C: Iterator<Item = usize>>
-    ArbitraryTandemControlIterator<'a, T, I, C>
-{
-    pub fn new(data: &'a I, control: C) -> Self {
+impl<'a, T, C: Iterator<Item = usize>> ArbitraryTandemControlIterator<'a, T, C> {
+    pub fn new(data: &'a [T], control: C) -> Self {
         Self {
             data,
             control,

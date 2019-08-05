@@ -51,6 +51,8 @@
 mod arbitrary_tandem_control_iter;
 mod fallible;
 mod infallible;
+mod permutations;
+mod permute_iter;
 
 pub use fallible::new_fallible_engine;
 pub use infallible::new_knowledge_engine;
