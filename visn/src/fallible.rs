@@ -1,5 +1,4 @@
 use crate::KnowledgeEngine;
-use std::collections::VecDeque;
 
 /// Create a new KnowledgeEngine implementation with the given fallible resolver function.
 /// This function should translate synthetic (test) events into actual changes in the
@@ -15,13 +14,17 @@ where
     F: Fn(Event, System) -> Result<System, Error> + 'static,
 {
     FallibleEngineImpl {
-        events: VecDeque::new(),
+        prologue: Vec::new(),
+        events: Vec::new(),
+        epilogue: Vec::new(),
         resolve: Box::new(resolve),
     }
 }
 
 struct FallibleEngineImpl<System, Event, Error> {
-    events: VecDeque<Event>,
+    prologue: Vec<Event>,
+    events: Vec<Event>,
+    epilogue: Vec<Event>,
     resolve: Box<dyn Fn(Event, System) -> Result<System, Error>>,
 }
 
@@ -30,7 +33,19 @@ impl<System, Event: Clone, Error> KnowledgeEngine<System, Event, Result<System, 
 {
     fn queue_event(self, event: Event) -> Self {
         let mut new = self;
-        new.events.push_back(event);
+        new.events.push(event);
+        new
+    }
+
+    fn queue_prologue(self, event: Event) -> Self {
+        let mut new = self;
+        new.prologue.push(event);
+        new
+    }
+
+    fn queue_epilogue(self, event: Event) -> Self {
+        let mut new = self;
+        new.epilogue.push(event);
         new
     }
     fn resolve_with<
@@ -42,8 +57,16 @@ impl<System, Event: Clone, Error> KnowledgeEngine<System, Event, Result<System, 
         comb: F,
     ) -> Result<System, Error> {
         let mut system = init();
+        for event in self.prologue.into_iter() {
+            system = (self.resolve)(event, system)?;
+        }
+
         let mut events_iter = self.events.into_iter();
         for event in comb(&mut events_iter) {
+            system = (self.resolve)(event, system)?;
+        }
+
+        for event in self.epilogue.into_iter() {
             system = (self.resolve)(event, system)?;
         }
         Ok(system)

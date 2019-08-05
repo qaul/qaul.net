@@ -48,9 +48,9 @@
 //! assert_eq!(result.a, "a2".to_string());
 //! assert_eq!(result.b, "b1".to_string());
 //! ```
+mod arbitrary_tandem_control_iter;
 mod fallible;
 mod infallible;
-mod arbitrary_tandem_control_iter;
 
 pub use fallible::new_fallible_engine;
 pub use infallible::new_knowledge_engine;
@@ -69,8 +69,15 @@ pub use infallible::new_knowledge_engine;
 /// - `Return`: the type returned by the `resolve` function. Can be the same as `System`,
 /// or sometimes a `Result<System, _>`.
 pub trait KnowledgeEngine<System, Event: Clone, Return>: Sized {
-    /// Add a single event to the queue of events.
+    /// Add a single event to a queue of events to run before permutation.
+    fn queue_prologue(self, event: Event) -> Self;
+
+    /// Add a single event to a queue of events to be permuted.
     fn queue_event(self, event: Event) -> Self;
+
+    /// Add a single event to a queue of events to be permuted.
+    fn queue_epilogue(self, event: Event) -> Self;
+
     /// Resolve the queue of events using the given iterator combinator (a function taking
     /// an iterator over events and returning another iterator over events)
     fn resolve_with<
@@ -102,7 +109,7 @@ pub trait KnowledgeEngine<System, Event: Clone, Return>: Sized {
 mod tests {
     use crate::{new_fallible_engine, new_knowledge_engine, KnowledgeEngine};
 
-    #[derive(Debug, Default)]
+    #[derive(Debug, Default, PartialEq, Eq)]
     struct SystemUnderTest {
         a: String,
         b: String,
@@ -155,6 +162,30 @@ mod tests {
             .resolve_in_order(SystemUnderTest::default);
         assert_eq!(system.a, "second a value".to_string());
         assert_eq!(system.b, "first b value".to_string());
+    }
+
+    #[test]
+    fn inorder_vs_prologue_epilogue() {
+        use SyntheticEvent::*;
+        let system_using_events = new_knowledge_engine(resolve)
+            .queue_event(SetA("first a value"))
+            .queue_event(SetB("first b value"))
+            .queue_event(SetA("second a value"))
+            .resolve_in_order(SystemUnderTest::default);
+        let system_using_prologue = new_knowledge_engine(resolve)
+            .queue_prologue(SetA("first a value"))
+            .queue_prologue(SetB("first b value"))
+            .queue_prologue(SetA("second a value"))
+            .resolve_in_order(SystemUnderTest::default);
+        let system_using_epilogue = new_knowledge_engine(resolve)
+            .queue_epilogue(SetA("first a value"))
+            .queue_epilogue(SetB("first b value"))
+            .queue_epilogue(SetA("second a value"))
+            .resolve_in_order(SystemUnderTest::default);
+        assert_eq!(system_using_events.a, "second a value".to_string());
+        assert_eq!(system_using_events.b, "first b value".to_string());
+        assert_eq!(system_using_events, system_using_prologue);
+        assert_eq!(system_using_events, system_using_epilogue);
     }
 
     #[test]

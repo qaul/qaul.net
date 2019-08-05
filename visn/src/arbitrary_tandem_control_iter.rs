@@ -13,8 +13,12 @@ use std::ops::Index;
 /// # Panics
 /// Panics if the control iterator asks to return an index outside the bounds of the
 /// data structure being controlled.
-pub struct ArbitraryTandemControlIterator<'a, T, I: Index<usize, Output = T>, C: Iterator<Item = usize>>
-{
+pub struct ArbitraryTandemControlIterator<
+    'a,
+    T,
+    I: Index<usize, Output = T>,
+    C: Iterator<Item = usize>,
+> {
     data: &'a I,
     control: C,
     _pd: PhantomData<&'a T>,
