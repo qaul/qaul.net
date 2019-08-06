@@ -16,7 +16,8 @@
 //! #[derive(Debug, Default)]
 //! struct SystemUnderTest {
 //!     a: String,
-//!     b: String
+//!     b: String,
+//!     c: String
 //! }
 //!
 //! // The two possible changes to the system are setting string A or setting string B
@@ -24,6 +25,7 @@
 //! enum SyntheticEvent {
 //!     SetA(&'static str),
 //!     SetB(&'static str),
+//!     SetC(&'static str),
 //! }
 //!
 //! // This function maps SyntheticEvent variants to real changes in the system
@@ -31,22 +33,25 @@
 //!     let mut system = system;
 //!     match event {
 //!         SyntheticEvent::SetA(s) => system.a = s.into(),
-//!         SyntheticEvent::SetB(s) => system.b = s.into()
+//!         SyntheticEvent::SetB(s) => system.b = s.into(),
+//!         SyntheticEvent::SetC(s) => system.c = s.into()
 //!     };
 //!     system
 //! }
 //!
 //! use SyntheticEvent::*;
 //! // Create a new knowledge engine
-//! let result = new_knowledge_engine(resolve)
+//! let results = new_knowledge_engine(resolve)
 //!     // Queue up some events for the engine to execute
-//!     .queue_events(&[SetA("a1"), SetB("b1"), SetA("a2")])
-//!     // Resolve these events in order, starting from the default state and returning
-//!     // the final state of the system.
-//!     .resolve_in_order(SystemUnderTest::default);
-//!
-//! assert_eq!(result.a, "a2".to_string());
-//! assert_eq!(result.b, "b1".to_string());
+//!     .queue_events(&[SetA("a1"), SetB("b1"), SetC("c1")])
+//!     // Resolve these events in every possible order, starting from the default state
+//!     // and returning the final state of the system.
+//!     .resolve_all_orders(SystemUnderTest::default);
+//! for result in results {
+//!     assert_eq!(&result.a, "a1");
+//!     assert_eq!(&result.b, "b1");
+//!     assert_eq!(&result.c, "c1");
+//! }
 //! ```
 mod arbitrary_tandem_control_iter;
 mod fallible;
@@ -56,7 +61,6 @@ mod permute_iter;
 
 pub use fallible::new_fallible_engine;
 pub use infallible::new_knowledge_engine;
-
 /// The KnowledgeEngine provides a framework for testing the consequences of messages
 /// in an eventually consistent system arriving in various orders.
 ///
@@ -70,7 +74,7 @@ pub use infallible::new_knowledge_engine;
 /// - `Event`: the type of synthetic events.
 /// - `Return`: the type returned by the `resolve` function. Can be the same as `System`,
 /// or sometimes a `Result<System, _>`.
-pub trait KnowledgeEngine<System, Event: Clone, Return>: Sized {
+pub trait KnowledgeEngine<'e, System, Event: Clone + 'e, Return>: Sized {
     /// Add a single event to a queue of events to run before permutation.
     fn queue_prologue(self, event: Event) -> Self;
 
@@ -105,6 +109,8 @@ pub trait KnowledgeEngine<System, Event: Clone, Return>: Sized {
     fn resolve_in_order<G: Fn() -> System>(self, init: G) -> Return {
         self.resolve_with(init, |iter| iter)
     }
+
+    fn resolve_all_orders<G: Fn() -> System>(self, init: G) -> Vec<Return>;
 }
 
 #[cfg(test)]

@@ -1,3 +1,4 @@
+use crate::permute_iter::permutations_of;
 use crate::KnowledgeEngine;
 
 /// Create a new KnowledgeEngine implementation with the given fallible resolver function.
@@ -6,11 +7,11 @@ use crate::KnowledgeEngine;
 ///
 /// If the resolver function ever returns an Err variant, the engine will cease and return
 /// that Err.
-pub fn new_fallible_engine<System, Event, Error, F>(
+pub fn new_fallible_engine<'e, System, Event, Error, F>(
     resolve: F,
-) -> impl KnowledgeEngine<System, Event, Result<System, Error>>
+) -> impl KnowledgeEngine<'e, System, Event, Result<System, Error>>
 where
-    Event: Clone,
+    Event: Clone + 'e,
     F: Fn(Event, System) -> Result<System, Error> + 'static,
 {
     FallibleEngineImpl {
@@ -28,7 +29,20 @@ struct FallibleEngineImpl<System, Event, Error> {
     resolve: Box<dyn Fn(Event, System) -> Result<System, Error>>,
 }
 
-impl<System, Event: Clone, Error> KnowledgeEngine<System, Event, Result<System, Error>>
+impl<System, Event: Clone, Error> FallibleEngineImpl<System, Event, Error> {
+    fn resolve_onto_fallible(
+        &self,
+        mut system: System,
+        events: impl Iterator<Item = Event>,
+    ) -> Result<System, Error> {
+        for event in events {
+            system = (self.resolve)(event, system)?;
+        }
+        Ok(system)
+    }
+}
+
+impl<'e, System, Event: Clone + 'e, Error> KnowledgeEngine<'e, System, Event, Result<System, Error>>
     for FallibleEngineImpl<System, Event, Error>
 {
     fn queue_event(self, event: Event) -> Self {
@@ -70,5 +84,39 @@ impl<System, Event: Clone, Error> KnowledgeEngine<System, Event, Result<System, 
             system = (self.resolve)(event, system)?;
         }
         Ok(system)
+    }
+
+    fn resolve_all_orders<G: Fn() -> System>(self, init: G) -> Vec<Result<System, Error>> {
+        let mut results = Vec::new();
+        let permutations = permutations_of(&self.events);
+        for events_iter in permutations {
+            let mut system = init();
+            let prologue_result = self.resolve_onto_fallible(system, self.prologue.iter().cloned());
+            system = match prologue_result {
+                Ok(s) => s,
+                Err(e) => {
+                    results.push(Err(e));
+                    continue;
+                }
+            };
+            let test_result = self.resolve_onto_fallible(system, events_iter.cloned());
+            system = match test_result {
+                Ok(s) => s,
+                Err(e) => {
+                    results.push(Err(e));
+                    continue;
+                }
+            };
+            let epilogue_result = self.resolve_onto_fallible(system, self.epilogue.iter().cloned());
+            system = match epilogue_result {
+                Ok(s) => s,
+                Err(e) => {
+                    results.push(Err(e));
+                    continue;
+                }
+            };
+            results.push(Ok(system));
+        }
+        results
     }
 }

@@ -2,8 +2,6 @@
 //! to control what the next element is.
 
 use std::marker::PhantomData;
-use std::ops::Index;
-use std::slice::SliceIndex;
 
 /// An iterator that uses another iterator to control the next element in the iteration,
 /// in any arbitrary order.
@@ -45,7 +43,7 @@ impl<'a, T, C: Iterator<Item = usize>> ArbitraryTandemControlIterator<'a, T, C> 
 fn homogeneous_vecs() {
     let data = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     let control = vec![1, 1, 2, 3, 3, 2, 1];
-    let mut atci = ArbitraryTandemControlIterator::new(&data, control.clone().into_iter());
+    let atci = ArbitraryTandemControlIterator::new(&data, control.clone().into_iter());
     let output: Vec<_> = atci.cloned().collect();
     assert_eq!(output, control);
 }
@@ -64,7 +62,7 @@ fn heterogeneous_vecs_nocopy() {
 
     let control = vec![6, 5, 4, 3, 2, 1];
 
-    let mut atci = ArbitraryTandemControlIterator::new(&data, control.clone().into_iter());
+    let atci = ArbitraryTandemControlIterator::new(&data, control.clone().into_iter());
 
     for (atci_val, rev_val) in atci.zip(data.iter().rev()) {
         // Critically, these are both &std::string::String. No copying occurred.

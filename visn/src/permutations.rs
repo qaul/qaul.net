@@ -19,12 +19,7 @@ fn heaps_inner<T: Clone>(k: usize, values: &mut [T]) -> Vec<Vec<T>> {
     return v;
 }
 
-pub fn permute<T: Clone>(values: &[T]) -> Vec<Vec<T>> {
-    let mut values: Vec<T> = values.iter().cloned().collect();
-    permute_owned(values)
-}
-
-pub fn permute_owned<T: Clone>(values: Vec<T>) -> Vec<Vec<T>> {
+pub fn permute<T: Clone>(values: Vec<T>) -> Vec<Vec<T>> {
     let mut values = values;
     heaps_inner(values.len(), &mut values)
 }
@@ -32,7 +27,7 @@ pub fn permute_owned<T: Clone>(values: Vec<T>) -> Vec<Vec<T>> {
 #[test]
 fn permute_numbers() {
     assert_eq!(
-        permute(&[1, 2, 3]),
+        permute(vec![1, 2, 3]),
         vec![
             vec![1, 2, 3],
             vec![2, 1, 3],
