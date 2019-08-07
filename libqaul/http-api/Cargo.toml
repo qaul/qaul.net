@@ -3,7 +3,7 @@ name = "qaul-http"
 version = "0.1.0"
 authors = ["Jess 3Jane <me@jess.coffee>"]
 edition = "2018"
-license = "GPL-3.0"
+license = "AGPL-3.0"
 
 [dependencies]
 base64 = "0.10"
