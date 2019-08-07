@@ -2,7 +2,7 @@
 name = "libqaul"
 version = "0.1.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
-license = "GPL-3.0"
+license = "AGPL-3.0"
 edition = "2018"
 
 [dependencies]

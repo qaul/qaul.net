@@ -1,7 +1,7 @@
 [package]
 name = "ratman"
 description = "A fully delay tolerant, decentralised userspace routing protocol"
-license = "GPL-3.0"
+license = "AGPL-3.0"
 version = "0.0.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"

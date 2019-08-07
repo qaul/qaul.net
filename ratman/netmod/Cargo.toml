@@ -6,7 +6,7 @@ authors = [
   "Leonora Tindall <nora@nora.codes>"
 ]
 edition = "2018"
-license = "GPL-3.0"
+license = "AGPL-3.0"
 
 [dependencies]
 identity = { path = "../identity", package = "ratman-identity" }

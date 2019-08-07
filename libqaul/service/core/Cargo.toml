@@ -3,6 +3,6 @@ name = "qaul-core"
 version = "0.1.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
-license = "GPL-3.0"
+license = "AGPL-3.0"
 
 [dependencies]
