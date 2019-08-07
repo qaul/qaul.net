@@ -25,11 +25,16 @@ use super::AuthError;
 /// Use this key to get the logged in user of the request
 ///
 /// ```
+/// # use iron::prelude::*;
+/// # use qaul_http::CurrentUser;
 /// fn handler(req: &mut Request) -> IronResult<Response> {
 ///     // Some(UserAuth) if an authenticated user is is requesting this endpoint
 ///     // None otherwise
 ///     let user = req.extensions.get::<CurrentUser>();
-/// }
+///
+///     // ...
+/// # Ok(Response::with(""))
+/// # }
 /// ```
 pub struct CurrentUser;
 

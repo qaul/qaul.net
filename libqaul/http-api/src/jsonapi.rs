@@ -120,11 +120,16 @@ impl error::Error for JsonApiError {}
 ///
 ///
 /// ```
+/// # use iron::prelude::*;
+/// # use qaul_http::JsonApi;
 /// fn handler(req: &mut Request) -> IronResult<Response> {
 ///     // Some(Document) if there was a document in the request
 ///     // None otherwise
 ///     let document = req.extensions.get::<JsonApi>();
-/// }
+///
+///     // ...
+/// # Ok(Response::with(""))
+/// # }
 /// ```
 pub struct JsonApi;
 

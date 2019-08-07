@@ -117,9 +117,14 @@ impl ApiServer {
 /// Use this key to get a `Qaul` instance from the `Request` object
 ///
 /// ```
+/// # use iron::prelude::*;
+/// # use qaul_http::QaulCore;
 /// fn handler(req: &mut Request) -> IronResult<Response> {
 ///     let qaul = req.extensions.get::<QaulCore>().unwrap();
-/// }
+///     
+///     // ...
+/// # Ok(Response::with(""))
+/// # }
 /// ```
 pub struct QaulCore{
     qaul: Arc<Qaul>,
