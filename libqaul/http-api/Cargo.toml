@@ -9,7 +9,7 @@ license = "AGPL-3.0"
 base64 = "0.10"
 iron = "0.6"
 persistent = "0.4"
-json-api = { git = "https://github.com/qaul/json-api" }
+json-api = { git = "https://git.open-communication.net/qaul/json-api" }
 serde_derive = "1.0"
 serde = "1.0"
 serde_json = "1.0"
