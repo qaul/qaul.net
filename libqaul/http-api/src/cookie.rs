@@ -80,9 +80,14 @@ impl From<ParseError> for CookieJarError {
 /// client in the response
 ///
 /// ```
+/// # use iron::prelude::*;
+/// # use qaul_http::Cookies;
 /// fn handler(req: &mut Request) -> IronResult<Response> {
-///     let cookie_jar = req.extensions.get::<CookieJar>().unwrap();
-/// }
+///     let cookie_jar = req.extensions.get::<Cookies>().unwrap();
+///
+///     // ...
+/// # Ok(Response::with(""))
+/// # }
 /// ```
 pub struct Cookies;
 
@@ -124,5 +129,56 @@ impl AfterMiddleware for CookieManager {
         if cookies.len() != 0 { res.headers.set::<SetCookie>(SetCookie(cookies)); }
 
         Ok(res)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use anneal::RequestBuilder; 
+    use iron::method::Method;
+    use super::*;
+
+    #[test]
+    fn no_cookies() {
+        RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
+            .request(|mut req| {
+                CookieManager.before(&mut req).unwrap();
+                assert_eq!(req.extensions.get::<Cookies>().unwrap().iter().count(), 0);
+                let res = CookieManager.after(&mut req, Response::with("")).unwrap();
+                assert!(!res.headers.has::<SetCookie>());
+            });
+    }
+
+    #[test]
+    fn valid_cookies() {
+        RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
+            .set_header(CookieHeader(vec!["a=b".into(), "c=d".into()]))
+            .request(|mut req| {
+                CookieManager.before(&mut req).unwrap();
+
+                assert_eq!(req.extensions.get::<Cookies>().unwrap().iter().count(), 2);
+                let mut cookies = req.extensions.get_mut::<Cookies>().unwrap();
+                assert_eq!(cookies.get("a").unwrap().value(), "b");
+                assert_eq!(cookies.get("c").unwrap().value(), "d");
+
+                cookies.add(Cookie::new("e", "f"));
+                let res = CookieManager.after(&mut req, Response::with("")).unwrap();
+                assert_eq!(*res.headers.get::<SetCookie>().unwrap(), 
+                           SetCookie(vec!["e=f".into()]));
+            })
+    }
+
+    #[test]
+    fn invalid_cookies() {
+        RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
+            .set_header(CookieHeader(vec!["a".into()]))
+            .request(|mut req| {
+                let err = match CookieManager.before(&mut req) {
+                    Ok(_) => panic!("Request completed successfully"),
+                    Err(e) => e.error,
+                };
+                assert_eq!(err.to_string(), 
+                    "Cookie jar error: Error parsing cookies (the cookie is missing a name/value pair)");
+            });
     }
 }
