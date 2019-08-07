@@ -1,4 +1,4 @@
-use crate::permute_iter::permutations_of;
+use permute::permutations_of;
 use crate::KnowledgeEngine;
 
 /// Create a new KnowledgeEngine implementation with the given fallible resolver function.

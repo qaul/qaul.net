@@ -23,6 +23,7 @@ members = [
     # A high-level network simulator
     "service-sim",
     "visn",
+    "permute",
 
     # A _low level_ network simulator
     "netmod-sim",

@@ -315,6 +315,10 @@ version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "permute"
+version = "0.1.0"
+
+[[package]]
 name = "persistent"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -771,6 +775,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "visn"
 version = "0.1.0"
+dependencies = [
+ "permute 0.1.0",
+]
 
 [[package]]
 name = "winapi"

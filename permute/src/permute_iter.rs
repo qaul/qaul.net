@@ -2,8 +2,47 @@
 use crate::arbitrary_tandem_control_iter::ArbitraryTandemControlIterator;
 use crate::permutations::permute;
 
-/// Returns an iterator of iterators, with all the permutations of the given slice,
-/// without copying that data.
+/// Produce an iterator over iterators, each one of which yields one permutation of the
+/// provided slice. No copying of elements of the slice occurs.
+///
+/// # Complexity
+///
+/// This function is `O(n!)` in both space and time, though with a lower constant than
+/// `permute` for collections with large elements, since it does not copy elements of the
+/// give slice, only indices.
+///
+/// # Determinism
+///
+/// The order of the permutations is deterministic and can be found ahead of time by
+/// consulting the OEIS sequence for reverse colexicographic ordering, using
+/// the appropriate elements of [A280318](https://oeis.org/A280318) as indices into
+/// [A055089](https://oeis.org/A055089).
+///
+/// # Example
+///
+/// For instance, printing all the permutations of the sequence
+/// `["red", "green", "blue"]`:
+/// ```
+/// # use permute::permutations_of;
+/// for permutation in permutations_of(&["red", "green", "blue"]) {
+///     for element in permutation {
+///         print!("{}, ", element);
+///     }
+///     println!("");
+/// }
+/// ```
+///
+/// Based on the ordering provided by Heap's algorithm, it's guaranteed that this
+/// program will produce:
+///
+/// ```text
+/// red, green, blue,
+/// green, red, blue,
+/// blue, red, green,
+/// red, blue, green,
+/// green, blue, red,
+/// blue, green, red,
+/// ```
 pub fn permutations_of<'a, T: Clone + Sized>(
     items: &'a [T],
 ) -> impl Iterator<Item = impl Iterator<Item = &'a T>> {

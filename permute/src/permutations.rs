@@ -19,6 +19,32 @@ fn heaps_inner<T: Clone>(k: usize, values: &mut [T]) -> Vec<Vec<T>> {
     return v;
 }
 
+/// Generate permutations of a given `Vec` by copying.
+///
+/// # Complexity
+/// This function is `O(n!)` in both memory and time.
+///
+/// # Determinism
+/// The order of the permutations is deterministic and can be found ahead of time by
+/// consulting the OEIS sequence for reverse colexicographic ordering, using
+/// the appropriate elements of [A280318](https://oeis.org/A280318) as indices into
+/// [A055089](https://oeis.org/A055089).
+///
+/// # Examples
+/// ```
+/// # use permute::permute;
+/// assert_eq!(
+///     permute(vec![1, 2, 3]),
+///     vec![
+///         vec![1, 2, 3],
+///         vec![2, 1, 3],
+///         vec![3, 1, 2],
+///         vec![1, 3, 2],
+///         vec![2, 3, 1],
+///         vec![3, 2, 1]
+///     ]
+/// );
+/// ```
 pub fn permute<T: Clone>(values: Vec<T>) -> Vec<Vec<T>> {
     let mut values = values;
     heaps_inner(values.len(), &mut values)

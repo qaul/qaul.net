@@ -1,17 +1,37 @@
-//! An iterator that uses another iterator over usize
-//! to control what the next element is.
+//! An iterator over a slice that uses another iterator to control the next element in
+//! the sequence.
 
 use std::marker::PhantomData;
 
-/// An iterator that uses another iterator to control the next element in the iteration,
-/// in any arbitrary order.
-///
-/// # Limitations
-/// Currently, the control iterator must be `Item = usize`.
+/// An iterator over a slice that uses another iterator to control the next element in the
+/// sequence, in any arbitrary order, without copying.
 ///
 /// # Panics
-/// Panics if the control iterator asks to return an index outside the bounds of the
+/// Panics if the control iterator presents an index outside the bounds of the
 /// data structure being controlled.
+///
+/// # Example
+/// ```
+/// # use permute::arbitrary_tandem_control_iter::ArbitraryTandemControlIterator;
+/// let data = vec![
+///     String::from("red"),
+///     String::from("orange"),
+///     String::from("yellow"),
+///     String::from("green"),
+///     String::from("blue"),
+///     String::from("indigo"),
+///     String::from("violet"),
+/// ];
+///
+/// let control = vec![6, 5, 4, 3, 2, 1];
+///
+///    let atci = ArbitraryTandemControlIterator::new(&data, control.clone().into_iter());
+///
+///    for (atci_val, rev_val) in atci.zip(data.iter().rev()) {
+///        // Critically, these are both &std::string::String. No copying occurred.
+///        assert_eq!(atci_val, rev_val);
+///    }
+/// ```
 pub struct ArbitraryTandemControlIterator<'a, T, C: Iterator<Item = usize>> {
     data: &'a [T],
     control: C,
