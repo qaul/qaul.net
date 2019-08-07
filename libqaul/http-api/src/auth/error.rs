@@ -50,7 +50,8 @@ impl AuthError {
                     GrantType::Cookie => "Invalid cookie",
                     GrantType::Token => "Invalid token",
                 }.into(),
-            AuthError::DifferingLogins => "Both an authorization header and cookie are present, both are valid, but they point to different users".into(),
+            AuthError::DifferingLogins => "Both an authorization header and cookie are present, \
+both are valid, but they point to different users".into(),
         }
     }
 
