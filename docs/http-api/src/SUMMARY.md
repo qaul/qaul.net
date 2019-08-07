@@ -3,6 +3,7 @@
 - [Topics](./topics/_intro.md)
 	- [Authentication](./topics/authentication.md)
 	- [JSON:API](./topics/jsonapi.md)
+	- [Services](./topics/services.md)
 - [Entities](./entities/_intro.md)
 	- [`success`](./entities/success.md)
 	- [`user`](./entities/user.md)
