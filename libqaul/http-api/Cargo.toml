@@ -16,7 +16,9 @@ serde_json = "1.0"
 lazy_static = "1.3"
 chrono = "0.4"
 cookie = "0.12"
-anneal = { git = "https://git.open-communication.net/qaul/anneal", features = ["jsonapi"] }
 
 libqaul = { path = ".." } 
 identity = { path = "../../ratman/identity", package = "ratman-identity" }
+
+[dev-dependencies]
+anneal = { git = "https://git.open-communication.net/qaul/anneal", features = ["jsonapi", "cookies"] }
