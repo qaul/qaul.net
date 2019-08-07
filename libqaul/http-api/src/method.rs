@@ -146,3 +146,67 @@ impl BeforeMiddleware for MethodGaurd {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use anneal::RequestBuilder;
+    use super::*;
+
+    #[test]
+    fn same_method() {
+        let gaurds = [
+            (
+                MethodGaurd::new(vec![Method::Get, Method::Extension("a".into())]), 
+                Method::Extension("a".into()),
+            ),
+            (
+                MethodGaurd::new(vec![Method::Get, Method::Extension("a".into())]), 
+                Method::Get,
+            ),
+            (MethodGaurd::options(), Method::Options),
+            (MethodGaurd::get(), Method::Get),
+            (MethodGaurd::post(), Method::Post),
+            (MethodGaurd::put(), Method::Put),
+            (MethodGaurd::delete(), Method::Delete),
+            (MethodGaurd::head(), Method::Head),
+            (MethodGaurd::trace(), Method::Trace),
+            (MethodGaurd::connect(), Method::Connect),
+            (MethodGaurd::patch(), Method::Patch),
+        ];
+
+        for (gaurd, method) in gaurds.iter() {
+            RequestBuilder::new(method.clone(), "http://127.0.0.1:8080/")
+                .request(|mut req| {
+                    gaurd.before(&mut req).unwrap();
+                });
+        }
+    }
+
+    #[test]
+    fn different_method() {
+        let gaurds = [
+            (
+                MethodGaurd::new(vec![Method::Get, Method::Extension("a".into())]), 
+                Method::Options,
+            ),
+            (MethodGaurd::options(), Method::Get),
+            (MethodGaurd::get(), Method::Post),
+            (MethodGaurd::post(), Method::Put),
+            (MethodGaurd::put(), Method::Delete),
+            (MethodGaurd::delete(), Method::Head),
+            (MethodGaurd::head(), Method::Trace),
+            (MethodGaurd::trace(), Method::Connect),
+            (MethodGaurd::connect(), Method::Patch),
+            (MethodGaurd::patch(), Method::Extension("a".into())),
+        ];
+
+        for (gaurd, method) in gaurds.iter() {
+            RequestBuilder::new(method.clone(), "http://127.0.0.1:8080/")
+                .request(|mut req| {
+                    if let Ok(_) = gaurd.before(&mut req) {
+                        panic!("Request was successful");
+                    }
+                });
+        }
+    }
+}
