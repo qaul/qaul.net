@@ -6,7 +6,7 @@ use libqaul::{
 };
 use json_api::{ResourceObject, Attributes};
 use serde_derive::{Serialize, Deserialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use identity::ID_LEN;
 use super::ConversionError;
 
@@ -20,7 +20,7 @@ pub struct UserEntity {
     #[serde(skip_serializing_if = "BTreeMap::is_empty")]
     bio: BTreeMap<String, String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    services: Option<Vec<String>>,
+    services: Option<BTreeSet<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     avatar: Option<String>,
 }
