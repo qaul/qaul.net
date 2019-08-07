@@ -1,4 +1,5 @@
 use crate::{
+    Cookies,
     QaulCore,
     JSONAPI_MIME,
     models::Success,
@@ -39,6 +40,12 @@ pub fn logout(req: &mut Request) -> IronResult<Response> {
         req.extensions.get::<Authenticator>().unwrap()
             .tokens.lock().unwrap()
             .remove(token);
+    }
+
+    // if an auth cookie had been set mark it for removal
+    let mut cookies = req.extensions.get_mut::<Cookies>().unwrap();
+    if let Some(cookie) = cookies.get("bearer") {
+        cookies.remove(cookie.clone());
     }
 
     // return a little success message

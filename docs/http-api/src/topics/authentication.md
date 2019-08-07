@@ -40,12 +40,25 @@ If included authentication information in the request will be checked for EVERY
 request, even to endpoints that don't require authentication. These errors can
 therefore occur on any endpoint.
 
-### Invalid Token
+### Differing Logins
 **Status:** 400 _Bad Request_
 
-The request contained a login token, either in an `Authoization` header or in
-a cookie, which is currently invalid.
+There is both an `Authorization` header and a `bearer` token which both contain
+valid auth tokens but the auth tokens they contain differ. Probably you should only
+be sending one or the other but if you want to use both authentication schemes they both
+need to contain the same token.
 
+### Invalid Login Cookie
+**Status:** 400 _Bad Request_
+
+The `bearer` cookie contains an auth token which is either not currently or
+never was valid.
+
+### Invalid Login Token 
+**Status:** 400 _Bad Request_
+
+The `Authorization` header provided an auth token which is either not currently 
+or never was valid.
 
 ## Returning a grant
 To return a grant simply visit the [`logout`](/endpoints/logout.html) endpoint.

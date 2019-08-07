@@ -1,4 +1,5 @@
 use crate::{
+    Cookies,
     JsonApi,
     models::{
         UserAuth,
@@ -9,6 +10,7 @@ use crate::{
     QaulCore,
     JSONAPI_MIME,
 };
+use cookie::Cookie;
 use chrono::{ DateTime, offset::Utc };
 use libqaul::UserAuth as QaulUserAuth;
 use iron::{
@@ -87,7 +89,11 @@ pub fn login(req: &mut Request) -> IronResult<Response> {
     // return the grant
     let obj = match grant_type {
         GrantType::Token => ResourceObject::<UserGrant>::new(token, None).into(),
-        GrantType::Cookie => { unimplemented!() },
+        GrantType::Cookie => { 
+            // TODO: what should we do when a user is already logged in?
+            req.extensions.get_mut::<Cookies>().unwrap().add(Cookie::new("bearer", token));
+            Success::from_message("Successfully logged in".into()).into()
+        },
     };
 
     let doc = Document {
