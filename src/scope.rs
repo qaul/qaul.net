@@ -36,4 +36,5 @@ impl Scope {
 pub struct ScopeAttrs {
     pub ns_auth: bool,
     pub encryption: KeyAttr,
+    pub offset: String,
 }

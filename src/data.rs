@@ -1,7 +1,16 @@
 //! Data descriptor module
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use std::collections::BTreeMap;
+
+use std::{
+    fs::OpenOptions,
+    io::{Read, Write},
+    path::PathBuf,
+};
+
+use crate::store::Storable;
 
 /// Discriminant data container
 pub enum Data {
@@ -12,15 +21,47 @@ pub enum Data {
 }
 
 impl Data {
-
     /// Turn this data node into a raw data vec
     ///
     /// TODO: hint, this should stream at some point :)
-    pub fn to_stream(self) -> Vec<u8> {
+    pub fn to_stream(&self) -> Cow<[u8]> {
         match self {
-            Data::Blob(vec) => vec,
-            Data::KV(tree) => serde_json::to_vec(&tree).unwrap(),
+            Data::Blob(vec) => vec.into(),
+            Data::KV(tree) => serde_json::to_vec(&tree).unwrap().into(),
         }
+    }
+}
+
+// The `offset` given to the data is the scope offset of it's parent
+impl Storable for Data {
+    fn read(offset: &str, name: &str) -> Self {
+        let mut path = PathBuf::new();
+        path.push(offset);
+        path.push(name);
+
+        let mut data = Vec::new();
+        OpenOptions::new()
+            .read(true)
+            .create(false)
+            .open(&path)
+            .unwrap()
+            .read_to_end(&mut data)
+            .unwrap();
+
+        // Is it a KV or Blob? Parse it and find out! :)
+        match serde_json::from_slice(&data) {
+            Ok(tree) => Data::KV(tree),
+            Err(_) => Data::Blob(data),
+        }
+    }
+
+    fn write(&self, offset: &str, name: &str) {
+        let mut path = PathBuf::new();
+        path.push(offset);
+        path.push(name);
+
+        let mut f = OpenOptions::new().write(true).open(&path).unwrap();
+        f.write_all(&self.to_stream()).unwrap();
     }
 }
 

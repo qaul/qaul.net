@@ -41,6 +41,7 @@ pub mod keys;
 pub mod namespace;
 pub mod scope;
 pub mod user;
+pub mod store;
 
 use namespace::Namespace;
 use scope::ScopeAttrs;
