@@ -9,6 +9,10 @@
 //! in other combinations.
 //!
 //! # Example
+//!
+//! Here, a system storing three strings is used as a demonstration of how to test all
+//! possible orderings of incoming events.
+//!
 //! ```
 //! use visn::{KnowledgeEngine, new_knowledge_engine};
 //!
@@ -47,6 +51,8 @@
 //!     // Resolve these events in every possible order, starting from the default state
 //!     // and returning the final state of the system.
 //!     .resolve_all_orders(SystemUnderTest::default);
+//!
+//! // Make sure that all the results end up with the same state.
 //! for result in results {
 //!     assert_eq!(&result.a, "a1");
 //!     assert_eq!(&result.b, "b1");

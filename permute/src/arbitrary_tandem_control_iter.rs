@@ -7,10 +7,12 @@ use std::marker::PhantomData;
 /// sequence, in any arbitrary order, without copying.
 ///
 /// # Panics
+///
 /// Panics if the control iterator presents an index outside the bounds of the
 /// data structure being controlled.
 ///
 /// # Example
+///
 /// ```
 /// # use permute::arbitrary_tandem_control_iter::ArbitraryTandemControlIterator;
 /// let data = vec![
@@ -25,12 +27,12 @@ use std::marker::PhantomData;
 ///
 /// let control = vec![6, 5, 4, 3, 2, 1];
 ///
-///    let atci = ArbitraryTandemControlIterator::new(&data, control.clone().into_iter());
+/// let atci = ArbitraryTandemControlIterator::new(&data, control.clone().into_iter());
 ///
-///    for (atci_val, rev_val) in atci.zip(data.iter().rev()) {
-///        // Critically, these are both &std::string::String. No copying occurred.
-///        assert_eq!(atci_val, rev_val);
-///    }
+/// for (atci_val, rev_val) in atci.zip(data.iter().rev()) {
+///     // Critically, these are both &std::string::String. No copying occurred.
+///     assert_eq!(atci_val, rev_val);
+/// }
 /// ```
 pub struct ArbitraryTandemControlIterator<'a, T, C: Iterator<Item = usize>> {
     data: &'a [T],

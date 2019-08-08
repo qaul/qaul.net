@@ -1,5 +1,5 @@
-use permute::permutations_of;
 use crate::KnowledgeEngine;
+use permute::permutations_of;
 
 /// Create a new KnowledgeEngine implementation with the given resolver function.
 /// This function should translate synthetic (test) events into actual changes in the
@@ -47,14 +47,11 @@ impl<'e, System, Event: Clone + 'e> KnowledgeEngine<'e, System, Event, System>
         new
     }
 
-    fn resolve_with<
+    fn resolve_with<F, G>(self, init: G, comb: F) -> System
+    where
         F: FnOnce(&mut dyn Iterator<Item = Event>) -> &mut dyn Iterator<Item = Event>,
         G: Fn() -> System,
-    >(
-        self,
-        init: G,
-        comb: F,
-    ) -> System {
+    {
         let mut system = init();
         for event in self.prologue.into_iter() {
             system = (self.resolve)(event, system);
