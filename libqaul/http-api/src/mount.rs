@@ -213,3 +213,194 @@ impl Handler for HotPlugMount {
         handler.handle(req)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use anneal::RequestBuilder;
+    use iron::{
+        headers::{
+            Location,
+            Referer,
+            Server,
+        },
+        middleware::BeforeMiddleware,
+        method::Method,
+        modifiers::Header,
+    };
+    use super::*;
+
+    // says it's own name, like a pokemon
+    struct NamedHandler { name: String }
+
+    impl Handler for NamedHandler { 
+        fn handle(&self, req: &mut Request) -> IronResult<Response> {
+            Ok(Response::with((
+                    // "this is blatant misuse of headers to exfiltrate information
+                    // why not put it in the body or have it set a field or literally
+                    // anything else"
+                    //
+                    // the only answer is a chilling laugh
+                    Header(Referer(self.name.clone())),
+                    Header(Server(req.url.clone().to_string())),
+                    Header(Location(req.extensions.get::<OriginalUrl>().unwrap().to_string())),
+            )))
+        }
+    }
+
+    // the base set of routes used in these tests
+    fn build_mount() -> HotPlugMount {
+        let mount = HotPlugMount::new();
+        assert!(!mount.mount("a".into(), NamedHandler { name: "a".into() }).unwrap());
+        assert!(!mount.mount_core("b".into(), NamedHandler { name: "b".into() }));
+        mount
+    }
+
+    #[test]
+    fn basic_route() {
+        let mount = build_mount();
+
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/a")
+            .request(|mut req| {
+                let res = mount.handle(&mut req).unwrap();
+                assert_eq!(res.headers.get::<Referer>().unwrap().0, "a");
+            });
+
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .request(|mut req| {
+                let res = mount.handle(&mut req).unwrap();
+                assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
+            });
+
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/c")
+            .request(|mut req| {
+                assert!(mount.handle(&mut req).is_err());
+            });
+    }
+
+    #[test]
+    fn add_route() {
+        let mount = build_mount();
+
+        assert!(mount.mount("a".into(), NamedHandler { name: "c".into() }).unwrap());
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/a")
+            .request(|mut req| {
+                let res = mount.handle(&mut req).unwrap();
+                assert_eq!(res.headers.get::<Referer>().unwrap().0, "c");
+            });
+
+        assert!(mount.mount("b".into(), NamedHandler { name: "d".into() }).is_err());
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .request(|mut req| {
+                let res = mount.handle(&mut req).unwrap();
+                assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
+            });
+
+        assert!(mount.mount_core("b".into(), NamedHandler { name: "e".into() }));
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .request(|mut req| {
+                let res = mount.handle(&mut req).unwrap();
+                assert_eq!(res.headers.get::<Referer>().unwrap().0, "e");
+            });
+    }
+
+    #[test]
+    fn unmount() {
+        let mount = build_mount();
+
+        assert!(mount.unmount("a").unwrap());
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/a")
+            .request(|mut req| {
+                assert!(mount.handle(&mut req).is_err());
+            });
+
+        assert!(mount.unmount("b").is_err());
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .request(|mut req| {
+                let res = mount.handle(&mut req).unwrap();
+                assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
+            });
+
+        assert!(mount.unmount_core("b"));
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .request(|mut req| {
+                assert!(mount.handle(&mut req).is_err());
+            });
+    }
+
+    // this tests for variants of routes being matched as the actual route
+    // if in the future routing is changed to be a little more sophisticated
+    // and this test starts failing that's because it relies on the current
+    // way routes are handled.
+    #[test]
+    fn malicious_routes() {
+        let mount = build_mount();
+
+        assert!(!mount.mount("/b".into(), NamedHandler { name: "c".into(), }).unwrap());
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .request(|mut req| {
+                let res = mount.handle(&mut req).unwrap();
+                assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
+            });
+
+        assert!(!mount.mount("b/".into(), NamedHandler { name: "c".into(), }).unwrap());
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .request(|mut req| {
+                let res = mount.handle(&mut req).unwrap();
+                assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
+            });
+
+        assert!(!mount.mount("b/a".into(), NamedHandler { name: "c".into(), }).unwrap());
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b/a")
+            .request(|mut req| {
+                let res = mount.handle(&mut req).unwrap();
+                assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
+            });
+    }
+
+    #[test]
+    fn paths() {
+        let mount = build_mount();
+
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b/a/b/c/d/e?f=g")
+            .request(|mut req| {
+                let res = mount.handle(&mut req).unwrap();
+                assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
+                assert_eq!(res.headers.get::<Server>().unwrap().0, 
+                    "http://127.0.0.1:8080/a/b/c/d/e?f=g");
+                assert_eq!(res.headers.get::<Location>().unwrap().0, 
+                    "http://127.0.0.1:8080/b/a/b/c/d/e?f=g");
+            });
+    }
+
+    // TODO: test the qaul integrated portion of this
+    // ya know
+    // once that exists
+//    #[test]
+//    fn service_auth() {
+//        use libqaul::{
+//            Qaul,
+//            User,
+//        };
+//
+//        let mount = build_mount();
+//
+//        // you are probably here because you just ran a full test after
+//        // updating Qaul to actually do things
+//        // at the time this code was written Qaul::start() created an
+//        // empty instance for testing
+//        // please put it in whatever the appropriate testing mode is
+//        let qaul = Qaul::start();
+//        let qaul_core = QaulCore::new(&qaul);
+//
+//        let u = User::new();
+//        let user_auth = qaul.user_create("a").unwrap();
+//
+//        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+//            .request(|mut req| {
+//                req.extensions.insert::<CurrentUser>(user_auth.clone());
+//
+//                qaul_core.before(&mut req).unwrap();
+//                assert!(mount.handle(&mut req).is_err());
+//            });
+//    }
+}
