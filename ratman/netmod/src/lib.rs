@@ -19,6 +19,10 @@ pub use result::{Error as NetError, Result as NetResult};
 
 // A `RATMAN` `netmod` endpoint describes a networking interface
 pub trait Endpoint {
+
+    /// Provides maximum frame-size information to `RATMAN`
+    fn size_hint(&self) -> usize;
+    
     /// Send a message to a specific endpoint (client)
     fn send(&mut self, frame: Frame) -> NetResult<()>;
 
