@@ -9,6 +9,10 @@
 //! in other combinations.
 //!
 //! # Example
+//!
+//! Here, a system storing three strings is used as a demonstration of how to test all
+//! possible orderings of incoming events.
+//!
 //! ```
 //! use visn::{KnowledgeEngine, new_knowledge_engine};
 //!
@@ -16,7 +20,8 @@
 //! #[derive(Debug, Default)]
 //! struct SystemUnderTest {
 //!     a: String,
-//!     b: String
+//!     b: String,
+//!     c: String
 //! }
 //!
 //! // The two possible changes to the system are setting string A or setting string B
@@ -24,6 +29,7 @@
 //! enum SyntheticEvent {
 //!     SetA(&'static str),
 //!     SetB(&'static str),
+//!     SetC(&'static str),
 //! }
 //!
 //! // This function maps SyntheticEvent variants to real changes in the system
@@ -31,25 +37,34 @@
 //!     let mut system = system;
 //!     match event {
 //!         SyntheticEvent::SetA(s) => system.a = s.into(),
-//!         SyntheticEvent::SetB(s) => system.b = s.into()
+//!         SyntheticEvent::SetB(s) => system.b = s.into(),
+//!         SyntheticEvent::SetC(s) => system.c = s.into()
 //!     };
 //!     system
 //! }
 //!
 //! use SyntheticEvent::*;
 //! // Create a new knowledge engine
-//! let result = new_knowledge_engine(resolve)
+//! let results = new_knowledge_engine(resolve)
 //!     // Queue up some events for the engine to execute
-//!     .queue_events(&[SetA("a1"), SetB("b1"), SetA("a2")])
-//!     // Resolve these events in order, starting from the default state and returning
-//!     // the final state of the system.
-//!     .resolve_in_order(SystemUnderTest::default);
+//!     .queue_events(&[SetA("a1"), SetB("b1"), SetC("c1")])
+//!     // Resolve these events in every possible order, starting from the default state
+//!     // and returning the final state of the system.
+//!     .resolve_all_orders(SystemUnderTest::default);
 //!
-//! assert_eq!(result.a, "a2".to_string());
-//! assert_eq!(result.b, "b1".to_string());
+//! // Make sure that all the results end up with the same state.
+//! for result in results {
+//!     assert_eq!(&result.a, "a1");
+//!     assert_eq!(&result.b, "b1");
+//!     assert_eq!(&result.c, "c1");
+//! }
 //! ```
-use std::collections::VecDeque;
+extern crate permute;
+mod fallible;
+mod infallible;
 
+pub use fallible::new_fallible_engine;
+pub use infallible::new_knowledge_engine;
 /// The KnowledgeEngine provides a framework for testing the consequences of messages
 /// in an eventually consistent system arriving in various orders.
 ///
@@ -63,9 +78,16 @@ use std::collections::VecDeque;
 /// - `Event`: the type of synthetic events.
 /// - `Return`: the type returned by the `resolve` function. Can be the same as `System`,
 /// or sometimes a `Result<System, _>`.
-pub trait KnowledgeEngine<System, Event: Clone, Return>: Sized {
-    /// Add a single event to the queue of events.
+pub trait KnowledgeEngine<'e, System, Event: Clone + 'e, Return>: Sized {
+    /// Add a single event to a queue of events to run before permutation.
+    fn queue_prologue(self, event: Event) -> Self;
+
+    /// Add a single event to a queue of events to be permuted.
     fn queue_event(self, event: Event) -> Self;
+
+    /// Add a single event to a queue of events to be permuted.
+    fn queue_epilogue(self, event: Event) -> Self;
+
     /// Resolve the queue of events using the given iterator combinator (a function taking
     /// an iterator over events and returning another iterator over events)
     fn resolve_with<
@@ -91,108 +113,15 @@ pub trait KnowledgeEngine<System, Event: Clone, Return>: Sized {
     fn resolve_in_order<G: Fn() -> System>(self, init: G) -> Return {
         self.resolve_with(init, |iter| iter)
     }
-}
 
-/// Create a new KnowledgeEngine implementation with the given resolver function.
-/// This function should translate synthetic (test) events into actual changes in the
-/// state of the system under test.
-pub fn new_knowledge_engine<System, Event, F>(
-    resolve: F,
-) -> impl KnowledgeEngine<System, Event, System>
-where
-    Event: Clone,
-    F: Fn(Event, System) -> System + 'static,
-{
-    KnowledgeEngineImpl {
-        events: VecDeque::new(),
-        resolve: Box::new(resolve),
-    }
-}
-
-/// Create a new KnowledgeEngine implementation with the given fallible resolver function.
-/// This function should translate synthetic (test) events into actual changes in the
-/// state of the system under test.
-///
-/// If the resolver function ever returns an Err variant, the engine will cease and return
-/// that Err.
-pub fn new_fallible_engine<System, Event, Error, F>(
-    resolve: F,
-) -> impl KnowledgeEngine<System, Event, Result<System, Error>>
-where
-    Event: Clone,
-    F: Fn(Event, System) -> Result<System, Error> + 'static,
-{
-    FallibleEngineImpl {
-        events: VecDeque::new(),
-        resolve: Box::new(resolve),
-    }
-}
-
-struct KnowledgeEngineImpl<System, Event> {
-    events: VecDeque<Event>,
-    resolve: Box<dyn Fn(Event, System) -> System>,
-}
-
-struct FallibleEngineImpl<System, Event, Error> {
-    events: VecDeque<Event>,
-    resolve: Box<dyn Fn(Event, System) -> Result<System, Error>>,
-}
-
-impl<System, Event: Clone> KnowledgeEngine<System, Event, System>
-    for KnowledgeEngineImpl<System, Event>
-{
-    fn queue_event(self, event: Event) -> Self {
-        let mut new = self;
-        new.events.push_back(event);
-        new
-    }
-    fn resolve_with<
-        F: FnOnce(&mut dyn Iterator<Item = Event>) -> &mut dyn Iterator<Item = Event>,
-        G: Fn() -> System,
-    >(
-        self,
-        init: G,
-        comb: F,
-    ) -> System {
-        let mut system = init();
-        let mut events_iter = self.events.into_iter();
-        for event in comb(&mut events_iter) {
-            system = (self.resolve)(event, system);
-        }
-        system
-    }
-}
-
-impl<System, Event: Clone, Error> KnowledgeEngine<System, Event, Result<System, Error>>
-    for FallibleEngineImpl<System, Event, Error>
-{
-    fn queue_event(self, event: Event) -> Self {
-        let mut new = self;
-        new.events.push_back(event);
-        new
-    }
-    fn resolve_with<
-        F: FnOnce(&mut dyn Iterator<Item = Event>) -> &mut dyn Iterator<Item = Event>,
-        G: Fn() -> System,
-    >(
-        self,
-        init: G,
-        comb: F,
-    ) -> Result<System, Error> {
-        let mut system = init();
-        let mut events_iter = self.events.into_iter();
-        for event in comb(&mut events_iter) {
-            system = (self.resolve)(event, system)?;
-        }
-        Ok(system)
-    }
+    fn resolve_all_orders<G: Fn() -> System>(self, init: G) -> Vec<Return>;
 }
 
 #[cfg(test)]
 mod tests {
     use crate::{new_fallible_engine, new_knowledge_engine, KnowledgeEngine};
 
-    #[derive(Debug, Default)]
+    #[derive(Debug, Default, PartialEq, Eq)]
     struct SystemUnderTest {
         a: String,
         b: String,
@@ -245,6 +174,30 @@ mod tests {
             .resolve_in_order(SystemUnderTest::default);
         assert_eq!(system.a, "second a value".to_string());
         assert_eq!(system.b, "first b value".to_string());
+    }
+
+    #[test]
+    fn inorder_vs_prologue_epilogue() {
+        use SyntheticEvent::*;
+        let system_using_events = new_knowledge_engine(resolve)
+            .queue_event(SetA("first a value"))
+            .queue_event(SetB("first b value"))
+            .queue_event(SetA("second a value"))
+            .resolve_in_order(SystemUnderTest::default);
+        let system_using_prologue = new_knowledge_engine(resolve)
+            .queue_prologue(SetA("first a value"))
+            .queue_prologue(SetB("first b value"))
+            .queue_prologue(SetA("second a value"))
+            .resolve_in_order(SystemUnderTest::default);
+        let system_using_epilogue = new_knowledge_engine(resolve)
+            .queue_epilogue(SetA("first a value"))
+            .queue_epilogue(SetB("first b value"))
+            .queue_epilogue(SetA("second a value"))
+            .resolve_in_order(SystemUnderTest::default);
+        assert_eq!(system_using_events.a, "second a value".to_string());
+        assert_eq!(system_using_events.b, "first b value".to_string());
+        assert_eq!(system_using_events, system_using_prologue);
+        assert_eq!(system_using_events, system_using_epilogue);
     }
 
     #[test]

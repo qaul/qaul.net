@@ -1,0 +1,11 @@
+[package]
+name = "permute"
+version = "0.1.0"
+description = "Generate permutations of vectors and slices in a memory-efficient and deterministic manner, using Heap's algorithm."
+categories = ["algorithms", "simulation"]
+keywords = ["combinatorics", "permutations", "heaps", "algorithm", "permutation"]
+authors = ["Leonora Tindall <nora@nora.codes>"]
+license = "AGPL-3.0-or-later"
+edition = "2018"
+
+[dependencies]
