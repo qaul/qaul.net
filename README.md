@@ -1,6 +1,6 @@
 ![http://qaul.net/](https://raw.githubusercontent.com/qaul/qaul.net/release-1.0.0/doc/qaul-net.png)
 
-# qaul.net [![pipeline status](https://gitlab.com/qaul/qaul-net/badges/master/pipeline.svg)](https://gitlab.com/qaul/qaul-net/commits/master)
+# qaul.net [![pipeline status](https://git.open-communication.net/qaul/qaul.net/badges/master/pipeline.svg)](https://git.open-communication.net/qaul/qaul.net/commits/master)
 
 **qaul.net** is an Internet independent ad-hoc wireless mesh-network 
 suite that harnesses the power of everyday devices such as computers and 
