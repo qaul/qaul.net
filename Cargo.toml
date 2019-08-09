@@ -20,13 +20,13 @@ members = [
     "ratman/identity",
     "ratman/netmod",
 
-    # A high-level network simulator
+    # Simulator and testing frameworks
     "service-sim",
     "visn",
     "permute",
 
-    # A _low level_ network simulator
-    "netmod-sim",
+    # An entirely in-memory netmod endpoint
+    "netmod-mem",
 
     # Client specific targets
     "clients/linux",

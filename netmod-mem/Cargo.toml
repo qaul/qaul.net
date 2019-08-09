@@ -1,0 +1,10 @@
+[package]
+name = "netmod-mem"
+description = "A fully in-memory implementation of a netmod endpoint"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+license = "AGPL-3.0"
+
+[dependencies]
+ratman-netmod = { path = "../ratman/netmod" }
