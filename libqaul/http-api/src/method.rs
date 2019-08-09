@@ -176,6 +176,7 @@ mod test {
 
         for (gaurd, method) in gaurds.iter() {
             RequestBuilder::new(method.clone(), "http://127.0.0.1:8080/")
+                .unwrap()
                 .request(|mut req| {
                     gaurd.before(&mut req).unwrap();
                 });
@@ -202,6 +203,7 @@ mod test {
 
         for (gaurd, method) in gaurds.iter() {
             RequestBuilder::new(method.clone(), "http://127.0.0.1:8080/")
+                .unwrap()
                 .request(|mut req| {
                     if let Ok(_) = gaurd.before(&mut req) {
                         panic!("Request was successful");

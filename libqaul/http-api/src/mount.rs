@@ -260,18 +260,21 @@ mod test {
         let mount = build_mount();
 
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/a")
+            .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "a");
             });
 
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
             });
 
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/c")
+            .unwrap()
             .request(|mut req| {
                 assert!(mount.handle(&mut req).is_err());
             });
@@ -283,6 +286,7 @@ mod test {
 
         assert!(mount.mount("a".into(), NamedHandler { name: "c".into() }).unwrap());
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/a")
+            .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "c");
@@ -290,6 +294,7 @@ mod test {
 
         assert!(mount.mount("b".into(), NamedHandler { name: "d".into() }).is_err());
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
@@ -297,6 +302,7 @@ mod test {
 
         assert!(mount.mount_core("b".into(), NamedHandler { name: "e".into() }));
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "e");
@@ -309,12 +315,14 @@ mod test {
 
         assert!(mount.unmount("a").unwrap());
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/a")
+            .unwrap()
             .request(|mut req| {
                 assert!(mount.handle(&mut req).is_err());
             });
 
         assert!(mount.unmount("b").is_err());
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
@@ -322,6 +330,7 @@ mod test {
 
         assert!(mount.unmount_core("b"));
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .unwrap()
             .request(|mut req| {
                 assert!(mount.handle(&mut req).is_err());
             });
@@ -337,6 +346,7 @@ mod test {
 
         assert!(!mount.mount("/b".into(), NamedHandler { name: "c".into(), }).unwrap());
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
@@ -344,6 +354,7 @@ mod test {
 
         assert!(!mount.mount("b/".into(), NamedHandler { name: "c".into(), }).unwrap());
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
@@ -351,6 +362,7 @@ mod test {
 
         assert!(!mount.mount("b/a".into(), NamedHandler { name: "c".into(), }).unwrap());
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b/a")
+            .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
@@ -362,6 +374,7 @@ mod test {
         let mount = build_mount();
 
         RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b/a/b/c/d/e?f=g")
+            .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");

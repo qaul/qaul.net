@@ -141,6 +141,7 @@ mod test {
     #[test]
     fn no_cookies() {
         RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
+            .unwrap()
             .request(|mut req| {
                 CookieManager.before(&mut req).unwrap();
                 assert_eq!(req.extensions.get::<Cookies>().unwrap().iter().count(), 0);
@@ -152,6 +153,7 @@ mod test {
     #[test]
     fn valid_cookies() {
         RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
+            .unwrap()
             .set_header(CookieHeader(vec!["a=b".into(), "c=d".into()]))
             .request(|mut req| {
                 CookieManager.before(&mut req).unwrap();
@@ -171,6 +173,7 @@ mod test {
     #[test]
     fn invalid_cookies() {
         RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
+            .unwrap()
             .set_header(CookieHeader(vec!["a".into()]))
             .request(|mut req| {
                 let err = match CookieManager.before(&mut req) {

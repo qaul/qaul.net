@@ -251,6 +251,7 @@ mod test {
             ..Default::default()
         };
         RequestBuilder::new(Method::Post, "http://127.0.0.1:8080/")
+            .unwrap()
             .set_document(&doc)
             .request(|mut req| {
                 assert!(JsonApi.before(&mut req).is_ok());
@@ -265,7 +266,8 @@ mod test {
     fn skips_other() {
         let data = "abcdef";
         RequestBuilder::new(Method::Post, "http://127.0.0.1:8080/")
-            .set_body(data.to_string())
+            .unwrap()
+            .set_string(data)
             .request(|mut req| {
                 assert!(JsonApi.before(&mut req).is_ok());
                 assert!(req.extensions.get::<JsonApi>().is_none());
@@ -281,6 +283,7 @@ mod test {
     #[test]
     fn rejects_media_type() {
         RequestBuilder::new(Method::Post, "http://127.0.0.1:8080/")
+            .unwrap()
             .set_header(ContentType(invalid_media_type())) 
             .request(|mut req| {
                 let err = match JsonApi.before(&mut req) {
@@ -305,7 +308,7 @@ mod test {
             qitem(invalid_media_type()),
         ];
 
-        let mut rb = RequestBuilder::new(Method::Post, "http://127.0.0.1:8080/");
+        let mut rb = RequestBuilder::new(Method::Post, "http://127.0.0.1:8080/").unwrap();
         rb.set_document(&doc);
         rb.set_header(Accept(accept.clone()));
 
@@ -330,7 +333,8 @@ mod test {
     #[test]
     fn bad_payload() {
         RequestBuilder::new(Method::Post, "http://127.0.0.1:8080/")
-            .set_body("{\"data\": 1}".into())
+            .unwrap()
+            .set_string("{\"data\": 1}".into())
             .set_header(ContentType(JSONAPI_MIME.clone()))
             .request(|mut req| {
                 let err = match JsonApi.before(&mut req) {
