@@ -10,3 +10,5 @@ platform = { path = "platform", package = "qaul-platform" }
 identity = { path = "../ratman/identity", package = "ratman-identity" }
 
 rand = "0.7"
+base64 = "0.10"
+bcrypt = "0.4"

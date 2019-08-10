@@ -44,12 +44,16 @@ use std::{
 #[derive(Clone)]
 pub struct Qaul {
     users: Arc<Mutex<BTreeMap<Identity, User>>>,
+    auth: Arc<Mutex<BTreeMap<Identity, String>>>,
+    keys: Arc<Mutex<BTreeMap<String, Identity>>>,
 }
 
 impl Qaul {
     pub fn start() -> Self {
         Self {
             users: Arc::new(Mutex::new(BTreeMap::new())),
+            auth: Arc::new(Mutex::new(BTreeMap::new())),
+            keys: Arc::new(Mutex::new(BTreeMap::new())),
         }
     }
 }
