@@ -31,9 +31,9 @@ use crate::Qaul;
 use crate::User;
 use identity::Identity;
 
+use argon2;
 use base64::{encode_config, URL_SAFE};
-use bcrypt::{hash as bcrypt_hash, DEFAULT_COST, verify as bcrypt_verify};
-use rand::{Rng, thread_rng};
+use rand::{Rng, rngs::OsRng};
 
 impl Qaul {
     /// Create a new user
@@ -46,12 +46,14 @@ impl Qaul {
         let mut users = self.users.lock().unwrap();
         users.insert(id.clone(), user);
 
+        let mut salt = [0; 16];
+        OsRng.fill(&mut salt[..]); 
         // TODO: Use this error somehow
-        let pass = bcrypt_hash(pw, DEFAULT_COST).unwrap(); 
-        self.auth.lock().unwrap().insert(id.clone(), pass);
+        let hash = argon2::hash_encoded(pw.as_bytes(), &salt, &argon2::Config::default()).unwrap();
+        self.auth.lock().unwrap().insert(id.clone(), hash);
 
         let mut key = [0; 32];
-        thread_rng().fill(&mut key[..]);
+        OsRng.fill(&mut key[..]);
         let key = encode_config(&key, URL_SAFE); 
         self.keys.lock().unwrap().insert(key.clone(), id.clone());
 
@@ -148,18 +150,18 @@ impl Qaul {
     /// Log-in to an existing user
     pub fn user_login(&self, id: Identity, pw: &str) -> QaulResult<UserAuth> {
         let auth = self.auth.lock().unwrap();
-        let pass = match auth.get(&id) {
-            Some(pass) => pass,
+        let hash = match auth.get(&id) {
+            Some(hash) => hash,
             None => { return Err(QaulError::UnknownUser); },
         };
 
         // TODO: Use this error somehow
-        if !bcrypt_verify(pw, pass).unwrap() {
+        if !argon2::verify_encoded(hash, pw.as_bytes()).unwrap() {
             return Err(QaulError::NotAuthorised);
         }
 
         let mut key = [0; 32];
-        thread_rng().fill(&mut key[..]);
+        OsRng.fill(&mut key[..]);
         let key = encode_config(&key, URL_SAFE); 
         self.keys.lock().unwrap().insert(key.clone(), id.clone());
 
