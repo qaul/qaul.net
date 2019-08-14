@@ -22,13 +22,15 @@
 //! developers to interact with, not including
 //! shared service state or secrets.
 
+use std::collections::BTreeMap;
+
 mod models;
 mod service;
 pub use models::{Message, QaulError, QaulResult, SigTrust, UserAuth};
 
-pub use crate::users::{UserData, UserUpdate};
 use crate::Qaul;
 use crate::User;
+pub use crate::{ContactBook, LocalContactData, UserData, UserUpdate};
 use identity::Identity;
 
 use argon2;
@@ -183,9 +185,22 @@ impl Qaul {
     /// Add a new contact to a user's known contacts
     pub fn contacts_add(&self, user: UserAuth, contact: User) -> QaulResult<()> {
         let (my_id, _) = user.trusted()?;
-        let mut users = self.users.lock().unwrap();
         let contact_id = contact.id.clone();
-        users.insert(contact_id, contact);
+
+        // If the user isn't know to this libqaul instance, add it there first
+        {
+            let mut users = self.users.lock().expect("Users lock poisioned. Error");
+            users.insert(contact_id.clone(), contact);
+        }
+
+        // Now, add it to the user's contact book.
+        {
+            let my_id = my_id.clone();
+            let mut contacts = self.contacts.lock().expect("Contacts lock poisoned. Error");
+            let mut contacts_book = contacts.entry(my_id).or_insert(ContactBook::new());
+            contacts_book.insert(contact_id, LocalContactData::default());
+        }
+
         Ok(())
     }
 
