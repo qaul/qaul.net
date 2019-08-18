@@ -33,6 +33,32 @@ fn auth_for_local_user() -> UserAuth {
     UserAuth::Trusted(id, k)
 }
 
+/// Get a new `User` with the same ID returned in `auth_for_local_user` and some associated
+/// user data.
+fn local_user() -> User {
+    User {
+        id: auth_for_local_user().identity(),
+        data: UserData {
+            real_name: Some(String::from("Danny Default")),
+            display_name: Some(String::from("dannydefault")),
+            ..UserData::default()
+        },
+    }
+}
+
+/// Get a new `User` with the same ID returned in `auth_for_remote_user` and some associated
+/// user data.
+fn remote_user() -> User {
+    User {
+        id: auth_for_remote_user().identity(),
+        data: UserData {
+            real_name: Some(String::from("Jake Coolice")),
+            display_name: Some(String::from("jakec1234")),
+            ..UserData::default()
+        },
+    }
+}
+
 /// Get a new `UserAuth::Trusted` with a second dummy identity, representing a user
 /// somewhere else on the network.
 fn auth_for_remote_user() -> UserAuth {
@@ -127,21 +153,12 @@ fn update_user_events_order_independent() {
 }
 
 #[test]
-fn added_users_can_be_searched() {
+fn users_can_be_retrieved_and_searched() {
     use QaulApiEvent::*;
-    let remote_user = User {
-        id: auth_for_remote_user().identity(),
-        data: UserData {
-            real_name: Some(String::from("Jake Coolice")),
-            display_name: Some(String::from("jakec1234")),
-            ..UserData::default()
-        },
-    };
-
     let qaul = new_fallible_engine(resolve)
         .queue_events(&[AddContact {
             user: auth_for_local_user(),
-            contact: remote_user.clone(),
+            contact: remote_user(),
         }])
         .resolve_in_order(system_with_users)
         .expect("Resolution of events failed. Error");
@@ -149,6 +166,40 @@ fn added_users_can_be_searched() {
     let search_result = qaul
         .contacts_find(auth_for_local_user(), "Jake")
         .expect("Search failed.");
+    let fetch_result = qaul
+        .contacts_get_all(auth_for_local_user())
+        .expect("Fetch failed.");
     assert_eq!(search_result.len(), 1);
-    assert_eq!(search_result[0], remote_user);
+    assert_eq!(search_result[0], remote_user());
+    assert_eq!(fetch_result.len(), 1);
+    assert_eq!(fetch_result[0], remote_user());
+}
+
+#[test]
+fn contacts_retrieval_exclusive_across_identities() {
+    use QaulApiEvent::*;
+    let qaul = new_fallible_engine(resolve)
+        .queue_events(&[
+            AddContact {
+                user: auth_for_local_user(),
+                contact: remote_user(),
+            },
+            AddContact {
+                user: auth_for_remote_user(),
+                contact: local_user(),
+            },
+        ])
+        .resolve_in_order(system_with_users)
+        .expect("Resolution of events failed. Error");
+
+    let fetch_as_local = qaul
+        .contacts_get_all(auth_for_local_user())
+        .expect("Search failed.");
+    let fetch_as_remote = qaul
+        .contacts_get_all(auth_for_remote_user())
+        .expect("Search failed.");
+    assert_eq!(fetch_as_local.len(), 1);
+    assert_eq!(fetch_as_remote.len(), 1);
+    assert_eq!(fetch_as_local[0], remote_user());
+    assert_eq!(fetch_as_remote[0], local_user());
 }

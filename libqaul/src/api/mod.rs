@@ -233,7 +233,24 @@ impl Qaul {
 
     /// Enumerate all contacts known by a user
     pub fn contacts_get_all(&self, user: UserAuth) -> QaulResult<Vec<User>> {
-        unimplemented!()
+        let my_id = user.identity();
+
+        let users = self.users.lock().expect("Users lock poisoned. Error");
+        let mut contacts = self
+            .contacts
+            .lock()
+            .expect("Contacts lock poisioned. Error");
+        let contacts_book = contacts.entry(my_id).or_insert(ContactBook::new());
+
+        Ok(contacts_book
+            .iter()
+            .map(|(id, _)| {
+                users
+                    .get(&id)
+                    .expect("User in contact book not present in users map.")
+            })
+            .cloned()
+            .collect())
     }
 
     /// Send a message to another user
