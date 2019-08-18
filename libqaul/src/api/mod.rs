@@ -211,8 +211,7 @@ impl Qaul {
         query: S,
     ) -> QaulResult<Vec<User>> {
         let query = query.into();
-        let (my_id, _) = user.trusted()?;
-
+        let my_id = user.identity();
         let mut results = Vec::new();
         let users = self.users.lock().expect("Users lock poisoned. Error");
         let mut contacts = self
