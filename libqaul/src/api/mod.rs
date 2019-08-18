@@ -205,8 +205,30 @@ impl Qaul {
     }
 
     /// Find a subset of contacts with some query
-    pub fn contacts_find(&self, user: UserAuth, query: String) -> QaulResult<Vec<User>> {
-        unimplemented!()
+    pub fn contacts_find<S: Into<String>>(
+        &self,
+        user: UserAuth,
+        query: S,
+    ) -> QaulResult<Vec<User>> {
+        let query = query.into();
+        let my_id = user.identity();
+
+        let mut results = Vec::new();
+        let users = self.users.lock().expect("Users lock poisoned. Error");
+        let mut contacts = self
+            .contacts
+            .lock()
+            .expect("Contacts lock poisioned. Error");
+        let contacts_book = contacts.entry(my_id).or_insert(ContactBook::new());
+        for (contact_id, _) in contacts_book {
+            let contact_info = users
+                .get(&contact_id)
+                .expect("User in contact book not present in users map.");
+            if contact_info.data.like_query(&query) {
+                results.push(contact_info.clone());
+            }
+        }
+        Ok(results)
     }
 
     /// Enumerate all contacts known by a user
