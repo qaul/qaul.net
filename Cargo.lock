@@ -485,14 +485,6 @@ name = "qaul-platform"
 version = "0.1.0"
 
 [[package]]
-name = "qaul-sim"
-version = "0.1.0"
-dependencies = [
- "libqaul 0.1.0",
- "visn 0.1.0",
-]
-
-[[package]]
 name = "quote"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -710,6 +702,14 @@ dependencies = [
  "itoa 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "ryu 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "service-sim"
+version = "0.1.0"
+dependencies = [
+ "libqaul 0.1.0",
+ "visn 0.1.0",
 ]
 
 [[package]]

@@ -1,148 +1,147 @@
-#![cfg(test)]
+//! # Qaul service-sim
+//! Simulation and testing of libqaul API usage using `visn` and locally defined data-
+//! types. This is the crate in which integration testing of the `libqaul` Qaul API is
+//! confined.
+//!
+//! ## Writing a new test
+//!
+//! Tests follows the "given/when/then" structure; *given* certain pre-conditions, *when*
+//! certain actions are performed, *then* the state of the system will be just so.
+//!
+//! For example, *given* a newly created Qaul instance, *when* a user's name is updated,
+//! *then* the user's data will have the new name.
+//!
+//! `visn` is used to implement different orderings of events. See the documentation of
+//! that crate and the tests that already exist for additional details. In essence,
+//! `visn` is given the `resolve` function from the `events` module and a list of events
+//! and processes them to create either a single Qaul instance or a `Vec` of all possible
+//! Qaul instances for each possible ordering of those events.
+//!
+//! ## Adding new events
+//!
+//! If you have implemented a new piece of the API, you will need to add a corresponding
+//! event in the `events` module. See the documentation there for more info.
+//!
+
 use libqaul::{Identity, Qaul, QaulResult, User, UserAuth, UserData, UserUpdate};
 use visn::{new_fallible_engine, KnowledgeEngine};
 
-#[derive(Clone)]
-enum QaulApiEvent {
-    UpdateUser { user: UserAuth, data: UserUpdate },
-    DeleteUser { user: UserAuth },
-    AddContact { user: UserAuth, contact: User },
-}
+/// The events that define mutations on the state of `libqaul`.
+pub mod events;
+pub use events::{QaulApiEvent, resolve};
 
-fn resolve(event: QaulApiEvent, system: Qaul) -> QaulResult<Qaul> {
-    use QaulApiEvent::*;
-    match event {
-        UpdateUser { user, data } => {
-            system.user_update(user, data)?;
-        }
-        DeleteUser { user } => {
-            system.user_delete(user)?;
-        }
-        AddContact { user, contact } => {
-            system.contacts_add(user, contact)?;
-        }
-    }
-    Ok(system)
-}
-
-/// Get a new `UserAuth::Trusted` with a dummy identity and no key material, representing
-/// the primary user of the local libqaul instance.
-fn auth_for_local_user() -> UserAuth {
-    let id: Identity = [00; 12].into();
-    let k = String::from("local user key");
-    UserAuth::Trusted(id, k)
-}
-
-/// Get a new `User` with the same ID returned in `auth_for_local_user` and some associated
-/// user data.
-fn local_user() -> User {
-    User {
-        id: auth_for_local_user().identity(),
-        data: UserData {
-            real_name: Some(String::from("Danny Default")),
-            display_name: Some(String::from("dannydefault")),
-            ..UserData::default()
-        },
-    }
-}
-
-/// Get a new `User` with the same ID returned in `auth_for_remote_user` and some associated
-/// user data.
-fn remote_user() -> User {
-    User {
-        id: auth_for_remote_user().identity(),
-        data: UserData {
-            real_name: Some(String::from("Jake Coolice")),
-            display_name: Some(String::from("jakec1234")),
-            ..UserData::default()
-        },
-    }
-}
-
-/// Get a new `UserAuth::Trusted` with a second dummy identity, representing a user
-/// somewhere else on the network.
-fn auth_for_remote_user() -> UserAuth {
-    let id: Identity = [01; 12].into();
-    let k = String::from("remote user key");
-    UserAuth::Trusted(id, k)
-}
-
-/// Create a Qaul instance with a local user and a remote user, with the same IDs given by
-/// `auth_for_local_user` and `auth_for_remote_user`.
-fn system_with_users() -> Qaul {
-    let mut qaul = Qaul::start();
-    qaul.user_inject(auth_for_local_user())
-        .expect("Could not create test local user.");
-    qaul.user_inject(auth_for_remote_user())
-        .expect("Could not create test remote user.");
-    qaul
-}
+/// Sample users for use in tests, each with their own unique identity and data.
+///
+/// Each user has a name, which is its own module's identifier. Each name should begin
+/// with a unique letter (and if we end up with more than 24 users, this system should
+/// probably be refined into a less hard-coded one).
+///
+/// Each user should provide `::auth()`, giving a privelaged `UserAuth`; `::user()`, giving
+/// a full `User` with some data, and `::creation_events()`, the events needed to create
+/// the `User` (to be used with .queue_prologues()).
+pub mod users;
 
 #[test]
 fn update_user_updates_applied_in_order() {
     use QaulApiEvent::*;
-    let auth = auth_for_local_user();
-
-    let update1 = UserUpdate::RealName(Some("Danny Default".into()));
-    let update2 = UserUpdate::RealName(Some("Dougie D'Ifferent".into()));
-
     let qaul = new_fallible_engine(resolve)
+        .queue_prologue(InjectUser { user: users::danny::auth() })
         .queue_events(&[
             UpdateUser {
-                user: auth_for_local_user(),
-                data: update1,
+                user: users::danny::auth(),
+                data: UserUpdate::DisplayName(Some("danny_d".into())),
             },
             UpdateUser {
-                user: auth_for_local_user(),
-                data: update2,
+                user: users::danny::auth(),
+                data: UserUpdate::RealName(Some("ddefault".into())),
             },
         ])
-        .resolve_in_order(system_with_users)
+        .resolve_in_order(Qaul::start)
         .expect("Resolution of events failed. Error");
 
     let user = qaul
-        .user_get(auth_for_local_user())
+        .user_get(users::danny::auth())
         .expect("Could not get test user.");
-    assert_eq!(user.data.real_name, Some(String::from("Dougie D'Ifferent")));
+    assert_eq!(user.data.display_name, Some(String::from("danny_d")));
+}
+
+#[test]
+fn users_can_be_retrieved_and_searched() {
+    use QaulApiEvent::*;
+    let qaul = new_fallible_engine(resolve)
+        .queue_prologues(&users::danny::creation_events())
+        .queue_events(&[AddContact {
+            user: users::danny::auth(),
+            contact: users::jake::user(),
+        }])
+        .resolve_in_order(Qaul::start)
+        .expect("Resolution of events failed. Error");
+
+    let search_result = qaul
+        .contacts_find(users::danny::auth(), "Jake")
+        .expect("Search failed.");
+    let fetch_result = qaul
+        .contacts_get_all(users::danny::auth())
+        .expect("Fetch failed.");
+    assert_eq!(search_result.len(), 1);
+    assert_eq!(search_result[0], users::jake::user());
+    assert_eq!(fetch_result.len(), 1);
+    assert_eq!(fetch_result[0], users::jake::user());
+}
+
+#[test]
+fn contacts_retrieval_exclusive_across_identities() {
+    use QaulApiEvent::*;
+    let qaul = new_fallible_engine(resolve)
+        .queue_prologues(&users::danny::creation_events())
+        .queue_prologues(&users::jake::creation_events())
+        .queue_events(&[
+            AddContact {
+                user: users::danny::auth(),
+                contact: users::jake::user(),
+            },
+            AddContact {
+                user: users::jake::auth(),
+                contact: users::danny::user(),
+            },
+        ])
+        .resolve_in_order(Qaul::start)
+        .expect("Resolution of events failed. Error");
+
+    let fetch_as_danny = qaul
+        .contacts_get_all(users::danny::auth())
+        .expect("Search failed.");
+    let fetch_as_jake = qaul
+        .contacts_get_all(users::jake::auth())
+        .expect("Search failed.");
+    assert_eq!(fetch_as_danny.len(), 1);
+    assert_eq!(fetch_as_jake.len(), 1);
+    assert_eq!(fetch_as_danny[0], users::jake::user());
+    assert_eq!(fetch_as_jake[0], users::danny::user());
 }
 
 #[test]
 fn update_user_events_order_independent() {
     use QaulApiEvent::*;
-    let auth = auth_for_local_user();
-
-    let prologue: Vec<_> = vec![
-        UserUpdate::RealName(Some("Danny Default".into())),
-        UserUpdate::DisplayName(Some("danny_default".into())),
-    ]
-    .into_iter()
-    .map(|event| UpdateUser {
-        data: event,
-        user: auth.clone(),
-    })
-    .collect();
-
-    let events: Vec<_> = vec![
-        UserUpdate::RealName(Some("Dougie D'Ifferent".into())),
-        UserUpdate::DisplayName(Some("dougie_different".into())),
-    ]
-    .into_iter()
-    .map(|event| UpdateUser {
-        data: event,
-        user: auth.clone(),
-    })
-    .collect();
-
     let qauls = new_fallible_engine(resolve)
-        .queue_prologues(&prologue)
-        .queue_events(&events)
-        .resolve_all_orders(system_with_users)
+        .queue_prologues(&users::danny::creation_events())
+        .queue_events(&[
+            UpdateUser {
+                user: users::danny::auth(),
+                data: UserUpdate::RealName(Some("Dougie D'Ifferent".into())),
+            },
+            UpdateUser {
+                user: users::danny::auth(),
+                data: UserUpdate::DisplayName(Some("dougie_different".into())),
+            }
+        ])
+        .resolve_all_orders(Qaul::start)
         .into_iter()
         .map(|result| result.expect("Resolution of events failed. Error"));
 
     for qaul in qauls {
         let user = qaul
-            .user_get(auth.clone())
+            .user_get(users::danny::auth())
             .expect("Could not get test user.");
         assert_eq!(user.data.real_name, Some(String::from("Dougie D'Ifferent")));
         assert_eq!(
@@ -150,56 +149,4 @@ fn update_user_events_order_independent() {
             Some(String::from("dougie_different"))
         );
     }
-}
-
-#[test]
-fn users_can_be_retrieved_and_searched() {
-    use QaulApiEvent::*;
-    let qaul = new_fallible_engine(resolve)
-        .queue_events(&[AddContact {
-            user: auth_for_local_user(),
-            contact: remote_user(),
-        }])
-        .resolve_in_order(system_with_users)
-        .expect("Resolution of events failed. Error");
-
-    let search_result = qaul
-        .contacts_find(auth_for_local_user(), "Jake")
-        .expect("Search failed.");
-    let fetch_result = qaul
-        .contacts_get_all(auth_for_local_user())
-        .expect("Fetch failed.");
-    assert_eq!(search_result.len(), 1);
-    assert_eq!(search_result[0], remote_user());
-    assert_eq!(fetch_result.len(), 1);
-    assert_eq!(fetch_result[0], remote_user());
-}
-
-#[test]
-fn contacts_retrieval_exclusive_across_identities() {
-    use QaulApiEvent::*;
-    let qaul = new_fallible_engine(resolve)
-        .queue_events(&[
-            AddContact {
-                user: auth_for_local_user(),
-                contact: remote_user(),
-            },
-            AddContact {
-                user: auth_for_remote_user(),
-                contact: local_user(),
-            },
-        ])
-        .resolve_in_order(system_with_users)
-        .expect("Resolution of events failed. Error");
-
-    let fetch_as_local = qaul
-        .contacts_get_all(auth_for_local_user())
-        .expect("Search failed.");
-    let fetch_as_remote = qaul
-        .contacts_get_all(auth_for_remote_user())
-        .expect("Search failed.");
-    assert_eq!(fetch_as_local.len(), 1);
-    assert_eq!(fetch_as_remote.len(), 1);
-    assert_eq!(fetch_as_local[0], remote_user());
-    assert_eq!(fetch_as_remote[0], local_user());
 }
