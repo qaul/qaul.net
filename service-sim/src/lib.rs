@@ -81,8 +81,6 @@ fn system_with_users() -> Qaul {
 #[test]
 fn update_user_updates_applied_in_order() {
     use QaulApiEvent::*;
-    let auth = auth_for_local_user();
-
     let update1 = UserUpdate::RealName(Some("Danny Default".into()));
     let update2 = UserUpdate::RealName(Some("Dougie D'Ifferent".into()));
 
