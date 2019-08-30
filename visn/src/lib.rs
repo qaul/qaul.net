@@ -99,11 +99,29 @@ pub trait KnowledgeEngine<'e, System, Event: Clone + 'e, Return>: Sized {
         comb: F,
     ) -> Return;
 
+    /// Queue multiple prologue events from a slice.
+    fn queue_prologues(self, events: &[Event]) -> Self {
+        let mut new = self;
+        for event in events {
+            new = new.queue_prologue(event.clone());
+        }
+        new
+    }
+
     /// Queue multiple events from a slice.
     fn queue_events(self, events: &[Event]) -> Self {
         let mut new = self;
         for event in events {
             new = new.queue_event(event.clone());
+        }
+        new
+    }
+
+    /// Queue multiple epilogue events from a slice.
+    fn queue_epilogues(self, events: &[Event]) -> Self {
+        let mut new = self;
+        for event in events {
+            new = new.queue_epilogue(event.clone());
         }
         new
     }

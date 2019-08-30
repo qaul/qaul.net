@@ -63,3 +63,49 @@ fn update_user_updates_applied_in_order() {
         .expect("Could not get test user.");
     assert_eq!(user.data.real_name, Some(String::from("Dougie D'Ifferent")));
 }
+
+#[test]
+fn update_user_events_order_independent() {
+    use QaulApiEvent::*;
+    let auth = test_auth();
+
+    let prologue: Vec<_> = vec![
+        UserUpdate::RealName(Some("Danny Default".into())),
+        UserUpdate::DisplayName(Some("danny_default".into())),
+    ]
+    .into_iter()
+    .map(|event| UpdateUser {
+        data: event,
+        user: auth.clone(),
+    })
+    .collect();
+
+    let events: Vec<_> = vec![
+        UserUpdate::RealName(Some("Dougie D'Ifferent".into())),
+        UserUpdate::DisplayName(Some("dougie_different".into())),
+    ]
+    .into_iter()
+    .map(|event| UpdateUser {
+        data: event,
+        user: auth.clone(),
+    })
+    .collect();
+
+    let qauls = new_fallible_engine(resolve)
+        .queue_prologues(&prologue)
+        .queue_events(&events)
+        .resolve_all_orders(system_with_auth)
+        .into_iter()
+        .map(|result| result.expect("Resolution of events failed. Error"));
+
+    for qaul in qauls {
+        let user = qaul
+            .user_get(auth.clone())
+            .expect("Could not get test user.");
+        assert_eq!(user.data.real_name, Some(String::from("Dougie D'Ifferent")));
+        assert_eq!(
+            user.data.display_name,
+            Some(String::from("dougie_different"))
+        );
+    }
+}
