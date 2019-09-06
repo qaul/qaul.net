@@ -8,10 +8,11 @@
 //! ## No but seriously
 //!
 //! `alexandria` provides multiple payload endpoints to store
-//! key-value data (usually encoded in json), as well as
-//! binary large objects (that 24GB copy of Hackers we all have)
-//! while also providing an easy hook-based interface to
-//! encrypt and decrypt data on write and read.
+//! key-value data (usually encoded in json), as well as binary large
+//! objects (that 24GB copy of Hackers we all have, but don't
+//! entirelty understand the origins of) while also providing an easy
+//! hook-based interface to encrypt and decrypt data on write and
+//! read.
 //!
 //! This is fundamentally done by assigning user zones. A user
 //! provides a public key which is then used to encrypt data
@@ -22,39 +23,48 @@
 //!
 //! ## Zones
 //!
-//! Every zone has a namespace (i.e. `lib:spacekookie`), followed
-//! by a scope (i.e. `lib:spacekookie/secure` would refer to an
-//! encrypted scope). Permissions are set per scope, so it's possible
-//! to define a zone for sharing (`lib:spacekookie/share`) and
-//! it's also entirely possible to not bind a scope to a namespace
-//! (such as a global `lib:/share` scope).
+//! Every zone has a namespace (i.e. `lib:spacekookie`), followed by a
+//! scope (i.e. `lib:spacekookie/secure` would refer to an encrypted
+//! scope). Permissions are set per scope, so it's possible to define
+//! a zone for sharing (`lib:spacekookie/share`) and it's also
+//! entirely possible to not bind a scope to a namespace (such as a
+//! global `lib:/share` scope).
 //!
 //! ## Persistence
 //!
 //! So far all of these concepts exist in memory. But `alexandria` is
 //! a _persistence_ module, meaning it stores things for ever (if WD
 //! drive failure statistics are to be believed...).
-//!
 
 pub mod data;
 pub mod keys;
 pub mod namespace;
 pub mod scope;
-pub mod user;
 pub mod store;
+pub mod user;
 
-use namespace::Namespace;
-use scope::ScopeAttrs;
+use data::{Data, Value};
+use namespace::{Address, Namespace};
+use scope::ScopeAttr;
 use std::collections::BTreeMap;
+use std::{fs::create_dir_all, path::Path};
+use store::Storable;
 
 /// Primary access point to the great library
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Alexandria {
     data: BTreeMap<Option<String>, Namespace>,
     keys: BTreeMap<String, String>,
 }
 
 impl Alexandria {
+    /// Create a new library in memory without any paths
+    ///
+    /// **Not implemented yet**
+    ///
+    /// While this operation is practically free in theory, please
+    /// keep in mind that async workers _will_ be started with this
+    /// call, to syndicate in-memory state with the persistence layer.
     pub fn new() -> Self {
         Default::default()
     }
@@ -68,7 +78,7 @@ impl Alexandria {
     ///
     /// The scheme follows: `lib:<namespace?>/<scope>`,
     /// where `lib` is a hard-coded string representing a library.
-    pub fn create_path(&mut self, path: String, attrs: ScopeAttrs) {
+    pub fn create_path(&mut self, path: String, attrs: ScopeAttr) {
         if !path.starts_with("lib:") {
             panic!("Invalid path!");
         }
@@ -84,5 +94,32 @@ impl Alexandria {
         self.data
             .get_mut(&ns)
             .map(|ns| ns.create_scope(scope, attrs));
+    }
+
+    pub fn insert(&mut self, name: &str, data: Data) {}
+
+    /// Sync state with disk (**remove before `1.0.0`**!)
+    ///
+    /// This function exists as a work-around to avoid having to model
+    /// internal workers and listeners and being able to debug
+    /// `alexandria` as a stateless system for 5 minutes before it all
+    /// goes to shit.
+    #[deprecated]
+    pub fn sync(&mut self) {
+        self.data.iter().for_each(|(_, ns)| {
+            ns.scopes().for_each(|(_, scope)| {
+                // First make sure the path offset exists
+                let offset = &scope.attrs.offset;
+                let offset_path = Path::new(offset);
+                if !offset_path.exists() {
+                    create_dir_all(&offset_path).unwrap();
+                }
+
+                // Then write all scope entries
+                scope.all().for_each(|(id, data)| {
+                    data.write(offset.as_str(), id.as_str());
+                });
+            });
+        });
     }
 }

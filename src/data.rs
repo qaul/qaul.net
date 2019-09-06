@@ -13,6 +13,7 @@ use std::{
 use crate::store::Storable;
 
 /// Discriminant data container
+#[derive(Debug)]
 pub enum Data {
     /// A key-value map, encoded in json under the hood
     KV(BTreeMap<String, Value>),
@@ -66,7 +67,7 @@ impl Storable for Data {
 }
 
 /// A strongly-typed value stored in an `alexandria` scope
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub enum Value {
     String(String),
     Bool(bool),

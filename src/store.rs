@@ -1,5 +1,3 @@
-
-
 /// A simple storable interface
 ///
 /// Interacting with a storable object requires knowing
@@ -12,11 +10,9 @@
 /// by passing calls off to children, augmenting them with
 /// the proper metadata.
 pub(crate) trait Storable {
-
     /// Read the selected type from disk
     fn read(offset: &str, name: &str) -> Self;
 
     /// Write the selected type to disk
     fn write(&self, offset: &str, name: &str);
 }
-
