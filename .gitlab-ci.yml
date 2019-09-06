@@ -1,0 +1,13 @@
+stages:
+  - build
+  - test
+
+build:nightly:
+  image: rustlang/rust:nightly
+  script:
+    - cargo build
+
+test:nightly:
+  image: rustlang/rust:nightly
+  script:
+    - cargo test --all
