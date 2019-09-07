@@ -61,7 +61,11 @@ impl Storable for Data {
         path.push(offset);
         path.push(name);
 
-        let mut f = OpenOptions::new().write(true).open(&path).unwrap();
+        let mut f = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(&path)
+            .unwrap();
         f.write_all(&self.to_stream()).unwrap();
     }
 }

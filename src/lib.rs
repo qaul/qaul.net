@@ -53,7 +53,10 @@ use store::Storable;
 /// Primary access point to the great library
 #[derive(Default, Debug)]
 pub struct Alexandria {
+    /// A map from Namespace-name -> Namespace. If the key is `None`,
+    /// the namespace is "root"
     data: BTreeMap<Option<String>, Namespace>,
+    /// A map of keys, from user-id to key value.
     keys: BTreeMap<String, String>,
 }
 
@@ -96,7 +99,23 @@ impl Alexandria {
             .map(|ns| ns.create_scope(scope, attrs));
     }
 
-    pub fn insert(&mut self, name: &str, data: Data) {}
+    /// Insert some data into an address position
+    ///
+    /// Previous data will be overwritten and should be checked
+    /// manually for existence first. The `Address` is a unique
+    /// identifiable path in a Library, pointing to an optional
+    /// namespace, a scope and ultimately a data id.
+    pub fn insert(&mut self, addr: Address, data: Data) {
+        let (ns, scope, name) = match addr {
+            Address::Ns(ns, scope, name) => (Some(ns.into()), scope, name),
+            Address::Root(scope, name) => (None, scope, name),
+        };
+
+        self.data
+            .get_mut(&ns)
+            .map(|ns| ns.insert(scope, name, data))
+            .expect("Failed to operate on non-existing Namespace");
+    }
 
     /// Sync state with disk (**remove before `1.0.0`**!)
     ///

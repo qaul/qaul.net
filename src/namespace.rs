@@ -1,4 +1,5 @@
 use crate::scope::{Scope, ScopeAttr};
+use crate::data::Data;
 use std::collections::BTreeMap;
 use std::iter::Iterator;
 
@@ -17,6 +18,13 @@ impl Namespace {
 
     pub fn scopes(&self) -> impl Iterator<Item = (&String, &Scope)> {
         self.scopes.iter()
+    }
+
+    pub fn insert(&mut self, scope: &str, name: &str, data: Data) {
+        self.scopes
+            .get_mut(scope)
+            .map(|scope| scope.push(name.into(), data))
+            .expect("Failed to operate on non-existing Scope");
     }
 }
 
