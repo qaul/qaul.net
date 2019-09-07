@@ -36,15 +36,28 @@ impl Namespace {
         };
     }
 
+    pub fn modify_record(&mut self, scope: &str, id: &str, delta: Delta<Data>) {
+        let scope = self.scopes.get_mut(scope).unwrap();
+
+        match delta {
+            Delta::Insert(data) => {
+                scope.insert(id, data);
+            }
+            Delta::Delete => {
+                scope.delete(id);
+            }
+            Delta::Update(data) => {
+                scope.update(id, data);
+            }
+        }
+    }
+
     pub fn scopes(&self) -> impl Iterator<Item = (&String, &Scope)> {
         self.scopes.iter()
     }
 
-    pub fn insert(&mut self, scope: &str, name: &str, data: Data) {
-        self.scopes
-            .get_mut(scope)
-            .map(|scope| scope.push(name.into(), data))
-            .expect("Failed to operate on non-existing Scope");
+    pub fn read(&self, scope: &str, id: &str) -> Option<&Data> {
+        self.scopes.get(scope)?.read(id)
     }
 }
 

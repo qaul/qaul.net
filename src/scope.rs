@@ -19,20 +19,24 @@ impl Scope {
         }
     }
 
-    pub fn push(&mut self, name: String, data: Data) {
-        self.files.insert(name, data);
+    pub(crate) fn insert(&mut self, id: &str, data: Data) {
+        self.files.insert(id.into(), data);
     }
 
-    pub fn get(&self, name: &str) -> &Data {
-        self.files.get(name).unwrap()
+    pub(crate) fn delete(&mut self, id: &str) -> Data {
+        self.files.remove(id).unwrap()
     }
 
-    pub fn all(&self) -> impl Iterator<Item = (&String, &Data)> {
+    pub(crate) fn update(&mut self, _id: &str, _data: Data) {
+        unimplemented!()
+    }
+    
+    pub(crate) fn read(&self, id: &str) -> Option<&Data> {
+        self.files.get(id)
+    }
+
+    pub(crate) fn all(&self) -> impl Iterator<Item = (&String, &Data)> {
         self.files.iter()
-    }
-
-    pub fn pop(&mut self, name: &str) -> Data {
-        self.files.remove(name).unwrap()
     }
 }
 

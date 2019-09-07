@@ -1,7 +1,5 @@
 //! A change applied to a databse
 
-use crate::data::Data;
-
 /// A delta object applied to a record
 ///
 /// Is always transferred in combination with an `Address`, which

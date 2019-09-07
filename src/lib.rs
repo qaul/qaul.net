@@ -49,18 +49,19 @@ mod user;
 // The way this is done via `prelude`, as well as putting important
 // types into the root namespace. This means that people can import
 // via `alexandria::Alexandria` or via `alexandria::prelude::*`
-pub mod prelude {   
+pub mod prelude {
     pub use crate::{
         data::{Data, Value},
         delta::Delta,
+        keys::KeyAttr,
         namespace::Address,
         scope::ScopeAttr,
-        keys::KeyAttr,
+        user::User,
     };
 }
 
 pub use crate::prelude::*;
-    
+
 use crate::{namespace::Namespace, store::Storable};
 use std::collections::BTreeMap;
 use std::{fs::create_dir_all, path::Path};
@@ -120,23 +121,38 @@ impl Alexandria {
         ns.modify_path(scope, delta);
     }
 
-    /// Insert some data into an address position
+    /// Modify a record from a canonically described address
     ///
-    /// Previous data will be overwritten and should be checked
-    /// manually for existence first. The `Address` is a unique
-    /// identifiable path in a Library, pointing to an optional
-    /// namespace, a scope and ultimately a data id.
-    pub fn insert(&mut self, addr: Address, data: Data) {
-        let (ns, scope, name) = match addr {
-            Address::Ns(ns, scope, name) => (Some(ns.into()), scope, name),
-            Address::Root(scope, name) => (None, scope, name),
+    /// Operations performed depend on the `Delta` that is provided,
+    /// and can either insert new records, delete existing or update
+    /// existing records. Check the documentation for `Delta` to see
+    /// all side-effects that can occur when using `Insert` vs
+    /// `Update`.
+    ///
+    /// This method works in a very similar way to `modify_path`, but
+    /// will only accept `Address::Ns` and `Address::Root`.
+    pub fn modify_record(&mut self, addr: Address, delta: Delta<Data>) {
+        let (ns, scope, id) = match addr {
+            Address::Ns(ns, scope, id) => (Some(ns.into()), scope, id),
+            Address::Root(scope, id) => (None, scope, id),
             _ => panic!("Invalid address!"),
         };
 
         self.data
             .get_mut(&ns)
-            .map(|ns| ns.insert(scope, name, data))
+            .map(|ns| ns.modify_record(scope, id, delta))
             .expect("Failed to operate on non-existing Namespace");
+    }
+
+    /// Read from a canonically described address
+    pub fn read(&self, addr: Address) -> Option<&Data> {
+        let (ns, scope, id) = match addr {
+            Address::Ns(ns, scope, id) => (Some(ns).map(|s| s.into()), scope, id),
+            Address::Root(scope, id) => (None, scope, id),
+            _ => panic!("Invalid address!"),
+        };
+
+        self.data.get(&ns)?.read(scope, id)
     }
 
     /// Sync state with disk (**remove before `1.0.0`**!)
