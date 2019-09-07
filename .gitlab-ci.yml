@@ -2,12 +2,12 @@ stages:
   - build
   - test
 
-build:nightly:
-  image: rustlang/rust:nightly
+build:stable:
+  image: rustlang/rust:stable
   script:
     - cargo build
 
-test:nightly:
+test:stable:
   image: rustlang/rust:nightly
   script:
     - cargo test --all
