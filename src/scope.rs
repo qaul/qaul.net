@@ -55,3 +55,20 @@ pub struct ScopeAttr {
     /// `"/home/.local/cache"`
     pub offset: String,
 }
+
+impl ScopeAttr {
+    /// Merge new attributes into this ScopeAttr
+    pub(crate) fn merge(&mut self, other: Self) {
+        // TODO: Thinking about this function, it kinda doesn't make
+        // much sense, but I want to leave the `Delta` in place
+        // nonetheless. There will be more attributes that can be
+        // applied to a scope and maybe we can work with something
+        // that is generated from a builder/factory pattern around
+        // lots of Options. Until then, this is kinda pointless and
+        // the `Delta::Update` on `modify_path` doesn't really make
+        // much sense to use but there we go.
+        self.ns_auth = other.ns_auth;
+        self.encryption = other.encryption;
+        self.offset = other.offset;
+    }
+}

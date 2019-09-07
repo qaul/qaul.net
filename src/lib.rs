@@ -36,19 +36,34 @@
 //! a _persistence_ module, meaning it stores things for ever (if WD
 //! drive failure statistics are to be believed...).
 
-pub mod data;
-pub mod keys;
-pub mod namespace;
-pub mod scope;
-pub mod store;
-pub mod user;
+mod data;
+mod delta;
+mod keys;
+mod namespace;
+mod scope;
+mod store;
+mod user;
 
-use data::{Data, Value};
-use namespace::{Address, Namespace};
-use scope::ScopeAttr;
+// === API EXPORTS ===
+//
+// The way this is done via `prelude`, as well as putting important
+// types into the root namespace. This means that people can import
+// via `alexandria::Alexandria` or via `alexandria::prelude::*`
+pub mod prelude {   
+    pub use crate::{
+        data::{Data, Value},
+        delta::Delta,
+        namespace::Address,
+        scope::ScopeAttr,
+        keys::KeyAttr,
+    };
+}
+
+pub use crate::prelude::*;
+    
+use crate::{namespace::Namespace, store::Storable};
 use std::collections::BTreeMap;
 use std::{fs::create_dir_all, path::Path};
-use store::Storable;
 
 /// Primary access point to the great library
 #[derive(Default, Debug)]
@@ -77,26 +92,32 @@ impl Alexandria {
         self.keys.insert(id, pubkey);
     }
 
-    /// Create a new path from an input string
+    /// Modify a path from a cannonically described address
     ///
-    /// The scheme follows: `lib:<namespace?>/<scope>`,
-    /// where `lib` is a hard-coded string representing a library.
-    pub fn create_path(&mut self, path: String, attrs: ScopeAttr) {
-        if !path.starts_with("lib:") {
-            panic!("Invalid path!");
+    /// This function can create, modify (change `ScopeAttr`) and
+    /// delete paths. A path endpoint in this case is a `Scope`, which
+    /// holds `Data`.
+    ///
+    /// In documentation and debug information, addresses are
+    /// expressed as follows: `lib:<namespace?>/<scope>/<data_id?>`,
+    /// where `namespace?` is optional and `data_id` can be omitted
+    /// when using `Address::Scope`.
+    ///
+    /// `lib` is a hardcoded prefix to differentiate it from other
+    /// filesystem paths, and can sometimes be found on wire formats.
+    pub fn modify_path(&mut self, addr: Address, delta: Delta<ScopeAttr>) {
+        let (ns, scope) = match addr {
+            Address::Scope(ns, scope) => (ns.map(|s| s.into()), scope),
+            _ => panic!("Invalid address!"),
+        };
+
+        // FIXME: This is kinda ugly
+        if !self.data.contains_key(&ns) {
+            self.data.insert(ns.clone(), Namespace::default());
         }
 
-        let segs: Vec<&str> = path[4..].split('/').collect();
-        let ns = match segs[0] {
-            "" => None,
-            ns => Some(ns.into()),
-        };
-        let scope = segs[1].into();
-
-        self.data.insert(ns.clone(), Namespace::default());
-        self.data
-            .get_mut(&ns)
-            .map(|ns| ns.create_scope(scope, attrs));
+        let ns = self.data.get_mut(&ns).expect("Failed to load namespace");
+        ns.modify_path(scope, delta);
     }
 
     /// Insert some data into an address position
@@ -109,6 +130,7 @@ impl Alexandria {
         let (ns, scope, name) = match addr {
             Address::Ns(ns, scope, name) => (Some(ns.into()), scope, name),
             Address::Root(scope, name) => (None, scope, name),
+            _ => panic!("Invalid address!"),
         };
 
         self.data

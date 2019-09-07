@@ -1,5 +1,11 @@
-use crate::scope::{Scope, ScopeAttr};
-use crate::data::Data;
+//! Alexandria namespace handling
+
+use crate::{
+    data::Data,
+    delta::Delta,
+    scope::{Scope, ScopeAttr},
+};
+
 use std::collections::BTreeMap;
 use std::iter::Iterator;
 
@@ -12,8 +18,22 @@ pub struct Namespace {
 }
 
 impl Namespace {
-    pub fn create_scope(&mut self, name: String, attrs: ScopeAttr) {
-        self.scopes.insert(name, Scope::new(attrs));
+    /// Modify a path in this particular namespace
+    pub(crate) fn modify_path(&mut self, scope: &str, delta: Delta<ScopeAttr>) {
+        match delta {
+            Delta::Insert(attrs) => {
+                self.scopes.insert(scope.into(), Scope::new(attrs));
+            }
+            Delta::Delete => {
+                self.scopes.remove(scope);
+            }
+            Delta::Update(attrs) => self
+                .scopes
+                .get_mut(scope)
+                .expect("Failed to update scope!")
+                .attrs
+                .merge(attrs),
+        };
     }
 
     pub fn scopes(&self) -> impl Iterator<Item = (&String, &Scope)> {
@@ -35,8 +55,12 @@ impl Namespace {
 /// funcitons fo r creating new addresses for inserting or retrieving
 /// data from a library.
 pub enum Address<'a> {
+    /// Refer to a record in a namespaced scope
     Ns(&'a str, &'a str, &'a str),
+    /// Refer to a record in a root-namespaced scope
     Root(&'a str, &'a str),
+    /// Refer to a scope directly (used in `Delta`s)
+    Scope(Option<&'a str>, &'a str),
 }
 
 impl<'a> Address<'a> {
@@ -48,5 +72,10 @@ impl<'a> Address<'a> {
     /// Create an address to root-namespace data
     pub fn root(scope: &'a str, id: &'a str) -> Self {
         Address::Root(scope, id)
+    }
+
+    /// Create an address to a scope
+    pub fn scope(ns: Option<&'a str>, scope: &'a str) -> Self {
+        Address::Scope(ns, scope)
     }
 }
