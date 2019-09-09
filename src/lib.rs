@@ -1,40 +1,60 @@
-//! # Alexandria persistence store
+//! # Alexandria data store library
 //!
-//! A muli-payload (key-value store and binary large object),
-//! zone-encryption (key registry and permissions),
-//! persistence module (storing things on spinning rust
-//! or zappy quantum tunnels).
+//! A multi-payload, zone-encrypting, journaled persistence module,
+//! built with low-overhead applications in mind.
 //!
-//! ## No but seriously
+//! - Stores data in namespaces and scopes
+//! - Key-value stores and lazy blobs
+//! - Supports per-scope asymetric encryption key
+//! - Uses transaction Deltas for journal and concurrency safety
+//! - Integrates into OS persistence layers (storing things on spinning
+//!   rust or zappy quantum tunnels)
 //!
-//! `alexandria` provides multiple payload endpoints to store
-//! key-value data (usually encoded in json), as well as binary large
-//! objects (that 24GB copy of Hackers we all have, but don't
-//! entirelty understand the origins of) while also providing an easy
-//! hook-based interface to encrypt and decrypt data on write and
-//! read.
+//! `alexandria` provides an easy to use database interface with
+//! transactions, merges and dynamic queries, ensuring that your
+//! in-memory representation of data never get's out-of-sync with your
+//! on-disk representation. Don't burn your data.
 //!
-//! This is fundamentally done by assigning user zones. A user
-//! provides a public key which is then used to encrypt data
-//! that is saved in their "secure" scope zone.
+//! ## Payload types
 //!
-//! `alexandria` also handles access management and sharing files
-//! between users.
+//! `alexandria` supports key-value stores, encoded as `json` on the
+//! wire format, and lazy blobs, meaning that they exist as blobs on
+//! disk, and are only fetched when absolutely needed (you know, that
+//! 24GB copy of Hackers we all have, but don't entirely understand
+//! the origins of).
 //!
-//! ## Zones
+//! Both `KV` and `Blob` payloads can use encryption at rest.
 //!
-//! Every zone has a namespace (i.e. `lib:spacekookie`), followed by a
-//! scope (i.e. `lib:spacekookie/secure` would refer to an encrypted
-//! scope). Permissions are set per scope, so it's possible to define
-//! a zone for sharing (`lib:spacekookie/share`) and it's also
-//! entirely possible to not bind a scope to a namespace (such as a
-//! global `lib:/share` scope).
+//! ## Namespaces & Scopes
 //!
-//! ## Persistence
+//! `alexandria` also has a users concept, allowing you to construct
+//! permissive layers, optionally backed by encrpted
+//! storage. Referring to a location in an `alexandria` library
+//! requires an `Address`, which consists of an optional namespace, a
+//! scope and data ID.
 //!
-//! So far all of these concepts exist in memory. But `alexandria` is
-//! a _persistence_ module, meaning it stores things for ever (if WD
-//! drive failure statistics are to be believed...).
+//! We use the following notation in documentation and external
+//! queries: `lib:</namespace?>/<scope>/<ID>`.
+//!
+//! Each scope has metadata attributes that allow `alexandria` to
+//! handle encryption, access, and on-disk offset management. What
+//! that means is that a scope `lib:/me/downloads` might be saved into
+//! `/home/me/downloads`, while the scope `lib:/me/secret_chat` is
+//! saved into `/home/me/.local/share/chat_app/secret/`.
+//!
+//! ## Questions?
+//!
+//! Check out the `examples` directory first, there's some cool
+//! ones in there (I've been told by...someone).
+//!
+//! `alexandria` is developed as part of
+//! [qaul.net][website]. We have a [mailing list][list] and
+//! an [IRC channel][irc]! Please come by and ask us questions!  (the
+//! issue tracker is a bad place to ask questions)
+//!
+//! [website]: https://qaul.net
+//! [list]: https://lists.sr.ht/~qaul/community/
+//! [irc]: https://irccloud.com/freenode/#qaul.net
 
 mod data;
 mod delta;
@@ -45,30 +65,25 @@ mod store;
 mod user;
 
 // === API EXPORTS ===
-//
-// The way this is done via `prelude`, as well as putting important
-// types into the root namespace. This means that people can import
-// via `alexandria::Alexandria` or via `alexandria::prelude::*`
-pub mod prelude {
-    pub use crate::{
-        data::{Data, Value},
-        delta::Delta,
-        keys::KeyAttr,
-        namespace::Address,
-        scope::ScopeAttr,
-        user::User,
-    };
-}
-
-pub use crate::prelude::*;
+pub use crate::{
+    data::{Data, Value},
+    delta::Delta,
+    keys::KeyAttr,
+    namespace::Address,
+    scope::ScopeAttr,
+    user::User,
+};
 
 use crate::{namespace::Namespace, store::Storable};
 use std::collections::BTreeMap;
 use std::{fs::create_dir_all, path::Path};
 
-/// Primary access point to the great library
+/// Primary context structure for Alexandria library
+///
+/// Each function is pretty well documented. For more big picture
+/// context, maybe look at the crate docs or the accompanying book.
 #[derive(Default, Debug)]
-pub struct Alexandria {
+pub struct Library {
     /// A map from Namespace-name -> Namespace. If the key is `None`,
     /// the namespace is "root"
     data: BTreeMap<Option<String>, Namespace>,
@@ -76,10 +91,10 @@ pub struct Alexandria {
     keys: BTreeMap<String, String>,
 }
 
-impl Alexandria {
+impl Library {
     /// Create a new library in memory without any paths
     ///
-    /// **Not implemented yet**
+    /// **Not implemented yet:**
     ///
     /// While this operation is practically free in theory, please
     /// keep in mind that async workers _will_ be started with this

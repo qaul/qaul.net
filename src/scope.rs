@@ -30,7 +30,7 @@ impl Scope {
     pub(crate) fn update(&mut self, _id: &str, _data: Data) {
         unimplemented!()
     }
-    
+
     pub(crate) fn read(&self, id: &str) -> Option<&Data> {
         self.files.get(id)
     }

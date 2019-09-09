@@ -1,9 +1,9 @@
 //! A small example showing how to setup an Alexandria library
 
-use alexandria::{Address, Alexandria, Data, Delta, KeyAttr, ScopeAttr, Value};
+use alexandria::{Address, Data, Delta, KeyAttr, Library, ScopeAttr, Value};
 
 fn main() {
-    let mut a = Alexandria::new();
+    let mut a = Library::new();
     a.modify_path(
         Address::scope(None, "test"),
         Delta::Insert(ScopeAttr {
@@ -13,14 +13,14 @@ fn main() {
         }),
     );
 
-    // a.insert(
-    //     Address::root("test", "foo"),
-    //     Data::KV(
-    //         vec![("name".into(), Value::String("Alice".into()))]
-    //             .into_iter()
-    //             .collect(),
-    //     ),
-    // );
+    a.modify_record(
+        Address::root("test", "foo"),
+        Delta::Insert(Data::KV(
+            vec![("name".into(), Value::String("Alice".into()))]
+                .into_iter()
+                .collect(),
+        )),
+    );
 
     a.insert(
         Address::root("test", "bar"),

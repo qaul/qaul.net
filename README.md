@@ -1,28 +1,67 @@
-# Alexandria
+# alexandria [![][ci-badge]][ci-url] [![][irc-badge]][irc-url]
 
-An experimental data persistence module. Handles both key-value stores
-and blobs on disk, in user-defined namespaces and scopes that differentiate
-in storage attributes. Supports pubkey crypto and provides some easy
-utilities to get your data back!
+[ci-badge]: https://git.open-communication.net/qaul/alexandria/badges/master/pipeline.svg
+[ci-url]: https://git.open-communication.net/qaul/alexandria/commits/master
+[irc-badge]: https://img.shields.io/badge/IRC-%23qaul.net-1e72ff.svg
+[irc-url]: https://www.irccloud.com/invite?channel=%23qaul.net&hostname=irc.freenode.org&port=6697&ssl=1
 
-## The problem
+A multi-payload, zone-encrypting, journaled persistence module, built
+with low-overhead applications in mind.
 
-The problem that `alexandria` solves isn't one that nobody solved before,
-rather it's one that everyone has to solve and aims to do it better.
-Fundamentally there's two types of payloads: `KV` are key-value encoded
-structures that are internally represented as `json`, and then `Blobs`,
-which are literally just binary large objects, that are not parsed further
-and passed through.
+- Stores data in namespaces and scopes
+- Key-value stores and lazy blobs
+- Supports per-scope asymetric encryption key
+- Uses transaction Deltas for journal and concurrency safety
+- Integrates into OS persistence layers (storing things on spinning
+  rust or zappy quantum tunnels)
 
-Every file is contained in a scope, which is optionally contained in
-a namespace. `lib:spacekookie/messages` is the scope `messages` in
-namespace `spacekookie`, while `lib:/messages` is the scope `messages`
-in the root namespace.
+`alexandria` provides an easy to use database interface with
+transactions, merges and dynamic queries, ensuring that your in-memory
+representation of data never get's out-of-sync with your on-disk
+representation. Don't burn your data.
 
-A scope can have scope attributes such as "auth_required", "encrypted"
-and a storage offset. Under the hood not every data entry in a scope
-might yield in a new file (lots of smaller ones might be stored together
-unless they are marked "fast", indicating that their contents cycle quickly),
-but fundamentally all files in a `Scope` are stored somewhere near each other.
+## Payload types
 
+`alexandria` supports key-value stores, encoded as `json` on the wire
+format, and lazy blobs, meaning that they exist as blobs on disk, and
+are only fetched when absolutely needed (you know, that 24GB copy of
+Hackers we all have, but don't entirely understand the origins of).
 
+Both `KV` and `Blob` payloads can use encryption at rest.
+
+## Namespaces & Scopes
+
+`alexandria` also has a users concept, allowing you to construct
+permissive layers, optionally backed by encrpted storage. Referring to
+a location in an `alexandria` library requires an `Address`, which
+consists of an optional namespace, a scope and data ID.
+
+We use the following notation in documentation and external queries:
+`lib:</namespace?>/<scope>/<ID>`.
+
+Each scope has metadata attributes that allow `alexandria` to handle
+encryption, access, and on-disk offset management. What that means is
+that a scope `lib:/me/downloads` might be saved into
+`/home/me/downloads`, while the scope `lib:/me/secret_chat` is saved
+into `/home/me/.local/share/chat_app/secret/`.
+
+## Questions?
+
+Check out the `examples` directory first, there's some cool ones in
+there (I've been told by...someone).
+
+`alexandria` is developed as part of [qaul.net][website]. We have a
+[mailing list][list] and an [IRC channel][irc]! Please come by and ask
+us questions!  (the issue tracker is a bad place to ask questions)
+
+[website]: https://qaul.net
+[list]: https://lists.sr.ht/~qaul/community/
+[irc]: https://irccloud.com/freenode/#qaul.net
+
+## License
+
+`alexandria` is free software and part of [qaul.net][qaul.net]. You
+are free to use, modify and redistribute the source code under the
+terms of the GNU General Public License 3.0 or (at your choice) any
+later version. For a full copy of the license, see `LICENSE` in the
+source directory attached.
