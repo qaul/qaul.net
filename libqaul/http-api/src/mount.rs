@@ -183,7 +183,7 @@ impl Handler for HotPlugMount {
         match req.extensions.get::<CurrentUser>()
                 .map(|user| req.extensions.get::<QaulCore>().unwrap().user_get(user.clone())) {
             Some(Ok(user)) => {
-                if !user.data.services.iter().fold(false, |c, s| c || *s == service) {
+                if !user.data.services.contains(&service) {
                     return Err(HotPlugHandlerError::ServiceNotAuthorized(service).into());
                 }
             },
@@ -385,35 +385,42 @@ mod test {
             });
     }
 
-    // TODO: test the qaul integrated portion of this
-    // ya know
-    // once that exists
-//    #[test]
-//    fn service_auth() {
-//        use libqaul::{
-//            Qaul,
-//            User,
-//        };
-//
-//        let mount = build_mount();
-//
-//        // you are probably here because you just ran a full test after
-//        // updating Qaul to actually do things
-//        // at the time this code was written Qaul::start() created an
-//        // empty instance for testing
-//        // please put it in whatever the appropriate testing mode is
-//        let qaul = Qaul::start();
-//        let qaul_core = QaulCore::new(&qaul);
-//
-//        let u = User::new();
-//        let user_auth = qaul.user_create("a").unwrap();
-//
-//        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
-//            .request(|mut req| {
-//                req.extensions.insert::<CurrentUser>(user_auth.clone());
-//
-//                qaul_core.before(&mut req).unwrap();
-//                assert!(mount.handle(&mut req).is_err());
-//            });
-//    }
+    #[test]
+    fn service_auth() {
+        use libqaul::{
+            Qaul,
+            UserUpdate,
+        };
+        use std::collections::BTreeSet;
+
+        let mount = build_mount();
+
+        // you are probably here because you just ran a full test after
+        // updating Qaul to actually do things
+        // at the time this code was written Qaul::start() created an
+        // empty instance for testing
+        // please put it in whatever the appropriate testing mode is
+        let qaul = Qaul::start();
+        let qaul_core = QaulCore::new(&qaul);
+        let user_auth = qaul.user_create("a".into()).unwrap();
+        qaul.user_update(user_auth.clone(), UserUpdate::AddService("a".into())).unwrap();
+
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+            .unwrap()
+            .request(|mut req| {
+                req.extensions.insert::<CurrentUser>(user_auth.clone());
+
+                qaul_core.before(&mut req).unwrap();
+                assert!(mount.handle(&mut req).is_err());
+            });
+        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/a")
+            .unwrap()
+            .request(|mut req| {
+                req.extensions.insert::<CurrentUser>(user_auth);
+
+                qaul_core.before(&mut req).unwrap();
+                let res = mount.handle(&mut req).unwrap();
+                assert_eq!(res.headers.get::<Referer>().unwrap().0, "a");
+            });
+    }
 }
