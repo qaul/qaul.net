@@ -5,7 +5,7 @@ mod crypto;
 mod storage;
 
 mod users;
-pub use users::{User, UserData, UserUpdate};
+pub use users::{ContactBook, ContactUpdate, LocalContactData, User, UserData, UserUpdate};
 
 // This module defines the libqaul service API
 mod api;
@@ -46,6 +46,7 @@ pub struct Qaul {
     users: Arc<Mutex<BTreeMap<Identity, User>>>,
     auth: Arc<Mutex<BTreeMap<Identity, String>>>,
     keys: Arc<Mutex<BTreeMap<String, Identity>>>,
+    contacts: Arc<Mutex<BTreeMap<Identity, ContactBook>>>,
 }
 
 impl Qaul {
@@ -54,6 +55,7 @@ impl Qaul {
             users: Arc::new(Mutex::new(BTreeMap::new())),
             auth: Arc::new(Mutex::new(BTreeMap::new())),
             keys: Arc::new(Mutex::new(BTreeMap::new())),
+            contacts: Arc::new(Mutex::new(BTreeMap::new())),
         }
     }
 }

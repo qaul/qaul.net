@@ -45,6 +45,11 @@ impl UserAuth {
             UserAuth::Untrusted(id) => id,
         }
     }
+
+    /// Returns the interior identity as an `Untrusted`, regardless of trust status.
+    pub fn as_untrusted(&self) -> Self {
+        UserAuth::Untrusted(self.clone().identity())
+    }
 }
 
 /// Signature trust information embedded into service messages

@@ -6,6 +6,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 mod updates;
 pub use updates::UserUpdate;
+mod contacts;
+pub use contacts::{ContactBook, ContactUpdate, LocalContactData};
 
 /// A complete user, with ID and data.
 #[derive(Debug, PartialEq, Clone)]
