@@ -211,7 +211,7 @@ impl Qaul {
         query: S,
     ) -> QaulResult<Vec<User>> {
         let query = query.into();
-        let my_id = user.identity();
+        let (my_id, _) = user.trusted()?;
 
         let mut results = Vec::new();
         let users = self.users.lock().expect("Users lock poisoned. Error");
@@ -233,7 +233,7 @@ impl Qaul {
 
     /// Enumerate all contacts known by a user
     pub fn contacts_get_all(&self, user: UserAuth) -> QaulResult<Vec<User>> {
-        let my_id = user.identity();
+        let (my_id, _) = user.trusted()?;
 
         let users = self.users.lock().expect("Users lock poisoned. Error");
         let mut contacts = self
