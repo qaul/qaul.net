@@ -19,7 +19,7 @@ You will need the following things properly installed on your computer.
 
 The qaul.net web GUI code is in the `webgui` foder of the qaul.net source code repository.
 
-* `git clone git@github.com:qaul/qaul.net.git`
+* `git clone https://git.open-communication.net/qaul/qaul.net.git`
 * `cd qaul.net/webgui`
 * `yarn`
 
