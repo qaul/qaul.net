@@ -17,25 +17,25 @@ struct Io {
 
 /// Represent a single netmod endpoint that can connect to exactly one other
 ///
-/// Both `lacency` and `bn` are public so that they can be
+/// Both `latency` and `bn` are public so that they can be
 /// dynamically adjusted in a simulation.
 pub struct MemMod<'p> {
     /// In this scenario an endpoint talks to one other endpoint
     pair: Cell<Option<&'p MemMod<'p>>>,
     /// Internal memory access to send/receive
     io: Option<Io>,
-    /// Apply artificial lacency
-    pub lacency: u8,
+    /// Apply artificial latency
+    pub latency: u8,
     /// The troughput limit in bytes per second
     pub bn: u32,
 }
 
 impl<'p> MemMod<'p> {
-    pub fn new(lacency: u8) -> Self {
+    pub fn new(latency: u8) -> Self {
         Self {
             pair: Cell::new(None),
             io: None,
-            lacency,
+            latency,
             bn: 1024 * 64, /* 64kb */
         }
     }
@@ -77,4 +77,3 @@ impl<'p> Endpoint for MemMod<'p> {
         unimplemented!()
     }
 }
-
