@@ -45,11 +45,10 @@ impl<'p> MemMod<'p> {
         self.pair.swap(&Cell::new(Some(pair)));
     }
 
-    /// Remove the connection between MemMods.
-    ///
-    /// **Warning**: will panic if no connection exists
-    pub fn split(&self) -> &'p MemMod<'p> {
-        self.pair.replace(None).expect("No connection found!")
+    /// Remove the connection between MemMods, returning the paired MemMod if there was
+    /// a connection.
+    pub fn split(&self) -> Option<&'p MemMod<'p>> {
+        self.pair.replace(None)
     }
 }
 
