@@ -32,4 +32,10 @@ impl UserAuth {
         let id = Identity::truncate(&raw_id);
         Ok(id)
     }
+
+    pub fn from_identity(id: Identity, secret: String, grant_type: GrantType) 
+    -> ResourceObject<UserAuth> {
+        let id = encode_config(id.as_ref(), URL_SAFE);
+        ResourceObject::new(id, Some(UserAuth { secret, grant_type }))
+    }
 }
