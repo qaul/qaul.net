@@ -118,200 +118,120 @@ mod test {
     };
     use super::*;
 
-    fn setup() -> (QaulCore, Identity, QaulUserAuth) {
+    fn setup() -> (RequestBuilder, Identity, QaulUserAuth, Authenticator) {
         let mut qaul = Qaul::start();
         let user_auth = qaul.user_create("a").unwrap();
         let qaul_core = QaulCore::new(&qaul);
-        (qaul_core, user_auth.clone().identity(), user_auth)
+        let (before_manager, _) = CookieManager::new();
+        let mut rb = RequestBuilder::default_post();
+        let auth = Authenticator::new();
+        rb
+            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(before_manager)
+            .add_middleware(JsonApi)
+            .add_middleware(auth.clone());
+        (rb, user_auth.clone().identity(), user_auth, auth)
     }
 
     #[test]
     fn valid_login_token() {
-        let (core, id, user_auth) = setup();
+        let (mut rb, id, user_auth, auth) = setup();
 
-        RequestBuilder::new(Method::Post, "https://127.0.0.1:8080/")
-            .unwrap()
+        let go = rb
             .set_primary_data(UserAuth::from_identity(id.clone(), "a".into(), GrantType::Token).into())
-            .request(|mut req| {
-                let (before_manager, _) = CookieManager::new();
-                let auth = Authenticator::new();
-
-                core.before(&mut req).unwrap();
-                before_manager.before(&mut req).unwrap();
-                JsonApi.before(&mut req).unwrap();
-                auth.before(&mut req).unwrap();
-
+            .request_response(|mut req| {
                 let response = login(&mut req).unwrap();
-
-                let mut body = Vec::new();
-                response.body.unwrap().write_body(&mut body).unwrap();
-                let body = String::from_utf8(body).unwrap();
-                let doc : Document = serde_json::from_str(&body).unwrap();
-                let go = match doc.data {
-                    OptionalVec::One(Some(go)) => go,
-                    o => panic!("Expected single generic object, got {:?}", o),
-                };
-                let ro : ResourceObject<UserGrant> = go.try_into().unwrap();
-                let token = ro.id;
-                assert_eq!(auth.tokens.lock().unwrap().get(&token), Some(&id));
-
                 assert_eq!(req.extensions.get::<Cookies>().unwrap().get("bearer"), None);
-            });
+                Ok(response)
+            }).unwrap()
+            .get_primary_data().unwrap();
+        let ro : ResourceObject<UserGrant> = go.try_into().unwrap();
+        let token = ro.id;
+        assert_eq!(auth.tokens.lock().unwrap().get(&token), Some(&id));
     }
 
     #[test]
     fn valid_login_cookie() {
-        let (core, id, user_auth) = setup();
+        let (mut rb, id, user_auth, auth) = setup();
 
-        RequestBuilder::new(Method::Post, "https://127.0.0.1:8080/")
-            .unwrap()
+        let go = rb
             .set_primary_data(UserAuth::from_identity(id.clone(), "a".into(), GrantType::Cookie).into())
-            .request(|mut req| {
-                let (before_manager, _) = CookieManager::new();
-                let auth = Authenticator::new();
-
-                core.before(&mut req).unwrap();
-                before_manager.before(&mut req).unwrap();
-                JsonApi.before(&mut req).unwrap();
-                auth.before(&mut req).unwrap();
-
+            .request_response(|mut req| {
                 let response = login(&mut req).unwrap();
-
-                let mut body = Vec::new();
-                response.body.unwrap().write_body(&mut body).unwrap();
-                let body = String::from_utf8(body).unwrap();
-                let doc : Document = serde_json::from_str(&body).unwrap();
-                let go = match doc.data {
-                    OptionalVec::One(Some(go)) => go,
-                    o => panic!("Expected single generic object, got {:?}", o),
-                };
-                let ro : ResourceObject<Success> = go.try_into().unwrap();
-
                 let token = req.extensions.get::<Cookies>().unwrap().get("bearer").unwrap();
                 assert_eq!(auth.tokens.lock().unwrap().get(token.value()), Some(&id));
-            });
+                Ok(response)
+            }).unwrap()
+            .get_primary_data().unwrap();
+        let ro : ResourceObject<Success> = go.try_into().unwrap();
     }
 
     #[test]
     fn multiple_data() {
-        let (core, id, user_auth) = setup();
+        let (mut rb, id, user_auth, _) = setup();
 
-        RequestBuilder::new(Method::Post, "https://127.0.0.1:8080")
-            .unwrap()
-            .set_document(
+        rb.set_document(
                 &Document { 
                     data: OptionalVec::Many(vec![]),
                     ..Default::default()
                 })
             .request(|mut req| {
-                let (before_manager, _) = CookieManager::new();
-                let auth = Authenticator::new();
-
-                core.before(&mut req).unwrap();
-                before_manager.before(&mut req).unwrap();
-                JsonApi.before(&mut req).unwrap();
-                auth.before(&mut req).unwrap();
                 assert!(login(&mut req).is_err())
             })
     }
 
     #[test]
     fn no_data() {
-        let (core, id, user_auth) = setup();
+        let (mut rb, id, user_auth, _) = setup();
 
-        RequestBuilder::new(Method::Post, "https://127.0.0.1:8080")
-            .unwrap()
-            .set_document(
+        rb.set_document(
                 &Document { 
                     data: OptionalVec::NotPresent,
                     ..Default::default()
                 })
             .request(|mut req| {
-                let (before_manager, _) = CookieManager::new();
-                let auth = Authenticator::new();
-
-                core.before(&mut req).unwrap();
-                before_manager.before(&mut req).unwrap();
-                JsonApi.before(&mut req).unwrap();
-                auth.before(&mut req).unwrap();
                 assert!(login(&mut req).is_err())
             })
     }
 
     #[test]
     fn wrong_object() {
-        let (core, id, user_auth) = setup();
+        let (mut rb, id, user_auth, _) = setup();
 
-        RequestBuilder::new(Method::Post, "https://127.0.0.1:8080")
-            .unwrap()
-            .set_primary_data(Success::from_message("test".into()).into())
+        rb.set_primary_data(Success::from_message("test".into()).into())
             .request(|mut req| {
-                let (before_manager, _) = CookieManager::new();
-                let auth = Authenticator::new();
-
-                core.before(&mut req).unwrap();
-                before_manager.before(&mut req).unwrap();
-                JsonApi.before(&mut req).unwrap();
-                auth.before(&mut req).unwrap();
                 assert!(login(&mut req).is_err())
             })
     }
 
     #[test]
     fn invalid_identity() {
-        let (core, id, user_auth) = setup();
+        let (mut rb, id, user_auth, _) = setup();
 
-        RequestBuilder::new(Method::Post, "https://127.0.0.1:8080")
-            .unwrap()
-            .set_primary_data(ResourceObject::<UserAuth>::new("".into(), None).into())
+        rb.set_primary_data(ResourceObject::<UserAuth>::new("".into(), None).into())
             .request(|mut req| {
-                let (before_manager, _) = CookieManager::new();
-                let auth = Authenticator::new();
-
-                core.before(&mut req).unwrap();
-                before_manager.before(&mut req).unwrap();
-                JsonApi.before(&mut req).unwrap();
-                auth.before(&mut req).unwrap();
                 assert!(login(&mut req).is_err())
             })
     }
 
     #[test]
     fn no_secret() {
-        let (core, id, user_auth) = setup();
+        let (mut rb, id, user_auth, _) = setup();
 
         let mut ro = UserAuth::from_identity(id, "".into(), GrantType::Token);
         ro.attributes = None;
-        RequestBuilder::new(Method::Post, "https://127.0.0.1:8080")
-            .unwrap()
-            .set_primary_data(ro.into())
+        rb.set_primary_data(ro.into())
             .request(|mut req| {
-                let (before_manager, _) = CookieManager::new();
-                let auth = Authenticator::new();
-
-                core.before(&mut req).unwrap();
-                before_manager.before(&mut req).unwrap();
-                JsonApi.before(&mut req).unwrap();
-                auth.before(&mut req).unwrap();
                 assert!(login(&mut req).is_err())
             })
     }
 
     #[test]
     fn bad_password() {
-        let (core, id, user_auth) = setup();
+        let (mut rb, id, user_auth, _) = setup();
 
-        RequestBuilder::new(Method::Post, "https://127.0.0.1:8080")
-            .unwrap()
-            .set_primary_data(UserAuth::from_identity(id, "".into(), GrantType::Token).into())
+        rb.set_primary_data(UserAuth::from_identity(id, "".into(), GrantType::Token).into())
             .request(|mut req| {
-                let (before_manager, _) = CookieManager::new();
-                let auth = Authenticator::new();
-
-                core.before(&mut req).unwrap();
-                before_manager.before(&mut req).unwrap();
-                JsonApi.before(&mut req).unwrap();
-                auth.before(&mut req).unwrap();
                 assert!(login(&mut req).is_err())
             })
     }

@@ -223,8 +223,7 @@ mod test {
 
         let mut jar = CookieJar::new();
         jar.add(Cookie::new("bearer", key.clone()));
-        RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
-            .unwrap()
+        RequestBuilder::default()
             .set_header(Authorization(Bearer { token: key }))
             .set_cookies(&jar)
             .request(|mut req| {

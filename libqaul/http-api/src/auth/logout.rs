@@ -79,85 +79,65 @@ mod test {
     };
     use json_api::ResourceObject;
 
-    fn setup() -> (Vec<Box<dyn BeforeMiddleware>>, Authenticator, CookieManager, Identity, String) {
+    fn setup() -> (RequestBuilder, Authenticator, String) {
         let qaul = Qaul::start();
         let user_auth = qaul.user_create("a".into()).unwrap();
         let (ident, key) = qaul.user_authenticate(user_auth).unwrap();
 
-        let core = QaulCore::new(&qaul);
-        let (before_manager, after_manager) = CookieManager::new();
+        let (before_manager, _) = CookieManager::new();
         let auth = Authenticator::new();
-        { auth.tokens.lock().unwrap().insert(key.clone(), ident.clone()); } 
+        { auth.tokens.lock().unwrap().insert(key.clone(), ident); } 
+
+        let mut rb = RequestBuilder::default();
+        rb.add_middleware(QaulCore::new(&qaul));
+        rb.add_middleware(before_manager);
+        rb.add_middleware(JsonApi);
+        rb.add_middleware(auth.clone());
 
         (
-            vec![Box::new(core), Box::new(before_manager), Box::new(JsonApi), Box::new(auth.clone())], 
+            rb,
             auth,
-            after_manager,
-            ident,
             key
         )
     }
 
     #[test]
     fn logout_cookie() {
-        let (chain, auth, cookie_manager, ident, key) = setup();
-
+        let (mut rb, auth, key) = setup();
+    
         let mut jar = CookieJar::new();
         jar.add(Cookie::new("bearer", key.clone()));
-        RequestBuilder::new(Method::Get, "https://127.0.0.1/")
-            .unwrap()
+        let go = rb
             .set_cookies(&jar)
-            .request(|mut req| {
-                for m in chain { m.before(&mut req).unwrap() }
+            .request_response(|mut req| {
                 let response = logout(&mut req).unwrap();
-
-                let mut body = Vec::new();
-                response.body.unwrap().write_body(&mut body).unwrap();
-                let body = String::from_utf8(body).unwrap();
-                let doc : Document = serde_json::from_str(&body).unwrap();
-                let go = match doc.data {
-                    OptionalVec::One(Some(go)) => go,
-                    o => panic!("Exepected single generic object, got {:?}", o),
-                };
-                let ro : ResourceObject<Success> = go.try_into().unwrap();
-
                 assert_eq!(auth.tokens.lock().unwrap().get(&key), None);
                 assert_eq!(req.extensions.get::<Cookies>().unwrap().get("bearer"), None);
-            });
+                Ok(response)
+            }).unwrap()
+            .get_primary_data().unwrap();
+        let ro : ResourceObject<Success> = go.try_into().unwrap();
     }
 
     #[test]
     fn logout_token() {
-        let (chain, auth, cookie_manager, ident, key) = setup();
-
-        RequestBuilder::new(Method::Get, "https://127.0.0.1/")
-            .unwrap()
+        let (mut rb, auth, key) = setup();
+    
+        let go = rb
             .set_header(Authorization(Bearer { token: key.clone() }))
-            .request(|mut req| {
-                for m in chain { m.before(&mut req).unwrap() }
+            .request_response(|mut req| {
                 let response = logout(&mut req).unwrap();
-
-                let mut body = Vec::new();
-                response.body.unwrap().write_body(&mut body).unwrap();
-                let body = String::from_utf8(body).unwrap();
-                let doc : Document = serde_json::from_str(&body).unwrap();
-                let go = match doc.data {
-                    OptionalVec::One(Some(go)) => go,
-                    o => panic!("Exepected single generic object, got {:?}", o),
-                };
-                let ro : ResourceObject<Success> = go.try_into().unwrap();
-
                 assert_eq!(auth.tokens.lock().unwrap().get(&key), None);
-            });
+                Ok(response)
+            }).unwrap()
+            .get_primary_data().unwrap();
+        let ro : ResourceObject<Success> = go.try_into().unwrap();
     }
-
+    
     #[test]
     fn no_login() {
-        let (chain, auth, cookie_manager, ident, key) = setup();
-        RequestBuilder::new(Method::Get, "https://127.0.0.1/")
-            .unwrap()
-            .request(|mut req| {
-                for m in chain { m.before(&mut req).unwrap() }
+        let (rb, _, _) = setup();
+        rb.request(|mut req| {
                 assert!(logout(&mut req).is_err())
             });
     }

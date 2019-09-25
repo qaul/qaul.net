@@ -259,21 +259,21 @@ mod test {
     fn basic_route() {
         let mount = build_mount();
 
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/a")
+        RequestBuilder::get("http://127.0.0.1:8080/a")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "a");
             });
 
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/b")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
             });
 
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/c")
+        RequestBuilder::get("http://127.0.0.1:8080/c")
             .unwrap()
             .request(|mut req| {
                 assert!(mount.handle(&mut req).is_err());
@@ -285,7 +285,7 @@ mod test {
         let mount = build_mount();
 
         assert!(mount.mount("a".into(), NamedHandler { name: "c".into() }).unwrap());
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/a")
+        RequestBuilder::get("http://127.0.0.1:8080/a")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -293,7 +293,7 @@ mod test {
             });
 
         assert!(mount.mount("b".into(), NamedHandler { name: "d".into() }).is_err());
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/b")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -301,7 +301,7 @@ mod test {
             });
 
         assert!(mount.mount_core("b".into(), NamedHandler { name: "e".into() }));
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/b")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -314,14 +314,14 @@ mod test {
         let mount = build_mount();
 
         assert!(mount.unmount("a").unwrap());
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/a")
+        RequestBuilder::get("http://127.0.0.1:8080/a")
             .unwrap()
             .request(|mut req| {
                 assert!(mount.handle(&mut req).is_err());
             });
 
         assert!(mount.unmount("b").is_err());
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/b")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -329,7 +329,7 @@ mod test {
             });
 
         assert!(mount.unmount_core("b"));
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/b")
             .unwrap()
             .request(|mut req| {
                 assert!(mount.handle(&mut req).is_err());
@@ -345,7 +345,7 @@ mod test {
         let mount = build_mount();
 
         assert!(!mount.mount("/b".into(), NamedHandler { name: "c".into(), }).unwrap());
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/b")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -353,7 +353,7 @@ mod test {
             });
 
         assert!(!mount.mount("b/".into(), NamedHandler { name: "c".into(), }).unwrap());
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/b")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -361,7 +361,7 @@ mod test {
             });
 
         assert!(!mount.mount("b/a".into(), NamedHandler { name: "c".into(), }).unwrap());
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b/a")
+        RequestBuilder::get("http://127.0.0.1:8080/b/a")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -373,7 +373,7 @@ mod test {
     fn paths() {
         let mount = build_mount();
 
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b/a/b/c/d/e?f=g")
+        RequestBuilder::get("http://127.0.0.1:8080/b/a/b/c/d/e?f=g")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -405,7 +405,7 @@ mod test {
         let user_auth = qaul.user_create("a".into()).unwrap();
         qaul.user_update(user_auth.clone(), UserUpdate::AddService("a".into())).unwrap();
 
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/b")
             .unwrap()
             .request(|mut req| {
                 req.extensions.insert::<CurrentUser>(user_auth.clone());
@@ -413,7 +413,7 @@ mod test {
                 qaul_core.before(&mut req).unwrap();
                 assert!(mount.handle(&mut req).is_err());
             });
-        RequestBuilder::new(Method::Get, "http://127.0.0.1:8080/a")
+        RequestBuilder::get("http://127.0.0.1:8080/a")
             .unwrap()
             .request(|mut req| {
                 req.extensions.insert::<CurrentUser>(user_auth);

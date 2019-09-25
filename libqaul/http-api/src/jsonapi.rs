@@ -250,8 +250,7 @@ mod test {
             data: OptionalVec::One(Some(Identifier::new("a".into(), "b".into()).into())),
             ..Default::default()
         };
-        RequestBuilder::new(Method::Post, "http://127.0.0.1:8080/")
-            .unwrap()
+        RequestBuilder::default_post()
             .set_document(&doc)
             .request(|mut req| {
                 assert!(JsonApi.before(&mut req).is_ok());
@@ -265,8 +264,7 @@ mod test {
     #[test]
     fn skips_other() {
         let data = "abcdef";
-        RequestBuilder::new(Method::Post, "http://127.0.0.1:8080/")
-            .unwrap()
+        RequestBuilder::default_post()
             .set_string(data)
             .request(|mut req| {
                 assert!(JsonApi.before(&mut req).is_ok());
@@ -282,8 +280,7 @@ mod test {
     // test that it rejects requests with incorrect media types
     #[test]
     fn rejects_media_type() {
-        RequestBuilder::new(Method::Post, "http://127.0.0.1:8080/")
-            .unwrap()
+        RequestBuilder::default_post()
             .set_header(ContentType(invalid_media_type())) 
             .request(|mut req| {
                 let err = match JsonApi.before(&mut req) {
@@ -308,7 +305,7 @@ mod test {
             qitem(invalid_media_type()),
         ];
 
-        let mut rb = RequestBuilder::new(Method::Post, "http://127.0.0.1:8080/").unwrap();
+        let mut rb = RequestBuilder::default_post();
         rb.set_document(&doc);
         rb.set_header(Accept(accept.clone()));
 
@@ -332,8 +329,7 @@ mod test {
     // test to see if it handles a bad payload
     #[test]
     fn bad_payload() {
-        RequestBuilder::new(Method::Post, "http://127.0.0.1:8080/")
-            .unwrap()
+        RequestBuilder::default_post()
             .set_string("{\"data\": 1}".into())
             .set_header(ContentType(JSONAPI_MIME.clone()))
             .request(|mut req| {
