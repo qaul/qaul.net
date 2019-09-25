@@ -105,7 +105,7 @@ mod test {
         UserUpdate
     };
 
-    fn setup() -> (Vec<Box<dyn BeforeMiddleware>>, UserAuth, String) {
+    fn setup() -> (RequestBuilder, Authenticator, UserAuth, String) {
         let qaul = Qaul::start();
         let user_auth = qaul.user_create("a".into()).unwrap();
         let (ident, key) = qaul.user_authenticate(user_auth.clone()).unwrap();
@@ -113,69 +113,60 @@ mod test {
         let authenticator = Authenticator::new();
         { authenticator.tokens.lock().unwrap().insert(key.clone(), ident); } 
 
-        (vec![Box::new(CookieManager::new().0), Box::new(authenticator)], user_auth, key)
+        let mut rb = RequestBuilder::default();
+        rb.add_middleware(CookieManager::new().0);
+        rb.add_middleware(authenticator.clone());
+
+        (rb, authenticator, user_auth, key)
     }
 
     #[test]
     fn no_login() {
-        let (chain, _, _) = setup();
-        RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
-            .unwrap()
-            .request(|mut req| {
-                for m in chain { m.before(&mut req).unwrap() }
+        let (rb, _, _, _) = setup();
+        rb.request(|mut req| {
                 assert_eq!(req.extensions.get::<CurrentUser>(), None);
             });
     }
 
     #[test]
     fn valid_token_login() {
-        let (chain, user_auth, key) = setup();
-        RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
-            .unwrap()
-            .set_header(Authorization(Bearer { token: key }))
+        let (mut rb, _, user_auth, key) = setup();
+        rb.set_header(Authorization(Bearer { token: key }))
             .request(|mut req| {
-                for m in chain { m.before(&mut req).unwrap(); }
                 assert_eq!(req.extensions.get::<CurrentUser>(), Some(&user_auth));
             });
     }
 
     #[test]
     fn invalid_token_login() {
-        let (chain, user_auth, _) = setup();
-        RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
-            .unwrap()
-            .set_header(Authorization(Bearer { token: "i am not valid".into() }))
+        let (mut rb, authenticator, user_auth, _) = setup();
+        rb.set_header(Authorization(Bearer { token: "i am not valid".into() }))
+            .set_chain(vec![Box::new(CookieManager::new().0)])
             .request(|mut req| {
-                chain[0].before(&mut req).unwrap();
-                assert!(chain[1].before(&mut req).is_err());
+                assert!(authenticator.before(&mut req).is_err());
             });
     }
 
     #[test]
     fn valid_login_cookie() {
-        let (chain, user_auth, key) = setup();
+        let (mut rb, _, user_auth, key) = setup();
         let mut jar = CookieJar::new();
         jar.add(Cookie::new("bearer", key));
-        RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
-            .unwrap()
-            .set_cookies(&jar)
+        rb.set_cookies(&jar)
             .request(|mut req| {
-                for m in chain { m.before(&mut req).unwrap(); }
                 assert_eq!(req.extensions.get::<CurrentUser>(), Some(&user_auth));
             });
     }
 
     #[test]
     fn invalid_login_cookie() {
-        let (chain, user_auth, key) = setup();
+        let (mut rb, authenticator, user_auth, key) = setup();
         let mut jar = CookieJar::new();
         jar.add(Cookie::new("bearer", "i'm not the right key"));
-        RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
-            .unwrap()
-            .set_cookies(&jar)
+        rb.set_cookies(&jar)
+            .set_chain(vec![Box::new(CookieManager::new().0)])
             .request(|mut req| {
-                chain[0].before(&mut req).unwrap();
-                assert!(chain[1].before(&mut req).is_err());
+                assert!(authenticator.before(&mut req).is_err());
             });
     }
 
@@ -197,12 +188,11 @@ mod test {
 
         let mut jar = CookieJar::new();
         jar.add(Cookie::new("bearer", key2));
-        RequestBuilder::new(Method::Get, "https://127.0.0.1:8080/")
-            .unwrap()
+        RequestBuilder::default()
             .set_header(Authorization(Bearer { token: key }))
             .set_cookies(&jar)
+            .add_middleware(CookieManager::new().0)
             .request(|mut req| {
-                CookieManager::new().0.before(&mut req).unwrap();
                 assert!(authenticator.before(&mut req).is_err());
             });
     }
@@ -226,9 +216,9 @@ mod test {
         RequestBuilder::default()
             .set_header(Authorization(Bearer { token: key }))
             .set_cookies(&jar)
+            .add_middleware(CookieManager::new().0)
+            .add_middleware(authenticator)
             .request(|mut req| {
-                CookieManager::new().0.before(&mut req).unwrap();
-                authenticator.before(&mut req).unwrap();
                 assert_eq!(req.extensions.get::<CurrentUser>(), Some(&user_auth));
             });
     }
