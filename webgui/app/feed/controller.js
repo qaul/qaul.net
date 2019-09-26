@@ -1,5 +1,5 @@
 import Controller from '@ember/controller';
-import { get, computed } from '@ember/object'
+import { computed } from '@ember/object'
 
 export default Controller.extend({
     messages: computed('model.@each.timestamp', {
