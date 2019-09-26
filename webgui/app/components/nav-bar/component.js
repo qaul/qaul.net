@@ -1,6 +1,8 @@
 import Component from '@ember/component';
 
-export default Component.extend({
-    //localClassNames: ['nav-bar']
-    localClassNames: 'nav-bar'
-});
+export default Component.extend({});
+
+// import Component from '@glimmer/component';
+
+// export default class MyComponentComponent extends Component {
+// }

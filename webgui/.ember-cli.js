@@ -1,9 +1,9 @@
 "use strit";
 
-// eslint-disable-next-line node/no-extraneous-require
-const { setEdition } = require('@ember/edition-utils');
+// this currently breaks
+// const { setEdition } = require('@ember/edition-utils');
 
-setEdition('octane');
+// setEdition('octane');
 
 module.exports = {
   /**
