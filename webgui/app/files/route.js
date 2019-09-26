@@ -3,6 +3,6 @@ import { get } from '@ember/object';
 
 export default Route.extend({
   model() {
-    return get(this, 'store').findAll('file');
+    return this.store.findAll('file');
   }
 });

@@ -1,10 +1,10 @@
 import Controller from '@ember/controller';
-import {get, computed } from '@ember/object'
+import { get, computed } from '@ember/object'
 
 export default Controller.extend({
     messages: computed('model.@each.timestamp', {
         get() {
-            return get(this, 'model').sortBy('timestamp').reverse();
+            return this.model.sortBy('timestamp').reverse();
         }
     }),
     actions: {
