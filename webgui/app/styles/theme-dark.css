@@ -1,0 +1,43 @@
+/* dark theme */
+:root {
+  /* over-all background */
+  --q-bg:#222;
+  --q-bg-middle:#333;
+  --q-bg-middle-hover:#3f3f3f;
+  --q-bg-strong:#444;
+  --q-bg-strong-hover:#4f4f4f;
+
+  /* theme color */
+  --q-theme-strong:#0076ab;
+  --q-theme-strong-hover:#0089c7;
+  --q-theme-middle:#386377;
+  --q-theme-light:#4b5962;
+
+  /* borders */
+  --q-border:#666;
+  --q-border-light:#444;
+
+  /* text color */
+  --q-color:#aaa;
+  --q-color-title:#ddd;
+
+  /* hyperlinks */
+  --q-a:#6399cc;
+  --q-a-hover:#6399cc; /* hover when there is underlining */
+  --q-a-hover-nounderline:#eee; /* hover when there is no underlining */
+
+  /* user availability */
+  --q-available:limegreen;
+
+  --q-nav-bg:var(--q-bg-middle);
+  --q-nav-bg-hover:var(--q-bg-middle-hover);
+  --q-nav-border:var(--q-border-light);
+  --q-nav-color:#ddd;
+  --q-nav-bg-active:var(--q-theme-strong);
+  --q-nav-bg-active-hover:var(--q-theme-strong-hover);
+  --q-nav-icon:#8a8a8a;
+  --q-nav-icon-shadow:#1c1c1c;
+  --q-input-hint:#666; /* hint text in the unselected input text field */
+  --q-bar-bg:#666;
+  --q-bar-border:#aaa;
+}
