@@ -233,10 +233,9 @@ mod test {
     use anneal::RequestBuilder;
     use iron::{
         headers::{qitem, Accept},
-        method::Method,
         mime,
     };
-    use json_api::Identifier;
+    use json_api::{Identifier, OptionalVec};
 
     fn invalid_media_type() -> mime::Mime<Vec<(mime::Attr, mime::Value)>> {
         mime::Mime(

@@ -245,7 +245,6 @@ mod test {
     use anneal::RequestBuilder;
     use iron::{
         headers::{Location, Referer, Server},
-        method::Method,
         middleware::BeforeMiddleware,
         modifiers::Header,
     };
@@ -429,7 +428,6 @@ mod test {
     #[test]
     fn service_auth() {
         use libqaul::{Qaul, UserUpdate};
-        use std::collections::BTreeSet;
 
         let mount = build_mount();
 

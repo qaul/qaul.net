@@ -143,7 +143,6 @@ impl AfterMiddleware for CookieManager {
 mod test {
     use super::*;
     use anneal::RequestBuilder;
-    use iron::method::Method;
 
     #[test]
     fn no_cookies() {
@@ -163,7 +162,7 @@ mod test {
                 CookieManager.before(&mut req).unwrap();
 
                 assert_eq!(req.extensions.get::<Cookies>().unwrap().iter().count(), 2);
-                let mut cookies = req.extensions.get_mut::<Cookies>().unwrap();
+                let cookies = req.extensions.get_mut::<Cookies>().unwrap();
                 assert_eq!(cookies.get("a").unwrap().value(), "b");
                 assert_eq!(cookies.get("c").unwrap().value(), "d");
 
