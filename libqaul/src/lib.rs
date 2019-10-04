@@ -1,61 +1,53 @@
-//! A common abstraction over several network backplanes
+//! # libqaul
+//!
+//! This is the library that sits at the heart of qaul.net. If you're
+//! not familiar with this project, go to https://qaul.net and learn
+//! about it.
+//!
+//! Fundamentally, it handles three types of interactions:
+//!
+//! - Initialised hardware messaging
+//! - Service messaging and service hosting
+//! - Internal storage, parsing and encryption
+//!
+//! The two things provided by libqaul, that make it useful to other
+//! applications are `Qaul`, the primary data struct and API holder,
+//! plus the "service API" (implemented on `Qaul`) which gives a
+//! developer access to a qaul network.
+//!
+//! The initilisation order for the libqaul stack is reverted.
+//!
+//! 1. Hardware modules (`netmod`) for the appropriate platform
+//! 2. `RATMAN` routing core, binding against available network
+//!    interfaces
+//! 3. (Optional) Platform specific storage shims for `Alexandria`
+//! 4. `Qaul` internals, which sets up storage, encryption and
+//!    user stores
+//! 5. API shims such as the `http-api` which exposes the service
+//!    API on a json:api schema
+//! 6. UI threads: either initialise the qaul.net web-frontend or
+//!    your own application stack
+//!
+//! `libqaul` handles user registration, sign-in and out, messaging,
+//! file-sharing, both encrypted and public communication, voice
+//! calls, as well as service hooks that mean that your applications
+//! can communicate with the existing services, and other instances
+//! running across a qaul network.
+//!
+//! Additionally to providing the entire application stack, `libqaul`
+//! can also tunnel to other `libqaul` instances, depending on the
+//! platform.  This means that your application might be shipping an
+//! entire copy of `libqaul`, but doesn't have to be the network entry
+//! point. This initialisation option is available before starting
+//! network bindings.
 
+mod api;
 mod auth;
 mod crypto;
+mod qaul;
 mod storage;
-
 mod users;
-pub use users::{ContactBook, ContactUpdate, LocalContactData, User, UserData, UserUpdate};
 
-// This module defines the libqaul service API
-mod api;
 pub use api::*;
-
-pub use identity::Identity;
-use std::{
-    collections::BTreeMap,
-    sync::{Arc, Mutex},
-};
-
-/// Primary context structure for `libqaul`
-///
-/// Handles user state, secret storage, network state,
-/// I/O and services. Check `api` for the extended
-/// service API
-///
-/// ## Bootstrapping
-///
-/// Starting an instance of `libqaul` requires several steps.
-/// For one, it needs to be initialised with a valid config
-/// for the routing-layer (`RATMAN`). This requires choosing
-/// of network backends and client configuration.
-///
-/// Secondly, `libqaul` by itself does very little, except handle
-/// service requests. The service API exposes various workloads
-/// available, but the consuming services also need to be configured,
-/// externally to `libqaul` and this instance.
-///
-/// A bootstrapping procedure should thus look as follows:
-///
-/// 1. RATMAN + netmod initialisation
-/// 2. `libqaul` startup (this struct, call `init()`)
-/// 3. Initialise services with a `libqaul` instance reference
-/// 4. Your application is now ready for use
-#[derive(Clone)]
-pub struct Qaul {
-    users: Arc<Mutex<BTreeMap<Identity, User>>>,
-    auth: Arc<Mutex<BTreeMap<Identity, String>>>,
-    keys: Arc<Mutex<BTreeMap<String, Identity>>>,
-    contacts: Arc<Mutex<BTreeMap<Identity, ContactBook>>>,
-}
-
-impl Qaul {
-    pub fn start() -> Self {
-        Self {
-            users: Arc::new(Mutex::new(BTreeMap::new())),
-            auth: Arc::new(Mutex::new(BTreeMap::new())),
-            keys: Arc::new(Mutex::new(BTreeMap::new())),
-            contacts: Arc::new(Mutex::new(BTreeMap::new())),
-        }
-    }
-}
+pub use qaul::Qaul;
+pub use users::{ContactBook, ContactUpdate, LocalContactData, User, UserData, UserUpdate};
