@@ -19,6 +19,25 @@ pub struct Message {
     attachments: Option<Attachments>,
 }
 
+/*
+
+# 
+- Recipients
+- Sender
+
+
+{
+  - message meta
+  - message
+}
+
+{
+  - message meta
+  - file
+}
+
+*/
+
 /// Messaging service state
 pub struct Messaging<'q> {
     async_files: bool,
@@ -47,6 +66,7 @@ impl<'q> Messaging<'q> {
     }
 
     /// Send a plain-text message with optional arbitrary attachments
+    // TODO: Broadcast messages
     pub fn send_message(
         &self,
         user: UserAuth,

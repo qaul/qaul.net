@@ -14,7 +14,6 @@ use japi::{
     Error,
     Links,
     Link,
-    OptionalVec
 };
 use std::{
     error,
@@ -165,7 +164,7 @@ impl BeforeMiddleware for JsonApi {
             for mime in v {
                 match mime {
                     QualityItem{ 
-                            item: Mime(TopLevel::Application, target_sublevel, params), 
+                            item: Mime(TopLevel::Application, _, params), 
                             quality: _ } => {
                         json_api_type = true;
                         if params.len() == 0 { 

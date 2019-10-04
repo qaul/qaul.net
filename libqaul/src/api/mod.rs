@@ -58,7 +58,7 @@ impl Qaul {
         OsRng.fill(&mut key[..]);
         let key = encode_config(&key, URL_SAFE); 
         self.keys.lock().unwrap().insert(key.clone(), id.clone());
-
+        
         Ok(UserAuth::Trusted(
             id,
             key,
@@ -75,10 +75,15 @@ impl Qaul {
 
         match self.keys.lock().unwrap().get(&key) {
             Some(id) if *id == user_id => Ok((user_id, key)),
-            Some(id) => Err(QaulError::NotAuthorised),
+            Some(_) => Err(QaulError::NotAuthorised),
             None => Err(QaulError::NotAuthorised),
         }
 
+    }
+
+    /// Get a list of available users
+    pub fn user_get_all(&self) -> Vec<Identity> {
+        self.users.lock().unwrap().keys().cloned().collect()
     }
 
     /// Inject a `UserAuth` into this `Qaul`.
@@ -115,7 +120,7 @@ impl Qaul {
         let (user_id, _) = self.user_authenticate(user)?;
 
         let mut users = self.users.lock().unwrap();
-        let mut user = match users.get_mut(&user_id) {
+        let user = match users.get_mut(&user_id) {
             Some(v) => v,
             None => {
                 return Err(QaulError::UnknownUser);
