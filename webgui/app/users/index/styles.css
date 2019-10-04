@@ -1,5 +1,5 @@
 .input-area input {
-    color:#ccc;
+    color:var(--q-input-hint);
 }
 
 .subnavigation {
@@ -13,11 +13,11 @@
 }
 .subnavigation a:hover {
     text-decoration: none;
-    color: #000;
+    color: var(--q-a-hover-nounderline);
 }
 .subnavigation a i {
     display: block;
-    border-right: 0.1rem solid #ccc;
+    border-right: 0.1rem solid var(--q-border);
     text-align: center;
 }
 .subnavigation a:last-child i {
@@ -40,8 +40,9 @@
 .user-avatar {
     width: 5rem;
     height: 5rem;
-    background-color: #d1e4f1;
+    background-color: var(--q-theme-middle);
     position:absolute;
+    border-radius: 50%;
 }
 .user-trust {
     position: absolute;
@@ -52,7 +53,7 @@
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 50%;
-    background-color: limegreen;
+    background-color: var(--q-available);
     position: absolute;
     top: -0.5rem;
     right: -0.5rem;

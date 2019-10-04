@@ -26,17 +26,17 @@
 .panel .item.name {
     font-weight: normal;
     font-size: smaller;
-    background-color: #e8e8e8;
+    background-color: var(--q-nav-bg);
 }
 .panel .item .icon {
     float: right;
 }
 .panel .item {
 	font-weight: bold;
-    border: solid 0.1rem #dcdcdc;
+    border: solid 0.1rem var(--q-nav-border);
     border-bottom-width: 0;
     display: block;
-    color: #333;
+    color: var(--q-nav-color);
     padding: 0.7rem 1.2rem;
 }
 .panel .item:first-child {
@@ -52,19 +52,6 @@
 }
 .panel a.item:hover {
     text-decoration: none;
-    background-color: ;
-    
-}
+    background-color: var(--q-nav-bg-hover);
 
-
-/*
-.item.selected {
-	color:#50b7ff;
-    border-color: #50b7ff;
-	border-width: 0.1rem;
 }
-.item.selected:hover {
-	color:#000;
-	border-color: #000;
-}
-*/
