@@ -1,0 +1,11 @@
+send: Senden
+search: Suchbegriff Eingeben ...
+settings:
+  configuration: Konfiguration
+  changeLanguage: Sprache wählen
+  selectTheme: Anzeige Thema
+info:
+  information: Informationen
+  aboutQaulNet: Über qaul.net
+  howto: Nutzer*innenanleitung
+  debug: Debugging Informationen
