@@ -1,22 +1,13 @@
-use libqaul::{
-    Qaul,
-};
 use iron::{
     error::HttpResult,
-    Listening,
-    typemap,
-    prelude::*,
-    middleware::{
-        BeforeMiddleware,
-        Handler,
-    },
+    middleware::{BeforeMiddleware, Handler},
     mime,
-};
-use std::{
-    net::ToSocketAddrs,
-    sync::Arc,
+    prelude::*,
+    typemap, Listening,
 };
 use lazy_static::lazy_static;
+use libqaul::Qaul;
+use std::{net::ToSocketAddrs, sync::Arc};
 
 mod auth;
 use auth::Authenticator;
@@ -38,12 +29,12 @@ pub use jsonapi::{JsonApi, JsonApiGaurd};
 mod cookie;
 pub use crate::cookie::Cookies;
 
-lazy_static! { 
+lazy_static! {
     /// A static `Mime` object representing `application/vnd.api+json`
     pub static ref JSONAPI_MIME : mime::Mime = mime::Mime(
         mime::TopLevel::Application,
         mime::SubLevel::Ext(String::from("vnd.api+json")),
-        Vec::new()); 
+        Vec::new());
 }
 
 /// The core of the qaul.net HTTP API
@@ -55,7 +46,6 @@ pub struct ApiServer {
 }
 
 impl ApiServer {
-
     pub fn new<A: ToSocketAddrs>(qaul: &Qaul, addr: A) -> HttpResult<Self> {
         let mount = mount::HotPlugMount::new();
 
@@ -70,27 +60,27 @@ impl ApiServer {
 
         let user_chain = Chain::new(core::get_all_users);
         mount.mount_core("users".into(), user_chain);
-        
+
         let mut chain = Chain::new(mount.clone());
         chain.link(crate::cookie::CookieManager::new());
-        chain.link_before(QaulCore::new(qaul)); 
+        chain.link_before(QaulCore::new(qaul));
         chain.link_before(jsonapi::JsonApi);
 
         let authenticator = Authenticator::new();
-        chain.link_before(authenticator.clone()); 
+        chain.link_before(authenticator.clone());
 
         let listening = Iron::new(chain).http(addr)?;
 
-        Ok(Self{ 
-            authenticator: authenticator.clone(), 
+        Ok(Self {
+            authenticator: authenticator.clone(),
             mount,
-            listening, 
+            listening,
         })
     }
 
     /// According to
-    /// [https://github.com/hyperium/hyper/issues/338](https://github.com/hyperium/hyper/issues/338) 
-    /// this _probably_ does nothing, but i'm providing it in the hope that in the 
+    /// [https://github.com/hyperium/hyper/issues/338](https://github.com/hyperium/hyper/issues/338)
+    /// this _probably_ does nothing, but i'm providing it in the hope that in the
     /// future someone will figure out how to shutdown a webserver without crashing it
     pub fn close(&mut self) -> HttpResult<()> {
         self.listening.close()
@@ -102,7 +92,11 @@ impl ApiServer {
     ///
     /// Returns `true` when a this service replaces a previous service mounted
     /// under the same path and `false` otherwise
-    pub fn mount_service<T: Handler>(&self, name: String, handler: T) -> Result<bool, HotPlugError> {
+    pub fn mount_service<T: Handler>(
+        &self,
+        name: String,
+        handler: T,
+    ) -> Result<bool, HotPlugError> {
         self.mount.mount(name, handler)
     }
 
@@ -110,8 +104,8 @@ impl ApiServer {
     ///
     /// Errors when you try to unmount a core route like `/login`
     ///
-    /// Returns `true` when a service with that name existed and was unmounted, 
-    /// `false` when no service of that name was found 
+    /// Returns `true` when a service with that name existed and was unmounted,
+    /// `false` when no service of that name was found
     pub fn unmount_service(&self, name: &str) -> Result<bool, HotPlugError> {
         self.mount.unmount(name)
     }
@@ -129,17 +123,21 @@ impl ApiServer {
 /// # Ok(Response::with(""))
 /// # }
 /// ```
-pub struct QaulCore{
+pub struct QaulCore {
     qaul: Arc<Qaul>,
 }
 
 impl QaulCore {
     fn new(qaul: &Qaul) -> Self {
-        Self{ qaul: Arc::new(qaul.clone()) }
+        Self {
+            qaul: Arc::new(qaul.clone()),
+        }
     }
 }
 
-impl typemap::Key for QaulCore { type Value = Arc<Qaul>; }
+impl typemap::Key for QaulCore {
+    type Value = Arc<Qaul>;
+}
 
 impl BeforeMiddleware for QaulCore {
     fn before(&self, req: &mut Request) -> IronResult<()> {
@@ -147,4 +145,3 @@ impl BeforeMiddleware for QaulCore {
         Ok(())
     }
 }
-

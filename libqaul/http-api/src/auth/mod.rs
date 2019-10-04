@@ -1,12 +1,12 @@
 mod authenticator;
-pub use authenticator::CurrentUser; 
-pub (crate) use authenticator::Authenticator;
+pub(crate) use authenticator::Authenticator;
+pub use authenticator::CurrentUser;
 
 mod login;
-pub (crate) use login::login;
+pub(crate) use login::login;
 
 mod logout;
-pub (crate) use logout::logout;
+pub(crate) use logout::logout;
 
 mod error;
-pub (crate) use error::AuthError;
+pub(crate) use error::AuthError;

@@ -1,9 +1,9 @@
-use base64::{encode_config, decode_config, URL_SAFE};
-use serde_derive::{Serialize, Deserialize};
-use json_api::{ResourceObject, Attributes};
 use super::ConversionError;
-use libqaul::Identity;
+use base64::{decode_config, encode_config, URL_SAFE};
 use identity::ID_LEN;
+use json_api::{Attributes, ResourceObject};
+use libqaul::Identity;
+use serde_derive::{Deserialize, Serialize};
 
 /// The type of the requested grant
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
@@ -20,11 +20,14 @@ pub struct UserAuth {
     pub grant_type: GrantType,
 }
 
-impl Attributes for UserAuth { fn kind() -> String { "user_auth".into() } }
+impl Attributes for UserAuth {
+    fn kind() -> String {
+        "user_auth".into()
+    }
+}
 
 impl UserAuth {
-    pub fn identity(obj: &ResourceObject<UserAuth>) -> 
-    Result<Identity, ConversionError> {
+    pub fn identity(obj: &ResourceObject<UserAuth>) -> Result<Identity, ConversionError> {
         let raw_id = decode_config(&obj.id, URL_SAFE)?;
         if raw_id.len() != ID_LEN {
             return Err(ConversionError::BadIdLength(raw_id.len()));
@@ -33,8 +36,11 @@ impl UserAuth {
         Ok(id)
     }
 
-    pub fn from_identity(id: Identity, secret: String, grant_type: GrantType) 
-    -> ResourceObject<UserAuth> {
+    pub fn from_identity(
+        id: Identity,
+        secret: String,
+        grant_type: GrantType,
+    ) -> ResourceObject<UserAuth> {
         let id = encode_config(id.as_ref(), URL_SAFE);
         ResourceObject::new(id, Some(UserAuth { secret, grant_type }))
     }

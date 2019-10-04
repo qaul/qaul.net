@@ -7,7 +7,7 @@ mod user;
 pub use user::UserEntity;
 
 mod user_auth;
-pub use user_auth::{UserAuth, GrantType};
+pub use user_auth::{GrantType, UserAuth};
 
 mod user_grant;
 pub use user_grant::UserGrant;
