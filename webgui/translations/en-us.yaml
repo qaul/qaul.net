@@ -1,1 +1,10 @@
-price_banner: The {product} costs {price, number, USD}
+search: search
+settings:
+  configuration: Configuration
+  changeLanguage: Change Language
+  selectTheme: Select Theme
+info:
+  information: Information
+  aboutQaulNet: About qaul.net
+  howto: How to
+  debug: Debugging Information
