@@ -1,8 +1,5 @@
-//! # libqaul
-//!
-//! This is the library that sits at the heart of qaul.net. If you're
-//! not familiar with this project, go to https://qaul.net and learn
-//! about it.
+//! This is the library that sits at the heart of
+//! [qaul.net](https://qaul.net).
 //!
 //! Fundamentally, it handles three types of interactions:
 //!
@@ -49,5 +46,6 @@ mod storage;
 mod users;
 
 pub use api::*;
+pub use identity::Identity;
 pub use qaul::Qaul;
 pub use users::{ContactBook, ContactUpdate, LocalContactData, User, UserData, UserUpdate};

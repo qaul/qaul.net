@@ -1,33 +1,27 @@
 //! # `libqaul` service API
 //!
-//! The idea behind this interface is further
-//! documented in the `contribute` book. It goes
-//! into detail about using it to write decentralised
-//! networking services, using qaul.net as a backend.
+//! The idea behind this interface is further documented in the
+//! `contribute` book. It goes into detail about using it to write
+//! decentralised networking services, using qaul.net as a backend.
 //!
-//! `qaul.net` itself provides a few primary services
-//! for "messaging", "file sharing" and "VoIP",
-//! as well as a sort of hidden, management "core"
-//! service.
-//! All of them are implemented via this API,
-//! allowing external developers to write their own
-//! services using qaul.net libraries and networks.
+//! `qaul.net` itself provides a few primary services for "messaging",
+//! "file sharing" and "VoIP", as well as a sort of hidden, management
+//! "core" service.  All of them are implemented via this API,
+//! allowing external developers to write their own services using
+//! qaul.net libraries and networks.
 //!
 //! ## Models
 //!
-//! Models defined in this submodule are different
-//! from any other models defined in `libqaul`:
-//! they are the public representations, i.e.
-//! only fields that are relevant for service
-//! developers to interact with, not including
-//! shared service state or secrets.
+//! Models defined in this submodule are different from any other
+//! models defined in `libqaul`: they are the public representations,
+//! i.e.  only fields that are relevant for service developers to
+//! interact with, not including shared service state or secrets.
 
 mod models;
 mod service;
 pub use models::{Message, QaulError, QaulResult, SigTrust, UserAuth};
 
-use crate::Qaul;
-use crate::User;
+use crate::{Qaul, User};
 pub use crate::{ContactBook, LocalContactData, UserData, UserUpdate};
 use identity::Identity;
 
@@ -38,8 +32,7 @@ use rand::{Rng, rngs::OsRng};
 impl Qaul {
     /// Create a new user
     ///
-    /// Generates a new `Identity` and takes a passphrase that is used
-    /// to encrypt
+    /// Generates a new `Identity` and takes a passphrase that is used to encrypt
     pub fn user_create(&self, pw: &str) -> QaulResult<UserAuth> {
         let user = User::new();
         let id = user.id.clone();

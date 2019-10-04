@@ -1,4 +1,6 @@
-pub use identity::Identity;
+use identity::Identity;
+use crate::{User, ContactBook};
+
 use std::{
     collections::BTreeMap,
     sync::{Arc, Mutex},
@@ -30,10 +32,10 @@ use std::{
 /// 4. Your application is now ready for use
 #[derive(Clone)]
 pub struct Qaul {
-    users: Arc<Mutex<BTreeMap<Identity, User>>>,
-    auth: Arc<Mutex<BTreeMap<Identity, String>>>,
-    keys: Arc<Mutex<BTreeMap<String, Identity>>>,
-    contacts: Arc<Mutex<BTreeMap<Identity, ContactBook>>>,
+    pub(crate) users: Arc<Mutex<BTreeMap<Identity, User>>>,
+    pub(crate) auth: Arc<Mutex<BTreeMap<Identity, String>>>,
+    pub(crate) keys: Arc<Mutex<BTreeMap<String, Identity>>>,
+    pub(crate) contacts: Arc<Mutex<BTreeMap<Identity, ContactBook>>>,
 }
 
 impl Qaul {
