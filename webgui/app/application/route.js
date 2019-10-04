@@ -6,6 +6,6 @@ export default Route.extend({
   intl: service(),
   beforeModel() {
     this.intl.setLocale('en');
-    this.style.setStyle('light');
+    this.style.setTheme('light');
   },
 })
