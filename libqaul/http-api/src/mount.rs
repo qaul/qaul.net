@@ -18,6 +18,7 @@ use japi::{
 };
 use std::{
     collections::BTreeMap,
+    path::PathBuf,
     error::Error as StdError,
     fmt::{Display, Formatter, Result as FmtResult},
     sync::{Arc, Mutex},
@@ -59,7 +60,12 @@ impl HotPlugMount {
 
     pub fn mount<T: Handler>(&self, path: String, handler: T) -> Result<bool, HotPlugError> {
         let mut routes = self.routes.lock().unwrap();
+        let mut p = PathBuf::new();
+        p.push("/api");
+        p.push(path);
 
+        let path = p.to_str().unwrap().to_string();
+        
         if let Some(Route::Core(_)) = routes.get(&path) {
             return Err(HotPlugError::CoreRoute);
         }
@@ -79,8 +85,11 @@ impl HotPlugMount {
 
     pub fn mount_core<T: Handler>(&self, path: String, handler: T) -> bool {
         let mut routes = self.routes.lock().unwrap();
+        let mut p = PathBuf::new();
+        p.push("/api");
+        p.push(path);
 
-        routes.insert(path, Route::Core(Arc::new(Box::new(handler)))).is_some()
+        routes.insert(p.to_str().unwrap().to_string(), Route::Core(Arc::new(Box::new(handler)))).is_some()
     }
 
     pub fn unmount_core(&self, path: &str) -> bool {

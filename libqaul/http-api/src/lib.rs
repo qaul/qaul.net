@@ -26,6 +26,8 @@ mod auth;
 use auth::Authenticator;
 pub use auth::CurrentUser;
 
+pub mod core;
+
 pub mod models;
 
 mod mount;
@@ -56,22 +58,27 @@ pub struct ApiServer {
 }
 
 impl ApiServer {
+
+    // FIXME: I panic (I'm sorry - spacekookie)
     pub fn new<A: ToSocketAddrs>(qaul: &Qaul, addr: A) -> HttpResult<Self> {
         let mount = mount::HotPlugMount::new();
 
         let mut login_chain = Chain::new(auth::login);
         login_chain.link_before(MethodGaurd::post());
         login_chain.link_before(JsonApiGaurd);
-        mount.mount_core("login".into(), login_chain);
+        mount.mount("login".into(), login_chain).unwrap();
 
         let mut logout_chain = Chain::new(auth::logout);
         logout_chain.link_before(MethodGaurd::get());
-        mount.mount_core("logout".into(), logout_chain);
+        mount.mount("logout".into(), logout_chain).unwrap();
 
+        let mut user_chain = Chain::new(core::get_all_users);
+        mount.mount("users".into(), user_chain).unwrap();
+        
         let mut chain = Chain::new(mount.clone());
         chain.link(crate::cookie::CookieManager::new());
         chain.link_before(QaulCore::new(qaul)); 
-        chain.link_before(jsonapi::JsonApi); 
+        chain.link_before(jsonapi::JsonApi);
 
         let authenticator = Authenticator::new();
         chain.link_before(authenticator.clone()); 
