@@ -1,0 +1,9 @@
+[package]
+name = "qaul-http-test"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+
+[dependencies]
+qaul-http = { path = "../../libqaul/http-api" }
+libqaul = { path = "../../libqaul" }
