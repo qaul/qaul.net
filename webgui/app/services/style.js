@@ -77,11 +77,11 @@ dark['q-input-hint'] = '#666'; /* hint text in the unselected input text field *
 dark['q-bar-bg'] = '#666';
 dark['q-bar-border'] = '#aaa';
 
-const styles = { dark, light };
+const themes = { dark, light };
 
 export default Service.extend({
   activeStyle: Object.freeze({}),
-  setStyle(style) {
-    this.set('activeStyle', styles[style]);
+  setTheme(theme) {
+    this.set('activeStyle', themes[theme]);
   },
 });
