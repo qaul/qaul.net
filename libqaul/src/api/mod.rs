@@ -22,8 +22,6 @@
 //! developers to interact with, not including
 //! shared service state or secrets.
 
-use std::collections::BTreeMap;
-
 mod models;
 mod service;
 pub use models::{Message, QaulError, QaulResult, SigTrust, UserAuth};
