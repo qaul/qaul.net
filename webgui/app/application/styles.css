@@ -2,4 +2,5 @@
   background:var(--q-bg);
   color:var(--q-color);
   min-height: 100vh;
+  margin-bottom: 3rem;
 }
