@@ -9,8 +9,17 @@
 
   <div local-class="settings panel">
     <div local-class="name item">{{t "settings.configuration"}}</div>
-    <a local-class="item">{{t "settings.changeLanguage"}} <span local-class="icon">{{fa-icon "cog"}}</span></a>
-    <a local-class="item">{{t "settings.selectTheme"}} <span local-class="icon">{{fa-icon "cog"}}</span></a>
+    <span local-class="item">
+      {{t "settings.changeLanguage"}}
+      <span local-class="langs">
+        <button onclick={{action "setLanguage" "en"}}>EN</button>
+        <button onclick={{action "setLanguage" "de"}}>DE</button>
+        <button onclick={{action "setLanguage" "ar"}}>AR</button>
+      </span>
+    </span>
+    <span local-class="item">
+      {{t "settings.selectTheme"}} <span local-class="icon">{{fa-icon "cog"}}</span>
+    </span>
   </div>
 
   <div local-class="info panel">

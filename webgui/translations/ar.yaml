@@ -1,4 +1,5 @@
-search: suchen
+send: Senden
+search: Suchbegriff Eingeben ...
 settings:
   configuration: Konfiguration
   changeLanguage: Sprache wählen
