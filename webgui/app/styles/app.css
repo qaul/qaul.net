@@ -1,44 +1,5 @@
 /* qaul.net GUI CSS */
 
-/* theming */
-:root {
-  /* over-all background */
-  --q-bg:#ffffff;
-
-  /* theme color */
-  --q-theme-strong:#0089c7;
-  --q-theme-strong-hover:#0076ab;
-  --q-theme-middle:#d1e4f1;
-  --q-theme-light:#d1e4f1;
-
-  /* text color */
-  --q-color:#666;
-  --q-color-title:#333;
-
-  /* hyperlinks */
-  --q-a:#6399cc;
-  --q-a-hover:#6399cc; /* hover when there is underlining */
-  --q-a-hover-nounderline:#000; /* hover when there is no underlining */
-
-  /* user availability */
-  --q-available:limegreen;
-
-
-  --q-border:#989898;
-  --q-nav-bg:#f6f6f6;
-  --q-nav-bg-hover:#ececec;
-  --q-nav-border:#cccccc;
-  --q-nav-color:#363636;
-  --q-nav-bg-active:var(--q-theme-strong);
-  --q-nav-bg-active-hover:var(--q-theme-strong-active);
-  --q-nav-icon:#8a8a8a;
-  --q-nav-icon-shadow:#1c1c1c;
-  --q-input-hint:#cccccc; /* hint text in the unselected input text field */
-  --q-bar-bg:#666;
-  --q-bar-border:#aaa;
-}
-
-
 /* set root font size */
 html {
 	font-size:10px;
@@ -46,10 +7,8 @@ html {
 
 /* define global elements */
 body  {
-	background:var(--q-bg);
 	font-size:1.8rem;
 	font-family: helvetica, sans-serif;
-	color:var(--q-color);
 	margin:0;
 	padding:0;
 	text-align: left;

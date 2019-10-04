@@ -5061,6 +5061,14 @@ ember-css-modules@^1.1.1:
     semver "^5.5.0"
     toposort "^1.0.6"
 
+ember-css-vars@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/ember-css-vars/-/ember-css-vars-1.0.0.tgz#433be46e7ab59eeeea2bbc545a3975e3f273fb6b"
+  integrity sha512-huqe/y7fomM9zmhpwTpLT7Ai+Dgdi2TFI35qWcXDsZBMpTpyk+9LDpj7olac9NjeYIXwCi//B63GeJAdaBiTRQ==
+  dependencies:
+    ember-cli-babel "^7.1.2"
+    ember-modifier-manager-polyfill "^1.0.3"
+
 ember-data@~3.13.0:
   version "3.13.1"
   resolved "https://registry.yarnpkg.com/ember-data/-/ember-data-3.13.1.tgz#a6b31703de9feaae19f2a0fccfc72185808174dd"
@@ -5210,6 +5218,15 @@ ember-maybe-import-regenerator@^0.1.6:
     broccoli-merge-trees "^1.0.0"
     ember-cli-babel "^6.0.0-beta.4"
     regenerator-runtime "^0.9.5"
+
+ember-modifier-manager-polyfill@^1.0.3:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/ember-modifier-manager-polyfill/-/ember-modifier-manager-polyfill-1.2.0.tgz#cf4444e11a42ac84f5c8badd85e635df57565dda"
+  integrity sha512-bnaKF1LLKMkBNeDoetvIJ4vhwRPKIIumWr6dbVuW6W6p4QV8ZiO+GdF8J7mxDNlog9CeL9Z/7wam4YS86G8BYA==
+  dependencies:
+    ember-cli-babel "^7.10.0"
+    ember-cli-version-checker "^2.1.2"
+    ember-compatibility-helpers "^1.2.0"
 
 ember-moment@^7.6.0:
   version "7.8.1"
