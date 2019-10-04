@@ -32,10 +32,18 @@
   margin-bottom: 0.5em;
 }
 
+[dir="rtl"] .message-name {
+  float: right;
+}
+
 .message-time {
   /*grid-area: time;*/
   text-align: right;
   font-size: smaller;
+}
+
+[dir="rtl"] .message-time {
+  text-align: left;;
 }
 
 .message-content {

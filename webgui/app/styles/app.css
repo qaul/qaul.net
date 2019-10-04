@@ -5,6 +5,10 @@ html {
 	font-size:10px;
 }
 
+html[dir="rtl"] {
+  direction: rtl;
+}
+
 /* define global elements */
 body  {
 	font-size:1.8rem;
