@@ -13,7 +13,7 @@
 
 .message {
   padding: 0.8rem;
-  border-top: 1px dotted #989898;
+  border-top: 1px dotted var(--q-border);
 /*
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -28,7 +28,7 @@
   /*grid-area: name;*/
   float:left;
   font-weight: bold;
-  color:#333;
+  color:var(--q-color-title);
   margin-bottom: 0.5em;
 }
 
