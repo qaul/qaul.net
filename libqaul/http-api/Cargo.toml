@@ -19,3 +19,6 @@ cookie = "0.12"
 
 libqaul = { path = ".." } 
 identity = { path = "../../ratman/identity", package = "ratman-identity" }
+
+[dev-dependencies]
+anneal = { git = "https://git.open-communication.net/qaul/anneal", features = ["jsonapi", "cookies"], version = "0.3" }

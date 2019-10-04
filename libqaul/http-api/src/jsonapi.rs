@@ -120,11 +120,16 @@ impl error::Error for JsonApiError {}
 ///
 ///
 /// ```
+/// # use iron::prelude::*;
+/// # use qaul_http::JsonApi;
 /// fn handler(req: &mut Request) -> IronResult<Response> {
 ///     // Some(Document) if there was a document in the request
 ///     // None otherwise
 ///     let document = req.extensions.get::<JsonApi>();
-/// }
+///
+///     // ...
+/// # Ok(Response::with(""))
+/// # }
 /// ```
 pub struct JsonApi;
 
@@ -152,7 +157,7 @@ impl BeforeMiddleware for JsonApi {
         }
 
         // next up, we check the accept header
-        // we hae to error if it contains the JSON:API media type and all instanced of that media
+        // we have to error if it contains the JSON:API media type and all instanced of that media
         // type are modified with media type parameters
         if let Some(Accept(v)) = req.headers.get::<Accept>() {
             let mut json_api_type = false;
@@ -213,5 +218,128 @@ impl BeforeMiddleware for JsonApiGaurd {
             None => Err(JsonApiError::NoDocument.into()),
         }
 
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use anneal::RequestBuilder;
+    use iron::{
+        method::Method,
+        mime,    
+        headers::{
+            Accept,
+            qitem,
+        },
+    };
+    use json_api::Identifier;
+    use super::*;
+
+    fn invalid_media_type() -> mime::Mime<Vec<(mime::Attr, mime::Value)>> {
+        mime::Mime(
+            mime::TopLevel::Application,
+            mime::SubLevel::Ext(String::from("vnd.api+json")),
+            vec![(mime::Attr::Charset, mime::Value::Utf8)]) 
+    }
+
+    // tests a completely valid request
+    // this also tests that the gaurd passes successfully
+    #[test]
+    fn successful() {
+        let doc = Document {
+            data: OptionalVec::One(Some(Identifier::new("a".into(), "b".into()).into())),
+            ..Default::default()
+        };
+        RequestBuilder::default_post()
+            .set_document(&doc)
+            .request(|mut req| {
+                assert!(JsonApi.before(&mut req).is_ok());
+                assert_eq!(*req.extensions.get::<JsonApi>().unwrap(), doc);
+                assert!(JsonApiGaurd.before(&mut req).is_ok());
+            });
+    }
+
+    // test that it doesn't process other content types
+    // this also tests that the gaurd doesn't pass when there's no document
+    #[test]
+    fn skips_other() {
+        let data = "abcdef";
+        RequestBuilder::default_post()
+            .set_string(data)
+            .request(|mut req| {
+                assert!(JsonApi.before(&mut req).is_ok());
+                assert!(req.extensions.get::<JsonApi>().is_none());
+                assert!(JsonApiGaurd.before(&mut req).is_err());
+
+                let mut buff = String::new();
+                req.body.read_to_string(&mut buff).unwrap();
+                assert_eq!(buff, data);
+            });
+    }
+
+    // test that it rejects requests with incorrect media types
+    #[test]
+    fn rejects_media_type() {
+        RequestBuilder::default_post()
+            .set_header(ContentType(invalid_media_type())) 
+            .request(|mut req| {
+                let err = match JsonApi.before(&mut req) {
+                    Ok(_) => panic!("Request completed successfully"),
+                    Err(e) => e.error,
+                };
+                assert_eq!(err.to_string(), JsonApiError::MediaTypeParameters.to_string());
+            });
+    }
+
+    // test that it handles accept headers properly
+    // this will test first that it fails when all are modified with parameters
+    // and then that it doesn't fail if at least one isn't
+    #[test]
+    fn accept_headers() {
+        let doc = Document {
+            data: OptionalVec::One(Some(Identifier::new("a".into(), "b".into()).into())),
+            ..Default::default()
+        };
+
+        let mut accept = vec![
+            qitem(invalid_media_type()),
+        ];
+
+        let mut rb = RequestBuilder::default_post();
+        rb.set_document(&doc);
+        rb.set_header(Accept(accept.clone()));
+
+        // should fail due to all acceptable types having media type parameters
+        rb.request(|mut req| {
+            let err = match JsonApi.before(&mut req) {
+                Ok(_) => panic!("Request completed successfully"),
+                Err(e) => e.error,
+            };
+            assert_eq!(err.to_string(), JsonApiError::NoAcceptableType.to_string());
+        });
+
+        accept.push(qitem(JSONAPI_MIME.clone()));
+        rb.set_header(Accept(accept));
+        rb.request(|mut req| {
+            assert!(JsonApi.before(&mut req).is_ok());
+            assert_eq!(*req.extensions.get::<JsonApi>().unwrap(), doc);
+        });
+    }
+
+    // test to see if it handles a bad payload
+    #[test]
+    fn bad_payload() {
+        RequestBuilder::default_post()
+            .set_string("{\"data\": 1}".into())
+            .set_header(ContentType(JSONAPI_MIME.clone()))
+            .request(|mut req| {
+                let err = match JsonApi.before(&mut req) {
+                    Ok(_) => panic!("Request completed successfully"),
+                    Err(e) => e.error,
+                };
+                // fragile, but not sure there's a better way
+                assert_eq!(err.to_string(), "Json Api Error: \
+Error deserializing document (Neither one nor many at line 1 column 11)");
+            });
     }
 }

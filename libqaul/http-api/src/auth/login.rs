@@ -103,3 +103,136 @@ pub fn login(req: &mut Request) -> IronResult<Response> {
 
     Ok(Response::with((Status::Ok, JSONAPI_MIME.clone(), serde_json::to_string(&doc).unwrap())))
 }
+
+#[cfg(test)]
+mod test {
+    use anneal::RequestBuilder;
+    use crate::cookie::CookieManager;
+    use libqaul::{
+        Qaul,
+        Identity,
+    };
+    use iron::{
+        method::Method,
+        middleware::BeforeMiddleware,
+    };
+    use super::*;
+
+    fn setup() -> (RequestBuilder, Identity, QaulUserAuth, Authenticator) {
+        let mut qaul = Qaul::start();
+        let user_auth = qaul.user_create("a").unwrap();
+        let qaul_core = QaulCore::new(&qaul);
+        let (before_manager, _) = CookieManager::new();
+        let mut rb = RequestBuilder::default_post();
+        let auth = Authenticator::new();
+        rb
+            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(before_manager)
+            .add_middleware(JsonApi)
+            .add_middleware(auth.clone());
+        (rb, user_auth.clone().identity(), user_auth, auth)
+    }
+
+    #[test]
+    fn valid_login_token() {
+        let (mut rb, id, user_auth, auth) = setup();
+
+        let go = rb
+            .set_primary_data(UserAuth::from_identity(id.clone(), "a".into(), GrantType::Token).into())
+            .request_response(|mut req| {
+                let response = login(&mut req).unwrap();
+                assert_eq!(req.extensions.get::<Cookies>().unwrap().get("bearer"), None);
+                Ok(response)
+            }).unwrap()
+            .get_primary_data().unwrap();
+        let ro : ResourceObject<UserGrant> = go.try_into().unwrap();
+        let token = ro.id;
+        assert_eq!(auth.tokens.lock().unwrap().get(&token), Some(&id));
+    }
+
+    #[test]
+    fn valid_login_cookie() {
+        let (mut rb, id, user_auth, auth) = setup();
+
+        let go = rb
+            .set_primary_data(UserAuth::from_identity(id.clone(), "a".into(), GrantType::Cookie).into())
+            .request_response(|mut req| {
+                let response = login(&mut req).unwrap();
+                let token = req.extensions.get::<Cookies>().unwrap().get("bearer").unwrap();
+                assert_eq!(auth.tokens.lock().unwrap().get(token.value()), Some(&id));
+                Ok(response)
+            }).unwrap()
+            .get_primary_data().unwrap();
+        let ro : ResourceObject<Success> = go.try_into().unwrap();
+    }
+
+    #[test]
+    fn multiple_data() {
+        let (mut rb, id, user_auth, _) = setup();
+
+        rb.set_document(
+                &Document { 
+                    data: OptionalVec::Many(vec![]),
+                    ..Default::default()
+                })
+            .request(|mut req| {
+                assert!(login(&mut req).is_err())
+            })
+    }
+
+    #[test]
+    fn no_data() {
+        let (mut rb, id, user_auth, _) = setup();
+
+        rb.set_document(
+                &Document { 
+                    data: OptionalVec::NotPresent,
+                    ..Default::default()
+                })
+            .request(|mut req| {
+                assert!(login(&mut req).is_err())
+            })
+    }
+
+    #[test]
+    fn wrong_object() {
+        let (mut rb, id, user_auth, _) = setup();
+
+        rb.set_primary_data(Success::from_message("test".into()).into())
+            .request(|mut req| {
+                assert!(login(&mut req).is_err())
+            })
+    }
+
+    #[test]
+    fn invalid_identity() {
+        let (mut rb, id, user_auth, _) = setup();
+
+        rb.set_primary_data(ResourceObject::<UserAuth>::new("".into(), None).into())
+            .request(|mut req| {
+                assert!(login(&mut req).is_err())
+            })
+    }
+
+    #[test]
+    fn no_secret() {
+        let (mut rb, id, user_auth, _) = setup();
+
+        let mut ro = UserAuth::from_identity(id, "".into(), GrantType::Token);
+        ro.attributes = None;
+        rb.set_primary_data(ro.into())
+            .request(|mut req| {
+                assert!(login(&mut req).is_err())
+            })
+    }
+
+    #[test]
+    fn bad_password() {
+        let (mut rb, id, user_auth, _) = setup();
+
+        rb.set_primary_data(UserAuth::from_identity(id, "".into(), GrantType::Token).into())
+            .request(|mut req| {
+                assert!(login(&mut req).is_err())
+            })
+    }
+}
