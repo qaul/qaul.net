@@ -1,7 +1,6 @@
 use crate::{
     Cookies,
     models::GrantType,
-    QaulCore,
 };
 use iron::{
     BeforeMiddleware,
@@ -123,7 +122,7 @@ mod test {
     #[test]
     fn no_login() {
         let (rb, _, _, _) = setup();
-        rb.request(|mut req| {
+        rb.request(|req| {
                 assert_eq!(req.extensions.get::<CurrentUser>(), None);
             });
     }
@@ -132,14 +131,14 @@ mod test {
     fn valid_token_login() {
         let (mut rb, _, user_auth, key) = setup();
         rb.set_header(Authorization(Bearer { token: key }))
-            .request(|mut req| {
+            .request(|req| {
                 assert_eq!(req.extensions.get::<CurrentUser>(), Some(&user_auth));
             });
     }
 
     #[test]
     fn invalid_token_login() {
-        let (mut rb, authenticator, user_auth, _) = setup();
+        let (mut rb, authenticator, _, _) = setup();
         rb.set_header(Authorization(Bearer { token: "i am not valid".into() }))
             .set_chain(vec![Box::new(CookieManager::new().0)])
             .request(|mut req| {
@@ -153,14 +152,14 @@ mod test {
         let mut jar = CookieJar::new();
         jar.add(Cookie::new("bearer", key));
         rb.set_cookies(&jar)
-            .request(|mut req| {
+            .request(|req| {
                 assert_eq!(req.extensions.get::<CurrentUser>(), Some(&user_auth));
             });
     }
 
     #[test]
     fn invalid_login_cookie() {
-        let (mut rb, authenticator, user_auth, key) = setup();
+        let (mut rb, authenticator, _, _) = setup();
         let mut jar = CookieJar::new();
         jar.add(Cookie::new("bearer", "i'm not the right key"));
         rb.set_cookies(&jar)
@@ -218,7 +217,7 @@ mod test {
             .set_cookies(&jar)
             .add_middleware(CookieManager::new().0)
             .add_middleware(authenticator)
-            .request(|mut req| {
+            .request(|req| {
                 assert_eq!(req.extensions.get::<CurrentUser>(), Some(&user_auth));
             });
     }

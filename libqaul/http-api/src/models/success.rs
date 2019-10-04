@@ -1,6 +1,6 @@
 use json_api::{ResourceObject, Attributes};
 use serde_derive::{Serialize, Deserialize};
-use chrono::{ DateTime, offset::Utc };
+use chrono::offset::Utc;
 
 /// Returned by endpoints that have successfully completed their task yet have 
 /// no actual data to return

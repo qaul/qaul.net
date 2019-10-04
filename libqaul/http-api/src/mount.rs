@@ -14,7 +14,6 @@ use iron::{
 use json_api::{
     Document,
     Error,
-    ErrorSource,
 };
 use std::{
     collections::BTreeMap,
@@ -92,6 +91,7 @@ impl HotPlugMount {
         routes.insert(p.to_str().unwrap().to_string(), Route::Core(Arc::new(Box::new(handler)))).is_some()
     }
 
+    #[allow(unused)]
     pub fn unmount_core(&self, path: &str) -> bool {
         let mut routes = self.routes.lock().unwrap();
 
@@ -104,6 +104,7 @@ impl typemap::Key for OriginalUrl { type Value = Url; }
 
 #[derive(Debug)]
 enum HotPlugHandlerError {
+    #[allow(unused)]
     NoPath,
     NoService(String),
     ServiceNotAuthorized(String),
@@ -114,9 +115,9 @@ impl HotPlugHandlerError {
     fn detail(&self) -> String {
         match self {
             HotPlugHandlerError::NoPath => "Url provided no path to a service".into(),
-            HotPlugHandlerError::NoService(s) => format!("No mounted service named {}", s),
+            HotPlugHandlerError::NoService(s) => format!("No mounted service named '{}'", s),
             HotPlugHandlerError::ServiceNotAuthorized(s) =>
-                format!("Current user has not authorized service {}", s),
+                format!("Current user has not authorized service '{}'", s),
             HotPlugHandlerError::QaulError(e) => format!("Qaul Error: {:?}", e),
         }
     }
@@ -128,7 +129,7 @@ impl HotPlugHandlerError {
             // api works, we could potentially provide some guidence to the
             // documentation
             HotPlugHandlerError::NoPath => Status::BadRequest,
-            HotPlugHandlerError::NoService(s) => Status::NotFound,
+            HotPlugHandlerError::NoService(_) => Status::NotFound,
             HotPlugHandlerError::ServiceNotAuthorized(_) => Status::Forbidden,
             HotPlugHandlerError::QaulError(_) => Status::InternalServerError,
         };
@@ -179,14 +180,19 @@ impl From<HotPlugHandlerError> for IronError {
 }
 
 impl Handler for HotPlugMount {
+
+    // FIXME: I'm so sorry - spacekookie
+    //        The reason for this horribleness was that we wanted everything
+    //        to be /api prefixed but I didn't want to refactor too much stuff here...
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
-        let mut path = req.url.path();
+        let path = req.url.path();
 
         // is there a service name in the path?
-        let service = match path.first() {
-            Some(p) => p.to_string(),
-            None => { return Err(HotPlugHandlerError::NoPath.into()); },
-        };
+        let service = "/".to_owned() + &path[0..=1].join("/");
+        // let service = match path. {
+        //     Some(p) => p.to_string(),
+        //     None => { return Err(HotPlugHandlerError::NoPath.into()); },
+        // };
 
         // if a user is logged in, do they have the service enabled?
         match req.extensions.get::<CurrentUser>()

@@ -20,7 +20,7 @@ pub struct Message {
     /// Sender of a message
     pub sender: Identity,
     /// Final recipient of a message
-    pub recipient: Identity,
+    pub recipient: Identity, // TODO: ALL
     /// Outside service associative information
     pub associator: String,
     /// Some raw message payload

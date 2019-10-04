@@ -1,15 +1,11 @@
 use libqaul::{
     Qaul,
-    QaulResult,
-    UserAuth, 
-    Identity,
 };
 use iron::{
     error::HttpResult,
     Listening,
     typemap,
     prelude::*,
-    status::Status,
     middleware::{
         BeforeMiddleware,
         Handler,
@@ -52,6 +48,7 @@ lazy_static! {
 
 /// The core of the qaul.net HTTP API
 pub struct ApiServer {
+    #[allow(unused)]
     authenticator: Authenticator,
     mount: mount::HotPlugMount,
     listening: Listening,
@@ -59,21 +56,20 @@ pub struct ApiServer {
 
 impl ApiServer {
 
-    // FIXME: I panic (I'm sorry - spacekookie)
     pub fn new<A: ToSocketAddrs>(qaul: &Qaul, addr: A) -> HttpResult<Self> {
         let mount = mount::HotPlugMount::new();
 
         let mut login_chain = Chain::new(auth::login);
         login_chain.link_before(MethodGaurd::post());
         login_chain.link_before(JsonApiGaurd);
-        mount.mount("login".into(), login_chain).unwrap();
+        mount.mount_core("login".into(), login_chain);
 
         let mut logout_chain = Chain::new(auth::logout);
         logout_chain.link_before(MethodGaurd::get());
-        mount.mount("logout".into(), logout_chain).unwrap();
+        mount.mount_core("logout".into(), logout_chain);
 
-        let mut user_chain = Chain::new(core::get_all_users);
-        mount.mount("users".into(), user_chain).unwrap();
+        let user_chain = Chain::new(core::get_all_users);
+        mount.mount_core("users".into(), user_chain);
         
         let mut chain = Chain::new(mount.clone());
         chain.link(crate::cookie::CookieManager::new());

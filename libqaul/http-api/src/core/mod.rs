@@ -1,23 +1,17 @@
 /// Core service routes
 
 use crate::{
-    Cookies,
     QaulCore,
-    JSONAPI_MIME,
-    models::Success,
 };
-use libqaul::UserAuth;
 use iron::{
     prelude::*,
-    status::Status,
-};
-use json_api::{
-    Document,
-    OptionalVec,
+    status,
 };
 
 pub fn get_all_users(req: &mut Request) -> IronResult<Response> {
-    
+    let qaul = req.extensions.get::<QaulCore>().unwrap();
 
-    unimplemented!()
+    let all_users = format!("{:?}", qaul.user_get_all());
+
+    Ok(Response::with((status::Ok, all_users)))
 }

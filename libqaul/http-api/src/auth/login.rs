@@ -11,7 +11,6 @@ use crate::{
     JSONAPI_MIME,
 };
 use cookie::Cookie;
-use chrono::{ DateTime, offset::Utc };
 use libqaul::UserAuth as QaulUserAuth;
 use iron::{
     prelude::*,
@@ -26,7 +25,6 @@ use std::convert::TryInto;
 use super::{
     AuthError,
     Authenticator,
-    CurrentUser,
 };
 
 pub fn login(req: &mut Request) -> IronResult<Response> {
@@ -112,10 +110,6 @@ mod test {
         Qaul,
         Identity,
     };
-    use iron::{
-        method::Method,
-        middleware::BeforeMiddleware,
-    };
     use super::*;
 
     fn setup() -> (RequestBuilder, Identity, QaulUserAuth, Authenticator) {
@@ -135,7 +129,7 @@ mod test {
 
     #[test]
     fn valid_login_token() {
-        let (mut rb, id, user_auth, auth) = setup();
+        let (mut rb, id, _, auth) = setup();
 
         let go = rb
             .set_primary_data(UserAuth::from_identity(id.clone(), "a".into(), GrantType::Token).into())
@@ -152,7 +146,7 @@ mod test {
 
     #[test]
     fn valid_login_cookie() {
-        let (mut rb, id, user_auth, auth) = setup();
+        let (mut rb, id, _, auth) = setup();
 
         let go = rb
             .set_primary_data(UserAuth::from_identity(id.clone(), "a".into(), GrantType::Cookie).into())
@@ -168,7 +162,7 @@ mod test {
 
     #[test]
     fn multiple_data() {
-        let (mut rb, id, user_auth, _) = setup();
+        let (mut rb, _, _, _) = setup();
 
         rb.set_document(
                 &Document { 
@@ -182,7 +176,7 @@ mod test {
 
     #[test]
     fn no_data() {
-        let (mut rb, id, user_auth, _) = setup();
+        let (mut rb, _, _, _) = setup();
 
         rb.set_document(
                 &Document { 
@@ -196,7 +190,7 @@ mod test {
 
     #[test]
     fn wrong_object() {
-        let (mut rb, id, user_auth, _) = setup();
+        let (mut rb, _, _, _) = setup();
 
         rb.set_primary_data(Success::from_message("test".into()).into())
             .request(|mut req| {
@@ -206,7 +200,7 @@ mod test {
 
     #[test]
     fn invalid_identity() {
-        let (mut rb, id, user_auth, _) = setup();
+        let (mut rb, _, _, _) = setup();
 
         rb.set_primary_data(ResourceObject::<UserAuth>::new("".into(), None).into())
             .request(|mut req| {
@@ -216,7 +210,7 @@ mod test {
 
     #[test]
     fn no_secret() {
-        let (mut rb, id, user_auth, _) = setup();
+        let (mut rb, id, _, _) = setup();
 
         let mut ro = UserAuth::from_identity(id, "".into(), GrantType::Token);
         ro.attributes = None;
@@ -228,7 +222,7 @@ mod test {
 
     #[test]
     fn bad_password() {
-        let (mut rb, id, user_auth, _) = setup();
+        let (mut rb, id, _, _) = setup();
 
         rb.set_primary_data(UserAuth::from_identity(id, "".into(), GrantType::Token).into())
             .request(|mut req| {

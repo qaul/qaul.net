@@ -13,7 +13,6 @@ use json_api::{
     Document,
     OptionalVec,
 };
-use std::convert::TryInto;
 use super::{
     AuthError,
     Authenticator,
@@ -43,8 +42,13 @@ pub fn logout(req: &mut Request) -> IronResult<Response> {
     }
 
     // if an auth cookie had been set mark it for removal
-    let mut cookies = req.extensions.get_mut::<Cookies>().unwrap();
+    //
+    // FIXME: This pattern has become disallowed, but I couldn't
+    // quickly figure out how to make it not need this pattern. Maybe
+    // a patch to `cookies` might be required?
+    let cookies = req.extensions.get_mut::<Cookies>().unwrap();
     if let Some(cookie) = cookies.get("bearer") {
+        #[allow(mutable_borrow_reservation_conflict)]
         cookies.remove(cookie.clone());
     }
 

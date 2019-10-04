@@ -6,9 +6,13 @@ pub use mime::Mime;
 
 /// A typed file that can be sent across the network
 pub struct File {
+    pub name: String,
     pub mime: Mime,
     pub data: Vec<u8>,
 }
+
+// TODO: Partial files/ file progress
+// TODO: Download links with tokens
 
 /// Filesharing service state
 pub struct Filesharing<'q> {
