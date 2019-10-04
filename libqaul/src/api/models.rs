@@ -79,7 +79,18 @@ pub enum SigTrust {
 /// relevant related service is being handed a message anyway.
 pub struct Message {
     sender: Identity,
-    recipient: Identity,
+    recipient: Recipient,
     payload: Vec<u8>,
     signature: SigTrust,
+}
+
+/// Service message recipient
+///
+/// A recipient is either a single user or the entire network.  The
+/// "flood" mechanic is passed through to `RATMAN`, which might
+/// implement this in the networking module, or emulate
+/// it. Performance may vary.
+pub enum Recipient {
+    User(Identity),
+    Flood
 }

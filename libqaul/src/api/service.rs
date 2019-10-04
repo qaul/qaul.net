@@ -1,4 +1,4 @@
-//! Defines a basic interface for a Qaul service
+//! Service interconnect interface
 
 use super::models::Message;
 use std::error::Error;
