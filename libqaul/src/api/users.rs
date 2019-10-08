@@ -2,6 +2,7 @@
 
 use super::models::{QaulError, QaulResult, UserAuth};
 use crate::{Qaul, User, UserUpdate};
+use identity::Identity;
 
 use argon2;
 use base64::{encode_config, URL_SAFE};
