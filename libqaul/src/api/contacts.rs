@@ -1,4 +1,8 @@
-//! Service API: contact book endpoints
+//! Service API contact book
+//!
+//! A user can store information about other users and query this
+//! information later. The contact book is zoned per-user. Ideally it
+//! would be encrypted (not for now).
 
 use super::models::{QaulResult, UserAuth};
 use crate::{Qaul, User, ContactBook, LocalContactData};

@@ -1,0 +1,1 @@
+//! Service API: message store
