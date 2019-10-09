@@ -16,7 +16,8 @@ impl Qaul {
         user: UserAuth,
         filter: Option<FileFilter>,
     ) -> QaulResult<impl Iterator<Item = FileMeta>> {
-        unimplemented!()
+        unimplemented!();
+        Ok(vec![].into_iter())
     }
 
     /// Stream one particular file from storage
