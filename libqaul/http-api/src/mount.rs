@@ -48,11 +48,6 @@ impl HotPlugMount {
 
     pub fn mount<T: Handler>(&self, path: String, handler: T) -> Result<bool, HotPlugError> {
         let mut routes = self.routes.lock().unwrap();
-        let mut p = PathBuf::new();
-        p.push("/api");
-        p.push(path);
-
-        let path = p.to_str().unwrap().to_string();
 
         if let Some(Route::Core(_)) = routes.get(&path) {
             return Err(HotPlugError::CoreRoute);
@@ -75,13 +70,9 @@ impl HotPlugMount {
 
     pub fn mount_core<T: Handler>(&self, path: String, handler: T) -> bool {
         let mut routes = self.routes.lock().unwrap();
-        let mut p = PathBuf::new();
-        p.push("/api");
-        p.push(path);
-
         routes
             .insert(
-                p.to_str().unwrap().to_string(),
+                path,
                 Route::Core(Arc::new(Box::new(handler))),
             )
             .is_some()
@@ -193,11 +184,15 @@ impl Handler for HotPlugMount {
         let path = req.url.path();
 
         // is there a service name in the path?
-        let service = "/".to_owned() + &path[0..=1].join("/");
-        // let service = match path. {
-        //     Some(p) => p.to_string(),
-        //     None => { return Err(HotPlugHandlerError::NoPath.into()); },
-        // };
+        let mut path_parts = path.iter();
+
+        if path_parts.next() != Some(&"api") {
+            return Err(HotPlugHandlerError::NoPath.into());
+        }
+        let service = match path_parts.next() {
+            Some(p) => p.to_string(),
+            None => { return Err(HotPlugHandlerError::NoPath.into()); },
+        };
 
         // if a user is logged in, do they have the service enabled?
         match req.extensions.get::<CurrentUser>().map(|user| {
@@ -232,8 +227,8 @@ impl Handler for HotPlugMount {
         req.extensions.insert::<OriginalUrl>(req.url.clone());
 
         // remove the prefix from the url
-        let path = path[1..].join("/");
-        req.url.as_mut().set_path(&path);
+        let path = path_parts.collect::<PathBuf>();
+        req.url.as_mut().set_path(path.to_str().unwrap());
 
         handler.handle(req)
     }
@@ -285,21 +280,21 @@ mod test {
     fn basic_route() {
         let mount = build_mount();
 
-        RequestBuilder::get("http://127.0.0.1:8080/a")
+        RequestBuilder::get("http://127.0.0.1:8080/api/a")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "a");
             });
 
-        RequestBuilder::get("http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/api/b")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
             });
 
-        RequestBuilder::get("http://127.0.0.1:8080/c")
+        RequestBuilder::get("http://127.0.0.1:8080/api/c")
             .unwrap()
             .request(|mut req| {
                 assert!(mount.handle(&mut req).is_err());
@@ -313,7 +308,7 @@ mod test {
         assert!(mount
             .mount("a".into(), NamedHandler { name: "c".into() })
             .unwrap());
-        RequestBuilder::get("http://127.0.0.1:8080/a")
+        RequestBuilder::get("http://127.0.0.1:8080/api/a")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -323,7 +318,7 @@ mod test {
         assert!(mount
             .mount("b".into(), NamedHandler { name: "d".into() })
             .is_err());
-        RequestBuilder::get("http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/api/b")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -331,7 +326,7 @@ mod test {
             });
 
         assert!(mount.mount_core("b".into(), NamedHandler { name: "e".into() }));
-        RequestBuilder::get("http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/api/b")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -344,14 +339,14 @@ mod test {
         let mount = build_mount();
 
         assert!(mount.unmount("a").unwrap());
-        RequestBuilder::get("http://127.0.0.1:8080/a")
+        RequestBuilder::get("http://127.0.0.1:8080/api/a")
             .unwrap()
             .request(|mut req| {
                 assert!(mount.handle(&mut req).is_err());
             });
 
         assert!(mount.unmount("b").is_err());
-        RequestBuilder::get("http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/api/b")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -359,7 +354,7 @@ mod test {
             });
 
         assert!(mount.unmount_core("b"));
-        RequestBuilder::get("http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/api/b")
             .unwrap()
             .request(|mut req| {
                 assert!(mount.handle(&mut req).is_err());
@@ -377,7 +372,7 @@ mod test {
         assert!(!mount
             .mount("/b".into(), NamedHandler { name: "c".into() })
             .unwrap());
-        RequestBuilder::get("http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/api/b")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -387,7 +382,7 @@ mod test {
         assert!(!mount
             .mount("b/".into(), NamedHandler { name: "c".into() })
             .unwrap());
-        RequestBuilder::get("http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/api/b")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -397,7 +392,7 @@ mod test {
         assert!(!mount
             .mount("b/a".into(), NamedHandler { name: "c".into() })
             .unwrap());
-        RequestBuilder::get("http://127.0.0.1:8080/b/a")
+        RequestBuilder::get("http://127.0.0.1:8080/api/b/a")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -409,7 +404,7 @@ mod test {
     fn paths() {
         let mount = build_mount();
 
-        RequestBuilder::get("http://127.0.0.1:8080/b/a/b/c/d/e?f=g")
+        RequestBuilder::get("http://127.0.0.1:8080/api/b/a/b/c/d/e?f=g")
             .unwrap()
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
@@ -420,7 +415,7 @@ mod test {
                 );
                 assert_eq!(
                     res.headers.get::<Location>().unwrap().0,
-                    "http://127.0.0.1:8080/b/a/b/c/d/e?f=g"
+                    "http://127.0.0.1:8080/api/b/a/b/c/d/e?f=g"
                 );
             });
     }
@@ -442,7 +437,7 @@ mod test {
         qaul.user_update(user_auth.clone(), UserUpdate::AddService("a".into()))
             .unwrap();
 
-        RequestBuilder::get("http://127.0.0.1:8080/b")
+        RequestBuilder::get("http://127.0.0.1:8080/api/b")
             .unwrap()
             .request(|mut req| {
                 req.extensions.insert::<CurrentUser>(user_auth.clone());
@@ -450,7 +445,7 @@ mod test {
                 qaul_core.before(&mut req).unwrap();
                 assert!(mount.handle(&mut req).is_err());
             });
-        RequestBuilder::get("http://127.0.0.1:8080/a")
+        RequestBuilder::get("http://127.0.0.1:8080/api/a")
             .unwrap()
             .request(|mut req| {
                 req.extensions.insert::<CurrentUser>(user_auth);
