@@ -12,3 +12,5 @@ identity = { path = "../ratman/identity", package = "ratman-identity" }
 rand = "0.7"
 base64 = "0.10"
 rust-argon2 = "0.5"
+
+mime = "0.3"
