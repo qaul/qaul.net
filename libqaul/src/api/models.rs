@@ -1,6 +1,7 @@
 //! Service API exchange models
 
 use identity::Identity;
+use mime::Mime;
 
 /// Convenience type for API functions
 pub type QaulResult<T> = Result<T, QaulError>;
@@ -78,10 +79,10 @@ pub enum SigTrust {
 /// has also been removed because at this stage, only the
 /// relevant related service is being handed a message anyway.
 pub struct Message {
-    sender: Identity,
-    recipient: Recipient,
-    payload: Vec<u8>,
-    signature: SigTrust,
+    pub sender: Identity,
+    pub recipient: Recipient,
+    pub payload: Vec<u8>,
+    pub signature: SigTrust,
 }
 
 /// Service message recipient
@@ -91,6 +92,50 @@ pub struct Message {
 /// implement this in the networking module, or emulate
 /// it. Performance may vary.
 pub enum Recipient {
+    /// A single user, known to this node
     User(Identity),
-    Flood
+    /// Addressed to nobody, flooded into the network
+    Flood,
+}
+
+/// Local file abstraction
+pub struct File {
+    pub name: String,
+    pub mime: Mime,
+    pub data: Option<Vec<u8>>,
+}
+
+/// Describe a file's lifecycle
+///
+/// Not to be confused with `FileFilter`, which is part of public API
+/// functions to allow users to easily filter for only certain types
+/// of file data.
+///
+/// Filter functions then take a `Filter` and return a `Meta`.
+pub enum FileMeta {
+    /// Files owned by the current user
+    Local(File),
+    /// Network files, fully locally mirrored
+    Available(File),
+    /// Network files, still downloading
+    InProgress {
+        size: usize,
+        local: usize,
+        stalled: bool,
+    },
+    /// A network advertised file that hasn't started downloading
+    Advertised {
+        size: usize,
+    }
+}
+
+/// Describe a file's lifecycle
+///
+/// Filter functions for each time exist and enable
+/// different sub-services based on which phase they
+/// aim for.
+pub enum FileFilter {
+    Local,
+    Available,
+    InProgress
 }

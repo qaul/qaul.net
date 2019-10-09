@@ -18,6 +18,7 @@
 //! interact with, not including shared service state or secrets.
 
 mod contacts;
+mod files;
 mod messages;
 mod models;
 mod service;
