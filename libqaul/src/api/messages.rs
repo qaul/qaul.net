@@ -1,4 +1,7 @@
 //! Service API: peer-to-peer messages
+//!
+//! A service layer message is not to be confused with a
+//! `messaging`-service message or a `RATMAN`-message!
 
 use super::models::{Message, QaulResult, UserAuth};
 use crate::Qaul;
