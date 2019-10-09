@@ -1,5 +1,7 @@
 //! Service API exchange models
 
+use std::fmt::{self, Debug, Formatter};
+
 use identity::Identity;
 use mime::Mime;
 
@@ -19,6 +21,23 @@ pub enum QaulError {
     InvalidPayload,
     /// A function callback timed out
     CallbackTimeout,
+}
+
+/// A security token to authenticate sessions
+#[derive(Clone, PartialEq, Eq)]
+pub struct Token(String);
+
+impl Debug for Token {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "<TOKEN>")
+    }
+}
+
+impl From<String> for Token {
+    fn from(s: String) -> Self {
+        assert!(s.len() == 64);
+        Token(s)
+    }
 }
 
 /// A wrapper around user authentication state
@@ -124,9 +143,7 @@ pub enum FileMeta {
         stalled: bool,
     },
     /// A network advertised file that hasn't started downloading
-    Advertised {
-        size: usize,
-    }
+    Advertised { size: usize },
 }
 
 /// Describe a file's lifecycle
@@ -137,5 +154,5 @@ pub enum FileMeta {
 pub enum FileFilter {
     Local,
     Available,
-    InProgress
+    InProgress,
 }

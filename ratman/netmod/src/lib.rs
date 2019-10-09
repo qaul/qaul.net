@@ -29,7 +29,8 @@ pub trait Endpoint {
     /// Listen for messages from a specific sender
     fn listen(&mut self, sender: impl Endpoint) -> NetResult<Frame>;
 
-    /// Setup a listener that will call a function on a structure that was received from the network
+    /// Setup a listener that will call a function on a structure that
+    /// was received from the network
     fn listen_all<F: 'static, E: Endpoint>(&mut self, handler: F)
     where
         F: FnMut(E, Frame) -> NetResult<()>;
