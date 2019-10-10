@@ -6,8 +6,7 @@ use iron::{
     typemap, Listening,
 };
 use lazy_static::lazy_static;
-use libqaul::Qaul;
-use std::{net::ToSocketAddrs, sync::Arc};
+use mount::Mount;
 
 mod auth;
 use auth::Authenticator;
@@ -17,19 +16,13 @@ pub mod core;
 
 pub mod models;
 
-mod mount;
-pub use mount::HotPlugError;
-
 mod method;
 pub use method::MethodGaurd;
 
 mod jsonapi;
 pub use jsonapi::{JsonApi, JsonApiGaurd};
 
-mod cookie;
-pub use crate::cookie::Cookies;
-
-lazy_static! {
+lazy_static! { 
     /// A static `Mime` object representing `application/vnd.api+json`
     pub static ref JSONAPI_MIME : mime::Mime = mime::Mime(
         mime::TopLevel::Application,
@@ -41,40 +34,34 @@ lazy_static! {
 pub struct ApiServer {
     #[allow(unused)]
     authenticator: Authenticator,
-    mount: mount::HotPlugMount,
     listening: Listening,
 }
 
 impl ApiServer {
     pub fn new<A: ToSocketAddrs>(qaul: &Qaul, addr: A) -> HttpResult<Self> {
-        let mount = mount::HotPlugMount::new();
+        let mut mount = Mount::new();
 
         let mut login_chain = Chain::new(auth::login);
         login_chain.link_before(MethodGaurd::post());
         login_chain.link_before(JsonApiGaurd);
-        mount.mount_core("login".into(), login_chain);
+        mount.mount("/api/login", login_chain);
 
         let mut logout_chain = Chain::new(auth::logout);
         logout_chain.link_before(MethodGaurd::get());
-        mount.mount_core("logout".into(), logout_chain);
+        mount.mount("/api/logout", logout_chain);
 
-        let user_chain = Chain::new(core::get_all_users);
-        mount.mount_core("users".into(), user_chain);
-
-        let mut chain = Chain::new(mount.clone());
-        chain.link(crate::cookie::CookieManager::new());
-        chain.link_before(QaulCore::new(qaul));
-        chain.link_before(jsonapi::JsonApi);
+        let mut chain = Chain::new(mount);
+        chain.link_before(QaulCore::new(qaul)); 
+        chain.link_before(jsonapi::JsonApi); 
 
         let authenticator = Authenticator::new();
         chain.link_before(authenticator.clone());
 
         let listening = Iron::new(chain).http(addr)?;
 
-        Ok(Self {
-            authenticator: authenticator.clone(),
-            mount,
-            listening,
+        Ok(Self{ 
+            authenticator: authenticator.clone(), 
+            listening, 
         })
     }
 
@@ -84,30 +71,6 @@ impl ApiServer {
     /// future someone will figure out how to shutdown a webserver without crashing it
     pub fn close(&mut self) -> HttpResult<()> {
         self.listening.close()
-    }
-
-    /// Mount a service's handler under `/{name}`
-    ///
-    /// Errors when you try to replace a core route like `/login`
-    ///
-    /// Returns `true` when a this service replaces a previous service mounted
-    /// under the same path and `false` otherwise
-    pub fn mount_service<T: Handler>(
-        &self,
-        name: String,
-        handler: T,
-    ) -> Result<bool, HotPlugError> {
-        self.mount.mount(name, handler)
-    }
-
-    /// Unmount a service's handler
-    ///
-    /// Errors when you try to unmount a core route like `/login`
-    ///
-    /// Returns `true` when a service with that name existed and was unmounted,
-    /// `false` when no service of that name was found
-    pub fn unmount_service(&self, name: &str) -> Result<bool, HotPlugError> {
-        self.mount.unmount(name)
     }
 }
 

@@ -1,11 +1,16 @@
 use super::{AuthError, Authenticator};
 use crate::{
-    models::{GrantType, Success, UserAuth, UserGrant},
-    Cookies, JsonApi, QaulCore, JSONAPI_MIME,
+    JsonApi,
+    models::{
+        UserAuth,
+        UserGrant,
+        GrantType,
+        Success,
+    },
+    QaulCore,
+    JSONAPI_MIME,
 };
-use cookie::Cookie;
-use iron::{prelude::*, status::Status};
-use japi::{Document, OptionalVec, ResourceObject};
+use chrono::{ DateTime, offset::Utc };
 use libqaul::UserAuth as QaulUserAuth;
 use std::convert::TryInto;
 
@@ -75,14 +80,9 @@ pub fn login(req: &mut Request) -> IronResult<Response> {
     // return the grant
     let obj = match grant_type {
         GrantType::Token => ResourceObject::<UserGrant>::new(token, None).into(),
-        GrantType::Cookie => {
-            // TODO: what should we do when a user is already logged in?
-            req.extensions
-                .get_mut::<Cookies>()
-                .unwrap()
-                .add(Cookie::new("bearer", token));
-            Success::from_message("Successfully logged in".into()).into()
-        }
+        GrantType::Cookie => { 
+            Success::from_message("boop".into()).into()
+        },
     };
 
     let doc = Document {
@@ -107,12 +107,11 @@ mod test {
     fn setup() -> (RequestBuilder, Identity, QaulUserAuth, Authenticator) {
         let qaul = Qaul::start();
         let user_auth = qaul.user_create("a").unwrap();
-        let _qaul_core = QaulCore::new(&qaul);
-        let (before_manager, _) = CookieManager::new();
+        let qaul_core = QaulCore::new(&qaul);
         let mut rb = RequestBuilder::default_post();
         let auth = Authenticator::new();
-        rb.add_middleware(QaulCore::new(&qaul))
-            .add_middleware(before_manager)
+        rb
+            .add_middleware(QaulCore::new(&qaul))
             .add_middleware(JsonApi)
             .add_middleware(auth.clone());
         (rb, user_auth.clone().identity(), user_auth, auth)
@@ -128,7 +127,6 @@ mod test {
             )
             .request_response(|mut req| {
                 let response = login(&mut req).unwrap();
-                assert_eq!(req.extensions.get::<Cookies>().unwrap().get("bearer"), None);
                 Ok(response)
             })
             .unwrap()
@@ -137,31 +135,6 @@ mod test {
         let ro: ResourceObject<UserGrant> = go.try_into().unwrap();
         let token = ro.id;
         assert_eq!(auth.tokens.lock().unwrap().get(&token), Some(&id));
-    }
-
-    #[test]
-    fn valid_login_cookie() {
-        let (mut rb, id, _, auth) = setup();
-
-        let go = rb
-            .set_primary_data(
-                UserAuth::from_identity(id.clone(), "a".into(), GrantType::Cookie).into(),
-            )
-            .request_response(|mut req| {
-                let response = login(&mut req).unwrap();
-                let token = req
-                    .extensions
-                    .get::<Cookies>()
-                    .unwrap()
-                    .get("bearer")
-                    .unwrap();
-                assert_eq!(auth.tokens.lock().unwrap().get(token.value()), Some(&id));
-                Ok(response)
-            })
-            .unwrap()
-            .get_primary_data()
-            .unwrap();
-        let _ro: ResourceObject<Success> = go.try_into().unwrap();
     }
 
     #[test]

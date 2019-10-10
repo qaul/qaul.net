@@ -1,7 +1,8 @@
-use super::{AuthError, Authenticator, CurrentUser};
-use crate::{models::Success, Cookies, QaulCore, JSONAPI_MIME};
-use iron::{prelude::*, status::Status};
-use japi::{Document, OptionalVec};
+use crate::{
+    QaulCore,
+    JSONAPI_MIME,
+    models::Success,
+};
 use libqaul::UserAuth;
 
 pub fn logout(req: &mut Request) -> IronResult<Response> {
@@ -28,17 +29,6 @@ pub fn logout(req: &mut Request) -> IronResult<Response> {
             .lock()
             .unwrap()
             .remove(token);
-    }
-
-    // if an auth cookie had been set mark it for removal
-    //
-    // FIXME: This pattern has become disallowed, but I couldn't
-    // quickly figure out how to make it not need this pattern. Maybe
-    // a patch to `cookies` might be required?
-    let cookies = req.extensions.get_mut::<Cookies>().unwrap();
-    if let Some(cookie) = cookies.get("bearer") {
-        #[allow(mutable_borrow_reservation_conflict)]
-        cookies.remove(cookie.clone());
     }
 
     // return a little success message
@@ -73,7 +63,6 @@ mod test {
         let user_auth = qaul.user_create("a".into()).unwrap();
         let (ident, key) = qaul.user_authenticate(user_auth).unwrap();
 
-        let (before_manager, _) = CookieManager::new();
         let auth = Authenticator::new();
         {
             auth.tokens.lock().unwrap().insert(key.clone(), ident);
@@ -81,31 +70,10 @@ mod test {
 
         let mut rb = RequestBuilder::default();
         rb.add_middleware(QaulCore::new(&qaul));
-        rb.add_middleware(before_manager);
         rb.add_middleware(JsonApi);
         rb.add_middleware(auth.clone());
 
         (rb, auth, key)
-    }
-
-    #[test]
-    fn logout_cookie() {
-        let (mut rb, auth, key) = setup();
-
-        let mut jar = CookieJar::new();
-        jar.add(Cookie::new("bearer", key.clone()));
-        let go = rb
-            .set_cookies(&jar)
-            .request_response(|mut req| {
-                let response = logout(&mut req).unwrap();
-                assert_eq!(auth.tokens.lock().unwrap().get(&key), None);
-                assert_eq!(req.extensions.get::<Cookies>().unwrap().get("bearer"), None);
-                Ok(response)
-            })
-            .unwrap()
-            .get_primary_data()
-            .unwrap();
-        let _ro: ResourceObject<Success> = go.try_into().unwrap();
     }
 
     #[test]
