@@ -6,7 +6,7 @@
 //! It's basically decentralised e-mail.
 //! It's basically e-mail.
 
-use qaul::{Qaul, QaulResult, UserAuth};
+use qaul::{Qaul, QaulResult, UserAuth, Recipient};
 use identity::Identity;
 use files::File;
 
@@ -18,25 +18,6 @@ pub struct Message {
     text: String,
     attachments: Option<Attachments>,
 }
-
-/*
-
-# 
-- Recipients
-- Sender
-
-
-{
-  - message meta
-  - message
-}
-
-{
-  - message meta
-  - file
-}
-
-*/
 
 /// Messaging service state
 pub struct Messaging<'q> {
@@ -66,11 +47,10 @@ impl<'q> Messaging<'q> {
     }
 
     /// Send a plain-text message with optional arbitrary attachments
-    // TODO: Broadcast messages
     pub fn send_message(
         &self,
         user: UserAuth,
-        recipients: Vec<Identity>,
+        recipients: Recipient,
         msg: Message,
     ) -> QaulResult<()> {
         unimplemented!()

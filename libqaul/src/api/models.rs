@@ -113,6 +113,8 @@ pub struct Message {
 pub enum Recipient {
     /// A single user, known to this node
     User(Identity),
+    /// A collection of users, sometimes called a Group
+    Group(Vec<Identity>),
     /// Addressed to nobody, flooded into the network
     Flood,
 }
