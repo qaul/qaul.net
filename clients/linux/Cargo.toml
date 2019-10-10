@@ -6,3 +6,4 @@ edition = "2018"
 license = "GPL-3.0"
 
 [dependencies]
+libqaul = { path = "../../libqaul" }
