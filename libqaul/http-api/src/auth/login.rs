@@ -105,9 +105,9 @@ mod test {
     use libqaul::{Identity, Qaul};
 
     fn setup() -> (RequestBuilder, Identity, QaulUserAuth, Authenticator) {
-        let mut qaul = Qaul::start();
+        let qaul = Qaul::start();
         let user_auth = qaul.user_create("a").unwrap();
-        let qaul_core = QaulCore::new(&qaul);
+        let _qaul_core = QaulCore::new(&qaul);
         let (before_manager, _) = CookieManager::new();
         let mut rb = RequestBuilder::default_post();
         let auth = Authenticator::new();
@@ -161,7 +161,7 @@ mod test {
             .unwrap()
             .get_primary_data()
             .unwrap();
-        let ro: ResourceObject<Success> = go.try_into().unwrap();
+        let _ro: ResourceObject<Success> = go.try_into().unwrap();
     }
 
     #[test]

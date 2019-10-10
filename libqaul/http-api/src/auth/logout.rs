@@ -63,14 +63,10 @@ mod test {
     use crate::{cookie::CookieManager, JsonApi};
     use anneal::RequestBuilder;
     use cookie::{Cookie, CookieJar};
-    use iron::{
-        headers::{Authorization, Bearer},
-        method::Method,
-        middleware::BeforeMiddleware,
-    };
+    use iron::headers::{Authorization, Bearer};
     use japi::ResourceObject;
-    use libqaul::{Identity, Qaul, UserUpdate};
-    use std::{convert::TryInto, io::Read};
+    use libqaul::Qaul;
+    use std::convert::TryInto;
 
     fn setup() -> (RequestBuilder, Authenticator, String) {
         let qaul = Qaul::start();
@@ -109,7 +105,7 @@ mod test {
             .unwrap()
             .get_primary_data()
             .unwrap();
-        let ro: ResourceObject<Success> = go.try_into().unwrap();
+        let _ro: ResourceObject<Success> = go.try_into().unwrap();
     }
 
     #[test]
@@ -126,7 +122,7 @@ mod test {
             .unwrap()
             .get_primary_data()
             .unwrap();
-        let ro: ResourceObject<Success> = go.try_into().unwrap();
+        let _ro: ResourceObject<Success> = go.try_into().unwrap();
     }
 
     #[test]

@@ -233,7 +233,6 @@ mod test {
     use anneal::RequestBuilder;
     use iron::{
         headers::{qitem, Accept},
-        method::Method,
         mime,
     };
     use japi::{Identifier, OptionalVec};

@@ -95,8 +95,7 @@ mod test {
     use crate::cookie::CookieManager;
     use anneal::RequestBuilder;
     use cookie::{Cookie, CookieJar};
-    use iron::method::Method;
-    use libqaul::{Qaul, UserUpdate};
+    use libqaul::Qaul;
 
     fn setup() -> (RequestBuilder, Authenticator, UserAuth, String) {
         let qaul = Qaul::start();
