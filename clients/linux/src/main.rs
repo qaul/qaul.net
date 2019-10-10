@@ -1,3 +1,5 @@
+use libqaul::DataStore;
+
 fn main() {
-    println!("Hello, world!");
+    let ds = DataStore::new("/home/".into());
 }

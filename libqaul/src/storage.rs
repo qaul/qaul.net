@@ -1,9 +1,27 @@
 //! General database storage abstraction
 
 use crate::{QaulResult, User};
-use alexandria::{Address, Delta, Library};
+use alexandria::{Address, Data, Delta, KeyAttr, Library, ScopeAttr};
+use std::sync::Arc;
+
+/// Describes that some internal state can be made persistent
+///
+/// This is done by implementing a simple `store` and `load` function
+/// which is called by the `DataStore` to serialise data for the
+/// Alexandria storage backend.
+pub trait Persisted {
+    /// Provide storage backend with storable data
+    fn store(&self) -> Vec<Data>;
+
+    /// Load an instance from deserialised data
+    fn load(&mut self, d: Vec<Data>);
+}
 
 /// Provides a persistent, namespaced key-value store
+///
+/// Handles the context to `alexandria` Library object and let's state
+/// providers (i.e. stateful systems inside `libqaul`) register
+/// themselves to be synced to disk when appropriate.
 ///
 /// Every user has it's own namespace. Enforcement at an Alexandria
 /// level doesn't yet happen (as of 0.1.0), which means that only
@@ -35,12 +53,38 @@ use alexandria::{Address, Delta, Library};
 /// permissions!). In the easy case (or Android), file storage is
 /// namespaced within the Alexandria HOME dir:
 /// `$ALEX_HOME/<username>/...`
-///
-
-pub(crate) struct DataStore {
+pub struct DataStore {
     inner: Library,
+    homedir: String,
+    states: Vec<Arc<Persisted>>,
 }
 
-trait StoreZone {
-    fn init() -> QaulResult<()>;
+impl DataStore {
+    pub fn new(homedir: String) -> Self {
+        let mut inner = Library::new();
+
+        Self {
+            inner,
+            homedir,
+            states: Vec::new(),
+        }
+    }
+
+    /// Register a state component with the persistence backend
+    pub fn register<S>(&mut self, name: S, offset: S, modl: Arc<impl Persisted>) -> usize
+    where
+        S: Into<String>,
+    {
+        let id = self.states.len();
+        self.inner.modify_path(
+            Address::scope(None, &name.into()),
+            Delta::Insert(ScopeAttr {
+                ns_auth: false,
+                encryption: KeyAttr::Off,
+                offset: self.homedir.clone() + "/" + &offset.into(),
+            }),
+        );
+        self.inner.sync();
+        id
+    }
 }
