@@ -1,26 +1,19 @@
 use crate::JSONAPI_MIME;
 use iron::{
-    BeforeMiddleware,
-    prelude::*,
-    headers::{ContentType, Accept, QualityItem},
-    typemap,
-    modifiers::Header,
-    mime::{Mime, TopLevel, SubLevel},
     error::IronError,
+    headers::{Accept, ContentType, QualityItem},
+    mime::{Mime, SubLevel, TopLevel},
+    modifiers::Header,
+    prelude::*,
     status::Status,
+    typemap, BeforeMiddleware,
 };
-use japi::{
-    Document,
-    Error,
-    Links,
-    Link,
-};
+use japi::{Document, Error, Link, Links};
+use serde_json;
 use std::{
-    error,
-    fmt,
+    error, fmt,
     io::{self, Read},
 };
-use serde_json;
 
 #[derive(Debug)]
 enum JsonApiError {
@@ -52,19 +45,24 @@ impl fmt::Display for JsonApiError {
 impl From<JsonApiError> for IronError {
     fn from(e: JsonApiError) -> Self {
         let about_link = match e {
-            JsonApiError::MediaTypeParameters => Some(
-                "https://jsonapi.org/format/#content-negotiation-servers"),
-            JsonApiError::NoAcceptableType => Some(
-                "https://jsonapi.org/format/#content-negotiation-servers"),
-            JsonApiError::NoDocument => Some(
-                "https://jsonapi.org/format/#content-negotiation-clients"),
+            JsonApiError::MediaTypeParameters => {
+                Some("https://jsonapi.org/format/#content-negotiation-servers")
+            }
+            JsonApiError::NoAcceptableType => {
+                Some("https://jsonapi.org/format/#content-negotiation-servers")
+            }
+            JsonApiError::NoDocument => {
+                Some("https://jsonapi.org/format/#content-negotiation-clients")
+            }
             _ => None,
         };
         let links = if let Some(url) = about_link {
             let mut links = Links::new();
             links.insert("about".into(), Link::Url(url.into()));
             Some(links)
-        } else { None };
+        } else {
+            None
+        };
 
         let status = match e {
             JsonApiError::MediaTypeParameters => Status::UnsupportedMediaType,
@@ -89,7 +87,7 @@ impl From<JsonApiError> for IronError {
         };
 
         let doc = Document {
-            errors: Some(vec![Error{
+            errors: Some(vec![Error {
                 links: links,
                 status: Some(format!("{}", status.to_u16())),
                 title,
@@ -99,10 +97,14 @@ impl From<JsonApiError> for IronError {
             ..Default::default()
         };
 
-        Self::new(e, (
-            serde_json::to_string(&doc).unwrap(), 
-            status, 
-            Header(ContentType(JSONAPI_MIME.clone()))))
+        Self::new(
+            e,
+            (
+                serde_json::to_string(&doc).unwrap(),
+                status,
+                Header(ContentType(JSONAPI_MIME.clone())),
+            ),
+        )
     }
 }
 
@@ -110,8 +112,8 @@ impl error::Error for JsonApiError {}
 
 /// Use this key to get the request's `Document`
 ///
-/// Will only decode documents when the `Content-Type` is 
-/// `application/vnd.api+json`. Also checks the headers as required by the 
+/// Will only decode documents when the `Content-Type` is
+/// `application/vnd.api+json`. Also checks the headers as required by the
 /// [JSON:API docs](https://jsonapi.org/format/#content-negotiation-clients).
 /// If the `Content-Type` header indicates that a JSON:API document is present
 /// and any of the header checks fail or the document fails to parse, an error
@@ -132,7 +134,9 @@ impl error::Error for JsonApiError {}
 /// ```
 pub struct JsonApi;
 
-impl typemap::Key for JsonApi { type Value = Document; } 
+impl typemap::Key for JsonApi {
+    type Value = Document;
+}
 
 impl BeforeMiddleware for JsonApi {
     fn before(&self, req: &mut Request) -> IronResult<()> {
@@ -144,15 +148,16 @@ impl BeforeMiddleware for JsonApi {
         // secondly we error on any requests that contain media type parameters as required by the
         // spec
         match req.headers.get::<ContentType>() {
-            Some(ContentType(Mime(TopLevel::Application, 
-                                  sublevel, 
-                                  params))) 
-            if *sublevel == target_sublevel => {
+            Some(ContentType(Mime(TopLevel::Application, sublevel, params)))
+                if *sublevel == target_sublevel =>
+            {
                 if params.len() > 0 {
                     return Err(JsonApiError::MediaTypeParameters.into());
                 }
-            },
-            _ => {return Ok(());},
+            }
+            _ => {
+                return Ok(());
+            }
         }
 
         // next up, we check the accept header
@@ -163,16 +168,17 @@ impl BeforeMiddleware for JsonApi {
             let mut with_no_params = false;
             for mime in v {
                 match mime {
-                    QualityItem{ 
-                            item: Mime(TopLevel::Application, _, params), 
-                            quality: _ } => {
+                    QualityItem {
+                        item: Mime(TopLevel::Application, _, params),
+                        quality: _,
+                    } => {
                         json_api_type = true;
-                        if params.len() == 0 { 
-                            with_no_params = true; 
+                        if params.len() == 0 {
+                            with_no_params = true;
                             break;
                         }
-                    },
-                    _ => {},
+                    }
+                    _ => {}
                 }
             }
 
@@ -191,9 +197,11 @@ impl BeforeMiddleware for JsonApi {
 
         // now we try to parse the body to see if it contains a valid JSON:API request
         // if it doesn't we'll return 400 BAD REQUEST
-        let doc : Document = match serde_json::from_slice(&buff) {
-            Ok(d) => d, 
-            Err(e) => { return Err(JsonApiError::SerdeError(e).into()); } 
+        let doc: Document = match serde_json::from_slice(&buff) {
+            Ok(d) => d,
+            Err(e) => {
+                return Err(JsonApiError::SerdeError(e).into());
+            }
         };
 
         // after all that we put the document into the extensions map for some handler futher down
@@ -216,29 +224,26 @@ impl BeforeMiddleware for JsonApiGaurd {
             Some(_) => Ok(()),
             None => Err(JsonApiError::NoDocument.into()),
         }
-
     }
 }
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use anneal::RequestBuilder;
     use iron::{
+        headers::{qitem, Accept},
         method::Method,
-        mime,    
-        headers::{
-            Accept,
-            qitem,
-        },
+        mime,
     };
-    use japi::Identifier;
-    use super::*;
+    use japi::{Identifier, OptionalVec};
 
     fn invalid_media_type() -> mime::Mime<Vec<(mime::Attr, mime::Value)>> {
         mime::Mime(
             mime::TopLevel::Application,
             mime::SubLevel::Ext(String::from("vnd.api+json")),
-            vec![(mime::Attr::Charset, mime::Value::Utf8)]) 
+            vec![(mime::Attr::Charset, mime::Value::Utf8)],
+        )
     }
 
     // tests a completely valid request
@@ -280,13 +285,16 @@ mod test {
     #[test]
     fn rejects_media_type() {
         RequestBuilder::default_post()
-            .set_header(ContentType(invalid_media_type())) 
+            .set_header(ContentType(invalid_media_type()))
             .request(|mut req| {
                 let err = match JsonApi.before(&mut req) {
                     Ok(_) => panic!("Request completed successfully"),
                     Err(e) => e.error,
                 };
-                assert_eq!(err.to_string(), JsonApiError::MediaTypeParameters.to_string());
+                assert_eq!(
+                    err.to_string(),
+                    JsonApiError::MediaTypeParameters.to_string()
+                );
             });
     }
 
@@ -300,9 +308,7 @@ mod test {
             ..Default::default()
         };
 
-        let mut accept = vec![
-            qitem(invalid_media_type()),
-        ];
+        let mut accept = vec![qitem(invalid_media_type())];
 
         let mut rb = RequestBuilder::default_post();
         rb.set_document(&doc);
@@ -337,8 +343,11 @@ mod test {
                     Err(e) => e.error,
                 };
                 // fragile, but not sure there's a better way
-                assert_eq!(err.to_string(), "Json Api Error: \
-Error deserializing document (Neither one nor many at line 1 column 11)");
+                assert_eq!(
+                    err.to_string(),
+                    "Json Api Error: \
+                     Error deserializing document (Neither one nor many at line 1 column 11)"
+                );
             });
     }
 }

@@ -1,50 +1,32 @@
+use super::{AuthError, Authenticator};
 use crate::{
-    Cookies,
-    JsonApi,
-    models::{
-        UserAuth,
-        UserGrant,
-        GrantType,
-        Success,
-    },
-    QaulCore,
-    JSONAPI_MIME,
+    models::{GrantType, Success, UserAuth, UserGrant},
+    Cookies, JsonApi, QaulCore, JSONAPI_MIME,
 };
 use cookie::Cookie;
+use iron::{prelude::*, status::Status};
+use japi::{Document, OptionalVec, ResourceObject};
 use libqaul::UserAuth as QaulUserAuth;
-use iron::{
-    prelude::*,
-    status::Status,
-};
-use japi::{
-    Document,
-    OptionalVec,
-    ResourceObject,
-};
 use std::convert::TryInto;
-use super::{
-    AuthError,
-    Authenticator,
-};
 
 pub fn login(req: &mut Request) -> IronResult<Response> {
     // data should contain exactly one object
     let data = match &req.extensions.get::<JsonApi>().unwrap().data {
         OptionalVec::One(Some(d)) => d,
-        OptionalVec::Many(_) => { 
+        OptionalVec::Many(_) => {
             return Err(AuthError::MultipleData.into());
-        },
+        }
         _ => {
             return Err(AuthError::NoData.into());
-        },
+        }
     };
 
     // try to decode the payload
-    let ua : ResourceObject<UserAuth> = match data.try_into() {
+    let ua: ResourceObject<UserAuth> = match data.try_into() {
         Ok(ua) => ua,
         Err(e) => {
             return Err(AuthError::ConversionError(e).into());
-        },
+        }
     };
 
     // is the identity valid
@@ -52,15 +34,15 @@ pub fn login(req: &mut Request) -> IronResult<Response> {
         Ok(id) => id,
         Err(e) => {
             return Err(AuthError::InvalidIdentity(e).into());
-        },
+        }
     };
 
     // is there a secret (there has to be a secret!)
     let attr = match ua.attributes {
         Some(s) => s,
-        None => { 
+        None => {
             return Err(AuthError::NoAttributes.into());
-        },
+        }
     };
 
     let secret = attr.secret;
@@ -71,27 +53,36 @@ pub fn login(req: &mut Request) -> IronResult<Response> {
     // perform the login
     let (ident, token) = match qaul.user_login(identity.clone(), &secret) {
         Ok(QaulUserAuth::Trusted(ident, token)) => (ident, token),
-        Ok(QaulUserAuth::Untrusted(_)) => { unreachable!(); },
+        Ok(QaulUserAuth::Untrusted(_)) => {
+            unreachable!();
+        }
         Err(e) => {
             return Err(AuthError::QaulError(e).into());
-        },
+        }
     };
 
     // register the token with the authenticator
     {
-        req.extensions.get::<Authenticator>().unwrap()
-            .tokens.lock().unwrap()
+        req.extensions
+            .get::<Authenticator>()
+            .unwrap()
+            .tokens
+            .lock()
+            .unwrap()
             .insert(token.clone(), ident);
     }
 
     // return the grant
     let obj = match grant_type {
         GrantType::Token => ResourceObject::<UserGrant>::new(token, None).into(),
-        GrantType::Cookie => { 
+        GrantType::Cookie => {
             // TODO: what should we do when a user is already logged in?
-            req.extensions.get_mut::<Cookies>().unwrap().add(Cookie::new("bearer", token));
+            req.extensions
+                .get_mut::<Cookies>()
+                .unwrap()
+                .add(Cookie::new("bearer", token));
             Success::from_message("Successfully logged in".into()).into()
-        },
+        }
     };
 
     let doc = Document {
@@ -99,18 +90,19 @@ pub fn login(req: &mut Request) -> IronResult<Response> {
         ..Default::default()
     };
 
-    Ok(Response::with((Status::Ok, JSONAPI_MIME.clone(), serde_json::to_string(&doc).unwrap())))
+    Ok(Response::with((
+        Status::Ok,
+        JSONAPI_MIME.clone(),
+        serde_json::to_string(&doc).unwrap(),
+    )))
 }
 
 #[cfg(test)]
 mod test {
-    use anneal::RequestBuilder;
-    use crate::cookie::CookieManager;
-    use libqaul::{
-        Qaul,
-        Identity,
-    };
     use super::*;
+    use crate::cookie::CookieManager;
+    use anneal::RequestBuilder;
+    use libqaul::{Identity, Qaul};
 
     fn setup() -> (RequestBuilder, Identity, QaulUserAuth, Authenticator) {
         let mut qaul = Qaul::start();
@@ -119,8 +111,7 @@ mod test {
         let (before_manager, _) = CookieManager::new();
         let mut rb = RequestBuilder::default_post();
         let auth = Authenticator::new();
-        rb
-            .add_middleware(QaulCore::new(&qaul))
+        rb.add_middleware(QaulCore::new(&qaul))
             .add_middleware(before_manager)
             .add_middleware(JsonApi)
             .add_middleware(auth.clone());
@@ -132,14 +123,18 @@ mod test {
         let (mut rb, id, _, auth) = setup();
 
         let go = rb
-            .set_primary_data(UserAuth::from_identity(id.clone(), "a".into(), GrantType::Token).into())
+            .set_primary_data(
+                UserAuth::from_identity(id.clone(), "a".into(), GrantType::Token).into(),
+            )
             .request_response(|mut req| {
                 let response = login(&mut req).unwrap();
                 assert_eq!(req.extensions.get::<Cookies>().unwrap().get("bearer"), None);
                 Ok(response)
-            }).unwrap()
-            .get_primary_data().unwrap();
-        let ro : ResourceObject<UserGrant> = go.try_into().unwrap();
+            })
+            .unwrap()
+            .get_primary_data()
+            .unwrap();
+        let ro: ResourceObject<UserGrant> = go.try_into().unwrap();
         let token = ro.id;
         assert_eq!(auth.tokens.lock().unwrap().get(&token), Some(&id));
     }
@@ -149,43 +144,46 @@ mod test {
         let (mut rb, id, _, auth) = setup();
 
         let go = rb
-            .set_primary_data(UserAuth::from_identity(id.clone(), "a".into(), GrantType::Cookie).into())
+            .set_primary_data(
+                UserAuth::from_identity(id.clone(), "a".into(), GrantType::Cookie).into(),
+            )
             .request_response(|mut req| {
                 let response = login(&mut req).unwrap();
-                let token = req.extensions.get::<Cookies>().unwrap().get("bearer").unwrap();
+                let token = req
+                    .extensions
+                    .get::<Cookies>()
+                    .unwrap()
+                    .get("bearer")
+                    .unwrap();
                 assert_eq!(auth.tokens.lock().unwrap().get(token.value()), Some(&id));
                 Ok(response)
-            }).unwrap()
-            .get_primary_data().unwrap();
-        let ro : ResourceObject<Success> = go.try_into().unwrap();
+            })
+            .unwrap()
+            .get_primary_data()
+            .unwrap();
+        let ro: ResourceObject<Success> = go.try_into().unwrap();
     }
 
     #[test]
     fn multiple_data() {
         let (mut rb, _, _, _) = setup();
 
-        rb.set_document(
-                &Document { 
-                    data: OptionalVec::Many(vec![]),
-                    ..Default::default()
-                })
-            .request(|mut req| {
-                assert!(login(&mut req).is_err())
-            })
+        rb.set_document(&Document {
+            data: OptionalVec::Many(vec![]),
+            ..Default::default()
+        })
+        .request(|mut req| assert!(login(&mut req).is_err()))
     }
 
     #[test]
     fn no_data() {
         let (mut rb, _, _, _) = setup();
 
-        rb.set_document(
-                &Document { 
-                    data: OptionalVec::NotPresent,
-                    ..Default::default()
-                })
-            .request(|mut req| {
-                assert!(login(&mut req).is_err())
-            })
+        rb.set_document(&Document {
+            data: OptionalVec::NotPresent,
+            ..Default::default()
+        })
+        .request(|mut req| assert!(login(&mut req).is_err()))
     }
 
     #[test]
@@ -193,9 +191,7 @@ mod test {
         let (mut rb, _, _, _) = setup();
 
         rb.set_primary_data(Success::from_message("test".into()).into())
-            .request(|mut req| {
-                assert!(login(&mut req).is_err())
-            })
+            .request(|mut req| assert!(login(&mut req).is_err()))
     }
 
     #[test]
@@ -203,9 +199,7 @@ mod test {
         let (mut rb, _, _, _) = setup();
 
         rb.set_primary_data(ResourceObject::<UserAuth>::new("".into(), None).into())
-            .request(|mut req| {
-                assert!(login(&mut req).is_err())
-            })
+            .request(|mut req| assert!(login(&mut req).is_err()))
     }
 
     #[test]
@@ -215,9 +209,7 @@ mod test {
         let mut ro = UserAuth::from_identity(id, "".into(), GrantType::Token);
         ro.attributes = None;
         rb.set_primary_data(ro.into())
-            .request(|mut req| {
-                assert!(login(&mut req).is_err())
-            })
+            .request(|mut req| assert!(login(&mut req).is_err()))
     }
 
     #[test]
@@ -225,8 +217,6 @@ mod test {
         let (mut rb, id, _, _) = setup();
 
         rb.set_primary_data(UserAuth::from_identity(id, "".into(), GrantType::Token).into())
-            .request(|mut req| {
-                assert!(login(&mut req).is_err())
-            })
+            .request(|mut req| assert!(login(&mut req).is_err()))
     }
 }

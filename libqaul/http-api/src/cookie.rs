@@ -1,29 +1,20 @@
-use cookie::{CookieJar, Cookie, ParseError}; 
 use crate::JSONAPI_MIME;
+use cookie::{Cookie, CookieJar, ParseError};
 use iron::{
-    headers::{
-        Cookie as CookieHeader,
-        SetCookie,
-    },
+    headers::{Cookie as CookieHeader, SetCookie},
+    middleware::{AfterMiddleware, BeforeMiddleware},
     prelude::*,
-    middleware::{
-        BeforeMiddleware,
-        AfterMiddleware,
-    },
-    typemap::Key,
     status::Status,
+    typemap::Key,
 };
-use japi::{
-    Document,
-    Error,
-};
+use japi::{Document, Error};
 use std::{
     error::Error as StdError,
     fmt::{Display, Formatter, Result as FmtResult},
 };
 
 #[derive(Debug)]
-struct CookieJarError(ParseError); 
+struct CookieJarError(ParseError);
 
 impl CookieJarError {
     fn detail(&self) -> String {
@@ -42,7 +33,7 @@ impl CookieJarError {
                 detail,
                 ..Default::default()
             },
-            status
+            status,
         )
     }
 }
@@ -64,7 +55,14 @@ impl From<CookieJarError> for IronError {
             ..Default::default()
         };
 
-        Self::new(e, (status, serde_json::to_string(&document).unwrap(), JSONAPI_MIME.clone()))
+        Self::new(
+            e,
+            (
+                status,
+                serde_json::to_string(&document).unwrap(),
+                JSONAPI_MIME.clone(),
+            ),
+        )
     }
 }
 
@@ -75,8 +73,8 @@ impl From<ParseError> for CookieJarError {
 }
 
 /// User this key to get the CookieJar for the request
-/// 
-/// Any changes performed on the cookie jar will be sent back to the 
+///
+/// Any changes performed on the cookie jar will be sent back to the
 /// client in the response
 ///
 /// ```
@@ -91,9 +89,11 @@ impl From<ParseError> for CookieJarError {
 /// ```
 pub struct Cookies;
 
-impl Key for Cookies { type Value = CookieJar; }
+impl Key for Cookies {
+    type Value = CookieJar;
+}
 
-pub (crate) struct CookieManager;
+pub(crate) struct CookieManager;
 
 impl CookieManager {
     fn build_jar(req: &mut Request) -> Result<CookieJar, CookieJarError> {
@@ -108,7 +108,9 @@ impl CookieManager {
         Ok(jar)
     }
 
-    pub fn new() -> (Self, Self) { (Self, Self) }
+    pub fn new() -> (Self, Self) {
+        (Self, Self)
+    }
 }
 
 impl BeforeMiddleware for CookieManager {
@@ -121,12 +123,17 @@ impl BeforeMiddleware for CookieManager {
 
 impl AfterMiddleware for CookieManager {
     fn after(&self, req: &mut Request, mut res: Response) -> IronResult<Response> {
-        let cookies : Vec<String> = req.extensions.get::<Cookies>().unwrap()
+        let cookies: Vec<String> = req
+            .extensions
+            .get::<Cookies>()
+            .unwrap()
             .delta()
             .map(|c| c.to_string())
             .collect();
 
-        if cookies.len() != 0 { res.headers.set::<SetCookie>(SetCookie(cookies)); }
+        if cookies.len() != 0 {
+            res.headers.set::<SetCookie>(SetCookie(cookies));
+        }
 
         Ok(res)
     }
@@ -134,19 +141,18 @@ impl AfterMiddleware for CookieManager {
 
 #[cfg(test)]
 mod test {
-    use anneal::RequestBuilder; 
-    use iron::method::Method;
     use super::*;
+    use anneal::RequestBuilder;
+    use iron::method::Method;
 
     #[test]
     fn no_cookies() {
-        RequestBuilder::default()
-            .request(|mut req| {
-                CookieManager.before(&mut req).unwrap();
-                assert_eq!(req.extensions.get::<Cookies>().unwrap().iter().count(), 0);
-                let res = CookieManager.after(&mut req, Response::with("")).unwrap();
-                assert!(!res.headers.has::<SetCookie>());
-            });
+        RequestBuilder::default().request(|mut req| {
+            CookieManager.before(&mut req).unwrap();
+            assert_eq!(req.extensions.get::<Cookies>().unwrap().iter().count(), 0);
+            let res = CookieManager.after(&mut req, Response::with("")).unwrap();
+            assert!(!res.headers.has::<SetCookie>());
+        });
     }
 
     #[test]
@@ -163,8 +169,10 @@ mod test {
 
                 cookies.add(Cookie::new("e", "f"));
                 let res = CookieManager.after(&mut req, Response::with("")).unwrap();
-                assert_eq!(*res.headers.get::<SetCookie>().unwrap(), 
-                           SetCookie(vec!["e=f".into()]));
+                assert_eq!(
+                    *res.headers.get::<SetCookie>().unwrap(),
+                    SetCookie(vec!["e=f".into()])
+                );
             })
     }
 
@@ -177,7 +185,7 @@ mod test {
                     Ok(_) => panic!("Request completed successfully"),
                     Err(e) => e.error,
                 };
-                assert_eq!(err.to_string(), 
+                assert_eq!(err.to_string(),
                     "Cookie jar error: Error parsing cookies (the cookie is missing a name/value pair)");
             });
     }

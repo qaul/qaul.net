@@ -1,25 +1,15 @@
-use crate::{
-    Cookies,
-    models::GrantType,
-};
+use super::AuthError;
+use crate::{models::GrantType, Cookies};
 use iron::{
-    BeforeMiddleware,
-    prelude::*,
     headers::{Authorization, Bearer},
-    typemap,
+    prelude::*,
+    typemap, BeforeMiddleware,
 };
-use libqaul::{
-    Identity,
-    UserAuth, 
-};
+use libqaul::{Identity, UserAuth};
 use std::{
     collections::HashMap,
-    sync::{
-        Arc,
-        Mutex,
-    },
+    sync::{Arc, Mutex},
 };
-use super::AuthError;
 
 /// Use this key to get the logged in user of the request
 ///
@@ -37,10 +27,12 @@ use super::AuthError;
 /// ```
 pub struct CurrentUser;
 
-impl typemap::Key for CurrentUser { type Value = UserAuth; }
+impl typemap::Key for CurrentUser {
+    type Value = UserAuth;
+}
 
 #[derive(Clone)]
-pub (crate) struct Authenticator{
+pub(crate) struct Authenticator {
     pub tokens: Arc<Mutex<HashMap<String, Identity>>>,
 }
 
@@ -52,7 +44,9 @@ impl Authenticator {
     }
 }
 
-impl typemap::Key for Authenticator { type Value = Self; }
+impl typemap::Key for Authenticator {
+    type Value = Self;
+}
 
 impl BeforeMiddleware for Authenticator {
     fn before(&self, req: &mut Request) -> IronResult<()> {
@@ -62,12 +56,12 @@ impl BeforeMiddleware for Authenticator {
         if let Some(bearer) = req.headers.get::<Authorization<Bearer>>() {
             match self.tokens.lock().unwrap().get(&bearer.token) {
                 Some(identity) => {
-                    req.extensions.insert::<CurrentUser>(
-                        UserAuth::Trusted(*identity, bearer.token.clone()));
-                },
+                    req.extensions
+                        .insert::<CurrentUser>(UserAuth::Trusted(*identity, bearer.token.clone()));
+                }
                 None => {
                     return Err(AuthError::InvalidToken(GrantType::Token).into());
-                },
+                }
             }
         }
 
@@ -76,15 +70,18 @@ impl BeforeMiddleware for Authenticator {
             match self.tokens.lock().unwrap().get(cookie.value()) {
                 Some(identity) => {
                     let ua = UserAuth::Trusted(*identity, cookie.value().into());
-                    if req.extensions.get::<CurrentUser>()
-                            .map_or(false, |other_id| *other_id != ua) {
+                    if req
+                        .extensions
+                        .get::<CurrentUser>()
+                        .map_or(false, |other_id| *other_id != ua)
+                    {
                         return Err(AuthError::DifferingLogins.into());
                     }
                     req.extensions.insert::<CurrentUser>(ua);
-                },
+                }
                 None => {
                     return Err(AuthError::InvalidToken(GrantType::Cookie).into());
-                },
+                }
             }
         }
 
@@ -94,15 +91,12 @@ impl BeforeMiddleware for Authenticator {
 
 #[cfg(test)]
 mod test {
-    use anneal::RequestBuilder;
-    use crate::cookie::CookieManager;
-    use cookie::{CookieJar, Cookie};
-    use iron::method::Method;
     use super::*;
-    use libqaul::{
-        Qaul,
-        UserUpdate
-    };
+    use crate::cookie::CookieManager;
+    use anneal::RequestBuilder;
+    use cookie::{Cookie, CookieJar};
+    use iron::method::Method;
+    use libqaul::{Qaul, UserUpdate};
 
     fn setup() -> (RequestBuilder, Authenticator, UserAuth, String) {
         let qaul = Qaul::start();
@@ -110,7 +104,13 @@ mod test {
         let (ident, key) = qaul.user_authenticate(user_auth.clone()).unwrap();
 
         let authenticator = Authenticator::new();
-        { authenticator.tokens.lock().unwrap().insert(key.clone(), ident); } 
+        {
+            authenticator
+                .tokens
+                .lock()
+                .unwrap()
+                .insert(key.clone(), ident);
+        }
 
         let mut rb = RequestBuilder::default();
         rb.add_middleware(CookieManager::new().0);
@@ -123,8 +123,8 @@ mod test {
     fn no_login() {
         let (rb, _, _, _) = setup();
         rb.request(|req| {
-                assert_eq!(req.extensions.get::<CurrentUser>(), None);
-            });
+            assert_eq!(req.extensions.get::<CurrentUser>(), None);
+        });
     }
 
     #[test]
@@ -139,11 +139,13 @@ mod test {
     #[test]
     fn invalid_token_login() {
         let (mut rb, authenticator, _, _) = setup();
-        rb.set_header(Authorization(Bearer { token: "i am not valid".into() }))
-            .set_chain(vec![Box::new(CookieManager::new().0)])
-            .request(|mut req| {
-                assert!(authenticator.before(&mut req).is_err());
-            });
+        rb.set_header(Authorization(Bearer {
+            token: "i am not valid".into(),
+        }))
+        .set_chain(vec![Box::new(CookieManager::new().0)])
+        .request(|mut req| {
+            assert!(authenticator.before(&mut req).is_err());
+        });
     }
 
     #[test]
@@ -151,10 +153,9 @@ mod test {
         let (mut rb, _, user_auth, key) = setup();
         let mut jar = CookieJar::new();
         jar.add(Cookie::new("bearer", key));
-        rb.set_cookies(&jar)
-            .request(|req| {
-                assert_eq!(req.extensions.get::<CurrentUser>(), Some(&user_auth));
-            });
+        rb.set_cookies(&jar).request(|req| {
+            assert_eq!(req.extensions.get::<CurrentUser>(), Some(&user_auth));
+        });
     }
 
     #[test]
@@ -179,10 +180,10 @@ mod test {
         let (ident2, key2) = qaul.user_authenticate(user_auth2.clone()).unwrap();
 
         let authenticator = Authenticator::new();
-        { 
+        {
             let mut tokens = authenticator.tokens.lock().unwrap();
-            tokens.insert(key.clone(), ident); 
-            tokens.insert(key2.clone(), ident2); 
+            tokens.insert(key.clone(), ident);
+            tokens.insert(key2.clone(), ident2);
         }
 
         let mut jar = CookieJar::new();
@@ -205,9 +206,9 @@ mod test {
         let (ident, key) = qaul.user_authenticate(user_auth.clone()).unwrap();
 
         let authenticator = Authenticator::new();
-        { 
+        {
             let mut tokens = authenticator.tokens.lock().unwrap();
-            tokens.insert(key.clone(), ident); 
+            tokens.insert(key.clone(), ident);
         }
 
         let mut jar = CookieJar::new();

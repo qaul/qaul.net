@@ -1,6 +1,5 @@
-use libqaul::Identity;
 use japi::Attributes;
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::{Deserialize, Serialize};
 
 /// Returned on successful `Token` grants
 ///
@@ -8,5 +7,8 @@ use serde_derive::{Serialize, Deserialize};
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct UserGrant {}
 
-impl Attributes for UserGrant { fn kind() -> String { "user_grant".into() } }
-
+impl Attributes for UserGrant {
+    fn kind() -> String {
+        "user_grant".into()
+    }
+}

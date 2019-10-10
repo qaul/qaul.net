@@ -1,21 +1,9 @@
 use crate::JSONAPI_MIME;
-use iron::{
-    prelude::*,
-    method::Method,
-    middleware::BeforeMiddleware,
-    status::Status,
-};
-use japi::{
-    Document,
-    Error,
-};
+use iron::{method::Method, middleware::BeforeMiddleware, prelude::*, status::Status};
+use japi::{Document, Error};
 use std::{
     error::Error as StdError,
-    fmt::{
-        Display,
-        Formatter,
-        Result,
-    },
+    fmt::{Display, Formatter, Result},
 };
 
 #[derive(Debug)]
@@ -31,7 +19,7 @@ impl MethodGaurdError {
 
         let mut method_string = String::new();
         for (i, method) in self.expected.iter().enumerate() {
-            if i != 0 { 
+            if i != 0 {
                 method_string.push(',');
                 method_string.push(' ');
             }
@@ -50,8 +38,10 @@ impl MethodGaurdError {
             });
         }
 
-        let detail = Some(format!("Request method was {} but endpoint only supports {}", 
-            self.got, method_string));
+        let detail = Some(format!(
+            "Request method was {} but endpoint only supports {}",
+            self.got, method_string
+        ));
 
         (
             Error {
@@ -60,14 +50,19 @@ impl MethodGaurdError {
                 detail,
                 ..Default::default()
             },
-            status
+            status,
         )
     }
 }
 
 impl Display for MethodGaurdError {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "Method Gaurd Error: expected {:?}, got {}", &self.expected[..], self.got)
+        write!(
+            f,
+            "Method Gaurd Error: expected {:?}, got {}",
+            &self.expected[..],
+            self.got
+        )
     }
 }
 
@@ -82,13 +77,20 @@ impl From<MethodGaurdError> for IronError {
             ..Default::default()
         };
 
-        Self::new(e, (status, serde_json::to_string(&document).unwrap(), JSONAPI_MIME.clone()))
+        Self::new(
+            e,
+            (
+                status,
+                serde_json::to_string(&document).unwrap(),
+                JSONAPI_MIME.clone(),
+            ),
+        )
     }
 }
 
 /// Aborts requests made with incorrect methods
 ///
-/// Add this to a request chain to deny all requests that do not use the 
+/// Add this to a request chain to deny all requests that do not use the
 /// required methods
 pub struct MethodGaurd {
     methods: Vec<Method>,
@@ -98,69 +100,94 @@ impl MethodGaurd {
     pub fn new(methods: Vec<Method>) -> Self {
         Self { methods }
     }
-    
+
     pub fn options() -> Self {
-        Self { methods: vec![Method::Options] }
+        Self {
+            methods: vec![Method::Options],
+        }
     }
 
     pub fn get() -> Self {
-        Self { methods: vec![Method::Get] }
+        Self {
+            methods: vec![Method::Get],
+        }
     }
 
     pub fn post() -> Self {
-        Self { methods: vec![Method::Post] }
+        Self {
+            methods: vec![Method::Post],
+        }
     }
 
     pub fn put() -> Self {
-        Self { methods: vec![Method::Put] }
+        Self {
+            methods: vec![Method::Put],
+        }
     }
 
     pub fn delete() -> Self {
-        Self { methods: vec![Method::Delete] }
+        Self {
+            methods: vec![Method::Delete],
+        }
     }
 
     pub fn head() -> Self {
-        Self { methods: vec![Method::Head] }
+        Self {
+            methods: vec![Method::Head],
+        }
     }
 
     pub fn trace() -> Self {
-        Self { methods: vec![Method::Trace] }
+        Self {
+            methods: vec![Method::Trace],
+        }
     }
 
     pub fn connect() -> Self {
-        Self { methods: vec![Method::Connect] }
+        Self {
+            methods: vec![Method::Connect],
+        }
     }
 
     pub fn patch() -> Self {
-        Self { methods: vec![Method::Patch] }
+        Self {
+            methods: vec![Method::Patch],
+        }
     }
-
 }
 
 impl BeforeMiddleware for MethodGaurd {
     fn before(&self, req: &mut Request) -> IronResult<()> {
-        if self.methods.iter().fold(false, |c, m| c || *m == req.method) {
+        if self
+            .methods
+            .iter()
+            .fold(false, |c, m| c || *m == req.method)
+        {
             Ok(())
         } else {
-            Err(MethodGaurdError{ got: req.method.clone(), expected: self.methods.clone() }.into())
+            Err(MethodGaurdError {
+                got: req.method.clone(),
+                expected: self.methods.clone(),
+            }
+            .into())
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use anneal::RequestBuilder;
     use super::*;
+    use anneal::RequestBuilder;
 
     #[test]
     fn same_method() {
         let gaurds = [
             (
-                MethodGaurd::new(vec![Method::Get, Method::Extension("a".into())]), 
+                MethodGaurd::new(vec![Method::Get, Method::Extension("a".into())]),
                 Method::Extension("a".into()),
             ),
             (
-                MethodGaurd::new(vec![Method::Get, Method::Extension("a".into())]), 
+                MethodGaurd::new(vec![Method::Get, Method::Extension("a".into())]),
                 Method::Get,
             ),
             (MethodGaurd::options(), Method::Options),
@@ -187,7 +214,7 @@ mod test {
     fn different_method() {
         let gaurds = [
             (
-                MethodGaurd::new(vec![Method::Get, Method::Extension("a".into())]), 
+                MethodGaurd::new(vec![Method::Get, Method::Extension("a".into())]),
                 Method::Options,
             ),
             (MethodGaurd::options(), Method::Get),

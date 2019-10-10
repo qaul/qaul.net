@@ -2,7 +2,7 @@ use base64::DecodeError;
 use identity::ID_LEN;
 use std::{
     error::Error,
-    fmt::{Formatter, Result, Display},
+    fmt::{Display, Formatter, Result},
 };
 
 /// The error type returned when converting a `String` to an `Identity` fails
@@ -17,8 +17,9 @@ impl Display for ConversionError {
         write!(f, "Conversion Error: ")?;
         match self {
             ConversionError::Base64Decode(e) => write!(f, "Base 64 Decode ({})", e),
-            ConversionError::BadIdLength(len) => 
-                write!(f, "Bad Id Length (expected {} bytes, got {})", ID_LEN, len), 
+            ConversionError::BadIdLength(len) => {
+                write!(f, "Bad Id Length (expected {} bytes, got {})", ID_LEN, len)
+            }
         }
     }
 }

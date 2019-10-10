@@ -1,25 +1,12 @@
-use crate::{
-    CurrentUser,
-    JSONAPI_MIME,
-    QaulCore,
-};
+use crate::{CurrentUser, QaulCore, JSONAPI_MIME};
+use iron::{middleware::Handler, prelude::*, status::Status, typemap, Url};
+use japi::{Document, Error};
 use libqaul::QaulError;
-use iron::{
-    middleware::Handler,
-    prelude::*,
-    Url,
-    typemap,
-    status::Status,
-};
-use japi::{
-    Document,
-    Error,
-};
 use std::{
     collections::BTreeMap,
-    path::PathBuf,
     error::Error as StdError,
     fmt::{Display, Formatter, Result as FmtResult},
+    path::PathBuf,
     sync::{Arc, Mutex},
 };
 
@@ -48,13 +35,15 @@ enum Route {
 }
 
 #[derive(Clone)]
-pub (crate) struct HotPlugMount {
+pub(crate) struct HotPlugMount {
     routes: Arc<Mutex<BTreeMap<String, Route>>>,
 }
 
 impl HotPlugMount {
     pub fn new() -> Self {
-        Self { routes: Default::default(), } 
+        Self {
+            routes: Default::default(),
+        }
     }
 
     pub fn mount<T: Handler>(&self, path: String, handler: T) -> Result<bool, HotPlugError> {
@@ -64,12 +53,14 @@ impl HotPlugMount {
         p.push(path);
 
         let path = p.to_str().unwrap().to_string();
-        
+
         if let Some(Route::Core(_)) = routes.get(&path) {
             return Err(HotPlugError::CoreRoute);
         }
 
-        Ok(routes.insert(path, Route::Service(Arc::new(Box::new(handler)))).is_some())
+        Ok(routes
+            .insert(path, Route::Service(Arc::new(Box::new(handler))))
+            .is_some())
     }
 
     pub fn unmount(&self, path: &str) -> Result<bool, HotPlugError> {
@@ -88,7 +79,12 @@ impl HotPlugMount {
         p.push("/api");
         p.push(path);
 
-        routes.insert(p.to_str().unwrap().to_string(), Route::Core(Arc::new(Box::new(handler)))).is_some()
+        routes
+            .insert(
+                p.to_str().unwrap().to_string(),
+                Route::Core(Arc::new(Box::new(handler))),
+            )
+            .is_some()
     }
 
     #[allow(unused)]
@@ -100,7 +96,9 @@ impl HotPlugMount {
 }
 
 pub struct OriginalUrl;
-impl typemap::Key for OriginalUrl { type Value = Url; }
+impl typemap::Key for OriginalUrl {
+    type Value = Url;
+}
 
 #[derive(Debug)]
 enum HotPlugHandlerError {
@@ -116,8 +114,9 @@ impl HotPlugHandlerError {
         match self {
             HotPlugHandlerError::NoPath => "Url provided no path to a service".into(),
             HotPlugHandlerError::NoService(s) => format!("No mounted service named '{}'", s),
-            HotPlugHandlerError::ServiceNotAuthorized(s) =>
-                format!("Current user has not authorized service '{}'", s),
+            HotPlugHandlerError::ServiceNotAuthorized(s) => {
+                format!("Current user has not authorized service '{}'", s)
+            }
             HotPlugHandlerError::QaulError(e) => format!("Qaul Error: {:?}", e),
         }
     }
@@ -153,7 +152,7 @@ impl HotPlugHandlerError {
                 detail,
                 ..Default::default()
             },
-            status
+            status,
         )
     }
 }
@@ -175,12 +174,18 @@ impl From<HotPlugHandlerError> for IronError {
             ..Default::default()
         };
 
-        Self::new(e, (status, serde_json::to_string(&document).unwrap(), JSONAPI_MIME.clone()))
+        Self::new(
+            e,
+            (
+                status,
+                serde_json::to_string(&document).unwrap(),
+                JSONAPI_MIME.clone(),
+            ),
+        )
     }
 }
 
 impl Handler for HotPlugMount {
-
     // FIXME: I'm so sorry - spacekookie
     //        The reason for this horribleness was that we wanted everything
     //        to be /api prefixed but I didn't want to refactor too much stuff here...
@@ -195,25 +200,31 @@ impl Handler for HotPlugMount {
         // };
 
         // if a user is logged in, do they have the service enabled?
-        match req.extensions.get::<CurrentUser>()
-                .map(|user| req.extensions.get::<QaulCore>().unwrap().user_get(user.clone())) {
+        match req.extensions.get::<CurrentUser>().map(|user| {
+            req.extensions
+                .get::<QaulCore>()
+                .unwrap()
+                .user_get(user.clone())
+        }) {
             Some(Ok(user)) => {
                 if !user.data.services.contains(&service) {
                     return Err(HotPlugHandlerError::ServiceNotAuthorized(service).into());
                 }
-            },
+            }
             Some(Err(e)) => {
                 return Err(HotPlugHandlerError::QaulError(e).into());
-            },
-            None => {},
+            }
+            None => {}
         }
 
-        // does the path point to a real handler? 
+        // does the path point to a real handler?
         let handler = {
             match self.routes.lock().unwrap().get(&service) {
                 Some(Route::Core(h)) => h.clone(),
                 Some(Route::Service(h)) => h.clone(),
-                None => { return Err(HotPlugHandlerError::NoService(service).into()); },
+                None => {
+                    return Err(HotPlugHandlerError::NoService(service).into());
+                }
             }
         };
 
@@ -224,40 +235,39 @@ impl Handler for HotPlugMount {
         let path = path[1..].join("/");
         req.url.as_mut().set_path(&path);
 
-
         handler.handle(req)
     }
 }
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use anneal::RequestBuilder;
     use iron::{
-        headers::{
-            Location,
-            Referer,
-            Server,
-        },
-        middleware::BeforeMiddleware,
+        headers::{Location, Referer, Server},
         method::Method,
+        middleware::BeforeMiddleware,
         modifiers::Header,
     };
-    use super::*;
 
     // says it's own name, like a pokemon
-    struct NamedHandler { name: String }
+    struct NamedHandler {
+        name: String,
+    }
 
-    impl Handler for NamedHandler { 
+    impl Handler for NamedHandler {
         fn handle(&self, req: &mut Request) -> IronResult<Response> {
             Ok(Response::with((
-                    // "this is blatant misuse of headers to exfiltrate information
-                    // why not put it in the body or have it set a field or literally
-                    // anything else"
-                    //
-                    // the only answer is a chilling laugh
-                    Header(Referer(self.name.clone())),
-                    Header(Server(req.url.clone().to_string())),
-                    Header(Location(req.extensions.get::<OriginalUrl>().unwrap().to_string())),
+                // "this is blatant misuse of headers to exfiltrate information
+                // why not put it in the body or have it set a field or literally
+                // anything else"
+                //
+                // the only answer is a chilling laugh
+                Header(Referer(self.name.clone())),
+                Header(Server(req.url.clone().to_string())),
+                Header(Location(
+                    req.extensions.get::<OriginalUrl>().unwrap().to_string(),
+                )),
             )))
         }
     }
@@ -265,7 +275,9 @@ mod test {
     // the base set of routes used in these tests
     fn build_mount() -> HotPlugMount {
         let mount = HotPlugMount::new();
-        assert!(!mount.mount("a".into(), NamedHandler { name: "a".into() }).unwrap());
+        assert!(!mount
+            .mount("a".into(), NamedHandler { name: "a".into() })
+            .unwrap());
         assert!(!mount.mount_core("b".into(), NamedHandler { name: "b".into() }));
         mount
     }
@@ -299,7 +311,9 @@ mod test {
     fn add_route() {
         let mount = build_mount();
 
-        assert!(mount.mount("a".into(), NamedHandler { name: "c".into() }).unwrap());
+        assert!(mount
+            .mount("a".into(), NamedHandler { name: "c".into() })
+            .unwrap());
         RequestBuilder::get("http://127.0.0.1:8080/a")
             .unwrap()
             .request(|mut req| {
@@ -307,7 +321,9 @@ mod test {
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "c");
             });
 
-        assert!(mount.mount("b".into(), NamedHandler { name: "d".into() }).is_err());
+        assert!(mount
+            .mount("b".into(), NamedHandler { name: "d".into() })
+            .is_err());
         RequestBuilder::get("http://127.0.0.1:8080/b")
             .unwrap()
             .request(|mut req| {
@@ -359,7 +375,9 @@ mod test {
     fn malicious_routes() {
         let mount = build_mount();
 
-        assert!(!mount.mount("/b".into(), NamedHandler { name: "c".into(), }).unwrap());
+        assert!(!mount
+            .mount("/b".into(), NamedHandler { name: "c".into() })
+            .unwrap());
         RequestBuilder::get("http://127.0.0.1:8080/b")
             .unwrap()
             .request(|mut req| {
@@ -367,7 +385,9 @@ mod test {
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
             });
 
-        assert!(!mount.mount("b/".into(), NamedHandler { name: "c".into(), }).unwrap());
+        assert!(!mount
+            .mount("b/".into(), NamedHandler { name: "c".into() })
+            .unwrap());
         RequestBuilder::get("http://127.0.0.1:8080/b")
             .unwrap()
             .request(|mut req| {
@@ -375,7 +395,9 @@ mod test {
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
             });
 
-        assert!(!mount.mount("b/a".into(), NamedHandler { name: "c".into(), }).unwrap());
+        assert!(!mount
+            .mount("b/a".into(), NamedHandler { name: "c".into() })
+            .unwrap());
         RequestBuilder::get("http://127.0.0.1:8080/b/a")
             .unwrap()
             .request(|mut req| {
@@ -393,19 +415,20 @@ mod test {
             .request(|mut req| {
                 let res = mount.handle(&mut req).unwrap();
                 assert_eq!(res.headers.get::<Referer>().unwrap().0, "b");
-                assert_eq!(res.headers.get::<Server>().unwrap().0, 
-                    "http://127.0.0.1:8080/a/b/c/d/e?f=g");
-                assert_eq!(res.headers.get::<Location>().unwrap().0, 
-                    "http://127.0.0.1:8080/b/a/b/c/d/e?f=g");
+                assert_eq!(
+                    res.headers.get::<Server>().unwrap().0,
+                    "http://127.0.0.1:8080/a/b/c/d/e?f=g"
+                );
+                assert_eq!(
+                    res.headers.get::<Location>().unwrap().0,
+                    "http://127.0.0.1:8080/b/a/b/c/d/e?f=g"
+                );
             });
     }
 
     #[test]
     fn service_auth() {
-        use libqaul::{
-            Qaul,
-            UserUpdate,
-        };
+        use libqaul::{Qaul, UserUpdate};
         use std::collections::BTreeSet;
 
         let mount = build_mount();
@@ -418,7 +441,8 @@ mod test {
         let qaul = Qaul::start();
         let qaul_core = QaulCore::new(&qaul);
         let user_auth = qaul.user_create("a".into()).unwrap();
-        qaul.user_update(user_auth.clone(), UserUpdate::AddService("a".into())).unwrap();
+        qaul.user_update(user_auth.clone(), UserUpdate::AddService("a".into()))
+            .unwrap();
 
         RequestBuilder::get("http://127.0.0.1:8080/b")
             .unwrap()
