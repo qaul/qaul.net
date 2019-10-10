@@ -49,3 +49,5 @@ pub use api::*;
 pub use identity::Identity;
 pub use qaul::Qaul;
 pub use users::{ContactBook, ContactUpdate, LocalContactData, User, UserData, UserUpdate};
+
+pub use storage::*;
