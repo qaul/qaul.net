@@ -11,7 +11,7 @@ use iron::{
     IronError,
     status::Status,
 };
-use json_api::{
+use japi::{
     Document,
     Error,
     ErrorSource,

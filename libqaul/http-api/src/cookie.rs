@@ -13,7 +13,7 @@ use iron::{
     typemap::Key,
     status::Status,
 };
-use json_api::{
+use japi::{
     Document,
     Error,
 };

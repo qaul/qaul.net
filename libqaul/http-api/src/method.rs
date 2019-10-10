@@ -5,7 +5,7 @@ use iron::{
     middleware::BeforeMiddleware,
     status::Status,
 };
-use json_api::{
+use japi::{
     Document,
     Error,
 };

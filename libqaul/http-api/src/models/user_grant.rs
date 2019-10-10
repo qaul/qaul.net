@@ -1,5 +1,5 @@
 use libqaul::Identity;
-use json_api::{ResourceObject, Attributes};
+use japi::{ResourceObject, Attributes};
 use serde_derive::{Serialize, Deserialize};
 
 /// Returned on successful `Token` grants

@@ -4,7 +4,7 @@ use libqaul::{
     UserData,
     Identity,
 };
-use json_api::{ResourceObject, Attributes};
+use japi::{ResourceObject, Attributes};
 use serde_derive::{Serialize, Deserialize};
 use std::collections::{BTreeMap, BTreeSet};
 use identity::ID_LEN;

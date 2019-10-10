@@ -9,7 +9,7 @@ use iron::{
     error::IronError,
     status::Status,
 };
-use json_api::{
+use japi::{
     Document,
     Error,
     Links,
@@ -232,7 +232,7 @@ mod test {
             qitem,
         },
     };
-    use json_api::Identifier;
+    use japi::Identifier;
     use super::*;
 
     fn invalid_media_type() -> mime::Mime<Vec<(mime::Attr, mime::Value)>> {

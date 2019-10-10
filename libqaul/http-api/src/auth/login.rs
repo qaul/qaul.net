@@ -17,7 +17,7 @@ use iron::{
     prelude::*,
     status::Status,
 };
-use json_api::{
+use japi::{
     Document,
     OptionalVec,
     ResourceObject,

@@ -11,7 +11,7 @@ use iron::{
     typemap,
     status::Status,
 };
-use json_api::{
+use japi::{
     Document,
     Error,
     ErrorSource,

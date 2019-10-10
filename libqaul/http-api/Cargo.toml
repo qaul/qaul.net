@@ -9,7 +9,7 @@ license = "AGPL-3.0"
 base64 = "0.10"
 iron = "0.6"
 persistent = "0.4"
-json-api = { git = "https://git.open-communication.net/qaul/json-api" }
+japi = "0.1"
 serde_derive = "1.0"
 serde = "1.0"
 serde_json = "1.0"
@@ -21,4 +21,4 @@ libqaul = { path = ".." }
 identity = { path = "../../ratman/identity", package = "ratman-identity" }
 
 [dev-dependencies]
-anneal = { git = "https://git.open-communication.net/qaul/anneal", features = ["jsonapi", "cookies"], version = "0.3" }
+anneal = { features = ["jsonapi", "cookies"], version = "0.3" }

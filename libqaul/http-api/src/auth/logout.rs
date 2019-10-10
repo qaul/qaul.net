@@ -9,7 +9,7 @@ use iron::{
     prelude::*,
     status::Status,
 };
-use json_api::{
+use japi::{
     Document,
     OptionalVec,
 };
@@ -77,7 +77,7 @@ mod test {
         UserUpdate,
         Identity,
     };
-    use json_api::ResourceObject;
+    use japi::ResourceObject;
 
     fn setup() -> (RequestBuilder, Authenticator, String) {
         let qaul = Qaul::start();

@@ -1,6 +1,6 @@
 use base64::{encode_config, decode_config, URL_SAFE};
 use serde_derive::{Serialize, Deserialize};
-use json_api::{ResourceObject, Attributes};
+use japi::{ResourceObject, Attributes};
 use super::ConversionError;
 use libqaul::Identity;
 use identity::ID_LEN;
