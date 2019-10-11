@@ -338,6 +338,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "netmod-mem"
 version = "0.1.0"
 dependencies = [
+ "ratman-identity 0.1.0",
  "ratman-netmod 0.1.0",
 ]
 

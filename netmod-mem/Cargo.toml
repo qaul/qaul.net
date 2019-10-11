@@ -8,3 +8,4 @@ license = "AGPL-3.0"
 
 [dependencies]
 ratman-netmod = { path = "../ratman/netmod" }
+ratman-identity = { path = "../ratman/identity" }
