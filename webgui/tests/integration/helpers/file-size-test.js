@@ -1,4 +1,3 @@
-
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { render } from '@ember/test-helpers';
@@ -9,14 +8,14 @@ module('helper:file-size', function(hooks) {
 
   test('it render KiB', async function(assert) {
     this.set('inputValue', '1234');
-    await render(hbs`{{file-size inputValue}}`);
-    assert.dom('*').hasText('1KiB');
+    await render(hbs`<div id="size">{{file-size inputValue}}</div>`);
+    assert.dom('#size').hasText('1KiB');
   });
 
   test('it render KiB', async function(assert) {
     this.set('inputValue', '2700877234');
-    await render(hbs`{{file-size inputValue}}`);
-    assert.dom('*').hasText('2GiB');
+    await render(hbs`<div id="size">{{file-size inputValue}}</div>`);
+    assert.dom('#size').hasText('2GiB');
   });
 });
 

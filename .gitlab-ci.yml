@@ -11,42 +11,42 @@ build:nightly:
     - cargo build
 
 # Run test suite
-# test_webgui:
-#   stage: test
-#   image: circleci/node:10-browsers
-#   cache:
-#     key: yarn
-#     paths:
-#       - webgui/.yarn
-#   script:
-#     - cd webgui
-#     - yarn install --pure-lockfile --cache-folder .yarn
-#     - yarn run test
+test_webgui:
+  stage: test
+  image: circleci/node:10-browsers
+  cache:
+    key: yarn
+    paths:
+      - webgui/.yarn
+  script:
+    - cd webgui
+    - yarn install --pure-lockfile --cache-folder .yarn
+    - yarn run test
 
-# build_webgui:
-#   stage: build
-#   image: node:10
-#   cache:
-#     key: yarn
-#     paths:
-#       - webgui/.yarn
-#   script:
-#     - cd webgui
-#     - yarn install --pure-lockfile --cache-folder .yarn
-#     - yarn run build --prod
-#   artifacts:
-#     paths:
-#       - webgui/dist/
+build_webgui:
+  stage: build
+  image: node:10
+  cache:
+    key: yarn
+    paths:
+      - webgui/.yarn
+  script:
+    - cd webgui
+    - yarn install --pure-lockfile --cache-folder .yarn
+    - yarn run build --prod
+  artifacts:
+    paths:
+      - webgui/dist/
 
 # publish_webgui:
-#   stage: publish
-#   environment:
-#     name: master
-#     url: http://qaul.surge.sh/
-#   only:
-#     - master
-#   image: andthensome/alpine-surge-bash
-#   script:
-#     - cd webgui/dist/
-#     - cp index.html 200.html
-#     - surge --project . --domain qaul.surge.sh
+  # stage: publish
+  # environment:
+  #   name: master
+  #   url: http://qaul.surge.sh/
+  # only:
+  #   - master
+  # image: andthensome/alpine-surge-bash
+  # script:
+  #   - cd webgui/dist/
+  #   - cp index.html 200.html
+  #   - surge --project . --domain qaul.surge.sh
