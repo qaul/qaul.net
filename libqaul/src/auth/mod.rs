@@ -19,6 +19,7 @@ use std::{
 /// Fundamentally it has two functions: hand out authentication
 /// tokens, and compare password hashes with their recordings to make
 /// sure that users are valid.
+#[derive(Clone)]
 pub(crate) struct AuthStore {
     tokens: Arc<Mutex<BTreeMap<Identity, Token>>>,
     hashes: Arc<Mutex<BTreeMap<Identity, PwHash>>>,
@@ -32,11 +33,19 @@ impl AuthStore {
         }
     }
 
+    /// Set a user's password hash
+    pub(crate) fn set_pw(&self, user: Identity, pw: &str) {
+        self.hashes
+            .lock()
+            .expect("Faied to unlock hash store")
+            .insert(user, PwHash::new(pw));
+    }
+
     /// Generate a new login token, if password is valid
     ///
     /// If a token already exists, and the password is valid, it will
     /// be returned instead of generating a new one.
-    pub(crate) fn new_login(&mut self, user: Identity, pw: &str) -> QaulResult<Token> {
+    pub(crate) fn new_login(&self, user: Identity, pw: &str) -> QaulResult<Token> {
         self.hashes
             .lock()
             .expect("Failed to unlock hash store")
@@ -52,6 +61,19 @@ impl AuthStore {
 
         tokens.insert(user, token.clone());
         Ok(token)
+    }
+
+    /// Yield a token for a session, logging out a user
+    pub(crate) fn logout(&self, user: &Identity, token: &Token) -> QaulResult<()> {
+        match self
+            .tokens
+            .lock()
+            .expect("Failed to lock token store")
+            .remove(user)
+        {
+            Some(ref t) if t == token => Ok(()),
+            Some(_) | None => Err(QaulError::NotAuthorised),
+        }
     }
 
     /// Verify that a user's token is valid

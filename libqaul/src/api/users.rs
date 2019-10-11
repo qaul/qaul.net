@@ -18,18 +18,12 @@ impl Qaul {
         let mut users = self.users.lock().unwrap();
         users.insert(id.clone(), user);
 
-        let mut salt = [0; 16];
-        OsRng.fill(&mut salt[..]);
-        // TODO: Use this error somehow
-        let hash = argon2::hash_encoded(pw.as_bytes(), &salt, &argon2::Config::default()).unwrap();
-        self.auth.lock().unwrap().insert(id.clone(), hash);
+        // Computes and stores the pw hash
+        self.auth.set_pw(id.clone(), pw);
 
-        let mut key = [0; 32];
-        OsRng.fill(&mut key[..]);
-        let key = encode_config(&key, URL_SAFE);
-        self.keys.lock().unwrap().insert(key.clone(), id.clone());
-
-        Ok(UserAuth::Trusted(id, key))
+        // Then generate a token
+        let token = self.auth.new_login(id.clone(), pw)?;
+        Ok(UserAuth::Trusted(id, token))
     }
 
     /// Checks if a `UserAuth` is valid
@@ -38,13 +32,9 @@ impl Qaul {
     /// - `id` points to a real user
     /// - `key` is a valid key for that user
     pub fn user_authenticate(&self, user: UserAuth) -> QaulResult<(Identity, String)> {
-        let (user_id, key) = user.trusted()?;
-
-        match self.keys.lock().unwrap().get(&key) {
-            Some(id) if *id == user_id => Ok((user_id, key)),
-            Some(_) => Err(QaulError::NotAuthorised),
-            None => Err(QaulError::NotAuthorised),
-        }
+        let (user_id, token) = user.trusted()?;
+        self.auth.verify_token(&user_id, &token)?;
+        Ok((user_id, token))
     }
 
     /// Get a list of available users
@@ -52,9 +42,20 @@ impl Qaul {
         self.users.lock().unwrap().keys().cloned().collect()
     }
 
+
     /// Inject a `UserAuth` into this `Qaul`.
-    /// This is not, in general, a sensible thing for regular applications to do, but is
-    /// necessary for testing.
+    ///
+    /// This is not, in general, a sensible thing for regular
+    /// applications to do, but is necessary for testing.
+    ///
+    /// ## Note
+    ///
+    /// In it's current form, this function can not be implemented
+    /// with the new `AuthStore` backend, because it doesn't map
+    /// tokens to users, but the other way around. The code is still
+    /// in the repo, albeit commented out. We should check what this
+    /// function should actually do and if it can be aproximated
+    /// better.
     ///
     /// # Panics
     /// Panics if the provided `UserAuth` describes a user that is already known to this
@@ -62,23 +63,24 @@ impl Qaul {
     /// Panics if the provided `UserAuth` users a key that is already known to this
     /// `Qaul` instance.
     pub fn user_inject(&self, user: UserAuth) -> QaulResult<UserAuth> {
-        let (id, key) = user.trusted()?;
-        let mut user = User::new();
-        user.id = id;
+        // let (id, key) = user.trusted()?;
+        // let mut user = User::new();
+        // user.id = id;
 
-        let mut users = self.users.lock().unwrap();
-        if users.contains_key(&id) {
-            panic!("The user {:?} already exists within the Qaul state.", id);
-        }
+        // let mut users = self.users.lock().unwrap();
+        // if users.contains_key(&id) {
+        //     panic!("The user {:?} already exists within the Qaul state.", id);
+        // }
 
-        let mut keys = self.keys.lock().unwrap();
-        if keys.contains_key(&key) {
-            panic!("The key {:?} already exists within the Qaul state.", key);
-        }
+        // let mut keys = self.keys.lock().unwrap();
+        // if keys.contains_key(&key) {
+        //     panic!("The key {:?} already exists within the Qaul state.", key);
+        // }
 
-        users.insert(id.clone(), user);
-        keys.insert(key.clone(), id.clone());
-        Ok(UserAuth::Trusted(id, key))
+        // users.insert(id.clone(), user);
+        // keys.insert(key.clone(), id.clone());
+        // Ok(UserAuth::Trusted(id, key))
+        unimplemented!()
     }
 
     /// Update an existing (logged-in) user to use the given details.
@@ -122,33 +124,13 @@ impl Qaul {
 
     /// Log-in to an existing user
     pub fn user_login(&self, id: Identity, pw: &str) -> QaulResult<UserAuth> {
-        let auth = self.auth.lock().unwrap();
-        let hash = match auth.get(&id) {
-            Some(hash) => hash,
-            None => {
-                return Err(QaulError::UnknownUser);
-            }
-        };
-
-        // TODO: Use this error somehow
-        if !argon2::verify_encoded(hash, pw.as_bytes()).unwrap() {
-            return Err(QaulError::NotAuthorised);
-        }
-
-        let mut key = [0; 32];
-        OsRng.fill(&mut key[..]);
-        let key = encode_config(&key, URL_SAFE);
-        self.keys.lock().unwrap().insert(key.clone(), id.clone());
-
-        Ok(UserAuth::Trusted(id, key))
+        let token = self.auth.new_login(id, pw)?;
+        Ok(UserAuth::Trusted(id, token))
     }
 
     /// End a currently active user session
     pub fn user_logout(&self, user: UserAuth) -> QaulResult<()> {
-        let (id, key) = self.user_authenticate(user)?;
-
-        self.keys.lock().unwrap().remove(&key);
-
-        Ok(())
+        let (id, token) = self.user_authenticate(user)?;
+        self.auth.logout(&id, &token)
     }
 }
