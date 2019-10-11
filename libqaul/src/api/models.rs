@@ -23,22 +23,24 @@ pub enum QaulError {
     CallbackTimeout,
 }
 
-/// A security token to authenticate sessions
-#[derive(Clone, PartialEq, Eq)]
-pub struct Token(String);
+// /// A security token to authenticate sessions
+// #[derive(Clone, PartialEq, Eq)]
+// pub struct Token(String);
 
-impl Debug for Token {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "<TOKEN>")
-    }
-}
+// impl Debug for Token {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+//         write!(f, "<TOKEN>")
+//     }
+// }
 
-impl From<String> for Token {
-    fn from(s: String) -> Self {
-        assert!(s.len() == 64);
-        Token(s)
-    }
-}
+// impl From<String> for Token {
+//     fn from(s: String) -> Self {
+//         assert!(s.len() == 64);
+//         Token(s)
+//     }
+// }
+
+pub type Token = String;
 
 /// A wrapper around user authentication state
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -46,12 +48,12 @@ pub enum UserAuth {
     /// A user ID which has not been verified
     Untrusted(Identity),
     /// The user ID of the currently logged-in user
-    Trusted(Identity, String),
+    Trusted(Identity, Token),
 }
 
 impl UserAuth {
     /// Returns an error if the UserAuth isn't Trusted.
-    pub fn trusted(self) -> QaulResult<(Identity, String)> {
+    pub fn trusted(self) -> QaulResult<(Identity, Token)> {
         match self {
             UserAuth::Trusted(id, s) => Ok((id, s)),
             UserAuth::Untrusted(_) => Err(QaulError::NotAuthorised),

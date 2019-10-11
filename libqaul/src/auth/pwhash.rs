@@ -7,9 +7,6 @@ use blake2::{Blake2b, Digest as _};
 use rand::prelude::*;
 use std::fmt::{self, Debug, Formatter, Result};
 
-/// Handles all authentication state
-pub(crate) struct Authenticator {}
-
 /// A wrapper around a salted password hash
 pub(crate) struct PwHash {
     hash: Vec<u8>,
@@ -74,5 +71,3 @@ mod test {
         assert!(pwhash.matches_with("horsecarbatterystaple"));
     }
 }
-
-impl Authenticator {}
