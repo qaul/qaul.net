@@ -28,7 +28,7 @@ pub trait Endpoint {
 
     /// Setup a listener that will call a function on a structure that was received from
     /// the network.
-    fn listen<F: 'static>(&mut self, handler: F) -> NetResult<()>
+    fn listen<F: 'static, R>(&mut self, handler: F) -> NetResult<R>
     where
-        F: FnMut(Frame) -> NetResult<()>;
+        F: FnMut(Frame) -> NetResult<R>;
 }

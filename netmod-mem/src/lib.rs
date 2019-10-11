@@ -103,7 +103,7 @@ impl Endpoint for MemMod {
 
     /// Block until the next message is received from a specific sender, then call the given
     /// callback and return the result.
-    fn listen<F: 'static>(&mut self, mut handler: F) -> NetResult<()> where F:FnMut(Frame) -> NetResult<()> {
+    fn listen<F: 'static, R>(&mut self, mut handler: F) -> NetResult<R> where F:FnMut(Frame) -> NetResult<R> {
         match &mut *self.io.write().expect("RWLock poisoned") {
             None => Err(NetError::OperationNotSupported),
             Some(ref mut  io) => {
