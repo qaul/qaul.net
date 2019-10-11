@@ -8,13 +8,15 @@ use iron::{
 use lazy_static::lazy_static;
 use mount::Mount;
 
-mod auth;
-use auth::Authenticator;
-pub use auth::CurrentUser;
+mod authenticator;
+use authenticator::Authenticator;
+pub use authenticator::CurrentUser;
 
 pub mod core;
 
 pub mod models;
+pub mod error;
+pub mod endpoints;
 
 mod method;
 pub use method::MethodGaurd;
@@ -41,12 +43,12 @@ impl ApiServer {
     pub fn new<A: ToSocketAddrs>(qaul: &Qaul, addr: A) -> HttpResult<Self> {
         let mut mount = Mount::new();
 
-        let mut login_chain = Chain::new(auth::login);
+        let mut login_chain = Chain::new(endpoints::login);
         login_chain.link_before(MethodGaurd::post());
         login_chain.link_before(JsonApiGaurd);
         mount.mount("/api/login", login_chain);
 
-        let mut logout_chain = Chain::new(auth::logout);
+        let mut logout_chain = Chain::new(endpoints::logout);
         logout_chain.link_before(MethodGaurd::get());
         mount.mount("/api/logout", logout_chain);
 
