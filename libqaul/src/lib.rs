@@ -46,6 +46,7 @@ mod crypto;
 mod qaul;
 mod storage;
 mod users;
+mod utils;
 
 pub use identity::Identity;
 pub use qaul::Qaul;

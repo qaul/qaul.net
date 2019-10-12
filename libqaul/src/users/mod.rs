@@ -1,11 +1,9 @@
 //! User storage
 
-use identity::Identity;
-use rand::prelude::*;
-use std::collections::{BTreeMap, BTreeSet};
-
-mod store;
-mod profile;
 mod contacts;
+mod profile;
+mod store;
 
-pub use profile::*;
+pub(crate) use contacts::{ContactData, ContactList, ContactStore};
+pub use profile::{UserProfile, UserUpdate};
+pub(crate) use store::{User, UserStore};
