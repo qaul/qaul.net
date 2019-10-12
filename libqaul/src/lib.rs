@@ -38,6 +38,8 @@
 //! point. This initialisation option is available before starting
 //! network bindings.
 
+#![allow(warnings)]
+
 mod api;
 mod auth;
 mod crypto;
@@ -45,9 +47,9 @@ mod qaul;
 mod storage;
 mod users;
 
-pub use api::*;
 pub use identity::Identity;
 pub use qaul::Qaul;
-pub use users::{ContactBook, ContactUpdate, LocalContactData, User, UserData, UserUpdate};
 
+pub use api::*;
 pub use storage::*;
+pub use users::*;

@@ -1,6 +1,6 @@
 //! General database storage abstraction
 
-use crate::{QaulResult, User};
+use crate::{QaulResult, UserProfile};
 use alexandria::{Address, Data, Delta, KeyAttr, Library, ScopeAttr};
 use std::sync::Arc;
 

@@ -1,5 +1,5 @@
 use identity::Identity;
-use crate::{User, ContactBook, auth::AuthStore};
+use crate::{UserProfile, auth::AuthStore};
 
 use std::{
     collections::BTreeMap,
@@ -32,12 +32,12 @@ use std::{
 /// 4. Your application is now ready for use
 #[derive(Clone)]
 pub struct Qaul {
-    pub(crate) users: Arc<Mutex<BTreeMap<Identity, User>>>,
+    pub(crate) users: Arc<Mutex<BTreeMap<Identity, UserProfile>>>,
 
     /// Handles user tokens and pw hashes
     pub(crate) auth: AuthStore,
     
-    pub(crate) contacts: Arc<Mutex<BTreeMap<Identity, ContactBook>>>,
+    // pub(crate) contacts: Arc<Mutex<BTreeMap<Identity, ContactBook>>>,
 }
 
 impl Qaul {
@@ -45,7 +45,7 @@ impl Qaul {
         Self {
             users: Arc::new(Mutex::new(BTreeMap::new())),
             auth: AuthStore::new(),
-            contacts: Arc::new(Mutex::new(BTreeMap::new())),
+            // contacts: Arc::new(Mutex::new(BTreeMap::new())),
         }
     }
 }
