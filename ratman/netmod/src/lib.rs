@@ -15,6 +15,7 @@ mod payload;
 mod result;
 
 pub use frame::Frame;
+pub use payload::Payload;
 pub use result::{Error as NetError, Result as NetResult};
 
 // A `RATMAN` `netmod` endpoint describes a networking interface

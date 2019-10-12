@@ -46,11 +46,12 @@ pub struct MemMod {
 }
 
 impl MemMod {
-    pub fn new(latency: u8) -> Self {
+    /// Create a new, unpaired `MemMod`.
+    pub fn new() -> Self {
         Self {
             io: RwLock::new(None),
-            latency,
-            bn: 1024 * 64, /* 64kb */
+            latency: 1,
+            bn: std::u32::MAX
         }
     }
 
@@ -63,13 +64,13 @@ impl MemMod {
     ///
     /// # Panics
     /// Panics if this MemMod, or the other one, is already linked.
-    pub fn link(&self, pair: &MemMod) {
+    pub fn link(&mut self, pair: &mut MemMod) {
         if self.linked() || pair.linked() {
             panic!("Attempted to link an already linked MemMod.");
         }
         let (my_io, their_io) = Io::make_pair();
-        *self.io.write().expect("RWLock poisoned") = Some(my_io);
-        *pair.io.write().expect("RWLock poisoned") = Some(their_io);
+        *self.io.get_mut().expect("RWLock poisoned") = Some(my_io);
+        *pair.io.get_mut().expect("RWLock poisoned") = Some(their_io);
     }
 
     /// Remove the connection between MemMods.
@@ -104,7 +105,7 @@ impl Endpoint for MemMod {
     /// Block until the next message is received from a specific sender, then call the given
     /// callback and return the result.
     fn listen<F: 'static, R>(&mut self, mut handler: F) -> NetResult<R> where F:FnMut(Frame) -> NetResult<R> {
-        match &mut *self.io.write().expect("RWLock poisoned") {
+        match &mut *self.io.get_mut().expect("RWLock poisoned") {
             None => Err(NetError::OperationNotSupported),
             Some(ref mut  io) => {
                 match io.inc.recv() {
