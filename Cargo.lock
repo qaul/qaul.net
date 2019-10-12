@@ -735,14 +735,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "service-sim"
-version = "0.1.0"
-dependencies = [
- "libqaul 0.1.0",
- "visn 0.1.0",
-]
-
-[[package]]
 name = "siphasher"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

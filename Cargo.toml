@@ -20,8 +20,8 @@ members = [
     "ratman/identity",
     "ratman/netmod",
 
-    # Simulator and testing frameworks
-    "service-sim",
+    # A high-level network simulator
+    # "service-sim",
     "visn",
     "permute",
 
