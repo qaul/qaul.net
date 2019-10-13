@@ -31,18 +31,44 @@
 //! You will have received a copy of this license
 //! with the source code of this project.
 
-pub const ID_LEN: usize = 12;
+use std::fmt::{self, Debug, Display, Formatter};
+pub const ID_LEN: usize = 16;
 
 /// A RATMAN identity
-#[derive(Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialOrd, Ord, PartialEq, Eq)]
 pub struct Identity([u8; ID_LEN]);
 
+impl Debug for Identity {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "<ID: {}>", hex::encode_upper(self))
+    }
+}
+
+impl Display for Identity {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let s = hex::encode_upper(self);
+        let mut v = s
+            .as_bytes()
+            .chunks(4)
+            .map(std::str::from_utf8)
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap()
+            .join(" ");
+        v.insert(20, ' ');
+        write!(f, "{}", v)
+    }
+}
+
 impl Identity {
-    /// Create an identity from the first 12 bytes of a vector
+    /// Create an identity from the first 16 bytes of a vector
+    ///
+    /// This function will panic, if the provided vector isn't long enough
     pub fn truncate<'vec, V: Into<&'vec Vec<u8>>>(vec: V) -> Self {
+        let vec = vec.into();
+        assert!(vec.len() >= 16);
+
         Self(
-            vec.into()
-                .into_iter()
+            vec.into_iter()
                 .zip(0..)
                 .take(ID_LEN)
                 .fold([0; ID_LEN], |mut buf, (u, i)| {
@@ -60,7 +86,14 @@ impl Identity {
     /// This process can cause collisions!
     #[cfg(feature = "digest")]
     pub fn with_digest<'vec, V: Into<&'vec Vec<u8>>>(vec: V) -> Self {
-        unimplemented!()
+        use blake2::{
+            digest::{Input, VariableOutput},
+            VarBlake2b,
+        };
+
+        let mut hasher = VarBlake2b::new(ID_LEN).unwrap();
+        hasher.input(vec.into());
+        Self::truncate(&hasher.vec_result())
     }
 }
 
@@ -78,14 +111,14 @@ impl From<&[u8; ID_LEN]> for Identity {
     }
 }
 
-/// Implement binary array `From` RAW 
+/// Implement binary array `From` RAW
 impl From<Identity> for [u8; ID_LEN] {
     fn from(i: Identity) -> Self {
         i.0
     }
 }
 
-/// Implement binary array `From` RAW reference 
+/// Implement binary array `From` RAW reference
 impl From<&Identity> for [u8; ID_LEN] {
     fn from(i: &Identity) -> Self {
         i.0.clone()

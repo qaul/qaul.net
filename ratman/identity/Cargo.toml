@@ -7,7 +7,8 @@ edition = "2018"
 license = "AGPL-3.0"
 
 [features]
-digest = []
+digest = ["blake2"]
 
 [dependencies]
-# sha512 = { version = "*", optional = true }
+blake2 = { version = "0.8.0", optional = true }
+hex = "0.4"
