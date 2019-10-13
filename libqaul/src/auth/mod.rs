@@ -6,9 +6,8 @@
 mod pwhash;
 pub(crate) use pwhash::PwHash;
 
-use crate::{DataStore, Identity, Persisted, QaulError, QaulResult, Token};
+use crate::{utils, DataStore, Identity, Persisted, QaulError, QaulResult, Token};
 use base64::{encode_config, URL_SAFE};
-use rand::prelude::*;
 use std::{
     collections::BTreeMap,
     sync::{Arc, Mutex},
@@ -88,20 +87,9 @@ impl AuthStore {
         Ok(())
     }
 
-    pub(crate) fn random(len: usize) -> Vec<u8> {
-        (0..)
-            .map(|_| rand::thread_rng().next_u64())
-            .take(len)
-            .map(|x| x.to_be_bytes())
-            .fold(Vec::new(), |mut acc, arr| {
-                acc.extend(arr.iter().cloned());
-                acc
-            })
-    }
-
     /// Generate a new base64 encoded token
     fn generate() -> Token {
-        let t = Self::random(32);
+        let t = utils::random(32);
         encode_config(&t, URL_SAFE)
     }
 }
