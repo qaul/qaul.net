@@ -1,4 +1,5 @@
 use crate::{
+    error::GenericError,
     models::GrantType,
     QaulCore,
 };
@@ -62,8 +63,10 @@ impl BeforeMiddleware for Authenticator {
                         .insert::<CurrentUser>(UserAuth::Trusted(*identity, bearer.token.clone()));
                 }
                 None => {
-                    return Err(AuthError::InvalidToken(GrantType::Token).into());
-                }
+                    return Err(GenericError::new("Invalid Login Token".into())
+                        .detail("The authorization header contains a token that is either no longer valid or never was valid".into())
+                        .into());
+                },
             }
         }
 

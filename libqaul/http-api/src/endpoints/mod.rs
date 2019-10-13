@@ -7,5 +7,4 @@ pub (crate) use logout::logout;
 use crate::{
     Authenticator,
     CurrentUser,
-    error::AuthError,
 };

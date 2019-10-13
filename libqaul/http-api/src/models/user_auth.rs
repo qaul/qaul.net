@@ -1,5 +1,8 @@
-use super::ConversionError;
-use base64::{decode_config, encode_config, URL_SAFE};
+use base64::{encode_config, decode_config, URL_SAFE};
+use crate::error::GenericError;
+use serde_derive::{Serialize, Deserialize};
+use japi::{ResourceObject, Attributes};
+use libqaul::Identity;
 use identity::ID_LEN;
 use japi::{Attributes, ResourceObject};
 use libqaul::Identity;
@@ -27,10 +30,18 @@ impl Attributes for UserAuth {
 }
 
 impl UserAuth {
-    pub fn identity(obj: &ResourceObject<UserAuth>) -> Result<Identity, ConversionError> {
-        let raw_id = decode_config(&obj.id, URL_SAFE)?;
+    pub fn identity(obj: &ResourceObject<UserAuth>) -> 
+    Result<Identity, GenericError> {
+        let raw_id = decode_config(&obj.id, URL_SAFE).map_err(|e| {
+            GenericError::new("Invalid Identity".into())
+                .detail(format!("Failed to decode identity, base 64 invalid: {}", e))
+                .pointer("/data/id".into())
+        })?;
         if raw_id.len() != ID_LEN {
-            return Err(ConversionError::BadIdLength(raw_id.len()));
+            return Err(GenericError::new("Invalid Identity".into())
+                .detail(format!("Decoded identity is {} bytes long when it should be {}", 
+                    raw_id.len(), ID_LEN))
+                .pointer("/data/id".into()));
         }
         let id = Identity::truncate(&raw_id);
         Ok(id)

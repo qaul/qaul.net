@@ -1,158 +1,37 @@
-use crate::{
-    models::{ConversionError, GrantType},
-    JSONAPI_MIME,
-};
-use identity::ID_LEN;
-use iron::{status::Status, IronError};
-use japi::{Document, Error, ErrorSource, ObjectConversionError};
-use libqaul::QaulError;
-use std::{
-    error::Error as StdError,
-    fmt::{Display, Formatter, Result},
+use super::{ApiError, Error};
+use iron::{
+    IronError,
+    status::Status,
 };
 
+/// Errors relating to the currently authorized user
 #[derive(Debug)]
-pub(crate) enum AuthError {
-    MultipleData,
-    NoData,
-    ConversionError(ObjectConversionError),
-    NoAttributes,
-    InvalidIdentity(ConversionError),
-    QaulError(QaulError),
+pub enum AuthError {
     NotLoggedIn,
-    InvalidToken(GrantType),
-    DifferingLogins,
-}
-
-impl AuthError {
-    fn detail(&self) -> String {
-        match self {
-            AuthError::MultipleData => {
-                "Multiple data were provided when the endpoint expects exactly one".into()
-            }
-            AuthError::NoData => "Document contains no data".into(),
-            AuthError::ConversionError(e) => format!("Error converting generic object ({})", e),
-            AuthError::NoAttributes => "Object has no attributes".into(),
-            AuthError::InvalidIdentity(e) => format!("Conversion Error ({})", e),
-            AuthError::QaulError(e) => format!("Qaul Error ({:?})", e),
-            AuthError::NotLoggedIn => "Not logged in".into(),
-            AuthError::InvalidToken(g) => match g {
-                GrantType::Cookie => "Invalid cookie",
-                GrantType::Token => "Invalid token",
-            }
-            .into(),
-            AuthError::DifferingLogins => "Both an authorization header and cookie are present, \
-                                           both are valid, but they point to different users"
-                .into(),
-        }
-    }
-
-    fn into_error(&self) -> (Error, Status) {
-        let status = match self {
-            AuthError::QaulError(QaulError::NotAuthorised) => Status::Unauthorized,
-            AuthError::QaulError(QaulError::NoUser) => Status::NotFound,
-            AuthError::QaulError(QaulError::CallbackTimeout) => Status::InternalServerError,
-            AuthError::NotLoggedIn => Status::Unauthorized,
-            _ => Status::BadRequest,
-        };
-
-        let title = match self {
-            AuthError::MultipleData => Some("Multiple Data".into()),
-            AuthError::NoData => Some("No Data".into()),
-            AuthError::ConversionError(_) => Some("Object Error".into()),
-            AuthError::NoAttributes => Some("No Attributes".into()),
-            AuthError::InvalidIdentity(_) => Some("Invalid identity".into()),
-            AuthError::QaulError(QaulError::NotAuthorised) => Some("Not Authorized".into()),
-            AuthError::QaulError(QaulError::NoUser) => Some("Unknown User".into()),
-            AuthError::QaulError(QaulError::InvalidQuery) => Some("Invalid Query".into()),
-            AuthError::QaulError(QaulError::InvalidPayload) => Some("Invalid Payload".into()),
-            AuthError::QaulError(QaulError::CallbackTimeout) => None,
-            AuthError::NotLoggedIn => Some("Not Logged In".into()),
-            AuthError::InvalidToken(GrantType::Cookie) => Some("Invalid Login Cookie".into()),
-            AuthError::InvalidToken(GrantType::Token) => Some("Invalid Login Token".into()),
-            AuthError::DifferingLogins => Some("Differing Logins".into()),
-        };
-
-        let detail = match self {
-            AuthError::ConversionError(ObjectConversionError::ImproperType{ expected, got }) =>
-                Some(format!("Primary data should be of type {} but is of type {} instead",
-                             expected, got)),
-            AuthError::ConversionError(ObjectConversionError::FailedDeserialization(e)) =>
-                Some(format!("Failed to deserialize attributes of primary data: {}", e)),
-            AuthError::InvalidIdentity(ConversionError::Base64Decode(e)) =>
-                Some(format!("Failed to decode identity, base 64 invalid: {}", e)),
-            AuthError::InvalidIdentity(ConversionError::BadIdLength(l)) =>
-                Some(format!("Failed to decode identity, decoded identity is {} bytes long when it should be {}", l, ID_LEN)),
-            AuthError::QaulError(QaulError::NotAuthorised) =>
-                Some("Current user is not authorised to perform this action".into()),
-            AuthError::QaulError(QaulError::NoUser) =>
-                Some("Target user is not known to Qaul".into()),
-            AuthError::QaulError(QaulError::InvalidQuery) => None,
-            AuthError::QaulError(QaulError::InvalidPayload) =>
-                Some("Most likely the payload is too large".into()),
-            AuthError::QaulError(QaulError::CallbackTimeout) => None,
-            AuthError::InvalidToken(GrantType::Cookie) =>
-                Some("The 'bearer' cookie contains a token that is either no long or never was valid".into()),
-            AuthError::InvalidToken(GrantType::Token) =>
-                Some("The Authorization header contains a token that is either no longer or never was valid".into()),
-            _ => Some(self.detail()),
-        };
-
-        let pointer = match self {
-            AuthError::MultipleData => Some("/data".into()),
-            AuthError::NoData => Some("/".into()),
-            AuthError::ConversionError(ObjectConversionError::ImproperType {
-                expected: _,
-                got: _,
-            }) => Some("/data/type".into()),
-            AuthError::ConversionError(ObjectConversionError::FailedDeserialization(_)) => {
-                Some("/data/attributes".into())
-            }
-            AuthError::NoAttributes => Some("/data".into()),
-            AuthError::InvalidIdentity(_) => Some("/data/id".into()),
-            _ => None,
-        };
-
-        (
-            Error {
-                status: Some(format!("{}", status.to_u16())),
-                title,
-                detail,
-                source: pointer.map(|p| ErrorSource {
-                    pointer: Some(p),
-                    ..Default::default()
-                }),
-                ..Default::default()
-            },
-            status,
-        )
-    }
-}
-
-impl StdError for AuthError {}
-
-impl Display for AuthError {
-    fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "Auth Error: {}", self.detail())
-    }
 }
 
 impl From<AuthError> for IronError {
     fn from(e: AuthError) -> IronError {
-        let (err, status) = e.into_error();
+        ApiError::from(e).into()
+    }
+}
 
-        let document = Document {
-            errors: Some(vec![err]),
-            ..Default::default()
-        };
+impl Error for AuthError {
+    fn title(&self) -> String {
+        match self {
+            AuthError::NotLoggedIn => "Not Logged In",
+        }.into()
+    }
 
-        Self::new(
-            e,
-            (
-                status,
-                serde_json::to_string(&document).unwrap(),
-                JSONAPI_MIME.clone(),
-            ),
-        )
+    fn status(&self) -> Status {
+        match self {
+            AuthError::NotLoggedIn => Status::Unauthorized,
+        }
+    }
+
+    fn detail(&self) -> Option<String> {
+        Some(match self {
+            AuthError::NotLoggedIn => "There is no user logged in",
+        }.into())
     }
 }

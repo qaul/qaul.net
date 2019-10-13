@@ -1,4 +1,4 @@
-use crate::JSONAPI_MIME;
+use crate::{JSONAPI_MIME, error::JsonApiError};
 use iron::{
     error::IronError,
     headers::{Accept, ContentType, QualityItem},
@@ -8,107 +8,15 @@ use iron::{
     status::Status,
     typemap, BeforeMiddleware,
 };
-use japi::{Document, Error, Link, Links};
-use serde_json;
-use std::{
-    error, fmt,
-    io::{self, Read},
+use japi::{
+    Document,
+    Error,
+    Links,
+    Link,
+    OptionalVec
 };
-
-#[derive(Debug)]
-enum JsonApiError {
-    MediaTypeParameters,
-    NoAcceptableType,
-    SerdeError(serde_json::Error),
-    IoError(io::Error),
-    NoDocument,
-}
-
-impl JsonApiError {
-    fn reason(&self) -> String {
-        match self {
-            JsonApiError::MediaTypeParameters => "Content type had media type parameters in violation of https://jsonapi.org/format/#content-negotiation-servers".into(),
-            JsonApiError::NoAcceptableType => "Accept header had JSON:API media type but all instances included parameters in violation of https://jsonapi.org/format/#content-negotiation-servers".into(),
-            JsonApiError::SerdeError(e) => format!("Error deserializing document ({})", e),
-            JsonApiError::IoError(e) => format!("IO Error while parsing body ({})", e),
-            JsonApiError::NoDocument => "No document found, probably due to the content type specifiying there isn't one".into(),
-        }
-    }
-}
-
-impl fmt::Display for JsonApiError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Json Api Error: {}", self.reason())
-    }
-}
-
-impl From<JsonApiError> for IronError {
-    fn from(e: JsonApiError) -> Self {
-        let about_link = match e {
-            JsonApiError::MediaTypeParameters => {
-                Some("https://jsonapi.org/format/#content-negotiation-servers")
-            }
-            JsonApiError::NoAcceptableType => {
-                Some("https://jsonapi.org/format/#content-negotiation-servers")
-            }
-            JsonApiError::NoDocument => {
-                Some("https://jsonapi.org/format/#content-negotiation-clients")
-            }
-            _ => None,
-        };
-        let links = if let Some(url) = about_link {
-            let mut links = Links::new();
-            links.insert("about".into(), Link::Url(url.into()));
-            Some(links)
-        } else {
-            None
-        };
-
-        let status = match e {
-            JsonApiError::MediaTypeParameters => Status::UnsupportedMediaType,
-            JsonApiError::NoAcceptableType => Status::NotAcceptable,
-            JsonApiError::SerdeError(_) => Status::BadRequest,
-            JsonApiError::IoError(_) => Status::InternalServerError,
-            JsonApiError::NoDocument => Status::BadRequest,
-        };
-
-        let title = match e {
-            JsonApiError::MediaTypeParameters => Some("Invalid Media Type Parameters".into()),
-            JsonApiError::NoAcceptableType => Some("No Acceptable Type".into()),
-            JsonApiError::SerdeError(_) => Some("Deserialization Error".into()),
-            JsonApiError::IoError(_) => None,
-            JsonApiError::NoDocument => Some("No Document".into()),
-        };
-
-        let detail = match e {
-            JsonApiError::IoError(_) => None,
-            JsonApiError::NoDocument => Some("The content type indicates this is not a JSON:API request and this endpoint only supports JSON:API requests.".into()),
-            _ => Some(e.reason()),
-        };
-
-        let doc = Document {
-            errors: Some(vec![Error {
-                links: links,
-                status: Some(format!("{}", status.to_u16())),
-                title,
-                detail,
-                ..Default::default()
-            }]),
-            ..Default::default()
-        };
-
-        Self::new(
-            e,
-            (
-                serde_json::to_string(&doc).unwrap(),
-                status,
-                Header(ContentType(JSONAPI_MIME.clone())),
-            ),
-        )
-    }
-}
-
-impl error::Error for JsonApiError {}
+use std::io::Read;
+use serde_json;
 
 /// Use this key to get the request's `Document`
 ///
@@ -286,6 +194,7 @@ mod test {
         RequestBuilder::default_post()
             .set_header(ContentType(invalid_media_type()))
             .request(|mut req| {
+<<<<<<< HEAD
                 let err = match JsonApi.before(&mut req) {
                     Ok(_) => panic!("Request completed successfully"),
                     Err(e) => e.error,
@@ -294,6 +203,9 @@ mod test {
                     err.to_string(),
                     JsonApiError::MediaTypeParameters.to_string()
                 );
+=======
+                assert!(JsonApi.before(&mut req).is_err());
+>>>>>>> 042a151... refactor errors
             });
     }
 
@@ -315,11 +227,7 @@ mod test {
 
         // should fail due to all acceptable types having media type parameters
         rb.request(|mut req| {
-            let err = match JsonApi.before(&mut req) {
-                Ok(_) => panic!("Request completed successfully"),
-                Err(e) => e.error,
-            };
-            assert_eq!(err.to_string(), JsonApiError::NoAcceptableType.to_string());
+            assert!(JsonApi.before(&mut req).is_err());
         });
 
         accept.push(qitem(JSONAPI_MIME.clone()));
@@ -337,16 +245,7 @@ mod test {
             .set_string("{\"data\": 1}".into())
             .set_header(ContentType(JSONAPI_MIME.clone()))
             .request(|mut req| {
-                let err = match JsonApi.before(&mut req) {
-                    Ok(_) => panic!("Request completed successfully"),
-                    Err(e) => e.error,
-                };
-                // fragile, but not sure there's a better way
-                assert_eq!(
-                    err.to_string(),
-                    "Json Api Error: \
-                     Error deserializing document (Neither one nor many at line 1 column 11)"
-                );
+                assert!(JsonApi.before(&mut req).is_err());
             });
     }
 }

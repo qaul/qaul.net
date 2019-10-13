@@ -1,6 +1,7 @@
 use super::{AuthError, Authenticator};
 use crate::{
     JsonApi,
+    error::{DocumentError, QaulError},
     models::{
         UserAuth,
         UserGrant,
@@ -13,41 +14,35 @@ use crate::{
 use chrono::{ DateTime, offset::Utc };
 use libqaul::UserAuth as QaulUserAuth;
 use std::convert::TryInto;
+use super::{
+    Authenticator,
+    CurrentUser,
+};
 
 pub fn login(req: &mut Request) -> IronResult<Response> {
     // data should contain exactly one object
     let data = match &req.extensions.get::<JsonApi>().unwrap().data {
         OptionalVec::One(Some(d)) => d,
-        OptionalVec::Many(_) => {
-            return Err(AuthError::MultipleData.into());
-        }
+        OptionalVec::Many(_) => { 
+            return Err(DocumentError::MultipleData.into());
+        },
         _ => {
-            return Err(AuthError::NoData.into());
-        }
+            return Err(DocumentError::NoData.into());
+        },
     };
 
     // try to decode the payload
-    let ua: ResourceObject<UserAuth> = match data.try_into() {
-        Ok(ua) => ua,
-        Err(e) => {
-            return Err(AuthError::ConversionError(e).into());
-        }
-    };
+    let ua: ResourceObject<UserAuth> = data.try_into().map_err(|e| DocumentError::from(e))?;
 
     // is the identity valid
-    let identity = match UserAuth::identity(&ua) {
-        Ok(id) => id,
-        Err(e) => {
-            return Err(AuthError::InvalidIdentity(e).into());
-        }
-    };
+    let identity = UserAuth::identity(&ua)?;
 
     // is there a secret (there has to be a secret!)
     let attr = match ua.attributes {
         Some(s) => s,
-        None => {
-            return Err(AuthError::NoAttributes.into());
-        }
+        None => { 
+            return Err(DocumentError::no_attributes("/data/attributes".into()).into());
+        },
     };
 
     let secret = attr.secret;
@@ -62,8 +57,8 @@ pub fn login(req: &mut Request) -> IronResult<Response> {
             unreachable!();
         }
         Err(e) => {
-            return Err(AuthError::QaulError(e).into());
-        }
+            return Err(QaulError::from(e).into());
+        },
     };
 
     // register the token with the authenticator

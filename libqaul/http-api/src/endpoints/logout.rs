@@ -3,7 +3,21 @@ use crate::{
     JSONAPI_MIME,
     models::Success,
 };
+use crate::error::{QaulError, GenericError, AuthError};
 use libqaul::UserAuth;
+use iron::{
+    prelude::*,
+    status::Status,
+};
+use japi::{
+    Document,
+    OptionalVec,
+};
+use std::convert::TryInto;
+use super::{
+    Authenticator,
+    CurrentUser
+};
 
 pub fn logout(req: &mut Request) -> IronResult<Response> {
     // we can't log out until we know who we are
@@ -16,9 +30,9 @@ pub fn logout(req: &mut Request) -> IronResult<Response> {
 
     // log us out
     let qaul = req.extensions.get::<QaulCore>().unwrap();
-    if let Err(e) = qaul.user_logout(UserAuth::Trusted(identity.clone(), token.clone())) {
-        return Err(AuthError::QaulError(e).into());
-    }
+    qaul.user_logout(UserAuth::Trusted(identity.clone(), token.clone())).map_err(|e| {
+        QaulError::from(e)
+    })?;
 
     // tell the authenticator we've logged out
     {

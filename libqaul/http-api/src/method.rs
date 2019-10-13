@@ -1,92 +1,9 @@
-use crate::JSONAPI_MIME;
-use iron::{method::Method, middleware::BeforeMiddleware, prelude::*, status::Status};
-use japi::{Document, Error};
-use std::{
-    error::Error as StdError,
-    fmt::{Display, Formatter, Result},
+use crate::error::MethodError;
+use iron::{
+    prelude::*,
+    method::Method,
+    middleware::BeforeMiddleware,
 };
-
-#[derive(Debug)]
-struct MethodGaurdError {
-    expected: Vec<Method>,
-    got: Method,
-}
-
-impl MethodGaurdError {
-    fn into_error(&self) -> (Error, Status) {
-        let status = Status::MethodNotAllowed;
-        let title = Some("Method Not Allowed".into());
-
-        let mut method_string = String::new();
-        for (i, method) in self.expected.iter().enumerate() {
-            if i != 0 {
-                method_string.push(',');
-                method_string.push(' ');
-            }
-
-            method_string.push_str(match method {
-                Method::Options => "Options",
-                Method::Get => "Get",
-                Method::Post => "Post",
-                Method::Put => "Put",
-                Method::Delete => "Delete",
-                Method::Head => "Head",
-                Method::Trace => "Trace",
-                Method::Connect => "Connect",
-                Method::Patch => "Patch",
-                Method::Extension(s) => &s,
-            });
-        }
-
-        let detail = Some(format!(
-            "Request method was {} but endpoint only supports {}",
-            self.got, method_string
-        ));
-
-        (
-            Error {
-                status: Some(format!("{}", status.to_u16())),
-                title,
-                detail,
-                ..Default::default()
-            },
-            status,
-        )
-    }
-}
-
-impl Display for MethodGaurdError {
-    fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(
-            f,
-            "Method Gaurd Error: expected {:?}, got {}",
-            &self.expected[..],
-            self.got
-        )
-    }
-}
-
-impl StdError for MethodGaurdError {}
-
-impl From<MethodGaurdError> for IronError {
-    fn from(e: MethodGaurdError) -> IronError {
-        let (err, status) = e.into_error();
-
-        let document = Document {
-            errors: Some(vec![err]),
-            ..Default::default()
-        };
-
-        Self::new(
-            e,
-            (
-                status,
-                serde_json::to_string(&document).unwrap(),
-                JSONAPI_MIME.clone(),
-            ),
-        )
-    }
-}
 
 /// Aborts requests made with incorrect methods
 ///
@@ -165,11 +82,7 @@ impl BeforeMiddleware for MethodGaurd {
         {
             Ok(())
         } else {
-            Err(MethodGaurdError {
-                got: req.method.clone(),
-                expected: self.methods.clone(),
-            }
-            .into())
+            Err(MethodError{ got: req.method.clone(), expected: self.methods.clone() }.into())
         }
     }
 }
