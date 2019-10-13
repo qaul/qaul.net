@@ -12,7 +12,7 @@ use std::{
 };
 
 /// Wraps around user-local contact books
-#[derive(Default, Debug)]
+#[derive(Clone, Debug, Default)]
 pub(crate) struct ContactStore {
     inner: Arc<Mutex<BTreeMap<Identity, ContactList>>>,
 }
@@ -20,9 +20,17 @@ pub(crate) struct ContactStore {
 /// A collection of contacts associated with their local-only data.
 pub(crate) type ContactList = BTreeMap<Identity, ContactData>;
 
+/// Query structure to find contacts by
+pub enum ContactQuery<'a> {
+    /// A fuzzy nickname search
+    Nick(&'a str),
+    /// A fuzzy trust level search
+    Trust { val: i8, fuz: i8 },
+}
+
 /// Data about a contact that is relevant only from a single user's perspective.
 #[derive(Default, Debug)]
-pub(crate) struct ContactData {
+pub struct ContactData {
     /// The name by which the associated contact is known by the owning user.
     nick: Option<String>,
     /// Set a user trust level
@@ -47,5 +55,30 @@ impl ContactStore {
             .unwrap();
         modify(contact);
         Ok(())
+    }
+
+    pub(crate) fn query(&self, id: &Identity, query: ContactQuery) -> QaulResult<Vec<Identity>> {
+        let mut inner = self.inner.lock().expect("Failed to lock ContactStore");
+        Ok(inner
+            .get(id)
+            .map_or(Err(QaulError::UnknownUser), |x| Ok(x))?
+            .iter()
+            .filter(|(_, con)| match query {
+                ContactQuery::Nick(nick) if con.nick.is_none() => false,
+                ContactQuery::Nick(nick) => con.nick.as_ref().unwrap().contains(nick),
+                ContactQuery::Trust { val, fuz } => con.trust + fuz < val || con.trust - fuz > val,
+            })
+            .map(|(id, _)| id.clone())
+            .collect())
+    }
+
+    pub(crate) fn get_all(&self, id: &Identity) -> QaulResult<Vec<Identity>> {
+        let mut inner = self.inner.lock().expect("Failed to lock ContactStore");
+        Ok(inner
+            .get(id)
+            .map_or(Err(QaulError::UnknownUser), |x| Ok(x))?
+            .iter()
+            .map(|(id, _)| id.clone())
+            .collect())
     }
 }

@@ -4,6 +4,11 @@ mod contacts;
 mod profile;
 mod store;
 
-pub(crate) use contacts::{ContactData, ContactList, ContactStore};
-pub use profile::{UserProfile, UserUpdate};
-pub(crate) use store::{User, UserStore};
+pub(crate) use {
+    contacts::{ContactList, ContactStore},
+    store::{User, UserStore},
+};
+pub use {
+    contacts::{ContactData, ContactQuery},
+    profile::{UserProfile, UserUpdate},
+};

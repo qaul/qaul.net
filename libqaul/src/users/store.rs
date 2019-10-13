@@ -12,10 +12,20 @@ pub(crate) enum User {
     Remote(UserProfile),
 }
 
+impl User {
+    pub(crate) fn id(&self) -> &Identity {
+        match self {
+            User::Local(ref u) => &u.id,
+            User::Remote(ref u) => &u.id,
+        }
+    }
+}
+
 /// User store responsible for tracking local and remote users
 ///
 /// Also provides some facilities to create and delete local users,
 /// providing persistent state for `Qaul`.
+#[derive(Clone)]
 pub(crate) struct UserStore {
     inner: Arc<Mutex<BTreeMap<Identity, User>>>,
 }
@@ -57,6 +67,20 @@ impl UserStore {
             },
         );
         Ok(())
+    }
+
+    pub(crate) fn get(&self, id: &Identity) -> QaulResult<UserProfile> {
+        self.inner
+            .lock()
+            .expect("Failed to lock UserStore")
+            .get(id)
+            .map_or(Err(QaulError::UnknownUser), |x| {
+                Ok(match x {
+                    User::Local(ref u) => u,
+                    User::Remote(ref u) => u,
+                }
+                .clone())
+            })
     }
 
     /// Get all locally available users

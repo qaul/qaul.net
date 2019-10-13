@@ -1,5 +1,10 @@
-use identity::Identity;
-use crate::{UserProfile, auth::AuthStore};
+//! Central qaul state holder module
+
+use crate::{
+    auth::AuthStore,
+    users::{ContactStore, UserProfile, UserStore},
+    Identity,
+};
 
 use std::{
     collections::BTreeMap,
@@ -32,20 +37,22 @@ use std::{
 /// 4. Your application is now ready for use
 #[derive(Clone)]
 pub struct Qaul {
-    pub(crate) users: Arc<Mutex<BTreeMap<Identity, UserProfile>>>,
+    /// Store available user profile data
+    pub(crate) users: UserStore,
 
     /// Handles user tokens and pw hashes
     pub(crate) auth: AuthStore,
-    
-    // pub(crate) contacts: Arc<Mutex<BTreeMap<Identity, ContactBook>>>,
+
+    /// Handles user-local contact books
+    pub(crate) contacts: ContactStore,
 }
 
 impl Qaul {
     pub fn start() -> Self {
         Self {
-            users: Arc::new(Mutex::new(BTreeMap::new())),
+            users: UserStore::new(),
             auth: AuthStore::new(),
-            // contacts: Arc::new(Mutex::new(BTreeMap::new())),
+            contacts: ContactStore::default(),
         }
     }
 }
