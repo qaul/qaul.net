@@ -6,13 +6,16 @@ use iron::{
     typemap, Listening,
 };
 use lazy_static::lazy_static;
-use mount::Mount;
+use router::Router;
+use std::{
+    net::ToSocketAddrs,
+    sync::Arc,
+};
+use libqaul::Qaul;
 
 mod authenticator;
 use authenticator::Authenticator;
 pub use authenticator::CurrentUser;
-
-pub mod core;
 
 pub mod models;
 pub mod error;
@@ -41,20 +44,12 @@ pub struct ApiServer {
 
 impl ApiServer {
     pub fn new<A: ToSocketAddrs>(qaul: &Qaul, addr: A) -> HttpResult<Self> {
-        let mut mount = Mount::new();
+        let mut router = Router::new();
+        endpoints::route(&mut router);
 
-        let mut login_chain = Chain::new(endpoints::login);
-        login_chain.link_before(MethodGaurd::post());
-        login_chain.link_before(JsonApiGaurd);
-        mount.mount("/api/login", login_chain);
-
-        let mut logout_chain = Chain::new(endpoints::logout);
-        logout_chain.link_before(MethodGaurd::get());
-        mount.mount("/api/logout", logout_chain);
-
-        let mut chain = Chain::new(mount);
-        chain.link_before(QaulCore::new(qaul)); 
-        chain.link_before(jsonapi::JsonApi); 
+        let mut chain = Chain::new(router);
+        chain.link_before(QaulCore::new(qaul));
+        chain.link_before(JsonApi);
 
         let authenticator = Authenticator::new();
         chain.link_before(authenticator.clone());

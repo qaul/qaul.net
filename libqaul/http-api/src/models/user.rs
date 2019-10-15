@@ -1,76 +1,100 @@
-use super::ConversionError;
-use base64::{decode_config, encode_config, URL_SAFE};
-use identity::ID_LEN;
-use japi::{Attributes, ResourceObject};
-use libqaul::{Identity, User, UserData};
+use crate::error::{GenericError, DocumentError, ApiError};
+use base64::{encode_config, decode_config, URL_SAFE};
+use japi::{Attributes, ResourceObject, Relationships, Relationship, OptionalVec, 
+    Identifier, Links, Link};
 use serde_derive::{Deserialize, Serialize};
-use std::collections::{BTreeMap, BTreeSet};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    convert::TryFrom,
+};
+use libqaul::{Identity, UserProfile};
+use super::{from_identity, into_identity};
 
-/// An entity dual for `libqaul::User`
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct UserEntity {
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+pub struct User {
     #[serde(skip_serializing_if = "Option::is_none")]
-    display_name: Option<String>,
+    pub display_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    real_name: Option<String>,
-    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
-    bio: BTreeMap<String, String>,
+    pub real_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    services: Option<BTreeSet<String>>,
+    pub bio: Option<BTreeMap<String, String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    avatar: Option<String>,
+    pub services: Option<BTreeSet<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub avatar: Option<String>,
 }
 
-impl Attributes for UserEntity {
+impl Attributes for User {
     fn kind() -> String {
         "user".into()
     }
 }
 
-impl UserEntity {
-    pub fn from_service_user(user: User) -> ResourceObject<UserEntity> {
-        let id = encode_config(user.id.as_ref(), URL_SAFE);
-        let avatar = user.data.avatar.map(|a| encode_config(&a, URL_SAFE));
-        let user = UserEntity {
-            display_name: user.data.display_name,
-            real_name: user.data.real_name,
-            bio: user.data.bio,
-            services: Some(user.data.services),
-            avatar,
-        };
-        ResourceObject::new(id, Some(user))
+impl User {
+    pub fn from_service_user(user: UserProfile) -> ResourceObject<User> {
+        let id = from_identity(&user.id);
+        let mut ro = ResourceObject::new(id.clone(), None);
+
+        let mut relationships = Relationships::new();
+        relationships.insert("secret".into(), Relationship {
+            data: OptionalVec::One(Some(Identifier::new(id.clone(), "secret".into()))),
+            ..Default::default()
+        });
+        ro.relationships = Some(relationships);
+
+        let mut links = Links::new();
+        links.insert("self".into(), Link::Url(format!("/api/users/{}", id)));
+        ro.links = Some(links);
+
+        ro
     }
 
-    pub fn into_service_user(user: ResourceObject<UserEntity>) -> Result<User, ConversionError> {
-        let raw_id = decode_config(&user.id, URL_SAFE)?;
-        if raw_id.len() != ID_LEN {
-            return Err(ConversionError::BadIdLength(raw_id.len()));
-        }
-        let id = Identity::truncate(&raw_id);
+    pub fn from_service_user_with_data(service_user: UserProfile) -> ResourceObject<User> {
+        let avatar = service_user.avatar.as_ref().map(|a| encode_config(a, URL_SAFE));
+        let user = User {
+            display_name: service_user.display_name.clone(),
+            real_name: service_user.real_name.clone(),
+            bio: Some(service_user.bio.clone()),
+            services: Some(service_user.services.clone()),
+            avatar,
+        };
+        let mut ro = Self::from_service_user(service_user); 
+        ro.attributes = Some(user);
+        ro
+    }
 
-        Ok(match user.attributes {
-            Some(user) => {
-                let avatar = if let Some(a) = user.avatar {
-                    Some(decode_config(&a, URL_SAFE)?)
-                } else {
-                    None
-                };
-                let services = user.services.unwrap_or_default();
-                User {
-                    id,
-                    data: UserData {
-                        display_name: user.display_name,
-                        real_name: user.real_name,
-                        bio: user.bio,
-                        services,
-                        avatar,
-                    },
-                }
-            }
-            None => User {
-                id,
-                data: Default::default(),
-            },
-        })
+    pub fn identity(ro: &ResourceObject<User>, pointer: &str) 
+    -> Result<Identity, ApiError> {
+        ro.id.as_ref().ok_or(DocumentError::NoId { pointer: Some(format!("{}/id", pointer)) }.into())
+            .and_then(|id| Ok(into_identity(&id)?))
+    }
+
+    pub fn avatar(ro: &ResourceObject<User>, pointer: &str) 
+    -> Result<Option<Vec<u8>>, GenericError> {
+        ro.attributes.as_ref().and_then(|d| d.avatar.as_ref()).map(|a| 
+            decode_config(a, URL_SAFE).map_err(|e| GenericError::new("Invalid Avatar".into())
+                .detail(format!("{}", e))
+                .pointer(format!("{}/attributes/avatar", pointer)))
+        ).transpose()
+    }
+
+    pub fn secret_relationship(ro: &ResourceObject<User>, pointer: &str) 
+    -> Result<Identity, ApiError> {
+        ro.relationships.as_ref().ok_or(DocumentError::NoRelationships { 
+                pointer: Some(format!("{}/relationships", pointer)) }.into())
+            .and_then(|r| r.get("secret")
+                .ok_or(DocumentError::NoRelationship { rel: "secret".into(), pointer: 
+                    Some(format!("{}/relationships/secret", pointer)) }.into()))
+            .and_then(|r| match &r.data {
+                OptionalVec::One(Some(r)) => Ok(r),
+                OptionalVec::Many(_) => Err(DocumentError::MultipleData.into()),
+                _ => Err(DocumentError::NoData.into()),})
+            .and_then(|id| ResourceObject::<User>::try_from(id)
+                .map_err(|e| DocumentError::ConversionError { 
+                    err: e, pointer: Some(format!("{}/relationships/secret", pointer)) }.into()))
+            .and_then(|id| id.id.ok_or(DocumentError::NoId { 
+                pointer: Some(format!("{}/relationships/secret/id", pointer)) }))
+            .map_err(|e| e.into())
+            .and_then(|id| Ok(into_identity(&id)?))
     }
 }

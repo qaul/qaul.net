@@ -1,16 +1,30 @@
-//! JSON:API entity models
-
-mod conversion_error;
-pub use conversion_error::ConversionError;
+mod secret;
+pub use secret::Secret;
 
 mod user;
-pub use user::UserEntity;
+pub use user::User;
 
-mod user_auth;
-pub use user_auth::{GrantType, UserAuth};
+mod grant;
+pub use grant::Grant;
 
-mod user_grant;
-pub use user_grant::UserGrant;
+use crate::error::GenericError;
+use hex::{encode, decode};
+use identity::{Identity, ID_LEN};
 
-mod success;
-pub use success::Success;
+pub fn from_identity(id: &Identity) -> String {
+    encode(id)
+}
+
+pub fn into_identity(s: &str) -> Result<Identity, GenericError> {
+    decode(s).map_err(|e| {
+        GenericError::new("Invalid Identity".into())
+            .detail(format!("{}", e))
+    }).and_then(|i| 
+        if i.len() != ID_LEN { 
+            Err(GenericError::new("Invalid Identity".into())
+                .detail(format!("Invalid length: expected {}, got {}", ID_LEN, i.len())))
+        } else {
+            Ok(Identity::truncate(&i))
+        }
+    )
+}

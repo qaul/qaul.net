@@ -1,10 +1,6 @@
-mod login;
-pub (crate) use login::login;
+mod secret;
 
-mod logout;
-pub (crate) use logout::logout;
-
-use crate::{
-    Authenticator,
-    CurrentUser,
-};
+use router::Router;
+pub fn route(router: &mut Router) {
+    secret::route(router);
+}

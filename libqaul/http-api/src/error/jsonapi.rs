@@ -13,7 +13,6 @@ pub enum JsonApiError {
     NoAcceptableType,
     SerdeError(SerdeError),
     IoError(IoError),
-    NoDocument,
 }
 
 impl From<JsonApiError> for IronError {
@@ -29,7 +28,6 @@ impl Error for JsonApiError {
             JsonApiError::NoAcceptableType => "No Acceptable Type",
             JsonApiError::SerdeError(_) => "Deserialization Error",
             JsonApiError::IoError(_) => "Internal Error",
-            JsonApiError::NoDocument => "No Document",
         }.into()
     }
 
@@ -39,8 +37,6 @@ impl Error for JsonApiError {
                 "https://jsonapi.org/format/#content-negotiation-servers".into()),
             JsonApiError::NoAcceptableType => Some(
                 "https://jsonapi.org/format/#content-negotiation-servers".into()),
-            JsonApiError::NoDocument => Some(
-                "https://jsonapi.org/format/#content-negotiation-clients".into()),
             _ => None,
         }
     }
@@ -51,7 +47,6 @@ impl Error for JsonApiError {
             JsonApiError::NoAcceptableType => Status::NotAcceptable,
             JsonApiError::SerdeError(_) => Status::BadRequest,
             JsonApiError::IoError(_) => Status::InternalServerError,
-            JsonApiError::NoDocument => Status::BadRequest,
         }
     }
 
@@ -62,7 +57,6 @@ impl Error for JsonApiError {
                 Some("Accept header had JSON:API media type but all instances included parameters in violation of https://jsonapi.org/format/#content-negotiation-servers".into()),
             JsonApiError::SerdeError(e) => Some(format!("Error deserializing document ({})", e)),
             JsonApiError::IoError(_) => None,
-            JsonApiError::NoDocument => Some("The content type indicates this is not a JSON:API request and this endpoint only supports JSON:API requests.".into()),
         }
     }
 }

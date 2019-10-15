@@ -1,4 +1,4 @@
-use crate::{JSONAPI_MIME, error::JsonApiError};
+use crate::{JSONAPI_MIME, error::{JsonApiError, DocumentError}};
 use iron::{
     error::IronError,
     headers::{Accept, ContentType, QualityItem},
@@ -130,7 +130,7 @@ impl BeforeMiddleware for JsonApiGaurd {
     fn before(&self, req: &mut Request) -> IronResult<()> {
         match req.extensions.get::<JsonApi>() {
             Some(_) => Ok(()),
-            None => Err(JsonApiError::NoDocument.into()),
+            None => Err(DocumentError::NoDocument.into()),
         }
     }
 }
@@ -194,18 +194,7 @@ mod test {
         RequestBuilder::default_post()
             .set_header(ContentType(invalid_media_type()))
             .request(|mut req| {
-<<<<<<< HEAD
-                let err = match JsonApi.before(&mut req) {
-                    Ok(_) => panic!("Request completed successfully"),
-                    Err(e) => e.error,
-                };
-                assert_eq!(
-                    err.to_string(),
-                    JsonApiError::MediaTypeParameters.to_string()
-                );
-=======
                 assert!(JsonApi.before(&mut req).is_err());
->>>>>>> 042a151... refactor errors
             });
     }
 

@@ -1,6 +1,5 @@
 use crate::{
     error::GenericError,
-    models::GrantType,
     QaulCore,
 };
 use iron::{
@@ -79,15 +78,12 @@ mod test {
     use anneal::RequestBuilder;
     use iron::method::Method;
     use super::*;
-    use crate::cookie::CookieManager;
-    use anneal::RequestBuilder;
-    use cookie::{Cookie, CookieJar};
     use libqaul::Qaul;
 
     fn setup() -> (RequestBuilder, Authenticator, UserAuth, String) {
         let qaul = Qaul::start();
         let user_auth = qaul.user_create("a".into()).unwrap();
-        let (ident, key) = qaul.user_authenticate(user_auth.clone()).unwrap();
+        let (ident, key) = user_auth.clone().trusted().unwrap();
 
         let authenticator = Authenticator::new();
         {
