@@ -12,17 +12,23 @@ pub use crate::{
     data::{Message, Payload, Signature},
     protocol::Protocol,
 };
+pub use netmod;
 
 use crate::core::Core;
+use netmod::Endpoint;
 
 /// A `RATMAN` router context
-#[derive(Clone)]
 pub struct Router {
     core: Core,
 }
 
 impl Router {
     pub fn new() -> Self {
-        Self { core: Core }
+        Self { core: Core::new() }
+    }
+
+    /// Add an `netmod` endpoint to this router
+    pub fn add_ep(&mut self, ep: impl Endpoint + 'static) {
+        self.core.add_if(ep);
     }
 }
