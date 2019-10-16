@@ -6,6 +6,7 @@ pub type Digest = GenericArray<u8, U64>;
 
 /// The actual content of a frame, along with the mechanism to validate that
 /// no transmission errors occurred (message digest of payload type and data).
+#[derive(Debug)]
 pub struct Payload {
     // The length of the data in this payload
     length: u32,

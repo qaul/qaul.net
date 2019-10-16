@@ -4,6 +4,7 @@ use identity::Identity;
 use crate::payload::Payload;
 
 /// A frame represents a single packet sent over a netmod
+#[derive(Debug)]
 pub struct Frame {
     /// Some messages are split across multiple frames
     /// that have sequence numbers so they can be
