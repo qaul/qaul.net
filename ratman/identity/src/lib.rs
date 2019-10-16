@@ -31,11 +31,12 @@
 //! You will have received a copy of this license
 //! with the source code of this project.
 
+use serde::{Deserialize, Serialize};
 use std::fmt::{self, Debug, Display, Formatter};
 pub const ID_LEN: usize = 16;
 
 /// A RATMAN identity
-#[derive(Copy, Clone, PartialOrd, Ord, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Identity([u8; ID_LEN]);
 
 impl Debug for Identity {

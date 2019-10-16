@@ -1,8 +1,18 @@
 //! Data exchange structures for `R.A.T.M.A.N.`
 
+use crate::utils;
 use identity::Identity;
+use serde::{Deserialize, Serialize};
+use std::hash::Hasher;
+use twox_hash::XxHash64;
 
 pub type Signature = u64;
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub enum Recipient {
+    User(Identity),
+    Flood,
+}
 
 /// An atomic message, handed to a `Router` to deliver
 ///
@@ -15,12 +25,12 @@ pub type Signature = u64;
 ///
 /// A `Message` assumes that no transmission errors were made,
 /// because this is guaranteed by the `netmod` `Frame` abstraction!
-#[derive(PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Message {
     /// Sender of a message
     pub sender: Identity,
     /// Final recipient of a message
-    pub recipient: Identity, // TODO: ALL
+    pub recipient: Recipient,
     /// Outside service associative information
     pub associator: String,
     /// Some raw message payload
@@ -30,8 +40,71 @@ pub struct Message {
 }
 
 /// A raw, binary encoded message payload
-#[derive(PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Payload {
     pub length: u64,
     pub data: Vec<u8>,
+}
+
+impl Message {
+    /// Construct a signed message from raw data inputs
+    ///
+    /// The payload structure needs to provide a serializer, which
+    /// allocates to be hashed for the XXHash signature of the
+    /// Message.
+    pub fn build_signed<S, V>(
+        sender: Identity,
+        recipient: Recipient,
+        associator: S,
+        payload: V,
+    ) -> Self
+    where
+        S: Into<String>,
+        V: Serialize,
+    {
+        #[derive(Serialize)]
+        struct SkeletonMsg {
+            sender: Identity,
+            recipient: Recipient,
+            associator: String,
+            payload: Payload,
+        };
+
+        let mut hasher = XxHash64::with_seed(1312);
+        let associator = associator.into();
+
+        let vec = utils::serialise(&payload);
+
+        let payload = Payload {
+            length: vec.len() as u64,
+            data: vec,
+        };
+
+        let teeth_gang = SkeletonMsg {
+            sender,
+            recipient,
+            associator,
+            payload,
+        };
+
+        let vec = utils::serialise(&teeth_gang);
+        hasher.write(&vec);
+        let signature = hasher.finish();
+
+        // Destructure data to move into a new `Message`
+        let SkeletonMsg {
+            sender,
+            recipient,
+            associator,
+            payload,
+        } = teeth_gang;
+
+        Self {
+            sender,
+            recipient,
+            associator,
+            payload,
+            signature,
+        }
+    }
 }

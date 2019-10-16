@@ -11,4 +11,5 @@ digest = ["blake2"]
 
 [dependencies]
 blake2 = { version = "0.8.0", optional = true }
+serde = { version = "1.0.0", features = ["derive"] }
 hex = "0.4"
