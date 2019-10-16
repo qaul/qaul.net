@@ -5,16 +5,24 @@
 
 mod core;
 mod data;
-mod diag;
+mod protocol;
+mod utils;
 
-use crate::core::RoutingCore;
-pub use crate::data::{Message, Payload, Signature};
+pub use crate::{
+    data::{Message, Payload, Signature},
+    protocol::Protocol,
+};
+
+use crate::core::Core;
 
 /// A `RATMAN` router context
-pub struct Router {}
+#[derive(Clone)]
+pub struct Router {
+    core: Core,
+}
 
 impl Router {
-    fn new() -> Self {
-        unimplemented!()
+    pub fn new() -> Self {
+        Self { core: Core }
     }
 }

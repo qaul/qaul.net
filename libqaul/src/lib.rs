@@ -43,6 +43,7 @@
 mod api;
 mod auth;
 mod crypto;
+mod discover;
 mod qaul;
 mod storage;
 mod users;

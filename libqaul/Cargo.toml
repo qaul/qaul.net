@@ -9,6 +9,7 @@ edition = "2018"
 platform = { path = "platform", package = "qaul-platform" }
 identity = { path = "../ratman/identity", package = "ratman-identity", features = ["digest"] }
 alexandria = { git = "https://git.open-communication.net/qaul/alexandria" }
+ratman = { path = "../ratman" }
 
 rand = "0.7"
 base64 = "0.10"

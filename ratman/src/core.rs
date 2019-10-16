@@ -3,8 +3,10 @@
 use identity::Identity;
 use std::collections::HashMap;
 
-pub struct RoutingCore {}
+#[derive(Clone)]
+pub(crate) struct Core;
 
-struct Node {
+#[derive(Clone)]
+pub(crate) struct Node {
     id: Identity,
 }

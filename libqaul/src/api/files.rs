@@ -1,11 +1,10 @@
-
 //! Service API file access
 //!
 //! Not to be confused with the `files` filesharing service. This is
 //! basic fs abstraction access to allow services to store files in a
 //! users namespace.
 
-use super::models::{File, FileMeta, FileFilter, UserAuth};
+use super::models::{File, FileFilter, FileMeta, UserAuth};
 use crate::{Qaul, QaulResult};
 
 impl Qaul {
@@ -13,11 +12,10 @@ impl Qaul {
     ///
     /// Optionally: use the `filter` parameter to exclude certain
     /// types of files, based on the lifecycle in the system.
-    pub fn files_query(
-        user: UserAuth,
-        filter: Option<FileFilter>,
-    ) -> QaulResult<impl Iterator<Item = FileMeta>> {
-        unimplemented!();
+    pub fn files_query<I>(user: UserAuth, filter: Option<FileFilter>) -> QaulResult<F>
+    where
+        I: Iterator<Item = FileMeta>,
+    {
         Ok(vec![].into_iter())
     }
 
