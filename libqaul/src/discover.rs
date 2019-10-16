@@ -9,7 +9,7 @@ use std::{
 #[derive(Clone)]
 pub(crate) struct Discovery {
     router: Option<Arc<Router>>,
-    worker: Option<JoinHandle<()>>,
+    worker: Option<Arc<JoinHandle<()>>>,
 }
 
 impl Discovery {
@@ -27,9 +27,9 @@ impl Discovery {
     pub(crate) fn new(r: Arc<Router>) -> Self {
         Self {
             router: Some(r),
-            worker: thread::spawn(|| {
+            worker: Some(Arc::new(thread::spawn(|| {
                 // Handle incoming `Announce` messages here
-            }),
+            }))),
         }
     }
 }

@@ -12,11 +12,11 @@ impl Qaul {
     ///
     /// Optionally: use the `filter` parameter to exclude certain
     /// types of files, based on the lifecycle in the system.
-    pub fn files_query<I>(user: UserAuth, filter: Option<FileFilter>) -> QaulResult<F>
+    pub fn files_query<I>(user: UserAuth, filter: Option<FileFilter>) -> QaulResult<I>
     where
         I: Iterator<Item = FileMeta>,
     {
-        Ok(vec![].into_iter())
+        unimplemented!()
     }
 
     /// Stream one particular file from storage
