@@ -49,8 +49,8 @@ Documentation is avaliable [here](https://docs.qaul.net).
 
 ## License
 
-qaul.net is free open source software licensed under the 
-[GNU General Public License version 3](licenses/gpl-3.0.md).
+qaul.net is free and open source software licensed under the
+[GNU Affero General Public License version 3](licenses/gpl-3.0.md).
 
 To see all external code's licenses used in this project please 
 visit the [`licenses` directory](licenses).
