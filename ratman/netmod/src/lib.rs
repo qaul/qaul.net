@@ -44,5 +44,5 @@ pub trait Endpoint {
     /// returned from the function for it to process incoming frames.
     ///
     /// For a more "classical" poll function, see `poll` instead
-    fn listen(&mut self, handler: Box<FnMut(Frame) -> NetResult<()>>) -> NetResult<()>;
+    fn listen(&mut self, handler: Box<dyn FnMut(Frame) -> NetResult<()>>) -> NetResult<()>;
 }
