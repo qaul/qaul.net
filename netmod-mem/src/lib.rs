@@ -3,10 +3,9 @@
 //! This aims to make testing any structure that binds against
 //! `netmod` easier and reproducable.
 
-use ratman_identity::Identity;
 use ratman_netmod::{Endpoint, Frame, NetError, NetResult};
 use std::{
-    sync::mpsc::{self, Receiver, Sender},
+    sync::mpsc::{self, Receiver, Sender, TryRecvError},
     sync::RwLock,
 };
 
@@ -100,18 +99,26 @@ impl Endpoint for MemMod {
         match &*self.io.read().expect("RWLock poisoned") {
             None => Err(NetError::OperationNotSupported),
             Some(ref io) => {
-                io.out.send(frame);
-                Ok(())
+                match io.out.send(frame) {
+                    Ok(_) => Ok(()),
+                    Err(_) => Err(NetError::ConnectionLost),
+                }
             }
         }
     }
 
-    /// Block until the next message is received from a specific
-    /// sender, then call the given callback and return the result.
-    fn listen<F: 'static, R>(&mut self, mut handler: F) -> NetResult<R>
-    where
-        F: FnMut(Frame) -> NetResult<R>,
-    {
+    fn poll(&mut self) -> NetResult<Option<Frame>> {
+        match *self.io.get_mut().expect("RWLock poisoned") {
+            None => Err(NetError::OperationNotSupported),
+            Some(ref mut io) => match io.inc.try_recv() {
+                Ok(v) => Ok(Some(v)),
+                Err(TryRecvError::Empty) => Ok(None),
+                Err(_) => Err(NetError::ConnectionLost),
+            },
+        }
+    }
+
+    fn listen(&mut self, mut handler: Box<dyn FnMut(Frame) -> NetResult<()>>) -> NetResult<()> {
         match &mut *self.io.get_mut().expect("RWLock poisoned") {
             None => Err(NetError::OperationNotSupported),
             Some(ref mut io) => match io.inc.recv() {
