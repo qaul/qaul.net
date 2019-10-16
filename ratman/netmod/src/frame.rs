@@ -1,8 +1,8 @@
 //! Networking frames
 
-use crate::SeqId;
+use crate::{SeqId, Sequence};
 use identity::Identity;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Encoded recipient data
 ///
@@ -22,7 +22,7 @@ pub enum Recipient {
 /// Because a `Frame` is usually created in a sequence, the
 /// constructors assume chainable operations, such as a `Vec<Frame>`
 /// can be returned with all sequence ID information correctly setup.
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Frame {
     /// Sender information
     pub sender: Identity,
@@ -32,4 +32,14 @@ pub struct Frame {
     pub seqid: SeqId,
     /// Raw data payload
     pub payload: Vec<u8>,
+}
+
+impl Frame {
+    /// Produce a new dummy frame that sends nonsense data from nowhere to everyone.
+    pub fn dummy() -> Self {
+        Sequence::new(Identity::from([0; 16]), Recipient::Flood)
+            .add(vec![0xDE, 0xAD, 0xBE, 0xEF])
+            .build()
+            .remove(0)
+    }
 }

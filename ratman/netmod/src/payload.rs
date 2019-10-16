@@ -6,14 +6,14 @@ pub type Digest = GenericArray<u8, U64>;
 
 /// The actual content of a frame, along with the mechanism to validate that
 /// no transmission errors occurred (message digest of payload type and data).
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Payload {
     /// The length of the data in this payload
     length: u32,
     /// Message digest used to ensure integrity
     digest: Digest,
     /// The actual data being transmitted
-    data: Vec<u8>
+    data: Vec<u8>,
 }
 
 /// Compute and return the 64-bit Blake2b digest of the given data.

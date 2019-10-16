@@ -23,7 +23,7 @@ pub struct XxSignature {
 /// was transmitted without error.
 ///
 /// Check the `netmod` crate documentation for more details.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SeqId {
     /// A hash signature of the payload
     pub sig: XxSignature,

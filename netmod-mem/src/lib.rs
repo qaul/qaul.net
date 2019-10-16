@@ -3,33 +3,17 @@
 //! This aims to make testing any structure that binds against
 //! `netmod` easier and reproducable.
 
-use netmod::{Endpoint, Frame, Error as NetError, Result as NetResult};
+use ratman_identity::Identity;
+use ratman_netmod::{Endpoint, Error as NetError, Frame, Result as NetResult};
 use std::{
     sync::mpsc::{self, Receiver, Sender, TryRecvError},
     sync::RwLock,
 };
 
-/// A simple I/O wrapper around channels
-struct Io {
-    out: Sender<Frame>,
-    inc: Receiver<Frame>,
-}
-
-impl Io {
-    fn make_pair() -> (Io, Io) {
-        let (a_to_b, b_from_a) = mpsc::channel();
-        let (b_to_a, a_from_b) = mpsc::channel();
-        let a = Io {
-            out: a_to_b,
-            inc: a_from_b,
-        };
-        let b = Io {
-            out: b_to_a,
-            inc: b_from_a,
-        };
-        return (a, b);
-    }
-}
+/// An input/output pair of `mpsc::channel`s.
+pub(crate) mod io;
+/// Simulated transmission media.
+pub mod media;
 
 /// Represent a single netmod endpoint that can connect to exactly one
 /// other
@@ -38,7 +22,7 @@ impl Io {
 /// adjusted in a simulation.
 pub struct MemMod {
     /// Internal memory access to send/receive
-    io: RwLock<Option<Io>>,
+    io: RwLock<Option<io::Io>>,
     /// Apply artificial latency (not implemented, needs async)
     pub latency: u8,
     /// The troughput limit in bytes per second (not implemented, needs async)
@@ -70,9 +54,20 @@ impl MemMod {
         if self.linked() || pair.linked() {
             panic!("Attempted to link an already linked MemMod.");
         }
-        let (my_io, their_io) = Io::make_pair();
+        let (my_io, their_io) = io::Io::make_pair();
         *self.io.get_mut().expect("RWLock poisoned") = Some(my_io);
         *pair.io.get_mut().expect("RWLock poisoned") = Some(their_io);
+    }
+
+    /// Establish a link to an `Io` module
+    ///
+    /// # Panics
+    /// Panics if this MemMod is already linked.
+    pub(crate) fn link_raw(&mut self, io: io::Io) {
+        if self.linked() {
+            panic!("Attempted to link an already linked MemMod.");
+        }
+        *self.io.get_mut().expect("RWLock poisoned") = Some(io);
     }
 
     /// Remove the connection between MemMods.
@@ -98,13 +93,10 @@ impl Endpoint for MemMod {
     fn send(&mut self, frame: Frame) -> NetResult<()> {
         match &*self.io.read().expect("RWLock poisoned") {
             None => Err(NetError::NotSupported),
-            Some(ref io) => {
-                dbg!("Endpoint delivery START");
-                match io.out.send(frame) {
-                    Ok(_) => Ok(()),
-                    Err(_) => Err(NetError::ConnectionLost),
-                }
-            }
+            Some(ref io) => match io.out.send(frame) {
+                Ok(_) => Ok(()),
+                Err(_) => Err(NetError::ConnectionLost),
+            },
         }
     }
 
