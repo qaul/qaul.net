@@ -230,6 +230,9 @@ name = "qaul-linux"
 version = "0.1.0"
 dependencies = [
  "libqaul 0.1.0",
+ "netmod-mem 0.1.0",
+ "ratman 0.0.0",
+ "ratman-netmod 0.1.0",
 ]
 
 [[package]]
