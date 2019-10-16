@@ -8,15 +8,15 @@ pub type Digest = GenericArray<u8, U64>;
 /// no transmission errors occurred (message digest of payload type and data).
 #[derive(Debug)]
 pub struct Payload {
-    // The length of the data in this payload
+    /// The length of the data in this payload
     length: u32,
-    // Message digest used to ensure integrity
+    /// Message digest used to ensure integrity
     digest: Digest,
-    // The actual data being transmitted
+    /// The actual data being transmitted
     data: Vec<u8>
 }
 
-// Compute and return the 64-bit Blake2b digest of the given data.
+/// Compute and return the 64-bit Blake2b digest of the given data.
 fn blake2b_digest(data: &[u8]) -> Digest {
     Blake2b::digest(data)
 }
