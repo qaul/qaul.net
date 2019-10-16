@@ -41,7 +41,7 @@ impl AuthStore {
     pub(crate) fn set_pw(&self, user: Identity, pw: &str) {
         self.hashes
             .lock()
-            .expect("Faied to unlock hash store")
+            .expect("Failed to unlock hash store")
             .insert(user, PwHash::new(pw));
     }
 
