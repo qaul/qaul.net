@@ -53,14 +53,12 @@ pub fn secret_update(req: &mut Request) -> IronResult<Response> {
     let old_val = attr.old_value.ok_or(
         DocumentError::no_attribute("old_value".into(), "/data/attributes/old_value".into()))?;
 
-    {
-        let qaul = req.extensions.get::<QaulCore>().unwrap();
+    let qaul = req.extensions.get::<QaulCore>().unwrap();
 
-        // check that the old password is correct
-        let ua = qaul.user_login(auth_id.clone(), &old_val).map_err(|e| QaulError::from(e))?;
-        qaul.user_change_pw(ua.clone(), &attr.value).map_err(|e| QaulError::from(e))?;
-        qaul.user_logout(ua).map_err(|e| QaulError::from(e))?;
-    }
+    // check that the old password is correct
+    let ua = qaul.user_login(auth_id.clone(), &old_val).map_err(|e| QaulError::from(e))?;
+    qaul.user_change_pw(ua.clone(), &attr.value).map_err(|e| QaulError::from(e))?;
+    qaul.user_logout(ua).map_err(|e| QaulError::from(e))?;
 
     Ok(Response::with(Status::NoContent))
 }

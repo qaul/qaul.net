@@ -22,13 +22,10 @@ pub fn secret_create(req: &mut Request) -> IronResult<Response> {
         .and_then(|go| ResourceObject::<Secret>::try_from(go).map_err(|e| DocumentError::from(e)))
         .and_then(|ro| ro.attributes.ok_or(DocumentError::no_attributes("/data/attributes".into())))?;
 
-    let id = {
-        let core = req.extensions.get::<QaulCore>().unwrap();
-        let ua = core.user_create(&attr.value).map_err(|e| QaulError::from(e))?;
-        core.user_logout(ua.clone()).map_err(|e| QaulError::from(e))?;
-        ua.identity()
-    };
-
+    let core = req.extensions.get::<QaulCore>().unwrap();
+    let ua = core.user_create(&attr.value).map_err(|e| QaulError::from(e))?;
+    core.user_logout(ua.clone()).map_err(|e| QaulError::from(e))?;
+    let id = ua.identity();
 
     let doc = Document {
         data: OptionalVec::One(Some(Secret::from_identity(&id).into())),

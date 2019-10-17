@@ -40,10 +40,8 @@ pub fn grant_create(req: &mut Request) -> IronResult<Response> {
 
     let attr = ro.attributes.ok_or(DocumentError::no_attributes("/data/attributes".into()))?;
 
-    let ua = {
-        req.extensions.get::<QaulCore>().unwrap().user_login(id, &attr.secret)
-            .map_err(|e| QaulError::from(e))?
-    };
+    let ua = req.extensions.get::<QaulCore>().unwrap().user_login(id, &attr.secret)
+        .map_err(|e| QaulError::from(e))?;
 
     { 
         let (id, grant) = ua.clone().trusted().unwrap();

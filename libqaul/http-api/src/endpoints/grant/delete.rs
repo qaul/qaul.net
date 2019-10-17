@@ -19,8 +19,8 @@ pub fn grant_delete(req: &mut Request) -> IronResult<Response> {
 
     let grant = req.extensions.get::<Router>().unwrap().find("id").unwrap();
     
-    { req.extensions.get::<QaulCore>().unwrap()
-        .user_logout(UserAuth::Trusted(id, grant.into())).map_err(|e| QaulError::from(e))?; }
+    req.extensions.get::<QaulCore>().unwrap()
+        .user_logout(UserAuth::Trusted(id, grant.into())).map_err(|e| QaulError::from(e))?;
 
     { req.extensions.get::<Authenticator>().unwrap().tokens.lock().unwrap().remove(grant); }
 
