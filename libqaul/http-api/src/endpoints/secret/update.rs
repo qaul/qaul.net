@@ -29,6 +29,20 @@ pub fn secret_update(req: &mut Request) -> IronResult<Response> {
         return Err(AuthError::NotAuthorised.into());
     }
 
+    // check that the authenticated user is the same as the secret's user relationship
+    let rel_id = ro.relationships.as_ref()
+        .ok_or(DocumentError::no_relationships("/data/relationships".into()))
+        .and_then(|rels| rels.get("user").ok_or(
+            DocumentError::no_relationship("user".into(), "/data/relationships/user".into())))
+        .and_then(|rel| match &rel.data {
+            OptionalVec::One(Some(d)) => Ok(d),
+            // TODO: this error needs a pointer
+            OptionalVec::Many(_) => Err(DocumentError::MultipleData),
+            _ => Err(DocumentError::NoData)})?;
+    if into_identity(&rel_id.id)? != auth_id {
+        return Err(AuthError::NotAuthorised.into());
+    }
+
     // check that the authenticated user is the same as the path id
     if into_identity(&req.extensions.get::<Router>().unwrap().find("id").unwrap())? != auth_id {
         return Err(AuthError::NotAuthorised.into());
@@ -49,4 +63,62 @@ pub fn secret_update(req: &mut Request) -> IronResult<Response> {
     }
 
     Ok(Response::with(Status::NoContent))
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use anneal::RequestBuilder;
+    use libqaul::Qaul;
+    use crate::{
+        endpoints::secret::route,
+        models::from_identity,
+        Authenticator,
+    };
+    use japi::{Identifier, Relationship, Relationships};
+    use iron::{
+        middleware::Handler,
+        headers::{Authorization, Bearer},
+    };
+
+    #[test]
+    fn works() {
+        let qaul = Qaul::start();
+        let (id, grant) = qaul.user_create("test").unwrap().trusted().unwrap();
+
+        let mut relationships = Relationships::new();
+        relationships.insert("user".into(), Relationship {
+            data: OptionalVec::One(Some(Identifier::new(from_identity(&id), "user".into()))),
+            ..Default::default()
+        });
+        let ro = ResourceObject {
+            id: Some(from_identity(&id)),
+            attributes: Some(Secret {
+                value: "test2".into(),
+                old_value: Some("test".into()),
+            }),
+            relationships: Some(relationships),
+            links: None,
+            meta: None,
+        };
+
+        let mut auth = Authenticator::new();
+        { auth.tokens.lock().unwrap().insert(grant.clone(), id.clone()); }
+
+        assert_eq!(RequestBuilder::patch(
+                &format!("http://127.0.0.1:8000/api/secrets/{}", from_identity(&id)))
+            .unwrap()
+            .set_header(Authorization(Bearer { token: grant.clone() }))
+            .set_primary_data(ro.into())
+            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(JsonApi)
+            .add_middleware(auth)
+            .request_response(|mut req| {
+                let mut router = Router::new();
+                route(&mut router);
+                router.handle(&mut req)
+            }).unwrap().get_status().unwrap(), &Status::NoContent);
+
+        assert!(qaul.user_login(id, "test2").is_ok())
+    }
 }

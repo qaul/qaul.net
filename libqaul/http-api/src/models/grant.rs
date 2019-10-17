@@ -5,7 +5,7 @@ use serde_derive::{Serialize, Deserialize};
 use libqaul::UserAuth;
 use super::from_identity;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Default)]
 pub struct Grant { 
     pub secret: String,
 }
