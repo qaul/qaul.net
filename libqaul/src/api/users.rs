@@ -124,4 +124,11 @@ impl Qaul {
         // let (id, token) = self.user_authenticate(user)?;
         // self.auth.logout(&id, &token)
     }
+
+    /// Change a currently logged in user's password
+    pub fn user_change_pw(&self, user: UserAuth, pw: &str) -> QaulResult<()> {
+        let (id, _) = user.trusted()?;
+        self.auth.set_pw(id, pw);
+        Ok(())
+    }
 }
