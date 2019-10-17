@@ -63,3 +63,51 @@ pub fn grant_create(req: &mut Request) -> IronResult<Response> {
         serde_json::to_string(&doc).unwrap(),
     )))
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::models::from_identity;
+    use anneal::RequestBuilder;
+    use libqaul::{Qaul, UserAuth};
+    use japi::{Identifier, Relationship, Relationships};
+
+    #[test]
+    fn works() {
+        let qaul = Qaul::start();
+        let id = qaul.user_create("test").unwrap().identity();
+
+        let mut relationships = Relationships::new();
+        relationships.insert("user".into(), Relationship {
+            data: OptionalVec::One(Some(Identifier::new(from_identity(&id), "user".into()))),
+            ..Default::default()
+        });
+        let ro = ResourceObject {
+            id: None,
+            attributes: Some(Grant { secret: "test".into() }),
+            relationships: Some(relationships.clone()),
+            links: None,
+            meta: None,
+        };
+
+        let auth = Authenticator::new();
+
+        let go = RequestBuilder::default_post()
+            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(JsonApi)
+            .add_middleware(auth.clone())
+            .set_primary_data(ro.into())
+            .request_response(|mut req| {
+                grant_create(&mut req)
+            }).unwrap().get_primary_data().unwrap();
+
+        let ro = ResourceObject::<Grant>::try_from(go).unwrap();
+        assert_eq!(ro.relationships.unwrap(), relationships);
+        let grant = ro.id.unwrap();
+
+        assert_eq!(auth.tokens.lock().unwrap().get(&grant), Some(&id));
+
+        qaul.user_delete(UserAuth::Trusted(id, grant)).unwrap();
+
+    }
+}
