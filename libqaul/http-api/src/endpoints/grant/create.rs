@@ -1,6 +1,7 @@
 use crate::{
     error::{ApiError, DocumentError, QaulError},
     models::{Grant, User, into_identity},
+    Authenticator,
     JsonApi,
     QaulCore,
     JSONAPI_MIME,
@@ -43,6 +44,11 @@ pub fn grant_create(req: &mut Request) -> IronResult<Response> {
         req.extensions.get::<QaulCore>().unwrap().user_login(id, &attr.secret)
             .map_err(|e| QaulError::from(e))?
     };
+
+    { 
+        let (id, grant) = ua.clone().trusted().unwrap();
+        req.extensions.get::<Authenticator>().unwrap().tokens.lock().unwrap().insert(grant, id);
+    }
 
     let grant = Grant::from_user_auth(ua)?;
 
