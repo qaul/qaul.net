@@ -6,19 +6,12 @@ use crate::{
     JSONAPI_MIME,
 };
 use iron::{
-    method::Method,
     status::Status,
     prelude::*,
 };
 use japi::{ResourceObject, OptionalVec, Document};
-use router::Router;
 use std::convert::TryFrom;
 use serde_json;
-
-pub fn route(router: &mut Router) {
-    let mut chain = 
-    router.route(Method::Post, "/api/secrets/", secret_create, "secret_create");
-}
 
 pub fn secret_create(req: &mut Request) -> IronResult<Response> {
     let attr = req.extensions.get::<JsonApi>().ok_or(DocumentError::NoDocument)
@@ -50,7 +43,7 @@ pub fn secret_create(req: &mut Request) -> IronResult<Response> {
 }
 
 #[cfg(test)]
-mod test_secret_create {
+mod test {
     use super::*;
     use anneal::RequestBuilder;
     use libqaul::Qaul;

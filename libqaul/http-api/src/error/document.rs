@@ -21,6 +21,8 @@ pub enum DocumentError {
     ConversionError{ err: ObjectConversionError, pointer: Option<String> },
     /// The endpoint expected an attribute where none was provided
     NoAttributes { pointer: Option<String> },
+    /// The endpoint expected an attribute where none was provided
+    NoAttribute { attr: String, pointer: Option<String> }
     /// The endpoint expected there to be a relationships key in the document
     NoRelationships { pointer: Option<String>},
     /// The named relationship was missing from the document
@@ -28,12 +30,16 @@ pub enum DocumentError {
 }
 
 impl DocumentError {
+    pub fn conversion_error(e: ObjectConversionError, pointer: String) -> DocumentError {
+        DocumentError::ConversionError { err: e, pointer: Some(pointer) }
+    }
+
     pub fn no_attributes(pointer: String) -> DocumentError {
         DocumentError::NoAttributes { pointer: Some(pointer) }
     }
 
-    pub fn conversion_error(e: ObjectConversionError, pointer: String) -> DocumentError {
-        DocumentError::ConversionError { err: e, pointer: Some(pointer) }
+    pub fn no_attribute(att: String, pointer: String) -> DocumentError {
+        DocumentError::NoAttribute { attr, pointer: Some(pointer) }
     }
 
     pub fn no_relationships(pointer: String) -> DocumentError {
@@ -74,6 +80,7 @@ impl Error for DocumentError {
             DocumentError::WrongType { expected: _, got: _, pointer: _ } => "Wrong Type",
             DocumentError::ConversionError { err: _, pointer: _ } => "Object Error",
             DocumentError::NoAttributes { pointer: _ } => "Missing Attributes",
+            DocumentError::NoAttribute { attr: _, pointer: _ } => "Missing Attribute",
             DocumentError::NoRelationships { pointer: _ } => "Missing Relationships",
             DocumentError::NoRelationship { rel: _, pointer: _ } => "Missing Relationship",
         }.into()
@@ -106,6 +113,8 @@ impl Error for DocumentError {
                 } =>
                 format!("Failed to deserialize attributes of primary data: {}", e),
             DocumentError::NoAttributes { pointer: _ } => "Data is missing attributes".into(),
+            DocumentError::NoAttribute { attr, pointer: _ } =>
+                format!("Data is missing attribute {}", attr),
             DocumentError::NoRelationships { pointer: _ } => 
                 "Data is missing relationships".into(),
             DocumentError::NoRelationship { rel, pointer: _ } => 
@@ -126,6 +135,7 @@ impl Error for DocumentError {
             DocumentError::WrongType { expected: _, got: _, pointer } => pointer.clone(),
             DocumentError::ConversionError { err: _, pointer } => pointer.clone(),
             DocumentError::NoAttributes { pointer } => pointer.clone(),
+            DocumentError::NoAttribute { attr: _, pointer } => pointer.clone(),
             DocumentError::NoRelationships { pointer } => pointer.clone(),
             DocumentError::NoRelationship { rel: _, pointer } => pointer.clone(),
         }
