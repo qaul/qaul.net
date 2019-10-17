@@ -22,7 +22,7 @@ pub enum DocumentError {
     /// The endpoint expected an attribute where none was provided
     NoAttributes { pointer: Option<String> },
     /// The endpoint expected an attribute where none was provided
-    NoAttribute { attr: String, pointer: Option<String> }
+    NoAttribute { attr: String, pointer: Option<String> },
     /// The endpoint expected there to be a relationships key in the document
     NoRelationships { pointer: Option<String>},
     /// The named relationship was missing from the document
@@ -38,7 +38,7 @@ impl DocumentError {
         DocumentError::NoAttributes { pointer: Some(pointer) }
     }
 
-    pub fn no_attribute(att: String, pointer: String) -> DocumentError {
+    pub fn no_attribute(attr: String, pointer: String) -> DocumentError {
         DocumentError::NoAttribute { attr, pointer: Some(pointer) }
     }
 

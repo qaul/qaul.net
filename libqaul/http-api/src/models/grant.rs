@@ -7,7 +7,7 @@ use super::from_identity;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Grant { 
-    secret: String,
+    pub secret: String,
 }
 
 impl Attributes for Grant {
@@ -15,7 +15,7 @@ impl Attributes for Grant {
 }
 
 impl Grant {
-    fn from_user_auth(ua: UserAuth) -> Result<ResourceObject<Grant>, ApiError> {
+    pub fn from_user_auth(ua: UserAuth) -> Result<ResourceObject<Grant>, ApiError> {
         let (id, grant) = ua.trusted().map_err(|e| QaulError::from(e))?;
         let mut g = ResourceObject::<Grant>::new(grant.clone(), None);
 
