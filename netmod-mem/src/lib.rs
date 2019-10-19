@@ -3,7 +3,7 @@
 //! This aims to make testing any structure that binds against
 //! `netmod` easier and reproducable.
 
-use ratman_netmod::{Endpoint, Frame, NetError, NetResult};
+use netmod::{Endpoint, Frame, NetError, NetResult};
 use std::{
     sync::mpsc::{self, Receiver, Sender, TryRecvError},
     sync::RwLock,
