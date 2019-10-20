@@ -6,6 +6,7 @@
 mod core;
 mod data;
 mod protocol;
+mod slicer;
 mod utils;
 
 pub use crate::{
@@ -28,7 +29,7 @@ impl Router {
     }
 
     /// Add an `netmod` endpoint to this router
-    pub fn add_ep(&mut self, ep: impl Endpoint + 'static) {
+    pub fn add_ep(&mut self, ep: impl Endpoint + 'static + Send) {
         self.core.add_if(ep);
     }
 }
