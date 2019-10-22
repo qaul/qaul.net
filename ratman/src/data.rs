@@ -1,11 +1,11 @@
 //! Data exchange structures for `R.A.T.M.A.N.`
 
-use crate::utils;
+use serde::{Deserialize, Serialize};
 use identity::Identity;
 use netmod::Recipient;
-use serde::{Deserialize, Serialize};
 use std::hash::Hasher;
 use twox_hash::XxHash64;
+use conjoiner as conj;
 
 pub type Signature = u64;
 
@@ -68,7 +68,7 @@ impl Message {
         let mut hasher = XxHash64::with_seed(1312);
         let associator = associator.into();
 
-        let vec = utils::serialise(&payload);
+        let vec = conj::serialise(&payload).unwrap();
 
         let payload = Payload {
             length: vec.len() as u64,
@@ -82,7 +82,7 @@ impl Message {
             payload,
         };
 
-        let vec = utils::serialise(&teeth_gang);
+        let vec = conj::serialise(&teeth_gang).unwrap();
         hasher.write(&vec);
         let signature = hasher.finish();
 

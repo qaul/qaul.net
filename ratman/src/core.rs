@@ -1,8 +1,8 @@
 //! The routing core module of `RATMAN`
+#![allow(unused)]
 
-use crate::{slicer::Slicer, Message};
 use identity::Identity;
-use netmod::{Endpoint, Frame, Sequence, SeqId};
+use netmod::{Endpoint, Frame};
 use std::{
     collections::BTreeMap,
     sync::{
@@ -20,7 +20,7 @@ pub(crate) struct Envelope(pub(crate) u8, pub(crate) Frame);
 /// A wrapper around a Message routing worker
 struct Worker {
     /// Underlying worker thread (or pool?)
-    thread: JoinHandle<()>,
+    _thread: JoinHandle<()>,
     /// Messages scheduled to be sent
     to_send: Arc<Mutex<Sender<Envelope>>>,
     /// Queue received Messages
@@ -38,7 +38,7 @@ impl Worker {
         let (tx, recvd) = channel();
         let received = Arc::new(Mutex::new(recvd));
 
-        let thread = thread::spawn(move || loop {
+        let _thread = thread::spawn(move || loop {
             // Send queued Messages
             if let Ok(Envelope(id, msg)) = rx.try_recv() {
                 let ifs = ifs.lock().unwrap();
@@ -56,7 +56,7 @@ impl Worker {
             });
         });
         Self {
-            thread,
+            _thread,
             to_send,
             received,
         }
@@ -133,7 +133,7 @@ impl Core {
 
     /// Send a properly enveloped message out into the network
     pub(crate) fn send(&self, envs: Vec<Envelope>) {
-        let mut sender = self.worker.to_send.lock().unwrap();
+        let sender = self.worker.to_send.lock().unwrap();
         envs.into_iter().for_each(|env| sender.send(env).unwrap());
     }
 }

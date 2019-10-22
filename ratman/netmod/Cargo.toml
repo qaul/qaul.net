@@ -10,5 +10,8 @@ license = "AGPL-3.0"
 
 [dependencies]
 identity = { path = "../identity", features = ["digest"], package = "ratman-identity" }
+
+conjoiner = { version = "1.0", package = "conjoiner-engine" }
 serde = { version = "1.0", features = ["derive"] }
+
 twox-hash = "1.5"

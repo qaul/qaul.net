@@ -1,8 +1,9 @@
 //! Routing journal module
+#![allow(unused)]
 
 use crate::{core::Envelope, slicer::Slicer, Core, Message};
 use identity::Identity;
-use netmod::{Frame, Recipient};
+use netmod::Recipient;
 use std::{
     collections::HashSet,
     sync::{

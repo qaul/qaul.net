@@ -1,7 +1,8 @@
 //! Slices `Message` into a series of Frames
+#![allow(unused)]
 
 use crate::{Message, Payload};
-use netmod::{Endpoint, Frame, Sequence, Recipient};
+use netmod::{Frame, Sequence};
 
 pub(crate) struct Slicer;
 

@@ -8,12 +8,9 @@
 //! - `Announce` is sent when a node comes online
 //! - `Sync` is a reply to an `Announce`, only omitted when `no_sync` is set
 
-use crate::{
-    data::{Message, Payload, Signature},
-    utils,
-};
-use netmod::Recipient;
+use crate::data::Message;
 use identity::Identity;
+use netmod::Recipient;
 use serde::{Deserialize, Serialize};
 
 const ASSOCIATOR: &'static str = ".internal";
