@@ -3,7 +3,7 @@
 //! This aims to make testing any structure that binds against
 //! `netmod` easier and reproducable.
 
-use netmod::{Endpoint, Frame, NetError, NetResult};
+use netmod::{Endpoint, Frame, Error as NetError, Result as NetResult};
 use std::{
     sync::mpsc::{self, Receiver, Sender, TryRecvError},
     sync::RwLock,
@@ -97,7 +97,7 @@ impl Endpoint for MemMod {
     /// a connection that is not yet connected.
     fn send(&mut self, frame: Frame) -> NetResult<()> {
         match &*self.io.read().expect("RWLock poisoned") {
-            None => Err(NetError::OperationNotSupported),
+            None => Err(NetError::NotSupported),
             Some(ref io) => {
                 match io.out.send(frame) {
                     Ok(_) => Ok(()),
@@ -109,7 +109,7 @@ impl Endpoint for MemMod {
 
     fn poll(&mut self) -> NetResult<Option<Frame>> {
         match *self.io.get_mut().expect("RWLock poisoned") {
-            None => Err(NetError::OperationNotSupported),
+            None => Err(NetError::NotSupported),
             Some(ref mut io) => match io.inc.try_recv() {
                 Ok(v) => Ok(Some(v)),
                 Err(TryRecvError::Empty) => Ok(None),
@@ -120,7 +120,7 @@ impl Endpoint for MemMod {
 
     fn listen(&mut self, mut handler: Box<dyn FnMut(Frame) -> NetResult<()>>) -> NetResult<()> {
         match &mut *self.io.get_mut().expect("RWLock poisoned") {
-            None => Err(NetError::OperationNotSupported),
+            None => Err(NetError::NotSupported),
             Some(ref mut io) => match io.inc.recv() {
                 Ok(v) => handler(v),
                 Err(_) => return Err(NetError::ConnectionLost),

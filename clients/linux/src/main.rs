@@ -1,6 +1,6 @@
 use netmod_mem::MemMod;
 use ratman::{
-    netmod::{Endpoint, Frame, Payload},
+    netmod::{Endpoint, Frame},
     Router,
 };
 
