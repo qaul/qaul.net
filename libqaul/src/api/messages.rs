@@ -1,6 +1,6 @@
 //! Service API: peer-to-peer messages
 
-use super::models::{Message, Recipient, QaulResult, UserAuth};
+use super::models::{Message, QaulResult, Recipient, UserAuth};
 use crate::Qaul;
 use identity::Identity;
 
@@ -34,6 +34,7 @@ impl Qaul {
         &self,
         user: UserAuth,
         recipient: Recipient,
+        associator: String,
         payload: Vec<u8>,
     ) -> QaulResult<()> {
         unimplemented!()
@@ -43,12 +44,11 @@ impl Qaul {
         unimplemented!()
     }
 
-    /// Register a new service with this `qaul` instance
-    ///
-    /// Internally this function dispatches a query to a UI service
-    /// (marked "primary" to allow the user to either verify or
-    /// deny the registration request).
-    pub fn service_register(&self, user: UserAuth, service_id: String) -> QaulResult<()> {
-        Ok(())
+    pub fn message_listen<S, F>(&self, user: UserAuth, associator: S, listener: F) -> QaulResult<()>
+    where
+        S: Into<String>,
+        F: Fn(Message) -> QaulResult<()>,
+    {
+        unimplemented!()
     }
 }

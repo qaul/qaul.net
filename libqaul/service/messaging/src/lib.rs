@@ -6,26 +6,31 @@
 //! It's basically decentralised e-mail.
 //! It's basically e-mail.
 
-use qaul::{Qaul, QaulResult, UserAuth, Recipient};
-use identity::Identity;
 use files::File;
+use identity::Identity;
+use qaul::{Qaul, QaulResult, Recipient, UserAuth};
+use serde::{Serialize, Deserialize};
+use std::sync::Arc;
+
+const ASC_NAME: &'static str = "qaul-messaging";
 
 /// A list of file-attachments
 pub type Attachments = Vec<File>;
 
 /// A plain-text message with optional attachments
-pub struct Message {
+#[derive(Serialize, Deserialize)]
+pub struct TextMessage {
     text: String,
-    attachments: Option<Attachments>,
+    // attachments: Option<Attachments>,
 }
 
 /// Messaging service state
-pub struct Messaging<'q> {
+pub struct Messaging {
     async_files: bool,
-    qaul: &'q Qaul,
+    qaul: Arc<Qaul>,
 }
 
-impl<'q> Messaging<'q> {
+impl Messaging {
     /// Initialise the messaging service
     ///
     /// In order to initialise, a valid and running
@@ -34,7 +39,7 @@ impl<'q> Messaging<'q> {
     /// but also check for the existence of a `filesharing` service.
     /// Depending on this check, the `async_files` capability
     /// can be set.
-    pub fn init(qaul: &'q Qaul) -> Self {
+    pub fn init(qaul: Arc<Qaul>) -> Self {
         Self {
             async_files: false,
             qaul,
@@ -47,17 +52,26 @@ impl<'q> Messaging<'q> {
     }
 
     /// Send a plain-text message with optional arbitrary attachments
-    pub fn send_message(
-        &self,
-        user: UserAuth,
-        recipients: Recipient,
-        msg: Message,
-    ) -> QaulResult<()> {
+    ///
+    /// Under the hood, this function constructs a service API
+    /// `Message`, signs it and optionally encrypts it, if it's
+    /// `recipient` isn't `Recipient::Flood`, then queues it in the
+    /// routing layer.
+    pub fn send(&self, user: UserAuth, recipient: Recipient, msg: TextMessage) -> QaulResult<()> {
+        // self.qaul.message_send(user, recipient, ASC_NAME,
         unimplemented!()
     }
 
-    /// Get all messages that were received since the last poll
-    pub fn poll_messages(&self, user: UserAuth) -> QaulResult<Vec<Message>> {
+    /// Non-blockingly poll for new `TextMessage`s for a session
+    pub fn poll(&self, user: UserAuth) -> QaulResult<Vec<TextMessage>> {
+        unimplemented!()
+    }
+
+    /// Setup a `TextMessage` listener for a specific user session
+    pub fn listen<F>(&self, user: UserAuth, listener: F) -> QaulResult<()>
+    where
+        F: Fn(TextMessage) -> QaulResult<()>,
+    {
         unimplemented!()
     }
 }
