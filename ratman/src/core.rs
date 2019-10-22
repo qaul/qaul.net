@@ -2,7 +2,7 @@
 
 use crate::{slicer::Slicer, Message};
 use identity::Identity;
-use netmod::{Endpoint, Frame, Payload};
+use netmod::{Endpoint, Frame, Sequence, SeqId};
 use std::{
     collections::BTreeMap,
     sync::{

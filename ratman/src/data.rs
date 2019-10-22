@@ -2,17 +2,12 @@
 
 use crate::utils;
 use identity::Identity;
+use netmod::Recipient;
 use serde::{Deserialize, Serialize};
 use std::hash::Hasher;
 use twox_hash::XxHash64;
 
 pub type Signature = u64;
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
-pub enum Recipient {
-    User(Identity),
-    Flood,
-}
 
 /// An atomic message, handed to a `Router` to deliver
 ///

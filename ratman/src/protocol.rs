@@ -9,9 +9,10 @@
 //! - `Sync` is a reply to an `Announce`, only omitted when `no_sync` is set
 
 use crate::{
-    data::{Message, Payload, Recipient, Signature},
+    data::{Message, Payload, Signature},
     utils,
 };
+use netmod::Recipient;
 use identity::Identity;
 use serde::{Deserialize, Serialize};
 

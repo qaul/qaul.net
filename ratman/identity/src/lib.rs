@@ -36,7 +36,7 @@ use std::fmt::{self, Debug, Display, Formatter};
 pub const ID_LEN: usize = 16;
 
 /// A RATMAN identity
-#[derive(Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Identity([u8; ID_LEN]);
 
 impl Debug for Identity {
