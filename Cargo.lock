@@ -318,9 +318,9 @@ dependencies = [
 name = "ratman-netmod"
 version = "0.1.0"
 dependencies = [
- "blake2 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "generic-array 0.12.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman-identity 0.1.0",
+ "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
+ "twox-hash 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

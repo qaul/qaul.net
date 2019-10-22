@@ -94,64 +94,64 @@ impl AuthStore {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use rand::{rngs::OsRng, Rng};
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     use rand::{rngs::OsRng, Rng};
 
-    struct Context {
-        id1: Identity,
-        id1pw: String,
+//     struct Context {
+//         id1: Identity,
+//         id1pw: String,
 
-        id2: Identity,
-        id2pw: String,
+//         id2: Identity,
+//         id2pw: String,
 
-        auth: AuthStore,
-    }
+//         auth: AuthStore,
+//     }
 
-    /// A small function that will seed an AuthStore for test purposes
-    fn setup() -> Context {
-        let id1 = Identity::truncate(&AuthStore::random(12));
-        let id1pw = "sunflowers".into();
+//     /// A small function that will seed an AuthStore for test purposes
+//     fn setup() -> Context {
+//         let id1 = Identity::truncate(&AuthStore::random(12));
+//         let id1pw = "sunflowers".into();
 
-        let id2 = Identity::truncate(&AuthStore::random(12));
-        let id2pw = "mushrooms".into();
+//         let id2 = Identity::truncate(&AuthStore::random(12));
+//         let id2pw = "mushrooms".into();
 
-        let mut auth = AuthStore::new();
-        {
-            let mut hashes = auth.hashes.lock().unwrap();
-            hashes.insert(id1.clone(), PwHash::new(&id1pw));
-            hashes.insert(id2.clone(), PwHash::new(&id2pw));
-        }
+//         let mut auth = AuthStore::new();
+//         {
+//             let mut hashes = auth.hashes.lock().unwrap();
+//             hashes.insert(id1.clone(), PwHash::new(&id1pw));
+//             hashes.insert(id2.clone(), PwHash::new(&id2pw));
+//         }
 
-        Context {
-            id1,
-            id1pw,
-            id2,
-            id2pw,
-            auth,
-        }
-    }
+//         Context {
+//             id1,
+//             id1pw,
+//             id2,
+//             id2pw,
+//             auth,
+//         }
+//     }
 
-    #[test]
-    fn collection() {
-        let Context {
-            id1,
-            id1pw,
-            id2,
-            id2pw,
-            mut auth,
-        } = setup();
+//     #[test]
+//     fn collection() {
+//         let Context {
+//             id1,
+//             id1pw,
+//             id2,
+//             id2pw,
+//             mut auth,
+//         } = setup();
 
-        // Test that correct user gets accepted, wrong gets rejected
-        let t1 = auth.new_login(id1.clone(), &id1pw).unwrap();
-        assert!(auth.new_login(id2.clone(), &id1pw).is_err());
+//         // Test that correct user gets accepted, wrong gets rejected
+//         let t1 = auth.new_login(id1.clone(), &id1pw).unwrap();
+//         assert!(auth.new_login(id2.clone(), &id1pw).is_err());
 
-        // Logging-in again results in the same token
-        let t1_2 = auth.new_login(id1.clone(), &id1pw).unwrap();
-        assert_eq!(t1, t1_2);
+//         // Logging-in again results in the same token
+//         let t1_2 = auth.new_login(id1.clone(), &id1pw).unwrap();
+//         assert_eq!(t1, t1_2);
 
-        // Verify "verify_token" endpoint
-        assert!(auth.verify_token(&id1, &t1_2).is_ok())
-    }
-}
+//         // Verify "verify_token" endpoint
+//         assert!(auth.verify_token(&id1, &t1_2).is_ok())
+//     }
+// }

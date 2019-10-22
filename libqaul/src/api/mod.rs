@@ -17,8 +17,8 @@
 //! i.e.  only fields that are relevant for service developers to
 //! interact with, not including shared service state or secrets.
 
-#[cfg(test)]
-mod tests;
+// #[cfg(test)]
+// mod tests;
 
 mod contacts;
 mod files;
