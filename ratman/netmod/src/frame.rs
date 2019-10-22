@@ -1,23 +1,34 @@
 //! Networking frames
 
-use crate::payload::Payload;
+use crate::SeqId;
 use identity::Identity;
+use serde::{Serialize, Deserialize};
 
-/// A frame represents a single packet sent over a netmod
-#[derive(Debug)]
+/// Encoded recipient data
+///
+/// A `Frame` can either be addressed to a single user on the network,
+/// or to the network as a whole. The latter is called `Flood` and
+/// should primarily be used for small payload sequences.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Recipient {
+    /// Addressed to a single user ID on the network
+    User(Identity),
+    /// Spreading a `Frame` to the whole network
+    Flood,
+}
+
+/// A sequence of data, represented by a single network packet
+///
+/// Because a `Frame` is usually created in a sequence, the
+/// constructors assume chainable operations, such as a `Vec<Frame>`
+/// can be returned with all sequence ID information correctly setup.
 pub struct Frame {
-    /// Indicate sequence window for this frame
-    ///
-    /// A `Message` can be split into multiple `Frame`s that are
-    /// indicated into a sequence by these upper and current bounds.
-    /// The first number is current, the second is upper bound
-    pub sequence: (u16, u16),
-    /// Origin ID (who sent the frame)
+    /// Sender information
     pub sender: Identity,
-    /// Destination ID (who will receive the frame)
-    pub recipient: Option<Identity>,
-    /// Origin-verification payload signature
-    pub signature: [u8; 18],
-    /// The actual data being transmitted, with validation metadata
-    pub payload: Payload,
+    /// Recipient information
+    pub recipient: Recipient,
+    /// Data sequence identifiers
+    pub seqid: SeqId,
+    /// Raw data payload
+    pub payload: Vec<u8>,
 }

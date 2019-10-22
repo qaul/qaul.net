@@ -42,6 +42,10 @@ impl Payload {
         }
     }
 
+    pub fn length(&self) -> u32 {
+        self.length
+    }
+
     /// Attempt to extract a binary payload from a `Payload` metadata package.
     /// Fails if the message was corrupted in any way.
     pub fn unpack(self) -> Result<Vec<u8>, PayloadError> {

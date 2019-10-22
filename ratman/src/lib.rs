@@ -7,6 +7,7 @@ mod core;
 mod data;
 mod protocol;
 mod slicer;
+mod journal;
 mod utils;
 
 pub use crate::{

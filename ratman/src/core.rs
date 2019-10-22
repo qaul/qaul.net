@@ -15,7 +15,7 @@ use std::{
 type EndpointMap = Arc<Mutex<BTreeMap<u8, Arc<Mutex<dyn Endpoint + Send>>>>>;
 
 /// A message envelope which encodes the corresponding interface
-pub(crate) struct Envelope(u8, Frame);
+pub(crate) struct Envelope(pub(crate) u8, pub(crate) Frame);
 
 /// A wrapper around a Message routing worker
 struct Worker {
