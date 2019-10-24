@@ -54,7 +54,13 @@ impl Worker {
             });
         });
 
-        (Self { _thread, to_send }, received)
+        (
+            Self {
+                _thread,
+                to_send,
+            },
+            received,
+        )
     }
 }
 
