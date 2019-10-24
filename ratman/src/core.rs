@@ -53,13 +53,7 @@ impl Worker {
             });
         });
 
-        (
-            Self {
-                _thread,
-                to_send,
-            },
-            received,
-        )
+        (Self { _thread, to_send }, received)
     }
 }
 
@@ -116,7 +110,12 @@ impl Core {
 
     /// Remove a list of interface names and their unique IDs
     pub(crate) fn get_ifs(&self) -> Vec<(u8, String)> {
-        vec![]
+        self.ifs
+            .lock()
+            .unwrap()
+            .keys()
+            .map(|k| (*k, "".into()))
+            .collect()
     }
 
     pub(crate) fn id_reachable(&self, id: Identity, ifid: u8) {
