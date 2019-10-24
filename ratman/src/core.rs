@@ -23,20 +23,17 @@ struct Worker {
     _thread: JoinHandle<()>,
     /// Messages scheduled to be sent
     to_send: Arc<Mutex<Sender<Envelope>>>,
-    /// Queue received Messages
-    received: Arc<Mutex<Receiver<Envelope>>>,
 }
 
 impl Worker {
     /// Start a worker that sends frames and receives them
-    fn start(ifs: EndpointMap) -> Self {
+    fn start(ifs: EndpointMap) -> (Self, Receiver<Envelope>) {
         // Setup sending channel pair
         let (sending, rx) = channel();
         let to_send = Arc::new(Mutex::new(sending));
 
         // Setup receiving channel pair
-        let (tx, recvd) = channel();
-        let received = Arc::new(Mutex::new(recvd));
+        let (tx, received) = channel();
 
         let _thread = thread::spawn(move || loop {
             // Send queued Messages
@@ -55,11 +52,14 @@ impl Worker {
                 }
             });
         });
-        Self {
-            _thread,
-            to_send,
+
+        (
+            Self {
+                _thread,
+                to_send,
+            },
             received,
-        }
+        )
     }
 }
 
@@ -80,16 +80,20 @@ pub(crate) struct Core {
 
 impl Core {
     /// Create a new routing core
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new() -> (Self, Receiver<Envelope>) {
         let ifs = Arc::new(Mutex::new(BTreeMap::new()));
         let routes = Arc::new(Mutex::new(BTreeMap::new()));
+        let (worker, journal) = Worker::start(Arc::clone(&ifs));
 
-        Core {
-            cnt: 0,
-            worker: Worker::start(Arc::clone(&ifs)),
-            routes,
-            ifs,
-        }
+        (
+            Core {
+                cnt: 0,
+                worker,
+                routes,
+                ifs,
+            },
+            journal,
+        )
     }
 
     /// Add an interface, assigning it a unique ID

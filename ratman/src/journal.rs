@@ -7,7 +7,7 @@ use netmod::Recipient;
 use std::{
     collections::HashSet,
     sync::{
-        mpsc::{Receiver, Sender},
+        mpsc::{channel, Receiver, Sender},
         Arc, Mutex,
     },
     thread::{self, JoinHandle},
@@ -37,29 +37,33 @@ impl Journal {
     /// back to the routing core `send` logic. Local-addressed
     /// messages will be de-sliced and passed up the stack.
     pub(crate) fn start(
-        discovery: Sender<Message>,
         recv: Receiver<Envelope>,
-        core: Arc<Core>,
-    ) -> Self {
+        core: Arc<Mutex<Core>>,
+    ) -> (Self, Receiver<Message>) {
         let local = Arc::new(Mutex::new(HashSet::new()));
-        Self {
-            local: Arc::clone(&local),
-            worker: thread::spawn(move || loop {
-                let Envelope(id, frame) = recv.recv().unwrap();
-                let local = local.lock().unwrap();
+        let (discovery, d_recv) = channel();
+        (
+            Self {
+                local: Arc::clone(&local),
+                worker: thread::spawn(move || loop {
+                    let Envelope(id, frame) = recv.recv().unwrap();
+                    let local = local.lock().unwrap();
 
-                match frame.recipient.clone() {
-                    Recipient::User(ref u) if local.contains(u) => {
-                        let msg = Slicer::unslice(vec![frame]);
-                        discovery.send(msg).unwrap();
+                    match frame.recipient.clone() {
+                        Recipient::User(ref u) if local.contains(u) => {
+                            // TODO: Implement de-sequencing
+                            let msg = Slicer::unslice(vec![frame]);
+                            discovery.send(msg).unwrap();
+                        }
+                        Recipient::User(ref u) => {
+                            let env = core.lock().unwrap().lookup(u, vec![frame]);
+                            core.lock().unwrap().send(env);
+                        }
+                        Recipient::Flood => core.lock().unwrap().send(vec![Envelope(id, frame)]),
                     }
-                    Recipient::User(ref u) => {
-                        let env = core.lookup(u, vec![frame]);
-                        core.send(env);
-                    }
-                    Recipient::Flood => core.send(vec![Envelope(id, frame)]),
-                }
-            }),
-        }
+                }),
+            },
+            d_recv,
+        )
     }
 }
