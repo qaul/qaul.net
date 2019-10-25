@@ -99,6 +99,7 @@ impl Endpoint for MemMod {
         match &*self.io.read().expect("RWLock poisoned") {
             None => Err(NetError::NotSupported),
             Some(ref io) => {
+                dbg!("Endpoint delivery START");
                 match io.out.send(frame) {
                     Ok(_) => Ok(()),
                     Err(_) => Err(NetError::ConnectionLost),
@@ -111,7 +112,10 @@ impl Endpoint for MemMod {
         match *self.io.get_mut().expect("RWLock poisoned") {
             None => Err(NetError::NotSupported),
             Some(ref mut io) => match io.inc.try_recv() {
-                Ok(v) => Ok(Some(v)),
+                Ok(v) => {
+                    dbg!("Endoint delivery END");
+                    Ok(Some(v))
+                },
                 Err(TryRecvError::Empty) => Ok(None),
                 Err(_) => Err(NetError::ConnectionLost),
             },

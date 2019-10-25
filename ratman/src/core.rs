@@ -38,6 +38,7 @@ impl Worker {
         let _thread = thread::spawn(move || loop {
             // Send queued Messages
             if let Ok(Envelope(id, msg)) = rx.try_recv() {
+                dbg!("Sending queued mesage!");
                 let ifs = ifs.lock().unwrap();
                 let epm = ifs.get(&id).unwrap();
                 let mut ep = epm.lock().unwrap();
@@ -119,8 +120,9 @@ impl Core {
     }
 
     pub(crate) fn id_reachable(&self, id: Identity, ifid: u8) {
-        let mut routes = self.routes.lock().unwrap();
+        let mut routes = dbg!(self.routes.lock().unwrap());
         routes.insert(id, ifid);
+        dbg!(routes);
     }
 
     /// Map a set of Frames into a set of Envelopes
@@ -129,13 +131,14 @@ impl Core {
     /// is used by the route worker to send a frame on a specific
     /// device.
     pub(crate) fn lookup(&self, id: &Identity, frames: Vec<Frame>) -> Vec<Envelope> {
-        let routes = self.routes.lock().unwrap();
+        let routes = dbg!(self.routes.lock().unwrap());
         let ifid = routes.get(id).unwrap();
         frames.into_iter().map(|f| Envelope(*ifid, f)).collect()
     }
 
     /// Send a properly enveloped message out into the network
     pub(crate) fn send(&self, envs: Vec<Envelope>) {
+        dbg!("Dispatching message...");
         let sender = self.worker.to_send.lock().unwrap();
         envs.into_iter().for_each(|env| sender.send(env).unwrap());
     }

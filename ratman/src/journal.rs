@@ -66,4 +66,8 @@ impl Journal {
             d_recv,
         )
     }
+
+    pub(crate) fn add_local(&self, id: Identity) {
+        self.local.lock().unwrap().insert(id);
+    }
 }

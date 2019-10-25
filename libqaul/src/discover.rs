@@ -1,8 +1,8 @@
 //!
 
-use ratman::{Router, Message};
+use ratman::{Message, Router};
 use std::{
-    sync::{Arc, mpsc::Receiver},
+    sync::{mpsc::Receiver, Arc},
     thread::{self, JoinHandle},
 };
 
@@ -24,11 +24,13 @@ impl Discovery {
     }
 
     /// Initialise and start Discovery feature
-    pub(crate) fn new(r: Arc<Router>, recv: Receiver<Message>) -> Self {
+    pub(crate) fn new(r: Arc<Router>, router: Receiver<Message>) -> Self {
         Self {
             router: Some(r),
-            worker: Some(Arc::new(thread::spawn(|| {
-                // Handle incoming `Announce` messages here
+            worker: Some(Arc::new(thread::spawn(move || {
+                while let Ok(msg) = router.recv() {
+                    dbg!(msg);
+                }
             }))),
         }
     }

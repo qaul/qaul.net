@@ -34,10 +34,11 @@ impl Protocol {
             sender,
             Recipient::Flood,
             ASSOCIATOR,
-            ProtoPayload::Announce {
-                id: sender.clone(),
-                no_sync: false,
-            },
+            vec![0],
+            // ProtoPayload::Announce {
+            //     id: sender.clone(),
+            //     no_sync: false,
+            // },
         )
     }
 
@@ -47,10 +48,11 @@ impl Protocol {
             sender.clone(),
             Recipient::User(recipient),
             ASSOCIATOR,
-            ProtoPayload::Sync {
-                id: sender,
-                table: known,
-            },
+            vec![0],
+            // ProtoPayload::Sync {
+            //     id: sender,
+            //     table: known,
+            // },
         )
     }
 }

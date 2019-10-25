@@ -1,11 +1,11 @@
 //! Data exchange structures for `R.A.T.M.A.N.`
 
-use serde::{Deserialize, Serialize};
+use conjoiner as conj;
 use identity::Identity;
 use netmod::Recipient;
+use serde::{Deserialize, Serialize};
 use std::hash::Hasher;
 use twox_hash::XxHash64;
-use conjoiner as conj;
 
 pub type Signature = u64;
 
@@ -47,52 +47,18 @@ impl Message {
     /// The payload structure needs to provide a serializer, which
     /// allocates to be hashed for the XXHash signature of the
     /// Message.
-    pub fn build_signed<S, V>(
+    pub fn build_signed<S>(
         sender: Identity,
         recipient: Recipient,
         associator: S,
-        payload: V,
+        data: Vec<u8>,
     ) -> Self
     where
         S: Into<String>,
-        V: Serialize,
     {
-        #[derive(Serialize)]
-        struct SkeletonMsg {
-            sender: Identity,
-            recipient: Recipient,
-            associator: String,
-            payload: Payload,
-        };
-
-        let mut hasher = XxHash64::with_seed(1312);
         let associator = associator.into();
-
-        let vec = conj::serialise(&payload).unwrap();
-
-        let payload = Payload {
-            length: vec.len() as u64,
-            data: vec,
-        };
-
-        let teeth_gang = SkeletonMsg {
-            sender,
-            recipient,
-            associator,
-            payload,
-        };
-
-        let vec = conj::serialise(&teeth_gang).unwrap();
-        hasher.write(&vec);
-        let signature = hasher.finish();
-
-        // Destructure data to move into a new `Message`
-        let SkeletonMsg {
-            sender,
-            recipient,
-            associator,
-            payload,
-        } = teeth_gang;
+        let payload = Payload { length: 0, data };
+        let signature = 1312;
 
         Self {
             sender,

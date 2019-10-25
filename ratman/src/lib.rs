@@ -10,17 +10,20 @@ mod journal;
 mod protocol;
 mod slicer;
 
-pub use crate::{
-    data::{Message, Payload, Signature},
-    protocol::Protocol,
-};
-pub use netmod;
-
 use crate::{
     core::{Core, Envelope},
     journal::Journal,
     slicer::Slicer,
 };
+
+pub use {
+    crate::{
+        data::{Message, Payload, Signature},
+        protocol::Protocol,
+    },
+    netmod, identity::Identity,
+};
+
 use netmod::{Endpoint, Recipient};
 use std::sync::{mpsc::Receiver, Arc, Mutex};
 
@@ -73,6 +76,17 @@ impl Router {
         self.core.lock().unwrap().add_if(ep);
     }
 
+    /// ONLY USE FOR DEBUGGING!
+    #[deprecated]
+    pub fn discover(&self, id: Identity) {
+        self.core.lock().unwrap().id_reachable(id, 0);
+    }
+
+    /// Teach the `Router` about local users
+    pub fn local(&self, id: Identity) {
+        self.journal.add_local(id);
+    }
+    
     /// Queue a `R.A.T.M.A.N.` message for sending
     pub fn send(&self, msg: Message) {
         // FIXME: This is so pointless...

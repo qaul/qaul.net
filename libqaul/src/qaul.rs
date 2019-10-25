@@ -75,14 +75,28 @@ impl Qaul {
 
     /// Create new `libqaul` context, with initialised `Router`
     pub fn new(r: RouterInit) -> Self {
-        let RouterInit { router, channel } = r;        
+        let RouterInit { router, channel } = r;
         let router = Arc::new(router);
         let discovery = Discovery::new(Arc::clone(&router), channel);
 
         Self {
             router,
             discovery,
-            ..Default::default()
+            users: UserStore::new(),
+            auth: AuthStore::new(),
+            contacts: ContactStore::default(),
         }
+    }
+
+    pub fn send_test_message(&self, sender: Identity, recipient: Identity) {
+        self.router.send(ratman::Message::build_signed(
+            sender,
+            ratman::netmod::Recipient::User(recipient),
+            "testing",
+            vec!['h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd']
+                .into_iter()
+                .map(|x| x as u8)
+                .collect(),
+        ));
     }
 }

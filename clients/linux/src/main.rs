@@ -1,51 +1,60 @@
 use {
     libqaul::Qaul,
     netmod_mem::MemMod,
-    ratman::{netmod::Endpoint, Router},
+    ratman::{netmod::Endpoint, Router, Identity},
 };
 
+// This function implements a very simple message send and
+// bootstrapping procedure. It is heavily documented to be useful as
+// an onboarding device.
 fn main() {
+    
     // Create virtual network with two devices
     let mut mm1 = MemMod::new();
     let mut mm2 = MemMod::new();
+    
+    // Link the two devices together
     mm1.link(&mut mm2);
 
+    // Print the sizehint for good measure to see how large a Message
+    // we can send through this endpoint
     println!("mm1.sizehint() = {} bytes", mm1.size_hint());
 
+    // Create two routers. These hold routing state and journals and
+    // are responsible for routing packets through the network
     let r1 = Router::new();
     let r2 = Router::new();
 
+    // Add the endpoints to their respective routers
     r1.modify().add_ep(mm1);
     r2.modify().add_ep(mm2);
 
+    // Generate two network IDs we will use instead of real user profiles
+    let id1 = Identity::with_digest(&vec![1]);
+    let id2 = Identity::with_digest(&vec![2]);
+
+    // This step is a hack because we don't have actual discovery
+    // Messages yet. It will be replaced soon though!
+    r1.modify().discover(id2.clone());
+    r1.modify().local(id1.clone());
+
+    // Teach Router 2 about ID1 and it's own local ID
+    r2.modify().discover(id1.clone());
+    r2.modify().local(id2.clone());
+
+    // Initialise two Qaul instances with their respective Routers.
+    // At this point it's important that the routers were previously
+    // initialised. Changes _can_ be made, but only from inside libqaul,
+    // i.e. via some configuration service NOT 
     let q1 = Qaul::new(r1);
     let q2 = Qaul::new(r2);
 
-    // dbg!(&mm1.size_hint());
+    // Send a test message from id1 to id2 that says "hello world"
+    q1.send_test_message(id1, id2);
 
-    // let f = Frame {
-    //     sequence: 0,
-    //     sender: Identity::with_digest(&vec![1, 2, 3]),
-    //     recipient: Some(Identity::with_digest(&vec![3, 2, 1])),
-    //     signature: [0; 18],
-    //     payload: Payload::pack(vec![ 0, 1, 2, 3 ]),
-    // };
-
-    // // We want to send this frame!
-    // dbg!(&f);
-
-    // let j = thread::spawn(move || {
-    //     println!("Spawning listener!");
-    //     mm2.listen(Box::new(|f| {
-    //         println!("Received frame!!!");
-    //         dbg!(&f.sender);
-    //         Ok(())
-    //     }));
-    // });
-
-    // mm1.send(f);
-    // j.join();
-
-    // println!("{}", Identity::with_digest(&vec![]));
-    //let ds = DataStore::new("/home/".into());
+    // This delay is required to make the main thread wait enough time
+    // for the exchange to complete. In a real app this is not a
+    // problem because the main thread might be running UI or whatever
+    #[allow(deprecated)]
+    std::thread::sleep_ms(5000);
 }
