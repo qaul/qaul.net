@@ -1,7 +1,7 @@
-use netmod_mem::MemMod;
-use ratman::{
-    netmod::{Endpoint, Frame},
-    Router,
+use {
+    libqaul::Qaul,
+    netmod_mem::MemMod,
+    ratman::{netmod::Endpoint, Router},
 };
 
 fn main() {
@@ -12,14 +12,14 @@ fn main() {
 
     println!("mm1.sizehint() = {} bytes", mm1.size_hint());
 
-    let mut r1 = Router::new();
-    let mut r2 = Router::new();
+    let r1 = Router::new();
+    let r2 = Router::new();
 
-    r1.add_ep(mm1);
-    r2.add_ep(mm2);
+    r1.modify().add_ep(mm1);
+    r2.modify().add_ep(mm2);
 
-    // let q1 = Qaul::new(r1);
-    // let q2 = Qaul::new(r2);
+    let q1 = Qaul::new(r1);
+    let q2 = Qaul::new(r2);
 
     // dbg!(&mm1.size_hint());
 

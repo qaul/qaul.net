@@ -29,8 +29,16 @@ use std::sync::{mpsc::Receiver, Arc, Mutex};
 /// Use this structure only for destructuring, it has no useful
 /// attributes beyond named fields.
 pub struct RouterInit {
-    router: Router,
-    channel: Receiver<Message>,
+    /// Initialised `Router`
+    pub router: Router,
+    /// Upwards communication channel for Discovery
+    pub channel: Receiver<Message>,
+}
+
+impl RouterInit {
+    pub fn modify(&self) -> &Router {
+        &self.router
+    }
 }
 
 /// A `R.A.T.M.A.N.` routing context
@@ -40,12 +48,13 @@ pub struct RouterInit {
 /// the discovery protocol.
 pub struct Router {
     core: Arc<Mutex<Core>>,
+    #[allow(unused)]
     journal: Arc<Journal>,
 }
 
 impl Router {
     /// Create a new `Router` with internal mutability
-    pub fn new() -> Self {
+    pub fn new() -> RouterInit {
         let (core, j_rcv) = Some(Core::new())
             .map(|(c, r)| (Arc::new(Mutex::new(c)), r))
             .unwrap();
@@ -53,7 +62,10 @@ impl Router {
             .map(|(j, s)| (Arc::new(j), s))
             .unwrap();
 
-        Self { core, journal }
+        RouterInit {
+            router: Self { core, journal },
+            channel: d_send,
+        }
     }
 
     /// Add an `netmod` endpoint to this router

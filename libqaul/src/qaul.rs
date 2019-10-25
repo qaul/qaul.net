@@ -6,7 +6,7 @@ use crate::{
     users::{ContactStore, UserProfile, UserStore},
     Identity,
 };
-use ratman::Router;
+use ratman::{Router, RouterInit};
 
 use std::{
     collections::BTreeMap,
@@ -62,7 +62,7 @@ impl Default for Qaul {
             auth: AuthStore::new(),
             contacts: ContactStore::default(),
             discovery: Discovery::missing(),
-            router: Arc::new(Router::new()),
+            router: Arc::new(unimplemented!()),
         }
     }
 }
@@ -74,9 +74,10 @@ impl Qaul {
     }
 
     /// Create new `libqaul` context, with initialised `Router`
-    pub fn new(r: Router) -> Self {
-        let router = Arc::new(r);
-        let discovery = Discovery::new(Arc::clone(&router));
+    pub fn new(r: RouterInit) -> Self {
+        let RouterInit { router, channel } = r;        
+        let router = Arc::new(router);
+        let discovery = Discovery::new(Arc::clone(&router), channel);
 
         Self {
             router,
