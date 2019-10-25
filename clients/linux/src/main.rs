@@ -12,9 +12,12 @@ fn main() {
     // Create virtual network with two devices
     let mut mm1 = MemMod::new();
     let mut mm2 = MemMod::new();
+    let mut mm3 = MemMod::new();
+    let mut mm4 = MemMod::new();
     
     // Link the two devices together
     mm1.link(&mut mm2);
+    mm3.link(&mut mm4);
 
     // Print the sizehint for good measure to see how large a Message
     // we can send through this endpoint
@@ -24,10 +27,13 @@ fn main() {
     // are responsible for routing packets through the network
     let r1 = Router::new();
     let r2 = Router::new();
+    let r3 = Router::new();
 
     // Add the endpoints to their respective routers
     r1.modify().add_ep(mm1);
     r2.modify().add_ep(mm2);
+    r2.modify().add_ep(mm3);
+    r3.modify().add_ep(mm4);
 
     // Generate two network IDs we will use instead of real user profiles
     let id1 = Identity::with_digest(&vec![1]);
@@ -35,12 +41,16 @@ fn main() {
 
     // This step is a hack because we don't have actual discovery
     // Messages yet. It will be replaced soon though!
-    r1.modify().discover(id2.clone());
+    r1.modify().discover(id2.clone(), 0);
     r1.modify().local(id1.clone());
 
-    // Teach Router 2 about ID1 and it's own local ID
-    r2.modify().discover(id1.clone());
-    r2.modify().local(id2.clone());
+    // Router 2 is purely pass-through, no local users!
+    r2.modify().discover(id1.clone(), 0);
+    r2.modify().discover(id2.clone(), 1);
+
+    // Router 3 has the second local user
+    r3.modify().discover(id1.clone(), 0);
+    r3.modify().local(id2.clone());
 
     // Initialise two Qaul instances with their respective Routers.
     // At this point it's important that the routers were previously
@@ -48,6 +58,7 @@ fn main() {
     // i.e. via some configuration service NOT 
     let q1 = Qaul::new(r1);
     let q2 = Qaul::new(r2);
+    let q3 = Qaul::new(r3);
 
     // Send a test message from id1 to id2 that says "hello world"
     q1.send_test_message(id1, id2);

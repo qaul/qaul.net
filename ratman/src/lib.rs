@@ -78,8 +78,8 @@ impl Router {
 
     /// ONLY USE FOR DEBUGGING!
     #[deprecated]
-    pub fn discover(&self, id: Identity) {
-        self.core.lock().unwrap().id_reachable(id, 0);
+    pub fn discover(&self, id: Identity, ifid: u8) {
+        self.core.lock().unwrap().id_reachable(id, ifid);
     }
 
     /// Teach the `Router` about local users

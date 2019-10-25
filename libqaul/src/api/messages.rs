@@ -37,7 +37,18 @@ impl Qaul {
         associator: String,
         payload: Vec<u8>,
     ) -> QaulResult<()> {
-        unimplemented!()
+        let (ref my_id, _) = user.trusted()?;
+        self.router.send(ratman::Message::build_signed(
+            my_id.clone(),
+            match recipient {
+                Recipient::User(u) => ratman::netmod::Recipient::User(u),
+                _ => unimplemented!(),
+            },
+            associator,
+            payload,
+        ));
+
+        Ok(())
     }
 
     pub fn message_poll(&self, user: UserAuth) -> QaulResult<Vec<Message>> {
