@@ -1,20 +1,19 @@
 use {
     libqaul::Qaul,
     netmod_mem::MemMod,
-    ratman::{netmod::Endpoint, Router, Identity},
+    ratman::{netmod::Endpoint, Identity, Router},
 };
 
 // This function implements a very simple message send and
 // bootstrapping procedure. It is heavily documented to be useful as
 // an onboarding device.
 fn main() {
-    
     // Create virtual network with two devices
     let mut mm1 = MemMod::new();
     let mut mm2 = MemMod::new();
     let mut mm3 = MemMod::new();
     let mut mm4 = MemMod::new();
-    
+
     // Link the two devices together
     mm1.link(&mut mm2);
     mm3.link(&mut mm4);
@@ -35,33 +34,39 @@ fn main() {
     r2.modify().add_ep(mm3);
     r3.modify().add_ep(mm4);
 
-    // Generate two network IDs we will use instead of real user profiles
-    let id1 = Identity::with_digest(&vec![1]);
-    let id2 = Identity::with_digest(&vec![2]);
-
-    // This step is a hack because we don't have actual discovery
-    // Messages yet. It will be replaced soon though!
-    r1.modify().discover(id2.clone(), 0);
-    r1.modify().local(id1.clone());
-
-    // Router 2 is purely pass-through, no local users!
-    r2.modify().discover(id1.clone(), 0);
-    r2.modify().discover(id2.clone(), 1);
-
-    // Router 3 has the second local user
-    r3.modify().discover(id1.clone(), 0);
-    r3.modify().local(id2.clone());
-
-    // Initialise two Qaul instances with their respective Routers.
-    // At this point it's important that the routers were previously
-    // initialised. Changes _can_ be made, but only from inside libqaul,
-    // i.e. via some configuration service NOT 
+    // While `libqaul` can't add users to the routing scope yet, we
+    // need to now create Qaul structures so we can create users
     let q1 = Qaul::new(r1);
     let q2 = Qaul::new(r2);
     let q3 = Qaul::new(r3);
 
+    // Generate two user profiles on node 1 and 3
+    let u1 = q1.users().create("abc").unwrap();
+    let u2 = q3.users().create("abc").unwrap();
+
+    // Now we can retroactively inject user info into the
+    // Routers. This should soon no longer be needed, because creating
+    // a User will update the routing table and announce on the network.
+    q1.router().discover(u2.0, 0);
+    q1.router().local(u1.0);
+
+    q2.router().discover(u1.0, 0);
+    q2.router().discover(u2.0, 1);
+
+    q3.router().discover(u1.0, 0);
+    q3.router().local(u2.0);
+
+    // At this point all `Qaul` stacks are sufficiently initialised to
+    // use the actual `message` API to send a message.
+    q1.messages().send(
+        u1,
+        libqaul::Recipient::User(u2.0),
+        "test".into(),
+        vec![1, 2, 3, 4],
+    );
+
     // Send a test message from id1 to id2 that says "hello world"
-    q1.send_test_message(id1, id2);
+    // q1.send_test_message(id1, id2);
 
     // This delay is required to make the main thread wait enough time
     // for the exchange to complete. In a real app this is not a

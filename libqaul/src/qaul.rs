@@ -4,7 +4,7 @@ use crate::{
     auth::AuthStore,
     discover::Discovery,
     users::{ContactStore, UserProfile, UserStore},
-    api::{Messages},
+    api::{Messages, Users},
     Identity,
 };
 use ratman::{Router, RouterInit};
@@ -73,6 +73,12 @@ impl Qaul {
     pub fn start() -> Self {
         Default::default()
     }
+    
+    /// Get access to the inner Router
+    #[deprecated]
+    pub fn router(&self) -> &Router {
+        &self.router
+    }
 
     /// Create new `libqaul` context, with initialised `Router`
     pub fn new(r: RouterInit) -> Self {
@@ -104,5 +110,10 @@ impl Qaul {
     /// Load the `messages` API scope for qaul
     pub fn messages(&self) -> Messages {
         Messages { q: self }
+    }
+
+    /// Load the `users` API scope for qaul
+    pub fn users(&self) -> Users {
+        Users { q: self }
     }
 }
