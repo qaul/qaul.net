@@ -1,134 +1,83 @@
-//! Service API: user endpoints
+use crate::{Identity, Qaul, utils, User, UserProfile, QaulResult, QaulError};
 
-use super::models::{QaulError, QaulResult, UserAuth};
-use crate::{
-    auth::{AuthStore, PwHash},
-    qaul::Qaul,
-    users::{User, UserProfile, UserUpdate},
-    utils, Identity,
-};
+/// A random authentication token
+pub type Token = String;
 
-impl Qaul {
-    /// Create a new fouser
+/// Wrapper to encode `User` authentication state
+///
+/// This structure can be aquired by challenging an authentication
+/// endpoint, such as `User::login` to yield a token. If a session for
+/// this `Identity` already exists, it will be re-used.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct UserAuth(pub(crate) Identity, pub(crate) Token);
+
+/// API scope type to access user functions
+///
+/// Used entirely to namespace API endpoints on `Qaul` instance,
+/// without having long type identifiers.
+pub struct Users<'chain> {
+    pub(crate) q: &'chain Qaul,
+}
+
+impl<'qaul> Users<'qaul> {
+    /// Drop this scope and return back to global `Qaul` scope
+    pub fn drop(&'qaul self) -> &'qaul Qaul {
+        self.q
+    }
+
+    /// Enumerate locally registered users available
     ///
-    /// Generates a new `Identity` and takes a passphrase that is used to encrypt
-    pub fn user_create(&self, pw: &str) -> QaulResult<UserAuth> {
-        // FIXME: Generate ID from pubkey
+    /// No information about sessions or existing login state is
+    /// stored or accessible via this API.
+    pub fn list(&self) -> Vec<UserProfile> {
+        self.q.users.get_local()
+    }
+
+    /// Create a new user and authenticated session
+    ///
+    /// The specified password `pw` is used to encrypt the user's
+    /// private key and message stores and should be kept safe from
+    /// potential attackers.
+    ///
+    /// It's mandatory to choose a password here, however it is
+    /// possible for a frontend to choose a random sequence _for_ a
+    /// user, instead of leaving files completely unencrypted. In this
+    /// case, there's no real security, but a drive-by will still only
+    /// grab encrypted files.
+    pub fn create(&self, pw: &str) -> QaulResult<UserAuth> {
         let id = Identity::truncate(&utils::random(16));
-        let user = User::Local(UserProfile::new(id.clone()));
+        let user = User::Local(UserProfile::new(id));
 
-        self.users.add_user(user);
-        self.auth.set_pw(id.clone(), pw);
-        self.auth
-            .new_login(id, pw)
-            .map(|token| UserAuth::Trusted(id, token))
+        self.q.users.add_user(user);
+        self.q.auth.set_pw(id, pw);
+        self.q.auth.new_login(id, pw).map(|t| UserAuth(id, t))
     }
 
-    /// Get a list of all available local users
-    pub fn user_local_users(&self) -> Vec<UserProfile> {
-        self.users.get_local()
-    }
-
-    /// Inject a `UserAuth` into this `Qaul`.
-    ///
-    /// This is not, in general, a sensible thing for regular
-    /// applications to do, but is necessary for testing.
-    ///
-    /// ## Note
-    ///
-    /// In it's current form, this function can not be implemented
-    /// with the new `AuthStore` backend, because it doesn't map
-    /// tokens to users, but the other way around. The code is still
-    /// in the repo, albeit commented out. We should check what this
-    /// function should actually do and if it can be aproximated
-    /// better.
-    ///
-    /// # Panics
-    /// Panics if the provided `UserAuth` describes a user that is already known to this
-    /// `Qaul` instance.
-    /// Panics if the provided `UserAuth` users a key that is already known to this
-    /// `Qaul` instance.
-    pub fn user_inject(&self, _user: UserAuth) -> QaulResult<UserAuth> {
-        // let (id, key) = user.trusted()?;
-        // let mut user = User::new();
-        // user.id = id;
-
-        // let mut users = self.users.lock().unwrap();
-        // if users.contains_key(&id) {
-        //     panic!("The user {:?} already exists within the Qaul state.", id);
-        // }
-
-        // let mut keys = self.keys.lock().unwrap();
-        // if keys.contains_key(&key) {
-        //     panic!("The key {:?} already exists within the Qaul state.", key);
-        // }
-
-        // users.insert(id.clone(), user);
-        // keys.insert(key.clone(), id.clone());
-        // Ok(UserAuth::Trusted(id, key))
-        unimplemented!()
-    }
-
-    /// Update an existing (logged-in) user to use the given details.
-    pub fn user_update(&self, user: UserAuth, update: UserUpdate) -> QaulResult<UserProfile> {
-        // let (user_id, _) = self.user_authenticate(user)?;
-
-        // let mut users = self.users.lock().unwrap();
-        // let user = match users.get_mut(&user_id) {
-        //     Some(v) => v,
-        //     None => {
-        //         return Err(QaulError::UnknownUser);
-        //     }
-        // };
-
-        // update.apply_to(&mut user.data);
-
-        // Ok(user.clone())
-        unimplemented!()
-    }
-
-    /// Get information for any user
-    pub fn user_get(&self, user: UserAuth) -> QaulResult<UserProfile> {
-        unimplemented!()
-        // let user_id = user.identity();
-        // let users = self.users.lock().unwrap();
-        // match users.get(&user_id) {
-        //     Some(user) => Ok(user.clone()),
-        //     None => Err(QaulError::UnknownUser),
-        // }
-    }
-
-    /// Delete the currently logged-in user
-    pub fn user_delete(&self, user: UserAuth) -> QaulResult<()> {
-        unimplemented!()
-        // let (user_id, _) = self.user_authenticate(user)?;
-
-        // let mut users = self.users.lock().unwrap();
-        // if !users.contains_key(&user_id) {
-        //     return Err(QaulError::UnknownUser);
-        // }
-        // users.remove(&user_id);
-        // Ok(())
-    }
-
-    /// Log-in to an existing user
-    pub fn user_login(&self, id: Identity, pw: &str) -> QaulResult<UserAuth> {
-        unimplemented!()
-        // let token = self.auth.new_login(id, pw)?;
-        // Ok(UserAuth::Trusted(id, token))
-    }
-
-    /// End a currently active user session
-    pub fn user_logout(&self, user: UserAuth) -> QaulResult<()> {
-        unimplemented!()
-        // let (id, token) = self.user_authenticate(user)?;
-        // self.auth.logout(&id, &token)
-    }
-
-    /// Change a currently logged in user's password
-    pub fn user_change_pw(&self, user: UserAuth, pw: &str) -> QaulResult<()> {
-        let (id, _) = user.trusted()?;
-        self.auth.set_pw(id, pw);
+    /// Change the passphrase for an authenticated user
+    pub fn change_pw(&self, user: UserAuth, newpw: &str) -> QaulResult<()> {
+        let (id, _) = self.q.auth.trusted(user)?;
+        self.q.auth.set_pw(id, newpw);
         Ok(())
+    }
+
+    /// Create a new session login for a local User
+    pub fn login(&self, user: Identity, pw: &str) -> QaulResult<UserAuth> {
+        let token = self.q.auth.new_login(user, pw)?;
+        Ok(UserAuth(user, token))
+    }
+
+    /// Drop the current session Token, invalidating it
+    pub fn logout(&self, user: UserAuth) -> QaulResult<()> {
+        let (ref id, ref token) = self.q.auth.trusted(user)?;
+        self.q.auth.logout(id, token)
+    }
+
+    /// Fetch the `UserProfile` for a known identity, remote or local
+    ///
+    /// No athentication is required for this endpoint, seeing as only
+    /// public information is exposed via the `UserProfile`
+    /// abstraction anyway.
+    pub fn get(&self, user: Identity) -> QaulResult<UserProfile> {
+        self.q.users.get(&user)
     }
 }

@@ -1,5 +1,5 @@
-use super::models::{QaulError, QaulResult, UserAuth};
-use crate::{Identity, MsgUtils, Qaul, RatMessageProto, VecUtils};
+use super::models::{QaulError, QaulResult};
+use crate::{Identity, MsgUtils, Qaul, RatMessageProto, VecUtils, UserAuth};
 
 use serde::{Deserialize, Serialize};
 
@@ -196,7 +196,7 @@ pub struct Messages<'chain> {
 
 impl<'qaul> Messages<'qaul> {
     /// Drop this scope and return back to global `Qaul` scope
-    fn drop(&'qaul self) -> &'qaul Qaul {
+    pub fn drop(&'qaul self) -> &'qaul Qaul {
         self.q
     }
 
@@ -232,7 +232,7 @@ impl<'qaul> Messages<'qaul> {
         service: String,
         payload: Vec<u8>,
     ) -> QaulResult<()> {
-        let sender = self.q.auth.trusted(user)?;
+        let (sender, _) = self.q.auth.trusted(user)?;
         let recipients = MsgUtils::readdress(&recipient);
         let associator = service;
 

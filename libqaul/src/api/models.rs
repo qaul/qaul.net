@@ -35,66 +35,6 @@ pub enum QaulError {
     NetworkError,
 }
 
-// impl From<NetError> for QaulError {
-//     fn from(err: NetError) -> Self {
-//         match err {
-//             NetError::FrameTooLarge => Self::InvalidPayload,
-//             _ => Self::NetworkError,
-//         }
-//     }
-// }
-
-// /// A security token to authenticate sessions
-// #[derive(Clone, PartialEq, Eq)]
-// pub struct Token(String);
-
-// impl Debug for Token {
-//     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-//         write!(f, "<TOKEN>")
-//     }
-// }
-
-// impl From<String> for Token {
-//     fn from(s: String) -> Self {
-//         assert!(s.len() == 64);
-//         Token(s)
-//     }
-// }
-
-pub type Token = String;
-
-/// A wrapper around user authentication state
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum UserAuth {
-    /// A user ID which has not been verified
-    Untrusted(Identity),
-    /// The user ID of the currently logged-in user
-    Trusted(Identity, Token),
-}
-
-impl UserAuth {
-    /// Returns an error if the UserAuth isn't Trusted.
-    pub fn trusted(self) -> QaulResult<(Identity, Token)> {
-        match self {
-            UserAuth::Trusted(id, s) => Ok((id, s)),
-            UserAuth::Untrusted(_) => Err(QaulError::NotAuthorised),
-        }
-    }
-
-    /// Returns the interior identity, regardless of trust status.
-    pub fn identity(self) -> Identity {
-        match self {
-            UserAuth::Trusted(id, _) => id,
-            UserAuth::Untrusted(id) => id,
-        }
-    }
-
-    /// Returns the interior identity as an `Untrusted`, regardless of trust status.
-    pub fn as_untrusted(&self) -> Self {
-        UserAuth::Untrusted(self.clone().identity())
-    }
-}
-
 /// Signature trust information embedded into service messages
 pub enum SigTrust {
     /// A verified signature by a known contact

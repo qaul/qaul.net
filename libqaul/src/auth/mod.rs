@@ -41,10 +41,10 @@ impl AuthStore {
     }
 
     /// `UserAuth` convenience wrapper for `AuthStore::verify_token`
-    pub(crate) fn trusted(&self, user: UserAuth) -> QaulResult<Identity> {
-        let (id, token) = user.trusted()?;
+    pub(crate) fn trusted(&self, user: UserAuth) -> QaulResult<(Identity, Token)> {
+        let UserAuth(id, token) = user;
         self.verify_token(&id, &token)?;
-        Ok(id)
+        Ok((id, token))
     }
 
     /// Generate a new login token, if password is valid

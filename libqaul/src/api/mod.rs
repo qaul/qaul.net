@@ -28,7 +28,9 @@
 #[deprecated]
 mod models;
 // mod service;
-// mod users;
+
+mod users;
+pub use users::*;
 
 mod messages;
 pub use messages::*;
