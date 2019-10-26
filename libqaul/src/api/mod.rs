@@ -23,12 +23,15 @@
 // mod contacts;
 // mod files;
 // mod message_store;
-mod messages;
+
 
 #[deprecated]
 mod models;
 // mod service;
 // mod users;
 
-pub use messages::Messages;
+mod messages;
+pub use messages::*;
+
+#[deprecated]
 pub use models::*;

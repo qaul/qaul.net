@@ -13,3 +13,23 @@ pub(crate) fn random(len: usize) -> Vec<u8> {
         })
 }
 
+/// A functional remove/add API for datastructures
+pub(crate) trait VecUtils<T: PartialEq> {
+    /// Remove from vector, by element
+    fn strip(self, t: &T) -> Self;
+    /// Add to vector, returning `Self`
+    fn add(self, t: T) -> Self;
+}
+
+impl<T: PartialEq> VecUtils<T> for Vec<T> {
+    #[inline(always)]
+    fn strip(mut self, t: &T) -> Self {
+        self.into_iter().filter(|i| i != t).collect()
+    }
+
+    #[inline(always)]
+    fn add(mut self, t: T) -> Self {
+        self.push(t);
+        self
+    }
+}

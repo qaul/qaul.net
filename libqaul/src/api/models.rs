@@ -95,27 +95,6 @@ pub enum SigTrust {
     Invalid,
 }
 
-/// A service message
-///
-/// Differs from the `RATMAN` abstraction for messages
-/// because it's signature has already been verified.
-/// Instead of delivering the raw signature to a service,
-/// this message only embeds validity information.
-///
-/// This makes it easier for service authors to trust
-/// data provided by `libqaul`, without having to do
-/// calls into some crypto library themselves.
-///
-/// In comparison to the `RATMAN` message, the `associator`
-/// has also been removed because at this stage, only the
-/// relevant related service is being handed a message anyway.
-pub struct Message {
-    pub sender: Identity,
-    pub recipient: Recipient,
-    pub payload: Vec<u8>,
-    pub signature: SigTrust,
-}
-
 /// Local file abstraction
 pub struct File {
     pub name: String,

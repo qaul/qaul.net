@@ -1,5 +1,7 @@
 use super::models::{QaulError, QaulResult, UserAuth};
-use crate::{Identity, Qaul};
+use crate::{Identity, Qaul, VecUtils};
+
+use serde::{Deserialize, Serialize};
 
 /// Signature trust level of an incoming `Message`
 ///
@@ -8,6 +10,7 @@ use crate::{Identity, Qaul};
 ///
 /// The `SigTrust::ok` convenience function can be used to reject
 /// non-verifiable (unknown or bad) `Message` signatures.
+#[derive(Serialize, Deserialize)]
 pub enum SigTrust {
     /// A verified signature by a known contact
     Trusted,
@@ -34,6 +37,7 @@ impl SigTrust {
 /// "flood" mechanic is passed through to `RATMAN`, which might
 /// implement this in the networking module, or emulate
 /// it. Performance may vary.
+#[derive(Serialize, Deserialize)]
 pub enum Recipient {
     /// A single user, known to this node
     User(Identity),
@@ -59,7 +63,10 @@ pub enum Recipient {
 ///
 /// ## Rationale
 ///
-/// This approach was chosen over having multiple structs
+/// This approach was chosen over having multiple structs becauseit
+/// makes storing this type in the internal data store easier, without
+/// having to duplicate structures _too_ much.
+#[derive(Serialize, Deserialize)]
 pub enum Message {
     /// An incoming `Message`, received from someone else on the network
     In {
@@ -125,6 +132,42 @@ impl Message {
             Self::In { .. } => None,
         }
     }
+
+    /// Construct a new `Recipient`, in reply to a `Message::In`
+    ///
+    /// If the `Message` was addressed to a single user, the sender is
+    /// used. If it was addressed to a group, the sender is added, and
+    /// self is removed from the `Group` set. If it was a flood, then
+    /// the reply is a flood.
+    pub fn reply(&self, id: &Identity) -> Recipient {
+        let recipient = self.recipient();
+        let sender = self.sender();
+
+        use Recipient::*;
+        match recipient {
+            Group(ref group) => Group(group.clone().strip(id).add(*sender)),
+            User(_) => User(*sender),
+            Flood => Flood,
+        }
+    }
+}
+
+/// A query interface for the local `Message` store
+///
+/// Important to consider that a `Query` can only be applied to the
+/// set of messages that the user has access to. User access
+/// information is not encoded in this enum, but rather passed to the
+/// `Messages::query` function as a first parameter.
+///
+/// While `Query` objects can't be combined (yet), it is also possible
+/// to pass an `Option<String>` as service filter, meaning that only
+/// messages addressed to the appropriate service will be
+/// returned. Without this parameter, all messages will be returned.
+pub enum MessageQuery {
+    /// Query by who a `Message` was composed by
+    Sender(Identity),
+    /// Query a Message by who it is addressed to
+    Recipient(Recipient),
 }
 
 /// API scope type to access messaging functions
@@ -186,19 +229,28 @@ impl<'qaul> Messages<'qaul> {
         &self,
         user: UserAuth,
         recipient: Recipient,
-        associator: String,
+        service: String,
         payload: Vec<u8>,
     ) -> QaulResult<()> {
-        let id = self.q.auth.trusted(user)?;
-        self.q.router.send(ratman::Message::build_signed(
-            id.clone(),
-            match recipient {
-                Recipient::User(u) => ratman::netmod::Recipient::User(u),
-                _ => unimplemented!(),
-            },
+        let sender = self.q.auth.trusted(user)?;
+        let associator = service;
+
+        let msg = Message::Out {
+            sender,
+            recipient,
             associator,
             payload,
-        ));
+        };
+
+        // self.q.router.send(ratman::Message::build_signed(
+        //     sender.clone(),
+        //     match recipient {
+        //         Recipient::User(u) => ratman::netmod::Recipient::User(u),
+        //         _ => unimplemented!(),
+        //     },
+        //     service,
+        //     payload,
+        // ));
 
         Ok(())
     }
@@ -214,7 +266,7 @@ impl<'qaul> Messages<'qaul> {
     ///    incoming messages as they are received.
     /// 2. The `Message` variant returned from this endpoint will
     ///    **always** be `Message::In`, never an outgoing type.
-    pub fn poll<S>(&self, user: UserAuth, associator: S) -> QaulResult<Message>
+    pub fn poll<S>(&self, user: UserAuth, service: S) -> QaulResult<Message>
     where
         S: Into<String>,
     {
@@ -227,7 +279,7 @@ impl<'qaul> Messages<'qaul> {
     /// that it uses a lambda to call when a new `Message` is
     /// received.  Both caveats mentioned in the doc comment for
     /// `poll` apply here as well.
-    pub fn listen<S, F>(&self, user: UserAuth, associator: S, listener: F) -> QaulResult<()>
+    pub fn listen<S, F>(&self, user: UserAuth, service: S, listener: F) -> QaulResult<()>
     where
         S: Into<String>,
         F: Fn(Message) -> QaulResult<()>,
@@ -239,12 +291,13 @@ impl<'qaul> Messages<'qaul> {
     pub fn query<S>(
         &self,
         user: UserAuth,
-        associator: S,
+        service: S,
         query: MessageQuery,
     ) -> QaulResult<Vec<Message>>
     where
-        S: Into<String>,
+        S: Into<Option<String>>,
     {
+        let service = service.into();
         Ok(vec![])
     }
 }

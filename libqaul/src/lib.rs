@@ -44,10 +44,12 @@ mod api;
 mod auth;
 mod crypto;
 mod discover;
+mod messages;
 mod qaul;
 mod storage;
 mod users;
 mod utils;
+use utils::*;
 
 pub use identity::Identity;
 pub use qaul::Qaul;
