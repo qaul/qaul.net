@@ -4,6 +4,7 @@ use crate::{
     auth::AuthStore,
     discover::Discovery,
     users::{ContactStore, UserProfile, UserStore},
+    api::{Messages},
     Identity,
 };
 use ratman::{Router, RouterInit};
@@ -98,5 +99,10 @@ impl Qaul {
                 .map(|x| x as u8)
                 .collect(),
         ));
+    }
+
+    /// Load the `messages` API scope for qaul
+    pub fn messages(&self) -> Messages {
+        Messages { q: self }
     }
 }

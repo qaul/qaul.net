@@ -6,7 +6,7 @@
 mod pwhash;
 pub(crate) use pwhash::PwHash;
 
-use crate::{utils, DataStore, Identity, Persisted, QaulError, QaulResult, Token};
+use crate::{utils, DataStore, Identity, Persisted, QaulError, QaulResult, Token, UserAuth};
 use base64::{encode_config, URL_SAFE};
 use std::{
     collections::BTreeMap,
@@ -38,6 +38,13 @@ impl AuthStore {
             .lock()
             .expect("Faied to unlock hash store")
             .insert(user, PwHash::new(pw));
+    }
+
+    /// `UserAuth` convenience wrapper for `AuthStore::verify_token`
+    pub(crate) fn trusted(&self, user: UserAuth) -> QaulResult<Identity> {
+        let (id, token) = user.trusted()?;
+        self.verify_token(&id, &token)?;
+        Ok(id)
     }
 
     /// Generate a new login token, if password is valid
@@ -83,7 +90,6 @@ impl AuthStore {
             .get(user)
             .map(|t| t == token)
             .map_or(Err(QaulError::NotAuthorised), |_| Ok(()))?;
-
         Ok(())
     }
 

@@ -20,12 +20,15 @@
 // #[cfg(test)]
 // mod tests;
 
-mod contacts;
-mod files;
-mod message_store;
+// mod contacts;
+// mod files;
+// mod message_store;
 mod messages;
-mod models;
-mod service;
-mod users;
 
+#[deprecated]
+mod models;
+// mod service;
+// mod users;
+
+pub use messages::Messages;
 pub use models::*;

@@ -8,7 +8,13 @@ use mime::Mime;
 /// Convenience type for API functions
 pub type QaulResult<T> = Result<T, QaulError>;
 
-/// Service API error wrapper
+/// `libqaul` service API error states
+///
+/// All errors that can occur in interaction with the API are encoded
+/// as variants on this enum. In most cases, no additional metadata is
+/// provided and needs to be inferred from whatever context or
+/// function call emitted the error. Check the variant doc comments
+/// for a broad overview, as well as detailed usage instructions.
 #[derive(Debug, Clone, PartialEq)]
 pub enum QaulError {
     /// Not authorised to perform this action
@@ -21,6 +27,10 @@ pub enum QaulError {
     InvalidPayload,
     /// A function callback timed out
     CallbackTimeout,
+    /// Signature with an unknown public key
+    UnknownSign,
+    /// Fraudulent signature for a known public key
+    BadSign,
 }
 
 // /// A security token to authenticate sessions
@@ -104,21 +114,6 @@ pub struct Message {
     pub recipient: Recipient,
     pub payload: Vec<u8>,
     pub signature: SigTrust,
-}
-
-/// Service message recipient
-///
-/// A recipient is either a single user or the entire network.  The
-/// "flood" mechanic is passed through to `RATMAN`, which might
-/// implement this in the networking module, or emulate
-/// it. Performance may vary.
-pub enum Recipient {
-    /// A single user, known to this node
-    User(Identity),
-    /// A collection of users, sometimes called a Group
-    Group(Vec<Identity>),
-    /// Addressed to nobody, flooded into the network
-    Flood,
 }
 
 /// Local file abstraction

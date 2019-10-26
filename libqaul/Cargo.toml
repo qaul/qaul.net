@@ -7,15 +7,14 @@ license = "AGPL-3.0"
 edition = "2018"
 
 [dependencies]
-platform = { path = "platform", package = "qaul-platform" }
 identity = { path = "../ratman/identity", package = "ratman-identity", features = ["digest"] }
-alexandria = { git = "https://git.open-communication.net/qaul/alexandria" }
+platform = { path = "platform", package = "qaul-platform" }
 ratman = { path = "../ratman" }
 
 async-std = "0.99"
-
-rand = "0.7"
+alexandria = { git = "https://git.open-communication.net/qaul/alexandria" }
 base64 = "0.10"
 blake2 = "0.8.0"
-
 mime = "0.3"
+rand = "0.7"
+traitcast = "0.5"

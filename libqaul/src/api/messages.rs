@@ -1,10 +1,162 @@
-//! Service API: peer-to-peer messages
+use super::models::{QaulError, QaulResult, UserAuth};
+use crate::{Identity, Qaul};
 
-use super::models::{Message, QaulResult, Recipient, UserAuth};
-use crate::Qaul;
-use identity::Identity;
+/// Signature trust level of an incoming `Message`
+///
+/// The three variants encode `trusted`, `unverified` and `invalid`,
+/// according to signature verification of the internal keystore.
+///
+/// The `SigTrust::ok` convenience function can be used to reject
+/// non-verifiable (unknown or bad) `Message` signatures.
+pub enum SigTrust {
+    /// A verified signature by a known contact
+    Trusted,
+    /// An unverified signature by a known contact
+    /// (pubkey not available!)
+    Unverified,
+    /// A fraudulent signature
+    Invalid,
+}
 
-impl Qaul {
+impl SigTrust {
+    pub fn ok(&self) -> QaulResult<()> {
+        match self {
+            Self::Trusted => Ok(()),
+            Self::Unverified => Err(QaulError::UnknownSign),
+            Self::Invalid => Err(QaulError::BadSign),
+        }
+    }
+}
+
+/// Service message recipient
+///
+/// A recipient is either a single user or the entire network.  The
+/// "flood" mechanic is passed through to `RATMAN`, which might
+/// implement this in the networking module, or emulate
+/// it. Performance may vary.
+pub enum Recipient {
+    /// A single user, known to this node
+    User(Identity),
+    /// A collection of users, sometimes called a Group
+    Group(Vec<Identity>),
+    /// Addressed to nobody, flooded into the network
+    Flood,
+}
+
+/// A multipurpose service Message
+///
+/// The two states that are encoded in this enum are meant to
+/// disambiguate between a `Message` being **sent into** the network,
+/// vs. a `Message` that is **being received**. Fundamentally they are
+/// the same, and share the same abstraction principles, but will
+/// contain different data.
+///
+/// The `Out` variant will for example not contain `signature`
+/// information, because by the time the object is made, this data has
+/// not been computed yet. On the other hand the `In` variant won't
+/// have a service `associator`, because this is abstracted away by
+/// the `poll` and `listen` function endpoints.
+///
+/// ## Rationale
+///
+/// This approach was chosen over having multiple structs
+pub enum Message {
+    /// An incoming `Message`, received from someone else on the network
+    In {
+        /// The sender identity
+        sender: Identity,
+        /// Recipient information
+        recipient: Recipient,
+        /// Attached `Message` signature, built for all fields
+        sign: SigTrust,
+        /// A raw byte `Message` payload
+        payload: Vec<u8>,
+    },
+    /// An outgoing `Message`, sent from a local user
+    Out {
+        /// The sender identity
+        sender: Identity,
+        /// Recipient information
+        recipient: Recipient,
+        /// The embedded service associator
+        associator: String,
+        /// A raw byte `Message` payload
+        payload: Vec<u8>,
+    },
+}
+
+impl Message {
+    /// Returns the `sender` field for both `Message` variants
+    pub fn sender(&self) -> &Identity {
+        match self {
+            Self::In { ref sender, .. } => sender,
+            Self::Out { ref sender, .. } => sender,
+        }
+    }
+
+    /// Returns the `recipient` field for both `Message` variants
+    pub fn recipient(&self) -> &Recipient {
+        match self {
+            Self::In { ref recipient, .. } => recipient,
+            Self::Out { ref recipient, .. } => recipient,
+        }
+    }
+
+    /// Returns the `payload` field for both `Message` variants
+    pub fn payload(&self) -> &Vec<u8> {
+        match self {
+            Self::In { ref payload, .. } => payload,
+            Self::Out { ref payload, .. } => payload,
+        }
+    }
+
+    /// Returns the `sign` field for the `Message::In` variant
+    pub fn signature(&self) -> Option<&SigTrust> {
+        match self {
+            Self::In { ref sign, .. } => Some(sign),
+            Self::Out { .. } => None,
+        }
+    }
+
+    /// Returns the `associator` field for the `Message::Out` variant
+    pub fn associator(&self) -> Option<&String> {
+        match self {
+            Self::Out { ref associator, .. } => Some(associator),
+            Self::In { .. } => None,
+        }
+    }
+}
+
+/// API scope type to access messaging functions
+///
+/// Used entirely to namespace API endpoints on `Qaul` instance,
+/// without having long type identifiers.
+///
+/// ```norun
+/// # use libqaul::{Qaul, Messages};
+/// # let user = unimplemented!();
+/// let q = Qaul::default();
+/// q.messages().poll(user)?;
+/// ```
+///
+/// It's also possible to `drop` the current scope, back into the
+/// primary `Qaul` scope, although this is not often useful.
+///
+/// ```norun
+/// # use libqaul::{Qaul, Messages};
+/// # let q = Qaul::default();
+/// q.messages().drop(); // Returns `&Qaul` again
+/// ```
+pub struct Messages<'chain> {
+    pub(crate) q: &'chain crate::Qaul,
+}
+
+impl<'qaul> Messages<'qaul> {
+    /// Drop this scope and return back to global `Qaul` scope
+    fn drop(&'qaul self) -> &'qaul Qaul {
+        self.q
+    }
+
     /// Send a message into the network
     ///
     /// Because the term `Message` is overloaded slightly in
@@ -30,16 +182,16 @@ impl Qaul {
     /// a payload or recipient is however, and payloads that are
     /// unsecured in a Service API message will have been encrypted by
     /// the time that `RATMAN` handles them.
-    pub fn message_send(
+    pub fn send(
         &self,
         user: UserAuth,
         recipient: Recipient,
         associator: String,
         payload: Vec<u8>,
     ) -> QaulResult<()> {
-        let (ref my_id, _) = user.trusted()?;
-        self.router.send(ratman::Message::build_signed(
-            my_id.clone(),
+        let id = self.q.auth.trusted(user)?;
+        self.q.router.send(ratman::Message::build_signed(
+            id.clone(),
             match recipient {
                 Recipient::User(u) => ratman::netmod::Recipient::User(u),
                 _ => unimplemented!(),
@@ -51,15 +203,48 @@ impl Qaul {
         Ok(())
     }
 
-    pub fn message_poll(&self, user: UserAuth) -> QaulResult<Vec<Message>> {
+    /// Non-blockingly poll the API for the latest `Message` for a service
+    ///
+    /// Two notes on the data returned from this endpoint. For a more
+    /// general `Message` query/ enumeration API, see
+    /// `Messages::query` instead.
+    ///
+    /// 1. This will only receive new messages, since last checking
+    ///    and can be used, while in active operation, to handle
+    ///    incoming messages as they are received.
+    /// 2. The `Message` variant returned from this endpoint will
+    ///    **always** be `Message::In`, never an outgoing type.
+    pub fn poll<S>(&self, user: UserAuth, associator: S) -> QaulResult<Message>
+    where
+        S: Into<String>,
+    {
         unimplemented!()
     }
 
-    pub fn message_listen<S, F>(&self, user: UserAuth, associator: S, listener: F) -> QaulResult<()>
+    /// Register a listener on new-message events for a service
+    ///
+    /// This function works very similarly to `Messages::poll`, except
+    /// that it uses a lambda to call when a new `Message` is
+    /// received.  Both caveats mentioned in the doc comment for
+    /// `poll` apply here as well.
+    pub fn listen<S, F>(&self, user: UserAuth, associator: S, listener: F) -> QaulResult<()>
     where
         S: Into<String>,
         F: Fn(Message) -> QaulResult<()>,
     {
         unimplemented!()
+    }
+
+    /// Query for `Messages` from the store for a service
+    pub fn query<S>(
+        &self,
+        user: UserAuth,
+        associator: S,
+        query: MessageQuery,
+    ) -> QaulResult<Vec<Message>>
+    where
+        S: Into<String>,
+    {
+        Ok(vec![])
     }
 }
