@@ -1,7 +1,7 @@
 //! Slices `Message` into a series of Frames
 #![allow(unused)]
 
-use crate::{Message, Payload};
+use crate::Message;
 use netmod::{Frame, Sequence};
 
 pub(crate) struct Slicer;
@@ -11,7 +11,7 @@ impl Slicer {
     // TODO: Implement this
     pub(crate) fn slice(_: usize, msg: Message) -> Vec<Frame> {
         Sequence::new(msg.sender, msg.recipient)
-            .add(msg.payload.data)
+            .add(msg.payload)
             .build()
     }
 
@@ -24,11 +24,8 @@ impl Slicer {
             sender: frame.sender,
             recipient: frame.recipient,
             associator: String::new(), // TODO!
-            payload: Payload {
-                length: frame.payload.len() as u64,
-                data: frame.payload,
-            },
-            signature: 0,
+            payload: frame.payload,
+            signature: vec![],
         }
     }
 }

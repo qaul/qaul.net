@@ -2,7 +2,7 @@
 
 use std::fmt::{self, Debug, Formatter};
 
-use identity::Identity;
+use ratman::{netmod::Error as NetError, Identity};
 use mime::Mime;
 
 /// Convenience type for API functions
@@ -31,7 +31,18 @@ pub enum QaulError {
     UnknownSign,
     /// Fraudulent signature for a known public key
     BadSign,
+    /// A generic networking error occured
+    NetworkError,
 }
+
+// impl From<NetError> for QaulError {
+//     fn from(err: NetError) -> Self {
+//         match err {
+//             NetError::FrameTooLarge => Self::InvalidPayload,
+//             _ => Self::NetworkError,
+//         }
+//     }
+// }
 
 // /// A security token to authenticate sessions
 // #[derive(Clone, PartialEq, Eq)]

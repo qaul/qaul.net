@@ -2,7 +2,7 @@
 #![allow(unused)]
 
 use identity::Identity;
-use netmod::{Endpoint, Frame};
+use netmod::{Endpoint, Frame, Result, Error};
 use std::{
     collections::BTreeMap,
     sync::{
@@ -143,9 +143,10 @@ impl Core {
     }
 
     /// Send a properly enveloped message out into the network
-    pub(crate) fn send(&self, envs: Vec<Envelope>) {
+    pub(crate) fn send(&self, envs: Vec<Envelope>) -> Result<()> {
         dbg!("Dispatching message...");
         let sender = self.worker.to_send.lock().unwrap();
         envs.into_iter().for_each(|env| sender.send(env).unwrap());
+        Ok(())
     }
 }

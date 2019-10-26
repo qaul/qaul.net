@@ -49,7 +49,9 @@ mod qaul;
 mod storage;
 mod users;
 mod utils;
-use utils::*;
+
+pub(crate) use utils::*;
+pub(crate) use messages::*;
 
 pub use identity::Identity;
 pub use qaul::Qaul;

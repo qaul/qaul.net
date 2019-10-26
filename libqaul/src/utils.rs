@@ -2,6 +2,7 @@
 
 use rand::prelude::*;
 
+/// Generate some secure random data into an allocated slice
 pub(crate) fn random(len: usize) -> Vec<u8> {
     (0..)
         .map(|_| rand::thread_rng().next_u64())

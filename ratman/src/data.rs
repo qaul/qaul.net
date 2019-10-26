@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::hash::Hasher;
 use twox_hash::XxHash64;
 
-pub type Signature = u64;
+pub type Signature = Vec<u8>;
 
 /// An atomic message, handed to a `Router` to deliver
 ///
@@ -29,16 +29,9 @@ pub struct Message {
     /// Outside service associative information
     pub associator: String,
     /// Some raw message payload
-    pub payload: Payload,
+    pub payload: Vec<u8>,
     /// Source-verifiable payload signature data
     pub signature: Signature,
-}
-
-/// A raw, binary encoded message payload
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
-pub struct Payload {
-    pub length: u64,
-    pub data: Vec<u8>,
 }
 
 impl Message {
@@ -57,8 +50,8 @@ impl Message {
         S: Into<String>,
     {
         let associator = associator.into();
-        let payload = Payload { length: 0, data };
-        let signature = 1312;
+        let payload = data;
+        let signature = vec![1, 3, 1, 2];
 
         Self {
             sender,

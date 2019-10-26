@@ -18,10 +18,11 @@ use crate::{
 
 pub use {
     crate::{
-        data::{Message, Payload, Signature},
+        data::{Message, Signature},
         protocol::Protocol,
     },
-    netmod, identity::Identity,
+    identity::Identity,
+    netmod::{self, Result},
 };
 
 use netmod::{Endpoint, Recipient};
@@ -86,9 +87,9 @@ impl Router {
     pub fn local(&self, id: Identity) {
         self.journal.add_local(id);
     }
-    
+
     /// Queue a `R.A.T.M.A.N.` message for sending
-    pub fn send(&self, msg: Message) {
+    pub fn send(&self, msg: Message) -> Result<()> {
         // FIXME: This is so pointless...
         let recp = msg.recipient.clone();
 
@@ -105,6 +106,6 @@ impl Router {
                     vec.append(&mut set);
                     vec
                 }),
-        });
+        })
     }
 }

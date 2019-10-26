@@ -59,7 +59,9 @@ impl Journal {
                             let env = core.lock().unwrap().lookup(u, vec![frame]);
                             core.lock().unwrap().send(env);
                         }
-                        Recipient::Flood => core.lock().unwrap().send(vec![Envelope(id, frame)]),
+                        Recipient::Flood => {
+                            core.lock().unwrap().send(vec![Envelope(id, frame)]);
+                        }
                     }
                 }),
             },

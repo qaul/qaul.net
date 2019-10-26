@@ -1,5 +1,5 @@
 use super::models::{QaulError, QaulResult, UserAuth};
-use crate::{Identity, Qaul, VecUtils};
+use crate::{Identity, MsgUtils, Qaul, RatMessageProto, VecUtils};
 
 use serde::{Deserialize, Serialize};
 
@@ -233,6 +233,7 @@ impl<'qaul> Messages<'qaul> {
         payload: Vec<u8>,
     ) -> QaulResult<()> {
         let sender = self.q.auth.trusted(user)?;
+        let recipients = MsgUtils::readdress(&recipient);
         let associator = service;
 
         let msg = Message::Out {
@@ -242,16 +243,17 @@ impl<'qaul> Messages<'qaul> {
             payload,
         };
 
-        // self.q.router.send(ratman::Message::build_signed(
-        //     sender.clone(),
-        //     match recipient {
-        //         Recipient::User(u) => ratman::netmod::Recipient::User(u),
-        //         _ => unimplemented!(),
-        //     },
-        //     service,
-        //     payload,
-        // ));
+        let signature = MsgUtils::sign(&msg);
+        MsgUtils::send(
+            &self.q.router,
+            RatMessageProto {
+                msg,
+                recipients,
+                signature,
+            },
+        );
 
+        // proto.into().into_iter().map(|msg| self.q.router.send(msg)).collect();
         Ok(())
     }
 

@@ -1,33 +1,79 @@
 //! Internal `Message` handling module
 
-use crate::{Message, QaulResult, Recipient};
+use crate::{Message, QaulResult, QaulError, Recipient};
 use conjoiner;
-use ratman::{Identity, Message as RatMessage};
+use ratman::{netmod::Recipient as RatRecipient, Identity, Message as RatMessage, Router};
 use serde::{de::DeserializeOwned, Serialize};
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, Mutex},
+};
 
-trait SignUtil: Serialize + DeserializeOwned {
-    /// Sign a `Message` into a raw payload.
-    fn sign(self) -> QaulResult<RatMessage>;
-    /// Verify an incoming `ratman::Message` signature stack
-    fn verify(msg: RatMessage) -> QaulResult<Self>;
+/// A searchable index of messages encountered by this system
+pub(crate) struct MsgStore {
+    inner: Arc<Mutex<BTreeMap<Identity, Vec<Message>>>>,
 }
 
-impl SignUtil for Message {
-    fn sign(self) -> QaulResult<RatMessage> {
-        let payload = conjoiner::serialise(&self);
+pub(crate) struct MsgUtils;
 
-        // let Message {
-        //     sender,
-        //     recipient,
-        //     associator,
-        //     payload,
-        // } = self;
-
-        // TODO: Build signature
-        unimplemented!()
+impl MsgUtils {
+    /// Readdress the `libqaul` `Recipient` to a routing `Recipient`
+    pub(crate) fn readdress(recp: &Recipient) -> Vec<RatRecipient> {
+        match recp {
+            Recipient::Group(ref group) => group
+                .into_iter()
+                .cloned()
+                .map(|id| RatRecipient::User(id))
+                .collect(),
+            Recipient::User(ref id) => vec![RatRecipient::User(*id)],
+            Recipient::Flood => vec![RatRecipient::Flood],
+        }
     }
 
-    fn verify(msg: RatMessage) -> QaulResult<Self> {
-        unimplemented!()
+    /// Construct a cryptographic signature for an inner `Message`
+    pub(crate) fn sign(msg: &Message) -> Vec<u8> {
+        vec![1, 3, 1, 2]
+    }
+
+    /// Sends a `RatMessageProto`, calls a set of `send` commands
+    pub(crate) fn send(router: &Router, msg: RatMessageProto) -> QaulResult<()> {
+        let messages: Vec<RatMessage> = msg.into();
+        messages.into_iter().map(|msg| router.send(msg)).fold(Ok(()), |acc, res| {
+            match (acc, res) {
+                (_, Err(e)) => Err(QaulError::NetworkError),
+                (Err(e), _) => Err(e),
+                (_, _) => Ok(()),
+            }
+        })
+    }
+}
+
+/// A `ratman::Message` set prototype structure
+pub(crate) struct RatMessageProto {
+    /// The high level `Message` to send and validate for
+    pub(crate) msg: Message,
+    /// Readdressed `Recipient` information
+    pub(crate) recipients: Vec<RatRecipient>,
+    /// Signature for the inlined `Message` data
+    pub(crate) signature: Vec<u8>,
+}
+
+impl From<RatMessageProto> for Vec<RatMessage> {
+    fn from(proto: RatMessageProto) -> Self {
+        let sender = proto.msg.sender();
+        let associator = proto.msg.associator().clone().unwrap();
+        let payload = proto.msg.payload();
+        let signature = proto.signature;
+        proto
+            .recipients
+            .into_iter()
+            .map(|recipient| RatMessage {
+                sender: sender.clone(),
+                recipient,
+                associator: associator.clone(),
+                payload: payload.clone(),
+                signature: signature.clone(),
+            })
+            .collect()
     }
 }
