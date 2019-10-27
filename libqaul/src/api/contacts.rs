@@ -124,8 +124,7 @@ impl<'qaul> Contacts<'qaul> {
     /// ````
     pub fn query(&self, user: UserAuth, query: ContactQuery) -> Result<Vec<Identity>> {
         let (ref id, _) = self.q.auth.trusted(user)?;
-
-        Ok(vec![])
+        self.q.contacts.query(id, query)
     }
 
     /// Get all users that have a `ContactEntry` for this user

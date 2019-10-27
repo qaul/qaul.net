@@ -22,7 +22,7 @@ fn main() {
     // we can send through this endpoint
     println!("mm1.sizehint() = {} bytes", mm1.size_hint());
 
-    // Create two routers. These hold routing state and journals and
+    // Create three routers. These hold routing state and journals and
     // are responsible for routing packets through the network
     let r1 = Router::new();
     let r2 = Router::new();

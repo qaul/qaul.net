@@ -1,15 +1,13 @@
-//! Central qaul state holder module
-
-// Export the identity into root scope
 pub use identity::Identity;
 
 use crate::{
-    api::{Messages, Users, Contacts},
+    api::{Contacts, Messages, Users},
     auth::AuthStore,
     contacts::ContactStore,
     discover::Discovery,
     users::UserStore,
 };
+
 use ratman::{Router, RouterInit};
 use std::sync::Arc;
 
@@ -34,7 +32,7 @@ use std::sync::Arc;
 /// A bootstrapping procedure should thus look as follows:
 ///
 /// 1. RATMAN + netmod initialisation
-/// 2. `libqaul` startup (this struct, call `init()`)
+/// 2. `libqaul` startup (this struct, call `new(...)`)
 /// 3. Initialise services with a `libqaul` instance reference
 /// 4. Your application is now ready for use
 #[derive(Clone)]
@@ -78,7 +76,14 @@ impl Qaul {
         &self.router
     }
 
-    /// Create new `libqaul` context, with initialised `Router`
+    /// Create new qaul context, with pre-initialised `Router`
+    ///
+    /// This function sets up discovery and API handler threads, as
+    /// well as local storage. Stopping a qaul instance is currently
+    /// not possible (woops). This call is non-blocking and assumes
+    /// that the main thread will take over execution of some other
+    /// application loop so to enable further API abstractions to hook
+    /// into the service API.
     pub fn new(r: RouterInit) -> Self {
         let RouterInit { router, channel } = r;
         let router = Arc::new(router);
@@ -93,16 +98,17 @@ impl Qaul {
         }
     }
 
-    /// Load the `messages` API scope for qaul
+    /// Get messages function scope
     pub fn messages(&self) -> Messages {
         Messages { q: self }
     }
 
-    /// Load the `users` API scope for qaul
+    /// Get users function scope
     pub fn users(&self) -> Users {
         Users { q: self }
     }
 
+    /// Get contact book function scope
     pub fn contacts(&self) -> Contacts {
         Contacts { q: self }
     }
