@@ -44,17 +44,11 @@ fn main() {
     let u1 = q1.users().create("abc").unwrap();
     let u2 = q3.users().create("abc").unwrap();
 
-    // Now we can retroactively inject user info into the
-    // Routers. This should soon no longer be needed, because creating
-    // a User will update the routing table and announce on the network.
+    // Manually make Routers discover each other
     q1.router().discover(u2.0, 0);
-    q1.router().local(u1.0);
-
     q2.router().discover(u1.0, 0);
     q2.router().discover(u2.0, 1);
-
     q3.router().discover(u1.0, 0);
-    q3.router().local(u2.0);
 
     // At this point all `Qaul` stacks are sufficiently initialised to
     // use the actual `message` API to send a message.
@@ -64,9 +58,6 @@ fn main() {
         "test".into(),
         vec![1, 2, 3, 4],
     );
-
-    // Send a test message from id1 to id2 that says "hello world"
-    // q1.send_test_message(id1, id2);
 
     // This delay is required to make the main thread wait enough time
     // for the exchange to complete. In a real app this is not a

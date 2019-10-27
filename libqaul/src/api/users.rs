@@ -48,6 +48,9 @@ impl<'qaul> Users<'qaul> {
         let id = Identity::truncate(&utils::random(16));
         let user = User::Local(UserProfile::new(id));
 
+        // Inform Router about new local user
+        self.q.router.local(id);
+        
         self.q.users.add_user(user);
         self.q.auth.set_pw(id, pw);
         self.q.auth.new_login(id, pw).map(|t| UserAuth(id, t))

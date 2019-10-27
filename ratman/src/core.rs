@@ -126,9 +126,8 @@ impl Core {
     }
 
     pub(crate) fn id_reachable(&self, id: Identity, ifid: u8) {
-        let mut routes = dbg!(self.routes.lock().unwrap());
+        let mut routes = self.routes.lock().unwrap();
         routes.insert(id, ifid);
-        dbg!(routes);
     }
 
     /// Map a set of Frames into a set of Envelopes
@@ -144,7 +143,7 @@ impl Core {
 
     /// Send a properly enveloped message out into the network
     pub(crate) fn send(&self, envs: Vec<Envelope>) -> Result<()> {
-        dbg!("Dispatching message...");
+        dbg!("Dispatching frames");
         let sender = self.worker.to_send.lock().unwrap();
         envs.into_iter().for_each(|env| sender.send(env).unwrap());
         Ok(())
