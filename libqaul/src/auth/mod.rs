@@ -6,7 +6,12 @@
 mod pwhash;
 pub(crate) use pwhash::PwHash;
 
-use crate::{utils, DataStore, Identity, Persisted, QaulError, QaulResult, Token, UserAuth};
+use crate::error::{Error, Result};
+use crate::qaul::Identity;
+use crate::random;
+use crate::store::DataStore;
+use crate::users::{Token, UserAuth};
+
 use base64::{encode_config, URL_SAFE};
 use std::{
     collections::BTreeMap,
@@ -41,7 +46,7 @@ impl AuthStore {
     }
 
     /// `UserAuth` convenience wrapper for `AuthStore::verify_token`
-    pub(crate) fn trusted(&self, user: UserAuth) -> QaulResult<(Identity, Token)> {
+    pub(crate) fn trusted(&self, user: UserAuth) -> Result<(Identity, Token)> {
         let UserAuth(id, token) = user;
         self.verify_token(&id, &token)?;
         Ok((id, token))
@@ -51,13 +56,13 @@ impl AuthStore {
     ///
     /// If a token already exists, and the password is valid, it will
     /// be returned instead of generating a new one.
-    pub(crate) fn new_login(&self, user: Identity, pw: &str) -> QaulResult<Token> {
+    pub(crate) fn new_login(&self, user: Identity, pw: &str) -> Result<Token> {
         self.hashes
             .lock()
             .expect("Failed to unlock hash store")
             .get(&user)
             .filter(|hash| hash.matches_with(pw))
-            .map_or(Err(QaulError::UnknownUser), |_| Ok(()))?;
+            .map_or(Err(Error::UnknownUser), |_| Ok(()))?;
 
         let mut tokens = self.tokens.lock().expect("Failed to lock token store!");
         let token = tokens
@@ -70,7 +75,7 @@ impl AuthStore {
     }
 
     /// Yield a token for a session, logging out a user
-    pub(crate) fn logout(&self, user: &Identity, token: &Token) -> QaulResult<()> {
+    pub(crate) fn logout(&self, user: &Identity, token: &Token) -> Result<()> {
         match self
             .tokens
             .lock()
@@ -78,24 +83,24 @@ impl AuthStore {
             .remove(user)
         {
             Some(ref t) if t == token => Ok(()),
-            Some(_) | None => Err(QaulError::NotAuthorised),
+            Some(_) | None => Err(Error::NotAuthorised),
         }
     }
 
     /// Verify that a user's token is valid
-    pub(crate) fn verify_token(&self, user: &Identity, token: &Token) -> QaulResult<()> {
+    pub(crate) fn verify_token(&self, user: &Identity, token: &Token) -> Result<()> {
         self.tokens
             .lock()
             .expect("Failed to lock token store")
             .get(user)
             .map(|t| t == token)
-            .map_or(Err(QaulError::NotAuthorised), |_| Ok(()))?;
+            .map_or(Err(Error::NotAuthorised), |_| Ok(()))?;
         Ok(())
     }
 
     /// Generate a new base64 encoded token
     fn generate() -> Token {
-        let t = utils::random(32);
+        let t = random(32);
         encode_config(&t, URL_SAFE)
     }
 }

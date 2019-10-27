@@ -1,39 +1,9 @@
 //! Service API exchange models
 
 use std::fmt::{self, Debug, Formatter};
-
-use ratman::{netmod::Error as NetError, Identity};
+use ratman::Identity;
 use mime::Mime;
 
-/// Convenience type for API functions
-pub type QaulResult<T> = Result<T, QaulError>;
-
-/// `libqaul` service API error states
-///
-/// All errors that can occur in interaction with the API are encoded
-/// as variants on this enum. In most cases, no additional metadata is
-/// provided and needs to be inferred from whatever context or
-/// function call emitted the error. Check the variant doc comments
-/// for a broad overview, as well as detailed usage instructions.
-#[derive(Debug, Clone, PartialEq)]
-pub enum QaulError {
-    /// Not authorised to perform this action
-    NotAuthorised,
-    /// The desired user was not known
-    UnknownUser,
-    /// Invalid search query
-    InvalidQuery,
-    /// Invalid payload (probably too big)
-    InvalidPayload,
-    /// A function callback timed out
-    CallbackTimeout,
-    /// Signature with an unknown public key
-    UnknownSign,
-    /// Fraudulent signature for a known public key
-    BadSign,
-    /// A generic networking error occured
-    NetworkError,
-}
 
 /// Signature trust information embedded into service messages
 pub enum SigTrust {

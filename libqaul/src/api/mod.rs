@@ -23,17 +23,9 @@
 // mod contacts;
 // mod files;
 // mod message_store;
-
-
-#[deprecated]
-mod models;
 // mod service;
+pub(crate) mod users;
+pub use users::Users;
 
-mod users;
-pub use users::*;
-
-mod messages;
-pub use messages::*;
-
-#[deprecated]
-pub use models::*;
+pub(crate) mod messages;
+pub use messages::Messages;

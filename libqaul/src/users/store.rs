@@ -1,6 +1,9 @@
 //! Store for user profiles
 
-use crate::{Identity, QaulError, QaulResult, UserProfile};
+use crate::error::{Error, Result};
+use crate::qaul::Identity;
+use crate::users::UserProfile;
+
 use std::{
     collections::BTreeMap,
     sync::{Arc, Mutex},
@@ -50,7 +53,7 @@ impl UserStore {
     }
 
     /// Modify a single user inside the store in-place
-    pub fn modify<F>(&self, id: &Identity, modifier: F) -> QaulResult<()>
+    pub fn modify<F>(&self, id: &Identity, modifier: F) -> Result<()>
     where
         F: Fn(&mut UserProfile),
     {
@@ -60,7 +63,7 @@ impl UserStore {
                 .lock()
                 .expect("Failed to lock user store")
                 .get_mut(id)
-                .map_or(Err(QaulError::UnknownUser), |x| Ok(x))?
+                .map_or(Err(Error::UnknownUser), |x| Ok(x))?
             {
                 User::Local(ref mut u) => u,
                 User::Remote(ref mut u) => u,
@@ -69,12 +72,12 @@ impl UserStore {
         Ok(())
     }
 
-    pub(crate) fn get(&self, id: &Identity) -> QaulResult<UserProfile> {
+    pub(crate) fn get(&self, id: &Identity) -> Result<UserProfile> {
         self.inner
             .lock()
             .expect("Failed to lock UserStore")
             .get(id)
-            .map_or(Err(QaulError::UnknownUser), |x| {
+            .map_or(Err(Error::UnknownUser), |x| {
                 Ok(match x {
                     User::Local(ref u) => u,
                     User::Remote(ref u) => u,

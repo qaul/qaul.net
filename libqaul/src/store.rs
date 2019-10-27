@@ -1,6 +1,6 @@
 //! General database storage abstraction
 
-use crate::{QaulResult, UserProfile};
+use crate::{error::Result, users::UserProfile};
 use alexandria::{Address, Data, Delta, KeyAttr, Library, ScopeAttr};
 use std::sync::Arc;
 
@@ -9,7 +9,7 @@ use std::sync::Arc;
 /// This is done by implementing a simple `store` and `load` function
 /// which is called by the `DataStore` to serialise data for the
 /// Alexandria storage backend.
-pub trait Persisted {
+pub(crate) trait Persisted {
     /// Provide storage backend with storable data
     fn store(&self) -> Vec<Data>;
 
@@ -53,7 +53,7 @@ pub trait Persisted {
 /// permissions!). In the easy case (or Android), file storage is
 /// namespaced within the Alexandria HOME dir:
 /// `$ALEX_HOME/<username>/...`
-pub struct DataStore {
+pub(crate) struct DataStore {
     inner: Library,
     homedir: String,
     states: Vec<Arc<Persisted>>,

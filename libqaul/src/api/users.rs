@@ -1,4 +1,8 @@
-use crate::{Identity, Qaul, utils, User, UserProfile, QaulResult, QaulError};
+use crate::error::{Error, Result};
+use crate::messages::{MsgUtils, RatMessageProto};
+use crate::qaul::{Identity, Qaul};
+use crate::random;
+use crate::users::{User, UserProfile};
 
 /// A random authentication token
 pub type Token = String;
@@ -44,33 +48,33 @@ impl<'qaul> Users<'qaul> {
     /// user, instead of leaving files completely unencrypted. In this
     /// case, there's no real security, but a drive-by will still only
     /// grab encrypted files.
-    pub fn create(&self, pw: &str) -> QaulResult<UserAuth> {
-        let id = Identity::truncate(&utils::random(16));
+    pub fn create(&self, pw: &str) -> Result<UserAuth> {
+        let id = Identity::truncate(&random(16));
         let user = User::Local(UserProfile::new(id));
 
         // Inform Router about new local user
         self.q.router.local(id);
-        
+
         self.q.users.add_user(user);
         self.q.auth.set_pw(id, pw);
         self.q.auth.new_login(id, pw).map(|t| UserAuth(id, t))
     }
 
     /// Change the passphrase for an authenticated user
-    pub fn change_pw(&self, user: UserAuth, newpw: &str) -> QaulResult<()> {
+    pub fn change_pw(&self, user: UserAuth, newpw: &str) -> Result<()> {
         let (id, _) = self.q.auth.trusted(user)?;
         self.q.auth.set_pw(id, newpw);
         Ok(())
     }
 
     /// Create a new session login for a local User
-    pub fn login(&self, user: Identity, pw: &str) -> QaulResult<UserAuth> {
+    pub fn login(&self, user: Identity, pw: &str) -> Result<UserAuth> {
         let token = self.q.auth.new_login(user, pw)?;
         Ok(UserAuth(user, token))
     }
 
     /// Drop the current session Token, invalidating it
-    pub fn logout(&self, user: UserAuth) -> QaulResult<()> {
+    pub fn logout(&self, user: UserAuth) -> Result<()> {
         let (ref id, ref token) = self.q.auth.trusted(user)?;
         self.q.auth.logout(id, token)
     }
@@ -80,7 +84,7 @@ impl<'qaul> Users<'qaul> {
     /// No athentication is required for this endpoint, seeing as only
     /// public information is exposed via the `UserProfile`
     /// abstraction anyway.
-    pub fn get(&self, user: Identity) -> QaulResult<UserProfile> {
+    pub fn get(&self, user: Identity) -> Result<UserProfile> {
         self.q.users.get(&user)
     }
 }

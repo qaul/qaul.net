@@ -5,7 +5,9 @@
 //! - lists of users they know about, by identity, plus
 //! - local-only information about those users, like personal nicknames
 
-use crate::{Identity, QaulError, QaulResult};
+use crate::error::{Error, Result};
+use crate::qaul::Identity;
+
 use std::{
     collections::BTreeMap,
     sync::{Arc, Mutex},
@@ -43,7 +45,7 @@ impl ContactStore {
     /// `id` in this case is the current session user, `user` is the
     /// contact entry they want to modify. If none previously existed,
     /// a fresh one will be created.
-    pub(crate) fn modify<F>(&self, id: &Identity, user: &Identity, modify: F) -> QaulResult<()>
+    pub(crate) fn modify<F>(&self, id: &Identity, user: &Identity, modify: F) -> Result<()>
     where
         F: Fn(&mut ContactData),
     {
@@ -57,11 +59,11 @@ impl ContactStore {
         Ok(())
     }
 
-    pub(crate) fn query(&self, id: &Identity, query: ContactQuery) -> QaulResult<Vec<Identity>> {
+    pub(crate) fn query(&self, id: &Identity, query: ContactQuery) -> Result<Vec<Identity>> {
         let mut inner = self.inner.lock().expect("Failed to lock ContactStore");
         Ok(inner
             .get(id)
-            .map_or(Err(QaulError::UnknownUser), |x| Ok(x))?
+            .map_or(Err(Error::UnknownUser), |x| Ok(x))?
             .iter()
             .filter(|(_, con)| match query {
                 ContactQuery::Nick(nick) if con.nick.is_none() => false,
@@ -72,11 +74,11 @@ impl ContactStore {
             .collect())
     }
 
-    pub(crate) fn get_all(&self, id: &Identity) -> QaulResult<Vec<Identity>> {
+    pub(crate) fn get_all(&self, id: &Identity) -> Result<Vec<Identity>> {
         let mut inner = self.inner.lock().expect("Failed to lock ContactStore");
         Ok(inner
             .get(id)
-            .map_or(Err(QaulError::UnknownUser), |x| Ok(x))?
+            .map_or(Err(Error::UnknownUser), |x| Ok(x))?
             .iter()
             .map(|(id, _)| id.clone())
             .collect())

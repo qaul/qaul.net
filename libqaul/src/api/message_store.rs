@@ -1,7 +1,6 @@
 //! Service API: message store
 
-use super::UserAuth;
-use crate::{api::Message, Qaul, QaulResult};
+use crate::{Qaul, Message, UserAuth, QaulError, QaulResult};
 
 impl Qaul {
     /// A temporary endpoint designed to get all messages from a user

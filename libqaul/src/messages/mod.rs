@@ -1,6 +1,10 @@
 //! Internal `Message` handling module
 
-use crate::{Message, QaulResult, QaulError, Recipient};
+// Public exports
+pub use crate::api::messages::{Message, MessageQuery, Recipient, SigTrust};
+
+use crate::error::{Error, Result};
+
 use conjoiner;
 use ratman::{netmod::Recipient as RatRecipient, Identity, Message as RatMessage, Router};
 use serde::{de::DeserializeOwned, Serialize};
@@ -36,15 +40,16 @@ impl MsgUtils {
     }
 
     /// Sends a `RatMessageProto`, calls a set of `send` commands
-    pub(crate) fn send(router: &Router, msg: RatMessageProto) -> QaulResult<()> {
+    pub(crate) fn send(router: &Router, msg: RatMessageProto) -> Result<()> {
         let messages: Vec<RatMessage> = msg.into();
-        messages.into_iter().map(|msg| router.send(msg)).fold(Ok(()), |acc, res| {
-            match (acc, res) {
-                (_, Err(e)) => Err(QaulError::NetworkError),
+        messages
+            .into_iter()
+            .map(|msg| router.send(msg))
+            .fold(Ok(()), |acc, res| match (acc, res) {
+                (_, Err(e)) => Err(Error::NetworkError),
                 (Err(e), _) => Err(e),
                 (_, _) => Ok(()),
-            }
-        })
+            })
     }
 }
 

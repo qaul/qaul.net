@@ -40,22 +40,20 @@
 
 #![allow(warnings)]
 
-mod api;
 mod auth;
 mod crypto;
 mod discover;
-mod messages;
-mod qaul;
-mod storage;
-mod users;
+
+pub mod messages;
+
 mod utils;
-
 pub(crate) use utils::*;
-pub(crate) use messages::*;
 
+mod qaul;
 pub use identity::Identity;
 pub use qaul::Qaul;
 
-pub use api::*;
-pub use storage::*;
-pub use users::*;
+pub mod api;
+pub mod error;
+pub mod store;
+pub mod users;

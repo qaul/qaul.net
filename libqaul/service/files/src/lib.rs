@@ -1,37 +1,38 @@
-//! `qaul.net` filesharing service
+// //! `qaul.net` filesharing service
+// #![allow(unused)]
 
-use qaul::{Qaul, QaulResult, UserAuth};
-use identity::Identity;
-pub use mime::Mime;
+// use qaul::{Qaul, QaulResult, UserAuth};
+// use identity::Identity;
+// pub use mime::Mime;
 
-/// A typed file that can be sent across the network
-pub struct File {
-    pub name: String,
-    pub mime: Mime,
-    pub data: Vec<u8>,
-}
+// /// A typed file that can be sent across the network
+// pub struct File {
+//     pub name: String,
+//     pub mime: Mime,
+//     pub data: Vec<u8>,
+// }
 
-// TODO: Partial files/ file progress
-// TODO: Download links with tokens
+// // TODO: Partial files/ file progress
+// // TODO: Download links with tokens
 
-/// Filesharing service state
-pub struct Filesharing<'q> {
-    qaul: &'q Qaul,
-}
+// /// Filesharing service state
+// pub struct Filesharing<'q> {
+//     qaul: &'q Qaul,
+// }
 
-impl<'q> Filesharing<'q> {
-    /// Send a single file to a group of people
-    pub fn send_file(
-        &self,
-        user: UserAuth,
-        recipients: Vec<Identity>,
-        file: File,
-    ) -> QaulResult<()> {
-        unimplemented!()
-    }
+// impl<'q> Filesharing<'q> {
+//     /// Send a single file to a group of people
+//     pub fn send_file(
+//         &self,
+//         user: UserAuth,
+//         recipients: Vec<Identity>,
+//         file: File,
+//     ) -> QaulResult<()> {
+//         unimplemented!()
+//     }
 
-    /// Get all files that were received since the last poll
-    pub fn poll_files(&self, user: UserAuth) -> QaulResult<Vec<File>> {
-        unimplemented!()
-    }
-}
+//     /// Get all files that were received since the last poll
+//     pub fn poll_files(&self, user: UserAuth) -> QaulResult<Vec<File>> {
+//         unimplemented!()
+//     }
+// }

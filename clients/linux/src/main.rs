@@ -1,8 +1,11 @@
 use {
-    libqaul::Qaul,
     netmod_mem::MemMod,
-    ratman::{netmod::Endpoint, Identity, Router},
+    ratman::{netmod::Endpoint, Router},
 };
+
+use libqaul::{Qaul, Identity};
+use libqaul::messages::Recipient;
+
 
 // This function implements a very simple message send and
 // bootstrapping procedure. It is heavily documented to be useful as
@@ -54,7 +57,7 @@ fn main() {
     // use the actual `message` API to send a message.
     q1.messages().send(
         u1,
-        libqaul::Recipient::User(u2.0),
+        Recipient::User(u2.0),
         "test".into(),
         vec![1, 2, 3, 4],
     );

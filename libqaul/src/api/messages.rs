@@ -1,5 +1,8 @@
-use super::models::{QaulError, QaulResult};
-use crate::{Identity, MsgUtils, Qaul, RatMessageProto, VecUtils, UserAuth};
+use crate::error::{Error, Result};
+use crate::messages::{MsgUtils, RatMessageProto};
+use crate::qaul::{Identity, Qaul};
+use crate::users::UserAuth;
+use crate::VecUtils;
 
 use serde::{Deserialize, Serialize};
 
@@ -22,11 +25,11 @@ pub enum SigTrust {
 }
 
 impl SigTrust {
-    pub fn ok(&self) -> QaulResult<()> {
+    pub fn ok(&self) -> Result<()> {
         match self {
             Self::Trusted => Ok(()),
-            Self::Unverified => Err(QaulError::UnknownSign),
-            Self::Invalid => Err(QaulError::BadSign),
+            Self::Unverified => Err(Error::UnknownSign),
+            Self::Invalid => Err(Error::BadSign),
         }
     }
 }
@@ -231,7 +234,7 @@ impl<'qaul> Messages<'qaul> {
         recipient: Recipient,
         service: String,
         payload: Vec<u8>,
-    ) -> QaulResult<()> {
+    ) -> Result<()> {
         let (sender, _) = self.q.auth.trusted(user)?;
         let recipients = MsgUtils::readdress(&recipient);
         let associator = service;
@@ -268,7 +271,7 @@ impl<'qaul> Messages<'qaul> {
     ///    incoming messages as they are received.
     /// 2. The `Message` variant returned from this endpoint will
     ///    **always** be `Message::In`, never an outgoing type.
-    pub fn poll<S>(&self, user: UserAuth, service: S) -> QaulResult<Message>
+    pub fn poll<S>(&self, user: UserAuth, service: S) -> Result<Message>
     where
         S: Into<String>,
     {
@@ -281,21 +284,16 @@ impl<'qaul> Messages<'qaul> {
     /// that it uses a lambda to call when a new `Message` is
     /// received.  Both caveats mentioned in the doc comment for
     /// `poll` apply here as well.
-    pub fn listen<S, F>(&self, user: UserAuth, service: S, listener: F) -> QaulResult<()>
+    pub fn listen<S, F>(&self, user: UserAuth, service: S, listener: F) -> Result<()>
     where
         S: Into<String>,
-        F: Fn(Message) -> QaulResult<()>,
+        F: Fn(Message) -> Result<()>,
     {
         unimplemented!()
     }
 
     /// Query for `Messages` from the store for a service
-    pub fn query<S>(
-        &self,
-        user: UserAuth,
-        service: S,
-        query: MessageQuery,
-    ) -> QaulResult<Vec<Message>>
+    pub fn query<S>(&self, user: UserAuth, service: S, query: MessageQuery) -> Result<Vec<Message>>
     where
         S: Into<Option<String>>,
     {

@@ -1,14 +1,13 @@
 //! Central qaul state holder module
 
 use crate::{
+    api::{Messages, Users},
     auth::AuthStore,
     discover::Discovery,
     users::{ContactStore, UserProfile, UserStore},
-    api::{Messages, Users},
-    Identity,
 };
+pub use identity::Identity;
 use ratman::{Router, RouterInit};
-
 use std::{
     collections::BTreeMap,
     sync::{Arc, Mutex},
@@ -73,7 +72,7 @@ impl Qaul {
     pub fn start() -> Self {
         Default::default()
     }
-    
+
     /// Get access to the inner Router
     #[deprecated]
     pub fn router(&self) -> &Router {
