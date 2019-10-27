@@ -228,16 +228,19 @@ impl<'qaul> Messages<'qaul> {
     /// a payload or recipient is however, and payloads that are
     /// unsecured in a Service API message will have been encrypted by
     /// the time that `RATMAN` handles them.
-    pub fn send(
+    pub fn send<S>(
         &self,
         user: UserAuth,
         recipient: Recipient,
-        service: String,
+        service: S,
         payload: Vec<u8>,
-    ) -> Result<()> {
+    ) -> Result<()>
+    where
+        S: Into<String>,
+    {
         let (sender, _) = self.q.auth.trusted(user)?;
         let recipients = MsgUtils::readdress(&recipient);
-        let associator = service;
+        let associator = service.into();
 
         let msg = Message::Out {
             sender,
@@ -268,7 +271,7 @@ impl<'qaul> Messages<'qaul> {
     ///    incoming messages as they are received.
     /// 2. The `Message` variant returned from this endpoint will
     ///    **always** be `Message::In`, never an outgoing type.
-    pub fn poll<S>(&self, user: UserAuth, service: S) -> Result<Message>
+    pub fn poll<S>(&self, _user: UserAuth, _service: S) -> Result<Message>
     where
         S: Into<String>,
     {
@@ -281,7 +284,7 @@ impl<'qaul> Messages<'qaul> {
     /// that it uses a lambda to call when a new `Message` is
     /// received.  Both caveats mentioned in the doc comment for
     /// `poll` apply here as well.
-    pub fn listen<S, F>(&self, user: UserAuth, service: S, listener: F) -> Result<()>
+    pub fn listen<S, F>(&self, _user: UserAuth, _service: S, _listener: F) -> Result<()>
     where
         S: Into<String>,
         F: Fn(Message) -> Result<()>,
@@ -290,11 +293,10 @@ impl<'qaul> Messages<'qaul> {
     }
 
     /// Query for `Messages` from the store for a service
-    pub fn query<S>(&self, user: UserAuth, service: S, query: MessageQuery) -> Result<Vec<Message>>
+    pub fn query<S>(&self, _user: UserAuth, _service: S, _query: MessageQuery) -> Result<Vec<Message>>
     where
         S: Into<Option<String>>,
     {
-        let service = service.into();
-        Ok(vec![])
+        unimplemented!()
     }
 }

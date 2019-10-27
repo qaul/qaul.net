@@ -60,7 +60,7 @@ pub(crate) struct DataStore {
 
 impl DataStore {
     pub fn new(homedir: String) -> Self {
-        let mut inner = Library::new();
+        let inner = Library::new();
 
         Self {
             inner,

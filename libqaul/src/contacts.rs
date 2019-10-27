@@ -38,7 +38,7 @@ impl ContactStore {
         F: Fn(&mut ContactEntry),
     {
         let mut inner = self.inner.lock().expect("Failed to lock ContactStore");
-        let mut contact = inner
+        let contact = inner
             .entry(*id)
             .or_insert(Default::default())
             .entry(*user)
@@ -47,7 +47,7 @@ impl ContactStore {
     }
 
     pub(crate) fn query(&self, id: &Identity, query: ContactQuery) -> Result<Vec<Identity>> {
-        let mut inner = self.inner.lock().expect("Failed to lock ContactStore");
+        let inner = self.inner.lock().expect("Failed to lock ContactStore");
         Ok(inner
             .get(id)
             .map_or(Err(Error::NoUser), |x| Ok(x))?
@@ -76,7 +76,7 @@ impl ContactStore {
     }
 
     pub(crate) fn get_all(&self, id: &Identity) -> Result<Vec<Identity>> {
-        let mut inner = self.inner.lock().expect("Failed to lock ContactStore");
+        let inner = self.inner.lock().expect("Failed to lock ContactStore");
         Ok(inner
             .get(id)
             .map_or(Err(Error::NoUser), |x| Ok(x))?

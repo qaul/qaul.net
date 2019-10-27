@@ -8,6 +8,6 @@ license = "AGPL-3.0"
 [dependencies]
 qaul = { path = "../../", package = "libqaul" }
 files = { path = "../files", package = "qaul-files" }
-identity = { path = "../../../ratman/identity", package = "ratman-identity" }
 
 serde = { version = "1.0", features = ["derive"] }
+conjoiner = { version = "1.0", package = "conjoiner-engine" }

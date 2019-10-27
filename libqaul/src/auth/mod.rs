@@ -8,9 +8,8 @@ pub(crate) use pwhash::PwHash;
 
 use crate::{
     error::{Error, Result},
-    Identity,
-    utils,
-    users::{Token, UserAuth}
+    users::{Token, UserAuth},
+    utils, Identity,
 };
 
 use base64::{encode_config, URL_SAFE};
@@ -69,7 +68,7 @@ impl AuthStore {
         let token = tokens
             .get(&user)
             .cloned()
-            .map_or_else(|| Ok(Self::generate()), |t| Ok(t))?;
+            .map_or_else(|| Self::generate(), |t| t);
 
         tokens.insert(user, token.clone());
         Ok(token)

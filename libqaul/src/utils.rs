@@ -24,7 +24,7 @@ pub(crate) trait VecUtils<T: PartialEq> {
 
 impl<T: PartialEq> VecUtils<T> for Vec<T> {
     #[inline(always)]
-    fn strip(mut self, t: &T) -> Self {
+    fn strip(self, t: &T) -> Self {
         self.into_iter().filter(|i| i != t).collect()
     }
 

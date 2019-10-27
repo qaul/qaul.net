@@ -500,9 +500,9 @@ dependencies = [
 name = "qaul-messaging"
 version = "0.1.0"
 dependencies = [
+ "conjoiner-engine 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "libqaul 0.1.0",
  "qaul-files 0.1.0",
- "ratman-identity 0.1.0",
  "serde 1.0.102 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

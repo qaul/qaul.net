@@ -56,7 +56,7 @@ fn main() {
     // At this point all `Qaul` stacks are sufficiently initialised to
     // use the actual `message` API to send a message.
     q1.messages()
-        .send(u1, Recipient::User(u2.0), "test".into(), vec![1, 2, 3, 4])
+        .send(u1, Recipient::User(u2.0), "test", vec![1, 2, 3, 4])
         .unwrap();
 
     // This delay is required to make the main thread wait enough time

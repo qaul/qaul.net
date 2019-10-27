@@ -19,6 +19,7 @@
 //! set `QAUL_LANG=ar` (or others) as an environment variable to get
 //! translations of these messages, with `en` being the fallback.
 
+use conjoiner::Error as ConjError;
 use std::{
     error::Error as StdError,
     fmt::{self, Display, Formatter},
@@ -71,10 +72,12 @@ pub enum Error {
     NetworkError,
     /// Failed to find a route to this user
     NoRoute,
+    /// Some serialisation action failed
+    BadSerialise,
 }
 
 impl Error {
-    fn help(&self) -> String {
+    pub fn help(&self) -> String {
         match std::env::var("QAUL_LANG").as_ref().map(|s| s.as_str()) {
             Ok("ar") => "حدث خطأ غير معروف",
             Ok("de") => "Ein unbekannter Fehler ist aufgetreten",
@@ -91,3 +94,9 @@ impl Display for Error {
 }
 
 impl StdError for Error {}
+
+impl From<ConjError> for Error {
+    fn from(_: ConjError) -> Self {
+        Error::BadSerialise
+    }
+}
