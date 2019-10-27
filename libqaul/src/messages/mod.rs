@@ -5,9 +5,7 @@ pub use crate::api::messages::{Message, MessageQuery, Recipient, SigTrust};
 
 use crate::error::{Error, Result};
 
-use conjoiner;
 use ratman::{netmod::Recipient as RatRecipient, Identity, Message as RatMessage, Router};
-use serde::{de::DeserializeOwned, Serialize};
 use std::{
     collections::BTreeMap,
     sync::{Arc, Mutex},

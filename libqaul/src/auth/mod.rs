@@ -6,11 +6,12 @@
 mod pwhash;
 pub(crate) use pwhash::PwHash;
 
-use crate::error::{Error, Result};
-use crate::qaul::Identity;
-use crate::random;
-use crate::store::DataStore;
-use crate::users::{Token, UserAuth};
+use crate::{
+    error::{Error, Result},
+    Identity,
+    utils,
+    users::{Token, UserAuth}
+};
 
 use base64::{encode_config, URL_SAFE};
 use std::{
@@ -100,7 +101,7 @@ impl AuthStore {
 
     /// Generate a new base64 encoded token
     fn generate() -> Token {
-        let t = random(32);
+        let t = utils::random(32);
         encode_config(&t, URL_SAFE)
     }
 }

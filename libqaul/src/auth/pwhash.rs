@@ -5,7 +5,7 @@
 
 use blake2::{Blake2b, Digest as _};
 use rand::prelude::*;
-use std::fmt::{self, Debug, Formatter, Result};
+use std::fmt::{self, Debug, Formatter};
 
 /// A wrapper around a salted password hash
 pub(crate) struct PwHash {

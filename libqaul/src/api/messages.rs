@@ -2,7 +2,7 @@ use crate::error::{Error, Result};
 use crate::messages::{MsgUtils, RatMessageProto};
 use crate::qaul::{Identity, Qaul};
 use crate::users::UserAuth;
-use crate::VecUtils;
+use crate::utils::VecUtils;
 
 use serde::{Deserialize, Serialize};
 
@@ -254,10 +254,7 @@ impl<'qaul> Messages<'qaul> {
                 recipients,
                 signature,
             },
-        );
-
-        // proto.into().into_iter().map(|msg| self.q.router.send(msg)).collect();
-        Ok(())
+        )
     }
 
     /// Non-blockingly poll the API for the latest `Message` for a service

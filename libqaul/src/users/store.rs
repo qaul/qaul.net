@@ -53,7 +53,7 @@ impl UserStore {
     }
 
     /// Modify a single user inside the store in-place
-    pub fn modify<F>(&self, id: &Identity, modifier: F) -> Result<()>
+    pub(crate) fn modify<F>(&self, id: &Identity, modifier: F) -> Result<()>
     where
         F: Fn(&mut UserProfile),
     {
@@ -87,7 +87,7 @@ impl UserStore {
     }
 
     /// Get all locally available users
-    pub fn get_local(&self) -> Vec<UserProfile> {
+    pub(crate) fn get_local(&self) -> Vec<UserProfile> {
         self.inner
             .lock()
             .expect("Failed to lock UserStore")
@@ -100,7 +100,8 @@ impl UserStore {
     }
 
     /// Get all remote users this device knows about
-    pub fn get_remote(&self) -> Vec<UserProfile> {
+    #[allow(unused)]
+    pub(crate) fn get_remote(&self) -> Vec<UserProfile> {
         self.inner
             .lock()
             .expect("Failed to lock UserStore")

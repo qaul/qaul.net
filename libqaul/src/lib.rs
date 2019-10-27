@@ -38,22 +38,22 @@
 //! point. This initialisation option is available before starting
 //! network bindings.
 
-#![allow(warnings)]
-
+// Internal modules
 mod auth;
 mod crypto;
 mod discover;
+mod store;
 
-pub mod messages;
-
-mod utils;
-pub(crate) use utils::*;
-
-mod qaul;
-pub use identity::Identity;
-pub use qaul::Qaul;
-
+// Exposed API modules
 pub mod api;
+pub mod contacts;
 pub mod error;
-pub mod store;
+pub mod messages;
 pub mod users;
+
+// Core state should be in the root
+mod qaul;
+pub use qaul::{Qaul, Identity};
+
+pub(crate) mod utils;
+

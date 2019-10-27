@@ -1,11 +1,8 @@
 use {
+    libqaul::{messages::Recipient, Qaul},
     netmod_mem::MemMod,
     ratman::{netmod::Endpoint, Router},
 };
-
-use libqaul::{Qaul, Identity};
-use libqaul::messages::Recipient;
-
 
 // This function implements a very simple message send and
 // bootstrapping procedure. It is heavily documented to be useful as
@@ -48,19 +45,19 @@ fn main() {
     let u2 = q3.users().create("abc").unwrap();
 
     // Manually make Routers discover each other
-    q1.router().discover(u2.0, 0);
-    q2.router().discover(u1.0, 0);
-    q2.router().discover(u2.0, 1);
-    q3.router().discover(u1.0, 0);
+    #[allow(deprecated)]
+    {
+        q1.router().discover(u2.0, 0);
+        q2.router().discover(u1.0, 0);
+        q2.router().discover(u2.0, 1);
+        q3.router().discover(u1.0, 0);
+    }
 
     // At this point all `Qaul` stacks are sufficiently initialised to
     // use the actual `message` API to send a message.
-    q1.messages().send(
-        u1,
-        Recipient::User(u2.0),
-        "test".into(),
-        vec![1, 2, 3, 4],
-    );
+    q1.messages()
+        .send(u1, Recipient::User(u2.0), "test".into(), vec![1, 2, 3, 4])
+        .unwrap();
 
     // This delay is required to make the main thread wait enough time
     // for the exchange to complete. In a real app this is not a

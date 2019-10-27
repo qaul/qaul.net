@@ -1,8 +1,8 @@
-use crate::error::{Error, Result};
-use crate::messages::{MsgUtils, RatMessageProto};
-use crate::qaul::{Identity, Qaul};
-use crate::random;
-use crate::users::{User, UserProfile};
+use crate::{
+    error::Result,
+    users::{User, UserProfile},
+    utils, Identity, Qaul,
+};
 
 /// A random authentication token
 pub type Token = String;
@@ -49,7 +49,7 @@ impl<'qaul> Users<'qaul> {
     /// case, there's no real security, but a drive-by will still only
     /// grab encrypted files.
     pub fn create(&self, pw: &str) -> Result<UserAuth> {
-        let id = Identity::truncate(&random(16));
+        let id = Identity::truncate(&utils::random(16));
         let user = User::Local(UserProfile::new(id));
 
         // Inform Router about new local user

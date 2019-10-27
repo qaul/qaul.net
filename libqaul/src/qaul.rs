@@ -1,17 +1,17 @@
 //! Central qaul state holder module
 
+// Export the identity into root scope
+pub use identity::Identity;
+
 use crate::{
     api::{Messages, Users},
     auth::AuthStore,
+    contacts::ContactStore,
     discover::Discovery,
-    users::{ContactStore, UserProfile, UserStore},
+    users::UserStore,
 };
-pub use identity::Identity;
 use ratman::{Router, RouterInit};
-use std::{
-    collections::BTreeMap,
-    sync::{Arc, Mutex},
-};
+use std::sync::Arc;
 
 /// Primary context structure for `libqaul`
 ///
@@ -55,24 +55,7 @@ pub struct Qaul {
     pub(crate) router: Arc<Router>,
 }
 
-impl Default for Qaul {
-    fn default() -> Self {
-        Self {
-            users: UserStore::new(),
-            auth: AuthStore::new(),
-            contacts: ContactStore::default(),
-            discovery: Discovery::missing(),
-            router: Arc::new(unimplemented!()),
-        }
-    }
-}
-
 impl Qaul {
-    #[deprecated]
-    pub fn start() -> Self {
-        Default::default()
-    }
-
     /// Get access to the inner Router
     #[deprecated]
     pub fn router(&self) -> &Router {
@@ -92,18 +75,6 @@ impl Qaul {
             auth: AuthStore::new(),
             contacts: ContactStore::default(),
         }
-    }
-
-    pub fn send_test_message(&self, sender: Identity, recipient: Identity) {
-        self.router.send(ratman::Message::build_signed(
-            sender,
-            ratman::netmod::Recipient::User(recipient),
-            "testing",
-            vec!['h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd']
-                .into_iter()
-                .map(|x| x as u8)
-                .collect(),
-        ));
     }
 
     /// Load the `messages` API scope for qaul

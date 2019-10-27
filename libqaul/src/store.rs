@@ -1,6 +1,5 @@
 //! General database storage abstraction
 
-use crate::{error::Result, users::UserProfile};
 use alexandria::{Address, Data, Delta, KeyAttr, Library, ScopeAttr};
 use std::sync::Arc;
 
@@ -56,7 +55,7 @@ pub(crate) trait Persisted {
 pub(crate) struct DataStore {
     inner: Library,
     homedir: String,
-    states: Vec<Arc<Persisted>>,
+    states: Vec<Arc<dyn Persisted>>,
 }
 
 impl DataStore {
