@@ -50,7 +50,7 @@ impl AuthError {
     fn into_error(&self) -> (Error, Status) {
         let status = match self {
             AuthError::QaulError(QaulError::NotAuthorised) => Status::Unauthorized,
-            AuthError::QaulError(QaulError::UnknownUser) => Status::NotFound,
+            AuthError::QaulError(QaulError::NoUser) => Status::NotFound,
             AuthError::QaulError(QaulError::CallbackTimeout) => Status::InternalServerError,
             AuthError::NotLoggedIn => Status::Unauthorized,
             _ => Status::BadRequest,
@@ -63,7 +63,7 @@ impl AuthError {
             AuthError::NoAttributes => Some("No Attributes".into()),
             AuthError::InvalidIdentity(_) => Some("Invalid identity".into()),
             AuthError::QaulError(QaulError::NotAuthorised) => Some("Not Authorized".into()),
-            AuthError::QaulError(QaulError::UnknownUser) => Some("Unknown User".into()),
+            AuthError::QaulError(QaulError::NoUser) => Some("Unknown User".into()),
             AuthError::QaulError(QaulError::InvalidQuery) => Some("Invalid Query".into()),
             AuthError::QaulError(QaulError::InvalidPayload) => Some("Invalid Payload".into()),
             AuthError::QaulError(QaulError::CallbackTimeout) => None,
@@ -85,7 +85,7 @@ impl AuthError {
                 Some(format!("Failed to decode identity, decoded identity is {} bytes long when it should be {}", l, ID_LEN)),
             AuthError::QaulError(QaulError::NotAuthorised) =>
                 Some("Current user is not authorised to perform this action".into()),
-            AuthError::QaulError(QaulError::UnknownUser) =>
+            AuthError::QaulError(QaulError::NoUser) =>
                 Some("Target user is not known to Qaul".into()),
             AuthError::QaulError(QaulError::InvalidQuery) => None,
             AuthError::QaulError(QaulError::InvalidPayload) =>

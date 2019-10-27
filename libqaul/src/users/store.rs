@@ -63,7 +63,7 @@ impl UserStore {
                 .lock()
                 .expect("Failed to lock user store")
                 .get_mut(id)
-                .map_or(Err(Error::UnknownUser), |x| Ok(x))?
+                .map_or(Err(Error::NoUser), |x| Ok(x))?
             {
                 User::Local(ref mut u) => u,
                 User::Remote(ref mut u) => u,
@@ -77,7 +77,7 @@ impl UserStore {
             .lock()
             .expect("Failed to lock UserStore")
             .get(id)
-            .map_or(Err(Error::UnknownUser), |x| {
+            .map_or(Err(Error::NoUser), |x| {
                 Ok(match x {
                     User::Local(ref u) => u,
                     User::Remote(ref u) => u,

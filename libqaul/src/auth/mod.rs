@@ -63,7 +63,7 @@ impl AuthStore {
             .expect("Failed to unlock hash store")
             .get(&user)
             .filter(|hash| hash.matches_with(pw))
-            .map_or(Err(Error::UnknownUser), |_| Ok(()))?;
+            .map_or(Err(Error::NoUser), |_| Ok(()))?;
 
         let mut tokens = self.tokens.lock().expect("Failed to lock token store!");
         let token = tokens

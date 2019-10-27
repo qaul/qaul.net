@@ -28,7 +28,7 @@ impl SigTrust {
     pub fn ok(&self) -> Result<()> {
         match self {
             Self::Trusted => Ok(()),
-            Self::Unverified => Err(Error::UnknownSign),
+            Self::Unverified => Err(Error::NoSign),
             Self::Invalid => Err(Error::BadSign),
         }
     }

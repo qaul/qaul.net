@@ -4,7 +4,7 @@
 pub use identity::Identity;
 
 use crate::{
-    api::{Messages, Users},
+    api::{Messages, Users, Contacts},
     auth::AuthStore,
     contacts::ContactStore,
     discover::Discovery,
@@ -56,6 +56,22 @@ pub struct Qaul {
 }
 
 impl Qaul {
+    /// This function exists entirely for doc tests
+    #[doc(hidden)]
+    #[allow(warnings)]
+    pub fn dummy() -> Self {
+        let RouterInit { router, channel } = Router::new();
+        let router = Arc::new(router);
+        let discovery = Discovery::new(Arc::clone(&router), channel);
+        Self {
+            router,
+            discovery,
+            users: UserStore::new(),
+            auth: AuthStore::new(),
+            contacts: ContactStore::default(),
+        }
+    }
+
     /// Get access to the inner Router
     #[deprecated]
     pub fn router(&self) -> &Router {
@@ -85,5 +101,9 @@ impl Qaul {
     /// Load the `users` API scope for qaul
     pub fn users(&self) -> Users {
         Users { q: self }
+    }
+
+    pub fn contacts(&self) -> Contacts {
+        Contacts { q: self }
     }
 }
