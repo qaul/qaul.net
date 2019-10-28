@@ -1,5 +1,7 @@
+use std::sync::Arc;
 use {
     libqaul::{messages::Recipient, Qaul},
+    messaging::{Messaging, TextPayload},
     netmod_mem::MemMod,
     ratman::{netmod::Endpoint, Router},
 };
@@ -36,7 +38,7 @@ fn main() {
 
     // While `libqaul` can't add users to the routing scope yet, we
     // need to now create Qaul structures so we can create users
-    let q1 = Qaul::new(r1);
+    let q1 = Arc::new(Qaul::new(r1));
     let q2 = Qaul::new(r2);
     let q3 = Qaul::new(r3);
 
@@ -53,11 +55,17 @@ fn main() {
         q3.router().discover(u1.0, 0);
     }
 
-    // At this point all `Qaul` stacks are sufficiently initialised to
-    // use the actual `message` API to send a message.
-    q1.messages()
-        .send(u1, Recipient::User(u2.0), "test", vec![1, 2, 3, 4])
-        .unwrap();
+    // We could now send a Service API message. But let's keep going
+    // up the stack. We initialise the `Messaging` service now.
+    let msg = Messaging::new(Arc::clone(&q1));
+    msg.send(
+        u1,
+        Recipient::User(u2.0),
+        TextPayload {
+            text: "Hello, world!".into(),
+        },
+    )
+    .unwrap();
 
     // This delay is required to make the main thread wait enough time
     // for the exchange to complete. In a real app this is not a

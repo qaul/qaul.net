@@ -22,7 +22,7 @@ const ASC_NAME: &'static str = "qaul-messaging";
 // pub type Attachments = Vec<File>;
 
 /// A plain-text message with optional attachments
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TextPayload {
     pub text: String,
 }
@@ -96,11 +96,12 @@ impl Messaging {
     /// `recipient` isn't `Recipient::Flood`, then queues it in the
     /// routing layer.
     pub fn send(&self, user: UserAuth, recipient: Recipient, payload: TextPayload) -> Result<()> {
-        let payload: Vec<u8> = conjoiner::serialise(&payload)?;
-
-        self.qaul
-            .messages()
-            .send(user, recipient, ASC_NAME, payload)
+        self.qaul.messages().send(
+            user,
+            recipient,
+            ASC_NAME,
+            conjoiner::serialise(&payload)?,
+        )
     }
 
     /// Non-blockingly poll for new `TextMessage`s for a session
