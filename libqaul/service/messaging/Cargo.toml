@@ -10,4 +10,4 @@ qaul = { path = "../../", package = "libqaul" }
 files = { path = "../files", package = "qaul-files" }
 
 serde = { version = "1.0", features = ["derive"] }
-conjoiner = { version = "1.0", package = "conjoiner-engine" }
+conjoiner = { git = "https://git.open-communication.net/qaul/conjoiner-engine", package = "conjoiner-engine" }
