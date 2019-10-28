@@ -1,13 +1,13 @@
 use netmod_mem::media::BroadcastMedium;
-use ratman_netmod::{Frame, Endpoint};
+use ratman_netmod::{Endpoint, Frame};
 #[test]
 fn broadcast_medium_ping_pong() {
-    let mut medium = BroadcastMedium::new(1);
+    let mut medium = BroadcastMedium::with_latency(1);
     let mut a = medium.make_netmod();
     let mut b = medium.make_netmod();
     a.send(Frame::dummy())
         .expect("Failed to send message from a. Error");
-    medium = medium.tick();
+    medium.tick();
     b.poll()
         .expect("Failed to get message at b. Error")
         .expect("No message available.");
@@ -21,7 +21,7 @@ fn broadcast_medium_ping_pong() {
 
 #[test]
 fn broadcast_medium_ping_broadcast() {
-    let mut medium = BroadcastMedium::new(1);
+    let mut medium = BroadcastMedium::with_latency(1);
     let mut a = medium.make_netmod();
     let mut b = medium.make_netmod();
     let mut c = medium.make_netmod();

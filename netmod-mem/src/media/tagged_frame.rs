@@ -1,4 +1,4 @@
-use ratman_netmod::{Endpoint, Frame};
+use ratman_netmod::Frame;
 /// A `Frame` tagged with an identifier and a time to live, for propagation through
 /// a simulated medium.
 pub(crate) struct TaggedFrame {

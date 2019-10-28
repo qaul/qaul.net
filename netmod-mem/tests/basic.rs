@@ -1,5 +1,5 @@
 use netmod_mem::MemMod;
-use ratman_netmod::{Frame, Endpoint};
+use ratman_netmod::{Endpoint, Frame};
 #[test]
 fn ping_pong() {
     let mut a = MemMod::new();
@@ -29,4 +29,3 @@ fn split() {
     b.split();
     assert!(b.poll().is_err());
 }
-
