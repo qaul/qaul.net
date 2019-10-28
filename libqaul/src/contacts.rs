@@ -52,11 +52,15 @@ impl ContactStore {
         modify(contact);
     }
 
+    /// Query a user's contact book data
+    ///
+    /// If this user hasn't yet specified any contact entries, then
+    /// just return an empty list instead.
     pub(crate) fn query(&self, id: &Identity, query: ContactQuery) -> Result<Vec<Identity>> {
-        let inner = self.inner.lock().expect("Failed to lock ContactStore");
+        let mut inner = self.inner.lock().expect("Failed to lock ContactStore");
         Ok(inner
-            .get(id)
-            .map_or(Err(Error::NoUser), |x| Ok(x))?
+           .entry(*id)
+            .or_insert(Default::default())
             .iter()
             .filter(|(_, con)| match query {
                 ContactQuery::Nick(_) if con.nick.is_none() => false,
