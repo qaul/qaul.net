@@ -113,13 +113,13 @@ impl Messaging {
     }
 
     /// Setup a `TextMessage` listener for a specific user session
-    pub fn listen<F>(&self, user: UserAuth, listener: F) -> Result<()>
+    pub fn listen<F: 'static>(&self, user: UserAuth, listener: F) -> Result<()>
     where
         F: Fn(TextMessage) -> Result<()>,
     {
         self.qaul
             .messages()
-            .listen(user, ASC_NAME, |msg| match TextMessage::try_from(msg) {
+            .listen(user, ASC_NAME, move |msg| match TextMessage::try_from(msg) {
                 Ok(text) => listener(text),
                 Err(e) => return Err(e),
             })

@@ -1,5 +1,3 @@
-pub use crate::api::services::Listener;
-
 use crate::{
     error::{Error, Result},
     messages::Message,
@@ -13,6 +11,8 @@ use std::{
     },
 };
 
+pub(crate) type Listener = Arc<dyn Fn(Message) -> Result<()>>;
+
 /// A small wrapper around a pair of channel ends used to poll Messages
 pub(crate) struct IoPair {
     rx: Receiver<Message>,
@@ -22,7 +22,7 @@ pub(crate) struct IoPair {
 /// A registered service, with a pre-made poll setup and listeners
 pub(crate) struct Service {
     io: Arc<IoPair>,
-    callbacks: Arc<RwLock<Vec<Box<Listener>>>>,
+    callbacks: Arc<RwLock<Vec<Listener>>>,
 }
 
 impl Service {
@@ -56,6 +56,30 @@ impl ServiceRegistry {
             inner.insert(name, Service::new());
             Ok(())
         }
+    }
+
+    pub(crate) fn unregister(&self, name: String) -> Result<()> {
+        let mut inner = self.inner.write().expect("ServiceRegistry was poisoned");
+        inner
+            .remove(&name)
+            .map_or(Err(Error::NoService), |_| Ok(()))
+    }
+
+    pub(crate) fn add_listener<F: 'static>(&self, service: String, listener: F) -> Result<()>
+    where
+        F: Fn(Message) -> Result<()>,
+    {
+        self.inner
+            .write()
+            .expect("ServiceRegistry was poisoned")
+            .get(&service)
+            .map_or(Err(Error::NoService), |srv| {
+                Ok(srv
+                    .callbacks
+                    .write()
+                    .expect("Service callbacks were poisoned")
+                    .push(Arc::new(listener)))
+            })
     }
 
     /// Poll for a new Message from a service queue

@@ -2,9 +2,6 @@
 
 use crate::{error::Result, messages::Message, Qaul};
 
-/// A `Message` listener for an external service
-pub type Listener = dyn Fn(Message) -> Result<()>;
-
 /// API scope type to access service management functions
 ///
 /// Used entirely to namespace API endpoints on `Qaul` instance,
@@ -40,6 +37,6 @@ impl<'qaul> Services<'qaul> {
     /// Will return `Error::NoService` if no such service name could
     /// be found.
     pub fn unregister<S: Into<String>>(&self, name: S) -> Result<()> {
-        Ok(())
+        self.q.services.unregister(name.into())
     }
 }
