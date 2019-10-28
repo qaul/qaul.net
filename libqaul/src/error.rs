@@ -74,6 +74,10 @@ pub enum Error {
     NoRoute,
     /// Some serialisation action failed
     BadSerialise,
+    /// No such service was found
+    NoService,
+    /// A sevice with this name already exists
+    ServiceExists,
 }
 
 impl Error {

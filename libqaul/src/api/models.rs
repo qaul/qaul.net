@@ -4,18 +4,6 @@ use std::fmt::{self, Debug, Formatter};
 use ratman::Identity;
 use mime::Mime;
 
-
-/// Signature trust information embedded into service messages
-pub enum SigTrust {
-    /// A verified signature by a known contact
-    Trusted(Identity),
-    /// An unverified signature by a known contact
-    /// (pubkey not available!)
-    Unverified(Identity),
-    /// A fraudulent signature
-    Invalid,
-}
-
 /// Local file abstraction
 pub struct File {
     pub name: String,

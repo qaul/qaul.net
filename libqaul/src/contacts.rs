@@ -22,12 +22,18 @@ use std::{
 pub(crate) type ContactList = BTreeMap<Identity, ContactEntry>;
 
 /// Wraps around user-local contact books
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub(crate) struct ContactStore {
     inner: Arc<Mutex<BTreeMap<Identity, ContactList>>>,
 }
 
 impl ContactStore {
+    pub(crate) fn new() -> Self {
+        Self {
+            inner: Arc::new(Mutex::new(BTreeMap::new())),
+        }
+    }
+
     /// Modify a users personal contact entry via a callback
     ///
     /// `id` in this case is the current session user, `user` is the

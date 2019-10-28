@@ -12,15 +12,16 @@
 
 // #[cfg(test)]
 // mod tests;
-
 // mod files;
-// mod service;
 
-pub(crate) mod users;
-pub use users::Users;
-
-pub(crate) mod contacts;
 pub use contacts::Contacts;
+pub(crate) mod contacts;
 
-pub(crate) mod messages;
 pub use messages::Messages;
+pub(crate) mod messages;
+
+pub(crate) mod services;
+pub use services::Services;
+
+pub use users::Users;
+pub(crate) mod users;
