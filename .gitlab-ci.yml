@@ -3,9 +3,9 @@ stages:
   - build
   - publish
 
-# Build the Rust root on nightly
-build:nightly:
-  image: rustlang/rust:nightly
+# Build the Rust root on beta (soon 1.39.0)
+build:beta:
+  image: rustlang/rust:beta
   script:
     - cargo test
     - cargo build
@@ -37,16 +37,3 @@ build_webgui:
   artifacts:
     paths:
       - webgui/dist/
-
-# publish_webgui:
-  # stage: publish
-  # environment:
-  #   name: master
-  #   url: http://qaul.surge.sh/
-  # only:
-  #   - master
-  # image: andthensome/alpine-surge-bash
-  # script:
-  #   - cd webgui/dist/
-  #   - cp index.html 200.html
-  #   - surge --project . --domain qaul.surge.sh
