@@ -42,6 +42,7 @@
 mod auth;
 mod crypto;
 mod discover;
+mod services;
 mod store;
 
 // Exposed API modules

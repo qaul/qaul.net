@@ -6,6 +6,7 @@ use crate::{
     contacts::ContactStore,
     discover::Discovery,
     users::UserStore,
+    services::ServiceRegistry,
 };
 
 use ratman::{Router, RouterInit};
@@ -49,6 +50,9 @@ pub struct Qaul {
     /// A service which reacts to router messages
     pub(crate) discovery: Discovery,
 
+    /// An ephemeral (non persistent) store for external services
+    pub(crate) services: ServiceRegistry,
+    
     /// A reference to the underlying routing code
     pub(crate) router: Arc<Router>,
 }
@@ -66,7 +70,8 @@ impl Qaul {
             discovery,
             users: UserStore::new(),
             auth: AuthStore::new(),
-            contacts: ContactStore::default(),
+            contacts: ContactStore::new(),
+            services: ServiceRegistry::new(),
         }
     }
 
@@ -94,7 +99,8 @@ impl Qaul {
             discovery,
             users: UserStore::new(),
             auth: AuthStore::new(),
-            contacts: ContactStore::default(),
+            contacts: ContactStore::new(),
+            services: ServiceRegistry::new(),
         }
     }
 
