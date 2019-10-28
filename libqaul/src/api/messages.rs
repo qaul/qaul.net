@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// The `SigTrust::ok` convenience function can be used to reject
 /// non-verifiable (unknown or bad) `Message` signatures.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum SigTrust {
     /// A verified signature by a known contact
     Trusted,
@@ -40,7 +40,7 @@ impl SigTrust {
 /// "flood" mechanic is passed through to `RATMAN`, which might
 /// implement this in the networking module, or emulate
 /// it. Performance may vary.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Recipient {
     /// A single user, known to this node
     User(Identity),
@@ -69,7 +69,7 @@ pub enum Recipient {
 /// This approach was chosen over having multiple structs becauseit
 /// makes storing this type in the internal data store easier, without
 /// having to duplicate structures _too_ much.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Message {
     /// An incoming `Message`, received from someone else on the network
     In {

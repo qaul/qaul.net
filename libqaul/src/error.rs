@@ -48,7 +48,7 @@ pub type Result<T> = StdResult<T, Error>;
 /// prefix. Invalid data is data that was either not expected or badly
 /// formatted. `No` in this case takes the place of `Unknown`, meaning
 /// that a query could not be fulfilled.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Error {
     /// Not authorised to perform this action
     NotAuthorised,
@@ -69,7 +69,7 @@ pub enum Error {
     /// Fraudulent signature for a known public key
     BadSign,
     /// A generic networking error occured
-    NetworkError,
+    NetworkFault,
     /// Failed to find a route to this user
     NoRoute,
     /// Some serialisation action failed
@@ -78,6 +78,8 @@ pub enum Error {
     NoService,
     /// A sevice with this name already exists
     ServiceExists,
+    /// Some internal components failed to communicate
+    CommFault,
 }
 
 impl Error {

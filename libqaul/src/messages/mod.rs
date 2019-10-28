@@ -44,7 +44,7 @@ impl MsgUtils {
             .into_iter()
             .map(|msg| router.send(msg))
             .fold(Ok(()), |acc, res| match (acc, res) {
-                (_, Err(e)) => Err(Error::NetworkError),
+                (_, Err(e)) => Err(Error::NetworkFault),
                 (Err(e), _) => Err(e),
                 (_, _) => Ok(()),
             })

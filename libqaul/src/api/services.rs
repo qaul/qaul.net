@@ -3,7 +3,7 @@
 use crate::{error::Result, messages::Message, Qaul};
 
 /// A `Message` listener for an external service
-pub type Listener = Fn(Message) -> Result<()>;
+pub type Listener = dyn Fn(Message) -> Result<()>;
 
 /// API scope type to access service management functions
 ///
@@ -28,7 +28,7 @@ impl<'qaul> Services<'qaul> {
     /// namespace them on some other key, for example the application
     /// package name (such as `com.example.myapp`)
     pub fn register<S: Into<String>>(&self, name: S) -> Result<()> {
-        Ok(())
+        self.q.services.register(name.into())
     }
 
     /// Remove an external service from the qaul service registry

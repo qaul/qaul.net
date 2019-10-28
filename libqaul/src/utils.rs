@@ -14,6 +14,27 @@ pub(crate) fn random(len: usize) -> Vec<u8> {
         })
 }
 
+pub(crate) trait IterUtils<E>: Iterator + Sized
+where
+    E: Copy,
+{
+    fn fold_errs(self, e: E) -> Result<(), E>;
+}
+
+impl<I, E> IterUtils<E> for I
+where
+    I: Iterator<Item = Result<(), E>>,
+    E: Copy,
+{
+    fn fold_errs(self, e: E) -> Result<(), E> {
+        self.fold(Ok(()), |acc, x| match (acc, x) {
+            (Ok(_), Ok(_)) => Ok(()),
+            (Ok(_), Err(_)) => Err(e),
+            (x, _) => x,
+        })
+    }
+}
+
 /// A functional remove/add API for datastructures
 pub(crate) trait VecUtils<T: PartialEq> {
     /// Remove from vector, by element
