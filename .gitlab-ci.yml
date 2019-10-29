@@ -3,9 +3,9 @@ stages:
   - build
   - publish
 
-# Build the Rust root on beta (soon 1.39.0)
+# Build the Rust root on nightly
 build:beta:
-  image: rustlang/rust:beta
+  image: instrumentisto/rust:1.39.0-beta
   script:
     - cargo test
     - cargo build
