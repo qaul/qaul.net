@@ -1,4 +1,4 @@
-# qaul.net Contributers Guide
+# qaul.net Contributors' Guide
 
 This guide should always be readable in it's latest version online:
 https://docs.qaul.net

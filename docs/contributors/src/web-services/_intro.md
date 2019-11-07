@@ -4,7 +4,7 @@ qaul.net runs many different web services:
 
 * [qaul.net](https://qaul.net) the qaul.net web site
 * [docs.qaul.net](https://docs.qaul.net) the qaul.net documentations
-  * [contributers guide](https://docs.qaul.net/contributers) (this document)
+  * [contributors' guide](https://docs.qaul.net/contributors) (this document)
   * [http-api](https://docs.qaul.net/http-api) qaul.net REST API guide
   * [Rust documentaiion](https://docs.qaul.net/api) the qaul.net rust software API documentation (automatically created from the qaul.net code sources)
 * [get.qaul.net](https://get.qaul.net) the qaul.net download directory for the qaul.net binaries and big content files (e.g. videos, etc.).

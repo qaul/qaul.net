@@ -7,7 +7,7 @@
 
 ## Guides
 
-* `contributers`: the contributers guide introduces and explains the structure of qaul.net and should guide you through the steps of how to the project.
+* `contributors`: the contributors' guide introduces and explains the structure of qaul.net and should guide you through the steps of how to the project.
 * `http-api`: contains the documentation of the qaul.net http-api.
 * `index`: this folder contains the overview page.
 

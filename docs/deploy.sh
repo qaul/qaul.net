@@ -5,8 +5,8 @@ cd index
 ./deploy.sh
 cd ..
 
-# build and upload the contributers guide
-cd contributers
+# build and upload the contributors' guide
+cd contributors
 ./deploy.sh
 cd ..
 
