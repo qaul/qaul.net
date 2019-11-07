@@ -18,7 +18,9 @@ The project is currently being re-written for a more modular and portable
 approach. The new Release will be qaul.net 2.0. Please check 
 our milestones & issues to get an idea of the development plan and 
 status.
-If you want to get involved, please [get in touch]()!
+If you want to get involved, please [get in touch][contributors-guide]!
+
+[contributors-guide]: /contributors/social/_intro.html
 
 For the latest stable release, check the [`release-1.0.0`][release] branch.
 
