@@ -35,10 +35,6 @@ impl Protocol {
             Recipient::Flood,
             ASSOCIATOR,
             vec![0],
-            // ProtoPayload::Announce {
-            //     id: sender.clone(),
-            //     no_sync: false,
-            // },
         )
     }
 
