@@ -47,9 +47,6 @@ pub struct Qaul {
     /// Handles user-local contact books
     pub(crate) contacts: ContactStore,
 
-    /// A service which reacts to router messages
-    pub(crate) discovery: Discovery,
-
     /// An ephemeral (non persistent) store for external services
     pub(crate) services: ServiceRegistry,
     
@@ -64,10 +61,8 @@ impl Qaul {
     pub fn dummy() -> Self {
         let RouterInit { router, channel } = Router::new();
         let router = Arc::new(router);
-        let discovery = Discovery::new(Arc::clone(&router), channel);
         Self {
             router,
-            discovery,
             users: UserStore::new(),
             auth: AuthStore::new(),
             contacts: ContactStore::new(),
@@ -89,19 +84,20 @@ impl Qaul {
     /// that the main thread will take over execution of some other
     /// application loop so to enable further API abstractions to hook
     /// into the service API.
-    pub fn new(r: RouterInit) -> Self {
+    pub fn new(r: RouterInit) -> Arc<Self> {
         let RouterInit { router, channel } = r;
         let router = Arc::new(router);
-        let discovery = Discovery::new(Arc::clone(&router), channel);
-
-        Self {
-            router,
-            discovery,
+        let q = Arc::new(Self {
+            router: Arc::clone(&router),
             users: UserStore::new(),
             auth: AuthStore::new(),
             contacts: ContactStore::new(),
             services: ServiceRegistry::new(),
-        }
+        });
+
+        // TODO: Where to store this?!
+        Discovery::start(Arc::clone(&q), router, channel);
+        q
     }
 
     /// Get messages function scope

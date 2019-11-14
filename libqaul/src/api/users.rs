@@ -76,6 +76,7 @@ impl<'qaul> Users<'qaul> {
     /// Drop the current session Token, invalidating it
     pub fn logout(&self, user: UserAuth) -> Result<()> {
         let (ref id, ref token) = self.q.auth.trusted(user)?;
+        // TODO: Stop discovery announcements
         self.q.auth.logout(id, token)
     }
 
