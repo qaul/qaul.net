@@ -42,11 +42,21 @@ pub(crate) struct Discovery;
 
 impl Discovery {
     /// Start a discovery service running inside libqaul
-    pub(crate) fn start(_qaul: Arc<Qaul>, router: Arc<Router>, inc: Receiver<Message>,) -> Sender<DiscCmd> {
+    pub(crate) fn start(qaul: Arc<Qaul>, router: Arc<Router>, inc: Receiver<Message>) -> Sender<DiscCmd> {
         let run = Arc::new(RunLock::new(true));
         let (sender, rx) = channel();
         
+        // Incoming message handler
+        Self::inc_handler(qaul, inc, Arc::clone(&run));
+
         // Spawn the service communicator
+        Self::service_handle(rx, router, run);
+        
+        sender
+    }
+
+    /// Spawns the service internal handler
+    fn service_handle(rx: Receiver<DiscCmd>, router: Arc<Router>, run: Arc<RunLock>) {
         thread::spawn(move || {
             let run = Arc::clone(&run);
             let buf = Arc::new(RwLock::new(BTreeMap::new()));
@@ -77,15 +87,15 @@ impl Discovery {
                 }
             }
         });
-
-        // Incoming Message handler
+    }
+    
+    /// Spawns a thread that listens to incoming messages
+    fn inc_handler(qaul: Arc<Qaul>, inc: Receiver<Message>, lock: Arc<RunLock>) {
         thread::spawn(move || {
             while let Ok(msg) = inc.recv() {
                 dbg!(msg);
             }
         });
-
-        sender
     }
 }
 
