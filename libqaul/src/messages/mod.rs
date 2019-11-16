@@ -17,11 +17,17 @@ pub(crate) struct MsgStore {
     inner: Arc<Mutex<BTreeMap<Identity, Vec<Message>>>>,
 }
 
-/// An internal wrapper around an unsent Message
+/// An internal wrapper around an incomplete Message
+///
+/// Because message signatures are computed based on the data provided
+/// by the envelope, this means that changing the layout will **break
+/// all message signature verification!** Keep that in mind!
+///
+/// Apart from that it contains all data that will be present in the
+/// Message set generated for ratman routing.
 pub(crate) struct Envelope {
     pub(crate) id: MsgId,
     pub(crate) sender: Identity,
-    pub(crate) recipient: Recipient,
     pub(crate) associator: String,
     pub(crate) payload: Vec<u8>,
 }
@@ -73,8 +79,10 @@ impl MsgUtils {
     }
 
     /// Construct a cryptographic signature for an inner `Message`
-    pub(crate) fn sign(_env: &Envelope) -> Vec<u8> {
-        vec![1, 3, 1, 2]
+    pub(crate) fn sign(env: &Envelope) -> Vec<u8> {
+        let mut v = vec![1, 3, 1, 2];
+        v.extend_from_slice(&env.id.0);
+        v
     }
 
     /// Sends a `RatMessageProto`, calls a set of `send` commands

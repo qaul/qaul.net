@@ -12,7 +12,7 @@ pub type MsgRef<'msg> = Cow<'msg, Message>;
 
 /// A unique, randomly generated message ID
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct MsgId([u8; 16]);
+pub struct MsgId(pub(crate) [u8; 16]);
 
 impl MsgId {
     /// Generate a new **random** message ID
@@ -209,7 +209,6 @@ impl<'qaul> Messages<'qaul> {
         let env = Envelope {
             id: MsgId::new(),
             sender,
-            recipient,
             associator,
             payload,
         };
