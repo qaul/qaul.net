@@ -9,7 +9,7 @@
 use conjoiner;
 use qaul::{
     error::{Error, Result},
-    messages::{Message, Recipient, SigTrust},
+    messages::{Message, MsgId, Recipient, SigTrust},
     users::UserAuth,
     Identity, Qaul,
 };
@@ -34,6 +34,7 @@ pub struct TextPayload {
 /// form. Generally, when querying from the service API, the return
 /// value needs to be mapped into this type.
 pub struct TextMessage {
+    pub id: MsgId,
     pub sender: Identity,
     pub recipient: Recipient,
     pub sign: SigTrust,
@@ -45,20 +46,22 @@ impl TryFrom<Message> for TextMessage {
 
     /// Map from a `Message::In` into a `TextMessage`
     fn try_from(msg: Message) -> Result<Self> {
-        match msg {
-            Message::In {
-                sender,
-                recipient,
-                sign,
-                payload,
-            } => Ok(Self {
-                sender,
-                recipient,
-                sign,
-                payload: conjoiner::deserialise(&payload)?,
-            }),
-            Message::Out { .. } => Err(Error::InvalidPayload),
-        }
+        let Message {
+            id,
+            sender,
+            recipient,
+            sign,
+            payload,
+            associator: _,
+        } = msg;
+
+        Ok(Self {
+            id,
+            sender,
+            recipient,
+            sign,
+            payload: conjoiner::deserialise(&payload)?,
+        })
     }
 }
 
@@ -96,12 +99,9 @@ impl Messaging {
     /// `recipient` isn't `Recipient::Flood`, then queues it in the
     /// routing layer.
     pub fn send(&self, user: UserAuth, recipient: Recipient, payload: TextPayload) -> Result<()> {
-        self.qaul.messages().send(
-            user,
-            recipient,
-            ASC_NAME,
-            conjoiner::serialise(&payload)?,
-        )
+        self.qaul
+            .messages()
+            .send(user, recipient, ASC_NAME, conjoiner::serialise(&payload)?)
     }
 
     /// Non-blockingly poll for new `TextMessage`s for a session
@@ -117,11 +117,11 @@ impl Messaging {
     where
         F: Fn(TextMessage) -> Result<()>,
     {
-        self.qaul
-            .messages()
-            .listen(user, ASC_NAME, move |msg| match TextMessage::try_from(msg) {
+        self.qaul.messages().listen(user, ASC_NAME, move |msg| {
+            match TextMessage::try_from(msg) {
                 Ok(text) => listener(text),
                 Err(e) => return Err(e),
-            })
+            }
+        })
     }
 }

@@ -1,10 +1,31 @@
 use crate::error::{Error, Result};
-use crate::messages::{MsgUtils, RatMessageProto};
+use crate::messages::{MsgUtils, Envelope, RatMessageProto};
 use crate::qaul::{Identity, Qaul};
 use crate::users::UserAuth;
 use crate::utils::VecUtils;
 
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
+
+/// A `clone-on-write` type wrapper around messages
+pub type MsgRef<'msg> = Cow<'msg, Message>;
+
+/// A unique, randomly generated message ID
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct MsgId([u8; 16]);
+
+impl MsgId {
+    /// Generate a new **random** message ID
+    pub(crate) fn new() -> Self {
+        crate::utils::random(16)
+            .into_iter()
+            .zip(0..)
+            .fold(Self([0; 16]), |mut acc, (x, i)| {
+                acc.0[i] = x;
+                acc
+            })
+    }
+}
 
 /// Signature trust level of an incoming `Message`
 ///
@@ -50,106 +71,49 @@ pub enum Recipient {
     Flood,
 }
 
-/// A multipurpose service Message
+/// A multi-purpose service Message
 ///
-/// The two states that are encoded in this enum are meant to
-/// disambiguate between a `Message` being **sent into** the network,
-/// vs. a `Message` that is **being received**. Fundamentally they are
-/// the same, and share the same abstraction principles, but will
-/// contain different data.
+/// While this representation is quite "low level", i.e. forces a user
+/// to deal with payload encoding themselves and provides no
+/// functionality for async payloads (via filesharing, or similar), it
+/// is quite a high level abstraction considering the data that needs
+/// to be sent over the network in order for it to reach it's
+/// recipient.
 ///
-/// The `Out` variant will for example not contain `signature`
-/// information, because by the time the object is made, this data has
-/// not been computed yet. On the other hand the `In` variant won't
-/// have a service `associator`, because this is abstracted away by
-/// the `poll` and `listen` function endpoints.
+/// This type is both returned by `listen`, `poll`, as well as
+/// specific message `queries`
 ///
-/// ## Rationale
-///
-/// This approach was chosen over having multiple structs becauseit
-/// makes storing this type in the internal data store easier, without
-/// having to duplicate structures _too_ much.
-#[derive(Clone, Serialize, Deserialize)]
-pub enum Message {
-    /// An incoming `Message`, received from someone else on the network
-    In {
-        /// The sender identity
-        sender: Identity,
-        /// Recipient information
-        recipient: Recipient,
-        /// Attached `Message` signature, built for all fields
-        sign: SigTrust,
-        /// A raw byte `Message` payload
-        payload: Vec<u8>,
-    },
-    /// An outgoing `Message`, sent from a local user
-    Out {
-        /// The sender identity
-        sender: Identity,
-        /// Recipient information
-        recipient: Recipient,
-        /// The embedded service associator
-        associator: String,
-        /// A raw byte `Message` payload
-        payload: Vec<u8>,
-    },
+#[derive(Clone)]
+pub struct Message {
+    /// A unique message ID
+    pub id: MsgId,
+    /// The sender identity
+    pub sender: Identity,
+    /// Recipient information
+    pub recipient: Recipient,
+    /// The embedded service associator
+    pub associator: String,
+    /// Verified signature data
+    pub sign: SigTrust,
+    /// A raw byte `Message` payload
+    pub payload: Vec<u8>,
 }
 
 impl Message {
-    /// Returns the `sender` field for both `Message` variants
-    pub fn sender(&self) -> &Identity {
-        match self {
-            Self::In { ref sender, .. } => sender,
-            Self::Out { ref sender, .. } => sender,
-        }
-    }
-
-    /// Returns the `recipient` field for both `Message` variants
-    pub fn recipient(&self) -> &Recipient {
-        match self {
-            Self::In { ref recipient, .. } => recipient,
-            Self::Out { ref recipient, .. } => recipient,
-        }
-    }
-
-    /// Returns the `payload` field for both `Message` variants
-    pub fn payload(&self) -> &Vec<u8> {
-        match self {
-            Self::In { ref payload, .. } => payload,
-            Self::Out { ref payload, .. } => payload,
-        }
-    }
-
-    /// Returns the `sign` field for the `Message::In` variant
-    pub fn signature(&self) -> Option<&SigTrust> {
-        match self {
-            Self::In { ref sign, .. } => Some(sign),
-            Self::Out { .. } => None,
-        }
-    }
-
-    /// Returns the `associator` field for the `Message::Out` variant
-    pub fn associator(&self) -> Option<&String> {
-        match self {
-            Self::Out { ref associator, .. } => Some(associator),
-            Self::In { .. } => None,
-        }
-    }
-
-    /// Construct a new `Recipient`, in reply to a `Message::In`
+    /// Construct a new `Recipient`, in reply to a Message
     ///
     /// If the `Message` was addressed to a single user, the sender is
     /// used. If it was addressed to a group, the sender is added, and
     /// self is removed from the `Group` set. If it was a flood, then
     /// the reply is a flood.
     pub fn reply(&self, id: &Identity) -> Recipient {
-        let recipient = self.recipient();
-        let sender = self.sender();
+        let recipient = &self.recipient;
+        let sender = self.sender;
 
         use Recipient::*;
         match recipient {
-            Group(ref group) => Group(group.clone().strip(id).add(*sender)),
-            User(_) => User(*sender),
+            Group(ref group) => Group(group.clone().strip(id).add(sender)),
+            User(_) => User(sender),
             Flood => Flood,
         }
     }
@@ -242,18 +206,19 @@ impl<'qaul> Messages<'qaul> {
         let recipients = MsgUtils::readdress(&recipient);
         let associator = service.into();
 
-        let msg = Message::Out {
+        let env = Envelope {
+            id: MsgId::new(),
             sender,
             recipient,
             associator,
             payload,
         };
 
-        let signature = MsgUtils::sign(&msg);
+        let signature = MsgUtils::sign(&env);
         MsgUtils::send(
             &self.q.router,
             RatMessageProto {
-                msg,
+                env,
                 recipients,
                 signature,
             },
@@ -295,7 +260,12 @@ impl<'qaul> Messages<'qaul> {
     }
 
     /// Query for `Messages` from the store for a service
-    pub fn query<S>(&self, _user: UserAuth, _service: S, _query: MessageQuery) -> Result<Vec<Message>>
+    pub fn query<S>(
+        &self,
+        _user: UserAuth,
+        _service: S,
+        _query: MessageQuery,
+    ) -> Result<Vec<Message>>
     where
         S: Into<Option<String>>,
     {

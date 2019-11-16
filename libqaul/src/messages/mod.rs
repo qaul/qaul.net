@@ -1,7 +1,7 @@
 //! Internal `Message` handling module
 
 // Public exports
-pub use crate::api::messages::{Message, MessageQuery, Recipient, SigTrust};
+pub use crate::api::messages::{Message, MessageQuery, MsgId, Recipient, SigTrust};
 
 use crate::error::{Error, Result};
 
@@ -12,8 +12,48 @@ use std::{
 };
 
 /// A searchable index of messages encountered by this system
+#[derive(Clone)]
 pub(crate) struct MsgStore {
     inner: Arc<Mutex<BTreeMap<Identity, Vec<Message>>>>,
+}
+
+/// An internal wrapper around an unsent Message
+pub(crate) struct Envelope {
+    pub(crate) id: MsgId,
+    pub(crate) sender: Identity,
+    pub(crate) recipient: Recipient,
+    pub(crate) associator: String,
+    pub(crate) payload: Vec<u8>,
+}
+
+/// A `ratman::Message` set prototype structure
+pub(crate) struct RatMessageProto {
+    /// The high level `Message` to send and validate for
+    pub(crate) env: Envelope,
+    /// Readdressed `Recipient` information
+    pub(crate) recipients: Vec<RatRecipient>,
+    /// Signature for the inlined `Message` data
+    pub(crate) signature: Vec<u8>,
+}
+
+impl From<RatMessageProto> for Vec<RatMessage> {
+    fn from(proto: RatMessageProto) -> Self {
+        let sender = proto.env.sender;
+        let associator = proto.env.associator.clone();
+        let payload = proto.env.payload;
+        let signature = proto.signature;
+        proto
+            .recipients
+            .into_iter()
+            .map(|recipient| RatMessage {
+                sender: sender.clone(),
+                recipient,
+                associator: associator.clone(),
+                payload: payload.clone(),
+                signature: signature.clone(),
+            })
+            .collect()
+    }
 }
 
 pub(crate) struct MsgUtils;
@@ -33,7 +73,7 @@ impl MsgUtils {
     }
 
     /// Construct a cryptographic signature for an inner `Message`
-    pub(crate) fn sign(msg: &Message) -> Vec<u8> {
+    pub(crate) fn sign(_env: &Envelope) -> Vec<u8> {
         vec![1, 3, 1, 2]
     }
 
@@ -44,39 +84,9 @@ impl MsgUtils {
             .into_iter()
             .map(|msg| router.send(msg))
             .fold(Ok(()), |acc, res| match (acc, res) {
-                (_, Err(e)) => Err(Error::NetworkFault),
+                (_, Err(_)) => Err(Error::NetworkFault),
                 (Err(e), _) => Err(e),
                 (_, _) => Ok(()),
             })
-    }
-}
-
-/// A `ratman::Message` set prototype structure
-pub(crate) struct RatMessageProto {
-    /// The high level `Message` to send and validate for
-    pub(crate) msg: Message,
-    /// Readdressed `Recipient` information
-    pub(crate) recipients: Vec<RatRecipient>,
-    /// Signature for the inlined `Message` data
-    pub(crate) signature: Vec<u8>,
-}
-
-impl From<RatMessageProto> for Vec<RatMessage> {
-    fn from(proto: RatMessageProto) -> Self {
-        let sender = proto.msg.sender();
-        let associator = proto.msg.associator().clone().unwrap();
-        let payload = proto.msg.payload();
-        let signature = proto.signature;
-        proto
-            .recipients
-            .into_iter()
-            .map(|recipient| RatMessage {
-                sender: sender.clone(),
-                recipient,
-                associator: associator.clone(),
-                payload: payload.clone(),
-                signature: signature.clone(),
-            })
-            .collect()
     }
 }

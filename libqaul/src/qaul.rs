@@ -7,6 +7,7 @@ use crate::{
     discover::Discovery,
     users::UserStore,
     services::ServiceRegistry,
+    messages::MsgStore,
 };
 
 use ratman::{Router, RouterInit};
@@ -47,6 +48,9 @@ pub struct Qaul {
     /// Handles user-local contact books
     pub(crate) contacts: ContactStore,
 
+    // /// Provide a persistent interface to query messages
+    // pub(crate) messages: MsgStore,
+    
     /// An ephemeral (non persistent) store for external services
     pub(crate) services: ServiceRegistry,
     
