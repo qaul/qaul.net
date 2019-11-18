@@ -28,14 +28,15 @@
 
 /* only for sidepane-menu & sidepane-log components */
 nav :global(.top-bar) {
-  color: var(--q-theme-strong);
-  border-bottom: 1px solid var(--q-nav-border);
+  background-color: var(--q-theme-strong);
+  border-right: 1px solid var(--q-a-hover);
+  border-left: 1px solid var(--q-a-hover);
 }
 nav :global(.top-bar) button {
-  color: var(--q-a);
+  color: var(--q-color-inverse);
 }
 nav :global(.top-bar) button:hover {
-  color: var(--q-a-hover);
+  color: var(--q-color-inverse);
 }
 
 
