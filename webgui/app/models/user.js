@@ -12,6 +12,9 @@ export default DS.Model.extend({
     starred: DS.attr('boolean'),
     // age or birthdate?
     // avatar and token link?
+    identicon: DS.attr('string'),
+    avatar: DS.attr('string'),
+
     gender: DS.attr('string'),
 
     lastSeen: DS.attr('date'),

@@ -13,6 +13,7 @@ light['q-theme-light'] = '#d1e4f1';
 /* text color */
 light['q-color'] = '#666';
 light['q-color-title'] = '#333';
+light['q-color-inverse'] = '#fff';
 
 /* hyperlinks */
 light['q-a'] = '#6399cc';

@@ -1,0 +1,58 @@
+.sidepane-log {
+  min-height: 100vh;
+  width: 30rem;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--q-nav-bg);
+  position: fixed;
+  top: 0;
+  max-width: 90%;
+  transition: .3s ease-out;
+  z-index: 10;
+}
+.networks {
+  display: flex;
+}
+.users {
+  display: flex;
+}
+.logs {
+  overflow: hidden;
+}
+.debug {
+  font-family: monospace;
+  white-space: pre;
+  overflow: scroll;
+}
+
+
+/* smaller than large tablet */
+@media only screen and (max-width: 53rem) {
+  html[dir="ltr"] .sidepane-log {
+    right: -30rem;
+  }
+  html[dir="rtl"] .sidepane-log {
+    left: -30rem;
+  }
+  html[dir="ltr"] :global(#sidepane-log.show) {
+    transform: translateX(-30rem);
+  }
+  html[dir="rtl"] :global(#sidepane-log.show) {
+    transform: translateX(30rem);
+  }
+}
+
+
+/* tablet large */
+@media only screen and (min-width: 53rem) {
+  html[dir="ltr"] .sidepane-log {
+    right: 0rem;
+  }
+  html[dir="rtl"] .sidepane-log {
+    left: 0rem;
+  }
+  main {
+    margin-inline-end: 30rem;
+  }
+}
+

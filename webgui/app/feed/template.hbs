@@ -1,14 +1,16 @@
-<div local-class="input-area">
-  <input onchange={{action (mut newMsg) value="target.value"}}>
-  <button onclick={{action "submit" newMsg}}>{{t "send"}}</button>
-</div>
+<div class="page">
+  <div local-class="input-area">
+    <input onchange={{action (mut newMsg) value="target.value"}}>
+    <button onclick={{action "submit" newMsg}}>{{t "send"}}</button>
+  </div>
 
-<div local-class="messages">
-  {{#each messages as |message|}}
-    <div local-class="message">
-      <div local-class="message-name">{{message.senderName}}</div>
-      <div local-class="message-time">{{moment-from-now message.timestamp}}</div>
-      <div local-class="message-content">{{message.content}}</div>
-    </div>
-  {{/each}}
+  <div local-class="messages">
+    {{#each messages as |message|}}
+      <div local-class="message">
+        <div local-class="message-name">{{message.senderName}}</div>
+        <div local-class="message-time">{{moment-from-now message.timestamp}}</div>
+        <div local-class="message-content">{{message.content}}</div>
+      </div>
+    {{/each}}
+  </div>
 </div>

@@ -4,3 +4,31 @@
   min-height: 100vh;
   margin-bottom: 3rem;
 }
+
+
+/* mobile */
+@media only screen and (max-width: 48rem) {
+
+}
+
+/* tablet */
+@media only screen and (min-width: 48rem) and (max-width: 62rem) {
+
+}
+
+/* tablet large */
+@media only screen and (min-width: 53rem) {
+  .root {
+    display: flex;
+  }
+}
+
+/* desktop */
+@media only screen and (min-width: 62rem) {
+
+}
+
+/* desktop large */
+@media only screen and (min-width: 75rem) {
+
+}

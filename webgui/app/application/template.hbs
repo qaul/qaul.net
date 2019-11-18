@@ -1,5 +1,8 @@
 <div {{css-vars this.style.activeStyle}} local-class="root">
-  {{outlet}}
-
-  <NavBar />
+  <SidepaneMenu />
+  <main>
+    <TopBar />
+    {{outlet}}
+  </main>
+  <SidepaneLog />
 </div>

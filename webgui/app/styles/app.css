@@ -5,9 +5,21 @@ html {
 	font-size:10px;
 }
 
-html[dir="rtl"] {
+html[dir="rtl"],
+html[dir="rtl"] body {
   direction: rtl;
 }
+html[dir="ltr"],
+html[dir="ltr"] body {
+  direction: ltr;
+}
+html[dir="rtl"] :global(.ltr) {
+  display: none;
+}
+html[dir="ltr"] :global(.rtl) {
+  display: none;
+}
+
 
 /* define global elements */
 body  {
@@ -28,7 +40,9 @@ a:hover {
 img {
 	border:none;
 }
-
+main {
+  width:100%;
+}
 
 
 

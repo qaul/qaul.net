@@ -1,0 +1,102 @@
+.sidepane-menu {
+  /* local variables for the menu width */
+  --width-expanded: 30rem;
+  --width-collapsed: 8rem;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--q-nav-bg);
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  transition: .3s ease-out;
+  z-index: 11;
+  max-width: 90%;
+}
+:global(#sidepane-menu) button.close {
+  visibility: hidden;
+}
+:global(#sidepane-menu.show) button.close {
+  visibility: visible;
+}
+:global(#sidepane-menu.show) button.open {
+  visibility: hidden;
+}
+
+.sidepane-menu a {
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid var(--q-nav-border);
+}
+.sidepane-menu a:hover {
+  background-color: var(--q-nav-bg-hover);
+  color: var(--q-a-hover);
+  text-decoration: none;
+}
+.sidepane-menu a:global(.active) {
+  background-color: var(--q-nav-bg-active);
+  color: var(--q-color-inverse);
+}
+.sidepane-menu a:global(.active):hover {
+  background-color: var(--q-nav-bg-active-hover);
+}
+.sidepane-menu a i {
+  font-size: 4rem;
+  padding: 1.5rem;
+  display: block;
+  width: var(--width-collapsed);
+  text-align: center;
+}
+
+/* mobile */
+@media only screen and (max-width: 48rem) {
+  .sidepane-menu {
+    width: var(--width-expanded);
+  }
+  html[dir="ltr"] .sidepane-menu {
+    left: -30rem;
+  }
+  html[dir="rtl"] .sidepane-menu {
+    right: -30rem;
+  }
+  html[dir="ltr"] :global(#sidepane-menu.show) {
+    transform: translateX(var(--width-expanded));
+  }
+  html[dir="rtl"] :global(#sidepane-menu.show) {
+    transform: translateX(-30rem);
+  }
+}
+
+
+/* tablet */
+@media only screen and (min-width: 48rem) {
+  html[dir="ltr"] .sidepane-menu {
+    left: 0;
+  }
+  html[dir="rtl"] .sidepane-menu {
+    right: 0;
+  }
+}
+@media only screen and (min-width: 48rem) and (max-width: 62rem) {
+  .sidepane-menu {
+    width: var(--width-collapsed);
+  }
+  .sidepane-menu:global(.show) {
+    width: var(--width-expanded);
+  }
+  html main {
+    margin-inline-start: 8rem;
+    width: calc(100% - 8rem);
+  }
+}
+
+/* desk */
+@media only screen and (min-width: 62rem) {
+  .sidepane-menu {
+    width: var(--width-expanded);
+  }
+  main {
+    margin-inline-start: 30rem;
+  }
+}

@@ -1,0 +1,14 @@
+<nav local-class="sidepane-menu" id="sidepane-menu">
+  <div class="top-bar">
+    <button {{action "showMenu"}} local-class="open" class="pane rtl">{{fa-icon "angle-double-left"}}</button>
+    <button {{action "hideMenu"}} local-class="close" class="pane rtl">{{fa-icon "angle-double-right"}}</button>
+    <button {{action "showMenu"}} local-class="open" class="pane ltr">{{fa-icon "angle-double-right"}}</button>
+    <button {{action "hideMenu"}} local-class="close" class="pane ltr">{{fa-icon "angle-double-left"}}</button>
+  </div>
+
+  {{#link-to "feed"}}{{fa-icon "comments"}}{{/link-to}}
+  {{#link-to "users"}}{{fa-icon "address-book"}}{{/link-to}}
+  {{#link-to "files"}}{{fa-icon "cloud-download"}}{{/link-to}}
+  {{#link-to "settings"}}{{fa-icon "gear"}}{{/link-to}}
+  {{#link-to "info"}}{{fa-icon "info"}}{{/link-to}}
+</nav>

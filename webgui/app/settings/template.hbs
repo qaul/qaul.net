@@ -1,11 +1,5 @@
 <div class="page">
-  <div local-class="user-info">
-    <div local-class="user-icon"></div>
-    <div local-class="user-name">MyUsername</div>
-    <div local-class="edit">
-      {{fa-icon "edit"}}
-    </div>
-  </div>
+  <h1>{{fa-icon "gear"}} {{t "settings.configuration"}}</h1>
 
   <div local-class="settings panel">
     <div local-class="name item">{{t "settings.configuration"}}</div>
@@ -22,12 +16,7 @@
       <button onclick={{action "setTheme" "dark"}}>dark</button>
       <button onclick={{action "setTheme" "light"}}>light</button>
     </span>
-  </div>
+    <a local-class="item"><span local-class="icon">{{fa-icon "info-circle"}}</span>{{t "info.debug"}}</a>
 
-  <div local-class="info panel">
-    <div local-class="name item">{{t "info.information"}}</div>
-    <a local-class="item">{{t "info.aboutQaulNet"}}<span local-class="icon">{{fa-icon "info-circle"}}</span></a>
-    <a local-class="item">{{t "info.howto"}}<span local-class="icon">{{fa-icon "info-circle"}}</span></a>
-    <a local-class="item">{{t "info.debug"}}<span local-class="icon">{{fa-icon "info-circle"}}</span></a>
   </div>
 </div>
