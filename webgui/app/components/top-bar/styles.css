@@ -31,6 +31,7 @@ nav :global(.top-bar) {
   background-color: var(--q-theme-strong);
   border-right: 1px solid var(--q-a-hover);
   border-left: 1px solid var(--q-a-hover);
+  border-bottom: 1px solid var(--q-nav-bg);
 }
 nav :global(.top-bar) button {
   color: var(--q-color-inverse);

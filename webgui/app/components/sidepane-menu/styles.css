@@ -3,6 +3,7 @@
   --width-expanded: 30rem;
   --width-collapsed: 8rem;
 
+
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -13,6 +14,8 @@
   transition: .3s ease-out;
   z-index: 11;
   max-width: 90%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 :global(#sidepane-menu) button.close {
   visibility: hidden;
@@ -26,6 +29,7 @@
 
 .sidepane-menu a {
   display: flex;
+  align-items: center;
   width: 100%;
   border-bottom: 1px solid var(--q-nav-border);
 }
@@ -41,11 +45,34 @@
 .sidepane-menu a:global(.active):hover {
   background-color: var(--q-nav-bg-active-hover);
 }
+
+:global(#sidepane-menu) .icon {
+  width: 8rem;
+}
+:global(#sidepane-menu) .info {
+  position: absolute;
+  font-size: 1rem;
+  margin-top: 0.6rem;
+  margin-left: 5.5rem;
+  padding: 0.2rem;
+  border-radius: 1rem;
+  min-width: 1.1rem;
+  text-align: center;
+  color: var(--q-color-inverse);
+  background-color: var(--q-theme-strong);
+  border: 1.5px solid var(--q-color-inverse);
+}
+:global(#sidepane-menu) .description {
+  display: none;
+}
+:global(#sidepane-menu.show) .description {
+  display: block;
+}
+
 .sidepane-menu a i {
   font-size: 4rem;
   padding: 1.5rem;
   display: block;
-  width: var(--width-collapsed);
   text-align: center;
 }
 

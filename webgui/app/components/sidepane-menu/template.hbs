@@ -6,9 +6,47 @@
     <button {{action "hideMenu"}} local-class="close" class="pane ltr">{{fa-icon "angle-double-left"}}</button>
   </div>
 
-  {{#link-to "feed"}}{{fa-icon "comments"}}{{/link-to}}
-  {{#link-to "users"}}{{fa-icon "address-book"}}{{/link-to}}
-  {{#link-to "files"}}{{fa-icon "cloud-download"}}{{/link-to}}
-  {{#link-to "settings"}}{{fa-icon "gear"}}{{/link-to}}
-  {{#link-to "info"}}{{fa-icon "info"}}{{/link-to}}
+  {{#link-to "feed"}}
+    <div local-class="icon">
+      <div local-class="info">5</div>
+      {{fa-icon "comments"}}
+    </div>
+    <div local-class="description">
+      {{t "nav.messenger"}}
+    </div>
+  {{/link-to}}
+  {{#link-to "users"}}
+    <div local-class="icon">
+      <div local-class="info">11</div>
+      {{fa-icon "users"}}
+    </div>
+    <div local-class="description">
+      {{t "nav.users"}}
+    </div>
+  {{/link-to}}
+  {{#link-to "files"}}
+    <div local-class="icon">
+      <div local-class="info">9</div>
+      {{fa-icon "cloud-download"}}
+    </div>
+    <div local-class="description">
+      {{t "nav.files"}}
+    </div>
+  {{/link-to}}
+  {{#link-to "settings"}}
+    <div local-class="icon">
+      {{fa-icon "gear"}}
+    </div>
+    <div local-class="description">
+      {{t "nav.settings"}}
+    </div>
+  {{/link-to}}
+  {{#link-to "info"}}
+    <div local-class="icon">
+      {{fa-icon "info"}}
+    </div>
+    <div local-class="description">
+      {{t "nav.info"}}
+    </div>
+  {{/link-to}}
 </nav>

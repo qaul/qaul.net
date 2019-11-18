@@ -9,6 +9,7 @@
   max-width: 90%;
   transition: .3s ease-out;
   z-index: 10;
+  overflow-y: auto;
 }
 .networks {
   display: flex;
@@ -53,6 +54,9 @@
   }
   main {
     margin-inline-end: 30rem;
+  }
+  .sidepane-log :global(.pane) {
+    visibility: hidden;
   }
 }
 

@@ -9,3 +9,9 @@ info:
   aboutQaulNet: Über qaul.net
   howto: Nutzer*innenanleitung
   debug: Debugging Informationen
+nav:
+  messenger: Mitteilungen
+  users: Kontakte
+  files: Dateien
+  settings: Konfiguration
+  info: Informationen

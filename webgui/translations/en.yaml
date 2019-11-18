@@ -9,3 +9,9 @@ info:
   aboutQaulNet: About qaul.net
   howto: How to
   debug: Debugging Information
+nav:
+  messenger: Messages
+  users: Users
+  files: File Sharing
+  settings: Settings
+  info: Information
