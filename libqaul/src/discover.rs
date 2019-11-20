@@ -1,6 +1,6 @@
 use crate::{Qaul, utils::RunLock};
 use async_std::task;
-use ratman::{Identity, Protocol, Message, Router};
+use ratman::{Identity, Protocol, Message, Router, netmod::Recipient};
 use std::{
     sync::{
         mpsc::{channel, Sender, Receiver},
@@ -11,7 +11,7 @@ use std::{
     collections::BTreeMap,
 };
 
-/// Encode available Discovery commands
+/// Encode available  commands
 pub(crate) enum DiscCmd {
     /// Start announcing a user ID
     Start(Identity),
@@ -93,6 +93,11 @@ impl Discovery {
     fn inc_handler(qaul: Arc<Qaul>, inc: Receiver<Message>, lock: Arc<RunLock>) {
         thread::spawn(move || {
             while let Ok(msg) = inc.recv() {
+                let user = match msg.recipient {
+                    Recipient::User(id) => id,
+                    Recipient::Flood => unimplemented!(),
+                };
+
                 dbg!(msg);
             }
         });

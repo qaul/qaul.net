@@ -1,21 +1,15 @@
-//! Internal `Message` handling module
+//! Service API messaging primitives
 
 // Public exports
-pub use crate::api::messages::{Message, MessageQuery, MsgId, Recipient, SigTrust};
+pub use crate::api::messages::{Message, MessageQuery, MsgId, MsgRef, Recipient, SigTrust};
+
+mod store;
+pub(crate) use self::store::MsgStore;
 
 use crate::error::{Error, Result};
-
-use ratman::{netmod::Recipient as RatRecipient, Identity, Message as RatMessage, Router};
-use std::{
-    collections::BTreeMap,
-    sync::{Arc, Mutex},
+use ratman::{
+    netmod::Recipient as RatRecipient, Identity, Message as RatMessage, MsgId as RatMsgId, Router,
 };
-
-/// A searchable index of messages encountered by this system
-#[derive(Clone)]
-pub(crate) struct MsgStore {
-    inner: Arc<Mutex<BTreeMap<Identity, Vec<Message>>>>,
-}
 
 /// An internal wrapper around an incomplete Message
 ///
@@ -32,6 +26,18 @@ pub(crate) struct Envelope {
     pub(crate) payload: Vec<u8>,
 }
 
+impl From<RatMsgId> for MsgId {
+    fn from(id: RatMsgId) -> Self {
+        Self(id.0)
+    }
+}
+
+impl From<MsgId> for RatMsgId {
+    fn from(id: MsgId) -> Self {
+        Self(id.0)
+    }
+}
+
 /// A `ratman::Message` set prototype structure
 pub(crate) struct RatMessageProto {
     /// The high level `Message` to send and validate for
@@ -44,6 +50,7 @@ pub(crate) struct RatMessageProto {
 
 impl From<RatMessageProto> for Vec<RatMessage> {
     fn from(proto: RatMessageProto) -> Self {
+        let id = proto.env.id.clone().into();
         let sender = proto.env.sender;
         let associator = proto.env.associator.clone();
         let payload = proto.env.payload;
@@ -52,6 +59,7 @@ impl From<RatMessageProto> for Vec<RatMessage> {
             .recipients
             .into_iter()
             .map(|recipient| RatMessage {
+                id,
                 sender: sender.clone(),
                 recipient,
                 associator: associator.clone(),

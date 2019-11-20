@@ -21,6 +21,7 @@ impl Slicer {
         assert!(frames.len() == 1);
         let frame: Frame = frames.remove(0);
         Message {
+            id: unimplemented!(),
             sender: frame.sender,
             recipient: frame.recipient,
             associator: String::new(), // TODO!

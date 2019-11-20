@@ -18,7 +18,7 @@ use crate::{
 
 pub use {
     crate::{
-        data::{Message, Signature},
+        data::{Message, Signature, MsgId},
         protocol::Protocol,
     },
     identity::Identity,

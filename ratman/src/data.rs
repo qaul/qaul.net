@@ -1,13 +1,14 @@
 //! Data exchange structures for `R.A.T.M.A.N.`
 
-use conjoiner as conj;
 use identity::Identity;
 use netmod::Recipient;
 use serde::{Deserialize, Serialize};
-use std::hash::Hasher;
-use twox_hash::XxHash64;
 
 pub type Signature = Vec<u8>;
+
+/// A unique, randomly generated message ID
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MsgId(pub [u8; 16]);
 
 /// An atomic message, handed to a `Router` to deliver
 ///
@@ -22,6 +23,8 @@ pub type Signature = Vec<u8>;
 /// because this is guaranteed by the `netmod` `Frame` abstraction!
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Message {
+    /// A random message ID
+    pub id: MsgId,
     /// Sender of a message
     pub sender: Identity,
     /// Final recipient of a message
@@ -41,6 +44,7 @@ impl Message {
     /// allocates to be hashed for the XXHash signature of the
     /// Message.
     pub fn build_signed<S>(
+        id: MsgId,
         sender: Identity,
         recipient: Recipient,
         associator: S,
@@ -54,6 +58,7 @@ impl Message {
         let signature = vec![1, 3, 1, 2];
 
         Self {
+            id,
             sender,
             recipient,
             associator,

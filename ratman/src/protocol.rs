@@ -8,7 +8,7 @@
 //! - `Announce` is sent when a node comes online
 //! - `Sync` is a reply to an `Announce`, only omitted when `no_sync` is set
 
-use crate::data::Message;
+use crate::data::{Message, MsgId};
 use identity::Identity;
 use netmod::Recipient;
 use serde::{Deserialize, Serialize};
@@ -31,6 +31,7 @@ impl Protocol {
     /// Build an announcement message for a user
     pub fn announce(sender: Identity) -> Message {
         Message::build_signed(
+            MsgId([0; 16]),
             sender,
             Recipient::Flood,
             ASSOCIATOR,
@@ -39,8 +40,9 @@ impl Protocol {
     }
 
     /// Build a message that synchronises routing table state
-    pub fn sync_rt(sender: Identity, recipient: Identity, known: Vec<Identity>) -> Message {
+    pub fn sync_rt(sender: Identity, recipient: Identity, _known: Vec<Identity>) -> Message {
         Message::build_signed(
+            MsgId([0; 16]),
             sender.clone(),
             Recipient::User(recipient),
             ASSOCIATOR,

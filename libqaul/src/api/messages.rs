@@ -5,13 +5,13 @@ use crate::users::UserAuth;
 use crate::utils::VecUtils;
 
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
+use std::sync::Arc;
 
-/// A `clone-on-write` type wrapper around messages
-pub type MsgRef<'msg> = Cow<'msg, Message>;
+/// A reference to an internally stored message object
+pub type MsgRef = Arc<Message>;
 
 /// A unique, randomly generated message ID
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MsgId(pub(crate) [u8; 16]);
 
 impl MsgId {
