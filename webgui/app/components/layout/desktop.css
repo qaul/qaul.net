@@ -1,0 +1,16 @@
+.root {
+  display: grid;
+  grid-template:
+    "nav main" minmax(100vh, 1fr)
+    / 300px 1fr
+}
+
+.main {
+  grid-area: main;
+  background: var(--q-bg);
+}
+
+.nav {
+  grid-area: nav;
+  background: var(--q-nav-bg);
+}

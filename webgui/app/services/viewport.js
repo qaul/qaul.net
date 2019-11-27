@@ -1,16 +1,20 @@
 import Service from '@ember/service';
-import { set } from "@ember/object";
+import { tracked } from '@glimmer/tracking';
 
-export default Service.extend({
-  init() {
-    this._super(...arguments);
+export default class ViewportService extends Service {
+  @tracked width;
+  @tracked height;
+
+  constructor() {
+    super(...arguments);
+
     const update = () => {
       if(window.innerWidth != this.width) {
-        set(this, 'width', window.innerWidth);
+        this.width = window.innerWidth;
       }
 
       if(window.innerHeight != this.height) {
-        set(this, 'height', window.innerHeight);
+        this.height = window.innerHeight;
       }
 
       window.requestAnimationFrame(update);
@@ -18,4 +22,16 @@ export default Service.extend({
 
     update();
   }
-});
+
+  get layout() {
+    if(this.width < 300) {
+      return 'mobile';
+    }
+
+    if(this.width < 800) {
+      return 'tablet';
+    }
+
+    return 'desktop';
+  }
+}

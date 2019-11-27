@@ -1,0 +1,15 @@
+<div local-class="root">
+  <nav local-class="nav">
+    <div local-class="nav-overflow {{if this.showAll "showall"}}">
+      {{component @navComponent showAll=this.showAll}}
+    </div>
+    {{#if fakeIncomingOverlay}}
+      <div local-class="nav-fake-overflow-in"></div>
+    {{/if}}
+  </nav>
+  <main local-class="main"></main>
+</div>
+
+<button {{on "click" (perform this.showNavigation)}}>
+  Start animations
+</button>

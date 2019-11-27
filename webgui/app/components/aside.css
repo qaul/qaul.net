@@ -53,7 +53,7 @@
     left: 0rem;
   }
   main {
-    margin-inline-end: 30rem;
+    /* margin-inline-end: 30rem; */
   }
   .sidepane-log :global(.pane) {
     visibility: hidden;

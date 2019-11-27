@@ -1,11 +1,1 @@
-<div local-class="root" {{css-vars this.style.activeStyle}}>
-  <Nav @show={{this.shownav}} @hide={{action "hide"}} />
-  <main local-class="main">
-    <div local-class="topbar">
-      <button {{on "click" (action "show" "nav")}} local-class="navbutton">{{fa-icon "bars"}}</button>
-      <button {{on "click" (action "show" "aside")}} local-class="navbutton">{{fa-icon "history"}}</button>
-    </div>
-    {{outlet}}
-  </main>
-  {{!-- <Aside /> --}}
-</div>
+<Root {{css-vars this.style.activeStyle}} />

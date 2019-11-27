@@ -1,0 +1,48 @@
+.root {
+  display: grid;
+  grid-template:
+    "nav main" minmax(100vh, 1fr)
+    / 8rem 1fr
+}
+
+.nav {
+  grid-area: nav;
+  z-index: 10;
+}
+
+.nav-overflow {
+  height: 100vh;
+  background: red;
+}
+
+.nav-overflow.showall {
+  width: 300px;
+}
+
+.main {
+  grid-area: main;
+  background: blue;
+}
+
+.nav-fake-overflow-in {
+  background:red;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 300px;
+  transform: translateX(-300px);
+
+  animation: flowin-nav 0.8s;
+  z-index: -1;
+}
+
+@keyframes flowin-nav {
+  from {
+    transform: translateX(-300px);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}

@@ -1,56 +1,6 @@
-<nav local-class="sidepane-menu {{if @show "show"}}">
-  <div local-class="topbar">
-    {{!-- <button {{action "showMenu"}} local-class="open" class="pane rtl">{{fa-icon "angle-double-left"}}</button>
-    <button {{action "hideMenu"}} local-class="close" class="pane rtl">{{fa-icon "angle-double-right"}}</button>
-    <button {{action "showMenu"}} local-class="open" class="pane ltr">{{fa-icon "angle-double-right"}}</button>
-    <button {{action "hideMenu"}} local-class="close" class="pane ltr">{{fa-icon "angle-double-left"}}</button> --}}
-    <button></button>
-    <button {{on "click" @hide}}>
-      {{fa-icon "angle-double-left"}}
-    </button>
-  </div>
-
-  {{#link-to "feed"}}
-    <div local-class="icon">
-      <div local-class="info">5</div>
-      {{fa-icon "comments"}}
-    </div>
-    <div local-class="description">
-      {{t "nav.messenger"}}
-    </div>
-  {{/link-to}}
-  {{#link-to "users"}}
-    <div local-class="icon">
-      <div local-class="info">11</div>
-      {{fa-icon "users"}}
-    </div>
-    <div local-class="description">
-      {{t "nav.users"}}
-    </div>
-  {{/link-to}}
-  {{#link-to "files"}}
-    <div local-class="icon">
-      <div local-class="info">9</div>
-      {{fa-icon "cloud-download"}}
-    </div>
-    <div local-class="description">
-      {{t "nav.files"}}
-    </div>
-  {{/link-to}}
-  {{#link-to "settings"}}
-    <div local-class="icon">
-      {{fa-icon "gear"}}
-    </div>
-    <div local-class="description">
-      {{t "nav.settings"}}
-    </div>
-  {{/link-to}}
-  {{#link-to "info"}}
-    <div local-class="icon">
-      {{fa-icon "info"}}
-    </div>
-    <div local-class="description">
-      {{t "nav.info"}}
-    </div>
-  {{/link-to}}
-</nav>
+<Nav::Item @text="bla" @long="Bla Bla Bla" @showAll={{@showAll}} />
+<Nav::Item @text="bla" @long="Bla Bla Bla" @showAll={{@showAll}} />
+<Nav::Item @text="bla" @long="Bla Bla Bla" @showAll={{@showAll}} />
+<Nav::Item @text="bla" @long="Bla Bla Bla" @showAll={{@showAll}} />
+<Nav::Item @text="bla" @long="Bla Bla Bla" @showAll={{@showAll}} />
+<Nav::Item @text="bla" @long="Bla Bla Bla" @showAll={{@showAll}} />
