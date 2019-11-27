@@ -1,8 +1,12 @@
+@value topbar-height: 5rem;
+@value nav-small-width: 8rem;
+
 .root {
   display: grid;
   grid-template:
-    "nav main" minmax(100vh, 1fr)
-    / 8rem 1fr
+    "nav topbar" topbar-height
+    "nav main" minmax(calc(100vh - topbar-height), 1fr)
+    / nav-small-width 1fr
 }
 
 .nav {
@@ -12,7 +16,7 @@
 
 .nav-overflow {
   height: 100vh;
-  background: red;
+  background: var(--q-nav-bg);
 }
 
 .nav-overflow.showall {
@@ -21,28 +25,58 @@
 
 .main {
   grid-area: main;
-  background: blue;
+  background: var(--q-bg);
 }
 
 .nav-fake-overflow-in {
-  background:red;
+  background:var(--q-nav-bg);
   position: absolute;
   top: 0;
-  left: 0;
+  left: calc(nav-small-width - 300px);
   bottom: 0;
   width: 300px;
-  transform: translateX(-300px);
+  transform: translateX(0);
 
   animation: flowin-nav 0.8s;
   z-index: -1;
 }
 
+.topbar {
+  grid-area: topbar;
+  background: var(--q-theme-strong);
+  color: var(--q-color);
+}
+
+.topbar-nav {
+  composes: topbar;
+  position: absolute;
+  border-color: var(--q-a-hover);
+  border-style: solid;
+  border-width: 0;
+  height: topbar-height;
+  left: calc(nav-small-width - 300px);
+  width: 300px;
+  padding-inline-start: calc(300px - nav-small-width);
+  box-sizing: border-box;
+}
+
+.topbar-nav.increase {
+  animation: flowin-nav 0.8s;
+}
+
+.topbar-nav.showall {
+  transform: translateX(calc(300px - nav-small-width));
+}
+
+[dir="ltr"] .topbar-nav { border-right-width: 1px; }
+[dir="rtl"] .topbar-nav { border-left-width: 1px; }
+
 @keyframes flowin-nav {
   from {
-    transform: translateX(-300px);
+    transform: translateX(0);
   }
 
   to {
-    transform: translateX(0);
+    transform: translateX(calc(300px - nav-small-width));
   }
 }

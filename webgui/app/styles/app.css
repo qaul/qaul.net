@@ -129,7 +129,7 @@ input {
     margin:0.5rem 0rem 1.0rem 0rem;
 }
 button {
-  color: var(--q-nav-color);
+  /* color: var(--q-nav-color);
   font-weight: bold;
   font-size:1.6rem;
   font-family:inherit;
@@ -138,10 +138,15 @@ button {
   border: 0.1rem solid var(--q-nav-border);
   border-radius: 1.5rem;
   width: 100%;
-  background-color: var(--q-nav-bg);
+  background-color: var(--q-nav-bg); */
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
 }
 button:hover {
-  background-color:var(--q-nav-bg-hover);
+  /* background-color:var(--q-nav-bg-hover); */
 }
 /*
 .form_box {

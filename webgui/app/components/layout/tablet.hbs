@@ -1,15 +1,25 @@
 <div local-class="root">
+  <div aria-hidden="true" local-class="topbar"></div>
   <nav local-class="nav">
+    <div aria-hidden="true" local-class="topbar-nav {{if fakeIncomingOverlay "increase"}} {{if this.showAll "showall"}}">
+      {{#if showExtendNavButton}}
+        <button {{on "click" (perform this.showNavigation)}}>
+          X
+        </button>
+      {{/if}}
+      {{#if showShrinkNavButton}}
+        <button {{on "click" (perform this.hideNavigation)}}>
+          O
+        </button>
+      {{/if}}
+    </div>
+
     <div local-class="nav-overflow {{if this.showAll "showall"}}">
-      {{component @navComponent showAll=this.showAll}}
+      <Nav @showAll={{this.showAll}} />
     </div>
     {{#if fakeIncomingOverlay}}
       <div local-class="nav-fake-overflow-in"></div>
     {{/if}}
   </nav>
-  <main local-class="main"></main>
+  <main local-class="main">{{yield}}</main>
 </div>
-
-<button {{on "click" (perform this.showNavigation)}}>
-  Start animations
-</button>

@@ -1,7 +1,11 @@
-<div class="navitem">
-  {{@text}}
-
-  {{#if @showAll}}
-    {{@long}}
+<LinkTo @route={{@route}} local-class="nav-item">
+  {{#if @badge}}
+    <div local-class="badge">{{@badge}}</div>
   {{/if}}
-</div>
+  <FaIcon @icon={{@icon}} local-class="icon" />
+  {{#if @showAll}}
+    <div local-class="description">
+      {{t @text}}
+    </div>
+  {{/if}}
+</LinkTo>

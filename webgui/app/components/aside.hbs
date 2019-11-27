@@ -1,34 +1,23 @@
-<nav local-class="sidepane-log" id="sidepane-log">
-  <div class="top-bar">
-    <button {{on "click" this.hideLog}}>
-      {{#if this.intl.ltr}}
-        {{fa-icon "angle-double-right"}}
-      {{else}}
-        {{fa-icon "angle-double-left"}}
-      {{/if}}
-    </button>
-  </div>
 
-  {{!-- network modules information --}}
-  <div local-class="networks">
-    {{#link-to "index"}}{{fa-icon "network-wired"}}{{/link-to}}
-    {{#link-to "index"}}{{fa-icon "wifi"}}{{/link-to}}
-    {{#link-to "index"}}{{fa-icon "bluetooth"}}{{/link-to}}
-  </div>
+{{!-- network modules information --}}
+<div local-class="networks">
+  {{#link-to "index"}}{{fa-icon "network-wired"}}{{/link-to}}
+  {{#link-to "index"}}{{fa-icon "wifi"}}{{/link-to}}
+  {{#link-to "index"}}{{fa-icon "bluetooth"}}{{/link-to}}
+</div>
 
-  {{!-- favorite user information --}}
-  <div local-class="users">
-    {{#link-to "users"}}{{fa-icon "address-book"}}{{/link-to}}
-  </div>
+{{!-- favorite user information --}}
+<div local-class="users">
+  {{#link-to "users"}}{{fa-icon "address-book"}}{{/link-to}}
+</div>
 
-  {{!-- logs (last messages & actions) --}}
-  <div local-class="logs">
+{{!-- logs (last messages & actions) --}}
+<div local-class="logs">
 
-  </div>
+</div>
 
-  {{!-- only for developing: debug information --}}
-  <div local-class="debug">
-    some debugging information
-    which can be handy while developing the application
-  </div>
-</nav>
+{{!-- only for developing: debug information --}}
+<div local-class="debug">
+  some debugging information
+  which can be handy while developing the application
+</div>

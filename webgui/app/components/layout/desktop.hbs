@@ -1,6 +1,9 @@
 <div local-class="root">
   <nav local-class="nav">
-    {{component @navComponent showAll=this.showAll}}
+    <Nav @showAll={{true}} />
   </nav>
   <main local-class="main">{{yield}}</main>
+  <aside local-class="aside">
+    <Aside />
+  </aside>
 </div>
