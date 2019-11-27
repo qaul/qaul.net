@@ -4,7 +4,7 @@
   sidepane-menu
   sidepane-log
 */
-:global(.top-bar) {
+/* :global(.top-bar) {
   display: flex;
   justify-content: space-between;
 }
@@ -23,15 +23,15 @@
 :global(.top-bar) i {
   padding: 0.5rem 1rem;
   display: block;
-}
+} */
 
 
 /* only for sidepane-menu & sidepane-log components */
 nav :global(.top-bar) {
-  background-color: var(--q-theme-strong);
+  /* background-color: var(--q-theme-strong);
   border-right: 1px solid var(--q-a-hover);
   border-left: 1px solid var(--q-a-hover);
-  border-bottom: 1px solid var(--q-nav-bg);
+  border-bottom: 1px solid var(--q-nav-bg); */
 }
 nav :global(.top-bar) button {
   color: var(--q-color-inverse);

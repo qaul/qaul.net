@@ -1,3 +1,18 @@
+.topbar {
+  composes: topbar from 'qaul-web/styles/topbar';
+}
+
+/* .top-bar button {
+  margin: 0;
+  border: 0;
+  background-color: inherit;
+  width: auto;
+  font-size: inherit;
+  cursor: pointer;
+
+  color: var(--q-color-inverse);
+} */
+
 .sidepane-menu {
   /* local variables for the menu width */
   --width-expanded: 30rem;
@@ -17,6 +32,11 @@
   overflow-y: auto;
   overflow-x: hidden;
 }
+
+.sidepane-menu.show {
+
+}
+
 :global(#sidepane-menu) button.close {
   visibility: hidden;
 }
@@ -87,10 +107,10 @@
   html[dir="rtl"] .sidepane-menu {
     right: -30rem;
   }
-  html[dir="ltr"] :global(#sidepane-menu.show) {
+  html[dir="ltr"] .sidepane-menu.show {
     transform: translateX(var(--width-expanded));
   }
-  html[dir="rtl"] :global(#sidepane-menu.show) {
+  html[dir="rtl"] .sidepane-menu.show {
     transform: translateX(-30rem);
   }
 }
@@ -113,8 +133,8 @@
     width: var(--width-expanded);
   }
   html main {
-    margin-inline-start: 8rem;
-    width: calc(100% - 8rem);
+    /* margin-inline-start: 8rem;
+    width: calc(100% - 8rem); */
   }
 }
 
@@ -124,6 +144,6 @@
     width: var(--width-expanded);
   }
   main {
-    margin-inline-start: 30rem;
+    /* margin-inline-start: 30rem; */
   }
 }

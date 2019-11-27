@@ -1,0 +1,19 @@
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--q-theme-strong);
+  height: 5rem;
+}
+
+.topbar button {
+  margin: 0;
+  padding: 0 .5rem;
+  color: var(--q-color-inverse);
+  border: none;
+  background: none;
+  width: auto;
+}
+
+.topbar button:hover {
+  background: none;
+}

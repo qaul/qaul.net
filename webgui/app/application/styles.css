@@ -5,6 +5,28 @@
   margin-bottom: 3rem;
 }
 
+.main {
+  margin-inline-start: 8rem;
+  margin-inline-start: 30rem;
+  width: calc(100% - 8rem);
+}
+
+.topbar {
+  composes: topbar from 'qaul-web/styles/topbar';
+  position: fixed;
+  left:0;
+  right:0;
+}
+
+.topbar {
+  /* display: flex;
+  justify-content: space-between; */
+
+
+  background-color: var(--q-theme-strong);
+  z-index: 2;
+}
+
 
 /* mobile */
 @media only screen and (max-width: 48rem) {

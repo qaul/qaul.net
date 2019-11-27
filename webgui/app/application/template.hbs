@@ -1,8 +1,12 @@
-<div {{css-vars this.style.activeStyle}} local-class="root">
-  <SidepaneMenu />
-  <main>
-    <TopBar />
-    {{outlet}}
+<div local-class="root" ...attributes>
+  <Nav @show={{this.shownav}} @hide={{action "hide"}} />
+  <main local-class="main">
+    <div local-class="topbar">
+      <button {{on "click" (action "show" "nav")}} local-class="navbutton">{{fa-icon "bars"}}</button>
+      <button {{on "click" (action "show" "aside")}} local-class="navbutton">{{fa-icon "history"}}</button>
+    </div>
+    {{yield}}
   </main>
-  <SidepaneLog />
+  {{!-- <Aside /> --}}
 </div>
+
