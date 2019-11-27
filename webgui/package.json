@@ -19,6 +19,8 @@
   },
   "devDependencies": {
     "@ember/optional-features": "^1.0.0",
+    "@fortawesome/ember-fontawesome": "^0.2.1",
+    "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "@glimmer/component": "^0.14.0-alpha.12",
     "babel-eslint": "^10.0.3",
     "broccoli-asset-rev": "^3.0.0",
@@ -43,7 +45,6 @@
     "ember-data": "~3.14.0",
     "ember-export-application-global": "^2.0.0",
     "ember-fetch": "^6.7.0",
-    "ember-font-awesome": "^4.0.0-rc.2",
     "ember-intl": "^4.2.0",
     "ember-load-initializers": "^2.1.0",
     "ember-maybe-import-regenerator": "^0.1.6",
