@@ -1,6 +1,7 @@
 import Component from '@ember/component';
 
 export default Component.extend({
+  tagName: '',
   actions: {
     hideMenu() {
       document.getElementById("sidepane-menu").classList.remove("show");

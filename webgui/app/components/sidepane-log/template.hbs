@@ -1,7 +1,12 @@
 <nav local-class="sidepane-log" id="sidepane-log">
   <div class="top-bar">
-    <button {{action "hideLog"}} class="pane rtl">{{fa-icon "angle-double-left"}}</button>
-    <button {{action "hideLog"}} class="pane ltr">{{fa-icon "angle-double-right"}}</button>
+    <button {{on "click" this.hideLog}}>
+      {{#if this.intl.ltr}}
+        {{fa-icon "angle-double-right"}}
+      {{else}}
+        {{fa-icon "angle-double-left"}}
+      {{/if}}
+    </button>
   </div>
 
   {{!-- network modules information --}}

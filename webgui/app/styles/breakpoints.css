@@ -1,0 +1,7 @@
+@value mobile: 100px;
+
+@media (min-width: mobile) {
+  body {
+    background: red;;
+  }
+}

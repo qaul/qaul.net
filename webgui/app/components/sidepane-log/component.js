@@ -1,10 +1,12 @@
-import Component from '@ember/component';
+import { inject as service } from '@ember/service';
+import Component from '@glimmer/component';
+import { action } from '@ember/object';
 
-export default Component.extend({
-  actions: {
-    hideLog() {
-      document.getElementById("sidepane-log").classList.remove("show");
-      document.getElementById("overlay").classList.remove("show");
-    }
+export default class SidepaneLog extends Component {
+  @service() intl;
+
+  @action hideLog() {
+    document.getElementById("sidepane-log").classList.remove("show");
+    document.getElementById("overlay").classList.remove("show");
   }
-});
+}
