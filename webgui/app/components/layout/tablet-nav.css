@@ -1,0 +1,68 @@
+@value topbar-height from './tablet';
+@value nav-small-width from './tablet';
+
+.nav {
+  z-index: 10;
+}
+
+.nav-overflow {
+  margin-top: topbar-height;
+  height: 100vh;
+  background: var(--q-nav-bg);
+}
+
+.nav-overflow.showall {
+  width: 300px;
+}
+
+.main {
+  grid-area: main;
+  background: var(--q-bg);
+}
+
+.nav-fake-overflow-in {
+  background:var(--q-nav-bg);
+  position: absolute;
+  top: 0;
+  left: calc(nav-small-width - 300px);
+  bottom: 0;
+  width: 300px;
+  transform: translateX(0);
+
+  animation: flowin-nav 0.8s;
+  z-index: -1;
+}
+
+.topbar-nav {
+  composes: topbar from './tablet';
+  position: absolute;
+  border-color: var(--q-a-hover);
+  border-style: solid;
+  border-width: 0;
+  height: topbar-height;
+  left: calc(nav-small-width - 300px);
+  width: 300px;
+  padding-inline-start: calc(300px - nav-small-width);
+  box-sizing: border-box;
+}
+
+.topbar-nav.increase {
+  animation: flowin-nav 0.8s;
+}
+
+.topbar-nav.showall {
+  transform: translateX(calc(300px - nav-small-width));
+}
+
+[dir="ltr"] .topbar-nav { border-right-width: 1px; }
+[dir="rtl"] .topbar-nav { border-left-width: 1px; }
+
+@keyframes flowin-nav {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(300px - nav-small-width));
+  }
+}
