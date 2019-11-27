@@ -1,6 +1,2 @@
-@value mobile: 100px;
-
-@media (min-width: mobile) {
-  body {
-  }
-}
+/* @value mobile: 100px; */
+@value desktop 62rem;

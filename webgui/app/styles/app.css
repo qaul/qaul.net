@@ -13,12 +13,12 @@ html[dir="ltr"],
 html[dir="ltr"] body {
   direction: ltr;
 }
-html[dir="rtl"] :global(.ltr) {
+/* html[dir="rtl"] :global(.ltr) {
   display: none;
 }
 html[dir="ltr"] :global(.rtl) {
   display: none;
-}
+} */
 
 
 /* define global elements */
@@ -177,9 +177,9 @@ select {
     -webkit-box-sizing: border-box;
 }
 */
-
+/*
 
 :global(.page) {
     padding: 1rem;
-}
+} */
 
