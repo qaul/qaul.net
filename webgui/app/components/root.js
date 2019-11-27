@@ -5,7 +5,6 @@ export default class RootComponent extends Component {
   @service() viewport;
 
   get layoutComponentName() {
-    return 'layout/tablet';
-    // return `layout/${this.viewport.layout}`
+    return `layout/${this.viewport.layout}`
   }
 }
