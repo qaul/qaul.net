@@ -20,3 +20,8 @@
   grid-area: aside;
   background: var(--q-nav-bg);
 }
+
+.sticky {
+  position: sticky;
+  top: 0;
+}
