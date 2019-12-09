@@ -190,3 +190,31 @@ impl MsgStore {
             .insert(id, msg);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{utils, Identity};
+    use crate::messages::{MsgStore, MsgState, Message, MsgId, Recipient, SigTrust};
+    use std::sync::Arc;
+    
+    fn setup(id: Identity) -> MsgStore {
+        let store = MsgStore::new();
+        let msg = Message {
+            id: MsgId::new(),
+            sender: Identity::truncate(&utils::random(16)),
+            recipient: Recipient::User(id),
+            associator: "__test".into(),
+            sign: SigTrust::Unverified,
+            payload: vec![1, 3, 1, 2],
+        };
+        store.insert(id, MsgState::Read(Arc::new(msg)));
+        store
+    }
+
+    #[test]
+    fn simple() {
+        let id = Identity::truncate(&utils::random(16));
+        let store = setup(id);
+        assert!(store.query(id).exec().unwrap().len() > 0);
+    }
+}

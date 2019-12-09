@@ -19,7 +19,7 @@ impl MsgId {
     pub(crate) fn new() -> Self {
         crate::utils::random(16)
             .into_iter()
-            .zip(0..)
+            .zip(0..16)
             .fold(Self([0; 16]), |mut acc, (x, i)| {
                 acc.0[i] = x;
                 acc

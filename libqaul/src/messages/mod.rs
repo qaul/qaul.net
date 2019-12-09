@@ -4,7 +4,7 @@
 pub use crate::api::messages::{Message, MessageQuery, MsgId, MsgRef, Recipient, SigTrust};
 
 mod store;
-pub(crate) use self::store::MsgStore;
+pub(crate) use self::store::{MsgStore, MsgState};
 
 use crate::error::{Error, Result};
 use ratman::{
