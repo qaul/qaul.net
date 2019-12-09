@@ -60,6 +60,8 @@ pub enum Error {
     NoContact,
     /// Invalid search query
     InvalidQuery,
+    /// Na data was returned for the provided query
+    NoData,
     /// Invalid payload (probably too big)
     InvalidPayload,
     /// A function callback timed out

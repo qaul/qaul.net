@@ -61,7 +61,7 @@ impl SigTrust {
 /// "flood" mechanic is passed through to `RATMAN`, which might
 /// implement this in the networking module, or emulate
 /// it. Performance may vary.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Recipient {
     /// A single user, known to this node
     User(Identity),
@@ -264,10 +264,16 @@ impl<'qaul> Messages<'qaul> {
     /// handle. It isn't possible to query all messages for all
     /// services in an efficient manner due to how messages are stored
     /// in a node.
-    pub fn query<S>(&self, user: UserAuth, service: S, query: MessageQuery) -> Result<Vec<Message>>
+    pub fn query<S>(&self, user: UserAuth, service: S, query: MessageQuery) -> Result<Vec<MsgRef>>
     where
         S: Into<String>,
     {
-        Ok(vec![])
+        let (id, _) = self.q.auth.trusted(user)?;
+        self.q
+            .messages
+            .query(id)
+            .constraints(query)
+            .service(service)
+            .exec()
     }
 }

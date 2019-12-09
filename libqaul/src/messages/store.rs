@@ -1,6 +1,6 @@
 use crate::{
     error::{Error, Result},
-    messages::{Message, MsgId, MsgRef},
+    messages::{Message, MessageQuery, MsgId, MsgRef},
     users::UserAuth,
     Identity,
 };
@@ -17,6 +17,7 @@ pub(crate) struct StoreQuery<'store> {
     user: Identity,
     unread: bool,
     service: Option<String>,
+    query: Option<MessageQuery>,
 }
 
 impl<'store> StoreQuery<'store> {
@@ -42,11 +43,20 @@ impl<'store> StoreQuery<'store> {
         }
     }
 
+    /// Filter messages additionally with a user provided query
+    pub(crate) fn constraints(self, query: MessageQuery) -> Self {
+        Self {
+            query: Some(query),
+            ..self
+        }
+    }
+
     /// Execute the query against the store
     pub(crate) fn exec(self) -> Result<Vec<MsgRef>> {
         let StoreQuery {
             store,
             user,
+            query,
             unread,
             service,
         } = self;
@@ -67,6 +77,13 @@ impl<'store> StoreQuery<'store> {
                         } else {
                             true
                         }
+                    })
+                    .filter(|msg| match query {
+                        Some(MessageQuery::Sender(ref sender)) => &msg.inner().sender == sender,
+                        Some(MessageQuery::Recipient(ref recipient)) => {
+                            &msg.inner().recipient == recipient
+                        }
+                        None => true,
                     })
                     .map(|msg| msg.read())
                     .collect())
@@ -140,6 +157,7 @@ impl MsgStore {
             store: self,
             unread: false,
             service: None,
+            query: None,
         }
     }
 
