@@ -1,5 +1,5 @@
 use crate::error::{Error, Result};
-use crate::messages::{MsgUtils, Envelope, RatMessageProto};
+use crate::messages::{Envelope, MsgUtils, RatMessageProto};
 use crate::qaul::{Identity, Qaul};
 use crate::users::UserAuth;
 use crate::utils::VecUtils;
@@ -258,16 +258,16 @@ impl<'qaul> Messages<'qaul> {
         self.q.services.add_listener(service.into(), listener)
     }
 
-    /// Query for `Messages` from the store for a service
-    pub fn query<S>(
-        &self,
-        _user: UserAuth,
-        _service: S,
-        _query: MessageQuery,
-    ) -> Result<Vec<Message>>
+    /// Retrieve locally stored messages from the store
+    ///
+    /// A query is made in relation to an associated service
+    /// handle. It isn't possible to query all messages for all
+    /// services in an efficient manner due to how messages are stored
+    /// in a node.
+    pub fn query<S>(&self, user: UserAuth, service: S, query: MessageQuery) -> Result<Vec<Message>>
     where
-        S: Into<Option<String>>,
+        S: Into<String>,
     {
-        unimplemented!()
+        Ok(vec![])
     }
 }
