@@ -235,7 +235,7 @@ impl<'qaul> Messages<'qaul> {
     ///    incoming messages as they are received.
     /// 2. The `Message` variant returned from this endpoint will
     ///    **always** be `Message::In`, never an outgoing type.
-    pub fn poll<S>(&self, user: UserAuth, service: S) -> Result<Message>
+    pub fn poll<S>(&self, user: UserAuth, service: S) -> Result<MsgRef>
     where
         S: Into<String>,
     {
@@ -252,7 +252,7 @@ impl<'qaul> Messages<'qaul> {
     pub fn listen<S, F: 'static>(&self, user: UserAuth, service: S, listener: F) -> Result<()>
     where
         S: Into<String>,
-        F: Fn(Message) -> Result<()>,
+        F: Fn(MsgRef) -> Result<()>,
     {
         self.q.auth.trusted(user)?;
         self.q.services.add_listener(service.into(), listener)

@@ -9,7 +9,7 @@
 use conjoiner;
 use qaul::{
     error::{Error, Result},
-    messages::{Message, MsgId, Recipient, SigTrust},
+    messages::{Message, MsgRef, MsgId, Recipient, SigTrust},
     users::UserAuth,
     Identity, Qaul,
 };
@@ -41,25 +41,25 @@ pub struct TextMessage {
     pub payload: TextPayload,
 }
 
-impl TryFrom<Message> for TextMessage {
+impl TryFrom<MsgRef> for TextMessage {
     type Error = Error;
 
     /// Map from a `Message::In` into a `TextMessage`
-    fn try_from(msg: Message) -> Result<Self> {
+    fn try_from(msg: MsgRef) -> Result<Self> {
         let Message {
-            id,
-            sender,
-            recipient,
-            sign,
-            payload,
+            ref id,
+            ref sender,
+            ref recipient,
+            ref sign,
+            ref payload,
             associator: _,
-        } = msg;
+        } = msg.as_ref();
 
         Ok(Self {
-            id,
-            sender,
-            recipient,
-            sign,
+            id: id.clone(),
+            sender: sender.clone(),
+            recipient: recipient.clone(),
+            sign: sign.clone(),
             payload: conjoiner::deserialise(&payload)?,
         })
     }

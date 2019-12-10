@@ -1,6 +1,6 @@
 use crate::{
     error::{Error, Result},
-    messages::Message,
+    messages::MsgRef,
     utils::IterUtils,
 };
 use std::{
@@ -11,12 +11,12 @@ use std::{
     },
 };
 
-pub(crate) type Listener = Arc<dyn Fn(Message) -> Result<()>>;
+pub(crate) type Listener = Arc<dyn Fn(MsgRef) -> Result<()>>;
 
 /// A small wrapper around a pair of channel ends used to poll Messages
 pub(crate) struct IoPair {
-    rx: Receiver<Message>,
-    tx: Sender<Message>,
+    rx: Receiver<MsgRef>,
+    tx: Sender<MsgRef>,
 }
 
 /// A registered service, with a pre-made poll setup and listeners
@@ -67,7 +67,7 @@ impl ServiceRegistry {
 
     pub(crate) fn add_listener<F: 'static>(&self, service: String, listener: F) -> Result<()>
     where
-        F: Fn(Message) -> Result<()>,
+        F: Fn(MsgRef) -> Result<()>,
     {
         self.inner
             .write()
@@ -83,7 +83,7 @@ impl ServiceRegistry {
     }
 
     /// Poll for a new Message from a service queue
-    pub(crate) fn poll_for(&self, service: String) -> Result<Message> {
+    pub(crate) fn poll_for(&self, service: String) -> Result<MsgRef> {
         self.inner
             .read()
             .expect("ServiceRegistry was poisoned")
@@ -95,7 +95,7 @@ impl ServiceRegistry {
 
     /// Push a Message out to all listener endpoints
     // TODO: Replace this with an Arc<T> ?
-    pub(crate) fn push_for(&self, service: String, msg: Message) -> Result<()> {
+    pub(crate) fn push_for(&self, service: String, msg: MsgRef) -> Result<()> {
         self.inner
             .read()
             .expect("ServiceRegistry was poisoned")
