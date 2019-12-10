@@ -3,15 +3,13 @@ use crate::{
     messages::MsgRef,
     utils::IterUtils,
 };
+use crossbeam_channel::{unbounded as channel, Receiver, Sender};
 use std::{
     collections::BTreeMap,
-    sync::{
-        mpsc::{channel, Receiver, Sender},
-        {Arc, RwLock},
-    },
+    sync::{Arc, RwLock},
 };
 
-pub(crate) type Listener = Arc<dyn Fn(MsgRef) -> Result<()>>;
+pub(crate) type Listener = Arc<dyn Fn(MsgRef) -> Result<()> + Send + Sync>;
 
 /// A small wrapper around a pair of channel ends used to poll Messages
 pub(crate) struct IoPair {
@@ -21,7 +19,7 @@ pub(crate) struct IoPair {
 
 /// A registered service, with a pre-made poll setup and listeners
 pub(crate) struct Service {
-    io: Arc<IoPair>,
+    io: Arc<RwLock<IoPair>>,
     callbacks: Arc<RwLock<Vec<Listener>>>,
 }
 
@@ -29,7 +27,7 @@ impl Service {
     fn new() -> Self {
         let (tx, rx) = channel();
         Self {
-            io: Arc::new(IoPair { rx, tx }),
+            io: Arc::new(RwLock::new(IoPair { rx, tx })),
             callbacks: Arc::new(RwLock::new(vec![])),
         }
     }
@@ -65,7 +63,7 @@ impl ServiceRegistry {
             .map_or(Err(Error::NoService), |_| Ok(()))
     }
 
-    pub(crate) fn add_listener<F: 'static>(&self, service: String, listener: F) -> Result<()>
+    pub(crate) fn add_listener<F: 'static + Send + Sync>(&self, service: String, listener: F) -> Result<()>
     where
         F: Fn(MsgRef) -> Result<()>,
     {
@@ -89,7 +87,12 @@ impl ServiceRegistry {
             .expect("ServiceRegistry was poisoned")
             .get(&service)
             .map_or(Err(Error::NoService), |srv| {
-                srv.io.rx.try_recv().map_err(|_| Error::CommFault)
+                srv.io
+                    .read()
+                    .unwrap()
+                    .rx
+                    .try_recv()
+                    .map_err(|_| Error::CommFault)
             })
     }
 
