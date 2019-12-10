@@ -8,7 +8,7 @@ use std::sync::Arc;
 /// This is done by implementing a simple `store` and `load` function
 /// which is called by the `DataStore` to serialise data for the
 /// Alexandria storage backend.
-pub(crate) trait Persisted {
+pub(crate) trait Persist {
     /// Provide storage backend with storable data
     fn store(&self) -> Vec<Data>;
 
@@ -55,11 +55,11 @@ pub(crate) trait Persisted {
 pub(crate) struct DataStore {
     inner: Library,
     homedir: String,
-    states: Vec<Arc<dyn Persisted>>,
+    states: Vec<Arc<dyn Persist>>,
 }
 
 impl DataStore {
-    pub fn new(homedir: String) -> Self {
+    pub(crate) fn new(homedir: String) -> Self {
         let inner = Library::new();
 
         Self {
@@ -70,7 +70,7 @@ impl DataStore {
     }
 
     /// Register a state component with the persistence backend
-    pub fn register<S>(&mut self, name: S, offset: S, modl: Arc<impl Persisted>) -> usize
+    pub(crate) fn register<S>(&mut self, name: S, offset: S, modl: Arc<impl Persist>) -> usize
     where
         S: Into<String>,
     {
