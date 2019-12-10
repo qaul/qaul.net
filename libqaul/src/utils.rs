@@ -1,7 +1,7 @@
 //! General utility module
 
 use rand::prelude::*;
-use std::{sync::RwLock, ops::Add};
+use std::sync::RwLock;
 
 /// Generate some secure random data into an allocated slice
 pub(crate) fn random(len: usize) -> Vec<u8> {
