@@ -37,16 +37,22 @@ pub struct SeqId {
 ///
 /// This type implements a builder, which is initialised
 pub struct Sequence {
-    sender: Identity,
-    recp: Recipient,
-    data: Vec<Vec<u8>>,
+    #[doc(hidden)]
+    pub seqid: [u8; 16],
+    #[doc(hidden)]
+    pub sender: Identity,
+    #[doc(hidden)]
+    pub recp: Recipient,
+    #[doc(hidden)]
+    pub data: Vec<Vec<u8>>,
 }
 
 impl Sequence {
-    pub fn new(sender: Identity, recp: Recipient) -> Self {
+    pub fn new(sender: Identity, recp: Recipient, seqid: [u8; 16]) -> Self {
         Self {
             sender,
             recp,
+            seqid,
             data: vec![],
         }
     }
@@ -57,7 +63,7 @@ impl Sequence {
     }
 
     pub fn build(self) -> Vec<Frame> {
-        let seqid = [0; 16];
+        let seqid = self.seqid;
         let sender = self.sender;
         let recipient = self.recp;
         let signed = self
@@ -103,6 +109,34 @@ impl Sequence {
             })
             .collect()
     }
+
+    /// Take a set of frames and build a restored sequence from it
+    // FIXME: implement frame sequencing here!
+    pub fn restore(mut vec: Vec<Frame>) -> Self {
+        let frame = vec.remove(0);
+        Self {
+            seqid: frame.seqid.seqid,
+            sender: frame.sender,
+            recp: frame.recipient,
+            data: vec![frame.payload],            
+        }
+    }
+
+    pub fn seqid(&self) -> &[u8; 16] {
+        &self.seqid
+    }
+    
+    pub fn sender(&self) -> Identity {
+        self.sender
+    }
+    
+    pub fn recp(&self) -> Recipient {
+        self.recp
+    }
+    
+    pub fn data(&self) -> Vec<u8> {
+        self.data.get(0).unwrap().clone()
+    }
 }
 
 fn hash_new(data: &Vec<u8>) -> XxSignature {
@@ -118,7 +152,7 @@ fn hash_new(data: &Vec<u8>) -> XxSignature {
 fn foo() {
     let sender = Identity::with_digest(&vec![1]);
     let recp = Identity::with_digest(&vec![2]);
-    let seq = Sequence::new(sender, Recipient::User(recp))
+    let seq = Sequence::new(sender, Recipient::User(recp), [0; 16])
         .add(vec![42])
         .add(vec![13, 12])
         .add(vec![13, 37])

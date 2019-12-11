@@ -34,7 +34,6 @@ impl Protocol {
             MsgId([0; 16]),
             sender,
             Recipient::Flood,
-            ASSOCIATOR,
             vec![0],
         )
     }
@@ -45,7 +44,6 @@ impl Protocol {
             MsgId([0; 16]),
             sender.clone(),
             Recipient::User(recipient),
-            ASSOCIATOR,
             vec![0],
             // ProtoPayload::Sync {
             //     id: sender,

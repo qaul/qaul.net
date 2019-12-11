@@ -29,8 +29,6 @@ pub struct Message {
     pub sender: Identity,
     /// Final recipient of a message
     pub recipient: Recipient,
-    /// Outside service associative information
-    pub associator: String,
     /// Some raw message payload
     pub payload: Vec<u8>,
     /// Source-verifiable payload signature data
@@ -43,17 +41,7 @@ impl Message {
     /// The payload structure needs to provide a serializer, which
     /// allocates to be hashed for the XXHash signature of the
     /// Message.
-    pub fn build_signed<S>(
-        id: MsgId,
-        sender: Identity,
-        recipient: Recipient,
-        associator: S,
-        data: Vec<u8>,
-    ) -> Self
-    where
-        S: Into<String>,
-    {
-        let associator = associator.into();
+    pub fn build_signed(id: MsgId, sender: Identity, recipient: Recipient, data: Vec<u8>) -> Self {
         let payload = data;
         let signature = vec![1, 3, 1, 2];
 
@@ -61,7 +49,6 @@ impl Message {
             id,
             sender,
             recipient,
-            associator,
             payload,
             signature,
         }
