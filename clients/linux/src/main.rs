@@ -55,8 +55,14 @@ fn main() {
         q3.router().discover(u1.0, 0);
     }
 
-    // We could now send a Service API message. But let's keep going
-    // up the stack. We initialise the `Messaging` service now.
+    // We setup a messaging endpoint listener on node u2
+    let recv = Messaging::new(Arc::clone(&q3));
+    recv.listen(u2.clone(), |msg| {
+        dbg!(msg);
+        Ok(())
+    }).unwrap();
+
+    // Then we setup a messaging endponti on note u1 and send a message to u2
     let msg = Messaging::new(Arc::clone(&q1));
     msg.send(
         u1,
