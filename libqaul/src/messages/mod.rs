@@ -4,12 +4,13 @@
 pub use crate::api::messages::{Message, MessageQuery, MsgId, MsgRef, Recipient, SigTrust};
 
 mod store;
-pub(crate) use self::store::{MsgStore, MsgState};
+pub(crate) use self::store::{MsgState, MsgStore};
 
 use crate::error::{Error, Result};
 use ratman::{
     netmod::Recipient as RatRecipient, Identity, Message as RatMessage, MsgId as RatMsgId, Router,
 };
+use serde::{Deserialize, Serialize};
 
 /// An internal wrapper around an incomplete Message
 ///
@@ -19,6 +20,7 @@ use ratman::{
 ///
 /// Apart from that it contains all data that will be present in the
 /// Message set generated for ratman routing.
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct Envelope {
     pub(crate) id: MsgId,
     pub(crate) sender: Identity,
@@ -52,17 +54,16 @@ impl From<RatMessageProto> for Vec<RatMessage> {
     fn from(proto: RatMessageProto) -> Self {
         let id = proto.env.id.clone().into();
         let sender = proto.env.sender;
-        let associator = proto.env.associator.clone();
-        let payload = proto.env.payload;
         let signature = proto.signature;
+        let payload = conjoiner::serialise(&proto.env).unwrap();
+
         proto
             .recipients
             .into_iter()
             .map(|recipient| RatMessage {
                 id,
-                sender: sender.clone(),
+                sender,
                 recipient,
-                associator: associator.clone(),
                 payload: payload.clone(),
                 signature: signature.clone(),
             })
@@ -104,5 +105,35 @@ impl MsgUtils {
                 (Err(e), _) => Err(e),
                 (_, _) => Ok(()),
             })
+    }
+
+    /// Process incoming RATMAN message, verifying it's signature and payload
+    pub(crate) fn process(msg: RatMessage, _: Identity) -> Message {
+        let RatMessage {
+            id,
+            sender,
+            recipient,
+            ref payload,
+            signature: _,
+        } = msg;
+
+        let Envelope {
+            id: _,
+            sender: _,
+            associator,
+            payload,
+        } = conjoiner::deserialise(&payload).unwrap();
+
+        Message {
+            id: id.into(),
+            sender,
+            recipient: match recipient {
+                RatRecipient::User(u) => Recipient::User(u),
+                _ => unimplemented!(),
+            },
+            associator,
+            sign: SigTrust::Unverified,
+            payload,
+        }
     }
 }

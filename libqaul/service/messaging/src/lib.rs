@@ -33,6 +33,7 @@ pub struct TextPayload {
 /// `Message` abstraction, and is not stored internally in this
 /// form. Generally, when querying from the service API, the return
 /// value needs to be mapped into this type.
+#[derive(Debug, Clone)]
 pub struct TextMessage {
     pub id: MsgId,
     pub sender: Identity,
@@ -81,6 +82,8 @@ impl Messaging {
     /// Depending on this check, the `async_files` capability
     /// can be set.
     pub fn new(qaul: Arc<Qaul>) -> Self {
+        qaul.services().register(ASC_NAME).unwrap();
+        
         Self {
             async_files: false,
             qaul,
@@ -113,7 +116,7 @@ impl Messaging {
     }
 
     /// Setup a `TextMessage` listener for a specific user session
-    pub fn listen<F: 'static>(&self, user: UserAuth, listener: F) -> Result<()>
+    pub fn listen<F: 'static + Send + Sync>(&self, user: UserAuth, listener: F) -> Result<()>
     where
         F: Fn(TextMessage) -> Result<()>,
     {

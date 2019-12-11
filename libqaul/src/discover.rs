@@ -1,4 +1,4 @@
-use crate::{Qaul, utils::RunLock};
+use crate::{Qaul, utils::RunLock, messages::{MsgState, MsgUtils}};
 use async_std::task;
 use ratman::{Identity, Protocol, Message, Router, netmod::Recipient};
 use std::{
@@ -90,15 +90,24 @@ impl Discovery {
     }
     
     /// Spawns a thread that listens to incoming messages
-    fn inc_handler(qaul: Arc<Qaul>, inc: Receiver<Message>, lock: Arc<RunLock>) {
+    fn inc_handler(qaul: Arc<Qaul>, inc: Receiver<Message>, _lock: Arc<RunLock>) {
         thread::spawn(move || {
+            let qaul = Arc::clone(&qaul);
+            
             while let Ok(msg) = inc.recv() {
+                println!("Receiving message...");
                 let user = match msg.recipient {
-                    Recipient::User(id) => id,
+                    Recipient::User(id) => id.clone(),
                     Recipient::Flood => unimplemented!(),
                 };
 
-                dbg!(msg);
+                let msg = Arc::new(MsgUtils::process(msg, user));
+                let associator = msg.associator.clone();
+
+                // println!("Associator: {}", associator);
+                qaul.messages.insert(user, MsgState::Unread(Arc::clone(&msg)));
+                qaul.services.push_for(associator, msg).unwrap();
+                println!("Finished processing incoming message!");
             }
         });
     }

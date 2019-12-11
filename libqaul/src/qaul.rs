@@ -1,7 +1,7 @@
 pub use identity::Identity;
 
 use crate::{
-    api::{Contacts, Messages, Users},
+    api::{Contacts, Messages, Users, Services},
     auth::AuthStore,
     contacts::ContactStore,
     discover::Discovery,
@@ -119,5 +119,10 @@ impl Qaul {
     /// Get contact book function scope
     pub fn contacts(&self) -> Contacts {
         Contacts { q: self }
+    }
+
+    /// Get service management function scope
+    pub fn services(&self) -> Services {
+        Services { q: self }
     }
 }
