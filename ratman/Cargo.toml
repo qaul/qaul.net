@@ -7,7 +7,7 @@ authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
 [dependencies]
-conjoiner = { git = "https://git.open-communication.net/qaul/conjoiner-engine", package = "conjoiner-engine" }
+conjoiner = { version = "1.2", package = "conjoiner-engine" }
 serde = { version = "1.0", features = ["derive"] }
 
 twox-hash = "1.5"
