@@ -21,3 +21,7 @@ blake2 = "0.8.0"
 mime = "0.3"
 rand = "0.7"
 
+[features]
+default = ["generate-message"]
+generate-message = []
+

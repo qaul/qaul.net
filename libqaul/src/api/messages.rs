@@ -1,5 +1,6 @@
 use crate::error::{Error, Result};
 use crate::messages::{Envelope, MsgUtils, RatMessageProto};
+use crate::messages::message_generation;
 use crate::qaul::{Identity, Qaul};
 use crate::users::UserAuth;
 use crate::utils::VecUtils;
