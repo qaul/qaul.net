@@ -14,6 +14,7 @@ pub(crate) type Listener = Arc<dyn Fn(MsgRef) -> Result<()> + Send + Sync>;
 /// A small wrapper around a pair of channel ends used to poll Messages
 pub(crate) struct IoPair {
     rx: Receiver<MsgRef>,
+    #[allow(unused)]
     tx: Sender<MsgRef>,
 }
 
@@ -97,7 +98,6 @@ impl ServiceRegistry {
     }
 
     /// Push a Message out to all listener endpoints
-    // TODO: Replace this with an Arc<T> ?
     pub(crate) fn push_for(&self, service: String, msg: MsgRef) -> Result<()> {
         self.inner
             .read()
