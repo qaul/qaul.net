@@ -12,6 +12,7 @@ use std::{
 };
 
 /// Encode available  commands
+#[allow(unused)]
 pub(crate) enum DiscCmd {
     /// Start announcing a user ID
     Start(Identity),
@@ -104,7 +105,6 @@ impl Discovery {
                 let msg = Arc::new(MsgUtils::process(msg, user));
                 let associator = msg.associator.clone();
 
-                // println!("Associator: {}", associator);
                 qaul.messages.insert(user, MsgState::Unread(Arc::clone(&msg)));
                 qaul.services.push_for(associator, msg).unwrap();
                 println!("Finished processing incoming message!");

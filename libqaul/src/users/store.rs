@@ -12,10 +12,12 @@ use std::{
 /// A small wrapper to express local vs. remote users
 pub(crate) enum User {
     Local(UserProfile),
+    #[allow(unused)]
     Remote(UserProfile),
 }
 
 impl User {
+    #[allow(unused)]
     pub(crate) fn id(&self) -> &Identity {
         match self {
             User::Local(ref u) => &u.id,

@@ -1,5 +1,7 @@
 //! General database storage abstraction
 
+#![allow(unused)]
+
 use alexandria::{Address, Data, Delta, KeyAttr, Library, ScopeAttr};
 use std::sync::Arc;
 
