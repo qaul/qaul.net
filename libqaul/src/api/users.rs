@@ -88,4 +88,13 @@ impl<'qaul> Users<'qaul> {
     pub fn get(&self, user: Identity) -> Result<UserProfile> {
         self.q.users.get(&user)
     }
+
+    /// Update a `UserProfile` with a lambda, if authentication passes
+    pub fn update<F>(&self, user: UserAuth, update: F) -> Result<()>
+    where
+        F: Fn(&mut UserProfile),
+    {
+        let (ref id, _) = self.q.auth.trusted(user)?;
+        self.q.users.modify(id, update)
+    }
 }
