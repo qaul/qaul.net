@@ -35,7 +35,7 @@ impl MsgId {
 ///
 /// The `SigTrust::ok` convenience function can be used to reject
 /// non-verifiable (unknown or bad) `Message` signatures.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SigTrust {
     /// A verified signature by a known contact
     Trusted,
@@ -84,7 +84,7 @@ pub enum Recipient {
 /// This type is both returned by `listen`, `poll`, as well as
 /// specific message `queries`
 ///
-#[derive(Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Message {
     /// A unique message ID
     pub id: MsgId,
