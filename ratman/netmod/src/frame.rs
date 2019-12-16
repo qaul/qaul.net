@@ -37,7 +37,7 @@ pub struct Frame {
 impl Frame {
     /// Produce a new dummy frame that sends nonsense data from nowhere to everyone.
     pub fn dummy() -> Self {
-        Sequence::new(Identity::from([0; 16]), Recipient::Flood)
+        Sequence::new(Identity::from([0; 16]), Recipient::Flood, [0; 16])
             .add(vec![0xDE, 0xAD, 0xBE, 0xEF])
             .build()
             .remove(0)
