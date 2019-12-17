@@ -1,11 +1,17 @@
-send: Senden
-search: Suchbegriff Eingeben ...
+send: Send
+search: Enter search term ...
 settings:
-  configuration: Konfiguration
-  changeLanguage: Sprache wählen
-  selectTheme: Anzeige Thema
+  configuration: Configuration
+  changeLanguage: Change Language
+  selectTheme: Select Theme
 info:
-  information: Informationen
-  aboutQaulNet: Über qaul.net
-  howto: Nutzer*innenanleitung
-  debug: Debugging Informationen
+  information: Information
+  aboutQaulNet: About qaul.net
+  howto: How to
+  debug: Debugging Information
+nav:
+  messenger: Messages
+  users: Users
+  files: File Sharing
+  settings: Settings
+  info: Information
