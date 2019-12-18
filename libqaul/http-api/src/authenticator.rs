@@ -79,8 +79,8 @@ mod test {
 
     fn setup() -> (RequestBuilder, Authenticator, UserAuth, String) {
         let qaul = Qaul::dummy();
-        let user_auth = qaul.user_create("a".into()).unwrap();
-        let (ident, key) = user_auth.clone().trusted().unwrap();
+        let user_auth = qaul.users().create("a".into()).unwrap();
+        let UserAuth(ident, key) = user_auth.clone();
 
         let authenticator = Authenticator::new();
         {

@@ -97,7 +97,7 @@ mod test {
         middleware::Handler,
     };
     use japi::{Identifier, Relationship, Relationships};
-    use libqaul::Qaul;
+    use libqaul::{Qaul, users::UserAuth};
 
     #[test]
     fn works() {

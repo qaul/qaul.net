@@ -54,7 +54,7 @@ mod test {
     use libqaul::Qaul;
 
     fn build() -> (Qaul, RequestBuilder) {
-        let qaul = Qaul::start();
+        let qaul = Qaul::dummy();
         let mut rb = RequestBuilder::post("http://127.0.0.1:8000/api/secrets").unwrap();
         rb.add_middleware(QaulCore::new(&qaul));
         rb.add_middleware(JsonApi);
@@ -92,7 +92,7 @@ mod test {
         let id = ro.id.unwrap();
         assert_eq!(id, rel.id);
         assert_eq!(rel.kind, "user");
-        qaul.user_login(into_identity(&id).unwrap(), "test")
+        qaul.users().login(into_identity(&id).unwrap(), "test")
             .unwrap();
     }
 }

@@ -52,7 +52,9 @@ mod test {
     #[test]
     fn works() {
         let qaul = Qaul::dummy();
-        let (id, grant) = qaul.users().create("test").unwrap().trusted().unwrap();
+        let user_auth = qaul.users().create("test").unwrap();
+        let id = user_auth.0;
+        let grant = user_auth.1;
 
         let auth = Authenticator::new();
         {

@@ -22,7 +22,7 @@ pub fn user_get(req: &mut Request) -> IronResult<Response> {
                 None
             }
         })
-        .unwrap();
+        .unwrap_or(id);
 
     let user = req
         .extensions
@@ -49,6 +49,7 @@ mod test {
     use super::*;
     use crate::{
         endpoints::user::route,
+        Authenticator,
         models::{from_identity, Secret},
     };
     use anneal::RequestBuilder;
@@ -71,6 +72,7 @@ mod test {
         let go = RequestBuilder::get(&format!("http://127.0.0.1:8000/api/users/{}", id))
             .unwrap()
             .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(Authenticator::new())
             .request_response(|mut req| {
                 let mut router = Router::new();
                 route(&mut router);

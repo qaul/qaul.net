@@ -101,12 +101,12 @@ mod test {
     use crate::models::from_identity;
     use anneal::RequestBuilder;
     use japi::{Identifier, Relationship, Relationships};
-    use libqaul::{Qaul, UserAuth};
+    use libqaul::{Qaul};
 
     #[test]
     fn works() {
-        let qaul = Qaul::start();
-        let id = qaul.user_create("test").unwrap().identity();
+        let qaul = Qaul::dummy();
+        let id = qaul.users().create("test").unwrap().0;
 
         let mut relationships = Relationships::new();
         relationships.insert(
@@ -144,6 +144,6 @@ mod test {
 
         assert_eq!(auth.tokens.lock().unwrap().get(&grant), Some(&id));
 
-        qaul.user_delete(UserAuth::Trusted(id, grant)).unwrap();
+        qaul.users().change_pw(UserAuth(id, grant), "test2").unwrap();
     }
 }
