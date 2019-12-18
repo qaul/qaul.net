@@ -24,3 +24,45 @@ pub fn user_delete(req: &mut Request) -> IronResult<Response> {
 
     Ok(Response::with((JSONAPI_MIME.clone(), Status::NoContent)))
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::{
+        endpoints::user::route,
+        Authenticator,
+        models::from_identity,
+    };
+    use anneal::RequestBuilder;
+    use iron::{
+        headers::{Authorization, Bearer},
+        middleware::Handler,
+    };
+    use libqaul::{Qaul, users::UserAuth};
+
+    #[test]
+    fn works() {
+        let qaul = Qaul::dummy();
+        let ua = qaul.users().create("test").unwrap();
+        let UserAuth(id, grant) = ua;
+
+        let auth = Authenticator::new();
+        { auth.tokens.lock().unwrap().insert(grant.clone(), id.clone()); }
+
+        let s_id = from_identity(&id);
+        assert!(RequestBuilder::delete(&format!("http://127.0.0.1:8000/api/users/{}", s_id))
+            .unwrap()
+            .set_header(Authorization(Bearer {
+                token: grant.clone()
+            }))
+            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(auth)
+            .request_response(|mut req| {
+                let mut router = Router::new();
+                route(&mut router);
+                router.handle(&mut req)
+            }).unwrap().is_success());
+
+        assert!(qaul.users().get(id).is_err());
+    }
+}
