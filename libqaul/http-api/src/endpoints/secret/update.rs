@@ -15,7 +15,7 @@ use std::convert::TryFrom;
 use serde_json;
 
 pub fn secret_update(req: &mut Request) -> IronResult<Response> {
-    let auth_id = req.extensions.get::<CurrentUser>().ok_or(AuthError::NotLoggedIn)?.clone().identity();
+    let auth_id = req.extensions.get::<CurrentUser>().ok_or(AuthError::NotLoggedIn)?.clone().0;
 
     let ro = req.extensions.get::<JsonApi>().ok_or(DocumentError::NoDocument)
         .and_then(|d| match &d.data {
@@ -56,9 +56,9 @@ pub fn secret_update(req: &mut Request) -> IronResult<Response> {
     let qaul = req.extensions.get::<QaulCore>().unwrap();
 
     // check that the old password is correct
-    let ua = qaul.user_login(auth_id.clone(), &old_val).map_err(|e| QaulError::from(e))?;
-    qaul.user_change_pw(ua.clone(), &attr.value).map_err(|e| QaulError::from(e))?;
-    qaul.user_logout(ua).map_err(|e| QaulError::from(e))?;
+    let ua = qaul.users().login(auth_id.clone(), &old_val).map_err(|e| QaulError::from(e))?;
+    qaul.users().change_pw(ua.clone(), &attr.value).map_err(|e| QaulError::from(e))?;
+    qaul.users().logout(ua).map_err(|e| QaulError::from(e))?;
 
     Ok(Response::with(Status::NoContent))
 }
@@ -81,8 +81,8 @@ mod test {
 
     #[test]
     fn works() {
-        let qaul = Qaul::start();
-        let (id, grant) = qaul.user_create("test").unwrap().trusted().unwrap();
+        let qaul = Qaul::dummy();
+        let UserAuth(id, grant) = qaul.users().create("test").unwrap();
 
         let mut relationships = Relationships::new();
         relationships.insert("user".into(), Relationship {
@@ -117,6 +117,6 @@ mod test {
                 router.handle(&mut req)
             }).unwrap().get_status().unwrap(), &Status::NoContent);
 
-        assert!(qaul.user_login(id, "test2").is_ok())
+        assert!(qaul.users().login(id, "test2").is_ok())
     }
 }

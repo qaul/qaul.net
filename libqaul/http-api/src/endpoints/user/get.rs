@@ -10,7 +10,6 @@ use iron::{
     status::Status,
 };
 use router::Router;
-use libqaul::UserAuth;
 use japi::{Document, OptionalVec};
 use serde_json;
 
@@ -18,13 +17,13 @@ pub fn user_get(req: &mut Request) -> IronResult<Response> {
     let id = into_identity(req.extensions.get::<Router>().unwrap().find("id").unwrap())?;
     
     // if we are authenticated as the same user we're getting we'll make a trusted request
-    let ua = req.extensions.get::<CurrentUser>().and_then(|user| 
-            if user.clone().identity() == id { 
-                Some(user.clone())
+    let id = req.extensions.get::<CurrentUser>().and_then(|user| 
+            if user.0 == id { 
+                Some(user.0.clone())
             } else { None })
-        .unwrap_or(UserAuth::Untrusted(id));
+        .unwrap();
 
-    let user = req.extensions.get::<QaulCore>().unwrap().user_get(ua).map_err(|e| QaulError::from(e))?;
+    let user = req.extensions.get::<QaulCore>().unwrap().users().get(id).map_err(|e| QaulError::from(e))?;
 
     let doc = Document {
         data: OptionalVec::One(Some(User::from_service_user_with_data(user).into())),
@@ -42,7 +41,7 @@ pub fn user_get(req: &mut Request) -> IronResult<Response> {
 mod test {
     use super::*;
     use anneal::RequestBuilder;
-    use libqaul::{Qaul, UserUpdate};
+    use libqaul::Qaul;
     use crate::{
         models::{from_identity, Secret},
         endpoints::user::route,
@@ -53,11 +52,13 @@ mod test {
 
     #[test]
     fn works() {
-        let qaul = Qaul::start();
-        let ua = qaul.user_create("test").unwrap();
-        qaul.user_update(ua.clone(), UserUpdate::DisplayName(Some("boop".into()))).unwrap();
-
-        let id = from_identity(&ua.identity());
+        let qaul = Qaul::dummy();
+        let ua = qaul.users().create("test").unwrap();
+        qaul.users().update(ua.clone(), |user| {
+            user.display_name = Some("boop".into());
+        }).unwrap();
+        
+        let id = from_identity(&ua.0);
         let go = RequestBuilder::get(&format!("http://127.0.0.1:8000/api/users/{}", id))
             .unwrap()
             .add_middleware(QaulCore::new(&qaul))

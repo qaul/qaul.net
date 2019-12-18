@@ -12,6 +12,7 @@ use iron::{
 };
 use japi::{ResourceObject, OptionalVec, Document};
 use std::convert::TryFrom;
+use libqaul::users::UserAuth;
 use serde_json;
 
 pub fn grant_create(req: &mut Request) -> IronResult<Response> {
@@ -40,11 +41,11 @@ pub fn grant_create(req: &mut Request) -> IronResult<Response> {
 
     let attr = ro.attributes.ok_or(DocumentError::no_attributes("/data/attributes".into()))?;
 
-    let ua = req.extensions.get::<QaulCore>().unwrap().user_login(id, &attr.secret)
+    let ua = req.extensions.get::<QaulCore>().unwrap().users().login(id, &attr.secret)
         .map_err(|e| QaulError::from(e))?;
 
     { 
-        let (id, grant) = ua.clone().trusted().unwrap();
+        let UserAuth(id, grant) = ua.clone();
         req.extensions.get::<Authenticator>().unwrap().tokens.lock().unwrap().insert(grant, id);
     }
 

@@ -3,7 +3,7 @@ use iron::{
     status::Status,
 };
 use super::{ApiError, Error};
-use libqaul::QaulError as QaulInternalError;
+use libqaul::error::Error as QaulInternalError;
 
 /// Wrapper for internal qaul errors 
 /// 
@@ -42,10 +42,11 @@ impl Error for QaulError {
     fn title(&self) -> String {
         match self.err {
             QaulInternalError::NotAuthorised => "Not Authorised",
-            QaulInternalError::UnknownUser => "Unknown User",
+            QaulInternalError::NoUser => "Unknown User",
             QaulInternalError::InvalidQuery => "Invalid Query",
             QaulInternalError::InvalidPayload => "Invalid Payload",
             QaulInternalError::CallbackTimeout => "Callback Timeout",
+            _ => "Unknown error!"
         }.into()
     }
 
@@ -53,7 +54,7 @@ impl Error for QaulError {
         let reason = match self.err {
             QaulInternalError::NotAuthorised => 
                 "The authenticated user is not authorised to perform the requested action",
-            QaulInternalError::UnknownUser =>
+            QaulInternalError::NoUser =>
                 "The authenticated user is not known to libqaul",
             QaulInternalError::InvalidQuery =>
                 "The query sent to libqaul was invalid",
@@ -61,7 +62,7 @@ impl Error for QaulError {
                 "The payload of the request was invalid",
             QaulInternalError::CallbackTimeout =>
                 "An internal callback timed out",
-
+            _ => "Unknown error!"
         };
 
         Some(if let Some(context) = &self.context {
@@ -73,7 +74,7 @@ impl Error for QaulError {
 
     fn status(&self) -> Status {
         match self.err {
-            QaulInternalError::UnknownUser => Status::InternalServerError,
+            QaulInternalError::NoUser => Status::InternalServerError,
             _ => Status::BadRequest,
         }
     }

@@ -1,8 +1,8 @@
-use crate::error::{ApiError, QaulError};
+use crate::error::ApiError;
 use japi::{Attributes, ResourceObject, Relationships, Relationship, OptionalVec, Links, 
     Link, Identifier};
 use serde_derive::{Serialize, Deserialize};
-use libqaul::UserAuth;
+use libqaul::users::UserAuth;
 use super::from_identity;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Default)]
@@ -16,7 +16,7 @@ impl Attributes for Grant {
 
 impl Grant {
     pub fn from_user_auth(ua: UserAuth) -> Result<ResourceObject<Grant>, ApiError> {
-        let (id, grant) = ua.trusted().map_err(|e| QaulError::from(e))?;
+        let UserAuth(id, grant) = ua;
         let mut g = ResourceObject::<Grant>::new(grant.clone(), None);
 
         let mut relationships = Relationships::new();

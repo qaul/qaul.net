@@ -23,9 +23,9 @@ pub fn secret_create(req: &mut Request) -> IronResult<Response> {
         .and_then(|ro| ro.attributes.ok_or(DocumentError::no_attributes("/data/attributes".into())))?;
 
     let core = req.extensions.get::<QaulCore>().unwrap();
-    let ua = core.user_create(&attr.value).map_err(|e| QaulError::from(e))?;
-    core.user_logout(ua.clone()).map_err(|e| QaulError::from(e))?;
-    let id = ua.identity();
+    let ua = core.users().create(&attr.value).map_err(|e| QaulError::from(e))?;
+    core.users().logout(ua.clone()).map_err(|e| QaulError::from(e))?;
+    let id = ua.0.clone();
 
     let doc = Document {
         data: OptionalVec::One(Some(Secret::from_identity(&id).into())),

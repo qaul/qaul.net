@@ -13,7 +13,7 @@ pub type Token = String;
 /// endpoint, such as `User::login` to yield a token. If a session for
 /// this `Identity` already exists, it will be re-used.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct UserAuth(pub Identity, pub(crate) Token);
+pub struct UserAuth(pub Identity, pub Token);
 
 /// API scope type to access user functions
 ///
@@ -60,6 +60,10 @@ impl<'qaul> Users<'qaul> {
         self.q.auth.new_login(id, pw).map(|t| UserAuth(id, t))
     }
 
+    pub fn delete(&self, user: UserAuth) -> Result<()> {
+        unimplemented!()
+    }
+    
     /// Change the passphrase for an authenticated user
     pub fn change_pw(&self, user: UserAuth, newpw: &str) -> Result<()> {
         let (id, _) = self.q.auth.trusted(user)?;

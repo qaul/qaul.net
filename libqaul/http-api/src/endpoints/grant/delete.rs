@@ -12,15 +12,15 @@ use iron::{
 use japi::{ResourceObject, OptionalVec, Document};
 use serde_json;
 use router::Router;
-use libqaul::UserAuth;
+use libqaul::users::UserAuth;
 
 pub fn grant_delete(req: &mut Request) -> IronResult<Response> {
-    let id = req.extensions.get::<CurrentUser>().ok_or(AuthError::NotLoggedIn)?.clone().identity();
+    let id = req.extensions.get::<CurrentUser>().ok_or(AuthError::NotLoggedIn)?.clone().0;
 
     let grant = req.extensions.get::<Router>().unwrap().find("id").unwrap();
     
     req.extensions.get::<QaulCore>().unwrap()
-        .user_logout(UserAuth::Trusted(id, grant.into())).map_err(|e| QaulError::from(e))?;
+        .users().logout(UserAuth(id, grant.into())).map_err(|e| QaulError::from(e))?;
 
     { req.extensions.get::<Authenticator>().unwrap().tokens.lock().unwrap().remove(grant); }
 
@@ -34,7 +34,7 @@ pub fn grant_delete(req: &mut Request) -> IronResult<Response> {
 mod test {
     use super::*;
     use anneal::RequestBuilder;
-    use libqaul::{Qaul, UserAuth};
+    use libqaul::{Qaul, users::UserAuth};
     use crate::{
         models::from_identity,
         endpoints::grant::route,
@@ -46,8 +46,8 @@ mod test {
 
     #[test]
     fn works() {
-        let qaul = Qaul::start();
-        let (id, grant) = qaul.user_create("test").unwrap().trusted().unwrap();
+        let qaul = Qaul::dummy();
+        let (id, grant) = qaul.users().create("test").unwrap().trusted().unwrap();
 
         let auth = Authenticator::new();
         { auth.tokens.lock().unwrap().insert(grant.clone(), id.clone()); }
@@ -63,7 +63,7 @@ mod test {
                 router.handle(&mut req)
             }).unwrap().get_status().unwrap(), &Status::NoContent);
         assert!(auth.tokens.lock().unwrap().get(&grant).is_none());
-        assert!(qaul.user_delete(UserAuth::Trusted(id, grant)).is_err());
+        assert!(qaul.users().delete(UserAuth(id, grant)).is_err());
 
     }
 }

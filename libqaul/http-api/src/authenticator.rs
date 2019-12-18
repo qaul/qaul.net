@@ -7,7 +7,7 @@ use iron::{
     prelude::*,
     typemap, BeforeMiddleware,
 };
-use libqaul::{Identity, UserAuth};
+use libqaul::{Identity, users::UserAuth};
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
@@ -59,7 +59,7 @@ impl BeforeMiddleware for Authenticator {
             match self.tokens.lock().unwrap().get(&bearer.token) {
                 Some(identity) => {
                     req.extensions
-                        .insert::<CurrentUser>(UserAuth::Trusted(*identity, bearer.token.clone()));
+                        .insert::<CurrentUser>(UserAuth(*identity, bearer.token.clone()));
                 }
                 None => {
                     return Err(GenericError::new("Invalid Login Token".into())
@@ -81,7 +81,7 @@ mod test {
     use libqaul::Qaul;
 
     fn setup() -> (RequestBuilder, Authenticator, UserAuth, String) {
-        let qaul = Qaul::start();
+        let qaul = Qaul::dummy();
         let user_auth = qaul.user_create("a".into()).unwrap();
         let (ident, key) = user_auth.clone().trusted().unwrap();
 

@@ -7,7 +7,7 @@ use std::{
     collections::{BTreeMap, BTreeSet},
     convert::TryFrom,
 };
-use libqaul::{Identity, UserProfile};
+use libqaul::{Identity, users::UserProfile};
 use super::{from_identity, into_identity};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
