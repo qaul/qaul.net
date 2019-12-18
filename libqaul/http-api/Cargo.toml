@@ -1,7 +1,8 @@
 [package]
-name = "qaul-http"
+name = "libqaul-http"
+description = "An IPC layer to expose libqaul and service APIs via http/json:api"
 version = "0.1.0"
-authors = ["Jess 3Jane <me@jess.coffee>"]
+authors = ["Jess 3Jane <me@jess.coffee>", "Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 license = "AGPL-3.0"
 
