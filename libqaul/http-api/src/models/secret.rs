@@ -1,15 +1,16 @@
+use super::{from_identity, into_identity};
 use crate::error::{ApiError, DocumentError};
-use super::{into_identity, from_identity};
+use japi::{
+    Attributes, Identifier, Link, Links, OptionalVec, Relationship, Relationships, ResourceObject,
+};
 use libqaul::Identity;
-use japi::{Attributes, ResourceObject, Links, Link, 
-    Relationships, Relationship, Identifier, OptionalVec};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Default)]
 pub struct Secret {
     pub value: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub old_value: Option<String>
+    pub old_value: Option<String>,
 }
 
 impl Attributes for Secret {
@@ -28,18 +29,30 @@ impl Secret {
         ro.links = Some(links);
 
         let mut relationships = Relationships::new();
-        relationships.insert("user".into(), Relationship {
-            data: OptionalVec::One(Some(Identifier::new(id, "user".into()))),
-            ..Default::default()
-        });
+        relationships.insert(
+            "user".into(),
+            Relationship {
+                data: OptionalVec::One(Some(Identifier::new(id, "user".into()))),
+                ..Default::default()
+            },
+        );
         ro.relationships = Some(relationships);
 
         ro
     }
 
-    pub fn into_identity(ro: &ResourceObject<Secret>, pointer: String) 
-    -> Result<Identity, ApiError> {
-        ro.id.as_ref().ok_or(DocumentError::NoId { pointer: Some(format!("{}/id", pointer)) }.into())
+    pub fn into_identity(
+        ro: &ResourceObject<Secret>,
+        pointer: String,
+    ) -> Result<Identity, ApiError> {
+        ro.id
+            .as_ref()
+            .ok_or(
+                DocumentError::NoId {
+                    pointer: Some(format!("{}/id", pointer)),
+                }
+                .into(),
+            )
             .and_then(|id| Ok(into_identity(&id)?))
     }
 }

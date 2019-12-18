@@ -1,9 +1,5 @@
 use crate::error::MethodError;
-use iron::{
-    prelude::*,
-    method::Method,
-    middleware::BeforeMiddleware,
-};
+use iron::{method::Method, middleware::BeforeMiddleware, prelude::*};
 
 /// Aborts requests made with incorrect methods
 ///
@@ -82,7 +78,11 @@ impl BeforeMiddleware for MethodGaurd {
         {
             Ok(())
         } else {
-            Err(MethodError{ got: req.method.clone(), expected: self.methods.clone() }.into())
+            Err(MethodError {
+                got: req.method.clone(),
+                expected: self.methods.clone(),
+            }
+            .into())
         }
     }
 }

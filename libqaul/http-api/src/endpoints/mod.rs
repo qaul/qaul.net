@@ -1,5 +1,5 @@
-mod secret;
 mod grant;
+mod secret;
 mod user;
 
 use router::Router;

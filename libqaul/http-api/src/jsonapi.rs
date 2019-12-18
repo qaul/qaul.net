@@ -1,4 +1,7 @@
-use crate::{JSONAPI_MIME, error::{JsonApiError, DocumentError}};
+use crate::{
+    error::{DocumentError, JsonApiError},
+    JSONAPI_MIME,
+};
 use iron::{
     error::IronError,
     headers::{Accept, ContentType, QualityItem},
@@ -8,15 +11,9 @@ use iron::{
     status::Status,
     typemap, BeforeMiddleware,
 };
-use japi::{
-    Document,
-    Error,
-    Links,
-    Link,
-    OptionalVec
-};
-use std::io::Read;
+use japi::{Document, Error, Link, Links, OptionalVec};
 use serde_json;
+use std::io::Read;
 
 /// Use this key to get the request's `Document`
 ///

@@ -1,8 +1,5 @@
-use iron::{
-    IronError,
-    status::Status,
-};
 use super::{ApiError, Error};
+use iron::{status::Status, IronError};
 use serde_json::Error as SerdeError;
 use std::io::Error as IoError;
 
@@ -28,15 +25,18 @@ impl Error for JsonApiError {
             JsonApiError::NoAcceptableType => "No Acceptable Type",
             JsonApiError::SerdeError(_) => "Deserialization Error",
             JsonApiError::IoError(_) => "Internal Error",
-        }.into()
+        }
+        .into()
     }
 
     fn about(&self) -> Option<String> {
         match self {
-            JsonApiError::MediaTypeParameters => Some(
-                "https://jsonapi.org/format/#content-negotiation-servers".into()),
-            JsonApiError::NoAcceptableType => Some(
-                "https://jsonapi.org/format/#content-negotiation-servers".into()),
+            JsonApiError::MediaTypeParameters => {
+                Some("https://jsonapi.org/format/#content-negotiation-servers".into())
+            }
+            JsonApiError::NoAcceptableType => {
+                Some("https://jsonapi.org/format/#content-negotiation-servers".into())
+            }
             _ => None,
         }
     }
@@ -52,9 +52,8 @@ impl Error for JsonApiError {
 
     fn detail(&self) -> Option<String> {
         match self {
-             JsonApiError::MediaTypeParameters => Some("Content type had media type parameters in violation of https://jsonapi.org/format/#content-negotiation-servers".into()),
-            JsonApiError::NoAcceptableType => 
-                Some("Accept header had JSON:API media type but all instances included parameters in violation of https://jsonapi.org/format/#content-negotiation-servers".into()),
+            JsonApiError::MediaTypeParameters => Some("Content type had media type parameters in violation of https://jsonapi.org/format/#content-negotiation-servers".into()),
+            JsonApiError::NoAcceptableType => Some("Accept header had JSON:API media type but all instances included parameters in violation of https://jsonapi.org/format/#content-negotiation-servers".into()),
             JsonApiError::SerdeError(e) => Some(format!("Error deserializing document ({})", e)),
             JsonApiError::IoError(_) => None,
         }

@@ -1,9 +1,6 @@
-use iron::{
-    IronError,
-    status::Status,
-};
-use japi::Meta;
 use super::{ApiError, Error};
+use iron::{status::Status, IronError};
+use japi::Meta;
 
 #[derive(Debug)]
 pub struct GenericError {
@@ -27,7 +24,7 @@ pub struct GenericError {
     /// The status HTTP status code applicable to this error
     ///
     /// Defaults to 400 (Bad Request)
-    status: Status, 
+    status: Status,
 
     /// Indicates which URI query parameter caused the error
     parameter: Option<String>,
@@ -49,7 +46,7 @@ impl GenericError {
             id: None,
             status: Status::BadRequest,
             parameter: None,
-            pointer: None, 
+            pointer: None,
             meta: None,
         }
     }
@@ -107,13 +104,31 @@ impl From<GenericError> for IronError {
 }
 
 impl Error for GenericError {
-    fn title(&self) -> String { self.title.clone() }
-    fn about(&self) -> Option<String> { self.about.clone() }
-    fn code(&self) -> Option<String> { self.code.clone() }
-    fn detail(&self) -> Option<String> { self.detail.clone() }
-    fn id(&self) -> Option<String> { self.id.clone() }
-    fn status(&self) -> Status { self.status.clone() }
-    fn parameter(&self) -> Option<String> { self.parameter.clone() }
-    fn pointer(&self) -> Option<String> { self.pointer.clone() }
-    fn meta(&self) -> Option<Meta> { self.meta.clone() }
+    fn title(&self) -> String {
+        self.title.clone()
+    }
+    fn about(&self) -> Option<String> {
+        self.about.clone()
+    }
+    fn code(&self) -> Option<String> {
+        self.code.clone()
+    }
+    fn detail(&self) -> Option<String> {
+        self.detail.clone()
+    }
+    fn id(&self) -> Option<String> {
+        self.id.clone()
+    }
+    fn status(&self) -> Status {
+        self.status.clone()
+    }
+    fn parameter(&self) -> Option<String> {
+        self.parameter.clone()
+    }
+    fn pointer(&self) -> Option<String> {
+        self.pointer.clone()
+    }
+    fn meta(&self) -> Option<Meta> {
+        self.meta.clone()
+    }
 }

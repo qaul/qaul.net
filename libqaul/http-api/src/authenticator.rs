@@ -1,13 +1,10 @@
-use crate::{
-    error::GenericError,
-    QaulCore,
-};
+use crate::{error::GenericError, QaulCore};
 use iron::{
     headers::{Authorization, Bearer},
     prelude::*,
     typemap, BeforeMiddleware,
 };
-use libqaul::{Identity, users::UserAuth};
+use libqaul::{users::UserAuth, Identity};
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
@@ -65,7 +62,7 @@ impl BeforeMiddleware for Authenticator {
                     return Err(GenericError::new("Invalid Login Token".into())
                         .detail("The authorization header contains a token that is either no longer valid or never was valid".into())
                         .into());
-                },
+                }
             }
         }
 
@@ -75,9 +72,9 @@ impl BeforeMiddleware for Authenticator {
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use anneal::RequestBuilder;
     use iron::method::Method;
-    use super::*;
     use libqaul::Qaul;
 
     fn setup() -> (RequestBuilder, Authenticator, UserAuth, String) {
@@ -120,10 +117,12 @@ mod test {
     #[test]
     fn invalid_token_login() {
         let (mut rb, authenticator, user_auth, _) = setup();
-        rb.set_header(Authorization(Bearer { token: "i am not valid".into() }))
-            .set_chain(vec![])
-            .request(|mut req| {
-                assert!(authenticator.before(&mut req).is_err());
-            });
+        rb.set_header(Authorization(Bearer {
+            token: "i am not valid".into(),
+        }))
+        .set_chain(vec![])
+        .request(|mut req| {
+            assert!(authenticator.before(&mut req).is_err());
+        });
     }
 }

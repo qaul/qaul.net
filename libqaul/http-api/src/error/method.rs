@@ -1,9 +1,5 @@
 use super::{ApiError, Error};
-use iron::{
-    IronError,
-    method::Method,
-    status::Status,
-};
+use iron::{method::Method, status::Status, IronError};
 
 /// Errors related to the http method of the request
 #[derive(Debug)]
@@ -51,6 +47,9 @@ impl Error for MethodError {
             });
         }
 
-        Some(format!("Request method was {} but endpoint only supports {}", self.got, method_string))
+        Some(format!(
+            "Request method was {} but endpoint only supports {}",
+            self.got, method_string
+        ))
     }
 }

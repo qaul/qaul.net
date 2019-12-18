@@ -1,8 +1,5 @@
 use super::{ApiError, Error};
-use iron::{
-    IronError,
-    status::Status,
-};
+use iron::{status::Status, IronError};
 
 /// Errors relating to the currently authorized user
 #[derive(Debug)]
@@ -22,7 +19,8 @@ impl Error for AuthError {
         match self {
             AuthError::NotLoggedIn => "Not Logged In",
             AuthError::NotAuthorised => "Not Authorised",
-        }.into()
+        }
+        .into()
     }
 
     fn status(&self) -> Status {
@@ -32,10 +30,14 @@ impl Error for AuthError {
     }
 
     fn detail(&self) -> Option<String> {
-        Some(match self {
-            AuthError::NotLoggedIn => "There is no user logged in",
-            AuthError::NotAuthorised => 
-                "The current user is not authorised to perform the requested action",
-        }.into())
+        Some(
+            match self {
+                AuthError::NotLoggedIn => "There is no user logged in",
+                AuthError::NotAuthorised => {
+                    "The current user is not authorised to perform the requested action"
+                }
+            }
+            .into(),
+        )
     }
 }

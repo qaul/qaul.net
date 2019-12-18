@@ -1,5 +1,5 @@
-use router::Router;
 use iron::method::Method;
+use router::Router;
 
 mod get;
 use get::user_get;

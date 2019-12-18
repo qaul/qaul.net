@@ -1,17 +1,20 @@
-use crate::error::ApiError;
-use japi::{Attributes, ResourceObject, Relationships, Relationship, OptionalVec, Links, 
-    Link, Identifier};
-use serde_derive::{Serialize, Deserialize};
-use libqaul::users::UserAuth;
 use super::from_identity;
+use crate::error::ApiError;
+use japi::{
+    Attributes, Identifier, Link, Links, OptionalVec, Relationship, Relationships, ResourceObject,
+};
+use libqaul::users::UserAuth;
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Default)]
-pub struct Grant { 
+pub struct Grant {
     pub secret: String,
 }
 
 impl Attributes for Grant {
-    fn kind() -> String { "grant".into() }
+    fn kind() -> String {
+        "grant".into()
+    }
 }
 
 impl Grant {
@@ -20,10 +23,13 @@ impl Grant {
         let mut g = ResourceObject::<Grant>::new(grant.clone(), None);
 
         let mut relationships = Relationships::new();
-        relationships.insert("user".into(), Relationship {
-            data: OptionalVec::One(Some(Identifier::new(from_identity(&id), "user".into()))),
-            ..Default::default()
-        });
+        relationships.insert(
+            "user".into(),
+            Relationship {
+                data: OptionalVec::One(Some(Identifier::new(from_identity(&id), "user".into()))),
+                ..Default::default()
+            },
+        );
         g.relationships = Some(relationships);
 
         let mut links = Links::new();
@@ -32,4 +38,4 @@ impl Grant {
 
         Ok(g)
     }
- }
+}

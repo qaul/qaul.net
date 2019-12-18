@@ -1,30 +1,37 @@
 use crate::{
     error::{DocumentError, QaulError},
     models::Secret,
-    JsonApi,
-    QaulCore,
-    JSONAPI_MIME,
+    JsonApi, QaulCore, JSONAPI_MIME,
 };
-use iron::{
-    status::Status,
-    prelude::*,
-};
-use japi::{ResourceObject, OptionalVec, Document};
-use std::convert::TryFrom;
+use iron::{prelude::*, status::Status};
+use japi::{Document, OptionalVec, ResourceObject};
 use serde_json;
+use std::convert::TryFrom;
 
 pub fn secret_create(req: &mut Request) -> IronResult<Response> {
-    let attr = req.extensions.get::<JsonApi>().ok_or(DocumentError::NoDocument)
+    let attr = req
+        .extensions
+        .get::<JsonApi>()
+        .ok_or(DocumentError::NoDocument)
         .and_then(|d| match &d.data {
             OptionalVec::One(Some(go)) => Ok(go),
             OptionalVec::Many(_) => Err(DocumentError::MultipleData),
-            _ => Err(DocumentError::NoData)})
+            _ => Err(DocumentError::NoData),
+        })
         .and_then(|go| ResourceObject::<Secret>::try_from(go).map_err(|e| DocumentError::from(e)))
-        .and_then(|ro| ro.attributes.ok_or(DocumentError::no_attributes("/data/attributes".into())))?;
+        .and_then(|ro| {
+            ro.attributes
+                .ok_or(DocumentError::no_attributes("/data/attributes".into()))
+        })?;
 
     let core = req.extensions.get::<QaulCore>().unwrap();
-    let ua = core.users().create(&attr.value).map_err(|e| QaulError::from(e))?;
-    core.users().logout(ua.clone()).map_err(|e| QaulError::from(e))?;
+    let ua = core
+        .users()
+        .create(&attr.value)
+        .map_err(|e| QaulError::from(e))?;
+    core.users()
+        .logout(ua.clone())
+        .map_err(|e| QaulError::from(e))?;
     let id = ua.0.clone();
 
     let doc = Document {
@@ -42,13 +49,9 @@ pub fn secret_create(req: &mut Request) -> IronResult<Response> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::{models::into_identity, JsonApi, QaulCore};
     use anneal::RequestBuilder;
     use libqaul::Qaul;
-    use crate::{
-        JsonApi, 
-        models::into_identity,
-        QaulCore,
-    };
 
     fn build() -> (Qaul, RequestBuilder) {
         let qaul = Qaul::start();
@@ -56,21 +59,29 @@ mod test {
         rb.add_middleware(QaulCore::new(&qaul));
         rb.add_middleware(JsonApi);
         (qaul, rb)
-    } 
+    }
 
     #[test]
     fn works() {
         let (qaul, mut rb) = build();
-        let go = rb.set_primary_data(ResourceObject {
-                attributes: Some(Secret { value: "test".into(), old_value: None }),
-                id: None,
-                relationships: None,
-                links: None, 
-                meta: None,
-            }.into())
-            .request_response(|mut req| {
-                secret_create(&mut req)
-            }).unwrap().get_primary_data().unwrap();
+        let go = rb
+            .set_primary_data(
+                ResourceObject {
+                    attributes: Some(Secret {
+                        value: "test".into(),
+                        old_value: None,
+                    }),
+                    id: None,
+                    relationships: None,
+                    links: None,
+                    meta: None,
+                }
+                .into(),
+            )
+            .request_response(|mut req| secret_create(&mut req))
+            .unwrap()
+            .get_primary_data()
+            .unwrap();
         let ro = ResourceObject::<Secret>::try_from(go).unwrap();
         let rels = ro.relationships.unwrap();
         let rel = rels.get("user").unwrap();
@@ -81,6 +92,7 @@ mod test {
         let id = ro.id.unwrap();
         assert_eq!(id, rel.id);
         assert_eq!(rel.kind, "user");
-        qaul.user_login(into_identity(&id).unwrap(), "test").unwrap();
+        qaul.user_login(into_identity(&id).unwrap(), "test")
+            .unwrap();
     }
 }

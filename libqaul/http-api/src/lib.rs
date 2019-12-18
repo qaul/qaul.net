@@ -6,20 +6,17 @@ use iron::{
     typemap, Listening,
 };
 use lazy_static::lazy_static;
-use router::Router;
-use std::{
-    net::ToSocketAddrs,
-    sync::Arc,
-};
 use libqaul::Qaul;
+use router::Router;
+use std::{net::ToSocketAddrs, sync::Arc};
 
 mod authenticator;
 use authenticator::Authenticator;
 pub use authenticator::CurrentUser;
 
-pub mod models;
-pub mod error;
 pub mod endpoints;
+pub mod error;
+pub mod models;
 
 mod method;
 pub use method::MethodGaurd;
@@ -27,7 +24,7 @@ pub use method::MethodGaurd;
 mod jsonapi;
 pub use jsonapi::{JsonApi, JsonApiGaurd};
 
-lazy_static! { 
+lazy_static! {
     /// A static `Mime` object representing `application/vnd.api+json`
     pub static ref JSONAPI_MIME : mime::Mime = mime::Mime(
         mime::TopLevel::Application,
@@ -56,9 +53,9 @@ impl ApiServer {
 
         let listening = Iron::new(chain).http(addr)?;
 
-        Ok(Self{ 
-            authenticator: authenticator.clone(), 
-            listening, 
+        Ok(Self {
+            authenticator: authenticator.clone(),
+            listening,
         })
     }
 
