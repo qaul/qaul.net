@@ -83,6 +83,6 @@ mod test {
             &Status::NoContent
         );
         assert!(auth.tokens.lock().unwrap().get(&grant).is_none());
-        assert!(qaul.users().delete(UserAuth(id, grant)).is_err());
+        assert!(qaul.users().change_pw(UserAuth(id, grant), "test2").is_err());
     }
 }
