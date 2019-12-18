@@ -92,3 +92,203 @@ pub fn user_update(req: &mut Request) -> IronResult<Response> {
         serde_json::to_string(&doc).unwrap(),
     )))
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::{
+        endpoints::user::route,
+        Authenticator,
+        models::{from_identity, User},
+    };
+    use anneal::RequestBuilder;
+    use iron::{
+        headers::{Authorization, Bearer},
+        middleware::Handler,
+    };
+    use japi::{Document, OptionalVec, ResourceObject};
+    use libqaul::{Qaul, users::UserAuth};
+    use std::{convert::TryFrom, collections::BTreeMap};
+
+    #[test]
+    fn set() {
+        let qaul = Qaul::dummy();
+        let UserAuth(id, grant) = qaul.users().create("test").unwrap();
+
+        let auth = Authenticator::new();
+        { auth.tokens.lock().unwrap().insert(grant.clone(), id.clone()); }
+
+        let mut bio = BTreeMap::new();
+        bio.insert("gender".to_string(), Some("yes please".to_string()));
+
+        let s_id = from_identity(&id);
+        let go = RequestBuilder::patch(
+                &format!("http://127.0.0.1:8000/api/users/{}", &s_id))
+            .unwrap()
+            .set_header(Authorization(Bearer {
+                token: grant.clone()
+            }))
+            .set_primary_data(
+                ResourceObject {
+                    attributes: Some(User {
+                        display_name: Optional::Present("display".into()),
+                        real_name: Optional::Present("real".into()),
+                        bio: Some(bio.clone()),
+                        services: None,
+                        avatar: Optional::Present("ThisIsTotallyB64".into()),
+                    }),
+                    id: Some(s_id),
+                    relationships: None,
+                    links: None,
+                    meta: None,
+                }.into()
+            )
+            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(JsonApi)
+            .add_middleware(auth)
+            .request_response(|mut req| {
+                let mut router = Router::new();
+                route(&mut router);
+                router.handle(&mut req)
+            })
+            .unwrap()
+            .get_primary_data()
+            .unwrap();
+        let ro = ResourceObject::<User>::try_from(go).unwrap();
+        let attr = ro.attributes.unwrap();
+        assert_eq!(attr.display_name, Optional::Present("display".to_string()));
+        assert_eq!(attr.real_name, Optional::Present("real".to_string()));
+        assert_eq!(attr.bio, Some(bio));
+        assert_eq!(attr.avatar, Optional::Present("ThisIsTotallyB64".to_string()));
+    }
+
+    #[test]
+    fn update() {
+        let qaul = Qaul::dummy();
+        let UserAuth(id, grant) = { 
+            let users = qaul.users();
+            let ua = users.create("test").unwrap();
+            users.update(ua.clone(), |profile| {
+                profile.display_name = Some("display".to_string());
+                profile.real_name = Some("real".to_string());
+
+                let mut bio = BTreeMap::new();
+                bio.insert("gender".to_string(), "yes please".to_string());
+                profile.bio = bio;
+                profile.avatar = Some(vec![1,3,1,2]);
+            });
+            ua
+        };
+
+        let auth = Authenticator::new();
+        { auth.tokens.lock().unwrap().insert(grant.clone(), id.clone()); }
+
+        let mut bio = BTreeMap::new();
+        bio.insert("gender".to_string(), Some("no thanks".to_string()));
+
+        let s_id = from_identity(&id);
+        let go = RequestBuilder::patch(
+                &format!("http://127.0.0.1:8000/api/users/{}", &s_id))
+            .unwrap()
+            .set_header(Authorization(Bearer {
+                token: grant.clone()
+            }))
+            .set_primary_data(
+                ResourceObject {
+                    attributes: Some(User {
+                        display_name: Optional::Present("yalpsid".into()),
+                        real_name: Optional::Present("lear".into()),
+                        bio: Some(bio.clone()),
+                        services: None,
+                        avatar: Optional::Present("ThisIsTotallyNotB64".into()),
+                    }),
+                    id: Some(s_id),
+                    relationships: None,
+                    links: None,
+                    meta: None,
+                }.into()
+            )
+            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(JsonApi)
+            .add_middleware(auth)
+            .request_response(|mut req| {
+                let mut router = Router::new();
+                route(&mut router);
+                router.handle(&mut req)
+            })
+            .unwrap()
+            .get_primary_data()
+            .unwrap();
+        let ro = ResourceObject::<User>::try_from(go).unwrap();
+        let attr = ro.attributes.unwrap();
+        assert_eq!(attr.display_name, Optional::Present("yalpsid".to_string()));
+        assert_eq!(attr.real_name, Optional::Present("lear".to_string()));
+        assert_eq!(attr.bio, Some(bio));
+        assert_eq!(attr.avatar, Optional::Present("ThisIsTotallyNotB64=".to_string()));
+    }
+
+    #[test]
+    fn clear() {
+        let qaul = Qaul::dummy();
+        let UserAuth(id, grant) = { 
+            let users = qaul.users();
+            let ua = users.create("test").unwrap();
+            users.update(ua.clone(), |profile| {
+                profile.display_name = Some("display".to_string());
+                profile.real_name = Some("real".to_string());
+
+                let mut bio = BTreeMap::new();
+                bio.insert("gender".to_string(), "yes please".to_string());
+                profile.bio = bio;
+                profile.avatar = Some(vec![1,3,1,2]);
+            });
+            ua
+        };
+
+        let auth = Authenticator::new();
+        { auth.tokens.lock().unwrap().insert(grant.clone(), id.clone()); }
+
+        let mut bio = BTreeMap::new();
+        bio.insert("gender".to_string(), None);
+
+        let s_id = from_identity(&id);
+        let go = RequestBuilder::patch(
+                &format!("http://127.0.0.1:8000/api/users/{}", &s_id))
+            .unwrap()
+            .set_header(Authorization(Bearer {
+                token: grant.clone()
+            }))
+            .set_primary_data(
+                ResourceObject {
+                    attributes: Some(User {
+                        display_name: Optional::Null,
+                        real_name: Optional::Null,
+                        bio: Some(bio),
+                        services: None,
+                        avatar: Optional::Null,
+                    }),
+                    id: Some(s_id),
+                    relationships: None,
+                    links: None,
+                    meta: None,
+                }.into()
+            )
+            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(JsonApi)
+            .add_middleware(auth)
+            .request_response(|mut req| {
+                let mut router = Router::new();
+                route(&mut router);
+                router.handle(&mut req)
+            })
+            .unwrap()
+            .get_primary_data()
+            .unwrap();
+        let ro = ResourceObject::<User>::try_from(go).unwrap();
+        let attr = ro.attributes.unwrap();
+        assert_eq!(attr.display_name, Optional::NotPresent);
+        assert_eq!(attr.real_name, Optional::NotPresent);
+        assert_eq!(attr.bio, Some(BTreeMap::new()));
+        assert_eq!(attr.avatar, Optional::NotPresent);
+    }
+}
