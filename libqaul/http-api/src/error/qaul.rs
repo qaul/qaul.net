@@ -5,7 +5,7 @@ use libqaul::error::Error as QaulInternalError;
 /// Wrapper for internal qaul errors
 ///
 /// You can provide optional context for the cause of the error
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct QaulError {
     err: QaulInternalError,
     context: Option<String>,

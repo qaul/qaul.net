@@ -2,7 +2,7 @@ use super::{ApiError, Error};
 use iron::{status::Status, IronError};
 
 /// Errors relating to the currently authorized user
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum AuthError {
     NotLoggedIn,
     NotAuthorised,

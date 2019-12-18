@@ -2,7 +2,7 @@ use super::{ApiError, Error};
 use iron::{method::Method, status::Status, IronError};
 
 /// Errors related to the http method of the request
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MethodError {
     /// The set of methods the endpoint supports
     pub expected: Vec<Method>,

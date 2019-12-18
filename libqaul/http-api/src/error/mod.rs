@@ -94,9 +94,22 @@ impl Display for ApiError {
 }
 
 impl StdError for ApiError {}
-
 impl From<ApiError> for IronError {
     fn from(e: ApiError) -> Self {
+        let status = e.0.status();
+
+        let document = Document {
+            errors: Some(vec![(&e).into()]),
+            ..Default::default()
+        };
+
+        IronError::new(Box::new(e),
+            (status, serde_json::to_string(&document).unwrap(), JSONAPI_MIME.clone()))
+    }
+}
+
+impl From<&ApiError> for JError {
+    fn from(e: &ApiError) -> Self {
         let pointer = e.0.pointer();
         let parameter = e.0.parameter();
         let source = if pointer.is_some() || parameter.is_some() {
@@ -113,29 +126,16 @@ impl From<ApiError> for IronError {
 
         let status = e.0.status();
 
-        let err = JError {
+        JError {
             id: e.0.id(),
-            links,
+           links,
             status: Some(format!("{}", status.to_u16())),
             code: e.0.code(),
             title: Some(e.0.title()),
             detail: e.0.detail(),
             source,
             meta: e.0.meta(),
-        };
-
-        let document = Document {
-            errors: Some(vec![err]),
-            ..Default::default()
-        };
-
-        IronError::new(
-            Box::new(e),
-            (
-                status,
-                serde_json::to_string(&document).unwrap(),
-                JSONAPI_MIME.clone(),
-            ),
-        )
+        }
     }
 }
+

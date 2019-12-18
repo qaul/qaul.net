@@ -2,7 +2,7 @@ use super::{ApiError, Error};
 use iron::{status::Status, IronError};
 use japi::Meta;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GenericError {
     /// The title of the error
     ///
@@ -94,6 +94,21 @@ impl GenericError {
     pub fn meta(mut self, meta: Meta) -> Self {
         self.meta = Some(meta);
         self
+    }
+
+
+    pub fn from_err<E: Error>(e: E) -> GenericError {
+        GenericError {
+            title: e.title(),
+            about: e.about(),
+            code: e.code(),
+            detail: e.detail(),
+            id: e.id(),
+            status: e.status(),
+            parameter: e.parameter(),
+            pointer: e.pointer(),
+            meta: e.meta(),
+        }
     }
 }
 
