@@ -422,13 +422,37 @@ dependencies = [
  "blake2 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-channel 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libqaul-ipc 0.1.0",
  "mime 0.3.14 (registry+https://github.com/rust-lang/crates.io-index)",
- "qaul-platform 0.1.0",
  "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman 0.0.0",
  "ratman-identity 0.1.0",
  "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "libqaul-http"
+version = "0.1.0"
+dependencies = [
+ "anneal 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "base64 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
+ "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "iron 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "japi 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libqaul 0.1.0",
+ "persistent 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ratman-identity 0.1.0",
+ "router 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_derive 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_json 1.0.44 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "libqaul-ipc"
+version = "0.1.0"
 
 [[package]]
 name = "linux-cli"
@@ -702,36 +726,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "qaul-core"
-version = "0.1.0"
-
-[[package]]
 name = "qaul-files"
 version = "0.1.0"
 dependencies = [
  "libqaul 0.1.0",
  "mime 0.3.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman-identity 0.1.0",
-]
-
-[[package]]
-name = "qaul-http"
-version = "0.1.0"
-dependencies = [
- "anneal 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "base64 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
- "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "iron 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "japi 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "libqaul 0.1.0",
- "persistent 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "ratman-identity 0.1.0",
- "router 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_derive 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_json 1.0.44 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -754,10 +754,6 @@ dependencies = [
  "qaul-files 0.1.0",
  "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
-
-[[package]]
-name = "qaul-platform"
-version = "0.1.0"
 
 [[package]]
 name = "quote"

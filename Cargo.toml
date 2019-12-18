@@ -4,16 +4,13 @@ members = [
     # qaul.net service library
     "libqaul",
 
-    # Platform specific utilities
-    "libqaul/platform",
+    # libqaul additions
+    "libqaul/http-api",
+    "libqaul/ipc",
 
     # qaul.net main services
     "libqaul/service/messaging",
     "libqaul/service/files",
-    "libqaul/service/core",
-
-    # qaul.net http-api
-    "libqaul/http-api",
 
     # decentralised routing protocol
     "ratman",

@@ -1,6 +1,6 @@
 [package]
-name = "qaul-platform"
-description = "Platform specific abstraction utilities"
+name = "libqaul-ipc"
+description = "Platform IPC utility abstractions to work with libqaul instances"
 version = "0.1.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
