@@ -22,5 +22,10 @@ router = "0.6"
 libqaul = { path = ".." } 
 identity = { path = "../../ratman/identity", package = "ratman-identity" }
 
+text_messaging = { path = "../service/messaging", package = "qaul-messaging", optional = true }
+
 [dev-dependencies]
 anneal = { features = ["jsonapi"], version = "0.3" }
+
+[features]
+messaging = ["text_messaging"]

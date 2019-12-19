@@ -37,6 +37,9 @@ pub enum DocumentError {
         rel: String,
         pointer: Option<String>,
     },
+    /// The field was expected to contain a singular item but in fact contained multiple
+    ManyItems { pointer: Option<String>, },
+    NullItem { pointer: Option<String>, },
 }
 
 impl DocumentError {
@@ -80,6 +83,18 @@ impl DocumentError {
             pointer: Some(pointer),
         }
     }
+
+    pub fn many_items(pointer: String) -> DocumentError {
+        DocumentError::ManyItems {
+            pointer: Some(pointer),
+        }
+    }
+
+    pub fn null_item(pointer: String) -> DocumentError {
+        DocumentError::NullItem {
+            pointer: Some(pointer),
+        }
+    }
 }
 
 impl From<ObjectConversionError> for DocumentError {
@@ -120,6 +135,8 @@ impl Error for DocumentError {
             } => "Missing Attribute",
             DocumentError::NoRelationships { pointer: _ } => "Missing Relationships",
             DocumentError::NoRelationship { rel: _, pointer: _ } => "Missing Relationship",
+            DocumentError::ManyItems { pointer: _ } => "Many Items",
+            DocumentError::NullItem { pointer: _ } => "Null Item",
         }
         .into()
     }
@@ -174,6 +191,12 @@ impl Error for DocumentError {
                 err: ObjectConversionError::MissingId,
                 pointer: _,
             } => panic!("No id"),
+            DocumentError::ManyItems { pointer: _ } => {
+                "Many items were provided when one was expected".into()
+            },
+            DocumentError::NullItem { pointer: _ } => {
+                "An item was null when it was expected to have a value".into()
+            },
         })
     }
 
@@ -193,6 +216,8 @@ impl Error for DocumentError {
             DocumentError::NoAttribute { attr: _, pointer } => pointer.clone(),
             DocumentError::NoRelationships { pointer } => pointer.clone(),
             DocumentError::NoRelationship { rel: _, pointer } => pointer.clone(),
+            DocumentError::ManyItems { pointer } => pointer.clone(),
+            DocumentError::NullItem { pointer } => pointer.clone(),
         }
     }
 }
