@@ -11,20 +11,58 @@ use std::sync::Arc;
 /// A reference to an internally stored message object
 pub type MsgRef = Arc<Message>;
 
+/// Length of an `MsgId`, for converting to and from arrays
+pub const ID_LEN: usize = 16;
+
 /// A unique, randomly generated message ID
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct MsgId(pub(crate) [u8; 16]);
+pub struct MsgId(pub(crate) [u8; ID_LEN]);
 
 impl MsgId {
     /// Generate a new **random** message ID
     pub(crate) fn new() -> Self {
-        crate::utils::random(16)
+        crate::utils::random(ID_LEN)
             .into_iter()
-            .zip(0..16)
-            .fold(Self([0; 16]), |mut acc, (x, i)| {
+            .zip(0..ID_LEN)
+            .fold(Self([0; ID_LEN]), |mut acc, (x, i)| {
                 acc.0[i] = x;
                 acc
             })
+    }
+}
+
+/// Implement RAW `From` binary array
+impl From<[u8; ID_LEN]> for MsgId {
+    fn from(i: [u8; ID_LEN]) -> Self {
+        Self(i)
+    }
+}
+
+/// Implement RAW `From` binary (reference) array
+impl From<&[u8; ID_LEN]> for MsgId {
+    fn from(i: &[u8; ID_LEN]) -> Self {
+        Self(i.clone())
+    }
+}
+
+/// Implement binary array `From` RAW
+impl From<MsgId> for [u8; ID_LEN] {
+    fn from(i: MsgId) -> Self {
+        i.0
+    }
+}
+
+/// Implement binary array `From` RAW reference
+impl From<&MsgId> for [u8; ID_LEN] {
+    fn from(i: &MsgId) -> Self {
+        i.0.clone()
+    }
+}
+
+/// Implement RAW identity to binary array reference
+impl AsRef<[u8]> for MsgId {
+    fn as_ref(&self) -> &[u8] {
+        &self.0
     }
 }
 
