@@ -67,6 +67,7 @@ impl TryFrom<MsgRef> for TextMessage {
 }
 
 /// Messaging service state
+#[derive(Clone)]
 pub struct Messaging {
     async_files: bool,
     qaul: Arc<Qaul>,
