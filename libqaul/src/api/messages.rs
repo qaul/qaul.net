@@ -170,6 +170,8 @@ impl Message {
 /// messages addressed to the appropriate service will be
 /// returned. Without this parameter, all messages will be returned.
 pub enum MessageQuery {
+    /// Single query for the exact message ID
+    Id(MsgId),
     /// Query by who a `Message` was composed by
     Sender(Identity),
     /// Query a Message by who it is addressed to

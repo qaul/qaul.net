@@ -78,13 +78,14 @@ impl<'store> StoreQuery<'store> {
                             true
                         }
                     })
-                    .filter(|msg| match query {
-                        Some(MessageQuery::Sender(ref sender)) => &msg.inner().sender == sender,
-                        Some(MessageQuery::Recipient(ref recipient)) => {
-                            &msg.inner().recipient == recipient
-                        }
-                        None => true,
-                    })
+                   .filter(|msg| match query {
+                       Some(MessageQuery::Id(ref id)) => &msg.inner().id == id,
+                       Some(MessageQuery::Sender(ref sender)) => &msg.inner().sender == sender,
+                       Some(MessageQuery::Recipient(ref recipient)) => {
+                           &msg.inner().recipient == recipient
+                       }
+                       None => true,
+                   })
                     .map(|msg| msg.read())
                     .collect())
             })
