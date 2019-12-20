@@ -9,7 +9,7 @@
 use conjoiner;
 use qaul::{
     error::{Error, Result},
-    messages::{Message, MsgRef, MsgId, Recipient, SigTrust},
+    messages::{Message, MessageQuery, MsgId, MsgRef, Recipient, SigTrust},
     users::UserAuth,
     Identity, Qaul,
 };
@@ -84,7 +84,7 @@ impl Messaging {
     /// can be set.
     pub fn new(qaul: Arc<Qaul>) -> Self {
         qaul.services().register(ASC_NAME).unwrap();
-        
+
         Self {
             async_files: false,
             qaul,
@@ -102,7 +102,12 @@ impl Messaging {
     /// `Message`, signs it and optionally encrypts it, if it's
     /// `recipient` isn't `Recipient::Flood`, then queues it in the
     /// routing layer.
-    pub fn send(&self, user: UserAuth, recipient: Recipient, payload: TextPayload) -> Result<MsgId> {
+    pub fn send(
+        &self,
+        user: UserAuth,
+        recipient: Recipient,
+        payload: TextPayload,
+    ) -> Result<MsgId> {
         self.qaul
             .messages()
             .send(user, recipient, ASC_NAME, conjoiner::serialise(&payload)?)
@@ -114,6 +119,11 @@ impl Messaging {
             .messages()
             .poll(user, ASC_NAME)
             .map(|msg| TextMessage::try_from(msg))?
+    }
+
+    /// Query existing messages from this service with a query
+    pub fn query(&self, user: UserAuth, query: MessageQuery) -> Result<Vec<MsgRef>> {
+        self.qaul.messages().query(user, ASC_NAME, query)
     }
 
     /// Setup a `TextMessage` listener for a specific user session
