@@ -1,0 +1,13 @@
+[package]
+name = "netmod-udp"
+description = "A UDP overlayed netmod endponti driver"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>", "Leonora Tindall <nora@nora.codes>"]
+edition = "2018"
+license = "AGPL-3.0"
+
+[dependencies]
+netmod = { path = "../ratman/netmod", package = "ratman-netmod" }
+identity = { path = "../ratman/identity", package = "ratman-identity", features = [ "digest" ] }
+
+async-std = { version = "1.0", default-features = false, features = ["std"] }
