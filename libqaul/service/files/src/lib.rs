@@ -38,10 +38,10 @@ impl Filesharing {
         Ok(Self { qaul })
     }
 
-    /// Announce a new file into a network
-    pub fn announce<S>(&self, name: S) -> Result<FileId> {
+    //     /// Announce a new file into a network
+    //     pub fn announce<S>(&self, name: S) -> Result<FileId> {
 
-    }
+    //     }
 }
 
 // impl<'q> Filesharing<'q> {
