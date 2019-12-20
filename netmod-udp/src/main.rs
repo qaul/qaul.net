@@ -44,12 +44,19 @@ impl Endpoint {
 
 fn main() {
     task::block_on(async {
-        let socket = UdpSocket::bind("0.0.0.0:1312").await.unwrap();        
-        let addr = socket.local_addr().unwrap();
-        dbg!(addr);
+        let socsender = UdpSocket::bind("0.0.0.0:1312").await.unwrap();        
+        let socreceiver = UdpSocket::bind("0.0.0.0:1313").await.unwrap();
+        let addrsender = socsender.local_addr().unwrap();
+        let addrrecvr = socreceiver.local_addr().unwrap();
+        dbg!(addrsender);
+        dbg!(addrrecvr);
 
-        dbg!(socket.connect("10.7.1.3:1312").await.unwrap());
-        dbg!(socket.send(&[1,2,3,4]).await.unwrap());
+        let mut buf = [0; 16];
+
+        dbg!(socsender.connect("127.0.0.1:1313").await.unwrap());
+        dbg!(socsender.send(b"Hello, qaul").await.unwrap());
+        dbg!(socreceiver.recv(&mut buf).await.unwrap());
+        dbg!(buf);
     });
 }
 
