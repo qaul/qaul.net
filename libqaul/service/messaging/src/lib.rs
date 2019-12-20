@@ -122,8 +122,13 @@ impl Messaging {
     }
 
     /// Query existing messages from this service with a query
-    pub fn query(&self, user: UserAuth, query: MessageQuery) -> Result<Vec<MsgRef>> {
-        self.qaul.messages().query(user, ASC_NAME, query)
+    pub fn query(&self, user: UserAuth, query: MessageQuery) -> Result<Vec<TextMessage>> {
+        self.qaul
+            .messages()
+            .query(user, ASC_NAME, query)?
+            .into_iter()
+            .map(|msg| TextMessage::try_from(msg))
+            .collect()
     }
 
     /// Setup a `TextMessage` listener for a specific user session
