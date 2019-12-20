@@ -14,7 +14,6 @@ pub(crate) type Listener = Arc<dyn Fn(MsgRef) -> Result<()> + Send + Sync>;
 /// A small wrapper around a pair of channel ends used to poll Messages
 pub(crate) struct IoPair {
     rx: Receiver<MsgRef>,
-    #[allow(unused)]
     tx: Sender<MsgRef>,
 }
 
@@ -97,7 +96,7 @@ impl ServiceRegistry {
             })
     }
 
-    /// Push a Message out to all listener endpoints
+    /// Push a Message out to all listener endpoints and pollers
     pub(crate) fn push_for(&self, service: String, msg: MsgRef) -> Result<()> {
         self.inner
             .read()
@@ -110,6 +109,15 @@ impl ServiceRegistry {
                     .iter()
                     .map(|cb| cb(msg.clone()))
                     .fold_errs(Error::CommFault)
+                    // Push to a poller
+                    .and_then(|_| {
+                        srv.io
+                            .read()
+                            .unwrap()
+                            .tx
+                            .send(msg)
+                            .map_err(|_| Error::CommFault)
+                    })
             })
     }
 }
