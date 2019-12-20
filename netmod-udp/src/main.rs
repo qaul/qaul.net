@@ -1,6 +1,6 @@
 //! netmod-udp is a UDP overlay for RATMAN
 
-use async_std::net::UdpSocket;
+use async_std::{net::UdpSocket, task};
 use identity::Identity;
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -41,3 +41,31 @@ impl Endpoint {
     /// Blocking call that runs
     pub fn run() {}
 }
+
+fn main() {
+    task::block_on(async {
+        let socket = UdpSocket::bind("0.0.0.0:1312").await.unwrap();        
+        let addr = socket.local_addr().unwrap();
+        dbg!(addr);
+
+        dbg!(socket.connect("10.7.1.3:1312").await.unwrap());
+        dbg!(socket.send(&[1,2,3,4]).await.unwrap());
+    });
+}
+
+
+// /// The following is the server code running on my NAS
+// fn main() {
+//     task::block_on(async {
+//         let socket = UdpSocket::bind("0.0.0.0:1312").await.unwrap();
+//         let addr = socket.local_addr().unwrap();
+//         // socket.connect("10.7.1.123:1312").await.unwrap();
+//         dbg!(addr);
+        
+//         let mut buf = vec![0u8; 1024];
+//         loop {
+//             dbg!(socket.recv(&mut buf).await.unwrap());
+//             dbg!(&buf);
+//         }
+//     });
+// }

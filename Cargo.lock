@@ -432,6 +432,11 @@ dependencies = [
 [[package]]
 name = "netmod-udp"
 version = "0.1.0"
+dependencies = [
+ "async-std 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ratman-identity 0.1.0",
+ "ratman-netmod 0.1.0",
+]
 
 [[package]]
 name = "num_cpus"
