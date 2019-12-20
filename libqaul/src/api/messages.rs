@@ -15,7 +15,7 @@ pub type MsgRef = Arc<Message>;
 pub const ID_LEN: usize = 16;
 
 /// A unique, randomly generated message ID
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MsgId(pub(crate) [u8; ID_LEN]);
 
 impl MsgId {
@@ -237,16 +237,17 @@ impl<'qaul> Messages<'qaul> {
         recipient: Recipient,
         service: S,
         payload: Vec<u8>,
-    ) -> Result<()>
+    ) -> Result<MsgId>
     where
         S: Into<String>,
     {
         let (sender, _) = self.q.auth.trusted(user)?;
         let recipients = MsgUtils::readdress(&recipient);
         let associator = service.into();
+        let id = MsgId::new();
 
         let env = Envelope {
-            id: MsgId::new(),
+            id,
             sender,
             associator,
             payload,
@@ -261,6 +262,7 @@ impl<'qaul> Messages<'qaul> {
                 signature,
             },
         )
+        .map(|_| id)
     }
 
     /// Non-blockingly poll the API for the latest `Message` for a service
