@@ -1,9 +1,16 @@
-// //! `qaul.net` filesharing service
+//! `qaul.net` filesharing service
+//!
+//! Provides a simple interface to announce and broadcast binary
+//! payload recipient messages.  Files can either be directly sent, or
+//! they can be advertised, then pulled with a unique file ID,
+//! contained in the announcement.
+
 // #![allow(unused)]
 
-// use qaul::{Qaul, QaulResult, UserAuth};
-// use identity::Identity;
-// pub use mime::Mime;
+use libqaul::{error::Result, Qaul};
+use std::sync::Arc;
+
+const ASC_NAME: &'static str = "net.qaul.filesharing";
 
 // /// A typed file that can be sent across the network
 // pub struct File {
@@ -15,10 +22,27 @@
 // // TODO: Partial files/ file progress
 // // TODO: Download links with tokens
 
-// /// Filesharing service state
-// pub struct Filesharing<'q> {
-//     qaul: &'q Qaul,
-// }
+/// Filesharing service state
+#[derive(Clone)]
+pub struct Filesharing {
+    qaul: Arc<Qaul>,
+}
+
+impl Filesharing {
+    /// Initialise the filesharing service
+    ///
+    /// In order to initialise, a valid and running
+    /// `Qaul` reference needs to be provided.
+    pub fn new(qaul: Arc<Qaul>) -> Result<Self> {
+        qaul.services().register(ASC_NAME)?;
+        Ok(Self { qaul })
+    }
+
+    /// Announce a new file into a network
+    pub fn announce<S>(&self, name: S) -> Result<FileId> {
+
+    }
+}
 
 // impl<'q> Filesharing<'q> {
 //     /// Send a single file to a group of people

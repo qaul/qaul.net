@@ -6,6 +6,6 @@ edition = "2018"
 license = "AGPL-3.0"
 
 [dependencies]
-qaul = { path = "../../", package = "libqaul" }
 identity = { path = "../../../ratman/identity", package = "ratman-identity" }
+libqaul = { path = "../../" }
 mime = "0.3"
