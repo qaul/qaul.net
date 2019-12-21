@@ -11,23 +11,14 @@ use std::{
 
 pub(crate) type Listener = Arc<dyn Fn(MsgRef) -> Result<()> + Send + Sync>;
 
-/// A small wrapper around a pair of channel ends used to poll Messages
-pub(crate) struct IoPair {
-    rx: Receiver<MsgRef>,
-    tx: Sender<MsgRef>,
-}
-
 /// A registered service, with a pre-made poll setup and listeners
 pub(crate) struct Service {
-    io: Arc<RwLock<IoPair>>,
     callbacks: Arc<RwLock<Vec<Listener>>>,
 }
 
 impl Service {
     fn new() -> Self {
-        let (tx, rx) = channel();
         Self {
-            io: Arc::new(RwLock::new(IoPair { rx, tx })),
             callbacks: Arc::new(RwLock::new(vec![])),
         }
     }
@@ -80,22 +71,6 @@ impl ServiceRegistry {
             })
     }
 
-    /// Poll for a new Message from a service queue
-    pub(crate) fn poll_for(&self, service: String) -> Result<MsgRef> {
-        self.inner
-            .read()
-            .expect("ServiceRegistry was poisoned")
-            .get(&service)
-            .map_or(Err(Error::NoService), |srv| {
-                srv.io
-                    .read()
-                    .unwrap()
-                    .rx
-                    .try_recv()
-                    .map_err(|_| Error::CommFault)
-            })
-    }
-
     /// Push a Message out to all listener endpoints and pollers
     pub(crate) fn push_for(&self, service: String, msg: MsgRef) -> Result<()> {
         self.inner
@@ -109,15 +84,6 @@ impl ServiceRegistry {
                     .iter()
                     .map(|cb| cb(msg.clone()))
                     .fold_errs(Error::CommFault)
-                    // Push to a poller
-                    .and_then(|_| {
-                        srv.io
-                            .read()
-                            .unwrap()
-                            .tx
-                            .send(msg)
-                            .map_err(|_| Error::CommFault)
-                    })
             })
     }
 }

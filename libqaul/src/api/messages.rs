@@ -296,8 +296,18 @@ impl<'qaul> Messages<'qaul> {
     where
         S: Into<String>,
     {
-        self.q.auth.trusted(user)?;
-        self.q.services.poll_for(service.into())
+        let (id, _) = self.q.auth.trusted(user)?;
+        self.q
+            .messages
+            .query(id)
+            .service(service)
+            .unread()
+            .limit(1)
+            .exec()
+            .map(|vec| match vec.into_iter().nth(0) {
+                Some(msg) => Ok(msg),
+                None => Err(Error::NoData),
+            })?
     }
 
     /// Register a listener on new-message events for a service
