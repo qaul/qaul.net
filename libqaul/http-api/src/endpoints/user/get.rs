@@ -56,11 +56,14 @@ mod test {
     use iron::middleware::Handler;
     use japi::ResourceObject;
     use libqaul::Qaul;
-    use std::convert::TryFrom;
+    use std::{
+        convert::TryFrom,
+        sync::Arc,
+    };
 
     #[test]
     fn works() {
-        let qaul = Qaul::dummy();
+        let qaul = Arc::new(Qaul::dummy());
         let ua = qaul.users().create("test").unwrap();
         qaul.users()
             .update(ua.clone(), |user| {
@@ -71,7 +74,7 @@ mod test {
         let id = from_identity(&ua.0);
         let go = RequestBuilder::get(&format!("http://127.0.0.1:8000/api/users/{}", id))
             .unwrap()
-            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(QaulCore::new(qaul.clone()))
             .add_middleware(Authenticator::new())
             .request_response(|mut req| {
                 let mut router = Router::new();

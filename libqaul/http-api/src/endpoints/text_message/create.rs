@@ -116,7 +116,7 @@ mod test {
                     meta: None,
                 }.into()
             )
-            .add_middleware(QaulCore::new(&network.a))
+            .add_middleware(QaulCore::new(network.a.clone()))
             .add_middleware(JsonApi)
             .add_middleware(auth)
             .add_middleware(QaulMessaging::new(&messaging_a))

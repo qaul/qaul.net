@@ -98,10 +98,11 @@ mod test {
     };
     use japi::{Identifier, Relationship, Relationships};
     use libqaul::{Qaul, users::UserAuth};
+    use std::sync::Arc;
 
     #[test]
     fn works() {
-        let qaul = Qaul::dummy();
+        let qaul = Arc::new(Qaul::dummy());
         let UserAuth(id, grant) = qaul.users().create("test").unwrap();
 
         let mut relationships = Relationships::new();
@@ -141,7 +142,7 @@ mod test {
                 token: grant.clone()
             }))
             .set_primary_data(ro.into())
-            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(QaulCore::new(qaul.clone()))
             .add_middleware(JsonApi)
             .add_middleware(auth)
             .request_response(|mut req| {

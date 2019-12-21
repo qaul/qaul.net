@@ -52,11 +52,12 @@ mod test {
     use crate::{models::into_identity, JsonApi, QaulCore};
     use anneal::RequestBuilder;
     use libqaul::Qaul;
+    use std::sync::Arc;
 
-    fn build() -> (Qaul, RequestBuilder) {
-        let qaul = Qaul::dummy();
+    fn build() -> (Arc<Qaul>, RequestBuilder) {
+        let qaul = Arc::new(Qaul::dummy());
         let mut rb = RequestBuilder::post("http://127.0.0.1:8000/api/secrets").unwrap();
-        rb.add_middleware(QaulCore::new(&qaul));
+        rb.add_middleware(QaulCore::new(qaul.clone()));
         rb.add_middleware(JsonApi);
         (qaul, rb)
     }

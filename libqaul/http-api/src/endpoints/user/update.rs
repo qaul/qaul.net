@@ -108,11 +108,11 @@ mod test {
     };
     use japi::{Document, OptionalVec, ResourceObject};
     use libqaul::{Qaul, users::UserAuth};
-    use std::{convert::TryFrom, collections::BTreeMap};
+    use std::{convert::TryFrom, collections::BTreeMap, sync::Arc};
 
     #[test]
     fn set() {
-        let qaul = Qaul::dummy();
+        let qaul = Arc::new(Qaul::dummy());
         let UserAuth(id, grant) = qaul.users().create("test").unwrap();
 
         let auth = Authenticator::new();
@@ -143,7 +143,7 @@ mod test {
                     meta: None,
                 }.into()
             )
-            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(QaulCore::new(qaul.clone()))
             .add_middleware(JsonApi)
             .add_middleware(auth)
             .request_response(|mut req| {
@@ -164,7 +164,7 @@ mod test {
 
     #[test]
     fn update() {
-        let qaul = Qaul::dummy();
+        let qaul = Arc::new(Qaul::dummy());
         let UserAuth(id, grant) = { 
             let users = qaul.users();
             let ua = users.create("test").unwrap();
@@ -208,7 +208,7 @@ mod test {
                     meta: None,
                 }.into()
             )
-            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(QaulCore::new(qaul.clone()))
             .add_middleware(JsonApi)
             .add_middleware(auth)
             .request_response(|mut req| {
@@ -229,7 +229,7 @@ mod test {
 
     #[test]
     fn clear() {
-        let qaul = Qaul::dummy();
+        let qaul = Arc::new(Qaul::dummy());
         let UserAuth(id, grant) = { 
             let users = qaul.users();
             let ua = users.create("test").unwrap();
@@ -273,7 +273,7 @@ mod test {
                     meta: None,
                 }.into()
             )
-            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(QaulCore::new(qaul.clone()))
             .add_middleware(JsonApi)
             .add_middleware(auth)
             .request_response(|mut req| {

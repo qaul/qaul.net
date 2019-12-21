@@ -102,10 +102,11 @@ mod test {
     use anneal::RequestBuilder;
     use japi::{Identifier, Relationship, Relationships};
     use libqaul::{Qaul};
+    use std::sync::Arc;
 
     #[test]
     fn works() {
-        let qaul = Qaul::dummy();
+        let qaul = Arc::new(Qaul::dummy());
         let id = qaul.users().create("test").unwrap().0;
 
         let mut relationships = Relationships::new();
@@ -129,7 +130,7 @@ mod test {
         let auth = Authenticator::new();
 
         let go = RequestBuilder::default_post()
-            .add_middleware(QaulCore::new(&qaul))
+            .add_middleware(QaulCore::new(qaul.clone()))
             .add_middleware(JsonApi)
             .add_middleware(auth.clone())
             .set_primary_data(ro.into())

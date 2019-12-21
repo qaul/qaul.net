@@ -47,7 +47,7 @@ pub struct ServerBuilder {
 }
 
 impl ServerBuilder {
-    pub fn new(qaul: &Qaul) -> Self {
+    pub fn new(qaul: Arc<Qaul>) -> Self {
         let mut router = Router::new();
         endpoints::route(&mut router);
 
@@ -110,9 +110,9 @@ pub struct QaulCore {
 }
 
 impl QaulCore {
-    fn new(qaul: &Qaul) -> Self {
+    fn new(qaul: Arc<Qaul>) -> Self {
         Self {
-            qaul: Arc::new(qaul.clone()),
+            qaul: qaul.clone(),
         }
     }
 }

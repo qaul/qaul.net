@@ -48,10 +48,11 @@ mod test {
         middleware::Handler,
     };
     use libqaul::{users::UserAuth, Qaul};
+    use std::sync::Arc;
 
     #[test]
     fn works() {
-        let qaul = Qaul::dummy();
+        let qaul = Arc::new(Qaul::dummy());
         let user_auth = qaul.users().create("test").unwrap();
         let id = user_auth.0;
         let grant = user_auth.1;
@@ -70,7 +71,7 @@ mod test {
                 .set_header(Authorization(Bearer {
                     token: grant.clone()
                 }))
-                .add_middleware(QaulCore::new(&qaul))
+                .add_middleware(QaulCore::new(qaul.clone()))
                 .add_middleware(auth.clone())
                 .request_response(|mut req| {
                     let mut router = Router::new();
