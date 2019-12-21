@@ -66,7 +66,7 @@ impl<'store> StoreQuery<'store> {
             .write()
             .unwrap()
             .get_mut(&user)
-            .map_or(Err(Error::NoData), |set| {
+            .map_or(Ok(vec![]), |set| {
                 Ok(set
                     .iter_mut()
                     // Conditional filters that are applied only if the query matches
