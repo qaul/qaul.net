@@ -283,15 +283,8 @@ impl<'qaul> Messages<'qaul> {
 
     /// Non-blockingly poll the API for the latest `Message` for a service
     ///
-    /// Two notes on the data returned from this endpoint. For a more
-    /// general `Message` query/ enumeration API, see
+    /// For a more general `Message` query/ enumeration API, see
     /// `Messages::query` instead.
-    ///
-    /// 1. This will only receive new messages, since last checking
-    ///    and can be used, while in active operation, to handle
-    ///    incoming messages as they are received.
-    /// 2. The `Message` variant returned from this endpoint will
-    ///    **always** be `Message::In`, never an outgoing type.
     pub fn poll<S>(&self, user: UserAuth, service: S) -> Result<MsgRef>
     where
         S: Into<String>,
