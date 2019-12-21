@@ -54,7 +54,11 @@ impl ServiceRegistry {
             .map_or(Err(Error::NoService), |_| Ok(()))
     }
 
-    pub(crate) fn add_listener<F: 'static + Send + Sync>(&self, service: String, listener: F) -> Result<()>
+    pub(crate) fn add_listener<F: 'static + Send + Sync>(
+        &self,
+        service: String,
+        listener: F,
+    ) -> Result<()>
     where
         F: Fn(MsgRef) -> Result<()>,
     {

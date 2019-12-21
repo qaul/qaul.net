@@ -67,14 +67,14 @@ impl<'qaul> Users<'qaul> {
     /// user, or messages from the node (or other device nodes).
     pub fn delete(&self, user: UserAuth) -> Result<()> {
         let id = user.0;
-        
+
         // If logout succeeds, we can delete the user
         self.logout(user)?;
         self.q.router.local_del(id);
         self.q.users.rm_user(id);
         Ok(())
     }
-    
+
     /// Change the passphrase for an authenticated user
     pub fn change_pw(&self, user: UserAuth, newpw: &str) -> Result<()> {
         let (id, _) = self.q.auth.trusted(user)?;

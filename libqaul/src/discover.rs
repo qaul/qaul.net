@@ -1,14 +1,18 @@
-use crate::{Qaul, utils::RunLock, messages::{MsgState, MsgUtils}};
+use crate::{
+    messages::{MsgState, MsgUtils},
+    utils::RunLock,
+    Qaul,
+};
 use async_std::task;
-use ratman::{Identity, Protocol, Message, Router, netmod::Recipient};
+use ratman::{netmod::Recipient, Identity, Message, Protocol, Router};
 use std::{
+    collections::BTreeMap,
     sync::{
-        mpsc::{channel, Sender, Receiver},
+        mpsc::{channel, Receiver, Sender},
         Arc, RwLock,
     },
     thread,
     time::Duration,
-    collections::BTreeMap,
 };
 
 /// Encode available  commands
@@ -43,16 +47,20 @@ pub(crate) struct Discovery;
 
 impl Discovery {
     /// Start a discovery service running inside libqaul
-    pub(crate) fn start(qaul: Arc<Qaul>, router: Arc<Router>, inc: Receiver<Message>) -> Sender<DiscCmd> {
+    pub(crate) fn start(
+        qaul: Arc<Qaul>,
+        router: Arc<Router>,
+        inc: Receiver<Message>,
+    ) -> Sender<DiscCmd> {
         let run = Arc::new(RunLock::new(true));
         let (sender, rx) = channel();
-        
+
         // Incoming message handler
         Self::inc_handler(qaul, inc, Arc::clone(&run));
 
         // Spawn the service communicator
         Self::service_handle(rx, router, run);
-        
+
         sender
     }
 
@@ -61,40 +69,42 @@ impl Discovery {
         thread::spawn(move || {
             let run = Arc::clone(&run);
             let buf = Arc::new(RwLock::new(BTreeMap::new()));
-            
+
             while let Ok(rscv) = rx.recv() {
                 match rscv {
                     DiscCmd::Shutdown => {
                         run.set(false);
                         break;
-                    },
+                    }
                     DiscCmd::Start(id) => {
                         let router = Arc::clone(&router);
                         let run = Arc::clone(&run);
 
-                        buf.write().unwrap().insert(id, Arc::new(RunLock::new(true)));
+                        buf.write()
+                            .unwrap()
+                            .insert(id, Arc::new(RunLock::new(true)));
                         let buf = Arc::clone(&buf);
-                        
+
                         task::spawn(async move {
                             while active(&id, &buf).and(&run) {
                                 task::sleep(Duration::from_secs(2)).await;
                                 router.send(Protocol::announce(id.clone())).unwrap();
                             }
                         });
-                    },
+                    }
                     DiscCmd::Stop(id) => {
                         buf.write().unwrap().get_mut(&id).unwrap().set(false);
-                    },
+                    }
                 }
             }
         });
     }
-    
+
     /// Spawns a thread that listens to incoming messages
     fn inc_handler(qaul: Arc<Qaul>, inc: Receiver<Message>, _lock: Arc<RunLock>) {
         thread::spawn(move || {
             let qaul = Arc::clone(&qaul);
-            
+
             while let Ok(msg) = inc.recv() {
                 println!("Receiving message...");
                 let user = match msg.recipient {
@@ -105,7 +115,8 @@ impl Discovery {
                 let msg = Arc::new(MsgUtils::process(msg, user));
                 let associator = msg.associator.clone();
 
-                qaul.messages.insert(user, MsgState::Unread(Arc::clone(&msg)));
+                qaul.messages
+                    .insert(user, MsgState::Unread(Arc::clone(&msg)));
                 qaul.services.push_for(associator, msg).unwrap();
                 println!("Finished processing incoming message!");
             }

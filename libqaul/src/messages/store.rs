@@ -87,17 +87,17 @@ impl<'store> StoreQuery<'store> {
                             true
                         }
                     })
-                   .filter(|msg| match query {
-                       Some(MessageQuery::Id(ref id)) => &msg.inner().id == id,
-                       Some(MessageQuery::Sender(ref sender)) => &msg.inner().sender == sender,
-                       Some(MessageQuery::Recipient(ref recipient)) => {
-                           &msg.inner().recipient == recipient
-                       }
-                       None => true,
-                   })
-                   .take(limit.unwrap_or(usize::max_value()))
-                   .map(|msg| msg.read())
-                   .collect())
+                    .filter(|msg| match query {
+                        Some(MessageQuery::Id(ref id)) => &msg.inner().id == id,
+                        Some(MessageQuery::Sender(ref sender)) => &msg.inner().sender == sender,
+                        Some(MessageQuery::Recipient(ref recipient)) => {
+                            &msg.inner().recipient == recipient
+                        }
+                        None => true,
+                    })
+                    .take(limit.unwrap_or(usize::max_value()))
+                    .map(|msg| msg.read())
+                    .collect())
             })
     }
 }
@@ -196,10 +196,10 @@ impl MsgStore {
 
 #[cfg(test)]
 mod tests {
+    use crate::messages::{Message, MsgId, MsgState, MsgStore, Recipient, SigTrust};
     use crate::{utils, Identity};
-    use crate::messages::{MsgStore, MsgState, Message, MsgId, Recipient, SigTrust};
     use std::sync::Arc;
-    
+
     fn setup(id: Identity) -> MsgStore {
         let store = MsgStore::new();
         let msg = Message {

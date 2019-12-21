@@ -59,7 +59,6 @@ impl AsRef<[u8]> for FileId {
     }
 }
 
-
 /// Local file abstraction
 pub struct File {
     pub name: String,
@@ -143,8 +142,7 @@ impl<'qaul> Files<'qaul> {
     }
 
     /// Stream one particular file from storage
-    pub async fn get(&self, user: UserAuth, file: FileId) -> Result<File>
-    {
+    pub async fn get(&self, user: UserAuth, file: FileId) -> Result<File> {
         self.q.auth.trusted(user)?;
         unimplemented!()
     }
@@ -155,7 +153,7 @@ impl<'qaul> Files<'qaul> {
         unimplemented!()
     }
 
-    /// Delete a file from the local user store 
+    /// Delete a file from the local user store
     pub fn delete(&self, user: UserAuth, name: FileId) -> Result<()> {
         self.q.auth.trusted(user)?;
         unimplemented!()

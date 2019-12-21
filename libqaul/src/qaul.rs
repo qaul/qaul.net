@@ -1,13 +1,13 @@
 pub use identity::Identity;
 
 use crate::{
-    api::{Contacts, Messages, Users, Services},
+    api::{Contacts, Messages, Services, Users},
     auth::AuthStore,
     contacts::ContactStore,
     discover::Discovery,
-    users::UserStore,
-    services::ServiceRegistry,
     messages::MsgStore,
+    services::ServiceRegistry,
+    users::UserStore,
 };
 
 use ratman::{Router, RouterInit};
@@ -50,10 +50,10 @@ pub struct Qaul {
 
     /// Provide a persistent interface to query messages
     pub(crate) messages: MsgStore,
-    
+
     /// An ephemeral (non persistent) store for external services
     pub(crate) services: ServiceRegistry,
-    
+
     /// A reference to the underlying routing code
     pub(crate) router: Arc<Router>,
 }

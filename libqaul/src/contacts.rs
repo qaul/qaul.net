@@ -59,7 +59,7 @@ impl ContactStore {
     pub(crate) fn query(&self, id: &Identity, query: ContactQuery) -> Result<Vec<Identity>> {
         let mut inner = self.inner.lock().expect("Failed to lock ContactStore");
         Ok(inner
-           .entry(*id)
+            .entry(*id)
             .or_insert(Default::default())
             .iter()
             .filter(|(_, con)| match query {
