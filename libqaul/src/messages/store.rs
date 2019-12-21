@@ -162,15 +162,6 @@ impl MsgStore {
         }
     }
 
-    /// Get a message by specific ID from the store
-    pub(crate) fn id(&self, id: &MsgId) -> Option<MsgRef> {
-        self.by_id
-            .write()
-            .unwrap()
-            .get_mut(id)
-            .map(|msg| msg.read())
-    }
-
     /// Permanently store a whole Message
     ///
     /// For this function it doesn't matter if the `Message` was
