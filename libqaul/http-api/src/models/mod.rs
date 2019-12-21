@@ -15,6 +15,9 @@ mod text_message;
 #[cfg(feature = "messaging")]
 pub use text_message::TextMessage;
 
+mod qaul_message;
+pub use qaul_message::QaulMessage;
+
 use crate::error::GenericError;
 use hex::{decode, encode};
 use identity::{Identity, ID_LEN};
