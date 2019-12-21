@@ -247,15 +247,29 @@ impl<'qaul> Messages<'qaul> {
         let recipients = MsgUtils::readdress(&recipient);
         let associator = service.into();
         let id = MsgId::new();
+        let sign = SigTrust::Trusted;
 
         let env = Envelope {
             id,
             sender,
-            associator,
-            payload,
+            associator: associator.clone(),
+            payload: payload.clone(),
         };
 
         let signature = MsgUtils::sign(&env);
+
+        self.q.messages.insert(
+            sender,
+            crate::messages::MsgState::Read(Arc::new(Message {
+                id,
+                sender,
+                recipient,
+                associator,
+                payload,
+                sign,
+            })),
+        );
+
         MsgUtils::send(
             &self.q.router,
             RatMessageProto {
