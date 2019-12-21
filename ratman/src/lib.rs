@@ -90,6 +90,10 @@ impl Router {
         self.journal.add_local(id);
     }
 
+    pub fn local_del(&self, id: Identity) {
+        self.journal.rm_local(id);
+    }
+
     /// Queue a `R.A.T.M.A.N.` message for sending
     pub fn send(&self, msg: Message) -> Result<()> {
         // FIXME: This is so pointless...

@@ -72,4 +72,8 @@ impl Journal {
     pub(crate) fn add_local(&self, id: Identity) {
         self.local.lock().unwrap().insert(id);
     }
+
+    pub(crate) fn rm_local(&self, id: Identity) {
+        self.local.lock().unwrap().remove(&id);
+    }
 }

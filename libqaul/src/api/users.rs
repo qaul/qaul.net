@@ -60,8 +60,19 @@ impl<'qaul> Users<'qaul> {
         self.q.auth.new_login(id, pw).map(|t| UserAuth(id, t))
     }
 
+    /// Delete a local user from the auth store
+    ///
+    /// This function requires a valid login for the user that's being
+    /// deleted.  This does not delete any data associated with this
+    /// user, or messages from the node (or other device nodes).
     pub fn delete(&self, user: UserAuth) -> Result<()> {
-        unimplemented!()
+        let id = user.0;
+        
+        // If logout succeeds, we can delete the user
+        self.logout(user)?;
+        self.q.router.local_del(id);
+        self.q.users.rm_user(id);
+        Ok(())
     }
     
     /// Change the passphrase for an authenticated user

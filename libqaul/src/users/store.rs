@@ -54,6 +54,10 @@ impl UserStore {
         inner.insert(id, user);
     }
 
+    pub(crate) fn rm_user(&self, user: Identity) {
+        self.inner.lock().unwrap().remove(&user);
+    }
+
     /// Modify a single user inside the store in-place
     pub(crate) fn modify<F>(&self, id: &Identity, modifier: F) -> Result<()>
     where
