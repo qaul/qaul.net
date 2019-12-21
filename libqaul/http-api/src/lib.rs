@@ -97,7 +97,7 @@ impl ApiServer {
 ///
 /// ```
 /// # use iron::prelude::*;
-/// # use qaul_http::QaulCore;
+/// # use libqaul_http::QaulCore;
 /// fn handler(req: &mut Request) -> IronResult<Response> {
 ///     let qaul = req.extensions.get::<QaulCore>().unwrap();
 ///     

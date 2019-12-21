@@ -14,7 +14,7 @@ use std::{
 ///
 /// ```
 /// # use iron::prelude::*;
-/// # use qaul_http::CurrentUser;
+/// # use libqaul_http::CurrentUser;
 /// fn handler(req: &mut Request) -> IronResult<Response> {
 ///     // Some(UserAuth) if an authenticated user is is requesting this endpoint
 ///     // None otherwise

@@ -27,7 +27,7 @@ use std::io::Read;
 ///
 /// ```
 /// # use iron::prelude::*;
-/// # use qaul_http::JsonApi;
+/// # use libqaul_http::JsonApi;
 /// fn handler(req: &mut Request) -> IronResult<Response> {
 ///     // Some(Document) if there was a document in the request
 ///     // None otherwise
