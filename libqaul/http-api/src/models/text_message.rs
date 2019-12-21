@@ -22,7 +22,7 @@ impl Attributes for TextMessage {
 }
 
 impl TextMessage { 
-    fn from_message(m: QaulMessage) -> ResourceObject<TextMessage> {
+    pub fn from_message(m: QaulMessage) -> ResourceObject<TextMessage> {
         let attr = TextMessage {
             sign: Some(m.sign.into()),
             payload: m.payload.text,

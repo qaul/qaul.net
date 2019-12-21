@@ -16,6 +16,9 @@ pub(crate) use document::DocumentError;
 mod generic;
 pub(crate) use generic::GenericError;
 
+mod service;
+pub(crate) use service::ServiceError;
+
 use crate::JSONAPI_MIME;
 use iron::{status::Status, IronError};
 use japi::{Document, Error as JError, ErrorSource, Link, Links, Meta};

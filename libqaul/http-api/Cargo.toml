@@ -26,6 +26,11 @@ text_messaging = { path = "../service/messaging", package = "qaul-messaging", op
 
 [dev-dependencies]
 anneal = { features = ["jsonapi"], version = "0.3" }
+netmod_mem = { path = "../../netmod-mem", package = "netmod-mem" }
+ratman = { path = "../../ratman", package = "ratman" }
 
 [features]
+default = ["messaging"]
+
+# add support for the qaul_messaging service
 messaging = ["text_messaging"]

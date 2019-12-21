@@ -9,6 +9,8 @@ use lazy_static::lazy_static;
 use libqaul::Qaul;
 use router::Router;
 use std::{net::ToSocketAddrs, sync::Arc};
+#[cfg(feature = "messaging")]
+use text_messaging::Messaging;
 
 mod authenticator;
 use authenticator::Authenticator;
@@ -24,6 +26,14 @@ pub use method::MethodGaurd;
 mod jsonapi;
 pub use jsonapi::{JsonApi, JsonApiGaurd};
 
+#[cfg(feature = "messaging")]
+mod qaul_messaging;
+#[cfg(feature = "messaging")]
+pub use qaul_messaging::QaulMessaging;
+
+#[cfg(test)]
+pub mod test_utils;
+
 lazy_static! {
     /// A static `Mime` object representing `application/vnd.api+json`
     pub static ref JSONAPI_MIME : mime::Mime = mime::Mime(
@@ -32,15 +42,12 @@ lazy_static! {
         Vec::new());
 }
 
-/// The core of the qaul.net HTTP API
-pub struct ApiServer {
-    #[allow(unused)]
-    authenticator: Authenticator,
-    listening: Listening,
+pub struct ServerBuilder {
+    chain: Chain,
 }
 
-impl ApiServer {
-    pub fn new<A: ToSocketAddrs>(qaul: &Qaul, addr: A) -> HttpResult<Self> {
+impl ServerBuilder {
+    pub fn new(qaul: &Qaul) -> Self {
         let mut router = Router::new();
         endpoints::route(&mut router);
 
@@ -48,17 +55,35 @@ impl ApiServer {
         chain.link_before(QaulCore::new(qaul));
         chain.link_before(JsonApi);
 
+        ServerBuilder { chain }
+    }
+
+    #[cfg(feature = "messaging")]
+    pub fn messaging(mut self, messaging: &Messaging) -> Self {
+        self.chain.link_before(QaulMessaging::new(messaging));
+        self
+    }
+
+    pub fn start<A: ToSocketAddrs>(mut self, addr: A) -> HttpResult<ApiServer> {
         let authenticator = Authenticator::new();
-        chain.link_before(authenticator.clone());
+        self.chain.link_before(authenticator.clone());
 
-        let listening = Iron::new(chain).http(addr)?;
+        let listening = Iron::new(self.chain).http(addr)?;
 
-        Ok(Self {
-            authenticator: authenticator.clone(),
+        Ok(ApiServer {
+            authenticator,
             listening,
         })
     }
+}
 
+/// The core of the qaul.net HTTP API
+pub struct ApiServer {
+    authenticator: Authenticator,
+    listening: Listening,
+}
+
+impl ApiServer {
     /// According to
     /// [https://github.com/hyperium/hyper/issues/338](https://github.com/hyperium/hyper/issues/338)
     /// this _probably_ does nothing, but i'm providing it in the hope that in the

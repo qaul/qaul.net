@@ -65,7 +65,7 @@ mod test {
         }
 
         assert_eq!(
-            RequestBuilder::delete(&format!("http://127.0.0.1:8000/api/grant/{}", grant))
+            RequestBuilder::delete(&format!("http://127.0.0.1:8000/api/grants/{}", grant))
                 .unwrap()
                 .set_header(Authorization(Bearer {
                     token: grant.clone()
