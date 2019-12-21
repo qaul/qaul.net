@@ -18,6 +18,7 @@ pub(crate) struct StoreQuery<'store> {
     unread: bool,
     service: Option<String>,
     query: Option<MessageQuery>,
+    limit: Option<usize>,
 }
 
 impl<'store> StoreQuery<'store> {
@@ -43,6 +44,13 @@ impl<'store> StoreQuery<'store> {
         }
     }
 
+    pub(crate) fn limit(self, limit: usize) -> Self {
+        Self {
+            limit: Some(limit),
+            ..self
+        }
+    }
+
     /// Filter messages additionally with a user provided query
     pub(crate) fn constraints(self, query: MessageQuery) -> Self {
         Self {
@@ -59,6 +67,7 @@ impl<'store> StoreQuery<'store> {
             query,
             unread,
             service,
+            limit,
         } = self;
 
         store
@@ -86,8 +95,9 @@ impl<'store> StoreQuery<'store> {
                        }
                        None => true,
                    })
-                    .map(|msg| msg.read())
-                    .collect())
+                   .take(limit.unwrap_or(usize::max_value()))
+                   .map(|msg| msg.read())
+                   .collect())
             })
     }
 }
@@ -159,6 +169,7 @@ impl MsgStore {
             unread: false,
             service: None,
             query: None,
+            limit: None,
         }
     }
 
