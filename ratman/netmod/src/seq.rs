@@ -8,7 +8,7 @@ use {
 };
 
 /// An XxHash signature and initialisation seed
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct XxSignature {
     sig: u64,
     seed: u64,
@@ -23,7 +23,7 @@ pub struct XxSignature {
 /// was transmitted without error.
 ///
 /// Check the `netmod` crate documentation for more details.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SeqId {
     /// A hash signature of the payload
     pub sig: XxSignature,

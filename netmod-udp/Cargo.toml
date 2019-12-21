@@ -11,3 +11,5 @@ netmod = { path = "../ratman/netmod", package = "ratman-netmod" }
 identity = { path = "../ratman/identity", package = "ratman-identity" }
 
 async-std = "1.0"
+conjoiner = { version = "1.2", package = "conjoiner-engine" }
+serde = { version = "1.0", features = ["derive"] }
