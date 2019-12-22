@@ -14,4 +14,4 @@ identity = { path = "../identity", features = ["digest"], package = "ratman-iden
 conjoiner = { git = "https://git.open-communication.net/qaul/conjoiner-engine", package = "conjoiner-engine" }
 serde = { version = "1.0", features = ["derive"] }
 twox-hash = "1.5"
-
+async-trait = "0.1"

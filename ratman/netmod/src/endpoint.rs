@@ -1,11 +1,13 @@
 //! Endpoint abstraction module
 
 use crate::{Frame, Result};
+use async_trait::async_trait;
 
 /// A `RATMAN` `netmod` endpoint describes a networking interface
 ///
 /// For more information about the rationale of this interface, check
 /// the `netmod` crate documentation!
+#[async_trait]
 pub trait Endpoint {
     /// Return a desired frame size in bytes
     ///
@@ -41,34 +43,10 @@ pub trait Endpoint {
     ///
     /// Send errors _can_ be encoded in the return value, and so if
     /// physically a `Frame` is too large for the transport layer,
-    /// using the error value `Error::FrameTooLarge` is permitted. 
-    ///
-    /// **NOTE: ASYNC THIS**
-    fn send(&mut self, frame: Frame, target: i16) -> Result<()>;
+    /// using the error value `Error::FrameTooLarge` is permitted.
+    async fn send(&mut self, frame: Frame, target: i16) -> Result<()>;
 
-    /// Get next available Frame, without blocking
-    ///
-    /// Because the poll might not have data to return, a valid, but
-    /// not fatal return is `Ok(None)`, which means that the
-    /// connection is healthy, but in the last poll cycle no new data
-    /// was transmitted.
-    ///
-    /// The target ID is a way to instruct a netmod where to send a
-    /// frame in a one-to-many mapping.  When implementing a
-    /// one-to-one endpoint, this ID can be ignored (set to 0).
-    ///
-    /// **IMPORTANT** setting the target to `-1` should result in a
-    /// broadcast on that channel.
-    ///
-    /// **NOTE: ASYNC THIS**
-    fn poll(&mut self) -> Result<Option<(Frame, i16)>>;
-
-    /// Setup a listener via a handler function
-    ///
-    /// This function assumes that relevant state can be captured via
-    /// the handler's closure, meaning that no data needs to be
-    /// returned from the function for it to process incoming frames.
-    ///
-    /// For a more "classical" poll function, see `poll` instead
-    fn listen(&mut self, handler: Box<dyn FnMut(Frame, i16) -> Result<()>>) -> Result<()>;
+    /// Get next available Frame from the network, or an error explaining why that's
+    /// not a possibility.
+    async fn next(&mut self) -> Result<(Frame, i16)>;
 }
