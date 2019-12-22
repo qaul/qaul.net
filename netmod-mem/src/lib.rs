@@ -3,6 +3,9 @@
 //! This aims to make testing any structure that binds against
 //! `netmod` easier and reproducable.
 
+use async_std::future;
+use async_std::task::Poll;
+use async_trait::async_trait;
 use ratman_netmod::{Endpoint, Error as NetError, Frame, Result as NetResult};
 use std::sync::mpsc::TryRecvError;
 
@@ -25,9 +28,7 @@ pub struct MemMod {
 impl MemMod {
     /// Create a new, unpaired `MemMod`.
     pub fn new() -> Self {
-        Self {
-            io: None
-        }
+        Self { io: None }
     }
 
     /// Create two already-paired `MemMod`s, ready for use.
@@ -76,6 +77,7 @@ impl MemMod {
     }
 }
 
+#[async_trait]
 impl Endpoint for MemMod {
     /// Provides maximum frame-size information to `RATMAN`
     fn size_hint(&self) -> usize {
@@ -88,7 +90,7 @@ impl Endpoint for MemMod {
     ///
     /// Returns `OperationNotSupported` if attempting to send through
     /// a connection that is not yet connected.
-    fn send(&mut self, frame: Frame, _: i16) -> NetResult<()> {
+    async fn send(&mut self, frame: Frame, _: i16) -> NetResult<()> {
         match self.io {
             None => Err(NetError::NotSupported),
             Some(ref io) => match io.out.send(frame) {
@@ -98,27 +100,15 @@ impl Endpoint for MemMod {
         }
     }
 
-    fn poll(&mut self) -> NetResult<Option<(Frame, i16)>> {
-        match self.io {
-            None => Err(NetError::NotSupported),
+    async fn next(&mut self) -> NetResult<(Frame, i16)> {
+        future::poll_fn(|_| match self.io {
+            None => Poll::Ready(Err(NetError::NotSupported)),
             Some(ref mut io) => match io.inc.try_recv() {
-                Ok(v) => {
-                    dbg!("Endoint delivery END");
-                    Ok(Some((v, 0)))
-                },
-                Err(TryRecvError::Empty) => Ok(None),
-                Err(_) => Err(NetError::ConnectionLost),
+                Ok(v) => Poll::Ready(Ok((v, 0))),
+                Err(TryRecvError::Empty) => Poll::Pending,
+                Err(_) => Poll::Ready(Err(NetError::ConnectionLost)),
             },
-        }
-    }
-
-    fn listen(&mut self, mut handler: Box<dyn FnMut(Frame, i16) -> NetResult<()>>) -> NetResult<()> {
-        match self.io {
-            None => Err(NetError::NotSupported),
-            Some(ref mut io) => match io.inc.recv() {
-                Ok(v) => handler(v, 0),
-                Err(_) => return Err(NetError::ConnectionLost),
-            },
-        }
+        })
+        .await
     }
 }

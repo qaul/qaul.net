@@ -9,3 +9,8 @@ license = "AGPL-3.0"
 [dependencies]
 ratman-netmod = { path = "../ratman/netmod", package = "ratman-netmod" }
 ratman-identity = { path = "../ratman/identity", package = "ratman-identity", features = [ "digest" ] }
+async-trait = "0.1"
+
+[dependencies.async-std]
+version = "1"
+features = ["attributes"]
