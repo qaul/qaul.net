@@ -1,17 +1,25 @@
 //! netmod-udp is a UDP overlay for RATMAN
 
+mod addrs;
+use addrs::AddrTable;
+
+mod socket;
+use socket::Socket;
+
+mod framing;
+use framing::{Envelope, FrameExt};
+
 use async_std::{io, task};
 use conjoiner;
 
-use netmod::{Endpoint, Error, Frame, Recipient, Sequence};
+use netmod::{Endpoint, Frame, Result};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, VecDeque},
     io::ErrorKind,
-    net::{IpAddr, UdpSocket},
+    net::{IpAddr, SocketAddr, UdpSocket},
     sync::{Arc, Mutex},
     thread,
-    time::Duration,
 };
 
 /// An internal envelope that is used as a transfer protocol
@@ -82,23 +90,15 @@ impl UdpEndpoint {
                     Ok((_, peer)) => {
                         let udp_env =
                             conjoiner::deserialise(&buf).expect("couldn't deserialise. error: ");
-
                         match udp_env {
                             UdpEnvelope::Announce => {
                                 let id = endpoint.id();
-                                endpoint
-                                    .ips
-                                    .lock()
-                                    .unwrap()
-                                    .insert(id, peer.ip());
-                                endpoint
-                                    .ids
-                                    .lock()
-                                    .unwrap()
-                                    .insert(peer.ip(), id);
-                            },
+                                endpoint.ips.lock().unwrap().insert(id, peer.ip());
+                                endpoint.ids.lock().unwrap().insert(peer.ip(), id);
+                            }
                             UdpEnvelope::Data(vec) => {
-                                let frame = conjoiner::deserialise(&vec).expect("couldn't deserialise Frame");
+                                let frame = conjoiner::deserialise(&vec)
+                                    .expect("couldn't deserialise Frame");
                                 let ip_id = *endpoint.ids.lock().unwrap().get(&peer.ip()).unwrap();
                                 endpoint
                                     .inbox
@@ -107,7 +107,6 @@ impl UdpEndpoint {
                                     .push_back(FrameEnvelope(frame, ip_id));
                             }
                         }
-
                     }
                     Err(e) => match e.kind() {
                         ErrorKind::WouldBlock => {
@@ -123,6 +122,43 @@ impl UdpEndpoint {
                 // handling here.
             }
         });
+    }
+}
 
+impl Endpoint for UdpEndpoint {
+    fn size_hint(&self) -> usize {
+        1024 // just an arbitrary number for now
+    }
+
+    fn send(&mut self, frame: Frame, target: i16) -> Result<()> {
+        let data = conjoiner::serialise(&frame).unwrap();
+
+        match target {
+            -1 => {
+                // broadcast
+            }
+            val => {
+                self.sock
+                    .lock()
+                    .unwrap()
+                    .send_to(
+                        &data,
+                        SocketAddr::new(
+                            self.ips.lock().unwrap().get(&(val as u16)).unwrap().clone(),
+                            20120,
+                        ),
+                    )
+                    .unwrap();
+            }
+        }
+        Ok(())
+    }
+
+    fn poll(&mut self) -> Result<Option<(Frame, i16)>> {
+        unimplemented!()
+    }
+
+    fn listen(&mut self, _: Box<dyn FnMut(Frame, i16) -> Result<()>>) -> Result<()> {
+        unimplemented!()
     }
 }
