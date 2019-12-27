@@ -11,7 +11,7 @@ mod protocol;
 mod slicer;
 
 use crate::{
-    core::{Core, Envelope},
+    core::{Core, Envelope, Target},
     journal::Journal,
     slicer::Slicer,
 };
@@ -78,9 +78,11 @@ impl Router {
     }
 
     /// ONLY USE FOR DEBUGGING!
+    ///
+    /// This function does not properly advertise one-to-many mappings!
     #[deprecated]
     pub fn discover(&self, id: Identity, ifid: u8) {
-        self.core.lock().unwrap().id_reachable(id, ifid);
+        self.core.lock().unwrap().id_reachable(id, Target(ifid, 0));
     }
 
     /// Teach the `Router` about local users
@@ -102,7 +104,10 @@ impl Router {
                 .get_ifs()
                 .into_iter()
                 .fold(vec![], |mut vec, (ifid, _)| {
-                    let mut set = frames.iter().cloned().map(|f| Envelope(ifid, f)).collect();
+                    // Setting the target to -1 carries the semantic
+                    // meanting for netmod to treat this send as a
+                    // broadcast if it is a one-to-many mapped driver!
+                    let mut set = frames.iter().cloned().map(|f| Envelope(Target(ifid, -1), f)).collect();
                     vec.append(&mut set);
                     vec
                 }),

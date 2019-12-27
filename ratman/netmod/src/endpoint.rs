@@ -32,12 +32,19 @@ pub trait Endpoint {
     /// implementation. As mentioned in the `size_hint` documentation,
     /// this function **must not** panic on a `Frame` for size reasons.
     ///
+    /// The target ID is a way to instruct a netmod where to send a
+    /// frame in a one-to-many mapping.  When implementing a
+    /// one-to-one endpoint, this ID can be ignored (set to 0).
+    ///
+    /// **IMPORTANT** setting the target to `-1` should result in a
+    /// broadcast on that channel.
+    ///
     /// Send errors _can_ be encoded in the return value, and so if
     /// physically a `Frame` is too large for the transport layer,
-    /// using the error value `Error::FrameTooLarge` is permitted.
+    /// using the error value `Error::FrameTooLarge` is permitted. 
     ///
     /// **NOTE: ASYNC THIS**
-    fn send(&mut self, frame: Frame) -> Result<()>;
+    fn send(&mut self, frame: Frame, target: i16) -> Result<()>;
 
     /// Get next available Frame, without blocking
     ///
@@ -46,8 +53,15 @@ pub trait Endpoint {
     /// connection is healthy, but in the last poll cycle no new data
     /// was transmitted.
     ///
+    /// The target ID is a way to instruct a netmod where to send a
+    /// frame in a one-to-many mapping.  When implementing a
+    /// one-to-one endpoint, this ID can be ignored (set to 0).
+    ///
+    /// **IMPORTANT** setting the target to `-1` should result in a
+    /// broadcast on that channel.
+    ///
     /// **NOTE: ASYNC THIS**
-    fn poll(&mut self) -> Result<Option<Frame>>;
+    fn poll(&mut self) -> Result<Option<(Frame, i16)>>;
 
     /// Setup a listener via a handler function
     ///
@@ -56,5 +70,5 @@ pub trait Endpoint {
     /// returned from the function for it to process incoming frames.
     ///
     /// For a more "classical" poll function, see `poll` instead
-    fn listen(&mut self, handler: Box<dyn FnMut(Frame) -> Result<()>>) -> Result<()>;
+    fn listen(&mut self, handler: Box<dyn FnMut(Frame, i16) -> Result<()>>) -> Result<()>;
 }

@@ -95,7 +95,7 @@ impl Endpoint for UdpEndpoint {
     fn size_hint(&self) -> usize {
         4096
     }
-    fn send(&mut self, frame: Frame) -> Result<(), Error> {
+    fn send(&mut self, frame: Frame, target: i16) -> Result<(), Error> {
         let peer_address = match frame.recipient {
             Recipient::User(ref identity) => unimplemented!(),
             Recipient::Flood => "255.255.255.255:1722",
@@ -113,14 +113,15 @@ impl Endpoint for UdpEndpoint {
         }
     }
 
-    fn poll(&mut self) -> Result<Option<Frame>, Error> {
+    fn poll(&mut self) -> Result<Option<(Frame, i16)>, Error> {
         let mut inbox = self.inbox.lock().expect("Inbox mutex poisoned");
-        Ok(inbox.pop_front())
+        // Ok(inbox.pop_front()) FIXME!
+        unimplemented!()
     }
 
     fn listen(
         &mut self,
-        mut handler: Box<dyn FnMut(Frame) -> Result<(), Error>>,
+        mut handler: Box<dyn FnMut(Frame, i16) -> Result<(), Error>>,
     ) -> Result<(), Error> {
         unimplemented!()
     }
@@ -135,7 +136,7 @@ fn main() {
     let frames = seq.add(b"Hello, UDP universe.".to_vec()).build();
     println!("Sending a frame");
     for frame in frames {
-        socsender.send(frame.clone()).unwrap();
+        socsender.send(frame.clone(), 0).unwrap();
     }
     println!("Waiting to get a frame");
     thread::sleep(Duration::from_millis(1000));

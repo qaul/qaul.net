@@ -88,7 +88,7 @@ impl Endpoint for MemMod {
     ///
     /// Returns `OperationNotSupported` if attempting to send through
     /// a connection that is not yet connected.
-    fn send(&mut self, frame: Frame) -> NetResult<()> {
+    fn send(&mut self, frame: Frame, _: i16) -> NetResult<()> {
         match self.io {
             None => Err(NetError::NotSupported),
             Some(ref io) => match io.out.send(frame) {
@@ -98,13 +98,13 @@ impl Endpoint for MemMod {
         }
     }
 
-    fn poll(&mut self) -> NetResult<Option<Frame>> {
+    fn poll(&mut self) -> NetResult<Option<(Frame, i16)>> {
         match self.io {
             None => Err(NetError::NotSupported),
             Some(ref mut io) => match io.inc.try_recv() {
                 Ok(v) => {
                     dbg!("Endoint delivery END");
-                    Ok(Some(v))
+                    Ok(Some((v, 0)))
                 },
                 Err(TryRecvError::Empty) => Ok(None),
                 Err(_) => Err(NetError::ConnectionLost),
@@ -112,11 +112,11 @@ impl Endpoint for MemMod {
         }
     }
 
-    fn listen(&mut self, mut handler: Box<dyn FnMut(Frame) -> NetResult<()>>) -> NetResult<()> {
+    fn listen(&mut self, mut handler: Box<dyn FnMut(Frame, i16) -> NetResult<()>>) -> NetResult<()> {
         match self.io {
             None => Err(NetError::NotSupported),
             Some(ref mut io) => match io.inc.recv() {
-                Ok(v) => handler(v),
+                Ok(v) => handler(v, 0),
                 Err(_) => return Err(NetError::ConnectionLost),
             },
         }

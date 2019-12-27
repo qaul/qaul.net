@@ -14,8 +14,12 @@ use std::{
 
 type EndpointMap = Arc<Mutex<BTreeMap<u8, Arc<Mutex<dyn Endpoint + Send>>>>>;
 
+/// A target is a specific endpoint, sending to a specific recipient
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) struct Target(pub(crate) u8, pub(crate) i16);
+
 /// A message envelope which encodes the corresponding interface
-pub(crate) struct Envelope(pub(crate) u8, pub(crate) Frame);
+pub(crate) struct Envelope(pub(crate) Target, pub(crate) Frame);
 
 /// A wrapper around a Message routing worker
 struct Worker {
@@ -40,16 +44,16 @@ impl Worker {
             if let Ok(Envelope(id, msg)) = rx.try_recv() {
                 dbg!("Sending queued mesage!");
                 let ifs = ifs.lock().unwrap();
-                let epm = ifs.get(&id).unwrap();
+                let epm = ifs.get(&id.0).unwrap();
                 let mut ep = epm.lock().unwrap();
-                ep.send(msg).unwrap();
+                ep.send(msg, id.1).unwrap();
             }
 
             // Poll all available interfaces
             ifs.lock().unwrap().iter().for_each(|(id, epm)| {
                 let mut ep = epm.lock().unwrap();
-                if let Ok(Some(f)) = ep.poll() {
-                    tx.send(Envelope(*id, f)).unwrap();
+                if let Ok(Some((f, target))) = ep.poll() {
+                    tx.send(Envelope(Target(*id, target), f)).unwrap();
                 }
             });
         });
@@ -73,8 +77,8 @@ pub(crate) struct Core {
     cnt: u8,
     /// A routing worker that handles routing
     worker: Worker,
-    /// Mapping network IDs to interface IDs
-    pub(crate) routes: Arc<Mutex<BTreeMap<Identity, u8>>>,
+    /// Mapping network IDs to interface targets
+    pub(crate) routes: Arc<Mutex<BTreeMap<Identity, Target>>>,
     /// A list of available interfaces, assigned sequentials IDs
     pub(crate) ifs: EndpointMap,
 }
@@ -125,9 +129,9 @@ impl Core {
             .collect()
     }
 
-    pub(crate) fn id_reachable(&self, id: Identity, ifid: u8) {
+    pub(crate) fn id_reachable(&self, id: Identity, target: Target) {
         let mut routes = self.routes.lock().unwrap();
-        routes.insert(id, ifid);
+        routes.insert(id, target);
     }
 
     /// Map a set of Frames into a set of Envelopes
@@ -137,8 +141,8 @@ impl Core {
     /// device.
     pub(crate) fn lookup(&self, id: &Identity, frames: Vec<Frame>) -> Vec<Envelope> {
         let routes = dbg!(self.routes.lock().unwrap());
-        let ifid = routes.get(id).unwrap();
-        frames.into_iter().map(|f| Envelope(*ifid, f)).collect()
+        let target = routes.get(id).unwrap();
+        frames.into_iter().map(|f| Envelope(*target, f)).collect()
     }
 
     /// Send a properly enveloped message out into the network
