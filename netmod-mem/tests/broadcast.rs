@@ -5,13 +5,13 @@ fn broadcast_medium_ping_pong() {
     let mut medium = BroadcastMedium::with_latency(1);
     let mut a = medium.make_netmod();
     let mut b = medium.make_netmod();
-    a.send(Frame::dummy())
+    a.send(Frame::dummy(), 0)
         .expect("Failed to send message from a. Error");
     medium.tick();
     b.poll()
         .expect("Failed to get message at b. Error")
         .expect("No message available.");
-    b.send(Frame::dummy())
+    b.send(Frame::dummy(), 0)
         .expect("Failed to send message from b. Error");
     medium.tick();
     a.poll()
@@ -26,7 +26,7 @@ fn broadcast_medium_ping_broadcast() {
     let mut b = medium.make_netmod();
     let mut c = medium.make_netmod();
     let mut d = medium.make_netmod();
-    a.send(Frame::dummy())
+    a.send(Frame::dummy(), 0)
         .expect("Failed to send message from a. Error");
     medium.tick();
     b.poll()

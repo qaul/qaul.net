@@ -55,7 +55,7 @@ impl BroadcastMedium {
     /// # use ratman_netmod::{Frame, Endpoint};
     /// let mut medium = BroadcastMedium::with_latency(1);
     /// let mut a = medium.make_netmod();
-    /// a.send(Frame::dummy()).expect("Couldn't send frame from a.");
+    /// a.send(Frame::dummy(), 0).expect("Couldn't send frame from a.");
     ///
     /// let mut b = medium.make_netmod();
     /// medium.tick();
