@@ -5,15 +5,15 @@ use crate::{
 };
 
 /// A random authentication token
-pub type Token = [char; 32];
+pub type Token = String;
 
 /// Wrapper to encode `User` authentication state
 ///
 /// This structure can be aquired by challenging an authentication
 /// endpoint, such as `User::login` to yield a token. If a session for
 /// this `Identity` already exists, it will be re-used.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct UserAuth(pub Identity, pub(crate) Token);
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct UserAuth(pub Identity, pub Token);
 
 /// API scope type to access user functions
 ///

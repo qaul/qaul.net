@@ -102,12 +102,6 @@ impl AuthStore {
     fn generate() -> Token {
         let t = utils::random(32);
         encode_config(&t, URL_SAFE)
-            .chars()
-            .zip(0..31)
-            .fold([0 as char; 32], |mut acc, (x, i)| {
-                acc[i] = x;
-                acc
-            })
     }
 }
 
