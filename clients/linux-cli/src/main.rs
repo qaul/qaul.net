@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Register a service
     q.services().register("de.spacekookie.myapp")?;
     q.messages().send(
-        user,
+        user.clone(),
         Recipient::Flood,
         "de.spacekokie.myapp",
         vec![1, 2, 3, 4],
