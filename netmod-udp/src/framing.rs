@@ -23,5 +23,8 @@ pub(crate) enum Envelope {
 }
 
 /// A frame wrapped with the ID that it was targeted with
+///
+/// The ID can be resolved via the AddrTable to find out where to send
+/// a payload
 #[derive(Debug, Clone)]
-pub(crate) struct FrameExt(Frame, u16);
+pub(crate) struct FrameExt(pub(crate) Frame, pub(crate) u16);
