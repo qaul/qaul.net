@@ -10,7 +10,7 @@ use {
 // bootstrapping procedure. It is heavily documented to be useful as
 // an onboarding device.
 fn main() {
-/    // Create virtual network with two devices
+    // Create virtual network with two devices
     let mut mm1 = MemMod::new();
     let mut mm2 = MemMod::new();
     let mut mm3 = MemMod::new();

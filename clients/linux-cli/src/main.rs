@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     q.messages().listen(user, "de.spacekookie.myapp", |msg| {
         println!("Received message: {:?}", msg);
         Ok(()) // Return error if parsing fails
-    });
+    }).unwrap();
 
     Ok(())
 }
