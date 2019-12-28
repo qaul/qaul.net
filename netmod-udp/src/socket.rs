@@ -8,7 +8,7 @@ use std::{
     collections::VecDeque,
     net::{IpAddr, Ipv4Addr, SocketAddr},
     sync::{Arc, RwLock},
-    thread
+    thread,
 };
 
 const PORT: u16 = 20120;
@@ -79,22 +79,24 @@ impl Socket {
                         match udp_env {
                             Envelope::Announce => {
                                 table.set(peer.ip());
-                            },
+                            }
                             Envelope::Data(vec) => {
                                 let frame = conjoiner::deserialise(&vec)
                                     .expect("couldn't deserialise Frame");
                                 dbg!(&frame);
-                                let id = table.id(&peer.ip()).unwrap();
+                                let id = table
+                                    .id(&peer.ip())
+                                    .expect("Got data from unknown peer");
                                 arc.inbox
                                     .write()
                                     .expect("Inbox mutex poisoned")
                                     .push_back(FrameExt(frame, id));
                             }
                         }
-                    },
+                    }
                     val => {
-                        dbg!(val);
-                        unimplemented!()
+                        // TODO: handle errors more gracefully
+                        dbg!(val).expect("Crashed UDP thread!");
                     }
                 }
             }

@@ -55,11 +55,28 @@ impl AddrTable {
 
     /// Get the ID for a given IP address
     pub(crate) fn id(&self, ip: &IpAddr) -> Option<u16> {
-        self.ids.read().expect("AddrTable poisoned").get(ip).cloned()
+        self.ids
+            .read()
+            .expect("AddrTable poisoned")
+            .get(ip)
+            .cloned()
     }
 
     /// Get the IP for a given internal ID
     pub(crate) fn ip(&self, id: u16) -> Option<IpAddr> {
-        self.ips.read().expect("AddrTable poisoned").get(&id).cloned()
+        self.ips
+            .read()
+            .expect("AddrTable poisoned")
+            .get(&id)
+            .cloned()
+    }
+
+    pub(crate) fn all(&self) -> Vec<IpAddr> {
+        self.ips
+            .read()
+            .expect("AddrTable poisoned")
+            .values()
+            .cloned()
+            .collect()
     }
 }
