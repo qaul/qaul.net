@@ -1,0 +1,11 @@
+<aside local-class="log {{if this.showLog "show"}}" ...attributes>
+  <div aria-hidden="true" local-class="topbar">
+      <button {{on "click" (perform this.hideLog)}}>
+        {{fa-icon "arrow-right"}}
+      </button>
+  </div>
+
+  <div local-class="log-content">
+    <Aside />
+  </div>
+</aside>

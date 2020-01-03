@@ -2,7 +2,9 @@
   {{#if @badge}}
     <div local-class="badge">{{@badge}}</div>
   {{/if}}
-  <FaIcon @icon={{@icon}} local-class="icon" />
+  <div local-class="icon">
+    <FaIcon @icon={{@icon}} />
+  </div>
   {{#if @showAll}}
     <div local-class="description">
       {{t @text}}

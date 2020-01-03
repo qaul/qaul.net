@@ -26,7 +26,8 @@
 .icon {
   font-size: 3rem;
   padding: .5rem;
-  padding-right: 3rem;
+  width: 5rem;
+  text-align: center;
 }
 
 .badge {
@@ -39,5 +40,10 @@
   border: 2px solid white;
   font-size: .8rem;
   top: 0.25rem;
-  left: 3rem;
+  left: 5rem;
+  text-align: center;
+}
+
+.description {
+  margin-left: 2rem;
 }

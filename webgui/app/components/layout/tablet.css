@@ -1,4 +1,4 @@
-@value topbar-height: 5rem;
+@value topbar-height: 3rem;
 @value nav-small-width: 8rem;
 
 .root {
@@ -16,5 +16,10 @@
 .topbar {
   grid-area: topbar;
   background: var(--q-theme-strong);
-  color: var(--q-color);
+  display: flex;
+  justify-content: flex-end;
+}
+.topbar button {
+  color: var(--q-color-inverse);
+  margin: 0 1rem;
 }

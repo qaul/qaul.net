@@ -1,0 +1,35 @@
+@value topbar-height from './tablet';
+
+.nav {
+  width: 300px;
+  max-width: 90%;
+  height: 100vh;
+  z-index: 30;
+  position: absolute;
+  top: 0;
+  left: -300px;
+  background-color: var(--q-bg);
+  transition: transform 1s ease;
+}
+.nav.show {
+  transform: translateX(-300px);
+}
+[dir="rtl"] .nav {
+  left: 100vw;
+}
+[dir="rtl"] .nav.show {
+  transform: translateX(-300px);
+}
+
+.topbar {
+  composes: topbar from './tablet';
+  height: topbar-height;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+.topbar button {
+  color: var(--q-color-inverse);
+  margin: 0 1rem;
+}
+

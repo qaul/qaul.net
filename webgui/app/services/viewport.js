@@ -27,8 +27,7 @@ export default class ViewportService extends Service {
     if(this.width < 300) {
       return 'mobile';
     }
-
-    if(this.width < 800) {
+    else if(this.width < 800) {
       return 'tablet';
     }
 

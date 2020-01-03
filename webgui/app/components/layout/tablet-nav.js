@@ -23,7 +23,9 @@ export default class RootComponent extends Component {
   * hideNavigation() {
     this.showShrinkNavButton = false;
     this.showAll = false;
+    this.fakeOutgoingOverlay = true;
     yield timeout(800);
+    this.fakeIncomingOverlay = false;
     this.showExtendNavButton = true;
   }
 }

@@ -1,0 +1,17 @@
+<div local-class="root">
+  <div aria-hidden="true" local-class="topbar">
+      <button {{on "click" (perform this.showNavigation)}}>
+        {{fa-icon "bars"}}
+      </button>
+      <button {{on "click" (perform this.showLog)}}>
+        {{fa-icon "history"}}
+      </button>
+  </div>
+  {{#if showNavOverlay}}
+  <Layout::SlideNav local-class="nav" />
+  {{/if}}
+  {{#if showLogOverlay}}
+  <Layout::SlideLog local-class="log" />
+  {{/if}}
+  <main local-class="main">{{yield}}</main>
+</div>
