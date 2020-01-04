@@ -1,4 +1,4 @@
-<nav local-class="nav {{if this.showNav "show"}}" ...attributes>
+<nav local-class="nav {{if @showNav "show"}}" ...attributes>
   <div aria-hidden="true" local-class="topbar {{if fakeIncomingOverlay "increase"}} {{if this.showAll "showall"}}">
       <button {{on "click" (perform this.hideNavigation)}}>
         {{fa-icon "angle-double-left"}}

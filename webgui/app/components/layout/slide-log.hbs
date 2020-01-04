@@ -1,4 +1,4 @@
-<aside local-class="log {{if this.showLog "show"}}" ...attributes>
+<aside local-class="log {{if @showLog "show"}}" ...attributes>
   <div aria-hidden="true" local-class="topbar">
       <button {{on "click" (perform this.hideLog)}}>
         {{fa-icon "angle-double-right"}}

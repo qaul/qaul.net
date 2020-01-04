@@ -7,19 +7,41 @@
   position: absolute;
   top: 0;
   left: 100vw;
-  transition: transform 1s ease;
+  z-index: 100;
 }
 .log.show {
-  transform: translateX(-300px);
+  animation: slide-ltr 0.8s ease-out;
+  left: calc(100vw - 300px);
 }
-/*
-[dir="rtl"] .log {
-  left: 0;
+.log.show.out, .log.out {
+  animation: slide-out-ltr 0.8s ease-out reverse;
+  left: 100vw;
 }
 [dir="rtl"] .log.show {
-  transform: translateX(300px);
+  animation: slide-rtl 0.8s ease-out;
+  left: 0;
 }
-*/
+[dir="rtl"] .log.show.out {
+  animation: slide-rtl 0.8s ease-out reverse;
+  left: -300px;
+}
+
+@keyframes slide-ltr {
+  0% {
+    left: 100vw;
+  }
+  100% {
+    left: calc(100vw - 300px);
+  }
+}
+@keyframes slide-rtl {
+  0% {
+    left: -300px;
+  }
+  100% {
+    left: 0;
+  }
+}
 
 .topbar {
   composes: topbar from './tablet';

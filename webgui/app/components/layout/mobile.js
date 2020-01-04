@@ -6,29 +6,31 @@ import { tracked } from '@glimmer/tracking';
 
 export default class RootComponent extends Component {
   @tracked showNavOverlay;
+  @tracked showNav;
   @tracked showLogOverlay;
+  @tracked showLog;
 
   @task
-  * showNavigation() {
+  * slideNavIn() {
     this.showNavOverlay = true;
     this.showNav = true;
   }
 
   @task
-  * hideNavigation() {
+  * slideNavOut() {
     this.showNav = false;
     yield timeout(600);
     this.showNavOverlay = false;
   }
 
   @task
-  * showLog() {
+  * slideLogIn() {
     this.showLogOverlay = true;
     this.showLog = true;
   }
 
   @task
-  * hideLog() {
+  * slideLogOut() {
     this.showLog = false;
     yield timeout(600);
     this.showLogOverlay = false;

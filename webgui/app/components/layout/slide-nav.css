@@ -1,24 +1,46 @@
 @value topbar-height from './tablet';
 
 .nav {
+  background-color: var(--q-bg);
   width: 300px;
-  max-width: 90%;
   height: 100vh;
   z-index: 30;
   position: absolute;
   top: 0;
   left: -300px;
-  background-color: var(--q-bg);
-  transition: transform 1s ease;
 }
 .nav.show {
-  transform: translateX(-300px);
+  animation: slide-ltr 0.8s ease-out;
+  left: 0;
 }
-[dir="rtl"] .nav {
-  left: 100vw;
+.nav.show.out, .nav.out {
+  animation: slide-ltr 0.8s ease-out reverse;
+  left: -300px;
 }
 [dir="rtl"] .nav.show {
-  transform: translateX(-300px);
+  animation: slide-rtl 0.8s ease-out;
+  left: calc(100vw - 300px);
+}
+[dir="rtl"] .nav.show.out {
+  animation: slide-rtl 0.8s ease-out reverse;
+  left: 100vw;
+}
+
+@keyframes slide-ltr {
+  0% {
+    left: -300px;
+  }
+  100% {
+    left: 0;
+  }
+}
+@keyframes slide-rtl {
+  0% {
+    left: 100vw;
+  }
+  100% {
+    left: calc(100vw - 300px);
+  }
 }
 
 .topbar {
