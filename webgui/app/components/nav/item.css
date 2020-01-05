@@ -43,7 +43,11 @@
   left: 5rem;
   text-align: center;
 }
+[dir=rtl] .badge {
+  left: unset;
+  right: 5rem;
+}
 
 .description {
-  margin-left: 2rem;
+  margin-inline-start: 2rem;
 }
