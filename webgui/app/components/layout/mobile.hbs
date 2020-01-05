@@ -1,20 +1,20 @@
 <div local-class="root">
   <div aria-hidden="true" local-class="topbar">
-      <button {{on "click" (perform this.slideNavIn)}}>
-        {{fa-icon "bars"}}
-      </button>
-      <button {{on "click" (perform this.slideLogIn)}}>
-        {{fa-icon "history"}}
-      </button>
+    <button {{on "click" (perform this.slideNavIn)}}>
+      {{fa-icon "bars"}}
+    </button>
+    <button {{on "click" (perform this.slideLogIn)}}>
+      {{fa-icon "history"}}
+    </button>
   </div>
   {{#if showNavOverlay}}
-  <Layout::SlideNav local-class="nav" @showNav={{this.showNav}} @slideNavOut={{this.slideNavOut}}  />
+    <Layout::SlideNav local-class="nav" @showNav={{this.showNav}} @slideNavOut={{this.slideNavOut}}  />
   {{/if}}
   {{#if showLogOverlay}}
-  <Layout::SlideLog local-class="log" @showLog={{this.showLog}} @slideLogOut={{this.slideLogOut}} />
+    <Layout::SlideLog local-class="log" @showLog={{this.showLog}} @slideLogOut={{this.slideLogOut}} />
   {{/if}}
   {{#if showShadowOverlay}}
-  <div local-class="shadow" {{on "click" (perform this.slideOut)}}></div>
+    <div local-class="shadow" {{on "click" (perform this.slideOut)}}></div>
   {{/if}}
   <main local-class="main">{{yield}}</main>
 </div>
