@@ -55,5 +55,5 @@
   margin: 0 1rem;
 }
 [dir=rtl] .topbar button {
-  transform: rotate(180deg);
+  transform: scale(-1, 1);
 }
