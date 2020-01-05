@@ -13,3 +13,14 @@
   color: var(--q-color-inverse);
   margin: 0 1rem;
 }
+
+.shadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000000;
+  opacity: 50%;
+  z-index: 5;
+}

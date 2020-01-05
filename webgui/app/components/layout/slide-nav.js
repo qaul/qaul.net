@@ -3,10 +3,10 @@ import { tracked } from '@glimmer/tracking';
 import { action } from "@ember/object";
 
 
-export default class SlideLog extends Component {
+export default class SlideNav extends Component {
 
   @action
   slideOut() {
-    this.args.slideLogOut();
+    this.args.slideNavOut();
   }
 }
