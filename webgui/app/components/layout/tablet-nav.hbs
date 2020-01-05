@@ -2,12 +2,12 @@
   <div aria-hidden="true" local-class="topbar-nav {{if fakeIncomingOverlay "increase"}} {{if this.showAll "showall"}}">
     {{#if showExtendNavButton}}
       <button {{on "click" (perform this.showNavigation)}}>
-        {{fa-icon "arrow-right"}}
+        {{fa-icon "angle-double-right"}}
       </button>
     {{/if}}
     {{#if showShrinkNavButton}}
       <button {{on "click" (perform this.hideNavigation)}}>
-        {{fa-icon "arrow-left"}}
+        {{fa-icon "angle-double-left"}}
       </button>
     {{/if}}
   </div>

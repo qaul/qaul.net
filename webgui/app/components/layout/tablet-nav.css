@@ -29,13 +29,21 @@
   z-index: -1;
   transform: translateX(0);
 }
-.nav-fake-overflow.in {
+[dir=ltr] .nav-fake-overflow.in {
   left: calc(nav-small-width - 300px);
-  animation: flowin-nav 0.8s;
+  animation: flowin-nav-ltr 0.8s;
 }
-.nav-fake-overflow.out {
-  left: calc(nav-small-width);
-  /*animation: flowout-nav 0.8s;*/
+[dir=ltr] .nav-fake-overflow.out {
+  left: 0;
+  /*animation: flowin-nav-ltr 0.8s reverse;*/
+}
+[dir=rtl] .nav-fake-overflow.in {
+  left: calc(100% - nav-small-width);
+  animation: flowin-nav-rtl 0.8s;
+}
+[dir=rtl] .nav-fake-overflow.out {
+  left: calc(100% - 300px);
+  /*animation: flowin-nav-rtl 0.8s reverse;*/
 }
 
 .topbar-nav {
@@ -45,45 +53,56 @@
   border-style: solid;
   border-width: 0;
   height: topbar-height;
-  left: calc(nav-small-width - 300px);
   width: 300px;
   padding-inline-start: calc(300px - nav-small-width);
   box-sizing: border-box;
   display: flex;
   justify-content: flex-start;
 }
+[dir="ltr"] .topbar-nav {
+  left: calc(nav-small-width - 300px);
+  border-right-width: 1px;
+}
+[dir="rtl"] .topbar-nav {
+  left: calc(100% - nav-small-width);
+  border-left-width: 1px;
+}
+[dir=ltr] .topbar-nav.increase {
+  animation: flowin-nav-ltr 0.8s;
+}
+[dir=rtl] .topbar-nav.increase {
+  animation: flowin-nav-rtl 0.8s;
+}
+
 .topbar-nav button {
   color: var(--q-color-inverse);
   margin: 0 1rem;
 }
 
-.topbar-nav.increase {
-  animation: flowin-nav 0.8s;
-}
-
 .topbar-nav.showall {
-  transform: translateX(calc(300px - nav-small-width));
   justify-content: flex-end;
 }
+[dir=ltr] .topbar-nav.showall {
+  transform: translateX(calc(300px - nav-small-width));
+}
+[dir=rtl] .topbar-nav.showall {
+  transform: translateX(calc(nav-small-width - 300px));
+}
 
-[dir="ltr"] .topbar-nav { border-right-width: 1px; }
-[dir="rtl"] .topbar-nav { border-left-width: 1px; }
 
-@keyframes flowin-nav {
+@keyframes flowin-nav-ltr {
   from {
     transform: translateX(0);
   }
-
   to {
     transform: translateX(calc(300px - nav-small-width));
   }
 }
 
-@keyframes flowout-nav {
+@keyframes flowin-nav-rtl {
   from {
     transform: translateX(0);
   }
-
   to {
     transform: translateX(calc(nav-small-width - 300px));
   }
