@@ -3,7 +3,7 @@
 .log {
   width: 300px;
   height: 100vh;
-  background-color: var(--q-bg);
+  background-color: var(--q-nav-bg);
   position: absolute;
   top: 0;
   left: 100vw;
@@ -51,6 +51,12 @@
   display: flex;
   justify-content: flex-start;
 }
+[dir=ltr] .topbar {
+  border-left: 1px solid var(--q-a-hover);
+}
+[dir=rtl] .topbar {
+  border-right: 1px solid var(--q-a-hover);
+}
 .topbar button {
   color: var(--q-color-inverse);
   margin: 0 1rem;
@@ -58,3 +64,4 @@
 [dir=rtl] .topbar button {
   transform: scale(-1, 1);
 }
+

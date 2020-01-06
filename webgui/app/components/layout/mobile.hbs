@@ -11,7 +11,7 @@
     <Layout::SlideNav local-class="nav" @showNav={{this.showNav}} @slideNavOut={{this.slideNavOut}}  />
   {{/if}}
   {{#if showLogOverlay}}
-    <Layout::SlideLog local-class="log" @showLog={{this.showLog}} @slideLogOut={{this.slideLogOut}} />
+    <Layout::SlideLog @showLog={{this.showLog}} @slideLogOut={{this.slideLogOut}} />
   {{/if}}
   {{#if showShadowOverlay}}
     <div local-class="shadow" {{on "click" (perform this.slideOut)}}></div>
