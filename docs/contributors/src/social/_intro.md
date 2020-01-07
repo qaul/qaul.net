@@ -8,14 +8,14 @@ lives easier.
 
 ## Communication
 
-The qaul.net projet uses a [zulip] as development and social chat. Feel free to drop by!
+The qaul.net projet uses [IRC] as development and social chat. Feel free to drop by!
 
 We also have an [announcement mailing list], which is very low volume.
 
 If you don't want to or can't use zulip, we also have a [community mailing list], which is mixed volume.
 You can post questions there, show off your projects using `libqaul` or submit patches to the project!
 
-[zulip]: https://qaul.zulipchat.com
+[IRC]: https://webchat.freenode.net/#qaul.net
 [announcement mailing list]: https://lists.sr.ht/~qaul/announcements
 [community mailing list]: https://lists.sr.ht/~qaul/community
 

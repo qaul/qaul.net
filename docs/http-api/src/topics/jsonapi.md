@@ -23,7 +23,7 @@ the server returns this when the client specifies any media type parameters with
 `Content-Type` header
 
 ### No Acceptable Type
-**Status:** 416 _Not Acceptable_
+**Status:** 406 _Not Acceptable_
 
 The client's `Accept` header contained a JSON:API media type and all the instances
 of that media type are modified with media type parameters. This server returns this

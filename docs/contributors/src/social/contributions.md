@@ -2,8 +2,10 @@
 
 First of all: you're cool! 😎
 
-Development of qaul.net happens mostly on [github](https://github.com/qaul)
-with an open development & support chat on [zulip](https://qaul.zulipchat.com).
+Development of qaul.net happens mostly on
+[Open Communication](https://git.open-communication.net/qaul) with an
+open development & support chat on
+[qaul.net IRC channel](https://webchat.freenode.net/#qaul.net).
 If you have any questions getting started, please come by!
 
 ## Submitting a PR
@@ -21,7 +23,8 @@ If you can't contribute via github (for whatever reason),
 you're very welcome to submit your patch via e-mail.
 
 The easiest way of doing this is to configure `git send-email`.
-Patches should be submitted to the community mailing list at [~qaul/community@lists.sr.ht](mailto:~qaul/community@lists.sr.ht)
+Patches should be submitted to the community mailing list at
+[~qaul/community@lists.sr.ht](mailto:~qaul/community@lists.sr.ht)
 
 **Manually**
 
