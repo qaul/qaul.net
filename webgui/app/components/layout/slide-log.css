@@ -1,4 +1,5 @@
 @value topbar-height from './tablet';
+@value tablet-max from './tablet';
 
 .log {
   width: 300px;
@@ -65,3 +66,15 @@
   transform: scale(-1, 1);
 }
 
+
+@media only screen and (min-width: tablet-max) {
+  .log {
+    position: initial;
+    top: auto;
+    left: auto;
+  }
+
+  .topbar button {
+    display: none;
+  }
+}

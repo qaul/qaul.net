@@ -1,16 +1,51 @@
 @value topbar-height: 3rem;
 @value nav-small-width: 8rem;
+@value nav-width: 300px;
+@value log-width: 300px;
+@value mobile-max: 768px;
+@value tablet-max: 950px;
+@value tablet2-max: 1200px;
+
 
 .root {
   display: grid;
-  grid-template:
-    "nav topbar" topbar-height
-    "nav main" minmax(calc(100vh - topbar-height), 1fr)
-    / nav-small-width 1fr
 }
+
+@media only screen and (max-width: tablet-max) {
+  .root {
+    grid-template-columns: nav-small-width calc(100% - nav-small-width);
+    grid-template-rows: topbar-height auto;
+    grid-template-areas:
+      "nav topbar"
+      "nav main";
+    justify-content: stretch;
+  }
+}
+
+@media only screen and (min-width: tablet-max) {
+  .root {
+    grid-template-columns: nav-small-width auto log-width;
+    grid-template-rows: topbar-height auto;
+    grid-template-areas:
+      "nav topbar log"
+      "nav main   log";
+    justify-content: stretch;
+  }
+  .topbar-main button {
+    display: none;
+  }
+}
+
+
 
 .nav {
   grid-area: nav;
+}
+.log {
+  grid-area: log;
+}
+.main {
+  grid-area: main;
 }
 
 .topbar {
