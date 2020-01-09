@@ -1,12 +1,11 @@
 //! `netmod` is a network module abstraction for `RATMAN`
 //!
-//! It provides a small interface to interact with endpoints
-//! (send/ receive frames) and basic data frame definitions.
+//! It provides a small interface to interact with endpoints (send/
+//! receive frames) and basic data frame definitions.
 //!
-//! The interface itself makes no assumption about underlying
-//! address spacing or resend behaviour.
-//! Using `netmod` as a library allows you to write
-//! RATMAN-compatible network adapters.
+//! The interface itself makes no assumption about underlying address
+//! spacing or resend behaviour.  Using `netmod` as a library allows
+//! you to write RATMAN-compatible network adapters.
 //!
 //! ## Frames, Sequences and Signatures
 //!
@@ -48,12 +47,12 @@
 mod endpoint;
 mod frame;
 mod seq;
-// mod payload;
 mod result;
+
+pub mod capi;
 
 pub use endpoint::Endpoint;
 pub use frame::{Frame, Recipient};
 pub use seq::{SeqId, Sequence};
 
-// pub use payload::Payload;
 pub use result::{Error, Result};
