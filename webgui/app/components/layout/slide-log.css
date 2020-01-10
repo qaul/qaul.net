@@ -5,7 +5,7 @@
   width: 300px;
   height: 100vh;
   background-color: var(--q-nav-bg);
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 100vw;
   z-index: 100;
@@ -44,25 +44,24 @@
   }
 }
 
-.topbar {
-  composes: topbar from './tablet';
+.topbar-log {
   height: topbar-height;
   width: 100%;
   background-color: var(--q-theme-strong);
   display: flex;
   justify-content: flex-start;
 }
-[dir=ltr] .topbar {
+[dir=ltr] .topbar-log {
   border-left: 1px solid var(--q-a-hover);
 }
-[dir=rtl] .topbar {
+[dir=rtl] .topbar-log {
   border-right: 1px solid var(--q-a-hover);
 }
-.topbar button {
+.topbar-log button {
   color: var(--q-color-inverse);
   margin: 0 1rem;
 }
-[dir=rtl] .topbar button {
+[dir=rtl] .topbar-log button {
   transform: scale(-1, 1);
 }
 
@@ -74,7 +73,7 @@
     left: auto;
   }
 
-  .topbar button {
+  .topbar-log button {
     display: none;
   }
 }

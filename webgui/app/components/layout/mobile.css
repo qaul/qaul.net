@@ -1,15 +1,15 @@
 @value topbar-height from './tablet';
 
 .topbar {
-  composes: topbar from './tablet';
   position: fixed;
   width: 100%;
   height: topbar-height;
   top: 0;
   display: flex;
   justify-content: space-between;
+  background-color: var(--q-theme-strong);
 }
-.topbar-nav button {
+.topbar button {
   color: var(--q-color-inverse);
   margin: 0 1rem;
 }
@@ -23,4 +23,8 @@
   background-color: #000000;
   opacity: 50%;
   z-index: 5;
+}
+
+.main {
+  margin-top: topbar-height;
 }

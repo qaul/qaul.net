@@ -44,11 +44,12 @@
 }
 
 .topbar {
-  composes: topbar from './tablet';
   height: topbar-height;
+  background-color: var(--q-theme-strong);
   width: 100%;
   display: flex;
   justify-content: flex-end;
+  border-bottom: 1px solid var(--q-bg);
 }
 .topbar button {
   color: var(--q-color-inverse);

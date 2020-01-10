@@ -40,19 +40,25 @@
 
 .nav {
   grid-area: nav;
+  width: nav-small-width;
+  position: fixed;
 }
 .log {
   grid-area: log;
+  position: fixed;
 }
 .main {
   grid-area: main;
 }
 
-.topbar {
+.topbar-main {
   grid-area: topbar;
   background: var(--q-theme-strong);
   display: flex;
   justify-content: flex-end;
+  position: fixed;
+  width: 100%;
+  height: topbar-height;
 }
 .topbar button {
   color: var(--q-color-inverse);
