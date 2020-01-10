@@ -37,15 +37,19 @@
   font-weight: bolder;
   border-radius: 20px;
   padding: 3px;
-  border: 2px solid white;
   font-size: .8rem;
-  top: 0.25rem;
-  left: 5rem;
+  top: 0.50rem;
+  left: 5.25rem;
+  min-width: 1.5em;
   text-align: center;
 }
 [dir=rtl] .badge {
   left: unset;
   right: 5rem;
+}
+.nav-item:global(.active) .badge {
+  background: var(--q-color-inverse);
+  color: var(--q-nav-bg-active);
 }
 
 .description {
