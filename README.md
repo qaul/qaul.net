@@ -54,8 +54,20 @@ Documentation is avaliable [here](https://docs.qaul.net).
 
 ## License
 
-qaul.net is free and open source software licensed under the
-[GNU Affero General Public License version 3 or later](licenses/gpl-3.0.md).
+qaul.net is free and open source software licensed under the [GNU
+Affero General Public License version 3 or
+later](licenses/gpl-3.0.md).
 
-To see all external code's licenses used in this project please 
-visit the [`licenses` directory](licenses).
+**Additional Permissions:** For Submission to the Apple App Store:
+Provided that you are otherwise in compliance with the AGPLv3 for each
+covered work you convey (including without limitation making the
+Corresponding Source available in compliance with Section 6 of the
+AGPLv3), the qaul.net developers also grant you the additional
+permission to convey through the Apple App Store non-source executable
+versions of the Program as incorporated into each applicable covered
+work as Executable Versions only under the Mozilla Public License
+version 2.0.
+
+A copy of both the AGPL-3.0 and MPL-2.0 license texts are included in
+this repository, along other external licenses for third-party code,
+and can be found in the [licenses](licenses) directory.
