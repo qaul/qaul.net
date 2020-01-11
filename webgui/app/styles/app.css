@@ -31,7 +31,7 @@ a {
 }
 a:hover {
   text-decoration:underline;
-  color:var(--q-hover);
+  color:var(--q-a-hover);
 }
 img {
 	border:none;
@@ -61,4 +61,8 @@ button {
   padding: 0;
   border: none;
   background: none;
+  color: var(--q-a);
+}
+button:hover {
+  color: var(--q-a-hover);
 }

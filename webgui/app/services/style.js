@@ -17,7 +17,7 @@ light['q-color-inverse'] = '#fff';
 
 /* hyperlinks */
 light['q-a'] = '#6399cc';
-light['q-a-hover'] = '#6399cc'; /* hover when there is underlining */
+light['q-a-hover'] = '#2d6dad'; /* hover when there is underlining */
 light['q-a-hover-nounderline'] = '#000'; /* hover when there is no underlining */
 
 /* user availability */
@@ -60,7 +60,7 @@ dark['q-color-title'] = '#ddd';
 
   /* hyperlinks */
 dark['q-a'] = '#6399cc';
-dark['q-a-hover'] = '#6399cc'; /* hover when there is underlining */
+dark['q-a-hover'] = '#73b1ef'; /* hover when there is underlining */
 dark['q-a-hover-nounderline'] = '#eee'; /* hover when there is no underlining */
 
   /* user availability */
