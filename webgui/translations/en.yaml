@@ -10,7 +10,8 @@ info:
   howto: How to
   debug: Debugging Information
 nav:
-  messenger: Messages
+  feed: Feed
+  messenger: Messenger
   users: Users
   files: File Sharing
   settings: Settings

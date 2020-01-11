@@ -10,6 +10,7 @@ info:
   howto: How to
   debug: Debugging Information
 nav:
+  feed: Feed
   messenger: Messages
   users: Users
   files: File Sharing

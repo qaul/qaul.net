@@ -7,6 +7,9 @@
   position: relative;
   box-sizing: border-box;
 }
+.nav-item:first-child {
+  border-top: 1px solid var(--q-nav-border);
+}
 
 .nav-item:hover {
   background-color: var(--q-nav-bg-hover);

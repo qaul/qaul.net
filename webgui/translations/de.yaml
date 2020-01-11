@@ -10,6 +10,7 @@ info:
   howto: Nutzer*innenanleitung
   debug: Debugging Informationen
 nav:
+  feed: Feed
   messenger: Mitteilungen
   users: Kontakte
   files: Dateien
