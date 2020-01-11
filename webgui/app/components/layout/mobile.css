@@ -1,17 +1,16 @@
-@value topbar-height from './tablet';
+@value topbar-height from './layout-global.css';
 
-.topbar {
+.root {
+  composes: root from './layout-global.css';
+}
+
+.topbar-mobile {
   position: fixed;
   width: 100%;
-  height: topbar-height;
   top: 0;
   display: flex;
   justify-content: space-between;
   background-color: var(--q-theme-strong);
-}
-.topbar button {
-  color: var(--q-color-inverse);
-  margin: 0 1rem;
 }
 
 .shadow {
@@ -20,11 +19,12 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #000000;
+  background-color: var(--q-color);
   opacity: 50%;
   z-index: 5;
 }
 
 .main {
-  margin-top: topbar-height;
+  composes: main from './layout-global.css';
+  margin-top: calc(topbar-height);
 }

@@ -1,8 +1,9 @@
-@value topbar-height from './tablet';
-@value tablet-max from './tablet';
+@value log-width from './layout-global.css';
+@value tablet-max from './layout-global.css';
+
 
 .log {
-  width: 300px;
+  width: log-width;
   height: 100vh;
   background-color: var(--q-nav-bg);
   position: fixed;
@@ -11,20 +12,20 @@
   z-index: 100;
 }
 .log.show {
-  animation: slide-ltr 0.8s ease-out;
-  left: calc(100vw - 300px);
+  animation: slide-ltr 0.5s ease-out;
+  left: calc(100vw - log-width);
 }
 .log.show.out, .log.out {
-  animation: slide-out-ltr 0.8s ease-out reverse;
+  animation: slide-out-ltr 0.5s ease-out reverse;
   left: 100vw;
 }
 [dir="rtl"] .log.show {
-  animation: slide-rtl 0.8s ease-out;
+  animation: slide-rtl 0.5s ease-out;
   left: 0;
 }
 [dir="rtl"] .log.show.out {
-  animation: slide-rtl 0.8s ease-out reverse;
-  left: -300px;
+  animation: slide-rtl 0.5s ease-out reverse;
+  left: calc(log-width * -1);
 }
 
 @keyframes slide-ltr {
@@ -32,12 +33,12 @@
     left: 100vw;
   }
   100% {
-    left: calc(100vw - 300px);
+    left: calc(100vw - log-width);
   }
 }
 @keyframes slide-rtl {
   0% {
-    left: -300px;
+    left: calc(log-width * -1);
   }
   100% {
     left: 0;
@@ -45,7 +46,6 @@
 }
 
 .topbar-log {
-  height: topbar-height;
   width: 100%;
   background-color: var(--q-theme-strong);
   display: flex;
@@ -57,20 +57,16 @@
 [dir=rtl] .topbar-log {
   border-right: 1px solid var(--q-a-hover);
 }
-.topbar-log button {
-  color: var(--q-color-inverse);
-  margin: 0 1rem;
-}
-[dir=rtl] .topbar-log button {
-  transform: scale(-1, 1);
-}
 
 
 @media only screen and (min-width: tablet-max) {
   .log {
     position: initial;
     top: auto;
-    left: auto;
+    left: calc(100% - log-width);
+  }
+  [dir=rtl] .log {
+    left: 0;
   }
 
   .topbar-log button {

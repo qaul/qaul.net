@@ -13,7 +13,7 @@ export default class RootComponent extends Component {
   * showNavigation() {
     this.showExtendNavButton = false;
     this.fakeIncomingOverlay = true;
-    yield timeout(800);
+    yield timeout(500);
     this.fakeIncomingOverlay = false;
     this.showAll = true;
     this.showShrinkNavButton = true;
@@ -24,7 +24,7 @@ export default class RootComponent extends Component {
     this.showShrinkNavButton = false;
     this.showAll = false;
     this.fakeOutgoingOverlay = true;
-    yield timeout(800);
+    yield timeout(500);
     this.fakeIncomingOverlay = false;
     this.showExtendNavButton = true;
   }

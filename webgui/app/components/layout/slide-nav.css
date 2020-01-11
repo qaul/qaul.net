@@ -1,34 +1,35 @@
-@value topbar-height from './tablet';
+@value nav-width from './layout-global.css';
+@value topbar-height from './layout-global.css';
 
 .nav {
   background-color: var(--q-bg);
-  width: 300px;
+  width: nav-width;
   height: 100vh;
   z-index: 30;
   position: absolute;
   top: 0;
-  left: -300px;
+  left: calc(nav-width * -1);
 }
 .nav.show {
-  animation: slide-ltr 0.8s ease-out;
+  animation: slide-ltr 0.5s ease-out;
   left: 0;
 }
 .nav.show.out, .nav.out {
-  animation: slide-ltr 0.8s ease-out reverse;
-  left: -300px;
+  animation: slide-ltr 0.5s ease-out reverse;
+  left: calc(nav-width * -1);
 }
 [dir="rtl"] .nav.show {
-  animation: slide-rtl 0.8s ease-out;
-  left: calc(100vw - 300px);
+  animation: slide-rtl 0.5s ease-out;
+  left: calc(100vw - nav-width);
 }
 [dir="rtl"] .nav.show.out {
-  animation: slide-rtl 0.8s ease-out reverse;
+  animation: slide-rtl 0.5s ease-out reverse;
   left: 100vw;
 }
 
 @keyframes slide-ltr {
   0% {
-    left: -300px;
+    left: calc(nav-width * -1);
   }
   100% {
     left: 0;
@@ -39,22 +40,13 @@
     left: 100vw;
   }
   100% {
-    left: calc(100vw - 300px);
+    left: calc(100vw - nav-width);
   }
 }
 
-.topbar {
-  height: topbar-height;
-  background-color: var(--q-theme-strong);
+.topbar-nav {
   width: 100%;
   display: flex;
   justify-content: flex-end;
   border-bottom: 1px solid var(--q-bg);
-}
-.topbar button {
-  color: var(--q-color-inverse);
-  margin: 0 1rem;
-}
-[dir=rtl] .topbar button {
-  transform: scale(-1, 1);
 }

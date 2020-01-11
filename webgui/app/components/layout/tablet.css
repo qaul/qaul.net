@@ -1,13 +1,12 @@
-@value topbar-height: 3rem;
-@value nav-small-width: 8rem;
-@value nav-width: 300px;
-@value log-width: 300px;
-@value mobile-max: 768px;
-@value tablet-max: 950px;
-@value tablet2-max: 1200px;
+@value topbar-height from './layout-global.css';
+@value nav-small-width from './layout-global.css';
+@value nav-width from './layout-global.css';
+@value log-width from './layout-global.css';
+@value tablet-max from './layout-global.css';
 
 
 .root {
+  composes: root from './layout-global.css';
   display: grid;
 }
 
@@ -36,8 +35,6 @@
   }
 }
 
-
-
 .nav {
   grid-area: nav;
   width: nav-small-width;
@@ -48,22 +45,15 @@
   position: fixed;
 }
 .main {
+  composes: main from './layout-global.css';
   grid-area: main;
+  align-self: start;
 }
 
 .topbar-main {
   grid-area: topbar;
-  background: var(--q-theme-strong);
   display: flex;
   justify-content: flex-end;
   position: fixed;
   width: 100%;
-  height: topbar-height;
-}
-.topbar button {
-  color: var(--q-color-inverse);
-  margin: 0 1rem;
-}
-[dir=rtl] .topbar button {
-  transform: scale(-1, 1);
 }
