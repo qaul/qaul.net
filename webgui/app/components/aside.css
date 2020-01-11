@@ -32,6 +32,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   font-size: x-small;
+  color: var(--q-color);
 }
 
 
