@@ -1,26 +1,9 @@
-:global(#settings) {
-    padding: 1rem;
+h1 {
+  margin-top: 0;
 }
-
-.user-icon {
-    float:left;
-}
-.user-name {
-    float:left;
-    font-weight: bold;
-    font-size: 3rem;
-    margin-right: 1rem;
-}
-.edit {
-    /*float:right;*/
-    padding:1rem;
-}
-
-
 
 /* selection panel */
 .panel {
-	/*clear: both;*/
     margin: 3rem 0;
 }
 .panel .item.name {
