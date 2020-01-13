@@ -100,6 +100,11 @@ impl BeforeMiddleware for JsonApi {
             return Err(JsonApiError::IoError(e).into());
         }
 
+        // if the body was empty we shouldn't try to parse a document
+        if buff.len() == 0 {
+            return Ok(());
+        }
+
         // now we try to parse the body to see if it contains a valid JSON:API request
         // if it doesn't we'll return 400 BAD REQUEST
         let doc: Document = match serde_json::from_slice(&buff) {
