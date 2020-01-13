@@ -742,6 +742,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "qaul-http-test"
+version = "0.1.0"
+dependencies = [
+ "libqaul 0.1.0",
+ "libqaul-http 0.1.0",
+ "qaul-messaging 0.1.0",
+]
+
+[[package]]
 name = "qaul-linux"
 version = "0.1.0"
 dependencies = [
