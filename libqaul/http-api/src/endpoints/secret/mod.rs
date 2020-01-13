@@ -16,7 +16,7 @@ pub fn route(router: &mut Router) {
     );
     router.route(
         Method::Post,
-        "/api/secrets/",
+        "/api/secrets",
         secret_create,
         "secret_create",
     );
