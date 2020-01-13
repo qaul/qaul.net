@@ -7,6 +7,7 @@
 - [Servers & Web Services](./web-services/_intro.md)
 - [Technical](./technical/_intro.md)
     - [Beta](./technical/beta/_intro.md)
+    - [Challenges](./technical/beta/challenges.md)
     - [Writing Services](./technical/services/_intro.md)
     - [Routing Layer](./technical/routing/_intro.md)
         - [Routing Table](./technical/routing/routing-table.md)
