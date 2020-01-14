@@ -79,9 +79,13 @@ contact data, and even encrypted file storage at rest.
 The API itself is available as an async Rust library and ffi C
 interface, with some optional IPC add-ons:
 
-- [http/json:api]() - this is how the qaul.net GUI is hooked up
-- [socket-ipc]() - using a capt'n proto ipc protocol over unix sockets
-- [android-ipc]() - implementing an Android specific ipc interface
+- [http/json:api] - this is how the qaul.net GUI is hooked up
+- [socket-ipc] - using a cap'n proto ipc protocol over unix sockets
+- [android-ipc] - implementing an Android specific ipc interface
+
+[http/json:api]: https://docs.qaul.net/http-api/
+[socket-ipc]: ./libqaul/ipc/socket.html
+[android-ipc]: ./libqaul/ipc/android.html
 
 The idea behind the variety of IPC interfaces is that your application
 can bundle it's own copy of libqaul, to provide the network backends
