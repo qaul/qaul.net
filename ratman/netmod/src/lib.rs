@@ -49,8 +49,6 @@ mod frame;
 mod seq;
 mod result;
 
-pub mod capi;
-
 pub use endpoint::Endpoint;
 pub use frame::{Frame, Recipient};
 pub use seq::{SeqId, Sequence};
