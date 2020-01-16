@@ -50,7 +50,7 @@ mod seq;
 mod result;
 
 pub use endpoint::Endpoint;
-pub use frame::{Frame, Recipient};
+pub use frame::{Frame, Recipient, Target};
 pub use seq::{SeqId, Sequence};
 
 pub use result::{Error, Result};

@@ -1,6 +1,6 @@
 //! Endpoint abstraction module
 
-use crate::{Frame, Result};
+use crate::{Frame, Result, Target};
 use async_trait::async_trait;
 
 /// A `RATMAN` `netmod` endpoint describes a networking interface
@@ -44,9 +44,9 @@ pub trait Endpoint {
     /// Send errors _can_ be encoded in the return value, and so if
     /// physically a `Frame` is too large for the transport layer,
     /// using the error value `Error::FrameTooLarge` is permitted.
-    async fn send(&mut self, frame: Frame, target: i16) -> Result<()>;
+    async fn send(&mut self, frame: Frame, target: Target) -> Result<()>;
 
     /// Get next available Frame from the network, or an error explaining why that's
     /// not a possibility.
-    async fn next(&mut self) -> Result<(Frame, i16)>;
+    async fn next(&mut self) -> Result<(Frame, Target)>;
 }
