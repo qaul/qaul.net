@@ -25,6 +25,7 @@ members = [
     # Available netmod drivers
     "netmod-mem",
     "netmod-udp",
+    "netmod-wd",
 
     # Client specific targets
     "clients/linux",

@@ -1,0 +1,15 @@
+[package]
+name = "netmod-wd"
+description = "A native network driver that binds wifi direct"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+conjoiner = { version = "1.2", package = "conjoiner-engine" }
+netmod = { path = "../ratman/netmod", package = "ratman-netmod" }
+async-std = { version = "1.0", features = ["unstable"] }
+async-trait = "0.1"
