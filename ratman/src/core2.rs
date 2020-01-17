@@ -46,13 +46,13 @@ impl Worker {
                 let ifs = ifs.lock().unwrap();
                 let epm = ifs.get(&id.0).unwrap();
                 let mut ep = epm.lock().unwrap();
-                ep.send(msg, id.1).unwrap();
+                ep.send(msg, id.1);
             }
 
             // Poll all available interfaces
             ifs.lock().unwrap().iter().for_each(|(id, epm)| {
                 let mut ep = epm.lock().unwrap();
-                if let Ok(Some((f, target))) = ep.poll() {
+                if let Ok(Some((f, target))) = ep.() {
                     tx.send(Envelope(Target(*id, target), f)).unwrap();
                 }
             });
