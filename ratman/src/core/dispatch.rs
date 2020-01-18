@@ -2,6 +2,7 @@
 
 use crate::core::{DriverMap, RouteTable};
 use async_std::sync::Arc;
+use netmod::{Frame, Target};
 
 pub(crate) struct Dispatch {
     routes: Arc<RouteTable>,
@@ -14,5 +15,8 @@ impl Dispatch {
     }
 
     /// Dispatch a single frame across the network
-    pub(crate) async fn send() {}
+    pub(crate) async fn send(&self, frame: Frame, target: Target) {}
+
+    /// Reflood a message to the network, except the previous interface
+    pub(crate) async fn reflood(&self, frame: Frame, target: Target) {}
 }

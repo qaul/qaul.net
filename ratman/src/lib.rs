@@ -32,10 +32,27 @@ mod core;
 /// journal keeping, re-transmissions of non-local frames, as well as
 /// the discovery protocol.
 pub struct Router {
-    // core: Arc<Core>,
+    core: Core,
 // #[allow(unused)]
 // journal: Arc<Journal>,
 }
+
+use crate::core::Core;
+
+impl Router {
+    pub fn new() -> Self {
+        Self { core: Core::init() }
+    }
+
+    pub fn run(&self) {
+        self.core.run();
+    }
+
+    pub async fn send(&self) {
+        self.core.send();
+    }
+}
+
 
 // impl Router {
 //     /// Create a new `Router` with internal mutability

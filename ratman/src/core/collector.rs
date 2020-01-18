@@ -1,4 +1,5 @@
 use async_std::{sync::Arc, task};
+use netmod::Frame;
 
 /// Local frame collector
 pub(crate) struct Collector {
@@ -16,5 +17,10 @@ impl Collector {
     /// Dispatches a long-running task to run the collection logic
     pub(crate) fn run(self: Arc<Self>) {
         task::spawn(async move { loop {} });
+    }
+
+    /// Enqueue a frame to be desequenced
+    pub(crate) async fn queue(&self, f: Frame) {
+
     }
 }

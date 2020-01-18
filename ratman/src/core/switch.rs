@@ -1,7 +1,7 @@
 use async_std::{sync::Arc, task};
-use netmod::{Frame, Target};
+use netmod::Recipient;
 
-use crate::core::{Collector, Dispatch, DriverMap, Journal, RouteTable};
+use crate::core::{Collector, Dispatch, DriverMap, Journal, RouteTable, RouteType};
 
 /// A frame switch inside Ratman to route packets and signals
 ///
@@ -40,19 +40,38 @@ impl Switch {
 
     /// Dispatches a long-running task to run the switching logic
     pub(crate) fn run(self: Arc<Self>) {
-        task::spawn(async move {
-            loop {
-                Self::run_inner(&self);
-            }
-        });
+        let _: Vec<_> = (0..self.drivers.len())
+            .into_iter()
+            .map(|i| {
+                let switch = Arc::clone(&self);
+                task::spawn(switch.run_inner(i))
+            })
+            .collect();
     }
 
-    async fn run_inner(s: &Arc<Self>) {
-        let mut g = s.drivers.inner().await;
-        g.iter_mut().for_each(|(_, ep)| {
-            task::spawn(async {
-                let (f, t) = ep.next().await.unwrap();
-            });
-        })
+    async fn run_inner(self: Arc<Self>, id: usize) {
+        let ep: &mut _ = unsafe { self.drivers.get_mut(id) };
+        loop {
+            let (f, t) = match ep.next().await {
+                Ok(f) => f,
+                _ => continue,
+            };
+
+            // Switch the traffic to the appropriate place
+            use {Recipient::*, RouteType::*};
+            match f.recipient {
+                Flood => {
+                    let seqid = f.seqid.seqid; // great names there kookie
+                    if self.journal.unique(&seqid).await {
+                        self.dispatch.reflood(f, t).await
+                    }
+                }
+                User(id) => match self.routes.reachable(id).await {
+                    Some(Local) => self.collector.queue(f).await,
+                    Some(Remote(_)) => self.dispatch.send(f, t).await,
+                    None => self.journal.queue(f).await,
+                },
+            }
+        }
     }
 }

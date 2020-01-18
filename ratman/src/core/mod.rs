@@ -15,7 +15,7 @@ pub(self) use collector::Collector;
 pub(self) use dispatch::Dispatch;
 pub(self) use drivers::DriverMap;
 pub(self) use journal::Journal;
-pub(self) use routes::RouteTable;
+pub(self) use routes::{RouteTable, RouteType};
 pub(self) use switch::Switch;
 
 use async_std::sync::Arc;
@@ -30,7 +30,6 @@ pub(crate) struct Core {
     journal: Arc<Journal>,
     routes: Arc<RouteTable>,
     switch: Arc<Switch>,
-    drivers: Arc<DriverMap>,
 }
 
 impl Core {
@@ -57,7 +56,6 @@ impl Core {
             journal,
             routes,
             switch,
-            drivers,
         }
     }
 
@@ -72,8 +70,8 @@ impl Core {
     }
 
     /// Asynchronously send a Message
-    pub(crate) async fn send() {}
+    pub(crate) async fn send(&self) {}
 
     /// Poll for the incoming Message
-    pub(crate) async fn next() {}
+    pub(crate) async fn next(&self) {}
 }
