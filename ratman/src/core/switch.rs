@@ -68,7 +68,7 @@ impl Switch {
                 }
                 User(id) => match self.routes.reachable(id).await {
                     Some(Local) => self.collector.queue(f).await,
-                    Some(Remote(_)) => self.dispatch.send(f, t).await,
+                    Some(Remote(_)) => self.dispatch.send(f).await,
                     None => self.journal.queue(f).await,
                 },
             }

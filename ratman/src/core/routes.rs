@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 
 /// A netmod endpoint ID and an endpoint target ID
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct EpTargetPair(u8, Target);
+pub(crate) struct EpTargetPair(pub(crate) u8, pub(crate) Target);
 
 /// Describes the reachability of a route
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

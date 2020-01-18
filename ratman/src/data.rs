@@ -1,26 +1,31 @@
-//! Data exchange structures for `R.A.T.M.A.N.`
-
 use identity::Identity;
 use netmod::Recipient;
 use serde::{Deserialize, Serialize};
 
+/// Cryptographic signature payload for primary payload
+///
+/// Because ratman can't assume access to an advanced keystore, the
+/// signature for a Message is not verified on this API level.  It is
+/// up to the users of the Router API to verify message payloads
+/// before parsing and trusting them.  This type variant merely
+/// provides a convenient wrapper for that to be simpler.
 pub type Signature = Vec<u8>;
 
 /// A unique, randomly generated message ID
+///
+/// The message ID is taken from the SeqId of the underlying frame
+/// sequenc, meaning that the same message will have the same ID on
+/// two separate devices.
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
 pub struct MsgId(pub [u8; 16]);
 
-/// An atomic message, handed to a `Router` to deliver
+/// An atomic message with a variable sized payload
 ///
-/// Fundamentally a message has a `sender`, `recipient`
-/// and is associated to some source, via `associator`.
-/// This field is ignored by `R.A.T.M.A.N.` and verbatim
-/// copied to the target system. It can thus be used to
-/// associate different services messages and metadata,
-/// outside of a complicated header structure.
-///
-/// A `Message` assumes that no transmission errors were made,
-/// because this is guaranteed by the `netmod` `Frame` abstraction!
+/// A message is only ever addressed to a single node, or everyone on
+/// the network.  The signature is required to be present, if a
+/// payload is.  The payload can be empty, which can be used to create
+/// a ping, or using the 16 byte MsgId as payload.  In these cases,
+/// the sigature can also be empty.
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Message {
     /// A random message ID

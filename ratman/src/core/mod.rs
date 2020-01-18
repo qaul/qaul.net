@@ -15,10 +15,12 @@ pub(self) use collector::Collector;
 pub(self) use dispatch::Dispatch;
 pub(self) use drivers::DriverMap;
 pub(self) use journal::Journal;
-pub(self) use routes::{RouteTable, RouteType};
+pub(self) use routes::{EpTargetPair, RouteTable, RouteType};
 pub(self) use switch::Switch;
 
+use crate::Message;
 use async_std::sync::Arc;
+use netmod::Endpoint;
 
 /// The Ratman routing core interface
 ///
@@ -26,10 +28,11 @@ use async_std::sync::Arc;
 /// be delivered at that time (delay-tolerance).
 pub(crate) struct Core {
     collector: Arc<Collector>,
-    dispatch: Arc<Dispatch>,
+    _dispatch: Arc<Dispatch>,
     journal: Arc<Journal>,
-    routes: Arc<RouteTable>,
+    _routes: Arc<RouteTable>,
     switch: Arc<Switch>,
+    drivers: Arc<DriverMap>,
 }
 
 impl Core {
@@ -51,11 +54,12 @@ impl Core {
         );
 
         Self {
+            _dispatch: dispatch,
+            _routes: routes,
             collector,
-            dispatch,
             journal,
-            routes,
             switch,
+            drivers,
         }
     }
 
@@ -70,8 +74,15 @@ impl Core {
     }
 
     /// Asynchronously send a Message
-    pub(crate) async fn send(&self) {}
+    pub(crate) async fn send(&self, msg: Message) {}
 
     /// Poll for the incoming Message
-    pub(crate) async fn next(&self) {}
+    pub(crate) async fn next(&self) -> Message {
+        self.collector.completed().await
+    }
+
+    /// Insert a new endpoint
+    pub(crate) fn add_ep(&self, ep: impl Endpoint + 'static + Send + Sync) {
+        unsafe { self.drivers.add(ep) };
+    }
 }

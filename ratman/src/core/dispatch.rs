@@ -1,8 +1,8 @@
 //! Asynchronous Ratman routing core
 
-use crate::core::{DriverMap, RouteTable};
+use crate::core::{DriverMap, RouteTable, EpTargetPair};
 use async_std::sync::Arc;
-use netmod::{Frame, Target};
+use netmod::{Frame, Recipient, Target};
 
 pub(crate) struct Dispatch {
     routes: Arc<RouteTable>,
@@ -15,7 +15,18 @@ impl Dispatch {
     }
 
     /// Dispatch a single frame across the network
-    pub(crate) async fn send(&self, frame: Frame, target: Target) {}
+    pub(crate) async fn send(&self, frame: Frame) {
+        let EpTargetPair(epid, trgt) = self
+            .routes
+            .resolve(match frame.recipient {
+                Recipient::User(id) => id,
+                Recipient::Flood => unreachable!(),
+            })
+            .await;
+
+        let ep: &mut _ = unsafe { self.drivers.get_mut(epid as usize) };
+        ep.send(frame, trgt).await.unwrap();
+    }
 
     /// Reflood a message to the network, except the previous interface
     pub(crate) async fn reflood(&self, frame: Frame, target: Target) {}
