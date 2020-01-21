@@ -41,7 +41,7 @@ Below will be shown the first image in my tutorial:
 
 
 [tutorials]: https://qaul.net/tutorials/
-[web site repository]: https://github.com/qaul/qaul-website/tree/master/content/tutorials
+[web site repository]: https://git.open-communication.net/qaul/website/tree/master/content/tutorials
 [markdown]: https://www.markdownguide.org/getting-started
 [tutorial overview]: https://qaul.net/tutorials/
 [pull request]: /social/contributions.html#submitting-a-pr

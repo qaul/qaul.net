@@ -18,7 +18,7 @@ There is an [own chapter] in this guide on the editing of the qaul.net web site.
 Please have a look there on how to edit and translate the web site.
 
 * Server: https://qaul.net
-* Source repository: https://github.com/qaul/qaul-website
+* Source repository: https://git.open-communication.net/qaul/website
 * Updated: by deploy script
 * Admin contact: contact@qaul.net
 
@@ -30,7 +30,7 @@ Please have a look there on how to edit and translate the web site.
 The software documentation & guides of qaul.net.
 
 * Server: https://docs.qaul.net
-* Source repository: https://github.com/qaul.net/qaul/docs/
+* Source repository: https://git.open-communication.net/qaul/qaul.net/tree/master/docs/
 * Updated: by deploy script
 * Admin contact: contact@qaul.net
 

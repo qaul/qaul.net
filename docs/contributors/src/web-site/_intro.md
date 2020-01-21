@@ -27,7 +27,7 @@ hugo version
 Clone or download the [github repository] of the web site. All needed files (templates, content, images) are in this repository.
 
 ```bash
-git clone https://github.com/qaul/qaul-website.git
+git clone https://git.open-communication.net/qaul/website.git
 ```
 
 
@@ -66,6 +66,6 @@ For translating the web site see the chapter [Translate the qaul.net Web Site](/
 [https://qaul.net]: https://qaul.net
 [qaul.net]: https://qaul.net
 [HUGO]: https://gohugo.io/
-[github repository]: https://github.com/qaul.net/qaul-website/
+[github repository]: https://git.open-communication.net/qaul/website
 [open a PR]: /social/contributions.html#submitting-a-pr
 [send us a patch]: /social/contributions.html#submitting-an-e-mail-patch

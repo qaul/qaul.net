@@ -1,4 +1,4 @@
-![http://qaul.net/](https://raw.githubusercontent.com/qaul/qaul.net/release-1.0.0/doc/qaul-net.png)
+![http://qaul.net/](https://git.open-communication.net/qaul/qaul.net/raw/release-1.0.0/doc/qaul-net.png)
 
 # qaul.net [![pipeline status](https://git.open-communication.net/qaul/qaul.net/badges/master/pipeline.svg)](https://git.open-communication.net/qaul/qaul.net/commits/master)
 
@@ -17,36 +17,39 @@ what so ever.
 
 The project is currently being re-written for a more modular and
 portable approach. The new Release will be qaul.net 2.0. Please check
-our milestones & issues to get an idea of the development plan and
-status.  If you want to get involved, please [get in
-touch][contributors-guide]!
+our [milestones] & [issues] to get an idea of the development plan and
+status. If you want to get involved, see how to [participate] and read 
+the [contributors-guide].
 
 For the latest stable release, check the [`release-1.0.0`][release]
 branch.
 
-[contributors-guide]: /contributors/social/_intro.html
-[release]: https://github.com/qaul/qaul.net/tree/release-1.0.0
+[milestones]: https://git.open-communication.net/groups/qaul/-/milestones
+[issues]: https://git.open-communication.net/qaul/qaul.net/issues
+[participate]: https://qaul.net/#participation
+[contributors-guide]: https://docs.qaul.net/contributors/
+[release]: https://git.open-communication.net/qaul/qaul.net/tree/release-1.0.0
 
 
 ## Build Instructions
 
 The project is being re-written in Rust, thus using [cargo][cargo] as
-a build system.  If you don't have Rust installed, you can get it
-[here](https://rustup.sh) or via your OS.
+a build system.  If you don't have Rust installed, you can istall it via
+[rustup.rs](https://rustup.rs) or via your OS's package manager.
 
 [cargo]: https://crates.io/
 
 
 ## Documentation
 
-Documentation is avaliable [here](https://docs.qaul.net).
+Documentation is available on [docs.qaul.net](https://docs.qaul.net).
 
 
 ## License
 
 qaul.net is free and open source software licensed under the [GNU
 Affero General Public License version 3 or
-later](licenses/gpl-3.0.md).
+later](licenses/agpl-3.0.md).
 
 **Additional Permissions:** For Submission to the Apple App Store:
 Provided that you are otherwise in compliance with the AGPLv3 for each
