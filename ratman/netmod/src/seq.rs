@@ -35,7 +35,9 @@ pub struct SeqId {
 
 /// Utility wrapping around `Vec<Frame>` with `SeqId` initialisation.
 ///
-/// This type implements a builder, which is initialised
+/// This type implements a builder, which is initialised with header
+/// data, then filled with various sliced payloads, and then made into
+/// a frame sequence, as outlined in the root netmod docs.
 pub struct Sequence {
     #[doc(hidden)]
     pub seqid: [u8; 16],
@@ -48,6 +50,7 @@ pub struct Sequence {
 }
 
 impl Sequence {
+    /// Initialise a Sequence builder
     pub fn new(sender: Identity, recp: Recipient, seqid: [u8; 16]) -> Self {
         Self {
             sender,
@@ -57,11 +60,13 @@ impl Sequence {
         }
     }
 
+    /// Add a slice of payload to the sequence set
     pub fn add(mut self, data: Vec<u8>) -> Self {
         self.data.push(data);
         self
     }
 
+    /// Consume the builder into a set of frames
     pub fn build(self) -> Vec<Frame> {
         let seqid = self.seqid;
         let sender = self.sender;
@@ -111,7 +116,7 @@ impl Sequence {
     }
 
     /// Take a set of frames and build a restored sequence from it
-    // FIXME: implement frame sequencing here!
+    // FIXME: implement frame de-sequencing here!
     pub fn restore(mut vec: Vec<Frame>) -> Self {
         let frame = vec.remove(0);
         Self {
@@ -122,18 +127,22 @@ impl Sequence {
         }
     }
 
+    /// Read the sequence ID back from the builder
     pub fn seqid(&self) -> &[u8; 16] {
         &self.seqid
     }
-    
+
+    /// Read the sender back from the builder
     pub fn sender(&self) -> Identity {
         self.sender
     }
-    
+
+    /// Read the recipient back from the builder
     pub fn recp(&self) -> Recipient {
         self.recp
     }
-    
+
+    /// Read the payload data set back from the builder
     pub fn data(&self) -> Vec<u8> {
         self.data.get(0).unwrap().clone()
     }

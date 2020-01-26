@@ -2,7 +2,7 @@ use async_std::{
     sync::{Arc, Mutex},
     task,
 };
-use netmod::{Frame, SeqId as SeqData};
+use netmod::{Sequence, Frame, SeqId as SeqData};
 use std::collections::BTreeMap;
 use crate::{Message, MsgId};
 
