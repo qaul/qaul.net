@@ -2,6 +2,7 @@
 
 mod core;
 mod data;
+pub mod clock;
 
 use crate::core::Core;
 pub use data::{Message, MsgId, Signature};
