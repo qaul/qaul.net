@@ -48,6 +48,7 @@
 //!
 //! Check the documentation for the `Clockwork` type for more details.
 
+pub mod clock;
 mod core;
 mod data;
 mod error;
@@ -60,7 +61,7 @@ pub use identity::Identity;
 pub use netmod::Endpoint;
 
 use crate::core::Core;
-use clockwork::Clockwork;
+use clock::{ClockCtrl, Tasks};
 
 /// Primary async ratman router handle
 ///
@@ -122,8 +123,8 @@ impl Router {
         Ok(())
     }
 
-    /// Register a manual clockwork timing object for internal tasks
-    pub fn clock(&self, clw: Clockwork) -> Result<()> {
+    /// Register a manual clock controller object for internal tasks
+    pub fn clock(&self, cc: ClockCtrl<Tasks>) -> Result<()> {
         Ok(())
     }
 
