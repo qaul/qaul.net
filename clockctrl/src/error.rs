@@ -14,7 +14,9 @@ pub enum Error {
     /// Set the clock type to `Stepped` but didn't provide a fence
     NoFence,
     /// No interval was provided
-    NoInterval
+    NoInterval,
+    /// The requested target has no settings attached to it
+    NoTarget,
 }
 
 impl Display for Error {
@@ -26,6 +28,7 @@ impl Display for Error {
                 Error::InvalidTime => "Provided time was invalid (probably 0)",
                 Error::NoFence => "Stepped is impossible without providing a fence",
                 Error::NoInterval => "No interval known for a clock value",
+                Error::NoTarget => "The requested target has no settings attached",
             }
         )
     }

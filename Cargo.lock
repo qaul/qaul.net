@@ -170,6 +170,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "clockctrl"
+version = "0.1.0"
+dependencies = [
+ "async-std 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "cloudabi"
 version = "0.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1022,6 +1029,7 @@ name = "ratman"
 version = "0.0.0"
 dependencies = [
  "async-std 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "clockctrl 0.1.0",
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman-identity 0.1.0",
  "ratman-netmod 0.1.0",
@@ -1042,7 +1050,6 @@ dependencies = [
 name = "ratman-netmod"
 version = "0.1.0"
 dependencies = [
- "async-std 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "async-trait 0.1.22 (registry+https://github.com/rust-lang/crates.io-index)",
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman-identity 0.1.0",

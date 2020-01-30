@@ -17,10 +17,10 @@ members = [
     "ratman/identity",
     "ratman/netmod",
 
-    # A high-level network simulator
-    # "service-sim",
-    "visn",
+    # Various utility crates
+    "clockctrl",
     "permute",
+    "visn",
 
     # Available netmod drivers
     "netmod-mem",

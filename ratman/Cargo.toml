@@ -17,3 +17,4 @@ twox-hash = "1.5"
 # Sub-components
 identity = { version = "0.1", path = "identity", package = "ratman-identity" }
 netmod = { version = "0.1", path = "netmod", package = "ratman-netmod"}
+clockctrl = { version = "0.1", path = "../clockctrl" }

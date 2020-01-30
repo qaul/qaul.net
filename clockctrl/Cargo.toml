@@ -1,0 +1,10 @@
+[package]
+name = "clockctrl"
+description = "An asynchronous framework to provide various clock stepping for reactors"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+license = "GPL-3.0-or-later"
+
+[dependencies]
+async-std = { version = "1.0", features = ["unstable"] }
