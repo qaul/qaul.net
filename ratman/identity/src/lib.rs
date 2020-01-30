@@ -1,41 +1,36 @@
-//! `RATMAN` identity management
+//! # A Ratman network identity abstraction
 //!
-//! ## Why?!
+//! Because Ratman is a userspace router with no concept of link layer
+//! identities, network IDs are chosen to be fixed size byte arrays.
+//! It's left to the implementing application to map these to some
+//! useful source of identity.  This crate also provides a hashing
+//! constructor behind the `digest` feature flag which can be used to
+//! hash a secret to derive the identity value. 
 //!
-//! Because `RATMAN` does routing based on higher-abstraction IDs
-//! that don't neccessarily map lineraly to an IP address
-//! (or because some networks might not _use_ IP addresses),
-//! we need to introduce an ID abstraction to do routing with.
+//! Whatever scheme is chosen, two principles about identity must not
+//! be violated:
 //!
-//! An ID in it's simplest form is the hash of a private key
-//! (i.e. fingerprint).
+//! 1. There are no identity collisions
+//! 2. Identities don't change mid-route
 //!
-//! This library provides two things:
+//! This crate is part of the qaul.net project.  The docs for this
+//! crate are propably lacking because currently Ratman/ libqaul are
+//! the only users of it.  If you have questions, don't hesitate to
+//! [contact us]!
 //!
-//! 1. A small serialisable datastructure that represents an ID
-//! 2. Some utility functions to _generate_ an ID based on input
-//!
-//! This input doesn't have to be the same for all users of RATMAN.
-//! In `qaul.net` we use the hash of a private key,
-//! but in your application you are welcome to use something else.
-//!
-//! As long as two principles aren't violated, RATMAN will work:
-//!
-//! 1. IDs don't collide on a network
-//! 2. IDs don't change mid-frame-transport
-//!
-//! ## License
-//!
-//! This library is part of `RATMAN` and as such licensed under the
-//! GNU General Public License 3.0 (or later).
-//! You will have received a copy of this license
-//! with the source code of this project.
+//! [contact us]: https://docs.qaul.net/contributors/social/_intro.html
 
 use serde::{Deserialize, Serialize};
 use std::fmt::{self, Debug, Display, Formatter};
 pub const ID_LEN: usize = 16;
 
-/// A RATMAN identity
+/// A Ratman network identity
+///
+/// Note: this type implements `Eq`, which is a much better way of
+/// comparing two instances of Identity information than making a
+/// string comparison.  While this might be convenient in certain API
+/// settings, we can't make the promise that the `Display`
+/// implementation will never change.
 #[derive(Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Identity([u8; ID_LEN]);
 
@@ -63,14 +58,15 @@ impl Display for Identity {
 impl Identity {
     /// Create an identity from the first 16 bytes of a vector
     ///
-    /// This function will panic, if the provided vector isn't long enough
+    /// This function will panic, if the provided vector isn't long
+    /// enough, but extra data will simply be discarded.
     pub fn truncate<'vec, V: Into<&'vec Vec<u8>>>(vec: V) -> Self {
         let vec = vec.into();
         assert!(vec.len() >= 16);
 
         Self(
             vec.into_iter()
-                .zip(0..)
+                .zip(0..16)
                 .take(ID_LEN)
                 .fold([0; ID_LEN], |mut buf, (u, i)| {
                     buf[i] = *u;
@@ -81,10 +77,14 @@ impl Identity {
 
     /// Create an identity using a digest function
     ///
-    /// This allows you to pass arbitrary length data
-    /// which will result in a precise ID length data output.
+    /// This allows you to pass arbitrary length data which will
+    /// result in a precise ID length data output.  The hash function
+    /// is the cryptographic [blake2] cipher, so it can be used to
+    /// turn secrets into identity information.
     ///
-    /// This process can cause collisions!
+    /// This function requires the `digest` feature.
+    ///
+    /// [blake2]: https://blake2.net/
     #[cfg(feature = "digest")]
     pub fn with_digest<'vec, V: Into<&'vec Vec<u8>>>(vec: V) -> Self {
         use blake2::{

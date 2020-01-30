@@ -1,7 +1,8 @@
 [package]
 name = "ratman-identity"
-description = "A small crate that provides an identity abstraction for RATMAN"
+description = "Network identity abstraction for Ratman routers and drivers"
 version = "0.1.0"
+website = "https://qaul.net"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 license = "AGPL-3.0"
@@ -13,3 +14,6 @@ digest = ["blake2"]
 serde = { version = "1.0", features = ["derive"] }
 blake2 = { version = "0.8.0", optional = true }
 hex = "0.4"
+
+[package.metadata.docs.rs]
+all-features = true
