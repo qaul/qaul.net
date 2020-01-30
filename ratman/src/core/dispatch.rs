@@ -1,6 +1,6 @@
 //! Asynchronous Ratman routing core
 
-use crate::core::{DriverMap, RouteTable, EpTargetPair};
+use crate::core::{DriverMap, EpTargetPair, RouteTable};
 use async_std::sync::Arc;
 use netmod::{Frame, Recipient, Target};
 

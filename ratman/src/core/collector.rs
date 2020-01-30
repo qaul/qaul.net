@@ -1,10 +1,10 @@
+use crate::{Message, MsgId};
 use async_std::{
     sync::{Arc, Mutex},
     task,
 };
-use netmod::{Sequence, Frame, SeqId as SeqData};
+use netmod::{Frame, SeqId as SeqData, Sequence};
 use std::collections::BTreeMap;
-use crate::{Message, MsgId};
 
 /// This module is the only one that addresses this as the seqId, and
 /// the overall SeqChain as SeqData.

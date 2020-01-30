@@ -1,7 +1,8 @@
 [package]
 name = "ratman"
-description = "A fully delay tolerant, decentralised userspace routing protocol"
+description = "A delay tolerant, journaled and distributed userspace packet router"
 license = "AGPL-3.0"
+website = "https://qaul.net"
 version = "0.0.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"

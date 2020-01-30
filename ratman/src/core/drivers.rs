@@ -1,8 +1,6 @@
 use async_std::sync::Arc;
 use netmod::Endpoint;
-use std::{
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 type Ep = dyn Endpoint + 'static + Send + Sync;
 type EpVec = Vec<Box<Ep>>;
@@ -27,7 +25,7 @@ impl DriverMap {
     pub(crate) fn len(&self) -> usize {
         self.curr.load(Ordering::Relaxed)
     }
-    
+
     /// Insert a new endpoint to the set of known endpoints
     ///
     /// This function comes with some caveats.  To avoid the overhead
