@@ -2,7 +2,7 @@
 name = "ratman-identity"
 description = "Network identity abstraction for Ratman routers and drivers"
 version = "0.1.0"
-website = "https://qaul.net"
+homepage = "https://qaul.net"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 license = "AGPL-3.0"

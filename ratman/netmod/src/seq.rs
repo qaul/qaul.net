@@ -18,11 +18,11 @@ pub struct XxSignature {
 ///
 /// When a large chunk of data is split across a `Frame` set,
 /// signature hashes are used to verify data integrity, as well as
-/// sequence ordering. The "Sequence ID" itself can be used to re-order
-/// frames received out of order, as well as verifying that a `Frame`
-/// was transmitted without error.
+/// sequence ordering.  The "Sequence ID" itself can be used to
+/// re-order frames received out of order, as well as verifying that a
+/// `Frame` was transmitted without error.
 ///
-/// Check the `netmod` crate documentation for more details.
+/// Check the crate documentation for more details.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SeqId {
     /// A hash signature of the payload
@@ -158,7 +158,7 @@ fn hash_new(data: &Vec<u8>) -> XxSignature {
 }
 
 #[test]
-fn foo() {
+fn simple() {
     let sender = Identity::with_digest(&vec![1]);
     let recp = Identity::with_digest(&vec![2]);
     let seq = Sequence::new(sender, Recipient::User(recp), [0; 16])

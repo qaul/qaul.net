@@ -1,17 +1,19 @@
 [package]
 name = "ratman-netmod"
+description = "Interface and framing abstraction for Ratman network drivers"
 version = "0.1.0"
 authors = [
   "Katharina Fey <kookie@spacekookie.de>",
   "Leonora Tindall <nora@nora.codes>"
 ]
 edition = "2018"
+homepage = "https://qaul.net"
 license = "AGPL-3.0"
 
 [dependencies]
-identity = { path = "../identity", features = ["digest"], package = "ratman-identity" }
+identity = { version = "0.1", path = "../identity", features = ["digest"], package = "ratman-identity" }
 
-conjoiner = { git = "https://git.open-communication.net/qaul/conjoiner-engine", package = "conjoiner-engine" }
+conjoiner = { version = "1.0", package = "conjoiner-engine" }
 serde = { version = "1.0", features = ["derive"] }
 twox-hash = "1.5"
 
