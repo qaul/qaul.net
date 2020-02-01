@@ -5,7 +5,7 @@ import { tracked } from '@glimmer/tracking';
 import { action } from "@ember/object";
 
 
-export default class RootComponent extends Component {
+export default class MobileComponent extends Component {
   @tracked showNavOverlay;
   @tracked showNav;
   @tracked showLogOverlay;

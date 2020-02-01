@@ -3,7 +3,7 @@ import { timeout } from 'ember-concurrency';
 import { task } from 'ember-concurrency-decorators';
 import { tracked } from '@glimmer/tracking';
 
-export default class RootComponent extends Component {
+export default class TabletNavComponent extends Component {
   @tracked fakeIncomingOverlay;
   @tracked showAll;
   @tracked showExtendNavButton = true;
