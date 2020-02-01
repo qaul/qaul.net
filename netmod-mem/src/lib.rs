@@ -6,7 +6,7 @@
 use async_std::future;
 use async_std::task::Poll;
 use async_trait::async_trait;
-use ratman_netmod::{Endpoint, Error as NetError, Frame, Result as NetResult};
+use ratman_netmod::{Endpoint, Error as NetError, Frame, Result as NetResult, Target};
 use std::sync::mpsc::TryRecvError;
 
 /// An input/output pair of `mpsc::channel`s.
@@ -90,7 +90,7 @@ impl Endpoint for MemMod {
     ///
     /// Returns `OperationNotSupported` if attempting to send through
     /// a connection that is not yet connected.
-    async fn send(&mut self, frame: Frame, _: i16) -> NetResult<()> {
+    async fn send(&mut self, frame: Frame, _: Target) -> NetResult<()> {
         match self.io {
             None => Err(NetError::NotSupported),
             Some(ref io) => match io.out.send(frame) {
@@ -100,11 +100,11 @@ impl Endpoint for MemMod {
         }
     }
 
-    async fn next(&mut self) -> NetResult<(Frame, i16)> {
+    async fn next(&mut self) -> NetResult<(Frame, Target)> {
         future::poll_fn(|_| match self.io {
             None => Poll::Ready(Err(NetError::NotSupported)),
             Some(ref mut io) => match io.inc.try_recv() {
-                Ok(v) => Poll::Ready(Ok((v, 0))),
+                Ok(v) => Poll::Ready(Ok((v, Target::default()))),
                 Err(TryRecvError::Empty) => Poll::Pending,
                 Err(_) => Poll::Ready(Err(NetError::ConnectionLost)),
             },
