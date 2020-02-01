@@ -55,5 +55,7 @@ module.exports = function(environment) {
     includeLocales: ['en', 'de', 'ar'],
   };
 
+  ENV.factoryGuy = { useScenarios: true };
+
   return ENV;
 };
