@@ -8,12 +8,12 @@ Scenario.settings({
 
 export default class extends Scenario {
   run() {
-    // Passthrough 'data:' requests.
+    this.mockFindAll('message', 10);
+    this.mockFindAll('user', 10);
+    this.mockFindAll('file', 10);
 
-    // this.mockFindAll('message', 10);
-    // this.mockFindAll('user', 10);
-    // this.mockFindAll('file', 10);
-
-    // getPretender().get('/api/secrets', getPretender().passthrough);
+    getPretender().post('*', getPretender().passthrough);
+    getPretender().get('*', getPretender().passthrough);
+    getPretender().patch('*', getPretender().passthrough);
   }
 }
