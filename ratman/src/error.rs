@@ -4,6 +4,7 @@
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// A Ratman error type
+#[derive(Debug)]
 pub enum Error {
     /// An error occured during router initialisation
     InitFailed,
