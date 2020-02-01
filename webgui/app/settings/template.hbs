@@ -6,17 +6,16 @@
     <span local-class="item">
       {{t "settings.changeLanguage"}}
       <span local-class="langs">
-        <button onclick={{action "setLanguage" "en"}}>EN</button>
-        <button onclick={{action "setLanguage" "de"}}>DE</button>
-        <button onclick={{action "setLanguage" "ar"}}>AR</button>
+        <button type="button" {{on "click" (fn this.setLanguage "en")}}>EN</button>
+        <button type="button" {{on "click" (fn this.setLanguage "de")}}>DE</button>
+        <button type="button" {{on "click" (fn this.setLanguage "ar")}}>AR</button>
       </span>
     </span>
     <span local-class="item">
       {{t "settings.selectTheme"}} <span local-class="icon">{{fa-icon "cog"}}</span>
-      <button onclick={{action "setTheme" "dark"}}>dark</button>
-      <button onclick={{action "setTheme" "light"}}>light</button>
+      <button type="button" {{on "click" (fn this.setTheme "dark")}}>dark</button>
+      <button type="button" {{on "click" (fn this.setTheme "light")}}>light</button>
     </span>
-    <a local-class="item"><span local-class="icon">{{fa-icon "info-circle"}}</span>{{t "info.debug"}}</a>
-
+    <a local-class="item" href=""><span local-class="icon">{{fa-icon "info-circle"}}</span>{{t "info.debug"}}</a>
   </div>
 </div>

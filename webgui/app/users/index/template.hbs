@@ -1,18 +1,18 @@
 <div class="page">
 
   <div local-class="input-area">
-    {{input value="{{t 'search'}}"}}
+    <input placeholder={{t "search"}}>
   </div>
 
   <div local-class="subnavigation">
-    <a>{{fa-icon "users"}}</a>
-    <a>{{fa-icon "history"}}</a>
-    <a>{{fa-icon "lock"}}</a>
-    <a>{{fa-icon "star"}}</a>
+    <a href=""><FaIcon @icon="users" /></a>
+    <a href=""><FaIcon @icon="history" /></a>
+    <a href=""><FaIcon @icon="lock" /></a>
+    <a href=""><FaIcon @icon="star" /></a>
   </div>
 
   <div local-class="contacts">
-    {{#each model as |user|}}
+    {{#each @model as |user|}}
       <div local-class="user">
         <div local-class="user-icon">
           <div local-class="user-avatar">
@@ -26,7 +26,7 @@
         </div>
         <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
         <div local-class="user-name">
-          {{#link-to "users.user" user}}{{user.username}}{{/link-to}}
+          <LinkTo @route="users.user" @model={{user}}>{{user.username}}</LinkTo>
         </div>
       </div>
     {{/each}}

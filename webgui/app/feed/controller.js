@@ -1,20 +1,19 @@
 import Controller from '@ember/controller';
-import { computed } from '@ember/object'
+import { tracked } from '@glimmer/tracking';
+import { action } from '@ember/object';
 
-export default Controller.extend({
-    messages: computed('model.@each.timestamp', {
-        get() {
-            return this.model.sortBy('timestamp').reverse();
-        }
-    }),
-    actions: {
-        submit(/*content*/) {
-            // const store = get(this, 'store');
-            // const newMsg = store.createRecord('message', {
-            //     senderName: 'Lux',
-            //     timestamp: new Date(),
-            //     content
-            // });
-        }
-    }
-});
+export default class FeedController extends Controller {
+  @tracked newMsg;
+
+  get messages() {
+    return this.model.sortBy('timestamp').reverse();
+  }
+
+  @action
+  enterMessage(event) {
+    this.newMsg = event.target.value;
+  }
+
+  @action
+  submit() {}
+}
