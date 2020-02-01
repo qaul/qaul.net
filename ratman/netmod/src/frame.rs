@@ -26,13 +26,19 @@ pub enum Recipient {
 /// routing table.
 ///
 /// If your endpoint doesn't implement a one-to-many link (i.e. if
-/// it's always one-to-one), just let this value to `0`
+/// it's always one-to-one), just let this value to `Single(0)` (`Target::default()`)
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Target {
     /// Send message to all reachable endpoints
     Flood,
     /// Encodes a specific target ID
     Single(u16),
+}
+
+impl Default for Target {
+    fn default() -> Self {
+        Self::Single(0)
+    }
 }
 
 /// A sequence of data, represented by a single network packet
