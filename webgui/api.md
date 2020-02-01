@@ -27,14 +27,8 @@ Must return up to 30 users that match ther search term XX
 This MUST be possible without an Authorization header to search for the user during login.
 
 **get a single user**
-`/api/user/X`
+`/api/users/X`
 Must return the user with id X.
-
-**user attributes**
-A user has the following attributes:
-- `display-name`
-- `real-name`
-- `bio` whats the data type here? key value map? abitary json?
 
 ## chatRoom
 
@@ -57,7 +51,7 @@ In combination this can be used to load the most recent chat rooms:
 
 **get a single chat room**
 
-`/api/chat-room/X`
+`/api/chat-rooms/X`
 Must return the chat room with id X.
 
 **chat room attributes**
@@ -127,7 +121,7 @@ and to load the next 10 messages before them when the user scolls up:
 
 **get a single chat message**
 
-`/api/chat-message/X`
+`/api/chat-messages/X`
 Must return the chat room with id X.
 
 **chat message attributes**
