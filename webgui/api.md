@@ -24,6 +24,8 @@ In combination this can be used to search for users:
 `/api/users?filter[searchTerm]=XX&page[limit]=30`
 Must return up to 30 users that match ther search term XX
 
+This MUST be possible without an Authorization header to search for the user during login.
+
 **get a single user**
 `/api/users/X`
 Must return the user with id X.
