@@ -1,0 +1,17 @@
+<button type="button" {{on "click" (perform this.slideIn)}}>
+  {{fa-icon "history"}}
+</button>
+
+{{#if this.showAside}}
+  <aside local-class="aside {{this.animation}}">
+    <div aria-hidden="true" local-class="topbar-log" class="topbar">
+      <button type="button" {{on "click" (perform this.slideOut)}}>
+        {{fa-icon "angle-double-right"}}
+      </button>
+    </div>
+
+    <div>
+      <Aside />
+    </div>
+  </aside>
+̣{{/if}}

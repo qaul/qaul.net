@@ -1,0 +1,70 @@
+@value log-width from './layout-global.css';
+
+.aside {
+  width: log-width;
+  height: 100vh;
+  background-color: var(--q-nav-bg);
+  position: fixed;
+  top: 0;
+  /* left: 100vw; */
+  z-index: 100;
+}
+
+.slide-in {
+  animation: slide-ltr 0.5s ease-out;
+}
+.slide-out {
+  animation: slide-ltr 0.5s ease-out reverse;
+}
+[dir="rtl"] .slide-in {
+  animation: slide-rtl 0.5s ease-out;
+}
+[dir="rtl"] .slide-out {
+  animation: slide-rtl 0.5s ease-out reverse;
+}
+
+@keyframes slide-ltr {
+  0% {
+    left: 100vw;
+  }
+  100% {
+    left: calc(100vw - log-width);
+  }
+}
+@keyframes slide-rtl {
+  0% {
+    left: calc(log-width * -1);
+  }
+  100% {
+    left: 0;
+  }
+}
+
+.topbar-log {
+  width: 100%;
+  background-color: var(--q-theme-strong);
+  display: flex;
+  justify-content: flex-start;
+}
+[dir=ltr] .topbar-log {
+  border-left: 1px solid var(--q-a-hover);
+}
+[dir=rtl] .topbar-log {
+  border-right: 1px solid var(--q-a-hover);
+}
+
+
+@media only screen and (min-width: tablet-max) {
+  .log {
+    position: initial;
+    top: auto;
+    left: calc(100% - log-width);
+  }
+  [dir=rtl] .log {
+    left: 0;
+  }
+
+  .topbar-log button {
+    display: none;
+  }
+}

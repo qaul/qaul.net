@@ -1,10 +1,13 @@
 <div local-class="root">
   <div aria-hidden="true" local-class="topbar-main" class="topbar">
-    <button type="button" {{on "click" this.slideLogIn}}>
-      {{fa-icon "history"}}
-    </button>
+    <Layout::DynamicAside />
   </div>
   <Layout::TabletNav local-class="nav" />
-  <Layout::SlideLog local-class="log" @showLog={{this.showLog}} @slideLogOut={{this.slideLogOut}}  />
-  <main local-class="main">{{yield}}</main>
+
+  {{#if this.asidePermanentVisible}}
+
+  {{/if}}
+
+  {{!-- <Layout::SlideLog local-class="log" @showLog={{this.showLog}} @slideLogOut={{this.slideLogOut}}  />
+  <main local-class="main">{{yield}}</main> --}}
 </div>
