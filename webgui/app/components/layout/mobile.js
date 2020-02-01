@@ -14,6 +14,7 @@ export default class RootComponent extends Component {
 
   @task
   * slideNavIn() {
+    yield timeout(1); // Todo: add animation
     this.showNavOverlay = true;
     this.showNav = true;
     this.showShadowOverlay = true;
@@ -37,6 +38,7 @@ export default class RootComponent extends Component {
 
   @task
   * slideLogIn() {
+    yield timeout(1); // Todo: add animation
     this.showLogOverlay = true;
     this.showLog = true;
     this.showShadowOverlay = true;
@@ -60,6 +62,7 @@ export default class RootComponent extends Component {
 
   @task
   * slideOut() {
+    yield timeout(1); // Todo: add animation
     if (this.showNav) this.slideNavOut();
     if (this.showLog) this.slideLogOut();
   }
