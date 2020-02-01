@@ -15,4 +15,5 @@ Router.map(function() {
   this.route('files');
   this.route('settings');
   this.route('info');
+  this.route('register');
 });

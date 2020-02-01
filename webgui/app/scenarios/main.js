@@ -1,4 +1,5 @@
-import {Scenario} from 'ember-data-factory-guy';
+import {Scenario, getPretender} from 'ember-data-factory-guy';
+import 'faker'; // used in the factories
 
 // Just for fun, set the log level ( to 1 ) and see all FactoryGuy response info in console
 Scenario.settings({
@@ -7,8 +8,12 @@ Scenario.settings({
 
 export default class extends Scenario {
   run() {
-    this.mockFindAll('message', 10);
-    this.mockFindAll('user', 10);
-    this.mockFindAll('file', 10);
+    // Passthrough 'data:' requests.
+
+    // this.mockFindAll('message', 10);
+    // this.mockFindAll('user', 10);
+    // this.mockFindAll('file', 10);
+
+    // getPretender().get('/api/secrets', getPretender().passthrough);
   }
 }
