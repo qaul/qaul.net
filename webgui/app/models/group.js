@@ -1,4 +1,4 @@
-import { hasMany } from 'ember-data/relationships';
+import { hasMany } from '@ember-data/model';
 import Owner from './user';
 
 export default Owner.extend({

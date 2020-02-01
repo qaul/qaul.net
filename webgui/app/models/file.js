@@ -1,11 +1,10 @@
-import DS from 'ember-data';
-import { belongsTo } from 'ember-data/relationships';
+import Model, { belongsTo, attr } from '@ember-data/model';
 
-export default DS.Model.extend({
-  filename: DS.attr('string'),
-  extention: DS.attr('string'),
-  downloadType: DS.attr('string'),
-  downloadStatus: DS.attr('number'),
-  size: DS.attr('number'),
+export default Model.extend({
+  filename: attr('string'),
+  extention: attr('string'),
+  downloadType: attr('string'),
+  downloadStatus: attr('number'),
+  size: attr('number'),
   owner: belongsTo('owner'),
 });
