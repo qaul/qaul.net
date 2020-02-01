@@ -40,7 +40,13 @@ export default class QaulAuthenticator extends Base {
     };
   }
 
-  invalidate(/* data */) {
-    return true;
+  async invalidate({ token }) {
+    await fetch(`/api/grants/${token}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Authorization: `Bearer ${token}`
+      },
+    });
   }
 }
