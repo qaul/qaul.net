@@ -17,6 +17,7 @@ Either must return all users or throw HTTP 500. May be useful in the beginning, 
 **search users**
 
 It must be possible to specify `filter[searchTerm]=XX` as query param to search users.
+It must be possible to specify `filter[local]=true` as query param to only return local users (that can be logged in).
 It must be possible to specify `page[limit]=X` to limit the number of returned users.
 
 In combination this can be used to search for users:
@@ -24,7 +25,7 @@ In combination this can be used to search for users:
 `/api/users?filter[searchTerm]=XX&page[limit]=30`
 Must return up to 30 users that match ther search term XX
 
-This MUST be possible without an Authorization header to search for the user during login.
+This MUST be possible without an Authorization header when `filter[local]=true` is specified to search for the user during login.
 
 **get a single user**
 `/api/users/X`
