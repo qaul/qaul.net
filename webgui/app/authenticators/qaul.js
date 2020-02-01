@@ -32,9 +32,10 @@ export default class QaulAuthenticator extends Base {
     }
 
     const grantData = await grantResponse.json();
+    const token = grantData.data.id;
 
     return {
-      token: grantData.data.id,
+      token,
       userId,
     };
   }

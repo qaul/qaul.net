@@ -1,3 +1,11 @@
-<button type="button" {{on "click" this.register}}>
-  Registrieren
-</button>
+<form {{on "submit" this.register}}>
+  <label>Display name</label>
+  <Input @value={{this.displayName}} />
+
+  <label>Real name</label>
+  <Input @value={{this.realName}} />
+
+  <label>Password</label>
+  <Input type="password" @value={{this.password}} />
+  <button type="submit">Register</button>
+</form>
