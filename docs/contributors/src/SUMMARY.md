@@ -21,6 +21,8 @@
     - [internals](./technical/ratman/internals/index.md)
       - [routing](./technical/ratman/internals/routing.md)
       - [journal](./technical/ratman/internals/journal.md)
+  - [Web GUI](./technical/webgui/_intro.md)
+    - [Install EmberJS & Test Web GUI](./technical/webgui/install.md)
 - [Beta](./technical/beta/_intro.md)
   - [TODO](./technical/beta/challenges.md)
 - [Translations](./translations/_intro.md)
