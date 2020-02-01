@@ -22,6 +22,8 @@ test_webgui:
     - cd webgui
     - yarn install --pure-lockfile --cache-folder .yarn
     - yarn run test
+    - yarn run lint:hbs
+    - yarn run lint:js
 
 build_webgui:
   stage: build
