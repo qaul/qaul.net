@@ -26,7 +26,7 @@
         </div>
         <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
         <div local-class="user-name">
-          <LinkTo @route="users.user" @model={{user}}>{{user.username}}</LinkTo>
+          <LinkTo @route="users.user" @model={{user}}>{{user.realName}}</LinkTo>
         </div>
       </div>
     {{/each}}
