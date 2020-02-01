@@ -53,7 +53,7 @@ impl<'qaul> Users<'qaul> {
         let user = User::Local(UserProfile::new(id));
 
         // Inform Router about new local user
-        self.q.router.local(id);
+        self.q.router.add_local(id);
 
         self.q.users.add_user(user);
         self.q.auth.set_pw(id, pw);
@@ -70,7 +70,7 @@ impl<'qaul> Users<'qaul> {
 
         // If logout succeeds, we can delete the user
         self.logout(user)?;
-        self.q.router.local_del(id);
+        self.q.router.rm_local(id, true);
         self.q.users.rm_user(id);
         Ok(())
     }

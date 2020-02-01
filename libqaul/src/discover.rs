@@ -4,7 +4,8 @@ use crate::{
     Qaul,
 };
 use async_std::task;
-use ratman::{netmod::Recipient, Identity, Message, Protocol, Router};
+use ratman_netmod::{Recipient};
+use ratman::{Identity, Message, Router};
 use std::{
     collections::BTreeMap,
     sync::{
@@ -88,7 +89,7 @@ impl Discovery {
                         task::spawn(async move {
                             while active(&id, &buf).and(&run) {
                                 task::sleep(Duration::from_secs(2)).await;
-                                router.send(Protocol::announce(id.clone())).unwrap();
+                                router.send(Protocol::announce(id.clone())).await.unwrap();
                             }
                         });
                     }

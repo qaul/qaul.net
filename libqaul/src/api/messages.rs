@@ -233,7 +233,7 @@ impl<'qaul> Messages<'qaul> {
     /// a payload or recipient is however, and payloads that are
     /// unsecured in a Service API message will have been encrypted by
     /// the time that `RATMAN` handles them.
-    pub fn send<S>(
+    pub async fn send<S>(
         &self,
         user: UserAuth,
         recipient: Recipient,
@@ -277,7 +277,7 @@ impl<'qaul> Messages<'qaul> {
                 recipients,
                 signature,
             },
-        )
+        ).await
         .map(|_| id)
     }
 

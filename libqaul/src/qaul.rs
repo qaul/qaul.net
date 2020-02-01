@@ -10,7 +10,7 @@ use crate::{
     users::UserStore,
 };
 
-use ratman::{Router, RouterInit};
+use ratman::{Router};
 use std::sync::Arc;
 
 /// Primary context structure for `libqaul`

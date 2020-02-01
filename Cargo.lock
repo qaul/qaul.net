@@ -490,6 +490,7 @@ dependencies = [
  "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman 0.0.0",
  "ratman-identity 0.1.0",
+ "ratman-netmod 0.1.0",
  "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
