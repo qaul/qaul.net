@@ -25,7 +25,7 @@ export default class TabletNavComponent extends Component {
     this.showAll = false;
     this.fakeOutgoingOverlay = true;
     yield timeout(500);
-    this.fakeIncomingOverlay = false;
+    this.fakeOutgoingOverlay = false;
     this.showExtendNavButton = true;
   }
 }
