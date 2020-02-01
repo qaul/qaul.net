@@ -7,7 +7,8 @@ Scenario.settings({
 
 export default class extends Scenario {
   run() {
-    console.log('mock');
-    this.mockFindAll('message', 3);
+    this.mockFindAll('message', 10);
+    this.mockFindAll('user', 10);
+    this.mockFindAll('file', 10);
   }
 }
