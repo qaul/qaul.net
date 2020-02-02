@@ -1,9 +1,9 @@
 
 {{!-- network modules information --}}
 <div local-class="networks aside-box">
-  {{#link-to "index"}}<FaIcon @icon="network-wired" />{{/link-to}}
-  {{#link-to "index"}}<FaIcon @icon="wifi" />{{/link-to}}
-  {{#link-to "index"}}<FaIcon @icon="bluetooth" @prefix="fab" />{{/link-to}}
+  <LinkTo @route="index"><FaIcon @icon="network-wired" /></LinkTo>
+  <LinkTo @route="index"><FaIcon @icon="wifi" /></LinkTo>
+  <LinkTo @route="index"><FaIcon @icon="bluetooth" @prefix="fab" /></LinkTo>
 </div>
 
 {{!-- favorite user information --}}
