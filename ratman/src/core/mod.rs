@@ -18,9 +18,9 @@ pub(self) use journal::Journal;
 pub(self) use routes::{EpTargetPair, RouteTable, RouteType};
 pub(self) use switch::Switch;
 
-use crate::Message;
+use crate::{Message, Endpoint, Identity};
 use async_std::sync::Arc;
-use netmod::Endpoint;
+
 
 /// The Ratman routing core interface
 ///
@@ -85,4 +85,15 @@ impl Core {
     pub(crate) fn add_ep(&self, ep: impl Endpoint + 'static + Send + Sync) {
         unsafe { self.drivers.add(ep) };
     }
+
+    /// Add a local endpoint
+    pub(crate) async fn add_local(&self, id: Identity) {
+        self._routes.local(id).await;
+    }
+
+    /// Remove a local endpoint
+    pub(crate) async fn rm_local(&self, id: Identity) {
+        self._routes.delete(id).await;
+    }
+
 }

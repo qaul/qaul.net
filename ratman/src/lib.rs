@@ -57,11 +57,14 @@ pub use crate::{
     data::{Message, MsgId, Signature},
     error::{Error, Result},
 };
+
 pub use identity::Identity;
-pub use netmod::Endpoint;
+pub use netmod;
 
 use crate::core::Core;
+use async_std::task;
 use clock::{ClockCtrl, Tasks};
+use netmod::Endpoint;
 
 /// Primary async ratman router handle
 ///
@@ -111,6 +114,7 @@ impl Router {
     /// Ratman will listen for messages to local identities and offer
     /// them up for polling via the Router API.
     pub fn add_local(&self, id: Identity) -> Result<()> {
+        task::block_on( async { self.inner.add_local(id) });
         Ok(())
     }
 
@@ -120,6 +124,7 @@ impl Router {
     /// collector.  Optionally these frames can be moved into the
     /// journal with low priority instead.
     pub fn rm_local(&self, id: Identity, keep: bool) -> Result<()> {
+        task::block_on( async { self.inner.rm_local(id) });
         Ok(())
     }
 

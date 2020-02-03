@@ -38,6 +38,11 @@ impl RouteTable {
         tbl.insert(id, RouteType::Remote(ep)).unwrap();
     }
 
+    /// Track a local ID in the routes table
+    pub(crate) async fn local(&self, id: Identity) {
+        self.routes.lock().await.insert(id, RouteType::Local);
+    }
+    
     /// Delete an entry from the routing table
     pub(crate) async fn delete(&self, id: Identity) {
         self.routes.lock().await.remove(&id);
