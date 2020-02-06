@@ -5,7 +5,7 @@ use crate::{
 };
 use async_std::task;
 use ratman_netmod::{Recipient};
-use ratman::{Identity, Message, Router};
+use ratman::{Identity, Protocol, Router};
 use std::{
     collections::BTreeMap,
     sync::{
@@ -51,13 +51,12 @@ impl Discovery {
     pub(crate) fn start(
         qaul: Arc<Qaul>,
         router: Arc<Router>,
-        inc: Receiver<Message>,
     ) -> Sender<DiscCmd> {
         let run = Arc::new(RunLock::new(true));
         let (sender, rx) = channel();
 
         // Incoming message handler
-        Self::inc_handler(qaul, inc, Arc::clone(&run));
+        Self::inc_handler(qaul, Arc::clone(&router), Arc::clone(&run));
 
         // Spawn the service communicator
         Self::service_handle(rx, router, run);
@@ -102,11 +101,11 @@ impl Discovery {
     }
 
     /// Spawns a thread that listens to incoming messages
-    fn inc_handler(qaul: Arc<Qaul>, inc: Receiver<Message>, _lock: Arc<RunLock>) {
-        thread::spawn(move || {
-            let qaul = Arc::clone(&qaul);
+    fn inc_handler(qaul: Arc<Qaul>, router: Arc<Router>, _lock: Arc<RunLock>) {
+        task::spawn(async move {
+            loop {
+                let msg = router.next().await;
 
-            while let Ok(msg) = inc.recv() {
                 println!("Receiving message...");
                 let user = match msg.recipient {
                     Recipient::User(id) => id.clone(),

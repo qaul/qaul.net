@@ -63,8 +63,8 @@ impl Qaul {
     #[doc(hidden)]
     #[allow(warnings)]
     pub fn dummy() -> Self {
-        let RouterInit { router, channel } = Router::new();
-        let router = Arc::new(router);
+        let router = Arc::new(Router::new());
+        
         Self {
             router,
             users: UserStore::new(),
@@ -89,9 +89,7 @@ impl Qaul {
     /// that the main thread will take over execution of some other
     /// application loop so to enable further API abstractions to hook
     /// into the service API.
-    pub fn new(r: RouterInit) -> Arc<Self> {
-        let RouterInit { router, channel } = r;
-        let router = Arc::new(router);
+    pub fn new(router: Arc<Router>) -> Arc<Self> {
         let q = Arc::new(Self {
             router: Arc::clone(&router),
             users: UserStore::new(),
@@ -102,7 +100,7 @@ impl Qaul {
         });
 
         // TODO: Where to store this?!
-        Discovery::start(Arc::clone(&q), router, channel);
+        Discovery::start(Arc::clone(&q), router);
         q
     }
 

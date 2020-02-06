@@ -105,7 +105,7 @@ impl MsgUtils {
             .map(|msg| { router.send(msg) }) {
                 match result.await {
                     Ok(_) => (),
-                    Err(e) => return Err(e)
+                    Err(e) => return Err(Error::CommFault)
                 }
             }
             return Ok(())
