@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use async_std::{sync::Arc, task};
 use {
     libqaul::{messages::Recipient, Qaul},
     messaging::{Messaging, TextPayload},
@@ -31,10 +31,10 @@ fn main() {
     let r3 = Router::new();
 
     // Add the endpoints to their respective routers
-    r1.modify().add_ep(mm1);
-    r2.modify().add_ep(mm2);
-    r2.modify().add_ep(mm3);
-    r3.modify().add_ep(mm4);
+    r1.add_endpoint(mm1);
+    r2.add_endpoint(mm2);
+    r2.add_endpoint(mm3);
+    r3.add_endpoint(mm4);
 
     // While `libqaul` can't add users to the routing scope yet, we
     // need to now create Qaul structures so we can create users
@@ -47,30 +47,34 @@ fn main() {
     let u2 = q3.users().create("abc").unwrap();
 
     // Manually make Routers discover each other
-    #[allow(deprecated)]
-    {
-        q1.router().discover(u2.0, 0);
-        q2.router().discover(u1.0, 0);
-        q2.router().discover(u2.0, 1);
-        q3.router().discover(u1.0, 0);
-    }
+    // #[allow(deprecated)]
+    // {
+    //     q1.router().discover(u2.0, 0);
+    //     q2.router().discover(u1.0, 0);
+    //     q2.router().discover(u2.0, 1);
+    //     q3.router().discover(u1.0, 0);
+    // }
 
     // We setup a messaging endpoint listener on node u2
     let recv = Messaging::new(Arc::clone(&q3));
     recv.listen(u2.clone(), |msg| {
         dbg!(msg);
         Ok(())
-    }).unwrap();
+    })
+    .unwrap();
 
     // Then we setup a messaging endponti on note u1 and send a message to u2
     let msg = Messaging::new(Arc::clone(&q1));
-    msg.send(
-        u1,
-        Recipient::User(u2.0),
-        TextPayload {
-            text: "Hello, world!".into(),
-        },
-    )
+    task::block_on(async {
+        msg.send(
+            u1,
+            Recipient::User(u2.0),
+            TextPayload {
+                text: "Hello, world!".into(),
+            },
+        )
+        .await
+    })
     .unwrap();
 
     // This delay is required to make the main thread wait enough time

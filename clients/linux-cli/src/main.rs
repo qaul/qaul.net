@@ -1,3 +1,4 @@
+use async_std::task;
 use libqaul::{messages::Recipient, Qaul};
 use ratman::Router;
 
@@ -10,17 +11,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Register a service
     q.services().register("de.spacekookie.myapp")?;
-    q.messages().send(
-        user.clone(),
-        Recipient::Flood,
-        "de.spacekokie.myapp",
-        vec![1, 2, 3, 4],
-    )?;
+    task::block_on(async {
+        q.messages()
+            .send(
+                user.clone(),
+                Recipient::Flood,
+                "de.spacekokie.myapp",
+                vec![1, 2, 3, 4],
+            )
+            .await
+    })?;
 
     q.messages().listen(user, "de.spacekookie.myapp", |msg| {
         println!("Received message: {:?}", msg);
         Ok(()) // Return error if parsing fails
-    }).unwrap();
+    })?;
 
     Ok(())
 }

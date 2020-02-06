@@ -12,3 +12,5 @@ messaging = { path = "../../libqaul/service/messaging", package = "qaul-messagin
 ratman = { path = "../../ratman" }
 ratman-netmod = { path = "../../ratman/netmod" }
 netmod-mem = { path = "../../netmod-mem" }
+
+async-std = "1.0"

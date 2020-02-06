@@ -8,3 +8,4 @@ license = "GPL-3.0"
 [dependencies]
 libqaul = { path = "../../libqaul" }
 ratman = { path = "../../ratman" }
+async-std = "1.0"
