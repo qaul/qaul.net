@@ -2,12 +2,14 @@
 
 use crate::{AddrTable, Envelope, FrameExt};
 use async_std::{
+    future::{self, Future},
     net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket},
+    pin::Pin,
     sync::{Arc, RwLock},
-    task,
+    task::{self, Poll},
 };
 use conjoiner;
-use netmod::Frame;
+use netmod::{Frame, Target};
 use std::collections::VecDeque;
 
 const PORT: u16 = 20120;
@@ -69,6 +71,20 @@ impl Socket {
             .await;
     }
 
+    pub(crate) async fn next(&self) -> FrameExt {
+        future::poll_fn(|ctx| {
+            let lock = &mut self.inbox.write();
+            match unsafe { Pin::new_unchecked(lock).poll(ctx) } {
+                Poll::Ready(mut inc) => match inc.pop_front() {
+                    Some(f) => Poll::Ready(f),
+                    None => Poll::Pending,
+                },
+                Poll::Pending => Poll::Pending,
+            }
+        })
+        .await
+    }
+
     fn spawn(arc: Arc<Self>, table: Arc<AddrTable>) -> Arc<Self> {
         let arc2 = Arc::clone(&arc);
         task::spawn(async move {
@@ -88,7 +104,10 @@ impl Socket {
                                     .expect("couldn't deserialise Frame");
                                 dbg!(&frame);
                                 let id = table.id(&peer.ip()).await.unwrap();
-                                arc.inbox.write().await.push_back(FrameExt(frame, id));
+                                arc.inbox
+                                    .write()
+                                    .await
+                                    .push_back(FrameExt(frame, Target::Single(id)));
                             }
                         }
                     }

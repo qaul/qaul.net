@@ -48,7 +48,8 @@ impl EndpointExt for Endpoint {
                     .await
             },
             Target::Flood => {
-                // self.socket.send_many
+                let addrs = self.addrs.all().await;
+                self.socket.send_many(frame, addrs).await;
             }
         }
 
@@ -56,6 +57,7 @@ impl EndpointExt for Endpoint {
     }
 
     async fn next(&mut self) -> Result<(Frame, Target)> {
-        unimplemented!()
+        let fe = self.socket.next().await;
+        Ok((fe.0, fe.1))
     }
 }
