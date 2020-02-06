@@ -25,6 +25,8 @@ pub struct MemMod {
     io: Option<io::Io>,
 }
 
+unsafe impl Sync for MemMod {}
+
 impl MemMod {
     /// Create a new, unpaired `MemMod`.
     pub fn new() -> Self {

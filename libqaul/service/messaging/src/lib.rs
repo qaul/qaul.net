@@ -102,7 +102,7 @@ impl Messaging {
     /// `Message`, signs it and optionally encrypts it, if it's
     /// `recipient` isn't `Recipient::Flood`, then queues it in the
     /// routing layer.
-    pub fn send(
+    pub async fn send(
         &self,
         user: UserAuth,
         recipient: Recipient,
@@ -111,6 +111,7 @@ impl Messaging {
         self.qaul
             .messages()
             .send(user, recipient, ASC_NAME, conjoiner::serialise(&payload)?)
+            .await
     }
 
     /// Non-blockingly poll for new `TextMessage`s for a session

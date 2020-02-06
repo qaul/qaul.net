@@ -122,7 +122,7 @@ pub enum Recipient {
 /// This type is both returned by `listen`, `poll`, as well as
 /// specific message `queries`
 ///
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Message {
     /// A unique message ID
     pub id: MsgId,

@@ -63,7 +63,7 @@ impl Qaul {
     #[doc(hidden)]
     #[allow(warnings)]
     pub fn dummy() -> Self {
-        let router = Arc::new(Router::new());
+        let router = Router::new();
         
         Self {
             router,
