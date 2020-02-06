@@ -5,7 +5,7 @@ members = [
     "libqaul",
 
     # libqaul additions
-    "libqaul/http-api",
+    # "libqaul/http-api",
     "libqaul/ipc",
 
     # qaul.net main services
@@ -30,5 +30,5 @@ members = [
     # Client specific targets
     "clients/linux",
     "clients/linux-cli",
-    "clients/http-test"
+    # "clients/http-test"
 ]
