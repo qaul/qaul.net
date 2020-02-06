@@ -1,10 +1,10 @@
 //! Address resolution table module
 
-use std::{
-    collections::BTreeMap,
+use async_std::{
     net::IpAddr,
     sync::{Arc, RwLock},
 };
+use std::collections::BTreeMap;
 
 /// A small utility that creates sequential IDs
 struct IdMaker {
@@ -12,12 +12,12 @@ struct IdMaker {
 }
 
 impl IdMaker {
-    fn curr(&self) -> u16 {
-        *self.last.read().expect("IdMaker was poisoned!")
+    async fn curr(&self) -> u16 {
+        *self.last.read().await
     }
 
-    fn incr(&self) -> &Self {
-        *self.last.write().expect("IdMaker was poisoned!") += 1;
+    async fn incr(&self) -> &Self {
+        *self.last.write().await += 1;
         self
     }
 }
@@ -46,37 +46,24 @@ impl AddrTable {
     /// possible to find out what previous IP a node had, without
     /// performing deep packet inspection and looking at certain
     /// Identity information.  As such, this table can only grow.
-    pub(crate) fn set(&self, ip: IpAddr) -> u16 {
-        let id = self.factory.incr().curr();
-        self.ips.write().expect("").insert(id, ip).unwrap();
-        self.ids.write().expect("").insert(ip, id).unwrap();
+    pub(crate) async fn set(&self, ip: IpAddr) -> u16 {
+        let id = self.factory.incr().await.curr().await;
+        self.ips.write().await.insert(id, ip).unwrap();
+        self.ids.write().await.insert(ip, id).unwrap();
         id
     }
 
     /// Get the ID for a given IP address
-    pub(crate) fn id(&self, ip: &IpAddr) -> Option<u16> {
-        self.ids
-            .read()
-            .expect("AddrTable poisoned")
-            .get(ip)
-            .cloned()
+    pub(crate) async fn id(&self, ip: &IpAddr) -> Option<u16> {
+        self.ids.read().await.get(ip).cloned()
     }
 
     /// Get the IP for a given internal ID
-    pub(crate) fn ip(&self, id: u16) -> Option<IpAddr> {
-        self.ips
-            .read()
-            .expect("AddrTable poisoned")
-            .get(&id)
-            .cloned()
+    pub(crate) async fn ip(&self, id: u16) -> Option<IpAddr> {
+        self.ips.read().await.get(&id).cloned()
     }
 
-    pub(crate) fn all(&self) -> Vec<IpAddr> {
-        self.ips
-            .read()
-            .expect("AddrTable poisoned")
-            .values()
-            .cloned()
-            .collect()
+    pub(crate) async fn all(&self) -> Vec<IpAddr> {
+        self.ips.read().await.values().cloned().collect()
     }
 }

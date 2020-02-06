@@ -669,6 +669,7 @@ name = "netmod-udp"
 version = "0.1.0"
 dependencies = [
  "async-std 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "async-trait 0.1.22 (registry+https://github.com/rust-lang/crates.io-index)",
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman-identity 0.1.0",
  "ratman-netmod 0.1.0",

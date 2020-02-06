@@ -1,44 +1,61 @@
-//! netmod-udp is a UDP overlay for RATMAN
+//! netmod-udp is a UDP overlay for Ratman
+#![allow(warnings)]
 
 mod addrs;
-use addrs::AddrTable;
+pub(crate) use addrs::AddrTable;
 
 mod socket;
-use socket::Socket;
+pub(crate) use socket::Socket;
 
 mod framing;
-use framing::{Envelope, FrameExt};
+pub(crate) use framing::{Envelope, FrameExt};
 
-use netmod::{Endpoint as EndpointExt, Frame, Result};
-use std::sync::Arc;
+use async_std::{sync::Arc, task};
+use async_trait::async_trait;
+use netmod::{Endpoint as EndpointExt, Frame, Recipient, Result, Target};
 
-#[derive(Debug, Clone)]
-struct FrameEnvelope(Frame, u16);
-
-/// Represents an IP network tunneled via UDP
+#[derive(Clone)]
 pub struct Endpoint {
-    socket: Socket,
+    socket: Arc<Socket>,
     addrs: Arc<AddrTable>,
 }
 
+impl Endpoint {
+    /// Create a new endpoint and spawn a dispatch task
+    pub fn spawn(addr: &str) -> Arc<Self> {
+        task::block_on(async move {
+            let addrs = Arc::new(AddrTable::new());
+            Arc::new(Self {
+                socket: Socket::with_addr(addr, Arc::clone(&addrs)).await,
+                addrs,
+            })
+        })
+    }
+}
+
+#[async_trait]
 impl EndpointExt for Endpoint {
     fn size_hint(&self) -> usize {
-        1024 // just an arbitrary number for now
+        0
     }
 
-    fn send(&mut self, frame: Frame, target: i16) -> Result<()> {
+    async fn send(&mut self, frame: Frame, target: Target) -> Result<()> {
         match target {
-            -1 => self.socket.send_many(frame, self.addrs.all()),
-            id => self.socket.send(frame, self.addrs.ip(id as u16).unwrap()),
+            /// Sending to a user, 
+            Target::Single(ref id) => {
+                self.socket
+                    .send(frame, self.addrs.ip(*id).await.unwrap())
+                    .await
+            },
+            Target::Flood => {
+                // self.socket.send_many
+            }
         }
+
         Ok(())
     }
 
-    fn poll(&mut self) -> Result<Option<(Frame, i16)>> {
-        unimplemented!()
-    }
-
-    fn listen(&mut self, _: Box<dyn FnMut(Frame, i16) -> Result<()>>) -> Result<()> {
+    async fn next(&mut self) -> Result<(Frame, Target)> {
         unimplemented!()
     }
 }

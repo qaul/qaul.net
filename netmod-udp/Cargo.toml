@@ -10,6 +10,7 @@ license = "AGPL-3.0"
 netmod = { path = "../ratman/netmod", package = "ratman-netmod" }
 identity = { path = "../ratman/identity", package = "ratman-identity" }
 
+async-trait = "0.1"
 async-std = "1.0"
 conjoiner = { version = "1.2", package = "conjoiner-engine" }
 serde = { version = "1.0", features = ["derive"] }
