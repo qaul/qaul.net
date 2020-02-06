@@ -52,10 +52,12 @@ pub mod clock;
 mod core;
 mod data;
 mod error;
+mod protocol;
 
 pub use crate::{
     data::{Message, MsgId, Signature},
     error::{Error, Result},
+    protocol::Protocol,
 };
 
 pub use identity::Identity;
@@ -114,7 +116,7 @@ impl Router {
     /// Ratman will listen for messages to local identities and offer
     /// them up for polling via the Router API.
     pub fn add_local(&self, id: Identity) -> Result<()> {
-        task::block_on( async { self.inner.add_local(id) });
+        task::block_on( async { self.inner.add_local(id).await });
         Ok(())
     }
 
@@ -124,7 +126,7 @@ impl Router {
     /// collector.  Optionally these frames can be moved into the
     /// journal with low priority instead.
     pub fn rm_local(&self, id: Identity, keep: bool) -> Result<()> {
-        task::block_on( async { self.inner.rm_local(id) });
+        task::block_on( async { self.inner.rm_local(id).await });
         Ok(())
     }
 
