@@ -44,7 +44,7 @@ impl DriverMap {
     /// Sync, which we are enforcing with the trait bounds.
     ///
     /// Some thoughts about this: maybe there's a way to use
-    /// UnsafeCess, which is slightly less gross than doing a mut
+    /// UnsafeCell, which is slightly less gross than doing a mut
     /// transmute?  It's not sync though, so there's a bunch of
     /// overhead there which really defeats the point.  On the other
     /// hand, maybe we don't even need this collection.  We could have
