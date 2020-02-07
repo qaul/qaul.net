@@ -31,10 +31,10 @@ fn main() {
     let r3 = Router::new();
 
     // Add the endpoints to their respective routers
-    r1.add_endpoint(mm1);
-    r2.add_endpoint(mm2);
-    r2.add_endpoint(mm3);
-    r3.add_endpoint(mm4);
+    r1.add_endpoint(mm1).unwrap();
+    r2.add_endpoint(mm2).unwrap();
+    r2.add_endpoint(mm3).unwrap();
+    r3.add_endpoint(mm4).unwrap();
 
     // While `libqaul` can't add users to the routing scope yet, we
     // need to now create Qaul structures so we can create users

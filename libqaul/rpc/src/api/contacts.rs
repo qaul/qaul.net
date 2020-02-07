@@ -1,4 +1,4 @@
-//! The contacs API structures
+//! Contacts API structures
 
 use libqaul::{Identity, users::UserAuth, contacts::ContactQuery};
 use crate::Change;
