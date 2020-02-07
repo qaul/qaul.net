@@ -5,8 +5,9 @@ members = [
     "libqaul",
 
     # libqaul additions
-    # "libqaul/http-api",
+    # "libqaul/http",
     "libqaul/ipc",
+    "libqaul/rpc",
 
     # qaul.net main services
     "libqaul/service/messaging",

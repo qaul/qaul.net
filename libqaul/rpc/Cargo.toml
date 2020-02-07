@@ -1,0 +1,9 @@
+[package]
+name = "libqaul-rpc"
+description = "libqaul rpc structures and utilities"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+
+[dependencies]
+libqaul = { version = "*", path = ".." }

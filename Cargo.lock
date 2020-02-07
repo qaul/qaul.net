@@ -400,6 +400,13 @@ name = "libqaul-ipc"
 version = "0.1.0"
 
 [[package]]
+name = "libqaul-rpc"
+version = "0.1.0"
+dependencies = [
+ "libqaul 0.1.0",
+]
+
+[[package]]
 name = "linux-cli"
 version = "0.1.0"
 dependencies = [
