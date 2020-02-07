@@ -20,7 +20,10 @@
 //!
 //! [contact us]: https://docs.qaul.net/contributors/social/_intro.html
 
-use serde::{Deserialize, Serialize, Serializer, de::{Deserializer, Visitor, SeqAccess}};
+use serde::{
+    de::{Deserializer, SeqAccess, Visitor},
+    Deserialize, Serialize, Serializer,
+};
 use std::{
     fmt::{self, Debug, Display, Formatter},
     string::ToString,
@@ -144,7 +147,7 @@ impl Serialize for Identity {
         S: Serializer,
     {
         if ser.is_human_readable() {
-            ser.serialize_str(&self.to_string()) 
+            ser.serialize_str(&self.to_string())
         } else {
             ser.serialize_bytes(&self.0)
         }
@@ -152,15 +155,18 @@ impl Serialize for Identity {
 }
 
 impl<'de> Deserialize<'de> for Identity {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> 
-    where D: Deserializer<'de> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         use serde::de::Error;
 
         struct IdentityVisitor;
 
         impl IdentityVisitor {
             fn from_str<E: Error>(v: &str) -> Result<Identity, E> {
-                let v : Vec<u8> = v.split(" ")
+                let v: Vec<u8> = v
+                    .split(" ")
                     .map(|s| hex::decode(s).map_err(|e| E::custom(e)))
                     // I don't like this way of propagating errors up but the alternative
                     // is a for loop which i also don't like
@@ -175,27 +181,35 @@ impl<'de> Deserialize<'de> for Identity {
             fn from_bytes<E: Error, V: AsRef<[u8]>>(v: V) -> Result<Identity, E> {
                 let v = v.as_ref();
                 if v.len() != ID_LEN {
-                    return Err(E::custom(format!("Expected {} bytes, got {}", ID_LEN, v.len()))); 
+                    return Err(E::custom(format!(
+                        "Expected {} bytes, got {}",
+                        ID_LEN,
+                        v.len()
+                    )));
                 }
 
-                Ok(Identity(v.iter()
-                    .enumerate()
-                    .take(ID_LEN)
-                    .fold([0; ID_LEN], |mut buf, (i, u)| {
+                Ok(Identity(v.iter().enumerate().take(ID_LEN).fold(
+                    [0; ID_LEN],
+                    |mut buf, (i, u)| {
                         buf[i] = *u;
                         buf
-                    })))
+                    },
+                )))
             }
         }
 
         impl<'de> Visitor<'de> for IdentityVisitor {
-            type Value = Identity; 
+            type Value = Identity;
 
             fn expecting(&self, f: &mut Formatter) -> fmt::Result {
-                write!(f, "Either a {l} byte array or a hex string representing {l} bytes", l = ID_LEN)
+                write!(
+                    f,
+                    "Either a {l} byte array or a hex string representing {l} bytes",
+                    l = ID_LEN
+                )
             }
 
-            fn visit_borrowed_str<E: Error>(self, v: &'de str) -> Result<Self::Value, E> { 
+            fn visit_borrowed_str<E: Error>(self, v: &'de str) -> Result<Self::Value, E> {
                 Self::from_str(v)
             }
 
@@ -211,8 +225,10 @@ impl<'de> Deserialize<'de> for Identity {
                 Self::from_bytes(v)
             }
 
-            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error> 
-            where A: SeqAccess<'de> {
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
                 let mut v = Vec::new();
                 while let Some(b) = seq.next_element::<u8>()? {
                     v.push(b);
@@ -233,8 +249,8 @@ impl<'de> Deserialize<'de> for Identity {
 #[cfg(test)]
 mod test {
     use super::*;
-    use serde_json;
     use bincode;
+    use serde_json;
 
     #[test]
     fn json_serde() {
@@ -250,12 +266,31 @@ mod test {
     fn bincode_serde() {
         let s = b"yellow submarine";
         let i = Identity::truncate(&s.to_vec());
-        let v : Vec<u8> = bincode::serialize(&i).unwrap();
+        let v: Vec<u8> = bincode::serialize(&i).unwrap();
         assert_eq!(
-            v, 
-            vec![16, 0, 0, 0, 0, 0, 0, 0, 121, 101, 108, 108, 111, 119, 32, 115, 117, 98, 109, 97, 114, 105, 110, 101],
+            v,
+            vec![
+                16, 0, 0, 0, 0, 0, 0, 0, 121, 101, 108, 108, 111, 119, 32, 115, 117, 98, 109, 97,
+                114, 105, 110, 101
+            ],
         );
         let i2 = bincode::deserialize(&v).unwrap();
+        assert_eq!(i, i2);
+    }
+
+    #[test]
+    fn conjoiner_serde() {
+        let s = b"yellow submarine";
+        let i = Identity::truncate(&s.to_vec());
+        let v: Vec<u8> = conjoiner_engine::serialise(&i).unwrap();
+        assert_eq!(
+            v,
+            vec![
+                40, 55, 57, 54, 53, 32, 54, 67, 54, 67, 32, 54, 70, 55, 55, 32, 50, 48, 55, 51, 32,
+                32, 55, 53, 54, 50, 32, 54, 68, 54, 49, 32, 55, 50, 54, 57, 32, 54, 69, 54, 53
+            ],
+        );
+        let i2 = conjoiner_engine::deserialise(&v).unwrap();
         assert_eq!(i, i2);
     }
 }
