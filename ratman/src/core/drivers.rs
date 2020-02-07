@@ -57,7 +57,7 @@ impl DriverMap {
     {
         let map: &mut EpVec = std::mem::transmute(&self.map);
         let curr = self.curr.fetch_add(1, Ordering::Relaxed);
-        map[curr + 1] = Box::new(ep);
+        map.push(Box::new(ep));
     }
 
     /// Get raw mutable access to an endpoint (see `add` for more)
