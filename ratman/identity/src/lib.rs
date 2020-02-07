@@ -20,7 +20,7 @@
 //!
 //! [contact us]: https://docs.qaul.net/contributors/social/_intro.html
 
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Serialize, Serializer, de::{Deserializer, Visitor, SeqAccess}};
 use std::{
     fmt::{self, Debug, Display, Formatter},
     string::ToString,
@@ -38,12 +38,6 @@ pub const ID_LEN: usize = 16;
 /// implementation will never change.
 #[derive(Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct Identity([u8; ID_LEN]);
-
-impl ToString for Identity {
-    fn to_string(&self) -> String {
-        format!("{}", self)
-    }
-}
 
 impl Debug for Identity {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -147,12 +141,91 @@ impl AsRef<[u8]> for Identity {
 impl Serialize for Identity {
     fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
     where
-        S: Serialize,
+        S: Serializer,
     {
         if ser.is_human_readable() {
             self.to_string().serialize(ser)
         } else {
             self.serialize(ser)
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for Identity {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> 
+    where D: Deserializer<'de> {
+        use serde::de::Error;
+
+        struct IdentityVisitor;
+
+        impl IdentityVisitor {
+            fn from_str<E: Error>(v: &str) -> Result<Identity, E> {
+                let v : Vec<u8> = v.split(" ")
+                    .map(|s| hex::decode(s).map_err(|e| E::custom(e)))
+                    // I don't like this way of propagating errors up but the alternative
+                    // is a for loop which i also don't like
+                    .collect::<Result<Vec<Vec<u8>>, E>>()?
+                    .into_iter()
+                    .flatten()
+                    .collect();
+
+                Self::from_bytes(&v)
+            }
+
+            fn from_bytes<E: Error, V: AsRef<[u8]>>(v: V) -> Result<Identity, E> {
+                let v = v.as_ref();
+                if v.len() != ID_LEN {
+                    return Err(E::custom(format!("Expected {} bytes, got {}", ID_LEN, v.len()))); 
+                }
+
+                Ok(Identity(v.iter()
+                    .enumerate()
+                    .take(ID_LEN)
+                    .fold([0; ID_LEN], |mut buf, (i, u)| {
+                        buf[i] = *u;
+                        buf
+                    })))
+            }
+        }
+
+        impl<'de> Visitor<'de> for IdentityVisitor {
+            type Value = Identity; 
+
+            fn expecting(&self, f: &mut Formatter) -> fmt::Result {
+                write!(f, "Either a {l} byte array or a hex string representing {l} bytes", l = ID_LEN)
+            }
+
+            fn visit_borrowed_str<E: Error>(self, v: &'de str) -> Result<Self::Value, E> { 
+                Self::from_str(v)
+            }
+
+            fn visit_string<E: Error>(self, v: String) -> Result<Self::Value, E> {
+                Self::from_str(&v)
+            }
+
+            fn visit_borrowed_bytes<E: Error>(self, v: &'de [u8]) -> Result<Self::Value, E> {
+                Self::from_bytes(v)
+            }
+
+            fn visit_byte_buf<E: Error>(self, v: Vec<u8>) -> Result<Self::Value, E> {
+                Self::from_bytes(v)
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error> 
+            where A: SeqAccess<'de> {
+                let mut v = Vec::new();
+                while let Some(b) = seq.next_element::<u8>()? {
+                    v.push(b);
+                }
+
+                Self::from_bytes(v)
+            }
+        }
+
+        if deserializer.is_human_readable() {
+            deserializer.deserialize_str(IdentityVisitor)
+        } else {
+            deserializer.deserialize_bytes(IdentityVisitor)
         }
     }
 }
