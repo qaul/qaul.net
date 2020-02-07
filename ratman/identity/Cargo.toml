@@ -15,5 +15,9 @@ serde = { version = "1.0", features = ["derive"] }
 blake2 = { version = "0.8.0", optional = true }
 hex = "0.4"
 
+[dev-dependencies]
+serde_json = "1.0"
+bincode = "1.2"
+
 [package.metadata.docs.rs]
 all-features = true

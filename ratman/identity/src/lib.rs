@@ -144,9 +144,9 @@ impl Serialize for Identity {
         S: Serializer,
     {
         if ser.is_human_readable() {
-            self.to_string().serialize(ser)
+            ser.serialize_str(&self.to_string()) 
         } else {
-            self.serialize(ser)
+            ser.serialize_bytes(&self.0)
         }
     }
 }
@@ -227,5 +227,35 @@ impl<'de> Deserialize<'de> for Identity {
         } else {
             deserializer.deserialize_bytes(IdentityVisitor)
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use serde_json;
+    use bincode;
+
+    #[test]
+    fn json_serde() {
+        let s = b"yellow submarine";
+        let i = Identity::truncate(&s.to_vec());
+        let v = serde_json::to_string(&i).unwrap();
+        assert_eq!(v, "\"7965 6C6C 6F77 2073  7562 6D61 7269 6E65\"");
+        let i2 = serde_json::from_str(&v).unwrap();
+        assert_eq!(i, i2);
+    }
+
+    #[test]
+    fn bincode_serde() {
+        let s = b"yellow submarine";
+        let i = Identity::truncate(&s.to_vec());
+        let v : Vec<u8> = bincode::serialize(&i).unwrap();
+        assert_eq!(
+            v, 
+            vec![16, 0, 0, 0, 0, 0, 0, 0, 121, 101, 108, 108, 111, 119, 32, 115, 117, 98, 109, 97, 114, 105, 110, 101],
+        );
+        let i2 = bincode::deserialize(&v).unwrap();
+        assert_eq!(i, i2);
     }
 }
