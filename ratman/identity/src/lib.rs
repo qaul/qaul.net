@@ -67,11 +67,11 @@ impl Identity {
     /// enough, but extra data will simply be discarded.
     pub fn truncate<'vec, V: Into<&'vec Vec<u8>>>(vec: V) -> Self {
         let vec = vec.into();
-        assert!(vec.len() >= 16);
+        assert!(vec.len() >= ID_LEN);
 
         Self(
             vec.into_iter()
-                .zip(0..16)
+                .zip(0..ID_LEN)
                 .take(ID_LEN)
                 .fold([0; ID_LEN], |mut buf, (u, i)| {
                     buf[i] = *u;
