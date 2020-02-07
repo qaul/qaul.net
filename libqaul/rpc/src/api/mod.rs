@@ -1,6 +1,7 @@
 //! API wrapper structures
 
 pub mod contacts;
+pub mod messages;
 
 /// Represents a generic change made to some structure
 pub enum Change<T> {
