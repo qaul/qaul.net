@@ -5,7 +5,7 @@
 //! It's left to the implementing application to map these to some
 //! useful source of identity.  This crate also provides a hashing
 //! constructor behind the `digest` feature flag which can be used to
-//! hash a secret to derive the identity value. 
+//! hash a secret to derive the identity value.
 //!
 //! Whatever scheme is chosen, two principles about identity must not
 //! be violated:
@@ -20,8 +20,13 @@
 //!
 //! [contact us]: https://docs.qaul.net/contributors/social/_intro.html
 
-use serde::{Deserialize, Serialize};
-use std::fmt::{self, Debug, Display, Formatter};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::{
+    fmt::{self, Debug, Display, Formatter},
+    string::ToString,
+};
+
+/// Length of the identity buffer
 pub const ID_LEN: usize = 16;
 
 /// A Ratman network identity
@@ -31,8 +36,14 @@ pub const ID_LEN: usize = 16;
 /// string comparison.  While this might be convenient in certain API
 /// settings, we can't make the promise that the `Display`
 /// implementation will never change.
-#[derive(Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct Identity([u8; ID_LEN]);
+
+impl ToString for Identity {
+    fn to_string(&self) -> String {
+        format!("{}", self)
+    }
+}
 
 impl Debug for Identity {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -130,5 +141,18 @@ impl From<&Identity> for [u8; ID_LEN] {
 impl AsRef<[u8]> for Identity {
     fn as_ref(&self) -> &[u8] {
         &self.0
+    }
+}
+
+impl Serialize for Identity {
+    fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serialize,
+    {
+        if ser.is_human_readable() {
+            self.to_string().serialize(ser)
+        } else {
+            self.serialize(ser)
+        }
     }
 }
