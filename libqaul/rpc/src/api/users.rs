@@ -1,5 +1,6 @@
 //! Users API structures
 
+use std::collections::{BTreeMap, BTreeSet};
 use libqaul::{Identity, users::UserAuth};
 use crate::Change;
 

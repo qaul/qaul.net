@@ -1,6 +1,7 @@
 //! API wrapper structures
 
 pub mod contacts;
+pub mod users;
 pub mod messages;
 
 /// Represents a generic change made to some structure
