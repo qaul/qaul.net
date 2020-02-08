@@ -3,6 +3,7 @@
 pub mod contacts;
 pub mod users;
 pub mod messages;
+pub mod files;
 
 /// Represents a generic change made to some structure
 pub enum Change<T> {
