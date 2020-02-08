@@ -29,7 +29,7 @@ use std::{
     string::ToString,
 };
 
-/// Length of the identity buffer
+/// Lengthc of the identity buffer
 pub const ID_LEN: usize = 16;
 
 /// A Ratman network identity
@@ -294,3 +294,22 @@ mod test {
         assert_eq!(i, i2);
     }
 }
+
+
+// impl DeserializeOwned for Identity {
+//     fn deserialize<D>(der: D) -> Result<Self, D::Error>
+//     where
+//         D: Deserializer,
+//     {
+//         if der.is_human_readable() {
+//             // Deserialize from a human-readable string like "2015-05-15T17:01:00Z".
+//             let s = String::deserialize(deserializer)?;
+//             Timestamp::from_str(&s).map_err(de::Error::custom)
+//         } else {
+//             // Deserialize from a compact binary representation, seconds since
+//             // the Unix epoch.
+//             let n = u64::deserialize(deserializer)?;
+//             Ok(Timestamp::EPOCH + Duration::seconds(n))
+//         }
+//     }
+// }

@@ -51,13 +51,14 @@ impl DriverMap {
     /// a handler here that can spawn tasks for an endpoint, meaning
     /// we never have to yield references to poll.. food for thought!
     #[allow(mutable_transmutes)]
-    pub(crate) unsafe fn add<E>(&self, ep: E)
+    pub(crate) unsafe fn add<E>(&self, ep: E) -> usize
     where
         E: Endpoint + 'static + Send + Sync,
     {
         let map: &mut EpVec = std::mem::transmute(&self.map);
         let curr = self.curr.fetch_add(1, Ordering::Relaxed);
         map.push(Box::new(ep));
+        curr
     }
 
     /// Get raw mutable access to an endpoint (see `add` for more)
