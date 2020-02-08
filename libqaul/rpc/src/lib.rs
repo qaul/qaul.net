@@ -19,4 +19,4 @@
 mod api;
 pub use api::{contacts, files, messages, users, Change};
 
-mod proto;
+//mod proto;

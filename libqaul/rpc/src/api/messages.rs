@@ -6,8 +6,10 @@ use libqaul::{
     users::UserAuth,
     Identity,
 };
+use serde::{Serialize, Deserialize};
 
 /// Send a raw payload message
+#[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
 pub struct Send {
     auth: UserAuth,
     recipient: Recipient,
@@ -20,12 +22,14 @@ pub struct Send {
 /// Polling the API for changes might not be the most performant way
 /// of getting new messages.  Instead, consider setting up a push
 /// listener for your transport layer.
+#[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
 pub struct Poll {
     auth: UserAuth,
     service: String,
 }
 
 /// Setup a listener/ push handler for messages
+#[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
 pub struct Subscribe {
     auth: UserAuth,
     service: String,
@@ -37,6 +41,7 @@ pub struct Subscribe {
 /// Instead of subscribing to the set of message changes for a
 /// service, query the existing set of messages, according to some
 /// parameters
+#[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
 pub struct Query {
     auth: UserAuth,
     service: String,

@@ -3,6 +3,7 @@ use crate::{
     users::{UserAuth, UserProfile},
     Identity, Qaul,
 };
+use serde::{Serialize, Deserialize};
 
 /// A user-local set of contact metadata in their contact book
 ///

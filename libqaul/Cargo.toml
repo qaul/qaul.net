@@ -19,6 +19,7 @@ base64 = "0.10"
 blake2 = "0.8.0"
 mime = "0.3"
 rand = "0.7"
+hex = "0.4"
 
 [features]
 default = ["generate-message"]
