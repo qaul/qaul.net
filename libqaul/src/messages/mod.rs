@@ -9,9 +9,8 @@ pub(crate) use self::store::{MsgState, MsgStore};
 pub(crate) mod message_generation;
 
 use crate::error::{Error, Result};
-use ratman_netmod::Recipient as RatRecipient;
 use ratman::{
-    Identity, Message as RatMessage, MsgId as RatMsgId, Router,
+    netmod::Recipient as RatRecipient, Identity, Message as RatMessage, MsgId as RatMsgId, Router,
 };
 use serde::{Deserialize, Serialize};
 
@@ -100,15 +99,13 @@ impl MsgUtils {
     /// Sends a `RatMessageProto`, calls a set of `send` commands
     pub(crate) async fn send(router: &Router, msg: RatMessageProto) -> Result<()> {
         let messages: Vec<RatMessage> = msg.into();
-        for result in messages
-            .into_iter()
-            .map(|msg| { router.send(msg) }) {
-                match result.await {
-                    Ok(_) => (),
-                    Err(e) => return Err(Error::CommFault)
-                }
+        for result in messages.into_iter().map(|msg| router.send(msg)) {
+            match result.await {
+                Ok(_) => (),
+                Err(e) => return Err(Error::CommFault),
             }
-            return Ok(())
+        }
+        return Ok(());
     }
 
     /// Process incoming RATMAN message, verifying it's signature and payload

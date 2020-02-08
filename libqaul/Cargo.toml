@@ -7,10 +7,8 @@ license = "AGPL-3.0"
 edition = "2018"
 
 [dependencies]
-identity = { path = "../ratman/identity", package = "ratman-identity", features = ["digest"] }
-libqaul-ipc = { path = "ipc" }
+# Re-exports correct netmod and identity modules
 ratman = { path = "../ratman" }
-ratman-netmod = { path = "../ratman/netmod" }
 
 async-std = "1.0"
 alexandria = { git = "https://git.open-communication.net/qaul/alexandria" }

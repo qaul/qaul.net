@@ -1,4 +1,5 @@
-pub use identity::Identity;
+// Re-export Identity to the rest of the crate
+pub use ratman::Identity;
 
 use crate::{
     api::{Contacts, Messages, Services, Users},

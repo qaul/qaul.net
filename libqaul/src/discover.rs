@@ -4,8 +4,7 @@ use crate::{
     Qaul,
 };
 use async_std::task;
-use ratman_netmod::{Recipient};
-use ratman::{Identity, Protocol, Router};
+use ratman::{Identity, Protocol, Router, netmod::{Recipient}};
 use std::{
     collections::BTreeMap,
     sync::{
