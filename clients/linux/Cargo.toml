@@ -7,7 +7,7 @@ license = "GPL-3.0"
 
 [dependencies]
 libqaul = { path = "../../libqaul" }
-messaging = { path = "../../libqaul/service/messaging", package = "qaul-messaging" }
+chat = { path = "../../libqaul/service/chat", package = "qaul-chat" }
 
 ratman = { path = "../../ratman" }
 ratman-netmod = { path = "../../ratman/netmod" }

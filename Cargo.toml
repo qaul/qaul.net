@@ -6,11 +6,12 @@ members = [
 
     # libqaul additions
     "libqaul/http",
-    "libqaul/ipc",
     "libqaul/rpc",
+    "libqaul/ipc",
 
     # qaul.net main services
-    "libqaul/service/messaging",
+    "libqaul/service/chat",
+    # "libqaul/service/feed",
     "libqaul/service/files",
 
     # decentralised routing protocol

@@ -1049,6 +1049,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "qaul-chat"
+version = "0.1.0"
+dependencies = [
+ "async-std",
+ "conjoiner-engine",
+ "libqaul",
+ "qaul-files",
+ "serde",
+]
+
+[[package]]
 name = "qaul-files"
 version = "0.1.0"
 dependencies = [
@@ -1064,19 +1075,9 @@ dependencies = [
  "async-std",
  "libqaul",
  "netmod-mem",
- "qaul-messaging",
+ "qaul-chat",
  "ratman",
  "ratman-netmod",
-]
-
-[[package]]
-name = "qaul-messaging"
-version = "0.1.0"
-dependencies = [
- "conjoiner-engine",
- "libqaul",
- "qaul-files",
- "serde",
 ]
 
 [[package]]
