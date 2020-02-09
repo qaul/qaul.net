@@ -19,8 +19,8 @@
 //! set `QAUL_LANG=ar` (or others) as an environment variable to get
 //! translations of these messages, with `en` being the fallback.
 
-use ratman::Error as RatError;
 use conjoiner::Error as ConjError;
+use ratman::Error as RatError;
 use std::{
     error::Error as StdError,
     fmt::{self, Display, Formatter},

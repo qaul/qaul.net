@@ -11,7 +11,7 @@ use crate::{
     users::UserStore,
 };
 
-use ratman::{Router};
+use ratman::Router;
 use std::sync::Arc;
 
 /// Primary context structure for `libqaul`
@@ -65,7 +65,7 @@ impl Qaul {
     #[allow(warnings)]
     pub fn dummy() -> Self {
         let router = Router::new();
-        
+
         Self {
             router,
             users: UserStore::new(),

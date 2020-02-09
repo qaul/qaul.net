@@ -3,11 +3,7 @@ use crate::{
     users::{User, UserProfile},
     utils, Identity, Qaul,
 };
-use serde::{
-    Serialize, Deserialize,
-    de::{Deserializer},
-    ser::{Serializer},
-};
+use serde::{de::Deserializer, ser::Serializer, Deserialize, Serialize};
 
 /// A random authentication token
 pub type Token = String;
@@ -129,11 +125,16 @@ struct UserAuthSer<'a> {
 
 impl serde::ser::Serialize for UserAuth {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-    where S: Serializer {
-        serde::ser::Serialize::serialize(&UserAuthSer {
-            id: &self.0,
-            token: &self.1,
-        }, serializer)
+    where
+        S: Serializer,
+    {
+        serde::ser::Serialize::serialize(
+            &UserAuthSer {
+                id: &self.0,
+                token: &self.1,
+            },
+            serializer,
+        )
     }
 }
 
@@ -146,9 +147,11 @@ struct UserAuthDe {
 }
 
 impl<'de> serde::de::Deserialize<'de> for UserAuth {
-    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error> 
-    where D: Deserializer<'de> {
-        let ua : UserAuthDe = serde::de::Deserialize::deserialize(deserializer)?;
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let ua: UserAuthDe = serde::de::Deserialize::deserialize(deserializer)?;
         Ok(UserAuth(ua.id, ua.token))
     }
 }

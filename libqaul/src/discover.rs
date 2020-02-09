@@ -4,7 +4,7 @@ use crate::{
     Qaul,
 };
 use async_std::task;
-use ratman::{Identity, Protocol, Router, netmod::{Recipient}};
+use ratman::{netmod::Recipient, Identity, Protocol, Router};
 use std::{
     collections::BTreeMap,
     sync::{
@@ -47,10 +47,7 @@ pub(crate) struct Discovery;
 
 impl Discovery {
     /// Start a discovery service running inside libqaul
-    pub(crate) fn start(
-        qaul: Arc<Qaul>,
-        router: Arc<Router>,
-    ) -> Sender<DiscCmd> {
+    pub(crate) fn start(qaul: Arc<Qaul>, router: Arc<Router>) -> Sender<DiscCmd> {
         let run = Arc::new(RunLock::new(true));
         let (sender, rx) = channel();
 

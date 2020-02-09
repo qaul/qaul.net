@@ -1,8 +1,4 @@
-use crate::{
-    error::Result,
-    users::UserAuth,
-    Identity, Qaul,
-};
+use crate::{error::Result, users::UserAuth, Identity, Qaul};
 
 /// A user-local set of contact metadata in their contact book
 ///
