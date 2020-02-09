@@ -193,18 +193,21 @@ impl MsgStore {
 
 #[cfg(test)]
 mod tests {
-    use crate::messages::{Message, MsgId, MsgState, MsgStore, SigTrust};
+    use crate::messages::{Message, MessageQuery, MsgId, MsgState, MsgStore, MsgTag, SigTrust};
     use crate::{utils, Identity};
-    use std::sync::Arc;
+    use std::{collections::BTreeSet, sync::Arc};
 
     fn setup(id: Identity) -> MsgStore {
         let store = MsgStore::new();
+        let mut tags = BTreeSet::default();
+        tags.insert(MsgTag::new("room", vec![1, 3, 1, 2]));
         let msg = Message {
             id: MsgId::random(),
             sender: Identity::truncate(&utils::random(16)),
             associator: "__test".into(),
             sign: SigTrust::Unverified,
             payload: vec![1, 3, 1, 2],
+            tags,
         };
         store.insert(id, MsgState::Read(Arc::new(msg)));
         store
@@ -212,8 +215,24 @@ mod tests {
 
     #[test]
     fn simple() {
-        let id = Identity::truncate(&utils::random(16));
+        let id = Identity::random();
         let store = setup(id);
         assert!(store.query(id).exec().unwrap().len() > 0);
+    }
+
+    #[test]
+    fn query_tags() {
+        let id = Identity::random();
+        let store = setup(id);
+
+        assert!(
+            store
+                .query(id)
+                .constraints(MessageQuery::Tag(MsgTag::new("room", vec![1, 3, 1, 2])))
+                .exec()
+                .unwrap()
+                .len()
+                > 0
+        );
     }
 }
