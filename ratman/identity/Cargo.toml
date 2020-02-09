@@ -9,16 +9,18 @@ license = "AGPL-3.0"
 
 [features]
 digest = ["blake2"]
+random = ["rand"]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 blake2 = { version = "0.8.0", optional = true }
+rand = { version = "0.7", optional = true }
 hex = "0.4"
 
 [dev-dependencies]
+conjoiner-engine = "1.0"
 serde_json = "1.0"
 bincode = "1.2"
-conjoiner-engine = "1.0"
 
 [package.metadata.docs.rs]
 all-features = true

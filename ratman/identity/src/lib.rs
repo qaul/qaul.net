@@ -104,6 +104,11 @@ impl Identity {
         hasher.input(vec.into());
         Self::truncate(&hasher.vec_result())
     }
+
+    #[cfg(feature = "random")]
+    pub fn random() -> Self {
+        unimplemented!()
+    }
 }
 
 /// Implement RAW `From` binary array

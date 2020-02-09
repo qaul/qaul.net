@@ -1,20 +1,13 @@
-use crate::error::{Error, Result};
-use crate::messages::{Envelope, MsgUtils, RatMessageProto};
-use crate::messages::message_generation;
-use crate::qaul::{Identity, Qaul};
-use crate::users::UserAuth;
-use crate::utils::VecUtils;
+use crate::{
+    error::{Error, Result},
+    messages::{Envelope, MsgUtils, RatMessageProto},
+    qaul::{Identity, Qaul},
+    users::UserAuth,
+    utils::VecUtils,
+};
 
-use serde::{
-    Deserialize, Serialize,
-    de::{Deserializer},
-    ser::{Serializer},
-};
-use std::{
-    fmt::{Display, Debug, Formatter, self},
-    sync::Arc,
-};
-use hex;
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 /// A reference to an internally stored message object
 pub type MsgRef = Arc<Message>;
@@ -23,184 +16,7 @@ pub type MsgRef = Arc<Message>;
 pub const ID_LEN: usize = 16;
 
 /// A unique, randomly generated message ID
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct MsgId(pub(crate) [u8; ID_LEN]);
-
-impl MsgId {
-    /// Generate a new **random** message ID
-    pub(crate) fn new() -> Self {
-        crate::utils::random(ID_LEN)
-            .into_iter()
-            .zip(0..ID_LEN)
-            .fold(Self([0; ID_LEN]), |mut acc, (x, i)| {
-                acc.0[i] = x;
-                acc
-            })
-    }
-}
-
-impl Debug for MsgId {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "<MSG ID: {}>", hex::encode_upper(self))
-    }
-}
-
-impl Display for MsgId {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let s = hex::encode_upper(self);
-        let mut v = s
-            .as_bytes()
-            .chunks(4)
-            .map(std::str::from_utf8)
-            .collect::<std::result::Result<Vec<_>, _>>()
-            .unwrap()
-            .join(" ");
-        v.insert(20, ' ');
-        write!(f, "{}", v)
-    }
-}
-
-
-/// Implement RAW `From` binary array
-impl From<[u8; ID_LEN]> for MsgId {
-    fn from(i: [u8; ID_LEN]) -> Self {
-        Self(i)
-    }
-}
-
-/// Implement RAW `From` binary (reference) array
-impl From<&[u8; ID_LEN]> for MsgId {
-    fn from(i: &[u8; ID_LEN]) -> Self {
-        Self(i.clone())
-    }
-}
-
-/// Implement binary array `From` RAW
-impl From<MsgId> for [u8; ID_LEN] {
-    fn from(i: MsgId) -> Self {
-        i.0
-    }
-}
-
-/// Implement binary array `From` RAW reference
-impl From<&MsgId> for [u8; ID_LEN] {
-    fn from(i: &MsgId) -> Self {
-        i.0.clone()
-    }
-}
-
-/// Implement RAW identity to binary array reference
-impl AsRef<[u8]> for MsgId {
-    fn as_ref(&self) -> &[u8] {
-        &self.0
-    }
-}
-
-impl serde::ser::Serialize for MsgId {
-    fn serialize<S>(&self, ser: S) -> std::result::Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        if ser.is_human_readable() {
-            ser.serialize_str(&self.to_string())
-        } else {
-            ser.serialize_bytes(&self.0)
-        }
-    }
-}
-
-impl<'de> serde::de::Deserialize<'de> for MsgId {
-    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        use serde::de::{Error, Visitor, SeqAccess};
-        use std::result::Result;
-
-        struct IdentityVisitor;
-
-        impl IdentityVisitor {
-            fn from_str<E: Error>(v: &str) -> Result<MsgId, E> {
-                let v: Vec<u8> = v
-                    .split(" ")
-                    .map(|s| hex::decode(s).map_err(|e| E::custom(e)))
-                    // I don't like this way of propagating errors up but the alternative
-                    // is a for loop which i also don't like
-                    .collect::<Result<Vec<Vec<u8>>, E>>()?
-                    .into_iter()
-                    .flatten()
-                    .collect();
-
-                Self::from_bytes(&v)
-            }
-
-            fn from_bytes<E: Error, V: AsRef<[u8]>>(v: V) -> Result<MsgId, E> {
-                let v = v.as_ref();
-                if v.len() != ID_LEN {
-                    return Err(E::custom(format!(
-                        "Expected {} bytes, got {}",
-                        ID_LEN,
-                        v.len()
-                    )));
-                }
-
-                Ok(MsgId(v.iter().enumerate().take(ID_LEN).fold(
-                    [0; ID_LEN],
-                    |mut buf, (i, u)| {
-                        buf[i] = *u;
-                        buf
-                    },
-                )))
-            }
-        }
-
-        impl<'de> Visitor<'de> for IdentityVisitor {
-            type Value = MsgId;
-
-            fn expecting(&self, f: &mut Formatter) -> fmt::Result {
-                write!(
-                    f,
-                    "Either a {l} byte array or a hex string representing {l} bytes",
-                    l = ID_LEN
-                )
-            }
-
-            fn visit_borrowed_str<E: Error>(self, v: &'de str) -> Result<Self::Value, E> {
-                Self::from_str(v)
-            }
-
-            fn visit_string<E: Error>(self, v: String) -> Result<Self::Value, E> {
-                Self::from_str(&v)
-            }
-
-            fn visit_borrowed_bytes<E: Error>(self, v: &'de [u8]) -> Result<Self::Value, E> {
-                Self::from_bytes(v)
-            }
-
-            fn visit_byte_buf<E: Error>(self, v: Vec<u8>) -> Result<Self::Value, E> {
-                Self::from_bytes(v)
-            }
-
-            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-            where
-                A: SeqAccess<'de>,
-            {
-                let mut v = Vec::new();
-                while let Some(b) = seq.next_element::<u8>()? {
-                    v.push(b);
-                }
-
-                Self::from_bytes(v)
-            }
-        }
-
-        if deserializer.is_human_readable() {
-            deserializer.deserialize_str(IdentityVisitor)
-        } else {
-            deserializer.deserialize_bytes(IdentityVisitor)
-        }
-    }
-}
+pub type MsgId = Identity;
 
 /// Signature trust level of an incoming `Message`
 ///
@@ -385,7 +201,7 @@ impl<'qaul> Messages<'qaul> {
         let (sender, _) = self.q.auth.trusted(user)?;
         let recipients = MsgUtils::readdress(&recipient);
         let associator = service.into();
-        let id = MsgId::new();
+        let id = MsgId::random();
         let sign = SigTrust::Trusted;
 
         let env = Envelope {
@@ -416,7 +232,8 @@ impl<'qaul> Messages<'qaul> {
                 recipients,
                 signature,
             },
-        ).await
+        )
+        .await
         .map(|_| id)
     }
 

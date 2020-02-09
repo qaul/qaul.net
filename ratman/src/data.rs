@@ -12,12 +12,7 @@ use serde::{Deserialize, Serialize};
 pub type Signature = Vec<u8>;
 
 /// A unique, randomly generated message ID
-///
-/// The message ID is taken from the SeqId of the underlying frame
-/// sequenc, meaning that the same message will have the same ID on
-/// two separate devices.
-#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
-pub struct MsgId(pub [u8; 16]);
+pub type MsgId = Identity;
 
 /// An atomic message with a variable sized payload
 ///

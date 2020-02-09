@@ -1150,6 +1150,7 @@ dependencies = [
  "blake2",
  "conjoiner-engine",
  "hex",
+ "rand",
  "serde",
  "serde_json",
 ]

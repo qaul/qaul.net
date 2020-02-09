@@ -31,7 +31,7 @@ impl Protocol {
     /// Build an announcement message for a user
     pub fn announce(sender: Identity) -> Message {
         Message::build_signed(
-            MsgId([0; 16]),
+            MsgId::random(),
             sender,
             Recipient::Flood,
             vec![0],
@@ -41,7 +41,7 @@ impl Protocol {
     /// Build a message that synchronises routing table state
     pub fn sync_rt(sender: Identity, recipient: Identity, _known: Vec<Identity>) -> Message {
         Message::build_signed(
-            MsgId([0; 16]),
+            MsgId::random(),
             sender.clone(),
             Recipient::User(recipient),
             vec![0],

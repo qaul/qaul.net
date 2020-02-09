@@ -85,7 +85,7 @@ impl MessageGenBuilder {
             ))
         });
         let associator = self.associator.clone().unwrap_or("".into());
-        let id = self.id.clone().unwrap_or_else(|| MsgId::new());
+        let id = self.id.clone().unwrap_or_else(|| MsgId::random());
         let payload = self
             .payload
             .clone()

@@ -30,18 +30,6 @@ pub(crate) struct Envelope {
     pub(crate) payload: Vec<u8>,
 }
 
-impl From<RatMsgId> for MsgId {
-    fn from(id: RatMsgId) -> Self {
-        Self(id.0)
-    }
-}
-
-impl From<MsgId> for RatMsgId {
-    fn from(id: MsgId) -> Self {
-        Self(id.0)
-    }
-}
-
 /// A `ratman::Message` set prototype structure
 pub(crate) struct RatMessageProto {
     /// The high level `Message` to send and validate for
@@ -92,7 +80,6 @@ impl MsgUtils {
     /// Construct a cryptographic signature for an inner `Message`
     pub(crate) fn sign(env: &Envelope) -> Vec<u8> {
         let mut v = vec![1, 3, 1, 2];
-        v.extend_from_slice(&env.id.0);
         v
     }
 
