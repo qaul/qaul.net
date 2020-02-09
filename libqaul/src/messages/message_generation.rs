@@ -78,6 +78,7 @@ impl MessageGenBuilder {
             id,
             associator,
             sender,
+            tags: Default::default(),
             sign: self.sign.clone().unwrap_or(SigTrust::Unverified),
             payload,
         }

@@ -7,7 +7,7 @@ use crate::{
 
 use ratman::netmod::Recipient;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+use std::{collections::BTreeSet, sync::Arc};
 
 /// A reference to an internally stored message object
 pub type MsgRef = Arc<Message>;
@@ -42,6 +42,38 @@ impl SigTrust {
             Self::Trusted => Ok(()),
             Self::Unverified => Err(Error::NoSign),
             Self::Invalid => Err(Error::BadSign),
+        }
+    }
+}
+
+/// A generic message metadata tag
+///
+/// Because searching through payloads might be slow, and I/O
+/// intensive (with secret messages), there's a metadata interface
+/// with tags, where a message in the store can be inserted with tags.
+/// These are included in the wire-format, meaning that they will get
+/// transferred across to another node.
+///
+/// This can be used to implement things like conversation ID's,
+/// In-Reply-To, and more.
+#[derive(Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Serialize, Deserialize)]
+pub struct MsgTag {
+    /// A string key for a tag
+    pub key: String,
+    /// Some binary data that is up to a service to interpret
+    pub val: Vec<u8>,
+}
+
+impl MsgTag {
+    /// Create a new MsgTag with key and value
+    pub fn new<K, I>(key: K, val: I) -> Self
+    where
+        K: Into<String>,
+        I: IntoIterator<Item = u8>,
+    {
+        Self {
+            key: key.into(),
+            val: val.into_iter().collect(),
         }
     }
 }
@@ -98,6 +130,8 @@ pub struct Message {
     pub sender: Identity,
     /// The embedded service associator
     pub associator: String,
+    /// A tag store for persistent message metadata
+    pub tags: BTreeSet<MsgTag>,
     /// Verified signature data
     pub sign: SigTrust,
     /// A raw byte `Message` payload
@@ -118,10 +152,12 @@ pub struct Message {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum MessageQuery {
-    /// Single query for the exact message ID
+    /// Query for the exact message ID
     Id(MsgId),
     /// Query by who a `Message` was composed by
     Sender(Identity),
+    /// Search for a set of tag values
+    Tag(MsgTag),
 }
 
 /// API scope type to access messaging functions
@@ -194,6 +230,7 @@ impl<'qaul> Messages<'qaul> {
         let associator = service.into();
         let id = MsgId::random();
         let sign = SigTrust::Trusted;
+        let tags = BTreeSet::default();
 
         let env = Envelope {
             id,
@@ -210,6 +247,7 @@ impl<'qaul> Messages<'qaul> {
                 id,
                 sender,
                 associator,
+                tags,
                 payload,
                 sign,
             })),

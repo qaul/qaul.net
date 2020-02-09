@@ -91,6 +91,7 @@ impl MsgUtils {
             id: id.into(),
             sender,
             associator,
+            tags: Default::default(),
             sign: SigTrust::Unverified,
             payload,
         }

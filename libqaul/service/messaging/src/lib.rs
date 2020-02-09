@@ -52,6 +52,7 @@ impl TryFrom<MsgRef> for TextMessage {
             ref sign,
             ref payload,
             associator: _,
+            tags: _,
         } = msg.as_ref();
 
         Ok(Self {

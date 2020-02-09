@@ -89,6 +89,7 @@ impl<'store> StoreQuery<'store> {
                     .filter(|msg| match query {
                         Some(MessageQuery::Id(ref id)) => &msg.inner().id == id,
                         Some(MessageQuery::Sender(ref sender)) => &msg.inner().sender == sender,
+                        Some(MessageQuery::Tag(ref tag)) => msg.inner().tags.contains(tag),
                         None => true,
                     })
                     .take(limit.unwrap_or(usize::max_value()))
