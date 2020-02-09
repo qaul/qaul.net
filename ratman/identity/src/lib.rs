@@ -107,7 +107,11 @@ impl Identity {
 
     #[cfg(feature = "random")]
     pub fn random() -> Self {
-        unimplemented!()
+        use rand::RngCore;
+        let mut rng = rand::thread_rng();
+        let mut buf = [0; ID_LEN];
+        rng.fill_bytes(&mut buf);
+        Self(buf)
     }
 }
 

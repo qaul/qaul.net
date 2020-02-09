@@ -203,7 +203,7 @@ mod tests {
     fn setup(id: Identity) -> MsgStore {
         let store = MsgStore::new();
         let msg = Message {
-            id: MsgId::new(),
+            id: MsgId::random(),
             sender: Identity::truncate(&utils::random(16)),
             recipient: Recipient::User(id),
             associator: "__test".into(),
