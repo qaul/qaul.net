@@ -1,6 +1,6 @@
 use crate::{
     error::Result,
-    messages::{MessageQuery, MsgId, MsgRef},
+    messages::{MsgQuery, MsgId, MsgRef},
     Identity,
 };
 use std::{
@@ -16,7 +16,7 @@ pub(crate) struct StoreQuery<'store> {
     user: Identity,
     unread: bool,
     service: Option<String>,
-    query: Option<MessageQuery>,
+    query: Option<MsgQuery>,
     limit: Option<usize>,
 }
 
@@ -51,7 +51,7 @@ impl<'store> StoreQuery<'store> {
     }
 
     /// Filter messages additionally with a user provided query
-    pub(crate) fn constraints(self, query: MessageQuery) -> Self {
+    pub(crate) fn constraints(self, query: MsgQuery) -> Self {
         Self {
             query: Some(query),
             ..self
@@ -87,9 +87,9 @@ impl<'store> StoreQuery<'store> {
                         }
                     })
                     .filter(|msg| match query {
-                        Some(MessageQuery::Id(ref id)) => &msg.inner().id == id,
-                        Some(MessageQuery::Sender(ref sender)) => &msg.inner().sender == sender,
-                        Some(MessageQuery::Tag(ref tag)) => msg.inner().tags.contains(tag),
+                        Some(MsgQuery::Id(ref id)) => &msg.inner().id == id,
+                        Some(MsgQuery::Sender(ref sender)) => &msg.inner().sender == sender,
+                        Some(MsgQuery::Tag(ref tag)) => msg.inner().tags.contains(tag),
                         None => true,
                     })
                     .take(limit.unwrap_or(usize::max_value()))
@@ -193,14 +193,14 @@ impl MsgStore {
 
 #[cfg(test)]
 mod tests {
-    use crate::messages::{Message, MessageQuery, MsgId, MsgState, MsgStore, MsgTag, SigTrust};
-    use crate::{utils, Identity};
+    use crate::messages::{Message, MsgQuery, MsgId, MsgState, MsgStore, SigTrust};
+    use crate::{utils, Identity, Tag};
     use std::{collections::BTreeSet, sync::Arc};
 
     fn setup(id: Identity) -> MsgStore {
         let store = MsgStore::new();
         let mut tags = BTreeSet::default();
-        tags.insert(MsgTag::new("room", vec![1, 3, 1, 2]));
+        tags.insert(Tag::new("room", vec![1, 3, 1, 2]));
         let msg = Message {
             id: MsgId::random(),
             sender: Identity::truncate(&utils::random(16)),
@@ -228,7 +228,7 @@ mod tests {
         assert!(
             store
                 .query(id)
-                .constraints(MessageQuery::Tag(MsgTag::new("room", vec![1, 3, 1, 2])))
+                .constraints(MsgQuery::Tag(Tag::new("room", vec![1, 3, 1, 2])))
                 .exec()
                 .unwrap()
                 .len()

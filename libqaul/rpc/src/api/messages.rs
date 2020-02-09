@@ -1,7 +1,7 @@
 //! Messages API structures
 
 use libqaul::{
-    messages::{MessageQuery, Mode},
+    messages::{MsgQuery, Mode},
     users::UserAuth,
 };
 use serde::{Serialize, Deserialize};
@@ -43,5 +43,5 @@ pub struct Subscribe {
 pub struct Query {
     auth: UserAuth,
     service: String,
-    query: MessageQuery,
+    query: MsgQuery,
 }

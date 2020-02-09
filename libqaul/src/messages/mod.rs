@@ -1,7 +1,7 @@
 //! Service API messaging primitives
 
 // Public exports
-pub use crate::api::messages::{Message, MessageQuery, Mode, MsgId, MsgTag, MsgRef, SigTrust, ID_LEN};
+pub use crate::api::messages::{Message, Mode, MsgId, MsgQuery, MsgRef, SigTrust, ID_LEN};
 
 mod store;
 pub(crate) use self::store::{MsgState, MsgStore};

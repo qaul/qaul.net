@@ -9,7 +9,7 @@
 use conjoiner;
 use qaul::{
     error::{Error, Result},
-    messages::{Message, MessageQuery, Mode, MsgId, MsgRef, SigTrust},
+    messages::{Message, MsgQuery, Mode, MsgId, MsgRef, SigTrust},
     users::UserAuth,
     Identity, Qaul,
 };
@@ -108,7 +108,7 @@ impl Messaging {
     ) -> Result<MsgId> {
         self.qaul
             .messages()
-            .send(user, mode, ASC_NAME, conjoiner::serialise(&payload)?)
+            .send(user, mode, ASC_NAME, vec![], conjoiner::serialise(&payload)?)
             .await
     }
 
@@ -121,7 +121,7 @@ impl Messaging {
     }
 
     /// Query existing messages from this service with a query
-    pub fn query(&self, user: UserAuth, query: MessageQuery) -> Result<Vec<TextMessage>> {
+    pub fn query(&self, user: UserAuth, query: MsgQuery) -> Result<Vec<TextMessage>> {
         self.qaul
             .messages()
             .query(user, ASC_NAME, query)?

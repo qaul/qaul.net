@@ -3,11 +3,12 @@ use crate::{
     messages::{Envelope, MsgUtils, RatMessageProto},
     qaul::{Identity, Qaul},
     users::UserAuth,
+    Tag,
 };
 
 use ratman::netmod::Recipient;
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeSet, sync::Arc};
+use std::{collections::BTreeSet, iter::FromIterator, sync::Arc};
 
 /// A reference to an internally stored message object
 pub type MsgRef = Arc<Message>;
@@ -42,38 +43,6 @@ impl SigTrust {
             Self::Trusted => Ok(()),
             Self::Unverified => Err(Error::NoSign),
             Self::Invalid => Err(Error::BadSign),
-        }
-    }
-}
-
-/// A generic message metadata tag
-///
-/// Because searching through payloads might be slow, and I/O
-/// intensive (with secret messages), there's a metadata interface
-/// with tags, where a message in the store can be inserted with tags.
-/// These are included in the wire-format, meaning that they will get
-/// transferred across to another node.
-///
-/// This can be used to implement things like conversation ID's,
-/// In-Reply-To, and more.
-#[derive(Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Serialize, Deserialize)]
-pub struct MsgTag {
-    /// A string key for a tag
-    pub key: String,
-    /// Some binary data that is up to a service to interpret
-    pub val: Vec<u8>,
-}
-
-impl MsgTag {
-    /// Create a new MsgTag with key and value
-    pub fn new<K, I>(key: K, val: I) -> Self
-    where
-        K: Into<String>,
-        I: IntoIterator<Item = u8>,
-    {
-        Self {
-            key: key.into(),
-            val: val.into_iter().collect(),
         }
     }
 }
@@ -131,7 +100,7 @@ pub struct Message {
     /// The embedded service associator
     pub associator: String,
     /// A tag store for persistent message metadata
-    pub tags: BTreeSet<MsgTag>,
+    pub tags: BTreeSet<Tag>,
     /// Verified signature data
     pub sign: SigTrust,
     /// A raw byte `Message` payload
@@ -151,13 +120,13 @@ pub struct Message {
 /// returned. Without this parameter, all messages will be returned.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum MessageQuery {
+pub enum MsgQuery {
     /// Query for the exact message ID
     Id(MsgId),
     /// Query by who a `Message` was composed by
     Sender(Identity),
     /// Search for a set of tag values
-    Tag(MsgTag),
+    Tag(Tag),
 }
 
 /// API scope type to access messaging functions
@@ -215,22 +184,24 @@ impl<'qaul> Messages<'qaul> {
     /// a payload or recipient is however, and payloads that are
     /// unsecured in a Service API message will have been encrypted by
     /// the time that `RATMAN` handles them.
-    pub async fn send<S>(
+    pub async fn send<S, T>(
         &self,
         user: UserAuth,
         mode: Mode,
         service: S,
+        tags: T,
         payload: Vec<u8>,
     ) -> Result<MsgId>
     where
         S: Into<String>,
+        T: IntoIterator<Item = Tag>,
     {
         let (sender, _) = self.q.auth.trusted(user)?;
         let recipient = mode.into();
         let associator = service.into();
         let id = MsgId::random();
         let sign = SigTrust::Trusted;
-        let tags = BTreeSet::default();
+        let tags = BTreeSet::from_iter(tags.into_iter());
 
         let env = Envelope {
             id,
@@ -313,7 +284,7 @@ impl<'qaul> Messages<'qaul> {
     /// handle. It isn't possible to query all messages for all
     /// services in an efficient manner due to how messages are stored
     /// in a node.
-    pub fn query<S>(&self, user: UserAuth, service: S, query: MessageQuery) -> Result<Vec<MsgRef>>
+    pub fn query<S>(&self, user: UserAuth, service: S, query: MsgQuery) -> Result<Vec<MsgRef>>
     where
         S: Into<String>,
     {

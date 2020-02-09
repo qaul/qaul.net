@@ -17,6 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 user.clone(),
                 Mode::Flood,
                 "de.spacekokie.myapp",
+                vec![],
                 vec![1, 2, 3, 4],
             )
             .await
