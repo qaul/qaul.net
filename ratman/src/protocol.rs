@@ -13,8 +13,6 @@ use identity::Identity;
 use netmod::Recipient;
 use serde::{Deserialize, Serialize};
 
-const ASSOCIATOR: &'static str = ".internal";
-
 /// A payload that represents a RATMAN-protocol message
 #[derive(Serialize, Deserialize)]
 pub(crate) enum ProtoPayload {

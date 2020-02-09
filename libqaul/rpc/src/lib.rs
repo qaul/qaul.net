@@ -15,6 +15,7 @@
 //! In order to use this RPC crate correctly you will also have to
 //! depend on the `libqaul` crate for structure, error, and return
 //! type definitions.
+#![allow(unused)]
 
 mod api;
 pub use api::{contacts, files, messages, users, Change};

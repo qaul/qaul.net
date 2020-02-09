@@ -39,7 +39,7 @@ fn main() {
     // While `libqaul` can't add users to the routing scope yet, we
     // need to now create Qaul structures so we can create users
     let q1 = Arc::new(Qaul::new(r1));
-    let q2 = Qaul::new(r2);
+    let _q2 = Qaul::new(r2);
     let q3 = Qaul::new(r3);
 
     // Generate two user profiles on node 1 and 3

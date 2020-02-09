@@ -1,6 +1,6 @@
 //! Service interconnect interface
 
-use crate::{error::Result, messages::Message, Qaul};
+use crate::{error::Result, Qaul};
 
 /// API scope type to access service management functions
 ///

@@ -1,9 +1,8 @@
 use crate::{
     error::Result,
-    users::{UserAuth, UserProfile},
+    users::UserAuth,
     Identity, Qaul,
 };
-use serde::{Serialize, Deserialize};
 
 /// A user-local set of contact metadata in their contact book
 ///
@@ -130,7 +129,7 @@ impl<'qaul> Contacts<'qaul> {
 
     /// Get all users that have a `ContactEntry` for this user
     pub fn all(&self, user: UserAuth) -> Result<Vec<Identity>> {
-        let (ref id, _) = self.q.auth.trusted(user)?;
+        let (ref _id, _) = self.q.auth.trusted(user)?;
         Ok(vec![])
     }
 }

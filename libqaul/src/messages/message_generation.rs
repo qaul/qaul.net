@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use crate::messages::{Message, MsgId, SigTrust};
 use crate::qaul::Identity;
 use rand::distributions::{Distribution, Standard};

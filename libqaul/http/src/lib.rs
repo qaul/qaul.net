@@ -1,4 +1,5 @@
 //! libqaul http server API
+#![allow(unused)]
 
 use tide::{self, Server, Request, Response};
 use libqaul::Qaul;

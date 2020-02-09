@@ -1,7 +1,6 @@
 use crate::{
-    error::{Error, Result},
-    messages::{Message, MessageQuery, MsgId, MsgRef},
-    users::UserAuth,
+    error::Result,
+    messages::{MessageQuery, MsgId, MsgRef},
     Identity,
 };
 use std::{
@@ -193,7 +192,7 @@ impl MsgStore {
 
 #[cfg(test)]
 mod tests {
-    use crate::messages::{Message, MsgId, MsgState, MsgStore, Recipient, SigTrust};
+    use crate::messages::{Message, MsgId, MsgState, MsgStore, SigTrust};
     use crate::{utils, Identity};
     use std::sync::Arc;
 

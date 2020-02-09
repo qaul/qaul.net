@@ -66,7 +66,7 @@ impl UserProfile {
     }
 
     /// Do a fully fuzzy query on names to facilitate searching
-    pub fn fuzzy_query(&self, query: &str) -> bool {
+    pub fn fuzzy_query(&self, _query: &str) -> bool {
         unimplemented!()
     }
 }

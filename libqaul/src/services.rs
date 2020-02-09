@@ -3,7 +3,6 @@ use crate::{
     messages::MsgRef,
     utils::IterUtils,
 };
-use crossbeam_channel::{unbounded as channel, Receiver, Sender};
 use std::{
     collections::BTreeMap,
     sync::{Arc, RwLock},

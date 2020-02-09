@@ -75,7 +75,7 @@ impl MsgUtils {
         let RatMessage {
             id,
             sender,
-            recipient,
+            recipient: _,
             ref payload,
             signature: _,
         } = msg;

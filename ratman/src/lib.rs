@@ -125,13 +125,13 @@ impl Router {
     /// Ratman will by default remove all cached frames from the
     /// collector.  Optionally these frames can be moved into the
     /// journal with low priority instead.
-    pub fn rm_local(&self, id: Identity, keep: bool) -> Result<()> {
+    pub fn rm_local(&self, id: Identity, _keep: bool) -> Result<()> {
         task::block_on(async { self.inner.rm_local(id).await });
         Ok(())
     }
 
     /// Register a manual clock controller object for internal tasks
-    pub fn clock(&self, cc: ClockCtrl<Tasks>) -> Result<()> {
+    pub fn clock(&self, _cc: ClockCtrl<Tasks>) -> Result<()> {
         Ok(())
     }
 

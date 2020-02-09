@@ -85,6 +85,7 @@ impl ContactStore {
             .map_or(Err(Error::NoContact), |x| Ok(x.clone()))
     }
 
+    #[allow(unused)]
     pub(crate) fn get_all(&self, id: &Identity) -> Result<Vec<Identity>> {
         let inner = self.inner.lock().expect("Failed to lock ContactStore");
         Ok(inner

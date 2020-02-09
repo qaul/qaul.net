@@ -3,6 +3,7 @@
 //! In previous designs (both code and docs) this was a single
 //! component. This has proven to be a hard to maintain approach, so
 //! instead the core has been split into several parts.
+#![allow(unused)]
 
 mod collector;
 mod dispatch;
