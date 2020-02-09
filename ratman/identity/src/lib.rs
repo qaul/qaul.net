@@ -29,16 +29,10 @@ use std::{
     string::ToString,
 };
 
-/// Lengthc of the identity buffer
+/// Length of the identity buffer
 pub const ID_LEN: usize = 16;
 
-/// A Ratman network identity
-///
-/// Note: this type implements `Eq`, which is a much better way of
-/// comparing two instances of Identity information than making a
-/// string comparison.  While this might be convenient in certain API
-/// settings, we can't make the promise that the `Display`
-/// implementation will never change.
+/// A generic object identifier
 #[derive(Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct Identity([u8; ID_LEN]);
 
@@ -105,6 +99,7 @@ impl Identity {
         Self::truncate(&hasher.vec_result())
     }
 
+    /// Generate a new random Identity
     #[cfg(feature = "random")]
     pub fn random() -> Self {
         use rand::RngCore;
