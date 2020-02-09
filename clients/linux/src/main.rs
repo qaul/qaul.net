@@ -1,6 +1,6 @@
 use async_std::{sync::Arc, task};
 use {
-    libqaul::{messages::Recipient, Qaul},
+    libqaul::{Qaul, messages::Mode},
     messaging::{Messaging, TextPayload},
     netmod_mem::MemMod,
     ratman::{netmod::Endpoint, Router},
@@ -68,7 +68,7 @@ fn main() {
     task::block_on(async {
         msg.send(
             u1,
-            Recipient::User(u2.0),
+            Mode::Std(u2.0),
             TextPayload {
                 text: "Hello, world!".into(),
             },

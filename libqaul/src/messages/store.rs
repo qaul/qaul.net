@@ -90,9 +90,6 @@ impl<'store> StoreQuery<'store> {
                     .filter(|msg| match query {
                         Some(MessageQuery::Id(ref id)) => &msg.inner().id == id,
                         Some(MessageQuery::Sender(ref sender)) => &msg.inner().sender == sender,
-                        Some(MessageQuery::Recipient(ref recipient)) => {
-                            &msg.inner().recipient == recipient
-                        }
                         None => true,
                     })
                     .take(limit.unwrap_or(usize::max_value()))
@@ -205,7 +202,6 @@ mod tests {
         let msg = Message {
             id: MsgId::random(),
             sender: Identity::truncate(&utils::random(16)),
-            recipient: Recipient::User(id),
             associator: "__test".into(),
             sign: SigTrust::Unverified,
             payload: vec![1, 3, 1, 2],

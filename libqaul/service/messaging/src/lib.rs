@@ -9,7 +9,7 @@
 use conjoiner;
 use qaul::{
     error::{Error, Result},
-    messages::{Message, MessageQuery, MsgId, MsgRef, Recipient, SigTrust},
+    messages::{Message, MessageQuery, Mode, MsgId, MsgRef, SigTrust},
     users::UserAuth,
     Identity, Qaul,
 };
@@ -37,7 +37,6 @@ pub struct TextPayload {
 pub struct TextMessage {
     pub id: MsgId,
     pub sender: Identity,
-    pub recipient: Recipient,
     pub sign: SigTrust,
     pub payload: TextPayload,
 }
@@ -50,7 +49,6 @@ impl TryFrom<MsgRef> for TextMessage {
         let Message {
             ref id,
             ref sender,
-            ref recipient,
             ref sign,
             ref payload,
             associator: _,
@@ -59,7 +57,6 @@ impl TryFrom<MsgRef> for TextMessage {
         Ok(Self {
             id: id.clone(),
             sender: sender.clone(),
-            recipient: recipient.clone(),
             sign: sign.clone(),
             payload: conjoiner::deserialise(&payload)?,
         })
@@ -105,12 +102,12 @@ impl Messaging {
     pub async fn send(
         &self,
         user: UserAuth,
-        recipient: Recipient,
+        mode: Mode,
         payload: TextPayload,
     ) -> Result<MsgId> {
         self.qaul
             .messages()
-            .send(user, recipient, ASC_NAME, conjoiner::serialise(&payload)?)
+            .send(user, mode, ASC_NAME, conjoiner::serialise(&payload)?)
             .await
     }
 

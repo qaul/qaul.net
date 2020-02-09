@@ -1,10 +1,8 @@
 //! Messages API structures
 
-use crate::Change;
 use libqaul::{
-    messages::{MessageQuery, Recipient},
+    messages::{MessageQuery, Mode},
     users::UserAuth,
-    Identity,
 };
 use serde::{Serialize, Deserialize};
 
@@ -12,7 +10,7 @@ use serde::{Serialize, Deserialize};
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
 pub struct Send {
     auth: UserAuth,
-    recipient: Recipient,
+    mode: Mode,
     service: String,
     payload: Vec<u8>,
 }

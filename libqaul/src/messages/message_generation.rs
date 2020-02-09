@@ -1,11 +1,6 @@
-use crate::error::{Error, Result};
-use crate::messages::{MsgId, Message, MsgUtils, RatMessageProto, Recipient, SigTrust};
-use crate::qaul::{Identity, Qaul};
-use crate::users::UserAuth;
-use crate::utils::VecUtils;
-
+use crate::messages::{Message, MsgId, SigTrust};
+use crate::qaul::Identity;
 use rand::distributions::{Distribution, Standard};
-use rand::{thread_rng, Rng};
 
 /// A builder struct that can be used to generate any and all fields of a `Message`.
 #[derive(Debug, Default, PartialEq)]
@@ -14,8 +9,6 @@ pub struct MessageGenBuilder {
     id: Option<MsgId>,
     /// The sender identity
     sender: Option<Identity>,
-    /// Recipient information
-    recipient: Option<Recipient>,
     /// The embedded service associator
     associator: Option<String>,
     /// A raw byte `Message` payload
@@ -43,12 +36,6 @@ impl MessageGenBuilder {
         self
     }
 
-    /// Set the recipient of the resulting message.
-    pub fn with_recipient(mut self, recipient: Recipient) -> Self {
-        self.recipient = Some(recipient);
-        self
-    }
-
     /// Set the service associator of the resulting message.
     pub fn with_associator<S: Into<String>>(mut self, associator: S) -> Self {
         self.associator = Some(associator.into());
@@ -61,7 +48,7 @@ impl MessageGenBuilder {
         self
     }
 
-    /// Set the signature (`SigAuth`) of the resulting message. 
+    /// Set the signature (`SigAuth`) of the resulting message.
     pub fn with_signature(mut self, signature: SigTrust) -> Self {
         self.sign = Some(signature);
         self
@@ -79,11 +66,6 @@ impl MessageGenBuilder {
             .sender
             .clone()
             .unwrap_or_else(|| Identity::truncate(&Standard.sample_iter(rng).take(16).collect()));
-        let recipient = self.recipient.clone().unwrap_or_else(|| {
-            Recipient::User(Identity::truncate(
-                &Standard.sample_iter(rng).take(16).collect(),
-            ))
-        });
         let associator = self.associator.clone().unwrap_or("".into());
         let id = self.id.clone().unwrap_or_else(|| MsgId::random());
         let payload = self
@@ -94,11 +76,10 @@ impl MessageGenBuilder {
             id,
             associator,
             sender,
-            recipient,
             sign: self.sign.clone().unwrap_or(SigTrust::Unverified),
             payload,
         }
-    } 
+    }
 }
 
 /// This structure, created by a `MessageGenBuilder`, generates an infinite stream of

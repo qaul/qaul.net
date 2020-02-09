@@ -19,6 +19,7 @@
 //! set `QAUL_LANG=ar` (or others) as an environment variable to get
 //! translations of these messages, with `en` being the fallback.
 
+use ratman::Error as RatError;
 use conjoiner::Error as ConjError;
 use std::{
     error::Error as StdError,
@@ -106,5 +107,11 @@ impl StdError for Error {}
 impl From<ConjError> for Error {
     fn from(_: ConjError) -> Self {
         Error::BadSerialise
+    }
+}
+
+impl From<RatError> for Error {
+    fn from(_: RatError) -> Self {
+        Error::NetworkFault
     }
 }

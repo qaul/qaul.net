@@ -3,9 +3,9 @@ use crate::{
     messages::{Envelope, MsgUtils, RatMessageProto},
     qaul::{Identity, Qaul},
     users::UserAuth,
-    utils::VecUtils,
 };
 
+use ratman::netmod::Recipient;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -46,21 +46,36 @@ impl SigTrust {
     }
 }
 
-/// Service message recipient
+/// Specify the way that a message gets dispatched
 ///
-/// A recipient is either a single user or the entire network.  The
-/// "flood" mechanic is passed through to `RATMAN`, which might
-/// implement this in the networking module, or emulate
-/// it. Performance may vary.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum Recipient {
-    /// A single user, known to this node
-    User(Identity),
-    /// A collection of users, sometimes called a Group
-    Group(Vec<Identity>),
-    /// Addressed to nobody, flooded into the network
+/// This information is only needed during transmission, because the
+/// message should later be associated with some other metadata
+/// provided by your service (or just the message ID).
+///
+/// When sending a flooded message, it becomes publicly accessible for
+/// everybody on this node, and will most likely be stored in plain
+/// text on receiving nodes across the network.  Be aware of this!
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub enum Mode {
+    /// Send a message to everybody
     Flood,
+    /// Address only a single identity
+    Std(Identity),
+}
+
+impl From<Identity> for Mode {
+    fn from(id: Identity) -> Self {
+        Self::Std(id)
+    }
+}
+
+impl From<Mode> for Recipient {
+    fn from(sm: Mode) -> Self {
+        match sm {
+            Mode::Flood => Self::Flood,
+            Mode::Std(id) => Self::User(id),
+        }
+    }
 }
 
 /// A multi-purpose service Message
@@ -81,34 +96,12 @@ pub struct Message {
     pub id: MsgId,
     /// The sender identity
     pub sender: Identity,
-    /// Recipient information
-    pub recipient: Recipient,
     /// The embedded service associator
     pub associator: String,
     /// Verified signature data
     pub sign: SigTrust,
     /// A raw byte `Message` payload
     pub payload: Vec<u8>,
-}
-
-impl Message {
-    /// Construct a new `Recipient`, in reply to a Message
-    ///
-    /// If the `Message` was addressed to a single user, the sender is
-    /// used. If it was addressed to a group, the sender is added, and
-    /// self is removed from the `Group` set. If it was a flood, then
-    /// the reply is a flood.
-    pub fn reply(&self, id: &Identity) -> Recipient {
-        let recipient = &self.recipient;
-        let sender = self.sender;
-
-        use Recipient::*;
-        match recipient {
-            Group(ref group) => Group(group.clone().strip(id).add(sender)),
-            User(_) => User(sender),
-            Flood => Flood,
-        }
-    }
 }
 
 /// A query interface for the local `Message` store
@@ -129,8 +122,6 @@ pub enum MessageQuery {
     Id(MsgId),
     /// Query by who a `Message` was composed by
     Sender(Identity),
-    /// Query a Message by who it is addressed to
-    Recipient(Recipient),
 }
 
 /// API scope type to access messaging functions
@@ -191,7 +182,7 @@ impl<'qaul> Messages<'qaul> {
     pub async fn send<S>(
         &self,
         user: UserAuth,
-        recipient: Recipient,
+        mode: Mode,
         service: S,
         payload: Vec<u8>,
     ) -> Result<MsgId>
@@ -199,7 +190,7 @@ impl<'qaul> Messages<'qaul> {
         S: Into<String>,
     {
         let (sender, _) = self.q.auth.trusted(user)?;
-        let recipients = MsgUtils::readdress(&recipient);
+        let recipient = mode.into();
         let associator = service.into();
         let id = MsgId::random();
         let sign = SigTrust::Trusted;
@@ -218,7 +209,6 @@ impl<'qaul> Messages<'qaul> {
             crate::messages::MsgState::Read(Arc::new(Message {
                 id,
                 sender,
-                recipient,
                 associator,
                 payload,
                 sign,
@@ -229,7 +219,7 @@ impl<'qaul> Messages<'qaul> {
             &self.q.router,
             RatMessageProto {
                 env,
-                recipients,
+                recipient,
                 signature,
             },
         )

@@ -1,5 +1,5 @@
 use async_std::task;
-use libqaul::{messages::Recipient, Qaul};
+use libqaul::{messages::Mode, Qaul};
 use ratman::Router;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         q.messages()
             .send(
                 user.clone(),
-                Recipient::Flood,
+                Mode::Flood,
                 "de.spacekokie.myapp",
                 vec![1, 2, 3, 4],
             )
