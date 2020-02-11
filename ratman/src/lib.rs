@@ -113,8 +113,7 @@ impl Router {
     /// collector.  Optionally these frames can be moved into the
     /// journal with low priority instead.
     pub fn rm_local(&self, id: Identity, _keep: bool) -> Result<()> {
-        task::block_on(async { self.inner.rm_local(id).await });
-        Ok(())
+        task::block_on(async { self.inner.rm_local(id).await })
     }
 
     /// Register a manual clock controller object for internal tasks

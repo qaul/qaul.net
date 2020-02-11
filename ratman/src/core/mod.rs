@@ -93,8 +93,8 @@ impl Core {
     }
 
     /// Remove a local endpoint
-    pub(crate) async fn rm_local(&self, id: Identity) {
-        self._routes.delete(id).await;
+    pub(crate) async fn rm_local(&self, id: Identity)  -> Result<()> {
+        self._routes.delete(id).await
     }
 
 }

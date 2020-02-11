@@ -47,8 +47,11 @@ impl RouteTable {
     }
 
     /// Delete an entry from the routing table
-    pub(crate) async fn delete(&self, id: Identity) {
-        self.routes.lock().await.remove(&id);
+    pub(crate) async fn delete(&self, id: Identity) -> Result<()> {
+        match self.routes.lock().await.remove(&id) {
+            Some(_) => Ok(()),
+            None => Err(Error::NoUser),
+        }
     }
 
     /// Get the endpoint and target ID for a user Identity
