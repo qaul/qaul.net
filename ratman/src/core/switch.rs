@@ -62,7 +62,8 @@ impl Switch {
             match f.recipient {
                 Flood => {
                     let seqid = f.seqid.seqid; // great names there kookie
-                    if self.journal.unique(&seqid).await {
+                    if self.journal.known(&seqid).await {
+                        self.journal.save(&seqid).await;
                         self.dispatch.reflood(f, t).await
                     }
                 }
