@@ -54,7 +54,7 @@ impl Endpoint for wifid_t {
         0
     }
 
-    async fn send(&mut self, frame: Frame, _: Target) -> Result<()> {
+    async fn send(&self, frame: Frame, _: Target) -> Result<()> {
         let buf = Box::new(conjoiner::serialise(&frame).unwrap());
         let len = buf.len();
         let c = unsafe { send_raw(Box::into_raw(buf) as *const c_void, len, 0) };
@@ -65,7 +65,7 @@ impl Endpoint for wifid_t {
         }
     }
 
-    async fn next(&mut self) -> Result<(Frame, Target)> {
+    async fn next(&self) -> Result<(Frame, Target)> {
         let inc = Arc::clone(&self.inc);
         future::poll_fn(|ctx| {
             let lock = &mut inc.lock();
