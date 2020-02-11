@@ -39,14 +39,14 @@ impl EndpointExt for Endpoint {
         0
     }
 
-    async fn send(&mut self, frame: Frame, target: Target) -> Result<()> {
+    async fn send(&self, frame: Frame, target: Target) -> Result<()> {
         match target {
-            /// Sending to a user, 
+            /// Sending to a user,
             Target::Single(ref id) => {
                 self.socket
                     .send(frame, self.addrs.ip(*id).await.unwrap())
                     .await
-            },
+            }
             Target::Flood => {
                 let addrs = self.addrs.all().await;
                 self.socket.send_many(frame, addrs).await;
@@ -56,7 +56,7 @@ impl EndpointExt for Endpoint {
         Ok(())
     }
 
-    async fn next(&mut self) -> Result<(Frame, Target)> {
+    async fn next(&self) -> Result<(Frame, Target)> {
         let fe = self.socket.next().await;
         Ok((fe.0, fe.1))
     }
