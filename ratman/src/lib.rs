@@ -76,16 +76,15 @@ use netmod::Endpoint;
 /// [`run`]: struct.Router.html#method.run
 pub struct Router {
     inner: Core,
-    init: bool,
 }
 
 impl Router {
-    /// Create a new, empty message router
+    /// Create a new message router
     pub fn new() -> Arc<Self> {
-        Arc::new(Self {
-            inner: Core::init(),
-            init: false,
-        })
+        let inner = Core::init();
+        inner.run();
+
+        Arc::new(Self { inner })
     }
 
     /// Add a new endpoint to this router
@@ -96,19 +95,8 @@ impl Router {
     /// recreated without the endpoint you wish to remove.
     ///
     /// [`Endpoint`]: https://docs.rs/ratman-netmod/0.1.0/ratman_netmod/trait.Endpoint.html
-    pub fn add_endpoint(&self, ep: impl Endpoint + 'static + Send + Sync) -> Result<()> {
-        if self.init {
-            Err(Error::AlreadyInit)
-        } else {
-            self.inner.add_ep(ep);
-            Ok(())
-        }
-    }
-
-    /// Finalise the routers endpoint map and run the internal tasks
-    pub fn finalise(&mut self) {
-        self.init = true;
-        self.inner.run();
+    pub fn add_endpoint(&self, ep: impl Endpoint + 'static + Send + Sync) {
+        task::block_on(async { self.inner.add_ep(ep).await });
     }
 
     /// Add an identity to the local set
@@ -116,8 +104,7 @@ impl Router {
     /// Ratman will listen for messages to local identities and offer
     /// them up for polling via the Router API.
     pub fn add_local(&self, id: Identity) -> Result<()> {
-        task::block_on(async { self.inner.add_local(id).await });
-        Ok(())
+        task::block_on(async { self.inner.add_local(id).await })
     }
 
     /// Remove a local identity, discarding imcomplete messages

@@ -1,9 +1,9 @@
 //! Routing table module
 
+use crate::{Error, Result};
 use async_std::sync::{Arc, Mutex};
-use identity::Identity;
-use netmod::Target;
 use std::collections::BTreeMap;
+use {identity::Identity, netmod::Target};
 
 /// A netmod endpoint ID and an endpoint target ID
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -39,10 +39,13 @@ impl RouteTable {
     }
 
     /// Track a local ID in the routes table
-    pub(crate) async fn local(&self, id: Identity) {
-        self.routes.lock().await.insert(id, RouteType::Local);
+    pub(crate) async fn local(&self, id: Identity) -> Result<()> {
+        match self.routes.lock().await.insert(id, RouteType::Local) {
+            Some(_) => Err(Error::DuplicateUser),
+            None => Ok(()),
+        }
     }
-    
+
     /// Delete an entry from the routing table
     pub(crate) async fn delete(&self, id: Identity) {
         self.routes.lock().await.remove(&id);
