@@ -7,6 +7,9 @@ use {
     twox_hash::RandomXxHashBuilder64 as RXHash64,
 };
 
+/// A unique identifier to represent a frame in a sequence
+pub type FrameId = [u8; 16];
+
 /// An XxHash signature and initialisation seed
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct XxSignature {
@@ -28,7 +31,7 @@ pub struct SeqId {
     /// A hash signature of the payload
     pub sig: XxSignature,
     /// Global frame sequence ID
-    pub seqid: [u8; 16],
+    pub seqid: FrameId,
     /// Next sequenced Frame SIG
     pub next: Option<u64>,
 }

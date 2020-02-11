@@ -34,14 +34,15 @@
 //! set.
 #![allow(warnings)]
 
-#[macro_use] extern crate serde;
+#[macro_use]
+extern crate serde;
 
 mod endpoint;
 mod frame;
-mod seq;
 mod result;
+mod seq;
 
 pub use endpoint::Endpoint;
 pub use frame::{Frame, Recipient, Target};
-pub use seq::{SeqId, Sequence};
 pub use result::{Error, Result};
+pub use seq::{FrameId, SeqId, Sequence};
