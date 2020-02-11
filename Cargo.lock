@@ -1138,6 +1138,7 @@ dependencies = [
  "async-std",
  "clockctrl",
  "conjoiner-engine",
+ "futures 0.3.4",
  "ratman-identity",
  "ratman-netmod",
  "serde",

@@ -64,7 +64,7 @@ impl Switch {
                     let seqid = f.seqid.seqid; // great names there kookie
                     if self.journal.known(&seqid).await {
                         self.journal.save(&seqid).await;
-                        self.dispatch.reflood(f, t).await
+                        self.dispatch.reflood(f, id).await
                     }
                 }
                 User(id) => match self.routes.reachable(id).await {

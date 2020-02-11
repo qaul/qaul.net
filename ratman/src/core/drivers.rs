@@ -60,4 +60,16 @@ impl DriverMap {
             EpWrap::Void => panic!("Trying to use a removed endpoint!"),
         })
     }
+
+    /// Get all endpoints, except for the one provided via the ID
+    pub(crate) async fn get_without(&self, not: usize) -> Vec<Arc<Ep>> {
+        let map = self.map.read().await;
+        map.iter()
+            .enumerate()
+            .filter_map(|(i, ep)| match ep {
+                EpWrap::Used(ref ep) if i != not => Some(Arc::clone(ep)),
+                _ => None,
+            })
+            .collect()
+    }
 }
