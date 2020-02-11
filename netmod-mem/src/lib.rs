@@ -3,11 +3,15 @@
 //! This aims to make testing any structure that binds against
 //! `netmod` easier and reproducable.
 
-use async_std::future;
-use async_std::task::Poll;
+use async_std::{
+    future::{self, Future},
+    sync::{Arc, RwLock},
+    task::{self, Poll},
+    pin::Pin,
+};
 use async_trait::async_trait;
 use ratman_netmod::{Endpoint, Error as NetError, Frame, Result as NetResult, Target};
-use std::sync::mpsc::TryRecvError;
+use crossbeam_channel::TryRecvError;
 
 /// An input/output pair of `mpsc::channel`s.
 ///
@@ -22,28 +26,28 @@ pub mod media;
 /// medium of some kind.
 pub struct MemMod {
     /// Internal memory access to send/receive
-    io: Option<io::Io>,
+    io: Arc<RwLock<Option<io::Io>>>,
 }
-
-unsafe impl Sync for MemMod {}
 
 impl MemMod {
     /// Create a new, unpaired `MemMod`.
     pub fn new() -> Self {
-        Self { io: None }
+        Self {
+            io: Default::default(),
+        }
     }
 
     /// Create two already-paired `MemMod`s, ready for use.
     pub fn make_pair() -> (Self, Self) {
-        let (mut a, mut b) = (MemMod::new(), MemMod::new());
-        a.link(&mut b);
+        let (a, b) = (MemMod::new(), MemMod::new());
+        a.link(&b);
         (a, b)
     }
 
     /// Return `true` if the MemMod is linked to another one or
     /// `false` otherwise.
     pub fn linked(&self) -> bool {
-        self.io.is_some()
+        task::block_on(async { self.io.read().await.is_some() })
     }
 
     /// Establish a 1-to-1 link between two `MemMod`s.
@@ -51,13 +55,14 @@ impl MemMod {
     /// # Panics
     ///
     /// Panics if this MemMod, or the other one, is already linked.
-    pub fn link(&mut self, pair: &mut MemMod) {
+    pub fn link(&self, pair: &MemMod) {
         if self.linked() || pair.linked() {
             panic!("Attempted to link an already linked MemMod.");
         }
         let (my_io, their_io) = io::Io::make_pair();
-        self.io = Some(my_io);
-        pair.io = Some(their_io);
+
+        self.set_io_async(my_io);
+        pair.set_io_async(their_io);
     }
 
     /// Establish a link to an `Io` module
@@ -68,14 +73,18 @@ impl MemMod {
         if self.linked() {
             panic!("Attempted to link an already linked MemMod.");
         }
-        self.io = Some(io);
+        self.set_io_async(io);
     }
 
     /// Remove the connection between MemMods.
-    pub fn split(&mut self) {
+    pub fn split(&self) {
         // The previous value in here will now be dropped,
         // so future messages will fail.
-        self.io = None;
+        self.set_io_async(None);
+    }
+
+    fn set_io_async<I: Into<Option<io::Io>>>(&self, val: I) {
+        task::block_on(async { *self.io.write().await = val.into() });
     }
 }
 
@@ -92,24 +101,31 @@ impl Endpoint for MemMod {
     ///
     /// Returns `OperationNotSupported` if attempting to send through
     /// a connection that is not yet connected.
-    async fn send(&mut self, frame: Frame, _: Target) -> NetResult<()> {
-        match self.io {
+    async fn send(&self, frame: Frame, _: Target) -> NetResult<()> {
+        let mut lock = self.io.write().await;
+        match *lock {
             None => Err(NetError::NotSupported),
-            Some(ref io) => match io.out.send(frame) {
+            Some(ref mut io) => match io.out.send(frame) {
                 Ok(_) => Ok(()),
                 Err(_) => Err(NetError::ConnectionLost),
             },
         }
     }
 
-    async fn next(&mut self) -> NetResult<(Frame, Target)> {
-        future::poll_fn(|_| match self.io {
-            None => Poll::Ready(Err(NetError::NotSupported)),
-            Some(ref mut io) => match io.inc.try_recv() {
-                Ok(v) => Poll::Ready(Ok((v, Target::default()))),
-                Err(TryRecvError::Empty) => Poll::Pending,
-                Err(_) => Poll::Ready(Err(NetError::ConnectionLost)),
-            },
+    async fn next(&self) -> NetResult<(Frame, Target)> {
+        future::poll_fn(|ctx| {
+            let lock = &mut self.io.write();
+            match unsafe { Pin::new_unchecked(lock).poll(ctx) } {
+                Poll::Ready(mut io_opt) => match &mut *io_opt {
+                    Some(ref mut io) => match io.inc.try_recv() {
+                        Ok(v) => Poll::Ready(Ok((v, Target::default()))),
+                        Err(TryRecvError::Empty) => Poll::Pending,
+                        Err(_) => Poll::Ready(Err(NetError::ConnectionLost)),
+                    },
+                    None => Poll::Ready(Err(NetError::ConnectionLost)),
+                },
+                Poll::Pending => Poll::Pending,
+            }
         })
         .await
     }

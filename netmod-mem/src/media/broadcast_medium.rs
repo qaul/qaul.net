@@ -3,7 +3,7 @@ use crate::media::TaggedFrame;
 use crate::MemMod;
 use ratman_netmod::Endpoint;
 use std::collections::{BTreeMap, VecDeque};
-use std::sync::mpsc::TryRecvError;
+use crossbeam_channel::TryRecvError;
 
 /// A `BroadcastMedium` permits up to 2^32 `MemMod` interfaces to connect and
 /// always sends all messages to all connected interfaces except for the sender.
