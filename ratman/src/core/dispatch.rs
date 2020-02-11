@@ -24,7 +24,7 @@ impl Dispatch {
             })
             .await;
 
-        let ep: &mut _ = unsafe { self.drivers.get_mut(epid as usize) };
+        let ep = self.drivers.get_arc(epid as usize).await;
         ep.send(frame, trgt).await.unwrap();
     }
 

@@ -1,9 +1,18 @@
-use async_std::sync::Arc;
+use async_std::sync::{Arc, RwLock};
 use netmod::Endpoint;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 type Ep = dyn Endpoint + 'static + Send + Sync;
-type EpVec = Vec<Box<Ep>>;
+type EpVec = Vec<EpWrap>;
+
+/// Wrap around endpoints that can be removed
+///
+/// This way, when remove an interface, the ID's of other interfaces
+/// don't have have to be updated or mapped, because their place in the list doesn't change.
+enum EpWrap {
+    Used(Arc<Ep>),
+    Void,
+}
 
 /// A map of available endpoint drivers
 ///
@@ -13,7 +22,7 @@ type EpVec = Vec<Box<Ep>>;
 #[derive(Default)]
 pub(crate) struct DriverMap {
     curr: AtomicUsize,
-    map: EpVec,
+    map: RwLock<EpVec>,
 }
 
 impl DriverMap {
@@ -27,56 +36,28 @@ impl DriverMap {
     }
 
     /// Insert a new endpoint to the set of known endpoints
-    ///
-    /// This function comes with some caveats.  To avoid the overhead
-    /// of blocking on a mutex (both code and speed overhead), we
-    /// store each endpoint in a vec that is sequentially addressed.
-    /// An endpoint can't be removed from the list.
-    ///
-    /// The reason we do this is that we can spawn a future for each
-    /// endpoint that will keep polling it's respective socket for
-    /// packets, without having to share the entire structure as
-    /// mutable or locking an endpoint when we know that we're the
-    /// only ones with access.
-    ///
-    /// Now: this does mean that a send and receive call can be run at
-    /// the same time, meanining that the endpoint needs to implement
-    /// Sync, which we are enforcing with the trait bounds.
-    ///
-    /// Some thoughts about this: maybe there's a way to use
-    /// UnsafeCell, which is slightly less gross than doing a mut
-    /// transmute?  It's not sync though, so there's a bunch of
-    /// overhead there which really defeats the point.  On the other
-    /// hand, maybe we don't even need this collection.  We could have
-    /// a handler here that can spawn tasks for an endpoint, meaning
-    /// we never have to yield references to poll.. food for thought!
-    #[allow(mutable_transmutes)]
-    pub(crate) unsafe fn add<E>(&self, ep: E) -> usize
+    pub(crate) async fn add<E>(&self, ep: E) -> usize
     where
         E: Endpoint + 'static + Send + Sync,
     {
-        let map: &mut EpVec = std::mem::transmute(&self.map);
+        let mut map = self.map.write().await;
         let curr = self.curr.fetch_add(1, Ordering::Relaxed);
-        map.push(Box::new(ep));
+        map.push(EpWrap::Used(Arc::new(ep)));
         curr
     }
 
-    /// Get raw mutable access to an endpoint (see `add` for more)
-    #[allow(mutable_transmutes)]
-    pub(crate) unsafe fn get_mut(&self, id: usize) -> &mut Ep {
-        let map: &mut EpVec = std::mem::transmute(&self.map);
-        &mut *map[id]
+    /// Remove an endpoint from the list
+    pub(crate) async fn remove(&self, id: usize) {
+        let mut map = self.map.write().await;
+        std::mem::swap(&mut map[id], &mut EpWrap::Void);
     }
 
-    // Add a new interface with a guaranteed unique ID to the map
-    // pub(crate) async fn add(&self, ep: impl Endpoint + 'static + Send) {
-    //     let (mut map, mut id) = self.map.lock().join(self.curr.lock()).await;
-    //     map.insert(*id, Box::new(ep));
-    //     *id += 1;
-    // }
-
-    // Returns access to the unlocked endpoint collection
-    //     pub(crate) async fn inner<'this>(&'this self) -> MutexGuard<'_, EndpointMap> {
-    //         self.map.lock().await
-    //     }
+    /// Get access to an endpoint via an Arc wrapper
+    pub(crate) async fn get_arc(&self, id: usize) -> Arc<Ep> {
+        let map = self.map.read().await;
+        Arc::clone(match map[id] {
+            EpWrap::Used(ref ep) => ep,
+            EpWrap::Void => panic!("Trying to use a removed endpoint!"),
+        })
+    }
 }
