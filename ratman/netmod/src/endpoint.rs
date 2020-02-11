@@ -4,6 +4,19 @@ use crate::{Frame, Result, Target};
 use async_trait::async_trait;
 
 /// The main trait describing a Ratman networking interface
+///
+/// All functions work without mutability because an endpoint is
+/// expected to implement some access multiplexing or rely on atomic
+/// operations to ensure thread safety.  This is because it's not
+/// reasonable for an endpoint driver to rely purely on Rust's
+/// ownership and mutability model, because it will inevitably have to
+/// interact with system components, other buffers that push into a
+/// queue, or similar.
+///
+/// This interface doesn't care about the implementation details of
+/// these endpoints, and so, to make matters simpler for the router,
+/// and to make it obvious that internal mutability needs to be used,
+/// this interface is immutable by default.
 #[async_trait]
 pub trait Endpoint {
     /// Return a desired frame size in bytes
@@ -27,12 +40,12 @@ pub trait Endpoint {
     /// The target ID is a way to instruct a netmod where to send a
     /// frame in a one-to-many mapping.  When implementing a
     /// one-to-one endpoint, this ID can be ignored (set to 0).
-    async fn send(&mut self, frame: Frame, target: Target) -> Result<()>;
+    async fn send(&self, frame: Frame, target: Target) -> Result<()>;
 
     /// Poll for the next available Frame from this interface
     ///
     /// It's recomended to return transmission errors, even if there
     /// are no ways to correct the situation from the router's POV,
     /// simply to feed packet drop metrics.
-    async fn next(&mut self) -> Result<(Frame, Target)>;
+    async fn next(&self) -> Result<(Frame, Target)>;
 }
