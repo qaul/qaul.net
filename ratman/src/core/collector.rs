@@ -50,7 +50,7 @@ impl Collector {
                     task::spawn(async move {
                         let mut buf: Vec<Frame> = vec![];
                         while let Some(f) = rx.recv().await {
-                            match join_frames(&mut buf) {
+                            match join_frames(&mut buf, f) {
                                 // If the sequence was complete, clean up handlers
                                 Some(msg) => {
                                     done.send(msg).await;
@@ -74,6 +74,30 @@ impl Collector {
 }
 
 /// Utility function that uses the SeqBuilder to rebuild Sequence
-fn join_frames(buf: &mut Vec<Frame>) -> Option<Message> {
-    None
+fn join_frames(buf: &mut Vec<Frame>, new: Frame) -> Option<Message> {
+    // Insert the frame
+    buf.push(new);
+
+    // Sort by sequence numbers
+    buf.sort_by(|a, b| a.seq.num.cmp(&b.seq.num));
+
+    // Test inductive sequence number property
+    if buf.iter().enumerate().fold(true, |status, (i, frame)| {
+        status && (frame.seq.num == i as u32)
+    }) {
+        let id = buf[0].seq.seqid;
+        let sender = buf[0].sender;
+        let recipient = buf[0].recipient;
+        let payload = SeqBuilder::restore(buf);
+
+        Some(Message {
+            id,
+            sender,
+            recipient,
+            payload,
+            signature: vec![],
+        })
+    } else {
+        None
+    }
 }
