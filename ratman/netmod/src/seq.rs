@@ -8,7 +8,7 @@ use {
 };
 
 /// A unique identifier to represents a sequence of frames
-pub type SeqId = [u8; 16];
+pub type SeqId = Identity;
 
 /// An XxHash signature and initialisation seed
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -45,7 +45,7 @@ pub struct SeqData {
 /// a frame sequence, as outlined in the root netmod docs.
 pub struct SeqBuilder {
     #[doc(hidden)]
-    pub seqid: [u8; 16],
+    pub seqid: SeqId,
     #[doc(hidden)]
     pub sender: Identity,
     #[doc(hidden)]
@@ -56,7 +56,7 @@ pub struct SeqBuilder {
 
 impl SeqBuilder {
     /// Initialise a Sequence builder
-    pub fn new(sender: Identity, recp: Recipient, seqid: [u8; 16]) -> Self {
+    pub fn new(sender: Identity, recp: Recipient, seqid: SeqId) -> Self {
         Self {
             sender,
             recp,
@@ -123,8 +123,13 @@ impl SeqBuilder {
             .collect()
     }
 
+    /// Take a sequence of frames and turn it into a complete payload
+    pub fn restore(buf: &Vec<Frame>) -> Vec<u8> {
+        unimplemented!()
+    }
+    
     /// Read the sequence ID back from the builder
-    pub fn seqid(&self) -> &[u8; 16] {
+    pub fn seqid(&self) -> &SeqId {
         &self.seqid
     }
 
@@ -157,7 +162,7 @@ fn hash_new(data: &Vec<u8>) -> XxSignature {
 fn setup() -> Vec<Frame> {
     let sender = Identity::with_digest(&vec![1]);
     let recp = Identity::with_digest(&vec![2]);
-    SeqBuilder::new(sender, Recipient::User(recp), [0; 16])
+    SeqBuilder::new(sender, Recipient::User(recp), Identity::random())
         .add(vec![42])
         .add(vec![13, 12])
         .add(vec![13, 37])

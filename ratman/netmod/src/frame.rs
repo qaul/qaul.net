@@ -61,7 +61,7 @@ pub struct Frame {
 impl Frame {
     /// Produce a new dummy frame that sends nonsense data from nowhere to everyone.
     pub fn dummy() -> Self {
-        SeqBuilder::new(Identity::from([0; 16]), Recipient::Flood, [0; 16])
+        SeqBuilder::new(Identity::from([0; 16]), Recipient::Flood, Identity::random())
             .add(vec![0xDE, 0xAD, 0xBE, 0xEF])
             .build()
             .remove(0)
