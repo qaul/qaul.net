@@ -71,7 +71,6 @@ impl Core {
     pub(crate) fn run(&self) {
         Arc::clone(&self.switch).run();
         Arc::clone(&self.journal).run();
-        Arc::clone(&self.collector).run();
     }
 
     /// Asynchronously send a Message

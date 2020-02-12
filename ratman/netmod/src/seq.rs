@@ -171,5 +171,5 @@ fn simple() {
         .build();
 
     assert!(seq.len() == 3);
-    assert!(seq.get(0).unwrap().seqid.next == Some(seq.get(1).unwrap().seqid.sig.sig));
+    assert!(seq.get(0).unwrap().seq.next == Some(seq.get(1).unwrap().seq.sig.sig));
 }
