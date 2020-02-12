@@ -31,11 +31,11 @@ impl Collector {
 
     /// Dispatches a long-running task to run the collection logic
     pub(crate) fn run(self: Arc<Self>, inc: Receiver<(SeqId, Frame)>, done: Sender<Message>) {
-        let map: ArcRw<BTreeMap<SeqId, Sender<Frame>>> = Default::default();
+        let omap: ArcRw<BTreeMap<SeqId, Sender<Frame>>> = Default::default();
 
         task::spawn(async move {
             while let Some((fid, f)) = inc.recv().await {
-                let mut map = map.lock().await;
+                let mut map = omap.lock().await;
 
                 // Check if a handler was already spawned for SeqId
                 if map.contains_key(&fid) {
@@ -45,12 +45,18 @@ impl Collector {
                     let done = done.clone();
                     let (tx, rx) = channel(1);
                     map.insert(fid, tx);
+                    let map = Arc::clone(&omap);
 
                     task::spawn(async move {
                         let mut buf: Vec<Frame> = vec![];
                         while let Some(f) = rx.recv().await {
                             match join_frames(&mut buf) {
-                                Some(msg) => done.send(msg).await,
+                                // If the sequence was complete, clean up handlers
+                                Some(msg) => {
+                                    done.send(msg).await;
+                                    map.lock().await.remove(&fid);
+                                    break;
+                                }
                                 None => continue,
                             }
                         }

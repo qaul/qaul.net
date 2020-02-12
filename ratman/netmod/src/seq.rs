@@ -28,6 +28,8 @@ pub struct XxSignature {
 /// Check the crate documentation for more details.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SeqData {
+    /// Frame number in sequence
+    pub num: u32,
     /// A hash signature of the payload
     pub sig: XxSignature,
     /// Global frame sequence ID
@@ -81,7 +83,8 @@ impl SeqBuilder {
             .collect::<Vec<_>>();
 
         (0..signed.len())
-            .map(|i| match (signed.get(i), signed.get(i + 1)) {
+            .enumerate()
+            .map(|(num, i)| match (signed.get(i), signed.get(i + 1)) {
                 (
                     Some((ref sig, data)),
                     Some((
@@ -93,6 +96,7 @@ impl SeqBuilder {
                     )),
                 ) => (
                     SeqData {
+                        num: num as u32,
                         seqid,
                         sig: *sig,
                         next: Some(*next),
@@ -101,6 +105,7 @@ impl SeqBuilder {
                 ),
                 (Some((ref sig, data)), None) => (
                     SeqData {
+                        num: num as u32,
                         seqid,
                         sig: *sig,
                         next: None,
@@ -116,18 +121,6 @@ impl SeqBuilder {
                 payload: data.to_vec(),
             })
             .collect()
-    }
-
-    /// Take a set of frames and build a restored sequence from it
-    // FIXME: implement frame de-sequencing here!
-    pub fn restore(mut vec: Vec<Frame>) -> Self {
-        let frame = vec.remove(0);
-        Self {
-            seqid: frame.seq.seqid,
-            sender: frame.sender,
-            recp: frame.recipient,
-            data: vec![frame.payload],            
-        }
     }
 
     /// Read the sequence ID back from the builder
@@ -160,16 +153,38 @@ fn hash_new(data: &Vec<u8>) -> XxSignature {
     }
 }
 
-#[test]
-fn simple() {
+#[cfg(test)]
+fn setup() -> Vec<Frame> {
     let sender = Identity::with_digest(&vec![1]);
     let recp = Identity::with_digest(&vec![2]);
-    let seq = SeqBuilder::new(sender, Recipient::User(recp), [0; 16])
+    SeqBuilder::new(sender, Recipient::User(recp), [0; 16])
         .add(vec![42])
         .add(vec![13, 12])
         .add(vec![13, 37])
-        .build();
+        .build()
+}
 
+#[test]
+fn simple() {
+    let seq = setup();
     assert!(seq.len() == 3);
     assert!(seq.get(0).unwrap().seq.next == Some(seq.get(1).unwrap().seq.sig.sig));
+}
+
+/// A simple test to see if the sequence numbers are ok
+#[test]
+fn seq_num() {
+    let seq = setup();
+    assert_eq!(seq[0].seq.num, 0);
+    assert_eq!(seq[1].seq.num, 1);
+    assert_eq!(seq[2].seq.num, 2);
+}
+
+/// Hash sequence test
+#[test]
+fn hash_seq() {
+    let seq = setup();
+    assert_eq!(seq[0].seq.next, Some(seq[1].seq.sig.sig));
+    assert_eq!(seq[1].seq.next, Some(seq[2].seq.sig.sig));
+    assert_eq!(seq[2].seq.next, None);
 }
