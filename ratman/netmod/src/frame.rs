@@ -1,6 +1,6 @@
 //! Networking frames
 
-use crate::{SeqId, Sequence};
+use crate::{SeqData, SeqBuilder};
 use identity::Identity;
 use serde::{Deserialize, Serialize};
 
@@ -53,7 +53,7 @@ pub struct Frame {
     /// Recipient information
     pub recipient: Recipient,
     /// Data sequence identifiers
-    pub seqid: SeqId,
+    pub seq: SeqData,
     /// Raw data payload
     pub payload: Vec<u8>,
 }
@@ -61,7 +61,7 @@ pub struct Frame {
 impl Frame {
     /// Produce a new dummy frame that sends nonsense data from nowhere to everyone.
     pub fn dummy() -> Self {
-        Sequence::new(Identity::from([0; 16]), Recipient::Flood, [0; 16])
+        SeqBuilder::new(Identity::from([0; 16]), Recipient::Flood, [0; 16])
             .add(vec![0xDE, 0xAD, 0xBE, 0xEF])
             .build()
             .remove(0)

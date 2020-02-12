@@ -61,7 +61,7 @@ impl Switch {
             use {Recipient::*, RouteType::*};
             match f.recipient {
                 Flood => {
-                    let seqid = f.seqid.seqid; // great names there kookie
+                    let seqid = f.seq.seqid; // great names there kookie
                     if self.journal.known(&seqid).await {
                         self.journal.save(&seqid).await;
                         self.dispatch.reflood(f, id).await

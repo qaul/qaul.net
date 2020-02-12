@@ -1,11 +1,11 @@
 use async_std::{sync::{Arc, RwLock}, task};
-use netmod::{Frame, FrameId};
+use netmod::{Frame, SeqId};
 use std::collections::BTreeSet;
 
 /// Remote frame journal
 pub(crate) struct Journal {
     /// Keeps track of known frames to do reflood
-    known: RwLock<BTreeSet<FrameId>>,
+    known: RwLock<BTreeSet<SeqId>>,
 }
 
 impl Journal {
@@ -24,12 +24,12 @@ impl Journal {
     pub(crate) async fn queue(&self, frame: Frame) {}
 
     /// Save a FrameID in the known journal page
-    pub(crate) async fn save(&self, fid: &FrameId) {
+    pub(crate) async fn save(&self, fid: &SeqId) {
         self.known.write().await.insert(fid.clone());
     }
     
     /// Checks if a frame ID has been seen before
-    pub(crate) async fn known(&self, fid: &FrameId) -> bool {
+    pub(crate) async fn known(&self, fid: &SeqId) -> bool {
         self.known.read().await.contains(fid)
     }
 }

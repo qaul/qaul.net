@@ -3,7 +3,7 @@ use async_std::{
     sync::{Arc, Mutex},
     task,
 };
-use netmod::{Frame, SeqId as SeqData, Sequence};
+use netmod::{Frame, SeqBuilder, SeqId as SeqData};
 use std::collections::BTreeMap;
 
 /// This module is the only one that addresses this as the seqId, and
@@ -33,7 +33,7 @@ impl Collector {
 
     /// Enqueue a frame to be desequenced
     pub(crate) async fn queue(&self, f: Frame) {
-        let seqid = f.seqid.seqid;
+        let seqid = f.seq.seqid;
         self.frags.lock().await.entry(seqid).or_default().push(f);
     }
 }

@@ -7,8 +7,8 @@ use {
     twox_hash::RandomXxHashBuilder64 as RXHash64,
 };
 
-/// A unique identifier to represent a frame in a sequence
-pub type FrameId = [u8; 16];
+/// A unique identifier to represents a sequence of frames
+pub type SeqId = [u8; 16];
 
 /// An XxHash signature and initialisation seed
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -27,11 +27,11 @@ pub struct XxSignature {
 ///
 /// Check the crate documentation for more details.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SeqId {
+pub struct SeqData {
     /// A hash signature of the payload
     pub sig: XxSignature,
     /// Global frame sequence ID
-    pub seqid: FrameId,
+    pub seqid: SeqId,
     /// Next sequenced Frame SIG
     pub next: Option<u64>,
 }
@@ -41,7 +41,7 @@ pub struct SeqId {
 /// This type implements a builder, which is initialised with header
 /// data, then filled with various sliced payloads, and then made into
 /// a frame sequence, as outlined in the root netmod docs.
-pub struct Sequence {
+pub struct SeqBuilder {
     #[doc(hidden)]
     pub seqid: [u8; 16],
     #[doc(hidden)]
@@ -52,7 +52,7 @@ pub struct Sequence {
     pub data: Vec<Vec<u8>>,
 }
 
-impl Sequence {
+impl SeqBuilder {
     /// Initialise a Sequence builder
     pub fn new(sender: Identity, recp: Recipient, seqid: [u8; 16]) -> Self {
         Self {
@@ -92,7 +92,7 @@ impl Sequence {
                         _,
                     )),
                 ) => (
-                    SeqId {
+                    SeqData {
                         seqid,
                         sig: *sig,
                         next: Some(*next),
@@ -100,7 +100,7 @@ impl Sequence {
                     data,
                 ),
                 (Some((ref sig, data)), None) => (
-                    SeqId {
+                    SeqData {
                         seqid,
                         sig: *sig,
                         next: None,
@@ -109,10 +109,10 @@ impl Sequence {
                 ),
                 _ => unreachable!(),
             })
-            .map(|(seqid, data)| Frame {
+            .map(|(seq, data)| Frame {
                 sender,
                 recipient,
-                seqid,
+                seq,
                 payload: data.to_vec(),
             })
             .collect()
@@ -123,7 +123,7 @@ impl Sequence {
     pub fn restore(mut vec: Vec<Frame>) -> Self {
         let frame = vec.remove(0);
         Self {
-            seqid: frame.seqid.seqid,
+            seqid: frame.seq.seqid,
             sender: frame.sender,
             recp: frame.recipient,
             data: vec![frame.payload],            
@@ -164,7 +164,7 @@ fn hash_new(data: &Vec<u8>) -> XxSignature {
 fn simple() {
     let sender = Identity::with_digest(&vec![1]);
     let recp = Identity::with_digest(&vec![2]);
-    let seq = Sequence::new(sender, Recipient::User(recp), [0; 16])
+    let seq = SeqBuilder::new(sender, Recipient::User(recp), [0; 16])
         .add(vec![42])
         .add(vec![13, 12])
         .add(vec![13, 37])
