@@ -42,6 +42,8 @@ pub enum Error {
     /// should not be returned by `listen`, as an invalid `Frame` can
     /// simply be dropped.
     ConnectionLost,
+    /// During desequencing an error occured
+    DesequenceFault,
 }
 
 impl Display for Error {

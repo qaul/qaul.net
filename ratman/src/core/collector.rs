@@ -81,6 +81,11 @@ fn join_frames(buf: &mut Vec<Frame>, new: Frame) -> Option<Message> {
     // Sort by sequence numbers
     buf.sort_by(|a, b| a.seq.num.cmp(&b.seq.num));
 
+    // The last frame needs to point to `None`
+    if buf.last().unwrap().seq.next.is_some() {
+        return None;
+    }
+    
     // Test inductive sequence number property
     if buf.iter().enumerate().fold(true, |status, (i, frame)| {
         status && (frame.seq.num == i as u32)
@@ -100,4 +105,27 @@ fn join_frames(buf: &mut Vec<Frame>, new: Frame) -> Option<Message> {
     } else {
         None
     }
+}
+
+#[test]
+fn join_frame_simple() {
+    use identity::Identity;
+    use netmod::Recipient;
+
+    let sender = Identity::random();
+    let resp = Identity::random();
+    let seqid = Identity::random();
+
+    let mut seq = SeqBuilder::new(sender, Recipient::User(resp), seqid)
+        .add((0..10).into_iter().collect())
+        .add((10..20).into_iter().collect())
+        .add((20..30).into_iter().collect())
+        .build();
+
+    // The function expects a filling buffer
+    let mut buf = vec![];
+
+    assert!(join_frames(&mut buf, seq.remove(0)) == None);
+    assert!(join_frames(&mut buf, seq.remove(1)) == None); // Insert out of order
+    assert!(join_frames(&mut buf, seq.remove(0)).is_some());
 }

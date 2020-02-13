@@ -1,20 +1,37 @@
 //! Sequence handling module
 
-use crate::{Frame, Recipient};
+use crate::{Error, Frame, Recipient};
 use identity::Identity;
 use {
     std::hash::{BuildHasher, Hasher},
-    twox_hash::RandomXxHashBuilder64 as RXHash64,
+    twox_hash::{RandomXxHashBuilder64 as RXHash64, XxHash64},
 };
 
 /// A unique identifier to represents a sequence of frames
 pub type SeqId = Identity;
 
 /// An XxHash signature and initialisation seed
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct XxSignature {
     sig: u64,
     seed: u64,
+}
+
+impl XxSignature {
+    fn new(data: &Vec<u8>) -> Self {
+        let mut hasher = RXHash64::default().build_hasher();
+        hasher.write(data);
+        Self {
+            sig: hasher.finish(),
+            seed: hasher.seed(),
+        }
+    }
+
+    fn verify(&self, data: &Vec<u8>) -> bool {
+        let mut hasher = XxHash64::with_seed(self.seed);
+        hasher.write(data);
+        hasher.finish() == self.sig
+    }
 }
 
 /// Encoded signature information related to a data sequence
@@ -79,7 +96,7 @@ impl SeqBuilder {
         let signed = self
             .data
             .into_iter()
-            .map(|d| (hash_new(&d), d))
+            .map(|d| (XxSignature::new(&d), d))
             .collect::<Vec<_>>();
 
         (0..signed.len())
@@ -124,10 +141,53 @@ impl SeqBuilder {
     }
 
     /// Take a sequence of frames and turn it into a complete payload
-    pub fn restore(buf: &Vec<Frame>) -> Vec<u8> {
-        unimplemented!()
+    ///
+    /// This function assumes a complete set of frame that has
+    /// previously been sorted along the `seq.num` metric.
+    pub fn restore(buf: &mut Vec<Frame>) -> Vec<u8> {
+        let wins = buf.windows(2);
+        let len = wins.len();
+
+        let r: Result<Vec<u8>, Error> = wins.enumerate().into_iter().fold(
+            Ok(Vec::with_capacity(buf.len())),
+            |mut res, (i, win)| {
+                let last = i == (len - 1);
+                let a = &win[0];
+                let seqa = &a.seq;
+                let b = &win[1];
+                let seqb = &b.seq;
+
+                if !seqa.sig.verify(&a.payload) {
+                    res = Err(Error::DesequenceFault);
+                }
+
+                if last && !seqb.sig.verify(&b.payload) {
+                    res = Err(Error::DesequenceFault);
+                }
+
+                fn append(vec: &mut Vec<u8>, other: &Vec<u8>) {
+                    let mut f = other.clone();
+                    vec.append(&mut f);
+                }
+
+                match (res, last) {
+                    (Ok(mut vec), false) => {
+                        append(&mut vec, &a.payload);
+                        Ok(vec)
+                    }
+                    (Ok(mut vec), true) => {
+                        append(&mut vec, &a.payload);
+                        append(&mut vec, &b.payload);
+                        Ok(vec)
+                    }
+                    _ => Err(Error::DesequenceFault),
+                }
+            },
+        );
+
+        r.expect("SeqBuilder::restore failed with invalid inputs!")
     }
-    
+
     /// Read the sequence ID back from the builder
     pub fn seqid(&self) -> &SeqId {
         &self.seqid
@@ -146,15 +206,6 @@ impl SeqBuilder {
     /// Read the payload data set back from the builder
     pub fn data(&self) -> Vec<u8> {
         self.data.get(0).unwrap().clone()
-    }
-}
-
-fn hash_new(data: &Vec<u8>) -> XxSignature {
-    let mut hasher = RXHash64::default().build_hasher();
-    hasher.write(data);
-    XxSignature {
-        sig: hasher.finish(),
-        seed: hasher.seed(),
     }
 }
 
