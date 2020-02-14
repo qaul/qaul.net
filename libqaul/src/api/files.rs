@@ -1,63 +1,11 @@
 #![allow(unused)]
 
+use crate::Identity;
 use crate::error::Result;
 use crate::users::UserAuth;
 use serde::{Deserialize, Serialize};
 
-/// Length of an `MsgId`, for converting to and from arrays
-pub const ID_LEN: usize = 16;
-
-/// A unique, randomly generated file ID
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct FileId(pub(crate) [u8; ID_LEN]);
-
-impl FileId {
-    /// Generate a new **random** message ID
-    pub(crate) fn new() -> Self {
-        crate::utils::random(ID_LEN)
-            .into_iter()
-            .zip(0..ID_LEN)
-            .fold(Self([0; ID_LEN]), |mut acc, (x, i)| {
-                acc.0[i] = x;
-                acc
-            })
-    }
-}
-
-/// Implement RAW `From` binary array
-impl From<[u8; ID_LEN]> for FileId {
-    fn from(i: [u8; ID_LEN]) -> Self {
-        Self(i)
-    }
-}
-
-/// Implement RAW `From` binary (reference) array
-impl From<&[u8; ID_LEN]> for FileId {
-    fn from(i: &[u8; ID_LEN]) -> Self {
-        Self(i.clone())
-    }
-}
-
-/// Implement binary array `From` RAW
-impl From<FileId> for [u8; ID_LEN] {
-    fn from(i: FileId) -> Self {
-        i.0
-    }
-}
-
-/// Implement binary array `From` RAW reference
-impl From<&FileId> for [u8; ID_LEN] {
-    fn from(i: &FileId) -> Self {
-        i.0.clone()
-    }
-}
-
-/// Implement RAW identity to binary array reference
-impl AsRef<[u8]> for FileId {
-    fn as_ref(&self) -> &[u8] {
-        &self.0
-    }
-}
+pub type FileId = Identity;
 
 /// Local file abstraction
 pub struct File {
