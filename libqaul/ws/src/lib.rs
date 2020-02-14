@@ -1,5 +1,5 @@
 use {
-    rpc::{contacts, messages, users},
+    libqaul_rpc::{contacts, files, messages, users},
 };
 
 pub struct Transaction<T> {
