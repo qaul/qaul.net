@@ -8,6 +8,7 @@ members = [
     "libqaul/http",
     "libqaul/rpc",
     "libqaul/ipc",
+	"libqaul/ws",
 
     # qaul.net main services
     "libqaul/service/chat",

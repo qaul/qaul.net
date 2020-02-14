@@ -1,0 +1,13 @@
+[package]
+name = "ws"
+version = "0.1.0"
+authors = ["Jess 3Jane <me@jess.coffee>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio-tungstenite = "0.10"
+futures = "0.3"
+libqaul = { path = ".." }
+rpc = { path = "../rpc" }
