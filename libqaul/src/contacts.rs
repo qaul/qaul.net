@@ -41,7 +41,7 @@ impl ContactStore {
     /// existed, a fresh one will be created.**
     pub(crate) fn modify<F>(&self, id: &Identity, user: &Identity, modify: F)
     where
-        F: Fn(&mut ContactEntry),
+        F: FnOnce(&mut ContactEntry),
     {
         let mut inner = self.inner.lock().expect("Failed to lock ContactStore");
         let contact = inner
@@ -62,11 +62,11 @@ impl ContactStore {
             .entry(*id)
             .or_insert(Default::default())
             .iter()
-            .filter(|(_, con)| match query {
+            .filter(|(_, con)| match &query {
                 ContactQuery::Nick(_) if con.nick.is_none() => false,
                 ContactQuery::Nick(nick) => con.nick.as_ref().unwrap().contains(nick),
-                ContactQuery::Trust { val, fuz } => con.trust + fuz < val || con.trust - fuz > val,
-                ContactQuery::Met(met) => con.met == met,
+                ContactQuery::Trust { val, fuz } => con.trust + fuz < *val || con.trust - fuz > *val,
+                ContactQuery::Met(met) => con.met == *met,
                 ContactQuery::Location(_) if con.location.is_none() => false,
                 ContactQuery::Location(loc) => con.location.as_ref().unwrap().contains(loc),
                 ContactQuery::Notes(_) if con.notes.is_none() => false,

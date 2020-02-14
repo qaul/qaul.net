@@ -83,6 +83,17 @@ impl<T> ItemDiffExt<Option<T>> for ItemDiff<T> {
     }
 }
 
+impl<T> ItemDiffExt<&mut Option<T>> for ItemDiff<T> {
+    fn apply(self, prev: &mut Option<T>) -> &mut Option<T> {
+        match self {
+            ItemDiff::Ignore => {},
+            ItemDiff::Set(t) => { *prev = Some(t); },
+            ItemDiff::Unset => { *prev = None; },
+        }
+        prev
+    }
+}
+
 impl<T: Default> ItemDiffExt<T> for ItemDiff<T> {
     fn apply(self, prev: T) -> T {
         match self {

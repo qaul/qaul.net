@@ -22,7 +22,7 @@ pub struct Transaction<T> {
 }
 
 /// The various different kinds of requests a client could make
-pub enum Request<'a> {
+pub enum Request {
     MessageSend(messages::Send),
     MessagePoll(messages::Poll),
     MessageSubscribe(messages::Subscribe),
@@ -31,7 +31,7 @@ pub enum Request<'a> {
     FileList(files::List),
     ContactModify(contacts::Modify),
     ContactGet(contacts::Get),
-    ContactQuery(contacts::Query<'a>),
+    ContactQuery(contacts::Query),
     ContactAll(contacts::All),
     UserList,
     UserCreate(users::Create),

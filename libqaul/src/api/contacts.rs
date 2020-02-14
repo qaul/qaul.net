@@ -1,4 +1,5 @@
 use crate::{error::Result, users::UserAuth, Identity, Qaul};
+use serde::{Serialize, Deserialize};
 
 /// A user-local set of contact metadata in their contact book
 ///
@@ -26,17 +27,18 @@ pub struct ContactEntry {
 /// A query is always applied to a field that is present in
 /// `ContactEntry`, and will filter contacts by what set of
 /// prerequisites they fulfill.
-pub enum ContactQuery<'a> {
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum ContactQuery {
     /// A fuzzy nickname search
-    Nick(&'a str),
+    Nick(String),
     /// A fuzzy trust level search
     Trust { val: i8, fuz: i8 },
     /// Filter by physical meeting
     Met(bool),
     /// A fuzzy location string search
-    Location(&'a str),
+    Location(String),
     /// A fuzzy notes string search
-    Notes(&'a str),
+    Notes(String),
 }
 
 /// API scope type to access contact book functions
@@ -80,7 +82,7 @@ impl<'qaul> Contacts<'qaul> {
     /// created before calling the passed-in lambda.
     pub fn modify<F>(&self, user: UserAuth, contact: &Identity, modify: F) -> Result<()>
     where
-        F: Fn(&mut ContactEntry),
+        F: FnOnce(&mut ContactEntry),
     {
         let (ref id, _) = self.q.auth.trusted(user)?;
         self.q.contacts.modify(id, contact, modify);
