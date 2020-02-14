@@ -1,7 +1,6 @@
 //! Contacts API structures
 
-use libqaul::{Identity, users::UserAuth, contacts::ContactQuery};
-use crate::Change;
+use libqaul::{Identity, users::UserAuth, contacts::ContactQuery, api::ItemDiff};
 use serde::{Serialize, Deserialize};
 
 /// Apply a modification to a contact entry
@@ -10,15 +9,15 @@ pub struct Modify {
     auth: UserAuth,
     contact: Identity,
     #[serde(default)]
-    nick: Change<String>,
+    nick: ItemDiff<String>,
     #[serde(default)]
-    trust: Change<i8>,
+    trust: ItemDiff<i8>,
     #[serde(default)]
-    met: Change<bool>,
+    met: ItemDiff<bool>,
     #[serde(default)]
-    location: Change<String>,
+    location: ItemDiff<String>,
     #[serde(default)]
-    notes: Change<String>,
+    notes: ItemDiff<String>,
 }
 
 /// Get the contact entry for an identity

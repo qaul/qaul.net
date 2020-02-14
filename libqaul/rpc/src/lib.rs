@@ -18,6 +18,6 @@
 #![allow(unused)]
 
 mod api;
-pub use api::{contacts, files, messages, users, Change};
+pub use api::{contacts, files, messages, users};
 
 //mod proto;

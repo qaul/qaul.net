@@ -2,7 +2,6 @@
 
 
 use libqaul::{Identity, users::UserAuth, files::FileFilter};
-use crate::Change;
 
 /// Send a file store query
 pub struct Query {

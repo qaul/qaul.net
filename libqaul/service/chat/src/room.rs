@@ -1,6 +1,6 @@
 //! A module to handle chat rooms
 
-use libqaul::{Identity, Qaul, error::Result};
+use libqaul::{Identity, Qaul, error::Result, api::{ItemDiff, SetDiff}};
 use std::collections::BTreeSet;
 use async_std::sync::Arc;
 use serde::{Serialize, Deserialize};
@@ -24,23 +24,14 @@ pub enum RoomState {
     
 }
 
-/// A simple command type to make remote changes
-#[derive(Serialize, Deserialize)]
-pub(crate) enum Diff<T> {
-    /// Add a new user to the set
-    Add(T),
-    /// Remove a user from the set
-    Remove(T),
-    /// Clear some Optional state value
-    Clear,
-}
-
 /// Apply changes to a room by ID
 #[derive(Serialize, Deserialize)]
 pub struct RoomDiff {
     id: Identity,
-    users: Vec<Diff<Identity>>,
-    name: Diff<String>,
+    #[serde(default)]
+    users: Vec<SetDiff<Identity>>,
+    #[serde(default)]
+    name: ItemDiff<String>,
 }
 
 /// Abstraction over a chat room

@@ -729,6 +729,7 @@ dependencies = [
  "rand",
  "ratman",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

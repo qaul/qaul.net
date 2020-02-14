@@ -1,8 +1,7 @@
 //! Users API structures
 
 use std::collections::{BTreeMap, BTreeSet};
-use libqaul::{Identity, users::UserAuth};
-use crate::Change;
+use libqaul::{Identity, users::UserAuth, api::{ItemDiff, SetDiff, MapDiff}};
 use serde::{Serialize, Deserialize};
 
 /// Enumerate all publicly known users
@@ -55,14 +54,13 @@ pub struct Update {
     auth: UserAuth,
 
     #[serde(default)]
-    display_name: Change<String>,
+    display_name: ItemDiff<String>,
     #[serde(default)]
-    real_name: Change<String>,
-    /// Can either be a set of insertions, or a set of deletions
+    real_name: ItemDiff<String>,
     #[serde(default)]
-    bio: Change<BTreeMap<String, String>>,
+    bio: Vec<MapDiff<String, String>>,
     #[serde(default)]
-    services: Change<BTreeSet<String>>,
+    services: Vec<SetDiff<String>>,
     #[serde(default)]
-    avatar: Change<Vec<u8>>,
+    avatar: ItemDiff<Vec<u8>>,
 }
