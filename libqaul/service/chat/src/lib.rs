@@ -41,7 +41,9 @@ impl Chat {
         auth: UserAuth,
         room: RoomId,
     ) -> Result<impl Stream<Item = ChatMessage> + Unpin> {
-        struct Subscription;
+        struct Subscription {
+            qaul: Arc<Qaul>,
+        };
 
         use async_std::{
             pin::Pin,
@@ -59,7 +61,9 @@ impl Chat {
             }
         }
 
-        Ok(Subscription)
+        Ok(Subscription {
+            qaul: Arc::clone(&self.qaul),
+        })
     }
 
     /// Send a message into a conversation
