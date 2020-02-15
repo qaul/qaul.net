@@ -1,21 +1,14 @@
 //! `qaul.net` chat service
 #![allow(unused)]
 
-// use libqaul::{
-//     error::{Error, Result},
-//     messages::{Message, MsgQuery, Mode, MsgId, MsgRef, SigTrust},
-//     users::UserAuth,
-//     Identity, Qaul,
-// };
-
 mod msg;
 pub use msg::ChatMessage;
 
 pub mod room;
 use room::{Room, RoomId};
 
-use async_std::sync::Arc;
-use libqaul::{error::Result, Qaul};
+use async_std::{stream::Stream, sync::Arc};
+use libqaul::{error::Result, users::UserAuth, Identity, Qaul};
 
 const ASC_NAME: &'static str = "net.qaul.chat";
 
@@ -32,30 +25,78 @@ impl Chat {
         Ok(Self { qaul })
     }
 
+    /// Access room function scope
+    pub fn rooms<'s>(&'s self) -> Rooms<'s> {
+        Rooms { chat: self }
+    }
+
     /// Get the next available chat message
-    pub async fn next(&self) -> ChatMessage {
+    pub async fn next(&self, auth: UserAuth, room: RoomId) -> ChatMessage {
         unimplemented!()
     }
 
-    /// Send a new message
-    pub async fn send(&self) -> Result<()> {
+    /// Subscribe to any future messages that are sent to a room
+    pub async fn subscribe(
+        &self,
+        auth: UserAuth,
+        room: RoomId,
+    ) -> Result<impl Stream<Item = ChatMessage> + Unpin> {
+        struct Subscription;
+
+        use async_std::{
+            pin::Pin,
+            poll::{Context, Poll},
+        };
+
+        impl Stream for Subscription {
+            type Item = ChatMessage;
+
+            fn poll_next(
+                mut self: Pin<&mut Self>,
+                cx: &mut Context<'_>,
+            ) -> Poll<Option<Self::Item>> {
+                unimplemented!()
+            }
+        }
+
+        Ok(Subscription)
+    }
+
+    /// Send a message into a conversation
+    pub async fn send<S>(&self, auth: UserAuth, room: RoomId, text: S) -> Result<()>
+    where
+        S: Into<String>,
+    {
         unimplemented!()
     }
 }
 
 /// Small API wrapper for room management
 pub struct Rooms<'c> {
-    chat: &'c Chat
+    chat: &'c Chat,
 }
 
 impl<'c> Rooms<'c> {
+    /// Get a list of available rooms by ID
+    pub async fn list(&self) -> Vec<RoomId> {
+        vec![]
+    }
+
+    /// Get all state information by room ID
+    pub async fn get(&self, id: RoomId) -> Room {
+        unimplemented!()
+    }
+
     /// Create a new room
-    pub async fn create(&self, _room: Room) -> Result<RoomId> {
+    pub async fn create<I>(&self, auth: UserAuth, users: I) -> Result<RoomId>
+    where
+        I: IntoIterator<Item = Identity>,
+    {
         Ok(RoomId::random())
     }
 
     /// Make modifications to an existing room
-    pub async fn modify<F>(&self, _id: RoomId, _f: F) -> Result<()>
+    pub async fn modify<F>(&self, auth: UserAuth, _id: RoomId, _f: F) -> Result<()>
     where
         F: Fn(&mut Room) -> Result<()>,
     {
@@ -63,79 +104,7 @@ impl<'c> Rooms<'c> {
     }
 
     /// Delete a room locally
-    pub async fn delete(&self, _id: RoomId) -> Result<()> {
+    pub async fn delete(&self, auth: UserAuth, _id: RoomId) -> Result<()> {
         unimplemented!()
     }
 }
-
-// impl Messaging {
-//     /// Initialise the messaging service
-//     ///
-//     /// In order to initialise, a valid and running
-//     /// `Qaul` reference needs to be provided.
-//     /// This is then used to register this service,
-//     /// but also check for the existence of a `filesharing` service.
-//     /// Depending on this check, the `async_files` capability
-//     /// can be set.
-//     pub fn new(qaul: Arc<Qaul>) -> Self {
-
-//         Self {
-//             async_files: false,
-//             qaul,
-//         }
-//     }
-
-//     /// Check if the `async_files` capability is set on this service
-//     pub fn async_files(&self) -> bool {
-//         self.async_files
-//     }
-
-//     /// Send a plain-text message with optional arbitrary attachments
-//     ///
-//     /// Under the hood, this function constructs a service API
-//     /// `Message`, signs it and optionally encrypts it, if it's
-//     /// `recipient` isn't `Recipient::Flood`, then queues it in the
-//     /// routing layer.
-//     pub async fn send(
-//         &self,
-//         user: UserAuth,
-//         mode: Mode,
-//         payload: TextPayload,
-//     ) -> Result<MsgId> {
-//         self.qaul
-//             .messages()
-//             .send(user, mode, ASC_NAME, vec![], conjoiner::serialise(&payload)?)
-//             .await
-//     }
-
-//     /// Non-blockingly poll for new `TextMessage`s for a session
-//     pub fn poll(&self, user: UserAuth) -> Result<TextMessage> {
-//         self.qaul
-//             .messages()
-//             .poll(user, ASC_NAME)
-//             .map(|msg| TextMessage::try_from(msg))?
-//     }
-
-//     /// Query existing messages from this service with a query
-//     pub fn query(&self, user: UserAuth, query: MsgQuery) -> Result<Vec<TextMessage>> {
-//         self.qaul
-//             .messages()
-//             .query(user, ASC_NAME, query)?
-//             .into_iter()
-//             .map(|msg| TextMessage::try_from(msg))
-//             .collect()
-//     }
-
-//     /// Setup a `TextMessage` listener for a specific user session
-//     pub fn listen<F: 'static + Send + Sync>(&self, user: UserAuth, listener: F) -> Result<()>
-//     where
-//         F: Fn(TextMessage) -> Result<()>,
-//     {
-//         self.qaul.messages().listen(user, ASC_NAME, move |msg| {
-//             match TextMessage::try_from(msg) {
-//                 Ok(text) => listener(text),
-//                 Err(e) => return Err(e),
-//             }
-//         })
-//     }
-// }
