@@ -1,4 +1,5 @@
 use crate::{
+    api::Subscription,
     error::{Error, Result},
     messages::{Envelope, MsgUtils, RatMessageProto},
     qaul::{Identity, Qaul},
@@ -258,24 +259,26 @@ impl<'qaul> Messages<'qaul> {
             })?
     }
 
-    /// Register a listener on new-message events for a service
+    /// Subscribe to a stream of future message updates
     ///
-    /// This function works very similarly to `Messages::poll`, except
-    /// that it uses a lambda to call when a new `Message` is
-    /// received.  Both caveats mentioned in the doc comment for
-    /// `poll` apply here as well.
-    pub fn listen<S, F: 'static + Send + Sync>(
+    /// A subscription is an async stream of messages, that is
+    /// specific to a user, service token, set of store search tags,
+    /// and subscription tag.  The subscription tag is generated for
+    /// each subscription and can later on be used to cancel a stream.
+    pub fn subscribe<S, T>(
         &self,
         user: UserAuth,
         service: S,
-        listener: F,
-    ) -> Result<()>
+        tags: T,
+    ) -> Result<Subscription<MsgRef>>
     where
         S: Into<String>,
-        F: Fn(MsgRef) -> Result<()>,
+        T: IntoIterator<Item = Tag>,
     {
         self.q.auth.trusted(user)?;
-        self.q.services.add_listener(service.into(), listener)
+        // self.q.services.add_listener(service.into(), listener)
+
+        unimplemented!()
     }
 
     /// Retrieve locally stored messages from the store
