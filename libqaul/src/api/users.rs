@@ -108,7 +108,7 @@ impl<'qaul> Users<'qaul> {
     /// Update a `UserProfile` with a lambda, if authentication passes
     pub fn update<F>(&self, user: UserAuth, update: F) -> Result<()>
     where
-        F: Fn(&mut UserProfile),
+        F: FnOnce(&mut UserProfile),
     {
         let (ref id, _) = self.q.auth.trusted(user)?;
         self.q.users.modify(id, update)

@@ -61,7 +61,7 @@ impl UserStore {
     /// Modify a single user inside the store in-place
     pub(crate) fn modify<F>(&self, id: &Identity, modifier: F) -> Result<()>
     where
-        F: Fn(&mut UserProfile),
+        F: FnOnce(&mut UserProfile),
     {
         modifier(
             match self
