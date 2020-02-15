@@ -1,5 +1,5 @@
 use crate::{
-    api::Subscription,
+    api::{Subscription, SubId},
     error::{Error, Result},
     messages::{Envelope, MsgUtils, RatMessageProto},
     qaul::{Identity, Qaul},
@@ -281,6 +281,14 @@ impl<'qaul> Messages<'qaul> {
         unimplemented!()
     }
 
+    /// Cancel a previous subscription by Id
+    ///
+    /// Messages can still be queried or polled, but will stop being
+    /// streamed to the registered receiver.
+    pub fn unsubscribe(&self, user: UserAuth, id: SubId) -> Result<()> {
+        Ok(())
+    }
+    
     /// Retrieve locally stored messages from the store
     ///
     /// A query is made in relation to an associated service
