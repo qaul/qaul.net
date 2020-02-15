@@ -30,13 +30,18 @@ use libqaul::Qaul;
 #[async_trait]
 pub trait QaulExt {
     async fn apply<R, T>(&self, r: T) -> R
-    where R: Send + Sync, T: Send + Sync + QaulRPC<Response = R>;
+    where
+        R: Send + Sync,
+        T: Send + Sync + QaulRPC<Response = R>;
 }
 
 #[async_trait]
 impl QaulExt for Qaul {
     async fn apply<R, T>(&self, r: T) -> R
-    where R: Send + Sync, T: Send + Sync + QaulRPC<Response = R> {
+    where
+        R: Send + Sync,
+        T: Send + Sync + QaulRPC<Response = R>,
+    {
         r.apply(self).await
     }
 }
