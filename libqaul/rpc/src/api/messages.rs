@@ -2,12 +2,8 @@
 
 use async_trait::async_trait;
 use crate::QaulRPC;
-use futures::{
-    channel::mpsc::{unbounded, UnboundedReceiver},
-    stream::Stream,
-};
 use libqaul::{
-    api::Tag,
+    api::{Tag, Subscription},
     messages::{MsgQuery, Mode, MsgId, MsgRef},
     users::UserAuth,
     error::{Error, Result},
@@ -61,20 +57,16 @@ impl QaulRPC for Poll {
 pub struct Subscribe {
     auth: UserAuth,
     service: String,
-    listener_id: String,
+    #[serde(default)]
+    tags: Vec<Tag>,
 }
 
 #[async_trait]
 impl QaulRPC for Subscribe {
-    type Response = Result<UnboundedReceiver<MsgRef>>;
+    type Response = Result<Subscription<MsgRef>>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        let (send, recv) = unbounded(); 
         qaul.messages()
-            .listen(self.auth, self.service, move |msg| {
-                send.unbounded_send(msg)
-                    .map_err(|_| Error::CommFault)
-            })
-            .map(|_| recv)
+            .subscribe(self.auth, self.service, self.tags)
     }
 }
 
