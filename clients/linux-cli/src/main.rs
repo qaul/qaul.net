@@ -1,4 +1,8 @@
-use async_std::task;
+use futures::{
+    executor::block_on,
+    stream::{StreamExt, Stream},
+    join,
+};
 use libqaul::{messages::Mode, Qaul};
 use ratman::Router;
 
@@ -9,24 +13,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let q = Qaul::new(r);
     let user = q.users().create("password")?;
 
-    // Register a service
-    q.services().register("de.spacekookie.myapp")?;
-    task::block_on(async {
-        q.messages()
-            .send(
-                user.clone(),
-                Mode::Flood,
-                "de.spacekokie.myapp",
-                vec![],
-                vec![1, 2, 3, 4],
-            )
-            .await
-    })?;
+    let msg = q.messages();
+    let send = msg
+        .send(
+            user.clone(),
+            Mode::Flood,
+            "de.spacekookie.myapp",
+            vec![],
+            vec![1, 2, 3, 4],
+        );
+    let mut subscriber = msg
+        .subscribe(user, "de.spacekookie.myapp", None)?;
 
-    q.messages().listen(user, "de.spacekookie.myapp", |msg| {
-        println!("Received message: {:?}", msg);
-        Ok(()) // Return error if parsing fails
-    })?;
+    block_on(async { join!(
+            send,
+            subscriber.next(),
+    )});
 
     Ok(())
 }
