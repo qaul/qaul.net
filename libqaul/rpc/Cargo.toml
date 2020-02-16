@@ -6,11 +6,14 @@ authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
 [features]
-default = ["proto", "json"]
+default = ["proto", "json", "chat"]
 proto = ["capnp"]
 json = ["serde_json"]
+chat = ["qaul-chat"]
 
 [dependencies]
+qaul-chat = { path = "../service/chat", optional = true }
+
 libqaul = { version = "*", path = ".." }
 capnp = { version = "0.12", optional = true }
 serde_json = { version = "1.0", optional = true }

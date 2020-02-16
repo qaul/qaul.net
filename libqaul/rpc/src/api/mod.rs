@@ -6,3 +6,5 @@ pub mod contacts;
 pub mod users;
 pub mod messages;
 pub mod files;
+#[feature(chat)]
+pub mod chat;

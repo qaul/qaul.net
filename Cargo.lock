@@ -828,6 +828,7 @@ dependencies = [
  "conjoiner-engine",
  "futures 0.3.4",
  "libqaul",
+ "qaul-chat",
  "serde",
  "serde_json",
 ]

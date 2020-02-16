@@ -84,7 +84,7 @@ impl<'c> Rooms<'c> {
     /// Make modifications to an existing room
     pub async fn modify<F>(&self, auth: UserAuth, _id: RoomId, _f: F) -> Result<()>
     where
-        F: Fn(&mut Room) -> Result<()>,
+        F: FnOnce(&mut Room) -> Result<()>,
     {
         unimplemented!()
     }

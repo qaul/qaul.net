@@ -1,6 +1,6 @@
 //! A module to handle chat rooms
 
-use libqaul::{Identity, Qaul, error::Result, api::{ItemDiff, SetDiff}};
+use libqaul::{Identity, Qaul, api::{ItemDiff, SetDiff}, error::Result};
 use std::collections::BTreeSet;
 use async_std::sync::Arc;
 use serde::{Serialize, Deserialize};
@@ -24,16 +24,6 @@ pub enum RoomState {
     
 }
 
-/// Apply changes to a room by ID
-#[derive(Serialize, Deserialize)]
-pub struct RoomDiff {
-    id: Identity,
-    #[serde(default)]
-    users: Vec<SetDiff<Identity>>,
-    #[serde(default)]
-    name: ItemDiff<String>,
-}
-
 /// Abstraction over a chat room
 #[derive(Serialize, Deserialize)]
 pub struct Room {
@@ -45,6 +35,14 @@ pub struct Room {
     pub name: Option<String>,
 }
 
+
+/// A set of changes made to a room
+#[derive(Serialize, Deserialize)]
+pub struct RoomDiff {
+    id: RoomId,
+    users: Vec<SetDiff<Identity>>,
+    name: ItemDiff<String>,
+}
 
 impl Room {
     /// Create a new room builder
