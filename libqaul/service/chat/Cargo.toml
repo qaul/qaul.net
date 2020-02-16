@@ -12,3 +12,4 @@ files = { path = "../files", package = "qaul-files" }
 serde = { version = "1.0", features = ["derive"] }
 conjoiner = { version = "1.2", package = "conjoiner-engine" }
 async-std = "1.0"
+futures = "0.3"

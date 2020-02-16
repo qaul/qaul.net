@@ -8,7 +8,8 @@ pub mod room;
 use room::{Room, RoomId};
 
 use async_std::{stream::Stream, sync::Arc};
-use libqaul::{error::Result, users::UserAuth, Identity, Qaul};
+use futures::stream::StreamExt;
+use libqaul::{api::Subscription, error::Result, users::UserAuth, Identity, Qaul, Tag};
 
 const ASC_NAME: &'static str = "net.qaul.chat";
 
@@ -41,29 +42,10 @@ impl Chat {
         auth: UserAuth,
         room: RoomId,
     ) -> Result<impl Stream<Item = ChatMessage> + Unpin> {
-        struct Subscription {
-            qaul: Arc<Qaul>,
-        };
-
-        use async_std::{
-            pin::Pin,
-            poll::{Context, Poll},
-        };
-
-        impl Stream for Subscription {
-            type Item = ChatMessage;
-
-            fn poll_next(
-                mut self: Pin<&mut Self>,
-                cx: &mut Context<'_>,
-            ) -> Poll<Option<Self::Item>> {
-                unimplemented!()
-            }
-        }
-
-        Ok(Subscription {
-            qaul: Arc::clone(&self.qaul),
-        })
+        self.qaul
+            .messages()
+            .subscribe(auth, ASC_NAME, Some(Tag::new("room_id", room)))
+            .map(|sub_stream| sub_stream.map(|msg| unimplemented!()))
     }
 
     /// Send a message into a conversation

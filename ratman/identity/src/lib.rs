@@ -108,6 +108,11 @@ impl Identity {
         rng.fill_bytes(&mut buf);
         Self(buf)
     }
+
+    /// Returns an iterator over the bytes of the identity
+    pub fn iter<'a>(&'a self) -> impl Iterator<Item = &'a u8> {
+        self.0.iter()
+    }
 }
 
 /// Implement RAW `From` binary array
@@ -142,6 +147,34 @@ impl From<&Identity> for [u8; ID_LEN] {
 impl AsRef<[u8]> for Identity {
     fn as_ref(&self) -> &[u8] {
         &self.0
+    }
+}
+
+/// Iterator for iterating over `Identity`
+pub struct Iter {
+    index: usize, 
+    ident: Identity,
+}
+
+impl Iterator for Iter {
+    type Item = u8;
+    fn next(&mut self) -> Option<Self::Item> {
+        let ret = self.ident.0
+            .get(self.index)
+            .map(|byte| *byte);
+        self.index += 1;
+        ret
+    }
+}
+
+impl IntoIterator for Identity {
+    type Item = u8;
+    type IntoIter = Iter;
+    fn into_iter(self) -> Self::IntoIter {
+        Iter {
+            index: 0,
+            ident: self,
+        }
     }
 }
 
