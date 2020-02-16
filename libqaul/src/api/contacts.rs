@@ -114,7 +114,7 @@ impl<'qaul> Contacts<'qaul> {
     /// let contacts = qaul.contacts();
     /// # (|| -> Result<()> {
     /// contacts
-    ///     .query(user.clone(), ContactQuery::Nick("buddy"))?
+    ///     .query(user.clone(), ContactQuery::Nick("buddy".to_string()))?
     ///     .into_iter()
     ///     .map(|i| contacts.get(user.clone(), &i));
     /// # Ok(())
