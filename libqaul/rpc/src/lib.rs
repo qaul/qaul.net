@@ -18,7 +18,12 @@
 #![allow(unused)]
 
 mod api;
-pub use api::{contacts, files, messages, users};
+pub use api::{
+    QaulExt, QaulRPC,
+    contacts, files, messages, users
+};
+#[feature(chat)]
+pub use api::{chat, chat::ChatExt, chat::ChatRPC};
 
 //mod proto;
 
