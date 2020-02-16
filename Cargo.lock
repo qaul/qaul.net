@@ -79,6 +79,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "async-tungstenite"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f1a7fca4f1ccd1fe926bec21a4ba6259d3d91f04d67a9dd76bd549366be5bef"
+dependencies = [
+ "futures 0.3.4",
+ "log",
+ "pin-project",
+ "tungstenite",
+]
+
+[[package]]
 name = "autocfg"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -375,6 +387,28 @@ checksum = "3ab49e9dcb602294bc42f9a7dfc9bc6e936fca4418ea300dbfb84fe16de0b7d9"
 dependencies = [
  "backtrace",
  "version_check",
+]
+
+[[package]]
+name = "failure"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8273f13c977665c5db7eb2b99ae520952fe5ac831ae4cd09d80c4c7042b5ed9"
+dependencies = [
+ "backtrace",
+ "failure_derive",
+]
+
+[[package]]
+name = "failure_derive"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0bc225b78e0391e4b8683440bf2e63c2deeeb2ce5189eab46e2b68c6d3725d08"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+ "synstructure",
 ]
 
 [[package]]
@@ -687,7 +721,7 @@ dependencies = [
  "net2",
  "rustc_version",
  "time",
- "tokio 0.1.22",
+ "tokio",
  "tokio-buf",
  "tokio-executor",
  "tokio-io",
@@ -826,6 +860,7 @@ dependencies = [
  "async-trait",
  "capnp",
  "conjoiner-engine",
+ "failure",
  "futures 0.3.4",
  "libqaul",
  "qaul-chat",
@@ -1433,6 +1468,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "synstructure"
+version = "0.12.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "67656ea1dc1b41b1451851562ea232ec2e5a80242139f7e679ceccfb5d61f545"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+ "unicode-xid",
+]
+
+[[package]]
 name = "tide"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1480,22 +1527,6 @@ dependencies = [
  "tokio-reactor",
  "tokio-threadpool",
  "tokio-timer",
-]
-
-[[package]]
-name = "tokio"
-version = "0.2.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fdd17989496f49cdc57978c96f0c9fe5e4a58a8bddc6813c449a4624f6a030b"
-dependencies = [
- "bytes 0.5.4",
- "iovec",
- "lazy_static",
- "libc",
- "memchr",
- "mio",
- "mio-uds",
- "pin-project-lite",
 ]
 
 [[package]]
@@ -1610,19 +1641,6 @@ dependencies = [
  "futures 0.1.29",
  "slab",
  "tokio-executor",
-]
-
-[[package]]
-name = "tokio-tungstenite"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8b8fe88007ebc363512449868d7da4389c9400072a3f666f212c7280082882a"
-dependencies = [
- "futures 0.3.4",
- "log",
- "pin-project",
- "tokio 0.2.11",
- "tungstenite",
 ]
 
 [[package]]
@@ -1785,10 +1803,10 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 name = "ws"
 version = "0.1.0"
 dependencies = [
+ "async-tungstenite",
  "futures 0.3.4",
  "libqaul",
  "libqaul-rpc",
- "tokio-tungstenite",
 ]
 
 [[package]]

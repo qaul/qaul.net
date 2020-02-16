@@ -4,6 +4,7 @@ use {
 };
 
 pub mod messages;
+pub mod rooms;
 
 #[async_trait]
 pub trait ChatRPC {

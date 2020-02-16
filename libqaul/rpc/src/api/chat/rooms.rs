@@ -11,7 +11,7 @@ use {
         Identity,
     },
     qaul_chat::{
-        room::RoomId,
+        room::{RoomId, Room},
         Chat,
     },
     serde::{Serialize, Deserialize},
@@ -75,6 +75,7 @@ impl ChatRPC for Modify {
             .modify(auth, id, move |room| {
                 name.apply(&mut room.name);
                 room.users.apply(users);
+                Ok(())
             })
             .await
     }

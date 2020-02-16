@@ -1,6 +1,6 @@
 //! API wrapper structures
 
-use serde::{Serialize, Deserialize};
+pub mod request;
 
 pub mod contacts;
 pub mod users;

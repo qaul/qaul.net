@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio-tungstenite = "0.10"
+async-tungstenite = "0.4"
 futures = "0.3"
 libqaul = { path = ".." }
 libqaul-rpc = { path = "../rpc" }
