@@ -10,11 +10,14 @@ use {
     futures::{
         channel::mpsc,
         future::FutureExt,
-        task::{Context, Poll, SpawnExt},
+        task::{Context, Poll, SpawnExt, SpawnError},
         stream::{Stream, StreamExt},
         sink::{Sink, SinkExt},
     },
-    libqaul::Qaul,
+    libqaul::{
+        api::{Subscription, SubId},
+        Qaul,
+    },
     std::{
         pin::Pin,
         sync::Arc,
@@ -162,10 +165,9 @@ impl Responder {
             let mut spawner = spawner;
             loop {
                 // wait for incoming messages, ending the task if the channel has closed
-                let request = if let Some(request) = input.next().await {
-                    request
-                } else {
-                    break;
+                let request = match input.next().await {
+                    Some(request) => request,
+                    None => { break; },
                 };
 
                 // spawn a task for each incoming message
@@ -184,7 +186,7 @@ impl Responder {
                     output.send(response).await;
                 });
             }
-        });
+        }).unwrap();
 
         Self {
             input,
@@ -202,8 +204,82 @@ impl Responder {
     ) -> TransactionResponse {
         let (request, response_ctx) = request.split();
         let response = match request {
+            // =^-^= Contacts =^-^=
+            Request::ContactModify(r) => services.respond_qaul(r).await.into(),
+            Request::ContactGet(r) => services.respond_qaul(r).await.into(),
+            Request::ContactQuery(r) => {
+                services.respond_qaul(r)
+                    .await
+                    .map(|r| r.map(|ids| Response::UserId(ids)))
+                    .into()
+            },
+            Request::ContactAll(r) => {
+                services.respond_qaul(r)
+                    .await
+                    .map(|r| r.map(|ids| Response::UserId(ids)))
+                    .into()
+            },
+
+            // =^-^= Messages =^-^=
+            Request::MessageSend(r) => {
+                services.respond_qaul(r)
+                    .await
+                    .map(|r| r.map(|id| Response::MessageId(id)))
+                    .into()
+            },
+            Request::MessagePoll(r) => services.respond_qaul(r).await.into(),
+            Request::MessageSubscribe(r) => {
+                services.respond_qaul(r)
+                    .await
+                    .map(|r| 
+                        r.map(|subscription| 
+                              Responder::subscribe(subscription, output, spawner)
+                        )
+                    )
+                    .into()
+            },
+            Request::MessageQuery(r) => services.respond_qaul(r).await.into(),
+
+            // =^-^= Users =^-^=
+            Request::UserList(r) => services.respond_qaul(r).await.into(),
+            Request::UserCreate(r) => services.respond_qaul(r).await.into(), 
+            Request::UserDelete(r) => services.respond_qaul(r).await.into(),
+            Request::UserChangePw(r) => services.respond_qaul(r).await.into(),
+            Request::UserLogin(r) => services.respond_qaul(r).await.into(),
+            Request::UserLogout(r) => services.respond_qaul(r).await.into(),
+            Request::UserGet(r) => services.respond_qaul(r).await.into(),
+            Request::UserUpdate(r) => services.respond_qaul(r).await.into(),
+
             _ => { unimplemented!(); },
         };
         response_ctx.with_response(response)
+    }
+
+    /// Spawn a future moving the results of this subscription to the output
+    fn subscribe<T: Into<Response> + Send + Sync + 'static>(
+        mut subscription: Subscription<T>,
+        mut output: mpsc::Sender<TransactionResponse>,
+        mut spawner: Spawner,
+    ) -> Response {
+        let id = subscription.id.clone();
+        spawner.spawn(async move {
+                loop {
+                    let t = match subscription.next().await {
+                        Some(t) => t,
+                        None => { break; },
+                    };
+
+                    let trans = TransactionResponse::subscription(
+                        t.into(),
+                        subscription.id.clone(),
+                    );
+
+                    if let Err(e) = output.send(trans).await {
+                        break;
+                    }
+                }
+            })
+            .map(|_| Response::Subscription(id))
+            .into()
     }
 }
