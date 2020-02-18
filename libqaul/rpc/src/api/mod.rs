@@ -1,6 +1,8 @@
 //! API wrapper structures
 
 pub mod request;
+pub mod response;
+pub mod responder;
 
 pub mod contacts;
 pub mod users;

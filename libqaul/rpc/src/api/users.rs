@@ -16,7 +16,7 @@ use libqaul::{
 use serde::{Serialize, Deserialize};
 
 /// Enumerate all publicly known users
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct List;
 
 #[async_trait]
@@ -29,7 +29,7 @@ impl QaulRPC for List {
 }
 
 /// Create a new user
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct Create {
     pw: String,
 }
@@ -44,7 +44,7 @@ impl QaulRPC for Create {
 }
 
 /// Delete a user
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct Delete {
     auth: UserAuth,
     /// Indicate whether local data should be deleted as well
@@ -62,7 +62,7 @@ impl QaulRPC for Delete {
 }
 
 /// Change the password on a user
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct ChangePw {
     auth: UserAuth,
     new: String,
@@ -78,7 +78,7 @@ impl QaulRPC for ChangePw {
 }
 
 /// Create a new session for a user
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct Login {
     user: Identity,
     pw: String
@@ -94,7 +94,7 @@ impl QaulRPC for Login {
 }
 
 /// Stop an existing session
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct Logout {
     auth: UserAuth
 }
@@ -109,7 +109,7 @@ impl QaulRPC for Logout {
 }
 
 /// Get the user profile for any remote or local user
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct Get {
     user: Identity
 }
@@ -124,7 +124,7 @@ impl QaulRPC for Get {
 }
 
 /// Apply an update to your user profile
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct Update {
     auth: UserAuth,
     #[serde(default)]

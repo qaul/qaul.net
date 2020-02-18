@@ -1,17 +1,45 @@
 use {
-    failure::{format_err, Fail},
-    libqaul::Qaul,
     serde::{Serialize, Deserialize},
-    std::sync::Arc,
     super::*,
 };
 #[feature(chat)]
 use qaul_chat::Chat;
 
+/// In some RPC systems requests will be processed in a non-deterministic
+/// order, making it hard to associtate requests with responses. In such
+/// systems clients are recommended to provide a transaction id with their
+/// requests. This id will be returned along with the response to help 
+/// correlation.
+#[derive(Serialize, Deserialize)]
+pub struct TransactionRequest {
+    #[serde(default)]
+    pub transaction_id: Option<String>,
+    pub request: Request,
+}
+
+impl TransactionRequest {
+    /// Split this incoming request into a `Request` and the required
+    /// context to add on to the outgoing `Response`
+    pub fn split(self) -> (Request, response::ResponseContext) {
+        let TransactionRequest { transaction_id, request } = self;
+        let transaction_request = match transaction_id {
+            Some(_) => None,
+            None => Some(request.clone()),
+        };
+        (
+            request,
+            response::ResponseContext {
+                transaction_id,
+                request: transaction_request,
+            }, 
+        )
+    }
+}
+
 /// This absolutely massive enum is for protocols like `ws` and `ipc`
 /// that will tunnel all kinds of messages through the same channel.
 /// Things like `http` should use the direct RPC structs instead.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Request {
     #[feature(chat)]
@@ -50,39 +78,4 @@ pub enum Request {
     UserLogout(users::Logout),
     UserGet(users::Get),
     UserUpdate(users::Update),
-}
-
-/// Due to the way we are locking services behind features we can't
-/// actually implement `QaulRPC` on `Request`, or at least it'd
-/// be a bit painful to use. This struct wraps a series of services
-/// and allows `Request` objects to be executed on them.
-#[derive(Clone)]
-pub struct RequestExecutor {
-    #[feature(chat)]
-    pub chat: Option<Arc<Chat>>,
-    pub qaul: Arc<Qaul>,
-}
-
-impl RequestExecutor {
-    pub fn new(qaul: Arc<Qaul>) -> Self {
-        Self {
-            #[feature(chat)]
-            chat: None,
-            qaul,
-        }
-    }
-
-    #[feature(chat)]
-    pub fn chat(&mut self, chat: Arc<Chat>) {
-        self.chat = Some(chat);
-    }
-
-    /// Execute the request on the appropriate service
-    ///
-    /// This returns an opaque type, if you need a concrete type please
-    /// pull out the `Request` variant you care about and handle that one
-    /// specially
-    pub fn execute(&self, req: Request) {
-        unimplemented!();
-    }
 }

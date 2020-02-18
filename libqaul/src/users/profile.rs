@@ -2,6 +2,7 @@
 
 use crate::Identity;
 use std::collections::{BTreeMap, BTreeSet};
+use serde::{Serialize, Deserialize};
 
 /// A complete user profile with ID and metadata
 ///
@@ -12,21 +13,26 @@ use std::collections::{BTreeMap, BTreeSet};
 /// The user profile itself makes no destinction between local, remote
 /// or self users (the latter being the currently active user in a
 /// session)
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize,)]
 pub struct UserProfile {
     /// A user's network (node) ID
     pub id: Identity,
     /// A human readable display-name (like @foobar)
+    #[serde(default)]
     pub display_name: Option<String>,
     /// A human's preferred call-sign ("Friends call me foo")
+    #[serde(default)]
     pub real_name: Option<String>,
     /// A key-value list of things the user deems interesting about
     /// themselves. This could be stuff like "gender", "preferred
     /// languages" or whatever.
+    #[serde(default)]
     pub bio: BTreeMap<String, String>,
     /// The set of services this user runs (should never be empty!)
+    #[serde(default)]
     pub services: BTreeSet<String>,
     /// A users profile picture (some people like selfies)
+    #[serde(default)]
     pub avatar: Option<Vec<u8>>,
 }
 

@@ -860,6 +860,7 @@ dependencies = [
  "async-trait",
  "capnp",
  "conjoiner-engine",
+ "crossbeam-queue",
  "failure",
  "futures 0.3.4",
  "libqaul",

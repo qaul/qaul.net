@@ -27,3 +27,4 @@ pub use api::{chat, chat::ChatExt, chat::ChatRPC};
 
 //mod proto;
 
+mod subtask;
