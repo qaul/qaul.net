@@ -78,7 +78,9 @@ pub enum Response {
     Error(String),
     Message(Vec<Message>),
     MessageId(MsgId),
+    #[feature(chat)]
     Room(Room),
+    #[feature(chat)]
     RoomId(Vec<RoomId>),
     Subscription(SubId),
     Success,
@@ -143,6 +145,7 @@ impl From<Vec<MsgRef>> for Response {
     }
 }
 
+#[feature(chat)]
 impl From<Room> for Response {
     fn from(room: Room) -> Response {
         Response::Room(room)
