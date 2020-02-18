@@ -204,6 +204,46 @@ impl Responder {
     ) -> TransactionResponse {
         let (request, response_ctx) = request.split();
         let response = match request {
+            // =^-^= Chat Messages =^-^=
+            #[feature(chat)]
+            Request::ChatMessageNext(r) => services.respond_chat(r).await.into(),
+            //#[feature(chat)]
+            //Request::ChatMessageSubscribe(r) => {
+            //    services.respond_chat(r)
+            //        .await
+            //        .map(|r| 
+            //            r.map(|subscription| 
+            //                  Responder::subscribe(subscription, output, spawner)
+            //            )
+            //        )
+            //        .into()
+            //},
+            #[feature(chat)]
+            Request::ChatMessageSend(r) => services.respond_chat(r).await.into(),
+
+            // =^-^= Chat Rooms =^-^=
+            #[feature(chat)]
+            Request::ChatRoomList(r) => {
+                services.respond_chat(r)
+                    .await
+                    .map(|ids| Response::RoomId(ids))
+                    .into()
+            },
+            #[feature(chat)]
+            Request::ChatRoomGet(r) => services.respond_chat(r).await.into(),
+            #[feature(chat)]
+            Request::ChatRoomCreate(r) => {
+                services.respond_chat(r)
+                    .await
+                    .map(|r| r.map(|id| Response::RoomId(vec![id])))
+                    .into()
+            },
+            #[feature(chat)]
+            Request::ChatRoomModify(r) => services.respond_chat(r).await.into(),
+            #[feature(chat)]
+            Request::ChatRoomDelete(r) => services.respond_chat(r).await.into(),
+
+
             // =^-^= Contacts =^-^=
             Request::ContactModify(r) => services.respond_qaul(r).await.into(),
             Request::ContactGet(r) => services.respond_qaul(r).await.into(),

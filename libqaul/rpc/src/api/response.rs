@@ -10,6 +10,8 @@ use {
     std::fmt::Display,
     super::request::Request,
 };
+#[feature(chat)]
+use qaul_chat::{ChatMessage, room::{RoomId, Room}};
 
 /// A wrapped response object carrying with it additional
 /// information to allow correlating the response with a sent
@@ -69,10 +71,14 @@ impl ResponseContext {
 #[derive(Serialize, Deserialize)]
 pub enum Response {
     Auth(UserAuth),
+    #[feature(chat)]
+    ChatMessage(Vec<ChatMessage>),
     Contact(Vec<ContactEntry>),
     Error(String),
     Message(Vec<Message>),
     MessageId(MsgId),
+    Room(Room),
+    RoomId(Vec<RoomId>),
     Subscription(SubId),
     Success,
     User(Vec<UserProfile>),
@@ -85,12 +91,17 @@ impl From<UserAuth> for Response {
     }
 }
 
-impl<T: Into<Response>, E: Display> From<Result<T, E> > for Response {
-    fn from(result: Result<T, E>) -> Response {
-        match result {
-            Ok(t) => t.into(),
-            Err(e) => Response::Error(e.to_string()),
-        }
+#[feature(chat)]
+impl From<ChatMessage> for Response {
+    fn from(msg: ChatMessage) -> Response {
+        Response::ChatMessage(vec![msg])
+    }
+}
+
+#[feature(chat)]
+impl From<Vec<ChatMessage>> for Response {
+    fn from(msgs: Vec<ChatMessage>) -> Response {
+        Response::ChatMessage(msgs)
     }
 }
 
@@ -103,6 +114,15 @@ impl From<ContactEntry> for Response {
 impl From<Vec<ContactEntry>> for Response {
     fn from(contacts: Vec<ContactEntry>) -> Response {
         Response::Contact(contacts)
+    }
+}
+
+impl<T: Into<Response>, E: Display> From<Result<T, E> > for Response {
+    fn from(result: Result<T, E>) -> Response {
+        match result {
+            Ok(t) => t.into(),
+            Err(e) => Response::Error(e.to_string()),
+        }
     }
 }
 
@@ -119,6 +139,12 @@ impl From<Vec<MsgRef>> for Response {
                 .map(|msg| msg.as_ref().clone())
                 .collect()
         )
+    }
+}
+
+impl From<Room> for Response {
+    fn from(room: Room) -> Response {
+        Response::Room(room)
     }
 }
 
