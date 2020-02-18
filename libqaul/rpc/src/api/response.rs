@@ -69,6 +69,7 @@ impl ResponseContext {
 /// In some systems all responses are channeled over a single pipe. In
 /// such systems, this object is provided to contain all possible responses.
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "snake_case", tag = "type")]
 pub enum Response {
     Auth(UserAuth),
     #[feature(chat)]
