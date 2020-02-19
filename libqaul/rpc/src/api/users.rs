@@ -1,7 +1,7 @@
 //! Users API structures
 
 use async_trait::async_trait;
-use crate::QaulRPC;
+use crate::QaulRpc;
 use std::collections::{BTreeMap, BTreeSet};
 use libqaul::{
     api::{
@@ -20,7 +20,7 @@ use serde::{Serialize, Deserialize};
 pub struct List;
 
 #[async_trait]
-impl QaulRPC for List {
+impl QaulRpc for List {
     type Response = Vec<UserProfile>; 
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.users()
@@ -35,7 +35,7 @@ pub struct Create {
 }
 
 #[async_trait]
-impl QaulRPC for Create {
+impl QaulRpc for Create {
     type Response = Result<UserAuth>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.users()
@@ -52,7 +52,7 @@ pub struct Delete {
 }
 
 #[async_trait]
-impl QaulRPC for Delete {
+impl QaulRpc for Delete {
     type Response = Result<()>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.users()
@@ -69,7 +69,7 @@ pub struct ChangePw {
 }
 
 #[async_trait]
-impl QaulRPC for ChangePw {
+impl QaulRpc for ChangePw {
     type Response = Result<()>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.users()
@@ -85,7 +85,7 @@ pub struct Login {
 }
 
 #[async_trait]
-impl QaulRPC for Login {
+impl QaulRpc for Login {
     type Response = Result<UserAuth>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.users()
@@ -100,7 +100,7 @@ pub struct Logout {
 }
 
 #[async_trait]
-impl QaulRPC for Logout {
+impl QaulRpc for Logout {
     type Response = Result<()>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.users()
@@ -115,7 +115,7 @@ pub struct Get {
 }
 
 #[async_trait]
-impl QaulRPC for Get {
+impl QaulRpc for Get {
     type Response = Result<UserProfile>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.users()
@@ -140,7 +140,7 @@ pub struct Update {
 }
 
 #[async_trait]
-impl QaulRPC for Update {
+impl QaulRpc for Update {
     type Response = Result<()>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         let Update {

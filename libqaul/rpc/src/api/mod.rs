@@ -1,27 +1,24 @@
 //! API wrapper structures
 
-pub mod request;
-pub mod response;
-pub mod responder;
-
 pub mod contacts;
-pub mod users;
-pub mod messages;
+pub mod envelope;
 pub mod files;
+pub mod messages;
+pub mod users;
+
 #[feature(chat)]
 pub mod chat;
 
 use async_trait::async_trait;
 use libqaul::Qaul;
 
-/// An extension allowing `QaulRPC` object to be applied directly
-/// to an instance of `Qaul`
+/// Apply an RPC structure to a libqaul instance
 #[async_trait]
 pub trait QaulExt {
-    async fn apply<R, T>(&self, r: T) -> R
+    async fn apply<Response, Request>(&self, r: Request) -> Response
     where
-        R: Send + Sync,
-        T: Send + Sync + QaulRPC<Response = R>;
+        Response: Send + Sync,
+        Request: Send + Sync + QaulRpc<Response = Response>;
 }
 
 #[async_trait]
@@ -29,15 +26,15 @@ impl QaulExt for Qaul {
     async fn apply<R, T>(&self, r: T) -> R
     where
         R: Send + Sync,
-        T: Send + Sync + QaulRPC<Response = R>,
+        T: Send + Sync + QaulRpc<Response = R>,
     {
         r.apply(self).await
     }
 }
 
-/// A trait for objects that can modify an instance of `Qaul`
+/// A trait for objects that can modify an instance of libqaul
 #[async_trait]
-pub trait QaulRPC {
+pub trait QaulRpc {
     type Response;
     async fn apply(self, qaul: &Qaul) -> Self::Response;
 }

@@ -1,15 +1,15 @@
 //! Messages API structures
 
+use crate::QaulRpc;
 use async_trait::async_trait;
-use crate::QaulRPC;
 use libqaul::{
-    api::{Tag, Subscription},
-    messages::{MsgQuery, Mode, MsgId, MsgRef},
-    users::UserAuth,
+    api::{Subscription, Tag},
     error::{Error, Result},
+    messages::{Mode, MsgId, MsgQuery, MsgRef},
+    users::UserAuth,
     Qaul,
 };
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Send a raw payload message
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
@@ -23,7 +23,7 @@ pub struct Send {
 }
 
 #[async_trait]
-impl QaulRPC for Send {
+impl QaulRpc for Send {
     type Response = Result<MsgId>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.messages()
@@ -44,11 +44,10 @@ pub struct Poll {
 }
 
 #[async_trait]
-impl QaulRPC for Poll {
+impl QaulRpc for Poll {
     type Response = Result<MsgRef>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.messages()
-            .poll(self.auth, self.service)
+        qaul.messages().poll(self.auth, self.service)
     }
 }
 
@@ -62,7 +61,7 @@ pub struct Subscribe {
 }
 
 #[async_trait]
-impl QaulRPC for Subscribe {
+impl QaulRpc for Subscribe {
     type Response = Result<Subscription<MsgRef>>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.messages()
@@ -83,10 +82,9 @@ pub struct Query {
 }
 
 #[async_trait]
-impl QaulRPC for Query {
+impl QaulRpc for Query {
     type Response = Result<Vec<MsgRef>>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.messages()
-            .query(self.auth, self.service, self.query)
+        qaul.messages().query(self.auth, self.service, self.query)
     }
 }

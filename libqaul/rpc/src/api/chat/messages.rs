@@ -1,19 +1,10 @@
 use {
-    async_trait::async_trait,
     super::ChatRPC,
-    futures::{
-        future::FutureExt,
-        stream::Stream,
-    },
-    libqaul::{
-        error::Result,
-        users::UserAuth,
-    },
-    qaul_chat::{
-        room::RoomId,
-        Chat, ChatMessage,
-    },
-    serde::{Serialize, Deserialize},
+    async_trait::async_trait,
+    futures::{future::FutureExt, stream::Stream},
+    libqaul::{error::Result, users::UserAuth},
+    qaul_chat::{room::RoomId, Chat, ChatMessage},
+    serde::{Deserialize, Serialize},
 };
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
@@ -56,8 +47,6 @@ pub struct Send {
 impl ChatRPC for Send {
     type Response = Result<()>;
     async fn apply(self, chat: &Chat) -> Self::Response {
-        chat.send(self.auth, self.room, self.text)
-            .await
+        chat.send(self.auth, self.room, self.text).await
     }
 }
-

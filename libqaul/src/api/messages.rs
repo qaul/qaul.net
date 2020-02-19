@@ -1,5 +1,5 @@
 use crate::{
-    api::{Subscription, SubId},
+    api::{SubId, Subscription},
     error::{Error, Result},
     messages::{Envelope, MsgUtils, RatMessageProto},
     qaul::{Identity, Qaul},
@@ -277,8 +277,12 @@ impl<'qaul> Messages<'qaul> {
     {
         self.q.auth.trusted(user)?;
         // self.q.services.add_listener(service.into(), listener)
+        let (_, rx) = futures::channel::mpsc::channel(1);
 
-        unimplemented!()
+        Ok(Subscription {
+            id: SubId::random(),
+            rx,
+        })
     }
 
     /// Cancel a previous subscription by Id
@@ -288,7 +292,7 @@ impl<'qaul> Messages<'qaul> {
     pub fn unsubscribe(&self, user: UserAuth, id: SubId) -> Result<()> {
         Ok(())
     }
-    
+
     /// Retrieve locally stored messages from the store
     ///
     /// A query is made in relation to an associated service

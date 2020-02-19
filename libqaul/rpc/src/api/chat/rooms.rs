@@ -2,19 +2,16 @@ use {
     super::ChatRPC,
     async_trait::async_trait,
     libqaul::{
-        api::{
-            ItemDiff, ItemDiffExt, 
-            SetDiff, SetDiffExt,
-        },
+        api::{ItemDiff, ItemDiffExt, SetDiff, SetDiffExt},
         error::Result,
         users::UserAuth,
         Identity,
     },
     qaul_chat::{
-        room::{RoomId, Room},
+        room::{Room, RoomId},
         Chat,
     },
-    serde::{Serialize, Deserialize},
+    serde::{Deserialize, Serialize},
 };
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
@@ -22,7 +19,7 @@ pub struct List;
 
 #[async_trait]
 impl ChatRPC for List {
-    type Response = Vec<RoomId>; 
+    type Response = Vec<RoomId>;
     async fn apply(self, chat: &Chat) -> Self::Response {
         chat.rooms().list().await
     }
@@ -35,7 +32,7 @@ pub struct Get {
 
 #[async_trait]
 impl ChatRPC for Get {
-    type Response = Room; 
+    type Response = Room;
     async fn apply(self, chat: &Chat) -> Self::Response {
         chat.rooms().get(self.id).await
     }
@@ -50,7 +47,7 @@ pub struct Create {
 
 #[async_trait]
 impl ChatRPC for Create {
-    type Response = Result<RoomId>; 
+    type Response = Result<RoomId>;
     async fn apply(self, chat: &Chat) -> Self::Response {
         chat.rooms().create(self.auth, self.users).await
     }
@@ -68,9 +65,14 @@ pub struct Modify {
 
 #[async_trait]
 impl ChatRPC for Modify {
-    type Response = Result<()>; 
+    type Response = Result<()>;
     async fn apply(self, chat: &Chat) -> Self::Response {
-        let Modify { auth, id, users, name } = self;
+        let Modify {
+            auth,
+            id,
+            users,
+            name,
+        } = self;
         chat.rooms()
             .modify(auth, id, move |room| {
                 name.apply(&mut room.name);

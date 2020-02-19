@@ -1,7 +1,7 @@
 //! File API structures
 
 use async_trait::async_trait;
-use crate::QaulRPC;
+use crate::QaulRpc;
 use libqaul::{Identity, users::UserAuth, files::FileFilter};
 
 /// Send a file store query

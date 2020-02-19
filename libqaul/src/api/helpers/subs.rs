@@ -18,7 +18,8 @@ pub type SubId = Identity;
 pub struct Subscription<T> {
     /// The subscription ID
     pub id: SubId,
-    rx: Receiver<T>,
+    /// The subscription reveicer that get's polled
+    pub(crate) rx: Receiver<T>,
 }
 
 impl<T> Subscription<T> {

@@ -1,7 +1,7 @@
 //! Contacts API structures
 
 use async_trait::async_trait;
-use crate::QaulRPC;
+use crate::QaulRpc;
 use libqaul::{
     api::{ItemDiff, ItemDiffExt}, 
     error::Result,
@@ -29,7 +29,7 @@ pub struct Modify {
 }
 
 #[async_trait]
-impl QaulRPC for Modify {
+impl QaulRpc for Modify {
     type Response = Result<()>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         let Modify { 
@@ -54,7 +54,7 @@ pub struct Get {
 }
 
 #[async_trait]
-impl QaulRPC for Get {
+impl QaulRpc for Get {
     type Response = Result<ContactEntry>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.contacts()
@@ -69,7 +69,7 @@ pub struct Query {
 }
 
 #[async_trait]
-impl QaulRPC for Query {
+impl QaulRpc for Query {
     type Response = Result<Vec<Identity>>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.contacts()
@@ -83,7 +83,7 @@ pub struct All {
 }
 
 #[async_trait]
-impl QaulRPC for All {
+impl QaulRpc for All {
     type Response = Result<Vec<Identity>>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.contacts()
