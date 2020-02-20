@@ -7,7 +7,7 @@ use async_std::{
     sync::{Arc, Sender},
     task::Poll,
 };
-use netmod::{SeqId, Frame};
+use netmod::{Frame, SeqId};
 use std::collections::{BTreeMap, VecDeque};
 
 type FrameMap = Locked<BTreeMap<SeqId, Sender<Frame>>>;
@@ -74,6 +74,16 @@ impl State {
             .entry(seq)
             .or_default()
             .push_back(frame);
+    }
+
+    /// Get the current number of queued frames for diagnostic and testing
+    #[cfg(test)]
+    pub(crate) async fn num_queued(&self) -> usize {
+        self.incoming
+            .lock()
+            .await
+            .iter()
+            .fold(0, |acc, (_, vec)| acc + vec.len())
     }
 }
 
