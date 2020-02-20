@@ -100,6 +100,9 @@ impl From<RequestEnv> for Envelope {
 
 #[test]
 fn envelope_chat_message_next() {
+    // This re-uses the same ID for auth and room data not because
+    // it's in any way significant but rather because it's 3am and I'm
+    // being lazy
     let json = r#"{ "id": "1", 
                     "auth": { "id": "1C56 105D 52C3 D617  2603 D69F 9E0F 93AE", "token": "token" }, 
                     "kind": "chat-message", 
