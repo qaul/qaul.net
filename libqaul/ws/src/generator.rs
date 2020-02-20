@@ -12,14 +12,16 @@ impl From<(Envelope, RequestEnv)> for ResponseEnv {
         } = env.1;
 
         // Turn the response into a map object
-        let data: Map<String, JsonValue> = match data {
+        let mut data: Map<String, JsonValue> = match data {
             EnvelopeType::Response(response) => match serde_json::to_value(response).unwrap() {
                 JsonValue::Object(obj) => obj,
                 _ => unreachable!(),
             },
             _ => unreachable!(),
         };
-
+        data.remove("type");
+        
+        
         // And build the final response envelope
         ResponseEnv {
             id,
@@ -61,4 +63,6 @@ fn get_auth() {
     let response: ResponseEnv = (env.clone(), request_env.clone()).into();
 
     assert!(response.id == env.id && env.id == request_env.id);
+
+    println!("{}", serde_json::to_string_pretty(&response).unwrap());
 }

@@ -49,14 +49,17 @@ pub(crate) struct ResponseEnv {
     /// Response ID, same as request ID
     pub id: String,
     /// Mirrored auth token
+    #[serde(skip)]
     pub auth: Option<JsonAuth>,
     /// Request method
     pub method: String,
     /// Request scope
     pub kind: String,
     /// Optional object count
+    #[serde(skip)]
     pub total: Option<usize>,
     /// Optional pagination info
+    #[serde(skip)]
     pub next: Option<String>,
     /// Response data
     pub data: JsonMap,
