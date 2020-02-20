@@ -13,7 +13,7 @@ pub type RoomId = Identity;
 /// The room diff should be embedded into a message when updates are
 /// sent across a room, or new people are invited (new invites get a
 /// create, everyone else gets a Diff
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum RoomState {
     /// A simple chat message just needs the Room ID
     Id(RoomId),
@@ -25,7 +25,7 @@ pub enum RoomState {
 }
 
 /// Abstraction over a chat room
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Room {
     /// The room ID
     pub id: RoomId,
@@ -37,7 +37,7 @@ pub struct Room {
 
 
 /// A set of changes made to a room
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct RoomDiff {
     id: RoomId,
     users: Vec<SetDiff<Identity>>,

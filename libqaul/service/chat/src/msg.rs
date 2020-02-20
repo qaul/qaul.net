@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 /// into the message.  The chat service API returns this
 /// representation when sending a message, but manages rooms via a
 /// separate interface.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ChatMessage {
     /// Unique message ID
     pub id: MsgId,

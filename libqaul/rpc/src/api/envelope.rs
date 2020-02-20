@@ -21,7 +21,7 @@ use std::fmt::Display;
 /// non-knowable order, making it hard to associtate requests with
 /// responses.  This is what the request ID is for, and should be set,
 /// even on systems that don't have this problem.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Envelope {
     pub id: String,
     pub data: EnvelopeType,
@@ -32,7 +32,7 @@ pub struct Envelope {
 /// In the rpc layer, the return data is then namespaced as "request"
 /// and "response", which should be used to disambiguate data on the
 /// wire.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum EnvelopeType {
     /// A libqaul request
     Request(Request),
@@ -41,7 +41,7 @@ pub enum EnvelopeType {
 }
 
 /// A wrapper enum to disambiguate request types in the envelope.
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Request {
     /// Poll the next chat message
@@ -130,7 +130,7 @@ pub enum Request {
 }
 
 /// Wrap around all possible response values for piped Rpc protocols
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Response {
     /// Return an auth object
