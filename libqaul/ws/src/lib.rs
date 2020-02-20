@@ -11,6 +11,7 @@
 //! a response, with appropriate data or error values inside.
 
 mod env;
-pub(crate) use env::{JsonAuth, JsonEnvelope, JsonMap};
+pub(crate) use env::{JsonAuth, RequestEnv, ResponseEnv, JsonMap};
 
 mod parser;
+mod generator;

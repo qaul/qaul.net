@@ -7,12 +7,28 @@ use std::collections::BTreeMap;
 
 pub(crate) type JsonMap = BTreeMap<String, JsonValue>;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct JsonEnvelope {
+/// A struct wrapper for UserAuth
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub(crate) struct JsonAuth {
+    id: Identity,
+    token: String,
+}
+
+impl From<JsonAuth> for UserAuth {
+    fn from(ja: JsonAuth) -> Self {
+        Self(ja.id, ja.token)
+    }
+}
+
+/// A json specific request envelope
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub(crate) struct RequestEnv {
     /// The request ID
     pub id: String,
     /// Auth data for the request
     pub auth: Option<JsonAuth>,
+    /// An optional page selector
+    pub page: Option<String>,
     /// Operation method
     pub method: String,
     /// Request scope
@@ -27,15 +43,21 @@ pub(crate) struct JsonEnvelope {
     pub data: JsonMap,
 }
 
-/// A struct wrapper for UserAuth
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct JsonAuth {
-    id: Identity,
-    token: String,
-}
-
-impl From<JsonAuth> for UserAuth {
-    fn from(ja: JsonAuth) -> Self {
-        Self(ja.id, ja.token)
-    }
+/// A json specific repsonse envelope
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub(crate) struct ResponseEnv {
+    /// Response ID, same as request ID
+    pub id: String,
+    /// Mirrored auth token
+    pub auth: Option<JsonAuth>,
+    /// Request method
+    pub method: String,
+    /// Request scope
+    pub kind: String,
+    /// Optional object count
+    pub total: Option<usize>,
+    /// Optional pagination info
+    pub next: Option<String>,
+    /// Response data
+    pub data: JsonMap,
 }

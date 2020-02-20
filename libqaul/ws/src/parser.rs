@@ -1,4 +1,4 @@
-use crate::{JsonAuth, JsonEnvelope, JsonMap};
+use crate::{JsonAuth, JsonMap, RequestEnv};
 use libqaul::users::UserAuth;
 use libqaul_rpc::{Envelope, EnvelopeType, Request};
 use serde::de::DeserializeOwned;
@@ -44,10 +44,11 @@ fn req(inner: Request) -> EnvelopeType {
     EnvelopeType::Request(inner)
 }
 
-impl From<JsonEnvelope> for Envelope {
-    fn from(je: JsonEnvelope) -> Self {
-        let JsonEnvelope {
+impl From<RequestEnv> for Envelope {
+    fn from(je: RequestEnv) -> Self {
+        let RequestEnv {
             id,
+            page: _,
             method,
             kind,
             auth,
@@ -105,7 +106,7 @@ fn envelope_chat_message_next() {
                     "method": "poll", 
                     "data": { "room": "1C56 105D 52C3 D617  2603 D69F 9E0F 93AE" } }"#;
 
-    let je: JsonEnvelope = serde_json::from_str(&json).expect("JsonEnvelope failed");
+    let je: RequestEnv = serde_json::from_str(&json).expect("JsonEnvelope failed");
     let env: Envelope = je.into();
 
     if let EnvelopeType::Request(Request::ChatMsgNext(msg)) = env.data {
@@ -129,6 +130,6 @@ fn envelope_chat_user_list() {
                     "kind": "users", 
                     "method": "list" }"#;
 
-    let je: JsonEnvelope = serde_json::from_str(&json).expect("JsonEnvelope failed");
-    let env: Envelope = je.into();
+    let je: RequestEnv = serde_json::from_str(&json).expect("JsonEnvelope failed");
+    let _env: Envelope = je.into();
 }
