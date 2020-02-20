@@ -1,30 +1,25 @@
 //! Users API structures
 
-use async_trait::async_trait;
 use crate::QaulRpc;
-use std::collections::{BTreeMap, BTreeSet};
+use async_trait::async_trait;
 use libqaul::{
-    api::{
-        ItemDiff, ItemDiffExt,
-        SetDiff, SetDiffExt,
-        MapDiff, MapDiffExt,
-    }, 
+    api::{ItemDiff, ItemDiffExt, MapDiff, MapDiffExt, SetDiff, SetDiffExt},
     error::Result,
-    users::{UserAuth, UserProfile}, 
-    Identity, Qaul, 
+    users::{UserAuth, UserProfile},
+    Identity, Qaul,
 };
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::collections::{BTreeMap, BTreeSet};
 
 /// Enumerate all publicly known users
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
-pub struct List;
+pub struct List {}
 
 #[async_trait]
 impl QaulRpc for List {
-    type Response = Vec<UserProfile>; 
+    type Response = Vec<UserProfile>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users()
-            .list()
+        qaul.users().list()
     }
 }
 
@@ -38,8 +33,7 @@ pub struct Create {
 impl QaulRpc for Create {
     type Response = Result<UserAuth>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users()
-            .create(&self.pw)
+        qaul.users().create(&self.pw)
     }
 }
 
@@ -55,8 +49,7 @@ pub struct Delete {
 impl QaulRpc for Delete {
     type Response = Result<()>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users()
-            .delete(self.auth)
+        qaul.users().delete(self.auth)
         // TODO: Purge user if requestd
     }
 }
@@ -72,8 +65,7 @@ pub struct ChangePw {
 impl QaulRpc for ChangePw {
     type Response = Result<()>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users()
-            .change_pw(self.auth, &self.new)
+        qaul.users().change_pw(self.auth, &self.new)
     }
 }
 
@@ -81,45 +73,42 @@ impl QaulRpc for ChangePw {
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct Login {
     user: Identity,
-    pw: String
+    pw: String,
 }
 
 #[async_trait]
 impl QaulRpc for Login {
     type Response = Result<UserAuth>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users()
-            .login(self.user, &self.pw)
+        qaul.users().login(self.user, &self.pw)
     }
 }
 
 /// Stop an existing session
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct Logout {
-    auth: UserAuth
+    auth: UserAuth,
 }
 
 #[async_trait]
 impl QaulRpc for Logout {
     type Response = Result<()>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users()
-            .logout(self.auth)
+        qaul.users().logout(self.auth)
     }
 }
 
 /// Get the user profile for any remote or local user
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct Get {
-    user: Identity
+    user: Identity,
 }
 
 #[async_trait]
 impl QaulRpc for Get {
     type Response = Result<UserProfile>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users()
-            .get(self.user)
+        qaul.users().get(self.user)
     }
 }
 
@@ -144,16 +133,19 @@ impl QaulRpc for Update {
     type Response = Result<()>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         let Update {
-            auth, display_name, real_name,
-            bio, services, avatar,
+            auth,
+            display_name,
+            real_name,
+            bio,
+            services,
+            avatar,
         } = self;
-        qaul.users()
-            .update(auth, move |profile| {
-                display_name.apply(&mut profile.display_name);
-                real_name.apply(&mut profile.real_name);
-                profile.bio.apply(bio);
-                profile.services.apply(services);
-                avatar.apply(&mut profile.avatar);
-            })
+        qaul.users().update(auth, move |profile| {
+            display_name.apply(&mut profile.display_name);
+            real_name.apply(&mut profile.real_name);
+            profile.bio.apply(bio);
+            profile.services.apply(services);
+            avatar.apply(&mut profile.avatar);
+        })
     }
 }

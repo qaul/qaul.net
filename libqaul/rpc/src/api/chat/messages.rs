@@ -7,10 +7,10 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Next {
-    auth: UserAuth,
-    room: RoomId,
+    pub auth: UserAuth,
+    pub room: RoomId,
 }
 
 #[async_trait]
@@ -23,8 +23,8 @@ impl ChatRPC for Next {
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Subscribe {
-    auth: UserAuth,
-    room: RoomId,
+    pub auth: UserAuth,
+    pub room: RoomId,
 }
 
 //#[async_trait]
@@ -38,9 +38,9 @@ pub struct Subscribe {
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Send {
-    auth: UserAuth,
-    room: RoomId,
-    text: String,
+    pub auth: UserAuth,
+    pub room: RoomId,
+    pub text: String,
 }
 
 #[async_trait]

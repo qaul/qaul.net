@@ -277,12 +277,8 @@ impl<'qaul> Messages<'qaul> {
     {
         self.q.auth.trusted(user)?;
         // self.q.services.add_listener(service.into(), listener)
-        let (_, rx) = futures::channel::mpsc::channel(1);
-
-        Ok(Subscription {
-            id: SubId::random(),
-            rx,
-        })
+        let (sub, _) = Subscription::new();
+        Ok(sub)
     }
 
     /// Cancel a previous subscription by Id

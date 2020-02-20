@@ -1,13 +1,15 @@
 //! API wrapper structures
 
 pub mod contacts;
-pub mod envelope;
 pub mod files;
 pub mod messages;
 pub mod users;
 
 #[feature(chat)]
 pub mod chat;
+
+mod envelope;
+pub use envelope::{Envelope, EnvelopeType, Request, Response};
 
 use async_trait::async_trait;
 use libqaul::Qaul;

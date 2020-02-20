@@ -15,8 +15,6 @@ use qaul_chat::{
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
-type EnvId = Identity;
-
 /// Represents a libqaul RPC request envelope
 ///
 /// Because in some rpc systems requests will be processed in a
@@ -25,7 +23,7 @@ type EnvId = Identity;
 /// even on systems that don't have this problem.
 #[derive(Serialize, Deserialize)]
 pub struct Envelope {
-    pub id: EnvId,
+    pub id: String,
     pub data: EnvelopeType,
 }
 
@@ -54,10 +52,14 @@ pub enum Request {
     #[feature(chat)]
     ChatMsgSub(chat::messages::Subscribe),
 
-    /// Send a chan message
+    /// Send a chat message
     #[feature(chat)]
     ChatMsgSend(chat::messages::Send),
 
+    /// Query the chat message store
+    #[feature(chat)]
+    ChatMsgQuery,
+    
     /// List all available chat rooms
     #[feature(chat)]
     ChatRoomList(chat::rooms::List),
