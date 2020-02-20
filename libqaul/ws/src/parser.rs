@@ -20,10 +20,10 @@ fn de_json<'env, T: DeserializeOwned>(mut data: JsonMap, auth: AuthInject<'env>)
     dbg!(&auth);
     match (auth.kind, auth.method) {
         // We don't want to inject the auth info for a few cases
-        ("user", "list")
-        | ("user", "login")
-        | ("user", "create")
-        | ("user", "get")
+        ("users", "list")
+        | ("users", "login")
+        | ("users", "create")
+        | ("users", "get")
         | ("files", "list") => {}
         (_, _) => {
             data.insert(
@@ -83,14 +83,14 @@ impl From<JsonEnvelope> for Envelope {
                 ("contact", "modify") => req(Request::ContactQuery(de_json(data, auth))),
 
                 // libqaul user functions
-                ("user", "list") => req(Request::UserList(de_json(data, auth))),
-                ("user", "create") => req(Request::UserCreate(de_json(data, auth))),
-                ("user", "delete") => req(Request::UserDelete(de_json(data, auth))),
-                ("user", "repass") => req(Request::UserChangePw(de_json(data, auth))),
-                ("user", "login") => req(Request::UserLogin(de_json(data, auth))),
-                ("user", "logout") => req(Request::UserLogout(de_json(data, auth))),
-                ("user", "get") => req(Request::UserGet(de_json(data, auth))),
-                ("user", "modify") => req(Request::UserUpdate(de_json(data, auth))),
+                ("users", "list") => req(Request::UserList(de_json(data, auth))),
+                ("users", "create") => req(Request::UserCreate(de_json(data, auth))),
+                ("users", "delete") => req(Request::UserDelete(de_json(data, auth))),
+                ("users", "repass") => req(Request::UserChangePw(de_json(data, auth))),
+                ("users", "login") => req(Request::UserLogin(de_json(data, auth))),
+                ("users", "logout") => req(Request::UserLogout(de_json(data, auth))),
+                ("users", "get") => req(Request::UserGet(de_json(data, auth))),
+                ("users", "modify") => req(Request::UserUpdate(de_json(data, auth))),
                 (_, _) => unreachable!(), // Replace with transmit error
             },
         }
@@ -126,7 +126,7 @@ fn envelope_chat_message_next() {
 #[test]
 fn envelope_chat_user_list() {
     let json = r#"{ "id": "1", 
-                    "kind": "user", 
+                    "kind": "users", 
                     "method": "list" }"#;
 
     let je: JsonEnvelope = serde_json::from_str(&json).expect("JsonEnvelope failed");
