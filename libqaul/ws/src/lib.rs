@@ -9,11 +9,6 @@
 //! libqaul-rpc structures.  Every request has an envelope, which
 //! contains in ID and some data.  the data can either be a request or
 //! a response, with appropriate data or error values inside.
-//!
-//! Because web devs are a bunch of pussies this crate also wraps the
-//! envelope in a way that web devs will like, such as making the data
-//! generic (a string) and pulling out the method names; things that
-//! other rpc layers would hit you for but hey, it's 2020.
 
 mod env;
 pub(crate) use env::{JsonAuth, JsonEnvelope, JsonMap};
