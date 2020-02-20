@@ -3,7 +3,6 @@
 //! In previous designs (both code and docs) this was a single
 //! component. This has proven to be a hard to maintain approach, so
 //! instead the core has been split into several parts.
-#![allow(unused)]
 
 mod collector;
 mod dispatch;
@@ -12,23 +11,22 @@ mod journal;
 mod routes;
 mod switch;
 
-pub(self) use collector::Collector;
+// pub(self) use collector::{Collector, CollectorInit};
 pub(self) use dispatch::Dispatch;
 pub(self) use drivers::DriverMap;
 pub(self) use journal::Journal;
 pub(self) use routes::{EpTargetPair, RouteTable, RouteType};
 pub(self) use switch::Switch;
 
-use crate::{Message, Endpoint, Identity, Result};
+use crate::{Endpoint, Identity, Message, Result};
 use async_std::sync::Arc;
-
 
 /// The Ratman routing core interface
 ///
 /// The core handles sending, receiving and storing frames that can't
 /// be delivered at that time (delay-tolerance).
 pub(crate) struct Core {
-    collector: Arc<Collector>,
+    // collector: Arc<Collector>,
     _dispatch: Arc<Dispatch>,
     journal: Arc<Journal>,
     _routes: Arc<RouteTable>,
@@ -44,20 +42,20 @@ impl Core {
         let journal = Journal::new();
 
         let dispatch = Dispatch::new(Arc::clone(&routes), Arc::clone(&drivers));
-        let collector = Collector::new();
+        // let ctx { CollectorInit, inc, done } = Collector::new();
 
         let switch = Switch::new(
             Arc::clone(&routes),
             Arc::clone(&journal),
             Arc::clone(&dispatch),
-            Arc::clone(&collector),
+            // Arc::clone(&unimplemented!()),
             Arc::clone(&drivers),
         );
 
         Self {
             _dispatch: dispatch,
             _routes: routes,
-            collector,
+            // collector: unimplemented!(),
             journal,
             switch,
             drivers,
@@ -78,7 +76,8 @@ impl Core {
 
     /// Poll for the incoming Message
     pub(crate) async fn next(&self) -> Message {
-        self.collector.completed().await
+        // self.collector.completed().await
+        unimplemented!()
     }
 
     /// Insert a new endpoint
@@ -92,8 +91,7 @@ impl Core {
     }
 
     /// Remove a local endpoint
-    pub(crate) async fn rm_local(&self, id: Identity)  -> Result<()> {
+    pub(crate) async fn rm_local(&self, id: Identity) -> Result<()> {
         self._routes.delete(id).await
     }
-
 }
