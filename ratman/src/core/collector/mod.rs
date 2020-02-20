@@ -64,7 +64,7 @@ impl Collector {
     pub(crate) async fn completed(&self) -> Message {
         self.state.completed().await
     }
-    
+
     #[cfg(test)]
     pub(crate) async fn num_queued(&self) -> usize {
         self.state.num_queued().await
@@ -75,7 +75,7 @@ impl Collector {
     async fn get_worker(&self, seq: SeqId) -> Arc<Worker> {
         Arc::clone(&self.workers.lock().await.get(&seq).unwrap())
     }
-    
+
     /// Spawn an async task runner for a worker
     async fn spawn_worker(&self, seq: SeqId) {
         let workers = Arc::clone(&self.workers);
@@ -121,6 +121,41 @@ fn queue_one_in_one() {
 
         // Now get the finished message
         assert!(c.completed().await.id == seqid);
-        
+    });
+}
+
+#[test]
+fn queue_many() {
+    use crate::Identity;
+    use netmod::{Recipient, SeqBuilder};
+
+    let (sender, recipient, seqid) = (Identity::random(), Identity::random(), Identity::random());
+    let seq = SeqBuilder::new(sender, Recipient::User(recipient), seqid)
+        .add(vec![0, 1, 2, 3])
+        .add(vec![1, 3, 1, 2])
+        .add(vec![1, 3, 3, 7])
+        .build();
+
+    let seqid = seq[0].seq.seqid;
+    let len = seq.len();
+
+    task::block_on(async move {
+        let c = Collector::new();
+
+        for f in seq {
+            c.queue(seqid, f).await;
+        }
+
+        // There is n queued frames
+        assert!(c.num_queued().await == len);
+
+        // We can poll three times before the worker dies
+        let w = c.get_worker(seqid).await;
+        assert!(w.poll().await == Some(()));
+        assert!(w.poll().await == Some(()));
+        assert!(w.poll().await == None);
+
+        // Now get the finished message
+        assert!(c.completed().await.id == seqid);
     });
 }
