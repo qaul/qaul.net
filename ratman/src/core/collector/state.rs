@@ -85,5 +85,10 @@ impl State {
             .iter()
             .fold(0, |acc, (_, vec)| acc + vec.len())
     }
-}
 
+    /// Get the current number of completed messages
+    #[cfg(test)]
+    pub(crate) async fn num_completed(&self) -> usize {
+        self.done.lock().await.len()
+    }
+}
