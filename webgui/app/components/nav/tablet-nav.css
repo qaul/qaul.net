@@ -1,6 +1,6 @@
-@value topbar-height from './layout-global.css';
-@value nav-width from './layout-global.css';
-@value nav-small-width from './layout-global.css';
+@value topbar-height from '../layout/layout-global.css';
+@value nav-width from '../layout/layout-global.css';
+@value nav-small-width from '../layout/layout-global.css';
 
 .nav {
   z-index: 10;

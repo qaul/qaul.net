@@ -7,10 +7,10 @@
 @value topbar-height: 3rem;
 @value nav-small-width: 8rem;
 @value nav-width: 250px;
-@value log-width: 300px;
+@value aside-width: 300px;
 @value mobile-max: 768px;
 @value tablet-max: 950px;
-@value tablet2-max: 1200px;
+@value largetablet-max: 1200px;
 
 
 /* style references */

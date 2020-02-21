@@ -2,33 +2,47 @@
 @value nav-small-width from './layout-global.css';
 @value nav-width from './layout-global.css';
 @value aside-width from './layout-global.css';
-@value tablet-max from './layout-global.css';
 
+body, .root {
+  height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
 
 .root {
   composes: root from './layout-global.css';
   display: grid;
-  grid-template-columns: nav-small-width calc(100% - nav-small-width);
-  grid-template-rows: topbar-height auto;
+  grid-template-columns: nav-small-width auto aside-width;
+  grid-template-rows: topbar-height 1fr;
   grid-template-areas:
-    "nav topbar"
-    "nav main";
+    "nav topbar aside"
+    "nav main   aside";
   justify-content: stretch;
+}
+.topbar-main button {
+  display: none;
 }
 
 .nav {
   grid-area: nav;
   width: nav-small-width;
-  position: fixed;
 }
 .aside {
   grid-area: aside;
-  position: fixed;
+  background: var(--q-nav-bg);
+  margin-top: topbar-height;
+  right: 0;
+  height: calc(100vh - topbar-height);
+  overflow: auto;
 }
 .main {
   composes: main from './layout-global.css';
   grid-area: main;
   align-self: start;
+  height: calc(100vh - topbar-height);
+  overflow: scroll;
 }
 
 .topbar-main {
@@ -37,4 +51,5 @@
   justify-content: flex-end;
   position: fixed;
   width: 100%;
+  height: topbar-height;
 }

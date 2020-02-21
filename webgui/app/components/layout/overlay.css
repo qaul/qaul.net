@@ -1,0 +1,10 @@
+.overlay {
+  z-index: 20;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: #666666;
+  opacity: 0.5;
+}

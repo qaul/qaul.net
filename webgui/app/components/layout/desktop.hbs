@@ -1,13 +1,15 @@
 <div local-class="root">
   <nav local-class="nav">
     <div local-class="sticky">
-      <Nav @showAll={{true}} />
+      <Nav::Nav @showAll={{true}} />
     </div>
   </nav>
+
   <main local-class="main">{{yield}}</main>
+
   <aside local-class="aside">
     <div local-class="sticky">
-      <Aside />
+      <Aside::Aside />
     </div>
   </aside>
 </div>

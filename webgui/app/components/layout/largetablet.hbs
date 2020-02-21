@@ -1,9 +1,12 @@
 <div local-class="root">
   <div aria-hidden="true" local-class="topbar-main" class="topbar">
-    <Aside::DynamicAside />
   </div>
 
   <Nav::TabletNav local-class="nav" />
 
   <main local-class="main">{{yield}}</main>
+
+  <aside local-class="aside">
+    <Aside::Aside />
+  </aside>
 </div>

@@ -13,7 +13,7 @@
   </div>
 
   <div local-class="nav-overflow {{if this.showAll "showall"}}">
-    <Nav @showAll={{this.showAll}} />
+    <Nav::Nav @showAll={{this.showAll}} />
   </div>
   {{#if this.fakeIncomingOverlay}}
     <div local-class="nav-fake-overflow in"></div>
@@ -21,5 +21,8 @@
   {{#if this.fakeOutgoingOverlay}}
     <div local-class="nav-fake-overflow out"></div>
   {{/if}}
-
 </nav>
+
+{{#if this.overlay}}
+  <!--<Layout::Overlay @overlayClick={{this.overlayClick}} />-->
+{{/if}}

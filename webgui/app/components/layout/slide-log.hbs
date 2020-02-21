@@ -1,11 +1,11 @@
-<aside local-class="log {{if @showLog "show"}}" ...attributes>
-  <div aria-hidden="true" local-class="topbar-log" class="topbar">
+<aside local-class="aside {{if @showAside "show"}}" ...attributes>
+  <div aria-hidden="true" local-class="topbar-aside" class="topbar">
     <button type="button" {{on "click" this.slideOut}}>
       {{fa-icon "angle-double-right"}}
     </button>
   </div>
 
-  <div local-class="log-content">
+  <div local-class="aside-content">
     <Aside />
   </div>
 </aside>

@@ -1,0 +1,37 @@
+@value aside-width from '../layout/layout-global.css';
+@value topbar-height from '../layout/layout-global.css';
+
+.aside {
+  width: aside-width;
+  height: 100vh;
+  background-color: var(--q-bg);
+  position: fixed;
+  top: 0;
+  left: 100vw;
+  z-index: 100;
+  transition: left 0.3s;
+}
+[dir="rtl"] .aside {
+  left: calc(aside-width * -1);
+}
+
+.slide-in {
+  left: calc(100vw - aside-width);
+}
+[dir="rtl"] .slide-in {
+  left: 0;
+}
+
+.topbar-aside {
+  height: topbar-height;
+  width: 100%;
+  background-color: var(--q-theme-strong);
+  display: flex;
+  justify-content: flex-start;
+}
+[dir=ltr] .topbar-aside {
+  border-left: 1px solid var(--q-a-hover);
+}
+[dir=rtl] .topbar-aside {
+  border-right: 1px solid var(--q-a-hover);
+}

@@ -1,0 +1,20 @@
+<button type="button" {{on "click" (perform this.slideIn)}}>
+  {{fa-icon "bars"}}
+</button>
+
+{{#if this.showNav}}
+  <nav local-class="nav {{this.animation}}">
+    <div aria-hidden="true" local-class="topbar-nav showall" class="topbar">
+      <button type="button" {{on "click" (perform this.slideOut)}}>
+        {{fa-icon "angle-double-left"}}
+      </button>
+    </div>
+    <div local-class="nav-overflow showall">
+      <Nav::Nav @showAll="true" />
+    </div>
+  </nav>
+{{/if}}
+
+{{#if this.overlay}}
+  <Layout::Overlay @overlayClick={{this.overlayClick}} />
+{{/if}}

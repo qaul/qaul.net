@@ -1,5 +1,5 @@
 @value nav-width from './layout-global.css';
-@value log-width from './layout-global.css';
+@value aside-width from './layout-global.css';
 
 
 .root {
@@ -7,7 +7,7 @@
   display: grid;
   grid-template:
     "nav main aside" minmax(100vh, 1fr)
-    / nav-width 1fr log-width;
+    / nav-width 1fr aside-width;
 }
 
 .main {

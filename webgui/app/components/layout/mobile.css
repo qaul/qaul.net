@@ -13,17 +13,6 @@
   background-color: var(--q-theme-strong);
 }
 
-.shadow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: var(--q-color);
-  opacity: 50%;
-  z-index: 5;
-}
-
 .main {
   composes: main from './layout-global.css';
   margin-top: calc(topbar-height);
