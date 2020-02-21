@@ -1,17 +1,3 @@
-.sidepane-aside {
-  min-height: 100vh;
-  width: 30rem;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--q-nav-bg);
-  position: fixed;
-  top: 0;
-  /*
-  max-width: 90%;
-  transition: .3s ease-out;
-  z-index: 10;*/
-  overflow-y: auto;
-}
 .aside-box {
   padding: 0 0 1rem 0;
   margin: 1rem;
@@ -35,38 +21,3 @@
   font-size: x-small;
   color: var(--q-color);
 }
-
-
-/* smaller than large tablet */
-@media only screen and (max-width: 53rem) {
-  html[dir="ltr"] .sidepane-aside {
-    right: -30rem;
-  }
-  html[dir="rtl"] .sidepane-aside {
-    left: -30rem;
-  }
-  html[dir="ltr"] :global(#sidepane-aside.show) {
-    transform: translateX(-30rem);
-  }
-  html[dir="rtl"] :global(#sidepane-aside.show) {
-    transform: translateX(30rem);
-  }
-}
-
-
-/* tablet large */
-@media only screen and (min-width: 53rem) {
-  html[dir="ltr"] .sidepane-aside {
-    right: 0rem;
-  }
-  html[dir="rtl"] .sidepane-aside {
-    left: 0rem;
-  }
-  main {
-    /* margin-inline-end: 30rem; */
-  }
-  .sidepane-aside :global(.pane) {
-    visibility: hidden;
-  }
-}
-
