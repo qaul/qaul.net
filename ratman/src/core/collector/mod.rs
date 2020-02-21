@@ -84,7 +84,6 @@ impl Collector {
     /// Spawn an async task runner for a worker
     async fn spawn_worker(&self, seq: SeqId) {
         let workers = Arc::clone(&self.workers);
-        dbg!("Spawning worker", seq);
 
         let worker = {
             let map = workers.lock().await;
@@ -93,7 +92,6 @@ impl Collector {
 
         task::spawn(async move {
             // This loop breaks when the worker is done
-            println!("Polling {:?}", seq);
             while let Some(()) = worker.poll().await {}
 
             // Then remove it
@@ -213,15 +211,14 @@ fn queue_10000() {
 // This test is a bit bleh because each message sequence is only 1
 // frame long.  There should be better test at generating frame
 // sequences, but we can always add that later.
-#[test]
-fn queue_and_collect_1000() {
+#[cfg(test)]
+fn queue_and_collect_test(num: usize) {
     use std::time::Duration;
-
-    let num = 1000;
     let col = queue_test(num);
 
     task::block_on(async move {
         while col.num_completed().await != num {
+            println!("Completed: {}", col.num_completed().await);
             task::sleep(Duration::from_millis(100)).await;
         }
 
@@ -234,3 +231,26 @@ fn queue_and_collect_1000() {
         assert!(vec.len() == num);
     });
 }
+
+#[test]
+fn queue_and_collect_1000() {
+    queue_and_collect_test(1000);
+}
+
+
+#[test]
+fn queue_and_collect_10000() {
+    queue_and_collect_test(10000);
+}
+
+
+#[test]
+fn queue_and_collect_100000() {
+    queue_and_collect_test(100000);
+}
+
+#[test]
+fn queue_and_collect_1000000() {
+    queue_and_collect_test(1000000);
+}
+
