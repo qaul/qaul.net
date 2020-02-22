@@ -38,11 +38,13 @@ members = [
     # Client specific targets
     "clients/linux",
     "clients/linux-cli",
+    "clients/linux-daemon",
 
     # Android specifics
     "librobot",
 
     # test binaries
     "clients/linux-http-test",
-    "clients/linux-voice-test"
+    "clients/linux-voice-test",
+    # "clients/http-test"
 ]
