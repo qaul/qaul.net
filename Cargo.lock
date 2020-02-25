@@ -84,6 +84,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f1a7fca4f1ccd1fe926bec21a4ba6259d3d91f04d67a9dd76bd549366be5bef"
 dependencies = [
+ "async-std",
  "futures 0.3.4",
  "log",
  "pin-project",
@@ -874,10 +875,12 @@ dependencies = [
 name = "libqaul-ws"
 version = "0.1.0"
 dependencies = [
+ "async-std",
  "async-tungstenite",
  "futures 0.3.4",
  "libqaul",
  "libqaul-rpc",
+ "qaul-chat",
  "serde",
  "serde_json",
 ]

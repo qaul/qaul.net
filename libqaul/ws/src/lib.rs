@@ -15,3 +15,6 @@ pub(crate) use env::{JsonAuth, RequestEnv, ResponseEnv, JsonMap};
 
 mod parser;
 mod generator;
+
+mod server;
+pub use server::WsServer;
