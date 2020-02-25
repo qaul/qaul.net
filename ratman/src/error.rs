@@ -11,7 +11,7 @@ pub enum Error {
     /// While sending an encoding operation failed
     EncodeFailed,
     /// While sending, a dispatch operation failed
-    DispatchFaled,
+    DispatchFailed,
     /// The provided payload was too large and was rejected
     PayloadTooLarge,
     /// An action failed because of a user collision

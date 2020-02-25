@@ -32,10 +32,13 @@ impl RouteTable {
     }
 
     /// Update or add an IDs entry in the routing table
-    pub(crate) async fn update(&self, ep: EpTargetPair, id: Identity) {
+    ///
+    /// Returns `Some(())` when the ID was previously known, and
+    /// simply updated in place.
+    pub(crate) async fn update(&self, if_: u8, t: Target, id: Identity) -> Option<()> {
         let mut tbl = self.routes.lock().await;
-        tbl.remove(&id);
-        tbl.insert(id, RouteType::Remote(ep)).unwrap();
+        let route = RouteType::Remote(EpTargetPair(if_, t));
+        tbl.insert(id, route).map(|_| ())
     }
 
     /// Track a local ID in the routes table

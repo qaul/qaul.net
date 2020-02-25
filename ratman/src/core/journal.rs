@@ -31,8 +31,8 @@ impl Journal {
         self.known.write().await.insert(fid.clone());
     }
 
-    /// Checks if a frame ID has been seen before
-    pub(crate) async fn known(&self, fid: &SeqId) -> bool {
-        self.known.read().await.contains(fid)
+    /// Checks if a frame ID has not been seen before
+    pub(crate) async fn unknown(&self, fid: &SeqId) -> bool {
+        !self.known.read().await.contains(fid)
     }
 }

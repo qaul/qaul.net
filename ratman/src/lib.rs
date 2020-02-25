@@ -55,12 +55,11 @@ mod error;
 mod protocol;
 
 mod slicer;
-pub(crate) use slicer::Slicer;
+pub(crate) use {protocol::Protocol, slicer::Slicer};
 
 pub use crate::{
     data::{Message, MsgId},
     error::{Error, Result},
-    protocol::Protocol,
 };
 
 pub use identity::Identity;
@@ -79,15 +78,17 @@ use netmod::Endpoint;
 /// [`run`]: struct.Router.html#method.run
 pub struct Router {
     inner: Core,
+    proto: Arc<Protocol>,
 }
 
 impl Router {
     /// Create a new message router
     pub fn new() -> Arc<Self> {
+        let proto = Protocol::new();
         let inner = Core::init();
         inner.run();
 
-        Arc::new(Self { inner })
+        Arc::new(Self { inner, proto })
     }
 
     /// Add a new endpoint to this router
@@ -119,9 +120,22 @@ impl Router {
         task::block_on(async { self.inner.rm_local(id).await })
     }
 
+    /// Set a user ID as online and broadcast announcements
+    ///
+    /// This function will return an error if the user is already
+    /// marked as offline, or if no such user is known to the router
+    pub async fn online(&self, id: Identity) -> Result<()> {
+        Ok(())
+    }
+
+    /// Set a user ID as offline and stop broadcasts
+    pub async fn offline(&self, id: Identity) -> Result<()> {
+        Ok(())
+    }
+
     /// Register a manual clock controller object for internal tasks
     pub fn clock(&self, _cc: ClockCtrl<Tasks>) -> Result<()> {
-        Ok(())
+        unimplemented!()
     }
 
     /// Dispatch a message into a network

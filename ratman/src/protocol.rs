@@ -8,27 +8,69 @@
 //! - `Announce` is sent when a node comes online
 //! - `Sync` is a reply to an `Announce`, only omitted when `no_sync` is set
 
-use crate::data::{Message, MsgId};
+use crate::{
+    data::{Message, MsgId},
+    error::{Error, Result},
+    Core,
+};
+use async_std::{
+    sync::{Arc, Mutex},
+    task,
+};
 use conjoiner;
 use identity::Identity;
 use netmod::Recipient;
 use serde::{Deserialize, Serialize};
+use std::{
+    collections::BTreeMap,
+    sync::atomic::{AtomicBool, Ordering},
+    time::Duration,
+};
 
 /// A payload that represents a RATMAN-protocol message
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) enum ProtoPayload {
+enum ProtoPayload {
     /// A network-wide announcement message
     Announce { id: Identity, no_sync: bool },
-    /// A 1-to-1 routing table sync message
-    Sync { id: Identity, table: Vec<Identity> },
 }
 
 /// Provide a builder API to construct different types of Messages
-pub struct Protocol;
+#[derive(Default)]
+pub(crate) struct Protocol {
+    online: Mutex<BTreeMap<Identity, Arc<AtomicBool>>>,
+}
 
 impl Protocol {
+    pub(crate) fn new() -> Arc<Self> {
+        Default::default()
+    }
+
+    pub(crate) async fn online(self: Arc<Self>, id: Identity, core: Arc<Core>) -> Result<()> {
+        let mut map = self.online.lock().await;
+        if map.contains_key(&id) {
+            return Err(Error::DuplicateUser);
+        }
+
+        let b = Arc::new(AtomicBool::new(true));
+        map.insert(id, Arc::clone(&b));
+        drop(map);
+
+        task::spawn(async move {
+            loop {
+                core.send(Self::announce(id)).await;
+                task::sleep(Duration::from_secs(2)).await;
+
+                if !b.load(Ordering::Relaxed) && break {}
+            }
+
+            self.online.lock().await.remove(&id);
+        });
+
+        Ok(())
+    }
+
     /// Build an announcement message for a user
-    pub fn announce(sender: Identity) -> Message {
+    fn announce(sender: Identity) -> Message {
         let payload = conjoiner::serialise(&ProtoPayload::Announce {
             id: sender,
             no_sync: true,
@@ -37,8 +79,8 @@ impl Protocol {
 
         Message {
             id: MsgId::random(),
-            sender,
             recipient: Recipient::Flood,
+            sender,
             payload,
         }
     }

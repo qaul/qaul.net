@@ -1,7 +1,10 @@
 use async_std::{sync::Arc, task};
 use netmod::Recipient;
 
-use crate::core::{Collector, Dispatch, DriverMap, Journal, RouteTable, RouteType};
+use crate::{
+    core::{Collector, Dispatch, DriverMap, Journal, RouteTable, RouteType},
+    Protocol,
+};
 
 /// A frame switch inside Ratman to route packets and signals
 ///
@@ -52,7 +55,7 @@ impl Switch {
     async fn run_inner(self: Arc<Self>, id: usize) {
         let ep = self.drivers.get_arc(id).await;
         loop {
-            let (f, _) = match ep.next().await {
+            let (f, t) = match ep.next().await {
                 Ok(f) => f,
                 _ => continue,
             };
@@ -61,10 +64,14 @@ impl Switch {
             use {Recipient::*, RouteType::*};
             match f.recipient {
                 Flood => {
-                    let seqid = f.seq.seqid; // great names there kookie
-                    if self.journal.known(&seqid).await {
+                    let seqid = f.seq.seqid;
+                    if self.journal.unknown(&seqid).await {
                         self.journal.save(&seqid).await;
-                        self.dispatch.reflood(f, id).await
+                        self.dispatch.reflood(f, id).await;
+
+                        // if Protocol::is_announce(f) {
+                        //     self.routes.update(id, t, f.sender()).await.and_then(|_| {});
+                        // }
                     }
                 }
                 User(id) => match self.routes.reachable(id).await {
