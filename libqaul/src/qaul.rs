@@ -9,6 +9,7 @@ use crate::{
     messages::MsgStore,
     services::ServiceRegistry,
     users::UserStore,
+    security::Sec,
 };
 
 use ratman::Router;
@@ -57,6 +58,9 @@ pub struct Qaul {
 
     /// A reference to the underlying routing code
     pub(crate) router: Arc<Router>,
+
+    /// A security subsystem
+    pub(crate) sec: Arc<Sec>,
 }
 
 impl Qaul {
@@ -73,6 +77,7 @@ impl Qaul {
             contacts: ContactStore::new(),
             messages: MsgStore::new(),
             services: ServiceRegistry::new(),
+            sec: Arc::new(Sec::new()),
         }
     }
 
@@ -98,6 +103,7 @@ impl Qaul {
             contacts: ContactStore::new(),
             messages: MsgStore::new(),
             services: ServiceRegistry::new(),
+            sec: Arc::new(Sec::new()),
         });
 
         // TODO: Where to store this?!

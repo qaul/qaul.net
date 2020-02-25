@@ -1,5 +1,6 @@
 use crate::{
     error::Result,
+    security::{KeyId, Sec},
     users::{User, UserProfile},
     utils, Identity, Qaul,
 };
@@ -51,15 +52,10 @@ impl<'qaul> Users<'qaul> {
     /// user, instead of leaving files completely unencrypted. In this
     /// case, there's no real security, but a drive-by will still only
     /// grab encrypted files.
-    pub fn create(&self, pw: &str) -> Result<UserAuth> {
-        let mut rng = OsRng {};
-        let id = Identity::random();
-        let keypair = Keypair::generate(&mut rng);
-
-        let user = User::Local {
-            profile: UserProfile::new(id),
-            keypair,
-        };
+    pub async fn create(&self, pw: &str) -> Result<UserAuth> {
+        let KeyId { keypair, id } = self.q.sec.generate().await;
+        let profile = UserProfile::new(id);
+        let user = User::Local { profile, keypair };
 
         // Inform Router about new local user
         self.q.router.add_local(id)?;

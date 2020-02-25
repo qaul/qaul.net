@@ -42,6 +42,7 @@
 mod auth;
 mod crypto;
 mod discover;
+mod security;
 mod services;
 mod store;
 

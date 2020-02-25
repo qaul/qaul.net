@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // TDOD: Add network drivers
 
     let q = Qaul::new(r);
-    let user = q.users().create("password")?;
+    let user = block_on(async { q.users().create("password").await })?;
 
     let msg = q.messages();
     let send = msg.send(

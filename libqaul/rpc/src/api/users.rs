@@ -33,7 +33,7 @@ pub struct Create {
 impl QaulRpc for Create {
     type Response = Result<UserAuth>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users().create(&self.pw)
+        qaul.users().create(&self.pw).await
     }
 }
 
