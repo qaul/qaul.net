@@ -34,7 +34,7 @@ impl State {
                 None => {}
             }
             drop(vec);
-            task::sleep(Duration::from_millis(5)).await;
+            task::sleep(Duration::from_millis(20)).await;
         }
     }
 
@@ -51,7 +51,7 @@ impl State {
                 _ => {}
             }
             drop(map);
-            task::sleep(Duration::from_millis(5)).await;
+            task::sleep(Duration::from_millis(20)).await;
         }
     }
 
