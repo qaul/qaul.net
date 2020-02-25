@@ -1,7 +1,7 @@
 use async_std::{sync::Arc, task};
 use netmod::Recipient;
 
-use crate::core::{Dispatch, DriverMap, Journal, RouteTable, RouteType};
+use crate::core::{Dispatch, DriverMap, Journal, RouteTable, RouteType, Collector};
 
 /// A frame switch inside Ratman to route packets and signals
 ///
@@ -16,7 +16,7 @@ pub(crate) struct Switch {
     routes: Arc<RouteTable>,
     journal: Arc<Journal>,
     dispatch: Arc<Dispatch>,
-    // collector: Arc<Collector>,
+    collector: Arc<Collector>,
     drivers: Arc<DriverMap>,
 }
 
@@ -26,14 +26,14 @@ impl Switch {
         routes: Arc<RouteTable>,
         journal: Arc<Journal>,
         dispatch: Arc<Dispatch>,
-        // collector: Arc<Collector>,
+        collector: Arc<Collector>,
         drivers: Arc<DriverMap>,
     ) -> Arc<Self> {
         Arc::new(Self {
             routes,
             journal,
             dispatch,
-            // collector,
+            collector,
             drivers,
         })
     }
@@ -68,7 +68,7 @@ impl Switch {
                     }
                 }
                 User(id) => match self.routes.reachable(id).await {
-                    Some(Local) => unimplemented!(), // self.collector.queue(f).await,
+                    Some(Local) => self.collector.queue(f.seqid(), f).await,
                     Some(Remote(_)) => self.dispatch.send(f).await,
                     None => self.journal.queue(f).await,
                 },

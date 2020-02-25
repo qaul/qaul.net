@@ -11,7 +11,7 @@ mod journal;
 mod routes;
 mod switch;
 
-// pub(self) use collector::{Collector, CollectorInit};
+pub(self) use collector::Collector;
 pub(self) use dispatch::Dispatch;
 pub(self) use drivers::DriverMap;
 pub(self) use journal::Journal;
@@ -26,7 +26,7 @@ use async_std::sync::Arc;
 /// The core handles sending, receiving and storing frames that can't
 /// be delivered at that time (delay-tolerance).
 pub(crate) struct Core {
-    // collector: Arc<Collector>,
+    collector: Arc<Collector>,
     _dispatch: Arc<Dispatch>,
     journal: Arc<Journal>,
     _routes: Arc<RouteTable>,
@@ -42,20 +42,20 @@ impl Core {
         let journal = Journal::new();
 
         let dispatch = Dispatch::new(Arc::clone(&routes), Arc::clone(&drivers));
-        // let ctx { CollectorInit, inc, done } = Collector::new();
+        let collector = Collector::new();
 
         let switch = Switch::new(
             Arc::clone(&routes),
             Arc::clone(&journal),
             Arc::clone(&dispatch),
-            // Arc::clone(&unimplemented!()),
+            Arc::clone(&collector),
             Arc::clone(&drivers),
         );
 
         Self {
             _dispatch: dispatch,
             _routes: routes,
-            // collector: unimplemented!(),
+            collector,
             journal,
             switch,
             drivers,
@@ -72,12 +72,13 @@ impl Core {
     }
 
     /// Asynchronously send a Message
-    pub(crate) async fn send(&self, msg: Message) {}
+    pub(crate) async fn send(&self, msg: Message) {
+        // Slice, then dispatch
+    }
 
     /// Poll for the incoming Message
     pub(crate) async fn next(&self) -> Message {
-        // self.collector.completed().await
-        unimplemented!()
+        self.collector.completed().await
     }
 
     /// Insert a new endpoint
