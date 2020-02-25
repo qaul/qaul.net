@@ -2,15 +2,6 @@ use identity::Identity;
 use netmod::Recipient;
 use serde::{Deserialize, Serialize};
 
-/// Cryptographic signature payload for primary payload
-///
-/// Because ratman can't assume access to an advanced keystore, the
-/// signature for a Message is not verified on this API level.  It is
-/// up to the users of the Router API to verify message payloads
-/// before parsing and trusting them.  This type variant merely
-/// provides a convenient wrapper for that to be simpler.
-pub type Signature = Vec<u8>;
-
 /// A unique, randomly generated message ID
 pub type MsgId = Identity;
 
@@ -31,26 +22,4 @@ pub struct Message {
     pub recipient: Recipient,
     /// Some raw message payload
     pub payload: Vec<u8>,
-    /// Source-verifiable payload signature data
-    pub signature: Signature,
-}
-
-impl Message {
-    /// Construct a signed message from raw data inputs
-    ///
-    /// The payload structure needs to provide a serializer, which
-    /// allocates to be hashed for the XXHash signature of the
-    /// Message.
-    pub fn build_signed(id: MsgId, sender: Identity, recipient: Recipient, data: Vec<u8>) -> Self {
-        let payload = data;
-        let signature = vec![1, 3, 1, 2];
-
-        Self {
-            id,
-            sender,
-            recipient,
-            payload,
-            signature,
-        }
-    }
 }

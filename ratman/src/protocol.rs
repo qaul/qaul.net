@@ -9,12 +9,13 @@
 //! - `Sync` is a reply to an `Announce`, only omitted when `no_sync` is set
 
 use crate::data::{Message, MsgId};
+use conjoiner;
 use identity::Identity;
 use netmod::Recipient;
 use serde::{Deserialize, Serialize};
 
 /// A payload that represents a RATMAN-protocol message
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum ProtoPayload {
     /// A network-wide announcement message
     Announce { id: Identity, no_sync: bool },
@@ -28,25 +29,17 @@ pub struct Protocol;
 impl Protocol {
     /// Build an announcement message for a user
     pub fn announce(sender: Identity) -> Message {
-        Message::build_signed(
-            MsgId::random(),
-            sender,
-            Recipient::Flood,
-            vec![0],
-        )
-    }
+        let payload = conjoiner::serialise(&ProtoPayload::Announce {
+            id: sender,
+            no_sync: true,
+        })
+        .unwrap();
 
-    /// Build a message that synchronises routing table state
-    pub fn sync_rt(sender: Identity, recipient: Identity, _known: Vec<Identity>) -> Message {
-        Message::build_signed(
-            MsgId::random(),
-            sender.clone(),
-            Recipient::User(recipient),
-            vec![0],
-            // ProtoPayload::Sync {
-            //     id: sender,
-            //     table: known,
-            // },
-        )
+        Message {
+            id: MsgId::random(),
+            sender,
+            recipient: Recipient::Flood,
+            payload,
+        }
     }
 }

@@ -44,7 +44,6 @@ impl From<RatMessageProto> for RatMessage {
         let payload = conjoiner::serialise(&proto.env).unwrap();
         let id = proto.env.id.clone().into();
         let sender = proto.env.sender;
-        let signature = proto.signature;
         let recipient = proto.recipient;
 
         RatMessage {
@@ -52,7 +51,6 @@ impl From<RatMessageProto> for RatMessage {
             sender,
             recipient,
             payload: payload.clone(),
-            signature: signature.clone(),
         }
     }
 }
@@ -77,7 +75,6 @@ impl MsgUtils {
             sender,
             recipient: _,
             ref payload,
-            signature: _,
         } = msg;
 
         let Envelope {

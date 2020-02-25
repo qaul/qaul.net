@@ -37,6 +37,6 @@ impl Dispatch {
             task::spawn(async move {
                 ep.send(f, Target::Flood).await;
             })
-        }));
+        })).await;
     }
 }

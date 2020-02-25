@@ -55,7 +55,7 @@ mod error;
 mod protocol;
 
 pub use crate::{
-    data::{Message, MsgId, Signature},
+    data::{Message, MsgId},
     error::{Error, Result},
     protocol::Protocol,
 };

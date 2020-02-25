@@ -65,7 +65,6 @@ fn join_frames(buf: &mut Vec<Frame>, new: Frame) -> Option<Message> {
             sender,
             recipient,
             payload,
-            signature: vec![],
         })
     } else {
         None
