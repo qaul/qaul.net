@@ -1,7 +1,7 @@
 //! Networking frames
 
 use crate::{SeqBuilder, SeqData, SeqId};
-use identity::Identity;
+use identity::{Identity, ID_LEN};
 use serde::{Deserialize, Serialize};
 
 /// Encoded recipient data
@@ -26,7 +26,8 @@ pub enum Recipient {
 /// routing table.
 ///
 /// If your endpoint doesn't implement a one-to-many link (i.e. if
-/// it's always one-to-one), just let this value to `Single(0)` (`Target::default()`)
+/// it's always one-to-one), just let this value to `Single(0)`
+/// (`Target::default()`)
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Target {
     /// Send message to all reachable endpoints
@@ -62,7 +63,7 @@ impl Frame {
     /// Produce a new dummy frame that sends nonsense data from nowhere to everyone.
     pub fn dummy() -> Self {
         SeqBuilder::new(
-            Identity::from([0; 16]),
+            Identity::from([0; ID_LEN]),
             Recipient::Flood,
             Identity::random(),
         )

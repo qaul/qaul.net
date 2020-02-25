@@ -29,8 +29,8 @@ use std::{
     string::ToString,
 };
 
-/// Length of the identity buffer
-pub const ID_LEN: usize = 16;
+/// Length of the identity buffer to align with an ed25519 pubkey
+pub const ID_LEN: usize = 32;
 
 /// A generic object identifier
 #[derive(Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
@@ -44,16 +44,17 @@ impl Debug for Identity {
 
 impl Display for Identity {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let s = hex::encode_upper(self);
-        let mut v = s
-            .as_bytes()
-            .chunks(4)
-            .map(std::str::from_utf8)
-            .collect::<Result<Vec<_>, _>>()
-            .unwrap()
-            .join(" ");
-        v.insert(20, ' ');
-        write!(f, "{}", v)
+        write!(
+            f,
+            "{}",
+            hex::encode_upper(self)
+                .as_bytes()
+                .chunks(4)
+                .map(std::str::from_utf8)
+                .collect::<Result<Vec<_>, _>>()
+                .unwrap()
+                .join(" ")
+        )
     }
 }
 
@@ -68,9 +69,26 @@ impl Identity {
 
         Self(
             vec.into_iter()
-                .zip(0..ID_LEN)
+                .enumerate()
                 .take(ID_LEN)
-                .fold([0; ID_LEN], |mut buf, (u, i)| {
+                .fold([0; ID_LEN], |mut buf, (i, u)| {
+                    buf[i] = *u;
+                    buf
+                }),
+        )
+    }
+
+    /// Create an identity from an exactly length-matched byte slice
+    ///
+    /// This function will panic, if the provided slice isn't exactly
+    /// the length of the underlying identity implementation (see
+    /// `ID_LEN`)
+    pub fn from_bytes(buf: &[u8]) -> Self {
+        assert_eq!(buf.len(), ID_LEN);
+        Self(
+            buf.into_iter()
+                .enumerate()
+                .fold([0; ID_LEN], |mut buf, (i, u)| {
                     buf[i] = *u;
                     buf
                 }),
@@ -289,24 +307,28 @@ mod test {
 
     #[test]
     fn json_serde() {
-        let s = b"yellow submarine";
+        let s = b"Yes, we will make total destroy.";
         let i = Identity::truncate(&s.to_vec());
         let v = serde_json::to_string(&i).unwrap();
-        assert_eq!(v, "\"7965 6C6C 6F77 2073  7562 6D61 7269 6E65\"");
+        assert_eq!(
+            v,
+            "\"5965 732C 2077 6520 7769 6C6C 206D 616B 6520 746F 7461 6C20 6465 7374 726F 792E\""
+        );
         let i2 = serde_json::from_str(&v).unwrap();
         assert_eq!(i, i2);
     }
 
     #[test]
     fn bincode_serde() {
-        let s = b"yellow submarine";
+        let s = b"Yes, we will make total destroy.";
         let i = Identity::truncate(&s.to_vec());
         let v: Vec<u8> = bincode::serialize(&i).unwrap();
         assert_eq!(
             v,
             vec![
-                16, 0, 0, 0, 0, 0, 0, 0, 121, 101, 108, 108, 111, 119, 32, 115, 117, 98, 109, 97,
-                114, 105, 110, 101
+                32, 0, 0, 0, 0, 0, 0, 0, 89, 101, 115, 44, 32, 119, 101, 32, 119, 105, 108, 108,
+                32, 109, 97, 107, 101, 32, 116, 111, 116, 97, 108, 32, 100, 101, 115, 116, 114,
+                111, 121, 46
             ],
         );
         let i2 = bincode::deserialize(&v).unwrap();
@@ -315,14 +337,16 @@ mod test {
 
     #[test]
     fn conjoiner_serde() {
-        let s = b"yellow submarine";
+        let s = b"Yes, we will make total destroy.";
         let i = Identity::truncate(&s.to_vec());
         let v: Vec<u8> = conjoiner_engine::serialise(&i).unwrap();
         assert_eq!(
             v,
             vec![
-                40, 55, 57, 54, 53, 32, 54, 67, 54, 67, 32, 54, 70, 55, 55, 32, 50, 48, 55, 51, 32,
-                32, 55, 53, 54, 50, 32, 54, 68, 54, 49, 32, 55, 50, 54, 57, 32, 54, 69, 54, 53
+                79, 53, 57, 54, 53, 32, 55, 51, 50, 67, 32, 50, 48, 55, 55, 32, 54, 53, 50, 48, 32,
+                55, 55, 54, 57, 32, 54, 67, 54, 67, 32, 50, 48, 54, 68, 32, 54, 49, 54, 66, 32, 54,
+                53, 50, 48, 32, 55, 52, 54, 70, 32, 55, 52, 54, 49, 32, 54, 67, 50, 48, 32, 54, 52,
+                54, 53, 32, 55, 51, 55, 52, 32, 55, 50, 54, 70, 32, 55, 57, 50, 69
             ],
         );
         let i2 = conjoiner_engine::deserialise(&v).unwrap();
