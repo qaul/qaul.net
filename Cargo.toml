@@ -14,6 +14,7 @@ members = [
     "libqaul/service/chat",
     # "libqaul/service/feed",
     "libqaul/service/files",
+	"libqaul/service/voices",
 
     # decentralised routing protocol
     "ratman",

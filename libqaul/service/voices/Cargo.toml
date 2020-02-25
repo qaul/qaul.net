@@ -1,0 +1,16 @@
+[package]
+name = "qaul-voip"
+version = "0.1.0"
+authors = ["Jess 3Jane <me@jess.coffee>"]
+edition = "2018"
+license = "AGPL-3.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+libqaul = { path = "../../" }
+
+serde = { version = "1.0", features = ["derive"] }
+futures = "0.3"
+failure = "0.1"
+conjoiner = { version = "1.2", package = "conjoiner-engine" }

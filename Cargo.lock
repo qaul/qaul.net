@@ -1296,6 +1296,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "qaul-voip"
+version = "0.1.0"
+dependencies = [
+ "conjoiner-engine",
+ "failure",
+ "futures 0.3.4",
+ "libqaul",
+ "serde",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
