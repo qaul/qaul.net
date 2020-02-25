@@ -4,7 +4,7 @@ use crate::{
     Qaul,
 };
 use async_std::task;
-use ratman::{netmod::Recipient, Identity, Protocol, Router};
+use ratman::{netmod::Recipient, Identity, Router};
 use std::{
     collections::BTreeMap,
     sync::{
@@ -54,46 +54,7 @@ impl Discovery {
         // Incoming message handler
         Self::inc_handler(qaul, Arc::clone(&router), Arc::clone(&run));
 
-        // Spawn the service communicator
-        Self::service_handle(rx, router, run);
-
         sender
-    }
-
-    /// Spawns the service internal handler
-    fn service_handle(rx: Receiver<DiscCmd>, router: Arc<Router>, run: Arc<RunLock>) {
-        thread::spawn(move || {
-            let run = Arc::clone(&run);
-            let buf = Arc::new(RwLock::new(BTreeMap::new()));
-
-            while let Ok(rscv) = rx.recv() {
-                match rscv {
-                    DiscCmd::Shutdown => {
-                        run.set(false);
-                        break;
-                    }
-                    DiscCmd::Start(id) => {
-                        let router = Arc::clone(&router);
-                        let run = Arc::clone(&run);
-
-                        buf.write()
-                            .unwrap()
-                            .insert(id, Arc::new(RunLock::new(true)));
-                        let buf = Arc::clone(&buf);
-
-                        task::spawn(async move {
-                            while active(&id, &buf).and(&run) {
-                                task::sleep(Duration::from_secs(2)).await;
-                                router.send(Protocol::announce(id.clone())).await.unwrap();
-                            }
-                        });
-                    }
-                    DiscCmd::Stop(id) => {
-                        buf.write().unwrap().get_mut(&id).unwrap().set(false);
-                    }
-                }
-            }
-        });
     }
 
     /// Spawns a thread that listens to incoming messages
