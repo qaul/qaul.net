@@ -52,7 +52,7 @@ impl Switch {
     async fn run_inner(self: Arc<Self>, id: usize) {
         let ep = self.drivers.get_arc(id).await;
         loop {
-            let (f, t) = match ep.next().await {
+            let (f, _) = match ep.next().await {
                 Ok(f) => f,
                 _ => continue,
             };
