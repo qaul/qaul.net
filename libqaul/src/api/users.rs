@@ -117,6 +117,12 @@ impl<'qaul> Users<'qaul> {
         let (ref id, _) = self.q.auth.trusted(user)?;
         self.q.users.modify(id, update)
     }
+
+    /// Validate that a `UserAuth` represents a currently logged in user
+    pub fn ok(&self, user: UserAuth) -> Result<()> {
+        self.q.auth.trusted(user)?;
+        Ok(())
+    }
 }
 
 /// A mirror of `UserAuth` used to implement the `Serialize` trait on
