@@ -96,7 +96,7 @@ pub enum Request {
     MsgSend(messages::Send),
 
     /// Poll the next raw libqaul message
-    MsgNext(messages::Poll),
+    MsgNext(messages::Next),
 
     /// Create a subscription for raw libqaul messages
     MsgSub(messages::Subscribe),

@@ -38,16 +38,16 @@ impl QaulRpc for Send {
 /// of getting new messages.  Instead, consider setting up a push
 /// listener for your transport layer.
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
-pub struct Poll {
+pub struct Next {
     auth: UserAuth,
     service: String,
 }
 
 #[async_trait]
-impl QaulRpc for Poll {
+impl QaulRpc for Next {
     type Response = Result<MsgRef>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.messages().poll(self.auth, self.service)
+        qaul.messages().next(self.auth, self.service).await
     }
 }
 
