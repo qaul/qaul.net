@@ -3,6 +3,8 @@ use crate::{
     users::{User, UserProfile},
     utils, Identity, Qaul,
 };
+use ed25519_dalek::Keypair;
+use rand::rngs::OsRng;
 use serde::{de::Deserializer, ser::Serializer, Deserialize, Serialize};
 
 /// A random authentication token
@@ -50,8 +52,14 @@ impl<'qaul> Users<'qaul> {
     /// case, there's no real security, but a drive-by will still only
     /// grab encrypted files.
     pub fn create(&self, pw: &str) -> Result<UserAuth> {
-        let id = Identity::truncate(&utils::random(16));
-        let user = User::Local(UserProfile::new(id));
+        let mut rng = OsRng {};
+        let id = Identity::random();
+        let keypair = Keypair::generate(&mut rng);
+
+        let user = User::Local {
+            profile: UserProfile::new(id),
+            keypair,
+        };
 
         // Inform Router about new local user
         self.q.router.add_local(id)?;

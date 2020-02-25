@@ -1,8 +1,11 @@
 //! Store for user profiles
 
-use crate::error::{Error, Result};
-use crate::qaul::Identity;
-use crate::users::UserProfile;
+use crate::{
+    error::{Error, Result},
+    qaul::Identity,
+    users::UserProfile,
+};
+use ed25519_dalek::Keypair;
 
 use std::{
     collections::BTreeMap,
@@ -11,8 +14,12 @@ use std::{
 
 /// A small wrapper to express local vs. remote users
 pub(crate) enum User {
-    Local(UserProfile),
-    #[allow(unused)]
+    /// A local user has a full keypair
+    Local {
+        profile: UserProfile,
+        keypair: Keypair,
+    },
+    /// A remote user with optional pubkey
     Remote(UserProfile),
 }
 
@@ -20,7 +27,7 @@ impl User {
     #[allow(unused)]
     pub(crate) fn id(&self) -> &Identity {
         match self {
-            User::Local(ref u) => &u.id,
+            User::Local { ref profile, keypair: _ } => &profile.id,
             User::Remote(ref u) => &u.id,
         }
     }
@@ -45,7 +52,10 @@ impl UserStore {
     /// Add a new user (local or remote)
     pub(crate) fn add_user(&self, user: User) {
         let id = match user {
-            User::Local(ref u) => u.id,
+            User::Local {
+                ref profile,
+                keypair: _,
+            } => profile.id,
             User::Remote(ref u) => u.id,
         }
         .clone();
@@ -71,7 +81,7 @@ impl UserStore {
                 .get_mut(id)
                 .map_or(Err(Error::NoUser), |x| Ok(x))?
             {
-                User::Local(ref mut u) => u,
+                User::Local { ref mut profile, keypair: _ } => profile,
                 User::Remote(ref mut u) => u,
             },
         );
@@ -85,7 +95,7 @@ impl UserStore {
             .get(id)
             .map_or(Err(Error::NoUser), |x| {
                 Ok(match x {
-                    User::Local(ref u) => u,
+                    User::Local { ref profile, keypair: _ } => profile,
                     User::Remote(ref u) => u,
                 }
                 .clone())
@@ -99,7 +109,7 @@ impl UserStore {
             .expect("Failed to lock UserStore")
             .iter()
             .filter_map(|(_, u)| match u {
-                User::Local(u) => Some(u.clone()),
+                User::Local { ref profile, keypair: _ } => Some(profile.clone()),
                 _ => None,
             })
             .collect()
