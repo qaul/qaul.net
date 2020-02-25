@@ -24,7 +24,8 @@ members = [
     "clockctrl",
     "permute",
     "visn",
-
+    "access-notifier",
+    
     # Available netmod drivers
     "netmod-mem",
     "netmod-udp",
