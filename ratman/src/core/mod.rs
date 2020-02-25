@@ -18,7 +18,7 @@ pub(self) use journal::Journal;
 pub(self) use routes::{EpTargetPair, RouteTable, RouteType};
 pub(self) use switch::Switch;
 
-use crate::{Endpoint, Identity, Message, Result};
+use crate::{Endpoint, Identity, Message, Result, Slicer};
 use async_std::sync::Arc;
 
 /// The Ratman routing core interface
@@ -27,7 +27,7 @@ use async_std::sync::Arc;
 /// be delivered at that time (delay-tolerance).
 pub(crate) struct Core {
     collector: Arc<Collector>,
-    _dispatch: Arc<Dispatch>,
+    dispatch: Arc<Dispatch>,
     journal: Arc<Journal>,
     _routes: Arc<RouteTable>,
     switch: Arc<Switch>,
@@ -53,7 +53,7 @@ impl Core {
         );
 
         Self {
-            _dispatch: dispatch,
+            dispatch: dispatch,
             _routes: routes,
             collector,
             journal,
@@ -73,7 +73,11 @@ impl Core {
 
     /// Asynchronously send a Message
     pub(crate) async fn send(&self, msg: Message) {
-        // Slice, then dispatch
+        let frames = Slicer::slice(0, msg);
+
+        for f in frames.into_iter() {
+            self.dispatch.send(f).await;
+        }
     }
 
     /// Poll for the incoming Message

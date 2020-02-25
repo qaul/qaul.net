@@ -54,6 +54,9 @@ mod data;
 mod error;
 mod protocol;
 
+mod slicer;
+pub(crate) use slicer::Slicer;
+
 pub use crate::{
     data::{Message, MsgId},
     error::{Error, Result},
