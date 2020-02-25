@@ -1,9 +1,13 @@
 //! A module to handle chat rooms
 
-use libqaul::{Identity, Qaul, api::{ItemDiff, SetDiff}, error::Result};
-use std::collections::BTreeSet;
 use async_std::sync::Arc;
-use serde::{Serialize, Deserialize};
+use libqaul::{
+    api::{ItemDiff, SetDiff},
+    error::Result,
+    Identity, Qaul,
+};
+use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 
 /// A unique identifier for a room
 pub type RoomId = Identity;
@@ -21,7 +25,6 @@ pub enum RoomState {
     Create(Room),
     /// Changes made to a room
     Diff(RoomDiff),
-    
 }
 
 /// Abstraction over a chat room
@@ -34,7 +37,6 @@ pub struct Room {
     /// A clear text room name
     pub name: Option<String>,
 }
-
 
 /// A set of changes made to a room
 #[derive(Clone, Serialize, Deserialize)]
@@ -72,8 +74,6 @@ impl Room {
     }
 
     pub async fn commit(&self, qaul: Arc<Qaul>) -> Result<()> {
-        
-        
         Ok(())
     }
 }

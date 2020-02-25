@@ -1,4 +1,7 @@
-use async_std::{sync::{Arc, RwLock}, task};
+use async_std::{
+    sync::{Arc, RwLock},
+    task,
+};
 use netmod::{Frame, SeqId};
 use std::collections::BTreeSet;
 
@@ -27,7 +30,7 @@ impl Journal {
     pub(crate) async fn save(&self, fid: &SeqId) {
         self.known.write().await.insert(fid.clone());
     }
-    
+
     /// Checks if a frame ID has been seen before
     pub(crate) async fn known(&self, fid: &SeqId) -> bool {
         self.known.read().await.contains(fid)

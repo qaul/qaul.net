@@ -1,8 +1,8 @@
 //! File API structures
 
-use async_trait::async_trait;
 use crate::QaulRpc;
-use libqaul::{Identity, users::UserAuth, files::FileFilter};
+use async_trait::async_trait;
+use libqaul::{files::FileFilter, users::UserAuth, Identity};
 
 /// Send a file store query
 pub struct Query {

@@ -1,5 +1,5 @@
+use crossbeam_channel::{bounded, Receiver, Sender};
 use ratman_netmod::Frame;
-use crossbeam_channel::{bounded, Sender, Receiver};
 
 /// A simple I/O wrapper around channels
 pub(crate) struct Io {

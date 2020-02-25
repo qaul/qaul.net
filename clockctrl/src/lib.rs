@@ -43,4 +43,4 @@ mod error;
 pub use error::Error;
 
 mod target;
-pub use target::{Target, Interval};
+pub use target::{Interval, Target};

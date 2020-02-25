@@ -1,8 +1,8 @@
 #![allow(unused)]
 
-use crate::Identity;
 use crate::error::Result;
 use crate::users::UserAuth;
+use crate::Identity;
 use serde::{Deserialize, Serialize};
 
 pub type FileId = Identity;

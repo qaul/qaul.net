@@ -1,7 +1,7 @@
 use async_std::{sync::Arc, task};
 use netmod::Recipient;
 
-use crate::core::{Dispatch, DriverMap, Journal, RouteTable, RouteType, Collector};
+use crate::core::{Collector, Dispatch, DriverMap, Journal, RouteTable, RouteType};
 
 /// A frame switch inside Ratman to route packets and signals
 ///

@@ -11,10 +11,10 @@
 //! a response, with appropriate data or error values inside.
 
 mod env;
-pub(crate) use env::{JsonAuth, RequestEnv, ResponseEnv, JsonMap};
+pub(crate) use env::{JsonAuth, JsonMap, RequestEnv, ResponseEnv};
 
-mod parser;
 mod generator;
+mod parser;
 
 mod server;
 pub use server::WsServer;

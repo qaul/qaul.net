@@ -1,7 +1,7 @@
 //! UDP overlay protocol and framing
 
-use serde::{Serialize, Deserialize};
 use netmod::{Frame, Target};
+use serde::{Deserialize, Serialize};
 
 /// A framing device to encapsulate the UDP overlay protocol
 ///

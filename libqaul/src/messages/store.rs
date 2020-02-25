@@ -1,6 +1,6 @@
 use crate::{
     error::Result,
-    messages::{MsgQuery, MsgId, MsgRef},
+    messages::{MsgId, MsgQuery, MsgRef},
     Identity,
 };
 use std::{
@@ -193,7 +193,7 @@ impl MsgStore {
 
 #[cfg(test)]
 mod tests {
-    use crate::messages::{Message, MsgQuery, MsgId, MsgState, MsgStore, SigTrust};
+    use crate::messages::{Message, MsgId, MsgQuery, MsgState, MsgStore, SigTrust};
     use crate::{utils, Identity, Tag};
     use std::{collections::BTreeSet, sync::Arc};
 

@@ -16,5 +16,5 @@ pub enum Tasks {
     /// Waits for local addressed frames to desequence them
     Collector,
     /// Main router poll loop checking for new frames
-    Switch
+    Switch,
 }

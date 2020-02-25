@@ -65,7 +65,9 @@ impl ContactStore {
             .filter(|(_, con)| match &query {
                 ContactQuery::Nick(_) if con.nick.is_none() => false,
                 ContactQuery::Nick(nick) => con.nick.as_ref().unwrap().contains(nick),
-                ContactQuery::Trust { val, fuz } => con.trust + fuz < *val || con.trust - fuz > *val,
+                ContactQuery::Trust { val, fuz } => {
+                    con.trust + fuz < *val || con.trust - fuz > *val
+                }
                 ContactQuery::Met(met) => con.met == *met,
                 ContactQuery::Location(_) if con.location.is_none() => false,
                 ContactQuery::Location(loc) => con.location.as_ref().unwrap().contains(loc),

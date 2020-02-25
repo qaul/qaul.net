@@ -2,7 +2,7 @@
 
 use crate::core::{DriverMap, EpTargetPair, RouteTable};
 use async_std::{sync::Arc, task};
-use futures::{Future, future};
+use futures::{future, Future};
 use netmod::{Frame, Recipient, Target};
 
 pub(crate) struct Dispatch {
@@ -37,6 +37,7 @@ impl Dispatch {
             task::spawn(async move {
                 ep.send(f, Target::Flood).await;
             })
-        })).await;
+        }))
+        .await;
     }
 }

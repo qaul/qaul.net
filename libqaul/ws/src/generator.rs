@@ -20,8 +20,7 @@ impl From<(Envelope, RequestEnv)> for ResponseEnv {
             _ => unreachable!(),
         };
         data.remove("type");
-        
-        
+
         // And build the final response envelope
         ResponseEnv {
             id,

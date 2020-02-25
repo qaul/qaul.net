@@ -5,13 +5,13 @@
 
 use async_std::{
     future::{self, Future},
+    pin::Pin,
     sync::{Arc, RwLock},
     task::{self, Poll},
-    pin::Pin,
 };
 use async_trait::async_trait;
-use ratman_netmod::{Endpoint, Error as NetError, Frame, Result as NetResult, Target};
 use crossbeam_channel::TryRecvError;
+use ratman_netmod::{Endpoint, Error as NetError, Frame, Result as NetResult, Target};
 
 /// An input/output pair of `mpsc::channel`s.
 ///

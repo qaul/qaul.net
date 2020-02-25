@@ -55,7 +55,7 @@ pub mod users;
 
 // Core state should be in the root
 mod qaul;
-pub use qaul::{Identity, Qaul};
 pub use api::Tag;
+pub use qaul::{Identity, Qaul};
 
 pub(crate) mod utils;

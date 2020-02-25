@@ -152,16 +152,14 @@ impl AsRef<[u8]> for Identity {
 
 /// Iterator for iterating over `Identity`
 pub struct Iter {
-    index: usize, 
+    index: usize,
     ident: Identity,
 }
 
 impl Iterator for Iter {
     type Item = u8;
     fn next(&mut self) -> Option<Self::Item> {
-        let ret = self.ident.0
-            .get(self.index)
-            .map(|byte| *byte);
+        let ret = self.ident.0.get(self.index).map(|byte| *byte);
         self.index += 1;
         ret
     }
@@ -331,4 +329,3 @@ mod test {
         assert_eq!(i, i2);
     }
 }
-

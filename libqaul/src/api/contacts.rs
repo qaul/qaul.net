@@ -1,5 +1,5 @@
 use crate::{error::Result, users::UserAuth, Identity, Qaul};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// A user-local set of contact metadata in their contact book
 ///

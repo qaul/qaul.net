@@ -45,4 +45,4 @@ mod seq;
 pub use endpoint::Endpoint;
 pub use frame::{Frame, Recipient, Target};
 pub use result::{Error, Result};
-pub use seq::{SeqId, SeqData, SeqBuilder};
+pub use seq::{SeqBuilder, SeqData, SeqId};

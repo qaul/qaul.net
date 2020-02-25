@@ -237,12 +237,10 @@ fn queue_and_collect_1000() {
     queue_and_collect_test(1000);
 }
 
-
 #[test]
 fn queue_and_collect_10000() {
     queue_and_collect_test(10000);
 }
-
 
 #[test]
 fn queue_and_collect_100000() {
@@ -253,4 +251,3 @@ fn queue_and_collect_100000() {
 fn queue_and_collect_1000000() {
     queue_and_collect_test(1000000);
 }
-

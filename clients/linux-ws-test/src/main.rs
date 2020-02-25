@@ -1,11 +1,10 @@
+use async_std::sync::Arc;
 use libqaul::Qaul;
 use libqaul_ws::WsServer;
 use qaul_chat::Chat;
 use ratman::Router;
-use async_std::sync::Arc;
 
 fn main() {
-
     // Init a basic libqaul stack with no interfaces
     let rat = Router::new();
     let qaul = Qaul::new(rat);

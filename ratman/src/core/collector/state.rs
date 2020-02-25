@@ -6,7 +6,10 @@ use async_std::{
     task::{self, Poll},
 };
 use netmod::{Frame, SeqId};
-use std::{collections::{BTreeMap, VecDeque}, time::Duration};
+use std::{
+    collections::{BTreeMap, VecDeque},
+    time::Duration,
+};
 
 type FrameMap = Locked<BTreeMap<SeqId, Sender<Frame>>>;
 
@@ -59,7 +62,6 @@ impl State {
     pub(super) async fn finish(&self, msg: Message) {
         self.done.lock().await.push_back(msg);
     }
-    
 
     /// Queue a new frame to the state
     pub(super) async fn queue(&self, seq: SeqId, frame: Frame) {

@@ -1,8 +1,8 @@
 //! User abstraction
 
 use crate::Identity;
+use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-use serde::{Serialize, Deserialize};
 
 /// A complete user profile with ID and metadata
 ///
@@ -13,7 +13,7 @@ use serde::{Serialize, Deserialize};
 /// The user profile itself makes no destinction between local, remote
 /// or self users (the latter being the currently active user in a
 /// session)
-#[derive(Clone, Serialize, Deserialize,)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct UserProfile {
     /// A user's network (node) ID
     pub id: Identity,

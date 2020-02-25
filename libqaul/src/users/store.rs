@@ -27,7 +27,10 @@ impl User {
     #[allow(unused)]
     pub(crate) fn id(&self) -> &Identity {
         match self {
-            User::Local { ref profile, keypair: _ } => &profile.id,
+            User::Local {
+                ref profile,
+                keypair: _,
+            } => &profile.id,
             User::Remote(ref u) => &u.id,
         }
     }
@@ -81,7 +84,10 @@ impl UserStore {
                 .get_mut(id)
                 .map_or(Err(Error::NoUser), |x| Ok(x))?
             {
-                User::Local { ref mut profile, keypair: _ } => profile,
+                User::Local {
+                    ref mut profile,
+                    keypair: _,
+                } => profile,
                 User::Remote(ref mut u) => u,
             },
         );
@@ -95,7 +101,10 @@ impl UserStore {
             .get(id)
             .map_or(Err(Error::NoUser), |x| {
                 Ok(match x {
-                    User::Local { ref profile, keypair: _ } => profile,
+                    User::Local {
+                        ref profile,
+                        keypair: _,
+                    } => profile,
                     User::Remote(ref u) => u,
                 }
                 .clone())
@@ -109,7 +118,10 @@ impl UserStore {
             .expect("Failed to lock UserStore")
             .iter()
             .filter_map(|(_, u)| match u {
-                User::Local { ref profile, keypair: _ } => Some(profile.clone()),
+                User::Local {
+                    ref profile,
+                    keypair: _,
+                } => Some(profile.clone()),
                 _ => None,
             })
             .collect()

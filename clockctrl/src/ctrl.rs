@@ -120,8 +120,8 @@ where
                     });
 
                     Ok(Scheduler::Internal(b))
-                },
-                
+                }
+
                 (_, _) => panic!("Invalid scheduler setup"),
             },
             None => Err(Error::NoTarget),

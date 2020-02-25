@@ -1,6 +1,6 @@
 //! API diffs
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Represents a generic change made to some structure

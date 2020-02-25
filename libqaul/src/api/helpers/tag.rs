@@ -1,4 +1,3 @@
-
 use serde::{Deserialize, Serialize};
 
 /// A generic metadata tag
@@ -32,4 +31,3 @@ impl Tag {
         }
     }
 }
-

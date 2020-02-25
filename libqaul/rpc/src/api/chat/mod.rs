@@ -1,7 +1,4 @@
-use {
-    async_trait::async_trait,
-    qaul_chat::Chat,
-};
+use {async_trait::async_trait, qaul_chat::Chat};
 
 pub mod messages;
 pub mod rooms;
@@ -10,7 +7,7 @@ pub mod rooms;
 #[async_trait]
 pub trait ChatExt {
     async fn apply<R, T>(&self, r: T) -> R
-    where 
+    where
         R: Send + Sync,
         T: Send + Sync + ChatRpc<Response = R>;
 }
@@ -18,9 +15,9 @@ pub trait ChatExt {
 #[async_trait]
 impl ChatExt for Chat {
     async fn apply<R, T>(&self, r: T) -> R
-    where 
+    where
         R: Send + Sync,
-        T: Send + Sync + ChatRpc<Response = R> 
+        T: Send + Sync + ChatRpc<Response = R>,
     {
         r.apply(self).await
     }
@@ -32,4 +29,3 @@ pub trait ChatRpc {
     type Response;
     async fn apply(self, chat: &Chat) -> Self::Response;
 }
-
