@@ -1,0 +1,14 @@
+[package]
+name = "linux-ws-test"
+description = "A linux server binary that bootstraps a test server for the web UI to test with"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+
+[dependencies]
+ratman = { path = "../../ratman" }
+libqaul = { path = "../../libqaul" }
+libqaul-ws = { path = "../../libqaul/ws", features = ["chat"] }
+qaul-chat = { path = "../../libqaul/service/chat" }
+
+async-std = "1.0"

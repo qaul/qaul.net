@@ -33,5 +33,7 @@ members = [
     # Client specific targets
     "clients/linux",
     "clients/linux-cli",
-    # "clients/http-test"
+
+    # Test binaries
+    "clients/linux-ws-test"
 ]
