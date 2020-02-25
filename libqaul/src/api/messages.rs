@@ -295,10 +295,7 @@ impl<'qaul> Messages<'qaul> {
         S: Into<String>,
         T: IntoIterator<Item = Tag>,
     {
-        self.q.auth.trusted(user)?;
-        // self.q.services.add_listener(service.into(), listener)
-        let (sub, _) = Subscription::new();
-        Ok(sub)
+        unimplemented!()
     }
 
     /// Cancel a previous subscription by Id
@@ -306,7 +303,7 @@ impl<'qaul> Messages<'qaul> {
     /// Messages can still be queried or polled, but will stop being
     /// streamed to the registered receiver.
     pub fn unsubscribe(&self, user: UserAuth, id: SubId) -> Result<()> {
-        Ok(())
+        unimplemented!()
     }
 
     /// Retrieve locally stored messages from the store

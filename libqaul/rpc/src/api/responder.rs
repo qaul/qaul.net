@@ -10,7 +10,7 @@ pub struct Responder {
     pub qaul: Arc<Qaul>,
 
     #[cfg(feature = "chat")]
-    pub cPollhat: Arc<Chat>,
+    pub chat: Arc<Chat>,
 }
 
 impl Responder {
