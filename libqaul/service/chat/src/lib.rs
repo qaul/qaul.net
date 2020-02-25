@@ -21,9 +21,9 @@ pub struct Chat {
 
 impl Chat {
     /// Create a new chat service instance
-    pub fn new(qaul: Arc<Qaul>) -> Result<Self> {
+    pub fn new(qaul: Arc<Qaul>) -> Result<Arc<Self>> {
         qaul.services().register(ASC_NAME)?;
-        Ok(Self { qaul })
+        Ok(Arc::new(Self { qaul }))
     }
 
     /// Access room function scope

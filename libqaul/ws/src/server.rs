@@ -9,7 +9,9 @@ use async_std::{
 };
 use async_tungstenite::tungstenite::Message;
 use futures::prelude::*;
+use libqaul::Qaul;
 use libqaul_rpc::{Envelope, EnvelopeType, Responder};
+use qaul_chat::Chat;
 use serde_json;
 use std::sync::atomic::{AtomicBool, Ordering};
 

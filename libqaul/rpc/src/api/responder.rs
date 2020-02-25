@@ -7,10 +7,10 @@ use qaul_chat::Chat;
 
 /// A type mapper to map RPC requests to libqaul and services
 pub struct Responder {
-    qaul: Arc<Qaul>,
+    pub qaul: Arc<Qaul>,
 
     #[cfg(feature = "chat")]
-    chat: Arc<Chat>,
+    pub chat: Arc<Chat>,
 }
 
 impl Responder {
