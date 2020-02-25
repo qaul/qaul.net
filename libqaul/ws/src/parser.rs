@@ -65,16 +65,24 @@ impl From<RequestEnv> for Envelope {
             id,
             data: match (kind.as_str(), method.as_str()) {
                 // chat service message functions
+                #[cfg(features = "chat")]
                 ("chat-message", "poll") => req(Request::ChatMsgNext(de_json(data, auth))),
+                #[cfg(features = "chat")]
                 ("chat-message", "subscribe") => req(Request::ChatMsgSub(de_json(data, auth))),
+                #[cfg(features = "chat")]
                 ("chat-message", "send") => req(Request::ChatMsgSend(de_json(data, auth))),
                 // ("chat-message", "query") => req(Request::ChatMsgQuery(de_json(data, auth))),
 
                 // chat service room management
+                #[cfg(features = "chat")]
                 ("chat-room", "list") => req(Request::ChatRoomList(de_json(data, auth))),
+                #[cfg(features = "chat")]
                 ("chat-room", "get") => req(Request::ChatRoomGet(de_json(data, auth))),
+                #[cfg(features = "chat")]
                 ("chat-room", "create") => req(Request::ChatRoomCreate(de_json(data, auth))),
+                #[cfg(features = "chat")]
                 ("chat-room", "modify") => req(Request::ChatRoomModify(de_json(data, auth))),
+                #[cfg(features = "chat")]
                 ("chat-room", "delete") => req(Request::ChatRoomDelete(de_json(data, auth))),
 
                 // libqaul contact functions
@@ -99,6 +107,7 @@ impl From<RequestEnv> for Envelope {
 }
 
 #[test]
+#[cfg(features = "chat")]
 fn envelope_chat_message_next() {
     // This re-uses the same ID for auth and room data not because
     // it's in any way significant but rather because it's 3am and I'm

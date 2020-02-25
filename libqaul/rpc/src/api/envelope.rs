@@ -13,7 +13,7 @@ use qaul_chat::{
     Chat, ChatMessage,
 };
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
+use std::{error::Error, fmt::Display};
 
 /// Represents a libqaul RPC request envelope
 ///
@@ -45,39 +45,39 @@ pub enum EnvelopeType {
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Request {
     /// Poll the next chat message
-    #[feature(chat)]
+    #[cfg(features = "chat")]
     ChatMsgNext(chat::messages::Next),
 
     /// Create a subscription for chat messages
-    #[feature(chat)]
+    #[cfg(features = "chat")]
     ChatMsgSub(chat::messages::Subscribe),
 
     /// Send a chat message
-    #[feature(chat)]
+    #[cfg(features = "chat")]
     ChatMsgSend(chat::messages::Send),
 
     /// Query the chat message store
-    #[feature(chat)]
+    #[cfg(features = "chat")]
     ChatMsgQuery,
-    
+
     /// List all available chat rooms
-    #[feature(chat)]
+    #[cfg(features = "chat")]
     ChatRoomList(chat::rooms::List),
 
     /// Get data about a chat room
-    #[feature(chat)]
+    #[cfg(features = "chat")]
     ChatRoomGet(chat::rooms::Get),
 
     /// Create a new chat room
-    #[feature(chat)]
+    #[cfg(features = "chat")]
     ChatRoomCreate(chat::rooms::Create),
 
     /// Modify a chat room
-    #[feature(chat)]
+    #[cfg(features = "chat")]
     ChatRoomModify(chat::rooms::Modify),
 
     /// Delete a chat room
-    #[feature(chat)]
+    #[cfg(features = "chat")]
     ChatRoomDelete(chat::rooms::Delete),
 
     /// Modify a user's contact
@@ -102,7 +102,7 @@ pub enum Request {
     MsgSub(messages::Subscribe),
 
     /// Query existing raw libqaul messages
-    Msguery(messages::Query),
+    MsgQuery(messages::Query),
 
     /// List local available users
     UserList(users::List),
@@ -137,7 +137,7 @@ pub enum Response {
     Auth(UserAuth),
 
     /// Return a set of chat messages
-    #[feature(chat)]
+    #[cfg(features = "chat")]
     ChatMessage(Vec<ChatMessage>),
 
     /// Return a set of contact entries
@@ -150,14 +150,14 @@ pub enum Response {
     Message(Vec<Message>),
 
     /// Return a message ID
-    MessageId(MsgId),
+    MsgId(MsgId),
 
     /// Return chat room data
-    #[feature(chat)]
+    #[cfg(features = "chat")]
     Room(Room),
 
     /// Get a set of chat room IDs
-    #[feature(chat)]
+    #[cfg(features = "chat")]
     RoomId(Vec<RoomId>),
 
     /// Confirmation for a new subscription
@@ -179,14 +179,14 @@ impl From<UserAuth> for Response {
     }
 }
 
-#[feature(chat)]
+#[cfg(features = "chat")]
 impl From<ChatMessage> for Response {
     fn from(msg: ChatMessage) -> Self {
         Response::ChatMessage(vec![msg])
     }
 }
 
-#[feature(chat)]
+#[cfg(features = "chat")]
 impl From<Vec<ChatMessage>> for Response {
     fn from(msgs: Vec<ChatMessage>) -> Self {
         Response::ChatMessage(msgs)
@@ -226,7 +226,7 @@ impl From<Vec<MsgRef>> for Response {
     }
 }
 
-#[feature(chat)]
+#[cfg(features = "chat")]
 impl From<Room> for Response {
     fn from(room: Room) -> Self {
         Response::Room(room)
@@ -235,7 +235,7 @@ impl From<Room> for Response {
 
 impl From<()> for Response {
     fn from(_: ()) -> Self {
-        Response::Success
+        Self::Success
     }
 }
 
@@ -248,5 +248,11 @@ impl From<UserProfile> for Response {
 impl From<Vec<UserProfile>> for Response {
     fn from(users: Vec<UserProfile>) -> Self {
         Response::User(users)
+    }
+}
+
+impl From<Vec<Identity>> for Response {
+    fn from(ids: Vec<Identity>) -> Self {
+        Self::UserId(ids)
     }
 }

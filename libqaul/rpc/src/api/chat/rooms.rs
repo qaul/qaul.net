@@ -1,5 +1,5 @@
 use {
-    super::ChatRPC,
+    super::ChatRpc,
     async_trait::async_trait,
     libqaul::{
         api::{ItemDiff, ItemDiffExt, SetDiff, SetDiffExt},
@@ -18,7 +18,7 @@ use {
 pub struct List;
 
 #[async_trait]
-impl ChatRPC for List {
+impl ChatRpc for List {
     type Response = Vec<RoomId>;
     async fn apply(self, chat: &Chat) -> Self::Response {
         chat.rooms().list().await
@@ -31,7 +31,7 @@ pub struct Get {
 }
 
 #[async_trait]
-impl ChatRPC for Get {
+impl ChatRpc for Get {
     type Response = Room;
     async fn apply(self, chat: &Chat) -> Self::Response {
         chat.rooms().get(self.id).await
@@ -46,7 +46,7 @@ pub struct Create {
 }
 
 #[async_trait]
-impl ChatRPC for Create {
+impl ChatRpc for Create {
     type Response = Result<RoomId>;
     async fn apply(self, chat: &Chat) -> Self::Response {
         chat.rooms().create(self.auth, self.users).await
@@ -64,7 +64,7 @@ pub struct Modify {
 }
 
 #[async_trait]
-impl ChatRPC for Modify {
+impl ChatRpc for Modify {
     type Response = Result<()>;
     async fn apply(self, chat: &Chat) -> Self::Response {
         let Modify {
@@ -90,7 +90,7 @@ pub struct Delete {
 }
 
 #[async_trait]
-impl ChatRPC for Delete {
+impl ChatRpc for Delete {
     type Response = Result<()>;
     async fn apply(self, chat: &Chat) -> Self::Response {
         chat.rooms().delete(self.auth, self.id).await

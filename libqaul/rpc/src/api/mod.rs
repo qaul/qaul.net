@@ -11,6 +11,9 @@ pub mod chat;
 mod envelope;
 pub use envelope::{Envelope, EnvelopeType, Request, Response};
 
+mod responder;
+pub use responder::Responder;
+
 use async_trait::async_trait;
 use libqaul::Qaul;
 
