@@ -7,9 +7,13 @@ use crate::{
     Tag,
 };
 
+use async_std::{
+    future::{self, Future},
+    task::{self, Poll},
+};
 use ratman::netmod::Recipient;
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeSet, iter::FromIterator, sync::Arc};
+use std::{collections::BTreeSet, iter::FromIterator, sync::Arc, time::Duration};
 
 /// A reference to an internally stored message object
 pub type MsgRef = Arc<Message>;
@@ -237,26 +241,42 @@ impl<'qaul> Messages<'qaul> {
         .map(|_| id)
     }
 
-    /// Non-blockingly poll the API for the latest `Message` for a service
+    /// Poll the API for the next `Message` for a service
     ///
     /// For a more general `Message` query/ enumeration API, see
     /// `Messages::query` instead.
-    pub fn poll<S>(&self, user: UserAuth, service: S) -> Result<MsgRef>
+    pub async fn next<S>(&self, user: UserAuth, service: S) -> Result<MsgRef>
     where
         S: Into<String>,
     {
         let (id, _) = self.q.auth.trusted(user)?;
-        self.q
-            .messages
-            .query(id)
-            .service(service)
-            .unread()
-            .limit(1)
-            .exec()
-            .map(|vec| match vec.into_iter().nth(0) {
-                Some(msg) => Ok(msg),
-                None => Err(Error::NoData),
-            })?
+        let service: String = service.into();
+
+        // This whole unholy mess needs to be rewritten, when we have
+        // an async message store ... yikes
+        
+        future::poll_fn(move |ctx| {
+            match self
+                .q
+                .messages
+                .query(id)
+                .service(service.as_str())
+                .unread()
+                .limit(1)
+                .exec()
+            {
+                Ok(msg) => Poll::Ready(Ok(msg.into_iter().nth(0).unwrap())),
+                Err(_) => {
+                    let waker = ctx.waker().clone();
+                    task::spawn(async move {
+                        task::sleep(Duration::from_millis(10)).await;
+                        waker.wake();
+                    });
+                    Poll::Pending
+                }
+            }
+        })
+        .await
     }
 
     /// Subscribe to a stream of future message updates
