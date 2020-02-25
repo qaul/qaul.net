@@ -18,7 +18,7 @@
 #![allow(unused)]
 
 mod api;
-pub use api::{contacts, files, messages, users, Envelope, EnvelopeType, QaulExt, QaulRpc, Request, Response};
+pub use api::{contacts, files, messages, users, Envelope, EnvelopeType, QaulExt, QaulRpc, Request, Response, Responder};
 
 #[feature(chat)]
 pub use api::{chat, chat::ChatExt, chat::ChatRPC};

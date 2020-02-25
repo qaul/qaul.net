@@ -15,6 +15,9 @@ use async_trait::async_trait;
 use libqaul::Qaul;
 
 /// Apply an RPC structure to a libqaul instance
+///
+/// This trait is used to attach a new function to the qaul.net state
+/// holder, without having to rely on feature flags to libqaul.
 #[async_trait]
 pub trait QaulExt {
     async fn apply<Response, Request>(&self, r: Request) -> Response
@@ -34,7 +37,7 @@ impl QaulExt for Qaul {
     }
 }
 
-/// A trait for objects that can modify an instance of libqaul
+/// The RPC trait that get's access to the libqaul state
 #[async_trait]
 pub trait QaulRpc {
     type Response;
