@@ -15,19 +15,6 @@
 //! track a user back to a specific device, is by design.
 //!
 //!
-//! ## Usage
-//!
-//! To use Ratman, you need to create a Router.  This type exposes an
-//! async API to interact with various network abstractions.  A
-//! networking endpoint and basic datagram types are defined in the
-//! `ratman-netmod` crate, and the routing identities are defined in
-//! the `ratman-identity` crate.
-//!
-//! [`ratman-netmod`]: https://crates.io/crate/ratman-netmod
-//! [`ratman-identity`]: https://crates.io/crate/ratman-identity
-//!
-//!
-//!
 //! ## Interface routing
 //!
 //! The interface that binds the Ratman router to underlying drivers
@@ -42,6 +29,64 @@
 //! way Ratman is able to route across network boundries, and on
 //! unpriviledged hardware (such as phones).
 //!
+//!
+//! ## Usage
+//!
+//! To use Ratman, you need to create a Router.  This type exposes an
+//! async API to interact with various network abstractions.  A
+//! networking endpoint and basic datagram types are defined in the
+//! [`ratman-netmod`] crate, and the routing identities are defined in
+//! the [`ratman-identity`] crate.
+//!
+//! [`ratman-netmod`]: https://crates.io/crate/ratman-netmod
+//! [`ratman-identity`]: https://crates.io/crate/ratman-identity
+//!
+//! Following is a small example.  Check out the [`tests`] directory
+//! for more!
+//!
+//! [`tests`]: https://git.open-communication.net/qaul/qaul.net/blob/master/ratman/tests
+//!
+//! ```rust
+//! # async fn testing() {
+//! use ratman::{Router, Identity};
+//! use netmod_mem::MemMod;
+//! # use std::time::Duration;
+//!
+//! // Build a simple channel in memory
+//! let mm1 = MemMod::new();
+//! let mm2 = MemMod::new();
+//! mm1.link(&mm2);
+//!
+//! // Initialise two routers, one for each device
+//! let r1 = Router::new();
+//! let r2 = Router::new();
+//!
+//! // Add channel endpoints to routers
+//! r1.add_endpoint(mm1);
+//! r2.add_endpoint(mm2);
+//!
+//! // Create some users and add them to the routers
+//! let u1 = Identity::random();
+//! r1.add_user(u1);
+//!
+//! let u2 = Identity::random();
+//! r2.add_user(u2);
+//!
+//! // And mark them "online"
+//! r1.online(u1);
+//! r2.online(u2);
+//!
+//! // The routers will now start announcing their new users on the
+//! // micro-network.  You can now poll for new user discoveries.
+//! assert_eq!(r1.discover().await, u2);
+//! # }
+//! ```
+//!
+//! Obviously this example is trivial, but hopefully it provides an
+//! overview of how the API of the router works.  Larger networks are
+//! fundamentally not any different from the example above: just more
+//! users, more hops, and more delay between marking a user as
+//! "online" and being able to sense their presence.
 //!
 //! ## Clocking
 //!
@@ -68,7 +113,6 @@
 //! See the main qaul.net repository README for additional permissions
 //! granted by the authors for this code.
 
-
 pub mod clock;
 mod core;
 mod data;
@@ -87,7 +131,7 @@ pub use identity::{Identity, ID_LEN};
 pub use netmod;
 
 use crate::core::Core;
-use async_std::{sync::Arc, task};
+use async_std::sync::Arc;
 use clock::{ClockCtrl, Tasks};
 use netmod::Endpoint;
 
@@ -120,8 +164,8 @@ impl Router {
     /// recreated without the endpoint you wish to remove.
     ///
     /// [`Endpoint`]: https://docs.rs/ratman-netmod/0.1.0/ratman_netmod/trait.Endpoint.html
-    pub fn add_endpoint(&self, ep: impl Endpoint + 'static + Send + Sync) -> usize {
-        task::block_on(async { self.inner.add_ep(ep).await })
+    pub async fn add_endpoint(&self, ep: impl Endpoint + 'static + Send + Sync) -> usize {
+        self.inner.add_ep(ep).await
     }
 
     /// Remove an endpoint from the router by ID
@@ -129,16 +173,16 @@ impl Router {
     /// This function is primarily meant for testing purposes, and
     /// shouldn't be used in heavy operation.  The required ID is
     /// returned by `add_endpoint`.
-    pub fn del_endpoint(&self, id: usize) {
-        task::block_on(async { self.inner.rm_ep(id).await });
+    pub async fn del_endpoint(&self, id: usize) {
+        self.inner.rm_ep(id).await;
     }
-    
+
     /// Add an identity to the local set
     ///
     /// Ratman will listen for messages to local identities and offer
     /// them up for polling via the Router API.
-    pub fn add_local(&self, id: Identity) -> Result<()> {
-        task::block_on(async { self.inner.add_local(id).await })
+    pub async fn add_user(&self, id: Identity) -> Result<()> {
+        self.inner.add_local(id).await
     }
 
     /// Remove a local identity, discarding imcomplete messages
@@ -146,8 +190,8 @@ impl Router {
     /// Ratman will by default remove all cached frames from the
     /// collector.  Optionally these frames can be moved into the
     /// journal with low priority instead.
-    pub fn rm_local(&self, id: Identity, _keep: bool) -> Result<()> {
-        task::block_on(async { self.inner.rm_local(id).await })
+    pub async fn rm_user(&self, id: Identity, _keep: bool) -> Result<()> {
+        self.inner.rm_local(id).await
     }
 
     /// Set a user ID as online and broadcast announcements
