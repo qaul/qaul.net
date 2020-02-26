@@ -125,6 +125,8 @@ impl Router {
     /// This function will return an error if the user is already
     /// marked as offline, or if no such user is known to the router
     pub async fn online(&self, id: Identity) -> Result<()> {
+        self.inner.known(id, true).await?;
+
         Ok(())
     }
 
@@ -133,6 +135,11 @@ impl Router {
         Ok(())
     }
 
+    /// Check the local routing table for a user ID
+    pub async fn known(&self, id: Identity) -> Result<()> {
+        self.inner.known(id, false).await
+    }
+    
     /// Register a manual clock controller object for internal tasks
     pub fn clock(&self, _cc: ClockCtrl<Tasks>) -> Result<()> {
         unimplemented!()

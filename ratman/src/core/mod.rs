@@ -18,7 +18,7 @@ pub(self) use journal::Journal;
 pub(self) use routes::{EpTargetPair, RouteTable, RouteType};
 pub(self) use switch::Switch;
 
-use crate::{Endpoint, Identity, Message, Result, Slicer};
+use crate::{Endpoint, Identity, Message, Result, Slicer, Error};
 use async_std::sync::Arc;
 
 /// The Ratman routing core interface
@@ -29,7 +29,7 @@ pub(crate) struct Core {
     collector: Arc<Collector>,
     dispatch: Arc<Dispatch>,
     journal: Arc<Journal>,
-    _routes: Arc<RouteTable>,
+    routes: Arc<RouteTable>,
     switch: Arc<Switch>,
     drivers: Arc<DriverMap>,
 }
@@ -53,8 +53,8 @@ impl Core {
         );
 
         Self {
-            dispatch: dispatch,
-            _routes: routes,
+            dispatch,
+            routes,
             collector,
             journal,
             switch,
@@ -85,18 +85,32 @@ impl Core {
         self.collector.completed().await
     }
 
+    /// Check if an Id is present in the routing table
+    pub(crate) async fn known(&self, id: Identity, local: bool) -> Result<()> {
+        if local {
+            self.routes.local(id).await
+        } else {
+            self.routes.resolve(id).await.map_or(Err(Error::NoUser), |_| Ok(()))
+        }
+    }
+
+    /// Returns users that were newly discovered in the network
+    pub(crate) async fn discover(&self) -> Identity {
+        self.routes.discover().await
+    }
+    
     /// Insert a new endpoint
     pub(crate) async fn add_ep(&self, ep: impl Endpoint + 'static + Send + Sync) {
         self.drivers.add(ep).await;
     }
 
-    /// Add a local endpoint
+    /// Add a local user endpoint
     pub(crate) async fn add_local(&self, id: Identity) -> Result<()> {
-        self._routes.local(id).await
+        self.routes.local(id).await
     }
 
-    /// Remove a local endpoint
+    /// Remove a local user endpoint
     pub(crate) async fn rm_local(&self, id: Identity) -> Result<()> {
-        self._routes.delete(id).await
+        self.routes.delete(id).await
     }
 }

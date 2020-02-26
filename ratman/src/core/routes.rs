@@ -1,13 +1,15 @@
 //! Routing table module
 
 use crate::{Error, Result};
-use async_std::sync::{Arc, Mutex};
+use async_std::sync::{channel, Arc, Mutex, Receiver, Sender};
 use std::collections::BTreeMap;
 use {identity::Identity, netmod::Target};
 
 /// A netmod endpoint ID and an endpoint target ID
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct EpTargetPair(pub(crate) u8, pub(crate) Target);
+
+type IoPair<T> = (Sender<T>, Receiver<T>);
 
 /// Describes the reachability of a route
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -21,31 +23,49 @@ pub(crate) enum RouteType {
 /// It only captures the current state of best routes and has no
 /// persistence relationships.  It can update entries for topology
 /// changes, but these are not carried between sessions.
-#[derive(Default)]
 pub(crate) struct RouteTable {
     routes: Arc<Mutex<BTreeMap<Identity, RouteType>>>,
+    new: IoPair<Identity>,
 }
 
 impl RouteTable {
     pub(crate) fn new() -> Arc<Self> {
-        Arc::new(Self::default())
+        Arc::new(Self {
+            routes: Default::default(),
+            new: channel(2),
+        })
     }
 
     /// Update or add an IDs entry in the routing table
     ///
-    /// Returns `Some(())` when the ID was previously known, and
-    /// simply updated in place.
-    pub(crate) async fn update(&self, if_: u8, t: Target, id: Identity) -> Option<()> {
+    /// If the Id was not previously known to the router, it is queued
+    /// to the `new` set which can be polled by calling `discovered().await`.
+    pub(crate) async fn update(&self, if_: u8, t: Target, id: Identity) {
         let mut tbl = self.routes.lock().await;
         let route = RouteType::Remote(EpTargetPair(if_, t));
-        tbl.insert(id, route).map(|_| ())
+        if tbl.insert(id, route).is_some() {
+            self.new.0.send(id).await;
+        }
+    }
+
+    /// Poll the set of newly discovered users
+    pub(crate) async fn discover(&self) -> Identity {
+        self.new.1.recv().await.unwrap()
     }
 
     /// Track a local ID in the routes table
-    pub(crate) async fn local(&self, id: Identity) -> Result<()> {
+    pub(crate) async fn add_local(&self, id: Identity) -> Result<()> {
         match self.routes.lock().await.insert(id, RouteType::Local) {
             Some(_) => Err(Error::DuplicateUser),
             None => Ok(()),
+        }
+    }
+
+    /// Check if a user is locally known
+    pub(crate) async fn local(&self, id: Identity) -> Result<()> {
+        match self.reachable(id).await {
+            Some(RouteType::Local) => Ok(()),
+            _ => Err(Error::NoUser),
         }
     }
 
@@ -59,13 +79,13 @@ impl RouteTable {
 
     /// Get the endpoint and target ID for a user Identity
     ///
-    /// **Note**: this function panics if the requested ID is not
-    /// currently reachable, or if it is local to the device.  Maybe
-    /// use the much safer function `reachable` instead.
-    pub(crate) async fn resolve(&self, id: Identity) -> EpTargetPair {
+    /// **Note**: this function may panic if no entry was found, and
+    /// returns `None` if the specified ID isn't remote.  To get more
+    /// control over how the table is queried, use `reachable` instead
+    pub(crate) async fn resolve(&self, id: Identity) -> Option<EpTargetPair> {
         match self.routes.lock().await.get(&id).cloned().unwrap() {
-            RouteType::Remote(ep) => ep,
-            _ => unreachable!(),
+            RouteType::Remote(ep) => Some(ep),
+            RouteType::Local => None,
         }
     }
 

@@ -24,7 +24,8 @@ impl Dispatch {
                 Recipient::User(id) => id,
                 Recipient::Flood => unreachable!(),
             })
-            .await;
+            .await
+            .unwrap();
 
         let ep = self.drivers.get_arc(epid as usize).await;
         ep.send(frame, trgt).await.unwrap();
@@ -35,7 +36,7 @@ impl Dispatch {
         future::join_all(self.drivers.get_without(ep).await.into_iter().map(|ep| {
             let f = frame.clone();
             task::spawn(async move {
-                ep.send(f, Target::Flood).await;
+                ep.send(f, Target::Flood).await.unwrap();
             })
         }))
         .await;
