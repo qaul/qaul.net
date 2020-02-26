@@ -1358,7 +1358,7 @@ dependencies = [
 
 [[package]]
 name = "ratman-identity"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "bincode",
  "blake2",
@@ -1371,7 +1371,7 @@ dependencies = [
 
 [[package]]
 name = "ratman-netmod"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "async-trait",
  "conjoiner-engine",

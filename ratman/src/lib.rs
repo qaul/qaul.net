@@ -119,6 +119,10 @@
 //! settings, without having to teach Ratman about your platform
 //! specifics.
 //!
+//! Check out the [clockctrl] crate for more details!
+//!
+//! [clockctrl]: https://docs.rs/clockctrl/0.1.0/clockctrl/
+//!
 //!
 //! ## License
 //!
@@ -278,6 +282,6 @@ impl Router {
 
     #[cfg(test)]
     pub async fn get_users(&self) -> Vec<Identity> {
-        self.innser.get_users().await
+        self.inner.get_users().await
     }
 }
