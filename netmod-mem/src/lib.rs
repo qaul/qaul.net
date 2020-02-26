@@ -12,6 +12,7 @@ use async_std::{
 use async_trait::async_trait;
 use crossbeam_channel::TryRecvError;
 use ratman_netmod::{Endpoint, Error as NetError, Frame, Result as NetResult, Target};
+use std::time::Duration;
 
 /// An input/output pair of `mpsc::channel`s.
 ///
@@ -115,11 +116,21 @@ impl Endpoint for MemMod {
     async fn next(&self) -> NetResult<(Frame, Target)> {
         future::poll_fn(|ctx| {
             let lock = &mut self.io.write();
+            let waker = ctx.waker().clone();
+
             match unsafe { Pin::new_unchecked(lock).poll(ctx) } {
                 Poll::Ready(mut io_opt) => match &mut *io_opt {
                     Some(ref mut io) => match io.inc.try_recv() {
                         Ok(v) => Poll::Ready(Ok((v, Target::default()))),
-                        Err(TryRecvError::Empty) => Poll::Pending,
+                        Err(TryRecvError::Empty) => {
+                            let w = waker.clone();
+                            task::spawn(async move {
+                                task::sleep(Duration::from_millis(20)).await;
+                                w.wake();
+                            });
+
+                            Poll::Pending
+                        }
                         Err(_) => Poll::Ready(Err(NetError::ConnectionLost)),
                     },
                     None => Poll::Ready(Err(NetError::ConnectionLost)),
