@@ -147,7 +147,11 @@ pub struct Router {
 }
 
 impl Router {
-    /// Create a new message router
+    /// Create a new and empty message router
+    ///
+    /// It's currently not possible to restore a router from stored
+    /// state, which means that all routing tables are lost when the
+    /// router is stopped.
     pub fn new() -> Arc<Self> {
         let proto = Protocol::new();
         let inner = Arc::new(Core::init());
@@ -190,7 +194,7 @@ impl Router {
     /// Ratman will by default remove all cached frames from the
     /// collector.  Optionally these frames can be moved into the
     /// journal with low priority instead.
-    pub async fn rm_user(&self, id: Identity, _keep: bool) -> Result<()> {
+    pub async fn del_user(&self, id: Identity, _keep: bool) -> Result<()> {
         self.inner.rm_local(id).await
     }
 
