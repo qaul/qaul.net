@@ -1,8 +1,6 @@
 use async_std::sync::Arc;
-use libqaul::Qaul;
-use libqaul_ws::WsServer;
-use qaul_chat::Chat;
 use ratman::Router;
+use {libqaul::Qaul, libqaul_http::HttpServer, libqaul_rpc::Responder, qaul_chat::Chat};
 
 fn main() {
     // Init a basic libqaul stack with no interfaces
@@ -11,6 +9,5 @@ fn main() {
     let chat = Chat::new(Arc::clone(&qaul)).unwrap();
 
     // Start the websocket server
-    let ws = WsServer::new("127.0.0.1:9900", qaul, chat);
-    ws.block();
+    HttpServer::block("127.0.0.1:9900", Responder { qaul, chat });
 }

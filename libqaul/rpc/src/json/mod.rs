@@ -1,4 +1,11 @@
-//! Json enveloping code
+//! Json enveloping module
+//!
+//! This code is mostly used in `libqaul-ws` and `libqaul-http`, and
+//! wraps the transactions of libqaul-rpc in json envelopes that are
+//! nicer to work with for web tools.
+
+mod parser;
+mod generator;
 
 use libqaul::{users::UserAuth, Identity};
 use serde::{Deserialize, Serialize};
@@ -9,7 +16,7 @@ pub(crate) type JsonMap = BTreeMap<String, JsonValue>;
 
 /// A struct wrapper for UserAuth
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub(crate) struct JsonAuth {
+pub  struct JsonAuth {
     id: Identity,
     token: String,
 }
@@ -22,7 +29,7 @@ impl From<JsonAuth> for UserAuth {
 
 /// A json specific request envelope
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub(crate) struct RequestEnv {
+pub  struct RequestEnv {
     /// The request ID
     pub id: String,
     /// Auth data for the request
@@ -45,7 +52,7 @@ pub(crate) struct RequestEnv {
 
 /// A json specific repsonse envelope
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub(crate) struct ResponseEnv {
+pub struct ResponseEnv {
     /// Response ID, same as request ID
     pub id: String,
     /// Mirrored auth token

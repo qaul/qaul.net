@@ -1,22 +1,47 @@
 //! libqaul http server API
-#![allow(unused)]
 
-use async_std::sync::Arc;
-use libqaul::Qaul;
-use tide::{self, Request, Response, Server};
+use libqaul_rpc::{
+    json::{RequestEnv, ResponseEnv},
+    Envelope, EnvelopeType, Responder,
+};
+
+use async_std::{sync::Arc, task};
+use serde_json;
+use tide::{self, Request, Response};
 
 /// State structure for the libqaul http server
-pub struct HttpServer {
-    qaul: Arc<Qaul>,
-    app: Server<()>,
-}
+pub struct HttpServer;
 
 impl HttpServer {
-    pub fn new(qaul: Arc<Qaul>) -> Self {
-        let mut app = tide::new();
-        app.at("/")
-            .get(|mut r: Request<()>| async move { Response::new(200) });
+    pub fn block(addr: &str, rpc: Responder) {
+        let mut app = tide::with_state(Arc::new(rpc));
+        app.at("/").post(|mut r: Request<Arc<Responder>>| {
+            async move {
+                let json: String = r.body_json().await.unwrap();
+                let req_env: RequestEnv =
+                    serde_json::from_str(json.as_str()).expect("Malformed json envelope");
+                let Envelope { id, data } = req_env.clone().into();
 
-        Self { qaul, app }
+                let req = match data {
+                    EnvelopeType::Request(req) => req,
+                    _ => unreachable!(), // Obviously possibly but fuck you
+                };
+
+                // Call into libqaul via the rpc utilities
+                let responder: Arc<_> = Arc::clone(r.state());
+                let resp = responder.respond(req).await;
+                
+                let env = Envelope {
+                    id,
+                    data: EnvelopeType::Response(resp),
+                };
+
+                // Build the reply envelope
+                let resp_env: ResponseEnv = (env, req_env).into();
+                Response::new(200).body_json(&resp_env).unwrap()
+            }
+        });
+
+        task::block_on(async move { app.listen(addr).await }).unwrap();
     }
 }

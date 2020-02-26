@@ -1,7 +1,9 @@
 //! Json message generator
 
-use crate::{RequestEnv, ResponseEnv};
-use libqaul_rpc::{Envelope, EnvelopeType};
+use crate::{
+    json::{RequestEnv, ResponseEnv},
+    Envelope, EnvelopeType,
+};
 use serde_json::{self, Map, Value as JsonValue};
 
 impl From<(Envelope, RequestEnv)> for ResponseEnv {

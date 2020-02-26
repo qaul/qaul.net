@@ -1,6 +1,8 @@
-use crate::{JsonAuth, JsonMap, RequestEnv};
+use crate::{
+    json::{JsonAuth, JsonMap, RequestEnv},
+    Envelope, EnvelopeType, Request,
+};
 use libqaul::users::UserAuth;
-use libqaul_rpc::{Envelope, EnvelopeType, Request};
 use serde::de::DeserializeOwned;
 
 #[derive(Debug)]
@@ -66,12 +68,13 @@ impl From<RequestEnv> for Envelope {
             data: match (kind.as_str(), method.as_str()) {
                 // chat service message functions
                 #[cfg(features = "chat")]
-                ("chat-message", "poll") => req(Request::ChatMsgNext(de_json(data, auth))),
-                #[cfg(features = "chat")]
-                ("chat-message", "subscribe") => req(Request::ChatMsgSub(de_json(data, auth))),
+                ("chat-message", "next") => req(Request::ChatMsgNext(de_json(data, auth))),
+                // #[cfg(features = "chat")]
+                // ("chat-message", "subscribe") => req(Request::ChatMsgSub(de_json(data, auth))),
                 #[cfg(features = "chat")]
                 ("chat-message", "send") => req(Request::ChatMsgSend(de_json(data, auth))),
-                // ("chat-message", "query") => req(Request::ChatMsgQuery(de_json(data, auth))),
+                #[cfg(features = "chat")]
+                ("chat-message", "query") => req(Request::ChatMsgQuery(de_json(data, auth))),
 
                 // chat service room management
                 #[cfg(features = "chat")]

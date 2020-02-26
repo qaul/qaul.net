@@ -1,7 +1,13 @@
 use super::Locked;
 use crate::Message;
 
-use async_std::{sync::Arc, task};
+use access_notifier::AccessNotifier as Notifier;
+use async_std::{
+    future::{self, Future},
+    pin::Pin,
+    sync::Arc,
+    task::{self, Poll},
+};
 use netmod::{Frame, SeqId};
 use std::{
     collections::{BTreeMap, VecDeque},
@@ -11,8 +17,8 @@ use std::{
 /// Local frame collector state holder
 #[derive(Default)]
 pub(super) struct State {
-    incoming: Locked<BTreeMap<SeqId, VecDeque<Frame>>>,
-    done: Locked<VecDeque<Message>>,
+    incoming: Locked<Notifier<BTreeMap<SeqId, Notifier<VecDeque<Frame>>>>>,
+    done: Locked<Notifier<VecDeque<Message>>>,
 }
 
 impl State {
@@ -24,32 +30,46 @@ impl State {
     /// Poll for completed messages from teh outside world
     pub(super) async fn completed(&self) -> Message {
         let done = Arc::clone(&self.done);
-        loop {
-            let mut vec = done.lock().await;
-            match vec.pop_front() {
-                Some(msg) => return msg,
-                None => {}
+        future::poll_fn(|ctx| {
+            let lock = &mut done.lock();
+            match unsafe { Pin::new_unchecked(lock).poll(ctx) } {
+                Poll::Ready(ref mut not) if not.len() > 0 => match not.pop_front() {
+                    Some(f) => Poll::Ready(f),
+                    None => {
+                        Notifier::register_waker(not, ctx.waker());
+                        Poll::Pending
+                    }
+                },
+                _ => Poll::Pending,
             }
-            drop(vec);
-            task::sleep(Duration::from_millis(20)).await;
-        }
+        })
+        .await
     }
 
     /// Poll for new work on a particular frame sequence
     pub(super) async fn get(&self, seq: &SeqId) -> Frame {
         let incoming = Arc::clone(&self.incoming);
-        loop {
-            let mut map = incoming.lock().await;
-            match map.get_mut(seq) {
-                Some(ref mut vec) => match vec.pop_front() {
-                    Some(msg) => return msg,
-                    None => {}
+        future::poll_fn(|ctx| {
+            let lock = &mut incoming.lock();
+            match unsafe { Pin::new_unchecked(lock).poll(ctx) } {
+                Poll::Ready(ref mut map) => match map.get_mut(seq) {
+                    Some(ref mut vec) if vec.len() > 0 => match vec.pop_front() {
+                        Some(f) => Poll::Ready(f),
+                        None => Poll::Pending,
+                    },
+                    Some(ref mut vec) => {
+                        Notifier::register_waker(vec, ctx.waker());
+                        Poll::Pending
+                    }
+                    None => {
+                        Notifier::register_waker(map, ctx.waker());
+                        Poll::Pending
+                    }
                 },
-                _ => {}
+                _ => Poll::Pending,
             }
-            drop(map);
-            task::sleep(Duration::from_millis(20)).await;
-        }
+        })
+        .await
     }
 
     /// Yield a finished message to the state
