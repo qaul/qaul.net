@@ -61,7 +61,7 @@ impl Switch {
     }
 
     async fn run_inner(self: Arc<Self>, id: usize) {
-        let ep = self.drivers.get_arc(id).await;
+        let ep = self.drivers.get(id).await;
         loop {
             let (f, t) = match ep.next().await {
                 Ok(f) => f,
@@ -77,15 +77,14 @@ impl Switch {
                         if let Some(sender) = Protocol::is_announce(&f) {
                             self.routes.update(id as u8, t, sender).await;
                         }
-                        
+
                         self.journal.save(&seqid).await;
                         self.dispatch.reflood(f, id).await;
-
                     }
                 }
                 User(id) => match self.routes.reachable(id).await {
                     Some(Local) => self.collector.queue_and_spawn(f.seqid(), f).await,
-                    Some(Remote(_)) => self.dispatch.send(f).await,
+                    Some(Remote(_)) => self.dispatch.send_one(f).await.unwrap(),
                     None => self.journal.queue(f).await,
                 },
             }

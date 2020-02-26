@@ -30,11 +30,6 @@ impl DriverMap {
         Arc::new(Self::default())
     }
 
-    /// Get the length of the driver set
-    pub(crate) fn len(&self) -> usize {
-        self.curr.load(Ordering::Relaxed)
-    }
-
     /// Insert a new endpoint to the set of known endpoints
     pub(crate) async fn add<E>(&self, ep: E) -> usize
     where
@@ -53,12 +48,23 @@ impl DriverMap {
     }
 
     /// Get access to an endpoint via an Arc wrapper
-    pub(crate) async fn get_arc(&self, id: usize) -> Arc<Ep> {
+    pub(crate) async fn get(&self, id: usize) -> Arc<Ep> {
         let map = self.map.read().await;
         Arc::clone(match map[id] {
             EpWrap::Used(ref ep) => ep,
             EpWrap::Void => panic!("Trying to use a removed endpoint!"),
         })
+    }
+
+    /// Get access to all endpoints wrapped in Arc
+    pub(crate) async fn get_all(&self) -> Vec<Arc<Ep>> {
+        let map = self.map.read().await;
+        map.iter()
+            .filter_map(|ep| match ep {
+                EpWrap::Used(ref ep) => Some(Arc::clone(ep)),
+                _ => None,
+            })
+            .collect()
     }
 
     /// Get all endpoints, except for the one provided via the ID
