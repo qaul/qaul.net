@@ -272,6 +272,7 @@ fn queue_and_collect_100000() {
 }
 
 #[test]
+#[ignore]
 fn queue_and_collect_1000000() {
     queue_and_collect_test(1000000);
 }
