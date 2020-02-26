@@ -15,7 +15,7 @@ pub struct HttpServer;
 impl HttpServer {
     pub fn block(addr: &str, rpc: Responder) {
         let mut app = tide::with_state(Arc::new(rpc));
-        app.at("/").post(|mut r: Request<Arc<Responder>>| {
+        app.at("/api").post(|mut r: Request<Arc<Responder>>| {
             async move {
                 let json: String = r.body_json().await.unwrap();
                 let req_env: RequestEnv =
