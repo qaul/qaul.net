@@ -34,7 +34,6 @@ mod worker;
 pub(self) use worker::Worker;
 
 /// The main collector management structure and API facade
-#[derive(Debug)]
 pub(crate) struct Collector {
     state: Arc<State>,
     workers: Locked<BTreeMap<SeqId, Arc<Worker>>>,
