@@ -69,12 +69,13 @@ impl MsgUtils {
     }
 
     /// Process incoming RATMAN message, verifying it's signature and payload
-    pub(crate) fn process(msg: RatMessage, _: Identity) -> Message {
+    pub(crate) fn process(id: Identity, msg: RatMessage) -> Message {
         let RatMessage {
             id,
             sender,
             recipient: _,
             ref payload,
+            ref sign,
         } = msg;
 
         let Envelope {
@@ -82,14 +83,18 @@ impl MsgUtils {
             sender: _,
             associator,
             payload,
+            tags,
         } = conjoiner::deserialise(&payload).unwrap();
+
+        // Verify signature
+        let sign = Sec::verify(id, payload.as_slice(), sign.as_slice());
 
         Message {
             id: id.into(),
             sender,
             associator,
             tags: Default::default(),
-            sign: SigTrust::Unverified,
+            sign,
             payload,
         }
     }

@@ -63,7 +63,7 @@ impl Discovery {
                     Recipient::Flood => unimplemented!(),
                 };
 
-                let msg = Arc::new(MsgUtils::process(msg, user));
+                let msg = Arc::new(MsgUtils::process(user, msg));
                 let associator = msg.associator.clone();
 
                 qaul.messages
