@@ -145,6 +145,21 @@ impl SeqBuilder {
     /// This function assumes a complete set of frame that has
     /// previously been sorted along the `seq.num` metric.
     pub fn restore(buf: &mut Vec<Frame>) -> Vec<u8> {
+        // FIXME: `windows` are weird when there's less than n Items.
+        // This hack just pretends that there are two.  We also
+        // communicate to the fold that we should drop the last frame
+        // in the set again.  A much better approach would be to use a
+        // windowing iterator that doesn't need to copy and can handle
+        // this situation more gracefully
+        //
+        // ~k
+        let fake = if buf.len() == 1 {
+            buf.push(buf.get(0).unwrap().clone());
+            true
+        } else {
+            false
+        };
+
         let wins = buf.windows(2);
         let len = wins.len();
 
@@ -177,7 +192,10 @@ impl SeqBuilder {
                     }
                     (Ok(mut vec), true) => {
                         append(&mut vec, &a.payload);
-                        append(&mut vec, &b.payload);
+
+                        if !fake {
+                            append(&mut vec, &b.payload);
+                        }
                         Ok(vec)
                     }
                     _ => Err(Error::DesequenceFault),
