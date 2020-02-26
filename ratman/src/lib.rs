@@ -77,7 +77,7 @@ use netmod::Endpoint;
 ///
 /// [`run`]: struct.Router.html#method.run
 pub struct Router {
-    inner: Core,
+    inner: Arc<Core>,
     proto: Arc<Protocol>,
 }
 
@@ -85,7 +85,7 @@ impl Router {
     /// Create a new message router
     pub fn new() -> Arc<Self> {
         let proto = Protocol::new();
-        let inner = Core::init();
+        let inner = Arc::new(Core::init());
         inner.run();
 
         Arc::new(Self { inner, proto })
@@ -126,13 +126,13 @@ impl Router {
     /// marked as offline, or if no such user is known to the router
     pub async fn online(&self, id: Identity) -> Result<()> {
         self.inner.known(id, true).await?;
-
-        Ok(())
+        Arc::clone(&self.proto).online(id, Arc::clone(&self.inner)).await
     }
 
     /// Set a user ID as offline and stop broadcasts
     pub async fn offline(&self, id: Identity) -> Result<()> {
-        Ok(())
+        self.inner.known(id, true).await?;
+        self.proto.offline(id).await
     }
 
     /// Check the local routing table for a user ID
@@ -144,7 +144,7 @@ impl Router {
     pub async fn discover(&self) -> Identity {
         self.inner.discover().await
     }
-    
+
     /// Register a manual clock controller object for internal tasks
     pub fn clock(&self, _cc: ClockCtrl<Tasks>) -> Result<()> {
         unimplemented!()

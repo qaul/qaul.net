@@ -45,6 +45,7 @@ impl Protocol {
         Default::default()
     }
 
+    /// Dispatch a task to announce a user periodically
     pub(crate) async fn online(self: Arc<Self>, id: Identity, core: Arc<Core>) -> Result<()> {
         let mut map = self.online.lock().await;
         if map.contains_key(&id) {
@@ -68,6 +69,15 @@ impl Protocol {
         });
 
         Ok(())
+    }
+
+    pub(crate) async fn offline(&self, id: Identity) -> Result<()> {
+        self.online
+            .lock()
+            .await
+            .get(&id)
+            .map(|b| b.swap(false, Ordering::Relaxed))
+            .map_or(Err(Error::NoUser), |_| Ok(()))
     }
 
     /// Try to parse a frame as an announcement
