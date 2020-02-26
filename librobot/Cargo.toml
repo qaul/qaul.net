@@ -6,6 +6,9 @@ license = "APGL-3.0-or-later"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
+[lib]
+crate-type = ["cdylib"]
+
 [dependencies]
 libqaul = { path = "../libqaul" }
 ratman = { path = "../ratman" }
