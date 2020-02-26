@@ -67,6 +67,12 @@ impl UserStore {
         inner.insert(id, user);
     }
 
+    /// Convenience function around creating a new remote user
+    pub(crate) fn discover(&self, id: Identity) {
+        let user = User::Remote(UserProfile::new(id));
+        self.add_user(user);
+    }
+    
     pub(crate) fn rm_user(&self, user: Identity) {
         self.inner.lock().unwrap().remove(&user);
     }

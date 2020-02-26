@@ -139,6 +139,11 @@ impl Router {
     pub async fn known(&self, id: Identity) -> Result<()> {
         self.inner.known(id, false).await
     }
+
+    /// Check for newly discovered users on the network
+    pub async fn discover(&self) -> Identity {
+        self.inner.discover().await
+    }
     
     /// Register a manual clock controller object for internal tasks
     pub fn clock(&self, _cc: ClockCtrl<Tasks>) -> Result<()> {

@@ -15,17 +15,6 @@ use std::{
     time::Duration,
 };
 
-/// Encode available  commands
-#[allow(unused)]
-pub(crate) enum DiscCmd {
-    /// Start announcing a user ID
-    Start(Identity),
-    /// Stop announcing a user ID
-    Stop(Identity),
-    /// Signal the discovery to stop operations
-    Shutdown,
-}
-
 /// A thread-detached discovery service running inside libqaul
 ///
 /// ## Required data
@@ -47,14 +36,19 @@ pub(crate) struct Discovery;
 
 impl Discovery {
     /// Start a discovery service running inside libqaul
-    pub(crate) fn start(qaul: Arc<Qaul>, router: Arc<Router>) -> Sender<DiscCmd> {
+    pub(crate) fn start(qaul: Arc<Qaul>, router: Arc<Router>) {
         let run = Arc::new(RunLock::new(true));
-        let (sender, rx) = channel();
 
         // Incoming message handler
         Self::inc_handler(qaul, Arc::clone(&router), Arc::clone(&run));
 
-        sender
+        // Handle new users
+        task::spawn(async move {
+            loop {
+                let id = router.discover().await;
+                qaul.users.discover(id);
+            }
+        });
     }
 
     /// Spawns a thread that listens to incoming messages
@@ -79,9 +73,4 @@ impl Discovery {
             }
         });
     }
-}
-
-/// Convenience function to get the RunLock for a specific user session
-fn active(id: &Identity, buf: &Arc<RwLock<BTreeMap<Identity, Arc<RunLock>>>>) -> Arc<RunLock> {
-    Arc::clone(&buf.read().unwrap().get(id).unwrap())
 }
