@@ -41,13 +41,14 @@ impl QaulRpc for Send {
 pub struct Next {
     auth: UserAuth,
     service: String,
+    tags: Vec<Tag>,
 }
 
 #[async_trait]
 impl QaulRpc for Next {
     type Response = Result<MsgRef>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.messages().next(self.auth, self.service).await
+        qaul.messages().next(self.auth, self.service, self.tags.into_iter()).await
     }
 }
 
