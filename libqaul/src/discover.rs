@@ -40,7 +40,7 @@ impl Discovery {
         let run = Arc::new(RunLock::new(true));
 
         // Incoming message handler
-        Self::inc_handler(qaul, Arc::clone(&router), Arc::clone(&run));
+        Self::inc_handler(Arc::clone(&qaul), Arc::clone(&router), Arc::clone(&run));
 
         // Handle new users
         task::spawn(async move {
