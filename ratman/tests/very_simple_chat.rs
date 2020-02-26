@@ -1,9 +1,19 @@
 //! A simple chat app built on the Ratman router
+//!
+//! It doesn't actually implement chat logic, as that would be silly
+//! (maybe another test could?), but shows how you can create messages
+//! by taking some data structure, serialising it, and then addressing
+//! the message to somewhere.
+//!
+//! As you can see the message isn't modified by the routing layer.
+//! Still, you should use some mechanism to seal and sign your
+//! payload.  The "Identity" used for Sender and Recipient is 32
+//! bytes: the right length for a curve25519 key!
 
-use async_std::{task};
+use async_std::task;
 use bincode;
 use netmod_mem::MemMod;
-use ratman::{netmod::Recipient, Identity, Message, MsgId, Result, Router};
+use ratman::{Identity, Message, MsgId, Recipient, Result, Router};
 use serde::{Deserialize, Serialize};
 
 /// A message from someone
@@ -11,6 +21,21 @@ use serde::{Deserialize, Serialize};
 struct ChatMessage {
     nick: String,
     text: String,
+}
+
+impl ChatMessage {
+    fn to_msg(&self, sender: Identity, recp: Identity) -> Message {
+        let payload = bincode::serialize(self).unwrap();
+        let recipient = Recipient::User(recp);
+
+        Message {
+            id: MsgId::random(),
+            recipient,
+            sender,
+            payload,
+            sign: vec![],
+        }
+    }
 }
 
 async fn build_network() -> Result<()> {
@@ -54,17 +79,8 @@ async fn build_network() -> Result<()> {
         text: "Hey bob, how are you?".into(),
     };
 
-    // Serialise the payload
-    let payload = bincode::serialize(&hello).unwrap();
-
-    // Create a Ratman message with the payload and recipient data
-    let msg = Message {
-        id: MsgId::random(),
-        recipient: Recipient::User(u3),
-        sender: u1,
-        payload,
-        sign: vec![],
-    };
+    // Create a message from Alice (u1) to Bob (u3)
+    let msg = hello.to_msg(u1, u3);
 
     r1.send(msg.clone()).await?;
     assert_eq!(r3.next().await, msg);

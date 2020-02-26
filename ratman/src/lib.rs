@@ -148,6 +148,7 @@ pub(crate) type IoPair<T> = (Sender<T>, Receiver<T>);
 pub use crate::{
     data::{Message, MsgId},
     error::{Error, Result},
+    netmod::Recipient,
 };
 pub use identity::{Identity, ID_LEN};
 pub use netmod;

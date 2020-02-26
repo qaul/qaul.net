@@ -9,3 +9,5 @@ description.
 
 - [announce](./announce.rs) a test with three static nodes, sending
   announcements.
+- [very_simple_chat](./very_simple_chat.rs) an example of how to send
+  messages with payloads via Ratman
