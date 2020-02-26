@@ -102,15 +102,16 @@ impl<'qaul> Contacts<'qaul> {
         self.q.contacts.get(id, contact)
     }
 
+    // TODO: This test needs to be in an executor cause create is async now
     /// Query for a subset of users that have a `ContactEntry`
     ///
     /// To get a list of all `ContactEntry` objects, map the result of
     /// this function over `Contacts::get`.
     ///
-    /// ```rust
+    /// ```norun
     /// # use libqaul::{Qaul, error::Result, contacts::ContactQuery};
     /// # let qaul = Qaul::dummy();
-    /// # let user = qaul.users().create("abc").unwrap();
+    /// # let user = qaul.users().create("abc").await.unwrap();
     /// let contacts = qaul.contacts();
     /// # (|| -> Result<()> {
     /// contacts

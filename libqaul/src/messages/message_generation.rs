@@ -2,6 +2,7 @@
 
 use crate::messages::{Message, MsgId, SigTrust};
 use crate::qaul::Identity;
+use ratman::ID_LEN;
 use rand::distributions::{Distribution, Standard};
 
 /// A builder struct that can be used to generate any and all fields of a `Message`.
@@ -67,7 +68,7 @@ impl MessageGenBuilder {
         let sender = self
             .sender
             .clone()
-            .unwrap_or_else(|| Identity::truncate(&Standard.sample_iter(rng).take(16).collect()));
+            .unwrap_or_else(|| Identity::truncate(&Standard.sample_iter(rng).take(ID_LEN).collect()));
         let associator = self.associator.clone().unwrap_or("".into());
         let id = self.id.clone().unwrap_or_else(|| MsgId::random());
         let payload = self

@@ -62,7 +62,7 @@ pub use crate::{
     error::{Error, Result},
 };
 
-pub use identity::Identity;
+pub use identity::{Identity, ID_LEN};
 pub use netmod;
 
 use crate::core::Core;
