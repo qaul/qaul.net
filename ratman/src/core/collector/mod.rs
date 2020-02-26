@@ -34,6 +34,7 @@ mod worker;
 pub(self) use worker::Worker;
 
 /// The main collector management structure and API facade
+#[derive(Debug)]
 pub(crate) struct Collector {
     state: Arc<State>,
     workers: Locked<BTreeMap<SeqId, Arc<Worker>>>,
@@ -113,17 +114,27 @@ impl Collector {
     }
 }
 
-#[test]
-fn queue_one_in_one() {
-    use crate::Identity;
-    use netmod::{Recipient, SeqBuilder};
 
-    let (sender, recipient, seqid) = (Identity::random(), Identity::random(), Identity::random());
-    let frame = SeqBuilder::new(sender, Recipient::User(recipient), seqid)
-        .add(vec![0, 1, 2, 3])
-        .build()
-        .remove(0);
-    let seqid = frame.seq.seqid;
+#[cfg(test)]
+use crate::Identity;
+
+#[test]
+fn queue_one() {
+    use netmod::Recipient;
+    use crate::Slicer;
+    
+    let (sender, recipient, id) = (Identity::random(), Identity::random(), Identity::random());
+    let mut seq = Slicer::slice(128, Message {
+        id,
+        sender,
+        recipient: Recipient::User(recipient),
+        payload: vec![0, 1, 2, 3, 1, 3, 1, 2, 1, 3, 3, 7],
+        sign: vec![0, 1],
+    });
+    
+    assert_eq!(seq.len(), 1);
+    let frame = seq.remove(0);
+    let seqid = id;
 
     task::block_on(async move {
         let c = Collector::new();
@@ -143,19 +154,22 @@ fn queue_one_in_one() {
 
 #[test]
 fn queue_many() {
-    use crate::Identity;
-    use netmod::{Recipient, SeqBuilder};
-
-    let (sender, recipient, seqid) = (Identity::random(), Identity::random(), Identity::random());
-    let seq = SeqBuilder::new(sender, Recipient::User(recipient), seqid)
-        .add(vec![0, 1, 2, 3])
-        .add(vec![1, 3, 1, 2])
-        .add(vec![1, 3, 3, 7])
-        .build();
-
-    let seqid = seq[0].seq.seqid;
+    use netmod::Recipient;
+    use crate::Slicer;
+    
+    let (sender, recipient, id) = (Identity::random(), Identity::random(), Identity::random());
+    let seq = Slicer::slice(8, Message {
+        id,
+        sender,
+        recipient: Recipient::User(recipient),
+        payload: vec![0, 1, 2, 3, 1, 3, 1, 2, 1, 3, 3, 7],
+        sign: vec![],
+    });
+    
+    let seqid = id;
     let len = seq.len();
-
+    assert_eq!(len, 2);
+    
     task::block_on(async move {
         let c = Collector::new();
 
@@ -164,11 +178,11 @@ fn queue_many() {
         }
 
         // There is n queued frames
-        assert!(c.num_queued().await == len);
+        assert!(c.num_queued().await == 2);
 
-        // We can poll three times before the worker dies
         let w = c.get_worker(seqid).await;
-        assert!(w.poll().await == Some(()));
+
+        // We can twice three times before the worker dies
         assert!(w.poll().await == Some(()));
         assert!(w.poll().await == None);
 
@@ -177,8 +191,6 @@ fn queue_many() {
     });
 }
 
-#[cfg(test)]
-use crate::Identity;
 
 #[cfg(test)]
 fn queue_test(num: usize) -> Arc<Collector> {
