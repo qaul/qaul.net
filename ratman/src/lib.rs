@@ -1,29 +1,46 @@
-//! # A modular packet router
+//! # Ratman
 //!
 //! A modular userspace frame router, implementing distance vector
-//! routing tables, and delay tolerance.  Its basic design is
-//! inspired by BATMAN, and it's written entirely in Rust (hence the
-//! name).
+//! routing, and delay tolerance.  Handles topology updates and user
+//! discovery via flood heartbeats, and provides a non-namespaced view
+//! into a network via ed25519 keyed user IDs.
+//!
+//! One of the core principles of Ratman is to make network roaming
+//! easier, building a general abstraction over a network, leaving it
+//! up to drivers to interface with implementation specifics.
+//!
+//! As such, the Ratman routing tables, and user IDs don't use IPs and
+//! one device on the network could potentially be home to many user
+//! IDs.  The decoupling of users and devices, making it impossible to
+//! track a user back to a specific device, is by design.
+//!
 //!
 //! ## Usage
 //!
-//! To use Ratman, you need to create a `Router`.  This type exposes
-//! an async API to interact with various network abstractions.  A
-//! networking endpoint, as well as the basic datagram types are
-//! defined in the [`ratman-netmod`] crate, and the routing identities are
-//! defined in the [`ratman-identity`] crate.
+//! To use Ratman, you need to create a Router.  This type exposes an
+//! async API to interact with various network abstractions.  A
+//! networking endpoint and basic datagram types are defined in the
+//! `ratman-netmod` crate, and the routing identities are defined in
+//! the `ratman-identity` crate.
 //!
 //! [`ratman-netmod`]: https://crates.io/crate/ratman-netmod
 //! [`ratman-identity`]: https://crates.io/crate/ratman-identity
 //!
 //!
-//! ## Netmod architecture
 //!
-//! Because the router exists entirely in userspace, decoupled from
-//! any kernel networking layer.  This means that the router is
-//! responsible for also sending any payload to the appropriate
-//! driver.  A driver is some binding to send data, via a channel,
-//! such as UDP, or in-memory channel interfaces.
+//! ## Interface routing
+//!
+//! The interface that binds the Ratman router to underlying drivers
+//! is called `netmod`, which handles sending and receiving frames.  A
+//! frame is a piece of data, which a checksum, which may be part of a
+//! larger mesage.  In the qaul.net repository, you can find several
+//! driver implementations for various platforms.  If you need to
+//! write your own, don't hesitate to ask for help.
+//!
+//! Routing is then done by mapping a user ID to an interface (plus
+//! some target data that's left to the driver to interpret).  This
+//! way Ratman is able to route across network boundries, and on
+//! unpriviledged hardware (such as phones).
 //!
 //!
 //! ## Clocking
@@ -33,20 +50,24 @@
 //! work, or to actually dispatch messages.  During initialisation the
 //! constructor spawns several long running tasks, that deal with
 //! various tasks in the router stack in a loop.  The downside to this
-//! is that the user of the library has no control over how this code
-//! is called.
+//! is that the user of the library (your app) has no control over how
+//! this code is called.
 //!
 //! This is where the Router API adds clock points, and the `clock`
-//! submodule.  The idea is that an external program (i.e. you!)  can
-//! use Barriers to set clock points for various tasks, that will
-//! internally wait for the external clock intput.  This way it is
-//! possible to reduce the data rate in low power mode, without having
-//! to teach Ratman what this means.
+//! submodule, enabling you to reduce data rates in low power
+//! settings, without having to teach Ratman about your platform
+//! specifics.
 //!
-//! It also means that you can manually clock step the router during
-//! tests to check various states and invariants in the tests.
 //!
-//! Check the documentation for the `Clockwork` type for more details.
+//! ## License
+//!
+//! Ratman is part of the qaul.net project, and licensed under the
+//! [GNU Affero General Public License version 3 or
+//! later](../licenses/agpl-3.0.md).
+//!
+//! See the main qaul.net repository README for additional permissions
+//! granted by the authors for this code.
+
 
 pub mod clock;
 mod core;
