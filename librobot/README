@@ -6,3 +6,11 @@
 
 A hacky binding to libqaul, for Android.
 
+
+You need:
+
+rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android
+
+Then run `build_env_setup.sh` and copy the contents of `cargo-config.toml` to your ~/.cargo/config
+
+To build use `build.sh` while in this directory

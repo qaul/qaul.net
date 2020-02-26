@@ -10,6 +10,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
+jni = { version = "0.14", default-features = false }
 libqaul = { path = "../libqaul" }
 ratman = { path = "../ratman" }
 
