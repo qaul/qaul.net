@@ -58,8 +58,8 @@ impl<'qaul> Users<'qaul> {
         let user = User::Local { profile, keypair };
 
         // Inform Router about new local user
-        self.q.router.add_local(id)?;
-
+        self.q.router.add_user(id).await?;
+        
         self.q.users.add_user(user);
         self.q.auth.set_pw(id, pw);
         self.q.auth.new_login(id, pw).map(|t| UserAuth(id, t))
@@ -70,12 +70,12 @@ impl<'qaul> Users<'qaul> {
     /// This function requires a valid login for the user that's being
     /// deleted.  This does not delete any data associated with this
     /// user, or messages from the node (or other device nodes).
-    pub fn delete(&self, user: UserAuth) -> Result<()> {
+    pub async fn delete(&self, user: UserAuth) -> Result<()> {
         let id = user.0;
 
         // If logout succeeds, we can delete the user
         self.logout(user)?;
-        self.q.router.rm_local(id, true)?;
+        self.q.router.del_user(id, true).await?;
         self.q.users.rm_user(id);
         Ok(())
     }

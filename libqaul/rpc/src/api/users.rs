@@ -49,7 +49,7 @@ pub struct Delete {
 impl QaulRpc for Delete {
     type Response = Result<()>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users().delete(self.auth)
+        qaul.users().delete(self.auth).await
         // TODO: Purge user if requestd
     }
 }
