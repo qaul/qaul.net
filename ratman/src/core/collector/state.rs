@@ -9,15 +9,12 @@ use async_std::{
     task::{self, Poll},
 };
 use netmod::{Frame, SeqId};
-use std::{
-    collections::{BTreeMap, VecDeque},
-    time::Duration,
-};
+use std::collections::{BTreeMap, VecDeque};
 
 /// Local frame collector state holder
 #[derive(Default)]
 pub(super) struct State {
-    incoming: Locked<Notifier<BTreeMap<SeqId, Notifier<VecDeque<Frame>>>>>,
+    incoming: Notifier<Locked<Notifier<BTreeMap<SeqId, Notifier<VecDeque<Frame>>>>>>,
     done: Locked<Notifier<VecDeque<Message>>>,
 }
 
@@ -33,7 +30,7 @@ impl State {
         future::poll_fn(|ctx| {
             let lock = &mut done.lock();
             match unsafe { Pin::new_unchecked(lock).poll(ctx) } {
-                Poll::Ready(ref mut not) if not.len() > 0 => match not.pop_front() {
+                Poll::Ready(ref mut not) => match not.pop_front() {
                     Some(f) => Poll::Ready(f),
                     None => {
                         Notifier::register_waker(not, ctx.waker());
@@ -53,18 +50,12 @@ impl State {
             let lock = &mut incoming.lock();
             match unsafe { Pin::new_unchecked(lock).poll(ctx) } {
                 Poll::Ready(ref mut map) => match map.get_mut(seq) {
-                    Some(ref mut vec) if vec.len() > 0 => match vec.pop_front() {
-                        Some(f) => Poll::Ready(f),
-                        None => Poll::Pending,
-                    },
+                    Some(ref mut vec) if vec.len() > 0 => Poll::Ready(vec.pop_front().unwrap()),
                     Some(ref mut vec) => {
                         Notifier::register_waker(vec, ctx.waker());
                         Poll::Pending
                     }
-                    None => {
-                        Notifier::register_waker(map, ctx.waker());
-                        Poll::Pending
-                    }
+                    None => unimplemented!(), // No work queue _should_ never happen
                 },
                 _ => Poll::Pending,
             }
@@ -74,17 +65,17 @@ impl State {
 
     /// Yield a finished message to the state
     pub(super) async fn finish(&self, msg: Message) {
-        self.done.lock().await.push_back(msg);
+        let mut done = self.done.lock().await;
+        done.push_back(msg);
+        Notifier::wake_if_waker(&mut *done);
     }
 
     /// Queue a new frame to the state
     pub(super) async fn queue(&self, seq: SeqId, frame: Frame) {
-        self.incoming
-            .lock()
-            .await
-            .entry(seq)
-            .or_default()
-            .push_back(frame);
+        let mut map = self.incoming.lock().await;
+        let vec = map.entry(seq).or_default();
+        vec.push_back(frame);
+        Notifier::wake_if_waker(vec);
     }
 
     /// Get the current number of queued frames for diagnostic and testing

@@ -1,9 +1,9 @@
-//! A utility wrapper type for notifying async tasks about mutation of data they're interested in. 
-use std::task::Waker;
+//! A utility wrapper type for notifying async tasks about mutation of data they're interested in.
 use std::ops::{Deref, DerefMut};
+use std::task::Waker;
 
 /// A wrapper which wakes tasks on mutable accesses to the wrapped value.
-/// 
+///
 /// This can be used to transparently notify an asyncronous task that it
 /// should, for example, check for more work in a queue or try again to
 /// acquire a lock.
@@ -29,7 +29,7 @@ impl<T> DerefMut for AccessNotifier<T> {
 
 impl<T> AccessNotifier<T> {
     /// Check whether or not this `AccessNotifier` has a registered `Waker`.
-    /// 
+    ///
     /// This function is implemented as an associated function rather than a
     /// method to avoid conflicts with methods on the wrapped type.
     /// Call it as `AccessNotifier::has_waker()`.
@@ -46,12 +46,19 @@ impl<T> AccessNotifier<T> {
         ptr.waker.as_ref().map(|w| w.clone())
     }
 
+    /// Call wake on the waker, if it's a waker, yehaa!
+    pub fn wake_if_waker(ptr: &mut AccessNotifier<T>) {
+        if let Some(ref w) = ptr.waker {
+            w.clone().wake();
+        }
+    }
+
     /// Register a `Waker` to be woken upon mutable accesses to the wrapped value.
     ///  
     /// This function is implemented as an associated function rather than a
     /// method to avoid conflicts with methods on the wrapped type.
     /// Call it as `AccessNotifier::register_waker()`.
-    /// 
+    ///
     /// # Panics
     /// Panics if there is an already registered `Waker`.
     /// Use `AccessNotifier::has_waker` to check the state before using this.
@@ -83,7 +90,7 @@ impl<T> AccessNotifier<T> {
     }
 
     /// Notifies any registered `Waker` immediately.
-    /// 
+    ///
     /// This function is implemented as an associated function rather than a
     /// method to avoid conflicts with methods on the wrapped type.
     /// Call it as `AccessNotifier::notify()`.

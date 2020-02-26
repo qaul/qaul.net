@@ -1,4 +1,7 @@
-use async_std::{sync::{Arc, channel}, task};
+use async_std::{
+    sync::{channel, Arc},
+    task,
+};
 use netmod::Recipient;
 
 use crate::{
@@ -49,7 +52,7 @@ impl Switch {
     pub(crate) async fn add(&self, id: usize) {
         self.ctrl.0.send(id).await;
     }
-    
+
     /// Dispatches a long-running task to run the switching logic
     pub(crate) fn run(self: Arc<Self>) {
         task::spawn(async move {
