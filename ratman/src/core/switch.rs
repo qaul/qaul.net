@@ -66,12 +66,13 @@ impl Switch {
                 Flood => {
                     let seqid = f.seq.seqid;
                     if self.journal.unknown(&seqid).await {
+                        if let Some(sender) = Protocol::is_announce(&f) {
+                            self.routes.update(id as u8, t, sender).await;
+                        }
+                        
                         self.journal.save(&seqid).await;
                         self.dispatch.reflood(f, id).await;
 
-                        // if Protocol::is_announce(f) {
-                        //     self.routes.update(id, t, f.sender()).await.and_then(|_| {});
-                        // }
                     }
                 }
                 User(id) => match self.routes.reachable(id).await {

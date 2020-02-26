@@ -19,7 +19,7 @@ use async_std::{
 };
 use conjoiner;
 use identity::Identity;
-use netmod::Recipient;
+use netmod::{Frame, Recipient};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeMap,
@@ -63,10 +63,22 @@ impl Protocol {
                 if !b.load(Ordering::Relaxed) && break {}
             }
 
+            // Remove the runtime bool again
             self.online.lock().await.remove(&id);
         });
 
         Ok(())
+    }
+
+    /// Try to parse a frame as an announcement
+    pub(crate) fn is_announce(f: &Frame) -> Option<Identity> {
+        let Frame { ref payload, .. } = f;
+
+        conjoiner::deserialise(payload)
+            .map(|p| match p {
+                ProtoPayload::Announce { id, .. } => id,
+            })
+            .ok()
     }
 
     /// Build an announcement message for a user
