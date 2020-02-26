@@ -1,0 +1,13 @@
+[package]
+name = "librobot"
+description = "A libqaul and ratman shim for Android"
+version = "0.1.0"
+license = "APGL-3.0-or-later"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+
+[dependencies]
+libqaul = { path = "../libqaul" }
+ratman = { path = "../ratman" }
+
+netmod-wd = { path = "../netmod-wd" }

@@ -919,6 +919,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "librobot"
+version = "0.1.0"
+dependencies = [
+ "libqaul",
+ "netmod-wd",
+ "ratman",
+]
+
+[[package]]
 name = "linux-cli"
 version = "0.1.0"
 dependencies = [
