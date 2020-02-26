@@ -33,10 +33,10 @@
 //! ## Development status
 //!
 //! Despite the API looking relatively complete, the Ratman internals
-//! are still being heavily developed.  Topology changes _should_ be
+//! are still very work-in-progres.  Topology changes _should_ be
 //! handled gracefully, but there's no cycle detection or mitigation,
-//! routing is done based on the last successful circuit, and there's
-//! no metrics or diagnostics API for netmod.
+//! routing is done based on the last successful circuit, no
+//! journaling, and there's no metrics API for netmod drivers.
 //!
 //! We would love to hear feedback from you, building applications on
 //! top of Ratman, so that the project and routing protocol can get
@@ -278,6 +278,6 @@ impl Router {
 
     #[cfg(test)]
     pub async fn get_users(&self) -> Vec<Identity> {
-        self.inner.get_users().await
+        self.innser.get_users().await
     }
 }
