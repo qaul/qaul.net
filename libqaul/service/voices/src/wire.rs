@@ -19,9 +19,7 @@ pub enum VoiceMessageKind {
     /// An incoming call
     Incoming(StreamMetadata),
     /// The call was accepted by the remote party
-    Accept,
-    /// The call was rejected by the remote party
-    Reject,
+    Accept(StreamMetadata),
     /// The call was ended by the remote party 
     HungUp,
     /// An OPUS encoded voice packet
@@ -32,9 +30,9 @@ pub enum VoiceMessageKind {
 /// The on-the-wire representation of a voice service message
 pub struct VoiceMessage {
     /// A unique identifier for this call 
-    call: CallId,
+    pub call: CallId,
     /// The actually content of the message
-    kind: VoiceMessageKind,
+    pub kind: VoiceMessageKind,
 }
 
 impl VoiceMessage {
@@ -46,8 +44,7 @@ impl VoiceMessage {
             Tag::new("call_id", self.call),
             match self.kind {
                 VoiceMessageKind::Incoming(_) => Tag::new("kind", b"incoming".to_vec()),
-                VoiceMessageKind::Accept |
-                    VoiceMessageKind::Reject |
+                VoiceMessageKind::Accept(_) |
                     VoiceMessageKind::HungUp => Tag::new("kind", b"control".to_vec()),
                 VoiceMessageKind::Packet(p) => Tag::new("kind", b"packet".to_vec()),
             },
