@@ -1,9 +1,9 @@
-use async_std::{sync::Arc, task};
+use async_std::{sync::{Arc, channel}, task};
 use netmod::Recipient;
 
 use crate::{
     core::{Collector, Dispatch, DriverMap, Journal, RouteTable, RouteType},
-    Protocol,
+    IoPair, Protocol,
 };
 
 /// A frame switch inside Ratman to route packets and signals
@@ -21,6 +21,9 @@ pub(crate) struct Switch {
     dispatch: Arc<Dispatch>,
     collector: Arc<Collector>,
     drivers: Arc<DriverMap>,
+
+    /// Control channel to start new endpoints
+    ctrl: IoPair<usize>,
 }
 
 impl Switch {
@@ -38,18 +41,23 @@ impl Switch {
             dispatch,
             collector,
             drivers,
+            ctrl: channel(1),
         })
     }
 
+    /// Add a new interface to the run switch
+    pub(crate) async fn add(&self, id: usize) {
+        self.ctrl.0.send(id).await;
+    }
+    
     /// Dispatches a long-running task to run the switching logic
     pub(crate) fn run(self: Arc<Self>) {
-        let _: Vec<_> = (0..self.drivers.len())
-            .into_iter()
-            .map(|i| {
+        task::spawn(async move {
+            while let Some(i) = self.ctrl.1.recv().await {
                 let switch = Arc::clone(&self);
-                task::spawn(switch.run_inner(i))
-            })
-            .collect();
+                task::spawn(switch.run_inner(i));
+            }
+        });
     }
 
     async fn run_inner(self: Arc<Self>, id: usize) {

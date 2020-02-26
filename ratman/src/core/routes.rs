@@ -1,15 +1,13 @@
 //! Routing table module
 
-use crate::{Error, Result};
-use async_std::sync::{channel, Arc, Mutex, Receiver, Sender};
+use crate::{Error, Result, IoPair};
+use async_std::sync::{channel, Arc, Mutex};
 use std::collections::BTreeMap;
 use {identity::Identity, netmod::Target};
 
 /// A netmod endpoint ID and an endpoint target ID
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct EpTargetPair(pub(crate) u8, pub(crate) Target);
-
-type IoPair<T> = (Sender<T>, Receiver<T>);
 
 /// Describes the reachability of a route
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

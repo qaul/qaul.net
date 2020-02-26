@@ -52,6 +52,10 @@ impl Core {
             Arc::clone(&drivers),
         );
 
+        // Dispatch the runners
+        Arc::clone(&switch).run();
+        Arc::clone(&_journal).run();
+        
         Self {
             dispatch,
             routes,
@@ -60,15 +64,6 @@ impl Core {
             switch,
             drivers,
         }
-    }
-
-    /// Asynchronously runs all routing core subroutines
-    ///
-    /// **Note**: currently it's not possible to gracefully shut down
-    /// the core subsystems!
-    pub(crate) fn run(&self) {
-        Arc::clone(&self.switch).run();
-        Arc::clone(&self.journal).run();
     }
 
     /// Asynchronously send a Message
@@ -101,7 +96,9 @@ impl Core {
     
     /// Insert a new endpoint
     pub(crate) async fn add_ep(&self, ep: impl Endpoint + 'static + Send + Sync) -> usize {
-        self.drivers.add(ep).await
+        let id = self.drivers.add(ep).await;
+        self.switch.add(id).await;
+        id
     }
 
     /// Remove an endpoint

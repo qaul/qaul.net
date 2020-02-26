@@ -132,20 +132,22 @@ mod core;
 mod data;
 mod error;
 mod protocol;
-
 mod slicer;
-pub(crate) use {data::Payload, protocol::Protocol, slicer::Slicer};
 
+// Provide exports to the rest of the crate
+pub(crate) use {data::Payload, protocol::Protocol, slicer::Slicer};
+pub(crate) type IoPair<T> = (Sender<T>, Receiver<T>);
+
+// Public API facade
 pub use crate::{
     data::{Message, MsgId},
     error::{Error, Result},
 };
-
 pub use identity::{Identity, ID_LEN};
 pub use netmod;
 
 use crate::core::Core;
-use async_std::sync::Arc;
+use async_std::sync::{Arc, Sender, Receiver};
 use clock::{ClockCtrl, Tasks};
 use netmod::Endpoint;
 
@@ -169,7 +171,6 @@ impl Router {
     pub fn new() -> Arc<Self> {
         let proto = Protocol::new();
         let inner = Arc::new(Core::init());
-        inner.run();
 
         Arc::new(Self { inner, proto })
     }
