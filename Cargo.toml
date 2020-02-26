@@ -39,5 +39,5 @@ members = [
     "librobot",
 
     # test binaries
-    "clients/linux-ws-test"
+    "clients/linux-http-test"
 ]
