@@ -245,10 +245,12 @@ impl<'qaul> Messages<'qaul> {
     ///
     /// For a more general `Message` query/ enumeration API, see
     /// `Messages::query` instead.
-    pub async fn next<S>(&self, user: UserAuth, service: S) -> Result<MsgRef>
+    pub async fn next<S, I>(&self, user: UserAuth, service: S, tags: I) -> Result<MsgRef>
     where
         S: Into<String>,
+        I: IntoIterator<Item = Tag>,
     {
+        let tags = tags.into_iter().collect::<BTreeSet<Tag>>();
         let (id, _) = self.q.auth.trusted(user)?;
         let service: String = service.into();
 
@@ -261,6 +263,7 @@ impl<'qaul> Messages<'qaul> {
                 .messages
                 .query(id)
                 .service(service.as_str())
+                .tags(tags.clone())
                 .unread()
                 .limit(1)
                 .exec()

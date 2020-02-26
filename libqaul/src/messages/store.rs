@@ -1,10 +1,10 @@
 use crate::{
     error::Result,
     messages::{MsgId, MsgQuery, MsgRef},
-    Identity,
+    Identity, Tag,
 };
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     sync::{Arc, RwLock},
 };
 
@@ -15,6 +15,7 @@ pub(crate) struct StoreQuery<'store> {
     store: &'store MsgStore,
     user: Identity,
     unread: bool,
+    tags: BTreeSet<Tag>,
     service: Option<String>,
     query: Option<MsgQuery>,
     limit: Option<usize>,
@@ -58,6 +59,16 @@ impl<'store> StoreQuery<'store> {
         }
     }
 
+    pub(crate) fn tag(mut self, tag: Tag) -> Self {
+        self.tags.insert(tag);
+        self
+    }
+
+    pub(crate) fn tags<I: IntoIterator<Item = Tag>>(mut self, tags: I) -> Self {
+        self.tags.extend(tags.into_iter());
+        self
+    }
+
     /// Execute the query against the store
     pub(crate) fn exec(self) -> Result<Vec<MsgRef>> {
         let StoreQuery {
@@ -65,6 +76,7 @@ impl<'store> StoreQuery<'store> {
             user,
             query,
             unread,
+            tags,
             service,
             limit,
         } = self;
@@ -86,6 +98,7 @@ impl<'store> StoreQuery<'store> {
                             true
                         }
                     })
+                    .filter(|msg| msg.inner().tags.is_superset(&tags)) 
                     .filter(|msg| match query {
                         Some(MsgQuery::Id(ref id)) => &msg.inner().id == id,
                         Some(MsgQuery::Sender(ref sender)) => &msg.inner().sender == sender,
@@ -164,6 +177,7 @@ impl MsgStore {
             user,
             store: self,
             unread: false,
+            tags: BTreeSet::new(),
             service: None,
             query: None,
             limit: None,
