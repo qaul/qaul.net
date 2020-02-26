@@ -24,7 +24,7 @@ impl Journal {
     }
 
     /// Add a new frame to the known set
-    pub(crate) async fn queue(&self, frame: Frame) {}
+    pub(crate) async fn queue(&self, _: Frame) {}
 
     /// Save a FrameID in the known journal page
     pub(crate) async fn save(&self, fid: &SeqId) {

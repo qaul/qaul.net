@@ -1,24 +1,18 @@
 use super::Locked;
 use crate::Message;
 
-use async_std::{
-    sync::{Arc, Sender},
-    task::{self, Poll},
-};
+use async_std::{sync::Arc, task};
 use netmod::{Frame, SeqId};
 use std::{
     collections::{BTreeMap, VecDeque},
     time::Duration,
 };
 
-type FrameMap = Locked<BTreeMap<SeqId, Sender<Frame>>>;
-
 /// Local frame collector state holder
 #[derive(Default)]
 pub(super) struct State {
     incoming: Locked<BTreeMap<SeqId, VecDeque<Frame>>>,
     done: Locked<VecDeque<Message>>,
-    tasks: FrameMap,
 }
 
 impl State {

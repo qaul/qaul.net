@@ -2,7 +2,7 @@
 
 use crate::core::{DriverMap, EpTargetPair, RouteTable};
 use async_std::{sync::Arc, task};
-use futures::{future, Future};
+use futures::future;
 use netmod::{Frame, Recipient, Target};
 
 pub(crate) struct Dispatch {

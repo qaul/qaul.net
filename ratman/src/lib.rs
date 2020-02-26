@@ -99,10 +99,19 @@ impl Router {
     /// recreated without the endpoint you wish to remove.
     ///
     /// [`Endpoint`]: https://docs.rs/ratman-netmod/0.1.0/ratman_netmod/trait.Endpoint.html
-    pub fn add_endpoint(&self, ep: impl Endpoint + 'static + Send + Sync) {
-        task::block_on(async { self.inner.add_ep(ep).await });
+    pub fn add_endpoint(&self, ep: impl Endpoint + 'static + Send + Sync) -> usize {
+        task::block_on(async { self.inner.add_ep(ep).await })
     }
 
+    /// Remove an endpoint from the router by ID
+    ///
+    /// This function is primarily meant for testing purposes, and
+    /// shouldn't be used in heavy operation.  The required ID is
+    /// returned by `add_endpoint`.
+    pub fn del_endpoint(&self, id: usize) {
+        task::block_on(async { self.inner.rm_ep(id).await });
+    }
+    
     /// Add an identity to the local set
     ///
     /// Ratman will listen for messages to local identities and offer

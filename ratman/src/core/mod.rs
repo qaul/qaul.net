@@ -100,13 +100,18 @@ impl Core {
     }
     
     /// Insert a new endpoint
-    pub(crate) async fn add_ep(&self, ep: impl Endpoint + 'static + Send + Sync) {
-        self.drivers.add(ep).await;
+    pub(crate) async fn add_ep(&self, ep: impl Endpoint + 'static + Send + Sync) -> usize {
+        self.drivers.add(ep).await
     }
 
+    /// Remove an endpoint
+    pub(crate) async fn rm_ep(&self, id: usize) {
+        self.drivers.remove(id).await;
+    }
+    
     /// Add a local user endpoint
     pub(crate) async fn add_local(&self, id: Identity) -> Result<()> {
-        self.routes.local(id).await
+        self.routes.add_local(id).await
     }
 
     /// Remove a local user endpoint

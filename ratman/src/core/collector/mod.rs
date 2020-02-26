@@ -51,6 +51,7 @@ impl Collector {
     /// Queue a new frame to collect
     ///
     /// This function can spawn new workers when needed
+    #[cfg(test)]
     pub(crate) async fn queue(&self, seq: SeqId, f: Frame) {
         self.state.queue(seq, f).await;
 
