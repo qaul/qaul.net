@@ -30,6 +30,20 @@
 //! unpriviledged hardware (such as phones).
 //!
 //!
+//! ## Development status
+//!
+//! Despite the API looking relatively complete, the Ratman internals
+//! are still being heavily developed.  Topology changes _should_ be
+//! handled gracefully, but there's no cycle detection/ mitigation,
+//! routing is done based on the last successful circuit, and there's
+//! no metrics and diagnostics API for netmod.
+//!
+//! We would love to hear feedback from you, building applications on
+//! top of Ratman, so that the project and routing protocol can get
+//! better.  But please be aware that it is my no means "production
+//! ready" code.
+//!
+//!
 //! ## Usage
 //!
 //! To use Ratman, you need to create a Router.  This type exposes an
