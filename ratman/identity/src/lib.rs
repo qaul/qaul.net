@@ -95,6 +95,10 @@ impl Identity {
         )
     }
 
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.0
+    }
+    
     /// Create an identity using a digest function
     ///
     /// This allows you to pass arbitrary length data which will

@@ -213,9 +213,8 @@ impl<'qaul> Messages<'qaul> {
             sender,
             associator: associator.clone(),
             payload: payload.clone(),
+            tags: tags.iter().cloned().collect(),
         };
-
-        let signature = MsgUtils::sign(&env);
 
         self.q.messages.insert(
             sender,
@@ -230,12 +229,9 @@ impl<'qaul> Messages<'qaul> {
         );
 
         MsgUtils::send(
+            &self.q.users,
             &self.q.router,
-            RatMessageProto {
-                env,
-                recipient,
-                signature,
-            },
+            RatMessageProto { env, recipient },
         )
         .await
         .map(|_| id)
@@ -256,7 +252,7 @@ impl<'qaul> Messages<'qaul> {
 
         // This whole unholy mess needs to be rewritten, when we have
         // an async message store ... yikes
-        
+
         future::poll_fn(move |ctx| {
             match self
                 .q

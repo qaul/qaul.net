@@ -9,7 +9,7 @@ pub(crate) use self::store::{MsgState, MsgStore};
 #[cfg(feature = "generate-message")]
 pub(crate) mod message_generation;
 
-use crate::error::Result;
+use crate::{api::helpers::Tag, error::Result, security::Sec, users::UserStore};
 use ratman::{netmod::Recipient as RatRecipient, Identity, Message as RatMessage, Router};
 use serde::{Deserialize, Serialize};
 
@@ -27,6 +27,7 @@ pub(crate) struct Envelope {
     pub(crate) sender: Identity,
     pub(crate) associator: String,
     pub(crate) payload: Vec<u8>,
+    pub(crate) tags: Vec<Tag>,
 }
 
 /// A `ratman::Message` set prototype structure
@@ -35,22 +36,30 @@ pub(crate) struct RatMessageProto {
     pub(crate) env: Envelope,
     /// Readdressed `Recipient` information
     pub(crate) recipient: RatRecipient,
-    /// Signature for the inlined `Message` data
-    pub(crate) signature: Vec<u8>,
 }
 
-impl From<RatMessageProto> for RatMessage {
-    fn from(proto: RatMessageProto) -> Self {
-        let payload = conjoiner::serialise(&proto.env).unwrap();
-        let id = proto.env.id.clone().into();
-        let sender = proto.env.sender;
-        let recipient = proto.recipient;
+impl RatMessageProto {
+    pub(crate) fn build(&self, store: &UserStore) -> RatMessage {
+        let id = self.env.id.clone().into();
+        let keypair = store.get_key(id).unwrap();
+
+        let payload = conjoiner::serialise(&self.env).unwrap();
+        let sign: Vec<_> = keypair
+            .sign(payload.as_slice())
+            .to_bytes()
+            .into_iter()
+            .cloned()
+            .collect();
+
+        let sender = self.env.sender;
+        let recipient = self.recipient;
 
         RatMessage {
             id,
             sender,
             recipient,
-            payload: payload.clone(),
+            payload,
+            sign,
         }
     }
 }
@@ -58,14 +67,13 @@ impl From<RatMessageProto> for RatMessage {
 pub(crate) struct MsgUtils;
 
 impl MsgUtils {
-    /// Construct a cryptographic signature for an inner `Message`
-    pub(crate) fn sign(_: &Envelope) -> Vec<u8> {
-        vec![1, 3, 1, 2]
-    }
-
     /// Sends a `RatMessageProto`, calls a set of `send` commands
-    pub(crate) async fn send(router: &Router, msg: RatMessageProto) -> Result<()> {
-        Ok(router.send(msg.into()).await?)
+    pub(crate) async fn send(
+        store: &UserStore,
+        router: &Router,
+        msg: RatMessageProto,
+    ) -> Result<()> {
+        Ok(router.send(msg.build(store)).await?)
     }
 
     /// Process incoming RATMAN message, verifying it's signature and payload

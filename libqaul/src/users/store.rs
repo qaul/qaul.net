@@ -17,7 +17,7 @@ pub(crate) enum User {
     /// A local user has a full keypair
     Local {
         profile: UserProfile,
-        keypair: Keypair,
+        keypair: Arc<Keypair>,
     },
     /// A remote user with optional pubkey
     Remote(UserProfile),
@@ -72,7 +72,7 @@ impl UserStore {
         let user = User::Remote(UserProfile::new(id));
         self.add_user(user);
     }
-    
+
     pub(crate) fn rm_user(&self, user: Identity) {
         self.inner.lock().unwrap().remove(&user);
     }
@@ -98,6 +98,18 @@ impl UserStore {
             },
         );
         Ok(())
+    }
+
+    /// Don't call this on non-local users please
+    pub(crate) fn get_key(&self, id: Identity) -> Option<Arc<Keypair>> {
+        self.inner
+            .lock()
+            .expect("Failed to lock the user store")
+            .get(&id)
+            .map(|user| match user {
+                User::Local { keypair, .. } => Arc::clone(&keypair),
+                _ => unreachable!(),
+            })
     }
 
     pub(crate) fn get(&self, id: &Identity) -> Result<UserProfile> {
