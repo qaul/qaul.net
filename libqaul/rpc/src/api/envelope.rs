@@ -131,7 +131,7 @@ pub enum Request {
 
 /// Wrap around all possible response values for piped Rpc protocols
 #[derive(Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case", tag = "type")]
+#[serde(rename_all = "snake_case")]
 pub enum Response {
     /// Return an auth object
     Auth(UserAuth),

@@ -65,3 +65,19 @@ fn get_auth() {
 
     println!("{}", serde_json::to_string_pretty(&response).unwrap());
 }
+
+#[test]
+fn user_list() {
+    use libqaul::{users::UserProfile, Identity};
+    use libqaul_rpc::Response;
+
+    let users = vec![
+        UserProfile::new(Identity::random()),
+        UserProfile::new(Identity::random()),
+        UserProfile::new(Identity::random()),
+    ];
+
+    let resp = Response::User(users);
+
+    println!("{}", serde_json::to_string_pretty(&resp).unwrap());
+}
