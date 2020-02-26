@@ -9,7 +9,6 @@
 //! - `Sync` is a reply to an `Announce`, only omitted when `no_sync` is set
 
 use crate::{
-    data::{Message, MsgId},
     error::{Error, Result},
     Core,
 };
@@ -19,7 +18,7 @@ use async_std::{
 };
 use conjoiner;
 use identity::Identity;
-use netmod::{Frame, Recipient};
+use netmod::Frame;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeMap,
@@ -58,7 +57,7 @@ impl Protocol {
 
         task::spawn(async move {
             loop {
-                core.send(Self::announce(id)).await;
+                core.raw_flood(Self::announce(id)).await.unwrap();
                 task::sleep(Duration::from_secs(2)).await;
 
                 if !b.load(Ordering::Relaxed) && break {}
@@ -92,19 +91,13 @@ impl Protocol {
     }
 
     /// Build an announcement message for a user
-    fn announce(sender: Identity) -> Message {
+    fn announce(sender: Identity) -> Frame {
         let payload = conjoiner::serialise(&ProtoPayload::Announce {
             id: sender,
             no_sync: true,
         })
         .unwrap();
 
-        Message {
-            id: MsgId::random(),
-            recipient: Recipient::Flood,
-            sender,
-            payload,
-            sign: vec![], // Announcements are unsigned currently
-        }
+        Frame::inline_flood(sender, payload)
     }
 }

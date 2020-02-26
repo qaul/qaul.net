@@ -19,7 +19,7 @@
 //!
 //! The interface that binds the Ratman router to underlying drivers
 //! is called `netmod`, which handles sending and receiving frames.  A
-//! frame is a piece of data, which a checksum, which may be part of a
+//! frame is a piece of data, with a checksum, which may be part of a
 //! larger mesage.  In the qaul.net repository, you can find several
 //! driver implementations for various platforms.  If you need to
 //! write your own, don't hesitate to ask for help.
@@ -27,16 +27,16 @@
 //! Routing is then done by mapping a user ID to an interface (plus
 //! some target data that's left to the driver to interpret).  This
 //! way Ratman is able to route across network boundries, and on
-//! unpriviledged hardware (such as phones).
+//! unpriviledged platforms (such as phones).
 //!
 //!
 //! ## Development status
 //!
 //! Despite the API looking relatively complete, the Ratman internals
 //! are still being heavily developed.  Topology changes _should_ be
-//! handled gracefully, but there's no cycle detection/ mitigation,
+//! handled gracefully, but there's no cycle detection or mitigation,
 //! routing is done based on the last successful circuit, and there's
-//! no metrics and diagnostics API for netmod.
+//! no metrics or diagnostics API for netmod.
 //!
 //! We would love to hear feedback from you, building applications on
 //! top of Ratman, so that the project and routing protocol can get
@@ -61,6 +61,7 @@
 //! [`tests`]: https://git.open-communication.net/qaul/qaul.net/blob/master/ratman/tests
 //!
 //! ```rust
+//! # use async_std::task;
 //! # async fn testing() {
 //! use ratman::{Router, Identity};
 //! use netmod_mem::MemMod;
@@ -76,24 +77,25 @@
 //! let r2 = Router::new();
 //!
 //! // Add channel endpoints to routers
-//! r1.add_endpoint(mm1);
-//! r2.add_endpoint(mm2);
+//! r1.add_endpoint(mm1).await;
+//! r2.add_endpoint(mm2).await;
 //!
 //! // Create some users and add them to the routers
 //! let u1 = Identity::random();
-//! r1.add_user(u1);
+//! r1.add_user(u1).await;
 //!
 //! let u2 = Identity::random();
-//! r2.add_user(u2);
+//! r2.add_user(u2).await;
 //!
 //! // And mark them "online"
-//! r1.online(u1);
-//! r2.online(u2);
+//! r1.online(u1).await;
+//! r2.online(u2).await;
 //!
 //! // The routers will now start announcing their new users on the
 //! // micro-network.  You can now poll for new user discoveries.
 //! assert_eq!(r1.discover().await, u2);
 //! # }
+//! # task::block_on(testing());
 //! ```
 //!
 //! Obviously this example is trivial, but hopefully it provides an
@@ -260,8 +262,7 @@ impl Router {
     /// already dispatched, essentially only filling in the missing
     /// gaps.
     pub async fn send(&self, msg: Message) -> Result<()> {
-        self.inner.send(msg).await;
-        Ok(())
+        self.inner.send(msg).await
     }
 
     /// Get the next available message from the router
@@ -273,5 +274,10 @@ impl Router {
     /// can be read from there asynchronously.
     pub async fn next(&self) -> Message {
         self.inner.next().await
+    }
+
+    #[cfg(test)]
+    pub async fn get_users(&self) -> Vec<Identity> {
+        self.inner.get_users().await
     }
 }

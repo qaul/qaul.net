@@ -72,6 +72,14 @@ impl Frame {
         .remove(0)
     }
 
+    /// Build a one-off frame with inline payload
+    pub fn inline_flood(sender: Identity, payload: Vec<u8>) -> Frame {
+        SeqBuilder::new(sender, Recipient::Flood, Identity::random())
+            .add(payload)
+            .build()
+            .remove(0)
+    }
+
     /// Return the sequence Id of a frame
     pub fn seqid(&self) -> SeqId {
         self.seq.seqid

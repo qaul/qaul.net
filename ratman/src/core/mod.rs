@@ -18,8 +18,9 @@ pub(self) use journal::Journal;
 pub(self) use routes::{EpTargetPair, RouteTable, RouteType};
 pub(self) use switch::Switch;
 
-use crate::{Endpoint, Identity, Message, Result, Slicer, Error};
+use crate::{Endpoint, Identity, Message, Result, Error};
 use async_std::sync::Arc;
+use netmod::Frame;
 
 /// The Ratman routing core interface
 ///
@@ -28,7 +29,7 @@ use async_std::sync::Arc;
 pub(crate) struct Core {
     collector: Arc<Collector>,
     dispatch: Arc<Dispatch>,
-    journal: Arc<Journal>,
+    _journal: Arc<Journal>,
     routes: Arc<RouteTable>,
     switch: Arc<Switch>,
     drivers: Arc<DriverMap>,
@@ -39,14 +40,14 @@ impl Core {
     pub(crate) fn init() -> Self {
         let drivers = DriverMap::new();
         let routes = RouteTable::new();
-        let journal = Journal::new();
+        let _journal = Journal::new();
 
         let dispatch = Dispatch::new(Arc::clone(&routes), Arc::clone(&drivers));
         let collector = Collector::new();
 
         let switch = Switch::new(
             Arc::clone(&routes),
-            Arc::clone(&journal),
+            Arc::clone(&_journal),
             Arc::clone(&dispatch),
             Arc::clone(&collector),
             Arc::clone(&drivers),
@@ -60,21 +61,26 @@ impl Core {
             dispatch,
             routes,
             collector,
-            journal,
+            _journal,
             switch,
             drivers,
         }
     }
 
     /// Asynchronously send a Message
-    pub(crate) async fn send(&self, msg: Message) {
-        let frames = Slicer::slice(0, msg);
-
-        for f in frames.into_iter() {
-            self.dispatch.send(f).await;
-        }
+    pub(crate) async fn send(&self, msg: Message) -> Result<()> {
+        self.dispatch.send_msg(msg).await
     }
 
+    /// Send a frame direncly, without message slicing
+    ///
+    /// Some components in Ratman, outside of the routing core, need
+    /// access to direct frame intercepts, because protocol logic
+    /// depends on unmodified frames.
+    pub(crate) async fn raw_flood(&self, f: Frame) -> Result<()> {
+        self.dispatch.flood(f).await
+    }
+    
     /// Poll for the incoming Message
     pub(crate) async fn next(&self) -> Message {
         self.collector.completed().await
@@ -114,5 +120,10 @@ impl Core {
     /// Remove a local user endpoint
     pub(crate) async fn rm_local(&self, id: Identity) -> Result<()> {
         self.routes.delete(id).await
+    }
+
+    #[cfg(test)]
+    pub(crate) async fn get_users(&self) -> Vec<Identity> {
+        self.routes.all().await
     }
 }
