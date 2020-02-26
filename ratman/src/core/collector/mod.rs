@@ -60,6 +60,17 @@ impl Collector {
         }
     }
 
+    /// Queue the work, and spawn a worker if required
+    pub(crate) async fn queue_and_spawn(&self, seq: SeqId, f: Frame) {
+        self.state.queue(seq, f).await;
+
+        let mut map = self.workers.lock().await;
+        if !map.contains_key(&seq) {
+            map.insert(seq, Arc::new(Worker::new(seq, Arc::clone(&self.state))));
+            self.spawn_worker(seq).await;
+        }
+    }
+    
     /// Get any message that has been completed
     pub(crate) async fn completed(&self) -> Message {
         self.state.completed().await
