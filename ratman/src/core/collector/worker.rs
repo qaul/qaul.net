@@ -1,7 +1,7 @@
 //! The collector worker
 
 use super::{Locked, State};
-use crate::Message;
+use crate::{Message, Payload};
 use async_std::sync::Arc;
 use netmod::{Frame, SeqBuilder, SeqId};
 
@@ -58,13 +58,15 @@ fn join_frames(buf: &mut Vec<Frame>, new: Frame) -> Option<Message> {
         let id = buf[0].seq.seqid;
         let sender = buf[0].sender;
         let recipient = buf[0].recipient;
-        let payload = SeqBuilder::restore(buf);
+        let layered = SeqBuilder::restore(buf);
+        let Payload { payload, sign } = conjoiner::deserialise(&layered).unwrap();
 
         Some(Message {
             id,
             sender,
             recipient,
             payload,
+            sign,
         })
     } else {
         None

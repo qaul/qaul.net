@@ -22,4 +22,13 @@ pub struct Message {
     pub recipient: Recipient,
     /// Some raw message payload
     pub payload: Vec<u8>,
+    /// Signature data for userspace layers
+    pub sign: Vec<u8>,
+}
+
+/// A wrapper around payload and signature 
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub(crate) struct Payload {
+    pub(crate)  payload: Vec<u8>,
+    pub(crate) sign: Vec<u8>,
 }

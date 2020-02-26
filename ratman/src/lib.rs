@@ -55,7 +55,7 @@ mod error;
 mod protocol;
 
 mod slicer;
-pub(crate) use {protocol::Protocol, slicer::Slicer};
+pub(crate) use {data::Payload, protocol::Protocol, slicer::Slicer};
 
 pub use crate::{
     data::{Message, MsgId},
@@ -126,7 +126,9 @@ impl Router {
     /// marked as offline, or if no such user is known to the router
     pub async fn online(&self, id: Identity) -> Result<()> {
         self.inner.known(id, true).await?;
-        Arc::clone(&self.proto).online(id, Arc::clone(&self.inner)).await
+        Arc::clone(&self.proto)
+            .online(id, Arc::clone(&self.inner))
+            .await
     }
 
     /// Set a user ID as offline and stop broadcasts

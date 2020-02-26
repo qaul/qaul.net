@@ -104,6 +104,7 @@ impl Protocol {
             recipient: Recipient::Flood,
             sender,
             payload,
+            sign: vec![], // Announcements are unsigned currently
         }
     }
 }
