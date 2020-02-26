@@ -12,7 +12,7 @@ pub type MsgId = Identity;
 /// payload is.  The payload can be empty, which can be used to create
 /// a ping, or using the 16 byte MsgId as payload.  In these cases,
 /// the sigature can also be empty.
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Message {
     /// A random message ID
     pub id: MsgId,
