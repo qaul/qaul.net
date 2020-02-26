@@ -17,7 +17,7 @@ use netmod_mem::MemMod;
 use ratman::{Identity, Result, Router};
 
 async fn testing() -> Result<()> {
-    // Build a simple channel in memory
+    // Build two channels in memory
     let mm1 = MemMod::new();
     let mm2_1 = MemMod::new();
     let mm2_3 = MemMod::new();
@@ -25,18 +25,18 @@ async fn testing() -> Result<()> {
     mm1.link(&mm2_1);
     mm2_3.link(&mm3);
 
-    // Initialise two routers, one for each device
+    // Initialise three empty routers
     let r1 = Router::new();
     let r2 = Router::new();
     let r3 = Router::new();
 
-    // Add channel endpoints to routers
+    // Attach endpoints so the topology is r1 - r2 - r3
     r1.add_endpoint(mm1).await;
     r2.add_endpoint(mm2_1).await;
     r2.add_endpoint(mm2_3).await;
     r3.add_endpoint(mm3).await;
 
-    // Create some users and add them to the routers
+    // Create two users and add them to the routers
     let u1 = Identity::random();
     r1.add_user(u1).await?;
 
@@ -50,7 +50,6 @@ async fn testing() -> Result<()> {
     // The routers will now start announcing their new users on the
     // micro-network.  You can now poll for new user discoveries.
     assert_eq!(r1.discover().await, u3);
-
     Ok(())
 }
 
