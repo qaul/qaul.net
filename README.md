@@ -34,7 +34,7 @@ branch.
 ## Build Instructions
 
 The project is being re-written in Rust, thus using [cargo][cargo] as
-a build system.  If you don't have Rust installed, you can istall it via
+a build system.  If you don't have Rust installed, you can install it via
 [rustup.rs](https://rustup.rs) or via your OS's package manager.
 
 [cargo]: https://crates.io/
