@@ -34,8 +34,6 @@ ENV ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
 
 ENV PATH="$PATH:$ANDROID_SDK_HOME/emulator:$ANDROID_SDK_HOME/tools/bin:$ANDROID_SDK_HOME/tools:$ANDROID_SDK_HOME/platform-tools:$ANDROID_NDK:$FLUTTER_HOME/bin:$FLUTTER_HOME/bin/cache/dart-sdk/bin"
 
-COPY README.md /README.md
-
 WORKDIR /tmp
 
 # Installing packages
@@ -193,7 +191,7 @@ RUN rustup target add x86_64-linux-android
 
 # Copy sdk license agreement files.
 RUN mkdir -p $ANDROID_HOME/licenses
-COPY sdk/licenses/* $ANDROID_HOME/licenses/
+COPY licenses/* $ANDROID_HOME/licenses/
 
 # Create some jenkins required directory to allow this image run with Jenkins
 RUN mkdir -p /var/lib/jenkins/workspace
