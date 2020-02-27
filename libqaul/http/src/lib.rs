@@ -7,7 +7,9 @@ use libqaul_rpc::{
 
 use async_std::{sync::Arc, task};
 use serde_json;
-use tide::{self, Request, Response};
+
+use tide::{self, Request, Response, Endpoint};
+use tide_naive_static_files::StaticFilesEndpoint as StaticEp;
 
 /// State structure for the libqaul http server
 pub struct HttpServer;
@@ -30,7 +32,7 @@ impl HttpServer {
                 // Call into libqaul via the rpc utilities
                 let responder: Arc<_> = Arc::clone(r.state());
                 let resp = responder.respond(req).await;
-                
+
                 let env = Envelope {
                     id,
                     data: EnvelopeType::Response(resp),
@@ -42,6 +44,10 @@ impl HttpServer {
             }
         });
 
+        // static file handler for the webui, assumes the webui exists
+        app.at("/").strip_prefix().get(StaticEp {
+            root: "./webui/".into(),
+        });
         task::block_on(async move { app.listen(addr).await }).unwrap();
     }
 }

@@ -33,11 +33,24 @@ branch.
 
 ## Build Instructions
 
-The project is being re-written in Rust, thus using [cargo][cargo] as
-a build system.  If you don't have Rust installed, you can install it via
-[rustup.rs](https://rustup.rs) or via your OS's package manager.
+The qaul.net project has many libraries and clients, for different
+platforms.  Check the "clients" directory for instructions on how to
+build them.  Because some platforms require some bootstrapping you may
+have to build different parts in sequence: we don't currently have an
+overarching build system for this.
 
-[cargo]: https://crates.io/
+To build the rust libraries for most platforms, simply run `cargo
+build --release` (for release mode).  To build android, check the
+[`build.sh`](./clients/android/build.sh) in that client.  The web UI
+is built with emberJS and con be found [here](webgui).
+
+To build the web stack on Linux, you can build the ember UI with
+`ember dist`, then move the output to `libqaul/http/ui`, so that they
+can be included in the web server, which will then serve them via
+`clients/linux-http-test` or `clients/android`.
+
+The repo has a `shell.nix` if you want to use nix to get dependencies,
+however this doesn't actually build the project.
 
 
 ## Documentation
