@@ -6,6 +6,7 @@ use {
     failure::{Error, Fail},
     futures::stream::Stream,
     libqaul::{ 
+        error::Error as QaulError,
         users::UserAuth,
         Identity, Tag, 
     },
@@ -229,10 +230,22 @@ impl Voices {
 
     /// Get the metadata needed to decode incoming packets
     pub async fn get_metadata(&self, auth: UserAuth, call: CallId) -> Result<StreamMetadata> {
-        self.qaul.users().ok(auth)?;
-        self.calls.lock().await
-            .get(&call)
-            .ok_or(CallNotFound(call))?
-            .remote_metadata()
+        self.qaul.users().ok(auth.clone())?;
+        let mut calls = self.calls.lock().await;
+        let call = calls.get(&call).ok_or(CallNotFound(call))?;
+        if call.local() != auth.0 { return Err(QaulError::NotAuthorised.into()); }
+        call.remote_metadata()
+    }
+
+    /// Push some samples of voice data on to the outgoing voice queue
+    pub async fn push_voice<V>(&self, auth: UserAuth, call: CallId, data: V) -> Result<()> 
+    where
+        V: IntoIterator<Item = i16>
+    {
+        self.qaul.users().ok(auth.clone())?;
+        let mut calls = self.calls.lock().await;
+        let mut call = calls.get_mut(&call).ok_or(CallNotFound(call))?;
+        if call.local() != auth.0 { return Err(QaulError::NotAuthorised.into()); }
+        call.push_data(data)
     }
 }

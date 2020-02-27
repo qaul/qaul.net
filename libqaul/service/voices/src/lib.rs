@@ -343,4 +343,16 @@ impl CallState {
 
         Ok(packet)
     }
+
+    /// Push some samples of voice data onto the outgoing voice queue
+    pub fn push_data<V: IntoIterator<Item = i16>>(&mut self, data: V) -> Result<()> {
+        match self {
+            CallState::Ringing(_) => Err(InvalidState::new("Ringing").into()),
+            CallState::Incoming(_) => Err(InvalidState::new("Incoming").into()),
+            CallState::Connected(state) => {
+                state.sending_state.outgoing_samples.extend(data);
+                Ok(())
+            },
+        }
+    }
 }
