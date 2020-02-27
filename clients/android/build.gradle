@@ -1,7 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
-
 buildscript {
     repositories {
         google()
@@ -17,12 +15,6 @@ buildscript {
     }
 }
 
-
-cargo {
-    module  = "../../librobot"
-    libname = "librobot"
-    targets = ["arm64", "arm", "x86", "x86_64", "linux-x86-64"]
-}
 
 allprojects {
     repositories {
