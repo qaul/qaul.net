@@ -13,6 +13,16 @@ use {
     serde::{Serialize, Deserialize},
 };
 
+/// A packet of audio data
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Packet {
+    /// A monotonically increasing sequence number used for ordering packets
+    /// on arrival
+    sequence_number: u32,
+    /// The actual OPUS encoded audio data of the connection
+    payload: Vec<u8>,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 /// Differentiates the various kinds of voice messages
 pub enum VoiceMessageKind {
@@ -22,8 +32,8 @@ pub enum VoiceMessageKind {
     Accept(StreamMetadata),
     /// The call was ended by the remote party 
     HungUp,
-    /// An OPUS encoded voice packet
-    Packet(Vec<u8>),
+    /// A packet of audio data
+    Packet(Packet),
 }
 
 #[derive(Serialize, Deserialize, Debug)]

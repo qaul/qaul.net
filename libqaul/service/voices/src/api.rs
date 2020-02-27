@@ -1,7 +1,7 @@
 use {
     crate::{
         wire::{VoiceMessage, VoiceMessageKind},
-        ASC_NAME, CallState, Voices,
+        ASC_NAME, CallState, Result, Voices,
     },
     failure::{Error, Fail},
     futures::stream::Stream,
@@ -14,7 +14,6 @@ use {
 };
 
 pub type CallId = Identity;
-pub type Result<T> = std::result::Result<T, Error>;
 
 /// The number of channels in the incoming stream
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -70,7 +69,7 @@ impl Display for BadMessageKind {
 
 /// No call was found with the provided id
 #[derive(Debug)]
-pub struct CallNotFound(CallId);
+pub struct CallNotFound(pub CallId);
 
 impl Fail for CallNotFound {}
 
@@ -97,6 +96,10 @@ impl Voices {
     pub async fn call(&self, auth: UserAuth, user: Identity, metadata: StreamMetadata) 
     -> Result<CallId> {
         let id = CallId::random();
+        self.calls.lock().await.insert(
+            id.clone(),
+            CallState::ringing(auth.0.clone(), metadata.clone(), user.clone())
+        );
         VoiceMessage {
             call: id.clone(),
             kind: VoiceMessageKind::Incoming(metadata),
@@ -112,12 +115,12 @@ impl Voices {
         let msg : VoiceMessage = conjoiner::deserialise(&msg.payload)?;
         match msg.kind {
             VoiceMessageKind::Accept(remote_metadata) => {
-                self.calls.lock().await.insert(id.clone(), CallState {
-                    local: auth.0,
-                    remote,
-                    remote_metadata,
-                });
-                Ok(id)
+                self.modify_call_state(
+                        id.clone(), 
+                        |mut call| { call.connect(remote_metadata) },
+                    )
+                    .await
+                    .map(|_| id)
             },
             VoiceMessageKind::HungUp => Err(CallRejected.into()),
             VoiceMessageKind::Incoming(_) => 
@@ -132,7 +135,13 @@ impl Voices {
     /// `metadata` provides the stream settings this end of the conversation will use
     pub async fn accept(&self, auth: UserAuth, call: CallId, metadata: StreamMetadata) 
     -> Result<()> {
-        let other = self.calls.lock().await.get(&call).ok_or(CallNotFound(call))?.remote.clone();
+        let other = self.modify_call_state(
+            call.clone(),
+            |mut call| {
+                let (state, res) = call.connect(metadata.clone());
+                let res = res.map(|_| state.remote());
+                (state, res)
+            }).await?;
         VoiceMessage {
             call,
             kind: VoiceMessageKind::Accept(metadata),
@@ -149,7 +158,7 @@ impl Voices {
 
     /// End a call, notifying the other party
     pub async fn hang_up(&self, auth: UserAuth, call: CallId) -> Result<()> {
-        let other = self.calls.lock().await.remove(&call).ok_or(CallNotFound(call))?.remote.clone();
+        let other = self.calls.lock().await.remove(&call).ok_or(CallNotFound(call))?.remote();
         VoiceMessage {
             call,
             kind: VoiceMessageKind::HungUp,
@@ -168,11 +177,10 @@ impl Voices {
             VoiceMessageKind::Incoming(remote_metadata) => {
                 self.calls.lock()
                     .await
-                    .insert(msg.call.clone(), CallState {
-                        local: auth.0,
-                        remote: user.clone(),
-                        remote_metadata,
-                    });
+                    .insert(
+                        msg.call.clone(),
+                        CallState::incoming(auth.0, user.clone(), remote_metadata),
+                    );
                 Ok(IncomingCall {
                     id: msg.call,
                     user,
@@ -192,7 +200,7 @@ impl Voices {
         self.qaul.users().ok(auth)?;
         self.calls.lock().await
             .get(&call)
-            .map(|v| v.remote_metadata.clone())
-            .ok_or(CallNotFound(call).into())
+            .ok_or(CallNotFound(call))?
+            .remote_metadata()
     }
 }
