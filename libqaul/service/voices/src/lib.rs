@@ -1,18 +1,25 @@
 use {
-    crate::api::{CallId, StreamMetadata, CallNotFound},
+    async_std::task,
+    crate::{
+        api::{CallId, StreamMetadata, CallNotFound},
+        wire::{Packet, VoiceMessage, VoiceMessageKind},
+    },
     failure::{Error, Fail},
     futures::{
         channel::mpsc,
         lock::Mutex,
     },
     libqaul::{
+        users::UserAuth,
         Identity, Qaul,
     },
     std::{
         collections::{BTreeMap, VecDeque},
         fmt::{Display, Formatter, Result as FmtResult},
         sync::Arc,
+        time::{Instant, Duration},
     },
+    opus::{Encoder, Application},
 };
 
 pub mod api;
@@ -21,6 +28,10 @@ mod wire;
 pub type Result<T> = std::result::Result<T, Error>;
 
 const ASC_NAME: &'static str = "net.qaul.voices";
+/// The duration of each packet in milliseconds
+const PACKET_DURATION: usize = 20;
+/// The maximum size in bytes of each packet
+const PACKET_SIZE: usize = 256;
 
 #[derive(Clone)]
 pub struct Voices {
@@ -39,7 +50,7 @@ impl Voices {
 
     /// Mutate an owned call state, potentially moving the state machine between
     /// states
-    pub async fn modify_call_state<F, T>(&self, id: CallId, f: F) -> Result<T> 
+    async fn modify_call_state<F, T>(&self, id: CallId, f: F) -> Result<T> 
     where
         F: FnOnce(CallState) -> (CallState, Result<T>)
     {
@@ -51,6 +62,42 @@ impl Voices {
         let (call, res) = f(call); 
         calls.insert(id, call);
         res
+    }
+
+    async fn start_call(&self, id: CallId, auth: UserAuth) {
+        let voices = self.clone();
+        task::spawn(async move {
+            let mut next_tick = Instant::now();
+            loop {
+                let (packet, dest) = {
+                    let mut calls = voices.calls.lock().await;
+                    let mut call = if let Some(call) = calls.get_mut(&id) {
+                        call
+                    } else {
+                        break;
+                    };
+
+                    match call.encode_packet() {
+                        Ok(p) => (p, call.remote()),
+                        Err(_) => { break; },
+                    }
+                };
+
+                let send = VoiceMessage {
+                    call: id.clone(),
+                    kind: VoiceMessageKind::Packet(packet),
+                }.send(&voices, auth.clone(), dest);
+
+                if send.await.is_err() {
+                    break;
+                }
+
+                // this looks a little silly but it helps prevent errors
+                // from accumulating and causing us to needlessly miss packets
+                next_tick += Duration::from_millis(PACKET_DURATION as u64);
+                task::sleep(next_tick.duration_since(Instant::now())).await;
+            }
+        });
     }
 }
 
@@ -108,12 +155,12 @@ struct RingingState {
 impl RingingState {
     /// The remote party has picked up the call, move to `Connected` state
     fn connected(self, remote_metadata: StreamMetadata) -> CallState {
-        CallState::Connected(ConnectedState {
-            local: self.local,
-            local_metadata: self.local_metadata,
-            remote: self.remote,
+        CallState::Connected(ConnectedState::new(
+            self.local,
+            self.local_metadata,
+            self.remote,
             remote_metadata,
-        })
+        ))
     }
 }
 
@@ -129,12 +176,12 @@ struct IncomingState {
 impl IncomingState {
     /// Pick up the call and move to `Connected` state
     fn connected(self, local_metadata: StreamMetadata) -> CallState {
-        CallState::Connected(ConnectedState {
-            local: self.local,
+        CallState::Connected(ConnectedState::new(
+            self.local,
             local_metadata,
-            remote: self.remote,
-            remote_metadata: self.remote_metadata,
-        })
+            self.remote,
+            self.remote_metadata,
+        ))
     }
 }
 
@@ -147,6 +194,48 @@ struct ConnectedState {
     remote: Identity,
     /// Stream metadata for the remote user on this call
     remote_metadata: StreamMetadata,
+    /// The state of the outgoing end of the call
+    sending_state: SendingState,
+}
+
+impl ConnectedState {
+    fn new(
+        local: Identity, 
+        local_metadata: StreamMetadata, 
+        remote: Identity, 
+        remote_metadata: StreamMetadata
+    ) -> Self {
+        let sending_samples = local_metadata.calc_samples();
+        // TODO: make this return errors
+        let encoder = Encoder::new(
+            local_metadata.sample_rate,
+            local_metadata.channels.clone().into(),
+            Application::Voip,
+        ).unwrap();
+        ConnectedState {
+            local,
+            local_metadata,
+            remote,
+            remote_metadata,
+            sending_state: SendingState {
+                next_sequence_number: 0,
+                outgoing_samples: VecDeque::new(),
+                encoder,
+                samples: sending_samples,
+            },
+        }
+    }
+}
+
+struct SendingState {
+    /// The sequence number that will be given to the next outgoing packet
+    next_sequence_number: u32,
+    /// The set of samples queued up to be sent 
+    outgoing_samples: VecDeque<i16>,
+    /// The Opus Encoder that will be used to encode the next samples
+    encoder: Encoder,
+    /// The number of samples in each packet
+    samples: usize,
 }
 
 /// A small state machine tracking the status of calls
@@ -223,5 +312,35 @@ impl CallState {
             CallState::Connected(state) => state.remote_metadata.clone(),
         };
         Ok(rm)
+    }
+
+    /// Encode the next packet of voice data for sending
+    ///
+    /// If there is not enough voice data in the output buffer this will encode
+    /// a packet of silence
+    pub fn encode_packet(&mut self) -> Result<Packet> {
+        let mut sending_state = match self {
+            CallState::Ringing(_) => Err(InvalidState::new("Ringing")),
+            CallState::Incoming(_) => Err(InvalidState::new("Incoming")),
+            CallState::Connected(state) => Ok(&mut state.sending_state),
+        }?;
+
+        let packet_contents = if sending_state.outgoing_samples.len() < sending_state.samples {
+            (0..sending_state.samples)
+                .map(|_| sending_state.outgoing_samples.pop_front().unwrap())
+                .collect()
+        } else {
+            Vec::new()
+        };
+
+        let encoded_packet = sending_state.encoder.encode_vec(&packet_contents, PACKET_SIZE)?;
+
+        let packet = Packet {
+            sequence_number: sending_state.next_sequence_number,
+            payload: encoded_packet,
+        };
+        sending_state.next_sequence_number += 1;
+
+        Ok(packet)
     }
 }

@@ -1,5 +1,5 @@
 [package]
-name = "qaul-voip"
+name = "qaul-voices"
 version = "0.1.0"
 authors = ["Jess 3Jane <me@jess.coffee>"]
 edition = "2018"
@@ -10,7 +10,9 @@ license = "AGPL-3.0"
 [dependencies]
 libqaul = { path = "../../" }
 
+async-std = "1.5"
 serde = { version = "1.0", features = ["derive"] }
 futures = "0.3"
 failure = "0.1"
 conjoiner = { version = "1.2", package = "conjoiner-engine" }
+opus = "0.2"

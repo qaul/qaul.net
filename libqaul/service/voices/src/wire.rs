@@ -18,9 +18,9 @@ use {
 pub struct Packet {
     /// A monotonically increasing sequence number used for ordering packets
     /// on arrival
-    sequence_number: u32,
+    pub sequence_number: u32,
     /// The actual OPUS encoded audio data of the connection
-    payload: Vec<u8>,
+    pub payload: Vec<u8>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

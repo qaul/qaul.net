@@ -1115,6 +1115,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2839e79665f131bdb5782e51f2c6c9599c133c6098982a54c794358bf432529c"
 
 [[package]]
+name = "opus"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e9059a7daf1e6665eb88c4a95ca9ff393a6d276fd66e9d85191280d7e5ec18b"
+dependencies = [
+ "libc",
+ "opus-sys",
+]
+
+[[package]]
+name = "opus-sys"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fad8b294f482f7972fa466b1c64d5a564e4ee6975599d80483ee4fa83f25b6ec"
+dependencies = [
+ "libc",
+ "pkg-config",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1213,6 +1233,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5894c618ce612a3fa23881b152b608bafb8c56cfc22f434a3ba3120b40f7b587"
 
 [[package]]
+name = "pkg-config"
+version = "0.3.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05da548ad6865900e60eaba7f589cc0783590a92e940c26953ff81ddbab2d677"
+
+[[package]]
 name = "postcard"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1296,13 +1322,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "qaul-voip"
+name = "qaul-voices"
 version = "0.1.0"
 dependencies = [
+ "async-std",
  "conjoiner-engine",
  "failure",
  "futures 0.3.4",
  "libqaul",
+ "opus",
  "serde",
 ]
 

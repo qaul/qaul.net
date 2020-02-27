@@ -1,7 +1,7 @@
 use {
     crate::{
         wire::{VoiceMessage, VoiceMessageKind},
-        ASC_NAME, CallState, Result, Voices,
+        ASC_NAME, PACKET_DURATION, CallState, Result, Voices,
     },
     failure::{Error, Fail},
     futures::stream::Stream,
@@ -11,6 +11,7 @@ use {
     },
     serde::{Serialize, Deserialize},
     std::fmt::{Display, Formatter, Result as FmtResult},
+    opus,
 };
 
 pub type CallId = Identity;
@@ -22,13 +23,40 @@ pub enum Channels {
     Stereo,
 }
 
+impl Channels {
+    pub fn num_channels(&self) -> usize {
+        match self {
+            Channels::Mono => 1,
+            Channels::Stereo => 2,
+        }
+    }
+}
+
+impl From<Channels> for opus::Channels {
+    fn from(c: Channels) -> Self {
+        match c {
+            Channels::Mono => opus::Channels::Mono,
+            Channels::Stereo => opus::Channels::Stereo,
+        }
+    }
+}
+
 /// The metadata needed to decode incoming packets
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct StreamMetadata {
     /// The sample rate of the stream 
-    sample_rate: u32,
+    pub sample_rate: u32,
     /// The number of channels in the stream
-    channels: Channels,
+    pub channels: Channels,
+}
+
+impl StreamMetadata {
+    pub(crate) fn calc_samples(&self) -> usize {
+        self.sample_rate as usize
+            * self.channels.num_channels()
+            * PACKET_DURATION
+            / 1000
+    }
 }
 
 /// The call was rejected by the remote party
@@ -120,7 +148,10 @@ impl Voices {
                         |mut call| { call.connect(remote_metadata) },
                     )
                     .await
-                    .map(|_| id)
+                    .map(|_| {
+                        self.start_call(id.clone(), auth); 
+                        id
+                    })
             },
             VoiceMessageKind::HungUp => Err(CallRejected.into()),
             VoiceMessageKind::Incoming(_) => 
@@ -142,6 +173,7 @@ impl Voices {
                 let res = res.map(|_| state.remote());
                 (state, res)
             }).await?;
+        self.start_call(call.clone(), auth.clone());
         VoiceMessage {
             call,
             kind: VoiceMessageKind::Accept(metadata),
