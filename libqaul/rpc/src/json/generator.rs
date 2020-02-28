@@ -38,9 +38,8 @@ impl From<(Envelope, RequestEnv)> for ResponseEnv {
 
 #[test]
 fn get_auth() {
-    use crate::RequestEnv;
     use libqaul::{users::UserAuth, Identity};
-    use libqaul_rpc::{Envelope, Response};
+    use crate::api::{Envelope, Response};
 
     let ua = UserAuth(Identity::random(), "my-token-is-great".into());
     let data = EnvelopeType::Response(Response::Auth(ua));
@@ -71,7 +70,7 @@ fn get_auth() {
 #[test]
 fn user_list() {
     use libqaul::{users::UserProfile, Identity};
-    use libqaul_rpc::Response;
+    use crate::api::Response;
 
     let users = vec![
         UserProfile::new(Identity::random()),
