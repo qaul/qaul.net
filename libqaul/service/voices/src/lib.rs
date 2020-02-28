@@ -79,6 +79,10 @@ impl Voices {
         let voices = self.clone();
         // the connector taking incoming messages and turning them into packets
         task::spawn(async move {
+            // TODO: currently when the call drops this will leave the task dangling
+            // forever
+            //
+            // it should do not that
             while let Some(msg) = subscription.next().await {
                 let msg: VoiceMessage = match conjoiner::deserialise(&msg.payload) {
                     Ok(msg) => msg,
