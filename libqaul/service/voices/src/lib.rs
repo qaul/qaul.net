@@ -7,11 +7,12 @@ use {
     failure::{Error, Fail},
     futures::{
         channel::mpsc,
+        stream::StreamExt,
         lock::Mutex,
     },
     libqaul::{
         users::UserAuth,
-        Identity, Qaul,
+        Identity, Tag, Qaul,
     },
     std::{
         collections::{BTreeMap, VecDeque},
@@ -19,7 +20,7 @@ use {
         sync::Arc,
         time::{Instant, Duration},
     },
-    opus::{Encoder, Application},
+    opus::{Encoder, Application, Decoder},
 };
 
 pub mod api;
@@ -32,6 +33,10 @@ const ASC_NAME: &'static str = "net.qaul.voices";
 const PACKET_DURATION: usize = 20;
 /// The maximum size in bytes of each packet
 const PACKET_SIZE: usize = 256;
+/// The delay between the first recieved packet and the first decoded packet in milliseconds
+///
+/// This exists to account for misordering of packets and variable latency
+const JITTER_DELAY: usize = 250;
 
 #[derive(Clone)]
 pub struct Voices {
@@ -64,8 +69,42 @@ impl Voices {
         res
     }
 
-    async fn start_call(&self, id: CallId, auth: UserAuth) {
+    fn start_call(&self, id: CallId, auth: UserAuth) -> Result<()> {
+        let mut subscription = self.qaul
+            .messages()
+            .subscribe(auth.clone(), ASC_NAME, vec![
+                Tag::new("call_id", id.clone()),
+                Tag::new("kind", b"packet".to_vec()),
+            ])?;
         let voices = self.clone();
+        // the connector taking incoming messages and turning them into packets
+        task::spawn(async move {
+            while let Some(msg) = subscription.next().await {
+                let msg: VoiceMessage = match conjoiner::deserialise(&msg.payload) {
+                    Ok(msg) => msg,
+                    Err(_) => { break; },
+                };
+                let packet = match msg.kind {
+                    VoiceMessageKind::Packet(p) => p,
+                    _ => { break; }
+                };
+
+                let mut calls = voices.calls.lock().await;
+                let mut call = if let Some(call) = calls.get_mut(&id) {
+                    call
+                } else {
+                    break;
+                };
+
+                match call.push_packet(packet) {
+                    Ok(_) => {},
+                    Err(_) => { break; },
+                };
+            }
+        });
+
+        let voices = self.clone();
+        // the encoder heartbeat, sending out a packet every 20 ms
         task::spawn(async move {
             let mut next_tick = Instant::now();
             loop {
@@ -98,6 +137,35 @@ impl Voices {
                 task::sleep(next_tick.duration_since(Instant::now())).await;
             }
         });
+
+        let voices = self.clone();
+        // the decoder heartbeat, decoding a packet every 20 ms
+        task::spawn(async move {
+            task::sleep(Duration::from_millis(JITTER_DELAY as u64)).await;
+
+            let mut next_tick = Instant::now();
+            loop {
+                {
+                    let mut calls = voices.calls.lock().await;
+                    let mut call = if let Some(call) = calls.get_mut(&id) {
+                        call
+                    } else {
+                        break;
+                    };
+
+                    if call.decode_packet().is_err() {
+                        break;
+                    }
+                }
+
+                // this looks a little silly but it helps prevent errors
+                // from accumulating and causing us to needlessly miss packets
+                next_tick += Duration::from_millis(PACKET_DURATION as u64);
+                task::sleep(next_tick.duration_since(Instant::now())).await;
+            }
+        });
+
+        Ok(())
     }
 }
 
@@ -196,6 +264,8 @@ struct ConnectedState {
     remote_metadata: StreamMetadata,
     /// The state of the outgoing end of the call
     sending_state: SendingState,
+    /// The state of the incoming end of the call
+    receiving_state: ReceivingState,
 }
 
 impl ConnectedState {
@@ -212,6 +282,13 @@ impl ConnectedState {
             local_metadata.channels.clone().into(),
             Application::Voip,
         ).unwrap();
+
+        let receiving_samples = remote_metadata.calc_samples();
+        let decoder = Decoder::new(
+            remote_metadata.sample_rate,
+            remote_metadata.channels.clone().into(),
+        ).unwrap();
+
         ConnectedState {
             local,
             local_metadata,
@@ -222,6 +299,13 @@ impl ConnectedState {
                 outgoing_samples: VecDeque::new(),
                 encoder,
                 samples: sending_samples,
+            },
+            receiving_state: ReceivingState {
+                next_sequence_number: 0,
+                incoming_packets: BTreeMap::new(),
+                decoder,
+                samples: receiving_samples,
+                senders: Vec::new(),
             },
         }
     }
@@ -236,6 +320,19 @@ struct SendingState {
     encoder: Encoder,
     /// The number of samples in each packet
     samples: usize,
+}
+
+struct ReceivingState {
+    /// The sequence number of the next packet that will be deocded
+    next_sequence_number: u32,
+    /// All currently unprocessed packets ordered by sequence number 
+    incoming_packets: BTreeMap<u32, Vec<u8>>,
+    /// The Opus Decoder that will be used to decode the next packet
+    decoder: Decoder,
+    /// The number of samples in each packet
+    samples: usize,
+    /// The senders samples will be pushed to
+    senders: Vec<mpsc::UnboundedSender<Vec<i16>>>,
 }
 
 /// A small state machine tracking the status of calls
@@ -354,5 +451,75 @@ impl CallState {
                 Ok(())
             },
         }
+    }
+
+    /// Decode the next packet of voice data and return the contained audio samples
+    pub fn decode_packet(&mut self) -> Result<()> {
+        let mut receiving_state = match self {
+            CallState::Ringing(_) => Err(InvalidState::new("Ringing")),
+            CallState::Incoming(_) => Err(InvalidState::new("Incoming")),
+            CallState::Connected(state) => Ok(&mut state.receiving_state),
+        }?;
+        
+        // get the next packet or an empty packet if it hasn't come in yet
+        let packet = receiving_state.incoming_packets
+            .remove(&receiving_state.next_sequence_number)
+            .unwrap_or(Vec::new());
+        receiving_state.next_sequence_number += 1;
+
+        // decode the packet into a sample set
+        let mut samples = vec![0; receiving_state.samples];
+        let length = receiving_state.decoder.decode(&packet[..], &mut samples[..], false)?;
+        samples.truncate(length);
+
+        // send the samples down each open channel, marking the closed channels for removal
+        let to_remove = receiving_state.senders
+            .iter_mut()
+            .enumerate()
+            .filter_map(|(i, sender)| sender
+                 .unbounded_send(samples.clone())
+                 .map(|_| None)
+                 .unwrap_or(Some(i))
+            )
+            .collect::<Vec<_>>();
+        
+        // remove them starting from the back so the indicies don't change
+        to_remove
+            .into_iter()
+            .rev()
+            .for_each(|i| { receiving_state.senders.remove(i); }); 
+
+        Ok(())
+    }
+
+    /// Push an incoming packet on to the queue of packets to be decoded
+    pub fn push_packet(&mut self, packet: Packet) -> Result<()> {
+        let mut receiving_state = match self {
+            CallState::Ringing(_) => Err(InvalidState::new("Ringing")),
+            CallState::Incoming(_) => Err(InvalidState::new("Incoming")),
+            CallState::Connected(state) => Ok(&mut state.receiving_state),
+        }?;
+
+        if receiving_state.next_sequence_number <= packet.sequence_number {
+            receiving_state.incoming_packets.insert(
+                packet.sequence_number, 
+                packet.payload,
+            );
+        }
+
+        Ok(())
+    }
+
+    /// Add a listener for incoming voice samples
+    pub fn add_voice_listener(&mut self) -> Result<mpsc::UnboundedReceiver<Vec<i16>>> {
+        let mut receiving_state = match self {
+            CallState::Ringing(_) => Err(InvalidState::new("Ringing")),
+            CallState::Incoming(_) => Err(InvalidState::new("Incoming")),
+            CallState::Connected(state) => Ok(&mut state.receiving_state),
+        }?;
+
+        let (sender, receiver) = mpsc::unbounded();
+        receiving_state.senders.push(sender);
+        Ok(receiver)
     }
 }

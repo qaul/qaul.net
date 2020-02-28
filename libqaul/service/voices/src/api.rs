@@ -1,10 +1,13 @@
 use {
     crate::{
         wire::{VoiceMessage, VoiceMessageKind},
-        ASC_NAME, PACKET_DURATION, CallState, Result, Voices,
+        ASC_NAME, PACKET_DURATION, CallState, Result, Voices, InvalidState,
     },
     failure::{Error, Fail},
-    futures::stream::Stream,
+    futures::{
+        channel::mpsc,
+        stream::Stream,
+    },
     libqaul::{ 
         error::Error as QaulError,
         users::UserAuth,
@@ -149,9 +152,9 @@ impl Voices {
                         |mut call| { call.connect(remote_metadata) },
                     )
                     .await
-                    .map(|_| {
-                        self.start_call(id.clone(), auth); 
-                        id
+                    .and_then(|_| {
+                        self.start_call(id.clone(), auth)?; 
+                        Ok(id)
                     })
             },
             VoiceMessageKind::HungUp => Err(CallRejected.into()),
@@ -174,7 +177,7 @@ impl Voices {
                 let res = res.map(|_| state.remote());
                 (state, res)
             }).await?;
-        self.start_call(call.clone(), auth.clone());
+        self.start_call(call.clone(), auth.clone())?;
         VoiceMessage {
             call,
             kind: VoiceMessageKind::Accept(metadata),
@@ -205,7 +208,7 @@ impl Voices {
             .next(auth.clone(), ASC_NAME, Some(Tag::new("kind", b"incoming".to_vec())))
             .await?;
         let user = msg.sender.clone();
-        let msg : VoiceMessage = conjoiner::deserialise(&msg.payload)?;
+        let msg: VoiceMessage = conjoiner::deserialise(&msg.payload)?;
         match msg.kind {
             VoiceMessageKind::Incoming(remote_metadata) => {
                 self.calls.lock()
@@ -261,6 +264,49 @@ impl Voices {
             CallState::Connected(_) => CallStatus::Connected,
         };
         Ok(status)
+    }
+
+    /// Subscribe to incoming voice sample packets for a call
+    pub async fn subscribe_to_voice(&self, auth: UserAuth, call: CallId) 
+    -> Result<mpsc::UnboundedReceiver<Vec<i16>>> {
+        self.qaul.users().ok(auth.clone())?;
+        let mut calls = self.calls.lock().await;
+        let mut call = calls.get_mut(&call).ok_or(CallNotFound(call))?;
+        if call.local() != auth.0 { return Err(QaulError::NotAuthorised.into()); }
+        call.add_voice_listener()
+    }
+
+    /// A future which completes when the other end of the call hangs up
+    pub async fn on_hangup(&self, auth: UserAuth, call: CallId) -> Result<()> {
+        match self.get_status(auth.clone(), call.clone()).await? {
+            CallStatus::Ringing => Err(InvalidState::new("Ringing")),
+            CallStatus::Incoming => Err(InvalidState::new("Incoming")),
+            CallStatus::Connected => Ok(()),
+        }?;
+
+        let msg = self.qaul.messages()
+            .next(auth, ASC_NAME, vec![
+                  Tag::new("call_id", call),
+                  Tag::new("kind", b"control".to_vec()),
+            ])
+            .await?;
+        let msg: VoiceMessage = conjoiner::deserialise(&msg.payload)?;
+        match msg.kind {
+            VoiceMessageKind::HungUp => {},
+            VoiceMessageKind::Incoming(_) =>  {
+                Err(BadMessageKind::new("control", "Incoming"))?;
+            },
+            VoiceMessageKind::Accept(_) => {
+                Err(InvalidState::new("Connected"))?;
+            },
+            VoiceMessageKind::Packet(_) => {
+                Err(BadMessageKind::new("control", "Packet"))?
+            },
+        }
+
+        self.calls.lock().await.remove(&call);
+
+        Ok(())
     }
 }
 
