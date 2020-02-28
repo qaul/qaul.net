@@ -248,4 +248,29 @@ impl Voices {
         if call.local() != auth.0 { return Err(QaulError::NotAuthorised.into()); }
         call.push_data(data)
     }
+
+    /// Get the current state of a call
+    pub async fn get_status(&self, auth: UserAuth, call: CallId) -> Result<CallStatus> {
+        self.qaul.users().ok(auth.clone())?;
+        let mut calls = self.calls.lock().await;
+        let mut call = calls.get_mut(&call).ok_or(CallNotFound(call))?;
+        if call.local() != auth.0 { return Err(QaulError::NotAuthorised.into()); }
+        let status = match call {
+            CallState::Ringing(_) => CallStatus::Ringing,
+            CallState::Incoming(_) => CallStatus::Incoming,
+            CallState::Connected(_) => CallStatus::Connected,
+        };
+        Ok(status)
+    }
+}
+
+/// The current state of the call
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum CallStatus {
+    /// We're waiting for the other side to either accept or reject our call
+    Ringing,
+    /// We have an incoming call and we need to accept or reject it
+    Incoming,
+    /// We are connected and audio is flowing down the wire
+    Connected,
 }
