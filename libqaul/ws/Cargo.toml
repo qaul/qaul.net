@@ -8,7 +8,8 @@ license = "AGPL-3.0-or-later"
 
 [features]
 chat = ["qaul-chat"]
-default = ["chat"]
+voices = ["qaul-voices"]
+default = ["chat", "voices"]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -22,3 +23,4 @@ libqaul = { path = ".." }
 libqaul-rpc = { path = "../rpc" }
 
 qaul-chat = { path = "../service/chat", optional = true }
+qaul-voices = { path = "../service/voices", optional = true }

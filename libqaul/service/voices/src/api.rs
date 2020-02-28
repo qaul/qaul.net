@@ -112,7 +112,7 @@ impl Display for CallNotFound {
 }
 
 /// An incoming call
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct IncomingCall {
     /// The `id` associated with this call
     id: CallId,

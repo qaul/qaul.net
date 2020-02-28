@@ -12,6 +12,10 @@ use qaul_chat::{
     room::{Room, RoomId},
     Chat, ChatMessage,
 };
+
+#[feature(voices)]
+use qaul_voices::api::{CallId, IncomingCall, StreamMetadata, CallStatus};
+
 use serde::{Deserialize, Serialize};
 use std::{error::Error, fmt::Display};
 
@@ -45,39 +49,39 @@ pub enum EnvelopeType {
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Request {
     /// Poll the next chat message
-    #[cfg(features = "chat")]
+    #[cfg(feature = "chat")]
     ChatMsgNext(chat::messages::Next),
 
     /// Create a subscription for chat messages
-    #[cfg(features = "chat")]
+    #[cfg(feature = "chat")]
     ChatMsgSub(chat::messages::Subscribe),
 
     /// Send a chat message
-    #[cfg(features = "chat")]
+    #[cfg(feature = "chat")]
     ChatMsgSend(chat::messages::Send),
 
     /// Query the chat message store
-    #[cfg(features = "chat")]
+    #[cfg(feature = "chat")]
     ChatMsgQuery,
 
     /// List all available chat rooms
-    #[cfg(features = "chat")]
+    #[cfg(feature = "chat")]
     ChatRoomList(chat::rooms::List),
 
     /// Get data about a chat room
-    #[cfg(features = "chat")]
+    #[cfg(feature = "chat")]
     ChatRoomGet(chat::rooms::Get),
 
     /// Create a new chat room
-    #[cfg(features = "chat")]
+    #[cfg(feature = "chat")]
     ChatRoomCreate(chat::rooms::Create),
 
     /// Modify a chat room
-    #[cfg(features = "chat")]
+    #[cfg(feature = "chat")]
     ChatRoomModify(chat::rooms::Modify),
 
     /// Delete a chat room
-    #[cfg(features = "chat")]
+    #[cfg(feature = "chat")]
     ChatRoomDelete(chat::rooms::Delete),
 
     /// Modify a user's contact
@@ -127,6 +131,46 @@ pub enum Request {
 
     /// Update a user
     UserUpdate(users::Update),
+
+    #[cfg(feature = "voices")]
+    /// Initiate a call to a remote user
+    VoicesMakeCall(voices::MakeCall),
+
+    #[cfg(feature = "voices")]
+    /// Accept a call from a remote user
+    VoicesAcceptCall(voices::AcceptCall),
+
+    #[cfg(feature = "voices")]
+    /// Reject a call
+    VoicesRejectCall(voices::RejectCall),
+
+    #[cfg(feature = "voices")]
+    /// Terminate a call
+    VoicesHangUp(voices::HangUp),
+
+    #[cfg(feature = "voices")]
+    /// Wait for the next incoming call
+    VoicesNextIncoming(voices::NextIncoming),
+
+    #[cfg(feature = "voices")]
+    /// Get the stream metadata for the remote end of a call
+    VoicesGetMetadata(voices::GetMetadata),
+
+    #[cfg(feature = "voices")]
+    /// Push voice samples on to the outgoing call buffer
+    VoicesPushVoice(voices::PushVoice),
+
+    #[cfg(feature = "voices")]
+    /// Get the status of a call
+    VoicesGetStatus(voices::GetStatus),
+
+    #[cfg(feature = "voices")]
+    /// Subscribe to the incoming voice samples of a call
+    VoicesSubscribe(voices::SubscribeToVoice),
+
+    #[cfg(feature = "voices")]
+    /// Await the termination of a call
+    VoicesOnHangup(voices::OnHangup),
 }
 
 /// Wrap around all possible response values for piped Rpc protocols
@@ -137,7 +181,7 @@ pub enum Response {
     Auth(UserAuth),
 
     /// Return a set of chat messages
-    #[cfg(features = "chat")]
+    #[cfg(feature = "chat")]
     ChatMessage(Vec<ChatMessage>),
 
     /// Return a set of contact entries
@@ -153,11 +197,11 @@ pub enum Response {
     MsgId(MsgId),
 
     /// Return chat room data
-    #[cfg(features = "chat")]
+    #[cfg(feature = "chat")]
     Room(Room),
 
     /// Get a set of chat room IDs
-    #[cfg(features = "chat")]
+    #[cfg(feature = "chat")]
     RoomId(Vec<RoomId>),
 
     /// Confirmation for a new subscription
@@ -171,6 +215,22 @@ pub enum Response {
 
     /// Return available user IDs
     UserId(Vec<Identity>),
+
+    /// A call id
+    #[cfg(feature = "voices")]
+    CallId(CallId),
+
+    /// An incoming call
+    #[cfg(feature = "voices")]
+    IncomingCall(IncomingCall),
+
+    /// Metadata about a voice stream 
+    #[cfg(feature = "voices")]
+    StreamMetadata(StreamMetadata),
+
+    /// The status of a call 
+    #[cfg(feature = "voices")]
+    CallStatus(CallStatus),
 }
 
 impl From<UserAuth> for Response {
@@ -179,14 +239,14 @@ impl From<UserAuth> for Response {
     }
 }
 
-#[cfg(features = "chat")]
+#[cfg(feature = "chat")]
 impl From<ChatMessage> for Response {
     fn from(msg: ChatMessage) -> Self {
         Response::ChatMessage(vec![msg])
     }
 }
 
-#[cfg(features = "chat")]
+#[cfg(feature = "chat")]
 impl From<Vec<ChatMessage>> for Response {
     fn from(msgs: Vec<ChatMessage>) -> Self {
         Response::ChatMessage(msgs)
@@ -226,7 +286,7 @@ impl From<Vec<MsgRef>> for Response {
     }
 }
 
-#[cfg(features = "chat")]
+#[cfg(feature = "chat")]
 impl From<Room> for Response {
     fn from(room: Room) -> Self {
         Response::Room(room)
@@ -251,8 +311,23 @@ impl From<Vec<UserProfile>> for Response {
     }
 }
 
-impl From<Vec<Identity>> for Response {
-    fn from(ids: Vec<Identity>) -> Self {
-        Self::UserId(ids)
+#[cfg(feature = "voices")]
+impl From<IncomingCall> for Response {
+    fn from(incoming: IncomingCall) -> Self {
+        Response::IncomingCall(incoming)
+    }
+}
+
+#[cfg(feature = "voices")]
+impl From<StreamMetadata> for Response {
+    fn from(metadata: StreamMetadata) -> Self {
+        Response::StreamMetadata(metadata)
+    }
+}
+
+#[cfg(feature = "voices")]
+impl From<CallStatus> for Response {
+    fn from(status: CallStatus) -> Self {
+        Response::CallStatus(status)
     }
 }

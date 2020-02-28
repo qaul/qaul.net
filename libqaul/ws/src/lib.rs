@@ -5,7 +5,9 @@ use libqaul_rpc::{
     json::{RequestEnv, ResponseEnv},
     Envelope, EnvelopeType, Responder,
 };
+// TODO: these will break if we turn features off
 use qaul_chat::Chat;
+use qaul_voices::Voices;
 
 use async_std::{
     net::{TcpListener, TcpStream},
@@ -27,11 +29,12 @@ pub struct WsServer {
 
 impl WsServer {
     /// Create a websocket server with a libqaul instance and services
-    pub fn new<S: Into<String>>(addr: S, qaul: Arc<Qaul>, chat: Arc<Chat>) -> Arc<Self> {
+    pub fn new<S: Into<String>>(addr: S, qaul: Arc<Qaul>, chat: Arc<Chat>, voices: Arc<Voices>) 
+    -> Arc<Self> {
         Arc::new(Self {
             running: AtomicBool::from(true),
             addr: addr.into(),
-            rpc: Responder { qaul, chat },
+            rpc: Responder { qaul, chat, voices },
         })
     }
 

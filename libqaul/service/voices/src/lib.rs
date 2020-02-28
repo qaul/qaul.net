@@ -45,12 +45,12 @@ pub struct Voices {
 }
 
 impl Voices {
-    pub fn new(qaul: Arc<Qaul>) -> Result<Self> {
+    pub fn new(qaul: Arc<Qaul>) -> Result<Arc<Self>> {
         qaul.services().register(ASC_NAME)?;
-        Ok(Self { 
+        Ok(Arc::new(Self { 
             calls: Arc::new(Mutex::new(BTreeMap::new())),
             qaul 
-        })
+        }))
     }
 
     /// Mutate an owned call state, potentially moving the state machine between
@@ -79,7 +79,7 @@ impl Voices {
         let voices = self.clone();
         // the connector taking incoming messages and turning them into packets
         task::spawn(async move {
-            let task_spawned = false;
+            let mut task_spawned = false;
             // TODO: currently when the call drops this will leave the task dangling
             // forever
             //
@@ -87,6 +87,7 @@ impl Voices {
             while let Some(msg) = subscription.next().await {
                 if !task_spawned {
                     // the decoder heartbeat, decoding a packet every 20 ms
+                    let voices = voices.clone();
                     task::spawn(async move {
                         task::sleep(Duration::from_millis(JITTER_DELAY as u64)).await;
 

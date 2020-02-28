@@ -897,6 +897,7 @@ dependencies = [
  "futures 0.3.4",
  "libqaul",
  "qaul-chat",
+ "qaul-voices",
  "serde",
  "serde_json",
 ]
@@ -911,6 +912,7 @@ dependencies = [
  "libqaul",
  "libqaul-rpc",
  "qaul-chat",
+ "qaul-voices",
  "serde",
  "serde_json",
 ]
@@ -942,6 +944,7 @@ dependencies = [
  "libqaul-http",
  "libqaul-rpc",
  "qaul-chat",
+ "qaul-voices",
  "ratman",
 ]
 

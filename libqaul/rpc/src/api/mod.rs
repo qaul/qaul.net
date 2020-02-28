@@ -8,6 +8,9 @@ pub mod users;
 #[feature(chat)]
 pub mod chat;
 
+#[feature(voices)]
+pub mod voices;
+
 mod envelope;
 pub use envelope::{Envelope, EnvelopeType, Request, Response};
 
