@@ -1,6 +1,7 @@
 use {
     async_trait::async_trait,
-    futures::channel::mpsc,
+    failure::format_err,
+    futures::stream::StreamExt,
     libqaul::{
         users::UserAuth,
         Identity,
@@ -158,16 +159,20 @@ impl VoicesRpc for GetStatus {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct SubscribeToVoice {
+pub struct NextVoice {
     auth: UserAuth,
     call: CallId,
 }
 
 #[async_trait]
-impl VoicesRpc for SubscribeToVoice {
-    type Response = Result<mpsc::UnboundedReceiver<Vec<i16>>>;
+impl VoicesRpc for NextVoice {
+    type Response = Result<Vec<i16>>;
     async fn apply(self, voices: &Voices) -> Self::Response {
-        voices.subscribe_to_voice(self.auth, self.call).await
+        voices.subscribe_to_voice(self.auth, self.call)
+            .await?
+            .next()
+            .await
+            .ok_or(format_err!("Stream closed"))
     }
 }
 

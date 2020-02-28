@@ -166,7 +166,7 @@ pub enum Request {
 
     #[cfg(feature = "voices")]
     /// Subscribe to the incoming voice samples of a call
-    VoicesSubscribe(voices::SubscribeToVoice),
+    VoicesNextVoice(voices::NextVoice),
 
     #[cfg(feature = "voices")]
     /// Await the termination of a call
@@ -231,6 +231,10 @@ pub enum Response {
     /// The status of a call 
     #[cfg(feature = "voices")]
     CallStatus(CallStatus),
+
+    /// A set of voice samples
+    #[cfg(feature = "voices")]
+    VoiceData(Vec<i16>),
 }
 
 impl From<UserAuth> for Response {

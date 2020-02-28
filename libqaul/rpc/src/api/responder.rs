@@ -136,8 +136,10 @@ impl Responder {
             Request::VoicesGetStatus(r) => self.respond_voices(r).await.into(),
             #[cfg(feature = "voices")]
             Request::VoicesOnHangup(r) => self.respond_voices(r).await.into(),
-            // TODO: we have no way to handle subscriptions right now and as such
-            // can't get voice data out
+            #[cfg(feature = "voices")]
+            Request::VoicesNextVoice(r) => self.respond_voices(r).await
+                .map(|samples| Response::VoiceData(samples))
+                .unwrap_or_else(|e| Response::Error(e.to_string())),
 
             _ => unimplemented!(),
         }
