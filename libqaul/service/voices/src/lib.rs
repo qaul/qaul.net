@@ -79,11 +79,40 @@ impl Voices {
         let voices = self.clone();
         // the connector taking incoming messages and turning them into packets
         task::spawn(async move {
+            let task_spawned = false;
             // TODO: currently when the call drops this will leave the task dangling
             // forever
             //
             // it should do not that
             while let Some(msg) = subscription.next().await {
+                if !task_spawned {
+                    // the decoder heartbeat, decoding a packet every 20 ms
+                    task::spawn(async move {
+                        task::sleep(Duration::from_millis(JITTER_DELAY as u64)).await;
+
+                        let mut next_tick = Instant::now();
+                        loop {
+                            {
+                                let mut calls = voices.calls.lock().await;
+                                let mut call = if let Some(call) = calls.get_mut(&id) {
+                                    call
+                                } else {
+                                    break;
+                                };
+
+                                if call.decode_packet().is_err() {
+                                    break;
+                                }
+                            }
+
+                            // this looks a little silly but it helps prevent errors
+                            // from accumulating and causing us to needlessly miss packets
+                            next_tick += Duration::from_millis(PACKET_DURATION as u64);
+                            task::sleep(next_tick.duration_since(Instant::now())).await;
+                        }
+                    });
+                    task_spawned = true;
+                }
                 let msg: VoiceMessage = match conjoiner::deserialise(&msg.payload) {
                     Ok(msg) => msg,
                     Err(_) => { break; },
@@ -133,33 +162,6 @@ impl Voices {
 
                 if send.await.is_err() {
                     break;
-                }
-
-                // this looks a little silly but it helps prevent errors
-                // from accumulating and causing us to needlessly miss packets
-                next_tick += Duration::from_millis(PACKET_DURATION as u64);
-                task::sleep(next_tick.duration_since(Instant::now())).await;
-            }
-        });
-
-        let voices = self.clone();
-        // the decoder heartbeat, decoding a packet every 20 ms
-        task::spawn(async move {
-            task::sleep(Duration::from_millis(JITTER_DELAY as u64)).await;
-
-            let mut next_tick = Instant::now();
-            loop {
-                {
-                    let mut calls = voices.calls.lock().await;
-                    let mut call = if let Some(call) = calls.get_mut(&id) {
-                        call
-                    } else {
-                        break;
-                    };
-
-                    if call.decode_packet().is_err() {
-                        break;
-                    }
                 }
 
                 // this looks a little silly but it helps prevent errors
