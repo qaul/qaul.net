@@ -85,10 +85,7 @@ RUN apt-get update -qq > /dev/null && \
         node-gyp npm-check-updates \
         react-native-cli > /dev/null && \
     npm cache clean --force > /dev/null && \
-    rm -rf /tmp/* /var/tmp/* && \
-    echo "Installing fastlane" && \
-    gem install fastlane --quiet --no-document > /dev/null && \
-    gem install bundler --quiet --no-document > /dev/null
+    rm -rf /tmp/* /var/tmp/*
 
 # Install Android SDK
 RUN echo "Installing sdk tools ${ANDROID_SDK_TOOLS_VERSION}" && \

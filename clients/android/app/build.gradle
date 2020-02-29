@@ -6,7 +6,7 @@ android {
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "net.qaul.app"
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -23,12 +23,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
-            version "3.10.2"
-        }
-    }
 }
 
 dependencies {
@@ -43,5 +37,5 @@ dependencies {
 cargo {
     module  = "../../../librobot"
     libname = "librobot"
-    targets = ["arm64", "arm", "x86", "x86_64", "linux-x86-64"]
+    targets = ["arm64", "x86_64", "linux-x86-64"]
 }
