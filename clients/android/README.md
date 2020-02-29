@@ -11,8 +11,12 @@ $ docker build . -t qaul.net-android
 $ docker run -d /path/to/qaul.net:/qaul.net -it -rm qaul.net-android /bin/bash
 ```
 
-Or you can just build the apk with
+In the container you can then do:
 
 ```console
-$ docker run -d /path/to/qaul.net:/qaul.net -it -rm qaul.net-android ./gradlew assembleDebug
+$ cd /qaul.net/clients/android
+$ ./gradlew cargoBuild
+$ ./gradlew assembleDebug
 ```
+
+There will be a debug APK in `/qaul.net/clients/android/app/build/outputs/apk/debug`.
