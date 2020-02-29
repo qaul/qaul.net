@@ -21,4 +21,6 @@ public class MainActivity extends AppCompatActivity {
         TextView tv = findViewById(R.id.sample_text);
         tv.setText("qaul.net");
     }
+
+    public native void hello();
 }

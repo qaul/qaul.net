@@ -3,7 +3,7 @@ name = "librobot"
 description = "A libqaul and ratman shim for Android"
 version = "0.1.0"
 license = "APGL-3.0-or-later"
-authors = ["Katharina Fey <kookie@spacekookie.de>"]
+authors = ["Katharina Fey <kookie@spacekookie.de>", "Leonora Tindall <nora@nora.codes>"]
 edition = "2018"
 
 [lib]
@@ -11,7 +11,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 jni = { version = "0.14", default-features = false }
+
 libqaul = { path = "../libqaul" }
 ratman = { path = "../ratman" }
-
 netmod-wd = { path = "../netmod-wd" }
