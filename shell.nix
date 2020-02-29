@@ -14,5 +14,8 @@ stdenv.mkDerivation {
 
     # Required for the Android builds
     androidenv.androidPkgs_9_0.androidsdk
+
+    # Required for libqaul-voice
+    libopus pkg-config
   ];
 }

@@ -1,16 +1,16 @@
 use {
-    crate::{ 
-        api::{ CallId, Channels, StreamMetadata },
-        ASC_NAME, Voices,
+    crate::{
+        api::{CallId, StreamMetadata},
+        Voices, ASC_NAME,
     },
     conjoiner,
-    failure::{Error},
-    libqaul::{ 
-        messages::{MsgId, Mode},
+    failure::Error,
+    libqaul::{
+        messages::{Mode, MsgId},
         users::UserAuth,
-        Identity, Tag, 
+        Identity, Tag,
     },
-    serde::{Serialize, Deserialize},
+    serde::{Deserialize, Serialize},
 };
 
 /// A packet of audio data
@@ -30,7 +30,7 @@ pub enum VoiceMessageKind {
     Incoming(StreamMetadata),
     /// The call was accepted by the remote party
     Accept(StreamMetadata),
-    /// The call was ended by the remote party 
+    /// The call was ended by the remote party
     HungUp,
     /// A packet of audio data
     Packet(Packet),
@@ -39,7 +39,7 @@ pub enum VoiceMessageKind {
 #[derive(Serialize, Deserialize, Debug)]
 /// The on-the-wire representation of a voice service message
 pub struct VoiceMessage {
-    /// A unique identifier for this call 
+    /// A unique identifier for this call
     pub call: CallId,
     /// The actually content of the message
     pub kind: VoiceMessageKind,
@@ -47,24 +47,22 @@ pub struct VoiceMessage {
 
 impl VoiceMessage {
     /// Serialize the message and send it down the wire with appropriate tags
-    pub async fn send(self, voices: &Voices, auth: UserAuth, to: Identity)
-    -> Result<MsgId, Error> {
-        let payload = conjoiner::serialise(&self).unwrap(); 
-        let tags = vec![ 
+    pub async fn send(self, voices: &Voices, auth: UserAuth, to: Identity) -> Result<MsgId, Error> {
+        let payload = conjoiner::serialise(&self).unwrap();
+        let tags = vec![
             Tag::new("call_id", self.call),
             match self.kind {
                 VoiceMessageKind::Incoming(_) => Tag::new("kind", b"incoming".to_vec()),
-                VoiceMessageKind::Accept(_) |
-                    VoiceMessageKind::HungUp => Tag::new("kind", b"control".to_vec()),
-                VoiceMessageKind::Packet(p) => Tag::new("kind", b"packet".to_vec()),
+                VoiceMessageKind::Accept(_) | VoiceMessageKind::HungUp => {
+                    Tag::new("kind", b"control".to_vec())
+                }
+                VoiceMessageKind::Packet(_) => Tag::new("kind", b"packet".to_vec()),
             },
         ];
-        Ok(voices.qaul.messages().send(
-            auth,
-            Mode::Std(to),
-            ASC_NAME,
-            tags,
-            payload,
-        ).await?)
+        Ok(voices
+            .qaul
+            .messages()
+            .send(auth, Mode::Std(to), ASC_NAME, tags, payload)
+            .await?)
     }
 }
