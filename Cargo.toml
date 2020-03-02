@@ -1,20 +1,17 @@
 [package]
 name = "alexandria"
-description = "A powerful, multi-payload, zone-encrypted persistence store"
-version = "0.1.0"
+description = "A zone-encrypted, user-namespaced, hybrid database with tag based query support"
+version = "0.2.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
-repository = "https://git.open-communication.net/spacekookie/alexandria"
+repository = "https://git.open-communication.net/qaul/alexandria"
 documentation = "https://docs.rs/alexandria"
 license = "GPL-3.0"
 edition = "2018"
 
-[[example]]
-name = "simple"
-required-features = ["tempdir"]
-
 [dependencies]
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+identity = { version = "0.3", features = ["digest", "random"], package = "ratman-identity" }
 
-# Only required for examples
-tempdir = { version = "0.3", optional = true }
+async-std = { version = "1.0", features = ["unstable"] }
+serde = { version = "1.0", features = ["derive"] }
+sodiumoxide = "0.2.5"
+
