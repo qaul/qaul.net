@@ -1,16 +1,5 @@
 //! Data formats
 
-use serde::{Deserialize, Serialize};
-
-/// An encrypted piece of data
-#[derive(Serialize, Deserialize)]
-pub(crate) struct Encrypted {
-    /// Number only used once
-    nonce: Vec<u8>,
-    /// Data buffer
-    data: Vec<u8>,
-}
-
 // /// A strongly-typed value stored in an `alexandria` scope
 // #[derive(Serialize, Deserialize, Debug)]
 // pub enum Value {
