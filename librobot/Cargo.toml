@@ -7,6 +7,7 @@ authors = ["Katharina Fey <kookie@spacekookie.de>", "Leonora Tindall <nora@nora.
 edition = "2018"
 
 [lib]
+name = "robot"
 crate-type = ["cdylib"]
 
 [dependencies]
