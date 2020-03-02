@@ -36,6 +36,8 @@ dependencies {
 
 cargo {
     module  = "../../../librobot"
+    targetDirectory = "../../../target"
     libname = "librobot"
-    targets = ["arm64", "x86_64", "linux-x86-64"]
+    targetIncludes = ['librobot.so']
+    targets = ["arm", "arm64", "x86", "x86_64"]
 }
