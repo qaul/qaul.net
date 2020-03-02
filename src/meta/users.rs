@@ -9,7 +9,7 @@ use crate::{
     },
     Id,
 };
-use bincode::deserialize;
+use bincode::{deserialize, serialize};
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, mem::swap};
 
@@ -38,8 +38,28 @@ pub(crate) enum Entry {
 pub(crate) struct UserTable(BTreeMap<Hid, Entry>);
 
 impl UserTable {
+    /// Create a new empty user table
     pub(crate) fn new() -> Self {
         Default::default()
+    }
+
+    /// Load data from disk
+    pub(crate) fn load(data: &[u8]) -> Self {
+        deserialize(data).unwrap()
+    }
+
+    /// Add a new user to the user table
+    pub(crate) fn add_user(&mut self, id: Id, pw: &str) -> Option<()> {
+        if self.0.contains_key(&id) {
+            return None;
+        }
+
+        let key = aes::key_from_pw(id.to_string().as_str(), pw);
+        let user = User { id };
+        let ser = serialize(&user).unwrap();
+        let enc = Encrypted::encrypt(&ser, &key);
+        self.0.insert(id, Entry::Open(user, enc));
+        Some(())
     }
 
     /// Unlock a user entry in place
@@ -55,7 +75,7 @@ impl UserTable {
                 _ => return None,
             };
 
-            let dec = enc.decrypt(&k);
+            let dec = enc.decrypt(&k)?;
             Entry::Open(deserialize(&dec).unwrap(), enc.clone())
         };
 
@@ -64,7 +84,7 @@ impl UserTable {
     }
 
     /// Re-seal the user metadata structure in place
-    pub(crate) fn close_user(&mut self, id: Id) -> Option <()> {
+    pub(crate) fn close_user(&mut self, id: Id) -> Option<()> {
         let mut enc = Entry::Closed(match self.0.get_mut(&id) {
             Some(Entry::Open(_, enc)) => enc.clone(),
             _ => return None,
@@ -76,7 +96,13 @@ impl UserTable {
 }
 
 #[test]
-fn oof() {
+fn open_empty() {
     let mut u = UserTable::new();
-    u.open_user(Id::random(), "foobar");
+    assert_eq!(u.open_user(Id::random(), "cool_pw"), None);
+}
+
+#[test]
+fn close_empty() {
+    let mut u = UserTable::new();
+    assert_eq!(u.close_user(Id::random()), None);
 }

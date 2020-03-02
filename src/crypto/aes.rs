@@ -2,7 +2,7 @@
 //!
 //! These functions are only used to bootstrap the unlocking process
 //! for the database user table.  For all other cryptographic
-//! operations, see the `symm` module instead.
+//! operations, see the `asym` module instead.
 
 use crate::crypto::Encrypted;
 use keybob::{Key as KeyBuilder, KeyType};
@@ -16,7 +16,7 @@ pub(crate) fn key_from_pw(pw: &str, salt: &str) -> Key {
 
 pub(crate) trait Crypto {
     fn encrypt(data: &[u8], key: &Key) -> Self;
-    fn decrypt(&self, key: &Key) -> Vec<u8>;
+    fn decrypt(&self, key: &Key) -> Option<Vec<u8>>;
 }
 
 impl Crypto for Encrypted {
@@ -30,9 +30,9 @@ impl Crypto for Encrypted {
         }
     }
 
-    fn decrypt(&self, key: &Key) -> Vec<u8> {
+    fn decrypt(&self, key: &Key) -> Option<Vec<u8>> {
         let Encrypted { nonce, data } = self;
         let nonce = Nonce::from_slice(nonce.as_slice()).unwrap();
-        open(data.as_slice(), &nonce, key).unwrap()
+        open(data.as_slice(), &nonce, key).ok()
     }
 }
