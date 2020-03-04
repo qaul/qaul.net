@@ -19,24 +19,19 @@ impl KeyPair {
     }
 }
 
-pub(crate) trait Crypto {
-    fn encrypt(data: &[u8], keypair: &KeyPair) -> Self;
-    fn decrypt(&self, keypair: &KeyPair) -> Option<Vec<u8>>;
-}
+// impl Crypto for Encrypted {
+//     fn encrypt(data: &[u8], keypair: &KeyPair) -> Self {
+//         let nonce = box_::gen_nonce();
+//         let data = box_::seal(data, &nonce, &keypair.pub_, &keypair.sec);
+//         Self {
+//             nonce: nonce.0.into_iter().cloned().collect(),
+//             data,
+//         }
+//     }
 
-impl Crypto for Encrypted {
-    fn encrypt(data: &[u8], keypair: &KeyPair) -> Self {
-        let nonce = box_::gen_nonce();
-        let data = box_::seal(data, &nonce, &keypair.pub_, &keypair.sec);
-        Self {
-            nonce: nonce.0.into_iter().cloned().collect(),
-            data,
-        }
-    }
-
-    fn decrypt(&self, keypair: &KeyPair) -> Option<Vec<u8>> {
-        let Encrypted { nonce, data } = self;
-        let nonce = Nonce::from_slice(nonce.as_slice()).unwrap();
-        box_::open(data.as_slice(), &nonce, &keypair.pub_, &keypair.sec).ok()
-    }
-}
+//     fn decrypt(&self, keypair: &KeyPair) -> Option<Vec<u8>> {
+//         let Encrypted { nonce, data } = self;
+//         let nonce = Nonce::from_slice(nonce.as_slice()).unwrap();
+//         box_::open(data.as_slice(), &nonce, &keypair.pub_, &keypair.sec).ok()
+//     }
+// }

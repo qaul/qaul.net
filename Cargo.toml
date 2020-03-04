@@ -16,3 +16,4 @@ serde = { version = "1.0", features = ["derive"] }
 sodiumoxide = "0.2.5"
 bincode = "1.0"
 keybob = "0.3"
+failure = "0.1"
