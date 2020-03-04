@@ -1,7 +1,11 @@
 //! Asymmetric cryto utilities
 
-use crate::{crypto::Encrypted, Id};
-use serde::{Deserialize, Serialize};
+use crate::{
+    crypto::{CipherText, Encrypter},
+    error::{Error, Result},
+    wire::Encoder,
+};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use sodiumoxide::crypto::box_::{self, Nonce, PublicKey, SecretKey};
 
 /// Both public and private keys for a user
@@ -19,19 +23,32 @@ impl KeyPair {
     }
 }
 
-// impl Crypto for Encrypted {
-//     fn encrypt(data: &[u8], keypair: &KeyPair) -> Self {
-//         let nonce = box_::gen_nonce();
-//         let data = box_::seal(data, &nonce, &keypair.pub_, &keypair.sec);
-//         Self {
-//             nonce: nonce.0.into_iter().cloned().collect(),
-//             data,
-//         }
-//     }
+impl<T> Encrypter<T> for KeyPair
+where
+    T: Encoder<T> + Serialize + DeserializeOwned,
+{
+    fn seal(&self, data: &T) -> Result<CipherText> {
+        let non = box_::gen_nonce();
+        let enc = data.encode()?;
+        let data = box_::seal(&enc, &non, &self.pub_, &self.sec);
+        let nonce = non.0.into_iter().cloned().collect();
+        Ok(CipherText { nonce, data })
+    }
 
-//     fn decrypt(&self, keypair: &KeyPair) -> Option<Vec<u8>> {
-//         let Encrypted { nonce, data } = self;
-//         let nonce = Nonce::from_slice(nonce.as_slice()).unwrap();
-//         box_::open(data.as_slice(), &nonce, &keypair.pub_, &keypair.sec).ok()
-//     }
-// }
+    fn open(&self, data: &CipherText) -> Result<T> {
+        let CipherText {
+            ref nonce,
+            ref data,
+        } = data;
+        let nonce = Nonce::from_slice(nonce.as_slice()).ok_or(Error::InternalError {
+            msg: "Failed to read nonce!".into(),
+        })?;
+        let clear = box_::open(data.as_slice(), &nonce, &self.pub_, &self.sec).map_err(|_| {
+            Error::InternalError {
+                msg: "Failed to decrypt data".into(),
+            }
+        })?;
+
+        Ok(T::decode(&clear)?)
+    }
+}

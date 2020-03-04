@@ -40,9 +40,14 @@ where
         })
     }
 
-    fn open(&self, data: CipherText) -> Result<T> {
-        let CipherText { nonce, data } = data;
-        let nonce = Nonce::from_slice(nonce.as_slice()).unwrap();
+    fn open(&self, data: &CipherText) -> Result<T> {
+        let CipherText {
+            ref nonce,
+            ref data,
+        } = data;
+        let nonce = Nonce::from_slice(nonce.as_slice()).ok_or(Error::InternalError {
+            msg: "Failed to read nonce!".into(),
+        })?;
         let clear = open(data.as_slice(), &nonce, self).map_err(|_| Error::InternalError {
             msg: "Failed to decrypt data".into(),
         })?;

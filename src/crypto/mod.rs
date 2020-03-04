@@ -3,7 +3,7 @@
 pub(crate) mod aes;
 pub(crate) mod asym;
 
-use crate::error::Result;
+use crate::error::{Error, Result};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 /// An encrypted piece of data
@@ -21,7 +21,7 @@ where
     T: Serialize + DeserializeOwned,
 {
     fn seal(&self, data: &T) -> Result<CipherText>;
-    fn open(&self, data: CipherText) -> Result<T>;
+    fn open(&self, data: &CipherText) -> Result<T>;
 }
 
 /// A generic wrapper around the unlock state of data
@@ -46,7 +46,15 @@ where
     where
         K: Encrypter<T>,
     {
-        Ok(())
+        match self {
+            Self::Open(_) => Err(Error::InternalError {
+                msg: "tried to open ::Open(_) variant".into(),
+            }),
+            Self::Closed(enc) => {
+                *self = Self::Open(key.open(enc)?);
+                Ok(())
+            }
+        }
     }
 
     /// Perform the close operation in place with a key
@@ -54,6 +62,14 @@ where
     where
         K: Encrypter<T>,
     {
-        Ok(())
+        match self {
+            Self::Closed(_) => Err(Error::InternalError {
+                msg: "tried to close ::Closed(_) variant".into(),
+            }),
+            Self::Open(data) => {
+                *self = Self::Closed(key.seal(data)?);
+                Ok(())
+            }
+        }
     }
 }
