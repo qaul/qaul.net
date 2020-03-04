@@ -4,14 +4,14 @@
 
 use crate::{
     crypto::{
-        aes::{self, Crypto},
-        Encrypted,
+        aes::{Constructor, Key},
+        DetachedKey, Encrypted,
     },
+    error::{Error, Result},
     Id,
 };
-use bincode::{deserialize, serialize};
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeMap, mem::swap};
+use std::collections::BTreeMap;
 
 /// The hash of an Id which is used for external representation
 pub(crate) type Hid = Id;
@@ -24,18 +24,23 @@ pub(crate) struct User {
     //pub(crate) keys: KeyTreePair,
 }
 
-/// An entry in the user table
+/// A simple wrapper to make sure
 #[derive(Serialize, Deserialize)]
-pub(crate) enum Entry {
-    /// A decrypted user metadata entry
-    Open(User, Encrypted),
-    /// An encrypted entry
-    Closed(Encrypted),
+struct UserWithKey<K> {
+    key: K,
+    #[serde(flatten)]
+    inner: User,
+}
+
+impl<K> DetachedKey<K> for UserWithKey<K> {
+    fn key(&self) -> Option<&K> {
+        Some(&self.key)
+    }
 }
 
 /// A table of users in the database
 #[derive(Default, Serialize, Deserialize)]
-pub(crate) struct UserTable(BTreeMap<Hid, Entry>);
+pub(crate) struct UserTable(BTreeMap<Hid, Encrypted<UserWithKey<Key>, Key>>);
 
 impl UserTable {
     /// Create a new empty user table
@@ -45,7 +50,8 @@ impl UserTable {
 
     /// Load data from disk
     pub(crate) fn load(data: &[u8]) -> Self {
-        deserialize(data).unwrap()
+        unimplemented!()
+        // deserialize(data).unwrap()
     }
 
     /// Add a new user to the user table
@@ -54,11 +60,12 @@ impl UserTable {
             return None;
         }
 
-        let key = aes::key_from_pw(id.to_string().as_str(), pw);
-        let user = User { id };
-        let ser = serialize(&user).unwrap();
-        let enc = Encrypted::encrypt(&ser, &key);
-        self.0.insert(id, Entry::Open(user, enc));
+        let with_key = UserWithKey {
+            key: Key::from_pw(pw, &id.to_string()),
+            inner: User { id },
+        };
+
+        self.0.insert(id, Encrypted::new(with_key));
         Some(())
     }
 
@@ -66,43 +73,38 @@ impl UserTable {
     ///
     /// The provided Id will be hashed, to corresponds to a `Hid`,
     /// which provides a layer of anonymity for users in the database.
-    pub(crate) fn open_user(&mut self, id: Id, pw: &str) -> Option<()> {
-        let k = aes::key_from_pw(id.to_string().as_str(), pw);
+    pub(crate) fn open_user(&mut self, id: Id, pw: &str) -> Result<()> {
+        let k = Key::from_pw(id.to_string().as_str(), pw);
 
-        let mut new = {
-            let enc = match self.0.get_mut(&id) {
-                Some(Entry::Closed(enc)) => enc,
-                _ => return None,
-            };
-
-            let dec = enc.decrypt(&k)?;
-            Entry::Open(deserialize(&dec).unwrap(), enc.clone())
-        };
-
-        swap(self.0.get_mut(&id).unwrap(), &mut new);
-        Some(())
+        // Unlocking happens in-place
+        match self.0.get_mut(&id) {
+            Some(ref mut e) => e.open(&k),
+            None => Err(Error::UnlockFailed { user: id }),
+        }
     }
 
     /// Re-seal the user metadata structure in place
-    pub(crate) fn close_user(&mut self, id: Id) -> Option<()> {
-        let mut enc = Entry::Closed(match self.0.get_mut(&id) {
-            Some(Entry::Open(_, enc)) => enc.clone(),
-            _ => return None,
-        });
-
-        swap(self.0.get_mut(&id).unwrap(), &mut enc);
-        Some(())
+    pub(crate) fn close_user(&mut self, id: Id) -> Result<()> {
+        //  Unlocking happens in-place
+        match self.0.get_mut(&id) {
+            Some(e) => Ok(e.close_detached()?),
+            None => Err(Error::UnlockFailed { user: id }),
+        }
     }
 }
 
 #[test]
 fn open_empty() {
     let mut u = UserTable::new();
-    assert_eq!(u.open_user(Id::random(), "cool_pw"), None);
+    assert_eq!(u.open_user(Id::random(), "cool_pw").is_err(), true);
 }
 
 #[test]
-fn close_empty() {
+fn create_clone_open() {
     let mut u = UserTable::new();
-    assert_eq!(u.close_user(Id::random()), None);
+    let id = Id::random();
+    let pw = "car horse battery staple";
+    u.add_user(id, pw).unwrap();
+    u.close_user(id).unwrap();
+    u.open_user(id, pw).unwrap();
 }

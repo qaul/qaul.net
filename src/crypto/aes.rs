@@ -11,7 +11,10 @@ use crate::{
 };
 use keybob::{Key as KeyBuilder, KeyType};
 use serde::{de::DeserializeOwned, Serialize};
-use sodiumoxide::crypto::secretbox::{gen_nonce, open, seal, Key, Nonce};
+use sodiumoxide::crypto::secretbox::{gen_nonce, open, seal, Nonce};
+
+// Make it easier for alexandria internals to use this type
+pub(crate) use sodiumoxide::crypto::secretbox::Key;
 
 pub(crate) trait Constructor {
     /// Create an AES symmetric key from a user password and salt
