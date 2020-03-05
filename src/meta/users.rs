@@ -27,14 +27,14 @@ pub(crate) struct User {
 /// A simple wrapper to make sure
 #[derive(Serialize, Deserialize)]
 struct UserWithKey<K> {
-    key: K,
-    #[serde(flatten)]
+    #[serde(skip, default)]
+    key: Option<K>,
     inner: User,
 }
 
 impl<K> DetachedKey<K> for UserWithKey<K> {
     fn key(&self) -> Option<&K> {
-        Some(&self.key)
+        self.key.as_ref()
     }
 }
 

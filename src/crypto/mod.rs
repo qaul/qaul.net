@@ -6,9 +6,10 @@ pub(crate) mod asym;
 
 use crate::error::{Error, Result};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use std::marker::PhantomData;
 
 /// An encrypted piece of data
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Default, Serialize, Deserialize)]
 pub(crate) struct CipherText {
     /// Number only used once
     nonce: Vec<u8>,
@@ -46,9 +47,11 @@ where
     Open(T),
     /// An encrypted value
     Closed(CipherText),
+
     /// Purely here to make rustc happy about the generic bounds
     #[doc(hidden)]
-    __Never(std::marker::PhantomData<K>),
+    #[serde(skip)]
+    Never(Option<PhantomData<K>>),
 }
 
 impl<T, K> Encrypted<T, K>
