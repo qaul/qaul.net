@@ -6,7 +6,7 @@ use crate::{
     crypto::{
         aes::{Constructor, Key},
         asym::KeyPair,
-        DetachedKey, Encrypted,
+        DetachedKey, Encrypted, EncryptedMap,
     },
     error::{Error, Result},
     Id,
@@ -56,13 +56,13 @@ impl DetachedKey<Key> for UserWithKey {
 }
 
 /// A table of users in the database
-#[derive(Debug, Default, Serialize, Deserialize)]
-pub(crate) struct UserTable(BTreeMap<Hid, Encrypted<UserWithKey, Key>>);
+#[derive(Serialize, Deserialize)]
+pub(crate) struct UserTable(EncryptedMap<Hid, UserWithKey, Key>);
 
 impl UserTable {
     /// Create a new empty user table
     pub(crate) fn new() -> Self {
-        Default::default()
+        Self(EncryptedMap::new())
     }
 
     /// Load data from disk
@@ -87,18 +87,12 @@ impl UserTable {
     /// which provides a layer of anonymity for users in the database.
     pub(crate) fn open(&mut self, id: Id, pw: &str) -> Result<()> {
         let k = Key::from_pw(pw, &id.to_string());
-        match self.0.get_mut(&id) {
-            Some(ref mut e) => e.open(&k),
-            None => Err(Error::UnlockFailed { id: id.to_string() }),
-        }
+        self.0.open(id, &k)
     }
 
     /// Re-seal the user metadata structure in place
     pub(crate) fn close(&mut self, id: Id) -> Result<()> {
-        match self.0.get_mut(&id) {
-            Some(e) => Ok(e.close_detached()?),
-            None => Err(Error::UnlockFailed { id: id.to_string() }),
-        }
+        self.0.close(id, None)
     }
 }
 

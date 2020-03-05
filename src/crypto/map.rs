@@ -14,12 +14,12 @@ use std::{
 };
 
 /// A mapper around encrypted data in a map
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub(crate) struct EncryptedMap<K, V, Q>
 where
     K: Serialize + DeserializeOwned + Ord + PartialOrd + Hash + ToString,
     V: DetachedKey<Q> + Serialize + DeserializeOwned,
-    Q: Encrypter<V> + Debug,
+    Q: Encrypter<V>,
 {
     #[serde(bound(deserialize = "V: DeserializeOwned"))]
     inner: BTreeMap<K, Encrypted<V, Q>>,
@@ -29,7 +29,7 @@ impl<K, V, Q> EncryptedMap<K, V, Q>
 where
     K: Serialize + DeserializeOwned + Ord + PartialOrd + Hash + ToString,
     V: DetachedKey<Q> + Serialize + DeserializeOwned,
-    Q: Encrypter<V> + Debug,
+    Q: Encrypter<V>,
 {
     /// Create a new encrypted map
     pub(crate) fn new() -> Self {

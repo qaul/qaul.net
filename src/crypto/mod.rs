@@ -46,10 +46,11 @@ pub(crate) trait DetachedKey<K> {
 pub(crate) enum Encrypted<T, K>
 where
     T: Serialize + DeserializeOwned + DetachedKey<K>,
-    K: Encrypter<T> + Debug,
+    K: Encrypter<T>,
 {
     /// An in-use data variant
-    #[serde(skip)]
+    #[serde(skip_serializing)]
+    #[serde(bound(deserialize = "T: DeserializeOwned"))]
     Open(T),
     /// An encrypted value
     Closed(CipherText),
@@ -63,7 +64,7 @@ where
 impl<T, K> Encrypted<T, K>
 where
     T: Serialize + DeserializeOwned + DetachedKey<K>,
-    K: Encrypter<T> + Debug,
+    K: Encrypter<T>,
 {
     pub(crate) fn new(init: T) -> Self {
         Self::Open(init)
@@ -92,7 +93,7 @@ where
                 msg: "tried to open ::Open(_) variant".into(),
             }),
             Self::Closed(enc) => {
-                *self = Self::Open(dbg!(key).open(enc)?);
+                *self = Self::Open(key.open(enc)?);
                 Ok(())
             }
             _ => unreachable!(),
