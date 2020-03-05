@@ -16,7 +16,7 @@ use std::collections::BTreeMap;
 /// The hash of an Id which is used for external representation
 pub(crate) type Hid = Id;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct User {
     /// The nested user token
     pub(crate) id: Id,
@@ -24,7 +24,7 @@ pub(crate) struct User {
     //pub(crate) keys: KeyTreePair,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct UserWithKey {
     #[serde(skip)]
     key: Option<Key>,
@@ -38,7 +38,7 @@ impl DetachedKey<Key> for UserWithKey {
 }
 
 /// A table of users in the database
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub(crate) struct UserTable(BTreeMap<Hid, Encrypted<UserWithKey, Key>>);
 
 impl UserTable {
@@ -59,8 +59,9 @@ impl UserTable {
             return None;
         }
 
+        let key = Key::from_pw(pw, &id.to_string());
         let with_key = UserWithKey {
-            key: Some(Key::from_pw(pw, &id.to_string())),
+            key: Some(key),
             inner: User { id },
         };
 
@@ -73,8 +74,7 @@ impl UserTable {
     /// The provided Id will be hashed, to corresponds to a `Hid`,
     /// which provides a layer of anonymity for users in the database.
     pub(crate) fn open_user(&mut self, id: Id, pw: &str) -> Result<()> {
-        let k = Key::from_pw(id.to_string().as_str(), pw);
-
+        let k = Key::from_pw(pw, &id.to_string());
         // Unlocking happens in-place
         match self.0.get_mut(&id) {
             Some(ref mut e) => e.open(&k),

@@ -9,7 +9,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use sodiumoxide::crypto::box_::{self, Nonce, PublicKey, SecretKey};
 
 /// Both public and private keys for a user
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct KeyPair {
     pub_: PublicKey,
     sec: SecretKey,

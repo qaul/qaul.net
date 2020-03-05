@@ -57,3 +57,10 @@ where
         Ok(T::decode(&clear)?)
     }
 }
+
+#[test]
+fn key_is_key() {
+    let k1 = KeyBuilder::from_pw(KeyType::Aes128, "password", "salt");
+    let k2 = KeyBuilder::from_pw(KeyType::Aes128, "password", "salt");
+    assert_eq!(k1, k2);
+}

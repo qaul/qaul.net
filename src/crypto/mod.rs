@@ -6,10 +6,10 @@ pub(crate) mod asym;
 
 use crate::error::{Error, Result};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::marker::PhantomData;
+use std::{fmt::Debug, marker::PhantomData};
 
 /// An encrypted piece of data
-#[derive(Clone, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub(crate) struct CipherText {
     /// Number only used once
     nonce: Vec<u8>,
@@ -36,11 +36,11 @@ pub(crate) trait DetachedKey<K> {
 }
 
 /// A generic wrapper around the unlock state of data
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum Encrypted<T, K>
 where
     T: Serialize + DeserializeOwned + DetachedKey<K>,
-    K: Encrypter<T>,
+    K: Encrypter<T> + Debug,
 {
     /// An in-use data variant
     #[serde(skip)]
@@ -57,10 +57,18 @@ where
 impl<T, K> Encrypted<T, K>
 where
     T: Serialize + DeserializeOwned + DetachedKey<K>,
-    K: Encrypter<T>,
+    K: Encrypter<T> + Debug,
 {
     pub(crate) fn new(init: T) -> Self {
         Self::Open(init)
+    }
+
+    /// Check if the value is encrypted
+    pub(crate) fn encrypted(&self) -> bool {
+        match self {
+            Self::Closed(_) => true,
+            _ => false,
+        }
     }
 
     /// Perform the open operation in place with a key
@@ -70,7 +78,7 @@ where
                 msg: "tried to open ::Open(_) variant".into(),
             }),
             Self::Closed(enc) => {
-                *self = Self::Open(key.open(enc)?);
+                *self = Self::Open(dbg!(key).open(enc)?);
                 Ok(())
             }
             _ => unreachable!(),
@@ -142,4 +150,83 @@ where
             _ => unreachable!(),
         }
     }
+
+    /// Consume the `Encrypted<T>` type into the inner value
+    ///
+    /// Pancis if the value is encrypted
+    #[cfg(test)]
+    pub(crate) fn consume(self) -> T {
+        match self {
+            Self::Open(data) => data,
+            _ => panic!("Couldn't consume encrypted value!"),
+        }
+    }
+}
+
+#[test]
+fn aes_encrypt_decrypt() {
+    use aes::{Constructor, Key};
+
+    #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+    struct Data {
+        num: i32,
+    };
+
+    impl DetachedKey<Key> for Data {
+        fn key(&self) -> Option<&Key> {
+            None
+        }
+    }
+
+    let key = Key::from_pw("fuck", "cops");
+    let data = Data { num: 1312 };
+
+    // Encrypted data wrapper
+    let mut enc = Encrypted::new(data.clone());
+
+    // Close the entry
+    enc.close(&key).unwrap();
+    assert!(enc.encrypted());
+
+    // Re-open the entry
+    enc.open(&key).unwrap();
+    assert_eq!(enc.encrypted(), false);
+
+    let data2 = enc.consume();
+
+    assert_eq!(data, data2);
+}
+
+#[test]
+fn asym_encrypt_decrypt() {
+    use asym::KeyPair;
+
+    #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+    struct Data {
+        num: i32,
+    };
+
+    impl DetachedKey<KeyPair> for Data {
+        fn key(&self) -> Option<&KeyPair> {
+            None
+        }
+    }
+
+    let key = KeyPair::new();
+    let data = Data { num: 1312 };
+
+    // Encrypted data wrapper
+    let mut enc = Encrypted::new(data.clone());
+
+    // Close the entry
+    enc.close(&key).unwrap();
+    assert!(enc.encrypted());
+
+    // Re-open the entry
+    enc.open(&key).unwrap();
+    assert_eq!(enc.encrypted(), false);
+
+    let data2 = enc.consume();
+
+    assert_eq!(data, data2);
 }
