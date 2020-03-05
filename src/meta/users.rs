@@ -24,23 +24,22 @@ pub(crate) struct User {
     //pub(crate) keys: KeyTreePair,
 }
 
-/// A simple wrapper to make sure
 #[derive(Serialize, Deserialize)]
-struct UserWithKey<K> {
-    #[serde(skip, default)]
-    key: Option<K>,
+struct UserWithKey {
+    #[serde(skip)]
+    key: Option<Key>,
     inner: User,
 }
 
-impl<K> DetachedKey<K> for UserWithKey<K> {
-    fn key(&self) -> Option<&K> {
+impl DetachedKey<Key> for UserWithKey {
+    fn key(&self) -> Option<&Key> {
         self.key.as_ref()
     }
 }
 
 /// A table of users in the database
 #[derive(Default, Serialize, Deserialize)]
-pub(crate) struct UserTable(BTreeMap<Hid, Encrypted<UserWithKey<Key>, Key>>);
+pub(crate) struct UserTable(BTreeMap<Hid, Encrypted<UserWithKey, Key>>);
 
 impl UserTable {
     /// Create a new empty user table
@@ -61,7 +60,7 @@ impl UserTable {
         }
 
         let with_key = UserWithKey {
-            key: Key::from_pw(pw, &id.to_string()),
+            key: Some(Key::from_pw(pw, &id.to_string())),
             inner: User { id },
         };
 
