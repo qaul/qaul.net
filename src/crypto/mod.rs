@@ -4,7 +4,11 @@
 pub(crate) mod aes;
 pub(crate) mod asym;
 
+mod map;
+pub(crate) use map::EncryptedMap;
+
 use crate::error::{Error, Result};
+use async_std::sync::Arc;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::{fmt::Debug, marker::PhantomData};
 
@@ -32,7 +36,9 @@ where
 /// it's own key, to avoid having to have a second control-structure
 /// for the keys.
 pub(crate) trait DetachedKey<K> {
-    fn key(&self) -> Option<&K>;
+    fn key(&self) -> Option<Arc<K>> {
+        None
+    }
 }
 
 /// A generic wrapper around the unlock state of data
@@ -71,6 +77,14 @@ where
         }
     }
 
+    /// Call to the inner unlocked `key()` if the entry is open
+    pub(crate) fn key(&self) -> Option<Arc<K>> {
+        match self {
+            Self::Open(t) => t.key(),
+            _ => None,
+        }
+    }
+
     /// Perform the open operation in place with a key
     pub(crate) fn open(&mut self, key: &K) -> Result<()> {
         match self {
@@ -86,7 +100,7 @@ where
     }
 
     /// Perform the close operation in place with a key
-    pub(crate) fn close(&mut self, key: &K) -> Result<()> {
+    pub(crate) fn close(&mut self, key: Arc<K>) -> Result<()> {
         match self {
             Self::Closed(_) => Err(Error::InternalError {
                 msg: "tried to close ::Closed(_) variant".into(),
@@ -118,39 +132,6 @@ where
         }
     }
 
-    /// Get the value, if it was decrypted before
-    pub(crate) fn read(&self) -> Result<&T> {
-        match self {
-            Self::Closed(_) => Err(Error::InternalError {
-                msg: "Tried reading ::Closed variant".into(),
-            }),
-            Self::Open(ref data) => Ok(data),
-            _ => unreachable!(),
-        }
-    }
-
-    /// Get a mutable reference to modify the value, if it was decrypted before
-    pub(crate) fn modify(&mut self) -> Result<&mut T> {
-        match self {
-            Self::Closed(_) => Err(Error::InternalError {
-                msg: "Tried reading ::Closed variant".into(),
-            }),
-            Self::Open(ref mut data) => Ok(data),
-            _ => unreachable!(),
-        }
-    }
-
-    /// Replace the value, if it was decrypted before
-    pub(crate) fn replace(&mut self, new: T) -> Result<T> {
-        match self {
-            Self::Closed(_) => Err(Error::InternalError {
-                msg: "Tried reading ::Closed variant".into(),
-            }),
-            Self::Open(ref mut prev) => Ok(std::mem::replace(prev, new)),
-            _ => unreachable!(),
-        }
-    }
-
     /// Consume the `Encrypted<T>` type into the inner value
     ///
     /// Pancis if the value is encrypted
@@ -173,23 +154,23 @@ fn aes_encrypt_decrypt() {
     };
 
     impl DetachedKey<Key> for Data {
-        fn key(&self) -> Option<&Key> {
+        fn key(&self) -> Option<Arc<Key>> {
             None
         }
     }
 
-    let key = Key::from_pw("fuck", "cops");
+    let key = Arc::new(Key::from_pw("fuck", "cops"));
     let data = Data { num: 1312 };
 
     // Encrypted data wrapper
     let mut enc = Encrypted::new(data.clone());
 
     // Close the entry
-    enc.close(&key).unwrap();
+    enc.close(Arc::clone(&key)).unwrap();
     assert!(enc.encrypted());
 
     // Re-open the entry
-    enc.open(&key).unwrap();
+    enc.open(&*key).unwrap();
     assert_eq!(enc.encrypted(), false);
 
     let data2 = enc.consume();
@@ -207,23 +188,23 @@ fn asym_encrypt_decrypt() {
     };
 
     impl DetachedKey<KeyPair> for Data {
-        fn key(&self) -> Option<&KeyPair> {
+        fn key(&self) -> Option<Arc<KeyPair>> {
             None
         }
     }
 
-    let key = KeyPair::new();
+    let key = Arc::new(KeyPair::new());
     let data = Data { num: 1312 };
 
     // Encrypted data wrapper
     let mut enc = Encrypted::new(data.clone());
 
     // Close the entry
-    enc.close(&key).unwrap();
+    enc.close(Arc::clone(&key)).unwrap();
     assert!(enc.encrypted());
 
     // Re-open the entry
-    enc.open(&key).unwrap();
+    enc.open(&*key).unwrap();
     assert_eq!(enc.encrypted(), false);
 
     let data2 = enc.consume();

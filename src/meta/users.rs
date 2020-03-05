@@ -5,11 +5,13 @@
 use crate::{
     crypto::{
         aes::{Constructor, Key},
+        asym::KeyPair,
         DetachedKey, Encrypted,
     },
     error::{Error, Result},
     Id,
 };
+use async_std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -20,20 +22,36 @@ pub(crate) type Hid = Id;
 pub(crate) struct User {
     /// The nested user token
     pub(crate) id: Id,
-    // Encrypion key tree
-    //pub(crate) keys: KeyTreePair,
+    /// The users' asymmetric encryption pair
+    ///
+    /// At the moment, this is used in a very symmetric way, but in
+    /// the future there are ways to create zones and drop-in
+    /// encryption.
+    pub(crate) key: KeyPair,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 struct UserWithKey {
     #[serde(skip)]
-    key: Option<Key>,
+    key: Option<Arc<Key>>,
     inner: User,
 }
 
+impl UserWithKey {
+    fn new(pw: &str, id: Id) -> Self {
+        let key = KeyPair::new();
+        let aes_key = Arc::new(Key::from_pw(pw, &id.to_string()));
+
+        Self {
+            key: Some(aes_key),
+            inner: User { id, key },
+        }
+    }
+}
+
 impl DetachedKey<Key> for UserWithKey {
-    fn key(&self) -> Option<&Key> {
-        self.key.as_ref()
+    fn key(&self) -> Option<Arc<Key>> {
+        self.key.as_ref().map(|key| Arc::clone(&key))
     }
 }
 
@@ -54,40 +72,32 @@ impl UserTable {
     }
 
     /// Add a new user to the user table
-    pub(crate) fn add_user(&mut self, id: Id, pw: &str) -> Option<()> {
+    pub(crate) fn insert(&mut self, id: Id, pw: &str) -> Result<()> {
         if self.0.contains_key(&id) {
-            return None;
+            return Err(Error::UserAlreadyExists);
         }
-
-        let key = Key::from_pw(pw, &id.to_string());
-        let with_key = UserWithKey {
-            key: Some(key),
-            inner: User { id },
-        };
-
+        let with_key = UserWithKey::new(pw, id);
         self.0.insert(id, Encrypted::new(with_key));
-        Some(())
+        Ok(())
     }
 
     /// Unlock a user entry in place
     ///
     /// The provided Id will be hashed, to corresponds to a `Hid`,
     /// which provides a layer of anonymity for users in the database.
-    pub(crate) fn open_user(&mut self, id: Id, pw: &str) -> Result<()> {
+    pub(crate) fn open(&mut self, id: Id, pw: &str) -> Result<()> {
         let k = Key::from_pw(pw, &id.to_string());
-        // Unlocking happens in-place
         match self.0.get_mut(&id) {
             Some(ref mut e) => e.open(&k),
-            None => Err(Error::UnlockFailed { user: id }),
+            None => Err(Error::UnlockFailed { id: id.to_string() }),
         }
     }
 
     /// Re-seal the user metadata structure in place
-    pub(crate) fn close_user(&mut self, id: Id) -> Result<()> {
-        //  Unlocking happens in-place
+    pub(crate) fn close(&mut self, id: Id) -> Result<()> {
         match self.0.get_mut(&id) {
             Some(e) => Ok(e.close_detached()?),
-            None => Err(Error::UnlockFailed { user: id }),
+            None => Err(Error::UnlockFailed { id: id.to_string() }),
         }
     }
 }
@@ -95,7 +105,7 @@ impl UserTable {
 #[test]
 fn open_empty() {
     let mut u = UserTable::new();
-    assert_eq!(u.open_user(Id::random(), "cool_pw").is_err(), true);
+    assert_eq!(u.open(Id::random(), "cool_pw").is_err(), true);
 }
 
 #[test]
@@ -103,7 +113,7 @@ fn create_clone_open() {
     let mut u = UserTable::new();
     let id = Id::random();
     let pw = "car horse battery staple";
-    u.add_user(id, pw).unwrap();
-    u.close_user(id).unwrap();
-    u.open_user(id, pw).unwrap();
+    u.insert(id, pw).unwrap();
+    u.close(id).unwrap();
+    u.open(id, pw).unwrap();
 }

@@ -1,15 +1,16 @@
 //! Library specific errors
 
 use failure::Fail;
-use identity::Identity as Id;
 
 /// Alexandria library API errors
 #[derive(Debug, Fail)]
 pub enum Error {
+    #[fail(display = "failed to add a user that already exits")]
+    UserAlreadyExists,
     #[fail(display = "failed to initialise library at offset `{}`", offset)]
     InitFailed { offset: String },
-    #[fail(display = "bad unlock token (password?) for user `{}`", user)]
-    UnlockFailed { user: Id },
+    #[fail(display = "bad unlock token (password?) for id `{}`", id)]
+    UnlockFailed { id: String },
     #[fail(display = "failed to sync data: `{}`", msg)]
     SyncFailed { msg: String },
     #[doc(hidden)]
