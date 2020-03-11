@@ -13,6 +13,8 @@ pub enum Error {
     UnlockFailed { id: String },
     #[fail(display = "failed to sync data: `{}`", msg)]
     SyncFailed { msg: String },
+    #[fail(display = "failed to load data: `{}`", msg)]
+    LoadFailed { msg: String },
     #[doc(hidden)]
     #[fail(display = "An alexandria internal error occured: `{}`", msg)]
     InternalError { msg: String },
@@ -33,5 +35,13 @@ impl From<bincode::Error> for Error {
         };
 
         Self::SyncFailed { msg }
+    }
+}
+
+impl From<async_std::io::Error> for Error {
+    fn from(e: async_std::io::Error) -> Self {
+        Self::LoadFailed {
+            msg: format!("{}", e),
+        }
     }
 }
