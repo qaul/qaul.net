@@ -1,6 +1,6 @@
 [package]
 name = "alexandria"
-description = "A zone-encrypted, user-namespaced, hybrid database with tag based query support"
+description = "An encrypted document-oriented database with tag based query support"
 version = "0.2.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 repository = "https://git.open-communication.net/qaul/alexandria"
@@ -17,3 +17,6 @@ sodiumoxide = "0.2.5"
 bincode = "1.0"
 keybob = "0.3"
 failure = "0.1"
+
+[dev-dependencies]
+tempdir = "*"
