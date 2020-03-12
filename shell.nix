@@ -12,6 +12,8 @@ stdenv.mkDerivation {
     # Required for the docs
     mdbook graphviz
 
+    cmake
+    
     # Required for the Android builds
     androidenv.androidPkgs_9_0.androidsdk
 

@@ -20,6 +20,7 @@
 //!
 //! [contact us]: https://docs.qaul.net/contributors/social/_intro.html
 
+use cfg_if;
 use serde::{
     de::{Deserializer, SeqAccess, Visitor},
     Deserialize, Serialize, Serializer,
@@ -29,8 +30,16 @@ use std::{
     string::ToString,
 };
 
-/// Length of the identity buffer to align with an ed25519 pubkey
-pub const ID_LEN: usize = 32;
+cfg_if::cfg_if! {
+    if #[cfg(features = "aligned")] {
+        use std::mem::size_of,
+        /// Length of the identity buffer to align with platform words
+        pub const ID_LEN: usize = size_of::<usize>();
+    } else {
+        /// Length of the identity buffer to align with an ed25519 pubkey
+        pub const ID_LEN: usize = 32;
+    }
+}
 
 /// A generic object identifier
 #[derive(Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
@@ -98,7 +107,7 @@ impl Identity {
     pub fn as_bytes(&self) -> &[u8] {
         &self.0
     }
-    
+
     /// Create an identity using a digest function
     ///
     /// This allows you to pass arbitrary length data which will
@@ -310,6 +319,7 @@ mod test {
     use serde_json;
 
     #[test]
+    #[cfg(not(features = "aligned"))]
     fn json_serde() {
         let s = b"Yes, we will make total destroy.";
         let i = Identity::truncate(&s.to_vec());
@@ -323,6 +333,7 @@ mod test {
     }
 
     #[test]
+    #[cfg(not(features = "aligned"))]
     fn bincode_serde() {
         let s = b"Yes, we will make total destroy.";
         let i = Identity::truncate(&s.to_vec());
@@ -340,6 +351,7 @@ mod test {
     }
 
     #[test]
+    #[cfg(not(features = "aligned"))]
     fn conjoiner_serde() {
         let s = b"Yes, we will make total destroy.";
         let i = Identity::truncate(&s.to_vec());
@@ -355,5 +367,18 @@ mod test {
         );
         let i2 = conjoiner_engine::deserialise(&v).unwrap();
         assert_eq!(i, i2);
+    }
+
+    #[test]
+    #[cfg(features = "aligned")]
+    fn sized() {
+        assert_eq!(crate::ID_LEN, size_of::<usize>());
+    }
+
+    /// This is the default length
+    #[test]
+    #[cfg(not(features = "aligned"))]
+    fn sized() {
+        assert_eq!(crate::ID_LEN, 32);
     }
 }

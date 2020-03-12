@@ -12,7 +12,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "alexandria"
 version = "0.2.0"
-source = "git+https://git.open-communication.net/qaul/alexandria#b5f20ee1c1c64c1b152847f7c42f79e7727d9edc"
+source = "git+https://git.open-communication.net/qaul/alexandria#f51a31adcc74dc0ba086916a82ff924fbf7b518b"
 dependencies = [
  "async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bincode 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -49,7 +49,7 @@ version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "quote 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 1.0.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 1.0.17 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -89,21 +89,22 @@ dependencies = [
 
 [[package]]
 name = "async-trait"
-version = "0.1.24"
+version = "0.1.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "proc-macro2 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 1.0.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 1.0.17 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "async-tungstenite"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "futures 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "futures-io 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "futures-util 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "pin-project 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "tungstenite 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -116,10 +117,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "backtrace"
-version = "0.3.45"
+version = "0.3.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "backtrace-sys 0.1.34 (registry+https://github.com/rust-lang/crates.io-index)",
+ "backtrace-sys 0.1.35 (registry+https://github.com/rust-lang/crates.io-index)",
  "cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.68 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-demangle 0.1.16 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -127,7 +128,7 @@ dependencies = [
 
 [[package]]
 name = "backtrace-sys"
-version = "0.1.34"
+version = "0.1.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "cc 1.0.50 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -481,7 +482,7 @@ name = "error-chain"
 version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "backtrace 0.3.45 (registry+https://github.com/rust-lang/crates.io-index)",
+ "backtrace 0.3.46 (registry+https://github.com/rust-lang/crates.io-index)",
  "version_check 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -490,7 +491,7 @@ name = "failure"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "backtrace 0.3.45 (registry+https://github.com/rust-lang/crates.io-index)",
+ "backtrace 0.3.46 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure_derive 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -501,7 +502,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "proc-macro2 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 1.0.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 1.0.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "synstructure 0.12.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -617,10 +618,10 @@ name = "futures-macro"
 version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "proc-macro-hack 0.5.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "proc-macro-hack 0.5.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 1.0.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 1.0.17 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -652,7 +653,7 @@ dependencies = [
  "futures-task 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "memchr 2.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "pin-utils 0.1.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "proc-macro-hack 0.5.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "proc-macro-hack 0.5.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro-nested 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "slab 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio-io 0.1.13 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1002,7 +1003,7 @@ name = "libqaul-rpc"
 version = "0.1.0"
 dependencies = [
  "async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "async-trait 0.1.24 (registry+https://github.com/rust-lang/crates.io-index)",
+ "async-trait 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "capnp 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-queue 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1020,7 +1021,7 @@ name = "libqaul-ws"
 version = "0.1.0"
 dependencies = [
  "async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "async-tungstenite 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "async-tungstenite 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "libqaul 0.1.0",
  "libqaul-rpc 0.1.0",
@@ -1182,7 +1183,7 @@ name = "netmod-mem"
 version = "0.1.0"
 dependencies = [
  "async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "async-trait 0.1.24 (registry+https://github.com/rust-lang/crates.io-index)",
+ "async-trait 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-channel 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman-identity 0.3.0",
  "ratman-netmod 0.3.0",
@@ -1193,7 +1194,7 @@ name = "netmod-udp"
 version = "0.1.0"
 dependencies = [
  "async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "async-trait 0.1.24 (registry+https://github.com/rust-lang/crates.io-index)",
+ "async-trait 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman-identity 0.3.0",
  "ratman-netmod 0.3.0",
@@ -1205,7 +1206,7 @@ name = "netmod-wd"
 version = "0.1.0"
 dependencies = [
  "async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "async-trait 0.1.24 (registry+https://github.com/rust-lang/crates.io-index)",
+ "async-trait 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman-netmod 0.3.0",
 ]
@@ -1337,7 +1338,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "proc-macro2 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 1.0.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 1.0.17 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1378,13 +1379,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "proc-macro-hack"
-version = "0.5.12"
+version = "0.5.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "proc-macro2 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "quote 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 1.0.16 (registry+https://github.com/rust-lang/crates.io-index)",
-]
 
 [[package]]
 name = "proc-macro-nested"
@@ -1538,6 +1534,7 @@ version = "0.3.0"
 dependencies = [
  "bincode 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "blake2 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "hex 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1561,7 +1558,7 @@ dependencies = [
 name = "ratman-netmod"
 version = "0.3.0"
 dependencies = [
- "async-trait 0.1.24 (registry+https://github.com/rust-lang/crates.io-index)",
+ "async-trait 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratman-identity 0.3.0",
  "serde 1.0.105 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1647,7 +1644,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "proc-macro2 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 1.0.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 1.0.17 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1757,7 +1754,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "syn"
-version = "1.0.16"
+version = "1.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "proc-macro2 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1772,7 +1769,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "proc-macro2 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 1.0.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 1.0.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "unicode-xid 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -2174,11 +2171,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum async-attributes 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "efd3d156917d94862e779f356c5acae312b08fd3121e792c857d7928c8088423"
 "checksum async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "538ecb01eb64eecd772087e5b6f7540cbc917f047727339a472dafed2185b267"
 "checksum async-task 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "0ac2c016b079e771204030951c366db398864f5026f84a44dafb0ff20f02085d"
-"checksum async-trait 0.1.24 (registry+https://github.com/rust-lang/crates.io-index)" = "750b1c38a1dfadd108da0f01c08f4cdc7ff1bb39b325f9c82cc972361780a6e1"
-"checksum async-tungstenite 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "1f1a7fca4f1ccd1fe926bec21a4ba6259d3d91f04d67a9dd76bd549366be5bef"
+"checksum async-trait 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)" = "21a03abb7c9b93ae229356151a083d26218c0358866a2a59d4280c856e9482e6"
+"checksum async-tungstenite 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "6221dc5c27a7e520c7c3eed53f68d4169d136f1dfa5ee29681bfeba4c5d80386"
 "checksum autocfg 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f8aac770f1885fd7e387acedd76065302551364496e46b3dd00860b2f8359b9d"
-"checksum backtrace 0.3.45 (registry+https://github.com/rust-lang/crates.io-index)" = "ad235dabf00f36301792cfe82499880ba54c6486be094d1047b02bacb67c14e8"
-"checksum backtrace-sys 0.1.34 (registry+https://github.com/rust-lang/crates.io-index)" = "ca797db0057bae1a7aa2eef3283a874695455cecf08a43bfb8507ee0ebc1ed69"
+"checksum backtrace 0.3.46 (registry+https://github.com/rust-lang/crates.io-index)" = "b1e692897359247cc6bb902933361652380af0f1b7651ae5c5013407f30e109e"
+"checksum backtrace-sys 0.1.35 (registry+https://github.com/rust-lang/crates.io-index)" = "7de8aba10a69c8e8d7622c5710229485ec32e9d55fdad160ea559c086fdcd118"
 "checksum base64 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)" = "0b25d992356d2eb0ed82172f5248873db5560c4721f564b13cb5193bda5e668e"
 "checksum base64 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b41b7ea54a0c9d92199de89e20e58d49f02f8e699814ef3fdf266f6f748d15c7"
 "checksum base64 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)" = "489d6c0ed21b11d038c31b6ceccca973e65d73ba3bd8ecb9a2babf5546164643"
@@ -2306,7 +2303,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum postcard 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)" = "f61f42c9617f3d7b447ee300bf80cb16c7cd7b28ca88555822793f073f69719f"
 "checksum postcard-cobs 0.1.5-pre (registry+https://github.com/rust-lang/crates.io-index)" = "7c68cb38ed13fd7bc9dd5db8f165b7c8d9c1a315104083a2b10f11354c2af97f"
 "checksum ppv-lite86 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)" = "74490b50b9fbe561ac330df47c08f3f33073d2d00c150f719147d7c54522fa1b"
-"checksum proc-macro-hack 0.5.12 (registry+https://github.com/rust-lang/crates.io-index)" = "f918f2b601f93baa836c1c2945faef682ba5b6d4828ecb45eeb7cc3c71b811b4"
+"checksum proc-macro-hack 0.5.14 (registry+https://github.com/rust-lang/crates.io-index)" = "fcfdefadc3d57ca21cf17990a28ef4c0f7c61383a28cb7604cf4a18e6ede1420"
 "checksum proc-macro-nested 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "8e946095f9d3ed29ec38de908c22f95d9ac008e424c7bcae54c75a79c527c694"
 "checksum proc-macro2 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)" = "6c09721c6781493a2a492a96b5a5bf19b65917fe6728884e7c44dd0c60ca3435"
 "checksum quote 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "2bdc6c187c65bca4260c9011c9e3132efe4909da44726bad24cf7572ae338d7f"
@@ -2344,7 +2341,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum string 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "d24114bfcceb867ca7f71a0d3fe45d45619ec47a6fbfa98cb14e14250bfa5d6d"
 "checksum subtle 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "2d67a5a62ba6e01cb2192ff309324cb4875d0c451d55fe2319433abe7a05a8ee"
 "checksum subtle 2.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7c65d530b10ccaeac294f349038a597e435b18fb456aadd0840a623f83b9e941"
-"checksum syn 1.0.16 (registry+https://github.com/rust-lang/crates.io-index)" = "123bd9499cfb380418d509322d7a6d52e5315f064fe4b3ad18a53d6b92c07859"
+"checksum syn 1.0.17 (registry+https://github.com/rust-lang/crates.io-index)" = "0df0eb663f387145cab623dea85b09c2c5b4b0aef44e945d928e682fce71bb03"
 "checksum synstructure 0.12.3 (registry+https://github.com/rust-lang/crates.io-index)" = "67656ea1dc1b41b1451851562ea232ec2e5a80242139f7e679ceccfb5d61f545"
 "checksum take_mut 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "f764005d11ee5f36500a149ace24e00e3da98b0158b3e2d53a7495660d3f4d60"
 "checksum tar 0.4.26 (registry+https://github.com/rust-lang/crates.io-index)" = "b3196bfbffbba3e57481b6ea32249fbaf590396a52505a2615adbb79d9d826d3"
