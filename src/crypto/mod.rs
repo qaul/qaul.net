@@ -78,6 +78,26 @@ where
         }
     }
 
+    /// Attempt to deref the entry
+    pub(crate) fn deref<'s>(&'s self) -> Result<&'s T> {
+        match self {
+            Self::Open(ref t) => Ok(t),
+            _ => Err(Error::LockedState {
+                msg: "Encrypted::Closed(_) can't be derefed".into(),
+            }),
+        }
+    }
+
+    /// Attempt to deref the entry
+    pub(crate) fn deref_mut<'s>(&'s mut self) -> Result<&'s mut T> {
+        match self {
+            Self::Open(ref mut t) => Ok(t),
+            _ => Err(Error::LockedState {
+                msg: "Encrypted::Closed(_) can't be derefed".into(),
+            }),
+        }
+    }
+
     /// Call to the inner unlocked `key()` if the entry is open
     pub(crate) fn key(&self) -> Option<Arc<K>> {
         match self {

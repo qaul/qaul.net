@@ -1,6 +1,6 @@
 //! The library user table
 //!
-//! Users and scopes in Alexandria are secret.  They have a public Id, which get's opened with
+//! Users and scopes in Alexandria are secret.
 
 use crate::{
     crypto::{
@@ -13,7 +13,6 @@ use crate::{
 };
 use async_std::sync::Arc;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
 
 /// The hash of an Id which is used for external representation
 pub(crate) type Hid = Id;
@@ -27,7 +26,7 @@ pub(crate) struct User {
     /// At the moment, this is used in a very symmetric way, but in
     /// the future there are ways to create zones and drop-in
     /// encryption.
-    pub(crate) key: KeyPair,
+    pub(crate) key: Arc<KeyPair>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -39,7 +38,7 @@ struct UserWithKey {
 
 impl UserWithKey {
     fn new(pw: &str, id: Id) -> Self {
-        let key = KeyPair::new();
+        let key = Arc::new(KeyPair::new());
         let aes_key = Arc::new(Key::from_pw(pw, &id.to_string()));
 
         Self {
