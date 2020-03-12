@@ -16,12 +16,17 @@ pub use data::*;
 mod builder;
 pub use builder::Builder;
 
+pub mod api;
+
+use crate::{api::users::Users as UsersApi, meta::users::UserTable};
 use std::path::PathBuf;
 
 /// In-memory alexandria library
 pub struct Library {
     /// The main management path
     pub(crate) root: PathBuf,
+    /// Table with encrypted user metadata
+    pub(crate) users: UserTable,
 }
 
 impl Library {
@@ -29,5 +34,14 @@ impl Library {
     pub(crate) fn init(self) -> Result<Self> {
         dir::scaffold(&self.root)?;
         Ok(self)
+    }
+
+    /// Load the user API scope
+    pub fn user<'a>(&'a self, id: Id) -> UsersApi<'a> {
+        UsersApi {
+            inner: self,
+            hot: true,
+            id,
+        }
     }
 }

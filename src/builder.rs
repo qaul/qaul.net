@@ -1,4 +1,4 @@
-use crate::{error::Result, Library};
+use crate::{error::Result, meta::users::UserTable, Library};
 use std::path::PathBuf;
 
 /// A utility builder to construct the Alexandria library
@@ -32,6 +32,10 @@ impl Builder {
             self.offset
                 .expect("Builder without `offset` cannot be built"),
         );
-        Library { root }.init()
+        Library {
+            root,
+            users: UserTable::new(),
+        }
+        .init()
     }
 }
