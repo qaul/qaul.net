@@ -23,7 +23,7 @@ where
     V: DetachedKey<KeyPair> + Serialize + DeserializeOwned,
 {
     /// Cache from K -> V with an asymmetric encryption key
-    cache: EncryptedMap<K, V, KeyPair>,
+    cache: LockNotify<EncryptedMap<K, Notify<V>, KeyPair>>,
     /// Indicade whether the cache is hot
     ///
     /// A hot cache does write-through caching to disk, meaning that

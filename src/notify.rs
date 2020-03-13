@@ -1,4 +1,8 @@
-use async_std::{sync::RwLock, task};
+use crate::crypto::DetachedKey;
+use async_std::{
+    sync::{Arc, RwLock},
+    task,
+};
 use serde::{de::DeserializeOwned, Deserialize, Deserializer, Serialize, Serializer};
 use std::ops::{Deref, DerefMut};
 use std::task::Waker;
@@ -23,13 +27,13 @@ where
     }
 }
 
-impl<T> Deserialize<'static> for Lock<T>
+impl<'de, T> Deserialize<'de> for Lock<T>
 where
     T: DeserializeOwned + Serialize,
 {
     fn deserialize<D>(de: D) -> Result<Self, D::Error>
     where
-        D: Deserializer<'static>,
+        D: Deserializer<'de>,
     {
         T::deserialize(de).map(|t| Self(RwLock::new(t)))
     }
@@ -84,6 +88,11 @@ impl<T> Notify<T>
 where
     T: DeserializeOwned + Serialize,
 {
+    /// Create an empty Notify handler
+    pub fn new(inner: T) -> Self {
+        Self { inner, waker: None }
+    }
+
     /// Call wake on the waker, if it's a waker, yehaa!
     pub fn wake(ptr: &mut Notify<T>) {
         if let Some(ref w) = ptr.waker {
@@ -117,6 +126,16 @@ where
     }
 }
 
+// If T implements DetachedKey, just proxy the trait
+impl<K, T> DetachedKey<K> for Notify<T>
+where
+    T: DeserializeOwned + Serialize + DetachedKey<K>,
+{
+    fn key(&self) -> Option<Arc<K>> {
+        self.inner.key()
+    }
+}
+
 impl<T> Serialize for Notify<T>
 where
     T: DeserializeOwned + Serialize,
@@ -129,20 +148,14 @@ where
     }
 }
 
-impl<T> Deserialize<'static> for Notify<T>
+impl<'de, T> Deserialize<'de> for Notify<T>
 where
     T: DeserializeOwned + Serialize,
 {
     fn deserialize<D>(de: D) -> Result<Self, D::Error>
     where
-        D: Deserializer<'static>,
+        D: Deserializer<'de>,
     {
         T::deserialize(de).map(|inner| Self { inner, waker: None })
     }
-}
-
-#[test]
-fn test_types() {
-    let inner = Lock(RwLock::new(1312));
-    let _ = Notify { inner, waker: None };
 }
