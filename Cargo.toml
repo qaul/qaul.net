@@ -5,11 +5,11 @@ version = "0.2.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 repository = "https://git.open-communication.net/qaul/alexandria"
 documentation = "https://docs.rs/alexandria"
-license = "GPL-3.0"
+license = "GPL-3.0-or-later"
 edition = "2018"
 
 [dependencies]
-identity = { version = "0.3", features = ["digest", "random"], package = "ratman-identity" }
+identity = { version = "0.4", features = ["digest", "random", "aligned"], package = "ratman-identity" }
 
 async-std = { version = "1.0", features = ["unstable"] }
 serde = { version = "1.0", features = ["derive", "rc"] }

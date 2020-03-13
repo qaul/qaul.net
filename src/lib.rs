@@ -1,32 +1,36 @@
 //! Alexandria storage library
 
-pub(crate) use identity::Identity as Id;
-
-pub(crate) mod crypto;
+//pub(crate) mod cache;
+//pub(crate) mod crypto;
+pub(crate) mod delta;
 pub(crate) mod dir;
-pub(crate) mod meta;
+//pub(crate) mod meta;
+pub(crate) mod notify;
 pub(crate) mod wire;
 
-mod error;
-pub use error::{Error, Result};
-
+// pub mod api;
+// mod builder;
 mod data;
-pub use data::*;
+mod error;
 
-mod builder;
-pub use builder::Builder;
+pub use crate::{
+    // builder::Builder,
+    data::*,
+    delta::DeltaType as Delta,
+    error::{Error, Result},
+};
+pub use identity::Identity as Id;
 
-pub mod api;
-
-use crate::{api::users::Users as UsersApi, meta::users::UserTable};
+// use crate::{api::users::Users as UsersApi, meta::users::UserTable};
+use async_std::sync::RwLock;
 use std::path::PathBuf;
 
 /// In-memory alexandria library
 pub struct Library {
     /// The main management path
     pub(crate) root: PathBuf,
-    /// Table with encrypted user metadata
-    pub(crate) users: UserTable,
+    // Table with encrypted user metadata
+    // pub(crate) users: RwLock<UserTable>,
 }
 
 impl Library {
@@ -36,12 +40,12 @@ impl Library {
         Ok(self)
     }
 
-    /// Load the user API scope
-    pub fn user<'a>(&'a self, id: Id) -> UsersApi<'a> {
-        UsersApi {
-            inner: self,
-            hot: true,
-            id,
-        }
-    }
+    // /// Load the user API scope
+    // pub fn user<'a>(&'a self, id: Id) -> UsersApi<'a> {
+    //     UsersApi {
+    //         inner: self,
+    //         hot: true,
+    //         id,
+    //     }
+    // }
 }

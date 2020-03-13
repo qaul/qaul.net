@@ -1,4 +1,5 @@
 use crate::{error::Result, meta::users::UserTable, Library};
+use async_std::sync::RwLock;
 use std::path::PathBuf;
 
 /// A utility builder to construct the Alexandria library
@@ -34,7 +35,7 @@ impl Builder {
         );
         Library {
             root,
-            users: UserTable::new(),
+            users: RwLock::new(UserTable::new()),
         }
         .init()
     }

@@ -10,7 +10,10 @@ pub enum Error {
 
     #[fail(display = "failed to perform action because user `{}` is locked", id)]
     UserNotOpen { id: String },
-
+    
+    #[fail(display = "operation failed because user `{}` doesn't exist", id)]
+    NoSuchUser { id: String },
+    
     #[fail(display = "failed to initialise library at offset `{}`", offset)]
     InitFailed { offset: String },
 

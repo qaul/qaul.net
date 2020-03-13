@@ -1,0 +1,148 @@
+use async_std::{sync::RwLock, task};
+use serde::{de::DeserializeOwned, Deserialize, Deserializer, Serialize, Serializer};
+use std::ops::{Deref, DerefMut};
+use std::task::Waker;
+
+/// Utility wrapper around a serialisable lock
+pub(crate) struct Lock<T>(RwLock<T>)
+where
+    T: DeserializeOwned + Serialize;
+
+impl<T> Serialize for Lock<T>
+where
+    T: DeserializeOwned + Serialize,
+{
+    fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        task::block_on(async {
+            let l = self.0.read().await;
+            l.serialize(ser)
+        })
+    }
+}
+
+impl<T> Deserialize<'static> for Lock<T>
+where
+    T: DeserializeOwned + Serialize,
+{
+    fn deserialize<D>(de: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'static>,
+    {
+        T::deserialize(de).map(|t| Self(RwLock::new(t)))
+    }
+}
+
+/// A notifiable, serialisable lock type
+///
+/// After deserialisation the waker will have been removed and needs
+/// to be re-initialised.  Otherwise the serde calls will be forwarded
+/// to the implementation provided by `T`.
+pub(crate) type LockNotify<T> = Notify<Lock<T>>;
+
+/// Wake tasks on mutable accesses to the wrapped value
+///
+/// This can be used to transparently notify an asyncronous task that
+/// it should, for example, check for more work in a queue or try
+/// again to acquire a lock.
+///
+/// Most importantly, this type is serialisation transparent, meaning
+/// it implements `Serialize`, `Deserialize` which is forwarded to the
+/// implementations provided by `T`.
+#[derive(Default, Debug, Clone)]
+pub struct Notify<T>
+where
+    T: DeserializeOwned + Serialize,
+{
+    inner: T,
+    waker: Option<Waker>,
+}
+
+impl<T> Deref for Notify<T>
+where
+    T: DeserializeOwned + Serialize,
+{
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl<T> DerefMut for Notify<T>
+where
+    T: DeserializeOwned + Serialize,
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.waker.as_ref().map(|w| w.wake_by_ref());
+        &mut self.inner
+    }
+}
+
+impl<T> Notify<T>
+where
+    T: DeserializeOwned + Serialize,
+{
+    /// Call wake on the waker, if it's a waker, yehaa!
+    pub fn wake(ptr: &mut Notify<T>) {
+        if let Some(ref w) = ptr.waker {
+            w.clone().wake();
+        }
+    }
+
+    /// Register a `Waker` if the wrapped value is updated
+    ///
+    /// This function will return the previous waker, if one existed.
+    /// If `None` is returned, there was no previous waker, so be
+    /// careful not to simply unwrap this value.  You may want to use
+    /// `unwrap_none()`.
+    pub fn register(ptr: &mut Notify<T>, waker: &Waker) -> Option<Waker> {
+        ptr.waker.replace(waker.clone())
+    }
+
+    /// Removes and returns the registered `Waker`
+    pub fn clear(ptr: &mut Notify<T>) -> Option<Waker> {
+        ptr.waker.take()
+    }
+
+    /// Consumes the `Notify`
+    pub fn into_inner(ptr: Notify<T>) -> T {
+        ptr.inner
+    }
+
+    /// Notifies any registered `Waker` immediately.
+    pub fn notify(ptr: &Notify<T>) {
+        ptr.waker.as_ref().map(|w| w.wake_by_ref());
+    }
+}
+
+impl<T> Serialize for Notify<T>
+where
+    T: DeserializeOwned + Serialize,
+{
+    fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.inner.serialize(ser)
+    }
+}
+
+impl<T> Deserialize<'static> for Notify<T>
+where
+    T: DeserializeOwned + Serialize,
+{
+    fn deserialize<D>(de: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'static>,
+    {
+        T::deserialize(de).map(|inner| Self { inner, waker: None })
+    }
+}
+
+#[test]
+fn test_types() {
+    let inner = Lock(RwLock::new(1312));
+    let _ = Notify { inner, waker: None };
+}

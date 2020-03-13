@@ -80,6 +80,12 @@ impl UserTable {
         Ok(())
     }
 
+    pub(crate) fn delete(&mut self, id: Id) -> Result<()> {
+        self.0
+            .remove(&id)
+            .map_or(Err(Error::NoSuchUser { id: id.to_string() }), |_| Ok(()))
+    }
+
     /// Unlock a user entry in place
     ///
     /// The provided Id will be hashed, to corresponds to a `Hid`,

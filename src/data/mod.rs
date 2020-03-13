@@ -1,5 +1,8 @@
 //! On-file data formats
 
+mod inbox;
+mod tag;
+
 use crate::error::Result;
 use async_std::{fs::File, io::ReadExt, sync::Arc};
 use serde::{Deserialize, Serialize};

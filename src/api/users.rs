@@ -1,12 +1,12 @@
 //! Users API scope
 
-use crate::{Id, Library};
+use crate::{error::Result, Id, Library};
 
 /// API scope handler for a single user in a library
 ///
 /// The API is sharded into different scopes, each of which can be
 /// nested to call more specific functions.
-/// 
+///
 /// In Alexandria, a library has users that store data in zones and
 /// records.  To modify a user's zone list, you first have to
 /// initialise the API scope for this user Id.  This way all further
@@ -47,16 +47,29 @@ impl<'a> Users<'a> {
         self.inner
     }
 
-    pub fn open(&self) {}
+    pub async fn open(&self, pw: &str) -> Result<()> {
+        let ref mut u = self.inner.users.write().await;
+        u.open(self.id, pw)
+    }
 
     /// Close and sync a user's session
-    pub fn clone(&self) {}
+    pub async fn clone(&self) -> Result<()> {
+        let ref mut u = self.inner.users.write().await;
+        u.close(self.id)
+    }
 
     /// Create a new user
-    pub fn create(&self) {}
+    pub async fn create(&self, pw: &str) -> Result<Id> {
+        let id = Id::random();
+        let ref mut u = self.inner.users.write().await;
+        u.insert(id, pw).map(|_| id)
+    }
 
-    /// Remove a user Id
-    pub fn remove(&self, _: Id) {}
+    /// Remove a user Id and corresponding data from the library
+    pub async fn remove(&self, id: Id) -> Result<()> {
+        let ref mut u = self.inner.users.write().await;
+        u.delete(id)
+    }
 
     pub fn update(&'a self, _: Id) -> Update<'a> {
         Update { inner: self }

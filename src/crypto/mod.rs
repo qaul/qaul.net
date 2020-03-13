@@ -41,6 +41,18 @@ pub(crate) trait DetachedKey<K> {
     }
 }
 
+// use std::ops::Deref;
+
+// /// Provide a blanket implementation for wrappers
+// impl<T, K> DetachedKey<K> for T
+// where
+//     T: Deref<Target = dyn DetachedKey<K>>,
+// {
+//     fn key(&self) -> Option<Arc<K>> {
+//         (*self).key()
+//     }
+// }
+
 /// A generic wrapper around the unlock state of data
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum Encrypted<T, K>
