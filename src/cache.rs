@@ -39,13 +39,13 @@ where
     K: Serialize + DeserializeOwned + Ord + PartialOrd + Hash + ToString,
     V: DetachedKey<KeyPair> + Serialize + DeserializeOwned,
 {
-    // /// Create a new in-memory cache
-    // pub(crate) fn new() -> Self {
-    //     Self {
-    //         cache: RwLock::new(EncryptedMap::new()),
-    //         hot: false.into(),
-    //     }
-    // }
+    /// Create a new in-memory cache
+    pub(crate) fn new() -> Self {
+        Self {
+            cache: Notify::new(Lock::new(EncryptedMap::new())),
+            hot: false.into(),
+        }
+    }
 
     /// Set the cache to hot, enabling write-through caching
     ///

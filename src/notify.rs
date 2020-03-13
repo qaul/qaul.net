@@ -12,6 +12,15 @@ pub(crate) struct Lock<T>(RwLock<T>)
 where
     T: DeserializeOwned + Serialize;
 
+impl<T> Lock<T>
+where
+    T: DeserializeOwned + Serialize,
+{
+    pub(crate) fn new(inner: T) -> Self {
+        Self(RwLock::new(inner))
+    }
+}
+
 impl<T> Serialize for Lock<T>
 where
     T: DeserializeOwned + Serialize,
@@ -89,12 +98,12 @@ where
     T: DeserializeOwned + Serialize,
 {
     /// Create an empty Notify handler
-    pub fn new(inner: T) -> Self {
+    pub(crate) fn new(inner: T) -> Self {
         Self { inner, waker: None }
     }
 
     /// Call wake on the waker, if it's a waker, yehaa!
-    pub fn wake(ptr: &mut Notify<T>) {
+    pub(crate) fn wake(ptr: &mut Notify<T>) {
         if let Some(ref w) = ptr.waker {
             w.clone().wake();
         }
@@ -106,17 +115,17 @@ where
     /// If `None` is returned, there was no previous waker, so be
     /// careful not to simply unwrap this value.  You may want to use
     /// `unwrap_none()`.
-    pub fn register(ptr: &mut Notify<T>, waker: &Waker) -> Option<Waker> {
+    pub(crate) fn register(ptr: &mut Notify<T>, waker: &Waker) -> Option<Waker> {
         ptr.waker.replace(waker.clone())
     }
 
     /// Removes and returns the registered `Waker`
-    pub fn clear(ptr: &mut Notify<T>) -> Option<Waker> {
+    pub(crate) fn clear(ptr: &mut Notify<T>) -> Option<Waker> {
         ptr.waker.take()
     }
 
     /// Consumes the `Notify`
-    pub fn into_inner(ptr: Notify<T>) -> T {
+    pub(crate) fn into_inner(ptr: Notify<T>) -> T {
         ptr.inner
     }
 
