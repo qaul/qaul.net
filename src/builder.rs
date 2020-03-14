@@ -1,4 +1,4 @@
-use crate::{error::Result, meta::users::UserTable, Library};
+use crate::{cache::Cache, dir::Dirs, error::Result, meta::users::UserTable, Library};
 use async_std::sync::RwLock;
 use std::path::PathBuf;
 
@@ -28,15 +28,13 @@ impl Builder {
 
     /// Consume the builder and create a Library
     pub fn build(self) -> Result<Library> {
-        let mut root = PathBuf::new();
-        root.push(
+        let root = Dirs::new(
             self.offset
                 .expect("Builder without `offset` cannot be built"),
         );
-        Library {
-            root,
-            users: RwLock::new(UserTable::new()),
-        }
-        .init()
+        let users = RwLock::new(UserTable::new());
+        let cache = Cache::new(root.cache());
+
+        Library { root, users, cache }.init()
     }
 }

@@ -21,22 +21,23 @@ pub use crate::{
 };
 pub use identity::Identity as Id;
 
-use crate::{api::users::Users as UsersApi, meta::users::UserTable};
+use crate::{api::users::Users as UsersApi, cache::Cache, dir::Dirs, meta::users::UserTable};
 use async_std::sync::RwLock;
-use std::path::PathBuf;
 
 /// In-memory alexandria library
 pub struct Library {
     /// The main management path
-    pub(crate) root: PathBuf,
+    pub(crate) root: Dirs,
     /// Table with encrypted user metadata
     pub(crate) users: RwLock<UserTable>,
+    /// Active cache
+    pub(crate) cache: Cache<String, Id>,
 }
 
 impl Library {
     /// Internally called setup function
     pub(crate) fn init(self) -> Result<Self> {
-        dir::scaffold(&self.root)?;
+        self.root.scaffold()?;
         Ok(self)
     }
 

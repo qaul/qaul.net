@@ -7,7 +7,10 @@ pub(crate) mod asym;
 mod map;
 pub(crate) use map::EncryptedMap;
 
-use crate::error::{Error, Result};
+use crate::{
+    error::{Error, Result},
+    Id,
+};
 use async_std::sync::Arc;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::{fmt::Debug, marker::PhantomData};
@@ -40,6 +43,9 @@ pub(crate) trait DetachedKey<K> {
         None
     }
 }
+
+// Ids are special and should just impl this
+impl<K> DetachedKey<K> for Id {}
 
 /// A generic wrapper around the unlock state of data
 #[derive(Debug, Serialize, Deserialize)]
