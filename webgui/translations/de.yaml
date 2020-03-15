@@ -2,8 +2,12 @@ send: Senden
 search: Suchbegriff Eingeben ...
 settings:
   configuration: Konfiguration
-  changeLanguage: Sprache wählen
+  setLanguage: Sprache wählen
   selectTheme: Anzeige Thema
+  theme:
+    dark: Dunkles Profil
+    light: Helles Profil
+  userProfile: Dein Nutzerprofil
 info:
   information: Informationen
   aboutQaulNet: Über qaul.net
