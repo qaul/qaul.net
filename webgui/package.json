@@ -57,6 +57,7 @@
     "ember-resolver": "^7.0.0",
     "ember-simple-auth": "^2.1.1",
     "ember-source": "~3.16.0",
+    "ember-truth-helpers": "^2.1.0",
     "eslint-plugin-ember": "^7.7.1",
     "eslint-plugin-node": "^11.0.0",
     "faker": "^4.1.0",
