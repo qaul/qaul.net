@@ -1,0 +1,10 @@
+<button type="button" {{on "click" (fn this.setLanguage @language)}} class="settings-item" local-class="button">
+  <span class="icon">
+    {{#if (eq @language (fn this.languageSelected))}}
+      <FaIcon @icon="dot-circle" />
+    {{else}}
+      <FaIcon @icon="circle"/>
+    {{/if}}
+  </span>
+  <span class="text">{{yield}}</span>
+</button>

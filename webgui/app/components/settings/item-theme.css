@@ -1,0 +1,19 @@
+.item {
+  color: var(--q-color);
+}
+
+.selector {
+  display: flex;
+  border-radius: 1.5em;
+  padding: 0.1em;
+  background-color: var(--q-nav-bg-hover);
+}
+.selector button {
+  background-color: var(--q-bg);
+  border: 1px solid;
+  border-radius: 1.5em;
+  margin: 0 0.1em;
+  padding: 0.25em 0.25em 0.10em 0.25em;
+  width: 2em;
+  height: 2em;
+}

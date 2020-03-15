@@ -1,21 +1,7 @@
-<div class="page">
-  <h1>{{fa-icon "cog"}} {{t "settings.configuration"}}</h1>
+<Settings::Title @title={{t "settings.configuration"}} />
 
-  <div local-class="settings panel">
-    <div local-class="name item">{{t "settings.configuration"}}</div>
-    <span local-class="item">
-      {{t "settings.changeLanguage"}}
-      <span local-class="langs">
-        <button type="button" {{on "click" (fn this.setLanguage "en")}}>EN</button>
-        <button type="button" {{on "click" (fn this.setLanguage "de")}}>DE</button>
-        <button type="button" {{on "click" (fn this.setLanguage "ar")}}>AR</button>
-      </span>
-    </span>
-    <span local-class="item">
-      {{t "settings.selectTheme"}} <span local-class="icon">{{fa-icon "cog"}}</span>
-      <button type="button" {{on "click" (fn this.setTheme "dark")}}>dark</button>
-      <button type="button" {{on "click" (fn this.setTheme "light")}}>light</button>
-    </span>
-    <a local-class="item" href=""><span local-class="icon">{{fa-icon "info-circle"}}</span>{{t "info.debug"}}</a>
-  </div>
-</div>
+<Settings::Container>
+  <Settings::Item @icon="language" @title={{t "settings.setLanguage"}} @route="settings/language" />
+  <Settings::Item @icon="user" @title={{t "settings.userProfile"}} @route="settings" />
+  <Settings::ItemTheme />
+</Settings::Container>

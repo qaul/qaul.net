@@ -1,0 +1,38 @@
+/* global settings classes */
+
+:global(.settings-item) {
+  display: flex;
+  margin: 0;
+  padding: 1.5rem 1rem;
+}
+
+:global(.settings-item .icon) {
+  width: 5rem;
+}
+
+:global(.settings-item .text) {
+  width: 100%;
+}
+
+:global(.settings-item .description) {
+  font-size: smaller;
+}
+
+
+/* local classes */
+
+
+a.button:hover {
+  text-decoration: none;
+  background-color: var(--q-nav-bg);
+}
+.button > span {
+  display: block;
+}
+
+.title {
+  display: block;
+}
+.description {
+  display: block;
+}

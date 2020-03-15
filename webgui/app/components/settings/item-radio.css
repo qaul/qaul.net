@@ -1,0 +1,9 @@
+.button {
+  width: 100%;
+}
+.button:hover {
+  background-color: var(--q-nav-bg);
+}
+.button.selected {
+  background-color: var(--q-nav-bg-hover);
+}

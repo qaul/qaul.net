@@ -1,0 +1,10 @@
+<div class="settings-item" local-class="item">
+  <div class="icon"><FaIcon @icon="palette" /></div>
+  <div class="text">
+      {{t "settings.selectTheme"}}
+  </div>
+  <div local-class="selector">
+    <button type="button" title={{t "settings.theme.light"}} {{on "click" (fn this.setTheme "light")}}>{{fa-icon "sun"}}</button>
+    <button type="button" title={{t "settings.theme.dark"}} {{on "click" (fn this.setTheme "dark")}}>{{fa-icon "moon"}}</button>
+  </div>
+</div>

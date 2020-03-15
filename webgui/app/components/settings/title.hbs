@@ -1,0 +1,13 @@
+<header local-class="header">
+  {{#if @backLink}}
+    <div local-class="back"><LinkTo @route="settings">{{fa-icon "arrow-left"}}</LinkTo></div>
+  {{/if}}
+  <h1 local-class="title">
+    {{#if @icon}}
+      <FaIcon @icon={{@icon}} />
+    {{else}}
+      <FaIcon @icon="cog" />
+    {{/if}}
+    {{@title}}
+  </h1>
+</header>
