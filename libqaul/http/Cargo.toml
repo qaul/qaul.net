@@ -12,6 +12,5 @@ libqaul-rpc = { path = "../rpc" }
 serde_json = "1.0"
 async-std = "1.0"
 
-
-tide = { version = "0.5", features = ["unstable"] }
-tide-naive-static-files = "2.1.0"
+tide = { version = "0.6", features = ["unstable"] }
+tide-naive-static-files = "2.2.0"
