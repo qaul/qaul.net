@@ -11,17 +11,18 @@ export default Model.extend({
   // fpToken: attr('string'),
   // username: attr('string'),
   // bio: attr('string'),
-  // trust: attr('number'),
+  trust: attr('number'),
   // starred: attr('boolean'),
   // // age or birthdate?
   // // avatar and token link?
   // identicon: attr('string'),
-  // avatar: attr('string'),
+  avatar: attr('string'),
 
   // gender: attr('string'),
 
-  // lastSeen: attr('date'),
+  lastSeen: attr('date'),
 
+  online: attr('boolean'),
   // online: computed('lastSeen', {
   //     get() {
   //         return moment.duration(moment().diff(get(this, 'lastSeen'))).asMinutes() < 2;

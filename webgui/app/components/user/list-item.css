@@ -1,0 +1,21 @@
+.list-item {
+  display: flex;
+  flex-direction: row;
+  padding: 0.5rem;
+  align-items: center;
+}
+.list-item:hover {
+  background-color: var(--q-bg-hover);
+  text-decoration: none;
+}
+
+
+.icon {
+  font-size: 2.5rem;
+  padding: 0.5rem;
+  margin-inline-end: 1rem;
+}
+.text {
+  color: var(--q-color);
+  padding: 0.5rem;
+}

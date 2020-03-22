@@ -1,0 +1,22 @@
+.icon {
+  width:  1.6em;
+  height: 1.6em;
+  border-radius: 50%;
+  background-color: var(--q-theme-light);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.trusted .icon {
+  /*border: 0.2em solid var(--q-theme-strong);*/
+}
+
+.online .status {
+  width: 0.3em;
+  height: 0.3em;
+  background-color: var(--q-available);
+  border: 0.1em solid var(--q-bg);
+  border-radius: 50%;
+  position: relative;
+  top: -0.05em;
+  left: -0.05em;
+}
