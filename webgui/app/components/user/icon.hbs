@@ -1,5 +1,6 @@
 <div local-class="user-icon {{if @user.online "online"}} {{if @user.trust "trusted"}}">
-  <div local-class="icon" style="background-image: url({{@user.avatar}});">
+  <div local-class="icon">
+    <img src="{{@user.avatar}}" alt="" role="presentation" />
     <div local-class="status"></div>
   </div>
 </div>

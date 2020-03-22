@@ -1,4 +1,5 @@
 .icon {
+  position: relative;
   width:  1.6em;
   height: 1.6em;
   border-radius: 50%;
@@ -9,14 +10,18 @@
 .trusted .icon {
   /*border: 0.2em solid var(--q-theme-strong);*/
 }
+.icon img {
+  width: 100%;
+  border-radius: 50%;
+}
 
-.online .status {
+.status {
   width: 0.3em;
   height: 0.3em;
   background-color: var(--q-available);
   border: 0.1em solid var(--q-bg);
   border-radius: 50%;
-  position: relative;
-  top: -0.05em;
-  left: -0.05em;
+  position: absolute;
+  top: -0.1em;
+  left: -0.1em;
 }

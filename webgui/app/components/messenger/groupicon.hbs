@@ -1,5 +1,7 @@
 {{!#if @group.multiuser}}
   {{!<User::Icon @user={{@group.users} } />}}
 {{!else}}
-  <div local-class="group-icon" style="background-image: url({{@group.avatar}});"></div>
+  <div local-class="group-icon">
+    <img src="{{@group.avatar}}" alt="" role="presentation"/>
+  </div>
 {{!/if}}
