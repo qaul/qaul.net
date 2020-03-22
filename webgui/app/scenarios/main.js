@@ -8,9 +8,10 @@ Scenario.settings({
 
 export default class extends Scenario {
   run() {
-    this.mockFindAll('message', 10);
-    this.mockFindAll('user', 10);
-    this.mockFindAll('file', 10);
+    this.mockFindAll('feedmessage', 20);
+    this.mockFindAll('user', 15);
+    this.mockFindAll('file', 15);
+    this.mockFindAll('group', 10);
 
     getPretender().post('*', getPretender().passthrough);
     getPretender().get('*', getPretender().passthrough);
