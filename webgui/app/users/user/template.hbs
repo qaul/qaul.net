@@ -1,1 +1,6 @@
-{{@model.username}}
+<div local-class="head">
+  <div local-class="icon">
+    <User::Icon @user={{this.user}} />
+  </div>
+  <h1>{{this.user.realName}}</h1>
+</div>

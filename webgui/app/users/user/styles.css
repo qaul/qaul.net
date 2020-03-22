@@ -1,0 +1,11 @@
+.head {
+  font-size: 10rem;
+  text-align: center;
+  margin: 1rem;
+}
+.icon {
+  display: inline-block;
+}
+.head h1 {
+  font-size: 3rem;
+}

@@ -4,31 +4,9 @@
     <input placeholder={{t "search"}}>
   </div>
 
-  <div local-class="subnavigation">
-    <a href=""><FaIcon @icon="users" /></a>
-    <a href=""><FaIcon @icon="history" /></a>
-    <a href=""><FaIcon @icon="lock" /></a>
-    <a href=""><FaIcon @icon="star" /></a>
-  </div>
-
   <div local-class="contacts">
     {{#each @model as |user|}}
-      <div local-class="user">
-        <div local-class="user-icon">
-          <div local-class="user-avatar">
-            {{#if user.trust}}
-              <div local-class="user-trust">{{fa-icon "lock"}}</div>
-            {{/if}}
-            {{#if user.online}}
-              <div local-class="user-online"></div>
-            {{/if}}
-          </div>
-        </div>
-        <div local-class="user-menu">{{fa-icon "ellipsis-v"}}</div>
-        <div local-class="user-name">
-          <LinkTo @route="users.user" @model={{user}}>{{user.realName}}</LinkTo>
-        </div>
-      </div>
+      <User::ListItem @user={{user}} />
     {{/each}}
   </div>
 </div>
