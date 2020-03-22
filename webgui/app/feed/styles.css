@@ -5,48 +5,4 @@
 
 .messages {
   margin:1rem;
-/*
-  display: flex;
-  flex-direction: column;
-*/
-}
-
-.message {
-  padding: 0.8rem;
-  border-top: 1px dotted var(--q-border);
-/*
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1.5rem 3rem;
-  grid-template-areas:
-    "name time"
-    "content content";
-*/
-}
-
-.message-name {
-  /*grid-area: name;*/
-  float:left;
-  font-weight: bold;
-  color:var(--q-color-title);
-  margin-bottom: 0.5em;
-}
-
-[dir="rtl"] .message-name {
-  float: right;
-}
-
-.message-time {
-  /*grid-area: time;*/
-  text-align: right;
-  font-size: smaller;
-}
-
-[dir="rtl"] .message-time {
-  text-align: left;;
-}
-
-.message-content {
-  /*grid-area: content;*/
-  clear: both;
 }

@@ -6,11 +6,7 @@
 
   <div local-class="messages">
     {{#each this.messages as |message|}}
-      <div local-class="message">
-        <div local-class="message-name">{{message.senderName}}</div>
-        <div local-class="message-time">{{moment-from-now message.timestamp}}</div>
-        <div local-class="message-content">{{message.content}}</div>
-      </div>
+      <Feed::Message @message={{message}} />
     {{/each}}
   </div>
 </div>
