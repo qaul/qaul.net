@@ -1,0 +1,7 @@
+<h1>Messenger</h1>
+<div local-class="conversations">
+  {{#each this.groups as |group|}}
+    <Messenger::LastConversation @group={{group}} />
+  {{/each}}
+</div>
+<Messenger::New />

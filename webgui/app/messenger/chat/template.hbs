@@ -1,0 +1,9 @@
+<Messenger::ChatHeader @group={{this.group}} />
+
+<div local-class="chat">
+{{#each this.group.messages as |message|}}
+  <Messenger::ChatBubble @message={{message}} />
+{{/each}}
+</div>
+
+<Messenger::ChatInput />

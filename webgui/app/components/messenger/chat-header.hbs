@@ -1,0 +1,9 @@
+<header local-class="header">
+  <div local-class="back"><LinkTo @route="messenger">{{fa-icon "arrow-left"}}</LinkTo></div>
+  <h1 local-class="title">
+    <div local-class="icon">
+      <Messenger::Groupicon @group={{@group}} />
+    </div>
+    <div local-class="name">{{@group.name}}</div>
+  </h1>
+</header>

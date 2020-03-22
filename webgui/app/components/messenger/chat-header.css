@@ -1,0 +1,33 @@
+.header {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--q-nav-bg);
+  position: sticky;
+}
+
+.title {
+  width: 100%;
+  font-weight: normal;
+  margin: 1rem;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+}
+.icon {
+  font-size: 3rem;
+}
+.name {
+  margin-inline-start: 1rem;
+}
+
+.back {
+  text-align: center;
+  font-size: 2.5rem;
+  margin: 1rem;
+}
+
+[dir="rtl"] .back svg {
+  transform: scale(-1, 1)
+}

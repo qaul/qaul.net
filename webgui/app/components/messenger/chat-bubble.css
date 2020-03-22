@@ -1,0 +1,29 @@
+.chat {
+  display:flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-end;
+}
+.chat.my {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.bubble {
+  width: fit-content;
+  max-width: 85%;
+  background-color: var(--q-theme-light);
+  color: var(--q-color);
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 1rem 1rem 1rem 0;
+  font-size: 1.25rem;
+}
+.my .bubble {
+  background-color: var(--q-nav-hover);
+  border-radius: 1rem 0 1rem 1rem;
+}
+
+.time {
+  font-size: 1rem;
+}

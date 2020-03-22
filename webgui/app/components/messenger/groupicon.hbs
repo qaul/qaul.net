@@ -1,0 +1,5 @@
+{{!#if @group.multiuser}}
+  {{!<User::Icon @user={{@group.users} } />}}
+{{!else}}
+  <div local-class="group-icon" style="background-image: url({{@group.avatar}});"></div>
+{{!/if}}

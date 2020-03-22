@@ -3,6 +3,7 @@ import Service from '@ember/service';
 const light = {};
 /* over-all background */
 light['q-bg'] = '#ffffff';
+light['q-bg-hover'] = '#f6f6f6';
 
 /* theme color */
 light['q-theme-strong'] = '#0089c7';
@@ -25,6 +26,8 @@ light['q-available'] = 'limegreen';
 
 
 light['q-border'] = '#989898';
+light['q-border-light'] = '#ddd';
+
 light['q-nav-bg'] = '#f6f6f6';
 light['q-nav-bg-hover'] = '#ececec';
 light['q-nav-border'] = '#cccccc';
@@ -39,6 +42,7 @@ light['q-bar-border'] = '#aaa';
 
 const dark = {};
 dark['q-bg'] = '#222';
+dark['q-bg-hover'] = '#2f2f2f';
 dark['q-bg-middle'] = '#333';
 dark['q-bg-middle-hover'] = '#3f3f3f';
 dark['q-bg-strong'] = '#444';

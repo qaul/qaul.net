@@ -1,0 +1,16 @@
+.input {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  padding: 1rem;
+  background-color: var(--q-nav-bg);
+}
+.text {
+  margin: 0 0.5rem;
+  border-radius: 1rem;
+}
+.button {
+  margin: 0 1rem;
+  font-size: 3rem;
+}

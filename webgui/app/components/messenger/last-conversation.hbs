@@ -1,0 +1,12 @@
+<LinkTo local-class="conversation" @route="messenger.chat" @model={{@group}}>
+  <div local-class="icon">
+    <Messenger::Groupicon @group={{@group}} />
+  </div>
+  <div local-class="content">
+    <div local-class="head">
+      <div local-class="name">{{@group.name}}</div>
+      <div local-class="time">{{moment-from-now @group.messages.1.timestamp}}</div>
+    </div>
+    <div local-class="content">DummyText {{@group.messages.1.content}}</div>
+  </div>
+</LinkTo>
