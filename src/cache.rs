@@ -49,6 +49,8 @@ impl ToString for CombKey {
     }
 }
 
+pub(crate) type CacheRef<K, V> = Arc<Cache<K, V>>;
+
 pub(crate) struct Cache<K, V>
 where
     K: Serialize + DeserializeOwned + Ord + PartialOrd + Hash + ToString,
@@ -74,20 +76,15 @@ where
     V: DetachedKey<KeyPair> + Serialize + DeserializeOwned,
 {
     /// Create a new in-memory cache
-    pub(crate) fn new<P>(path: P) -> Self
+    pub(crate) fn new<P>(path: P) -> CacheRef<K, V>
     where
         P: Into<Option<PathBuf>>,
     {
-        Self {
+        Arc::new(Self {
             cache: Notify::new(Lock::new(EncryptedMap::new())),
             hot: false.into(),
             path: path.into(),
-        }
-    }
-
-    /// Check whether this cache is hot
-    pub(crate) fn is_hot(&self) -> bool {
-        self.hot.load(Ordering::Relaxed)
+        })
     }
 
     /// Set the cache to hot, enabling write-through caching

@@ -21,8 +21,8 @@ pub use crate::{
 };
 pub use identity::Identity as Id;
 
-use crate::{api::users::Users as UsersApi, cache::Cache, dir::Dirs, meta::users::UserTable};
-use async_std::sync::RwLock;
+use crate::{api::users::Users as UsersApi, cache::CacheRef, dir::Dirs, meta::users::UserTable};
+use async_std::sync::{Arc, RwLock};
 
 /// In-memory alexandria library
 pub struct Library {
@@ -31,13 +31,14 @@ pub struct Library {
     /// Table with encrypted user metadata
     pub(crate) users: RwLock<UserTable>,
     /// Active cache
-    pub(crate) cache: Cache<String, Id>,
+    pub(crate) cache: CacheRef<String, Id>,
 }
 
 impl Library {
     /// Internally called setup function
     pub(crate) fn init(self) -> Result<Self> {
         self.root.scaffold()?;
+        Arc::clone(&self.cache).hot();
         Ok(self)
     }
 

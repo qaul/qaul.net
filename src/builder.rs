@@ -34,7 +34,6 @@ impl Builder {
         );
         let users = RwLock::new(UserTable::new());
         let cache = Cache::new(root.cache());
-
         Library { root, users, cache }.init()
     }
 }
