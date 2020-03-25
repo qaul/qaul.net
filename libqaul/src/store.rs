@@ -2,21 +2,20 @@
 
 #![allow(unused)]
 
-use alexandria::{Address, Data, Delta, KeyAttr, Library, ScopeAttr};
 use std::sync::Arc;
 
-/// Describes that some internal state can be made persistent
-///
-/// This is done by implementing a simple `store` and `load` function
-/// which is called by the `DataStore` to serialise data for the
-/// Alexandria storage backend.
-pub(crate) trait Persist {
-    /// Provide storage backend with storable data
-    fn store(&self) -> Vec<Data>;
+// /// Describes that some internal state can be made persistent
+// ///
+// /// This is done by implementing a simple `store` and `load` function
+// /// which is called by the `DataStore` to serialise data for the
+// /// Alexandria storage backend.
+// pub(crate) trait Persist {
+//     /// Provide storage backend with storable data
+//     fn store(&self) -> Vec<Data>;
 
-    /// Load an instance from deserialised data
-    fn load(&mut self, d: Vec<Data>);
-}
+//     /// Load an instance from deserialised data
+//     fn load(&mut self, d: Vec<Data>);
+// }
 
 /// Provides a persistent, namespaced key-value store
 ///
@@ -55,37 +54,32 @@ pub(crate) trait Persist {
 /// namespaced within the Alexandria HOME dir:
 /// `$ALEX_HOME/<username>/...`
 pub(crate) struct DataStore {
-    inner: Library,
     homedir: String,
-    states: Vec<Arc<dyn Persist>>,
 }
 
 impl DataStore {
     pub(crate) fn new(homedir: String) -> Self {
-        let inner = Library::new();
-
         Self {
-            inner,
             homedir,
-            states: Vec::new(),
         }
     }
 
     /// Register a state component with the persistence backend
-    pub(crate) fn register<S>(&mut self, name: S, offset: S, modl: Arc<impl Persist>) -> usize
+    pub(crate) fn register<S>(&mut self, name: S, offset: S) -> usize
     where
         S: Into<String>,
     {
-        let id = self.states.len();
-        self.inner.modify_path(
-            Address::scope(None, &name.into()),
-            Delta::Insert(ScopeAttr {
-                ns_auth: false,
-                encryption: KeyAttr::Off,
-                offset: self.homedir.clone() + "/" + &offset.into(),
-            }),
-        );
-        self.inner.sync();
-        id
+        0
+        // let id = self.states.len();
+        // self.inner.modify_path(
+        //     Address::scope(None, &name.into()),
+        //     Delta::Insert(ScopeAttr {
+        //         ns_auth: false,
+        //         encryption: KeyAttr::Off,
+        //         offset: self.homedir.clone() + "/" + &offset.into(),
+        //     }),
+        // );
+        // self.inner.sync();
+        // id
     }
 }
