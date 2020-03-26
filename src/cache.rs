@@ -49,6 +49,7 @@ impl ToString for CombKey {
     }
 }
 
+/// An Arc reference to a cache
 pub(crate) type CacheRef<K, V> = Arc<Cache<K, V>>;
 
 pub(crate) struct Cache<K, V>
@@ -58,14 +59,6 @@ where
 {
     /// Cache from K -> V with an asymmetric encryption key
     cache: LockNotify<EncryptedMap<K, Notify<V>, KeyPair>>,
-    /// Indicade whether the cache is hot
-    ///
-    /// A hot cache does write-through caching to disk, meaning that
-    /// changes are mirrored to disk immediately to avoid data loss
-    /// when crashing.  If this is `false` the cache can be used to
-    /// improve in-memory lookups, but will not be persistent across
-    /// reboots.  This can still be useful for frequently used data.
-    hot: AtomicBool,
     /// The path the cache is written to
     path: Option<PathBuf>,
 }
@@ -82,19 +75,18 @@ where
     {
         Arc::new(Self {
             cache: Notify::new(Lock::new(EncryptedMap::new())),
-            hot: false.into(),
             path: path.into(),
         })
     }
 
     /// Set the cache to hot, enabling write-through caching
     ///
-    /// Reversing this option is not possible.  You can only scrub the
-    /// cache from disk, and build a new one.
+    /// Reversing this option is not possible.  A hot cache does
+    /// write-through caching to disk, meaning that changes are
+    /// mirrored to disk immediately to avoid data loss when crashing.
+    /// By default the cache can be used to improve in-memory lookups,
+    /// but will not be persistent across reboots.
     pub(crate) fn hot(self: Arc<Self>) {
-        self.hot.swap(true, Ordering::Relaxed);
-
-        // TODO: start sync worker
         task::spawn(async move {});
     }
 }

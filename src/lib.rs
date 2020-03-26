@@ -22,7 +22,12 @@ pub use crate::{
 };
 pub use identity::Identity as Id;
 
-use crate::{api::users::Users as UsersApi, cache::CacheRef, dir::Dirs, meta::users::UserTable};
+use crate::{
+    api::users::Users as UsersApi,
+    cache::{CacheRef, CombKey},
+    dir::Dirs,
+    meta::users::UserTable,
+};
 use async_std::sync::{Arc, RwLock};
 
 /// In-memory alexandria library
@@ -31,8 +36,8 @@ pub struct Library {
     pub(crate) root: Dirs,
     /// Table with encrypted user metadata
     pub(crate) users: RwLock<UserTable>,
-    /// Active cache
-    pub(crate) cache: CacheRef<String, Id>,
+    /// Primary active/hot cache
+    pub(crate) cache: CacheRef<CombKey, Id>,
 }
 
 impl Library {
