@@ -38,7 +38,7 @@ where
         let data = seal(&encoded, &nonce, self);
 
         Ok(CipherText {
-            nonce: nonce.0.into_iter().cloned().collect(),
+            nonce: nonce.0.iter().cloned().collect(),
             data,
         })
     }

@@ -31,7 +31,7 @@ where
         let non = box_::gen_nonce();
         let enc = data.encode()?;
         let data = box_::seal(&enc, &non, &self.pub_, &self.sec);
-        let nonce = non.0.into_iter().cloned().collect();
+        let nonce = non.0.iter().cloned().collect();
         Ok(CipherText { nonce, data })
     }
 
