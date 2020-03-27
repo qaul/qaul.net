@@ -9,6 +9,8 @@
 - [Licenses](./legal/_intro.md)
     - [GNU Affero General Public License version 3 or later](agpl-3.0.md)
     - [Creative Commons Attribution 4.0 International License](./legal/cc-by.md)
+- [Build & Install](./install/_intro.md)
+  - [Linux](./install/linux.md)
 - [Technical](./technical/index.md)
   - [qaul.net](./technical/qaul.net/index.md)
     - [services](./technical/qaul.net/services.md)
