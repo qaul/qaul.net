@@ -16,7 +16,10 @@ pub(crate) struct Delta {
 
 /// Encode a change made to a record
 pub enum DeltaType {
+    /// Creating a new record
     Insert,
+    /// Updating an existing record in place
     Update,
+    /// Deleting a record
     Delete,
 }

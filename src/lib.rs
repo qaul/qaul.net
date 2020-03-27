@@ -1,7 +1,6 @@
 //! Alexandria storage library
 
 pub(crate) mod cache;
-
 pub(crate) mod crypto;
 pub(crate) mod delta;
 pub(crate) mod dir;
