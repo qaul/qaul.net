@@ -1,1 +1,0 @@
-../../../../licenses/cc-by.md
