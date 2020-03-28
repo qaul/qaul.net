@@ -1602,6 +1602,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "netmod-overlay"
+version = "0.1.0"
+dependencies = [
+ "async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "async-trait 0.1.24 (registry+https://github.com/rust-lang/crates.io-index)",
+ "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ratman-identity 0.3.0",
+ "ratman-netmod 0.3.0",
+ "serde 1.0.105 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "netmod-udp"
 version = "0.1.0"
 dependencies = [
@@ -1990,6 +2002,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ce23b6b870e8f94f81fb0a363d65d86675884b34a09043c81e5562f11c1f8e1"
 dependencies = [
  "proc-macro2 0.4.30",
+]
+
+[[package]]
+name = "qaulhubd"
+version = "0.1.0"
+dependencies = [
+ "async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libqaul 0.1.0",
+ "netmod-overlay 0.1.0",
+ "ratman 0.1.0",
+ "ratman-netmod 0.3.0",
 ]
 
 [[package]]

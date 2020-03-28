@@ -34,6 +34,10 @@ members = [
     "netmod-mem",
     "netmod-udp",
     "netmod-wd",
+    "netmod-overlay",
+
+    # infrastructure crates
+    "qaulhubd",
 
     # Client specific targets
     "clients/linux",
