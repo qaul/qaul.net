@@ -1,6 +1,6 @@
-# Introduction
+# qaul.net Contributors Guide
 
-Welcome to the `qaul.net` contributors' manual!
+Welcome to the *qaul.net Contributors Guide*!
 
 This guide is open and publicly editable. You can find it's sources 
 in our [gitlab repository].

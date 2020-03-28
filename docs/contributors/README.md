@@ -27,6 +27,11 @@ After installing Rust you can install mdbook as follows:
 cargo install mdbook
 ```
 
+### Further Dependencies (Optional)
+
+In order to be able to build the graph SVG of the program structure you 
+need to install the CLI program `graphviz`.
+
 
 ## Develop
 
