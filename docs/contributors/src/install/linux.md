@@ -26,17 +26,13 @@ cd qaul.net
 cargo build
 ```
 
-
-## Run and Test qaul.net
-
-The rust build created the following binaries
+The rust build created the following binaries:
 
 * `qaul-linux`
 * `linux-cli`
 * `linux-http-test`
 
-To run the test `linux-http-test` enter the following into your terminal.
 
-```bash
-cargo run --bin linux-http-test
-```
+## Run and Test qaul.net
+
+See the [test chapter](../test/index.md).

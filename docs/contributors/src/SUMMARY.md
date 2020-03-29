@@ -32,6 +32,8 @@
     - [Install EmberJS & Test Web GUI](./technical/webgui/install.md)
 - [Beta](./technical/beta/_intro.md)
   - [TODO](./technical/beta/challenges.md)
+- [Test](./test/index.md)
+  - [linux-http-test](./test/linux-http-test.md)
 - [Translations](./translations/_intro.md)
 - [Design](./design/_intro.md)
 - [qaul.net Web Site](./web-site/_intro.md)
