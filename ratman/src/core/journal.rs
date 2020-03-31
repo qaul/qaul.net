@@ -20,7 +20,7 @@ impl Journal {
 
     /// Dispatches a long-running task to run the journal logic
     pub(crate) fn run(self: Arc<Self>) {
-        task::spawn(async move { loop {} });
+        // task::spawn(async move { loop {} });
     }
 
     /// Add a new frame to the known set
