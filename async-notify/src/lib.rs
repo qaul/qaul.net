@@ -8,46 +8,47 @@ use std::task::Waker;
 /// should, for example, check for more work in a queue or try again to
 /// acquire a lock.
 #[derive(Default, Debug, Clone)]
-pub struct AccessNotifier<T> {
+pub struct Notify<T> {
     inner: T,
     waker: Option<Waker>,
 }
 
-impl<T> Deref for AccessNotifier<T> {
+impl<T> Deref for Notify<T> {
     type Target = T;
     fn deref(&self) -> &Self::Target {
         &self.inner
     }
 }
 
-impl<T> DerefMut for AccessNotifier<T> {
+impl<T> DerefMut for Notify<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.waker.as_ref().map(|w| w.wake_by_ref());
         &mut self.inner
     }
 }
 
-impl<T> AccessNotifier<T> {
-    /// Check whether or not this `AccessNotifier` has a registered `Waker`.
+impl<T> Notify<T> {
+    /// Check whether or not this `Notify` has a registered `Waker`.
     ///
     /// This function is implemented as an associated function rather than a
     /// method to avoid conflicts with methods on the wrapped type.
-    /// Call it as `AccessNotifier::has_waker()`.
-    pub fn has_waker(ptr: &AccessNotifier<T>) -> bool {
+    /// Call it as `Notify::has_waker()`.
+    pub fn has_waker(ptr: &Notify<T>) -> bool {
         ptr.waker.is_some()
     }
 
-    /// Get a copy of the registered `Waker` for this `AccessNotifier`.
+    /// Get a copy of the registered `Waker` for this `Notify`.
     ///  
     /// This function is implemented as an associated function rather than a
     /// method to avoid conflicts with methods on the wrapped type.
-    /// Call it as `AccessNotifier::waker()`.
-    pub fn waker(ptr: &mut AccessNotifier<T>) -> Option<Waker> {
+    /// Call it as `Notify::waker()`.
+    pub fn waker(ptr: &mut Notify<T>) -> Option<Waker> {
         ptr.waker.as_ref().map(|w| w.clone())
     }
 
     /// Call wake on the waker, if it's a waker, yehaa!
-    pub fn wake_if_waker(ptr: &mut AccessNotifier<T>) {
+    #[inline]
+    pub fn wake(ptr: &mut Notify<T>) {
         if let Some(ref w) = ptr.waker {
             w.clone().wake();
         }
@@ -57,35 +58,34 @@ impl<T> AccessNotifier<T> {
     ///  
     /// This function is implemented as an associated function rather than a
     /// method to avoid conflicts with methods on the wrapped type.
-    /// Call it as `AccessNotifier::register_waker()`.
+    /// Call it as `Notify::register_waker()`.
     ///
     /// # Panics
     /// Panics if there is an already registered `Waker`.
-    /// Use `AccessNotifier::has_waker` to check the state before using this.
-    pub fn register_waker(ptr: &mut AccessNotifier<T>, waker: &Waker) {
-        if AccessNotifier::has_waker(ptr) {
-            panic!("Tried to register a Waker on an AccessWaker with an already registered Waker.");
-        } else {
+    /// Use `Notify::has_waker` to check the state before using this.
+    #[inline]
+    pub fn register_waker(ptr: &mut Notify<T>, waker: &Waker) {
+        if !Notify::has_waker(ptr) {
             ptr.waker = Some(waker.clone())
         }
     }
 
-    /// Removes and returns the `Waker` registered to this `AccessNotifier`.
+    /// Removes and returns the `Waker` registered to this `Notify`.
     ///  
     /// This function is implemented as an associated function rather than a
     /// method to avoid conflicts with methods on the wrapped type.
-    /// Call it as `AccessNotifier::clear_waker()`.
-    pub fn clear_waker(ptr: &mut AccessNotifier<T>) -> Option<Waker> {
+    /// Call it as `Notify::clear_waker()`.
+    pub fn clear_waker(ptr: &mut Notify<T>) -> Option<Waker> {
         ptr.waker.take()
     }
 
-    /// Consumes the `AccessNotifier`, dropping any associated `Waker` and
+    /// Consumes the `Notify`, dropping any associated `Waker` and
     /// returning the inner value without notifying the `Waker`.
     ///  
     /// This function is implemented as an associated function rather than a
     /// method to avoid conflicts with methods on the wrapped type.
-    /// Call it as `AccessNotifier::into_inner()`.
-    pub fn into_inner(ptr: AccessNotifier<T>) -> T {
+    /// Call it as `Notify::into_inner()`.
+    pub fn into_inner(ptr: Notify<T>) -> T {
         ptr.inner
     }
 
@@ -93,8 +93,8 @@ impl<T> AccessNotifier<T> {
     ///
     /// This function is implemented as an associated function rather than a
     /// method to avoid conflicts with methods on the wrapped type.
-    /// Call it as `AccessNotifier::notify()`.
-    pub fn notify(ptr: &AccessNotifier<T>) {
+    /// Call it as `Notify::notify()`.
+    pub fn notify(ptr: &Notify<T>) {
         ptr.waker.as_ref().map(|w| w.wake_by_ref());
     }
 }

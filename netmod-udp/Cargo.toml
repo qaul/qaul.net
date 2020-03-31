@@ -7,7 +7,7 @@ edition = "2018"
 license = "AGPL-3.0"
 
 [dependencies]
-access-notifier = { path = "../access-notifier" }
+async-notify = { path = "../async-notify" }
 netmod = { path = "../ratman/netmod", package = "ratman-netmod" }
 identity = { path = "../ratman/identity", package = "ratman-identity" }
 

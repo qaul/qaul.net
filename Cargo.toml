@@ -8,13 +8,13 @@ members = [
     "libqaul/http",
     "libqaul/rpc",
     "libqaul/ipc",
-	"libqaul/ws",
+    "libqaul/ws",
 
     # qaul.net main services
     "libqaul/service/chat",
     # "libqaul/service/feed",
     "libqaul/service/files",
-	"libqaul/service/voices",
+    "libqaul/service/voices",
 
     # decentralised routing protocol
     "ratman",
@@ -25,7 +25,7 @@ members = [
     "clockctrl",
     "permute",
     "visn",
-    "access-notifier",
+    "async-notify",
     
     # Available netmod drivers
     "netmod-mem",

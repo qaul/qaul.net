@@ -1,7 +1,7 @@
 //! Socket handler module
 
 use crate::{AddrTable, Envelope, FrameExt, Peer};
-use access_notifier::AccessNotifier as Notify;
+use async_notify::Notify;
 use async_std::{
     future::{self, Future},
     net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket},
@@ -115,7 +115,7 @@ impl Socket {
                                 // Append to the inbox and wake
                                 let mut inbox = arc.inbox.write().await;
                                 inbox.push_back(FrameExt(frame, Target::Single(id)));
-                                Notify::wake_if_waker(&mut inbox);
+                                Notify::wake(&mut inbox);
                             }
                         }
                     }

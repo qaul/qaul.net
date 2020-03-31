@@ -1,7 +1,7 @@
 use super::Locked;
 use crate::Message;
 
-use access_notifier::AccessNotifier as Notifier;
+use async_notify::Notify;
 use async_std::{
     future::{self, Future},
     pin::Pin,
@@ -14,8 +14,8 @@ use std::collections::{BTreeMap, VecDeque};
 /// Local frame collector state holder
 #[derive(Default)]
 pub(super) struct State {
-    incoming: Notifier<Locked<Notifier<BTreeMap<SeqId, Notifier<VecDeque<Frame>>>>>>,
-    done: Locked<Notifier<VecDeque<Message>>>,
+    incoming: Notify<Locked<Notify<BTreeMap<SeqId, Notify<VecDeque<Frame>>>>>>,
+    done: Locked<Notify<VecDeque<Message>>>,
 }
 
 impl State {
@@ -33,7 +33,7 @@ impl State {
                 Poll::Ready(ref mut not) => match not.pop_front() {
                     Some(f) => Poll::Ready(f),
                     None => {
-                        Notifier::register_waker(not, ctx.waker());
+                        Notify::register_waker(not, ctx.waker());
                         Poll::Pending
                     }
                 },
@@ -52,7 +52,7 @@ impl State {
                 Poll::Ready(ref mut map) => match map.get_mut(seq) {
                     Some(ref mut vec) if vec.len() > 0 => Poll::Ready(vec.pop_front().unwrap()),
                     Some(ref mut vec) => {
-                        Notifier::register_waker(vec, ctx.waker());
+                        Notify::register_waker(vec, ctx.waker());
                         Poll::Pending
                     }
                     None => unimplemented!(), // No work queue _should_ never happen
@@ -67,7 +67,7 @@ impl State {
     pub(super) async fn finish(&self, msg: Message) {
         let mut done = self.done.lock().await;
         done.push_back(msg);
-        Notifier::wake_if_waker(&mut *done);
+        Notify::wake(&mut *done);
     }
 
     /// Queue a new frame to the state
@@ -75,7 +75,7 @@ impl State {
         let mut map = self.incoming.lock().await;
         let vec = map.entry(seq).or_default();
         vec.push_back(frame);
-        Notifier::wake_if_waker(vec);
+        Notify::wake(vec);
     }
 
     /// Get the current number of queued frames for diagnostic and testing
