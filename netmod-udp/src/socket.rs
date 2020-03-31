@@ -19,7 +19,7 @@ const SELF: Ipv4Addr = Ipv4Addr::new(0, 0, 0, 0);
 
 /// Wraps around a UDP socket an the input queue
 pub(crate) struct Socket {
-    sock: Arc<RwLock<UdpSocket>>,
+    sock: Arc<UdpSocket>,
     inbox: Arc<RwLock<Notify<VecDeque<FrameExt>>>>,
 }
 
@@ -29,10 +29,10 @@ impl Socket {
         let sock = UdpSocket::bind(addr).await.unwrap();
         sock.join_multicast_v4(MULTI, SELF)
             .expect("Failed to join multicast. Error");
-        sock.set_multicast_loop_v4(true).unwrap(); // only for testing
+        sock.set_multicast_loop_v4(true).unwrap();
 
         let arc = Arc::new(Self {
-            sock: Arc::new(RwLock::new(sock)),
+            sock: Arc::new(sock),
             inbox: Default::default(),
         });
 
@@ -46,8 +46,6 @@ impl Socket {
     pub(crate) async fn send(&self, frame: &Frame, ip: IpAddr) {
         let data = Envelope::frame(frame);
         self.sock
-            .write()
-            .await
             .send_to(&data, SocketAddr::new(ip, PORT))
             .await
             .unwrap();
@@ -65,8 +63,6 @@ impl Socket {
     pub(crate) async fn multicast(&self, env: Envelope) {
         dbg!("Sending mulitcast {}", &env);
         self.sock
-            .write()
-            .await
             .send_to(
                 &dbg!(env.as_bytes()),
                 SocketAddr::new(IpAddr::V4(MULTI.clone()), 12322),
@@ -97,48 +93,42 @@ impl Socket {
                 // This is a bad idea
                 let mut buf = vec![0; 8192];
 
-                // Lock the socket, then poll the recv future _once_,
-                // and move on.  This way we avoid perma-locking the
-                // socket for writers, because UdpSocket doesn't
-                // implement split(). . o O ( why not actually? )
-                let socket = arc.sock.write().await;
-                let mut fut = socket.recv_from(&mut buf);
-                let res = future::poll_fn(move |ctx| {
-                    match unsafe { Pin::new_unchecked(&mut fut).poll(ctx) } {
-                        Poll::Ready(Ok((_, peer))) => Poll::Ready(Some(peer)),
-                        _ => Poll::Ready(None),
+                match arc.sock.recv_from(&mut buf).await {
+                    Ok((_, peer)) => {
+                        let env = Envelope::from_bytes(&buf);
+                        match env {
+                            Envelope::Announce => {
+                                dbg!("Receiving announce");
+                                table.set(peer.ip()).await;
+                                arc.multicast(Envelope::Reply).await;
+                            }
+                            Envelope::Reply => {
+                                dbg!("Receiving announce");
+                                table.set(peer.ip()).await;
+                            }
+                            Envelope::Data(_) => {
+                                let frame = env.get_frame();
+                                dbg!(&frame);
+
+                                let id = table.id(&peer.ip()).await.unwrap();
+
+                                // Append to the inbox and wake
+                                let mut inbox = arc.inbox.write().await;
+                                inbox.push_back(FrameExt(frame, Target::Single(id)));
+                                Notify::wake_if_waker(&mut inbox);
+                            }
+                        }
                     }
-                })
-                .await;
-
-                if let Some(peer) = res {
-                    let env = dbg!(Envelope::from_bytes(&buf));
-                    match env {
-                        Envelope::Announce => {
-                            dbg!("Receiving announce");
-                            table.set(peer.ip()).await;
-                            arc.multicast(Envelope::Reply).await;
-                        }
-                        Envelope::Reply => {
-                            dbg!("Receiving announce");
-                            table.set(peer.ip()).await;
-                        }
-                        Envelope::Data(_) => {
-                            let frame = env.get_frame();
-                            dbg!(&frame);
-
-                            let id = table.id(&peer.ip()).await.unwrap();
-
-                            // Append to the inbox and wake
-                            let mut inbox = arc.inbox.write().await;
-                            inbox.push_back(FrameExt(frame, Target::Single(id)));
-                            Notify::wake_if_waker(&mut inbox);
-                        }
+                    val => {
+                        // TODO: handle errors more gracefully
+                        dbg!(val).expect("Crashed UDP thread!");
                     }
                 }
             }
         });
     }
+
+    async fn send_envelope(arc: Arc<Self>) {}
 }
 
 #[test]
