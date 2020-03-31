@@ -13,7 +13,7 @@ pub(crate) use framing::{Envelope, FrameExt};
 use async_std::{sync::Arc, task};
 use async_trait::async_trait;
 use netmod::{Endpoint as EndpointExt, Frame, Recipient, Result, Target};
-use std::net::SocketAddrs;
+use std::net::ToSocketAddrs;
 
 #[derive(Clone)]
 pub struct Endpoint {
@@ -34,10 +34,11 @@ impl Endpoint {
     }
 
     /// Manually introduce this endpoint to other endpoints
-    pub async fn introduce<A: ToSockAddrs>(&self, addr: A) -> std::io::Result<()> {
-        for addr in addr.to_socket_addrs() {
-            self.addrs.set(addr).await
+    pub async fn introduce<A: ToSocketAddrs>(&self, addr: A) -> std::io::Result<()> {
+        for addr in addr.to_socket_addrs()? {
+            self.addrs.set(addr).await;
         }
+        Ok(())
     }
 
     #[cfg(test)]
