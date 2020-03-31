@@ -52,7 +52,7 @@ fn scaffold_lib() {
     let mut offset = root.path().to_path_buf();
     offset.push("library");
 
-    let d = Dirs::new(offset);
+    let d = Dirs::new(offset.clone());
     d.scaffold();
 
     assert!(Path::new(dbg!(&offset.join("records"))).exists());
