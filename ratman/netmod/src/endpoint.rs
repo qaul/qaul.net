@@ -54,14 +54,14 @@ pub trait Endpoint {
 #[async_trait]
 impl<T: Endpoint + Send + Sync> Endpoint for Arc<T> {
     fn size_hint(&self) -> usize {
-        self.size_hint()
+        T::size_hint(self)
     }
 
     async fn send(&self, frame: Frame, target: Target) -> Result<()> {
-        self.send(frame, target).await
+        T::send(self, frame, target).await
     }
 
     async fn next(&self) -> Result<(Frame, Target)> {
-        self.next().await
+        T::next(self).await
     }
 }
