@@ -1,7 +1,7 @@
 //! Address resolution table module
 
 use async_std::{
-    net::IpAddr,
+    net::{IpAddr, SocketAddr},
     sync::{Arc, RwLock},
 };
 use std::collections::BTreeMap;
@@ -22,10 +22,43 @@ impl IdMaker {
     }
 }
 
+/// A peer with IP and port
+///
+/// The netmod-udp layer can't make assumptions about what port it
+/// will be run on, so we need to keep track of that in this table.
+/// The information can be pulled from the peer info returned by the
+/// Udp abstraction.
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub(crate) struct Peer {
+    pub(crate) ip: IpAddr,
+    pub(crate) port: u16,
+}
+
+impl Peer {
+    pub(crate) fn to_string(&self) -> String {
+        format!("{}:{}", self.ip, self.port)
+    }
+}
+
+impl From<SocketAddr> for Peer {
+    fn from(sa: SocketAddr) -> Self {
+        Self::from(&sa)
+    }
+}
+
+impl From<&SocketAddr> for Peer {
+    fn from(sa: &SocketAddr) -> Self {
+        Self {
+            ip: sa.ip(),
+            port: sa.port(),
+        }
+    }
+}
+
 pub(crate) struct AddrTable {
     factory: IdMaker,
-    ips: Arc<RwLock<BTreeMap<u16, IpAddr>>>,
-    ids: Arc<RwLock<BTreeMap<IpAddr, u16>>>,
+    ips: Arc<RwLock<BTreeMap<u16, Peer>>>,
+    ids: Arc<RwLock<BTreeMap<Peer, u16>>>,
 }
 
 impl AddrTable {
@@ -46,24 +79,25 @@ impl AddrTable {
     /// possible to find out what previous IP a node had, without
     /// performing deep packet inspection and looking at certain
     /// Identity information.  As such, this table can only grow.
-    pub(crate) async fn set(&self, ip: IpAddr) -> u16 {
+    pub(crate) async fn set<I: Into<Peer>>(&self, i: I) -> u16 {
         let id = self.factory.incr().await.curr().await;
-        self.ips.write().await.insert(id, ip).unwrap();
-        self.ids.write().await.insert(ip, id).unwrap();
+        let peer = i.into();
+        self.ips.write().await.insert(id, peer);
+        self.ids.write().await.insert(peer, id);
         id
     }
 
-    /// Get the ID for a given IP address
-    pub(crate) async fn id(&self, ip: &IpAddr) -> Option<u16> {
-        self.ids.read().await.get(ip).cloned()
+    /// Get the ID for a given Peer address
+    pub(crate) async fn id(&self, peer: Peer) -> Option<u16> {
+        self.ids.read().await.get(&peer).cloned()
     }
 
-    /// Get the IP for a given internal ID
-    pub(crate) async fn ip(&self, id: u16) -> Option<IpAddr> {
+    /// Get the Peer for a given internal ID
+    pub(crate) async fn ip(&self, id: u16) -> Option<Peer> {
         self.ips.read().await.get(&id).cloned()
     }
 
-    pub(crate) async fn all(&self) -> Vec<IpAddr> {
+    pub(crate) async fn all(&self) -> Vec<Peer> {
         self.ips.read().await.values().cloned().collect()
     }
 }

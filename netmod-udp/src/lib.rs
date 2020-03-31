@@ -2,7 +2,7 @@
 #![allow(warnings)]
 
 mod addrs;
-pub(crate) use addrs::AddrTable;
+pub(crate) use addrs::{AddrTable, Peer};
 
 mod socket;
 pub(crate) use socket::Socket;
@@ -69,11 +69,24 @@ impl EndpointExt for Endpoint {
 
 /// This test requires network access to set the multicast
 #[test]
-fn simple_two_way() {
-    let a = Endpoint::spawn("0.0.0.0:9999");
-    let b = Endpoint::spawn("0.0.0.0:8888");
+fn discover() {
+    task::block_on(async {
+        use async_std::net::{IpAddr, Ipv4Addr};
 
-    std::thread::sleep_ms(5000);
-    
-    assert_eq!(task::block_on(async { a.peers().await }), 1);
+        let p1 = Peer {
+            ip: IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
+            port: 11000,
+        };
+        let p2 = Peer {
+            ip: IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
+            port: 11001,
+        };
+
+        let e1 = Endpoint::spawn(&p1.to_string());
+        let e2 = Endpoint::spawn(&p2.to_string());
+
+        std::thread::sleep_ms(5000);
+
+        assert_eq!(task::block_on(async { e1.peers().await }), 1);
+    })
 }

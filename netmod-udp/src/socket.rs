@@ -1,6 +1,6 @@
 //! Socket handler module
 
-use crate::{AddrTable, Envelope, FrameExt};
+use crate::{AddrTable, Envelope, FrameExt, Peer};
 use access_notifier::AccessNotifier as Notify;
 use async_std::{
     future::{self, Future},
@@ -13,7 +13,6 @@ use conjoiner;
 use netmod::{Frame, Target};
 use std::collections::VecDeque;
 
-const PORT: u16 = 20120;
 const MULTI: Ipv4Addr = Ipv4Addr::new(224, 0, 0, 123);
 const SELF: Ipv4Addr = Ipv4Addr::new(0, 0, 0, 0);
 
@@ -29,7 +28,8 @@ impl Socket {
         let sock = UdpSocket::bind(addr).await.unwrap();
         sock.join_multicast_v4(MULTI, SELF)
             .expect("Failed to join multicast. Error");
-        sock.set_multicast_loop_v4(true).unwrap();
+
+        // sock.set_multicast_loop_v4(true).unwrap();
 
         let arc = Arc::new(Self {
             sock: Arc::new(sock),
@@ -43,19 +43,19 @@ impl Socket {
     }
 
     /// Send a message to one specific client
-    pub(crate) async fn send(&self, frame: &Frame, ip: IpAddr) {
+    pub(crate) async fn send(&self, frame: &Frame, peer: Peer) {
         let data = Envelope::frame(frame);
         self.sock
-            .send_to(&data, SocketAddr::new(ip, PORT))
+            .send_to(&data, SocketAddr::new(peer.ip, peer.port))
             .await
             .unwrap();
     }
 
     /// Send a frame to many recipients (via multicast)
-    pub(crate) async fn send_many(&self, frame: &Frame, ips: Vec<IpAddr>) {
+    pub(crate) async fn send_many(&self, frame: &Frame, ips: Vec<Peer>) {
         let data = Envelope::frame(frame);
-        for ip in ips.iter() {
-            self.send(frame, *ip).await
+        for peer in ips.iter() {
+            self.send(frame, *peer).await
         }
     }
 
@@ -99,18 +99,18 @@ impl Socket {
                         match env {
                             Envelope::Announce => {
                                 dbg!("Receiving announce");
-                                table.set(peer.ip()).await;
+                                table.set(peer).await;
                                 arc.multicast(Envelope::Reply).await;
                             }
                             Envelope::Reply => {
                                 dbg!("Receiving announce");
-                                table.set(peer.ip()).await;
+                                table.set(peer).await;
                             }
                             Envelope::Data(_) => {
                                 let frame = env.get_frame();
                                 dbg!(&frame);
 
-                                let id = table.id(&peer.ip()).await.unwrap();
+                                let id = table.id(dbg!(peer.into())).await.unwrap();
 
                                 // Append to the inbox and wake
                                 let mut inbox = arc.inbox.write().await;
@@ -127,8 +127,6 @@ impl Socket {
             }
         });
     }
-
-    async fn send_envelope(arc: Arc<Self>) {}
 }
 
 #[test]
@@ -138,5 +136,37 @@ fn test_init() {
         let sock = Socket::with_addr("0.0.0.0:12322", table).await;
         println!("Multicasting");
         sock.multicast(Envelope::Announce);
+    });
+}
+
+#[test]
+fn test_single_unicast() {
+    task::block_on(async {
+        let p1 = Peer {
+            ip: IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
+            port: 10000,
+        };
+        let p2 = Peer {
+            ip: IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
+            port: 10001,
+        };
+
+        let t1 = Arc::new(AddrTable::new());
+        let t2 = Arc::new(AddrTable::new());
+
+        // This is a hack for this test to "introduce" the two
+        // endpoints to each other.  It's the "Haaaave you met..." of
+        // wire protocols
+        t1.set(p2).await;
+        t2.set(p1).await;
+
+        // Create two sockets on two ports
+        let s1 = Socket::with_addr(&p1.to_string(), t1).await;
+        let s2 = Socket::with_addr(&p2.to_string(), t2).await;
+
+        let f = Frame::dummy();
+        s1.send(&f, p2).await;
+
+        assert_eq!(s2.next().await.0, f);
     });
 }

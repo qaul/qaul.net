@@ -47,7 +47,7 @@ impl Default for Target {
 /// Because a `Frame` is usually created in a sequence, the
 /// constructors assume chainable operations, such as a `Vec<Frame>`
 /// can be returned with all sequence ID information correctly setup.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Frame {
     /// Sender information
     pub sender: Identity,
