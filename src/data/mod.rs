@@ -1,15 +1,16 @@
 //! On-file data formats
 
-mod inbox;
+mod blob;
 mod kv;
 mod tag;
+mod loader;
 
+use self::{blob::Blob, kv::Kv, tag::Tag};
 use crate::{
-    crypto::{asym::KeyPair, Encrypted, DetachedKey},
+    crypto::{asym::KeyPair, DetachedKey, Encrypted},
     error::Result,
     Id,
 };
-use tag::Tag;
 
 use async_std::{fs::File, io::ReadExt, sync::Arc};
 use serde::{Deserialize, Serialize};
@@ -21,8 +22,8 @@ use std::{
 /// A record header
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Header {
-    id: Id,
-    tags: BTreeSet<Tag>,
+    pub id: Id,
+    pub tags: BTreeSet<Tag>,
     sec: Encrypted<SecHeader, KeyPair>,
 }
 
@@ -37,11 +38,29 @@ pub enum Type {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SecHeader {
     /// Record type
-    t: Type,
+    pub t: Type,
     /// Total payload size
-    size: u64,
+    pub size: u64,
     /// Beginning chunk markers
-    chunks: Vec<u32>,
+    pub chunks: Vec<u32>,
 }
 
 impl DetachedKey<KeyPair> for SecHeader {}
+
+/// A record data body
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Body {
+    Kv(Kv),
+    Blob(Blob),
+}
+
+impl DetachedKey<KeyPair> for Body {}
+
+/// A single record in alexandria, defined by a header and body
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Record {
+    /// The clear record header
+    pub header: Header,
+    /// A handle to the data body
+    body: Encrypted<Body, KeyPair>,
+}

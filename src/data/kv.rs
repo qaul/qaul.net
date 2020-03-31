@@ -1,7 +1,6 @@
-
-use serde::{Serialize, Deserialize};
-use std::{collections::BTreeMap, ops::Deref};
 use async_std::sync::Arc;
+use serde::{Deserialize, Serialize};
+use std::{collections::BTreeMap, ops::Deref};
 
 /// The key-value map used in a Kv record
 pub type Map = BTreeMap<String, Value>;
@@ -10,7 +9,7 @@ pub type Map = BTreeMap<String, Value>;
 pub type KvRef = Arc<Kv>;
 
 /// A strongly-typed value stored in an `alexandria` scope
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Value {
     // Text
     String(String),
@@ -47,14 +46,16 @@ pub enum Value {
 }
 
 /// A key-value store record
-#[derive(Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Kv {
     map: Map,
 }
 
 impl Kv {
     pub fn new() -> Self {
-        Self::default()
+        Self {
+            map: Default::default(),
+        }
     }
 }
 
