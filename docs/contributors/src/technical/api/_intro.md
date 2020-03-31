@@ -38,7 +38,7 @@ isn't handled via the transport protocol (like http).
 }
 ```
 
-This type can be found in `libqaul/rpc/json/mod.rs`.  The general
+This type can be found in `libqaul/rpc/src/json/mod.rs`.  The general
 structure of requests stays the same: there's an ID, some auth data,
 the page (which isn't implemented yet), `method` and `kind` the
 request operates on.
@@ -72,4 +72,4 @@ Three special ones only exist for users:
 
 Following is a list of examples of how to construct valid requests.
 If in doubt, the code that parses these is in
-`libqaul/rpc/json/parser.rs`.  You can always look it up there.
+`libqaul/rpc/src/json/parser.rs`.  You can always look it up there.
