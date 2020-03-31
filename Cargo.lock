@@ -1185,7 +1185,7 @@ dependencies = [
  "async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "async-trait 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-channel 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "ratman-identity 0.3.0",
+ "ratman-identity 0.4.0",
  "ratman-netmod 0.3.0",
 ]
 
@@ -1197,7 +1197,7 @@ dependencies = [
  "async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "async-trait 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "ratman-identity 0.3.0",
+ "ratman-identity 0.4.0",
  "ratman-netmod 0.3.0",
  "serde 1.0.105 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -1414,7 +1414,7 @@ version = "0.1.0"
 dependencies = [
  "libqaul 0.1.0",
  "mime 0.3.16 (registry+https://github.com/rust-lang/crates.io-index)",
- "ratman-identity 0.3.0",
+ "ratman-identity 0.4.0",
 ]
 
 [[package]]
@@ -1523,7 +1523,7 @@ dependencies = [
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "netmod-mem 0.1.0",
- "ratman-identity 0.3.0",
+ "ratman-identity 0.4.0",
  "ratman-netmod 0.3.0",
  "serde 1.0.105 (registry+https://github.com/rust-lang/crates.io-index)",
  "twox-hash 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1561,7 +1561,7 @@ version = "0.3.0"
 dependencies = [
  "async-trait 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "ratman-identity 0.3.0",
+ "ratman-identity 0.4.0",
  "serde 1.0.105 (registry+https://github.com/rust-lang/crates.io-index)",
  "twox-hash 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

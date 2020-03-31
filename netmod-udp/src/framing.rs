@@ -1,5 +1,6 @@
 //! UDP overlay protocol and framing
 
+use conjoiner;
 use netmod::{Frame, Target};
 use serde::{Deserialize, Serialize};
 
@@ -14,12 +15,47 @@ use serde::{Deserialize, Serialize};
 /// what internal ID they are represented by.  All other routing is
 /// then done via Ratman and the netmod API which considers target
 /// state.
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum Envelope {
     /// Announcing an endpoint via multicast
     Announce,
+    /// Reply to an announce
+    Reply,
     /// A raw data frame
     Data(Vec<u8>),
+}
+
+impl Envelope {
+    pub(crate) fn frame(f: &Frame) -> Vec<u8> {
+        let inner = conjoiner::serialise(f).unwrap();
+        let env = Envelope::Data(inner);
+        conjoiner::serialise(&env).unwrap()
+    }
+
+    pub(crate) fn get_frame(&self) -> Frame {
+        match self {
+            Self::Data(ref vec) => conjoiner::deserialise(vec).unwrap(),
+            _ => unreachable!(),
+        }
+    }
+
+    pub(crate) fn announce() -> Vec<u8> {
+        let env = Envelope::Announce;
+        conjoiner::serialise(&env).unwrap()
+    }
+
+    pub(crate) fn reply() -> Vec<u8> {
+        let env = Envelope::Reply;
+        conjoiner::serialise(&env).unwrap()
+    }
+
+    pub(crate) fn as_bytes(&self) -> Vec<u8> {
+        conjoiner::serialise(self).unwrap()
+    }
+
+    pub(crate) fn from_bytes(vec: &Vec<u8>) -> Self {
+        conjoiner::deserialise(&vec).unwrap()
+    }
 }
 
 /// A frame wrapped with the ID that it was targeted with

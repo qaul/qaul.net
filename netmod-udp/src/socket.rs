@@ -36,12 +36,15 @@ impl Socket {
             inbox: Default::default(),
         });
 
-        Self::spawn(Arc::clone(&arc), table)
+        Self::incoming_handle(Arc::clone(&arc), table);
+        arc.multicast(Envelope::Announce).await;
+        dbg!();
+        arc
     }
 
     /// Send a message to one specific client
-    pub(crate) async fn send(&self, frame: Frame, ip: IpAddr) {
-        let data = conjoiner::serialise(&frame).unwrap();
+    pub(crate) async fn send(&self, frame: &Frame, ip: IpAddr) {
+        let data = Envelope::frame(frame);
         self.sock
             .write()
             .await
@@ -51,22 +54,21 @@ impl Socket {
     }
 
     /// Send a frame to many recipients (via multicast)
-    pub(crate) async fn send_many(&self, frame: Frame, ips: Vec<IpAddr>) {
-        let data = conjoiner::serialise(&frame).unwrap();
-        self.sock
-            .write()
-            .await
-            .send_to(&data, SocketAddr::new(IpAddr::V4(MULTI.clone()), 12322))
-            .await;
+    pub(crate) async fn send_many(&self, frame: &Frame, ips: Vec<IpAddr>) {
+        let data = Envelope::frame(frame);
+        for ip in ips.iter() {
+            self.send(frame, *ip).await
+        }
     }
 
-    /// Send a multicast with an envelope
-    pub(crate) async fn multicast(&self) {
+    /// Send a multicast with an Envelope
+    pub(crate) async fn multicast(&self, env: Envelope) {
+        dbg!("Sending mulitcast {}", &env);
         self.sock
             .write()
             .await
             .send_to(
-                &vec![13, 12],
+                &dbg!(env.as_bytes()),
                 SocketAddr::new(IpAddr::V4(MULTI.clone()), 12322),
             )
             .await;
@@ -89,41 +91,53 @@ impl Socket {
         .await
     }
 
-    fn spawn(arc: Arc<Self>, table: Arc<AddrTable>) -> Arc<Self> {
-        let arc2 = Arc::clone(&arc);
+    fn incoming_handle(arc: Arc<Self>, table: Arc<AddrTable>) {
         task::spawn(async move {
             loop {
+                // This is a bad idea
                 let mut buf = vec![0; 8192];
-                let socket = arc.sock.write().await;
-                match socket.recv_from(&mut buf).await {
-                    Ok((_, peer)) => {
-                        let udp_env =
-                            conjoiner::deserialise(&buf).expect("couldn't deserialise. error: ");
-                        match udp_env {
-                            Envelope::Announce => {
-                                table.set(peer.ip());
-                            }
-                            Envelope::Data(vec) => {
-                                let frame = conjoiner::deserialise(&vec)
-                                    .expect("couldn't deserialise Frame");
-                                dbg!(&frame);
-                                let id = table.id(&peer.ip()).await.unwrap();
 
-                                // Append to the inbox and wake
-                                let mut inbox = arc.inbox.write().await;
-                                inbox.push_back(FrameExt(frame, Target::Single(id)));
-                                Notify::wake_if_waker(&mut inbox);
-                            }
-                        }
+                // Lock the socket, then poll the recv future _once_,
+                // and move on.  This way we avoid perma-locking the
+                // socket for writers, because UdpSocket doesn't
+                // implement split(). . o O ( why not actually? )
+                let socket = arc.sock.write().await;
+                let mut fut = socket.recv_from(&mut buf);
+                let res = future::poll_fn(move |ctx| {
+                    match unsafe { Pin::new_unchecked(&mut fut).poll(ctx) } {
+                        Poll::Ready(Ok((_, peer))) => Poll::Ready(Some(peer)),
+                        _ => Poll::Ready(None),
                     }
-                    val => {
-                        // TODO: handle errors more gracefully
-                        dbg!(val).expect("Crashed UDP thread!");
+                })
+                .await;
+
+                if let Some(peer) = res {
+                    let env = dbg!(Envelope::from_bytes(&buf));
+                    match env {
+                        Envelope::Announce => {
+                            dbg!("Receiving announce");
+                            table.set(peer.ip()).await;
+                            arc.multicast(Envelope::Reply).await;
+                        }
+                        Envelope::Reply => {
+                            dbg!("Receiving announce");
+                            table.set(peer.ip()).await;
+                        }
+                        Envelope::Data(_) => {
+                            let frame = env.get_frame();
+                            dbg!(&frame);
+
+                            let id = table.id(&peer.ip()).await.unwrap();
+
+                            // Append to the inbox and wake
+                            let mut inbox = arc.inbox.write().await;
+                            inbox.push_back(FrameExt(frame, Target::Single(id)));
+                            Notify::wake_if_waker(&mut inbox);
+                        }
                     }
                 }
             }
         });
-        arc2
     }
 }
 
@@ -133,6 +147,6 @@ fn test_init() {
         let table = Arc::new(AddrTable::new());
         let sock = Socket::with_addr("0.0.0.0:12322", table).await;
         println!("Multicasting");
-        sock.multicast();
+        sock.multicast(Envelope::Announce);
     });
 }

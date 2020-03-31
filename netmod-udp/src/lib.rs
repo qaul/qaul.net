@@ -31,6 +31,11 @@ impl Endpoint {
             }
         })
     }
+
+    #[cfg(test)]
+    pub async fn peers(&self) -> usize {
+        self.addrs.all().await.len()
+    }
 }
 
 #[async_trait]
@@ -44,12 +49,12 @@ impl EndpointExt for Endpoint {
             /// Sending to a user,
             Target::Single(ref id) => {
                 self.socket
-                    .send(frame, self.addrs.ip(*id).await.unwrap())
+                    .send(&frame, self.addrs.ip(*id).await.unwrap())
                     .await
             }
             Target::Flood => {
                 let addrs = self.addrs.all().await;
-                self.socket.send_many(frame, addrs).await;
+                self.socket.send_many(&frame, addrs).await;
             }
         }
 
@@ -60,4 +65,15 @@ impl EndpointExt for Endpoint {
         let fe = self.socket.next().await;
         Ok((fe.0, fe.1))
     }
+}
+
+/// This test requires network access to set the multicast
+#[test]
+fn simple_two_way() {
+    let a = Endpoint::spawn("0.0.0.0:9999");
+    let b = Endpoint::spawn("0.0.0.0:8888");
+
+    std::thread::sleep_ms(5000);
+    
+    assert_eq!(task::block_on(async { a.peers().await }), 1);
 }
