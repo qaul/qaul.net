@@ -1193,6 +1193,7 @@ dependencies = [
 name = "netmod-udp"
 version = "0.1.0"
 dependencies = [
+ "access-notifier 0.1.0",
  "async-std 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "async-trait 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "conjoiner-engine 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",

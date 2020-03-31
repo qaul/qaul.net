@@ -1,6 +1,7 @@
 //! Socket handler module
 
 use crate::{AddrTable, Envelope, FrameExt};
+use access_notifier::AccessNotifier as Notify;
 use async_std::{
     future::{self, Future},
     net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket},
@@ -19,7 +20,7 @@ const SELF: Ipv4Addr = Ipv4Addr::new(0, 0, 0, 0);
 /// Wraps around a UDP socket an the input queue
 pub(crate) struct Socket {
     sock: Arc<RwLock<UdpSocket>>,
-    inbox: Arc<RwLock<VecDeque<FrameExt>>>,
+    inbox: Arc<RwLock<Notify<VecDeque<FrameExt>>>>,
 }
 
 impl Socket {
@@ -75,9 +76,12 @@ impl Socket {
         future::poll_fn(|ctx| {
             let lock = &mut self.inbox.write();
             match unsafe { Pin::new_unchecked(lock).poll(ctx) } {
-                Poll::Ready(mut inc) => match inc.pop_front() {
+                Poll::Ready(ref mut inc) => match inc.pop_front() {
                     Some(f) => Poll::Ready(f),
-                    None => Poll::Pending,
+                    None => {
+                        Notify::register_waker(inc, ctx.waker());
+                        Poll::Pending
+                    }
                 },
                 Poll::Pending => Poll::Pending,
             }
@@ -104,10 +108,11 @@ impl Socket {
                                     .expect("couldn't deserialise Frame");
                                 dbg!(&frame);
                                 let id = table.id(&peer.ip()).await.unwrap();
-                                arc.inbox
-                                    .write()
-                                    .await
-                                    .push_back(FrameExt(frame, Target::Single(id)));
+
+                                // Append to the inbox and wake
+                                let mut inbox = arc.inbox.write().await;
+                                inbox.push_back(FrameExt(frame, Target::Single(id)));
+                                Notify::wake_if_waker(&mut inbox);
                             }
                         }
                     }
