@@ -77,6 +77,7 @@ impl Socket {
                 Poll::Ready(ref mut inc) => match inc.pop_front() {
                     Some(f) => Poll::Ready(f),
                     None => {
+                        Notify::clear_waker(inc);
                         Notify::register_waker(inc, ctx.waker());
                         Poll::Pending
                     }
