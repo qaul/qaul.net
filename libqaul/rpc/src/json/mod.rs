@@ -4,8 +4,8 @@
 //! wraps the transactions of libqaul-rpc in json envelopes that are
 //! nicer to work with for web tools.
 
-mod parser;
 mod generator;
+mod parser;
 
 use libqaul::{users::UserAuth, Identity};
 use serde::{Deserialize, Serialize};
@@ -16,7 +16,7 @@ pub(crate) type JsonMap = BTreeMap<String, JsonValue>;
 
 /// A struct wrapper for UserAuth
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub  struct JsonAuth {
+pub struct JsonAuth {
     id: Identity,
     token: String,
 }
@@ -29,7 +29,7 @@ impl From<JsonAuth> for UserAuth {
 
 /// A json specific request envelope
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub  struct RequestEnv {
+pub struct RequestEnv {
     /// The request ID
     pub id: String,
     /// Auth data for the request
@@ -48,6 +48,41 @@ pub  struct RequestEnv {
     /// envelope
     #[serde(default)]
     pub data: JsonMap,
+}
+
+/// Just print an example request envelope for reference.  You can see
+/// this by running `cargo test json::print_sample_req -- --nocapture`
+#[test]
+fn print_sample_req() {
+    use libqaul::{api::Tag, messages::MsgQuery};
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&RequestEnv {
+            id: "1".into(),
+            auth: Some(JsonAuth {
+                id: Identity::random(),
+                token: Identity::random().to_string()
+            }),
+            page: Some("1".into()),
+            method: "query".into(),
+            kind: "messages".into(),
+            data: {
+                let mut map = JsonMap::new();
+                map.insert("service".into(), JsonValue::String("net.qaul.chat".into()));
+                map.insert(
+                    "query".into(),
+                    serde_json::to_value(MsgQuery::Tag(Tag {
+                        key: "room-id".into(),
+                        val: Identity::random().iter().cloned().collect(),
+                    }))
+                    .unwrap(),
+                );
+
+                map
+            },
+        })
+        .unwrap()
+    );
 }
 
 /// A json specific repsonse envelope
