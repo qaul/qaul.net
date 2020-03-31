@@ -9,6 +9,7 @@ pub(crate) use map::EncryptedMap;
 
 use crate::{
     error::{Error, Result},
+    wire::Encoder,
     Id,
 };
 use async_std::sync::Arc;
@@ -27,7 +28,7 @@ pub(crate) struct CipherText {
 /// A trait that encrypts data on an associated key
 pub(crate) trait Encrypter<T>
 where
-    T: Serialize + DeserializeOwned,
+    T: Encoder<T>,
 {
     fn seal(&self, data: &T) -> Result<CipherText>;
     fn open(&self, data: &CipherText) -> Result<T>;
@@ -51,7 +52,7 @@ impl<K> DetachedKey<K> for Id {}
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) enum Encrypted<T, K>
 where
-    T: Serialize + DeserializeOwned + DetachedKey<K>,
+    T: Encoder<T> + DetachedKey<K>,
     K: Encrypter<T>,
 {
     /// An in-use data variant
@@ -69,7 +70,7 @@ where
 
 impl<T, K> Encrypted<T, K>
 where
-    T: Serialize + DeserializeOwned + DetachedKey<K>,
+    T: Encoder<T> + DetachedKey<K>,
     K: Encrypter<T>,
 {
     pub(crate) fn new(init: T) -> Self {

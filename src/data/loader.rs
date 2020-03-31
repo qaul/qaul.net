@@ -1,4 +1,11 @@
-//! A record data loader abstraction
+//! Data record loader abstraction
+//!
+//! This module contains a set of functions to load records from disk
+//! in various circumstances. Some, like `Record::load` go
+//! through the entire load operation, decrypting all metadata and
+//! caching a whole record, while others just load certain aspects of
+//! metadata.  The idea is that load operations be made as simple as
+//! possible for the rest of the library internals.
 
 use crate::{
     crypto::{asym::KeyPair, Encrypted},
@@ -6,13 +13,13 @@ use crate::{
     error::Result,
     Id,
 };
-use std::collections::BTreeSet;
 use async_std::{fs::File, io::ReadExt, path::Path};
 use bincode;
+use std::collections::BTreeSet;
 
 impl Record {
     /// Lazy load a record from disk, depending on the payload
-    pub(crate) async fn load_record<'p, P: Into<&'p Path>>(
+    pub(crate) async fn load<'p, P: Into<&'p Path>>(
         path: P,
         id: Id,
         key: &KeyPair,
