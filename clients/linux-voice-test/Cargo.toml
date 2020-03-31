@@ -1,0 +1,19 @@
+[package]
+name = "linux-voice-test"
+version = "0.1.0"
+authors = ["Jess 3Jane <me@jess.coffee>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ratman = { path = "../../ratman" }
+libqaul = { path = "../../libqaul" }
+qaul-voices = { path = "../../libqaul/service/voices" }
+netmod-udp = { path = "../../netmod-udp" }
+
+async-std = "1.0"
+futures = "0.3"
+failure = "0.1"
+libpulse-binding = { version = "2.15", features = [] }
+libpulse-simple-binding = { version = "2.15", features = [] }

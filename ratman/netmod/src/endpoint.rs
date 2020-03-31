@@ -1,5 +1,6 @@
 //! Endpoint abstraction module
 
+use std::sync::Arc;
 use crate::{Frame, Result, Target};
 use async_trait::async_trait;
 
@@ -48,4 +49,19 @@ pub trait Endpoint {
     /// are no ways to correct the situation from the router's POV,
     /// simply to feed packet drop metrics.
     async fn next(&self) -> Result<(Frame, Target)>;
+}
+
+#[async_trait]
+impl<T: Endpoint + Send + Sync> Endpoint for Arc<T> {
+    fn size_hint(&self) -> usize {
+        self.size_hint()
+    }
+
+    async fn send(&self, frame: Frame, target: Target) -> Result<()> {
+        self.send(frame, target).await
+    }
+
+    async fn next(&self) -> Result<(Frame, Target)> {
+        self.next().await
+    }
 }

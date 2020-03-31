@@ -40,5 +40,6 @@ members = [
     "librobot",
 
     # test binaries
-    "clients/linux-http-test"
+    "clients/linux-http-test",
+	"clients/linux-voice-test"
 ]

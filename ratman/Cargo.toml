@@ -3,7 +3,7 @@ name = "ratman"
 description = "A delay tolerant, journaled and distributed userspace packet router"
 license = "AGPL-3.0"
 homepage = "https://qaul.net"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Katharina Fey <kookie@spacekookie.de>", "Leonora Tindall <nora@nora.codes>"]
 edition = "2018"
 
