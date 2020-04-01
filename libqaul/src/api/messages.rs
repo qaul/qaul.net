@@ -264,8 +264,8 @@ impl<'qaul> Messages<'qaul> {
                 .limit(1)
                 .exec()
             {
-                Ok(msg) => Poll::Ready(Ok(msg.into_iter().nth(0).unwrap())),
-                Err(_) => {
+                Ok(msg) if msg.len() >= 1 => Poll::Ready(Ok(msg.into_iter().nth(0).unwrap())),
+                _ => {
                     let waker = ctx.waker().clone();
                     task::spawn(async move {
                         task::sleep(Duration::from_millis(10)).await;
