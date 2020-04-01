@@ -107,6 +107,8 @@ impl Responder {
 
             // =^-^= Users =^-^=
             Request::UserList(r) => self.respond_qaul(r).await.into(),
+            Request::UserListLocal(r) => self.respond_qaul(r).await.into(),
+            Request::UserListRemote(r) => self.respond_qaul(r).await.into(),
             Request::UserCreate(r) => self.respond_qaul(r).await.into(),
             Request::UserDelete(r) => self.respond_qaul(r).await.into(),
             Request::UserChangePw(r) => self.respond_qaul(r).await.into(),

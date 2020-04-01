@@ -158,4 +158,21 @@ impl UserStore {
             })
             .collect()
     }
+
+    /// Get *all* users this device knows about
+    #[allow(unused)]
+    pub(crate) fn get_all(&self) -> Vec<UserProfile> {
+        self.inner
+            .lock()
+            .expect("Failed to lock UserStore")
+            .iter()
+            .map(|(_, u)| match u {
+                User::Remote(u) => u.clone(),
+                User::Local {
+                    ref profile,
+                    keypair: _,
+                } => profile.clone(),
+            })
+            .collect()
+    }
 }

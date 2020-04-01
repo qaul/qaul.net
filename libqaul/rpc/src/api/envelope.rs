@@ -95,8 +95,14 @@ pub enum Request {
     /// Query existing raw libqaul messages
     MsgQuery(messages::Query),
 
-    /// List local available users
+    /// List all available users
     UserList(users::List),
+
+    /// List locally available users
+    UserListLocal(users::ListLocal),
+
+    /// List remote available users
+    UserListRemote(users::ListRemote),
 
     /// Create a new user
     UserCreate(users::Create),

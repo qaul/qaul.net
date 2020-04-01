@@ -33,12 +33,22 @@ impl<'qaul> Users<'qaul> {
         self.q
     }
 
-    /// Enumerate locally registered users available
+    /// Enumerate all users available
     ///
     /// No information about sessions or existing login state is
     /// stored or accessible via this API.
     pub fn list(&self) -> Vec<UserProfile> {
+        self.q.users.get_all()
+    }
+
+    /// Enumerate locally stored users available
+    pub fn list_local(&self) -> Vec<UserProfile> {
         self.q.users.get_local()
+    }
+
+    /// Enumerate remote stored users available
+    pub fn list_remote(&self) -> Vec<UserProfile> {
+        self.q.users.get_remote()
     }
 
     /// Create a new user and authenticated session
