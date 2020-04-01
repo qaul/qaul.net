@@ -103,7 +103,7 @@ pub struct Login {
 impl QaulRpc for Login {
     type Response = Result<UserAuth>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users().login(self.user, &self.pw)
+        qaul.users().login(self.user, &self.pw).await
     }
 }
 
@@ -117,7 +117,7 @@ pub struct Logout {
 impl QaulRpc for Logout {
     type Response = Result<()>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users().logout(self.auth)
+        qaul.users().logout(self.auth).await
     }
 }
 
