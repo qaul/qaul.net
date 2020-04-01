@@ -1,4 +1,4 @@
-# Overview of crates
+# Overview of Crates
 
 The qaul.net project mostly uses a monorepo approach, meaning that all
 libraries relevant to the application, library, and service ecosystem

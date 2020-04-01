@@ -1,4 +1,4 @@
-# libqaul internals
+# libqaul Internals
 
 This section of the manual covers parts of libqaul not exposed
 directly via the API.  It's primarily useful to learn to debug
@@ -10,7 +10,7 @@ that acts as a strongly typed store (messages, users, contacts, files,
 ...).  Some more interesting components are those that are not exposed.
 
 
-## Key store
+## Key Store
 
 Similar to the user and message store, libqaul stores public keys that
 it comes across, for later.  This is meant to opportunisticly fill the
@@ -43,7 +43,7 @@ service handler was found.
 ## Persistence
 
 The presistence module is implemented mostly by wrapping internal
-libqaul types with [alexantria] storage callbacks, which is the
+libqaul types with [alexandria] storage callbacks, which is the
 library which implements all of the persistence logic and at-rest
 encryption.  It is developed as part of qaul.net, but pulled out of
 the main tree to make it easier to use in other projects.

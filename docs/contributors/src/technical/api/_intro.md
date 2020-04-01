@@ -1,4 +1,4 @@
-# Development interfaces
+# Development Interfaces
 
 This document will change quite a lot during the development,
 especially because there are several layers of interfaces that need to
@@ -43,7 +43,16 @@ structure of requests stays the same: there's an ID, some auth data,
 the page (which isn't implemented yet), `method` and `kind` the
 request operates on.
 
-Possible methods are (not all combinations exist though!):
+
+There are several types available (`kind`):
+
+- **users**, either a local or remote user
+- **contacts**, some user-specific contact data for another user
+- **chat-rooms**, a chat room via service (requires `qaul` feature)
+- **chat-messages**, a chat room message (requires `qaul` feature)
+
+
+Possible `methods` are (not all combinations exist though!):
 
 - **list**, get a list of all, if available
 - **create**, create a new (with side-effects, such as sending)
@@ -55,15 +64,7 @@ Possible methods are (not all combinations exist though!):
 - **unsubscribe**, (not implemented yet)
 
 
-There are several types availble (`kind`):
-
-- **users**, either a local or remote user
-- **contacts**, some user-specific contact data for another user
-- **chat-rooms**, a chat room via service (requires `qaul` feature)
-- **chat-messages**, a chat room message (requires `qaul` feature)
-
-
-Three special ones only exist for users: 
+Three special `methods` only exist for users: 
 
 - **login**, validate password and receive auth tokens
 - **logout**, end session token

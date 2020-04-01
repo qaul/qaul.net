@@ -1,6 +1,6 @@
 # qaul.net services
 
-Following is a list of services that are bundled in with qaul.net, and
+Following is a list of services that are bundled with qaul.net, and
 what they can do for you.
 
 **Important** because we're still in development, some of these

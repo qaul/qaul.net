@@ -1,4 +1,4 @@
-# libqaul IPC interfaces
+# libqaul IPC Interfaces
 
 While libqaul and all of the qaul.net services are written in Rust,
 that doens't mean that you need to write your application in Rust.
