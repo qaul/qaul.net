@@ -59,6 +59,7 @@ impl<'qaul> Users<'qaul> {
 
         // Inform Router about new local user
         self.q.router.add_user(id).await?;
+        self.q.router.online(id).await?;
         
         self.q.users.add_user(user);
         self.q.auth.set_pw(id, pw);
@@ -74,7 +75,7 @@ impl<'qaul> Users<'qaul> {
         let id = user.0;
 
         // If logout succeeds, we can delete the user
-        self.logout(user)?;
+        self.logout(user).await?;
         self.q.router.del_user(id, true).await?;
         self.q.users.rm_user(id);
         Ok(())
@@ -88,16 +89,19 @@ impl<'qaul> Users<'qaul> {
     }
 
     /// Create a new session login for a local User
-    pub fn login(&self, user: Identity, pw: &str) -> Result<UserAuth> {
+    pub async fn login(&self, user: Identity, pw: &str) -> Result<UserAuth> {
         let token = self.q.auth.new_login(user, pw)?;
+        self.q.router.online(user).await?;
         Ok(UserAuth(user, token))
     }
 
     /// Drop the current session Token, invalidating it
-    pub fn logout(&self, user: UserAuth) -> Result<()> {
+    pub async fn logout(&self, user: UserAuth) -> Result<()> {
         let (ref id, ref token) = self.q.auth.trusted(user)?;
         // TODO: Stop discovery announcements
-        self.q.auth.logout(id, token)
+        self.q.auth.logout(id, token)?;
+        self.q.router.offline(*id).await?;
+        Ok(())
     }
 
     /// Fetch the `UserProfile` for a known identity, remote or local
