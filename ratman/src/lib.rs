@@ -133,6 +133,8 @@
 //! See the main qaul.net repository README for additional permissions
 //! granted by the authors for this code.
 
+#[macro_use] extern crate tracing;
+
 pub mod clock;
 mod core;
 mod data;

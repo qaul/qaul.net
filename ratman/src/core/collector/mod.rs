@@ -24,6 +24,7 @@ use async_std::{
 };
 use netmod::{Frame, SeqId};
 use std::collections::BTreeMap;
+use tracing_futures::Instrument;
 
 pub(self) type Locked<T> = Arc<Mutex<T>>;
 
@@ -62,8 +63,9 @@ impl Collector {
     }
 
     /// Queue the work, and spawn a worker if required
+    #[instrument(skip(self, f), level = "trace")]
     pub(crate) async fn queue_and_spawn(&self, seq: SeqId, f: Frame) {
-        println!("Queuing work");
+        info!("Queuing work");
         self.state.queue(seq, f).await;
 
         let mut map = self.workers.lock().await;
@@ -107,7 +109,7 @@ impl Collector {
         };
 
         task::spawn(async move {
-            println!("Spawning worker");
+            info!("Spawning worker");
             
             // This loop breaks when the worker is done
             while let Some(()) = worker.poll().await {}
@@ -115,7 +117,7 @@ impl Collector {
             // Then remove it
             let mut map = workers.lock().await;
             map.remove(&seq).unwrap();
-        });
+        }.instrument(info_span!("Worker", seq = seq.to_string().as_str())));
     }
 }
 

@@ -1745,6 +1745,8 @@ dependencies = [
  "ratman-identity 0.4.0",
  "ratman-netmod",
  "serde",
+ "tracing",
+ "tracing-futures",
  "twox-hash",
 ]
 

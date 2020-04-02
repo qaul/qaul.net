@@ -20,6 +20,8 @@ identity = { version = "0.4", path = "identity", package = "ratman-identity", fe
 netmod = { version = "0.3", path = "netmod", package = "ratman-netmod"}
 clockctrl = { version = "0.1", path = "../clockctrl" }
 async-notify = { path = "../async-notify" }
+tracing = "0.1"
+tracing-futures = "0.2"
 
 [dev-dependencies]
 netmod-mem = { path = "../netmod-mem" }
