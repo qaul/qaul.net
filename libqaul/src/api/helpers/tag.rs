@@ -45,7 +45,7 @@ impl Serialize for HumanVec {
     where
         S: Serializer,
     {
-        if ser.is_human_readable() {
+        if dbg!(ser.is_human_readable()) {
             ser.serialize_str(
                 &hex::encode_upper(&self.0)
                     .as_bytes()
@@ -127,9 +127,10 @@ impl Serialize for Tag {
     where
         S: Serializer,
     {
+        dbg!();
         let mut state = ser.serialize_struct("Tag", 2)?;
         state.serialize_field("key", &self.key)?;
-        state.serialize_field("val", &self.val)?;
+        state.serialize_field("val", &HumanVec(self.val.clone()))?;
         state.end()
     }
 }
@@ -178,4 +179,65 @@ impl<'de> Deserialize<'de> for Tag {
 
         der.deserialize_struct("Tag", &["key", "val"], TagVisitor)
     }
+}
+
+#[test]
+fn serialize_tag_json() {
+    let t = Tag {
+        key: "blorp".into(),
+        val: vec![172, 171],
+    };
+
+    use serde_json;
+    let json = serde_json::to_string(&t).unwrap();
+    assert_eq!(json.as_str(), r#"{"key":"blorp","val":"ACAB"}"#);
+}
+
+#[test]
+fn serialize_tag_bincode() {
+    let t = Tag {
+        key: "blorp".into(),
+        val: vec![172, 171],
+    };
+
+    use bincode;
+    let bc = bincode::serialize(&t).unwrap();
+    assert_eq!(
+        bc.as_slice(),
+        &[5, 0, 0, 0, 0, 0, 0, 0, 98, 108, 111, 114, 112, 2, 0, 0, 0, 0, 0, 0, 0, 172, 171]
+    );
+}
+
+#[test]
+fn deserialize_tag_json() {
+    let json = r#"{"key":"blorp","val":"ACAB"}"#;
+
+    use serde_json;
+    let t: Tag = serde_json::from_str(&json).unwrap();
+
+    assert_eq!(
+        t,
+        Tag {
+            key: "blorp".into(),
+            val: vec![172, 171],
+        }
+    );
+}
+
+#[test]
+fn deserialize_tag_bincode() {
+    let bin = [
+        5, 0, 0, 0, 0, 0, 0, 0, 98, 108, 111, 114, 112, 2, 0, 0, 0, 0, 0, 0, 0, 172, 171,
+    ];
+
+    use bincode;
+    let t: Tag = bincode::deserialize(&bin).unwrap();
+
+    assert_eq!(
+        t,
+        Tag {
+            key: "blorp".into(),
+            val: vec![172, 171],
+        }
+    );
 }
