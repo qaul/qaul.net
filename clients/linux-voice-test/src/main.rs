@@ -15,13 +15,15 @@ use {
         Qaul,
     },
     std::{
+        ops::DerefMut,
         time::Duration,
         env::args,
         io::{stdout, Write},
     },
     async_std::{
+        sync::{Arc, Mutex},
         stream::interval,
-        task::block_on,
+        task,
     },
     netmod_udp::Endpoint,
     ratman::{Router, Identity},
@@ -52,13 +54,28 @@ async fn run() {
 
     let user = qaul.users().create("test").await.unwrap();
 
-    let mut state = State::UserSelect(0);
+    let state = Arc::new(Mutex::new(State::UserSelect(0)));
+
+    let _user = user.clone();
+    let _qaul = qaul.clone();
+    let _state = state.clone(); 
+    task::spawn(async {
+        let user = _user;
+        let state = _state;
+        let qaul = _qaul;
+
+        while let Ok(m) = qaul.messages().next(user.clone(), "HELLO", None).await {
+            *(state.lock().await.deref_mut()) = State::MessageDisplay(m);
+        }
+    });
 
     let mut stream = futures::stream::select(
         Events::new().map(|e| Some(e)),
         interval(Duration::from_millis(250)).map(|_| None),
     );
     while let Some(e) = stream.next().await {
+        let mut state = state.lock().await;
+        let mut state = state.deref_mut();
         // keyboard input
         if let Some(e) = e {
             match e {
@@ -89,7 +106,7 @@ async fn run() {
                                 .list()
                                 .into_iter()
                                 .filter(|u| u.id != user.0)
-                                .nth(index)
+                                .nth(*index)
                                 .unwrap();
                             qaul.messages().send(
                                 user.clone(),
@@ -98,11 +115,11 @@ async fn run() {
                                 None,
                                 Vec::new(),
                             ).await.unwrap();
-                            State::UserSelect(index)
+                            State::UserSelect(*index)
                         },
                         State::MessageDisplay(_) => State::UserSelect(0),
                     };
-                    state = next_state;
+                    *state = next_state;
                 },
                 _ => {},
             }
@@ -143,12 +160,20 @@ async fn run() {
 
                 write!(stdout, "{}{}", cursor::Goto(1, 2 + user_count as u16), clear::AfterCursor);
             },
-            _ => {},
+            State::MessageDisplay(m) => {
+                writeln!(
+                    stdout, 
+                    "{} Message from {}{}", 
+                    cursor::Goto(1, 1),
+                    m.sender,
+                    clear::AfterCursor,
+                );
+            },
         }
         stdout.flush();
     }
 }
 
 fn main() {
-    block_on(run())
+    task::block_on(run())
 }
