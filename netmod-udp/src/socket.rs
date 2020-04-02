@@ -18,6 +18,7 @@ const SELF: Ipv4Addr = Ipv4Addr::new(0, 0, 0, 0);
 
 /// Wraps around a UDP socket an the input queue
 pub(crate) struct Socket {
+    port: u16,
     sock: Arc<UdpSocket>,
     inbox: Arc<RwLock<Notify<VecDeque<FrameExt>>>>,
 }
@@ -25,14 +26,15 @@ pub(crate) struct Socket {
 impl Socket {
     /// Create a new socket handler and return a management reference
     #[instrument(skip(table), level="trace")]
-    pub(crate) async fn with_addr(addr: &str, table: Arc<AddrTable>) -> Arc<Self> {
-        let sock = UdpSocket::bind(addr).await.unwrap();
+    pub(crate) async fn with_port(port: u16, table: Arc<AddrTable>) -> Arc<Self> {
+        let sock = UdpSocket::bind((SELF, port)).await.unwrap();
         sock.join_multicast_v4(MULTI, SELF)
             .expect("Failed to join multicast. Error");
 
         // sock.set_multicast_loop_v4(true).unwrap();
 
         let arc = Arc::new(Self {
+            port,
             sock: Arc::new(sock),
             inbox: Default::default(),
         });
@@ -67,7 +69,7 @@ impl Socket {
         self.sock
             .send_to(
                 &env.as_bytes(),
-                SocketAddr::new(IpAddr::V4(MULTI.clone()), 12322),
+                SocketAddr::new(IpAddr::V4(MULTI.clone()), self.port),
             )
             .await;
     }
@@ -140,7 +142,7 @@ impl Socket {
 fn test_init() {
     task::block_on(async move {
         let table = Arc::new(AddrTable::new());
-        let sock = Socket::with_addr("0.0.0.0:12322", table).await;
+        let sock = Socket::with_port(12322, table).await;
         println!("Multicasting");
         sock.multicast(Envelope::Announce);
     });

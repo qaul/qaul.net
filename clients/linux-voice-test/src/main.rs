@@ -41,7 +41,7 @@ async fn run() {
     let mut stdout = cursor::HideCursor::from(stdout);
 
     let args = args().collect::<Vec<_>>();
-    let endpoint = Endpoint::spawn(&args[1]);
+    let endpoint = Endpoint::spawn(args[1].parse::<u16>().unwrap());
 
     for i in 2..args.len() {
         endpoint.introduce(&args[i]).await;
@@ -175,5 +175,22 @@ async fn run() {
 }
 
 fn main() {
+    use {
+        std::fs::File,
+        tracing_subscriber::{fmt, Layer, registry::Registry, EnvFilter},
+        tracing,
+    };
+
+    let logfile = File::create("/tmp/qaul.log").unwrap();
+    let subscriber = fmt::Subscriber::builder()
+        .with_env_filter(EnvFilter::from_default_env())
+        .with_ansi(false)
+        .with_writer(move || {
+            logfile.try_clone().unwrap()
+        })
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber).unwrap();
+
     task::block_on(run())
 }

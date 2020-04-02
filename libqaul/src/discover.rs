@@ -46,6 +46,7 @@ impl Discovery {
         task::spawn(async move {
             loop {
                 let id = router.discover().await;
+                info!(id = id.to_string().as_str(), "Discovered user!");
                 qaul.users.discover(id);
             }
         });
