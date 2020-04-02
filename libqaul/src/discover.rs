@@ -52,12 +52,13 @@ impl Discovery {
     }
 
     /// Spawns a thread that listens to incoming messages
+    #[instrument(skip(qaul, router, _lock), level = "info")]
     fn inc_handler(qaul: Arc<Qaul>, router: Arc<Router>, _lock: Arc<RunLock>) {
         task::spawn(async move {
             loop {
                 let msg = router.next().await;
 
-                println!("Receiving message...");
+                info!("Receiving message...");
                 let user = match msg.recipient {
                     Recipient::User(id) => id.clone(),
                     Recipient::Flood => unimplemented!(),
@@ -69,7 +70,7 @@ impl Discovery {
                 qaul.messages
                     .insert(user, MsgState::Unread(Arc::clone(&msg)));
                 qaul.services.push_for(associator, msg).unwrap();
-                println!("Finished processing incoming message!");
+                info!("Finished processing incoming message!");
             }
         });
     }
