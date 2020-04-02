@@ -1,5 +1,5 @@
 use serde::{
-    de::{Error, MapAccess, SeqAccess, Visitor},
+    de::{Error, SeqAccess, Visitor},
     ser::SerializeStruct,
     Deserialize, Deserializer, Serialize, Serializer,
 };
@@ -163,13 +163,6 @@ impl<'de> Deserialize<'de> for Tag {
                 let val: Vec<u8> = hvec.0;
 
                 Ok(Tag { key, val })
-            }
-
-            fn visit_map<A>(self, map: A) -> Result<Self::Value, A::Error>
-            where
-                A: MapAccess<'de>,
-            {
-                unimplemented!()
             }
 
             fn expecting(&self, fmt: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
