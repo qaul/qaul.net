@@ -15,3 +15,5 @@ async-trait = "0.1"
 async-std = { version = "1.0", features = ["unstable"] }
 conjoiner = { version = "1.2", package = "conjoiner-engine" }
 serde = { version = "1.0", features = ["derive"] }
+tracing = "0.1"
+tracing-futures = "0.2"

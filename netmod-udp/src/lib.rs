@@ -1,6 +1,8 @@
 //! netmod-udp is a UDP overlay for Ratman
 #![allow(warnings)]
 
+#[macro_use] extern crate tracing;
+
 mod addrs;
 pub(crate) use addrs::{AddrTable, Peer};
 

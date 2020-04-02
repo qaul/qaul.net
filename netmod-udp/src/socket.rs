@@ -24,6 +24,7 @@ pub(crate) struct Socket {
 
 impl Socket {
     /// Create a new socket handler and return a management reference
+    #[instrument(skip(table), level="trace")]
     pub(crate) async fn with_addr(addr: &str, table: Arc<AddrTable>) -> Arc<Self> {
         let sock = UdpSocket::bind(addr).await.unwrap();
         sock.join_multicast_v4(MULTI, SELF)
@@ -38,7 +39,7 @@ impl Socket {
 
         Self::incoming_handle(Arc::clone(&arc), table);
         arc.multicast(Envelope::Announce).await;
-        dbg!();
+        info!("Sent multicast announcement");
         arc
     }
 
@@ -60,11 +61,12 @@ impl Socket {
     }
 
     /// Send a multicast with an Envelope
+    #[instrument(skip(self, env), level="trace")]
     pub(crate) async fn multicast(&self, env: Envelope) {
-        dbg!("Sending mulitcast {}", &env);
+        info!("Sending multicast message: {:#?}", env);
         self.sock
             .send_to(
-                &dbg!(env.as_bytes()),
+                &env.as_bytes(),
                 SocketAddr::new(IpAddr::V4(MULTI.clone()), 12322),
             )
             .await;
@@ -88,6 +90,7 @@ impl Socket {
         .await
     }
 
+    #[instrument(skip(arc, table), level="trace")]
     fn incoming_handle(arc: Arc<Self>, table: Arc<AddrTable>) {
         task::spawn(async move {
             loop {
@@ -99,19 +102,21 @@ impl Socket {
                         let env = Envelope::from_bytes(&buf);
                         match env {
                             Envelope::Announce => {
-                                dbg!("Receiving announce");
+                                debug!("Recieving announce");
                                 table.set(peer).await;
                                 arc.multicast(Envelope::Reply).await;
                             }
                             Envelope::Reply => {
-                                dbg!("Receiving announce");
+                                debug!("Recieving announce reply");
                                 table.set(peer).await;
                             }
                             Envelope::Data(_) => {
+                                debug!("Recieved frame");
                                 let frame = env.get_frame();
-                                dbg!(&frame);
+                                info!(frame = format!("{:#?}", frame).as_str());
 
-                                let id = table.id(dbg!(peer.into())).await.unwrap();
+                                info!(peer = format!("{:#?}", peer).as_str());
+                                let id = table.id(peer.into()).await.unwrap();
 
                                 // Append to the inbox and wake
                                 let mut inbox = arc.inbox.write().await;
@@ -122,7 +127,8 @@ impl Socket {
                     }
                     val => {
                         // TODO: handle errors more gracefully
-                        dbg!(val).expect("Crashed UDP thread!");
+                        error!("Crashed UDP thread: {:#?}", val);
+                        val.expect("Crashed UDP thread!");
                     }
                 }
             }
