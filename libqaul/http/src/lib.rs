@@ -19,9 +19,9 @@ impl HttpServer {
         let mut app = tide::with_state(Arc::new(rpc));
         app.at("/api").post(|mut r: Request<Arc<Responder>>| {
             async move {
-                let json: String = r.body_json().await.unwrap();
+                let hopefully_json: String = dbg!(r.body_string().await).unwrap();
                 let req_env: RequestEnv =
-                    serde_json::from_str(json.as_str()).expect("Malformed json envelope");
+                    serde_json::from_str(hopefully_json.as_str()).expect("Malformed json envelope");
                 let Envelope { id, data } = req_env.clone().into();
 
                 let req = match data {
@@ -45,9 +45,9 @@ impl HttpServer {
         });
 
         // static file handler for the webui, assumes the webui exists
-        app.at("/").strip_prefix().get(StaticEp {
-            root: path.into(),
-        });
+        app.at("/")
+            .strip_prefix()
+            .get(StaticEp { root: path.into() });
         task::block_on(async move { app.listen(addr).await }).unwrap();
     }
 }
