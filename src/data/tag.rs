@@ -1,4 +1,51 @@
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
+
+/// A set of tags where every tag is unique
+///
+/// Simply construct a set via one of the `From` implementations of a
+/// containing type.
+///
+/// ```norun
+/// # use alexandria::data::TagSet;
+/// # use std::collections::BTreeSet;
+/// let _: TagSet = vec![].into();
+/// let _: TagSet = BTreeSet::default().into();
+/// ```
+pub struct TagSet(BTreeSet<Tag>);
+
+impl From<Vec<Tag>> for TagSet {
+    fn from(vec: Vec<Tag>) -> Self {
+        Self(vec.into_iter().fold(BTreeSet::new(), |mut set, tag| {
+            set.insert(tag);
+            set
+        }))
+    }
+}
+
+impl From<&Vec<Tag>> for TagSet {
+    fn from(vec: &Vec<Tag>) -> Self {
+        Self(vec.iter().fold(BTreeSet::new(), |mut set, tag| {
+            set.insert(tag.clone());
+            set
+        }))
+    }
+}
+
+impl From<Vec<&Tag>> for TagSet {
+    fn from(vec: Vec<&Tag>) -> Self {
+        Self(vec.into_iter().fold(BTreeSet::new(), |mut set, tag| {
+            set.insert(tag.clone());
+            set
+        }))
+    }
+}
+
+impl From<BTreeSet<Tag>> for TagSet {
+    fn from(set: BTreeSet<Tag>) -> Self {
+        Self(set)
+    }
+}
 
 /// A generic metadata tag
 ///

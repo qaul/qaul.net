@@ -5,7 +5,7 @@
 //! get an API object.  This object can already be pre-configured with
 //! settings, or further tuned before building a transaction.
 //!
-//! ```rust
+//! ```norun
 //! # use alexandria::{Library, Builder, Result};
 //! # fn foo() -> Result<()> {
 //! let l = Builder::new().offset("/var/lib/myapp").build()?;

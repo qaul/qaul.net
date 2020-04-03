@@ -102,24 +102,17 @@ where
         Self { inner, waker: None }
     }
 
-    /// Call wake on the waker, if it's a waker, yehaa!
-    pub(crate) fn wake(ptr: &mut Notify<T>) {
-        if let Some(ref w) = ptr.waker {
-            w.clone().wake();
-        }
-    }
-
     /// Register a `Waker` if the wrapped value is updated
     ///
     /// This function will return the previous waker, if one existed.
     /// If `None` is returned, there was no previous waker, so be
     /// careful not to simply unwrap this value.  You may want to use
     /// `unwrap_none()`.
-    pub(crate) fn register(ptr: &mut Notify<T>, waker: &Waker) -> Option<Waker> {
-        ptr.waker.replace(waker.clone())
+    pub(crate) fn setup(ptr: &mut Notify<T>, waker: &Waker) {
+        ptr.waker.replace(waker.clone());
     }
 
-    /// Notifies any registered `Waker` immediately.
+    /// Call wake on the waker, if there is a waker, yehaa!
     pub fn notify(ptr: &Notify<T>) {
         ptr.waker.as_ref().map(|w| w.wake_by_ref());
     }

@@ -7,8 +7,14 @@
 
 pub use crate::delta::DeltaData as DiffSeg;
 
-use crate::data::Value;
+use crate::{data::Value, error::DiffErrs, Error, Result};
 use std::collections::BTreeMap;
+
+pub(crate) type DiffResult<T> = std::result::Result<T, DiffErrs>;
+
+pub(crate) trait DiffExt {
+    fn apply(&mut self, diff: Diff) -> Result<()>;
+}
 
 /// An atomic set of changes applied to a record
 pub enum Diff {

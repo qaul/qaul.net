@@ -8,11 +8,11 @@ mod tag;
 pub use self::{
     blob::Blob,
     kv::{Kv, Value},
-    tag::Tag,
+    tag::{Tag, TagSet},
 };
 use crate::{
     crypto::{asym::KeyPair, DetachedKey, Encrypted},
-    Id,
+    Diff, Id, Result,
 };
 
 use serde::{Deserialize, Serialize};
@@ -31,7 +31,7 @@ pub struct Header {
 
 /// Distinguishes between the type of records
 #[derive(Debug, Serialize, Deserialize)]
-pub enum Type {
+pub(crate) enum Type {
     /// Key-value mapped store
     Kv,
     /// Large binary object
@@ -67,4 +67,15 @@ pub struct Record {
     pub header: Header,
     /// A handle to the data body
     body: Encrypted<Body, KeyPair>,
+}
+
+impl Record {
+    pub(crate) fn create(tags: TagSet, diff: Diff) -> Result<Self> {
+        // let (t, body) = match diff {
+        //     Diff::Map(kv) => (Type::Kv, Body::Kv(Kv::new().apply(diff)?)),
+        //     Diff::Binary(blob) => unimplemented!(),
+        // };
+
+        unimplemented!()
+    }
 }

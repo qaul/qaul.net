@@ -1,3 +1,7 @@
+use crate::{
+    diff::{Diff, DiffExt, DiffResult, DiffSeg},
+    Error, Result,
+};
 use async_std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, ops::Deref};
@@ -69,10 +73,72 @@ pub struct Kv {
     map: Map,
 }
 
+impl DiffExt for Kv {
+    fn apply(&mut self, diff: Diff) -> Result<()> {
+        match diff {
+            Diff::Map(map) => map
+                .into_iter()
+                .fold(Ok(()), |res: DiffResult<()>, (k, v)| {
+                    match (
+                        res,
+                        match v {
+                            DiffSeg::Insert(val) => self.insert(k, val),
+                            DiffSeg::Update(val) => self.update(k, val),
+                            DiffSeg::Delete => self.delete(&k),
+                        },
+                    ) {
+                        (Ok(_), Ok(_)) => Ok(()),
+                        (Ok(_), e @ Err(_)) => e,
+                        (Err(o), Err(n)) => Err(o.add(n)),
+                        (e @ Err(_), Ok(_)) => e,
+                    }
+                })
+                .map_err(|e| e.into()),
+            Diff::Binary(_) => Err(Error::BadDiffType),
+        }
+    }
+}
+
 impl Kv {
     pub fn new() -> Self {
         Self {
             map: Default::default(),
+        }
+    }
+
+    /// A creation or chain friendly way to apply a diff
+    pub fn apply(mut self, diff: Diff) -> Result<Self> {
+        (&mut self).apply(diff)?;
+        Ok(self)
+    }
+
+    /// A helper function to insert and error if the key existed
+    fn insert(&mut self, key: String, val: Value) -> DiffResult<()> {
+        if self.map.contains_key(&key) {
+            Err((0, format!("key `{}` already exists!", key)).into())
+        } else {
+            self.map.insert(key, val);
+            Ok(())
+        }
+    }
+
+    /// A helper function to insert and error if the key didn't exists
+    fn update(&mut self, key: String, val: Value) -> DiffResult<()> {
+        if self.map.contains_key(&key) {
+            self.map.insert(key, val);
+            Ok(())
+        } else {
+            Err((0, format!("key `{}` doesn't exist!", key)).into())
+        }
+    }
+
+    /// A helper function to insert and error if the key didn't exists
+    fn delete(&mut self, key: &String) -> DiffResult<()> {
+        if self.map.contains_key(key) {
+            self.map.remove(key);
+            Ok(())
+        } else {
+            Err((0, format!("key `{}` doesn't exist!", key)).into())
         }
     }
 }

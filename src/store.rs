@@ -5,7 +5,7 @@ use crate::{
         asym::{KeyPair, SharedKey},
         DetachedKey, Encrypted,
     },
-    data::{Record, Tag, Type},
+    data::{Record, TagSet},
     diff::Diff,
     notify::Notify,
     Error, Id, Path, Result,
@@ -31,7 +31,7 @@ impl Store {
     ///
     /// If providing a user ID, check the user store first, before
     /// checking the shared store.
-    pub(crate) async fn get(&self, id: Option<Id>, path: &Path) -> Result<Arc<Record>> {
+    pub(crate) async fn get_path(&self, id: Option<Id>, path: &Path) -> Result<Arc<Record>> {
         id.and_then(|ref id| self.usrd.get(id))
             .and_then(|tree| {
                 tree.get(path)
@@ -47,14 +47,16 @@ impl Store {
     /// Insert a record into the store
     ///
     /// This operation will fail if the path already exists
-    pub(crate) async fn insert(
+    pub(crate) fn insert(
         &self,
         id: Option<Id>,
         path: &Path,
-        tags: Vec<Tag>,
-        t: Type,
+        tags: TagSet,
         d: Diff,
     ) -> Result<()> {
+        // Create a record
+        
+        
         Ok(())
     }
 }

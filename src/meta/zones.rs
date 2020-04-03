@@ -6,42 +6,42 @@ use crate::{
     meta::users::User,
     Id,
 };
+use async_std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
-use async_std::sync::Arc;
 
-/// A set of zones that a user has access to
+/// A set of paths that a user has access to
 #[derive(Default, Serialize, Deserialize)]
-struct ZoneMap {
+struct PathMap {
     set: BTreeSet<String>,
 }
 
-impl DetachedKey<KeyPair> for ZoneMap {}
+impl DetachedKey<KeyPair> for PathMap {}
 
 #[derive(Serialize, Deserialize)]
-pub(crate) struct ZoneTable(EncryptedMap<Id, ZoneMap, KeyPair>);
+pub(crate) struct PathTable(EncryptedMap<Id, PathMap, KeyPair>);
 
-impl ZoneTable {
+impl PathTable {
     /// Create an empty zone table
     pub(crate) fn new() -> Self {
         Self(EncryptedMap::new())
     }
 
     /// Add a new user to the user table
-    pub(crate) fn insert<S: Into<String>>(&mut self, user: &User, zone: S) -> Result<()> {
-        let zone = zone.into();
+    pub(crate) fn insert<S: Into<String>>(&mut self, user: &User, path: S) -> Result<()> {
+        let zone = path.into();
         let id = user.id;
 
         // Load the existing zone map or create a new one
         let ref mut zm = self
             .0
             .entry(id)
-            .or_insert(Encrypted::new(ZoneMap::default()))
+            .or_insert(Encrypted::new(PathMap::default()))
             .deref_mut()?;
 
         // Return an error if the zone exsts
         if zm.set.contains(&zone) {
-            return Err(Error::ZoneAlreadyExsts {
+            return Err(Error::PathExists {
                 id: id.to_string(),
                 zone,
             });
