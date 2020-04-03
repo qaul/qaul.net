@@ -29,6 +29,9 @@ pub enum Error {
     #[fail(display = "failed to sync data: `{}`", msg)]
     SyncFailed { msg: String },
 
+    #[fail(display = "no such path: `{}`", msg)]
+    NoSuchPath { msg: String },
+
     #[fail(display = "failed to load data: `{}`", msg)]
     LoadFailed { msg: String },
 

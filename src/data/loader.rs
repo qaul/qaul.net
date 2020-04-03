@@ -65,6 +65,7 @@ impl Record {
     }
 }
 
+/// Load only the tags from the record header
 pub(crate) async fn load_tags<'p, P: Into<&'p Path>>(path: P) -> Result<BTreeSet<Tag>> {
     let mut f = File::open(path.into()).await?;
 
@@ -78,7 +79,7 @@ pub(crate) async fn load_tags<'p, P: Into<&'p Path>>(path: P) -> Result<BTreeSet
     f.read_exact(&mut hser).await?;
 
     // Build the header
-    let Header { id, tags, sec } = bincode::deserialize(&hser)?;
+    let Header { tags, .. } = bincode::deserialize(&hser)?;
 
     // Return the tags
     Ok(tags)

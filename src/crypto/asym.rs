@@ -8,6 +8,8 @@ use crate::{
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use sodiumoxide::crypto::box_::{self, Nonce, PublicKey, SecretKey};
 
+pub(crate) type SharedKey = KeyPair;
+
 /// Both public and private keys for a user
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct KeyPair {

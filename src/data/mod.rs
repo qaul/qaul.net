@@ -1,55 +1,59 @@
-//! On-file data formats
+//! Record data formats and utility types
 
 mod blob;
 mod kv;
-mod tag;
 mod loader;
+mod tag;
 
-use self::{blob::Blob, kv::Kv, tag::Tag};
+pub use self::{
+    blob::Blob,
+    kv::{Kv, Value},
+    tag::Tag,
+};
 use crate::{
     crypto::{asym::KeyPair, DetachedKey, Encrypted},
-    error::Result,
     Id,
 };
 
-use async_std::{fs::File, io::ReadExt, sync::Arc};
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::{BTreeMap, BTreeSet},
-    ops::Deref,
-};
+use std::collections::BTreeSet;
 
 /// A record header
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Header {
+    /// A unique record ID
     pub id: Id,
+    /// Public set of search tags
     pub tags: BTreeSet<Tag>,
+    /// The encrypted header
     sec: Encrypted<SecHeader, KeyPair>,
 }
 
 /// Distinguishes between the type of records
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Type {
+    /// Key-value mapped store
     Kv,
+    /// Large binary object
     Blob,
 }
 
 /// The secret header is encrypted
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SecHeader {
+pub(crate) struct SecHeader {
     /// Record type
-    pub t: Type,
+    pub(crate) t: Type,
     /// Total payload size
-    pub size: u64,
+    pub(crate) size: u64,
     /// Beginning chunk markers
-    pub chunks: Vec<u32>,
+    pub(crate) chunks: Vec<u32>,
 }
 
 impl DetachedKey<KeyPair> for SecHeader {}
 
 /// A record data body
 #[derive(Debug, Serialize, Deserialize)]
-pub enum Body {
+pub(crate) enum Body {
     Kv(Kv),
     Blob(Blob),
 }

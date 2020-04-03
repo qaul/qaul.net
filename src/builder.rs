@@ -1,6 +1,6 @@
-use crate::{cache::Cache, dir::Dirs, error::Result, meta::users::UserTable, Library};
+use crate::{dir::Dirs, error::Result, meta::users::UserTable, Library};
 use async_std::sync::RwLock;
-use std::path::PathBuf;
+// use std::path::PathBuf;
 
 /// A utility builder to construct the Alexandria library
 #[derive(Default)]
@@ -33,7 +33,6 @@ impl Builder {
                 .expect("Builder without `offset` cannot be built"),
         );
         let users = RwLock::new(UserTable::new());
-        let cache = Cache::new(root.cache());
-        Library { root, users, cache }.init()
+        Library { root, users }.init()
     }
 }

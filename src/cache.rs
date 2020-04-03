@@ -17,7 +17,6 @@ use std::{
     cmp::{Ord, Ordering as Order /* slurred yelling */, PartialOrd},
     hash::Hash,
     path::PathBuf,
-    sync::atomic::{AtomicBool, Ordering},
 };
 
 /// A key that expresses an (id, zone) tuple
@@ -87,6 +86,7 @@ where
     /// By default the cache can be used to improve in-memory lookups,
     /// but will not be persistent across reboots.
     pub(crate) fn hot(self: Arc<Self>) {
+        let path = self.path.as_ref().expect("Can't set cache without path to 'hot'");
         task::spawn(async move {});
     }
 }

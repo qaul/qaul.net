@@ -119,16 +119,6 @@ where
         ptr.waker.replace(waker.clone())
     }
 
-    /// Removes and returns the registered `Waker`
-    pub(crate) fn clear(ptr: &mut Notify<T>) -> Option<Waker> {
-        ptr.waker.take()
-    }
-
-    /// Consumes the `Notify`
-    pub(crate) fn into_inner(ptr: Notify<T>) -> T {
-        ptr.inner
-    }
-
     /// Notifies any registered `Waker` immediately.
     pub fn notify(ptr: &Notify<T>) {
         ptr.waker.as_ref().map(|w| w.wake_by_ref());
