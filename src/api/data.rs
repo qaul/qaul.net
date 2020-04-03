@@ -6,8 +6,8 @@ use crate::{
 };
 
 pub struct Data<'a> {
-    inner: &'a Library,
-    id: Option<Id>,
+    pub(crate) inner: &'a Library,
+    pub(crate) id: Option<Id>,
 }
 
 impl<'a> Data<'a> {
