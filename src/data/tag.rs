@@ -12,7 +12,14 @@ use std::collections::BTreeSet;
 /// let _: TagSet = vec![].into();
 /// let _: TagSet = BTreeSet::default().into();
 /// ```
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct TagSet(BTreeSet<Tag>);
+
+impl TagSet {
+    pub fn empty() -> Self {
+        Self(Default::default())
+    }
+}
 
 impl From<Vec<Tag>> for TagSet {
     fn from(vec: Vec<Tag>) -> Self {
