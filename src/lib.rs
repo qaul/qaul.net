@@ -51,6 +51,7 @@ use crate::{
     api::{Data as DataApi, Users as UsersApi},
     dir::Dirs,
     meta::users::UserTable,
+    store::Store,
 };
 use async_std::sync::RwLock;
 
@@ -68,8 +69,8 @@ pub struct Library {
     pub(crate) root: Dirs,
     /// Table with encrypted user metadata
     pub(crate) users: RwLock<UserTable>,
-    // /// Primary active/hot cache
-    // pub(crate) cache: CacheRef<CombKey, Id>,
+    /// The main data store
+    pub(crate) store: RwLock<Store>,
 }
 
 impl Library {

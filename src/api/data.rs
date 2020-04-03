@@ -46,33 +46,41 @@ impl<'a> Data<'a> {
         self.inner
     }
 
-    /// Insert a new record into the library
+    /// Insert a new record into the library and return it's ID
     ///
     /// You need to have a valid and active user session to do so, and
     /// the `path` must be unique.
-    pub fn insert<D>(&self, path: Path, tags: Vec<Tag>, data: D) -> Result<()>
+    pub async fn insert<T, D>(&self, path: Path, tags: T, data: D) -> Result<Id>
     where
+        T: Into<TagSet>,
         D: Into<Diff>,
     {
-        Ok(())
+        let mut store = self.inner.store.write().await;
+        store.insert(self.id, &path, tags.into(), data.into())
     }
 
-    pub fn delete(&self, path: Path) -> Result<()> {
-        Ok(())
+    pub async fn delete(&self, path: Path) -> Result<()> {
+        let mut store = self.inner.store.write().await;
+        store.destroy(self.id, &path)
     }
 
     /// Update a record in-place
-    pub fn update<D>(&self, path: Path, diff: D) -> Result<()>
+    pub async fn update<D>(&self, path: Path, diff: D) -> Result<()>
     where
         D: Into<Diff>,
     {
-        let diff: Diff = diff.into();
-
-        Ok(())
+        let mut store = self.inner.store.write().await;
+        store.update(self.id, &path, diff.into())
     }
 
     /// Query the database with a specific query object
-    pub fn query(&self, _: Query) -> Result<QueryResult> {
-        unimplemented!()
+    pub async fn query(&self, q: Query) -> Result<QueryResult> {
+        let store = self.inner.store.read().await;
+        match q {
+            Query::Path(ref path) => store
+                .get_path(self.id, path)
+                .map(|rec| QueryResult::Single(rec)),
+            _ => unimplemented!(),
+        }
     }
 }
