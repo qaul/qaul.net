@@ -67,7 +67,11 @@ impl UserTable {
     /// Load data from disk
     pub(crate) fn load(data: &[u8]) -> Self {
         unimplemented!()
-        // deserialize(data).unwrap()
+    }
+
+    /// Check if the user is currently open
+    pub(crate) fn is_open(&self, id: Id) -> Result<()> {
+        self.0.get(id).map(|_| ())
     }
 
     /// Add a new user to the user table

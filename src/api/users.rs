@@ -45,19 +45,4 @@ impl<'a> Users<'a> {
         let ref mut u = self.inner.users.write().await;
         u.delete(id)
     }
-
-    pub fn update(&'a self, _: Id) -> Update<'a> {
-        Update { inner: self }
-    }
-}
-
-pub struct Update<'a> {
-    pub(crate) inner: &'a Users<'a>,
-}
-
-impl<'a> Update<'a> {
-    /// Drop this scope to return the inner library borrow;
-    pub fn drop(&'a self) -> &'a Users {
-        self.inner
-    }
 }

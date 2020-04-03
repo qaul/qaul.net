@@ -38,7 +38,7 @@
 //! resistence; **the cold cache will not!**
 
 mod users;
-pub use users::{Update, Users};
+pub use users::Users;
 
 mod data;
 pub use data::Data;

@@ -26,7 +26,7 @@ impl Dirs {
     pub(crate) fn root(&self) -> &PathBuf {
         &self.root
     }
-    
+
     /// Return the records directory in the library
     pub(crate) fn records(&self) -> PathBuf {
         self.root.join("records")
@@ -44,7 +44,7 @@ impl Dirs {
 }
 
 #[test]
-fn scaffold_lib() {
+fn scaffold_lib() -> Result<()> {
     use std::path::Path;
     use tempdir::TempDir;
 
@@ -53,9 +53,10 @@ fn scaffold_lib() {
     offset.push("library");
 
     let d = Dirs::new(offset.clone());
-    d.scaffold();
+    d.scaffold()?;
 
     assert!(Path::new(dbg!(&offset.join("records"))).exists());
     assert!(Path::new(dbg!(&offset.join("meta"))).exists());
     assert!(Path::new(dbg!(&offset.join("cache"))).exists());
+    Ok(())
 }

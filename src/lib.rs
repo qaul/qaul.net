@@ -85,10 +85,16 @@ impl Library {
     }
 
     /// Load the user API scope
-    pub fn data<'a, I: Into<Option<Id>>>(&'a self, id: I) -> DataApi<'a> {
-        DataApi {
-            inner: self,
-            id: id.into(),
+    pub async fn data<'a, I: Into<Option<Id>>>(&'a self, id: I) -> Result<DataApi<'a>> {
+        let id = id.into();
+
+        if let Some(id) = id {
+            self.users.read().await.is_open(id)?;
         }
+
+        Ok(DataApi {
+            inner: self,
+            id: id,
+        })
     }
 }
