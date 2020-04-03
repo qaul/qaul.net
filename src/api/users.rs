@@ -4,41 +4,9 @@ use crate::{error::Result, Id, Library};
 
 /// API scope handler for a single user in a library
 ///
-/// The API is sharded into different scopes, each of which can be
-/// nested to call more specific functions.
-///
-/// In Alexandria, a library has users that store data in zones and
-/// records.  To modify a user's zone list, you first have to
-/// initialise the API scope for this user Id.  This way all further
-/// API calls will be properly namespaced, without having to replicate
-/// the same arguments to all function calls again, thus reducing
-/// errors in the usage.
-///
-/// ## Commiting data
-///
-/// All changes made are cached before being written to the
-/// active data set.  You need to call `commit()` to queue them from
-/// the cache to the active set.  Alternatively you can call
-/// `discard()` to clear the entries from the cache.  Dropping the API
-/// scope handler is synonymous to calling `commit()`.
-///
-/// ## Hot cache & cold cache
-///
-/// When you queue an action via the API it will be immediatiely
-/// validated and entered into a hot cache.  This ensures that other
-/// comsumers get immediate access to the data.  Altenatively you can
-/// queue your changes into the cald cache, by first calling `cold()`
-/// on the API state handler.
-///
-/// Then either `commit()` your changes or release the cold-lock by
-/// calling `cache()`.
-///
-/// The hot cache will be periodically synced to disk to provide crash
-/// resistence; **the cold cache will not!**
 pub struct Users<'a> {
     pub(crate) inner: &'a Library,
     pub(crate) id: Id,
-    pub(crate) hot: bool,
 }
 
 impl<'a> Users<'a> {
@@ -47,18 +15,25 @@ impl<'a> Users<'a> {
         self.inner
     }
 
+    /// Open a user for transactions
+    ///
+    /// This means that future transactions for this user ID will be
+    /// applied, instead of being queued to the inbox.
     pub async fn open(&self, pw: &str) -> Result<()> {
         let ref mut u = self.inner.users.write().await;
         u.open(self.id, pw)
     }
 
-    /// Close and sync a user's session
+    /// Close an active user session
+    ///
+    /// This means that all future transactions will be queued to the
+    /// inbox, until another session is created with `open()`
     pub async fn clone(&self) -> Result<()> {
         let ref mut u = self.inner.users.write().await;
         u.close(self.id)
     }
 
-    /// Create a new user
+    /// Create a new user with a unique encryption key
     pub async fn create(&self, pw: &str) -> Result<Id> {
         let id = Id::random();
         let ref mut u = self.inner.users.write().await;

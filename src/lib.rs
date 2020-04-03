@@ -1,58 +1,93 @@
-//! Alexandria storage library
+//! Encrypted record-oriented database
+//!
+//! **Experimental:** please note that this database was writted for
+//! [qaul.net], which itself is a very experimental platform.  There
+//! will be data retention bugs, and you shouldn't use Alexandria
+//! unless you're okay with losing the data you're storing!
+//!
+//! A multi-payload, zone-encrypting, journaled persistence module,
+//! built with low-overhead applications in mind.
+//!
+//! - Stores data in namespaces and scopes
+//! - Key-value stores and lazy blobs
+//! - Supports per-scope asymetric encryption key
+//! - Uses transaction Deltas for journal and concurrency safety
+//! - Integrates into OS persistence layers (storing things on spinning
+//!   rust or zappy quantum tunnels)
+//!
+//! `alexandria` provides an easy to use database interface with
+//! transactions, merges and dynamic queries, ensuring that your
+//! in-memory representation of data never get's out-of-sync with your
+//! on-disk representation. Don't burn your data.
 
-pub(crate) mod cache;
+// pub(crate) mod cache;
 pub(crate) mod crypto;
 pub(crate) mod delta;
+pub(crate) mod diff;
 pub(crate) mod dir;
 pub(crate) mod meta;
 pub(crate) mod notify;
+pub(crate) mod path;
+pub(crate) mod store;
 pub(crate) mod wire;
 
 pub mod api;
 mod builder;
-mod data;
+pub mod data;
 mod error;
 
 pub use crate::{
     builder::Builder,
-    data::*,
-    delta::DeltaType as Delta,
+    diff::{Diff, DiffSeg},
     error::{Error, Result},
+    path::Path,
 };
+
+/// Primary identifier type for records and users
 pub use identity::Identity as Id;
 
 use crate::{
-    api::users::Users as UsersApi,
-    cache::{CacheRef, CombKey},
+    api::{Data as DataApi, Users as UsersApi},
     dir::Dirs,
     meta::users::UserTable,
 };
-use async_std::sync::{Arc, RwLock};
+use async_std::sync::RwLock;
 
-/// In-memory alexandria library
+/// The in-memory representation of an alexandria storage library
+///
+/// Refer to `Builder` on how to most easily construct an Alexandria
+/// instance.  All actions (both actual and cached) are by default
+/// mirrored to disk.  You may notice performance improvements by
+/// turning off caches.
+///
+/// Alexandria addresses all data via `Path`, which is a nested
+/// segment set of namespaces, zones, and subzones.
 pub struct Library {
     /// The main management path
     pub(crate) root: Dirs,
     /// Table with encrypted user metadata
     pub(crate) users: RwLock<UserTable>,
-    /// Primary active/hot cache
-    pub(crate) cache: CacheRef<CombKey, Id>,
+    // /// Primary active/hot cache
+    // pub(crate) cache: CacheRef<CombKey, Id>,
 }
 
 impl Library {
     /// Internally called setup function
     pub(crate) fn init(self) -> Result<Self> {
         self.root.scaffold()?;
-        Arc::clone(&self.cache).hot();
         Ok(self)
     }
 
     /// Load the user API scope
     pub fn user<'a>(&'a self, id: Id) -> UsersApi<'a> {
-        UsersApi {
+        UsersApi { inner: self, id }
+    }
+
+    /// Load the user API scope
+    pub fn data<'a, I: Into<Option<Id>>>(&'a self, id: I) -> DataApi<'a> {
+        DataApi {
             inner: self,
-            hot: true,
-            id,
+            id: id.into(),
         }
     }
 }
