@@ -47,6 +47,12 @@ impl From<BTreeSet<Tag>> for TagSet {
     }
 }
 
+impl From<TagSet> for BTreeSet<Tag> {
+    fn from(ts: TagSet) -> Self {
+        ts.0
+    }
+}
+
 /// A generic metadata tag
 ///
 /// Because searching through message or file payloads might be slow,

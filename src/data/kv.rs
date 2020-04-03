@@ -68,12 +68,14 @@ pub enum Value {
 }
 
 /// A key-value store record
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Default, Debug, Serialize, Deserialize)]
 pub struct Kv {
     map: Map,
 }
 
 impl DiffExt for Kv {
+
+    /// Apply a key-value diff to this Kv map instance
     fn apply(&mut self, diff: Diff) -> Result<()> {
         match diff {
             Diff::Map(map) => map
@@ -101,15 +103,7 @@ impl DiffExt for Kv {
 
 impl Kv {
     pub fn new() -> Self {
-        Self {
-            map: Default::default(),
-        }
-    }
-
-    /// A creation or chain friendly way to apply a diff
-    pub fn apply(mut self, diff: Diff) -> Result<Self> {
-        (&mut self).apply(diff)?;
-        Ok(self)
+        Self::default()
     }
 
     /// A helper function to insert and error if the key existed

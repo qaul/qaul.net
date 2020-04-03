@@ -47,7 +47,7 @@ impl Record {
         } = sec.deref()?;
 
         match t {
-            /// We load kv records immediately
+            // We load kv records immediately
             Type::Kv => {
                 let mut bser = vec![0; *size as usize];
                 f.read_exact(&mut bser).await?;
@@ -59,7 +59,7 @@ impl Record {
                     body,
                 })
             }
-            /// We don't _really_ load blob records
+            // We don't _really_ load blob records
             Type::Blob => unimplemented!(),
         }
     }

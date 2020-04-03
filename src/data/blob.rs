@@ -20,6 +20,8 @@ pub struct Blob {
 }
 
 impl Blob {
+    
+    
     /// Resolve the file descriptor into
     pub async fn load(&mut self) -> Result<Vec<u8>> {
         let mut vec = vec![];

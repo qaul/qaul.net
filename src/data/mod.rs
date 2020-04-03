@@ -12,7 +12,8 @@ pub use self::{
 };
 use crate::{
     crypto::{asym::KeyPair, DetachedKey, Encrypted},
-    Diff, Id, Result,
+    diff::{Diff, DiffExt},
+    Id, Result,
 };
 
 use serde::{Deserialize, Serialize};
@@ -58,6 +59,15 @@ pub(crate) enum Body {
     Blob(Blob),
 }
 
+impl Body {
+    fn apply(&mut self, d: Diff) -> Result<()> {
+        match self {
+            Self::Kv(ref mut kv) => kv.apply(d),
+            Self::Blob(ref mut b) => unimplemented!(),
+        }
+    }
+}
+
 impl DetachedKey<KeyPair> for Body {}
 
 /// A single record in alexandria, defined by a header and body
@@ -71,11 +81,28 @@ pub struct Record {
 
 impl Record {
     pub(crate) fn create(tags: TagSet, diff: Diff) -> Result<Self> {
-        // let (t, body) = match diff {
-        //     Diff::Map(kv) => (Type::Kv, Body::Kv(Kv::new().apply(diff)?)),
-        //     Diff::Binary(blob) => unimplemented!(),
-        // };
+        // Create the body from the diff
+        let (t, mut body) = match diff {
+            Diff::Map(_) => (Type::Kv, Body::Kv(Kv::new())),
+            Diff::Binary(_) => unimplemented!(),
+        };
+        body.apply(diff)?;
+        let body = Encrypted::new(body);
 
-        unimplemented!()
+        // Secret header with no disk info present
+        let sec = Encrypted::new(SecHeader {
+            t,
+            size: 0,
+            chunks: vec![],
+        });
+
+        // Primary search header
+        let header = Header {
+            id: Id::random(),
+            tags: tags.into(),
+            sec,
+        };
+
+        Ok(Self { header, body })
     }
 }

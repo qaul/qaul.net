@@ -19,6 +19,7 @@
 //! transactions, merges and dynamic queries, ensuring that your
 //! in-memory representation of data never get's out-of-sync with your
 //! on-disk representation. Don't burn your data.
+#![allow(dead_code, unused_imports, unused_variables)]
 
 // pub(crate) mod cache;
 pub(crate) mod crypto;

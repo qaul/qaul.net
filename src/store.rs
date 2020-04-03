@@ -52,11 +52,11 @@ impl Store {
         id: Option<Id>,
         path: &Path,
         tags: TagSet,
-        d: Diff,
+        diff: Diff,
     ) -> Result<()> {
         // Create a record
-        
-        
+        let record = Record::create(tags, diff)?;
+
         Ok(())
     }
 }
