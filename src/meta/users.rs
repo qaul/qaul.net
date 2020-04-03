@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 /// The hash of an Id which is used for external representation
 pub(crate) type Hid = Id;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct User {
     /// The nested user token
     pub(crate) id: Id,
@@ -29,7 +29,7 @@ pub(crate) struct User {
     pub(crate) key: Arc<KeyPair>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct UserWithKey {
     #[serde(skip)]
     key: Option<Arc<Key>>,

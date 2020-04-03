@@ -45,3 +45,9 @@ impl From<(String, DiffSeg<Value>)> for Diff {
         })
     }
 }
+
+impl From<Vec<(String, DiffSeg<Value>)>> for Diff {
+    fn from(vec: Vec<(String, DiffSeg<Value>)>) -> Self {
+        Self::Map(vec.into_iter().collect())
+    }
+}

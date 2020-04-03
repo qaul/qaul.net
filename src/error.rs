@@ -27,11 +27,11 @@ pub enum Error {
     #[fail(display = "tried to unlock user Id `{}` twice", id)]
     AlreadyUnlocked { id: String },
 
-    #[fail(display = "no such path: `{}`", msg)]
-    NoSuchPath { msg: String },
+    #[fail(display = "no such path: `{}`", path)]
+    NoSuchPath { path: String },
 
-    #[fail(display = "user zone exists already: {}::{}", id, zone)]
-    PathExists { id: String, zone: String },
+    #[fail(display = "path exists already: {}", path)]
+    PathExists { path: String },
 
     #[fail(display = "failed to load data: `{}`", msg)]
     LoadFailed { msg: String },

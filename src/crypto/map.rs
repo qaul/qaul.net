@@ -18,7 +18,7 @@ use std::{
 pub(crate) struct EncryptedMap<K, V, Q>
 where
     K: Serialize + DeserializeOwned + Ord + PartialOrd + Hash + ToString,
-    V: DetachedKey<Q> + Serialize + DeserializeOwned,
+    V: Clone + DetachedKey<Q> + Serialize + DeserializeOwned,
     Q: Encrypter<V>,
 {
     #[serde(bound(deserialize = "V: DeserializeOwned"))]
@@ -28,7 +28,7 @@ where
 impl<K, V, Q> EncryptedMap<K, V, Q>
 where
     K: Serialize + DeserializeOwned + Ord + PartialOrd + Hash + ToString,
-    V: DetachedKey<Q> + Serialize + DeserializeOwned,
+    V: Clone + DetachedKey<Q> + Serialize + DeserializeOwned,
     Q: Encrypter<V>,
 {
     /// Create a new encrypted map
@@ -96,7 +96,7 @@ where
 impl<K, V, Q> Deref for EncryptedMap<K, V, Q>
 where
     K: Serialize + DeserializeOwned + Ord + PartialOrd + Hash + ToString,
-    V: DetachedKey<Q> + Serialize + DeserializeOwned,
+    V: Clone + DetachedKey<Q> + Serialize + DeserializeOwned,
     Q: Encrypter<V> + Debug,
 {
     type Target = BTreeMap<K, Encrypted<V, Q>>;
@@ -109,7 +109,7 @@ where
 impl<K, V, Q> DerefMut for EncryptedMap<K, V, Q>
 where
     K: Serialize + DeserializeOwned + Ord + PartialOrd + Hash + ToString,
-    V: DetachedKey<Q> + Serialize + DeserializeOwned,
+    V: Clone + DetachedKey<Q> + Serialize + DeserializeOwned,
     Q: Encrypter<V> + Debug,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {

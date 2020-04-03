@@ -11,7 +11,7 @@ use sodiumoxide::crypto::box_::{self, Nonce, PublicKey, SecretKey};
 pub(crate) type SharedKey = KeyPair;
 
 /// Both public and private keys for a user
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct KeyPair {
     pub_: PublicKey,
     sec: SecretKey,

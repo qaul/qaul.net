@@ -43,7 +43,7 @@ impl Store {
                 .shared
                 .get(path)
                 .and_then(|e| e.deref().map(|ref rec| Arc::clone(&rec)).ok()))
-            .map_or(Err(Error::NoSuchPath { msg: path.into() }), |rec| Ok(rec))
+            .map_or(Err(Error::NoSuchPath { path: path.into() }), |rec| Ok(rec))
     }
 
     /// Insert a record into the store
@@ -57,8 +57,8 @@ impl Store {
         diff: Diff,
     ) -> Result<Id> {
         // Check if the path exists already
-        if self.tree(id).map(|tree| tree.contains_key(path))? {
-            return Err(Error::NoSuchPath { msg: path.into() });
+        if self.tree_mut(id).contains_key(path) {
+            return Err(Error::PathExists { path: path.into() });
         }
 
         // Create a record
@@ -73,10 +73,33 @@ impl Store {
     }
 
     pub(crate) fn destroy(&mut self, id: Option<Id>, path: &Path) -> Result<()> {
+        // Check if the path exists already
+        if !self.tree_mut(id).contains_key(path) {
+            return Err(Error::NoSuchPath { path: path.into() });
+        }
+
+        self.tree_mut(id).remove(path);
         Ok(())
     }
 
     pub(crate) fn update(&mut self, id: Option<Id>, path: &Path, diff: Diff) -> Result<()> {
+        // Check that the path actually exists
+        if !self.tree_mut(id).contains_key(path) {
+            return Err(Error::NoSuchPath { path: path.into() });
+        }
+
+        // Make a copy of the underlying record
+        let mut not: Notify<_> = self.tree_mut(id).remove(path).unwrap();
+        let arc: &Arc<_> = not.deref()?;
+        let mut rec: Record = (**arc).clone();
+
+        // Apply changes
+        rec.apply(diff)?;
+
+        // Swap old and new records
+        let mut arc = Arc::new(rec);
+        not.swap(&mut arc);
+        self.tree_mut(id).insert(path.clone(), not);
         Ok(())
     }
 
@@ -113,22 +136,6 @@ impl Store {
         match id {
             Some(id) => self.usrd.entry(id).or_default(),
             None => &mut self.shared,
-        }
-    }
-
-    /// A utility function to get the tree, depending on id
-    fn tree(
-        &self,
-        id: Option<Id>,
-    ) -> Result<&BTreeMap<Path, Notify<Encrypted<Arc<Record>, KeyPair>>>> {
-        match id {
-            Some(ref id) => self
-                .usrd
-                .get(id)
-                .map_or(Err(Error::NoSuchUser { id: id.to_string() }), |tree| {
-                    Ok(tree)
-                }),
-            None => Ok(&self.shared),
         }
     }
 }
@@ -181,4 +188,55 @@ fn store_and_get() {
     let rec_id = store.insert(Some(id), &path, tags, diff).unwrap();
 
     assert_eq!(store.get_path(Some(id), &path).unwrap().header.id, rec_id);
+}
+
+#[test]
+fn store_and_update() {
+    use crate::{data::Value, diff::DiffSeg};
+
+    let id = Id::random();
+    let path = Path::from("/test:bob");
+    let tags = TagSet::empty();
+    let diff = Diff::from((
+        "hello".into(),
+        DiffSeg::Insert(Value::String("world".into())),
+    ));
+
+    let mut store = Store::new();
+    let rec_id = store.insert(Some(id), &path, tags, diff).unwrap();
+    assert_eq!(
+        store
+            .usrd
+            .get(&id)
+            .unwrap()
+            .get(&path)
+            .unwrap()
+            .deref()
+            .unwrap()
+            .kv()
+            .len(),
+        1
+    );
+
+    let diff2 = Diff::from((
+        "saluton".into(),
+        DiffSeg::Insert(Value::String("mondo".into())),
+    ));
+
+    store.update(Some(id), &path, diff2).unwrap();
+
+    assert_eq!(store.usrd.get(&id).unwrap().len(), 1);
+    assert_eq!(
+        store
+            .usrd
+            .get(&id)
+            .unwrap()
+            .get(&path)
+            .unwrap()
+            .deref()
+            .unwrap()
+            .kv()
+            .len(),
+        2
+    );
 }

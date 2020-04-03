@@ -13,7 +13,7 @@ pub type BlobRef = Arc<Blob>;
 /// By itself this object contains nothing but a file descriptor.  You
 /// need to call `load()` on it to resolve the future and load the
 /// data from disk into memory.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Blob {
     /// The path to the file on disk
     path: String,

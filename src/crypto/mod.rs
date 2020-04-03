@@ -49,10 +49,10 @@ pub(crate) trait DetachedKey<K> {
 impl<K> DetachedKey<K> for Id {}
 
 /// A generic wrapper around the unlock state of data
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) enum Encrypted<T, K>
 where
-    T: Encoder<T> + DetachedKey<K>,
+    T: Clone + Encoder<T> + DetachedKey<K>,
     K: Encrypter<T>,
 {
     /// An in-use data variant
@@ -70,7 +70,7 @@ where
 
 impl<T, K> Encrypted<T, K>
 where
-    T: Encoder<T> + DetachedKey<K>,
+    T: Clone + Encoder<T> + DetachedKey<K>,
     K: Encrypter<T>,
 {
     pub(crate) fn new(init: T) -> Self {
@@ -92,6 +92,14 @@ where
             _ => Err(Error::LockedState {
                 msg: "Encrypted::Closed(_) can't be derefed".into(),
             }),
+        }
+    }
+
+    /// Swap the underlying data in place
+    pub(crate) fn swap(&mut self, new: &mut T) {
+        match self {
+            Self::Open(ref mut t) => std::mem::swap(t, new),
+            _ => {}
         }
     }
 

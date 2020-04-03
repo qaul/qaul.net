@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
 /// A set of paths that a user has access to
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Clone, Default, Serialize, Deserialize)]
 struct PathMap {
     set: BTreeSet<String>,
 }
@@ -29,7 +29,7 @@ impl PathTable {
 
     /// Add a new user to the user table
     pub(crate) fn insert<S: Into<String>>(&mut self, user: &User, path: S) -> Result<()> {
-        let zone = path.into();
+        let path = path.into();
         let id = user.id;
 
         // Load the existing zone map or create a new one
@@ -40,14 +40,11 @@ impl PathTable {
             .deref_mut()?;
 
         // Return an error if the zone exsts
-        if zm.set.contains(&zone) {
-            return Err(Error::PathExists {
-                id: id.to_string(),
-                zone,
-            });
+        if zm.set.contains(&path) {
+            return Err(Error::PathExists { path });
         }
 
-        zm.set.insert(zone);
+        zm.set.insert(path);
         Ok(())
     }
 

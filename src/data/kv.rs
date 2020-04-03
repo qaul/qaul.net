@@ -9,9 +9,6 @@ use std::{collections::BTreeMap, ops::Deref};
 /// The key-value map used in a Kv record
 pub type Map = BTreeMap<String, Value>;
 
-/// A key-value record reference
-pub type KvRef = Arc<Kv>;
-
 /// A strongly typed alexandria data value
 ///
 /// Because alexandria is written in Rust, all data is strongly typed,
@@ -21,7 +18,7 @@ pub type KvRef = Arc<Kv>;
 ///
 /// Value types can be nested with `Value::Map`, which contains a
 /// `BTreeMap<_, _>`.  Nestings can be arbitrarily deep.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Value {
     /// Some UTF-8 valid text, with no length limit
     String(String),
@@ -68,7 +65,7 @@ pub enum Value {
 }
 
 /// A key-value store record
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct Kv {
     map: Map,
 }
@@ -142,4 +139,34 @@ impl Deref for Kv {
     fn deref(&self) -> &Self::Target {
         &self.map
     }
+}
+
+#[test]
+fn apply_single_diff() {
+    let mut kv = Kv::new();
+    let diff = Diff::from((
+        "hello".into(),
+        DiffSeg::Insert(Value::String("world".into())),
+    ));
+
+    kv.apply(diff).unwrap();
+    assert_eq!(kv.len(), 1);
+}
+
+#[test]
+fn apply_multi_diff() {
+    let mut kv = Kv::new();
+    let diff = Diff::from(
+        vec![
+            ("hello".into(), DiffSeg::Insert(Value::String("workers".into()))),
+            ("of".into(), DiffSeg::Insert(Value::String("the".into()))),
+            ("world".into(), DiffSeg::Insert(Value::String("you".into()))),
+            ("have".into(), DiffSeg::Insert(Value::String("nothing".into()))),
+            ("to".into(), DiffSeg::Insert(Value::String("lose".into()))),
+            ("but".into(), DiffSeg::Insert(Value::String("your".into()))),
+            ("chains".into(), DiffSeg::Insert(Value::String("!".into()))),
+   ]);
+
+    kv.apply(diff).unwrap();
+    assert_eq!(kv.len(), 7);
 }

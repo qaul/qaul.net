@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
 /// A record header
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Header {
     /// A unique record ID
     pub id: Id,
@@ -31,7 +31,7 @@ pub struct Header {
 }
 
 /// Distinguishes between the type of records
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) enum Type {
     /// Key-value mapped store
     Kv,
@@ -40,7 +40,7 @@ pub(crate) enum Type {
 }
 
 /// The secret header is encrypted
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct SecHeader {
     /// Record type
     pub(crate) t: Type,
@@ -53,7 +53,7 @@ pub(crate) struct SecHeader {
 impl DetachedKey<KeyPair> for SecHeader {}
 
 /// A record data body
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) enum Body {
     Kv(Kv),
     Blob(Blob),
@@ -71,7 +71,7 @@ impl Body {
 impl DetachedKey<KeyPair> for Body {}
 
 /// A single record in alexandria, defined by a header and body
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Record {
     /// The clear record header
     pub header: Header,
@@ -104,5 +104,20 @@ impl Record {
         };
 
         Ok(Self { header, body })
+    }
+
+    /// Apply a diff to a record
+    pub(crate) fn apply(&mut self, diff: Diff) -> Result<()> {
+        match self.body.deref_mut()? {
+            Body::Kv(kv) => kv.apply(diff),
+            Body::Blob(b) => unimplemented!(),
+        }
+    }
+
+    pub fn kv(&self) -> &Kv {
+        match self.body.deref() {
+            Ok(Body::Kv(ref kv)) => kv,
+            _ => unimplemented!(),
+        }
     }
 }
