@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# create a new user
+# creates a new user with password '123456'
+# 
+# usage:
+# ./users_create.sh
 
 curl -i  \
     -H "Content-Type: application/json" \
