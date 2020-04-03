@@ -78,6 +78,7 @@ impl Store {
             return Err(Error::NoSuchPath { path: path.into() });
         }
 
+        self.wake_tree(id, path);
         self.tree_mut(id).remove(path);
         Ok(())
     }
@@ -99,7 +100,10 @@ impl Store {
         // Swap old and new records
         let mut arc = Arc::new(rec);
         not.swap(&mut arc);
+
+        // Re-insert into the tree and wake pollers
         self.tree_mut(id).insert(path.clone(), not);
+        self.wake_tree(id, path);
         Ok(())
     }
 
@@ -239,4 +243,36 @@ fn store_and_update() {
             .len(),
         2
     );
+}
+
+#[test]
+fn store_and_delete() {
+    use crate::{data::Value, diff::DiffSeg};
+
+    let id = Id::random();
+    let path = Path::from("/test:bob");
+    let tags = TagSet::empty();
+    let diff = Diff::from((
+        "hello".into(),
+        DiffSeg::Insert(Value::String("world".into())),
+    ));
+
+    let mut store = Store::new();
+    let rec_id = store.insert(Some(id), &path, tags, diff).unwrap();
+    assert_eq!(
+        store
+            .usrd
+            .get(&id)
+            .unwrap()
+            .get(&path)
+            .unwrap()
+            .deref()
+            .unwrap()
+            .kv()
+            .len(),
+        1
+    );
+
+    store.destroy(Some(id), &path).unwrap();
+    assert_eq!(store.usrd.get(&id).unwrap().len(), 0);
 }
