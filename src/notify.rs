@@ -4,8 +4,11 @@ use async_std::{
     task,
 };
 use serde::{de::DeserializeOwned, Deserialize, Deserializer, Serialize, Serializer};
-use std::ops::{Deref, DerefMut};
 use std::task::Waker;
+use std::{
+    fmt::Debug,
+    ops::{Deref, DerefMut},
+};
 
 /// Utility wrapper around a serialisable lock
 pub(crate) struct Lock<T>(RwLock<T>)
@@ -64,11 +67,8 @@ pub(crate) type LockNotify<T> = Notify<Lock<T>>;
 /// Most importantly, this type is serialisation transparent, meaning
 /// it implements `Serialize`, `Deserialize` which is forwarded to the
 /// implementations provided by `T`.
-#[derive(Default, Debug, Clone)]
-pub(crate) struct Notify<T>
-where
-    T: ?Encodable + Sized,
-{
+#[derive(Clone, Debug, Default)]
+pub(crate) struct Notify<T> {
     inner: T,
     waker: Option<Waker>,
 }

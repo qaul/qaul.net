@@ -1,9 +1,10 @@
 //! Encrypted record-oriented database
 //!
 //! **Experimental:** please note that this database was writted for
-//! [qaul.net], which itself is a very experimental platform.  There
-//! will be data retention bugs, and you shouldn't use Alexandria
-//! unless you're okay with losing the data you're storing!
+//! [qaul.net](git.open-communication.net/qaul/qaul.net), which itself
+//! is a very experimental platform.  There will be data retention
+//! bugs, and you shouldn't use Alexandria unless you're okay with
+//! losing the data you're storing!
 //!
 //! A multi-payload, zone-encrypting, journaled persistence module,
 //! built with low-overhead applications in mind.

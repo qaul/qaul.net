@@ -164,7 +164,7 @@ impl Store {
         id: Option<Id>,
     ) -> &mut BTreeMap<Path, Notify<Encrypted<Arc<Record>, KeyPair>>> {
         match id {
-            Some(id) => self.usrd.entry(id).or_default(),
+            Some(id) => self.usrd.entry(id).or_insert(Notify::new(BTreeMap::new())),
             None => &mut self.shared,
         }
     }
