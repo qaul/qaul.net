@@ -3,7 +3,7 @@
 use crate::{
     data::{Record, Tag, TagSet, Type},
     delta::{DeltaBuilder, DeltaType},
-    Diff, Id, Library, Path, Result,
+    Diff, Id, Library, Path, Result, Subscription,
 };
 use async_std::sync::Arc;
 
@@ -13,6 +13,7 @@ pub struct Data<'a> {
 }
 
 /// A data query type
+#[derive(Clone, Debug)]
 pub enum Query {
     /// Return a record by exact Id
     Id(Id),
@@ -23,6 +24,7 @@ pub enum Query {
 }
 
 /// The result of a query to the database
+#[derive(Clone, Debug)]
 pub enum QueryResult {
     /// There was a single matching item
     Single(Arc<Record>),
@@ -35,6 +37,7 @@ pub enum QueryResult {
 /// The query can either be run for a partial, or complete match.  The
 /// complete match is synonymous with equality (`A = B`), whereas the
 /// partial match does not have to be a true subset (`A ⊆ B`)
+#[derive(Clone, Debug)]
 pub enum SetQuery<T> {
     /// A partial match (subset)
     Partial(T),
@@ -89,5 +92,9 @@ impl<'a> Data<'a> {
                 .map(|rec| QueryResult::Single(rec)),
             _ => unimplemented!(),
         }
+    }
+
+    pub async fn subscribe(&self, q: Query) -> Subscription {
+        self.inner.subs.add_sub(q).await
     }
 }

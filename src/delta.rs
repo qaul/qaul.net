@@ -34,10 +34,10 @@ impl DeltaBuilder {
     pub(crate) fn make(self) -> Delta {
         Delta {
             user: self.user,
-            path: self.path.unwrap(),
             rec_id: self.rec_id,
-            tags: self.tags.unwrap(),
             action: self.action,
+            tags: self.tags.unwrap_or_else(|| TagSet::empty()),
+            path: self.path.unwrap(),
         }
     }
 }
@@ -49,14 +49,16 @@ impl DeltaBuilder {
 /// active user before being cached.
 ///
 /// The `path` segment is constructed via the
+#[derive(Clone, Debug)]
 pub(crate) struct Delta {
     pub(crate) user: Option<Id>,
-    pub(crate) path: Path,
     pub(crate) rec_id: Option<Id>,
+    pub(crate) path: Path,
     pub(crate) tags: TagSet,
     pub(crate) action: DeltaType,
 }
 
+#[derive(Clone, Debug)]
 pub(crate) enum DeltaType {
     Insert,
     Update,

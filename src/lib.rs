@@ -54,8 +54,9 @@ use crate::{
     dir::Dirs,
     meta::users::UserTable,
     store::Store,
+    sub::SubHub,
 };
-use async_std::sync::RwLock;
+use async_std::sync::{Arc, RwLock};
 
 /// The in-memory representation of an alexandria storage library
 ///
@@ -73,6 +74,8 @@ pub struct Library {
     pub(crate) users: RwLock<UserTable>,
     /// The main data store
     pub(crate) store: RwLock<Store>,
+    /// The state handler for subscriptions
+    pub(crate) subs: Arc<SubHub>,
 }
 
 impl Library {

@@ -1,4 +1,4 @@
-use crate::crypto::DetachedKey;
+use crate::{crypto::DetachedKey, wire::Encodable};
 use async_std::{
     sync::{Arc, RwLock},
     task,
@@ -10,11 +10,11 @@ use std::task::Waker;
 /// Utility wrapper around a serialisable lock
 pub(crate) struct Lock<T>(RwLock<T>)
 where
-    T: DeserializeOwned + Serialize;
+    T: Encodable;
 
 impl<T> Lock<T>
 where
-    T: DeserializeOwned + Serialize,
+    T: Encodable,
 {
     pub(crate) fn new(inner: T) -> Self {
         Self(RwLock::new(inner))
@@ -23,7 +23,7 @@ where
 
 impl<T> Serialize for Lock<T>
 where
-    T: DeserializeOwned + Serialize,
+    T: Encodable,
 {
     fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
     where
@@ -38,7 +38,7 @@ where
 
 impl<'de, T> Deserialize<'de> for Lock<T>
 where
-    T: DeserializeOwned + Serialize,
+    T: Encodable,
 {
     fn deserialize<D>(de: D) -> Result<Self, D::Error>
     where
@@ -65,9 +65,9 @@ pub(crate) type LockNotify<T> = Notify<Lock<T>>;
 /// it implements `Serialize`, `Deserialize` which is forwarded to the
 /// implementations provided by `T`.
 #[derive(Default, Debug, Clone)]
-pub struct Notify<T>
+pub(crate) struct Notify<T>
 where
-    T: DeserializeOwned + Serialize,
+    T: ?Encodable + Sized,
 {
     inner: T,
     waker: Option<Waker>,
@@ -85,7 +85,7 @@ where
 
 impl<T> DerefMut for Notify<T>
 where
-    T: DeserializeOwned + Serialize,
+    T: Encodable,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.waker.as_ref().map(|w| w.wake_by_ref());
@@ -95,7 +95,7 @@ where
 
 impl<T> Notify<T>
 where
-    T: DeserializeOwned + Serialize,
+    T: Encodable,
 {
     /// Create an empty Notify handler
     pub(crate) fn new(inner: T) -> Self {
@@ -121,7 +121,7 @@ where
 // If T implements DetachedKey, just proxy the trait
 impl<K, T> DetachedKey<K> for Notify<T>
 where
-    T: DeserializeOwned + Serialize + DetachedKey<K>,
+    T: Encodable + DetachedKey<K>,
 {
     fn key(&self) -> Option<Arc<K>> {
         self.inner.key()
@@ -130,7 +130,7 @@ where
 
 impl<T> Serialize for Notify<T>
 where
-    T: DeserializeOwned + Serialize,
+    T: Encodable,
 {
     fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
     where
@@ -142,7 +142,7 @@ where
 
 impl<'de, T> Deserialize<'de> for Notify<T>
 where
-    T: DeserializeOwned + Serialize,
+    T: Encodable,
 {
     fn deserialize<D>(de: D) -> Result<Self, D::Error>
     where

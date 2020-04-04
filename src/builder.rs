@@ -1,6 +1,5 @@
-use crate::{dir::Dirs, error::Result, meta::users::UserTable, store::Store, Library};
-use async_std::sync::RwLock;
-// use std::path::PathBuf;
+use crate::{dir::Dirs, error::Result, meta::users::UserTable, store::Store, sub::SubHub, Library};
+use async_std::sync::{Arc, RwLock};
 
 /// A utility builder to construct the Alexandria library
 #[derive(Default)]
@@ -34,6 +33,13 @@ impl Builder {
         );
         let users = RwLock::new(UserTable::new());
         let store = RwLock::new(Store::new());
-        Library { root, users, store }.init()
+        let subs = SubHub::new();
+        Library {
+            root,
+            users,
+            store,
+            subs,
+        }
+        .init()
     }
 }
