@@ -9,8 +9,8 @@ pub(crate) use map::EncryptedMap;
 
 use crate::{
     error::{Error, Result},
+    utils::Id,
     wire::Encoder,
-    Id,
 };
 use async_std::sync::Arc;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};

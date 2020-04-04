@@ -1,6 +1,6 @@
 use crate::{
-    diff::{Diff, DiffExt, DiffResult, DiffSeg},
-    Error, Result,
+    error::{Error, Result},
+    utils::{Diff, DiffExt, DiffResult, DiffSeg},
 };
 use async_std::sync::Arc;
 use serde::{Deserialize, Serialize};
@@ -23,10 +23,17 @@ pub enum Value {
     /// Some UTF-8 valid text, with no length limit
     String(String),
 
+    /// A string, with an enforced size limit
+    ///
+    /// While it is possible to encode any data into the provided
+    /// string, but it will be rejected by the diff apply validation
+    /// at runtime.
+    FixedString(String, usize),
+
     /// Simple boolean values (`true` or `false`)
     Bool(bool),
 
-    /// A nested tree object
+    /// A nested tree node object
     Child(Map),
 
     /// Signed 128bit integers
@@ -71,7 +78,6 @@ pub struct Kv {
 }
 
 impl DiffExt for Kv {
-
     /// Apply a key-value diff to this Kv map instance
     fn apply(&mut self, diff: Diff) -> Result<()> {
         match diff {
@@ -156,16 +162,21 @@ fn apply_single_diff() {
 #[test]
 fn apply_multi_diff() {
     let mut kv = Kv::new();
-    let diff = Diff::from(
-        vec![
-            ("hello".into(), DiffSeg::Insert(Value::String("workers".into()))),
-            ("of".into(), DiffSeg::Insert(Value::String("the".into()))),
-            ("world".into(), DiffSeg::Insert(Value::String("you".into()))),
-            ("have".into(), DiffSeg::Insert(Value::String("nothing".into()))),
-            ("to".into(), DiffSeg::Insert(Value::String("lose".into()))),
-            ("but".into(), DiffSeg::Insert(Value::String("your".into()))),
-            ("chains".into(), DiffSeg::Insert(Value::String("!".into()))),
-   ]);
+    let diff = Diff::from(vec![
+        (
+            "hello".into(),
+            DiffSeg::Insert(Value::String("workers".into())),
+        ),
+        ("of".into(), DiffSeg::Insert(Value::String("the".into()))),
+        ("world".into(), DiffSeg::Insert(Value::String("you".into()))),
+        (
+            "have".into(),
+            DiffSeg::Insert(Value::String("nothing".into())),
+        ),
+        ("to".into(), DiffSeg::Insert(Value::String("lose".into()))),
+        ("but".into(), DiffSeg::Insert(Value::String("your".into()))),
+        ("chains".into(), DiffSeg::Insert(Value::String("!".into()))),
+    ]);
 
     kv.apply(diff).unwrap();
     assert_eq!(kv.len(), 7);

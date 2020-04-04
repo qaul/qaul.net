@@ -4,7 +4,7 @@ use crate::{
     crypto::{asym::KeyPair, DetachedKey, Encrypted, EncryptedMap},
     error::{Error, Result},
     meta::users::User,
-    Id,
+    utils::Id,
 };
 use async_std::sync::Arc;
 use serde::{Deserialize, Serialize};

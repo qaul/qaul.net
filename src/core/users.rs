@@ -1,6 +1,6 @@
-//! Users API scope
+//! User management API scope
 
-use crate::{error::Result, Id, Library};
+use crate::{core::Library, error::Result, utils::Id};
 
 /// API scope handler for a single user in a library
 ///

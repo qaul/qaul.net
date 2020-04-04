@@ -1,4 +1,6 @@
-use crate::{data::TagSet, Id, Path};
+use crate::{
+    utils::{Id, Path, TagSet},
+};
 
 pub(crate) struct DeltaBuilder {
     user: Option<Id>,

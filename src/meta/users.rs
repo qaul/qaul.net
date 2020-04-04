@@ -9,7 +9,7 @@ use crate::{
         DetachedKey, Encrypted, EncryptedMap,
     },
     error::{Error, Result},
-    Id,
+    utils::Id,
 };
 use async_std::sync::Arc;
 use serde::{Deserialize, Serialize};

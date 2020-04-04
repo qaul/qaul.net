@@ -1,9 +1,11 @@
 //! Data handling
 
 use crate::{
-    data::{Record, Tag, TagSet, Type},
+    core::Library,
     delta::{DeltaBuilder, DeltaType},
-    Diff, Id, Library, Path, Result, Subscription,
+    error::Result,
+    record::{Record, Type},
+    utils::{Diff, Id, Path, Subscription, Tag, TagSet},
 };
 use async_std::sync::Arc;
 

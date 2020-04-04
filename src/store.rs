@@ -5,11 +5,11 @@ use crate::{
         asym::{KeyPair, SharedKey},
         DetachedKey, Encrypted,
     },
-    data::{Record, TagSet},
     delta::DeltaBuilder,
-    diff::Diff,
+    error::{Error, Result},
     notify::Notify,
-    Error, Id, Path, Result,
+    record::Record,
+    utils::{Diff, Id, Path, TagSet},
 };
 use async_std::sync::Arc;
 use std::collections::{BTreeMap, BTreeSet};

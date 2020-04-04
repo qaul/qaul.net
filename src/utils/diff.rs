@@ -1,17 +1,33 @@
-//! A public API facing diff system by which users can apply a diff
-//! with a lot of changes to a record in one atomic write.
-//!
-//! This file contains some convenient from implementations to make
-//! the public API easier to handle without having to always create a
-//! whole tree of Diff objects
-
-use crate::{data::Value, error::DiffErrs, Error, Result};
+use crate::{
+    error::DiffErrs,
+    error::{Error, Result},
+    record::kv::Value,
+};
 use std::collections::BTreeMap;
 
 pub(crate) type DiffResult<T> = std::result::Result<T, DiffErrs>;
 
 pub(crate) trait DiffExt {
     fn apply(&mut self, diff: Diff) -> Result<()>;
+}
+
+/// The ability to turn custom data structures into Diff objects
+///
+/// Every transaction in alexandria needs to be representable as a
+/// [`Diff`] (see link for details).  To make this easier, implement
+/// this trait.
+pub trait IntoDiff {
+    /// Turn a custom datastructure into an alexandria Diff
+    fn into_diff(&self) -> Diff;
+}
+
+impl<T> From<T> for Diff
+where
+    T: IntoDiff,
+{
+    fn from(t: T) -> Self {
+        t.into_diff()
+    }
 }
 
 /// Encode a single change made to a set of data

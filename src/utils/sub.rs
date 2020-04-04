@@ -1,4 +1,8 @@
-use crate::{api::Query, delta::Delta, notify::Notify, path::Path};
+use crate::{
+    delta::Delta,
+    notify::Notify,
+    utils::{Path, Query},
+};
 use async_std::{
     sync::{channel, Arc, Receiver, RwLock, Sender},
     task,

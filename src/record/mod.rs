@@ -1,19 +1,24 @@
-//! Record data formats and utility types
+//! Data record module
+//!
+//! A data record in alexandria is contained by an encryption wrapper,
+//! meaning that you can only interact with this representation after
+//! passing the `open()?` validation in the API.
+//!
+//! A record can be one of two mappings: a strongly typed key-value
+//! store, commonly named `Kv`, or a raw binary object lazily loaded
+//! from disk, called `Bin`.
+//!
+//! Shared between them is a Header which contains search tags, record
+//! IDs and secret metadata.
 
-mod blob;
-mod kv;
-mod loader;
-mod tag;
+pub mod bin;
+pub mod kv;
 
-pub use self::{
-    blob::Blob,
-    kv::{Kv, Value},
-    tag::{Tag, TagSet},
-};
+use self::{bin::Bin, kv::Kv};
 use crate::{
     crypto::{asym::KeyPair, DetachedKey, Encrypted},
-    diff::{Diff, DiffExt},
-    Id, Result,
+    utils::{Id, Diff, DiffExt, Tag, TagSet},
+    error::Result,
 };
 
 use serde::{Deserialize, Serialize};
@@ -36,7 +41,7 @@ pub(crate) enum Type {
     /// Key-value mapped store
     Kv,
     /// Large binary object
-    Blob,
+    Bin,
 }
 
 /// The secret header is encrypted
@@ -56,14 +61,14 @@ impl DetachedKey<KeyPair> for SecHeader {}
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) enum Body {
     Kv(Kv),
-    Blob(Blob),
+    Bin(Bin),
 }
 
 impl Body {
     fn apply(&mut self, d: Diff) -> Result<()> {
         match self {
             Self::Kv(ref mut kv) => kv.apply(d),
-            Self::Blob(ref mut b) => unimplemented!(),
+            Self::Bin(ref mut b) => unimplemented!(),
         }
     }
 }
@@ -110,7 +115,7 @@ impl Record {
     pub(crate) fn apply(&mut self, diff: Diff) -> Result<()> {
         match self.body.deref_mut()? {
             Body::Kv(kv) => kv.apply(diff),
-            Body::Blob(b) => unimplemented!(),
+            Body::Bin(b) => unimplemented!(),
         }
     }
 
