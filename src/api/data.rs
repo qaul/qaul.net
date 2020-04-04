@@ -2,6 +2,7 @@
 
 use crate::{
     data::{Record, Tag, TagSet, Type},
+    delta::{DeltaBuilder, DeltaType},
     Diff, Id, Library, Path, Result,
 };
 use async_std::sync::Arc;
@@ -55,13 +56,17 @@ impl<'a> Data<'a> {
         T: Into<TagSet>,
         D: Into<Diff>,
     {
+        let mut db = DeltaBuilder::new(self.id, DeltaType::Insert);
+
         let mut store = self.inner.store.write().await;
-        store.insert(self.id, &path, tags.into(), data.into())
+        store.insert(&mut db, self.id, &path, tags.into(), data.into())
     }
 
     pub async fn delete(&self, path: Path) -> Result<()> {
+        let mut db = DeltaBuilder::new(self.id, DeltaType::Delete);
+
         let mut store = self.inner.store.write().await;
-        store.destroy(self.id, &path)
+        store.destroy(&mut db, self.id, &path)
     }
 
     /// Update a record in-place
@@ -69,8 +74,10 @@ impl<'a> Data<'a> {
     where
         D: Into<Diff>,
     {
+        let mut db = DeltaBuilder::new(self.id, DeltaType::Delete);
+
         let mut store = self.inner.store.write().await;
-        store.update(self.id, &path, diff.into())
+        store.update(&mut db, self.id, &path, diff.into())
     }
 
     /// Query the database with a specific query object

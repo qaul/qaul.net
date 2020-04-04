@@ -5,8 +5,6 @@
 //! the public API easier to handle without having to always create a
 //! whole tree of Diff objects
 
-pub use crate::delta::DeltaData as DiffSeg;
-
 use crate::{data::Value, error::DiffErrs, Error, Result};
 use std::collections::BTreeMap;
 
@@ -14,6 +12,16 @@ pub(crate) type DiffResult<T> = std::result::Result<T, DiffErrs>;
 
 pub(crate) trait DiffExt {
     fn apply(&mut self, diff: Diff) -> Result<()>;
+}
+
+/// Encode a single change made to a set of data
+pub enum DiffSeg<T> {
+    /// Creating a new record
+    Insert(T),
+    /// Updating an existing record in place
+    Update(T),
+    /// Deleting a record
+    Delete,
 }
 
 /// An atomic set of changes applied to a record

@@ -36,12 +36,14 @@ pub mod api;
 mod builder;
 pub mod data;
 mod error;
+mod sub;
 
 pub use crate::{
     builder::Builder,
     diff::{Diff, DiffSeg},
     error::{Error, Result},
     path::Path,
+    sub::Subscription,
 };
 
 /// Primary identifier type for records and users

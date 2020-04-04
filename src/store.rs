@@ -6,6 +6,7 @@ use crate::{
         DetachedKey, Encrypted,
     },
     data::{Record, TagSet},
+    delta::DeltaBuilder,
     diff::Diff,
     notify::Notify,
     Error, Id, Path, Result,
@@ -51,6 +52,7 @@ impl Store {
     /// This operation will fail if the path already exists
     pub(crate) fn insert(
         &mut self,
+        db: &mut DeltaBuilder,
         id: Option<Id>,
         path: &Path,
         tags: TagSet,
@@ -61,10 +63,14 @@ impl Store {
             return Err(Error::PathExists { path: path.into() });
         }
 
+        db.tags(&tags);
+        db.path(&path);
+
         // Create a record
         let rec = Record::create(tags, diff)?;
         let rec_id = rec.header.id;
         let record = Notify::new(Encrypted::new(Arc::new(rec)));
+        db.rec_id(rec_id);
 
         self.tree_mut(id).insert(path.clone(), record);
         self.wake_tree(id, path);
@@ -72,27 +78,47 @@ impl Store {
         Ok(rec_id)
     }
 
-    pub(crate) fn destroy(&mut self, id: Option<Id>, path: &Path) -> Result<()> {
+    pub(crate) fn destroy(
+        &mut self,
+        db: &mut DeltaBuilder,
+        id: Option<Id>,
+        path: &Path,
+    ) -> Result<()> {
         // Check if the path exists already
         if !self.tree_mut(id).contains_key(path) {
             return Err(Error::NoSuchPath { path: path.into() });
         }
 
+        db.path(&path);
+
         self.wake_tree(id, path);
-        self.tree_mut(id).remove(path);
+        if let Ok(rec) = self.tree_mut(id).remove(path).unwrap().deref() {
+            db.rec_id(rec.header.id);
+        }
+
         Ok(())
     }
 
-    pub(crate) fn update(&mut self, id: Option<Id>, path: &Path, diff: Diff) -> Result<()> {
+    pub(crate) fn update(
+        &mut self,
+        db: &mut DeltaBuilder,
+        id: Option<Id>,
+        path: &Path,
+        diff: Diff,
+    ) -> Result<()> {
         // Check that the path actually exists
         if !self.tree_mut(id).contains_key(path) {
             return Err(Error::NoSuchPath { path: path.into() });
         }
 
+        db.path(&path);
+
         // Make a copy of the underlying record
         let mut not: Notify<_> = self.tree_mut(id).remove(path).unwrap();
         let arc: &Arc<_> = not.deref()?;
         let mut rec: Record = (**arc).clone();
+
+        db.rec_id(rec.header.id);
 
         // Apply changes
         rec.apply(diff)?;
@@ -146,7 +172,11 @@ impl Store {
 
 #[test]
 fn store_insert() {
-    use crate::{data::Value, diff::DiffSeg};
+    use crate::{
+        data::Value,
+        delta::{DeltaBuilder, DeltaType},
+        diff::DiffSeg,
+    };
 
     let id = Id::random();
     let path = Path::from("/test:bob");
@@ -156,8 +186,9 @@ fn store_insert() {
         DiffSeg::Insert(Value::String("world".into())),
     ));
 
+    let mut db = DeltaBuilder::new(Some(id), DeltaType::Insert);
     let mut store = Store::new();
-    let rec_id = store.insert(Some(id), &path, tags, diff).unwrap();
+    let rec_id = store.insert(&mut db, Some(id), &path, tags, diff).unwrap();
 
     assert_eq!(store.usrd.get(&id).unwrap().len(), 1);
     assert_eq!(store.shared.len(), 0);
@@ -178,7 +209,11 @@ fn store_insert() {
 
 #[test]
 fn store_and_get() {
-    use crate::{data::Value, diff::DiffSeg};
+    use crate::{
+        data::Value,
+        delta::{DeltaBuilder, DeltaType},
+        diff::DiffSeg,
+    };
 
     let id = Id::random();
     let path = Path::from("/test:bob");
@@ -188,15 +223,20 @@ fn store_and_get() {
         DiffSeg::Insert(Value::String("world".into())),
     ));
 
+    let mut db = DeltaBuilder::new(Some(id), DeltaType::Insert);
     let mut store = Store::new();
-    let rec_id = store.insert(Some(id), &path, tags, diff).unwrap();
+    let rec_id = store.insert(&mut db, Some(id), &path, tags, diff).unwrap();
 
     assert_eq!(store.get_path(Some(id), &path).unwrap().header.id, rec_id);
 }
 
 #[test]
 fn store_and_update() {
-    use crate::{data::Value, diff::DiffSeg};
+    use crate::{
+        data::Value,
+        delta::{DeltaBuilder, DeltaType},
+        diff::DiffSeg,
+    };
 
     let id = Id::random();
     let path = Path::from("/test:bob");
@@ -206,8 +246,9 @@ fn store_and_update() {
         DiffSeg::Insert(Value::String("world".into())),
     ));
 
+    let mut db = DeltaBuilder::new(Some(id), DeltaType::Insert);
     let mut store = Store::new();
-    let rec_id = store.insert(Some(id), &path, tags, diff).unwrap();
+    let rec_id = store.insert(&mut db, Some(id), &path, tags, diff).unwrap();
     assert_eq!(
         store
             .usrd
@@ -227,7 +268,8 @@ fn store_and_update() {
         DiffSeg::Insert(Value::String("mondo".into())),
     ));
 
-    store.update(Some(id), &path, diff2).unwrap();
+    let mut db = DeltaBuilder::new(Some(id), DeltaType::Update);
+    store.update(&mut db, Some(id), &path, diff2).unwrap();
 
     assert_eq!(store.usrd.get(&id).unwrap().len(), 1);
     assert_eq!(
@@ -247,7 +289,11 @@ fn store_and_update() {
 
 #[test]
 fn store_and_delete() {
-    use crate::{data::Value, diff::DiffSeg};
+    use crate::{
+        data::Value,
+        delta::{DeltaBuilder, DeltaType},
+        diff::DiffSeg,
+    };
 
     let id = Id::random();
     let path = Path::from("/test:bob");
@@ -258,7 +304,8 @@ fn store_and_delete() {
     ));
 
     let mut store = Store::new();
-    let rec_id = store.insert(Some(id), &path, tags, diff).unwrap();
+    let mut db = DeltaBuilder::new(Some(id), DeltaType::Insert);
+    let rec_id = store.insert(&mut db, Some(id), &path, tags, diff).unwrap();
     assert_eq!(
         store
             .usrd
@@ -273,6 +320,7 @@ fn store_and_delete() {
         1
     );
 
-    store.destroy(Some(id), &path).unwrap();
+    let mut db = DeltaBuilder::new(Some(id), DeltaType::Delete);
+    store.destroy(&mut db, Some(id), &path).unwrap();
     assert_eq!(store.usrd.get(&id).unwrap().len(), 0);
 }

@@ -41,4 +41,4 @@ mod users;
 pub use users::Users;
 
 mod data;
-pub use data::Data;
+pub use data::{Data, Query};
