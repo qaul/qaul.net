@@ -6,6 +6,9 @@ pub use data::Data as DataApi;
 mod users;
 pub use users::Users as UsersApi;
 
+mod builder;
+pub use builder::Builder;
+
 use crate::{
     dir::Dirs,
     error::Result,
@@ -15,7 +18,7 @@ use crate::{
 };
 use async_std::sync::{Arc, RwLock};
 
-/// memory-representation In of an alexandria storage library
+/// In-memory representation  of an alexandria database
 ///
 /// Refer to `Builder` on how to most easily construct an Alexandria
 /// instance.  All actions (both actual and cached) are by default

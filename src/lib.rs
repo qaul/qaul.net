@@ -22,6 +22,7 @@
 //! on-disk representation. Don't burn your data.
 #![allow(dead_code, unused_imports, unused_variables)]
 
+pub(crate) mod core;
 pub(crate) mod crypto;
 pub(crate) mod delta;
 pub(crate) mod dir;
@@ -30,7 +31,8 @@ pub(crate) mod notify;
 pub(crate) mod store;
 pub(crate) mod wire;
 
-pub mod core;
+pub use crate::core::{Builder, DataApi, Library, UsersApi};
+
 pub mod error;
 pub mod record;
 pub mod utils;

@@ -1,4 +1,6 @@
-use crate::{dir::Dirs, error::Result, meta::users::UserTable, store::Store, sub::SubHub, Library};
+use crate::{
+    dir::Dirs, error::Result, meta::users::UserTable, store::Store, utils::SubHub, Library,
+};
 use async_std::sync::{Arc, RwLock};
 
 /// A utility builder to construct the Alexandria library
