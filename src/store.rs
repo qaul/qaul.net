@@ -173,9 +173,9 @@ impl Store {
 #[test]
 fn store_insert() {
     use crate::{
-        data::Value,
+        record::kv::Value,
         delta::{DeltaBuilder, DeltaType},
-        diff::DiffSeg,
+        utils::DiffSeg,
     };
 
     let id = Id::random();
@@ -210,9 +210,9 @@ fn store_insert() {
 #[test]
 fn store_and_get() {
     use crate::{
-        data::Value,
+        record::kv::Value,
         delta::{DeltaBuilder, DeltaType},
-        diff::DiffSeg,
+        utils::DiffSeg,
     };
 
     let id = Id::random();
@@ -233,9 +233,9 @@ fn store_and_get() {
 #[test]
 fn store_and_update() {
     use crate::{
-        data::Value,
+        record::kv::Value,
         delta::{DeltaBuilder, DeltaType},
-        diff::DiffSeg,
+        utils::DiffSeg,
     };
 
     let id = Id::random();
@@ -290,9 +290,9 @@ fn store_and_update() {
 #[test]
 fn store_and_delete() {
     use crate::{
-        data::Value,
+        record::kv::Value,
         delta::{DeltaBuilder, DeltaType},
-        diff::DiffSeg,
+        utils::DiffSeg,
     };
 
     let id = Id::random();

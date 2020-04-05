@@ -121,7 +121,7 @@ impl Subscription {
 }
 
 #[cfg(test)]
-use crate::data::TagSet;
+use crate::utils::TagSet;
 
 #[cfg(test)]
 struct SubTest {

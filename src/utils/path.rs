@@ -26,7 +26,7 @@ use serde::{Deserialize, Serialize};
 /// strings:
 ///
 /// ```rust
-/// # use alexandria::Path;
+/// # use alexandria::utils::Path;
 /// let _: Path = "/test:data".into();
 /// ```
 ///

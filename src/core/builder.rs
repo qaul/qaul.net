@@ -2,6 +2,7 @@ use crate::{
     dir::Dirs, error::Result, meta::users::UserTable, store::Store, utils::SubHub, Library,
 };
 use async_std::sync::{Arc, RwLock};
+use std::path::Path;
 
 /// A utility builder to construct the Alexandria library
 #[derive(Default)]
@@ -20,11 +21,10 @@ impl Builder {
     /// This will act as the root metadata store.  On multi-user
     /// devices it needs to be a directory that's accessibly from the
     /// daemon that owns the alexandria scope.
-    pub fn offset(self, o: String) -> Self {
-        Self {
-            offset: o.into(),
-            ..self
-        }
+    pub fn offset<'tmp, P: Into<&'tmp Path>>(self, offset: P) -> Self {
+        let p: &Path = offset.into();
+        let offset = p.to_str().map(|s| s.to_string());
+        Self { offset, ..self }
     }
 
     /// Consume the builder and create a Library
