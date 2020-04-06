@@ -11,10 +11,10 @@ async fn main() {
     r2.add_endpoint(ep2).await;
     let user1 = ratman::Identity::random();
     let user2 = ratman::Identity::random();
-    r1.add_user(user1);
-    r2.add_user(user2);
-    r1.online(user1).await;
-    r2.online(user2).await;
+    r1.add_user(user1).await.unwrap();
+    r2.add_user(user2).await.unwrap();
+    r1.online(user1).await.unwrap();
+    r2.online(user2).await.unwrap();
     println!("Users online.");
 
     r1.send(ratman::Message {
@@ -23,6 +23,6 @@ async fn main() {
         recipient: ratman::Recipient::Flood,
         payload: Vec::from("Hello, world!".as_bytes()),
         sign: vec![]
-    }).await;
+    }).await.expect("Could not send message!");
     println!("Message sent.");
 }

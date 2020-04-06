@@ -4,6 +4,9 @@
 mod socket;
 pub(crate) use socket::Socket;
 
+mod addrs;
+pub(crate) use addrs::{Peer, AddrTable};
+
 use async_std::{sync::Arc, task};
 use async_trait::async_trait;
 use netmod::{Endpoint as EndpointExt, Frame, Recipient, Result, Target};
@@ -35,7 +38,7 @@ impl EndpointExt for Endpoint {
 
     async fn send(&self, frame: Frame, _target: Target) -> Result<()> {
         self.socket
-            .send(frame, &self.server)
+            .send(&frame, &self.server)
             .await;
         Ok(())
     }
