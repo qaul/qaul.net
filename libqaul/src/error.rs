@@ -116,7 +116,7 @@ impl Display for Error {
             Self::ServiceExists => "A sevice with this name already exists",
             Self::CommFault => "Some internal components failed to communicate",
         };
-        write!(f, "error: {}", msg)
+        write!(f, "{}", msg)
     }
 }
 
