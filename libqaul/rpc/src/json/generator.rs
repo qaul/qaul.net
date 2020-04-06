@@ -16,12 +16,18 @@ impl From<(Envelope, RequestEnv)> for ResponseEnv {
         // Turn the response into a map object
         let mut data: Map<String, JsonValue> = match data {
             EnvelopeType::Response(response) => match serde_json::to_value(response).unwrap() {
-                JsonValue::Object(obj) => obj,
-                _ => unreachable!(),
+                JsonValue::Object(mut obj) => {
+                    obj
+                },
+                JsonValue::String(s) => {
+                    Some(("type".into(), "success".into()))
+                        .into_iter()
+                        .collect()
+                }
+                s => panic!("Unexpected value: {:?}", s),
             },
-            _ => unreachable!(),
+            e => panic!("Expected response envelope, got request"),
         };
-        data.remove("type");
 
         // And build the final response envelope
         ResponseEnv {
@@ -40,6 +46,7 @@ impl From<(Envelope, RequestEnv)> for ResponseEnv {
 fn get_auth() {
     use libqaul::{users::UserAuth, Identity};
     use crate::api::{Envelope, Response};
+    use crate::json::{RequestEnv, ResponseEnv};
 
     let ua = UserAuth(Identity::random(), "my-token-is-great".into());
     let data = EnvelopeType::Response(Response::Auth(ua));
@@ -81,4 +88,58 @@ fn user_list() {
     let resp = Response::User(users);
 
     println!("{}", serde_json::to_string_pretty(&resp).unwrap());
+}
+
+#[test]
+fn user_delete() {
+    use libqaul::Qaul;
+    use async_std::task::block_on;
+    use crate::{Envelope, Responder, EnvelopeType};
+    use crate::json::{RequestEnv, JsonAuth};
+    use std::sync::Arc;
+    use qaul_chat::Chat;
+    use qaul_voices::Voices;
+
+    let qaul = Arc::new(Qaul::dummy());
+    let chat = Chat::new(qaul.clone()).unwrap();
+    let voices = Voices::new(qaul.clone()).unwrap();
+    let auth = block_on(qaul.users().create("blep")).unwrap();
+    assert_eq!(qaul.users().list().len(), 1);
+
+    let responder = Responder {
+        qaul: qaul.clone(),
+        chat: chat,
+        voices: voices,
+    };
+
+    let req_env = RequestEnv {
+        id: "bapples".into(),
+        auth: Some(JsonAuth {
+            id: auth.0.clone(),
+            token: auth.1.clone(),
+        }),
+        page: None,
+        method: "delete".into(),
+        kind: "users".into(),
+        data: vec![("purge".into(), true.into())]
+            .into_iter()
+            .collect(),
+    };
+
+    let Envelope { id, data } = req_env.clone().into();
+
+    let req = match data {
+        EnvelopeType::Request(req) => req,
+        _ => panic!(),
+    };
+
+    let resp = block_on(responder.respond(req));
+    let env = Envelope {
+        id,
+        data: EnvelopeType::Response(resp),
+    };
+
+    let resp_env: ResponseEnv = (env, req_env).into();
+
+    assert_eq!(qaul.users().list().len(), 0);
 }
