@@ -1,6 +1,6 @@
 use crate::{
     json::{JsonAuth, JsonMap, RequestEnv},
-    Envelope, EnvelopeType, Request,
+    Envelope, Request,
 };
 use libqaul::users::UserAuth;
 use serde::de::DeserializeOwned;
@@ -40,13 +40,7 @@ fn de_json<'env, T: DeserializeOwned>(mut data: JsonMap, auth: AuthInject<'env>)
         .expect(&format!("Failed to parse websocket payload `{:#?}`", &data))
 }
 
-/// Wrap a request type
-#[inline(always)]
-fn req(inner: Request) -> EnvelopeType {
-    EnvelopeType::Request(inner)
-}
-
-impl From<RequestEnv> for Envelope {
+impl From<RequestEnv> for Envelope<Request> {
     fn from(je: RequestEnv) -> Self {
         let RequestEnv {
             id,
@@ -68,41 +62,41 @@ impl From<RequestEnv> for Envelope {
             data: match (kind.as_str(), method.as_str()) {
                 // chat service message functions
                 #[cfg(features = "chat")]
-                ("chat-messages", "next") => req(Request::ChatMsgNext(de_json(data, auth))),
+                ("chat-messages", "next") => Request::ChatMsgNext(de_json(data, auth)),
                 // #[cfg(features = "chat")]
-                // ("chat-messages", "subscribe") => req(Request::ChatMsgSub(de_json(data, auth))),
+                // ("chat-messages", "subscribe") => Request::ChatMsgSub(de_json(data, auth)),
                 #[cfg(features = "chat")]
-                ("chat-messages", "create") => req(Request::ChatMsgSend(de_json(data, auth))),
+                ("chat-messages", "create") => Request::ChatMsgSend(de_json(data, auth)),
                 #[cfg(features = "chat")]
-                ("chat-messages", "query") => req(Request::ChatMsgQuery(de_json(data, auth))),
+                ("chat-messages", "query") => Request::ChatMsgQuery(de_json(data, auth)),
 
                 // chat service room management
                 #[cfg(features = "chat")]
-                ("chat-rooms", "list") => req(Request::ChatRoomList(de_json(data, auth))),
+                ("chat-rooms", "list") => Request::ChatRoomList(de_json(data, auth)),
                 #[cfg(features = "chat")]
-                ("chat-rooms", "get") => req(Request::ChatRoomGet(de_json(data, auth))),
+                ("chat-rooms", "get") => Request::ChatRoomGet(de_json(data, auth)),
                 #[cfg(features = "chat")]
-                ("chat-rooms", "create") => req(Request::ChatRoomCreate(de_json(data, auth))),
+                ("chat-rooms", "create") => Request::ChatRoomCreate(de_json(data, auth)),
                 #[cfg(features = "chat")]
-                ("chat-rooms", "modify") => req(Request::ChatRoomModify(de_json(data, auth))),
+                ("chat-rooms", "modify") => Request::ChatRoomModify(de_json(data, auth)),
                 #[cfg(features = "chat")]
-                ("chat-rooms", "delete") => req(Request::ChatRoomDelete(de_json(data, auth))),
+                ("chat-rooms", "delete") => Request::ChatRoomDelete(de_json(data, auth)),
 
                 // libqaul contact functions
-                ("contacts", "list") => req(Request::ContactAll(de_json(data, auth))),
-                ("contacts", "get") => req(Request::ContactGet(de_json(data, auth))),
-                ("contacts", "query") => req(Request::ContactQuery(de_json(data, auth))),
-                ("contacts", "modify") => req(Request::ContactQuery(de_json(data, auth))),
+                ("contacts", "list") => Request::ContactAll(de_json(data, auth)),
+                ("contacts", "get") => Request::ContactGet(de_json(data, auth)),
+                ("contacts", "query") => Request::ContactQuery(de_json(data, auth)),
+                ("contacts", "modify") => Request::ContactQuery(de_json(data, auth)),
 
                 // libqaul user functions
-                ("users", "list") => req(Request::UserList(de_json(data, auth))),
-                ("users", "create") => req(Request::UserCreate(de_json(data, auth))),
-                ("users", "delete") => req(Request::UserDelete(de_json(data, auth))),
-                ("users", "repass") => req(Request::UserChangePw(de_json(data, auth))),
-                ("users", "login") => req(Request::UserLogin(de_json(data, auth))),
-                ("users", "logout") => req(Request::UserLogout(de_json(data, auth))),
-                ("users", "get") => req(Request::UserGet(de_json(data, auth))),
-                ("users", "modify") => req(Request::UserUpdate(de_json(data, auth))),
+                ("users", "list") => Request::UserList(de_json(data, auth)),
+                ("users", "create") => Request::UserCreate(de_json(data, auth)),
+                ("users", "delete") => Request::UserDelete(de_json(data, auth)),
+                ("users", "repass") => Request::UserChangePw(de_json(data, auth)),
+                ("users", "login") => Request::UserLogin(de_json(data, auth)),
+                ("users", "logout") => Request::UserLogout(de_json(data, auth)),
+                ("users", "get") => Request::UserGet(de_json(data, auth)),
+                ("users", "modify") => Request::UserUpdate(de_json(data, auth)),
                 (kind, method) => panic!(format!("Unknown parse tuple: ({}, {})", kind, method)),
             },
         }
@@ -146,5 +140,5 @@ fn envelope_chat_user_list() {
                     "method": "list" }"#;
 
     let je: RequestEnv = serde_json::from_str(&json).expect("JsonEnvelope failed");
-    let _env: Envelope = je.into();
+    let _env: Envelope<Request> = je.into();
 }

@@ -2,7 +2,7 @@
 
 use libqaul_rpc::{
     json::{RequestEnv, ResponseEnv},
-    Envelope, EnvelopeType, Responder,
+    Envelope, Responder,
 };
 
 use async_std::{sync::Arc, task};
@@ -22,12 +22,7 @@ impl HttpServer {
                 let hopefully_json: String = dbg!(r.body_string().await).unwrap();
                 let req_env: RequestEnv =
                     serde_json::from_str(hopefully_json.as_str()).expect("Malformed json envelope");
-                let Envelope { id, data } = req_env.clone().into();
-
-                let req = match data {
-                    EnvelopeType::Request(req) => req,
-                    _ => unreachable!(), // Obviously possibly but fuck you
-                };
+                let Envelope { id, data: req } = req_env.clone().into();
 
                 // Call into libqaul via the rpc utilities
                 let responder: Arc<_> = Arc::clone(r.state());
@@ -35,7 +30,7 @@ impl HttpServer {
 
                 let env = Envelope {
                     id,
-                    data: EnvelopeType::Response(resp),
+                    data: resp,
                 };
 
                 // Build the reply envelope

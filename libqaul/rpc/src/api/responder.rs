@@ -1,6 +1,6 @@
 //!
 
-use crate::{EnvelopeType, QaulExt, QaulRpc, Request, Response};
+use crate::{QaulExt, QaulRpc, Request, Response};
 use async_std::{
     sync::Arc,
 };

@@ -26,22 +26,9 @@ use std::{error::Error, fmt::Display};
 /// responses.  This is what the request ID is for, and should be set,
 /// even on systems that don't have this problem.
 #[derive(Clone, Serialize, Deserialize)]
-pub struct Envelope {
+pub struct Envelope<D> {
     pub id: String,
-    pub data: EnvelopeType,
-}
-
-/// A generic wrapper for requests and responses
-///
-/// In the rpc layer, the return data is then namespaced as "request"
-/// and "response", which should be used to disambiguate data on the
-/// wire.
-#[derive(Clone, Serialize, Deserialize)]
-pub enum EnvelopeType {
-    /// A libqaul request
-    Request(Request),
-    /// A libqaul response
-    Response(Response),
+    pub data: D,
 }
 
 /// A wrapper enum to disambiguate request types in the envelope.

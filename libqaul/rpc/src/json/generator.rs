@@ -2,31 +2,28 @@
 
 use crate::{
     json::{RequestEnv, ResponseEnv},
-    Envelope, EnvelopeType,
+    Envelope, Response,
 };
 use serde_json::{self, Map, Value as JsonValue};
 
-impl From<(Envelope, RequestEnv)> for ResponseEnv {
-    fn from(env: (Envelope, RequestEnv)) -> ResponseEnv {
+impl From<(Envelope<Response>, RequestEnv)> for ResponseEnv {
+    fn from(env: (Envelope<Response>, RequestEnv)) -> ResponseEnv {
         let Envelope { id, data } = env.0;
         let RequestEnv {
             auth, method, kind, ..
         } = env.1;
 
         // Turn the response into a map object
-        let mut data: Map<String, JsonValue> = match data {
-            EnvelopeType::Response(response) => match serde_json::to_value(response).unwrap() {
-                JsonValue::Object(mut obj) => {
-                    obj
-                },
-                JsonValue::String(s) => {
-                    Some(("type".into(), "success".into()))
-                        .into_iter()
-                        .collect()
-                }
-                s => panic!("Unexpected value: {:?}", s),
+        let mut data: Map<String, JsonValue> = match serde_json::to_value(data).unwrap() {
+            JsonValue::Object(mut obj) => {
+                obj
             },
-            e => panic!("Expected response envelope, got request"),
+            JsonValue::String(s) => {
+                Some(("type".into(), "success".into()))
+                    .into_iter()
+                    .collect()
+            }
+            s => panic!("Unexpected value: {:?}", s),
         };
 
         // And build the final response envelope
@@ -49,7 +46,7 @@ fn get_auth() {
     use crate::json::{RequestEnv, ResponseEnv};
 
     let ua = UserAuth(Identity::random(), "my-token-is-great".into());
-    let data = EnvelopeType::Response(Response::Auth(ua));
+    let data = Response::Auth(ua);
 
     let env = Envelope {
         id: "request-id".into(),
@@ -94,7 +91,7 @@ fn user_list() {
 fn user_delete() {
     use libqaul::Qaul;
     use async_std::task::block_on;
-    use crate::{Envelope, Responder, EnvelopeType};
+    use crate::{Envelope, Responder};
     use crate::json::{RequestEnv, JsonAuth};
     use std::sync::Arc;
     use qaul_chat::Chat;
@@ -128,15 +125,10 @@ fn user_delete() {
 
     let Envelope { id, data } = req_env.clone().into();
 
-    let req = match data {
-        EnvelopeType::Request(req) => req,
-        _ => panic!(),
-    };
-
-    let resp = block_on(responder.respond(req));
+    let resp = block_on(responder.respond(data));
     let env = Envelope {
         id,
-        data: EnvelopeType::Response(resp),
+        data: resp,
     };
 
     let resp_env: ResponseEnv = (env, req_env).into();

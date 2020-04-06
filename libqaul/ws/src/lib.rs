@@ -3,7 +3,7 @@
 use libqaul::Qaul;
 use libqaul_rpc::{
     json::{RequestEnv, ResponseEnv},
-    Envelope, EnvelopeType, Responder,
+    Envelope, Responder,
 };
 // TODO: these will break if we turn features off
 use qaul_chat::Chat;
@@ -81,18 +81,13 @@ impl WsServer {
         // Read messages from this stream
         while let Some(Ok(Message::Text(msg))) = rx.next().await {
             let req_env: RequestEnv = serde_json::from_str(&msg).expect("Malformed json envelope");
-            let Envelope { id, data } = req_env.clone().into();
-
-            let req = match data {
-                EnvelopeType::Request(req) => req,
-                _ => unreachable!(), // Obviously possibly but fuck you
-            };
+            let Envelope { id, data: req } = req_env.clone().into();
 
             // Call into libqaul via the rpc utilities
             let resp = self.rpc.respond(req).await;
             let env = Envelope {
                 id,
-                data: EnvelopeType::Response(resp),
+                data: resp,
             };
 
             // Build the reply envelope

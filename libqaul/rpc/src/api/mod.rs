@@ -12,7 +12,7 @@ pub mod chat;
 pub mod voices;
 
 mod envelope;
-pub use envelope::{Envelope, EnvelopeType, Request, Response};
+pub use envelope::{Envelope, Request, Response};
 
 mod responder;
 pub use responder::Responder;
