@@ -9,24 +9,28 @@ pub(crate) use addrs::{Peer, AddrTable};
 
 use async_std::{sync::Arc, task};
 use async_trait::async_trait;
-use netmod::{Endpoint as EndpointExt, Frame, Recipient, Result, Target};
+use netmod::{Endpoint as EndpointExt, Frame, Recipient, Result, Target, Error};
 
 #[derive(Clone)]
 pub struct Endpoint {
     socket: Arc<Socket>,
-    server: String
+    server: Option<String>
 }
 
 impl Endpoint {
     /// Create a new endpoint binding the given address that connects to a given central
     /// server
-    pub fn spawn(addr: &str, server: &str) -> Self {
+    pub fn spawn(addr: &str) -> Self {
         task::block_on(async move {
             Self {
                 socket: Socket::with_addr(addr).await,
-                server: server.to_string()
+                server: None
             }
         })
+    }
+
+    pub fn set_server(&mut self, server: &str) {
+        self.server = Some(server.to_string());
     }
 }
 
@@ -37,8 +41,12 @@ impl EndpointExt for Endpoint {
     }
 
     async fn send(&self, frame: Frame, _target: Target) -> Result<()> {
+        let server_addr = match self.server.clone() {
+            Some(v) => v,
+            None => { return Err(Error::NotSupported); }
+        };
         self.socket
-            .send(&frame, &self.server)
+            .send(&frame, server_addr)
             .await;
         Ok(())
     }

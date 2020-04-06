@@ -69,9 +69,10 @@ impl Socket {
                 let mut buf = vec![0; 8192];
 
                 {
-                    println!("overlay incoming handler waiting");
                     let socket = arc.sock.write().await;
-                    println!("overlay incoming handler got lock");
+
+                    // recieving is lower priority than sending, so time out and just wait until later
+                    // if need be
                     match socket.recv_from(&mut buf).timeout(Duration::from_millis(10)).await {
                         Ok(v) => match v {
                             Ok((_, peer)) => {
@@ -85,7 +86,6 @@ impl Socket {
                             }
                         },
                         Err(_) => {
-                            println!("incoming_handle timed out");
                             task::sleep(Duration::from_millis(10));
                         }
                     }

@@ -2,8 +2,10 @@ use ratman_netmod::Endpoint;
 
 #[async_std::main]
 async fn main() {
-    let ep1 = netmod_overlay::Endpoint::spawn("0.0.0.0:31337", "127.0.0.1:20122");
-    let ep2 = netmod_overlay::Endpoint::spawn("0.0.0.0:31338", "127.0.0.1:20122");
+    let mut ep1 = netmod_overlay::Endpoint::spawn("0.0.0.0:31337");
+    let mut ep2 = netmod_overlay::Endpoint::spawn("0.0.0.0:31338");
+    ep1.set_server("127.0.0.1:20122");
+    ep2.set_server("127.0.0.1:20122");
     let r1 = ratman::Router::new();
     let r2 = ratman::Router::new();
     println!("Routers spawned.");
@@ -24,5 +26,18 @@ async fn main() {
         payload: Vec::from("Hello, world!".as_bytes()),
         sign: vec![]
     }).await.expect("Could not send message!");
-    println!("Message sent.");
+
+    println!("First message sent!");
+    
+    r2.send(ratman::Message {
+        id: ratman::Identity::random(),
+        sender: user1,
+        recipient: ratman::Recipient::Flood,
+        payload: Vec::from("Hello, nerd!".as_bytes()),
+        sign: vec![]
+    }).await.expect("Could not send message!");
+
+    println!("Messages sent.");
+
+    println!("{:?}", r2.next().await);
 }
