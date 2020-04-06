@@ -13,8 +13,10 @@ curl -i  \
         \"kind\": \"users\", 
         \"method\": \"modify\",
         \"data\": {
-            \"display_name\": \"testuser\",
-            \"real_name\": \"Test User\"
+            \"display_name\": {
+				\"set\": \"testuser\"
+			},
+            \"real_name\": \"unset\"
         },
         \"auth\": {
             \"id\":\"$QAUL_ID\",
