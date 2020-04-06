@@ -61,7 +61,7 @@ pub enum Error {
     NoContact,
     /// Invalid search query
     InvalidQuery,
-    /// Na data was returned for the provided query
+    /// No data was returned for the provided query
     NoData,
     /// Invalid payload (probably too big)
     InvalidPayload,
@@ -98,7 +98,25 @@ impl Error {
 
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.description(),)
+        let msg = match self { 
+            Self::NotAuthorised => "Not authorised to perform this action",
+            Self::NoUser => "The desired user was not known",
+            Self::ContactExists => "The provided contact already exists",
+            Self::NoContact => "The desired contact does not exist",
+            Self::InvalidQuery => "Invalid search query",
+            Self::NoData => "No data was returned for the provided query",
+            Self::InvalidPayload => "Invalid payload (probably too big)",
+            Self::CallbackTimeout => "A function callback timed out",
+            Self::NoSign => "Signature with an unknown public key",
+            Self::BadSign => "Fraudulent signature for a known public key",
+            Self::NetworkFault => "A generic networking error occured",
+            Self::NoRoute => "Failed to find a route to this user",
+            Self::BadSerialise => "Some serialisation action failed",
+            Self::NoService => "No such service was found",
+            Self::ServiceExists => "A sevice with this name already exists",
+            Self::CommFault => "Some internal components failed to communicate",
+        };
+        write!(f, "error: {}", msg)
     }
 }
 
