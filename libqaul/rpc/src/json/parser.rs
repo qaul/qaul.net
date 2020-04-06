@@ -103,7 +103,7 @@ impl From<RequestEnv> for Envelope {
                 ("users", "logout") => req(Request::UserLogout(de_json(data, auth))),
                 ("users", "get") => req(Request::UserGet(de_json(data, auth))),
                 ("users", "modify") => req(Request::UserUpdate(de_json(data, auth))),
-                (_, _) => unreachable!(), // Replace with transmit error
+                (kind, method) => panic!(format!("Unknown parse tuple: ({}, {})", kind, method)),
             },
         }
     }
