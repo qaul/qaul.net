@@ -1,5 +1,5 @@
 use serde::{
-    de::{Error, SeqAccess, Visitor},
+    de::{Error, SeqAccess, MapAccess, Visitor},
     ser::SerializeStruct,
     Deserialize, Deserializer, Serialize, Serializer,
 };
@@ -165,6 +165,41 @@ impl<'de> Deserialize<'de> for Tag {
                 Ok(Tag { key, val })
             }
 
+            // json will try to deserialize structs as maps
+            fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>
+            {
+                let mut key: Option<String> = None;
+                let mut value: Option<HumanVec> = None;
+
+                while let Some(k) = map.next_key::<String>()? {
+                    match k.as_str() {
+                        "key" => {
+                            if key.is_some() {
+                                return Err(Error::duplicate_field("key"));
+                            }
+                            key = Some(map.next_value()?);
+                        },
+                        "val" => {
+                            if value.is_some() {
+                                return Err(Error::duplicate_field("val"));
+                            }
+                            value = Some(map.next_value()?);
+                        },
+                        f => {
+                            static FIELDS: &'static [&'static str] = &["key", "val"];
+                            return Err(Error::unknown_field(f, FIELDS));
+                        },
+                    }
+                }
+
+                let key = key.ok_or_else(|| Error::missing_field("key"))?;
+                let value = value.ok_or_else(|| Error::missing_field("val"))?;
+
+                Ok(Tag { key, val: value.0 })
+            }
+
             fn expecting(&self, fmt: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
                 fmt.write_str("struct Tag { key, val }")
             }
@@ -203,10 +238,12 @@ fn serialize_tag_bincode() {
 
 #[test]
 fn deserialize_tag_json() {
-    let json = r#"{"key":"blorp","val":"ACAB"}"#;
-
     use serde_json;
-    let t: Tag = serde_json::from_str(&json).unwrap();
+    let json = serde_json::json!( {
+        "key": "blorp",
+        "val": "ACAB",
+    });
+    let t: Tag = serde_json::from_value(json).unwrap();
 
     assert_eq!(
         t,
