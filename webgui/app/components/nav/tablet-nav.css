@@ -49,7 +49,7 @@
 
 .topbar-nav {
   position: absolute;
-  border-color: var(--q-a-hover);
+  border-color: var(--q-theme-middle);
   border-style: solid;
   border-width: 0;
   width: nav-width;
@@ -57,6 +57,9 @@
   box-sizing: border-box;
   display: flex;
   justify-content: flex-start;
+}
+.topbar-nav button:hover {
+  color: var(--q-color-inverse);
 }
 [dir="ltr"] .topbar-nav {
   left: calc(nav-small-width - nav-width);

@@ -7,10 +7,14 @@
 .topbar-mobile {
   position: fixed;
   width: 100%;
+  height: topbar-height;
   top: 0;
   display: flex;
   justify-content: space-between;
   background-color: var(--q-theme-strong);
+}
+.topbar-mobile button:hover {
+  color: var(--q-color-inverse);
 }
 
 .main {

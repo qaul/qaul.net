@@ -29,3 +29,6 @@
   justify-content: flex-end;
   border-bottom: 1px solid var(--q-bg);
 }
+.topbar-nav button:hover {
+  color: var(--q-color-inverse);
+}
