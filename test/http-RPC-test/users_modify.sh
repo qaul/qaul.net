@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Set user name `testuser` and real name `Test User`
+# Set `dispaly_name` 'testuser' and unset `real_name`
 # 
 # usage
-# ./set-user-bio.sh
+# ./users_modify.sh
 #
 
 curl -i  \

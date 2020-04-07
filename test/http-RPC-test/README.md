@@ -34,8 +34,6 @@ export QAUL_TOKEN="p6vr6KiVgPP4l5ZRgRLK2eWHKK7eQUHSwUC1PKVIGi7WSijTFa-bvn31ukGYH
 
 #### Set User Name
 
-TODO: Crashes
-
 ```bash
 ./users_modify.sh
 ```
@@ -46,13 +44,22 @@ TODO: Crashes
 ./users_list.sh
 ```
 
-### Create a Chat-Room
+### Chat-Rooms
+
+#### Create a Chat-Room
 
 ```bash
 ./chat-rooms_create.sh
 ```
 
+#### List all Chat-Rooms
+
+```bash
+./chat-rooms_list.sh
+```
 
 #### Send a Message
 
-
+```bash
+./chat-messages_create.sh <ROOM_ID>
+```
