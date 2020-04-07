@@ -12,6 +12,7 @@
   display: flex;
   justify-content: space-between;
   background-color: var(--q-theme-strong);
+  z-index: 100;
 }
 .topbar-mobile button:hover {
   color: var(--q-color-inverse);
