@@ -1,4 +1,5 @@
 import Service from '@ember/service';
+import { tracked } from '@glimmer/tracking';
 
 const light = {};
 /* over-all background */
@@ -84,9 +85,14 @@ dark['q-bar-border'] = '#aaa';
 
 const themes = { dark, light };
 
-export default Service.extend({
-  activeStyle: Object.freeze({}),
+export default class StyleService extends Service {
+  @tracked activeTheme = 'light';
+
+  get activeStyle() {
+    return themes[this.activeTheme];
+  }
+
   setTheme(theme) {
-    this.set('activeStyle', themes[theme]);
-  },
-});
+    this.activeTheme = theme;
+  }
+}
