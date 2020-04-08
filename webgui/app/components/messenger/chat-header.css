@@ -5,6 +5,7 @@
   align-items: center;
   background-color: var(--q-nav-bg);
   position: sticky;
+  z-index: 10;
 }
 
 .title {

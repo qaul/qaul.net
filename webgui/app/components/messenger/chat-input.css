@@ -1,10 +1,10 @@
 .input {
-  position: absolute;
   bottom: 0;
   width: 100%;
   display: flex;
   padding: 1rem;
   background-color: var(--q-nav-bg);
+  box-sizing: border-box;
 }
 .text {
   margin: 0 0.5rem;

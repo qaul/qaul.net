@@ -1,3 +1,13 @@
+.chat-container {
+  display: grid;
+  height: calc(100vh - 3rem);
+  justify-content: stretch;
+  grid-template-rows: 8rem auto 5rem;
+  overflow: hidden;
+}
+
 .chat {
   padding: 1rem;
+  /*align-self: end;*/ /* TODO: this leads to now scrollbars at all */
+  overflow-y: scroll;
 }

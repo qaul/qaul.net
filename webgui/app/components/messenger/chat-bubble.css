@@ -1,10 +1,10 @@
-.chat {
+.message {
   display:flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: flex-end;
 }
-.chat.my {
+.message.my {
   flex-direction: row-reverse;
   justify-content: flex-end;
 }
@@ -14,7 +14,8 @@
   max-width: 85%;
   background-color: var(--q-theme-light);
   color: var(--q-color);
-  margin: 1rem 0;
+  margin: 1rem 0.5rem;
+  margin-bottom: 0rem;
   padding: 1rem;
   border-radius: 1rem 1rem 1rem 0;
   font-size: 1.25rem;
