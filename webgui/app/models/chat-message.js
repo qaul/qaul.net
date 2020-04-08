@@ -5,5 +5,5 @@ export default Model.extend({
   timestamp: attr('date'),
 
   sender: belongsTo('user'),
-  group: belongsTo('group', { inverse: 'messages' }),
+  room: belongsTo('chat-room', { inverse: 'messages' }),
 });

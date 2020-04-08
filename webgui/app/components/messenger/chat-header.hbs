@@ -2,8 +2,8 @@
   <div local-class="back"><LinkTo @route="messenger">{{fa-icon "arrow-left"}}</LinkTo></div>
   <h1 local-class="title">
     <div local-class="icon">
-      <Messenger::Groupicon @group={{@group}} />
+      <Messenger::RoomIcon @room={{@room}} />
     </div>
-    <div local-class="name">{{@group.name}}</div>
+    <div local-class="name">{{@room.name}}</div>
   </h1>
 </header>

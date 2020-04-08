@@ -1,7 +1,7 @@
 import FactoryGuy from 'ember-data-factory-guy';
 import faker from 'faker';
 
-FactoryGuy.define('chatmessage', {
+FactoryGuy.define('chat-message', {
   default: {
     content: () => faker.lorem.sentence(),
     timestamp: () => faker.date.recent(),

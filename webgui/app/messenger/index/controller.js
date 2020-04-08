@@ -1,7 +1,7 @@
 import Controller from '@ember/controller';
 
 export default class MessengerController extends Controller {
-  get groups() {
+  get rooms() {
     return this.model;
   }
 }

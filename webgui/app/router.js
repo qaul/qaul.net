@@ -9,7 +9,7 @@ export default class Router extends EmberRouter {
 Router.map(function() {
   this.route('feed');
   this.route('messenger', function() {
-    this.route('chat', { path: '/:group_id' })
+    this.route('chat', { path: '/:room_id' })
   });
   this.route('users', function() {
     this.route('user', { path: '/:user_id' });
