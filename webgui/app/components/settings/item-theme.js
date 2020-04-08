@@ -9,4 +9,9 @@ export default class ItemTheme extends Component {
   setTheme(theme) {
     this.style.setTheme(theme);
   }
+  
+  get activeTheme() {
+    return this.style.activeTheme;
+  }
+
 }
