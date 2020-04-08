@@ -10,8 +10,7 @@ export default class ItemRadio extends Component {
     this.intl.setLocale(lang);
   }
 
-  @action
-  languageSelected() {
+  get languageSelected() {
     return this.intl.get('primaryLocale');
   }
 }
