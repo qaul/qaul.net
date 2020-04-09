@@ -1,8 +1,9 @@
-//! Data record module
+//! Data records
 //!
-//! A data record in alexandria is contained by an encryption wrapper,
-//! meaning that you can only interact with this representation after
-//! passing the `open()?` validation in the API.
+//! All data in alexandria is encrypted.  However, at the stage of
+//! interacting with a `Record` object in your code you no longer have
+//! to worry about encryption, because your request has already been
+//! authenticated.
 //!
 //! A record can be one of two mappings: a strongly typed key-value
 //! store, commonly named `Kv`, or a raw binary object lazily loaded
