@@ -8,26 +8,6 @@ use std::{collections::BTreeMap, ops::Deref};
 /// The key-value map used in a Kv record
 pub type Map = BTreeMap<String, Value>;
 
-/// A `From` conversion trait for application specific data models
-///
-/// That way the compatibility layer between application specific
-/// models and alexandria internal types can simply call
-/// `from_value(v)` to get the correct types, similar to how `From` is
-/// implemented, without having to break the orphan rules.
-pub trait FromValue {
-    fn from_value(v: &Value) -> Self;
-}
-
-/// An `Into` conversion trait for application specific data models
-///
-/// That way the compatibility layer between application specific
-/// models and alexandria internal types can simply call `to_value(v)`
-/// to create the correct value for a record, similar to how `Into` is
-/// implemented, without having to break the orphan rules.
-pub trait ToValue {
-    fn to_value(&self) -> Value;
-}
-
 /// A strongly typed alexandria data value
 ///
 /// Because alexandria is written in Rust, all data is strongly typed,
@@ -53,7 +33,10 @@ pub enum Value {
     Bool(bool),
 
     /// A nested tree node object
-    Child(Map),
+    Map(Map),
+
+    /// A nested list node object
+    List(Vec<Value>),
 
     /// Signed 128bit integers
     I128(i128),
