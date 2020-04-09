@@ -7,5 +7,5 @@
 ember build
 
 # Deploy to server
-rsync -azhe "ssh -p 2422" ./dist/ admin@ember-gui.qaul.net:/home/admin/
+rsync -azzhe "ssh -p 2422" ./dist/ admin@ember-gui.qaul.net:/home/admin/
 
