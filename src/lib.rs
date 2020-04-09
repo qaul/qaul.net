@@ -9,18 +9,10 @@
 //! A multi-payload, zone-encrypting, journaled persistence module,
 //! built with low-overhead applications in mind.
 //!
-//! - Stores data in namespaces and scopes
-//! - Key-value stores and lazy blobs
-//! - Supports per-scope asymetric encryption key
-//! - Uses transaction Deltas for journal and concurrency safety
-//! - Integrates into OS persistence layers (storing things on spinning
-//!   rust or zappy quantum tunnels)
-//!
 //! `alexandria` provides an easy to use database interface with
 //! transactions, merges and dynamic queries, ensuring that your
 //! in-memory representation of data never get's out-of-sync with your
 //! on-disk representation. Don't burn your data.
-#![allow(dead_code, unused_imports, unused_variables)]
 
 pub(crate) mod core;
 pub(crate) mod crypto;

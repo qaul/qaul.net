@@ -8,7 +8,7 @@ pub const PASS: &'static str = "car horse battery staple";
 
 pub struct Test {
     pub users: Vec<Id>,
-    pub lib: Library,
+    lib: Library,
 }
 
 impl Test {
@@ -16,11 +16,17 @@ impl Test {
     pub fn new<P: Into<PathBuf>>(dir: P, userno: usize) -> Self {
         let lib = Builder::new().offset(dir.into().as_path()).build().unwrap();
         let users = (0..userno).fold(vec![], |mut vec, _| {
-            block_on(async { vec.push(lib.user(Id::random()).create(PASS).await.unwrap()) });
+            vec.push(block_on(async {
+                lib.user(Id::random()).create(PASS).await.unwrap()
+            }));
             vec
         });
 
         Self { users, lib }
+    }
+
+    pub fn lib(&self) -> &Library {
+        &self.lib
     }
 }
 

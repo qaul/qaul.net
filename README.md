@@ -3,47 +3,26 @@
 [ci-badge]: https://git.open-communication.net/qaul/alexandria/badges/master/pipeline.svg
 [ci-url]: https://git.open-communication.net/qaul/alexandria/commits/master
 [irc-badge]: https://img.shields.io/badge/IRC-%23qaul.net-1e72ff.svg
-[irc-url]: https://www.irccloud.com/invite?channel=%23qaul.net&hostname=irc.freenode.org&port=6697&ssl=1
+ [irc-url]: https://www.irccloud.com/invite?channel=%23qaul.net&hostname=irc.freenode.org&port=6697&ssl=1
 
-A multi-payload, zone-encrypting, journaled persistence module, built
-with low-overhead applications in mind.
+An strongly typed, encrypted record-based embedded database that
+supports multiple data payloads.
 
-- Stores data in namespaces and scopes
-- Key-value stores and lazy blobs
-- Supports per-scope asymetric encryption key
-- Uses transaction Deltas for journal and concurrency safety
-- Integrates into OS persistence layers (storing things on spinning
-  rust or zappy quantum tunnels)
+In alexandria all data is addressed via a user prefix and path.  Data
+is encrypted per-user, and can only be accessed if that user has
+previously been "opened".
 
-`alexandria` provides an easy to use database interface with
-transactions, merges and dynamic queries, ensuring that your in-memory
-representation of data never get's out-of-sync with your on-disk
-representation. Don't burn your data.
+**Notice:** alexandria should be considered experimental and not used
+in production systems where data loss is unacceptable.
 
-## Payload types
 
-`alexandria` supports key-value stores, encoded as `json` on the wire
-format, and lazy blobs, meaning that they exist as blobs on disk, and
-are only fetched when absolutely needed (you know, that 24GB copy of
-Hackers we all have, but don't entirely understand the origins of).
+## Features
 
-Both `KV` and `Blob` payloads can use encryption at rest.
+- Store key-value data in encrypted trees
+- Query based on record header data (tags, id, path)
+- Subscribe to updates based on path prefixes
 
-## Namespaces & Scopes
 
-`alexandria` also has a users concept, allowing you to construct
-permissive layers, optionally backed by encrpted storage. Referring to
-a location in an `alexandria` library requires an `Address`, which
-consists of an optional namespace, a scope and data ID.
-
-We use the following notation in documentation and external queries:
-`lib:</namespace?>/<scope>/<ID>`.
-
-Each scope has metadata attributes that allow `alexandria` to handle
-encryption, access, and on-disk offset management. What that means is
-that a scope `lib:/me/downloads` might be saved into
-`/home/me/downloads`, while the scope `lib:/me/secret_chat` is saved
-into `/home/me/.local/share/chat_app/secret/`.
 
 ## Questions?
 
