@@ -1,6 +1,5 @@
 //! Binary body representation
 
-use async_std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use std::{
     fs::File,

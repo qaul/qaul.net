@@ -22,11 +22,6 @@ impl Dirs {
         Ok(())
     }
 
-    /// Return the root path of the library
-    pub(crate) fn root(&self) -> &PathBuf {
-        &self.root
-    }
-
     /// Return the records directory in the library
     pub(crate) fn records(&self) -> PathBuf {
         self.root.join("records")

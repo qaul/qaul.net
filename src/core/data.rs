@@ -4,8 +4,8 @@ use crate::{
     core::Library,
     delta::{DeltaBuilder, DeltaType},
     error::Result,
-    record::{Record, Type},
-    utils::{Diff, Id, Path, Subscription, Tag, TagSet},
+    record::Record,
+    utils::{Diff, Id, Path, Subscription, TagSet},
 };
 use async_std::sync::Arc;
 
@@ -64,14 +64,19 @@ impl<'a> Data<'a> {
         let mut db = DeltaBuilder::new(self.id, DeltaType::Insert);
 
         let mut store = self.inner.store.write().await;
-        store.insert(&mut db, self.id, &path, tags.into(), data.into())
+        let id = store.insert(&mut db, self.id, &path, tags.into(), data.into())?;
+
+        self.inner.subs.queue(db.make()).await;
+        Ok(id)
     }
 
     pub async fn delete(&self, path: Path) -> Result<()> {
         let mut db = DeltaBuilder::new(self.id, DeltaType::Delete);
 
         let mut store = self.inner.store.write().await;
-        store.destroy(&mut db, self.id, &path)
+        store.destroy(&mut db, self.id, &path)?;
+        self.inner.subs.queue(db.make()).await;
+        Ok(())
     }
 
     /// Update a record in-place
@@ -79,10 +84,12 @@ impl<'a> Data<'a> {
     where
         D: Into<Diff>,
     {
-        let mut db = DeltaBuilder::new(self.id, DeltaType::Delete);
+        let mut db = DeltaBuilder::new(self.id, DeltaType::Update);
 
         let mut store = self.inner.store.write().await;
-        store.update(&mut db, self.id, &path, diff.into())
+        store.update(&mut db, self.id, &path, diff.into())?;
+        self.inner.subs.queue(db.make()).await;
+        Ok(())
     }
 
     /// Query the database with a specific query object

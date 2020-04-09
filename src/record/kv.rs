@@ -2,7 +2,6 @@ use crate::{
     error::{Error, Result},
     utils::{Diff, DiffExt, DiffResult, DiffSeg},
 };
-use async_std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, ops::Deref};
 

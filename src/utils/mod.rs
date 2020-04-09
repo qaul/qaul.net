@@ -23,5 +23,5 @@ mod path;
 pub use path::Path;
 
 mod sub;
+pub(crate) use sub::SubHub;
 pub use sub::Subscription;
-pub(crate) use sub::{SubHub, SubId};

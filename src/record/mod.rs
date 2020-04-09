@@ -17,8 +17,8 @@ pub mod kv;
 use self::{bin::Bin, kv::Kv};
 use crate::{
     crypto::{asym::KeyPair, DetachedKey, Encrypted},
-    utils::{Id, Diff, DiffExt, Tag, TagSet},
     error::Result,
+    utils::{Diff, DiffExt, Id, Tag, TagSet},
 };
 
 use serde::{Deserialize, Serialize};
@@ -68,7 +68,7 @@ impl Body {
     fn apply(&mut self, d: Diff) -> Result<()> {
         match self {
             Self::Kv(ref mut kv) => kv.apply(d),
-            Self::Bin(ref mut b) => unimplemented!(),
+            Self::Bin(_) => unimplemented!(),
         }
     }
 }
@@ -115,7 +115,7 @@ impl Record {
     pub(crate) fn apply(&mut self, diff: Diff) -> Result<()> {
         match self.body.deref_mut()? {
             Body::Kv(kv) => kv.apply(diff),
-            Body::Bin(b) => unimplemented!(),
+            Body::Bin(_) => unimplemented!(),
         }
     }
 

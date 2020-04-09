@@ -12,7 +12,7 @@ use crate::{
     utils::{Diff, Id, Path, TagSet},
 };
 use async_std::sync::Arc;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 
 /// Main data store (mirrored to /records)
 #[derive(Default)]
@@ -173,8 +173,8 @@ impl Store {
 #[test]
 fn store_insert() {
     use crate::{
-        record::kv::Value,
         delta::{DeltaBuilder, DeltaType},
+        record::kv::Value,
         utils::DiffSeg,
     };
 
@@ -210,8 +210,8 @@ fn store_insert() {
 #[test]
 fn store_and_get() {
     use crate::{
-        record::kv::Value,
         delta::{DeltaBuilder, DeltaType},
+        record::kv::Value,
         utils::DiffSeg,
     };
 
@@ -233,8 +233,8 @@ fn store_and_get() {
 #[test]
 fn store_and_update() {
     use crate::{
-        record::kv::Value,
         delta::{DeltaBuilder, DeltaType},
+        record::kv::Value,
         utils::DiffSeg,
     };
 
@@ -290,8 +290,8 @@ fn store_and_update() {
 #[test]
 fn store_and_delete() {
     use crate::{
-        record::kv::Value,
         delta::{DeltaBuilder, DeltaType},
+        record::kv::Value,
         utils::DiffSeg,
     };
 

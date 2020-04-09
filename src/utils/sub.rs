@@ -1,6 +1,5 @@
 use crate::{
     delta::Delta,
-    notify::Notify,
     utils::{Path, Query},
 };
 use async_std::{

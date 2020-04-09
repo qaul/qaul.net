@@ -1,62 +1,11 @@
 use crate::{crypto::DetachedKey, wire::Encodable};
-use async_std::{
-    sync::{Arc, RwLock},
-    task,
-};
+use async_std::sync::Arc;
 use serde::{de::DeserializeOwned, Deserialize, Deserializer, Serialize, Serializer};
 use std::task::Waker;
 use std::{
     fmt::Debug,
     ops::{Deref, DerefMut},
 };
-
-/// Utility wrapper around a serialisable lock
-pub(crate) struct Lock<T>(RwLock<T>)
-where
-    T: Encodable;
-
-impl<T> Lock<T>
-where
-    T: Encodable,
-{
-    pub(crate) fn new(inner: T) -> Self {
-        Self(RwLock::new(inner))
-    }
-}
-
-impl<T> Serialize for Lock<T>
-where
-    T: Encodable,
-{
-    fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        task::block_on(async {
-            let l = self.0.read().await;
-            l.serialize(ser)
-        })
-    }
-}
-
-impl<'de, T> Deserialize<'de> for Lock<T>
-where
-    T: Encodable,
-{
-    fn deserialize<D>(de: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        T::deserialize(de).map(|t| Self(RwLock::new(t)))
-    }
-}
-
-/// A notifiable, serialisable lock type
-///
-/// After deserialisation the waker will have been removed and needs
-/// to be re-initialised.  Otherwise the serde calls will be forwarded
-/// to the implementation provided by `T`.
-pub(crate) type LockNotify<T> = Notify<Lock<T>>;
 
 /// Wake tasks on mutable accesses to the wrapped value
 ///
