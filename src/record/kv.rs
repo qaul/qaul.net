@@ -22,13 +22,6 @@ pub enum Value {
     /// Some UTF-8 valid text, with no length limit
     String(String),
 
-    /// A string, with an enforced size limit
-    ///
-    /// While it is possible to encode any data into the provided
-    /// string, but it will be rejected by the diff apply validation
-    /// at runtime.
-    FixedString(String, usize),
-
     /// Simple boolean values (`true` or `false`)
     Bool(bool),
 
@@ -48,7 +41,6 @@ pub enum Value {
     /// Unsigned 64bit integers
     U64(u64),
 
-    // Medium numbers
     /// Signed 32bit integers
     I32(i32),
     /// Unsigned 32bit integers
@@ -79,6 +71,20 @@ pub struct Kv {
     map: Map,
 }
 
+trait ApplyExt {
+    /// A helper function to insert and error if the key existed
+    fn insert(&mut self, key: String, val: Value) -> DiffResult<()>;
+
+    /// A helper function to insert and error if the key didn't exists
+    fn update(&mut self, key: String, val: Value) -> DiffResult<()>;
+
+    /// A helper function to insert and error if the key didn't exists
+    fn delete(&mut self, key: &String) -> DiffResult<()>;
+
+    /// A helper function to handle nested diffs for Maps and Lists
+    fn nested(&mut self, k1: String, k2: String, diff: DiffSeg<Value>) -> DiffResult<()>;
+}
+
 impl DiffExt for Kv {
     /// Apply a key-value diff to this Kv map instance
     fn apply(&mut self, diff: Diff) -> Result<()> {
@@ -92,6 +98,7 @@ impl DiffExt for Kv {
                             DiffSeg::Insert(val) => self.insert(k, val),
                             DiffSeg::Update(val) => self.update(k, val),
                             DiffSeg::Delete => self.delete(&k),
+                            DiffSeg::Nested(k2, boxed) => self.nested(k, k2, *boxed),
                         },
                     ) {
                         (Ok(_), Ok(_)) => Ok(()),
@@ -106,39 +113,69 @@ impl DiffExt for Kv {
     }
 }
 
+impl ApplyExt for Map {
+    fn insert(&mut self, key: String, val: Value) -> DiffResult<()> {
+        if self.contains_key(&key) {
+            Err((0, format!("key `{}` already exists!", key)).into())
+        } else {
+            self.insert(key, val);
+            Ok(())
+        }
+    }
+
+    fn update(&mut self, key: String, val: Value) -> DiffResult<()> {
+        if self.contains_key(&key) {
+            self.insert(key, val);
+            Ok(())
+        } else {
+            Err((0, format!("key `{}` doesn't exist!", key)).into())
+        }
+    }
+
+    fn delete(&mut self, key: &String) -> DiffResult<()> {
+        if self.contains_key(key) {
+            self.remove(key);
+            Ok(())
+        } else {
+            Err((0, format!("key `{}` doesn't exist!", key)).into())
+        }
+    }
+
+    fn nested(&mut self, key: String, k2: String, diff: DiffSeg<Value>) -> DiffResult<()> {
+        match self.get_mut(&key) {
+            Some(Value::Map(ref mut map)) => match diff {
+                DiffSeg::Insert(val) => ApplyExt::insert(map, k2, val),
+                DiffSeg::Update(val) => ApplyExt::update(map, k2, val),
+                DiffSeg::Delete => ApplyExt::delete(map, &k2),
+                DiffSeg::Nested(k3, boxed) => ApplyExt::nested(map, k2, k3, *boxed),
+            }
+            .map_err(|e| e.replace_text("key", "nested key")),
+            Some(Value::List(_)) => unimplemented!(),
+            Some(_) => Err((0, format!("key `{}` is not of format Map or List", key)).into()),
+            None => Err((0, format!("key `{}` doesn't exist!", key)).into()),
+        }
+    }
+}
+
 impl Kv {
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// A helper function to insert and error if the key existed
     fn insert(&mut self, key: String, val: Value) -> DiffResult<()> {
-        if self.map.contains_key(&key) {
-            Err((0, format!("key `{}` already exists!", key)).into())
-        } else {
-            self.map.insert(key, val);
-            Ok(())
-        }
+        ApplyExt::insert(&mut self.map, key, val)
     }
 
-    /// A helper function to insert and error if the key didn't exists
     fn update(&mut self, key: String, val: Value) -> DiffResult<()> {
-        if self.map.contains_key(&key) {
-            self.map.insert(key, val);
-            Ok(())
-        } else {
-            Err((0, format!("key `{}` doesn't exist!", key)).into())
-        }
+        ApplyExt::update(&mut self.map, key, val)
     }
 
-    /// A helper function to insert and error if the key didn't exists
     fn delete(&mut self, key: &String) -> DiffResult<()> {
-        if self.map.contains_key(key) {
-            self.map.remove(key);
-            Ok(())
-        } else {
-            Err((0, format!("key `{}` doesn't exist!", key)).into())
-        }
+        ApplyExt::delete(&mut self.map, key)
+    }
+
+    fn nested(&mut self, k1: String, k2: String, diff: DiffSeg<Value>) -> DiffResult<()> {
+        ApplyExt::nested(&mut self.map, k1, k2, diff)
     }
 }
 
@@ -164,22 +201,87 @@ fn apply_single_diff() {
 #[test]
 fn apply_multi_diff() {
     let mut kv = Kv::new();
-    let diff = Diff::from(vec![
-        (
-            "hello".into(),
-            DiffSeg::Insert(Value::String("workers".into())),
-        ),
-        ("of".into(), DiffSeg::Insert(Value::String("the".into()))),
-        ("world".into(), DiffSeg::Insert(Value::String("you".into()))),
-        (
-            "have".into(),
-            DiffSeg::Insert(Value::String("nothing".into())),
-        ),
-        ("to".into(), DiffSeg::Insert(Value::String("lose".into()))),
-        ("but".into(), DiffSeg::Insert(Value::String("your".into()))),
-        ("chains".into(), DiffSeg::Insert(Value::String("!".into()))),
+    let diff: Diff = Diff::from(vec![
+        ("hello", DiffSeg::Insert(Value::String("workers".into()))),
+        ("of", DiffSeg::Insert(Value::String("the".into()))),
+        ("world", DiffSeg::Insert(Value::String("you".into()))),
+        ("have", DiffSeg::Insert(Value::String("nothing".into()))),
+        ("to", DiffSeg::Insert(Value::String("lose".into()))),
+        ("but", DiffSeg::Insert(Value::String("your".into()))),
+        ("chains", DiffSeg::Insert(Value::String("!".into()))),
     ]);
 
     kv.apply(diff).unwrap();
     assert_eq!(kv.len(), 7);
+}
+
+#[test]
+fn apply_nested_insert() {
+    let mut kv = Kv::new();
+
+    let d1 = Diff::from(vec![("map", DiffSeg::Insert(Value::Map(BTreeMap::new())))]);
+    kv.apply(d1).unwrap();
+
+    let d2 = Diff::from(vec![(
+        "map",
+        DiffSeg::Nested(
+            "map_key".to_owned(),
+            Box::new(DiffSeg::Insert(Value::String("map_val".into()))),
+        ),
+    )]);
+    kv.apply(d2).unwrap();
+
+    assert_eq!(
+        match kv.map.get("map").unwrap() {
+            Value::Map(map) => match map.get("map_key").unwrap() {
+                Value::String(s) => s.as_str(),
+                _ => panic!("Nested type is not Value::String!"),
+            },
+            _ => panic!("Type is not Value::Map!"),
+        },
+        "map_val"
+    );
+}
+
+#[test]
+fn apply_nested_nested_insert() {
+    let mut kv = Kv::new();
+
+    let d1 = Diff::from(vec![("map", DiffSeg::Insert(Value::Map(BTreeMap::new())))]);
+    kv.apply(d1).unwrap();
+
+    let d2 = Diff::from(vec![(
+        "map",
+        DiffSeg::Nested(
+            "map_key".to_owned(),
+            Box::new(DiffSeg::Insert(Value::Map(BTreeMap::new()))),
+        ),
+    )]);
+    kv.apply(d2).unwrap();
+
+    let d3 = Diff::from(vec![(
+        "map",
+        DiffSeg::Nested(
+            "map_key".to_owned(),
+            Box::new(DiffSeg::Nested(
+                "nested_map_key".to_owned(),
+                Box::new(DiffSeg::Insert(Value::String("nested_map_val".into()))),
+            )),
+        ),
+    )]);
+    kv.apply(d3).unwrap();
+
+    assert_eq!(
+        match kv.map.get("map").unwrap() {
+            Value::Map(map) => match map.get("map_key").unwrap() {
+                Value::Map(nested_map) => match nested_map.get("nested_map_key").unwrap() {
+                    Value::String(s) => s.as_str(),
+                    _ => panic!("Nested nested type is not Value::String!"),
+                },
+                _ => panic!("Nested type is not Value::Map!"),
+            },
+            _ => panic!("Type is not Value::Map!"),
+        },
+        "nested_map_val"
+    );
 }

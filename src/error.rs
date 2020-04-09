@@ -65,6 +65,16 @@ impl DiffErrs {
 
         self
     }
+
+    /// Helper function to apply text replacements to nested messages
+    pub(crate) fn replace_text<'n, 'o>(self, old: &'o str, new: &'n str) -> Self {
+        Self(
+            self.0
+                .into_iter()
+                .map(|(i, s)| (i, s.as_str().replace(old, new).into()))
+                .collect(),
+        )
+    }
 }
 
 impl Display for DiffErrs {

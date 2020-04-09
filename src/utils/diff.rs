@@ -27,6 +27,7 @@ where
 }
 
 /// Encode a single change made to a set of data
+#[derive(Clone)]
 pub enum DiffSeg<T> {
     /// Creating a new record
     Insert(T),
@@ -34,6 +35,8 @@ pub enum DiffSeg<T> {
     Update(T),
     /// Deleting a record
     Delete,
+    /// A nested diff segment used for maps and lists
+    Nested(String, Box<DiffSeg<T>>),
 }
 
 /// An atomic set of changes applied to a record
@@ -69,5 +72,15 @@ impl From<(String, DiffSeg<Value>)> for Diff {
 impl From<Vec<(String, DiffSeg<Value>)>> for Diff {
     fn from(vec: Vec<(String, DiffSeg<Value>)>) -> Self {
         Self::Map(vec.into_iter().collect())
+    }
+}
+
+impl<'s> From<Vec<(&'s str, DiffSeg<Value>)>> for Diff {
+    fn from(vec: Vec<(&'s str, DiffSeg<Value>)>) -> Self {
+        let v: Vec<(String, DiffSeg<Value>)> = vec
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.clone()))
+            .collect();
+        v.into()
     }
 }
