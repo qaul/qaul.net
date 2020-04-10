@@ -27,24 +27,82 @@ where
 }
 
 /// Encode a single change made to a set of data
-#[derive(Clone)]
-pub enum DiffSeg<T> {
+#[derive(Clone, Debug, PartialEq)]
+pub enum DiffSeg {
     /// Creating a new record
-    Insert(T),
+    Insert(Value),
     /// Updating an existing record in place
-    Update(T),
+    Update(Value),
     /// Deleting a record
     Delete,
     /// A nested diff segment used for maps and lists
-    Nested(String, Box<DiffSeg<T>>),
+    Nested(String, Box<DiffSeg>),
 }
 
 /// An atomic set of changes applied to a record
 pub enum Diff {
     /// Maps a key to a value
-    Map(BTreeMap<String, DiffSeg<Value>>),
+    Map(BTreeMap<String, DiffSeg>),
     /// Binary data
-    Binary(DiffSeg<Value>),
+    Binary(DiffSeg),
+}
+
+impl Diff {
+    /// Start building a map diff
+    pub fn map() -> Self {
+        Diff::Map(Default::default())
+    }
+
+    /// Add an insert line to the diff
+    pub fn insert<S: Into<String>, V: Into<Value>>(mut self, key: S, val: V) -> Self {
+        match self {
+            Self::Map(ref mut map) => {
+                map.insert(key.into(), DiffSeg::Insert(val.into()));
+                self
+            }
+            _ => panic!("Bad builder payload: Binary type, can't have keyed inserts!"),
+        }
+    }
+
+    /// Add an update line to the diff
+    pub fn update<S: Into<String>, V: Into<Value>>(mut self, key: S, val: V) -> Self {
+        match self {
+            Self::Map(ref mut map) => {
+                map.insert(key.into(), DiffSeg::Update(val.into()));
+                self
+            }
+            _ => panic!("Bad builder payload: Binary type, can't have keyed inserts!"),
+        }
+    }
+
+    /// Add an delete line to the diff
+    pub fn delete<S: Into<String>>(mut self, key: S) -> Self {
+        match self {
+            Self::Map(ref mut map) => {
+                map.insert(key.into(), DiffSeg::Delete);
+                self
+            }
+            _ => panic!("Bad builder payload: Binary type, can't have keyed inserts!"),
+        }
+    }
+
+    /// Add an insert line to the diff
+    pub fn nested<S: Into<String>>(mut self, key: S, val: Diff) -> Self {
+        match (&mut self, val) {
+            (Self::Map(ref mut map), Self::Map(ref other)) => {
+                let key = key.into();
+                other.into_iter().for_each(|(ikey, ival)| {
+                    map.insert(
+                        key.clone(),
+                        DiffSeg::Nested(ikey.clone(), Box::new(ival.clone())),
+                    );
+                });
+            }
+            _ => panic!("Bad builder payload: Binary type, can't have keyed inserts!"),
+        }
+
+        self
+    }
 }
 
 impl From<Vec<u8>> for Diff {
@@ -53,14 +111,14 @@ impl From<Vec<u8>> for Diff {
     }
 }
 
-impl From<BTreeMap<String, DiffSeg<Value>>> for Diff {
-    fn from(map: BTreeMap<String, DiffSeg<Value>>) -> Self {
+impl From<BTreeMap<String, DiffSeg>> for Diff {
+    fn from(map: BTreeMap<String, DiffSeg>) -> Self {
         Self::Map(map)
     }
 }
 
-impl From<(String, DiffSeg<Value>)> for Diff {
-    fn from(tup: (String, DiffSeg<Value>)) -> Self {
+impl From<(String, DiffSeg)> for Diff {
+    fn from(tup: (String, DiffSeg)) -> Self {
         Self::Map({
             let mut map = BTreeMap::new();
             map.insert(tup.0, tup.1);
@@ -69,18 +127,49 @@ impl From<(String, DiffSeg<Value>)> for Diff {
     }
 }
 
-impl From<Vec<(String, DiffSeg<Value>)>> for Diff {
-    fn from(vec: Vec<(String, DiffSeg<Value>)>) -> Self {
+impl From<Vec<(String, DiffSeg)>> for Diff {
+    fn from(vec: Vec<(String, DiffSeg)>) -> Self {
         Self::Map(vec.into_iter().collect())
     }
 }
 
-impl<'s> From<Vec<(&'s str, DiffSeg<Value>)>> for Diff {
-    fn from(vec: Vec<(&'s str, DiffSeg<Value>)>) -> Self {
-        let v: Vec<(String, DiffSeg<Value>)> = vec
+impl<'s> From<Vec<(&'s str, DiffSeg)>> for Diff {
+    fn from(vec: Vec<(&'s str, DiffSeg)>) -> Self {
+        let v: Vec<(String, DiffSeg)> = vec
             .iter()
             .map(|(k, v)| (k.to_string(), v.clone()))
             .collect();
         v.into()
     }
+}
+
+#[test]
+fn usability() {
+    let d = Diff::map().insert("my_key", "my_val");
+    assert_eq!(
+        match d {
+            Diff::Map(mut map) => map.remove("my_key").unwrap(),
+            _ => panic!(),
+        },
+        DiffSeg::Insert(Value::String("my_val".into()))
+    );
+}
+
+#[test]
+fn usability_nested() {
+    let d = Diff::map().nested("my_key", Diff::map().insert("my_sub_key", "my_actual_data"));
+
+    assert_eq!(
+        match d {
+            Diff::Map(mut map) => match map.remove("my_key").unwrap() {
+                DiffSeg::Nested(key, boxed) => (key, *boxed),
+                _ => panic!(),
+            },
+            _ => panic!(),
+        },
+        (
+            "my_sub_key".into(),
+            DiffSeg::Insert(Value::String("my_actual_data".into()))
+        )
+    );
 }

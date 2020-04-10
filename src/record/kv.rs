@@ -17,7 +17,7 @@ pub type Map = BTreeMap<String, Value>;
 ///
 /// Value types can be nested with `Value::Map`, which contains a
 /// `BTreeMap<_, _>`.  Nestings can be arbitrarily deep.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Value {
     /// Some UTF-8 valid text, with no length limit
     String(String),
@@ -65,6 +65,131 @@ pub enum Value {
     Vec(Vec<u8>),
 }
 
+// Strings
+
+impl From<String> for Value {
+    fn from(o: String) -> Self {
+        Self::String(o)
+    }
+}
+
+impl<'a> From<&'a str> for Value {
+    fn from(o: &'a str) -> Self {
+        Self::String(String::from(o))
+    }
+}
+
+// Boolean logic
+
+impl From<bool> for Value {
+    fn from(o: bool) -> Self {
+        Self::Bool(o)
+    }
+}
+
+// Nested types (map/list)
+
+impl From<Map> for Value {
+    fn from(o: Map) -> Self {
+        Self::Map(o)
+    }
+}
+
+impl From<Vec<Value>> for Value {
+    fn from(o: Vec<Value>) -> Self {
+        Self::List(o)
+    }
+}
+
+// 128 bit numbers
+
+impl From<i128> for Value {
+    fn from(o: i128) -> Self {
+        Self::I128(o)
+    }
+}
+
+impl From<u128> for Value {
+    fn from(o: u128) -> Self {
+        Self::U128(o)
+    }
+}
+
+// 64 bit numbers
+
+impl From<i64> for Value {
+    fn from(o: i64) -> Self {
+        Self::I64(o)
+    }
+}
+impl From<u64> for Value {
+    fn from(o: u64) -> Self {
+        Self::U64(o)
+    }
+}
+
+// 32 bit numbers
+
+impl From<i32> for Value {
+    fn from(o: i32) -> Self {
+        Self::I32(o)
+    }
+}
+impl From<u32> for Value {
+    fn from(o: u32) -> Self {
+        Self::U32(o)
+    }
+}
+
+// 16 bit numbers
+
+impl From<i16> for Value {
+    fn from(o: i16) -> Self {
+        Self::I16(o)
+    }
+}
+impl From<u16> for Value {
+    fn from(o: u16) -> Self {
+        Self::U16(o)
+    }
+}
+
+// 8 bit numbers
+
+impl From<i8> for Value {
+    fn from(o: i8) -> Self {
+        Self::I8(o)
+    }
+}
+impl From<u8> for Value {
+    fn from(o: u8) -> Self {
+        Self::U8(o)
+    }
+}
+
+// Non-integer numbers
+
+impl From<f64> for Value {
+    fn from(o: f64) -> Self {
+        Self::F64(o)
+    }
+}
+impl From<f32> for Value {
+    fn from(o: f32) -> Self {
+        Self::F32(o)
+    }
+}
+
+// Binary payloads
+
+impl From<Vec<u8>> for Value {
+    fn from(o: Vec<u8>) -> Self {
+        Self::Vec(o)
+    }
+}
+
+
+
 /// A key-value store record
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct Kv {
@@ -82,7 +207,7 @@ trait ApplyExt {
     fn delete(&mut self, key: &String) -> DiffResult<()>;
 
     /// A helper function to handle nested diffs for Maps and Lists
-    fn nested(&mut self, k1: String, k2: String, diff: DiffSeg<Value>) -> DiffResult<()>;
+    fn nested(&mut self, k1: String, k2: String, diff: DiffSeg) -> DiffResult<()>;
 }
 
 impl DiffExt for Kv {
@@ -141,7 +266,7 @@ impl ApplyExt for Map {
         }
     }
 
-    fn nested(&mut self, key: String, k2: String, diff: DiffSeg<Value>) -> DiffResult<()> {
+    fn nested(&mut self, key: String, k2: String, diff: DiffSeg) -> DiffResult<()> {
         match self.get_mut(&key) {
             Some(Value::Map(ref mut map)) => match diff {
                 DiffSeg::Insert(val) => ApplyExt::insert(map, k2, val),
@@ -174,7 +299,7 @@ impl Kv {
         ApplyExt::delete(&mut self.map, key)
     }
 
-    fn nested(&mut self, k1: String, k2: String, diff: DiffSeg<Value>) -> DiffResult<()> {
+    fn nested(&mut self, k1: String, k2: String, diff: DiffSeg) -> DiffResult<()> {
         ApplyExt::nested(&mut self.map, k1, k2, diff)
     }
 }
