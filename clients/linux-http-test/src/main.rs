@@ -10,7 +10,7 @@ fn main() {
     let assets = match env::args().nth(1) {
         Some(p) => p,
         None => {
-            eprintln!("Usage: linux-http-test <path>");
+            eprintln!("Usage: linux-http-test <path-to-static-webgui-directory>");
             process::exit(2);
         }
     };
