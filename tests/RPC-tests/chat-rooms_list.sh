@@ -1,22 +1,19 @@
 #!/bin/bash
 
-# delete a chatroom by id
-# 
+# returns a list of all chat-rooms
+#
 # usage:
-# ./chat-rooms_delete.sh <CHATROOM_ID>
+# ./chat-rooms_list.sh
 
 curl -i  \
     -H "Content-Type: application/json" \
     -d "{ \"id\": \"1\", 
           \"kind\": \"chat-rooms\", 
-          \"method\": \"delete\",
-          \"data\": {
-            \"id\": \"$1\"
-          },
+          \"method\": \"list\",
           \"auth\": {
             \"id\":\"$QAUL_ID\",
             \"token\":\"$QAUL_TOKEN\"
           }
         }" \
-    "http://127.0.0.1:9900/api"
+    "http://127.0.0.1:9900/rpc"
 

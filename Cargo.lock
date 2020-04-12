@@ -1169,6 +1169,7 @@ name = "libqaul-http"
 version = "0.1.0"
 dependencies = [
  "async-std",
+ "futures 0.3.4",
  "libqaul",
  "libqaul-rpc",
  "serde_json",
@@ -2211,8 +2212,6 @@ dependencies = [
 [[package]]
 name = "tide-naive-static-files"
 version = "2.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98825460221e1d8e735dcf1efc7f60be87801bda1411c3c137b01fcb0d9f3737"
 dependencies = [
  "async-std",
  "bytes 0.5.4",

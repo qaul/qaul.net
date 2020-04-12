@@ -125,14 +125,14 @@ impl QaulRpc for Logout {
 /// Get the user profile for any remote or local user
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct Get {
-    user: Identity,
+    id: Identity,
 }
 
 #[async_trait]
 impl QaulRpc for Get {
     type Response = Result<UserProfile>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users().get(self.user).await
+        qaul.users().get(self.id).await
     }
 }
 

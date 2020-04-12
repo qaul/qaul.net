@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use std::collections::BTreeMap;
 
-pub(crate) type JsonMap = BTreeMap<String, JsonValue>;
+pub type JsonMap = BTreeMap<String, JsonValue>;
 
 /// A struct wrapper for UserAuth
 #[derive(Clone, Debug, Serialize, Deserialize)]

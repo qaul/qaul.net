@@ -20,5 +20,5 @@ curl -i  \
             \"token\":\"$QAUL_TOKEN\"
         }
     }" \
-    "http://127.0.0.1:9900/api"
+    "http://127.0.0.1:9900/rpc"
 

@@ -5,7 +5,7 @@
 # usage:
 # ./users_create.sh
 
-curl -i  \
+curl -iv  \
     -H "Content-Type: application/json" \
     -d '{
         "id": "1",
@@ -15,5 +15,5 @@ curl -i  \
             "pw": "123456"
         }
     }' \
-    "http://127.0.0.1:9900/api"
+    "http://127.0.0.1:9900/rpc"
 

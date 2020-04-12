@@ -1,0 +1,32 @@
+[package]
+name = "tide-naive-static-files"
+version = "2.2.0"
+authors = ["eignnx <eignnx@gmail.com>"]
+edition = "2018"
+
+homepage = "https://github.com/eignnx/tide-naive-static-files"
+repository = "https://github.com/eignnx/tide-naive-static-files"
+license = "MIT OR Apache-2.0"
+
+description = "A simple static file serving component for Rust's Tide web framework."
+readme = "README.md"
+categories = ["web-programming::http-server"]
+keywords = ["tide", "static", "files"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tide = "0.6.0"
+http = "0.1.20"
+bytes = "0.5.3"
+futures-fs = "0.0.5"
+futures-util = "0.3.1"
+http-service = "0.4.0"
+mime = "0.3.14"
+mime_guess = "2.0.1"
+percent-encoding = "2.1.0"
+async-std = "1.4.0"
+
+[dev-dependencies]
+tide = { version = "0.6.0", features  = ["unstable"] }
+async-std = { version = "1.4.0", features = ["attributes"] }
