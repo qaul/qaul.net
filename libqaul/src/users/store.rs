@@ -3,8 +3,10 @@
 use crate::{
     error::{Error, Result},
     qaul::Identity,
+    security::KeyId,
     users::UserProfile,
 };
+use alexandria::{utils::Id, Library};
 use ed25519_dalek::Keypair;
 
 use std::{
@@ -36,45 +38,41 @@ impl User {
     }
 }
 
-/// User store responsible for tracking local and remote users
-///
-/// Also provides some facilities to create and delete local users,
-/// providing persistent state for `Qaul`.
+/// A type wrapper around the alexandria storage library
 #[derive(Clone)]
 pub(crate) struct UserStore {
-    inner: Arc<Mutex<BTreeMap<Identity, User>>>,
+    inner: Arc<Library>,
+    /// Map the key Ids to word-aligned alexandria Ids used in storage
+    map: BTreeMap<Identity, Id>,
 }
 
 impl UserStore {
-    pub(crate) fn new() -> Self {
+    /// Create a new type abstraction over an existing Alexandria lib
+    pub(crate) fn new(inner: Arc<Library>) -> Self {
         Self {
-            inner: Arc::new(Mutex::new(BTreeMap::new())),
+            inner,
+            map: Default::default(),
         }
+    }
+
+    /// Create a new storage user corresponding to a local user
+    pub(crate) async fn create_user(&self, keyid: KeyId, pw: &str) {
+        let KeyId { id, keypair } = keyid;
+        self.inner.user(id).create(pw).await.unwrap();
     }
 
     /// Add a new user (local or remote)
     pub(crate) fn add_user(&self, user: User) {
-        let id = match user {
-            User::Local {
-                ref profile,
-                keypair: _,
-            } => profile.id,
-            User::Remote(ref u) => u.id,
-        }
-        .clone();
-
-        let mut inner = self.inner.lock().expect("Failed to lock UserStore");
-        inner.insert(id, user);
+        unimplemented!()
     }
 
     /// Convenience function around creating a new remote user
     pub(crate) fn discover(&self, id: Identity) {
-        let user = User::Remote(UserProfile::new(id));
-        self.add_user(user);
+        unimplemented!()
     }
 
     pub(crate) fn rm_user(&self, user: Identity) {
-        self.inner.lock().unwrap().remove(&user);
+        unimplemented!()
     }
 
     /// Modify a single user inside the store in-place
@@ -82,97 +80,32 @@ impl UserStore {
     where
         F: FnOnce(&mut UserProfile),
     {
-        modifier(
-            match self
-                .inner
-                .lock()
-                .expect("Failed to lock user store")
-                .get_mut(id)
-                .map_or(Err(Error::NoUser), |x| Ok(x))?
-            {
-                User::Local {
-                    ref mut profile,
-                    keypair: _,
-                } => profile,
-                User::Remote(ref mut u) => u,
-            },
-        );
-        Ok(())
+        unimplemented!()
     }
 
     /// Don't call this on non-local users please
     pub(crate) fn get_key(&self, id: Identity) -> Option<Arc<Keypair>> {
-        self.inner
-            .lock()
-            .expect("Failed to lock the user store")
-            .get(&id)
-            .map(|user| match user {
-                User::Local { keypair, .. } => Arc::clone(&keypair),
-                _ => unreachable!(),
-            })
+        unimplemented!()
     }
 
     pub(crate) fn get(&self, id: &Identity) -> Result<UserProfile> {
-        self.inner
-            .lock()
-            .expect("Failed to lock UserStore")
-            .get(id)
-            .map_or(Err(Error::NoUser), |x| {
-                Ok(match x {
-                    User::Local {
-                        ref profile,
-                        keypair: _,
-                    } => profile,
-                    User::Remote(ref u) => u,
-                }
-                .clone())
-            })
+        unimplemented!()
     }
 
     /// Get all locally available users
     pub(crate) fn get_local(&self) -> Vec<UserProfile> {
-        self.inner
-            .lock()
-            .expect("Failed to lock UserStore")
-            .iter()
-            .filter_map(|(_, u)| match u {
-                User::Local {
-                    ref profile,
-                    keypair: _,
-                } => Some(profile.clone()),
-                _ => None,
-            })
-            .collect()
+        unimplemented!()
     }
 
     /// Get all remote users this device knows about
     #[allow(unused)]
     pub(crate) fn get_remote(&self) -> Vec<UserProfile> {
-        self.inner
-            .lock()
-            .expect("Failed to lock UserStore")
-            .iter()
-            .filter_map(|(_, u)| match u {
-                User::Remote(u) => Some(u.clone()),
-                _ => None,
-            })
-            .collect()
+        unimplemented!()
     }
 
     /// Get *all* users this device knows about
     #[allow(unused)]
     pub(crate) fn get_all(&self) -> Vec<UserProfile> {
-        self.inner
-            .lock()
-            .expect("Failed to lock UserStore")
-            .iter()
-            .map(|(_, u)| match u {
-                User::Remote(u) => u.clone(),
-                User::Local {
-                    ref profile,
-                    keypair: _,
-                } => profile.clone(),
-            })
-            .collect()
+        unimplemented!()
     }
 }

@@ -7,9 +7,9 @@ use crate::{
     contacts::ContactStore,
     discover::Discovery,
     messages::MsgStore,
+    security::Sec,
     services::ServiceRegistry,
     users::UserStore,
-    security::Sec,
 };
 
 use ratman::Router;
@@ -72,7 +72,7 @@ impl Qaul {
 
         Self {
             router,
-            users: UserStore::new(),
+            users: UserStore::new(unimplemented!()),
             auth: AuthStore::new(),
             contacts: ContactStore::new(),
             messages: MsgStore::new(),
@@ -98,7 +98,7 @@ impl Qaul {
     pub fn new(router: Arc<Router>) -> Arc<Self> {
         let q = Arc::new(Self {
             router: Arc::clone(&router),
-            users: UserStore::new(),
+            users: UserStore::new(unimplemented!()),
             auth: AuthStore::new(),
             contacts: ContactStore::new(),
             messages: MsgStore::new(),
