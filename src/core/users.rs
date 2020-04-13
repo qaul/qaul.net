@@ -10,11 +10,6 @@ pub struct Users<'a> {
 }
 
 impl<'a> Users<'a> {
-    /// Commit all changes up to this point and release the API scope
-    pub fn commit(&'a self) -> &'a Library {
-        self.inner
-    }
-
     /// Open a user for transactions
     ///
     /// This means that future transactions for this user ID will be
@@ -28,21 +23,20 @@ impl<'a> Users<'a> {
     ///
     /// This means that all future transactions will be queued to the
     /// inbox, until another session is created with `open()`
-    pub async fn clone(&self) -> Result<()> {
+    pub async fn close(&self) -> Result<()> {
         let ref mut u = self.inner.users.write().await;
         u.close(self.id)
     }
 
     /// Create a new user with a unique encryption key
-    pub async fn create(&self, pw: &str) -> Result<Id> {
-        let id = Id::random();
+    pub async fn create(&self, pw: &str) -> Result<()> {
         let ref mut u = self.inner.users.write().await;
-        u.insert(id, pw).map(|_| id)
+        u.insert(self.id, pw).map(|_| ())
     }
 
     /// Remove a user Id and corresponding data from the library
-    pub async fn remove(&self, id: Id) -> Result<()> {
+    pub async fn remove(&self) -> Result<()> {
         let ref mut u = self.inner.users.write().await;
-        u.delete(id)
+        u.delete(self.id)
     }
 }
