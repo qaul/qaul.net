@@ -18,7 +18,7 @@ dependencies = [
 [[package]]
 name = "alexandria"
 version = "0.2.0"
-source = "git+https://git.open-communication.net/qaul/alexandria#cbe37631c833cbfb4080fc0bcc389e2d0d97323c"
+source = "git+https://git.open-communication.net/qaul/alexandria#72fcacad5b80b78f440e7c7553e372362f8b28ec"
 dependencies = [
  "async-std",
  "bincode",
@@ -1156,6 +1156,7 @@ dependencies = [
  "ratman",
  "serde",
  "serde_json",
+ "tempfile",
  "tracing",
  "tracing-futures",
 ]
@@ -1893,6 +1894,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fe5bd57d1d7414c6b5ed48563a2c855d995ff777729dcd91c369ec7fea395ae"
 
 [[package]]
+name = "remove_dir_all"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4a83fa3702a688b9359eccba92d153ac33fd2e8462f9e0e3fdf155239ea7792e"
+dependencies = [
+ "winapi 0.3.8",
+]
+
+[[package]]
 name = "rle-decode-fast"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2147,6 +2157,20 @@ dependencies = [
  "libc",
  "redox_syscall",
  "xattr",
+]
+
+[[package]]
+name = "tempfile"
+version = "3.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a6e24d9338a0a5be79593e2fa15a648add6138caa803e2d5bc782c371732ca9"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "rand 0.7.3",
+ "redox_syscall",
+ "remove_dir_all",
+ "winapi 0.3.8",
 ]
 
 [[package]]

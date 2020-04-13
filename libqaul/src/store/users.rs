@@ -2,7 +2,11 @@
 
 use super::Conv;
 use crate::users::{UserProfile, UserUpdate};
-use alexandria::{record::Record, utils::Diff};
+use alexandria::{
+    record::{kv::Value, Record},
+    utils::Diff,
+};
+use std::collections::{BTreeMap, BTreeSet};
 
 const UID: &'static str = "id";
 const D_NAME: &'static str = "display_name";
@@ -34,6 +38,42 @@ impl From<&Record> for UserProfile {
 }
 
 impl UserProfile {
+    /// Generate the first insert diff based on an empty record
+    pub(crate) fn init_diff(&self) -> Vec<Diff> {
+        let mut v = vec![Diff::map().insert(UID, self.id.as_bytes().to_vec())];
+
+        if let Some(ref d_name) = self.display_name {
+            v.push(Diff::map().insert(D_NAME, d_name.clone()));
+        }
+        if let Some(ref r_name) = self.real_name {
+            v.push(Diff::map().insert(R_NAME, r_name.clone()));
+        }
+
+        v.push(
+            Diff::map().insert(
+                BIO,
+                self.bio
+                    .iter()
+                    .map(|(k, v)| (k.clone(), v.clone().into()))
+                    .collect::<BTreeMap<String, Value>>(),
+            ),
+        );
+        v.push(
+            Diff::map().insert(
+                SERV,
+                self.services
+                    .iter()
+                    .map(|k| k.clone().into())
+                    .collect::<Vec<Value>>(),
+            ),
+        );
+
+        if let Some(ref avi) = self.avatar {
+            v.push(Diff::map().insert(AVI, avi.clone()));
+        }
+
+        v
+    }
 
     /// Diff based on how a `UserUpdate` applies to a `UserProfile`
     pub(crate) fn gen_diff(&self, update: UserUpdate) -> Diff {
@@ -71,4 +111,51 @@ impl UserProfile {
             AvatarData(None) => Diff::map().delete(BIO),
         }
     }
+}
+
+#[test]
+fn persist_user_profile() {
+    use crate::Identity;
+    use alexandria::{
+        utils::{Path, TagSet},
+        Builder,
+    };
+
+    let dir = tempfile::tempdir().unwrap();
+    let lib = Builder::new().offset(dir.path()).build().unwrap();
+
+    let profile = UserProfile {
+        id: Identity::random(),
+        display_name: Some("spacekookie".into()),
+        real_name: Some("Katharina Fey".into()),
+        bio: {
+            let mut tree = BTreeMap::new();
+            tree.insert("location".into(), "The internet".into());
+            tree.insert("languages".into(), "en, de, fr, eo, ru".into());
+            tree
+        },
+        services: vec![
+            "net.qaul.chat",
+            "net.qaul.feed",
+            "net.qaul.voice",
+            "space.kookie.chess",
+        ]
+        .into_iter()
+        .map(|s| s.into())
+        .collect(),
+        avatar: None,
+    };
+
+    let path = Path::from(format!("/users:{}", profile.id));
+
+    let diffs = profile.init_diff();
+    async_std::task::block_on(async {
+        lib.data(None)
+            .await
+            .as_ref()
+            .unwrap()
+            .batch(path.clone(), TagSet::empty(), diffs)
+            .await
+    })
+    .unwrap();
 }
