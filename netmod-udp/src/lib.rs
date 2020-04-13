@@ -106,8 +106,8 @@ fn discover() {
             port: 11001,
         };
 
-        let e1 = Endpoint::spawn(&p1.port);
-        let e2 = Endpoint::spawn(&p2.port);
+        let e1 = Endpoint::spawn(p1.port);
+        let e2 = Endpoint::spawn(p2.port);
 
         std::thread::sleep_ms(5000);
 

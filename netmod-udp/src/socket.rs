@@ -170,8 +170,8 @@ fn test_single_unicast() {
         t2.set(p1).await;
 
         // Create two sockets on two ports
-        let s1 = Socket::with_addr(&p1.to_string(), t1).await;
-        let s2 = Socket::with_addr(&p2.to_string(), t2).await;
+        let s1 = Socket::with_port(p1.port, t1).await;
+        let s2 = Socket::with_port(p2.port, t2).await;
 
         let f = Frame::dummy();
         s1.send(&f, p2).await;
