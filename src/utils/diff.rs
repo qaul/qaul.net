@@ -111,6 +111,12 @@ impl From<Vec<u8>> for Diff {
     }
 }
 
+impl<'a> From<&'a [u8]> for Diff {
+    fn from(buf: &'a [u8]) -> Self {
+        Self::Binary(DiffSeg::Insert(Value::Vec(buf.iter().cloned().collect())))
+    }
+}
+
 impl From<BTreeMap<String, DiffSeg>> for Diff {
     fn from(map: BTreeMap<String, DiffSeg>) -> Self {
         Self::Map(map)
