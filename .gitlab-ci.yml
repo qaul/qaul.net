@@ -3,9 +3,9 @@ stages:
   - build
   - publish
 
-# Build the Rust root on nightly
-build:beta:
-  image: instrumentisto/rust:1.39.0-beta
+# Build the Rust root on a pinned stable
+build:
+  image: rust:1.42.0-buster
   script:
     - cargo test
     - cargo build
