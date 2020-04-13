@@ -52,6 +52,26 @@ impl<'a> Data<'a> {
         self.inner
     }
 
+    /// Similar to `insert`, but instead operating on a batch of Diffs
+    pub async fn batch<T, D>(&self, path: Path, tags: T, data: Vec<D>) -> Result<Id>
+    where
+        T: Into<TagSet>,
+        D: Into<Diff>,
+    {
+        let mut db = DeltaBuilder::new(self.id, DeltaType::Insert);
+
+        let mut store = self.inner.store.write().await;
+        let id = store.batch(
+            &mut db,
+            self.id,
+            &path,
+            tags.into(),
+            data.into_iter().map(|d| d.into()).collect(),
+        )?;
+
+        Ok(id)
+    }
+
     /// Insert a new record into the library and return it's ID
     ///
     /// You need to have a valid and active user session to do so, and

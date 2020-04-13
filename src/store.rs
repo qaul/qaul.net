@@ -47,6 +47,43 @@ impl Store {
             .map_or(Err(Error::NoSuchPath { path: path.into() }), |rec| Ok(rec))
     }
 
+    /// Similar to `insert`, but useful to seed an entire record from
+    /// individual diffs at the same time
+    pub(crate) fn batch(
+        &mut self,
+        db: &mut DeltaBuilder,
+        id: Option<Id>,
+        path: &Path,
+        tags: TagSet,
+        mut diffs: Vec<Diff>,
+    ) -> Result<Id> {
+        // Check if the path exists already
+        if self.tree_mut(id).contains_key(path) {
+            return Err(Error::PathExists { path: path.into() });
+        }
+
+        db.tags(&tags);
+        db.path(&path);
+
+        // Create a record
+        let ulterior = diffs.split_off(1);
+        let initial = diffs.remove(0);
+
+        let mut rec = Record::create(tags, initial)?;
+        for d in ulterior {
+            rec.apply(d)?;
+        }
+
+        let rec_id = rec.header.id;
+        let record = Notify::new(Encrypted::new(Arc::new(rec)));
+        db.rec_id(rec_id);
+
+        self.tree_mut(id).insert(path.clone(), record);
+        self.wake_tree(id, path);
+
+        Ok(rec_id)
+    }
+
     /// Insert a record into the store
     ///
     /// This operation will fail if the path already exists
@@ -305,7 +342,7 @@ fn store_and_delete() {
 
     let mut store = Store::new();
     let mut db = DeltaBuilder::new(Some(id), DeltaType::Insert);
-    let rec_id = store.insert(&mut db, Some(id), &path, tags, diff).unwrap();
+    let _ = store.insert(&mut db, Some(id), &path, tags, diff).unwrap();
     assert_eq!(
         store
             .usrd
@@ -323,4 +360,47 @@ fn store_and_delete() {
     let mut db = DeltaBuilder::new(Some(id), DeltaType::Delete);
     store.destroy(&mut db, Some(id), &path).unwrap();
     assert_eq!(store.usrd.get(&id).unwrap().len(), 0);
+}
+
+#[test]
+fn insert_batch() {
+    use crate::delta::{DeltaBuilder, DeltaType};
+
+    let vec = vec![
+        Diff::map().insert("hello", "world"),
+        Diff::map().insert("how", "are you?"),
+    ];
+
+    let path = Path::from("/test:bob");
+    let tags = TagSet::empty();
+
+    let mut store = Store::new();
+    let mut db = DeltaBuilder::new(None, DeltaType::Insert);
+
+    let _ = store.batch(&mut db, None, &path, tags, vec).unwrap();
+
+    assert_eq!(
+        store.shared.get(&path).unwrap().deref().unwrap().kv().len(),
+        2
+    );
+}
+
+#[test]
+fn insert_batch_single() {
+    use crate::delta::{DeltaBuilder, DeltaType};
+
+    let vec = vec![Diff::map().insert("hello", "world")];
+
+    let path = Path::from("/test:bob");
+    let tags = TagSet::empty();
+
+    let mut store = Store::new();
+    let mut db = DeltaBuilder::new(None, DeltaType::Insert);
+
+    let _ = store.batch(&mut db, None, &path, tags, vec).unwrap();
+
+    assert_eq!(
+        store.shared.get(&path).unwrap().deref().unwrap().kv().len(),
+        1
+    );
 }
