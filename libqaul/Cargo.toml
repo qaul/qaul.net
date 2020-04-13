@@ -14,7 +14,7 @@ async-std = "1.0"
 futures = "0.3"
 crossbeam-channel = "0.4"
 
-alexandria = { git = "https://git.open-communication.net/qaul/alexandria" }
+alexandria = { version = "0.2", path = "../alexandria" }
 conjoiner = { version = "1.2", package = "conjoiner-engine" }
 serde = { version = "1.0", features = [ "derive" ] }
 

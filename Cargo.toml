@@ -1,5 +1,7 @@
 [workspace]
 members = [
+    # Main storage database
+    "alexandria",
 
     # qaul.net service library
     "libqaul",
@@ -41,5 +43,5 @@ members = [
 
     # test binaries
     "clients/linux-http-test",
-	"clients/linux-voice-test"
+    "clients/linux-voice-test"
 ]

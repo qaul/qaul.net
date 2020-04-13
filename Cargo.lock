@@ -18,15 +18,15 @@ dependencies = [
 [[package]]
 name = "alexandria"
 version = "0.2.0"
-source = "git+https://git.open-communication.net/qaul/alexandria#72fcacad5b80b78f440e7c7553e372362f8b28ec"
 dependencies = [
  "async-std",
  "bincode",
  "failure",
  "keybob",
- "ratman-identity 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ratman-identity",
  "serde",
  "sodiumoxide",
+ "tempdir",
 ]
 
 [[package]]
@@ -1408,7 +1408,7 @@ dependencies = [
  "async-std",
  "async-trait",
  "crossbeam-channel",
- "ratman-identity 0.4.0",
+ "ratman-identity",
  "ratman-netmod",
 ]
 
@@ -1420,7 +1420,7 @@ dependencies = [
  "async-std",
  "async-trait",
  "conjoiner-engine",
- "ratman-identity 0.4.0",
+ "ratman-identity",
  "ratman-netmod",
  "serde",
  "tracing",
@@ -1687,7 +1687,7 @@ version = "0.1.0"
 dependencies = [
  "libqaul",
  "mime",
- "ratman-identity 0.4.0",
+ "ratman-identity",
 ]
 
 [[package]]
@@ -1722,6 +1722,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2bdc6c187c65bca4260c9011c9e3132efe4909da44726bad24cf7572ae338d7f"
 dependencies = [
  "proc-macro2",
+]
+
+[[package]]
+name = "rand"
+version = "0.4.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "552840b97013b1a26992c11eac34bdd778e464601a4c2054b5f0bff7c6761293"
+dependencies = [
+ "fuchsia-cprng",
+ "libc",
+ "rand_core 0.3.1",
+ "rdrand",
+ "winapi 0.3.8",
 ]
 
 [[package]]
@@ -1804,7 +1817,7 @@ dependencies = [
  "conjoiner-engine",
  "futures 0.3.4",
  "netmod-mem",
- "ratman-identity 0.4.0",
+ "ratman-identity",
  "ratman-netmod",
  "serde",
  "tracing",
@@ -1827,27 +1840,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "ratman-identity"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e94cc012804fd49daa7e0eecb6e3831f58b517dd0152c9533912c09bc5b8972"
-dependencies = [
- "blake2 0.8.1",
- "cfg-if",
- "hex",
- "rand 0.7.3",
- "serde",
-]
-
-[[package]]
 name = "ratman-netmod"
 version = "0.3.0"
 dependencies = [
  "async-trait",
  "conjoiner-engine",
- "ratman-identity 0.4.0",
+ "ratman-identity",
  "serde",
  "twox-hash",
+]
+
+[[package]]
+name = "rdrand"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "678054eb77286b51581ba43620cc911abf02758c91f93f479767aed0f90458b2"
+dependencies = [
+ "rand_core 0.3.1",
 ]
 
 [[package]]
@@ -2157,6 +2166,16 @@ dependencies = [
  "libc",
  "redox_syscall",
  "xattr",
+]
+
+[[package]]
+name = "tempdir"
+version = "0.3.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "15f2b5fb00ccdf689e0149d1b1b3c03fead81c2b37735d812fa8bddbbf41b6d8"
+dependencies = [
+ "rand 0.4.6",
+ "remove_dir_all",
 ]
 
 [[package]]

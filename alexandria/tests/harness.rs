@@ -17,7 +17,8 @@ impl Test {
         let lib = Builder::new().offset(dir.into().as_path()).build().unwrap();
         let users = (0..userno).fold(vec![], |mut vec, _| {
             vec.push(block_on(async {
-                lib.user(Id::random()).create(PASS).await.unwrap()
+                let id = Id::random();
+                lib.user(id).create(PASS).await.map(|_| id).unwrap()
             }));
             vec
         });

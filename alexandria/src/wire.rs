@@ -28,7 +28,7 @@ where
 
 #[test]
 fn encode_simple() {
-    use {identity::Identity as Id, serde::Deserialize};
+    use {crate::utils::Id, serde::Deserialize};
 
     #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
     struct TestStruct {
@@ -46,7 +46,7 @@ fn encode_simple() {
 #[test]
 fn encode_skip() {
     use std::cell::Cell;
-    use {identity::Identity as Id, serde::Deserialize};
+    use {crate::utils::Id, serde::Deserialize};
 
     #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
     struct TestStruct {

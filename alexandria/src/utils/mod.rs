@@ -8,7 +8,7 @@
 /// Internally an Id is represented as the size of a word on the
 /// platform that alexandria was compiled for.  Each Id is unique and
 /// random (via `Id::random()`).
-pub use identity::Identity as Id;
+pub use id::Identity as Id;
 
 pub use crate::core::data::{Query, QueryResult, SetQuery};
 
