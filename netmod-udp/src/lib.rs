@@ -1,7 +1,8 @@
 //! netmod-udp is a UDP overlay for Ratman
 #![allow(warnings)]
 
-#[macro_use] extern crate tracing;
+#[macro_use]
+extern crate tracing;
 
 mod addrs;
 pub(crate) use addrs::{AddrTable, Peer};
@@ -78,8 +79,20 @@ impl EndpointExt for Endpoint {
     }
 }
 
-/// This test requires network access to set the multicast
+/// A test that makes two instances on the same device see each other
+///
+/// In theory this test is a good idea, but in practise it doesn't
+/// work.  The multicast protocol doesn't filter by port, but the
+/// implementation on Linux does.  This means that unless all
+/// participants on the same device are on the same multicast port, we
+/// can't get the multicast messages from each other because they're
+/// being filtered by the Kernel.
+///
+/// We still wanna keep this test around just in case we can run on a
+/// platform that doesn't do this, or when we can set the
+/// non-exclusive port option.
 #[test]
+#[ignore]
 fn discover() {
     task::block_on(async {
         use async_std::net::{IpAddr, Ipv4Addr};
@@ -93,8 +106,8 @@ fn discover() {
             port: 11001,
         };
 
-        let e1 = Endpoint::spawn(&p1.to_string());
-        let e2 = Endpoint::spawn(&p2.to_string());
+        let e1 = Endpoint::spawn(&p1.port);
+        let e2 = Endpoint::spawn(&p2.port);
 
         std::thread::sleep_ms(5000);
 
