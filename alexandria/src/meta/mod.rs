@@ -1,8 +1,7 @@
 //! Various metadata tables in the database
 
 pub(crate) mod users;
-
-// pub(crate) mod tags;
+pub(crate) mod tags;
 
 // /// A metadata wrapper
 // pub(crate) struct Meta {
