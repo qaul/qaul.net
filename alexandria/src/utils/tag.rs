@@ -12,12 +12,36 @@ use std::collections::BTreeSet;
 /// let _: TagSet = vec![].into();
 /// let _: TagSet = BTreeSet::default().into();
 /// ```
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct TagSet(BTreeSet<Tag>);
 
 impl TagSet {
     pub fn empty() -> Self {
         Self(Default::default())
+    }
+
+    pub fn insert(&mut self, t: Tag) {
+        self.0.insert(t);
+    }
+
+    pub fn remove(&mut self, t: &Tag) {
+        self.0.remove(t);
+    }
+
+    pub fn contains(&self, t: &Tag) -> bool {
+        self.0.contains(t)
+    }
+
+    pub(crate) fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub(crate) fn exactly(&self, o: &TagSet) -> bool {
+        self.0 == o.0
+    }
+
+    pub(crate) fn iter(&self) -> impl Iterator<Item = &Tag> {
+        self.0.iter()
     }
 }
 

@@ -2,7 +2,7 @@ use crate::{
     crypto::{asym::KeyPair, DetachedKey, Encrypted, EncryptedMap},
     error::{Error, Result},
     meta::users::User,
-    utils::{Id, Path, Tag},
+    utils::{Id, Path, Tag, TagSet},
 };
 
 use async_std::sync::Arc;
@@ -12,7 +12,8 @@ use std::collections::{BTreeMap, BTreeSet};
 /// Per-user encrypted tag storage
 #[derive(Clone, Default, Serialize, Deserialize)]
 pub(crate) struct UserTags {
-    map: BTreeMap<Tag, BTreeSet<Path>>,
+    t2p: BTreeMap<Tag, BTreeSet<Path>>,
+    p2t: BTreeMap<Path, TagSet>,
 }
 
 impl UserTags {
@@ -25,7 +26,11 @@ impl UserTags {
     /// If the tag already exists, the path will be appended.  If it
     /// doesn't a new dataset will be created.
     pub(crate) fn insert(&mut self, tag: Tag, path: &Path) {
-        self.map.entry(tag).or_default().insert(path.clone());
+        self.t2p
+            .entry(tag.clone())
+            .or_default()
+            .insert(path.clone());
+        self.p2t.entry(path.clone()).or_default().insert(tag);
     }
 
     /// Remove a tag-path relationship from the store
@@ -34,25 +39,57 @@ impl UserTags {
     /// entirely from the table, meaning that the tag is no longer
     /// present anywhere in the database.
     pub(crate) fn delete(&mut self, tag: &Tag, path: &Path) {
-        self.map.get_mut(tag).unwrap().remove(path);
-        if self.map.get(tag).unwrap().len() == 0 {
-            self.map.remove(tag);
+        self.t2p.get_mut(tag).unwrap().remove(path);
+        self.p2t.get_mut(path).unwrap().remove(tag);
+
+        if self.t2p.get(tag).unwrap().len() == 0 {
+            self.t2p.remove(tag);
+        }
+
+        if self.p2t.get(path).unwrap().len() == 0 {
+            self.p2t.remove(path);
         }
     }
 
     /// Remove a path from all tag models
     pub(crate) fn clear(&mut self, path: &Path) {
-        self.map.iter_mut().for_each(|(_, set)| {
+        self.t2p.iter_mut().for_each(|(_, set)| {
             set.remove(path);
         });
     }
 
     /// Return a set of unique paths associated to a tag
-    pub(crate) fn paths(&self, tag: &Tag) -> Vec<Path> {
-        self.map
+    fn single_tag(&self, tag: &Tag) -> Vec<Path> {
+        self.t2p
             .get(tag)
             .map(|s| s.iter().cloned().collect())
             .unwrap_or(vec![])
+    }
+
+    /// Only return paths where tags are an exact match
+    pub(crate) fn paths(&self, tags: &TagSet) -> Vec<Path> {
+        tags.iter()
+            .map(|t| self.single_tag(t))
+            .fold(vec![], |mut vec, paths| {
+                paths.into_iter().for_each(|p| vec.push(p));
+                vec
+            })
+    }
+
+    /// Only return paths where tags are an exact match
+    pub(crate) fn paths_matching(&self, tags: &TagSet) -> Vec<Path> {
+        tags.iter()
+            .map(|t| self.single_tag(t))
+            .fold(vec![], |mut vec, paths| {
+                paths.into_iter().for_each(|p| {
+                    let other = self.p2t.get(&p).unwrap();
+                    if tags.exactly(&other) {
+                        vec.push(p);
+                    }
+                });
+
+                vec
+            })
     }
 }
 
@@ -100,9 +137,19 @@ impl TagCache {
     }
 
     /// Get all paths associated with a tag
-    pub(crate) fn get_paths<I: Into<Option<Id>>>(&self, id: I, tag: &Tag) -> Result<Vec<Path>> {
+    pub(crate) fn get_paths<I: Into<Option<Id>>>(&self, id: I, tags: &TagSet) -> Result<Vec<Path>> {
         let id = id.into().unwrap_or(self.id);
-        Ok(self.map.get(id)?.paths(tag))
+        Ok(self.map.get(id)?.paths(tags))
+    }
+
+    /// Get all paths associated with a tag
+    pub(crate) fn get_paths_matching<I: Into<Option<Id>>>(
+        &self,
+        id: I,
+        tags: &TagSet,
+    ) -> Result<Vec<Path>> {
+        let id = id.into().unwrap_or(self.id);
+        Ok(self.map.get(id)?.paths_matching(tags))
     }
 
     pub(crate) fn open(&mut self, user: &User) -> Result<()> {

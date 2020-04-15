@@ -119,6 +119,21 @@ impl<'a> Data<'a> {
             Query::Path(ref path) => store
                 .get_path(self.id, path)
                 .map(|rec| QueryResult::Single(rec)),
+            Query::Tag(query) => {
+                let tc = self.inner.tag_cache.read().await;
+
+                match query {
+                    SetQuery::Matching(ref tags) => tc.get_paths_matching(self.id, tags),
+                    SetQuery::Partial(ref tags) => tc.get_paths(self.id, tags),
+                }
+                .map(|paths| {
+                    paths
+                        .iter()
+                        .map(|p| store.get_path(self.id, p))
+                        .collect::<Result<Vec<_>>>()
+                        .map(|vec| QueryResult::Many(vec))
+                })?
+            }
             _ => unimplemented!(),
         }
     }

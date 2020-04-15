@@ -12,7 +12,7 @@ pub use builder::Builder;
 use crate::{
     dir::Dirs,
     error::Result,
-    meta::users::UserTable,
+    meta::{tags::TagCache, users::UserTable},
     store::Store,
     utils::{Id, SubHub},
 };
@@ -32,6 +32,8 @@ pub struct Library {
     pub(crate) root: Dirs,
     /// Table with encrypted user metadata
     pub(crate) users: RwLock<UserTable>,
+    /// Cache of tag/path mappings
+    pub(crate) tag_cache: RwLock<TagCache>,
     /// The main data store
     pub(crate) store: RwLock<Store>,
     /// The state handler for subscriptions

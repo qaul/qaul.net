@@ -1,5 +1,10 @@
 use crate::{
-    dir::Dirs, error::Result, meta::users::UserTable, store::Store, utils::SubHub, Library,
+    dir::Dirs,
+    error::Result,
+    meta::{tags::TagCache, users::UserTable},
+    store::Store,
+    utils::SubHub,
+    Library,
 };
 use async_std::sync::RwLock;
 use std::path::Path;
@@ -34,11 +39,14 @@ impl Builder {
                 .expect("Builder without `offset` cannot be built"),
         );
         let users = RwLock::new(UserTable::new());
+        let tag_cache = RwLock::new(TagCache::new());
+
         let store = RwLock::new(Store::new());
         let subs = SubHub::new();
         Library {
             root,
             users,
+            tag_cache,
             store,
             subs,
         }
