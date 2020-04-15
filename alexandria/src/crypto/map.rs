@@ -79,7 +79,7 @@ where
     }
 
     /// Get a mutable reference to the mapped value, if opened
-    pub(crate) fn get_mut(&mut self, id: K) -> Result<&V> {
+    pub(crate) fn get_mut(&mut self, id: K) -> Result<&mut V> {
         match self.inner.get_mut(&id) {
             Some(Encrypted::Open(ref mut data)) => Ok(data),
             Some(Encrypted::Closed(_)) => Err(Error::InternalError {
