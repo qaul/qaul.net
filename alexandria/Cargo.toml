@@ -19,4 +19,4 @@ keybob = "0.3"
 failure = "0.1"
 
 [dev-dependencies]
-tempdir = "0.3"
+tempfile = "3.0"

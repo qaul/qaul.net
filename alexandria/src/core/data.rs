@@ -113,6 +113,44 @@ impl<'a> Data<'a> {
     }
 
     /// Query the database with a specific query object
+    ///
+    /// Request data from alexandria via a `Query` object.  A query
+    /// can only touch a single parameter, such as the Record Id, the
+    /// path or a set query via tags.  The data returned are snapshots
+    /// or records that are immutable.  If you want to make changes to
+    /// them, use `update()` with a Diff instead.
+    ///
+    /// Also: future writes will not propagate to the copy of the
+    /// Record returned from this function, because alexandria is
+    /// Copy-on-Write.  You will need to query the database again in
+    /// the future.
+    ///
+    /// Following are some query examples
+    ///
+    /// ```
+    /// # use alexandria::{Builder, Library, error::Result, utils::{Tag, TagSet, Path, Query, SetQuery}};
+    /// # async fn foo() -> Result<()> {
+    /// # let tmp = tempfile::tempdir().unwrap();
+    /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
+    /// # let tag1 = Tag::new("tag1", vec![1, 3, 1, 2]);
+    /// # let tag2 = Tag::new("tag2", vec![13, 12]);
+    ///
+    /// // Returns QueryResult::Single(_) with a single record
+    /// let path = Path::from("/msg:alice");
+    /// lib.data(None).await?.query(Query::Path(path)).await;
+    ///
+    /// // Returns QueryResult::Many(_) for every path that contains
+    /// // the set of tags, or more!
+    /// let tags = TagSet::from(vec![tag1, tag2]);
+    /// lib.data(None).await?.query(Query::Tag(SetQuery::Partial(tags))).await;
+    ///
+    /// // Returns QueryResult::Many(_) for every path that contains
+    /// // the exact set of tags (no more, no less)
+    /// let tags = TagSet::from(vec![tag1, tag2]);
+    /// lib.data(None).await?.query(Query::Tag(SetQuery::Matching(tags))).await;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn query(&self, q: Query) -> Result<QueryResult> {
         let store = self.inner.store.read().await;
         match q {

@@ -2,8 +2,8 @@
 
 mod harness;
 use harness::Test;
+use tempfile::tempdir;
 
-use tempdir::TempDir;
 
 use alexandria::{
     record::kv::Value,
@@ -11,12 +11,12 @@ use alexandria::{
 };
 
 fn scaffold_lib() {
-    let dir = TempDir::new("alexandria").unwrap();
+    let dir = tempdir().unwrap();
     let _ = Test::new(dir.path(), 1);
 }
 
 fn insert_and_fetch() {
-    let dir = TempDir::new("alexandria").unwrap();
+    let dir = tempdir().unwrap();
     let t = Test::new(dir.path(), 1);
 
     let path = Path::from("/msg:alice");

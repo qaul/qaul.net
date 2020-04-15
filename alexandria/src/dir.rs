@@ -41,9 +41,9 @@ impl Dirs {
 #[test]
 fn scaffold_lib() -> Result<()> {
     use std::path::Path;
-    use tempdir::TempDir;
+    use tempfile::tempdir;
 
-    let root = TempDir::new("alexandria-test").unwrap();
+    let root = tempdir().unwrap();
     let mut offset = root.path().to_path_buf();
     offset.push("library");
 
