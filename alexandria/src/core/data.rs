@@ -125,7 +125,28 @@ impl<'a> Data<'a> {
     /// Copy-on-Write.  You will need to query the database again in
     /// the future.
     ///
-    /// Following are some query examples
+    /// ## Examples
+    ///
+    /// This code makes a direct query via the path of a record.  This
+    /// will only return a single record if successful.
+    /// 
+    /// ```
+    /// # use alexandria::{Builder, Library, error::Result, utils::{Tag, TagSet, Path, Query, SetQuery}};
+    /// # async fn foo() -> Result<()> {
+    /// # let tmp = tempfile::tempdir().unwrap();
+    /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
+    /// let path = Path::from("/msg:alice");
+    /// lib.data(None).await?.query(Query::Path(path)).await;
+    /// # Ok(()) }
+    /// ```
+    ///
+    /// In alexandria you can "tag" records with extra metadata, which
+    /// is also encrypted.  These tags are String-keyd, with an
+    /// arbitrary payload and can be used to make more precise (and
+    /// fast!) search queries into the database.
+    ///
+    /// The following code makes a query for any record that contains
+    /// the provided tags.
     ///
     /// ```
     /// # use alexandria::{Builder, Library, error::Result, utils::{Tag, TagSet, Path, Query, SetQuery}};
@@ -134,22 +155,24 @@ impl<'a> Data<'a> {
     /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
     /// # let tag1 = Tag::new("tag1", vec![1, 3, 1, 2]);
     /// # let tag2 = Tag::new("tag2", vec![13, 12]);
-    ///
-    /// // Returns QueryResult::Single(_) with a single record
-    /// let path = Path::from("/msg:alice");
-    /// lib.data(None).await?.query(Query::Path(path)).await;
-    ///
-    /// // Returns QueryResult::Many(_) for every path that contains
-    /// // the set of tags, or more!
     /// let tags = TagSet::from(vec![tag1, tag2]);
     /// lib.data(None).await?.query(Query::Tag(SetQuery::Partial(tags))).await;
+    /// # Ok(()) }
+    /// ```
     ///
-    /// // Returns QueryResult::Many(_) for every path that contains
-    /// // the exact set of tags (no more, no less)
+    /// Lastly, a "matching" query makes sure that *only* the provided
+    /// tags are present, no more.
+    ///
+    /// ```
+    /// # use alexandria::{Builder, Library, error::Result, utils::{Tag, TagSet, Path, Query, SetQuery}};
+    /// # async fn foo() -> Result<()> {
+    /// # let tmp = tempfile::tempdir().unwrap();
+    /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
+    /// # let tag1 = Tag::new("tag1", vec![1, 3, 1, 2]);
+    /// # let tag2 = Tag::new("tag2", vec![13, 12]);
     /// let tags = TagSet::from(vec![tag1, tag2]);
     /// lib.data(None).await?.query(Query::Tag(SetQuery::Matching(tags))).await;
-    /// # Ok(())
-    /// # }
+    /// # Ok(()) }
     /// ```
     pub async fn query(&self, q: Query) -> Result<QueryResult> {
         let store = self.inner.store.read().await;
@@ -176,6 +199,31 @@ impl<'a> Data<'a> {
         }
     }
 
+    /// Subscribe to future database updates via a query filter
+    ///
+    /// When querying repeatedly isn't an option, or would lead to
+    /// decreased performance, it's also possible to register a
+    /// subscription.  They use the same mechanism as Queries to
+    /// filter through tags and paths, but return a type that can be
+    /// async-polled for updates.
+    ///
+    /// This doesn't give immediate access to the data, only the path
+    /// that was changed, but can then be used to make a real query
+    /// into the database to get an updated set of data.
+    ///
+    /// ```
+    /// # use alexandria::{Builder, Library, error::Result, utils::{Tag, TagSet, Path, Query, SetQuery}};
+    /// # async fn foo() -> Result<()> {
+    /// # let tmp = tempfile::tempdir().unwrap();
+    /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
+    /// # let my_tag = Tag::new("tag1", vec![1, 3, 1, 2]);
+    /// let tags = TagSet::from(vec![my_tag]);
+    /// let sub = lib.data(None).await?.subscribe(Query::Tag::SetQuery::Partial(tags)).await;
+    ///
+    /// let path = sub.next().await;
+    /// let new_data = lib.data(None).await?.query(Query::Path(path)).await?;
+    /// # Ok(()) }
+    /// ```
     pub async fn subscribe(&self, q: Query) -> Subscription {
         self.inner.subs.add_sub(q).await
     }
