@@ -80,16 +80,18 @@ impl UserTags {
     pub(crate) fn paths_matching(&self, tags: &TagSet) -> Vec<Path> {
         tags.iter()
             .map(|t| self.single_tag(t))
-            .fold(vec![], |mut vec, paths| {
+            .fold(BTreeSet::new(), |mut set, paths| {
                 paths.into_iter().for_each(|p| {
                     let other = self.p2t.get(&p).unwrap();
                     if tags.exactly(&other) {
-                        vec.push(p);
+                        set.insert(p);
                     }
                 });
 
-                vec
+                set
             })
+            .into_iter()
+            .collect()
     }
 }
 
@@ -160,4 +162,81 @@ impl TagCache {
     pub(crate) fn close(&mut self, user: &User) -> Result<()> {
         self.map.close(user.id, Arc::clone(&user.key))
     }
+}
+
+#[test]
+fn data_simple() {
+    let path = Path::from("/msg:bob");
+    let tag = Tag::new("msg-id", vec![1, 3, 1, 2]);
+    let mut ut = UserTags::new();
+    ut.insert(tag.clone(), &path);
+
+    assert_eq!(ut.paths(&TagSet::from(vec![tag])), vec![path]);
+}
+
+#[test]
+fn data_non_matching() {
+    let path = Path::from("/msg:bob");
+    let t1 = Tag::new("msg-id", vec![1, 3, 1, 2]);
+    let t2 = Tag::new("room-id", vec![1, 3, 3, 7]);
+
+    let mut ut = UserTags::new();
+    ut.insert(t1.clone(), &path);
+    ut.insert(t2.clone(), &path);
+
+    assert_eq!(ut.paths(&TagSet::from(vec![t1])), vec![path]);
+}
+
+#[test]
+fn data_two_non_matching() {
+    let alice = Path::from("/msg:alice");
+    let bob = Path::from("/msg:bob");
+    let ta = Tag::new("msg-id", vec![0, 0, 0, 0]);
+    let tb = Tag::new("msg-id", vec![1, 1, 1, 1]);
+    let ts = Tag::new("shared", vec![1, 3, 1, 2]);
+
+    let mut ut = UserTags::new();
+    ut.insert(ta.clone(), &alice);
+    ut.insert(ts.clone(), &alice);
+
+    ut.insert(tb.clone(), &bob);
+    ut.insert(ts.clone(), &bob);
+
+    assert_eq!(ut.paths(&TagSet::from(vec![ts])), vec![alice, bob]);
+}
+
+#[test]
+fn data_two_matching() {
+    let alice = Path::from("/msg:alice");
+    let bob = Path::from("/msg:bob");
+
+    let ta = Tag::new("msg-id", vec![0, 0, 0, 0]);
+    let tb = Tag::new("msg-id", vec![1, 1, 1, 1]);
+    let ts = Tag::new("shared", vec![1, 3, 1, 2]);
+
+    let mut ut = UserTags::new();
+    ut.insert(ta.clone(), &alice);
+    ut.insert(ts.clone(), &alice);
+
+    ut.insert(tb.clone(), &bob);
+    ut.insert(ts.clone(), &bob);
+
+    assert_eq!(ut.paths_matching(&TagSet::from(vec![ta, ts])), vec![alice]);
+}
+
+
+#[test]
+fn data_no_match() {
+    let alice = Path::from("/msg:alice");
+    let bob = Path::from("/msg:bob");
+
+    let ta = Tag::new("msg-id", vec![1, 3, 1, 2]);
+    let tb = Tag::new("msg-id", vec![1, 3, 3, 7]);
+    let none = Tag::new("none", vec![0, 0, 0, 0]);
+
+    let mut ut = UserTags::new();
+    ut.insert(ta.clone(), &alice);
+    ut.insert(tb.clone(), &bob);
+
+    assert_eq!(ut.paths_matching(&TagSet::from(vec![none])), vec![]);
 }
