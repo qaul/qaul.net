@@ -10,7 +10,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let r = Router::new();
     // TDOD: Add network drivers
 
-    let q = Qaul::new(r);
+    let dir = tempfile::tempdir().unwrap();
+    let q = Qaul::new(r, dir.path());
     let user = block_on(async { q.users().create("password").await })?;
 
     let msg = q.messages();

@@ -14,3 +14,4 @@ qaul-chat = { path = "../../libqaul/service/chat" }
 qaul-voices = { path = "../../libqaul/service/voices" }
 
 async-std = "1.0"
+tempfile = "3.0"

@@ -20,3 +20,5 @@ libpulse-simple-binding = { version = "2.15", features = [] }
 termion = "1.5"
 tracing-subscriber = "0.2"
 tracing = "0.1"
+
+tempfile = "3.0"

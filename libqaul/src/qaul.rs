@@ -12,8 +12,9 @@ use crate::{
     users::UserStore,
 };
 
+use alexandria::{Builder, Library};
 use ratman::Router;
-use std::sync::Arc;
+use std::{sync::Arc, path::Path};
 
 /// Primary context structure for `libqaul`
 ///
@@ -61,23 +62,35 @@ pub struct Qaul {
 
     /// A security subsystem
     pub(crate) sec: Arc<Sec>,
+
+    /// Main library handle for storage
+    pub(crate) store: Arc<Library>,
 }
 
 impl Qaul {
     /// This function exists entirely for doc tests
     #[doc(hidden)]
     #[allow(warnings)]
+    #[cfg(feature = "testing")]
     pub fn dummy() -> Self {
+        use tempfile;
         let router = Router::new();
+        let temp = tempfile::tempdir().unwrap();
+        let store = Builder::new()
+            .offset(temp.path())
+            .build()
+            .map(|l| Arc::new(l))
+            .unwrap();
 
         Self {
             router,
-            users: UserStore::new(unimplemented!()),
+            users: UserStore::new(Arc::clone(&store)),
             auth: AuthStore::new(),
             contacts: ContactStore::new(),
             messages: MsgStore::new(),
             services: ServiceRegistry::new(),
             sec: Arc::new(Sec::new()),
+            store,
         }
     }
 
@@ -95,15 +108,25 @@ impl Qaul {
     /// that the main thread will take over execution of some other
     /// application loop so to enable further API abstractions to hook
     /// into the service API.
-    pub fn new(router: Arc<Router>) -> Arc<Self> {
+    pub fn new<'p, P>(router: Arc<Router>, store_path: P) -> Arc<Self>
+    where
+        P: Into<&'p Path>,
+    {
+        let store = Builder::new()
+            .offset(store_path)
+            .build()
+            .map(|l| Arc::new(l))
+            .unwrap();
+
         let q = Arc::new(Self {
             router: Arc::clone(&router),
-            users: UserStore::new(unimplemented!()),
+            users: UserStore::new(Arc::clone(&store)),
             auth: AuthStore::new(),
             contacts: ContactStore::new(),
             messages: MsgStore::new(),
             services: ServiceRegistry::new(),
             sec: Arc::new(Sec::new()),
+            store,
         });
 
         // TODO: Where to store this?!

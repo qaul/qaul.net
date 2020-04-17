@@ -9,3 +9,4 @@ license = "GPL-3.0"
 libqaul = { path = "../../libqaul" }
 ratman = { path = "../../ratman" }
 futures = "0.3"
+tempfile = "3.0"
