@@ -41,7 +41,7 @@ pub(crate) struct RatMessageProto {
 impl RatMessageProto {
     pub(crate) fn build(&self, store: &UserStore) -> RatMessage {
         let id = self.env.sender.clone().into();
-        let keypair = store.get_key(id).unwrap();
+        let keypair = async_std::task::block_on(async { store.get_key(id).await });
 
         let payload = conjoiner::serialise(&self.env).unwrap();
         let sign: Vec<_> = keypair

@@ -42,6 +42,25 @@ impl LocalUser {
     }
 }
 
+pub(crate) struct KeyWrap(pub(crate) Keypair);
+
+impl From<&Record> for KeyWrap {
+    fn from(rec: &Record) -> Self {
+        KeyWrap(
+            Keypair::from_bytes(
+                rec.kv()
+                    .get(KPAIR)
+                    .map(|v| match v {
+                        Value::Vec(bytes) => bytes,
+                        _ => unreachable!(),
+                    })
+                    .unwrap(),
+            )
+            .unwrap(),
+        )
+    }
+}
+
 /// Get a UserProfile from a record
 impl From<&Record> for UserProfile {
     fn from(rec: &Record) -> Self {

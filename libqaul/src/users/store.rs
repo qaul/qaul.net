@@ -4,11 +4,11 @@ use crate::{
     error::{Error, Result},
     qaul::Identity,
     security::KeyId,
-    store::LocalUser,
+    store::{KeyWrap, LocalUser},
     users::UserProfile,
 };
 use alexandria::{
-    utils::{Id, Path, TagSet},
+    utils::{Id, Path, Query, QueryResult, TagSet},
     Library,
 };
 use ed25519_dalek::Keypair;
@@ -28,17 +28,12 @@ fn profile_path(id: Id) -> Path {
 #[derive(Clone)]
 pub(crate) struct UserStore {
     inner: Arc<Library>,
-    /// Map the key Ids to word-aligned alexandria Ids used in storage
-    map: BTreeMap<Identity, Id>,
 }
 
 impl UserStore {
     /// Create a new type abstraction over an existing Alexandria lib
     pub(crate) fn new(inner: Arc<Library>) -> Self {
-        Self {
-            inner,
-            map: Default::default(),
-        }
+        Self { inner }
     }
 
     /// Create a new local user
@@ -84,8 +79,18 @@ impl UserStore {
     }
 
     /// Don't call this on non-local users please
-    pub(crate) fn get_key(&self, id: Identity) -> Option<Arc<Keypair>> {
-        unimplemented!()
+    pub(crate) async fn get_key(&self, id: Identity) -> Keypair {
+        match self
+            .inner
+            .data(id)
+            .await
+            .unwrap()
+            .query(Query::Path(Path::from(KEY_PATH)))
+            .await
+        {
+            Ok(QueryResult::Single(rec)) => KeyWrap::from(&*rec).0,
+            _ => panic!("Key not properly stored in the database"),
+        }
     }
 
     pub(crate) fn get(&self, id: &Identity) -> Result<UserProfile> {
@@ -108,4 +113,46 @@ impl UserStore {
     pub(crate) fn all(&self) -> Vec<UserProfile> {
         unimplemented!()
     }
+}
+
+#[cfg(test)]
+mod harness {
+    use crate::{users::UserStore, Identity};
+    use async_std::sync::Arc;
+
+    pub(super) fn setup() -> UserStore {
+        use alexandria::Builder;
+        let dir = tempfile::tempdir().unwrap();
+        let lib = Builder::new()
+            .offset(dir.path())
+            .build()
+            .map(|l| Arc::new(l))
+            .unwrap();
+
+        UserStore::new(lib)
+    }
+
+    /// Insert a random user into the store and return the Id
+    pub(super) fn insert_random(store: &UserStore) -> Identity {
+        async_std::task::block_on(async {
+            use crate::security::Sec;
+            let keyid = Sec::new().generate().await;
+            let id = keyid.id;
+            store.create_local(keyid, "car horse battery staple").await;
+            id
+        })
+    }
+}
+
+#[test]
+fn create_user() {
+    let store = harness::setup();
+    harness::insert_random(&store);
+}
+
+#[async_std::test]
+async fn create_and_get_key() {
+    let store = harness::setup();
+    let id = harness::insert_random(&store);
+    store.get_key(id).await;
 }
