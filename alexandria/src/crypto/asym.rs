@@ -54,3 +54,34 @@ where
         Ok(T::decode(&clear)?)
     }
 }
+
+#[test]
+fn sign_and_encrypt() {
+    use ed25519_dalek::Keypair as DKP;
+    use rand::rngs::OsRng;
+    let mut rng = OsRng {};
+
+    let DKP { secret, public } = DKP::generate(&mut rng);
+
+    let nacl_pair = KeyPair {
+        sec: SecretKey::from_slice(secret.as_bytes()).unwrap(),
+        pub_: PublicKey::from_slice(public.as_bytes()).unwrap(),
+    };
+    let dalek_pair = DKP { secret, public };
+
+    let message = "this can be signed and encrypted!";
+
+    // Try to sign data
+    let sign = dalek_pair.sign(message.as_bytes());
+
+    // Encrypt the message
+    let ctext = nacl_pair
+        .seal(&message.as_bytes().iter().cloned().collect::<Vec<u8>>())
+        .unwrap();
+
+    // Verify signature
+    dalek_pair.verify(message.as_bytes(), &sign).unwrap();
+
+    // Decrypt secret
+    nacl_pair.open(&ctext).unwrap()
+}

@@ -218,7 +218,7 @@ impl<'a> Data<'a> {
     /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
     /// # let my_tag = Tag::new("tag1", vec![1, 3, 1, 2]);
     /// let tags = TagSet::from(vec![my_tag]);
-    /// let sub = lib.data(None).await?.subscribe(Query::Tag::SetQuery::Partial(tags)).await;
+    /// let sub = lib.data(None).await?.subscribe(Query::Tag(SetQuery::Partial(tags))).await;
     ///
     /// let path = sub.next().await;
     /// let new_data = lib.data(None).await?.query(Query::Path(path)).await?;
