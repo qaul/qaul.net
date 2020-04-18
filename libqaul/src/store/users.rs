@@ -1,19 +1,46 @@
 //! User profile database wrappers (models)
 
 use super::Conv;
-use crate::users::{UserProfile, UserUpdate};
+use crate::{
+    users::{UserProfile, UserUpdate},
+    Identity,
+};
 use alexandria::{
     record::{kv::Value, Record},
     utils::Diff,
 };
+use async_std::sync::Arc;
+use ed25519_dalek::Keypair;
 use std::collections::{BTreeMap, BTreeSet};
 
+const KPAIR: &'static str = "keypair";
 const UID: &'static str = "id";
 const D_NAME: &'static str = "display_name";
 const R_NAME: &'static str = "real_name";
 const BIO: &'static str = "bio";
 const SERV: &'static str = "services";
 const AVI: &'static str = "avatar";
+
+/// An alexandria abstraction to store a local user
+pub(crate) struct LocalUser {
+    pub(crate) profile: UserProfile,
+    pub(crate) keypair: Arc<Keypair>,
+}
+
+impl LocalUser {
+    /// Create a new empty local user
+    pub(crate) fn new(id: Identity, keypair: Arc<Keypair>) -> Self {
+        Self {
+            profile: UserProfile::new(id),
+            keypair,
+        }
+    }
+
+    /// Generate the initial diff of metadata
+    pub(crate) fn meta_diff(&self) -> Diff {
+        Diff::map().insert(KPAIR, self.keypair.to_bytes().to_vec())
+    }
+}
 
 /// Get a UserProfile from a record
 impl From<&Record> for UserProfile {

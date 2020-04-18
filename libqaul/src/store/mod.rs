@@ -7,6 +7,7 @@
 //! reading a data type from a record.
 
 mod users;
+pub(crate) use users::LocalUser;
 
 use crate::Identity;
 use alexandria::record::kv::Value;

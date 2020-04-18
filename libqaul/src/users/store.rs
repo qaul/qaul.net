@@ -4,9 +4,13 @@ use crate::{
     error::{Error, Result},
     qaul::Identity,
     security::KeyId,
+    store::LocalUser,
     users::UserProfile,
 };
-use alexandria::{utils::Id, Library};
+use alexandria::{
+    utils::{Id, Path, TagSet},
+    Library,
+};
 use ed25519_dalek::Keypair;
 
 use std::{
@@ -14,28 +18,10 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-/// A small wrapper to express local vs. remote users
-pub(crate) enum User {
-    /// A local user has a full keypair
-    Local {
-        profile: UserProfile,
-        keypair: Arc<Keypair>,
-    },
-    /// A remote user with optional pubkey
-    Remote(UserProfile),
-}
+const KEY_PATH: &'static str = "/meta:keys";
 
-impl User {
-    #[allow(unused)]
-    pub(crate) fn id(&self) -> &Identity {
-        match self {
-            User::Local {
-                ref profile,
-                keypair: _,
-            } => &profile.id,
-            User::Remote(ref u) => &u.id,
-        }
-    }
+fn profile_path(id: Id) -> Path {
+    Path::from(format!("/users:{}", id))
 }
 
 /// A type wrapper around the alexandria storage library
@@ -55,23 +41,37 @@ impl UserStore {
         }
     }
 
-    /// Create a new storage user corresponding to a local user
-    pub(crate) async fn create_user(&self, keyid: KeyId, pw: &str) {
+    /// Create a new local user
+    pub(crate) async fn create_local(&self, keyid: KeyId, pw: &str) {
         let KeyId { id, keypair } = keyid;
         self.inner.user(id).create(pw).await.unwrap();
+        let local = LocalUser::new(id, keypair);
+
+        // Store the key
+        self.inner
+            .data(id)
+            .await
+            .unwrap()
+            .insert(Path::from(KEY_PATH), TagSet::empty(), local.meta_diff())
+            .await
+            .unwrap();
+
+        // Then insert the user profile
+        self.inner
+            .data(None)
+            .await
+            .unwrap()
+            .batch(profile_path(id), TagSet::empty(), local.profile.init_diff())
+            .await
+            .unwrap();
     }
 
-    /// Add a new user (local or remote)
-    pub(crate) fn add_user(&self, user: User) {
-        unimplemented!()
-    }
-
-    /// Convenience function around creating a new remote user
+    /// Add a newly discovered remote user
     pub(crate) fn discover(&self, id: Identity) {
         unimplemented!()
     }
 
-    pub(crate) fn rm_user(&self, user: Identity) {
+    pub(crate) fn delete(&self, user: Identity) {
         unimplemented!()
     }
 
@@ -93,19 +93,19 @@ impl UserStore {
     }
 
     /// Get all locally available users
-    pub(crate) fn get_local(&self) -> Vec<UserProfile> {
+    pub(crate) fn all_local(&self) -> Vec<UserProfile> {
         unimplemented!()
     }
 
     /// Get all remote users this device knows about
     #[allow(unused)]
-    pub(crate) fn get_remote(&self) -> Vec<UserProfile> {
+    pub(crate) fn all_remote(&self) -> Vec<UserProfile> {
         unimplemented!()
     }
 
     /// Get *all* users this device knows about
     #[allow(unused)]
-    pub(crate) fn get_all(&self) -> Vec<UserProfile> {
+    pub(crate) fn all(&self) -> Vec<UserProfile> {
         unimplemented!()
     }
 }

@@ -1,7 +1,7 @@
 use crate::{
     error::Result,
     security::{KeyId, Sec},
-    users::{User, UserProfile},
+    users::UserProfile,
     utils, Identity, Qaul,
 };
 use ed25519_dalek::Keypair;
@@ -38,17 +38,17 @@ impl<'qaul> Users<'qaul> {
     /// No information about sessions or existing login state is
     /// stored or accessible via this API.
     pub fn list(&self) -> Vec<UserProfile> {
-        self.q.users.get_all()
+        self.q.users.all()
     }
 
     /// Enumerate locally stored users available
     pub fn list_local(&self) -> Vec<UserProfile> {
-        self.q.users.get_local()
+        self.q.users.all_local()
     }
 
     /// Enumerate remote stored users available
     pub fn list_remote(&self) -> Vec<UserProfile> {
-        self.q.users.get_remote()
+        self.q.users.all_remote()
     }
 
     /// Create a new user and authenticated session
@@ -63,15 +63,15 @@ impl<'qaul> Users<'qaul> {
     /// case, there's no real security, but a drive-by will still only
     /// grab encrypted files.
     pub async fn create(&self, pw: &str) -> Result<UserAuth> {
-        let KeyId { keypair, id } = self.q.sec.generate().await;
-        let profile = UserProfile::new(id);
-        let user = User::Local { profile, keypair };
+        let keyd = self.q.sec.generate().await;
+        let id = keyd.id;
 
         // Inform Router about new local user
         self.q.router.add_user(id).await?;
         self.q.router.online(id).await?;
-        
-        self.q.users.add_user(user);
+
+        // Create user login
+        self.q.users.create_local(keyd, pw);
         self.q.auth.set_pw(id, pw);
         self.q.auth.new_login(id, pw).map(|t| UserAuth(id, t))
     }
@@ -87,7 +87,7 @@ impl<'qaul> Users<'qaul> {
         // If logout succeeds, we can delete the user
         self.logout(user).await?;
         self.q.router.del_user(id, true).await?;
-        self.q.users.rm_user(id);
+        self.q.users.delete(id);
         Ok(())
     }
 

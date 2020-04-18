@@ -21,8 +21,10 @@ version = "0.2.0"
 dependencies = [
  "async-std",
  "bincode",
+ "ed25519-dalek",
  "failure",
  "keybob",
+ "rand 0.7.3",
  "ratman-identity",
  "serde",
  "sodiumoxide",
@@ -843,9 +845,9 @@ dependencies = [
 
 [[package]]
 name = "hermit-abi"
-version = "0.1.10"
+version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "725cf19794cf90aa94e65050cb4191ff5d8fa87a498383774c47b332e3af952e"
+checksum = "8a0d737e0f947a1864e93d33fdef4af8445a00d1ed8dc0c8ddb73139ea6abf15"
 dependencies = [
  "libc",
 ]
@@ -1096,9 +1098,9 @@ dependencies = [
 
 [[package]]
 name = "libpulse-binding"
-version = "2.15.0"
+version = "2.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf6cf349b1f74f14bffd8f7897c4043a6b53eb1893159b3c628005624661f06f"
+checksum = "35b35c3c377b537d044107ff0830b4e5ae32a5c106289977a04b3387a143e994"
 dependencies = [
  "libc",
  "libpulse-sys",
@@ -1107,9 +1109,9 @@ dependencies = [
 
 [[package]]
 name = "libpulse-simple-binding"
-version = "2.15.0"
+version = "2.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b37d0e197487fc00ac6f560d9cce7c1e33951a5f2358c47397a477df1ff99317"
+checksum = "a4ef3ce750cdbce60fc96aac1f6dad84d67419d2307a05a27b73700f1f5d33e0"
 dependencies = [
  "libpulse-binding",
  "libpulse-simple-sys",
@@ -1118,9 +1120,9 @@ dependencies = [
 
 [[package]]
 name = "libpulse-simple-sys"
-version = "1.12.1"
+version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63ec4ead758215fc3f704364f79a8e5532db6c265d4f62d138e0ee332cc7e89f"
+checksum = "88d5e2cc71fee20c6ce410f3cc7430f067d5c63a5c3b11ea7e45cce1bfae19bd"
 dependencies = [
  "libpulse-sys",
  "pkg-config",
@@ -1128,9 +1130,9 @@ dependencies = [
 
 [[package]]
 name = "libpulse-sys"
-version = "1.12.1"
+version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53b35bb99a41910a408c28cafbdd6708584a2cbc90a57b82f1f08b13413cf094"
+checksum = "b4c5aecc8dd651c60c212267ef9599a6be8765e63509816695f96a91b1e06151"
 dependencies = [
  "libc",
  "pkg-config",
@@ -1461,9 +1463,9 @@ dependencies = [
 
 [[package]]
 name = "num_cpus"
-version = "1.12.0"
+version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46203554f085ff89c235cd12f7075f3233af9b11ed7c9e16dfe2560d03313ce6"
+checksum = "05499f3756671c15885fee9034446956fff3f243d6077b91e5767df161f766b3"
 dependencies = [
  "hermit-abi",
  "libc",
@@ -1857,9 +1859,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.3.6"
+version = "1.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f6946991529684867e47d86474e3a6d0c0ab9b82d5821e314b1ede31fa3a4b3"
+checksum = "a6020f034922e3194c711b82a627453881bc4682166cabb07134a10c26ba7692"
 dependencies = [
  "aho-corasick",
  "memchr",
