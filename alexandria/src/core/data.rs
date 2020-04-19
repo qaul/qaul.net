@@ -59,16 +59,24 @@ impl<'a> Data<'a> {
         D: Into<Diff>,
     {
         let mut db = DeltaBuilder::new(self.id, DeltaType::Insert);
+        let tags = tags.into();
 
         let mut store = self.inner.store.write().await;
         let id = store.batch(
             &mut db,
             self.id,
             &path,
-            tags.into(),
+            tags.clone(),
             data.into_iter().map(|d| d.into()).collect(),
         )?;
 
+        let mut tc = self.inner.tag_cache.write().await;
+        tags.iter().fold(Ok(()), |res, t| {
+            res.and_then(|_| tc.insert(self.id, path.clone(), t.clone()))
+        })?;
+        drop(tc);
+
+        self.inner.subs.queue(db.make()).await;
         Ok(id)
     }
 
@@ -82,9 +90,16 @@ impl<'a> Data<'a> {
         D: Into<Diff>,
     {
         let mut db = DeltaBuilder::new(self.id, DeltaType::Insert);
+        let tags = tags.into();
 
         let mut store = self.inner.store.write().await;
-        let id = store.insert(&mut db, self.id, &path, tags.into(), data.into())?;
+        let id = store.insert(&mut db, self.id, &path, tags.clone(), data.into())?;
+
+        let mut tc = self.inner.tag_cache.write().await;
+        tags.iter().fold(Ok(()), |res, t| {
+            res.and_then(|_| tc.insert(self.id, path.clone(), t.clone()))
+        })?;
+        drop(tc);
 
         self.inner.subs.queue(db.make()).await;
         Ok(id)
@@ -129,7 +144,7 @@ impl<'a> Data<'a> {
     ///
     /// This code makes a direct query via the path of a record.  This
     /// will only return a single record if successful.
-    /// 
+    ///
     /// ```
     /// # use alexandria::{Builder, Library, error::Result, utils::{Tag, TagSet, Path, Query, SetQuery}};
     /// # async fn foo() -> Result<()> {

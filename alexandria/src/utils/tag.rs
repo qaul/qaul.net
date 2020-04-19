@@ -114,4 +114,12 @@ impl Tag {
             val: val.into_iter().collect(),
         }
     }
+
+    /// Create a tag that consists of only a key, with no value
+    pub fn empty<K>(key: K) -> Self
+    where
+        K: Into<String>,
+    {
+        Self::new(key, vec![])
+    }
 }
