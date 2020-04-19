@@ -10,7 +10,7 @@ edition = "2018"
 # Re-exports correct netmod and identity modules
 ratman = { path = "../ratman" }
 
-async-std = { version = "1.0", features = ["attributes"] }
+async-std = { version = "1.0", features = ["attributes", "unstable"] }
 futures = "0.3"
 crossbeam-channel = "0.4"
 

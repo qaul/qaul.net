@@ -1,7 +1,7 @@
 use crate::{
     error::Result,
     security::{KeyId, Sec},
-    users::UserProfile,
+    users::{UserProfile, UserUpdate},
     utils, Identity, Qaul,
 };
 use ed25519_dalek::Keypair;
@@ -37,18 +37,18 @@ impl<'qaul> Users<'qaul> {
     ///
     /// No information about sessions or existing login state is
     /// stored or accessible via this API.
-    pub fn list(&self) -> Vec<UserProfile> {
-        self.q.users.all()
+    pub async fn list(&self) -> Vec<UserProfile> {
+        self.q.users.all().await
     }
 
     /// Enumerate locally stored users available
-    pub fn list_local(&self) -> Vec<UserProfile> {
-        self.q.users.all_local()
+    pub async fn list_local(&self) -> Vec<UserProfile> {
+        self.q.users.all_local().await
     }
 
     /// Enumerate remote stored users available
-    pub fn list_remote(&self) -> Vec<UserProfile> {
-        self.q.users.all_remote()
+    pub async fn list_remote(&self) -> Vec<UserProfile> {
+        self.q.users.all_remote().await
     }
 
     /// Create a new user and authenticated session
@@ -71,7 +71,7 @@ impl<'qaul> Users<'qaul> {
         self.q.router.online(id).await?;
 
         // Create user login
-        self.q.users.create_local(keyd, pw);
+        self.q.users.create_local(keyd, pw).await;
         self.q.auth.set_pw(id, pw);
         self.q.auth.new_login(id, pw).map(|t| UserAuth(id, t))
     }
@@ -87,7 +87,7 @@ impl<'qaul> Users<'qaul> {
         // If logout succeeds, we can delete the user
         self.logout(user).await?;
         self.q.router.del_user(id, true).await?;
-        self.q.users.delete(id);
+        self.q.users.delete_local(id).await;
         Ok(())
     }
 
@@ -119,17 +119,14 @@ impl<'qaul> Users<'qaul> {
     /// No athentication is required for this endpoint, seeing as only
     /// public information is exposed via the `UserProfile`
     /// abstraction anyway.
-    pub fn get(&self, user: Identity) -> Result<UserProfile> {
-        self.q.users.get(&user)
+    pub async fn get(&self, user: Identity) -> Result<UserProfile> {
+        self.q.users.get(user).await
     }
 
     /// Update a `UserProfile` with a lambda, if authentication passes
-    pub fn update<F>(&self, user: UserAuth, update: F) -> Result<()>
-    where
-        F: FnOnce(&mut UserProfile),
-    {
-        let (ref id, _) = self.q.auth.trusted(user)?;
-        self.q.users.modify(id, update)
+    pub async fn update(&self, user: UserAuth, update: UserUpdate) -> Result<()> {
+        let (id, _) = self.q.auth.trusted(user)?;
+        self.q.users.modify(id, update).await
     }
 
     /// Validate that a `UserAuth` represents a currently logged in user
