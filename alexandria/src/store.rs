@@ -205,6 +205,10 @@ impl Store {
             None => &mut self.shared,
         }
     }
+
+    fn length(&mut self, id: Option<Id>) -> usize {
+        self.tree_mut(id).len()
+    }
 }
 
 #[test]
@@ -403,4 +407,6 @@ fn insert_batch_single() {
         store.shared.get(&path).unwrap().deref().unwrap().kv().len(),
         1
     );
+
+    assert_eq!(store.length(None), 1);
 }

@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Per-user encrypted tag storage
-#[derive(Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(crate) struct UserTags {
     t2p: BTreeMap<Tag, BTreeSet<Path>>,
     p2t: BTreeMap<Path, TagSet>,
@@ -70,10 +70,14 @@ impl UserTags {
     pub(crate) fn paths(&self, tags: &TagSet) -> Vec<Path> {
         tags.iter()
             .map(|t| self.single_tag(t))
-            .fold(vec![], |mut vec, paths| {
-                paths.into_iter().for_each(|p| vec.push(p));
-                vec
+            .fold(BTreeSet::new(), |mut set, paths| {
+                paths.into_iter().for_each(|p| {
+                    set.insert(p);
+                });
+                set
             })
+            .into_iter()
+            .collect()
     }
 
     /// Only return paths where tags are an exact match
@@ -223,7 +227,6 @@ fn data_two_matching() {
 
     assert_eq!(ut.paths_matching(&TagSet::from(vec![ta, ts])), vec![alice]);
 }
-
 
 #[test]
 fn data_no_match() {
