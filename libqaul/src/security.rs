@@ -18,7 +18,7 @@ pub(crate) struct Sec {
 
 /// A keypair, and Identity
 pub(crate) struct KeyId {
-    pub keypair: Arc<Keypair>,
+    pub keypair: Keypair,
     pub id: Identity,
 }
 
@@ -33,7 +33,7 @@ impl Sec {
     /// Generate an Id and keypair for a new user
     pub(crate) async fn generate(&self) -> KeyId {
         let mut rng = self.rng.lock().await;
-        let keypair = Arc::new(Keypair::generate(&mut *rng));
+        let keypair = Keypair::generate(&mut *rng);
         let id = Identity::from_bytes(keypair.public.as_bytes());
 
         KeyId { keypair, id }

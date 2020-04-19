@@ -21,28 +21,14 @@ const BIO: &'static str = "bio";
 const SERV: &'static str = "services";
 const AVI: &'static str = "avatar";
 
-/// An alexandria abstraction to store a local user
-pub(crate) struct LocalUser {
-    pub(crate) profile: UserProfile,
-    pub(crate) keypair: Arc<Keypair>,
-}
-
-impl LocalUser {
-    /// Create a new empty local user
-    pub(crate) fn new(id: Identity, keypair: Arc<Keypair>) -> Self {
-        Self {
-            profile: UserProfile::new(id),
-            keypair,
-        }
-    }
-
-    /// Generate the initial diff of metadata
-    pub(crate) fn meta_diff(&self) -> Diff {
-        Diff::map().insert(KPAIR, self.keypair.to_bytes().to_vec())
-    }
-}
-
 pub(crate) struct KeyWrap(pub(crate) Keypair);
+
+impl KeyWrap {
+    /// Generate the initial diff of metadata
+    pub(crate) fn make_diff(&self) -> Diff {
+        Diff::map().insert(KPAIR, self.0.to_bytes().to_vec())
+    }
+}
 
 impl From<&Record> for KeyWrap {
     fn from(rec: &Record) -> Self {

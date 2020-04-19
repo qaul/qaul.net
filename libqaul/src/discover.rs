@@ -3,6 +3,7 @@ use crate::{
     utils::RunLock,
     Qaul,
 };
+use alexandria::utils::Tag;
 use async_std::task;
 use ratman::{netmod::Recipient, Identity, Router};
 use std::{
@@ -45,9 +46,9 @@ impl Discovery {
         // Handle new users
         task::spawn(async move {
             loop {
-                let id = router.discover().await;
+                let id = router.discover().await; // FIXME: Do we still need this?
                 info!(id = id.to_string().as_str(), "Discovered user!");
-                qaul.users.discover(id);
+                qaul.users.insert_profile(id, vec![Tag::empty("profile")]).await;
             }
         });
     }

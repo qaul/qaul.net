@@ -4,8 +4,8 @@ use crate::{
     error::{Error, Result},
     qaul::Identity,
     security::KeyId,
-    store::{KeyWrap, LocalUser},
-    users::UserProfile,
+    store::KeyWrap,
+    users::{UserProfile, UserUpdate},
 };
 use alexandria::{
     utils::{Id, Path, Query, QueryResult, TagSet},
@@ -40,30 +40,31 @@ impl UserStore {
     pub(crate) async fn create_local(&self, keyid: KeyId, pw: &str) {
         let KeyId { id, keypair } = keyid;
         self.inner.user(id).create(pw).await.unwrap();
-        let local = LocalUser::new(id, keypair);
+        let wrapped = KeyWrap(keypair);
 
         // Store the key
         self.inner
             .data(id)
             .await
             .unwrap()
-            .insert(Path::from(KEY_PATH), TagSet::empty(), local.meta_diff())
+            .insert(Path::from(KEY_PATH), TagSet::empty(), wrapped.make_diff())
             .await
             .unwrap();
 
-        // Then insert the user profile
+        self.insert_profile(id, vec![Tag::empty("profile"), Tag::empty("local")])
+            .await;
+    }
+
+    /// Add an empty user profile for an id
+    pub(crate) async fn insert_profile<T: Into<TagSet>>(&self, id: Identity, tags: T) {
+        let profile = UserProfile::new(id);
         self.inner
             .data(None)
             .await
             .unwrap()
-            .batch(profile_path(id), TagSet::empty(), local.profile.init_diff())
+            .batch(profile_path(id), tags, profile.init_diff())
             .await
             .unwrap();
-    }
-
-    /// Add a newly discovered remote user
-    pub(crate) fn discover(&self, id: Identity) {
-        unimplemented!()
     }
 
     pub(crate) fn delete(&self, user: Identity) {
