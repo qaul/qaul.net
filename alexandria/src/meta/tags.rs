@@ -138,7 +138,9 @@ impl TagCache {
     /// Delete a path from all tag mappings
     pub(crate) fn delete_path<I: Into<Option<Id>>>(&mut self, id: I, path: Path) -> Result<()> {
         let id = id.into().unwrap_or(self.id);
-        self.map.get_mut(id)?.clear(&path);
+        if let Ok(entry) = self.map.get_mut(id) {
+            entry.clear(&path);
+        }
         Ok(())
     }
 
