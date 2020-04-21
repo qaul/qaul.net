@@ -121,6 +121,7 @@ impl<'a> PointerIter<'a> {
     }
 
     /// reset the pointer to the checkpoint
+    #[allow(unused)]
     pub fn reset_pointer(&mut self) {
         self.pointer = self.checkpoint;
     }

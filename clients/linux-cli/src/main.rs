@@ -1,8 +1,4 @@
-use futures::{
-    executor::block_on,
-    join,
-    stream::{Stream, StreamExt},
-};
+use futures::{executor::block_on, join, stream::StreamExt};
 use libqaul::{messages::Mode, Qaul};
 use ratman::Router;
 
@@ -24,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     let mut subscriber = msg.subscribe(user, "de.spacekookie.myapp", None)?;
 
-    block_on(async { join!(send, subscriber.next(),) });
+    block_on(async { join!(send, subscriber.next(),) }).0.unwrap();
 
     Ok(())
 }

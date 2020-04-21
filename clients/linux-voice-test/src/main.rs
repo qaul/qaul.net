@@ -11,7 +11,7 @@ use {
     },
     linux_voice_test::event::Events,
     netmod_udp::Endpoint,
-    ratman::{Identity, Router},
+    ratman::Router,
     std::{
         env::args,
         io::{stdout, Write},
@@ -42,7 +42,7 @@ async fn run() {
     let endpoint = Endpoint::spawn(args[1].parse::<u16>().unwrap());
 
     for i in 2..args.len() {
-        endpoint.introduce(&args[i]).await;
+        endpoint.introduce(&args[i]).await.unwrap();
     }
 
     let router = Router::new();
@@ -75,7 +75,7 @@ async fn run() {
     );
     while let Some(e) = stream.next().await {
         let mut state = state.lock().await;
-        let mut state = state.deref_mut();
+        let state = state.deref_mut();
         // keyboard input
         if let Some(e) = e {
             match e {
@@ -125,7 +125,7 @@ async fn run() {
             }
         }
 
-        let (width, height) = terminal_size().unwrap();
+        let (width, _) = terminal_size().unwrap();
         match state {
             State::UserSelect(ref mut index) => {
                 let mut s = format!(" User ID: {}", user.0);
@@ -139,7 +139,8 @@ async fn run() {
                     style::Invert,
                     s,
                     style::Reset
-                );
+                )
+                .unwrap();
 
                 let user_count = qaul
                     .users()
@@ -150,7 +151,7 @@ async fn run() {
                     .enumerate()
                     .map(|(i, user)| {
                         if i == *index {
-                            write!(stdout, "{}", style::Underline);
+                            write!(stdout, "{}", style::Underline).unwrap();
                         }
                         writeln!(
                             stdout,
@@ -158,9 +159,10 @@ async fn run() {
                             cursor::Goto(1, 2 + i as u16),
                             user.id,
                             clear::UntilNewline
-                        );
+                        )
+                        .unwrap();
                         if i == *index {
-                            write!(stdout, "{}", style::Reset);
+                            write!(stdout, "{}", style::Reset).unwrap();
                         }
                     })
                     .count();
@@ -171,7 +173,8 @@ async fn run() {
                     "{}{}",
                     cursor::Goto(1, 2 + user_count as u16),
                     clear::AfterCursor
-                );
+                )
+                .unwrap();
             }
             State::MessageDisplay(m) => {
                 writeln!(
@@ -180,18 +183,18 @@ async fn run() {
                     cursor::Goto(1, 1),
                     m.sender,
                     clear::AfterCursor,
-                );
+                )
+                .unwrap();
             }
         }
-        stdout.flush();
+        stdout.flush().unwrap();
     }
 }
 
 fn main() {
     use {
         std::fs::File,
-        tracing,
-        tracing_subscriber::{fmt, registry::Registry, EnvFilter, Layer},
+        tracing_subscriber::{fmt, EnvFilter},
     };
 
     let logfile = File::create("/tmp/qaul.log").unwrap();
