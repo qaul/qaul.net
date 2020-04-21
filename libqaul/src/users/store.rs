@@ -1,7 +1,7 @@
 //! Store for user profiles
 
 use crate::{
-    error::{Error, Result},
+    error::Result,
     qaul::Identity,
     security::KeyId,
     store::KeyWrap,
@@ -11,13 +11,9 @@ use alexandria::{
     utils::{Id, Path, Query, QueryResult, SetQuery, Tag, TagSet},
     Library,
 };
-use async_std::prelude::FutureExt;
 use ed25519_dalek::Keypair;
 
-use std::{
-    collections::BTreeMap,
-    sync::{Arc, Mutex},
-};
+use std::sync::Arc;
 
 const KEY_PATH: &'static str = "/meta:keys";
 
@@ -70,26 +66,28 @@ impl UserStore {
 
     /// Delete the key and profile for a local user
     pub(crate) async fn delete_local(&self, id: Identity) {
-        let (r1, r2) = self
-            .inner
+        dbg!(self.get(id).await).unwrap();
+
+        self.inner
             .data(id)
             .await
             .unwrap()
             .delete(Path::from(KEY_PATH))
-            .join(
-                self.inner
-                    .data(None)
-                    .await
-                    .unwrap()
-                    .delete(profile_path(id)),
-            )
-            .await;
-        r1.and(r2).unwrap();
+            .await
+            .unwrap();
+
+        self.inner
+            .data(None)
+            .await
+            .unwrap()
+            .delete(profile_path(id))
+            .await
+            .unwrap();
     }
 
     /// Modify a single user inside the store in-place
     pub(crate) async fn modify(&self, id: Identity, modifier: UserUpdate) -> Result<()> {
-        let mut curr = self.get(id).await?;
+        let curr = self.get(id).await?;
         let diff = curr.gen_diff(modifier);
         self.inner
             .data(None)
@@ -98,7 +96,6 @@ impl UserStore {
             .update(profile_path(id), diff)
             .await
             .unwrap();
-
         Ok(())
     }
 
@@ -281,5 +278,5 @@ async fn delete_user() {
 async fn create_local_and_query() {
     let store = harness::setup();
     let id = harness::insert_random(&store);
-    assert_eq!(dbg!(store.all_local().await).len(), 1);
+    assert_eq!(store.all_local().await.len(), 1);
 }
