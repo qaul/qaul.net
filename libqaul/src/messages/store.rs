@@ -59,11 +59,6 @@ impl<'store> StoreQuery<'store> {
         }
     }
 
-    pub(crate) fn tag(mut self, tag: Tag) -> Self {
-        self.tags.insert(tag);
-        self
-    }
-
     pub(crate) fn tags<I: IntoIterator<Item = Tag>>(mut self, tags: I) -> Self {
         self.tags.extend(tags.into_iter());
         self

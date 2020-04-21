@@ -3,7 +3,7 @@ use async_std::{
     future::Future,
     pin::Pin,
     stream::Stream,
-    sync::{channel, Arc, Receiver, Sender},
+    sync::Receiver,
     task::{Context, Poll},
 };
 
@@ -22,14 +22,7 @@ pub struct Subscription<T> {
     pub(crate) rx: Receiver<T>,
 }
 
-impl<T> Subscription<T> {
-    /// Create a new subscription stream
-    pub(crate) fn new() -> (Self, Sender<T>) {
-        let (tx, rx) = channel(1);
-        let id = SubId::random();
-        (Self { id, rx }, tx)
-    }
-}
+impl<T> Subscription<T> {}
 
 impl<T> Stream for Subscription<T> {
     type Item = T;

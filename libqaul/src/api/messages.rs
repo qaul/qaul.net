@@ -8,7 +8,7 @@ use crate::{
 };
 
 use async_std::{
-    future::{self, Future},
+    future,
     task::{self, Poll},
 };
 use ratman::netmod::Recipient;
@@ -286,9 +286,9 @@ impl<'qaul> Messages<'qaul> {
     /// each subscription and can later on be used to cancel a stream.
     pub fn subscribe<S, T>(
         &self,
-        user: UserAuth,
-        service: S,
-        tags: T,
+        _user: UserAuth,
+        _service: S,
+        _tags: T,
     ) -> Result<Subscription<MsgRef>>
     where
         S: Into<String>,
@@ -301,7 +301,7 @@ impl<'qaul> Messages<'qaul> {
     ///
     /// Messages can still be queried or polled, but will stop being
     /// streamed to the registered receiver.
-    pub fn unsubscribe(&self, user: UserAuth, id: SubId) -> Result<()> {
+    pub fn unsubscribe(&self, _user: UserAuth, _id: SubId) -> Result<()> {
         unimplemented!()
     }
 

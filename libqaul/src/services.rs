@@ -53,27 +53,6 @@ impl ServiceRegistry {
             .map_or(Err(Error::NoService), |_| Ok(()))
     }
 
-    pub(crate) fn add_listener<F: 'static + Send + Sync>(
-        &self,
-        service: String,
-        listener: F,
-    ) -> Result<()>
-    where
-        F: Fn(MsgRef) -> Result<()>,
-    {
-        self.inner
-            .write()
-            .expect("ServiceRegistry was poisoned")
-            .get(&service)
-            .map_or(Err(Error::NoService), |srv| {
-                Ok(srv
-                    .callbacks
-                    .write()
-                    .expect("Service callbacks were poisoned")
-                    .push(Arc::new(listener)))
-            })
-    }
-
     /// Push a Message out to all listener endpoints and pollers
     pub(crate) fn push_for(&self, service: String, msg: MsgRef) -> Result<()> {
         self.inner

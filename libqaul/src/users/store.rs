@@ -224,6 +224,7 @@ mod harness {
     }
 
     /// Insert a random user into the store and return the Id
+    #[allow(unused)]
     pub(super) fn insert_random_remote(store: &UserStore) -> Identity {
         async_std::task::block_on(async {
             let id = Identity::random();
@@ -277,6 +278,6 @@ async fn delete_user() {
 #[async_std::test]
 async fn create_local_and_query() {
     let store = harness::setup();
-    let id = harness::insert_random(&store);
+    let _ = harness::insert_random(&store);
     assert_eq!(store.all_local().await.len(), 1);
 }

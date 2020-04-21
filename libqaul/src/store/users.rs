@@ -1,17 +1,13 @@
 //! User profile database wrappers (models)
 
 use super::Conv;
-use crate::{
-    users::{UserProfile, UserUpdate},
-    Identity,
-};
+use crate::users::{UserProfile, UserUpdate};
 use alexandria::{
     record::{kv::Value, Record},
     utils::Diff,
 };
-use async_std::sync::Arc;
 use ed25519_dalek::Keypair;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 
 const KPAIR: &'static str = "keypair";
 const UID: &'static str = "id";

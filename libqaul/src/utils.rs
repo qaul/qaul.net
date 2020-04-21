@@ -1,7 +1,6 @@
 //! General utility module
 
 use rand::prelude::*;
-use std::sync::RwLock;
 
 /// Generate some secure random data into an allocated slice
 pub(crate) fn random(len: usize) -> Vec<u8> {
@@ -54,34 +53,5 @@ impl<T: PartialEq> VecUtils<T> for Vec<T> {
     fn add(mut self, t: T) -> Self {
         self.push(t);
         self
-    }
-}
-
-/// A utility RunLock wrapper to reduce boilerplate
-pub(crate) struct RunLock {
-    inner: RwLock<bool>,
-}
-
-impl RunLock {
-    /// Create a RunLock with an initial value
-    pub(crate) fn new(inner: bool) -> Self {
-        Self {
-            inner: RwLock::new(inner),
-        }
-    }
-
-    /// Check the current value of RunLock
-    pub(crate) fn check(&self) -> bool {
-        *self.inner.read().expect("RunLock was poisoned!")
-    }
-
-    /// Set the new value of RunLock
-    pub(crate) fn set(&self, val: bool) {
-        let mut _val = self.inner.write().expect("RunLock was poisoned!");
-        *_val = val;
-    }
-
-    pub(crate) fn and(&self, other: &RunLock) -> bool {
-        self.check() && other.check()
     }
 }

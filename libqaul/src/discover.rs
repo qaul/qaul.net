@@ -1,20 +1,11 @@
 use crate::{
     messages::{MsgState, MsgUtils},
-    utils::RunLock,
     Qaul,
 };
 use alexandria::utils::Tag;
 use async_std::task;
-use ratman::{netmod::Recipient, Identity, Router};
-use std::{
-    collections::BTreeMap,
-    sync::{
-        mpsc::{channel, Receiver, Sender},
-        Arc, RwLock,
-    },
-    thread,
-    time::Duration,
-};
+use ratman::{netmod::Recipient, Router};
+use std::sync::Arc;
 
 /// A thread-detached discovery service running inside libqaul
 ///
@@ -38,24 +29,24 @@ pub(crate) struct Discovery;
 impl Discovery {
     /// Start a discovery service running inside libqaul
     pub(crate) fn start(qaul: Arc<Qaul>, router: Arc<Router>) {
-        let run = Arc::new(RunLock::new(true));
-
         // Incoming message handler
-        Self::inc_handler(Arc::clone(&qaul), Arc::clone(&router), Arc::clone(&run));
+        Self::inc_handler(Arc::clone(&qaul), Arc::clone(&router));
 
         // Handle new users
         task::spawn(async move {
             loop {
                 let id = router.discover().await; // FIXME: Do we still need this?
                 info!(id = id.to_string().as_str(), "Discovered user!");
-                qaul.users.insert_profile(id, vec![Tag::empty("profile")]).await;
+                qaul.users
+                    .insert_profile(id, vec![Tag::empty("profile")])
+                    .await;
             }
         });
     }
 
     /// Spawns a thread that listens to incoming messages
-    #[instrument(skip(qaul, router, _lock), level = "info")]
-    fn inc_handler(qaul: Arc<Qaul>, router: Arc<Router>, _lock: Arc<RunLock>) {
+    #[instrument(skip(qaul, router), level = "info")]
+    fn inc_handler(qaul: Arc<Qaul>, router: Arc<Router>) {
         task::spawn(async move {
             loop {
                 let msg = router.next().await;

@@ -1,11 +1,8 @@
 use crate::{
     error::Result,
-    security::{KeyId, Sec},
     users::{UserProfile, UserUpdate},
-    utils, Identity, Qaul,
+    Identity, Qaul,
 };
-use ed25519_dalek::Keypair;
-use rand::rngs::OsRng;
 use serde::{de::Deserializer, ser::Serializer, Deserialize, Serialize};
 
 /// A random authentication token

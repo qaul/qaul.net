@@ -47,7 +47,7 @@ impl RatMessageProto {
         let sign: Vec<_> = keypair
             .sign(payload.as_slice())
             .to_bytes()
-            .into_iter()
+            .iter()
             .cloned()
             .collect();
 
@@ -77,7 +77,7 @@ impl MsgUtils {
     }
 
     /// Process incoming RATMAN message, verifying it's signature and payload
-    pub(crate) fn process(id: Identity, msg: RatMessage) -> Message {
+    pub(crate) fn process(_: Identity, msg: RatMessage) -> Message {
         let RatMessage {
             id,
             sender,
@@ -91,7 +91,7 @@ impl MsgUtils {
             sender: _,
             associator,
             payload,
-            tags,
+            tags: _,
         } = conjoiner::deserialise(&payload).unwrap();
 
         // Verify signature

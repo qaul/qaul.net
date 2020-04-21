@@ -7,7 +7,6 @@ use crate::Identity;
 use async_std::sync::Mutex;
 use ed25519_dalek::{Keypair, PublicKey, Signature};
 use rand::rngs::OsRng;
-use std::sync::Arc;
 
 use crate::messages::SigTrust;
 
