@@ -188,8 +188,6 @@ impl From<Vec<u8>> for Value {
     }
 }
 
-
-
 /// A key-value store record
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct Kv {

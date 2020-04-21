@@ -9,11 +9,6 @@ use alexandria::{
     utils::{Diff, DiffSeg, Path, Query, TagSet},
 };
 
-fn scaffold_lib() {
-    let dir = tempdir().unwrap();
-    let _ = Test::new(dir.path(), 1);
-}
-
 #[test]
 fn insert_and_fetch() {
     let dir = tempdir().unwrap();

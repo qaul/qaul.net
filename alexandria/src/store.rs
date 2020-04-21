@@ -206,6 +206,8 @@ impl Store {
         }
     }
 
+    #[cfg(test)]
+    #[allow(unused)]
     fn length(&mut self, id: Option<Id>) -> usize {
         self.tree_mut(id).len()
     }
@@ -289,7 +291,7 @@ fn store_and_update() {
 
     let mut db = DeltaBuilder::new(Some(id), DeltaType::Insert);
     let mut store = Store::new();
-    let rec_id = store.insert(&mut db, Some(id), &path, tags, diff).unwrap();
+    let _ = store.insert(&mut db, Some(id), &path, tags, diff).unwrap();
     assert_eq!(
         store
             .usrd

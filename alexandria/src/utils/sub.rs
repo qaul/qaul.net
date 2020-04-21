@@ -156,6 +156,8 @@ impl SubTest {
         task::spawn(async move { hub.queue(delta).await });
     }
 
+    #[cfg(test)]
+    #[allow(unused)]
     fn path(&self) -> Path {
         self.path.clone()
     }

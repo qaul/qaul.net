@@ -32,6 +32,8 @@ impl TagSet {
         self.0.contains(t)
     }
 
+    #[cfg(test)]
+    #[allow(unused)]
     pub(crate) fn len(&self) -> usize {
         self.0.len()
     }

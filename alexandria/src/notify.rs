@@ -57,6 +57,7 @@ where
     /// If `None` is returned, there was no previous waker, so be
     /// careful not to simply unwrap this value.  You may want to use
     /// `unwrap_none()`.
+    #[allow(unused)]
     pub(crate) fn setup(ptr: &mut Notify<T>, waker: &Waker) {
         ptr.waker.replace(waker.clone());
     }

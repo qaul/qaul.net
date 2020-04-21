@@ -96,7 +96,7 @@ impl<'a> Data<'a> {
         let mut store = self.inner.store.write().await;
         let id = store.insert(&mut db, self.id, &path, tags.clone(), data.into())?;
         drop(store);
-        
+
         let mut tc = self.inner.tag_cache.write().await;
         tags.iter().fold(Ok(()), |res, t| {
             res.and_then(|_| tc.insert(self.id, path.clone(), t.clone()))
@@ -117,7 +117,7 @@ impl<'a> Data<'a> {
         let mut tc = self.inner.tag_cache.write().await;
         tc.delete_path(self.id, path)?;
         drop(tc);
-        
+
         self.inner.subs.queue(db.make()).await;
         Ok(())
     }
@@ -132,7 +132,7 @@ impl<'a> Data<'a> {
         let mut store = self.inner.store.write().await;
         store.update(&mut db, self.id, &path, diff.into())?;
         drop(store);
-        
+
         self.inner.subs.queue(db.make()).await;
         Ok(())
     }

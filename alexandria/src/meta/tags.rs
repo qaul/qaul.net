@@ -1,11 +1,9 @@
 use crate::{
     crypto::{asym::KeyPair, DetachedKey, Encrypted, EncryptedMap},
-    error::{Error, Result},
-    meta::users::User,
+    error::Result,
     utils::{Id, Path, Tag, TagSet},
 };
 
-use async_std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -31,24 +29,6 @@ impl UserTags {
             .or_default()
             .insert(path.clone());
         self.p2t.entry(path.clone()).or_default().insert(tag);
-    }
-
-    /// Remove a tag-path relationship from the store
-    ///
-    /// If it the last association for a tag, it will be removed
-    /// entirely from the table, meaning that the tag is no longer
-    /// present anywhere in the database.
-    pub(crate) fn delete(&mut self, tag: &Tag, path: &Path) {
-        self.t2p.get_mut(tag).unwrap().remove(path);
-        self.p2t.get_mut(path).unwrap().remove(tag);
-
-        if self.t2p.get(tag).unwrap().len() == 0 {
-            self.t2p.remove(tag);
-        }
-
-        if self.p2t.get(path).unwrap().len() == 0 {
-            self.p2t.remove(path);
-        }
     }
 
     /// Remove a path from all tag models
@@ -158,15 +138,6 @@ impl TagCache {
     ) -> Result<Vec<Path>> {
         let id = id.into().unwrap_or(self.id);
         Ok(self.map.get(id)?.paths_matching(tags))
-    }
-
-    pub(crate) fn open(&mut self, user: &User) -> Result<()> {
-        self.map.open(user.id, &*user.key)
-    }
-
-    /// Re-seal the user metadata structure in place
-    pub(crate) fn close(&mut self, user: &User) -> Result<()> {
-        self.map.close(user.id, Arc::clone(&user.key))
     }
 }
 
