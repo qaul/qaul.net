@@ -11,7 +11,7 @@ edition = "2018"
 [dependencies]
 id = { version = "0.4", path = "../ratman/identity", features = ["digest", "random", "aligned"], package = "ratman-identity" }
 
-async-std = { version = "1.0", features = ["unstable"] }
+async-std = { version = "1.0", features = ["unstable", "attributes"] }
 serde = { version = "1.0", features = ["derive", "rc"] }
 sodiumoxide = "0.2.5"
 bincode = "1.0"
@@ -22,3 +22,4 @@ failure = "0.1"
 tempfile = "3.0"
 rand = "0.7"
 ed25519-dalek = "1.0.0-pre.3"
+hex = "0.4"

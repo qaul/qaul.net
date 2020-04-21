@@ -16,6 +16,9 @@ mod diff;
 pub use diff::{Diff, DiffSeg};
 pub(crate) use diff::{DiffExt, DiffResult};
 
+mod iter;
+pub use iter::QueryIterator;
+
 mod tag;
 pub use tag::{Tag, TagSet};
 

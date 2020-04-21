@@ -23,6 +23,10 @@ pub enum Query {
     Path(Path),
     /// Make a query for the tag set
     Tag(SetQuery<TagSet>),
+    /// A fake query for tests
+    #[cfg(test)]
+    #[doc(hidden)]
+    Fake,
 }
 
 /// The result of a query to the database
@@ -218,6 +222,40 @@ impl Data {
             }
             _ => unimplemented!(),
         }
+    }
+
+    /// Iterator query the database via a set of constraints
+    ///
+    /// The primary difference between this function and `query()` is
+    /// that no records are returned or loaded immediately from the
+    /// database.  Instead a query is stored, sized and estimated at
+    /// the time of querying and can then be stepped through.  This
+    /// allows for fetching only a range of objects, limiting memory
+    /// usage.
+    ///
+    /// Paths that are inserted after the `QueryIterator` was
+    /// constructed aren't added to it, and when a path is deleted, it
+    /// will be held until the last QueryIterator with it goes out of
+    /// scope.
+    ///
+    /// Otherwise querying works very similarly to `query()`.
+    pub async fn query_iter(&self, q: Query) -> Result<QueryIterator> {
+        Ok(QueryIterator::new(
+            self.id,
+            match q {
+                Query::Path(ref p) => vec![p.clone()],
+                Query::Tag(ref tq) => {
+                    let tc = self.inner.tag_cache.read().await;
+                    match tq {
+                        SetQuery::Matching(ref tags) => tc.get_paths_matching(self.id, tags)?,
+                        SetQuery::Partial(ref tags) => tc.get_paths(self.id, tags)?,
+                    }
+                }
+                _ => unimplemented!(),
+            },
+            Arc::clone(&self.inner),
+            q,
+        ))
     }
 
     /// Subscribe to future database updates via a query filter
