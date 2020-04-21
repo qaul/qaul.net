@@ -1,20 +1,18 @@
 //!
 
 use crate::{QaulExt, QaulRpc, Request, Response};
-use async_std::{
-    sync::Arc,
-};
+use async_std::sync::Arc;
 use libqaul::Qaul;
 
 #[cfg(feature = "chat")]
-use qaul_chat::Chat;
-#[cfg(feature = "chat")]
 use crate::{ChatExt, ChatRpc};
+#[cfg(feature = "chat")]
+use qaul_chat::Chat;
 
 #[cfg(feature = "voices")]
-use qaul_voices::Voices;
-#[cfg(feature = "voices")]
 use crate::{VoicesExt, VoicesRpc};
+#[cfg(feature = "voices")]
+use qaul_voices::Voices;
 
 /// A type mapper to map RPC requests to libqaul and services
 pub struct Responder {
@@ -54,6 +52,15 @@ impl Responder {
         self.voices.apply(request).await
     }
 
+    /// Primary responder matcher
+    ///
+    /// Takes in a request, calls the appropriate submodule/service,
+    /// and then returns the result to the caller.
+    ///
+    // With this function we avoid having 100 functions that all do
+    // basically the same thing, and the switching logic stays in one
+    // place.  When touching this function, try to leave comments for
+    // anything that's not immediatly obvious.  Also: =^-^=!
     pub async fn respond(&self, req: Request) -> Response {
         // TODO: currently the ids all map into Response::UserId which is wrong
         match req {
@@ -69,7 +76,9 @@ impl Responder {
             #[cfg(feature = "chat")]
             Request::ChatRoomGet(r) => self.respond_chat(r).await.into(),
             #[cfg(feature = "chat")]
-            Request::ChatRoomCreate(r) => self.respond_chat(r).await
+            Request::ChatRoomCreate(r) => self
+                .respond_chat(r)
+                .await
                 .map(|id| Response::RoomId(vec![id]))
                 .unwrap_or_else(|e| Response::Error(e.to_string())),
             #[cfg(feature = "chat")]
@@ -90,10 +99,14 @@ impl Responder {
             // From<Result<T, E>>, which is already implemented, but I
             // think we need to turbo-fish it somehow.  Anyway, future
             // me's problem :)
-            Request::ContactQuery(r) => self.respond_qaul(r).await
+            Request::ContactQuery(r) => self
+                .respond_qaul(r)
+                .await
                 .map(|ids| Response::UserId(ids))
                 .unwrap_or_else(|e| Response::Error(e.to_string())),
-            Request::ContactAll(r) => self.respond_qaul(r).await
+            Request::ContactAll(r) => self
+                .respond_qaul(r)
+                .await
                 .map(|ids| Response::UserId(ids))
                 .unwrap_or_else(|e| Response::Error(e.to_string())),
 
@@ -119,7 +132,9 @@ impl Responder {
 
             // =^-^= Voices =^-^=
             #[cfg(feature = "voices")]
-            Request::VoicesMakeCall(r) => self.respond_voices(r).await
+            Request::VoicesMakeCall(r) => self
+                .respond_voices(r)
+                .await
                 .map(|id| Response::CallId(id))
                 .unwrap_or_else(|e| Response::Error(e.to_string())),
             #[cfg(feature = "voices")]
@@ -139,7 +154,9 @@ impl Responder {
             #[cfg(feature = "voices")]
             Request::VoicesOnHangup(r) => self.respond_voices(r).await.into(),
             #[cfg(feature = "voices")]
-            Request::VoicesNextVoice(r) => self.respond_voices(r).await
+            Request::VoicesNextVoice(r) => self
+                .respond_voices(r)
+                .await
                 .map(|samples| Response::VoiceData(samples))
                 .unwrap_or_else(|e| Response::Error(e.to_string())),
 

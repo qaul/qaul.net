@@ -87,8 +87,8 @@ fn user_list() {
     println!("{}", serde_json::to_string_pretty(&resp).unwrap());
 }
 
-#[test]
-fn user_delete() {
+#[async_std::test]
+async fn user_delete() {
     use libqaul::Qaul;
     use async_std::task::block_on;
     use crate::{Envelope, Responder};
@@ -101,7 +101,7 @@ fn user_delete() {
     let chat = Chat::new(qaul.clone()).unwrap();
     let voices = Voices::new(qaul.clone()).unwrap();
     let auth = block_on(qaul.users().create("blep")).unwrap();
-    assert_eq!(qaul.users().list().len(), 1);
+    assert_eq!(qaul.users().list().await.len(), 1);
 
     let responder = Responder {
         qaul: qaul.clone(),
@@ -133,5 +133,5 @@ fn user_delete() {
 
     let resp_env: ResponseEnv = (env, req_env).into();
 
-    assert_eq!(qaul.users().list().len(), 0);
+    assert_eq!(qaul.users().list().await.len(), 0);
 }

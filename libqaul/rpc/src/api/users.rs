@@ -2,10 +2,11 @@
 
 use crate::QaulRpc;
 use async_trait::async_trait;
+use futures::future;
 use libqaul::{
     api::{ItemDiff, ItemDiffExt, MapDiff, MapDiffExt, SetDiff, SetDiffExt},
     error::Result,
-    users::{UserAuth, UserProfile},
+    users::{UserAuth, UserProfile, UserUpdate},
     Identity, Qaul,
 };
 use serde::{Deserialize, Serialize};
@@ -19,7 +20,7 @@ pub struct List {}
 impl QaulRpc for List {
     type Response = Vec<UserProfile>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users().list()
+        qaul.users().list().await
     }
 }
 
@@ -31,7 +32,7 @@ pub struct ListLocal {}
 impl QaulRpc for ListLocal {
     type Response = Vec<UserProfile>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users().list_local()
+        qaul.users().list_local().await
     }
 }
 /// Enumerate all publicly known remote users
@@ -42,7 +43,7 @@ pub struct ListRemote {}
 impl QaulRpc for ListRemote {
     type Response = Vec<UserProfile>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users().list_remote()
+        qaul.users().list_remote().await
     }
 }
 
@@ -131,7 +132,7 @@ pub struct Get {
 impl QaulRpc for Get {
     type Response = Result<UserProfile>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users().get(self.user)
+        qaul.users().get(self.user).await
     }
 }
 
@@ -163,12 +164,39 @@ impl QaulRpc for Update {
             services,
             avatar,
         } = self;
-        qaul.users().update(auth, move |profile| {
-            display_name.apply(&mut profile.display_name);
-            real_name.apply(&mut profile.real_name);
-            profile.bio.apply(bio);
-            profile.services.apply(services);
-            avatar.apply(&mut profile.avatar);
-        })
+        let mut changes = vec![];
+
+        match display_name {
+            ItemDiff::Ignore => {}
+            ItemDiff::Set(name) => changes.push(UserUpdate::DisplayName(Some(name))),
+            ItemDiff::Unset => changes.push(UserUpdate::DisplayName(None)),
+        }
+
+        match real_name {
+            ItemDiff::Ignore => {}
+            ItemDiff::Set(name) => changes.push(UserUpdate::RealName(Some(name))),
+            ItemDiff::Unset => changes.push(UserUpdate::RealName(None)),
+        }
+
+        bio.into_iter().for_each(|bio| match bio {
+            MapDiff::Ignore => {}
+            MapDiff::Add { key, value } => changes.push(UserUpdate::SetBioLine(key, value)),
+            MapDiff::Remove(key) => changes.push(UserUpdate::RemoveBioLine(key)),
+        });
+
+        services.into_iter().for_each(|serv| match serv {
+            SetDiff::Ignore => {}
+            SetDiff::Add(val) => changes.push(UserUpdate::AddService(val)),
+            SetDiff::Remove(val) => changes.push(UserUpdate::RemoveService(val)),
+        });
+
+        let users = qaul.users();
+        future::join_all(changes.into_iter().fold(vec![], |mut vec, u| {
+            vec.push(users.update(auth.clone(), u));
+            vec
+        }))
+        .await
+        .into_iter()
+        .fold(Ok(()), |prev, res| prev.and_then(|_| res))
     }
 }
