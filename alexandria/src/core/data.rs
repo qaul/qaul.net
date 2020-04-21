@@ -114,6 +114,10 @@ impl<'a> Data<'a> {
         store.destroy(&mut db, self.id, &path)?;
         drop(store);
 
+        let mut tc = self.inner.tag_cache.write().await;
+        tc.delete_path(self.id, path)?;
+        drop(tc);
+        
         self.inner.subs.queue(db.make()).await;
         Ok(())
     }
