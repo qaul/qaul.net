@@ -48,12 +48,15 @@ impl Library {
     }
 
     /// Load the user API scope
-    pub fn user<'a>(&'a self, id: Id) -> UsersApi<'a> {
-        UsersApi { inner: self, id }
+    pub fn user(self: &Arc<Self>, id: Id) -> UsersApi {
+        UsersApi {
+            inner: Arc::clone(self),
+            id,
+        }
     }
 
     /// Load the user API scope
-    pub async fn data<'a, I: Into<Option<Id>>>(&'a self, id: I) -> Result<DataApi<'a>> {
+    pub async fn data<I: Into<Option<Id>>>(self: &Arc<Self>, id: I) -> Result<DataApi> {
         let id = id.into();
 
         if let Some(id) = id {
@@ -61,7 +64,7 @@ impl Library {
         }
 
         Ok(DataApi {
-            inner: self,
+            inner: Arc::clone(self),
             id: id,
         })
     }

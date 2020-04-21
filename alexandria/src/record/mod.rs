@@ -24,6 +24,7 @@ use crate::{
 
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
+use async_std::sync::Arc;
 
 /// A record header
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -75,6 +76,9 @@ impl Body {
 }
 
 impl DetachedKey<KeyPair> for Body {}
+
+/// A garbage-collected reference to a Record
+pub type RecordRef = Arc<Record>;
 
 /// A single record in alexandria, defined by a header and body
 #[derive(Clone, Debug, Serialize, Deserialize)]

@@ -4,13 +4,13 @@ use crate::{
     core::Library,
     delta::{DeltaBuilder, DeltaType},
     error::Result,
-    record::Record,
-    utils::{Diff, Id, Path, Subscription, TagSet},
+    record::RecordRef,
+    utils::{Diff, Id, Path, QueryIterator, Subscription, TagSet},
 };
 use async_std::sync::Arc;
 
-pub struct Data<'a> {
-    pub(crate) inner: &'a Library,
+pub struct Data {
+    pub(crate) inner: Arc<Library>,
     pub(crate) id: Option<Id>,
 }
 
@@ -29,9 +29,9 @@ pub enum Query {
 #[derive(Clone, Debug)]
 pub enum QueryResult {
     /// There was a single matching item
-    Single(Arc<Record>),
+    Single(RecordRef),
     /// There were many matching items
-    Many(Vec<Arc<Record>>),
+    Many(Vec<RecordRef>),
 }
 
 /// A special type of query on a set
@@ -47,11 +47,7 @@ pub enum SetQuery<T> {
     Matching(T),
 }
 
-impl<'a> Data<'a> {
-    pub fn drop(&'a self) -> &'a Library {
-        self.inner
-    }
-
+impl Data {
     /// Similar to `insert`, but instead operating on a batch of Diffs
     pub async fn batch<T, D>(&self, path: Path, tags: T, data: Vec<D>) -> Result<Id>
     where

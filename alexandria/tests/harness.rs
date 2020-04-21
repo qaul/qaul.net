@@ -1,14 +1,14 @@
 //! A test harness for alexandria tests
 
 use alexandria::{utils::Id, Builder, Library};
-use async_std::task::block_on;
+use async_std::{sync::Arc, task::block_on};
 use std::path::PathBuf;
 
 pub const PASS: &'static str = "car horse battery staple";
 
 pub struct Test {
     pub users: Vec<Id>,
-    lib: Library,
+    lib: Arc<Library>,
 }
 
 impl Test {
@@ -26,7 +26,7 @@ impl Test {
         Self { users, lib }
     }
 
-    pub fn lib(&self) -> &Library {
+    pub fn lib(&self) -> &Arc<Library> {
         &self.lib
     }
 }

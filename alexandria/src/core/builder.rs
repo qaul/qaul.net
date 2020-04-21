@@ -6,7 +6,7 @@ use crate::{
     utils::SubHub,
     Library,
 };
-use async_std::sync::RwLock;
+use async_std::sync::{Arc, RwLock};
 use std::path::Path;
 
 /// A utility builder to construct the Alexandria library
@@ -33,7 +33,7 @@ impl Builder {
     }
 
     /// Consume the builder and create a Library
-    pub fn build(self) -> Result<Library> {
+    pub fn build(self) -> Result<Arc<Library>> {
         let root = Dirs::new(
             self.offset
                 .expect("Builder without `offset` cannot be built"),
@@ -51,5 +51,6 @@ impl Builder {
             subs,
         }
         .init()
+        .map(|l| Arc::new(l))
     }
 }

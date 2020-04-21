@@ -1,15 +1,16 @@
 //! User management API scope
 
 use crate::{core::Library, error::Result, utils::Id};
+use async_std::sync::Arc;
 
 /// API scope handler for a single user in a library
 ///
-pub struct Users<'a> {
-    pub(crate) inner: &'a Library,
+pub struct Users {
+    pub(crate) inner: Arc<Library>,
     pub(crate) id: Id,
 }
 
-impl<'a> Users<'a> {
+impl Users {
     /// Open a user for transactions
     ///
     /// This means that future transactions for this user ID will be
