@@ -1,32 +1,30 @@
 use {
-    termion::{
-        event::{Event, Key},
-        cursor,
-        clear,
-        raw::IntoRawMode,
-        screen::AlternateScreen,
-        style,
-        terminal_size,
-    },
-    futures::stream::StreamExt,
-    linux_voice_test::event::Events,
-    libqaul::{
-        messages::{MsgRef, Mode},
-        Qaul,
-    },
-    std::{
-        ops::DerefMut,
-        time::Duration,
-        env::args,
-        io::{stdout, Write},
-    },
     async_std::{
-        sync::{Arc, Mutex},
         stream::interval,
+        sync::{Arc, Mutex},
         task,
     },
+    futures::stream::StreamExt,
+    libqaul::{
+        messages::{Mode, MsgRef},
+        Qaul,
+    },
+    linux_voice_test::event::Events,
     netmod_udp::Endpoint,
-    ratman::{Router, Identity},
+    ratman::{Identity, Router},
+    std::{
+        env::args,
+        io::{stdout, Write},
+        ops::DerefMut,
+        time::Duration,
+    },
+    termion::{
+        clear, cursor,
+        event::{Event, Key},
+        raw::IntoRawMode,
+        screen::AlternateScreen,
+        style, terminal_size,
+    },
 };
 
 enum State {
@@ -60,7 +58,7 @@ async fn run() {
 
     let _user = user.clone();
     let _qaul = qaul.clone();
-    let _state = state.clone(); 
+    let _state = state.clone();
     task::spawn(async {
         let user = _user;
         let state = _state;
@@ -81,24 +79,26 @@ async fn run() {
         // keyboard input
         if let Some(e) = e {
             match e {
-                Event::Key(Key::Char('q')) => { break; },
-                Event::Key(Key::Ctrl('c')) => { break; },
-                Event::Key(Key::Esc) => { break; },
-                Event::Key(Key::Up) => { 
-                    match state {
-                        State::UserSelect(ref mut index) => {
-                            *index = index.saturating_sub(1);
-                        },
-                        _ => {},
+                Event::Key(Key::Char('q')) => {
+                    break;
+                }
+                Event::Key(Key::Ctrl('c')) => {
+                    break;
+                }
+                Event::Key(Key::Esc) => {
+                    break;
+                }
+                Event::Key(Key::Up) => match state {
+                    State::UserSelect(ref mut index) => {
+                        *index = index.saturating_sub(1);
                     }
+                    _ => {}
                 },
-                Event::Key(Key::Down) => {
-                    match state {
-                        State::UserSelect(ref mut index) => {
-                            *index += 1;
-                        },
-                        _ => {},
+                Event::Key(Key::Down) => match state {
+                    State::UserSelect(ref mut index) => {
+                        *index += 1;
                     }
+                    _ => {}
                 },
                 Event::Key(Key::Char('\n')) => {
                     let next_state = match state {
@@ -106,24 +106,22 @@ async fn run() {
                             let dest = qaul
                                 .users()
                                 .list()
+                                .await
                                 .into_iter()
                                 .filter(|u| u.id != user.0)
                                 .nth(*index)
                                 .unwrap();
-                            qaul.messages().send(
-                                user.clone(),
-                                Mode::Std(dest.id),
-                                "HELLO",
-                                None,
-                                Vec::new(),
-                            ).await.unwrap();
+                            qaul.messages()
+                                .send(user.clone(), Mode::Std(dest.id), "HELLO", None, Vec::new())
+                                .await
+                                .unwrap();
                             State::UserSelect(*index)
-                        },
+                        }
                         State::MessageDisplay(_) => State::UserSelect(0),
                     };
                     *state = next_state;
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
 
@@ -134,23 +132,31 @@ async fn run() {
                 while (s.len() as u16) < width {
                     s.push(' ');
                 }
-                writeln!(stdout, "{}{}{}{}", cursor::Goto(1, 1), style::Invert, s, style::Reset);
+                writeln!(
+                    stdout,
+                    "{}{}{}{}",
+                    cursor::Goto(1, 1),
+                    style::Invert,
+                    s,
+                    style::Reset
+                );
 
                 let user_count = qaul
                     .users()
                     .list()
+                    .await
                     .into_iter()
                     .filter(|u| u.id != user.0)
                     .enumerate()
-                    .map(|(i, user)| {;
+                    .map(|(i, user)| {
                         if i == *index {
                             write!(stdout, "{}", style::Underline);
                         }
                         writeln!(
-                            stdout, 
-                            "{} {}{}", 
-                            cursor::Goto(1, 2 + i as u16), 
-                            user.id, 
+                            stdout,
+                            "{} {}{}",
+                            cursor::Goto(1, 2 + i as u16),
+                            user.id,
                             clear::UntilNewline
                         );
                         if i == *index {
@@ -160,17 +166,22 @@ async fn run() {
                     .count();
                 *index = (*index).min(user_count.saturating_sub(1));
 
-                write!(stdout, "{}{}", cursor::Goto(1, 2 + user_count as u16), clear::AfterCursor);
-            },
+                write!(
+                    stdout,
+                    "{}{}",
+                    cursor::Goto(1, 2 + user_count as u16),
+                    clear::AfterCursor
+                );
+            }
             State::MessageDisplay(m) => {
                 writeln!(
-                    stdout, 
-                    "{} Message from {}{}", 
+                    stdout,
+                    "{} Message from {}{}",
                     cursor::Goto(1, 1),
                     m.sender,
                     clear::AfterCursor,
                 );
-            },
+            }
         }
         stdout.flush();
     }
@@ -179,17 +190,15 @@ async fn run() {
 fn main() {
     use {
         std::fs::File,
-        tracing_subscriber::{fmt, Layer, registry::Registry, EnvFilter},
         tracing,
+        tracing_subscriber::{fmt, registry::Registry, EnvFilter, Layer},
     };
 
     let logfile = File::create("/tmp/qaul.log").unwrap();
     let subscriber = fmt::Subscriber::builder()
         .with_env_filter(EnvFilter::from_default_env())
         .with_ansi(false)
-        .with_writer(move || {
-            logfile.try_clone().unwrap()
-        })
+        .with_writer(move || logfile.try_clone().unwrap())
         .finish();
 
     tracing::subscriber::set_global_default(subscriber).unwrap();
