@@ -1,5 +1,5 @@
 use serde::{
-    de::{Error, SeqAccess, MapAccess, Visitor},
+    de::{Error, MapAccess, SeqAccess, Visitor},
     ser::SerializeStruct,
     Deserialize, Deserializer, Serialize, Serializer,
 };
@@ -168,7 +168,7 @@ impl<'de> Deserialize<'de> for Tag {
             // json will try to deserialize structs as maps
             fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
             where
-                A: MapAccess<'de>
+                A: MapAccess<'de>,
             {
                 let mut key: Option<String> = None;
                 let mut value: Option<HumanVec> = None;
@@ -180,17 +180,17 @@ impl<'de> Deserialize<'de> for Tag {
                                 return Err(Error::duplicate_field("key"));
                             }
                             key = Some(map.next_value()?);
-                        },
+                        }
                         "val" => {
                             if value.is_some() {
                                 return Err(Error::duplicate_field("val"));
                             }
                             value = Some(map.next_value()?);
-                        },
+                        }
                         f => {
                             static FIELDS: &'static [&'static str] = &["key", "val"];
                             return Err(Error::unknown_field(f, FIELDS));
-                        },
+                        }
                     }
                 }
 

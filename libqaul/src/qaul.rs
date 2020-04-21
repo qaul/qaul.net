@@ -14,7 +14,7 @@ use crate::{
 
 use alexandria::{Builder, Library};
 use ratman::Router;
-use std::{sync::Arc, path::Path};
+use std::{path::Path, sync::Arc};
 
 /// Primary context structure for `libqaul`
 ///

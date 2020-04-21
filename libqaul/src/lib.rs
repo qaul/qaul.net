@@ -38,7 +38,8 @@
 //! point. This initialisation option is available before starting
 //! network bindings.
 
-#[macro_use] extern crate tracing;
+#[macro_use]
+extern crate tracing;
 
 // Internal modules
 mod auth;

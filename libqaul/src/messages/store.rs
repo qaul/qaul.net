@@ -93,7 +93,7 @@ impl<'store> StoreQuery<'store> {
                             true
                         }
                     })
-                    .filter(|msg| msg.inner().tags.is_superset(&tags)) 
+                    .filter(|msg| msg.inner().tags.is_superset(&tags))
                     .filter(|msg| match query {
                         Some(MsgQuery::Id(ref id)) => &msg.inner().id == id,
                         Some(MsgQuery::Sender(ref sender)) => &msg.inner().sender == sender,

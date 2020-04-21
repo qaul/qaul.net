@@ -98,7 +98,7 @@ impl Error {
 
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let msg = match self { 
+        let msg = match self {
             Self::NotAuthorised => "Not authorised to perform this action",
             Self::NoUser => "The desired user was not known",
             Self::ContactExists => "The provided contact already exists",
