@@ -6,7 +6,7 @@ use async_std::{
     future::{self, Future},
     pin::Pin,
     sync::Arc,
-    task::{self, Poll},
+    task::Poll,
 };
 use netmod::{Frame, SeqId};
 use std::collections::{BTreeMap, VecDeque};
@@ -90,6 +90,7 @@ impl State {
 
     /// Get the current number of completed messages
     #[cfg(test)]
+    #[allow(unused)]
     pub(crate) async fn num_completed(&self) -> usize {
         self.done.lock().await.len()
     }

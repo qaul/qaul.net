@@ -89,6 +89,7 @@ impl Collector {
     }
 
     #[cfg(test)]
+    #[allow(unused)]
     pub(crate) async fn num_completed(&self) -> usize {
         self.state.num_completed().await
     }

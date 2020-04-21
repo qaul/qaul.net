@@ -1,7 +1,4 @@
-use async_std::{
-    sync::{Arc, RwLock},
-    task,
-};
+use async_std::sync::{Arc, RwLock};
 use netmod::{Frame, SeqId};
 use std::collections::BTreeSet;
 
