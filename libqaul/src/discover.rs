@@ -1,4 +1,7 @@
-use crate::{messages::MsgUtils, Qaul};
+use crate::{
+    messages::{Mode, MsgUtils},
+    Qaul,
+};
 use alexandria::utils::Tag;
 use async_std::task;
 use ratman::{netmod::Recipient, Router};
@@ -49,15 +52,17 @@ impl Discovery {
                 let msg = router.next().await;
 
                 info!("Receiving message...");
-                let user = match msg.recipient {
-                    Recipient::User(id) => id.clone(),
-                    Recipient::Flood => unimplemented!(),
+                let mode = match msg.recipient {
+                    Recipient::User(id) => Mode::Std(id.clone()),
+                    Recipient::Flood => Mode::Flood,
                 };
 
-                let msg = Arc::new(MsgUtils::process(user, msg));
+                let msg = Arc::new(MsgUtils::process(mode, msg));
                 let associator = msg.associator.clone();
 
-                qaul.messages.insert_new(user, Arc::clone(&msg)).await;
+                qaul.messages
+                    .insert_remote(mode.id(), Arc::clone(&msg), mode)
+                    .await;
                 qaul.services.push_for(associator, msg).unwrap();
                 info!("Finished processing incoming message!");
             }

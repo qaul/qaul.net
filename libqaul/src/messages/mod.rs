@@ -77,7 +77,7 @@ impl MsgUtils {
     }
 
     /// Process incoming RATMAN message, verifying it's signature and payload
-    pub(crate) fn process(_: Identity, msg: RatMessage) -> Message {
+    pub(crate) fn process(_: Mode, msg: RatMessage) -> Message {
         let RatMessage {
             id,
             sender,

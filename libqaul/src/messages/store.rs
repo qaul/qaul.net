@@ -1,8 +1,21 @@
 //! Internal message store wrapper
 
-use crate::{messages::MsgRef, Identity};
-use alexandria::Library;
+use crate::{
+    messages::{Mode, MsgRef},
+    Identity,
+};
+use alexandria::{
+    utils::{Path, Tag},
+    Library, Session, GLOBAL,
+};
 use async_std::sync::Arc;
+
+pub(crate) const TAG_FLOOD: &'static str = "libqaul._int.flood";
+pub(crate) const TAG_READ: &'static str = "libqaul._int.read";
+
+fn msg_path(msg_id: Identity) -> Path {
+    Path::from(format!("/msg:{}", msg_id))
+}
 
 #[derive(Clone)]
 pub(crate) struct MsgStore {
@@ -14,12 +27,48 @@ impl MsgStore {
         Self { inner }
     }
 
-    /// Insert a new local message
-    pub(crate) async fn insert_sent(&self, _user: Identity, _msg: MsgRef) {}
+    /// Insert a message that was sent locally
+    ///
+    /// This message will be marked as "read" immediately, and
+    /// inserted into either the user or global store, depending on
+    /// wether it was a Flooded message.
+    pub(crate) async fn insert_local(&self, user: Identity, msg: MsgRef, mode: Mode) {
+        let mut tags = msg.tags.clone().merge(Tag::empty(TAG_READ));
+        let diffs = msg.diff();
+        let session = match mode {
+            Mode::Flood => {
+                tags.insert(Tag::empty(TAG_FLOOD));
+                GLOBAL
+            }
+            Mode::Std(_) => Session::Id(user),
+        };
+
+        self.inner
+            .batch(session, msg_path(msg.id), tags, diffs)
+            .await
+            .unwrap();
+    }
 
     /// Insert a message captured from the network
-    pub(crate) async fn insert_new(&self, _user: Identity, _msg: MsgRef) {
-        unimplemented!()
+    ///
+    /// The primary difference to `insert_local()` is that the
+    /// inserted message will not be marked as "read" and can be
+    /// retrieved via the "unread messages" query.
+    pub(crate) async fn insert_remote(&self, user: Option<Identity>, msg: MsgRef, mode: Mode) {
+        let mut tags = msg.tags.clone();
+        let diffs = msg.diff();
+        let session = match mode {
+            Mode::Flood => {
+                tags.insert(Tag::empty(TAG_FLOOD));
+                GLOBAL
+            }
+            Mode::Std(_) => Session::Id(user.unwrap()),
+        };
+
+        self.inner
+            .batch(session, msg_path(msg.id), tags, diffs)
+            .await
+            .unwrap();
     }
 }
 

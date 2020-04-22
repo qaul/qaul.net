@@ -8,7 +8,7 @@ use crate::{
     users::{UserProfile, UserUpdate},
 };
 use alexandria::{
-    query::{Query, QueryResult, SetQuery},
+    query::{Query, QueryResult},
     utils::{Id, Path, Tag, TagSet},
     Library, Session, GLOBAL,
 };
@@ -116,9 +116,7 @@ impl UserStore {
             .inner
             .query(
                 GLOBAL,
-                Query::Tag(SetQuery::Partial(
-                    vec![Tag::empty("profile"), Tag::empty("local")].into(),
-                )),
+                Query::tags().subset(vec![Tag::empty("profile"), Tag::empty("local")]),
             )
             .await
             .unwrap()
@@ -136,10 +134,7 @@ impl UserStore {
     pub(crate) async fn all_remote(&self) -> Vec<UserProfile> {
         match self
             .inner
-            .query(
-                GLOBAL,
-                Query::Tag(SetQuery::Matching(vec![Tag::empty("profile")].into())),
-            )
+            .query(GLOBAL, Query::tags().equals(Tag::empty("profile")))
             .await
             .unwrap()
         {
@@ -156,10 +151,7 @@ impl UserStore {
     pub(crate) async fn all(&self) -> Vec<UserProfile> {
         match self
             .inner
-            .query(
-                GLOBAL,
-                Query::Tag(SetQuery::Partial(vec![Tag::empty("profile")].into())),
-            )
+            .query(GLOBAL, Query::tags().subset(Tag::empty("profile")))
             .await
             .unwrap()
         {
