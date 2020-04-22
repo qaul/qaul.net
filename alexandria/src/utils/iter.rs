@@ -46,6 +46,25 @@ impl QueryIterator {
         &self.query
     }
 
+    /// Lock the GC for the iterator scope
+    ///
+    /// Normally, when an iterator wants to access records that were
+    /// deleted by other transactions, it will return an error.  To
+    /// avoid this possible race condition, you can lock the garbage
+    /// collector for the set of paths the iterator can touch, meaning
+    /// they will remain accessible until the iterator goes out of
+    /// scope.
+    ///
+    /// This can have unwanted side-effects, such as having records
+    /// still accessible by other tasks after they were deleted, when
+    /// accessed by path directly (but not via tags), or not actually
+    /// deleting records if the program aborts before the iterator can
+    /// restart the garbage collector again.
+    pub async fn lock(&self) {
+        let mut s = self.inner.store.write().await;
+        s.gc_lock(self.id, &self.paths);
+    }
+
     /// Get the next item in the iterator
     ///
     /// When the iterator has reached it's end, it will start
@@ -73,6 +92,16 @@ impl QueryIterator {
                 QueryResult::Single(rec) => Some(rec),
                 QueryResult::Many(_) => unreachable!(),
             })
+    }
+}
+
+impl Drop for QueryIterator {
+    fn drop(&mut self) {
+        async_std::task::block_on(async {
+            let mut s = self.inner.store.write().await;
+            s.gc_release(self.id, &self.paths)
+                .expect("Failed to release deleted records!");
+        });
     }
 }
 
@@ -204,6 +233,33 @@ async fn gc_iterator_fail() -> Result<()> {
 
     // The iterator will error!
     assert!(iter.next().await.is_err());
+
+    Ok(())
+}
+
+/// Iterator test with three items, two of which are skipped
+#[async_std::test]
+async fn lock_gc_iterator() -> Result<()> {
+    let mut t = TestData::setup();
+    let paths = vec![
+        t.insert_random().await,
+        t.insert_random().await,
+        t.insert_random().await,
+    ];
+
+    let iter = QueryIterator::new(None, paths.clone(), t.lib(), Query::Fake);
+    iter.lock().await;
+
+    // Delete the first item
+    t.lib()
+        .data(None)
+        .await?
+        .delete(paths[0].clone())
+        .await
+        .unwrap();
+
+    // The path should still be there!
+    assert!(iter.next().await?.is_some());
 
     Ok(())
 }

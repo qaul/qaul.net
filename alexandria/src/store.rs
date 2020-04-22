@@ -5,7 +5,7 @@ use crate::{
         asym::{KeyPair, SharedKey},
         DetachedKey, Encrypted,
     },
-    delta::DeltaBuilder,
+    delta::{DeltaBuilder, DeltaType},
     error::{Error, Result},
     notify::Notify,
     record::Record,
@@ -21,6 +21,22 @@ pub(crate) struct Store {
     shared: BTreeMap<Path, Notify<Encrypted<Arc<Record>, SharedKey>>>,
     /// The per-user datastore
     usrd: BTreeMap<Id, Notify<BTreeMap<Path, Notify<Encrypted<Arc<Record>, KeyPair>>>>>,
+    /// Per-user GC locks
+    gc_usr: BTreeMap<Id, BTreeMap<Path, GcReq>>,
+    /// Shared-scope GC lock
+    gc_shared: BTreeMap<Path, GcReq>,
+}
+
+/// A request for garbage collection wrapper
+///
+/// Specifies if an item should be held for GC, how many holders there
+/// are and if the item should be deleted when the hold expires.
+#[derive(Default)]
+struct GcReq {
+    /// Number of GC holders
+    ctr: usize,
+    /// Determine if the item should be deleted
+    del: bool,
 }
 
 impl DetachedKey<SharedKey> for Arc<Record> {}
@@ -121,12 +137,18 @@ impl Store {
         id: Option<Id>,
         path: &Path,
     ) -> Result<()> {
-        // Check if the path exists already
+        // Check if the path exists
         if !self.tree_mut(id).contains_key(path) {
             return Err(Error::NoSuchPath { path: path.into() });
         }
 
         db.path(&path);
+
+        // Check if the path GC is locked and mark to delete
+        if let Some(GcReq { ref mut del, .. }) = self.gc_set_mut(id).get_mut(path) {
+            *del = true;
+            return Ok(());
+        }
 
         self.wake_tree(id, path);
         if let Ok(rec) = self.tree_mut(id).remove(path).unwrap().deref() {
@@ -170,6 +192,39 @@ impl Store {
         Ok(())
     }
 
+    /// Lock the GC for a set of paths
+    pub(crate) fn gc_lock(&mut self, id: Option<Id>, paths: &Vec<Path>) {
+        let set = self.gc_set_mut(id);
+        paths.iter().for_each(|path| {
+            set.entry(path.clone()).or_default().ctr += 1;
+        });
+    }
+
+    /// Release the GC for a set of paths and delete them
+    pub(crate) fn gc_release(&mut self, id: Option<Id>, paths: &Vec<Path>) -> Result<()> {
+        let mut db = DeltaBuilder::new(id, DeltaType::Delete);
+
+        paths.iter().fold(Ok(()), |res, path| {
+            if let Some(GcReq {
+                ref mut ctr,
+                ref del,
+            }) = self.gc_set_mut(id).get_mut(&path)
+            {
+                // Decrement ctr
+                *ctr -= 1;
+
+                // If we were last, delete
+                if *ctr == 0 && *del {
+                    res.and_then(|_| self.destroy(&mut db, id, path))
+                } else {
+                    res
+                }
+            } else {
+                res
+            }
+        })
+    }
+
     /// A helper to wake a tree, depending on Id
     fn wake_tree(&mut self, id: Option<Id>, path: &Path) {
         match id {
@@ -203,6 +258,14 @@ impl Store {
         match id {
             Some(id) => self.usrd.entry(id).or_insert(Notify::new(BTreeMap::new())),
             None => &mut self.shared,
+        }
+    }
+
+    /// A utility functiot to get the mutable gc lock, depending on id
+    fn gc_set_mut(&mut self, id: Option<Id>) -> &mut BTreeMap<Path, GcReq> {
+        match id {
+            Some(id) => self.gc_usr.entry(id).or_default(),
+            None => &mut self.gc_shared,
         }
     }
 
