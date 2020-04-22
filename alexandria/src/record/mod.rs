@@ -22,9 +22,9 @@ use crate::{
     utils::{Diff, DiffExt, Id, Tag, TagSet},
 };
 
+use async_std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
-use async_std::sync::Arc;
 
 /// A record header
 #[derive(Clone, Debug, Serialize, Deserialize)]

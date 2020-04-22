@@ -30,10 +30,3 @@ impl Test {
         &self.lib
     }
 }
-
-#[macro_export]
-macro_rules! poll {
-    ($x:expr) => {
-        async_std::task::block_on(async { $x })
-    };
-}
