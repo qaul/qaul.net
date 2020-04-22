@@ -198,17 +198,11 @@ impl UserStore {
 mod harness {
     use crate::{users::UserStore, Identity};
     use alexandria::utils::Tag;
-    use async_std::sync::Arc;
 
     pub(super) fn setup() -> UserStore {
         use alexandria::Builder;
         let dir = tempfile::tempdir().unwrap();
-        let lib = Builder::new()
-            .offset(dir.path())
-            .build()
-            .map(|l| Arc::new(l))
-            .unwrap();
-
+        let lib = Builder::new().offset(dir.path()).build().unwrap();
         UserStore::new(lib)
     }
 

@@ -76,18 +76,14 @@ impl Qaul {
         use tempfile;
         let router = Router::new();
         let temp = tempfile::tempdir().unwrap();
-        let store = Builder::new()
-            .offset(temp.path())
-            .build()
-            .map(|l| Arc::new(l))
-            .unwrap();
+        let store = Builder::new().offset(temp.path()).build().unwrap();
 
         Self {
             router,
             users: UserStore::new(Arc::clone(&store)),
             auth: AuthStore::new(),
             contacts: ContactStore::new(),
-            messages: MsgStore::new(),
+            messages: MsgStore::new(Arc::clone(&store)),
             services: ServiceRegistry::new(),
             sec: Arc::new(Sec::new()),
             store,
@@ -112,18 +108,13 @@ impl Qaul {
     where
         P: Into<&'p Path>,
     {
-        let store = Builder::new()
-            .offset(store_path)
-            .build()
-            .map(|l| Arc::new(l))
-            .unwrap();
-
+        let store = Builder::new().offset(store_path).build().unwrap();
         let q = Arc::new(Self {
             router: Arc::clone(&router),
             users: UserStore::new(Arc::clone(&store)),
             auth: AuthStore::new(),
             contacts: ContactStore::new(),
-            messages: MsgStore::new(),
+            messages: MsgStore::new(Arc::clone(&store)),
             services: ServiceRegistry::new(),
             sec: Arc::new(Sec::new()),
             store,
