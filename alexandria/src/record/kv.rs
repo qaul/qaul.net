@@ -1,6 +1,13 @@
+//! Key-Value store record abstraction
+//!
+//! This type of record stores data in a key-value store, where each
+//! key is a string, and each value can be any of a number of concrete
+//! types.  It's possible to nest values into trees to build complex
+//! relationships into these records.
+
 use crate::{
     error::{Error, Result},
-    utils::{Diff, DiffExt, DiffResult, DiffSeg},
+    utils::{Diff, DiffExt, DiffResult, DiffSeg, Id, Tag},
 };
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, ops::Deref};
@@ -63,6 +70,11 @@ pub enum Value {
 
     /// Arbitrary embedded binary data
     Vec(Vec<u8>),
+
+    /// A tag in use elsewhere in Alexandria
+    Tag(Tag),
+    /// A reference to another record Id
+    External(Id),
 }
 
 // Strings

@@ -1,4 +1,4 @@
-# alexandria [![][irc-badge]][irc-url]
+# alexandria 📚 [![][irc-badge]][irc-url]
 
 [irc-badge]: https://img.shields.io/badge/IRC-%23qaul.net-1e72ff.svg
 [irc-url]: https://www.irccloud.com/invite?channel=%23qaul.net&hostname=irc.freenode.org&port=6697&ssl=1
