@@ -161,7 +161,10 @@ impl Data {
     /// # let tmp = tempfile::tempdir().unwrap();
     /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
     /// let path = Path::from("/msg:alice");
-    /// lib.data(None).await?.query(Query::Path(path)).await;
+    /// lib.data(None)
+    ///     .await?
+    ///     .query(Query::Path(path))
+    ///     .await;
     /// # Ok(()) }
     /// ```
     ///
@@ -181,7 +184,11 @@ impl Data {
     /// # let tag1 = Tag::new("tag1", vec![1, 3, 1, 2]);
     /// # let tag2 = Tag::new("tag2", vec![13, 12]);
     /// let tags = TagSet::from(vec![tag1, tag2]);
-    /// lib.data(None).await?.query(Query::Tag(SetQuery::Partial(tags))).await;
+    /// let iter = lib
+    ///     .data(None)
+    ///     .await?
+    ///     .query_iter(Query::Tag(SetQuery::Partial(tags)))
+    ///     .await;
     /// # Ok(()) }
     /// ```
     ///
@@ -196,7 +203,11 @@ impl Data {
     /// # let tag1 = Tag::new("tag1", vec![1, 3, 1, 2]);
     /// # let tag2 = Tag::new("tag2", vec![13, 12]);
     /// let tags = TagSet::from(vec![tag1, tag2]);
-    /// lib.data(None).await?.query(Query::Tag(SetQuery::Matching(tags))).await;
+    /// let iter = lib
+    ///     .data(None)
+    ///     .await?
+    ///     .query_iter(Query::Tag(SetQuery::Matching(tags)))
+    ///     .await;
     /// # Ok(()) }
     /// ```
     pub async fn query(&self, q: Query) -> Result<QueryResult> {
@@ -224,7 +235,7 @@ impl Data {
         }
     }
 
-    /// Iterator query the database via a set of constraints
+    /// Create an iterator from a database query
     ///
     /// The primary difference between this function and `query()` is
     /// that no records are returned or loaded immediately from the
@@ -234,11 +245,48 @@ impl Data {
     /// usage.
     ///
     /// Paths that are inserted after the `QueryIterator` was
-    /// constructed aren't added to it, and when a path is deleted, it
-    /// will be held until the last QueryIterator with it goes out of
-    /// scope.
+    /// constructed aren't automatically added to it, because it's
+    /// internal state is atomic for the time it was created.  If you
+    /// want to get updates to the database as they happen, consider a
+    /// `Subscription` instead.
     ///
-    /// Otherwise querying works very similarly to `query()`.
+    /// Following is an example for an iterator query, mirroring most
+    /// of the `query()` usage quite closely.
+    ///
+    /// ```
+    /// # use alexandria::{Builder, Library, error::Result, utils::{Tag, TagSet, Path, Query, SetQuery}};
+    /// # async fn foo() -> Result<()> {
+    /// # let tmp = tempfile::tempdir().unwrap();
+    /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
+    /// # let tag1 = Tag::new("tag1", vec![1, 3, 1, 2]);
+    /// # let tag2 = Tag::new("tag2", vec![13, 12]);
+    /// let tags = TagSet::from(vec![tag1, tag2]);
+    /// let iter = lib
+    ///     .data(None)
+    ///     .await?
+    ///     .query_iter(Query::Tag(SetQuery::Matching(tags)))
+    ///     .await?;
+    /// iter.skip(5);
+    /// let rec = iter.next().await;
+    /// # Ok(()) }
+    /// ```
+    ///
+    /// ## Garbage collection
+    ///
+    /// By default, garbage collection isn't locked for paths that are
+    /// included in an iterator.  What this means is that any `delete`
+    /// call can remove records that will at some point be accessed by
+    /// the returned iterator, resulting in an `Err(_)` return.  To
+    /// avoid this race condition, you can call `lock()` on the
+    /// iterator, which blocks alexandria from cleaning the iternal
+    /// record representation for items that are supposed to be
+    /// accessed by the iterator.
+    ///
+    /// **Note:** `query` may still return "No such path" for these
+    /// items, since they were already deleted from the tag cache.
+    /// And a caveat worth mentioning: if the program aborts before
+    /// the Iterator `drop` was able to run, the items will not be
+    /// cleaned from disk and reloaded into cache on restart.
     pub async fn query_iter(&self, q: Query) -> Result<QueryIterator> {
         Ok(QueryIterator::new(
             self.id,

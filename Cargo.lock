@@ -23,6 +23,7 @@ dependencies = [
  "bincode",
  "ed25519-dalek",
  "failure",
+ "hex",
  "keybob",
  "rand 0.7.3",
  "ratman-identity",
