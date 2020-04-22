@@ -28,4 +28,4 @@ pub mod query;
 pub mod record;
 pub mod utils;
 
-pub use crate::core::{Builder, Library, Session, GLOBAL};
+pub use crate::core::{Builder, Library, Session, SessionsApi, GLOBAL};

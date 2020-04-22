@@ -36,7 +36,13 @@ pub const GLOBAL: Session = Session::Global;
 ///
 /// A session is some random Id which is used as a namespace
 /// identifier.  Each session namespace is encrypted independently,
-/// with a unique key, and record tree.
+/// with a unique key, and record tree.  This means that two paths
+/// (say `/foo:bar`) can point to two separate records in the
+/// database, if they belong to different sessions.
+///
+/// An important distiction to make here: a session is not ephemeral
+/// but a long living namespace Id, similar to a user in a traditional
+/// database.
 pub struct SessionsApi<'alex> {
     pub(crate) inner: &'alex Library,
 }
@@ -63,13 +69,13 @@ impl<'alex> SessionsApi<'alex> {
         }
     }
 
-    /// Create a new user with a unique encryption key
+    /// Create a new session with a unique encryption key
     pub async fn create(&self, id: Id, pw: &str) -> Result<Session> {
         let ref mut u = self.inner.users.write().await;
         u.insert(id, pw).map(|_| Session::Id(id))
     }
 
-    /// Remove a user Id and corresponding data from the library
+    /// Remove a session Id and corresponding data from the database
     pub async fn destroy(&self, id: Session) -> Result<()> {
         if let Some(id) = id.id() {
             let ref mut u = self.inner.users.write().await;
