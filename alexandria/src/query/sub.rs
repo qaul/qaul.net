@@ -99,9 +99,10 @@ impl Subscription {
                     if match query {
                         Query::Path(ref p) => p == &d.path,
                         Query::Tag(ref tq) => match tq {
-                            SetQuery::Matching(ref tags) => d.tags.exactly(tags),
-                            SetQuery::Partial(ref tags) => d.tags.subset(tags),
-                            SetQuery::Not(_) => unimplemented!(),
+                            SetQuery::Intersect(ref tags) => d.tags.intersect(tags),
+                            SetQuery::Subset(ref tags) => d.tags.subset(tags),
+                            SetQuery::Equals(ref tags) => d.tags.equality(tags),
+                            SetQuery::Not(ref tags) => d.tags.not(tags),
                         },
                         _ => unimplemented!(),
                     } {
@@ -188,7 +189,7 @@ async fn tag_delta() {
     use crate::utils::Tag;
     let test = SubTest::new("/msg:bob");
 
-    let sub = test.sub(Query::Tag(SetQuery::Partial(
+    let sub = test.sub(Query::Tag(SetQuery::Subset(
         vec![Tag::empty("tag-a")].into(),
     )));
 
@@ -204,7 +205,7 @@ async fn tag_delta_matching() {
     let test = SubTest::new("/msg:bob");
     let ts: TagSet = vec![Tag::empty("tag-a"), Tag::empty("tag-b")].into();
 
-    let sub = test.sub(Query::Tag(SetQuery::Matching(ts.clone())));
+    let sub = test.sub(Query::Tag(SetQuery::Equals(ts.clone())));
     test.insert(ts);
 
     assert_eq!(sub.next().await, test.path);

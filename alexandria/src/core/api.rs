@@ -171,7 +171,7 @@ impl Library {
     /// will only return a single record if successful.
     ///
     /// ```
-    /// # use alexandria::{Builder, GLOBAL, Library, error::Result, utils::{Tag, TagSet, Path}, query::{Query, SetQuery}};
+    /// # use alexandria::{Builder, GLOBAL, Library, error::Result, utils::{Tag, TagSet, Path}, query::Query};
     /// # async fn foo() -> Result<()> {
     /// # let tmp = tempfile::tempdir().unwrap();
     /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
@@ -180,39 +180,33 @@ impl Library {
     /// # Ok(()) }
     /// ```
     ///
-    /// In alexandria you can "tag" records with extra metadata, which
-    /// is also encrypted.  These tags are String-keyd, with an
-    /// arbitrary payload and can be used to make more precise (and
-    /// fast!) search queries into the database.
+    /// ### Search tags
     ///
-    /// The following code makes a query for any record that contains
-    /// the provided tags.
+    /// In alexandria you can tag records with extra metadata (which
+    /// is also encrypted), to make queries easier and even build
+    /// relationships between records in your application.  These tags
+    /// are String-keyed, with an arbitrary (or no) payload and can be
+    /// used to make more precise (and fast!) search queries into the
+    /// database.
+    ///
+    /// The constraints imposed by tag queries are modelled on set
+    /// theory and can be created via the [`TagQuery`][tq] helper type.
+    ///
+    /// [tq]: query/struct.TagQuery.html
+    ///
+    /// Following are a few examples for tag queries.
     ///
     /// ```
-    /// # use alexandria::{GLOBAL, Builder, Library, error::Result, utils::{Tag, TagSet, Path}, query::{Query, SetQuery}};
+    /// # use alexandria::{GLOBAL, Builder, Library, error::Result, utils::{Tag, TagSet, Path}, query::Query};
     /// # async fn foo() -> Result<()> {
     /// # let tmp = tempfile::tempdir().unwrap();
     /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
     /// # let tag1 = Tag::new("tag1", vec![1, 3, 1, 2]);
     /// # let tag2 = Tag::new("tag2", vec![13, 12]);
     /// let tags = TagSet::from(vec![tag1, tag2]);
-    /// lib.query(GLOBAL, Query::Tag(SetQuery::Partial(tags))).await;
+    /// lib.query(GLOBAL, Query::tags().subset(tags)).await;
     /// # Ok(()) }
-    /// ```
-    ///
-    /// Lastly, a "matching" query makes sure that *only* the provided
-    /// tags are present, no more.
-    ///
-    /// ```
-    /// # use alexandria::{GLOBAL, Builder, Library, error::Result, utils::{Tag, TagSet, Path}, query::{Query, SetQuery}};
-    /// # async fn foo() -> Result<()> {
-    /// # let tmp = tempfile::tempdir().unwrap();
-    /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
-    /// # let tag1 = Tag::new("tag1", vec![1, 3, 1, 2]);
-    /// # let tag2 = Tag::new("tag2", vec![13, 12]);
-    /// let tags = TagSet::from(vec![tag1, tag2]);
-    /// lib.query(GLOBAL, Query::Tag(SetQuery::Matching(tags))).await;
-    /// # Ok(()) }
+    /// # async_std::task::block_on(async { foo().await }).unwrap();
     /// ```
     pub async fn query(&self, id: Session, q: Query) -> Result<QueryResult> {
         if let Session::Id(id) = id {
@@ -226,9 +220,10 @@ impl Library {
                 let tc = self.tag_cache.read().await;
 
                 match query {
-                    SetQuery::Matching(ref tags) => tc.get_paths_matching(id, tags),
-                    SetQuery::Partial(ref tags) => tc.get_paths(id, tags),
-                    SetQuery::Not(_) => unimplemented!(),
+                    SetQuery::Intersect(ref tags) => tc.get_paths(id, |o| tags.intersect(o)),
+                    SetQuery::Subset(ref tags) => tc.get_paths(id, |o| tags.subset(o)),
+                    SetQuery::Equals(ref tags) => tc.get_paths(id, |o| tags.equality(o)),
+                    SetQuery::Not(ref tags) => tc.get_paths(id, |o| tags.not(o)),
                 }
                 .map(|paths| {
                     paths
@@ -261,7 +256,7 @@ impl Library {
     /// of the `query()` usage quite closely.
     ///
     /// ```
-    /// # use alexandria::{GLOBAL, Builder, Library, error::Result, utils::{Tag, TagSet, Path}, query::{Query, SetQuery}};
+    /// # use alexandria::{GLOBAL, Builder, Library, error::Result, utils::{Tag, TagSet, Path}, query::Query};
     /// # async fn foo() -> Result<()> {
     /// # let tmp = tempfile::tempdir().unwrap();
     /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
@@ -269,7 +264,7 @@ impl Library {
     /// # let tag2 = Tag::new("tag2", vec![13, 12]);
     /// let tags = TagSet::from(vec![tag1, tag2]);
     /// let iter = lib
-    ///     .query_iter(GLOBAL, Query::Tag(SetQuery::Matching(tags)))
+    ///     .query_iter(GLOBAL, Query::tags().equals(tags))
     ///     .await?;
     /// iter.skip(5);
     /// let rec = iter.next().await;
@@ -304,9 +299,10 @@ impl Library {
                 Query::Tag(ref tq) => {
                     let tc = self.tag_cache.read().await;
                     match tq {
-                        SetQuery::Matching(ref tags) => tc.get_paths_matching(id, tags)?,
-                        SetQuery::Partial(ref tags) => tc.get_paths(id, tags)?,
-                        SetQuery::Not(_) => unimplemented!(),
+                        SetQuery::Intersect(ref tags) => tc.get_paths(id, |o| tags.intersect(o))?,
+                        SetQuery::Subset(ref tags) => tc.get_paths(id, |o| tags.subset(o))?,
+                        SetQuery::Equals(ref tags) => tc.get_paths(id, |o| tags.equality(o))?,
+                        SetQuery::Not(ref tags) => tc.get_paths(id, |o| tags.not(o))?,
                     }
                 }
                 _ => unimplemented!(),
@@ -335,7 +331,7 @@ impl Library {
     /// # let lib = Builder::new().offset(tmp.path()).build().unwrap();
     /// # let my_tag = Tag::new("tag1", vec![1, 3, 1, 2]);
     /// let tags = TagSet::from(vec![my_tag]);
-    /// let sub = lib.subscribe(GLOBAL, Query::Tag(SetQuery::Partial(tags))).await?;
+    /// let sub = lib.subscribe(GLOBAL, Query::tags().subset(tags)).await?;
     ///
     /// let path = sub.next().await;
     /// let new_data = lib.query(GLOBAL, Query::Path(path)).await?;

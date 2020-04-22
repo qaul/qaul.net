@@ -61,21 +61,62 @@ impl Query {
 }
 
 /// An API type to build tag queries
+///
+/// Following is an overview of the type constraints available.
+///
+/// | SetQuery type        | Constraints model |
+/// |----------------------|-------------------|
+/// | SetQuery::Intersect  | A ∩ B             |
+/// | SetQuery::Subset     | A ⊆ B             |
+/// | SetQuery::Equals     | A = B             |
+/// | SetQuery::Not        | ¬(A ∩ B)          |
 pub struct TagQuery;
 
 impl TagQuery {
-    /// Build a partial (subset) tag query
-    pub fn partial<T: Into<TagSet>>(t: T) -> Query {
-        Query::Tag(SetQuery::Partial(t.into()))
+    /// Build a simple intersect query
+    ///
+    /// An [intersection] is defined by set theory as any overlap
+    /// between sets A and B, meaning that neither A nor B needs to be
+    /// contained in the other (A ∩ B).  This is the weakest tag
+    /// constraint, as it doesn't filter sub-, or equality sets.
+    ///
+    /// [intersection]: https://en.wikipedia.org/wiki/Intersection_(set_theory)
+    pub fn intersect<T: Into<TagSet>>(&self, t: T) -> Query {
+        Query::Tag(SetQuery::Intersect(t.into()))
     }
 
-    /// Build a matching (equality) tag query
-    pub fn matching<T: Into<TagSet>>(t: T) -> Query {
-        Query::Tag(SetQuery::Matching(t.into()))
+    /// Build a subset query
+    ///
+    /// A [subset] is defined by set theory as a set A, which is
+    /// contained in it's entirety by a set B.  The two sets may be
+    /// equals: A ⊆ B.  This is the most common set query to use
+    /// because it allows constrained tags, without disallowing
+    /// additional tags that are irrelevant to the query program.
+    ///
+    /// [subset]: https://en.wikipedia.org/wiki/Set_(mathematics)#Subsets
+    pub fn subset<T: Into<TagSet>>(&self, t: T) -> Query {
+        Query::Tag(SetQuery::Subset(t.into()))
     }
 
-    /// Build a negation (not) tag query
-    pub fn not<T: Into<TagSet>>(t: T) -> Query {
+    /// Build an equality set query
+    ///
+    /// An equality set checks for an exact match of tags in the
+    /// query, meaning that additional tags will make the comparison
+    /// fail.
+    ///
+    /// This query type is most likely a lot less useful than
+    /// `subset()`, but can still be used as part of a processing
+    /// pipeline that adds tags to records over time.
+    pub fn equals<T: Into<TagSet>>(&self, t: T) -> Query {
+        Query::Tag(SetQuery::Equals(t.into()))
+    }
+
+    /// Build an exclusion set query
+    ///
+    /// This query type can be considered the opposite of
+    /// `intersect()`, because it will fail the comparison of sets
+    /// if even a single tag is shared between them.
+    pub fn not<T: Into<TagSet>>(&self, t: T) -> Query {
         Query::Tag(SetQuery::Not(t.into()))
     }
 }
@@ -91,15 +132,15 @@ pub enum QueryResult {
 
 /// A special type of query on a set
 ///
-/// The query can either be run for a partial, or complete match.  The
-/// complete match is synonymous with equality (`A = B`), whereas the
-/// partial match does not have to be a true subset (`A ⊆ B`)
+/// It's highly recomended to read the function descriptions on
+/// [`TagQuery`][tagquery] for an explanation of the differences between these
+/// set query constraints.
+///
+/// [tagquery]: struct.TagQuery.html
 #[derive(Clone, Debug)]
 pub enum SetQuery<T> {
-    /// A partial match (subset)
-    Partial(T),
-    /// An  equality match
-    Matching(T),
-    /// A negation match
+    Intersect(T),
+    Subset(T),
+    Equals(T),
     Not(T),
 }

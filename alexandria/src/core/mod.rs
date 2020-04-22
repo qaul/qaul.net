@@ -1,7 +1,7 @@
 //! Fundamental API types
 
 mod sessions;
-pub use sessions::{Session, GLOBAL, SessionsApi};
+pub use sessions::{Session, SessionsApi, GLOBAL};
 
 mod builder;
 pub use builder::Builder;

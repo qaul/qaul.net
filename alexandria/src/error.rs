@@ -11,7 +11,6 @@
 //! on `Error`.  These can be bugs in Alexandria itself, or some
 //! runtime constraint like having run out of memory or disk space.
 
-
 use failure::Fail;
 use std::fmt::{self, Display, Formatter};
 

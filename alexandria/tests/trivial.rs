@@ -11,7 +11,7 @@ mod harness;
 use harness::Test;
 
 use alexandria::{
-    query::{Query, SetQuery},
+    query::Query,
     record::kv::Value,
     utils::{Diff, DiffSeg, Path, Tag, TagSet},
 };
@@ -107,10 +107,7 @@ async fn simple_subscription() {
 
     let sub = t
         .lib()
-        .subscribe(
-            t.users[0],
-            Query::Tag(SetQuery::Partial(tags.clone().into())),
-        )
+        .subscribe(t.users[0], Query::tags().subset(tags.clone()))
         .await
         .unwrap();
 
