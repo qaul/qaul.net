@@ -6,6 +6,7 @@ use {
     },
     futures::stream::StreamExt,
     libqaul::{
+        api::TagSet,
         messages::{Mode, MsgRef},
         Qaul,
     },
@@ -112,7 +113,13 @@ async fn run() {
                                 .nth(*index)
                                 .unwrap();
                             qaul.messages()
-                                .send(user.clone(), Mode::Std(dest.id), "HELLO", None, Vec::new())
+                                .send(
+                                    user.clone(),
+                                    Mode::Std(dest.id),
+                                    "HELLO",
+                                    TagSet::empty(),
+                                    Vec::new(),
+                                )
                                 .await
                                 .unwrap();
                             State::UserSelect(*index)

@@ -1,5 +1,5 @@
 use futures::{executor::block_on, join, stream::StreamExt};
-use libqaul::{messages::Mode, Qaul};
+use libqaul::{api::TagSet, messages::Mode, Qaul};
 use ratman::Router;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -15,12 +15,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         user.clone(),
         Mode::Flood,
         "de.spacekookie.myapp",
-        vec![],
+        TagSet::empty(),
         vec![1, 2, 3, 4],
     );
     let mut subscriber = msg.subscribe(user, "de.spacekookie.myapp", None)?;
 
-    block_on(async { join!(send, subscriber.next(),) }).0.unwrap();
+    block_on(async { join!(send, subscriber.next(),) })
+        .0
+        .unwrap();
 
     Ok(())
 }
