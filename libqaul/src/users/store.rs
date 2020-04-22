@@ -137,24 +137,7 @@ impl UserStore {
     pub(crate) async fn all_remote(&self) -> Vec<UserProfile> {
         match self
             .inner
-            .query(GLOBAL, Query::tags().equals(Tag::empty("profile")))
-            .await
-            .unwrap()
-        {
-            QueryResult::Many(vec) => vec
-                .into_iter()
-                .map(|rec| UserProfile::from(&*rec))
-                .collect(),
-            _ => unreachable!(),
-        }
-    }
-
-    /// Get *all* users this device knows about
-    #[allow(unused)]
-    pub(crate) async fn all(&self) -> Vec<UserProfile> {
-        match self
-            .inner
-            .query(GLOBAL, Query::tags().subset(Tag::empty("profile")))
+            .query(GLOBAL, Query::tags().equals(Tag::empty(TAG_PROFILE)))
             .await
             .unwrap()
         {

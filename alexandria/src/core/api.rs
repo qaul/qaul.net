@@ -220,10 +220,10 @@ impl Library {
                 let tc = self.tag_cache.read().await;
 
                 match query {
-                    SetQuery::Intersect(ref tags) => tc.get_paths(id, |o| tags.intersect(o)),
-                    SetQuery::Subset(ref tags) => tc.get_paths(id, |o| tags.subset(o)),
-                    SetQuery::Equals(ref tags) => tc.get_paths(id, |o| tags.equality(o)),
-                    SetQuery::Not(ref tags) => tc.get_paths(id, |o| tags.not(o)),
+                    SetQuery::Intersect(ref tags) => tc.get_paths(id, |o| o.intersect(tags)),
+                    SetQuery::Subset(ref tags) => tc.get_paths(id, |o| o.subset(tags)),
+                    SetQuery::Equals(ref tags) => tc.get_paths(id, |o| o.equality(tags)),
+                    SetQuery::Not(ref tags) => tc.get_paths(id, |o| o.not(tags)),
                 }
                 .map(|paths| {
                     paths

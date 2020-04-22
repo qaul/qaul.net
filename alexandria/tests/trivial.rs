@@ -165,3 +165,35 @@ async fn insert_tagged_delete() {
         0
     );
 }
+
+#[async_std::test]
+async fn insert_tagged_subset() {
+    let dir = tempdir().unwrap();
+    let t = Test::new(dir.path(), 1);
+
+    let path = Path::from("/msg:alice");
+    let diff = Diff::from(("msg_count".into(), DiffSeg::Insert(Value::U64(0))));
+
+    t.lib()
+        .insert(
+            t.users[0],
+            path.clone(),
+            vec![Tag::empty("a"), Tag::empty("b")],
+            diff,
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(
+        match t
+            .lib()
+            .query(t.users[0], Query::tags().subset(Tag::empty("a")))
+            .await
+            .unwrap()
+        {
+            QueryResult::Many(ref vec) => vec.len(),
+            QueryResult::Single(_) => unreachable!(),
+        },
+        1
+    );
+}

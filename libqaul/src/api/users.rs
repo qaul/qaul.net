@@ -35,7 +35,7 @@ impl<'qaul> Users<'qaul> {
     /// No information about sessions or existing login state is
     /// stored or accessible via this API.
     pub async fn list(&self) -> Vec<UserProfile> {
-        self.q.users.all().await
+        self.q.users.all_local().await
     }
 
     /// Enumerate locally stored users available

@@ -35,6 +35,7 @@ impl QaulRpc for ListLocal {
         qaul.users().list_local().await
     }
 }
+
 /// Enumerate all publicly known remote users
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct ListRemote {}
