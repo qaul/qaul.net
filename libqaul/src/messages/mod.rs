@@ -4,7 +4,7 @@
 pub use crate::api::messages::{Message, Mode, MsgId, MsgQuery, MsgRef, SigTrust, ID_LEN};
 
 mod store;
-pub(crate) use self::store::{MsgState, MsgStore};
+pub(crate) use self::store::MsgStore;
 
 #[cfg(feature = "generate-message")]
 pub(crate) mod message_generation;

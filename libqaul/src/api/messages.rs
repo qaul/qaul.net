@@ -7,13 +7,9 @@ use crate::{
     Tag,
 };
 
-use async_std::{
-    future,
-    task::{self, Poll},
-};
 use ratman::netmod::Recipient;
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeSet, iter::FromIterator, sync::Arc, time::Duration};
+use std::{collections::BTreeSet, iter::FromIterator, sync::Arc};
 
 /// A reference to an internally stored message object
 pub type MsgRef = Arc<Message>;
@@ -216,17 +212,20 @@ impl<'qaul> Messages<'qaul> {
             tags: tags.iter().cloned().collect(),
         };
 
-        self.q.messages.insert(
-            sender,
-            crate::messages::MsgState::Read(Arc::new(Message {
-                id,
+        self.q
+            .messages
+            .insert_sent(
                 sender,
-                associator,
-                tags,
-                payload,
-                sign,
-            })),
-        );
+                Arc::new(Message {
+                    id,
+                    sender,
+                    associator,
+                    tags,
+                    payload,
+                    sign,
+                }),
+            )
+            .await;
 
         MsgUtils::send(
             &self.q.users,
@@ -241,41 +240,40 @@ impl<'qaul> Messages<'qaul> {
     ///
     /// For a more general `Message` query/ enumeration API, see
     /// `Messages::query` instead.
-    pub async fn next<S, I>(&self, user: UserAuth, service: S, tags: I) -> Result<MsgRef>
+    pub async fn next<S, I>(&self, _user: UserAuth, _service: S, _tags: I) -> Result<MsgRef>
     where
         S: Into<String>,
         I: IntoIterator<Item = Tag>,
     {
-        let tags = tags.into_iter().collect::<BTreeSet<Tag>>();
-        let (id, _) = self.q.auth.trusted(user)?;
-        let service: String = service.into();
+        // let tags = tags.into_iter().collect::<BTreeSet<Tag>>();
+        // let (id, _) = self.q.auth.trusted(user)?;
+        // let service: String = service.into();
 
-        // This whole unholy mess needs to be rewritten, when we have
-        // an async message store ... yikes
+        unimplemented!()
 
-        future::poll_fn(move |ctx| {
-            match self
-                .q
-                .messages
-                .query(id)
-                .service(service.as_str())
-                .tags(tags.clone())
-                .unread()
-                .limit(1)
-                .exec()
-            {
-                Ok(msg) if msg.len() >= 1 => Poll::Ready(Ok(msg.into_iter().nth(0).unwrap())),
-                _ => {
-                    let waker = ctx.waker().clone();
-                    task::spawn(async move {
-                        task::sleep(Duration::from_millis(10)).await;
-                        waker.wake();
-                    });
-                    Poll::Pending
-                }
-            }
-        })
-        .await
+        // future::poll_fn(move |ctx| {
+        //     match self
+        //         .q
+        //         .messages
+        //         .query(id)
+        //         .service(service.as_str())
+        //         .tags(tags.clone())
+        //         .unread()
+        //         .limit(1)
+        //         .exec()
+        //     {
+        //         Ok(msg) if msg.len() >= 1 => Poll::Ready(Ok(msg.into_iter().nth(0).unwrap())),
+        //         _ => {
+        //             let waker = ctx.waker().clone();
+        //             task::spawn(async move {
+        //                 task::sleep(Duration::from_millis(10)).await;
+        //                 waker.wake();
+        //             });
+        //             Poll::Pending
+        //         }
+        //     }
+        // })
+        // .await
     }
 
     /// Subscribe to a stream of future message updates
@@ -311,16 +309,17 @@ impl<'qaul> Messages<'qaul> {
     /// handle. It isn't possible to query all messages for all
     /// services in an efficient manner due to how messages are stored
     /// in a node.
-    pub fn query<S>(&self, user: UserAuth, service: S, query: MsgQuery) -> Result<Vec<MsgRef>>
+    pub fn query<S>(&self, user: UserAuth, _service: S, _query: MsgQuery) -> Result<Vec<MsgRef>>
     where
         S: Into<String>,
     {
-        let (id, _) = self.q.auth.trusted(user)?;
-        self.q
-            .messages
-            .query(id)
-            .constraints(query)
-            .service(service)
-            .exec()
+        let (_, _) = self.q.auth.trusted(user)?;
+        // self.q
+        //     .messages
+        //     .query(id)
+        //     .constraints(query)
+        //     .service(service)
+        //     .exec()
+        unimplemented!()
     }
 }

@@ -1,7 +1,4 @@
-use crate::{
-    messages::{MsgState, MsgUtils},
-    Qaul,
-};
+use crate::{messages::MsgUtils, Qaul};
 use alexandria::utils::Tag;
 use async_std::task;
 use ratman::{netmod::Recipient, Router};
@@ -60,8 +57,7 @@ impl Discovery {
                 let msg = Arc::new(MsgUtils::process(user, msg));
                 let associator = msg.associator.clone();
 
-                qaul.messages
-                    .insert(user, MsgState::Unread(Arc::clone(&msg)));
+                qaul.messages.insert_new(user, Arc::clone(&msg)).await;
                 qaul.services.push_for(associator, msg).unwrap();
                 info!("Finished processing incoming message!");
             }
