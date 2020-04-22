@@ -14,12 +14,14 @@ id = { version = "0.4", path = "../ratman/identity", features = ["digest", "rand
 async-std = { version = "1.0", features = ["unstable", "attributes"] }
 bincode = "1.0"
 failure = "0.1"
+hex = "0.4"
 keybob = "0.3"
 serde = { version = "1.0", features = ["derive", "rc"] }
 sodiumoxide = "0.2.5"
 
 [dev-dependencies]
+bincode = "1.0"
 ed25519-dalek = "1.0.0-pre.3"
-hex = "0.4"
 rand = "0.7"
+serde_json = "1.0"
 tempfile = "3.0"

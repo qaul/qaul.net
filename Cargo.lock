@@ -28,6 +28,7 @@ dependencies = [
  "rand 0.7.3",
  "ratman-identity",
  "serde",
+ "serde_json",
  "sodiumoxide",
  "tempfile",
 ]
