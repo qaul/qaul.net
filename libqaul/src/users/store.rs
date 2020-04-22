@@ -17,6 +17,9 @@ use ed25519_dalek::Keypair;
 use std::sync::Arc;
 
 const KEY_PATH: &'static str = "/meta:keys";
+pub(crate) const TAG_PROFILE: &'static str = "libqaul.user.profile";
+pub(crate) const TAG_LOCAL: &'static str = "libqaul.user.local";
+
 
 fn profile_path(id: Id) -> Path {
     Path::from(format!("/users:{}", id))
@@ -51,7 +54,7 @@ impl UserStore {
             .await
             .unwrap();
 
-        self.insert_profile(id, vec![Tag::empty("profile"), Tag::empty("local")])
+        self.insert_profile(id, vec![Tag::empty(TAG_PROFILE), Tag::empty(TAG_LOCAL)])
             .await;
     }
 
@@ -116,7 +119,7 @@ impl UserStore {
             .inner
             .query(
                 GLOBAL,
-                Query::tags().subset(vec![Tag::empty("profile"), Tag::empty("local")]),
+                Query::tags().subset(vec![Tag::empty(TAG_PROFILE), Tag::empty(TAG_LOCAL)]),
             )
             .await
             .unwrap()
@@ -235,8 +238,10 @@ async fn update_user() {
 async fn delete_user() {
     let store = harness::setup();
     let id = harness::insert_random(&store);
-
+    assert_eq!(store.all_local().await.len(), 1);
+    
     store.delete_local(id).await;
+    assert_eq!(store.all_local().await.len(), 0);
 }
 
 #[async_std::test]

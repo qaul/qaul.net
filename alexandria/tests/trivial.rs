@@ -11,7 +11,7 @@ mod harness;
 use harness::Test;
 
 use alexandria::{
-    query::Query,
+    query::{Query, QueryResult},
     record::kv::Value,
     utils::{Diff, DiffSeg, Path, Tag, TagSet},
 };
@@ -118,4 +118,50 @@ async fn simple_subscription() {
         .unwrap();
 
     assert_eq!(sub.next().await, path);
+}
+
+/// Sometimes the tag cache is being weird and we don't actually
+/// delete something from the cache, which means we get ghost results
+/// after a delete.  This test is an attempt to model this behaviour.
+#[async_std::test]
+async fn insert_tagged_delete() {
+    let dir = tempdir().unwrap();
+    let t = Test::new(dir.path(), 1);
+
+    let path = Path::from("/msg:alice");
+    let tags = Tag::empty("my_tag");
+    let diff = Diff::from(("msg_count".into(), DiffSeg::Insert(Value::U64(0))));
+
+    t.lib()
+        .insert(t.users[0], path.clone(), tags.clone(), diff)
+        .await
+        .unwrap();
+
+    assert_eq!(
+        match t
+            .lib()
+            .query(t.users[0], Query::tags().subset(tags.clone()))
+            .await
+            .unwrap()
+        {
+            QueryResult::Many(ref vec) => vec.len(),
+            QueryResult::Single(_) => unreachable!(),
+        },
+        1
+    );
+
+    t.lib().delete(t.users[0], path.clone()).await.unwrap();
+
+    assert_eq!(
+        match t
+            .lib()
+            .query(t.users[0], Query::tags().subset(tags))
+            .await
+            .unwrap()
+        {
+            QueryResult::Many(ref vec) => vec.len(),
+            QueryResult::Single(_) => unreachable!(),
+        },
+        0
+    );
 }

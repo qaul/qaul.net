@@ -34,6 +34,7 @@ impl UserTags {
 
     /// Remove a path from all tag models
     pub(crate) fn clear(&mut self, path: &Path) {
+        self.p2t.remove(path);
         self.t2p.iter_mut().for_each(|(_, set)| {
             set.remove(path);
         });

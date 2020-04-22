@@ -416,21 +416,28 @@ fn subset_1() {
 
 #[test]
 fn subset_2() {
-    let whole = TagSet::from(vec![Tag::empty("a"), Tag::empty("b")]);
-    let sub = TagSet::from(vec![Tag::empty("a")]);
-    assert!(!sub.subset(&whole));
+    let a = TagSet::from(vec![Tag::empty("a"), Tag::empty("b")]);
+    let b = TagSet::from(vec![Tag::empty("b"), Tag::empty("c")]);
+    assert!(!a.subset(&b));
 }
 
 #[test]
-fn subset_3() {
-    let whole = TagSet::from(vec![Tag::empty("a"), Tag::empty("b"), Tag::empty("c")]);
-    let sub = TagSet::from(vec![Tag::empty("a"), Tag::empty("b")]);
-    assert!(whole.subset(&sub));
+fn intersect_1() {
+    let a = TagSet::from(vec![Tag::empty("a"), Tag::empty("b")]);
+    let b = TagSet::from(vec![Tag::empty("b"), Tag::empty("c")]);
+    assert!(a.intersect(&b));
 }
 
 #[test]
-fn subset_4() {
-    let whole = TagSet::from(vec![Tag::empty("a"), Tag::empty("b"), Tag::empty("c")]);
-    let sub = TagSet::from(vec![Tag::empty("a"), Tag::empty("b")]);
-    assert!(!sub.subset(&whole));
+fn intersect_4() {
+    let a = TagSet::from(vec![Tag::empty("a"), Tag::empty("b"), Tag::empty("c")]);
+    let b = TagSet::from(vec![Tag::empty("d"), Tag::empty("e")]);
+    assert!(!a.intersect(&b));
+}
+
+#[test]
+fn not_1() {
+    let a = TagSet::from(vec![Tag::empty("a"), Tag::empty("b"), Tag::empty("c")]);
+    let b = TagSet::from(vec![Tag::empty("d"), Tag::empty("e")]);
+    assert!(a.not(&b));
 }
