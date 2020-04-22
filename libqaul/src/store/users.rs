@@ -146,7 +146,7 @@ fn persist_user_profile() {
     use crate::Identity;
     use alexandria::{
         utils::{Path, TagSet},
-        Builder,
+        Builder, GLOBAL,
     };
 
     let dir = tempfile::tempdir().unwrap();
@@ -178,11 +178,7 @@ fn persist_user_profile() {
 
     let diffs = profile.init_diff();
     async_std::task::block_on(async {
-        lib.data(None)
-            .await
-            .as_ref()
-            .unwrap()
-            .batch(path.clone(), TagSet::empty(), diffs)
+        lib.batch(GLOBAL, path.clone(), TagSet::empty(), diffs)
             .await
     })
     .unwrap();

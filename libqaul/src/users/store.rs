@@ -8,8 +8,9 @@ use crate::{
     users::{UserProfile, UserUpdate},
 };
 use alexandria::{
-    utils::{Id, Path, Query, QueryResult, SetQuery, Tag, TagSet},
-    Library,
+    query::{Query, QueryResult, SetQuery},
+    utils::{Id, Path, Tag, TagSet},
+    Library, Session, GLOBAL,
 };
 use ed25519_dalek::Keypair;
 
@@ -36,15 +37,17 @@ impl UserStore {
     /// Create a new local user
     pub(crate) async fn create_local(&self, keyid: KeyId, pw: &str) {
         let KeyId { id, keypair } = keyid;
-        self.inner.user(id).create(pw).await.unwrap();
+        self.inner.sessions().create(id, pw).await.unwrap();
         let wrapped = KeyWrap(keypair);
 
         // Store the key
         self.inner
-            .data(id)
-            .await
-            .unwrap()
-            .insert(Path::from(KEY_PATH), TagSet::empty(), wrapped.make_diff())
+            .insert(
+                Session::Id(id),
+                Path::from(KEY_PATH),
+                TagSet::empty(),
+                wrapped.make_diff(),
+            )
             .await
             .unwrap();
 
@@ -56,10 +59,7 @@ impl UserStore {
     pub(crate) async fn insert_profile<T: Into<TagSet>>(&self, id: Identity, tags: T) {
         let profile = UserProfile::new(id);
         self.inner
-            .data(None)
-            .await
-            .unwrap()
-            .batch(profile_path(id), tags, profile.init_diff())
+            .batch(GLOBAL, profile_path(id), tags, profile.init_diff())
             .await
             .unwrap();
     }
@@ -69,20 +69,11 @@ impl UserStore {
         dbg!(self.get(id).await).unwrap();
 
         self.inner
-            .data(id)
-            .await
-            .unwrap()
-            .delete(Path::from(KEY_PATH))
+            .delete(Session::Id(id), Path::from(KEY_PATH))
             .await
             .unwrap();
 
-        self.inner
-            .data(None)
-            .await
-            .unwrap()
-            .delete(profile_path(id))
-            .await
-            .unwrap();
+        self.inner.delete(GLOBAL, profile_path(id)).await.unwrap();
     }
 
     /// Modify a single user inside the store in-place
@@ -90,10 +81,7 @@ impl UserStore {
         let curr = self.get(id).await?;
         let diff = curr.gen_diff(modifier);
         self.inner
-            .data(None)
-            .await
-            .unwrap()
-            .update(profile_path(id), diff)
+            .update(GLOBAL, profile_path(id), diff)
             .await
             .unwrap();
         Ok(())
@@ -103,10 +91,7 @@ impl UserStore {
     pub(crate) async fn get_key(&self, id: Identity) -> Keypair {
         match self
             .inner
-            .data(id)
-            .await
-            .unwrap()
-            .query(Query::Path(Path::from(KEY_PATH)))
+            .query(Session::Id(id), Query::Path(Path::from(KEY_PATH)))
             .await
         {
             Ok(QueryResult::Single(rec)) => KeyWrap::from(&*rec).0,
@@ -117,10 +102,7 @@ impl UserStore {
     pub(crate) async fn get(&self, id: Identity) -> Result<UserProfile> {
         match self
             .inner
-            .data(None)
-            .await
-            .unwrap()
-            .query(Query::Path(profile_path(id)))
+            .query(GLOBAL, Query::Path(profile_path(id)))
             .await
         {
             Ok(QueryResult::Single(rec)) => Ok(UserProfile::from(&*rec)),
@@ -132,12 +114,12 @@ impl UserStore {
     pub(crate) async fn all_local(&self) -> Vec<UserProfile> {
         match self
             .inner
-            .data(None)
-            .await
-            .unwrap()
-            .query(Query::Tag(SetQuery::Partial(
-                vec![Tag::empty("profile"), Tag::empty("local")].into(),
-            )))
+            .query(
+                GLOBAL,
+                Query::Tag(SetQuery::Partial(
+                    vec![Tag::empty("profile"), Tag::empty("local")].into(),
+                )),
+            )
             .await
             .unwrap()
         {
@@ -154,12 +136,10 @@ impl UserStore {
     pub(crate) async fn all_remote(&self) -> Vec<UserProfile> {
         match self
             .inner
-            .data(None)
-            .await
-            .unwrap()
-            .query(Query::Tag(SetQuery::Matching(
-                vec![Tag::empty("profile")].into(),
-            )))
+            .query(
+                GLOBAL,
+                Query::Tag(SetQuery::Matching(vec![Tag::empty("profile")].into())),
+            )
             .await
             .unwrap()
         {
@@ -176,12 +156,10 @@ impl UserStore {
     pub(crate) async fn all(&self) -> Vec<UserProfile> {
         match self
             .inner
-            .data(None)
-            .await
-            .unwrap()
-            .query(Query::Tag(SetQuery::Partial(
-                vec![Tag::empty("profile")].into(),
-            )))
+            .query(
+                GLOBAL,
+                Query::Tag(SetQuery::Partial(vec![Tag::empty("profile")].into())),
+            )
             .await
             .unwrap()
         {
