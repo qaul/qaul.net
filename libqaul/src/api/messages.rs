@@ -1,15 +1,14 @@
 use crate::{
-    api::{SubId, Subscription},
+    api::{SubId, Subscription, Tag, TagSet},
     error::{Error, Result},
     messages::{Envelope, MsgUtils, RatMessageProto},
     qaul::{Identity, Qaul},
     users::UserAuth,
-    Tag,
 };
 
 use ratman::netmod::Recipient;
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeSet, iter::FromIterator, sync::Arc};
+use std::sync::Arc;
 
 /// A reference to an internally stored message object
 pub type MsgRef = Arc<Message>;
@@ -57,12 +56,21 @@ impl SigTrust {
 /// When sending a flooded message, it becomes publicly accessible for
 /// everybody on this node, and will most likely be stored in plain
 /// text on receiving nodes across the network.  Be aware of this!
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum Mode {
     /// Send a message to everybody
     Flood,
     /// Address only a single identity
     Std(Identity),
+}
+
+impl Mode {
+    pub(crate) fn id(&self) -> Option<Identity> {
+        match self {
+            Self::Std(id) => Some(*id),
+            Self::Flood => None,
+        }
+    }
 }
 
 impl From<Identity> for Mode {
@@ -101,7 +109,7 @@ pub struct Message {
     /// The embedded service associator
     pub associator: String,
     /// A tag store for persistent message metadata
-    pub tags: BTreeSet<Tag>,
+    pub tags: TagSet,
     /// Verified signature data
     pub sign: SigTrust,
     /// A raw byte `Message` payload
@@ -195,14 +203,14 @@ impl<'qaul> Messages<'qaul> {
     ) -> Result<MsgId>
     where
         S: Into<String>,
-        T: IntoIterator<Item = Tag>,
+        T: Into<TagSet>,
     {
         let (sender, _) = self.q.auth.trusted(user)?;
         let recipient = mode.into();
         let associator = service.into();
         let id = MsgId::random();
         let sign = SigTrust::Trusted;
-        let tags = BTreeSet::from_iter(tags.into_iter());
+        let tags: TagSet = tags.into();
 
         let env = Envelope {
             id,
@@ -214,7 +222,7 @@ impl<'qaul> Messages<'qaul> {
 
         self.q
             .messages
-            .insert_sent(
+            .insert_local(
                 sender,
                 Arc::new(Message {
                     id,
@@ -224,6 +232,7 @@ impl<'qaul> Messages<'qaul> {
                     payload,
                     sign,
                 }),
+                mode,
             )
             .await;
 

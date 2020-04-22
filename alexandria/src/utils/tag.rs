@@ -28,6 +28,18 @@ impl TagSet {
         self.0.insert(t);
     }
 
+    /// Merge this and another tagset together into one
+    pub fn merge<T>(self, tags: T) -> Self
+    where
+        T: Into<Self>,
+    {
+        let ts = tags.into();
+        Self(ts.0.into_iter().fold(self.0, |mut set, t| {
+            set.insert(t);
+            set
+        }))
+    }
+
     pub fn remove(&mut self, t: &Tag) {
         self.0.remove(t);
     }
@@ -43,27 +55,40 @@ impl TagSet {
     }
 
     /// Any overlap between `self` and `o`
-    pub(crate) fn intersect(&self, o: &TagSet) -> bool {
+    pub fn intersect(&self, o: &TagSet) -> bool {
         o.iter().fold(false, |acc, t| acc || self.0.contains(t))
     }
 
     /// A subset where `o` needs to be contained entirely in `self`
-    pub(crate) fn subset(&self, o: &TagSet) -> bool {
+    pub fn subset(&self, o: &TagSet) -> bool {
         o.iter().fold(true, |acc, t| acc && self.0.contains(t))
     }
 
     /// An equality set where `o` and `self` are the same
-    pub(crate) fn equality(&self, o: &TagSet) -> bool {
+    pub fn equality(&self, o: &TagSet) -> bool {
         self.0 == o.0
     }
 
     /// No overlay between `self` and `o`
-    pub(crate) fn not(&self, o: &TagSet) -> bool {
+    pub fn not(&self, o: &TagSet) -> bool {
         o.iter().fold(true, |acc, tag| acc && !self.0.contains(tag))
     }
 
-    pub(crate) fn iter(&self) -> impl Iterator<Item = &Tag> {
+    /// Return an iterator over the inner collection
+    pub fn iter(&self) -> impl Iterator<Item = &Tag> {
         self.0.iter()
+    }
+}
+
+impl From<Tag> for TagSet {
+    fn from(t: Tag) -> Self {
+        Self::from(vec![t])
+    }
+}
+
+impl<'tag> From<&'tag Tag> for TagSet {
+    fn from(t: &'tag Tag) -> Self {
+        Self::from(vec![t.clone()])
     }
 }
 

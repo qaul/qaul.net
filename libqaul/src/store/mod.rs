@@ -6,10 +6,12 @@
 //! type yields in a diff that the storage system can then apply, and
 //! reading a data type from a record.
 
+mod messages;
+
 mod users;
 pub(crate) use users::KeyWrap;
 
-use crate::Identity;
+use crate::{messages::SigTrust, Identity};
 use alexandria::record::kv::Value;
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -43,7 +45,7 @@ impl Conv {
         }
     }
 
-    pub(self) fn set(v: &Value) -> BTreeSet<String> {
+    pub(self) fn str_set(v: &Value) -> BTreeSet<String> {
         match v {
             Value::List(list) => list
                 .iter()
@@ -60,6 +62,18 @@ impl Conv {
         match v {
             Value::Vec(v) => v.clone(),
             v => panic!("Invalid conversion: {:?} -> Vec<u8>", v),
+        }
+    }
+
+    pub(self) fn sig_trust(v: &Value) -> SigTrust {
+        match v {
+            Value::String(s) => match s.as_str() {
+                "trusted" => SigTrust::Trusted,
+                "unverified" => SigTrust::Unverified,
+                "invalid" => SigTrust::Invalid,
+                v => panic!("Invalid string payload: '{}'", v),
+            },
+            v => panic!("Invalid conversion: {:?} -> SigTrust", v),
         }
     }
 }

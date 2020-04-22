@@ -19,12 +19,11 @@ use self::{bin::Bin, kv::Kv};
 use crate::{
     crypto::{asym::KeyPair, DetachedKey, Encrypted},
     error::Result,
-    utils::{Diff, DiffExt, Id, Tag, TagSet},
+    utils::{Diff, DiffExt, Id, TagSet},
 };
 
 use async_std::sync::Arc;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeSet;
 
 /// A record header
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -32,7 +31,7 @@ pub struct Header {
     /// A unique record ID
     pub id: Id,
     /// Public set of search tags
-    pub tags: BTreeSet<Tag>,
+    pub tags: TagSet,
     /// The encrypted header
     sec: Encrypted<SecHeader, KeyPair>,
 }

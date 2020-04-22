@@ -22,3 +22,4 @@ pub use diff::{ItemDiff, ItemDiffExt, MapDiff, MapDiffExt, SetDiff, SetDiffExt};
 ///
 /// ---
 pub use alexandria::utils::Tag;
+pub use alexandria::utils::TagSet;

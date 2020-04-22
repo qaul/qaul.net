@@ -58,7 +58,7 @@ impl From<&Record> for UserProfile {
                 .unwrap_or_else(|| Default::default()),
             services: kv
                 .get(SERV)
-                .map(|v| Conv::set(v))
+                .map(|v| Conv::str_set(v))
                 .unwrap_or_else(|| Default::default()),
             avatar: kv.get(AVI).map(|v| Conv::binvec(v)),
         }
