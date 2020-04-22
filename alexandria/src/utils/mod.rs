@@ -10,21 +10,12 @@
 /// random (via `Id::random()`).
 pub use id::Identity as Id;
 
-pub use crate::core::data::{Query, QueryResult, SetQuery};
-
 mod diff;
 pub use diff::{Diff, DiffSeg};
 pub(crate) use diff::{DiffExt, DiffResult};
-
-mod iter;
-pub use iter::QueryIterator;
 
 mod tag;
 pub use tag::{Tag, TagSet};
 
 mod path;
 pub use path::Path;
-
-mod sub;
-pub(crate) use sub::SubHub;
-pub use sub::Subscription;

@@ -1,13 +1,13 @@
 //! A test harness for alexandria tests
 
-use alexandria::{utils::Id, Builder, Library};
+use alexandria::{utils::Id, Builder, Library, Session};
 use async_std::{sync::Arc, task::block_on};
 use std::path::PathBuf;
 
 pub const PASS: &'static str = "car horse battery staple";
 
 pub struct Test {
-    pub users: Vec<Id>,
+    pub users: Vec<Session>,
     lib: Arc<Library>,
 }
 
@@ -18,7 +18,7 @@ impl Test {
         let users = (0..userno).fold(vec![], |mut vec, _| {
             vec.push(block_on(async {
                 let id = Id::random();
-                lib.user(id).create(PASS).await.map(|_| id).unwrap()
+                Session::Id(lib.sessions().create(id, PASS).await.map(|_| id).unwrap())
             }));
             vec
         });

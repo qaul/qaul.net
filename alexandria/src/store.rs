@@ -10,6 +10,7 @@ use crate::{
     notify::Notify,
     record::Record,
     utils::{Diff, Id, Path, TagSet},
+    Session,
 };
 use async_std::sync::Arc;
 use std::collections::BTreeMap;
@@ -50,8 +51,9 @@ impl Store {
     ///
     /// If providing a user ID, check the user store first, before
     /// checking the shared store.
-    pub(crate) fn get_path(&self, id: Option<Id>, path: &Path) -> Result<Arc<Record>> {
-        id.and_then(|ref id| self.usrd.get(id))
+    pub(crate) fn get_path(&self, id: Session, path: &Path) -> Result<Arc<Record>> {
+        id.id()
+            .and_then(|ref id| self.usrd.get(id))
             .and_then(|tree| {
                 tree.get(path)
                     .and_then(|e| e.deref().map(|ref rec| Arc::clone(&rec)).ok())
@@ -68,7 +70,7 @@ impl Store {
     pub(crate) fn batch(
         &mut self,
         db: &mut DeltaBuilder,
-        id: Option<Id>,
+        id: Session,
         path: &Path,
         tags: TagSet,
         mut diffs: Vec<Diff>,
@@ -106,7 +108,7 @@ impl Store {
     pub(crate) fn insert(
         &mut self,
         db: &mut DeltaBuilder,
-        id: Option<Id>,
+        id: Session,
         path: &Path,
         tags: TagSet,
         diff: Diff,
@@ -134,7 +136,7 @@ impl Store {
     pub(crate) fn destroy(
         &mut self,
         db: &mut DeltaBuilder,
-        id: Option<Id>,
+        id: Session,
         path: &Path,
     ) -> Result<()> {
         // Check if the path exists
@@ -161,7 +163,7 @@ impl Store {
     pub(crate) fn update(
         &mut self,
         db: &mut DeltaBuilder,
-        id: Option<Id>,
+        id: Session,
         path: &Path,
         diff: Diff,
     ) -> Result<()> {
@@ -193,7 +195,7 @@ impl Store {
     }
 
     /// Lock the GC for a set of paths
-    pub(crate) fn gc_lock(&mut self, id: Option<Id>, paths: &Vec<Path>) {
+    pub(crate) fn gc_lock(&mut self, id: Session, paths: &Vec<Path>) {
         let set = self.gc_set_mut(id);
         paths.iter().for_each(|path| {
             set.entry(path.clone()).or_default().ctr += 1;
@@ -201,7 +203,7 @@ impl Store {
     }
 
     /// Release the GC for a set of paths and delete them
-    pub(crate) fn gc_release(&mut self, id: Option<Id>, paths: &Vec<Path>) -> Result<()> {
+    pub(crate) fn gc_release(&mut self, id: Session, paths: &Vec<Path>) -> Result<()> {
         let mut db = DeltaBuilder::new(id, DeltaType::Delete);
 
         paths.iter().fold(Ok(()), |res, path| {
@@ -226,8 +228,8 @@ impl Store {
     }
 
     /// A helper to wake a tree, depending on Id
-    fn wake_tree(&mut self, id: Option<Id>, path: &Path) {
-        match id {
+    fn wake_tree(&mut self, id: Session, path: &Path) {
+        match id.id() {
             Some(ref id) => {
                 let tree = self
                     .usrd
@@ -253,17 +255,17 @@ impl Store {
     /// A utility function to get the mutable tree, depending on id
     fn tree_mut(
         &mut self,
-        id: Option<Id>,
+        id: Session,
     ) -> &mut BTreeMap<Path, Notify<Encrypted<Arc<Record>, KeyPair>>> {
-        match id {
+        match id.id() {
             Some(id) => self.usrd.entry(id).or_insert(Notify::new(BTreeMap::new())),
             None => &mut self.shared,
         }
     }
 
     /// A utility functiot to get the mutable gc lock, depending on id
-    fn gc_set_mut(&mut self, id: Option<Id>) -> &mut BTreeMap<Path, GcReq> {
-        match id {
+    fn gc_set_mut(&mut self, id: Session) -> &mut BTreeMap<Path, GcReq> {
+        match id.id() {
             Some(id) => self.gc_usr.entry(id).or_default(),
             None => &mut self.gc_shared,
         }
@@ -271,10 +273,12 @@ impl Store {
 
     #[cfg(test)]
     #[allow(unused)]
-    fn length(&mut self, id: Option<Id>) -> usize {
+    fn length(&mut self, id: Session) -> usize {
         self.tree_mut(id).len()
     }
 }
+
+///////////////////// Store tests
 
 #[test]
 fn store_insert() {
@@ -292,9 +296,11 @@ fn store_insert() {
         DiffSeg::Insert(Value::String("world".into())),
     ));
 
-    let mut db = DeltaBuilder::new(Some(id), DeltaType::Insert);
+    let mut db = DeltaBuilder::new(Session::Id(id), DeltaType::Insert);
     let mut store = Store::new();
-    let rec_id = store.insert(&mut db, Some(id), &path, tags, diff).unwrap();
+    let rec_id = store
+        .insert(&mut db, Session::Id(id), &path, tags, diff)
+        .unwrap();
 
     assert_eq!(store.usrd.get(&id).unwrap().len(), 1);
     assert_eq!(store.shared.len(), 0);
@@ -329,11 +335,16 @@ fn store_and_get() {
         DiffSeg::Insert(Value::String("world".into())),
     ));
 
-    let mut db = DeltaBuilder::new(Some(id), DeltaType::Insert);
+    let mut db = DeltaBuilder::new(Session::Id(id), DeltaType::Insert);
     let mut store = Store::new();
-    let rec_id = store.insert(&mut db, Some(id), &path, tags, diff).unwrap();
+    let rec_id = store
+        .insert(&mut db, Session::Id(id), &path, tags, diff)
+        .unwrap();
 
-    assert_eq!(store.get_path(Some(id), &path).unwrap().header.id, rec_id);
+    assert_eq!(
+        store.get_path(Session::Id(id), &path).unwrap().header.id,
+        rec_id
+    );
 }
 
 #[test]
@@ -352,9 +363,11 @@ fn store_and_update() {
         DiffSeg::Insert(Value::String("world".into())),
     ));
 
-    let mut db = DeltaBuilder::new(Some(id), DeltaType::Insert);
+    let mut db = DeltaBuilder::new(Session::Id(id), DeltaType::Insert);
     let mut store = Store::new();
-    let _ = store.insert(&mut db, Some(id), &path, tags, diff).unwrap();
+    let _ = store
+        .insert(&mut db, Session::Id(id), &path, tags, diff)
+        .unwrap();
     assert_eq!(
         store
             .usrd
@@ -374,8 +387,10 @@ fn store_and_update() {
         DiffSeg::Insert(Value::String("mondo".into())),
     ));
 
-    let mut db = DeltaBuilder::new(Some(id), DeltaType::Update);
-    store.update(&mut db, Some(id), &path, diff2).unwrap();
+    let mut db = DeltaBuilder::new(Session::Id(id), DeltaType::Update);
+    store
+        .update(&mut db, Session::Id(id), &path, diff2)
+        .unwrap();
 
     assert_eq!(store.usrd.get(&id).unwrap().len(), 1);
     assert_eq!(
@@ -410,8 +425,10 @@ fn store_and_delete() {
     ));
 
     let mut store = Store::new();
-    let mut db = DeltaBuilder::new(Some(id), DeltaType::Insert);
-    let _ = store.insert(&mut db, Some(id), &path, tags, diff).unwrap();
+    let mut db = DeltaBuilder::new(Session::Id(id), DeltaType::Insert);
+    let _ = store
+        .insert(&mut db, Session::Id(id), &path, tags, diff)
+        .unwrap();
     assert_eq!(
         store
             .usrd
@@ -426,14 +443,17 @@ fn store_and_delete() {
         1
     );
 
-    let mut db = DeltaBuilder::new(Some(id), DeltaType::Delete);
-    store.destroy(&mut db, Some(id), &path).unwrap();
+    let mut db = DeltaBuilder::new(Session::Id(id), DeltaType::Delete);
+    store.destroy(&mut db, Session::Id(id), &path).unwrap();
     assert_eq!(store.usrd.get(&id).unwrap().len(), 0);
 }
 
 #[test]
 fn insert_batch() {
-    use crate::delta::{DeltaBuilder, DeltaType};
+    use crate::{
+        delta::{DeltaBuilder, DeltaType},
+        GLOBAL,
+    };
 
     let vec = vec![
         Diff::map().insert("hello", "world"),
@@ -444,9 +464,9 @@ fn insert_batch() {
     let tags = TagSet::empty();
 
     let mut store = Store::new();
-    let mut db = DeltaBuilder::new(None, DeltaType::Insert);
+    let mut db = DeltaBuilder::new(GLOBAL, DeltaType::Insert);
 
-    let _ = store.batch(&mut db, None, &path, tags, vec).unwrap();
+    let _ = store.batch(&mut db, GLOBAL, &path, tags, vec).unwrap();
 
     assert_eq!(
         store.shared.get(&path).unwrap().deref().unwrap().kv().len(),
@@ -456,7 +476,10 @@ fn insert_batch() {
 
 #[test]
 fn insert_batch_single() {
-    use crate::delta::{DeltaBuilder, DeltaType};
+    use crate::{
+        delta::{DeltaBuilder, DeltaType},
+        GLOBAL,
+    };
 
     let vec = vec![Diff::map().insert("hello", "world")];
 
@@ -464,14 +487,14 @@ fn insert_batch_single() {
     let tags = TagSet::empty();
 
     let mut store = Store::new();
-    let mut db = DeltaBuilder::new(None, DeltaType::Insert);
+    let mut db = DeltaBuilder::new(GLOBAL, DeltaType::Insert);
 
-    let _ = store.batch(&mut db, None, &path, tags, vec).unwrap();
+    let _ = store.batch(&mut db, GLOBAL, &path, tags, vec).unwrap();
 
     assert_eq!(
         store.shared.get(&path).unwrap().deref().unwrap().kv().len(),
         1
     );
 
-    assert_eq!(store.length(None), 1);
+    assert_eq!(store.length(GLOBAL), 1);
 }

@@ -1,7 +1,10 @@
-use crate::utils::{Id, Path, TagSet};
+use crate::{
+    utils::{Id, Path, TagSet},
+    Session,
+};
 
 pub(crate) struct DeltaBuilder {
-    user: Option<Id>,
+    user: Session,
     path: Option<Path>,
     rec_id: Option<Id>,
     tags: Option<TagSet>,
@@ -9,7 +12,7 @@ pub(crate) struct DeltaBuilder {
 }
 
 impl DeltaBuilder {
-    pub(crate) fn new(user: Option<Id>, action: DeltaType) -> Self {
+    pub(crate) fn new(user: Session, action: DeltaType) -> Self {
         Self {
             action,
             user,
@@ -51,7 +54,7 @@ impl DeltaBuilder {
 /// The `path` segment is constructed via the
 #[derive(Clone, Debug)]
 pub(crate) struct Delta {
-    pub(crate) user: Option<Id>,
+    pub(crate) user: Session,
     pub(crate) rec_id: Option<Id>,
     pub(crate) path: Path,
     pub(crate) tags: TagSet,

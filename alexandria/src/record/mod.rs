@@ -1,4 +1,4 @@
-//! Data records
+//! Clear-text data record representation
 //!
 //! All data in alexandria is encrypted.  However, at the stage of
 //! interacting with a `Record` object in your code you no longer have

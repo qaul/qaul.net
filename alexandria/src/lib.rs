@@ -23,8 +23,9 @@ pub(crate) mod notify;
 pub(crate) mod store;
 pub(crate) mod wire;
 
-pub use crate::core::{Builder, DataApi, Library, UsersApi};
-
 pub mod error;
+pub mod query;
 pub mod record;
 pub mod utils;
+
+pub use crate::core::{Builder, Library, Session, GLOBAL};

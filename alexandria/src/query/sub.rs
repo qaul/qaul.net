@@ -1,6 +1,7 @@
 use crate::{
     delta::Delta,
-    utils::{Path, Query, SetQuery},
+    query::{Query, SetQuery},
+    utils::Path,
 };
 use async_std::{
     sync::{channel, Arc, Receiver, RwLock, Sender},
@@ -100,6 +101,7 @@ impl Subscription {
                         Query::Tag(ref tq) => match tq {
                             SetQuery::Matching(ref tags) => d.tags.exactly(tags),
                             SetQuery::Partial(ref tags) => d.tags.subset(tags),
+                            SetQuery::Not(_) => unimplemented!(),
                         },
                         _ => unimplemented!(),
                     } {
@@ -146,9 +148,12 @@ impl SubTest {
     }
 
     fn insert<T: Into<Option<TagSet>>>(&self, ts: T) {
-        use crate::delta::{DeltaBuilder, DeltaType};
+        use crate::{
+            delta::{DeltaBuilder, DeltaType},
+            GLOBAL,
+        };
         let delta = {
-            let mut db = DeltaBuilder::new(None, DeltaType::Insert);
+            let mut db = DeltaBuilder::new(GLOBAL, DeltaType::Insert);
             db.path(&self.path);
             if let Some(ref ts) = ts.into() {
                 db.tags(ts);

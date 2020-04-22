@@ -2,6 +2,7 @@ use crate::{
     crypto::{asym::KeyPair, DetachedKey, Encrypted, EncryptedMap},
     error::Result,
     utils::{Id, Path, Tag, TagSet},
+    Session,
 };
 
 use serde::{Deserialize, Serialize};
@@ -98,13 +99,8 @@ impl TagCache {
     }
 
     /// Insert a new path-tag mapping for a user
-    pub(crate) fn insert<I: Into<Option<Id>>>(
-        &mut self,
-        id: I,
-        path: Path,
-        tag: Tag,
-    ) -> Result<()> {
-        let id = id.into().unwrap_or(self.id);
+    pub(crate) fn insert(&mut self, id: Session, path: Path, tag: Tag) -> Result<()> {
+        let id = id.id().unwrap_or(self.id);
 
         self.map
             .entry(id)
@@ -116,8 +112,8 @@ impl TagCache {
     }
 
     /// Delete a path from all tag mappings
-    pub(crate) fn delete_path<I: Into<Option<Id>>>(&mut self, id: I, path: Path) -> Result<()> {
-        let id = id.into().unwrap_or(self.id);
+    pub(crate) fn delete_path(&mut self, id: Session, path: Path) -> Result<()> {
+        let id = id.id().unwrap_or(self.id);
         if let Ok(entry) = self.map.get_mut(id) {
             entry.clear(&path);
         }
@@ -125,18 +121,14 @@ impl TagCache {
     }
 
     /// Get all paths associated with a tag
-    pub(crate) fn get_paths<I: Into<Option<Id>>>(&self, id: I, tags: &TagSet) -> Result<Vec<Path>> {
-        let id = id.into().unwrap_or(self.id);
+    pub(crate) fn get_paths(&self, id: Session, tags: &TagSet) -> Result<Vec<Path>> {
+        let id = id.id().unwrap_or(self.id);
         Ok(self.map.get(id)?.paths(tags))
     }
 
     /// Get all paths associated with a tag
-    pub(crate) fn get_paths_matching<I: Into<Option<Id>>>(
-        &self,
-        id: I,
-        tags: &TagSet,
-    ) -> Result<Vec<Path>> {
-        let id = id.into().unwrap_or(self.id);
+    pub(crate) fn get_paths_matching(&self, id: Session, tags: &TagSet) -> Result<Vec<Path>> {
+        let id = id.id().unwrap_or(self.id);
         Ok(self.map.get(id)?.paths_matching(tags))
     }
 }

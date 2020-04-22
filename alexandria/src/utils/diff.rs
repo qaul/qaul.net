@@ -1,7 +1,7 @@
-use crate::{error::DiffErrs, error::Result, record::kv::Value};
+use crate::{error::DiffErrors, error::Result, record::kv::Value};
 use std::collections::BTreeMap;
 
-pub(crate) type DiffResult<T> = std::result::Result<T, DiffErrs>;
+pub(crate) type DiffResult<T> = std::result::Result<T, DiffErrors>;
 
 pub(crate) trait DiffExt {
     fn apply(&mut self, diff: Diff) -> Result<()>;

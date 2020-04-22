@@ -1,9 +1,21 @@
-//! Library specific errors
+//! Alexandria specific error handling
+//!
+//! Generally, not all errors can be expressed as one, and many of the
+//! errors that happen internally are filtered and repacked into a set
+//! of common errors that users of the library will have to deal with.
+//! They are most commonly related to user mistakes, scheduling
+//! problems, etc.
+//!
+//! However there are some errors that the database itself can't
+//! handle, and so it has to bubble up via the `IternalError` variant
+//! on `Error`.  These can be bugs in Alexandria itself, or some
+//! runtime constraint like having run out of memory or disk space.
+
 
 use failure::Fail;
 use std::fmt::{self, Display, Formatter};
 
-/// Alexandria library API errors
+/// Common alexandria error fascade
 #[derive(Debug, Fail)]
 pub enum Error {
     #[fail(display = "failed to add a user that already exits")]
@@ -43,19 +55,21 @@ pub enum Error {
     BadDiffType,
 
     #[fail(display = "a Diff failed to apply: \n{}", msgs)]
-    BadDiff { msgs: DiffErrs },
+    BadDiff { msgs: DiffErrors },
 
     #[doc(hidden)]
     #[fail(display = "An alexandria internal error occured: `{}`", msg)]
     InternalError { msg: String },
 }
 
+/// A convenience alias to contain a common alexandria error
 pub type Result<T> = std::result::Result<T, Error>;
 
+/// Span info errors that can occur while applying a diff to a record
 #[derive(Debug)]
-pub struct DiffErrs(Vec<(usize, String)>);
+pub struct DiffErrors(Vec<(usize, String)>);
 
-impl DiffErrs {
+impl DiffErrors {
     pub(crate) fn add(mut self, new: Self) -> Self {
         let mut ctr = self.0.len();
         new.0.into_iter().for_each(|(_, e)| {
@@ -77,7 +91,7 @@ impl DiffErrs {
     }
 }
 
-impl Display for DiffErrs {
+impl Display for DiffErrors {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         self.0.iter().fold(Ok(()), |res, (num, msg)| {
             res.and_then(|_| write!(f, r#"{}: "{}""#, num, msg))
@@ -85,20 +99,20 @@ impl Display for DiffErrs {
     }
 }
 
-impl From<Vec<(usize, String)>> for DiffErrs {
+impl From<Vec<(usize, String)>> for DiffErrors {
     fn from(vec: Vec<(usize, String)>) -> Self {
         Self(vec)
     }
 }
 
-impl From<(usize, String)> for DiffErrs {
+impl From<(usize, String)> for DiffErrors {
     fn from(tup: (usize, String)) -> Self {
         Self(vec![tup])
     }
 }
 
-impl From<DiffErrs> for Error {
-    fn from(msgs: DiffErrs) -> Self {
+impl From<DiffErrors> for Error {
+    fn from(msgs: DiffErrors) -> Self {
         Error::BadDiff { msgs }
     }
 }

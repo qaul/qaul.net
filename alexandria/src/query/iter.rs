@@ -2,9 +2,10 @@
 
 use crate::{
     error::Result,
+    query::{Query, QueryResult},
     record::RecordRef,
-    utils::{Id, Path, Query, QueryResult},
-    Library,
+    utils::Path,
+    Library, Session,
 };
 use async_std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -19,11 +20,11 @@ pub struct QueryIterator {
     paths: Vec<Path>,
     inner: Arc<Library>,
     query: Query,
-    id: Option<Id>,
+    id: Session,
 }
 
 impl QueryIterator {
-    pub(crate) fn new(id: Option<Id>, paths: Vec<Path>, inner: Arc<Library>, query: Query) -> Self {
+    pub(crate) fn new(id: Session, paths: Vec<Path>, inner: Arc<Library>, query: Query) -> Self {
         Self {
             pos: 0.into(),
             paths,
@@ -84,9 +85,7 @@ impl QueryIterator {
         let path = self.paths.get(pos).unwrap().clone();
 
         self.inner
-            .data(self.id)
-            .await?
-            .query(Query::Path(path))
+            .query(self.id, Query::Path(path))
             .await
             .map(|r| match r {
                 QueryResult::Single(rec) => Some(rec),
@@ -111,6 +110,7 @@ impl Drop for QueryIterator {
 /// because it's mainly about testing this modules code, not the query code
 #[cfg(test)]
 mod harness {
+    pub use crate::GLOBAL;
     use crate::{
         utils::{Diff, Path, TagSet},
         Builder, Library,
@@ -154,10 +154,8 @@ mod harness {
             let value = hex::encode_upper(&seed);
 
             self.lib
-                .data(None)
-                .await
-                .unwrap()
                 .insert(
+                    GLOBAL,
                     path.clone(),
                     TagSet::empty(),
                     Diff::map().insert(key, value),
@@ -183,7 +181,7 @@ async fn basic_iterator() -> Result<()> {
         t.insert_random().await,
     ];
 
-    let iter = QueryIterator::new(None, paths, t.lib(), Query::Fake);
+    let iter = QueryIterator::new(harness::GLOBAL, paths, t.lib(), Query::Fake);
     assert!(iter.next().await?.is_some());
     assert!(iter.next().await?.is_some());
     assert!(iter.next().await?.is_some());
@@ -203,7 +201,7 @@ async fn skip_iterator() -> Result<()> {
         t.insert_random().await,
     ];
 
-    let iter = QueryIterator::new(None, paths, t.lib(), Query::Fake);
+    let iter = QueryIterator::new(harness::GLOBAL, paths, t.lib(), Query::Fake);
     iter.skip(2);
 
     assert!(iter.next().await?.is_some());
@@ -221,13 +219,11 @@ async fn gc_iterator_fail() -> Result<()> {
         t.insert_random().await,
     ];
 
-    let iter = QueryIterator::new(None, paths.clone(), t.lib(), Query::Fake);
+    let iter = QueryIterator::new(harness::GLOBAL, paths.clone(), t.lib(), Query::Fake);
 
     // Delete the first item
     t.lib()
-        .data(None)
-        .await?
-        .delete(paths[0].clone())
+        .delete(harness::GLOBAL, paths[0].clone())
         .await
         .unwrap();
 
@@ -247,14 +243,12 @@ async fn lock_gc_iterator() -> Result<()> {
         t.insert_random().await,
     ];
 
-    let iter = QueryIterator::new(None, paths.clone(), t.lib(), Query::Fake);
+    let iter = QueryIterator::new(harness::GLOBAL, paths.clone(), t.lib(), Query::Fake);
     iter.lock().await;
 
     // Delete the first item
     t.lib()
-        .data(None)
-        .await?
-        .delete(paths[0].clone())
+        .delete(harness::GLOBAL, paths[0].clone())
         .await
         .unwrap();
 
