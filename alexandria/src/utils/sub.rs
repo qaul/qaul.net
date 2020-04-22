@@ -1,6 +1,6 @@
 use crate::{
     delta::Delta,
-    utils::{Path, Query},
+    utils::{Path, Query, SetQuery},
 };
 use async_std::{
     sync::{channel, Arc, Receiver, RwLock, Sender},
@@ -97,6 +97,10 @@ impl Subscription {
                     let d: Delta = d;
                     if match query {
                         Query::Path(ref p) => p == &d.path,
+                        Query::Tag(ref tq) => match tq {
+                            SetQuery::Matching(ref tags) => d.tags.exactly(tags),
+                            SetQuery::Partial(ref tags) => d.tags.subset(tags),
+                        },
                         _ => unimplemented!(),
                     } {
                         re_notify.send(d.path).await;
@@ -163,18 +167,40 @@ impl SubTest {
     }
 }
 
-#[cfg(test)]
-fn poll(sub: &Subscription) -> Path {
-    task::block_on(async { sub.next().await })
-}
-
-#[test]
-fn single_delta() {
+#[async_std::test]
+async fn single_delta() {
     let test = SubTest::new("/msg:bob");
 
     let sub = test.sub(Query::Path(test.path.clone()));
 
     test.insert(None);
 
-    assert_eq!(poll(&sub), test.path);
+    assert_eq!(sub.next().await, test.path);
+}
+
+#[async_std::test]
+async fn tag_delta() {
+    use crate::utils::Tag;
+    let test = SubTest::new("/msg:bob");
+
+    let sub = test.sub(Query::Tag(SetQuery::Partial(
+        vec![Tag::empty("tag-a")].into(),
+    )));
+
+    let ts: TagSet = vec![Tag::empty("tag-a"), Tag::empty("tag-b")].into();
+    test.insert(ts);
+
+    assert_eq!(sub.next().await, test.path);
+}
+
+#[async_std::test]
+async fn tag_delta_matching() {
+    use crate::utils::Tag;
+    let test = SubTest::new("/msg:bob");
+    let ts: TagSet = vec![Tag::empty("tag-a"), Tag::empty("tag-b")].into();
+
+    let sub = test.sub(Query::Tag(SetQuery::Matching(ts.clone())));
+    test.insert(ts);
+
+    assert_eq!(sub.next().await, test.path);
 }

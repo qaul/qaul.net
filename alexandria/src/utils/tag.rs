@@ -42,6 +42,11 @@ impl TagSet {
         self.0 == o.0
     }
 
+    /// Every tag from o needs to be in self
+    pub(crate) fn subset(&self, o: &TagSet) -> bool {
+        o.iter().fold(true, |acc, t| acc && self.0.contains(t))
+    }
+
     pub(crate) fn iter(&self) -> impl Iterator<Item = &Tag> {
         self.0.iter()
     }
@@ -124,4 +129,32 @@ impl Tag {
     {
         Self::new(key, vec![])
     }
+}
+
+#[test]
+fn subset_1() {
+    let whole = TagSet::from(vec![Tag::empty("a"), Tag::empty("b")]);
+    let sub = TagSet::from(vec![Tag::empty("a")]);
+    assert!(whole.subset(&sub));
+}
+
+#[test]
+fn subset_2() {
+    let whole = TagSet::from(vec![Tag::empty("a"), Tag::empty("b")]);
+    let sub = TagSet::from(vec![Tag::empty("a")]);
+    assert!(!sub.subset(&whole));
+}
+
+#[test]
+fn subset_3() {
+    let whole = TagSet::from(vec![Tag::empty("a"), Tag::empty("b"), Tag::empty("c")]);
+    let sub = TagSet::from(vec![Tag::empty("a"), Tag::empty("b")]);
+    assert!(whole.subset(&sub));
+}
+
+#[test]
+fn subset_4() {
+    let whole = TagSet::from(vec![Tag::empty("a"), Tag::empty("b"), Tag::empty("c")]);
+    let sub = TagSet::from(vec![Tag::empty("a"), Tag::empty("b")]);
+    assert!(!sub.subset(&whole));
 }
