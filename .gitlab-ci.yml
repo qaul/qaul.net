@@ -13,7 +13,7 @@ build:
 # Run test suite
 test_webgui:
   stage: test
-  image: circleci/node:10-browsers
+  image: circleci/node:12-browsers
   cache:
     key: yarn
     paths:
@@ -27,7 +27,7 @@ test_webgui:
 
 build_webgui:
   stage: build
-  image: node:10
+  image: node:12
   cache:
     key: yarn
     paths:
