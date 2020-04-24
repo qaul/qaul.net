@@ -37,7 +37,7 @@ impl HttpServer {
 
         // static file handler for the webui, assumes the webui exists
         app.at("/")
-            //.strip_prefix()
+            .strip_prefix() // needed for static file server to function correctly
             .get(StaticEp { root: path.into() });
 
         task::block_on(async move { app.listen(addr).await }).unwrap();
