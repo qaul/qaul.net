@@ -46,8 +46,8 @@ mod auth;
 mod crypto;
 mod discover;
 mod security;
-mod services;
 mod store;
+mod utils;
 
 // Exposed API modules
 pub mod api;
@@ -55,11 +55,9 @@ pub mod contacts;
 pub mod error;
 pub mod files;
 pub mod messages;
+pub mod services;
 pub mod users;
 
 // Core state should be in the root
 mod qaul;
-pub use api::Tag;
 pub use qaul::{Identity, Qaul};
-
-pub(crate) mod utils;

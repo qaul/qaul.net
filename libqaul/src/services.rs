@@ -8,14 +8,38 @@ use std::{
     sync::{Arc, RwLock},
 };
 
+/// Represents a service using libqaul
+///
+/// Via this type it's possible to either perform actions as a
+/// particular survice, or none, which means that all service's events
+/// become available.  While this is probably not desirable (and
+/// should be turned off) in most situations, this way a user-level
+/// service can do very powerful things with the "raw" netork traffic
+/// of a qaul network.
+pub enum Service {
+    // One of the three most common passwords, you know?
+    God,
+    /// Service by domain qualified name (e.g. `net.qaul.chat`)
+    Name(String),
+}
+
+impl<T> From<T> for Service
+where
+    T: Into<String>,
+{
+    fn from(t: T) -> Self {
+        Self::Name(t.into())
+    }
+}
+
 pub(crate) type Listener = Arc<dyn Fn(MsgRef) -> Result<()> + Send + Sync>;
 
 /// A registered service, with a pre-made poll setup and listeners
-pub(crate) struct Service {
+pub(crate) struct IntService {
     callbacks: Arc<RwLock<Vec<Listener>>>,
 }
 
-impl Service {
+impl IntService {
     fn new() -> Self {
         Self {
             callbacks: Arc::new(RwLock::new(vec![])),
@@ -26,7 +50,7 @@ impl Service {
 /// Keeps track of registered services and their callbacks
 #[derive(Clone)]
 pub(crate) struct ServiceRegistry {
-    inner: Arc<RwLock<BTreeMap<String, Service>>>,
+    inner: Arc<RwLock<BTreeMap<String, IntService>>>,
 }
 
 impl ServiceRegistry {
@@ -41,7 +65,7 @@ impl ServiceRegistry {
         if inner.contains_key(&name) {
             Err(Error::ServiceExists)
         } else {
-            inner.insert(name, Service::new());
+            inner.insert(name, IntService::new());
             Ok(())
         }
     }

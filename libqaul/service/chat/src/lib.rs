@@ -9,7 +9,7 @@ use room::{Room, RoomId};
 
 use async_std::{stream::Stream, sync::Arc};
 use futures::stream::StreamExt;
-use libqaul::{api::Subscription, error::Result, users::UserAuth, Identity, Qaul, Tag};
+use libqaul::{api::Subscription, error::Result, users::UserAuth, Identity, Qaul, api::Tag};
 
 const ASC_NAME: &'static str = "net.qaul.chat";
 

@@ -16,6 +16,11 @@ impl<'qaul> Services<'qaul> {
         self.q
     }
 
+    /// Check if "god mode" is supported by this instance
+    pub fn god_mode(&self) -> bool {
+        true // TODO: make configurable
+    }
+
     /// Add an external service to the qaul service registry
     ///
     /// Registering a service means that future `Message` listeners

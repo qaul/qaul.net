@@ -6,7 +6,7 @@ use {
     },
     failure::Fail,
     futures::channel::mpsc,
-    libqaul::{error::Error as QaulError, users::UserAuth, Identity, Tag},
+    libqaul::{error::Error as QaulError, users::UserAuth, Identity, api::Tag},
     opus,
     serde::{Deserialize, Serialize},
     std::fmt::{Display, Formatter, Result as FmtResult},

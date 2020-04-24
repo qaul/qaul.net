@@ -6,7 +6,7 @@ use {
     async_std::task,
     failure::Error,
     futures::{lock::Mutex, stream::StreamExt},
-    libqaul::{users::UserAuth, Qaul, Tag},
+    libqaul::{users::UserAuth, Qaul, api::Tag},
     std::{
         collections::BTreeMap,
         sync::Arc,

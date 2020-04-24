@@ -6,9 +6,10 @@ use {
     conjoiner,
     failure::Error,
     libqaul::{
+        api::Tag,
         messages::{Mode, MsgId},
         users::UserAuth,
-        Identity, Tag,
+        Identity,
     },
     serde::{Deserialize, Serialize},
 };
