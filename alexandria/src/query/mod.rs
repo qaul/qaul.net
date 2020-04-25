@@ -19,17 +19,14 @@ mod sub;
 pub(crate) use sub::SubHub;
 pub use sub::Subscription;
 
-use crate::{
-    record::RecordRef,
-    utils::{Id, Path, TagSet},
-};
+use crate::{utils::{Id, Path, TagSet}, record::RecordRef};
 
 /// A one-dimentional database query
 ///
 /// It's recomended to use the builder-style constructor API, instead
 /// of building a query by hand, because the internals may change at a
 /// faster pace than the functions.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Query {
     /// Return a record by exact Id
     Id(Id),
@@ -130,14 +127,36 @@ pub enum QueryResult {
     Many(Vec<RecordRef>),
 }
 
-/// A special type of query on a set
+impl QueryResult {
+    pub fn merge(self, o: QueryResult) -> Self {
+        use self::QueryResult::*;
+
+        match (self, o) {
+            (Single(r1), Single(r2)) => Self::Many(vec![r1, r2]),
+            (Single(r), Many(mut vec)) => {
+                vec.push(r);
+                Self::Many(vec)
+            }
+            (Many(mut vec), Single(r)) => {
+                vec.push(r);
+                Self::Many(vec)
+            }
+            (Many(mut vec1), Many(mut vec2)) => {
+                vec1.append(&mut vec2);
+                Self::Many(vec1)
+            }
+        }
+    }
+}
+
+/// a special type of query on a set
 ///
 /// It's highly recomended to read the function descriptions on
 /// [`TagQuery`][tagquery] for an explanation of the differences between these
 /// set query constraints.
 ///
 /// [tagquery]: struct.TagQuery.html
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SetQuery<T> {
     Intersect(T),
     Subset(T),

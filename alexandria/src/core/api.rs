@@ -308,7 +308,14 @@ impl Library {
                     let tc = self.tag_cache.read().await;
                     match tq {
                         SetQuery::Intersect(ref tags) => tc.get_paths(id, |o| tags.intersect(o))?,
-                        SetQuery::Subset(ref tags) => tc.get_paths(id, |o| tags.subset(o))?,
+                        SetQuery::Subset(ref tags) => {
+                            // FIXME: I don't really know why this
+                            // operation needs to be asymptotic, but
+                            // some operations seem to be backwards?
+                            // In either case, this works but we
+                            // should figure out why this is.
+                            tc.get_paths(id, |o| tags.subset(o) || o.subset(tags))?
+                        }
                         SetQuery::Equals(ref tags) => tc.get_paths(id, |o| tags.equality(o))?,
                         SetQuery::Not(ref tags) => tc.get_paths(id, |o| tags.not(o))?,
                     }

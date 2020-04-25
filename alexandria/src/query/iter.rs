@@ -1,14 +1,18 @@
 //! QueryIterators
 
 use crate::{
-    error::Result,
+    error::{Error, Result},
     query::{Query, QueryResult},
     record::RecordRef,
     utils::Path,
     Library, Session,
 };
 use async_std::sync::Arc;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::mem;
+use std::{
+    collections::BTreeSet,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 
 /// A dynamically stepped iterator for query results
 ///
@@ -17,21 +21,44 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 /// garbage collection of deleted paths.
 pub struct QueryIterator {
     pos: AtomicUsize,
-    paths: Vec<Path>,
+    paths: Vec<(Path, Session)>,
     inner: Arc<Library>,
     query: Query,
-    id: Session,
 }
 
 impl QueryIterator {
     pub(crate) fn new(id: Session, paths: Vec<Path>, inner: Arc<Library>, query: Query) -> Self {
         Self {
             pos: 0.into(),
-            paths,
+            paths: paths.into_iter().map(|p| (p, id)).collect(),
             inner,
             query,
-            id,
         }
+    }
+
+    /// Allows merging two iterators with the same query into one
+    ///
+    /// The second iterator will simply be appended.  No further
+    /// sorting is scheduled.
+    pub fn merge(&mut self, mut other: Self) -> Result<()> {
+        if self.query != other.query {
+            return Err(Error::IncompatibleQuery {
+                q1: format!("{:?}", self.query),
+                q2: format!("{:?}", other.query),
+            });
+        }
+
+        // Merge, then deduplicate paths
+        self.paths.append(&mut other.paths);
+        self.paths = mem::replace(&mut self.paths, vec![])
+            .into_iter()
+            .fold(BTreeSet::new(), |mut set, pp| {
+                set.insert(pp);
+                set
+            })
+            .into_iter()
+            .collect();
+        Ok(())
     }
 
     /// Skip ahead to a certain position in the iterator
@@ -45,6 +72,24 @@ impl QueryIterator {
     /// Return a reference to the original query of the iterator
     pub fn query(&self) -> &Query {
         &self.query
+    }
+
+    /// Get the current iterator position
+    #[inline]
+    pub fn pos(&self) -> usize {
+        self.pos.load(Ordering::Relaxed)
+    }
+
+    /// Get the absolute length of the iterator
+    #[inline]
+    pub fn len(&self) -> usize {
+        self.paths.len()
+    }
+
+    /// Return the number of remaining items
+    #[inline]
+    pub fn remaining(&self) -> usize {
+        self.len() - self.pos()
     }
 
     /// Lock the GC for the iterator scope
@@ -63,7 +108,7 @@ impl QueryIterator {
     /// restart the garbage collector again.
     pub async fn lock(&self) {
         let mut s = self.inner.store.write().await;
-        s.gc_lock(self.id, &self.paths);
+        s.gc_lock(&self.paths);
     }
 
     /// Get the next item in the iterator
@@ -82,10 +127,10 @@ impl QueryIterator {
         }
 
         let pos = self.pos.fetch_add(1, Ordering::Relaxed);
-        let path = self.paths.get(pos).unwrap().clone();
+        let (path, id) = self.paths.get(pos).unwrap().clone();
 
         self.inner
-            .query(self.id, Query::Path(path))
+            .query(id, Query::Path(path))
             .await
             .map(|r| match r {
                 QueryResult::Single(rec) => Some(rec),
@@ -98,7 +143,7 @@ impl Drop for QueryIterator {
     fn drop(&mut self) {
         async_std::task::block_on(async {
             let mut s = self.inner.store.write().await;
-            s.gc_release(self.id, &self.paths)
+            s.gc_release(&self.paths)
                 .expect("Failed to release deleted records!");
         });
     }

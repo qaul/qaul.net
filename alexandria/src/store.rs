@@ -195,29 +195,27 @@ impl Store {
     }
 
     /// Lock the GC for a set of paths
-    pub(crate) fn gc_lock(&mut self, id: Session, paths: &Vec<Path>) {
-        let set = self.gc_set_mut(id);
-        paths.iter().for_each(|path| {
-            set.entry(path.clone()).or_default().ctr += 1;
+    pub(crate) fn gc_lock(&mut self, paths: &Vec<(Path, Session)>) {
+        paths.iter().for_each(|(path, id)| {
+            self.gc_set_mut(*id).entry(path.clone()).or_default().ctr += 1;
         });
     }
 
     /// Release the GC for a set of paths and delete them
-    pub(crate) fn gc_release(&mut self, id: Session, paths: &Vec<Path>) -> Result<()> {
-        let mut db = DeltaBuilder::new(id, DeltaType::Delete);
-
-        paths.iter().fold(Ok(()), |res, path| {
+    pub(crate) fn gc_release(&mut self, paths: &Vec<(Path, Session)>) -> Result<()> {
+        paths.iter().fold(Ok(()), |res, (path, id)| {
             if let Some(GcReq {
                 ref mut ctr,
                 ref del,
-            }) = self.gc_set_mut(id).get_mut(&path)
+            }) = self.gc_set_mut(*id).get_mut(&path)
             {
                 // Decrement ctr
                 *ctr -= 1;
 
                 // If we were last, delete
                 if *ctr == 0 && *del {
-                    res.and_then(|_| self.destroy(&mut db, id, path))
+                    let mut db = DeltaBuilder::new(*id, DeltaType::Delete);
+                    res.and_then(|_| self.destroy(&mut db, *id, path))
                 } else {
                     res
                 }

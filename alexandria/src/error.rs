@@ -56,6 +56,12 @@ pub enum Error {
     #[fail(display = "a Diff failed to apply: \n{}", msgs)]
     BadDiff { msgs: DiffErrors },
 
+    #[fail(
+        display = "can't merge two iterators with different underlying queries: a: '{}', b: '{}'",
+        q1, q2
+    )]
+    IncompatibleQuery { q1: String, q2: String },
+
     #[doc(hidden)]
     #[fail(display = "An alexandria internal error occured: `{}`", msg)]
     InternalError { msg: String },
