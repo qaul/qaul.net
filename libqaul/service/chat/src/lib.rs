@@ -1,19 +1,10 @@
 //! `qaul.net` chat service
 
-mod msg;
-pub use msg::ChatMessage;
+mod types;
+pub use types::{ChatMessage, Room, RoomDiff, RoomId, RoomMeta, RoomState};
 
-pub mod room;
-use room::{Room, RoomId};
-
-use async_std::{stream::Stream, sync::Arc};
-use futures::stream::StreamExt;
-use libqaul::{
-    error::Result,
-    helpers::{Subscription, Tag},
-    users::UserAuth,
-    Identity, Qaul,
-};
+use async_std::sync::Arc;
+use libqaul::{error::Result, users::UserAuth, Identity, Qaul};
 
 const ASC_NAME: &'static str = "net.qaul.chat";
 
@@ -31,69 +22,35 @@ impl Chat {
     }
 
     /// Access room function scope
-    pub fn rooms<'s>(&'s self) -> Rooms<'s> {
-        Rooms { chat: self }
+    pub fn rooms(&self, user: UserAuth) -> Result<Vec<RoomMeta>> {
+        Ok(vec![])
+    }
+
+    /// Get all metadata about a specific room
+    pub fn metadata(&self, user: UserAuth, room: RoomId) -> Result<Room> {
+        unimplemented!()
+    }
+
+    /// Start a new chat
+    pub fn start_chat(&self, user: UserAuth, friends: Vec<Identity>) -> Result<RoomId> {
+        unimplemented!()
+    }
+
+    pub fn send_message(&self, user: UserAuth, room: RoomId) -> Result<()> {
+        unimplemented!()
     }
 
     /// Subscribe to any future messages that are sent to a room
-    pub async fn subscribe(
-        &self,
-        auth: UserAuth,
-        room: RoomId,
-    ) -> Result<impl Stream<Item = ChatMessage> + Unpin> {
-        self.qaul
-            .messages()
-            .subscribe(auth, ASC_NAME, Some(Tag::new("room_id", room)))
-            .map(|sub_stream| sub_stream.map(|msg| unimplemented!()))
-    }
-
-    pub async fn get_msgs_for_room(&self, auth: UserAuth, room: RoomId) -> () {
+    pub async fn subscribe(&self, auth: UserAuth, room: RoomId) -> () {
+        // self.qaul
+        //     .messages()
+        //     .subscribe(auth, ASC_NAME, Some(Tag::new("room_id", room)))
+        //     .map(|sub_stream| sub_stream.map(|msg| unimplemented!()))
         unimplemented!()
     }
 
-    /// Send a message into a conversation
-    pub async fn send<S>(&self, auth: UserAuth, room: RoomId, text: S) -> Result<()>
-    where
-        S: Into<String>,
-    {
-        unimplemented!()
-    }
-}
-
-/// Small API wrapper for room management
-pub struct Rooms<'c> {
-    chat: &'c Chat,
-}
-
-impl<'c> Rooms<'c> {
-    /// Get a list of available rooms by ID
-    pub async fn list(&self) -> Vec<RoomId> {
-        vec![]
-    }
-
-    /// Get all state information by room ID
-    pub async fn get(&self, id: RoomId) -> Room {
-        unimplemented!()
-    }
-
-    /// Create a new room
-    pub async fn create<I>(&self, auth: UserAuth, users: I) -> Result<RoomId>
-    where
-        I: IntoIterator<Item = Identity>,
-    {
-        Ok(RoomId::random())
-    }
-
-    /// Make modifications to an existing room
-    pub async fn modify<F>(&self, auth: UserAuth, _id: RoomId, _f: F) -> Result<()>
-    where
-        F: FnOnce(&mut Room) -> Result<()>,
-    {
-        unimplemented!()
-    }
-
-    /// Delete a room locally
-    pub async fn delete(&self, auth: UserAuth, _id: RoomId) -> Result<()> {
+    /// Get all messages from a room
+    pub fn query(&self, user: UserAuth, room: RoomId) -> Result<Vec<ChatMessage>> {
         unimplemented!()
     }
 }

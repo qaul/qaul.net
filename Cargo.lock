@@ -347,6 +347,7 @@ checksum = "80094f509cf8b5ae86a4966a39b3ff66cd7e2a3e594accec3743ff3fabeab5b2"
 dependencies = [
  "num-integer",
  "num-traits",
+ "serde",
  "time",
 ]
 
@@ -1684,6 +1685,7 @@ name = "qaul-chat"
 version = "0.1.0"
 dependencies = [
  "async-std",
+ "chrono",
  "conjoiner-engine",
  "futures 0.3.4",
  "libqaul",

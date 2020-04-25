@@ -9,7 +9,8 @@ license = "AGPL-3.0"
 libqaul = { path = "../../" }
 files = { path = "../files", package = "qaul-files" }
 
-serde = { version = "1.0", features = ["derive"] }
-conjoiner = { version = "1.2", package = "conjoiner-engine" }
 async-std = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+conjoiner = { version = "1.2", package = "conjoiner-engine" }
 futures = "0.3"
+serde = { version = "1.0", features = ["derive"] }
