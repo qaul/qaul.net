@@ -17,7 +17,7 @@ pub type SubId = Identity;
 /// for example throttling throughput, or only taking a subset.
 pub struct Subscription<T> {
     /// The subscription ID
-    pub(crate) id: SubId,
+    pub id: SubId,
     /// The subscription reveicer that get's polled
     pub(crate) rx: Receiver<T>,
 }

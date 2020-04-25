@@ -2,7 +2,7 @@
 
 use crate::error::{Error, Result};
 use alexandria::{query::QueryIterator, record::Record};
-use std::{fmt::Debug, marker::PhantomData, sync::Arc};
+use std::{marker::PhantomData, sync::Arc};
 
 /// The resulting set of a query operation
 pub struct QueryResult<T>

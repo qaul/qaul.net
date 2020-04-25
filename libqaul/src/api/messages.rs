@@ -66,7 +66,7 @@ pub enum Mode {
 }
 
 impl Mode {
-    pub(crate) fn id(&self) -> Option<Identity> {
+    pub fn id(&self) -> Option<Identity> {
         match self {
             Self::Std(id) => Some(*id),
             Self::Flood => None,

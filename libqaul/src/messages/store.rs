@@ -1,7 +1,6 @@
 //! Internal message store wrapper
 
 use crate::{
-    error::Result,
     helpers::QueryResult,
     messages::{Message, Mode, MsgQuery, MsgRef},
     services::Service,
@@ -144,6 +143,8 @@ mod harness {
     use async_std::sync::Arc;
     use tempfile::tempdir;
 
+    pub(super) use crate::error::Result;
+
     pub(super) struct Test {
         pub(super) store: MsgStore,
         usr: UserStore,
@@ -223,7 +224,7 @@ mod harness {
 }
 
 #[async_std::test]
-async fn simple_send() -> Result<()> {
+async fn simple_send() -> harness::Result<()> {
     let state = harness::init();
     let id = Identity::random();
     let tags = TagSet::empty();
@@ -238,7 +239,7 @@ async fn simple_send() -> Result<()> {
 }
 
 #[async_std::test]
-async fn simple_received() -> Result<()> {
+async fn simple_received() -> harness::Result<()> {
     let state = harness::init();
     let id = Identity::random();
     harness::make_user(&state, id).await;

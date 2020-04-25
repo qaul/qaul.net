@@ -7,27 +7,23 @@ license = "AGPL-3.0"
 edition = "2018"
 
 [dependencies]
-# Re-exports correct netmod and identity modules
+alexandria = { version = "0.2", path = "../alexandria" }
 ratman = { path = "../ratman" }
 
 async-std = { version = "1.0", features = ["attributes", "unstable"] }
-futures = "0.3"
-crossbeam-channel = "0.4"
-
-alexandria = { version = "0.2", path = "../alexandria" }
-conjoiner = { version = "1.2", package = "conjoiner-engine" }
-serde = { version = "1.0", features = [ "derive" ] }
-
-ed25519-dalek = "1.0.0-pre.3"
 base64 = "0.10"
 blake2 = "0.8"
+conjoiner = { version = "1.2", package = "conjoiner-engine" }
+crossbeam-channel = "0.4"
+ed25519-dalek = "1.0.0-pre.3"
+futures = "0.3"
+hex = "0.4"
 mime = "0.3"
 rand = "0.7"
-hex = "0.4"
-
+serde = { version = "1.0", features = [ "derive" ] }
+tempfile = { version = "3.0", optional = true }
 tracing = "0.1"
 tracing-futures = "0.2"
-tempfile = { version = "3.0", optional = true }
 
 [dev-dependencies]
 serde_json = "1.0"

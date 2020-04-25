@@ -1,11 +1,12 @@
 use crate::{
-    messages::{Mode, MsgUtils},
+    messages::{MsgUtils},
     Qaul,
 };
 use alexandria::utils::Tag;
 use async_std::task;
 use ratman::{netmod::Recipient, Router};
 use std::sync::Arc;
+use tracing::info;
 
 /// A thread-detached discovery service running inside libqaul
 ///
@@ -45,7 +46,7 @@ impl Discovery {
     }
 
     /// Spawns a thread that listens to incoming messages
-    #[instrument(skip(qaul, router), level = "info")]
+    #[tracing::instrument(skip(qaul, router), level = "info")]
     fn inc_handler(qaul: Arc<Qaul>, router: Arc<Router>) {
         task::spawn(async move {
             loop {
