@@ -29,6 +29,12 @@ impl Session {
     }
 }
 
+impl From<Id> for Session {
+    fn from(id: Id) -> Self {
+        Self::Id(id)
+    }
+}
+
 /// Convenience type to represent the global namespace
 pub const GLOBAL: Session = Session::Global;
 

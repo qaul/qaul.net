@@ -208,7 +208,11 @@ impl Library {
     /// # Ok(()) }
     /// # async_std::task::block_on(async { foo().await }).unwrap();
     /// ```
-    pub async fn query(&self, id: Session, q: Query) -> Result<QueryResult> {
+    pub async fn query<S>(&self, id: S, q: Query) -> Result<QueryResult>
+    where
+        S: Into<Session>,
+    {
+        let id = id.into();
         if let Session::Id(id) = id {
             self.users.read().await.is_open(id)?;
         }
@@ -287,7 +291,11 @@ impl Library {
     /// And a caveat worth mentioning: if the program aborts before
     /// the Iterator `drop` was able to run, the items will not be
     /// cleaned from disk and reloaded into cache on restart.
-    pub async fn query_iter(self: &Arc<Self>, id: Session, q: Query) -> Result<QueryIterator> {
+    pub async fn query_iter<S>(self: &Arc<Self>, id: S, q: Query) -> Result<QueryIterator>
+    where
+        S: Into<Session>,
+    {
+        let id = id.into();
         if let Session::Id(id) = id {
             self.users.read().await.is_open(id)?;
         }
