@@ -137,25 +137,28 @@ impl Voices {
             Tag::new("call_id", id.clone()),
             Tag::new("kind", b"control".to_vec()),
         ];
-        let msg = self
-            .qaul
-            .messages()
-            .next(auth.clone(), ASC_NAME, tags)
-            .await?;
-        let _remote = msg.sender.clone();
-        let msg: VoiceMessage = conjoiner::deserialise(&msg.payload)?;
-        match msg.kind {
-            VoiceMessageKind::Accept(remote_metadata) => self
-                .modify_call_state(id.clone(), |call| call.connect(remote_metadata))
-                .await
-                .and_then(|_| {
-                    self.start_call(id.clone(), auth)?;
-                    Ok(id)
-                }),
-            VoiceMessageKind::HungUp => Err(CallRejected.into()),
-            VoiceMessageKind::Incoming(_) => Err(BadMessageKind::new("control", "Incoming").into()),
-            VoiceMessageKind::Packet(_) => Err(BadMessageKind::new("control", "Packet").into()),
-        }
+        // let msg = self
+        //     .qaul
+        //     .messages()
+        //     .next(auth.clone(), ASC_NAME, tags)
+        //     .await?;
+        unimplemented!();
+
+        
+        // let _remote = msg.sender.clone();
+        // let msg: VoiceMessage = conjoiner::deserialise(&msg.payload)?;
+        // match msg.kind {
+        //     VoiceMessageKind::Accept(remote_metadata) => self
+        //         .modify_call_state(id.clone(), |call| call.connect(remote_metadata))
+        //         .await
+        //         .and_then(|_| {
+        //             self.start_call(id.clone(), auth)?;
+        //             Ok(id)
+        //         }),
+        //     VoiceMessageKind::HungUp => Err(CallRejected.into()),
+        //     VoiceMessageKind::Incoming(_) => Err(BadMessageKind::new("control", "Incoming").into()),
+        //     VoiceMessageKind::Packet(_) => Err(BadMessageKind::new("control", "Packet").into()),
+        // }
     }
 
     /// Accept an incoming call
@@ -211,29 +214,31 @@ impl Voices {
 
     /// Wait for the next incoming call
     pub async fn next_incoming(&self, auth: UserAuth) -> Result<IncomingCall> {
-        let msg = self
-            .qaul
-            .messages()
-            .next(
-                auth.clone(),
-                ASC_NAME,
-                Some(Tag::new("kind", b"incoming".to_vec())),
-            )
-            .await?;
-        let user = msg.sender.clone();
-        let msg: VoiceMessage = conjoiner::deserialise(&msg.payload)?;
-        match msg.kind {
-            VoiceMessageKind::Incoming(remote_metadata) => {
-                self.calls.lock().await.insert(
-                    msg.call.clone(),
-                    CallState::incoming(auth.0, user.clone(), remote_metadata),
-                );
-                Ok(IncomingCall { id: msg.call, user })
-            }
-            VoiceMessageKind::Accept(_) => Err(BadMessageKind::new("incoming", "Accept").into()),
-            VoiceMessageKind::HungUp => Err(BadMessageKind::new("incoming", "HungUp").into()),
-            VoiceMessageKind::Packet(_) => Err(BadMessageKind::new("incoming", "Packet").into()),
-        }
+        unimplemented!()
+        
+        // let msg = self
+        //     .qaul
+        //     .messages()
+        //     .next(
+        //         auth.clone(),
+        //         ASC_NAME,
+        //         Some(Tag::new("kind", b"incoming".to_vec())),
+        //     )
+        //     .await?;
+        // let user = msg.sender.clone();
+        // let msg: VoiceMessage = conjoiner::deserialise(&msg.payload)?;
+        // match msg.kind {
+        //     VoiceMessageKind::Incoming(remote_metadata) => {
+        //         self.calls.lock().await.insert(
+        //             msg.call.clone(),
+        //             CallState::incoming(auth.0, user.clone(), remote_metadata),
+        //         );
+        //         Ok(IncomingCall { id: msg.call, user })
+        //     }
+        //     VoiceMessageKind::Accept(_) => Err(BadMessageKind::new("incoming", "Accept").into()),
+        //     VoiceMessageKind::HungUp => Err(BadMessageKind::new("incoming", "HungUp").into()),
+        //     VoiceMessageKind::Packet(_) => Err(BadMessageKind::new("incoming", "Packet").into()),
+        // }
     }
 
     /// Get the metadata needed to decode incoming packets
@@ -300,33 +305,34 @@ impl Voices {
             CallStatus::Connected => Ok(()),
         }?;
 
-        let msg = self
-            .qaul
-            .messages()
-            .next(
-                auth,
-                ASC_NAME,
-                vec![
-                    Tag::new("call_id", call),
-                    Tag::new("kind", b"control".to_vec()),
-                ],
-            )
-            .await?;
-        let msg: VoiceMessage = conjoiner::deserialise(&msg.payload)?;
-        match msg.kind {
-            VoiceMessageKind::HungUp => {}
-            VoiceMessageKind::Incoming(_) => {
-                Err(BadMessageKind::new("control", "Incoming"))?;
-            }
-            VoiceMessageKind::Accept(_) => {
-                Err(InvalidState::new("Connected"))?;
-            }
-            VoiceMessageKind::Packet(_) => Err(BadMessageKind::new("control", "Packet"))?,
-        }
+        // let msg = self
+        //     .qaul
+        //     .messages()
+        //     .next(
+        //         auth,
+        //         ASC_NAME,
+        //         vec![
+        //             Tag::new("call_id", call),
+        //             Tag::new("kind", b"control".to_vec()),
+        //         ],
+        //     )
+        //     .await?;
+        // let msg: VoiceMessage = conjoiner::deserialise(&msg.payload)?;
+        // match msg.kind {
+        //     VoiceMessageKind::HungUp => {}
+        //     VoiceMessageKind::Incoming(_) => {
+        //         Err(BadMessageKind::new("control", "Incoming"))?;
+        //     }
+        //     VoiceMessageKind::Accept(_) => {
+        //         Err(InvalidState::new("Connected"))?;
+        //     }
+        //     VoiceMessageKind::Packet(_) => Err(BadMessageKind::new("control", "Packet"))?,
+        // }
 
-        self.calls.lock().await.remove(&call);
+        // self.calls.lock().await.remove(&call);
 
-        Ok(())
+        unimplemented!()
+        // Ok(())
     }
 }
 

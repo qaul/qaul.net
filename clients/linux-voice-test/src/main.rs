@@ -65,9 +65,10 @@ async fn run() {
         let state = _state;
         let qaul = _qaul;
 
-        while let Ok(m) = qaul.messages().next(user.clone(), "HELLO", None).await {
-            *(state.lock().await.deref_mut()) = State::MessageDisplay(m);
-        }
+        unimplemented!()
+        // while let Ok(m) = qaul.messages().next(user.clone(), "HELLO", None).await {
+        //     *(state.lock().await.deref_mut()) = State::MessageDisplay(m);
+        // }
     });
 
     let mut stream = futures::stream::select(

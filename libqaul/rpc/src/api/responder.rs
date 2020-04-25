@@ -115,7 +115,6 @@ impl Responder {
                 Ok(id) => Response::MsgId(id),
                 Err(e) => Response::Error(e.to_string()),
             },
-            Request::MsgNext(r) => self.respond_qaul(r).await.into(),
             Request::MsgQuery(r) => self.respond_qaul(r).await.into(),
 
             // =^-^= Users =^-^=

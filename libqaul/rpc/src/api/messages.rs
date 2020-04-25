@@ -32,27 +32,6 @@ impl QaulRpc for Send {
     }
 }
 
-/// Send a poll request to the message endpoint
-///
-/// Polling the API for changes might not be the most performant way
-/// of getting new messages.  Instead, consider setting up a push
-/// listener for your transport layer.
-#[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
-pub struct Next {
-    auth: UserAuth,
-    service: String,
-    #[serde(default)]
-    tags: Vec<Tag>,
-}
-
-#[async_trait]
-impl QaulRpc for Next {
-    type Response = Result<MsgRef>;
-    async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.messages().next(self.auth, self.service, self.tags).await
-    }
-}
-
 /// Setup a listener/ push handler for messages
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
 pub struct Subscribe {
