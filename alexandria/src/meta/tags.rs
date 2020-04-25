@@ -116,7 +116,15 @@ impl TagCache {
         F: Fn(&TagSet) -> bool,
     {
         let id = id.id().unwrap_or(self.id);
-        Ok(self.map.get(id)?.paths(cond))
+        debug!("Querying pathsfor session ID: `{}`", id);
+
+        match self.map.get(id) {
+            Ok(map) => map.paths(cond),
+            Err(_) => {
+                debug!("Empty cache page: assuming empty query!");
+                vec![]
+            }
+        }
     }
 }
 
