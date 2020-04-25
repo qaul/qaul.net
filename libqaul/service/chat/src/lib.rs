@@ -1,7 +1,7 @@
 //! `qaul.net` chat service
 
 mod types;
-pub use types::{ChatMessage, Room, RoomDiff, RoomId, RoomMeta, RoomState};
+pub use types::{ChatMessage, Room, RoomDiff, RoomId, RoomMeta};
 
 use async_std::sync::Arc;
 use libqaul::{error::Result, users::UserAuth, Identity, Qaul};
@@ -27,7 +27,7 @@ impl Chat {
     }
 
     /// Get all metadata about a specific room
-    pub fn metadata(&self, user: UserAuth, room: RoomId) -> Result<Room> {
+    pub fn get_room(&self, user: UserAuth, room: RoomId) -> Result<Room> {
         unimplemented!()
     }
 
@@ -36,21 +36,23 @@ impl Chat {
         unimplemented!()
     }
 
-    pub fn send_message(&self, user: UserAuth, room: RoomId) -> Result<()> {
+    /// Send a normal chat message to a room
+    pub fn send_message(&self, user: UserAuth, room: RoomId, content: String) -> Result<()> {
         unimplemented!()
     }
 
-    /// Subscribe to any future messages that are sent to a room
-    pub async fn subscribe(&self, auth: UserAuth, room: RoomId) -> () {
-        // self.qaul
-        //     .messages()
-        //     .subscribe(auth, ASC_NAME, Some(Tag::new("room_id", room)))
-        //     .map(|sub_stream| sub_stream.map(|msg| unimplemented!()))
+    /// Subscribe to push updates for a particular room
+    pub async fn subscribe(&self, auth: UserAuth, room: RoomId) -> Result<()> {
+        unimplemented!()
+    }
+
+    /// Stop receiving push updates for a room
+    pub async fn unsubscribe(&self, auth: UserAuth, room: RoomId) -> Result<()> {
         unimplemented!()
     }
 
     /// Get all messages from a room
-    pub fn query(&self, user: UserAuth, room: RoomId) -> Result<Vec<ChatMessage>> {
+    pub fn get_messages(&self, user: UserAuth, room: RoomId) -> Result<Vec<ChatMessage>> {
         unimplemented!()
     }
 }

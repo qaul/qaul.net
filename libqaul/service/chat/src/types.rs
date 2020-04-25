@@ -23,11 +23,11 @@ pub struct ChatMessage {
     /// Message sender ID
     pub sender: Identity,
     /// Embedded or linked  information
-    pub room: RoomState,
-    /// Text payload
-    pub content: String,
+    room: RoomState,
     /// The timestamp at which the message was received (in utc)
     pub timestamp: DateTime<Utc>,
+    /// Text payload
+    pub content: String,
 }
 
 /// A unique identifier for a room
