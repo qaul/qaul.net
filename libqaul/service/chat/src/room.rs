@@ -1,4 +1,6 @@
-//! A module to handle chat rooms
+//! Over the wire room utilities
+//!
+//! These types are encoded and transferred to other nodes.
 
 use async_std::sync::Arc;
 use libqaul::{
@@ -57,6 +59,11 @@ impl Room {
             users: BTreeSet::default(),
             name: name.into(),
         }
+    }
+
+    /// Take a room diff from the network and apply it to a room
+    pub fn apply(&self, diff: RoomDiff) -> Result<()> {
+        Ok(())
     }
 
     /// Make a user join this room

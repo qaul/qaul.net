@@ -7,20 +7,6 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
-pub struct Next {
-    pub auth: UserAuth,
-    pub room: RoomId,
-}
-
-#[async_trait]
-impl ChatRpc for Next {
-    type Response = ChatMessage;
-    async fn apply(self, chat: &Chat) -> Self::Response {
-        chat.next(self.auth, self.room).await
-    }
-}
-
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Subscribe {
     pub auth: UserAuth,

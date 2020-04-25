@@ -35,10 +35,6 @@ pub struct Envelope<D> {
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Request {
-    /// Poll the next chat message
-    #[cfg(feature = "chat")]
-    ChatMsgNext(chat::messages::Next),
-
     /// Create a subscription for chat messages
     #[cfg(feature = "chat")]
     ChatMsgSub(chat::messages::Subscribe),

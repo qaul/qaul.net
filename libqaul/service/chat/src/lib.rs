@@ -1,5 +1,4 @@
 //! `qaul.net` chat service
-#![allow(unused)]
 
 mod msg;
 pub use msg::ChatMessage;

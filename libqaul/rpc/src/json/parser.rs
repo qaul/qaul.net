@@ -61,25 +61,23 @@ impl From<RequestEnv> for Envelope<Request> {
             id,
             data: match (kind.as_str(), method.as_str()) {
                 // chat service message functions
-                //#[cfg(features = "chat")]
-                ("chat-messages", "next") => Request::ChatMsgNext(de_json(data, auth)),
-                // #[cfg(features = "chat")]
+                // #[cfg(feature = "chat")]
                 // ("chat-messages", "subscribe") => Request::ChatMsgSub(de_json(data, auth)),
-                //#[cfg(features = "chat")]
+                #[cfg(feature = "chat")]
                 ("chat-messages", "create") => Request::ChatMsgSend(de_json(data, auth)),
-                #[cfg(features = "chat")]
-                ("chat-messages", "query") => Request::ChatMsgQuery(de_json(data, auth)),
+                //#[cfg(feature = "chat")]
+                //("chat-messages", "query") => Request::ChatMsgQuery(de_json(data, auth)),
 
                 // chat service room management
-                //#[cfg(features = "chat")]
+                #[cfg(feature = "chat")]
                 ("chat-rooms", "list") => Request::ChatRoomList(de_json(data, auth)),
-                //#[cfg(features = "chat")]
+                #[cfg(feature = "chat")]
                 ("chat-rooms", "get") => Request::ChatRoomGet(de_json(data, auth)),
-                //#[cfg(features = "chat")]
+                #[cfg(feature = "chat")]
                 ("chat-rooms", "create") => Request::ChatRoomCreate(de_json(data, auth)),
-                //#[cfg(features = "chat")]
+                #[cfg(feature = "chat")]
                 ("chat-rooms", "modify") => Request::ChatRoomModify(de_json(data, auth)),
-                //#[cfg(features = "chat")]
+                #[cfg(feature = "chat")]
                 ("chat-rooms", "delete") => Request::ChatRoomDelete(de_json(data, auth)),
 
                 // libqaul contact functions
@@ -100,31 +98,6 @@ impl From<RequestEnv> for Envelope<Request> {
                 (kind, method) => panic!(format!("Unknown parse tuple: ({}, {})", kind, method)),
             },
         }
-    }
-}
-
-#[test]
-#[cfg(features = "chat")]
-fn envelope_chat_message_next() {
-    // This re-uses the same ID for auth and room data not because
-    // it's in any way significant but rather because it's 3am and I'm
-    // being lazy
-    let json = r#"{ "id": "1", 
-                    "auth": { "id": "1C56 105D 52C3 D617  2603 D69F 9E0F 93AE", "token": "token" }, 
-                    "kind": "chat-messages", 
-                    "method": "next", 
-                    "data": { "room": "1C56 105D 52C3 D617  2603 D69F 9E0F 93AE" } }"#;
-
-    let je: RequestEnv = serde_json::from_str(&json).expect("JsonEnvelope failed");
-    let env: Envelope = je.into();
-
-    if let EnvelopeType::Request(Request::ChatMsgNext(msg)) = env.data {
-        assert_eq!(
-            msg.auth.0.to_string(),
-            "1C56 105D 52C3 D617  2603 D69F 9E0F 93AE"
-        );
-    } else {
-        panic!("Failed to deserialise correctly")
     }
 }
 
