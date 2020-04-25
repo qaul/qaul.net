@@ -71,10 +71,10 @@ fn print_sample_req() {
                 map.insert("service".into(), JsonValue::String("net.qaul.chat".into()));
                 map.insert(
                     "query".into(),
-                    serde_json::to_value(MsgQuery::Tag(Tag {
-                        key: "room-id".into(),
-                        val: Identity::random().iter().cloned().collect(),
-                    }))
+                    serde_json::to_value(
+                        MsgQuery::new()
+                            .tag(Tag::new("room-id", Identity::random().as_bytes().to_vec())),
+                    )
                     .unwrap(),
                 );
 

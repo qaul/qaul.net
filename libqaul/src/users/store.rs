@@ -1,7 +1,7 @@
 //! Store for user profiles
 
 use crate::{
-    error::Result,
+    error::{Error, Result},
     qaul::Identity,
     security::KeyId,
     store::KeyWrap,
@@ -19,7 +19,6 @@ use std::sync::Arc;
 const KEY_PATH: &'static str = "/meta:keys";
 pub(crate) const TAG_PROFILE: &'static str = "libqaul.user.profile";
 pub(crate) const TAG_LOCAL: &'static str = "libqaul.user.local";
-
 
 fn profile_path(id: Id) -> Path {
     Path::from(format!("/users:{}", id))
@@ -69,7 +68,7 @@ impl UserStore {
 
     /// Delete the key and profile for a local user
     pub(crate) async fn delete_local(&self, id: Identity) {
-        dbg!(self.get(id).await).unwrap();
+        self.get(id).await.unwrap();
 
         self.inner
             .delete(Session::Id(id), Path::from(KEY_PATH))
@@ -102,6 +101,7 @@ impl UserStore {
         }
     }
 
+    /// Get a specific user profile
     pub(crate) async fn get(&self, id: Identity) -> Result<UserProfile> {
         match self
             .inner
@@ -109,7 +109,8 @@ impl UserStore {
             .await
         {
             Ok(QueryResult::Single(rec)) => Ok(UserProfile::from(&*rec)),
-            _ => panic!(),
+            Err(_) => Err(Error::NoUser),
+            _ => unimplemented!(),
         }
     }
 
@@ -124,7 +125,7 @@ impl UserStore {
             .await
             .unwrap()
         {
-            QueryResult::Many(vec) => dbg!(vec)
+            QueryResult::Many(vec) => vec
                 .into_iter()
                 .map(|rec| UserProfile::from(&*rec))
                 .collect(),
@@ -222,7 +223,7 @@ async fn delete_user() {
     let store = harness::setup();
     let id = harness::insert_random(&store);
     assert_eq!(store.all_local().await.len(), 1);
-    
+
     store.delete_local(id).await;
     assert_eq!(store.all_local().await.len(), 0);
 }

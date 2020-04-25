@@ -1,21 +1,34 @@
 //! Internal message store wrapper
 
 use crate::{
-    messages::{Mode, MsgRef},
+    error::Result,
     helpers::QueryResult,
+    messages::{Message, Mode, MsgQuery, MsgRef},
+    services::Service,
     Identity,
 };
 use alexandria::{
-    utils::{Path, Tag},
+    query::Query,
+    utils::{Path, Tag, TagSet},
     Library, Session, GLOBAL,
 };
 use async_std::sync::Arc;
 
 pub(crate) const TAG_FLOOD: &'static str = "libqaul._int.flood";
 pub(crate) const TAG_READ: &'static str = "libqaul._int.read";
+pub(crate) const TAG_SENDER: &'static str = "libqaul._int.sender";
+pub(crate) const TAG_SERVICE: &'static str = "libqaul._int.service";
 
 fn msg_path(msg_id: Identity) -> Path {
     Path::from(format!("/msg:{}", msg_id))
+}
+
+fn sender_tag(sender: Identity) -> Tag {
+    Tag::new(TAG_SENDER, sender.as_bytes().to_vec())
+}
+
+fn service_tag(s: String) -> Tag {
+    Tag::new(TAG_SERVICE, s.as_bytes().to_vec())
 }
 
 #[derive(Clone)]
@@ -35,6 +48,9 @@ impl MsgStore {
     /// wether it was a Flooded message.
     pub(crate) async fn insert_local(&self, user: Identity, msg: MsgRef, mode: Mode) {
         let mut tags = msg.tags.clone().merge(Tag::empty(TAG_READ));
+        tags.insert(sender_tag(user));
+        tags.insert(service_tag(msg.associator.clone()));
+
         let diffs = msg.diff();
         let session = match mode {
             Mode::Flood => {
@@ -55,15 +71,18 @@ impl MsgStore {
     /// The primary difference to `insert_local()` is that the
     /// inserted message will not be marked as "read" and can be
     /// retrieved via the "unread messages" query.
-    pub(crate) async fn insert_remote(&self, user: Option<Identity>, msg: MsgRef, mode: Mode) {
+    pub(crate) async fn insert_remote(&self, recipient: Option<Identity>, msg: MsgRef) {
         let mut tags = msg.tags.clone();
+        tags.insert(sender_tag(msg.sender));
+        tags.insert(service_tag(msg.associator.clone()));
+
         let diffs = msg.diff();
-        let session = match mode {
-            Mode::Flood => {
+        let session = match recipient {
+            Some(id) => Session::Id(id),
+            None => {
                 tags.insert(Tag::empty(TAG_FLOOD));
                 GLOBAL
             }
-            Mode::Std(_) => Session::Id(user.unwrap()),
         };
 
         self.inner
@@ -71,206 +90,166 @@ impl MsgStore {
             .await
             .unwrap();
     }
+
+    /// Return items from alexandria via a user query
+    pub(crate) async fn query(
+        &self,
+        user: Identity,
+        service: Service,
+        query: MsgQuery,
+    ) -> QueryResult<Message> {
+        // Add the service tag to the set
+        let mut meta = match service {
+            Service::Name(s) => service_tag(s).into(),
+            Service::God => TagSet::empty(),
+        };
+
+        // Add the sender tag to the query
+        if let Some(sender) = query.sender {
+            meta.insert(sender_tag(sender));
+        }
+
+        // Add any other tags
+        let tags = meta.merge(query.tags);
+
+        // Make db query
+        let mut glb = self
+            .inner
+            .query_iter(GLOBAL, Query::tags().subset(tags.clone()))
+            .await
+            .unwrap();
+        let usr = self
+            .inner
+            .query_iter(user, Query::tags().subset(tags))
+            .await
+            .unwrap();
+
+        glb.merge(usr).unwrap();
+        QueryResult::new(glb)
+    }
 }
 
-// use crate::{
-//     error::Result,
-//     messages::{MsgId, MsgQuery, MsgRef},
-//     Identity, Tag,
-// };
-// use std::{
-//     collections::{BTreeMap, BTreeSet},
-//     sync::{Arc, RwLock},
-// };
+#[cfg(test)]
+mod harness {
+    use crate::{
+        messages::{generator::MsgBuilder, Mode, MsgStore},
+        security::Sec,
+        users::{UserStore, TAG_PROFILE},
+        Identity,
+    };
+    use alexandria::{
+        utils::{Tag, TagSet},
+        Builder,
+    };
+    use async_std::sync::Arc;
+    use tempfile::tempdir;
 
-// type MsgTree<K, V> = Arc<RwLock<BTreeMap<K, V>>>;
+    pub(super) struct Test {
+        pub(super) store: MsgStore,
+        usr: UserStore,
+    }
 
-// /// A query object that get's built and then executed asynchronously
-// pub(crate) struct StoreQuery<'store> {
-//     store: &'store MsgStore,
-//     user: Identity,
-//     unread: bool,
-//     tags: BTreeSet<Tag>,
-//     service: Option<String>,
-//     query: Option<MsgQuery>,
-//     limit: Option<usize>,
-// }
+    pub(super) fn init() -> Test {
+        let dir = tempdir().unwrap();
+        let lib = Builder::new().offset(dir.path()).build().unwrap();
 
-// impl<'store> StoreQuery<'store> {
-//     /// Filter messages for unreads only
-//     pub(crate) fn unread(self) -> Self {
-//         Self {
-//             unread: true,
-//             ..self
-//         }
-//     }
+        // Because the message store requires user namespaces, it
+        // depends on the user store initialising first!  We then also
+        // keep it around to insert users as needs be.
+        Test {
+            usr: UserStore::new(Arc::clone(&lib)),
+            store: MsgStore::new(lib),
+        }
+    }
 
-//     /// Filter messages by association with a service
-//     ///
-//     /// This lookup uses message ispection and might be generally
-//     /// slower than others.
-//     pub(crate) fn service<S>(self, service: S) -> Self
-//     where
-//         S: Into<String>,
-//     {
-//         Self {
-//             service: Some(service.into()),
-//             ..self
-//         }
-//     }
+    /// Insert a new user into the store if required
+    async fn maybe_make_user(state: &Test, id: Identity, local: bool) {
+        match state.usr.get(id).await {
+            Err(_) if local => {
+                make_user(state, id).await;
+            }
+            Err(_) => {
+                state.usr.insert_profile(id, Tag::empty(TAG_PROFILE)).await;
+            }
+            _ => {}
+        }
+    }
 
-//     pub(crate) fn limit(self, limit: usize) -> Self {
-//         Self {
-//             limit: Some(limit),
-//             ..self
-//         }
-//     }
+    /// Make a user to use in tests
+    pub(super) async fn make_user(state: &Test, id: Identity) {
+        let mut kid = Sec::new().generate().await;
+        kid.id = id;
+        state
+            .usr
+            .create_local(kid, "car horse battery staple")
+            .await;
+    }
 
-//     /// Filter messages additionally with a user provided query
-//     pub(crate) fn constraints(self, query: MsgQuery) -> Self {
-//         Self {
-//             query: Some(query),
-//             ..self
-//         }
-//     }
+    /// "Send" a random message with specific tags
+    pub(super) async fn send_with_tags(
+        state: &Test,
+        user: Identity,
+        tags: impl Into<TagSet>,
+        mode: Mode,
+    ) {
+        maybe_make_user(state, user, true).await;
 
-//     pub(crate) fn tags<I: IntoIterator<Item = Tag>>(mut self, tags: I) -> Self {
-//         self.tags.extend(tags.into_iter());
-//         self
-//     }
+        let msg = MsgBuilder::new()
+            .with_sender(user)
+            .with_tags(tags.into())
+            .generate();
+        state.store.insert_local(user, Arc::new(msg), mode).await;
+    }
 
-//     /// Execute the query against the store
-//     pub(crate) fn exec(self) -> Result<Vec<MsgRef>> {
-//         let StoreQuery {
-//             store,
-//             user,
-//             query,
-//             unread,
-//             tags,
-//             service,
-//             limit,
-//         } = self;
+    pub(super) async fn receive_with_tags(
+        state: &Test,
+        user: impl Into<Option<Identity>>,
+        tags: impl Into<TagSet>,
+    ) {
+        let user = user.into();
+        if let Some(user) = user {
+            maybe_make_user(state, user, false).await;
+        }
 
-//         store
-//             .by_user
-//             .write()
-//             .unwrap()
-//             .get_mut(&user)
-//             .map_or(Ok(vec![]), |set| {
-//                 Ok(set
-//                     .iter_mut()
-//                     // Conditional filters that are applied only if the query matches
-//                     .filter(|msg| if unread { msg.unread() } else { true })
-//                     .filter(|msg| {
-//                         if let Some(ref s) = service {
-//                             &msg.inner().associator == s
-//                         } else {
-//                             true
-//                         }
-//                     })
-//                     .filter(|msg| msg.inner().tags.is_superset(&tags))
-//                     .filter(|msg| match query {
-//                         Some(MsgQuery::Id(ref id)) => &msg.inner().id == id,
-//                         Some(MsgQuery::Sender(ref sender)) => &msg.inner().sender == sender,
-//                         Some(MsgQuery::Tag(ref tag)) => msg.inner().tags.contains(tag),
-//                         None => true,
-//                     })
-//                     .take(limit.unwrap_or(usize::max_value()))
-//                     .map(|msg| msg.read())
-//                     .collect())
-//             })
-//     }
-// }
+        let msg = match user {
+            Some(id) => MsgBuilder::new().with_sender(id),
+            None => MsgBuilder::new(),
+        }
+        .with_tags(tags.into())
+        .generate();
 
-// /// Encodes the read-state of a Message
-// ///
-// /// The state is transformed when a query yields in this message being
-// /// returned to an endpoint. At no point can the internal message
-// /// store keep track if a message has actually been shown to a
-// /// human. As such, the accuracy of this data might be flawed.
-// #[derive(Clone)]
-// pub(crate) enum MsgState {
-//     /// A previously read message
-//     Read(MsgRef),
-//     /// An unread message
-//     Unread(MsgRef),
-// }
+        state.store.insert_remote(user.into(), Arc::new(msg)).await;
+    }
+}
 
-// impl MsgState {
-//     /// Change state to read, while returning reference to inner message data
-//     fn read(&mut self) -> MsgRef {
-//         let msg = match self {
-//             Self::Unread(msg) => msg,
-//             Self::Read(msg) => msg,
-//         };
+#[async_std::test]
+async fn simple_send() -> Result<()> {
+    let state = harness::init();
+    let id = Identity::random();
+    let tags = TagSet::empty();
+    harness::send_with_tags(&state, id, tags, Mode::Std(Identity::random())).await;
 
-//         let msg_ref = Arc::clone(&msg);
-//         *self = Self::Read(Arc::clone(&msg));
-//         msg_ref
-//     }
+    let result = state
+        .store
+        .query(id, Service::God, MsgQuery::new().sender(id))
+        .await;
+    assert_eq!(result.take(1).await?.len(), 1);
+    Ok(())
+}
 
-//     fn unread(&self) -> bool {
-//         match self {
-//             Self::Unread(_) => true,
-//             _ => false,
-//         }
-//     }
+#[async_std::test]
+async fn simple_received() -> Result<()> {
+    let state = harness::init();
+    let id = Identity::random();
+    harness::make_user(&state, id).await;
 
-//     fn inner(&self) -> &MsgRef {
-//         match self {
-//             Self::Unread(msg) => msg,
-//             Self::Read(msg) => msg,
-//         }
-//     }
-// }
+    let tags = TagSet::empty();
+    harness::receive_with_tags(&state, id, tags).await;
 
-// /// A searchable index of messages encountered by this system
-// #[derive(Clone)]
-// pub(crate) struct MsgStore {
-//     /// Owns Message references by their ID
-//     by_id: MsgTree<MsgId, MsgState>,
-//     /// By-user reference table to improve search performance
-//     by_user: MsgTree<Identity, Vec<MsgState>>,
-// }
-
-// impl MsgStore {
-//     pub(crate) fn new() -> Self {
-//         Self {
-//             by_id: Arc::new(RwLock::new(BTreeMap::default())),
-//             by_user: Arc::new(RwLock::new(BTreeMap::default())),
-//         }
-//     }
-
-//     /// Start a query for a given user
-//     pub(crate) fn query(&self, user: Identity) -> StoreQuery {
-//         StoreQuery {
-//             user,
-//             store: self,
-//             unread: false,
-//             tags: BTreeSet::new(),
-//             service: None,
-//             query: None,
-//             limit: None,
-//         }
-//     }
-
-//     /// Permanently store a whole Message
-//     ///
-//     /// For this function it doesn't matter if the `Message` was
-//     /// dispatched by this system or has come in from outside.
-//     pub(crate) fn insert(&self, user: Identity, msg: MsgState) {
-//         let id = msg.inner().id.clone();
-
-//         self.by_user
-//             .write()
-//             .expect("Failed to lock MsgStore!")
-//             .entry(user)
-//             .or_insert(vec![])
-//             .push(msg.clone());
-
-//         self.by_id
-//             .write()
-//             .expect("Failed to lock MsgStore!")
-//             .insert(id, msg);
-//     }
-// }
+    let result = state
+        .store
+        .query(id, Service::God, MsgQuery::new().sender(id))
+        .await;
+    assert_eq!(result.take(1).await?.len(), 1);
+    Ok(())
+}

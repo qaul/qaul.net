@@ -52,16 +52,16 @@ impl Discovery {
                 let msg = router.next().await;
 
                 info!("Receiving message...");
-                let mode = match msg.recipient {
-                    Recipient::User(id) => Mode::Std(id.clone()),
-                    Recipient::Flood => Mode::Flood,
+                let recp = match msg.recipient {
+                    Recipient::User(id) => Some(id),
+                    Recipient::Flood => None,
                 };
 
-                let msg = Arc::new(MsgUtils::process(mode, msg));
+                let msg = Arc::new(MsgUtils::process(msg));
                 let associator = msg.associator.clone();
 
                 qaul.messages
-                    .insert_remote(mode.id(), Arc::clone(&msg), mode)
+                    .insert_remote(recp, Arc::clone(&msg))
                     .await;
                 qaul.services.push_for(associator, msg).unwrap();
                 info!("Finished processing incoming message!");

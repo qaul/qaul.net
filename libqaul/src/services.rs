@@ -7,6 +7,7 @@ use std::{
     collections::BTreeMap,
     sync::{Arc, RwLock},
 };
+use serde::{Serialize, Deserialize};
 
 /// Represents a service using libqaul
 ///
@@ -16,7 +17,9 @@ use std::{
 /// should be turned off) in most situations, this way a user-level
 /// service can do very powerful things with the "raw" netork traffic
 /// of a qaul network.
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub enum Service {
+    /// Get access to all service's events
     // One of the three most common passwords, you know?
     God,
     /// Service by domain qualified name (e.g. `net.qaul.chat`)

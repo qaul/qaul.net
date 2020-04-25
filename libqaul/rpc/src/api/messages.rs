@@ -45,8 +45,7 @@ pub struct Subscribe {
 impl QaulRpc for Subscribe {
     type Response = Result<Subscription<MsgRef>>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.messages()
-            .subscribe(self.auth, self.service, self.tags)
+        unimplemented!()
     }
 }
 
@@ -66,6 +65,7 @@ pub struct Query {
 impl QaulRpc for Query {
     type Response = Result<Vec<MsgRef>>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.messages().query(self.auth, self.service, self.query)
+        // qaul.messages().query(self.auth, self.service, self.query).await
+        unimplemented!()
     }
 }
