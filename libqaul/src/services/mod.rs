@@ -3,11 +3,16 @@ use crate::{
     messages::MsgRef,
     utils::IterUtils,
 };
+use alexandria::Library;
+use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeMap,
     sync::{Arc, RwLock},
 };
-use serde::{Serialize, Deserialize};
+
+mod store;
+pub use self::store::MetadataMap;
+pub(crate) use self::store::MetadataStore;
 
 /// Represents a service using libqaul
 ///
@@ -54,13 +59,20 @@ impl IntService {
 #[derive(Clone)]
 pub(crate) struct ServiceRegistry {
     inner: Arc<RwLock<BTreeMap<String, IntService>>>,
+    store: MetadataStore,
 }
 
 impl ServiceRegistry {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(library: Arc<Library>) -> Self {
         Self {
             inner: Arc::new(RwLock::new(BTreeMap::new())),
+            store: MetadataStore::new(library),
         }
+    }
+
+    /// Get access to the inner service store
+    pub(crate) fn store(&self) -> &MetadataStore {
+        &self.store
     }
 
     pub(crate) fn register(&self, name: String) -> Result<()> {
@@ -71,6 +83,15 @@ impl ServiceRegistry {
             inner.insert(name, IntService::new());
             Ok(())
         }
+    }
+
+    /// Check if a service was registered before
+    pub(crate) fn check(&self, name: &String) -> Result<()> {
+        self.inner
+            .read()
+            .unwrap()
+            .get(name)
+            .map_or(Err(Error::NoService), |_| Ok(()))
     }
 
     pub(crate) fn unregister(&self, name: String) -> Result<()> {

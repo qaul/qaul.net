@@ -84,7 +84,7 @@ impl Qaul {
             auth: AuthStore::new(),
             contacts: ContactStore::new(),
             messages: MsgStore::new(Arc::clone(&store)),
-            services: ServiceRegistry::new(),
+            services: ServiceRegistry::new(Arc::clone(&store)),
             sec: Arc::new(Sec::new()),
             store,
         }
@@ -115,7 +115,7 @@ impl Qaul {
             auth: AuthStore::new(),
             contacts: ContactStore::new(),
             messages: MsgStore::new(Arc::clone(&store)),
-            services: ServiceRegistry::new(),
+            services: ServiceRegistry::new(Arc::clone(&store)),
             sec: Arc::new(Sec::new()),
             store,
         });

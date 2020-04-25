@@ -1,21 +1,32 @@
 //! Service interconnect interface
 
-use crate::{error::Result, Qaul};
+use crate::{error::Result, helpers::TagSet, services::MetadataMap, users::UserAuth, Qaul};
 
 /// API scope type to access service management functions
 ///
-/// Used entirely to namespace API endpoints on `Qaul` instance,
-/// without having long type identifiers.
+/// Services are external applications using libqaul as a basis to
+/// communicate on a distributed network.  For a service to start
+/// using all libqaul functions it should register itself via this
+/// API.  This will unlock internal storage and better
+/// subscription support.
+///
+/// Some applications might be quite security critical, and so,
+/// there needs to be a way to store data in a safe way for future
+/// sessions, without offering metadata sidechannels from captured
+/// devices.  This API is a solution to this problem.
+///
+/// In libqaul, all data is stored to disk encrypted, meaning that
+/// conversations, keys and logs are safe from inspection.  To
+/// allow services to hook into the same storage mechanism for
+/// their own metadata, this API provides a view into a per-user,
+/// per-service metadata map.  This way your service doesn't have
+/// to re-implemented secure disk storage, or rely on easier
+/// non-secure storage.
 pub struct Services<'chain> {
     pub(crate) q: &'chain Qaul,
 }
 
 impl<'qaul> Services<'qaul> {
-    /// Drop this scope and return back to global `Qaul` scope
-    pub fn drop(&'qaul self) -> &'qaul Qaul {
-        self.q
-    }
-
     /// Check if "god mode" is supported by this instance
     pub fn god_mode(&self) -> bool {
         true // TODO: make configurable
@@ -43,5 +54,65 @@ impl<'qaul> Services<'qaul> {
     /// be found.
     pub fn unregister<S: Into<String>>(&self, name: S) -> Result<()> {
         self.q.services.unregister(name.into())
+    }
+
+    /// Save some piece of metadata, for a particular user and service
+    ///
+    /// This function can be used to save a piece of metadata with a
+    /// set of tags.  The name of a MetadataMap needs to be unique and
+    /// will be overridden by this call.  The search tags can be used
+    /// to identity different classes of data, but can also be left
+    /// empty.
+    pub async fn save<S, T>(
+        &self,
+        user: UserAuth,
+        service: S,
+        data: MetadataMap,
+        tags: T,
+    ) -> Result<()>
+    where
+        S: Into<String>,
+        T: Into<TagSet>,
+    {
+        let serv = service.into();
+        let (id, _) = self.q.auth.trusted(user)?;
+        self.q.services.check(&serv)?;
+        self.q
+            .services
+            .store()
+            .save(id, serv, data, tags.into())
+            .await
+    }
+
+    /// Delete a particular key from the service metadata store
+    ///
+    /// Will only error on access failure, not if the key didn't
+    /// previously exist.
+    pub async fn delete<S, K>(&self, user: UserAuth, service: S, key: K) -> Result<()>
+    where
+        S: Into<String>,
+        K: Into<String>,
+    {
+        let serv = service.into();
+        let (id, _) = self.q.auth.trusted(user)?;
+        self.q.services.check(&serv)?;
+        self.q.services.store().delete(id, serv, key.into()).await;
+        Ok(())
+    }
+
+    /// Make a query into the service metadata store via a set of tags
+    ///
+    /// Each entry in the store can further be associated with a name.
+    /// If your query doesn't provide a tag filter all entries for the
+    /// service/user combination will be returned.
+    pub async fn query<S, T>(&self, user: UserAuth, service: S, tags: T) -> Result<Vec<MetadataMap>>
+    where
+        S: Into<String>,
+        T: Into<TagSet>,
+    {
+        let serv = service.into();
+        let (id, _) = self.q.auth.trusted(user)?;
+        self.q.services.check(&serv)?;
+        Ok(self.q.services.store().query(id, serv, tags.into()).await)
     }
 }

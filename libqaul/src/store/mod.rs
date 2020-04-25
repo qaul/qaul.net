@@ -7,6 +7,7 @@
 //! reading a data type from a record.
 
 mod messages;
+mod services;
 
 mod users;
 pub(crate) use users::KeyWrap;
@@ -39,6 +40,19 @@ impl Conv {
                 .map(|(k, v)| match v {
                     Value::String(s) => (k.clone(), s.clone()),
                     v => panic!("Invalid map-inner conversion: {:?} -> String", v),
+                })
+                .collect(),
+            v => panic!("Invalid conversion: {:?} -> BTreeMap<String, String>", v),
+        }
+    }
+
+    pub(self) fn bin_map(v: &Value) -> BTreeMap<String, Vec<u8>> {
+        match v {
+            Value::Map(map) => map
+                .iter()
+                .map(|(k, v)| match v {
+                    ref v @ Value::Vec(_) => (k.clone(), Self::binvec(v)),
+                    v => panic!("Invalid map-inner conversion: {:?} -> Vec<u8>", v),
                 })
                 .collect(),
             v => panic!("Invalid conversion: {:?} -> BTreeMap<String, String>", v),
