@@ -21,6 +21,7 @@ pub enum DiffSeg {
 }
 
 /// An atomic set of changes applied to a record
+#[derive(Debug)]
 pub enum Diff {
     /// Maps a key to a value
     Map(BTreeMap<String, DiffSeg>),

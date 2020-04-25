@@ -2,8 +2,9 @@
 
 use libqaul::{
     error::Result,
-    helpers::Tag,
+    helpers::{Tag, TagSet},
     messages::{Mode, MsgQuery},
+    services::MetadataMap,
     Qaul,
 };
 
@@ -28,7 +29,8 @@ async fn user_insert_delete() -> Result<()> {
 #[async_std::test]
 async fn send_message_query() -> Result<()> {
     let q = harness();
-    let auth = dbg!(q.users().create("car horse battery staple").await?);
+
+    let auth = q.users().create("car horse battery staple").await?;
 
     let msgid = q
         .messages()
@@ -41,7 +43,8 @@ async fn send_message_query() -> Result<()> {
         )
         .await?;
 
-    let res = q.messages()
+    let res = q
+        .messages()
         .query(
             auth,
             "net.qaul.testing",
@@ -51,3 +54,53 @@ async fn send_message_query() -> Result<()> {
     assert_eq!(res.take(1).await?[0].id, msgid);
     Ok(())
 }
+
+#[async_std::test]
+async fn service_store_query() -> Result<()> {
+    let q = harness();
+    let auth = q.users().create("car horse battery staple").await?;
+    let serv = "net.qaul._test";
+    q.services().register(serv)?;
+    q.services()
+        .save(
+            auth.clone(),
+            serv,
+            MetadataMap::new("cool-data"),
+            TagSet::empty(),
+        )
+        .await?;
+
+    q.services()
+        .query(auth.clone(), serv, TagSet::empty())
+        .await?;
+
+    Ok(())
+}
+
+
+#[async_std::test]
+async fn service_delete() -> Result<()> {
+    let q = harness();
+    let auth = q.users().create("car horse battery staple").await?;
+    let serv = "net.qaul._test";
+    let data = MetadataMap::new("cool-data");
+    q.services().register(serv)?;
+    q.services()
+        .save(
+            auth.clone(),
+            serv,
+            data.clone(),
+            TagSet::empty(),
+        )
+        .await?;
+
+    q.services().delete(auth.clone(), serv, "cool-data").await?;
+
+    let query = q.services()
+        .query(auth.clone(), serv, TagSet::empty())
+        .await?;
+    
+    assert_eq!(query.len(), 0);
+    Ok(())
+}
+

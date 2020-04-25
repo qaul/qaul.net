@@ -99,7 +99,7 @@ impl Library {
         T: Into<TagSet>,
         D: Into<Diff>,
     {
-        if let Session::Id(id) = dbg!(id) {
+        if let Session::Id(id) = id {
             self.users.read().await.is_open(id)?;
             info!("Passed open-auth for id `{}`", id.to_string());
         }

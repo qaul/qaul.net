@@ -36,11 +36,6 @@ impl Chat {
         Rooms { chat: self }
     }
 
-    /// Get the next available chat message
-    pub async fn next(&self, auth: UserAuth, room: RoomId) -> ChatMessage {
-        unimplemented!()
-    }
-
     /// Subscribe to any future messages that are sent to a room
     pub async fn subscribe(
         &self,
@@ -51,6 +46,10 @@ impl Chat {
             .messages()
             .subscribe(auth, ASC_NAME, Some(Tag::new("room_id", room)))
             .map(|sub_stream| sub_stream.map(|msg| unimplemented!()))
+    }
+
+    pub async fn get_msgs_for_room(&self, auth: UserAuth, room: RoomId) -> () {
+        unimplemented!()
     }
 
     /// Send a message into a conversation
