@@ -6,7 +6,7 @@ use {
     },
     futures::stream::StreamExt,
     libqaul::{
-        api::TagSet,
+        helpers::TagSet,
         messages::{Mode, MsgRef},
         Qaul,
     },

@@ -4,7 +4,7 @@ use crate::QaulRpc;
 use async_trait::async_trait;
 use futures::future;
 use libqaul::{
-    api::{ItemDiff, ItemDiffExt, MapDiff, MapDiffExt, SetDiff, SetDiffExt},
+    helpers::{ItemDiff, ItemDiffExt, MapDiff, MapDiffExt, SetDiff, SetDiffExt},
     error::Result,
     users::{UserAuth, UserProfile, UserUpdate},
     Identity, Qaul,

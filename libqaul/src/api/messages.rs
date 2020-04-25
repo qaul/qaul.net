@@ -1,8 +1,9 @@
 use crate::{
-    api::{SubId, Subscription, Tag, TagSet},
     error::{Error, Result},
+    helpers::{QueryResult, Subscription, Tag, TagSet},
     messages::{Envelope, MsgUtils, RatMessageProto},
     qaul::{Identity, Qaul},
+    services::Service,
     users::UserAuth,
 };
 
@@ -88,6 +89,40 @@ impl From<Mode> for Recipient {
     }
 }
 
+/// A query interface for the local message store
+#[derive(Clone, Default, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct MsgQuery {
+    pub(crate) sender: Option<Identity>,
+    pub(crate) tags: TagSet,
+    pub(crate) skip: usize,
+}
+
+impl MsgQuery {
+    /// Create a new, empty query
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Query for messages by a specific sender
+    pub fn sender(self, sender: Identity) -> Self {
+        Self {
+            sender: Some(sender),
+            ..self
+        }
+    }
+
+    /// Add a tag to the query that must be present
+    ///
+    /// Tag queries aim to be a subset in matching messages, which
+    /// means that more tags can exist for a message, but all provided
+    /// tags must be present.
+    pub fn tag(mut self, t: Tag) -> Self {
+        self.tags.insert(t);
+        self
+    }
+}
+
 /// A multi-purpose service Message
 ///
 /// While this representation is quite "low level", i.e. forces a user
@@ -114,28 +149,6 @@ pub struct Message {
     pub sign: SigTrust,
     /// A raw byte `Message` payload
     pub payload: Vec<u8>,
-}
-
-/// A query interface for the local `Message` store
-///
-/// Important to consider that a `Query` can only be applied to the
-/// set of messages that the user has access to. User access
-/// information is not encoded in this enum, but rather passed to the
-/// `Messages::query` function as a first parameter.
-///
-/// While `Query` objects can't be combined (yet), it is also possible
-/// to pass an `Option<String>` as service filter, meaning that only
-/// messages addressed to the appropriate service will be
-/// returned. Without this parameter, all messages will be returned.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum MsgQuery {
-    /// Query for the exact message ID
-    Id(MsgId),
-    /// Query by who a `Message` was composed by
-    Sender(Identity),
-    /// Search for a set of tag values
-    Tag(Tag),
 }
 
 /// API scope type to access messaging functions
@@ -168,7 +181,7 @@ impl<'qaul> Messages<'qaul> {
         self.q
     }
 
-    /// Send a message into the network
+    /// Send a message with arbitrary payload into the network
     ///
     /// Because the term `Message` is overloaded slightly in
     /// `libqaul`, here is a small breakdown of what a message means
@@ -245,90 +258,37 @@ impl<'qaul> Messages<'qaul> {
         .map(|_| id)
     }
 
-    /// Poll the API for the next `Message` for a service
-    ///
-    /// For a more general `Message` query/ enumeration API, see
-    /// `Messages::query` instead.
-    pub async fn next<S, I>(&self, _user: UserAuth, _service: S, _tags: I) -> Result<MsgRef>
-    where
-        S: Into<String>,
-        I: IntoIterator<Item = Tag>,
-    {
-        // let tags = tags.into_iter().collect::<BTreeSet<Tag>>();
-        // let (id, _) = self.q.auth.trusted(user)?;
-        // let service: String = service.into();
-
-        unimplemented!()
-
-        // future::poll_fn(move |ctx| {
-        //     match self
-        //         .q
-        //         .messages
-        //         .query(id)
-        //         .service(service.as_str())
-        //         .tags(tags.clone())
-        //         .unread()
-        //         .limit(1)
-        //         .exec()
-        //     {
-        //         Ok(msg) if msg.len() >= 1 => Poll::Ready(Ok(msg.into_iter().nth(0).unwrap())),
-        //         _ => {
-        //             let waker = ctx.waker().clone();
-        //             task::spawn(async move {
-        //                 task::sleep(Duration::from_millis(10)).await;
-        //                 waker.wake();
-        //             });
-        //             Poll::Pending
-        //         }
-        //     }
-        // })
-        // .await
-    }
-
     /// Subscribe to a stream of future message updates
-    ///
-    /// A subscription is an async stream of messages, that is
-    /// specific to a user, service token, set of store search tags,
-    /// and subscription tag.  The subscription tag is generated for
-    /// each subscription and can later on be used to cancel a stream.
     pub fn subscribe<S, T>(
         &self,
         _user: UserAuth,
         _service: S,
         _tags: T,
-    ) -> Result<Subscription<MsgRef>>
+    ) -> Result<Subscription<Message>>
     where
-        S: Into<String>,
+        S: Into<Service>,
         T: IntoIterator<Item = Tag>,
     {
         unimplemented!()
     }
 
-    /// Cancel a previous subscription by Id
+    /// Query for messages in the store, according to some parameters
     ///
-    /// Messages can still be queried or polled, but will stop being
-    /// streamed to the registered receiver.
-    pub fn unsubscribe(&self, _user: UserAuth, _id: SubId) -> Result<()> {
-        unimplemented!()
-    }
-
-    /// Retrieve locally stored messages from the store
+    /// A query is always user authenticated, and normally associated
+    /// to a service, but it doesn't have to be, if `god-mode` is
+    /// enabled in the libqaul instance.
     ///
-    /// A query is made in relation to an associated service
-    /// handle. It isn't possible to query all messages for all
-    /// services in an efficient manner due to how messages are stored
-    /// in a node.
-    pub fn query<S>(&self, user: UserAuth, _service: S, _query: MsgQuery) -> Result<Vec<MsgRef>>
-    where
-        S: Into<String>,
-    {
-        let (_, _) = self.q.auth.trusted(user)?;
-        // self.q
-        //     .messages
-        //     .query(id)
-        //     .constraints(query)
-        //     .service(service)
-        //     .exec()
-        unimplemented!()
+    /// The query parameters can be specified via the [`Query`]
+    /// builder type which allows for very selective constraints.  The
+    /// return of this function is a Wrapper around a result iterator
+    /// that can return batches, or skip items dynamically.
+    pub async fn query(
+        &self,
+        user: UserAuth,
+        service: impl Into<Service>,
+        query: MsgQuery,
+    ) -> Result<QueryResult<Message>> {
+        let (id, _) = self.q.auth.trusted(user)?;
+        Ok(self.q.messages.query(id, service.into(), query).await)
     }
 }

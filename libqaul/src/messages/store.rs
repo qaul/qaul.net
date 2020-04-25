@@ -2,6 +2,7 @@
 
 use crate::{
     messages::{Mode, MsgRef},
+    helpers::QueryResult,
     Identity,
 };
 use alexandria::{

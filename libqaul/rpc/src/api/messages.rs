@@ -3,8 +3,8 @@
 use crate::QaulRpc;
 use async_trait::async_trait;
 use libqaul::{
-    api::{Subscription, Tag},
     error::{Error, Result},
+    helpers::{Subscription, Tag},
     messages::{Mode, MsgId, MsgQuery, MsgRef},
     users::UserAuth,
     Qaul,

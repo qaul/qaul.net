@@ -6,7 +6,7 @@ use {
     conjoiner,
     failure::Error,
     libqaul::{
-        api::Tag,
+        helpers::Tag,
         messages::{Mode, MsgId},
         users::UserAuth,
         Identity,

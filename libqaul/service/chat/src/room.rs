@@ -2,7 +2,7 @@
 
 use async_std::sync::Arc;
 use libqaul::{
-    api::{ItemDiff, SetDiff},
+    helpers::{ItemDiff, SetDiff},
     error::Result,
     Identity, Qaul,
 };

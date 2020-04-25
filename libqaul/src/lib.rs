@@ -57,6 +57,7 @@ pub mod files;
 pub mod messages;
 pub mod services;
 pub mod users;
+pub mod helpers;
 
 // Core state should be in the root
 mod qaul;

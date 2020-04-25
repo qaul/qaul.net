@@ -2,7 +2,7 @@ use {
     super::ChatRpc,
     async_trait::async_trait,
     libqaul::{
-        api::{ItemDiff, ItemDiffExt, SetDiff, SetDiffExt},
+        helpers::{ItemDiff, ItemDiffExt, SetDiff, SetDiffExt},
         error::Result,
         users::UserAuth,
         Identity,

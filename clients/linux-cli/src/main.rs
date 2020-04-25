@@ -1,5 +1,5 @@
 use futures::{executor::block_on, join, stream::StreamExt};
-use libqaul::{api::TagSet, messages::Mode, Qaul};
+use libqaul::{helpers::TagSet, messages::Mode, Qaul};
 use ratman::Router;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

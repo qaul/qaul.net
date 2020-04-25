@@ -1,10 +1,13 @@
 //! A set of API helpers
 
 mod subs;
-pub use subs::{SubId, Subscription};
+pub use subs::{Subscription, SubId};
 
 mod diff;
 pub use diff::{ItemDiff, ItemDiffExt, MapDiff, MapDiffExt, SetDiff, SetDiffExt};
+
+mod query;
+pub use query::QueryResult;
 
 /// A searchable metadata tag for messages and data files
 ///
@@ -16,10 +19,6 @@ pub use diff::{ItemDiff, ItemDiffExt, MapDiff, MapDiffExt, SetDiff, SetDiffExt};
 /// will be relevant to it's implementation, without having to teach
 /// libqaul about what they mean (for example `room-id` for
 /// `net.qaul.chat`).
-///
-/// Tags themselves are implemented by the `alexandria` storage
-/// library, and there's more documentation on how to use them below:
-///
-/// ---
-pub use alexandria::utils::Tag;
+pub type Tag = alexandria::utils::Tag;
+
 pub use alexandria::utils::TagSet;

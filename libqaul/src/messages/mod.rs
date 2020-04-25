@@ -9,7 +9,7 @@ pub(crate) use self::store::MsgStore;
 #[cfg(feature = "generate-message")]
 pub(crate) mod message_generation;
 
-use crate::{api::helpers::Tag, error::Result, security::Sec, users::UserStore};
+use crate::{error::Result, helpers::Tag, security::Sec, users::UserStore};
 use ratman::{netmod::Recipient as RatRecipient, Identity, Message as RatMessage, Router};
 use serde::{Deserialize, Serialize};
 

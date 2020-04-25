@@ -54,7 +54,7 @@ pub struct RequestEnv {
 /// this by running `cargo test json::print_sample_req -- --nocapture`
 #[test]
 fn print_sample_req() {
-    use libqaul::{api::Tag, messages::MsgQuery};
+    use libqaul::{helpers::Tag, messages::MsgQuery};
     println!(
         "{}",
         serde_json::to_string_pretty(&RequestEnv {

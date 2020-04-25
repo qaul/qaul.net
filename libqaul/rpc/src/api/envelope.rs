@@ -1,6 +1,6 @@
 use super::*;
 use libqaul::{
-    api::SubId,
+    helpers::SubId,
     contacts::ContactEntry,
     messages::{Message, MsgId, MsgRef},
     users::{UserAuth, UserProfile},

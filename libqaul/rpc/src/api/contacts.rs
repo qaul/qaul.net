@@ -3,7 +3,7 @@
 use crate::QaulRpc;
 use async_trait::async_trait;
 use libqaul::{
-    api::{ItemDiff, ItemDiffExt},
+    helpers::{ItemDiff, ItemDiffExt},
     contacts::{ContactEntry, ContactQuery},
     error::Result,
     users::UserAuth,
