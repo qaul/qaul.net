@@ -15,7 +15,7 @@ use std::collections::BTreeMap;
 use tide::{self, Request, Response};
 
 /// Convert the REST call to RPC
-pub async fn rest2rpc(mut r: Request<Arc<Responder>>, kind: &str, method: &str) -> Response {
+pub async fn rest2rpc(r: Request<Arc<Responder>>, kind: &str, method: &str) -> Response {
     rest2rpc_params(r, kind, method, None).await
 }
 
