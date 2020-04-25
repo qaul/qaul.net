@@ -1,19 +1,29 @@
 #![allow(unused)]
 
-use crate::messages::{Message, MsgId, SigTrust};
-use crate::qaul::Identity;
+use crate::{
+    helpers::TagSet,
+    messages::{Message, MsgId, SigTrust},
+    qaul::Identity,
+};
 use rand::distributions::{Distribution, Standard};
 use ratman::ID_LEN;
 
-/// A builder struct that can be used to generate any and all fields of a `Message`.
+/// A builder that can generate random messages with constraints
+///
+/// In some testing situations most fields of a message can be random,
+/// while others should be a discrete value that can be asserted on.
+/// This message builder generates random messages with given
+/// constraints.
 #[derive(Debug, Default, PartialEq)]
-pub struct MessageGenBuilder {
+pub struct MsgBuilder {
     /// The message ID
     id: Option<MsgId>,
     /// The sender identity
     sender: Option<Identity>,
     /// The embedded service associator
     associator: Option<String>,
+    /// The associated search tags
+    tags: Option<TagSet>,
     /// A raw byte `Message` payload
     payload: Option<Vec<u8>>,
     /// Attached `Message` signature, for all fields in a message
@@ -21,8 +31,8 @@ pub struct MessageGenBuilder {
     sign: Option<SigTrust>,
 }
 
-impl MessageGenBuilder {
-    /// Create an empty MessageGenBuilder that will create a totally randomized message.
+impl MsgBuilder {
+    /// Create an empty MsgBuilder
     pub fn new() -> Self {
         Default::default()
     }
@@ -52,18 +62,23 @@ impl MessageGenBuilder {
     }
 
     /// Set the signature (`SigAuth`) of the resulting message.
-    pub fn with_signature(mut self, signature: SigTrust) -> Self {
-        self.sign = Some(signature);
+    pub fn with_sign(mut self, sign: SigTrust) -> Self {
+        self.sign = Some(sign);
+        self
+    }
+
+    pub fn with_tags(mut self, tags: impl Into<TagSet>) -> Self {
+        self.tags = Some(tags.into());
         self
     }
 
     /// Create an iterator over an infinite sequence of `Message`s, with randomized
     /// or default fields for those not set on the `MessageGenBuilder`.
     pub fn messages(self) -> impl Iterator<Item = Message> {
-        MessageGenerator { mgb: self }
+        MsgGenerator { mgb: self }
     }
 
-    pub(crate) fn generate_message(&self) -> Message {
+    pub(crate) fn generate(&self) -> Message {
         let mut rng = rand::thread_rng();
         let sender = self.sender.clone().unwrap_or_else(|| {
             Identity::truncate(&Standard.sample_iter(rng).take(ID_LEN).collect())
@@ -74,11 +89,12 @@ impl MessageGenBuilder {
             .payload
             .clone()
             .unwrap_or_else(|| Standard.sample_iter(rng).take(1024).collect());
+        let tags = self.tags.clone().unwrap_or_default();
         Message {
             id,
             associator,
             sender,
-            tags: Default::default(),
+            tags,
             sign: self.sign.clone().unwrap_or(SigTrust::Unverified),
             payload,
         }
@@ -87,19 +103,19 @@ impl MessageGenBuilder {
 
 /// This structure, created by a `MessageGenBuilder`, generates an infinite stream of
 /// `Message`s.
-pub struct MessageGenerator {
-    mgb: MessageGenBuilder,
+pub struct MsgGenerator {
+    mgb: MsgBuilder,
 }
-impl Iterator for MessageGenerator {
+impl Iterator for MsgGenerator {
     type Item = Message;
 
     fn next(&mut self) -> Option<Message> {
-        Some(self.mgb.generate_message())
+        Some(self.mgb.generate())
     }
 }
 
 #[test]
 fn iter_messages_are_different() {
-    let mut iter = MessageGenBuilder::new().messages();
+    let mut iter = MsgBuilder::new().messages();
     assert!(iter.next() != iter.next());
 }
