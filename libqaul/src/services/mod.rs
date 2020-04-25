@@ -1,3 +1,5 @@
+//! Service inteface utilities
+
 use crate::{
     error::{Error, Result},
     messages::MsgRef,

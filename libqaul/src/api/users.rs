@@ -16,7 +16,7 @@ pub type Token = String;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct UserAuth(pub Identity, pub Token);
 
-/// API scope type to access user functions
+/// Local user data and session management
 ///
 /// Used entirely to namespace API endpoints on `Qaul` instance,
 /// without having long type identifiers.

@@ -2,7 +2,7 @@
 
 use crate::{error::Result, helpers::TagSet, services::MetadataMap, users::UserAuth, Qaul};
 
-/// API scope type to access service management functions
+/// Manage service sessions and related metadata
 ///
 /// Services are external applications using libqaul as a basis to
 /// communicate on a distributed network.  For a service to start

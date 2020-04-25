@@ -1,7 +1,7 @@
 use crate::{error::Result, users::UserAuth, Identity, Qaul};
 use serde::{Deserialize, Serialize};
 
-/// A user-local set of contact metadata in their contact book
+/// Per-user local contact access on the network
 ///
 /// All fields in this structure are entirely optional and can not be
 /// relied on. They are additional points of data, that a user can

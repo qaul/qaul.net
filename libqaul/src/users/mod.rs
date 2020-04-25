@@ -1,4 +1,4 @@
-//! User storage
+//! Local user and session types
 
 mod profile;
 mod store;

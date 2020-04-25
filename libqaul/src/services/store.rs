@@ -157,14 +157,14 @@ impl MetadataStore {
         Ok(())
     }
 
-    // #[tracing::instrument(skip(self), level = "debug")]
+    #[tracing::instrument(skip(self), level = "debug")]
     pub(crate) async fn delete(&self, user: Identity, service: String, key: String) {
         if let Err(e) = self
             .inner
             .delete(Session::Id(user), gen_path(&service, &key))
             .await
         {
-            // warn!("An error occured while deleting metadata: {}", e);
+            warn!("An error occured while deleting metadata: {}", e);
         }
     }
 

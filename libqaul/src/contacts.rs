@@ -1,4 +1,4 @@
-//! Contact books for users, storing the users they know about.
+//! Network user contact metadata and utilities
 //!
 //! Users' contact books exist as:
 //!

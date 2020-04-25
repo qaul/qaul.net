@@ -151,26 +151,7 @@ pub struct Message {
     pub payload: Vec<u8>,
 }
 
-/// API scope type to access messaging functions
-///
-/// Used entirely to namespace API endpoints on `Qaul` instance,
-/// without having long type identifiers.
-///
-/// ```norun
-/// # use libqaul::{Qaul, Messages};
-/// # let user = unimplemented!();
-/// let q = Qaul::default();
-/// q.messages().poll(user)?;
-/// ```
-///
-/// It's also possible to `drop` the current scope, back into the
-/// primary `Qaul` scope, although this is not often useful.
-///
-/// ```norun
-/// # use libqaul::{Qaul, Messages};
-/// # let q = Qaul::default();
-/// q.messages().drop(); // Returns `&Qaul` again
-/// ```
+/// Interface to access messages from the network
 pub struct Messages<'chain> {
     pub(crate) q: &'chain crate::Qaul,
 }

@@ -1,4 +1,4 @@
-//! Service API messaging primitives
+//! Network message types and utilities
 
 // Public exports
 pub use crate::api::messages::{Message, Mode, MsgId, MsgQuery, MsgRef, SigTrust, ID_LEN};

@@ -46,7 +46,7 @@ pub enum FileFilter {
     InProgress,
 }
 
-/// API scope type to access file functions
+/// Interface to access files from the network
 ///
 /// Used entirely to namespace API endpoints on `Qaul` instance,
 /// without having long type identifiers.
