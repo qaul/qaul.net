@@ -14,6 +14,7 @@ use crate::{
 };
 use async_std::sync::Arc;
 use std::collections::BTreeMap;
+use tracing::debug;
 
 /// Main data store (mirrored to /records)
 #[derive(Default)]
@@ -67,6 +68,7 @@ impl Store {
 
     /// Similar to `insert`, but useful to seed an entire record from
     /// individual diffs at the same time
+    #[tracing::instrument(skip(self, db, diffs), level = "debug")]
     pub(crate) fn batch(
         &mut self,
         db: &mut DeltaBuilder,
@@ -88,11 +90,14 @@ impl Store {
         let initial = diffs.remove(0);
 
         let mut rec = Record::create(tags, initial)?;
+        let rec_id = rec.header.id;
+        debug!("Created skeleton record `{}`", rec_id.to_string());
+        
         for d in ulterior {
             rec.apply(d)?;
         }
+        debug!("Applied diffs to skeleton record");
 
-        let rec_id = rec.header.id;
         let record = Notify::new(Encrypted::new(Arc::new(rec)));
         db.rec_id(rec_id);
 
@@ -105,6 +110,7 @@ impl Store {
     /// Insert a record into the store
     ///
     /// This operation will fail if the path already exists
+    #[tracing::instrument(skip(self, db, diff), level = "debug")]
     pub(crate) fn insert(
         &mut self,
         db: &mut DeltaBuilder,
@@ -124,6 +130,7 @@ impl Store {
         // Create a record
         let rec = Record::create(tags, diff)?;
         let rec_id = rec.header.id;
+        debug!("Seeded record `{}` from diff", rec_id);
         let record = Notify::new(Encrypted::new(Arc::new(rec)));
         db.rec_id(rec_id);
 
@@ -133,6 +140,7 @@ impl Store {
         Ok(rec_id)
     }
 
+    #[tracing::instrument(skip(self, db), level = "debug")]
     pub(crate) fn destroy(
         &mut self,
         db: &mut DeltaBuilder,
@@ -148,6 +156,7 @@ impl Store {
 
         // Check if the path GC is locked and mark to delete
         if let Some(GcReq { ref mut del, .. }) = self.gc_set_mut(id).get_mut(path) {
+            debug!("Marking path `{}` for future deletion", path);
             *del = true;
             return Ok(());
         }
@@ -155,11 +164,13 @@ impl Store {
         self.wake_tree(id, path);
         if let Ok(rec) = self.tree_mut(id).remove(path).unwrap().deref() {
             db.rec_id(rec.header.id);
+            debug!("Deleting record `{}` from store", rec.header.id);
         }
 
         Ok(())
     }
 
+    #[tracing::instrument(skip(self, db, diff), level = "debug")]
     pub(crate) fn update(
         &mut self,
         db: &mut DeltaBuilder,
@@ -195,6 +206,7 @@ impl Store {
     }
 
     /// Lock the GC for a set of paths
+    #[tracing::instrument(skip(self), level = "debug")]
     pub(crate) fn gc_lock(&mut self, paths: &Vec<(Path, Session)>) {
         paths.iter().for_each(|(path, id)| {
             self.gc_set_mut(*id).entry(path.clone()).or_default().ctr += 1;
@@ -202,6 +214,7 @@ impl Store {
     }
 
     /// Release the GC for a set of paths and delete them
+    #[tracing::instrument(skip(self), level = "debug")]
     pub(crate) fn gc_release(&mut self, paths: &Vec<(Path, Session)>) -> Result<()> {
         paths.iter().fold(Ok(()), |res, (path, id)| {
             if let Some(GcReq {

@@ -7,6 +7,7 @@ use crate::{
 
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
+use tracing::debug;
 
 /// Per-user encrypted tag storage
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -79,12 +80,17 @@ impl TagCache {
     }
 
     /// Insert a new path-tag mapping for a user
+    #[tracing::instrument(skip(self), level = "debug")]
     pub(crate) fn insert(&mut self, id: Session, path: Path, tag: Tag) -> Result<()> {
         let id = id.id().unwrap_or(self.id);
+        debug!("Inserting tag for session ID: `{}`", id);
 
         self.map
             .entry(id)
-            .or_insert(Encrypted::new(UserTags::new()))
+            .or_insert({
+                debug!("Creating new tag-cache page");
+                Encrypted::new(UserTags::new())
+            })
             .deref_mut()?
             .insert(tag, &path);
 
@@ -92,8 +98,11 @@ impl TagCache {
     }
 
     /// Delete a path from all tag mappings
+    #[tracing::instrument(skip(self), level = "debug")]
     pub(crate) fn delete_path(&mut self, id: Session, path: Path) -> Result<()> {
         let id = id.id().unwrap_or(self.id);
+        debug!("Deleting path `{}` for session ID: `{}`", path, id);
+
         if let Ok(entry) = self.map.get_mut(id) {
             entry.clear(&path);
         }
@@ -101,7 +110,8 @@ impl TagCache {
     }
 
     /// Get all paths associated with a tag
-    pub(crate) fn get_paths<'tags, F>(&self, id: Session, cond: F) -> Result<Vec<Path>>
+    #[tracing::instrument(skip(self, cond), level = "debug")]
+    pub(crate) fn get_paths<'tags, F>(&self, id: Session, cond: F) -> Vec<Path>
     where
         F: Fn(&TagSet) -> bool,
     {

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::fmt::{self, Display, Formatter};
 
 /// An in-database path segment
 ///
@@ -46,6 +47,12 @@ use serde::{Deserialize, Serialize};
 pub struct Path {
     leaf: String,
     seq: Vec<String>,
+}
+
+impl Display for Path {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", String::from(self))
+    }
 }
 
 impl From<&Path> for String {

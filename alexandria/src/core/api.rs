@@ -8,8 +8,9 @@ use crate::{
     store::Store,
     utils::{Diff, Id, Path, TagSet},
 };
-
 use async_std::sync::{Arc, RwLock};
+use std::fmt::Debug;
+use tracing::info;
 
 /// In-memory representation of an alexandria database
 ///
@@ -52,6 +53,7 @@ impl Library {
     }
 
     /// Similar to `insert`, but instead operating on a batch of Diffs
+    #[tracing::instrument(skip(self, data, tags), level = "info")]
     pub async fn batch<T, D>(&self, id: Session, path: Path, tags: T, data: Vec<D>) -> Result<Id>
     where
         T: Into<TagSet>,
@@ -59,6 +61,7 @@ impl Library {
     {
         if let Session::Id(id) = id {
             self.users.read().await.is_open(id)?;
+            info!("Passed open-auth for id `{}`", id.to_string());
         }
 
         let mut db = DeltaBuilder::new(id, DeltaType::Insert);
@@ -81,6 +84,8 @@ impl Library {
         drop(tc);
 
         self.subs.queue(db.make()).await;
+
+        info!("Batch insert succeeded");
         Ok(rec_id)
     }
 
@@ -88,13 +93,15 @@ impl Library {
     ///
     /// You need to have a valid and active user session to do so, and
     /// the `path` must be unique.
+    #[tracing::instrument(skip(self, data, tags), level = "info")]
     pub async fn insert<T, D>(&self, id: Session, path: Path, tags: T, data: D) -> Result<Id>
     where
         T: Into<TagSet>,
         D: Into<Diff>,
     {
-        if let Session::Id(id) = id {
+        if let Session::Id(id) = dbg!(id) {
             self.users.read().await.is_open(id)?;
+            info!("Passed open-auth for id `{}`", id.to_string());
         }
 
         let mut db = DeltaBuilder::new(id, DeltaType::Insert);
@@ -111,12 +118,16 @@ impl Library {
         drop(tc);
 
         self.subs.queue(db.make()).await;
+
+        info!("Record insert succeeded");
         Ok(rec_id)
     }
 
+    #[tracing::instrument(skip(self), level = "info")]
     pub async fn delete(&self, id: Session, path: Path) -> Result<()> {
         if let Session::Id(id) = id {
             self.users.read().await.is_open(id)?;
+            info!("Passed open-auth for id `{}`", id.to_string());
         }
 
         let mut db = DeltaBuilder::new(id, DeltaType::Delete);
@@ -130,16 +141,20 @@ impl Library {
         drop(tc);
 
         self.subs.queue(db.make()).await;
+
+        info!("Record delete succeeded");
         Ok(())
     }
 
     /// Update a record in-place
+    #[tracing::instrument(skip(self, diff), level = "info")]
     pub async fn update<D>(&self, id: Session, path: Path, diff: D) -> Result<()>
     where
         D: Into<Diff>,
     {
         if let Session::Id(id) = id {
             self.users.read().await.is_open(id)?;
+            info!("Passed open-auth for id `{}`", id.to_string());
         }
 
         let mut db = DeltaBuilder::new(id, DeltaType::Update);
@@ -149,6 +164,8 @@ impl Library {
         drop(store);
 
         self.subs.queue(db.make()).await;
+
+        info!("Record update succeeded");
         Ok(())
     }
 
@@ -208,13 +225,15 @@ impl Library {
     /// # Ok(()) }
     /// # async_std::task::block_on(async { foo().await }).unwrap();
     /// ```
+    #[tracing::instrument(skip(self), level = "info")]
     pub async fn query<S>(&self, id: S, q: Query) -> Result<QueryResult>
     where
-        S: Into<Session>,
+        S: Into<Session> + Debug,
     {
         let id = id.into();
         if let Session::Id(id) = id {
             self.users.read().await.is_open(id)?;
+            info!("Passed open-auth for id `{}`", id.to_string());
         }
 
         let store = self.store.read().await;
@@ -229,13 +248,10 @@ impl Library {
                     SetQuery::Equals(ref tags) => tc.get_paths(id, |o| o.equality(tags)),
                     SetQuery::Not(ref tags) => tc.get_paths(id, |o| o.not(tags)),
                 }
-                .map(|paths| {
-                    paths
-                        .iter()
-                        .map(|p| store.get_path(id, p))
-                        .collect::<Result<Vec<_>>>()
-                        .map(|vec| QueryResult::Many(vec))
-                })?
+                .iter()
+                .map(|p| store.get_path(id, p))
+                .collect::<Result<Vec<_>>>()
+                .map(|vec| QueryResult::Many(vec))
             }
             _ => unimplemented!(),
         }
@@ -291,13 +307,15 @@ impl Library {
     /// And a caveat worth mentioning: if the program aborts before
     /// the Iterator `drop` was able to run, the items will not be
     /// cleaned from disk and reloaded into cache on restart.
+    #[tracing::instrument(skip(self), level = "info")]
     pub async fn query_iter<S>(self: &Arc<Self>, id: S, q: Query) -> Result<QueryIterator>
     where
-        S: Into<Session>,
+        S: Into<Session> + Debug,
     {
         let id = id.into();
         if let Session::Id(id) = id {
             self.users.read().await.is_open(id)?;
+            info!("Passed open-auth for id `{}`", id.to_string());
         }
 
         Ok(QueryIterator::new(
@@ -307,17 +325,17 @@ impl Library {
                 Query::Tag(ref tq) => {
                     let tc = self.tag_cache.read().await;
                     match tq {
-                        SetQuery::Intersect(ref tags) => tc.get_paths(id, |o| tags.intersect(o))?,
+                        SetQuery::Intersect(ref tags) => tc.get_paths(id, |o| tags.intersect(o)),
                         SetQuery::Subset(ref tags) => {
                             // FIXME: I don't really know why this
                             // operation needs to be asymptotic, but
                             // some operations seem to be backwards?
                             // In either case, this works but we
                             // should figure out why this is.
-                            tc.get_paths(id, |o| tags.subset(o) || o.subset(tags))?
+                            tc.get_paths(id, |o| tags.subset(o) || o.subset(tags))
                         }
-                        SetQuery::Equals(ref tags) => tc.get_paths(id, |o| tags.equality(o))?,
-                        SetQuery::Not(ref tags) => tc.get_paths(id, |o| tags.not(o))?,
+                        SetQuery::Equals(ref tags) => tc.get_paths(id, |o| tags.equality(o)),
+                        SetQuery::Not(ref tags) => tc.get_paths(id, |o| tags.not(o)),
                     }
                 }
                 _ => unimplemented!(),
@@ -352,9 +370,15 @@ impl Library {
     /// let new_data = lib.query(GLOBAL, Query::Path(path)).await?;
     /// # Ok(()) }
     /// ```
-    pub async fn subscribe(&self, id: Session, q: Query) -> Result<Subscription> {
+    #[tracing::instrument(skip(self), level = "info")]
+    pub async fn subscribe<S>(&self, id: S, q: Query) -> Result<Subscription>
+    where
+        S: Into<Session> + Debug,
+    {
+        let id = id.into();
         if let Session::Id(id) = id {
             self.users.read().await.is_open(id)?;
+            info!("Passed open-auth for id `{}`", id.to_string());
         }
 
         Ok(self.subs.add_sub(q).await)
