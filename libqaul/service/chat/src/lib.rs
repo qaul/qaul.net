@@ -63,8 +63,8 @@ impl Chat {
     }
 
     /// Get all metadata about a specific room
-    pub fn get_room(&self, user: UserAuth, room: RoomId) -> Result<Room> {
-        unimplemented!()
+    pub async fn get_room(&self, user: UserAuth, room: RoomId) -> Result<Room> {
+        self.rooms.get(user, room).await.map(|r| Ok(r)).unwrap()
     }
 
     /// Start a new chat
