@@ -24,6 +24,7 @@ serde = { version = "1.0", features = [ "derive" ] }
 tempfile = { version = "3.0", optional = true }
 tracing = "0.1"
 tracing-futures = "0.2"
+netmod-mem = { path = "../netmod-mem", optional = true }
 
 [dev-dependencies]
 serde_json = "1.0"
@@ -33,4 +34,4 @@ tempfile = "3.0"
 [features]
 default = ["generate-message", "testing"]
 generate-message = []
-testing = ["tempfile"]
+testing = ["tempfile", "netmod-mem"]

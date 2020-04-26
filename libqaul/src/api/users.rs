@@ -13,7 +13,7 @@ pub type Token = String;
 /// This structure can be aquired by challenging an authentication
 /// endpoint, such as `User::login` to yield a token. If a session for
 /// this `Identity` already exists, it will be re-used.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct UserAuth(pub Identity, pub Token);
 
 /// Local user data and session management
@@ -70,7 +70,9 @@ impl<'qaul> Users<'qaul> {
         // Create user login
         self.q.users.create_local(keyd, pw).await;
         self.q.auth.set_pw(id, pw);
-        self.q.auth.new_login(id, pw).map(|t| UserAuth(id, t))
+        let auth = self.q.auth.new_login(id, pw).map(|t| UserAuth(id, t))?;
+        self.q.services.open_user(&auth).await;
+        Ok(auth)
     }
 
     /// Delete a local user from the auth store
@@ -99,15 +101,17 @@ impl<'qaul> Users<'qaul> {
     pub async fn login(&self, user: Identity, pw: &str) -> Result<UserAuth> {
         let token = self.q.auth.new_login(user, pw)?;
         self.q.router.online(user).await?;
-        Ok(UserAuth(user, token))
+        let auth = UserAuth(user, token);
+        self.q.services.open_user(&auth).await;
+        Ok(auth)
     }
 
     /// Drop the current session Token, invalidating it
     pub async fn logout(&self, user: UserAuth) -> Result<()> {
-        let (ref id, ref token) = self.q.auth.trusted(user)?;
-        // TODO: Stop discovery announcements
-        self.q.auth.logout(id, token)?;
+        let (ref id, ref token) = self.q.auth.trusted(user.clone())?;
+        self.q.services.close_user(&user).await;
         self.q.router.offline(*id).await?;
+        self.q.auth.logout(id, token)?;
         Ok(())
     }
 

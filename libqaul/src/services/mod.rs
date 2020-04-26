@@ -3,14 +3,12 @@
 use crate::{
     error::{Error, Result},
     messages::MsgRef,
-    utils::IterUtils,
+    users::UserAuth,
 };
 use alexandria::Library;
+use async_std::sync::{Arc, RwLock};
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::BTreeMap,
-    sync::{Arc, RwLock},
-};
+use std::collections::BTreeMap;
 
 mod store;
 pub use self::store::MetadataMap;
@@ -42,32 +40,27 @@ where
     }
 }
 
-pub(crate) type Listener = Arc<dyn Fn(MsgRef) -> Result<()> + Send + Sync>;
+/// Event type that can be sent to services to react to state changes
+pub enum ServiceEvent {
+    Open(UserAuth),
+    Close(UserAuth),
+}
+
+pub(crate) type Listener = Arc<dyn Fn(ServiceEvent) + Send + Sync>;
 
 /// A registered service, with a pre-made poll setup and listeners
-pub(crate) struct IntService {
-    callbacks: Arc<RwLock<Vec<Listener>>>,
-}
-
-impl IntService {
-    fn new() -> Self {
-        Self {
-            callbacks: Arc::new(RwLock::new(vec![])),
-        }
-    }
-}
 
 /// Keeps track of registered services and their callbacks
 #[derive(Clone)]
 pub(crate) struct ServiceRegistry {
-    inner: Arc<RwLock<BTreeMap<String, IntService>>>,
+    notify: Arc<RwLock<BTreeMap<String, Listener>>>,
     store: MetadataStore,
 }
 
 impl ServiceRegistry {
     pub(crate) fn new(library: Arc<Library>) -> Self {
         Self {
-            inner: Arc::new(RwLock::new(BTreeMap::new())),
+            notify: Arc::new(RwLock::new(BTreeMap::new())),
             store: MetadataStore::new(library),
         }
     }
@@ -77,45 +70,48 @@ impl ServiceRegistry {
         &self.store
     }
 
-    pub(crate) fn register(&self, name: String) -> Result<()> {
-        let mut inner = self.inner.write().expect("ServiceRegistry was poisoned");
-        if inner.contains_key(&name) {
+    /// Send an event to all services that a user has come online
+    pub(crate) async fn open_user(&self, auth: &UserAuth) {
+        self.notify
+            .read()
+            .await
+            .iter()
+            .for_each(|(_, fun)| fun(ServiceEvent::Open(auth.clone())));
+    }
+
+    /// Send an event to all services that a user has come online
+    pub(crate) async fn close_user(&self, auth: &UserAuth) {
+        self.notify
+            .read()
+            .await
+            .iter()
+            .for_each(|(_, fun)| fun(ServiceEvent::Close(auth.clone())));
+    }
+
+    pub(crate) async fn register<F: 'static>(&self, name: String, listen: F) -> Result<()>
+    where
+        F: Fn(ServiceEvent) + Send + Sync,
+    {
+        let mut map = self.notify.write().await;
+        if map.contains_key(&name) {
             Err(Error::ServiceExists)
         } else {
-            inner.insert(name, IntService::new());
+            map.insert(name, Arc::new(listen));
             Ok(())
         }
     }
 
     /// Check if a service was registered before
-    pub(crate) fn check(&self, name: &String) -> Result<()> {
-        self.inner
+    pub(crate) async fn check(&self, name: &String) -> Result<()> {
+        self.notify
             .read()
-            .unwrap()
+            .await
             .get(name)
             .map_or(Err(Error::NoService), |_| Ok(()))
     }
 
-    pub(crate) fn unregister(&self, name: String) -> Result<()> {
-        let mut inner = self.inner.write().expect("ServiceRegistry was poisoned");
-        inner
-            .remove(&name)
-            .map_or(Err(Error::NoService), |_| Ok(()))
-    }
-
-    /// Push a Message out to all listener endpoints and pollers
-    pub(crate) fn push_for(&self, service: String, msg: MsgRef) -> Result<()> {
-        self.inner
-            .read()
-            .expect("ServiceRegistry was poisoned")
-            .get(&service)
-            .map_or(Err(Error::NoService), |srv| {
-                srv.callbacks
-                    .read()
-                    .expect("Service callbacks were poisoned")
-                    .iter()
-                    .map(|cb| cb(msg.clone()))
-                    .fold_errs(Error::CommFault)
-            })
+    pub(crate) async fn unregister(&self, name: String) -> Result<()> {
+        let mut map = self.notify.write().await;
+        map.remove(&name).map_or(Err(Error::NoService), |_| Ok(()))
     }
 }

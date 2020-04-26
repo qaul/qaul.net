@@ -1,6 +1,12 @@
 //! Service interconnect interface
 
-use crate::{error::Result, helpers::TagSet, services::MetadataMap, users::UserAuth, Qaul};
+use crate::{
+    error::Result,
+    helpers::TagSet,
+    services::{MetadataMap, ServiceEvent},
+    users::UserAuth,
+    Qaul,
+};
 
 /// Manage service sessions and related metadata
 ///
@@ -40,8 +46,11 @@ impl<'qaul> Services<'qaul> {
     /// Names of services need to be unique, so it's advised to
     /// namespace them on some other key, for example the application
     /// package name (such as `com.example.myapp`)
-    pub fn register<S: Into<String>>(&self, name: S) -> Result<()> {
-        self.q.services.register(name.into())
+    pub async fn register<S: Into<String>, F: 'static>(&self, name: S, cb: F) -> Result<()>
+    where
+        F: Fn(ServiceEvent) + Send + Sync,
+    {
+        self.q.services.register(name.into(), cb).await
     }
 
     /// Remove an external service from the qaul service registry
@@ -52,8 +61,8 @@ impl<'qaul> Services<'qaul> {
     ///
     /// Will return `Error::NoService` if no such service name could
     /// be found.
-    pub fn unregister<S: Into<String>>(&self, name: S) -> Result<()> {
-        self.q.services.unregister(name.into())
+    pub async fn unregister<S: Into<String>>(&self, name: S) -> Result<()> {
+        self.q.services.unregister(name.into()).await
     }
 
     /// Save some piece of metadata, for a particular user and service
@@ -76,7 +85,7 @@ impl<'qaul> Services<'qaul> {
     {
         let serv = service.into();
         let (id, _) = self.q.auth.trusted(user)?;
-        self.q.services.check(&serv)?;
+        self.q.services.check(&serv).await?;
         self.q
             .services
             .store()
@@ -95,7 +104,7 @@ impl<'qaul> Services<'qaul> {
     {
         let serv = service.into();
         let (id, _) = self.q.auth.trusted(user)?;
-        self.q.services.check(&serv)?;
+        self.q.services.check(&serv).await?;
         self.q.services.store().delete(id, serv, key.into()).await;
         Ok(())
     }
@@ -112,7 +121,7 @@ impl<'qaul> Services<'qaul> {
     {
         let serv = service.into();
         let (id, _) = self.q.auth.trusted(user)?;
-        self.q.services.check(&serv)?;
+        self.q.services.check(&serv).await?;
         Ok(self.q.services.store().query(id, serv, tags.into()).await)
     }
 }

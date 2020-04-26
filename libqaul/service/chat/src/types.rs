@@ -86,6 +86,24 @@ pub struct Room {
     pub create_time: DateTime<Utc>,
 }
 
+impl Room {
+    pub(crate) fn apply(&mut self, diff: &RoomDiff) {
+        diff.users.iter().for_each(|change| {
+            match change {
+                SetDiff::Add(id) => self.users.insert(*id),
+                SetDiff::Remove(id) => self.users.remove(id),
+                SetDiff::Ignore => false,
+            };
+        });
+
+        match &diff.name {
+            ItemDiff::Set(name) => self.name = Some(name.clone()),
+            ItemDiff::Unset => self.name = None,
+            ItemDiff::Ignore => {}
+        }
+    }
+}
+
 /// A set of changes made to a room
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RoomDiff {

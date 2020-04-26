@@ -34,7 +34,6 @@ impl Filesharing {
     /// In order to initialise, a valid and running
     /// `Qaul` reference needs to be provided.
     pub fn new(qaul: Arc<Qaul>) -> Result<Self> {
-        qaul.services().register(ASC_NAME)?;
         Ok(Self { qaul })
     }
 

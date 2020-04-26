@@ -1,33 +1,50 @@
 use crate::Identity;
-use async_std::{
-    future::Future,
-    pin::Pin,
-    stream::Stream,
-    sync::Receiver,
-    task::{Context, Poll},
+use alexandria::{
+    query::{Query, QueryResult, Subscription as Sub},
+    record::RecordRef,
+    Library, Session,
 };
+use async_std::sync::Arc;
+use std::marker::PhantomData;
 
 /// A unique, randomly generated subscriber ID
 pub type SubId = Identity;
 
 /// A generic subscription which can stream data from libqaul
-///
-/// Each subscription has a unique ID that can later on be used to
-/// cancel the stream.  This type also allows for stream manipulation,
-/// for example throttling throughput, or only taking a subset.
-pub struct Subscription<T> {
-    /// The subscription ID
-    pub id: SubId,
-    /// The subscription reveicer that get's polled
-    pub(crate) rx: Receiver<T>,
+pub struct Subscription<T>
+where
+    T: From<RecordRef>,
+{
+    store: Arc<Library>,
+    session: Session,
+    inner: Sub,
+    _none: PhantomData<T>,
 }
 
-impl<T> Subscription<T> {}
+impl<T> Subscription<T>
+where
+    T: From<RecordRef>,
+{
+    pub(crate) fn new(store: &Arc<Library>, session: Session, inner: Sub) -> Self {
+        Self {
+            store: Arc::clone(store),
+            session,
+            inner,
+            _none: PhantomData,
+        }
+    }
 
-impl<T> Stream for Subscription<T> {
-    type Item = T;
-
-    fn poll_next(mut self: Pin<&mut Self>, ctx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        unsafe { Pin::new_unchecked(&mut self.rx.recv()) }.poll(ctx)
+    /// Poll for the next return from the subscription
+    pub async fn next(&self) -> T {
+        let path = self.inner.next().await;
+        match self
+            .store
+            .query(self.session, Query::path(path))
+            .await
+            .unwrap()
+        {
+            QueryResult::Single(rec) => rec.into(),
+            _ => unreachable!(),
+        }
     }
 }

@@ -1,7 +1,7 @@
 //! Internal message store wrapper
 
 use crate::{
-    helpers::QueryResult,
+    helpers::{QueryResult, Subscription},
     messages::{Message, Mode, MsgQuery, MsgRef},
     services::Service,
     Identity,
@@ -125,6 +125,31 @@ impl MsgStore {
 
         glb.merge(usr).unwrap();
         QueryResult::new(glb)
+    }
+
+    pub(crate) async fn subscribe(
+        &self,
+        user: Identity,
+        service: Service,
+        tags: TagSet,
+    ) -> Subscription<Message> {
+        Subscription::new(
+            &self.inner,
+            Session::Id(user),
+            self.inner
+                .subscribe(
+                    Session::Id(user),
+                    Query::tags().subset(
+                        match service {
+                            Service::Name(s) => service_tag(s).into(),
+                            Service::God => TagSet::empty(),
+                        }
+                        .merge(tags),
+                    ),
+                )
+                .await
+                .unwrap(),
+        )
     }
 }
 

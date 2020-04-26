@@ -6,13 +6,17 @@ use directory::RoomDirectory;
 mod msg;
 mod protocol;
 mod utils;
+mod worker;
 
 mod types;
 pub(crate) use types::RoomState;
 pub use types::{ChatMessage, Room, RoomDiff, RoomId, RoomMeta};
 
-use async_std::sync::Arc;
-use libqaul::{error::Result, users::UserAuth, Identity, Qaul};
+use async_std::{
+    sync::{Arc, Sender},
+    task,
+};
+use libqaul::{error::Result, services::ServiceEvent, users::UserAuth, Identity, Qaul};
 use std::collections::BTreeMap;
 
 const ASC_NAME: &'static str = "net.qaul.chat";
@@ -35,10 +39,26 @@ pub struct Chat {
 
 impl Chat {
     /// Create a new chat service instance
-    pub fn new(qaul: Arc<Qaul>) -> Result<Arc<Self>> {
-        qaul.services().register(ASC_NAME)?;
+    pub async fn new(qaul: Arc<Qaul>) -> Result<Arc<Self>> {
         let rooms = Arc::new(RoomDirectory::new(Arc::clone(&qaul)));
-        Ok(Arc::new(Self { qaul, rooms }))
+        let this = Arc::new(Self { qaul, rooms });
+
+        // Register the service event handle
+        let sender = Arc::new(worker::run_asnc(Arc::clone(&this)));
+        this.qaul
+            .services()
+            .register(ASC_NAME, move |cmd| {
+                let sender = Arc::clone(&sender);
+                task::block_on(async move {
+                    match cmd {
+                        ServiceEvent::Open(auth) => sender.send(worker::Command::Start(auth)).await,
+                        ServiceEvent::Close(auth) => sender.send(worker::Command::Stop(auth)).await,
+                    }
+                })
+            })
+            .await?;
+
+        Ok(this)
     }
 
     /// Get a list of available room metadata for a user

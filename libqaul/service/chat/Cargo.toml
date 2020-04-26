@@ -6,7 +6,7 @@ edition = "2018"
 license = "AGPL-3.0"
 
 [dependencies]
-libqaul = { path = "../../" }
+libqaul = { path = "../../", features = ["testing"] }
 files = { path = "../files", package = "qaul-files" }
 
 async-std = "1.0"
@@ -14,3 +14,8 @@ chrono = { version = "0.4", features = ["serde"] }
 conjoiner = { version = "1.2", package = "conjoiner-engine" }
 futures = "0.3"
 serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+netmod-mem = { path = "../../../netmod-mem" }
+ratman = { path = "../../../ratman" }
+tempfile = "3.0"

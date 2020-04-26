@@ -1,4 +1,4 @@
-use crate::{tags, Room, RoomId, ASC_NAME};
+use crate::{tags, Room, RoomDiff, RoomId, ASC_NAME};
 use async_std::sync::Arc;
 use conjoiner;
 use libqaul::{helpers::Tag, services::MetadataMap, users::UserAuth, Qaul};
@@ -57,6 +57,14 @@ impl RoomDirectory {
                     .add(room.id.to_string(), conjoiner::serialise(room).unwrap()),
                 Tag::empty(tags::ROOM_LIST),
             )
-            .await;
+            .await
+            .unwrap();
+    }
+
+    /// Apply a diff to a room
+    pub(crate) async fn apply_diff(&self, user: UserAuth, diff: &RoomDiff) {
+        let mut room = self.get(user.clone(), diff.id).await.unwrap();
+        room.apply(diff);
+        self.insert(user, &room).await;
     }
 }

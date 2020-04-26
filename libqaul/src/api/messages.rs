@@ -245,17 +245,22 @@ impl<'qaul> Messages<'qaul> {
     }
 
     /// Subscribe to a stream of future message updates
-    pub fn subscribe<S, T>(
+    pub async fn subscribe<S, T>(
         &self,
-        _user: UserAuth,
-        _service: S,
-        _tags: T,
+        user: UserAuth,
+        service: S,
+        tags: T,
     ) -> Result<Subscription<Message>>
     where
         S: Into<Service>,
-        T: IntoIterator<Item = Tag>,
+        T: Into<TagSet>,
     {
-        unimplemented!()
+        let (id, _) = self.q.auth.trusted(user)?;
+        Ok(self
+            .q
+            .messages
+            .subscribe(id, service.into(), tags.into())
+            .await)
     }
 
     /// Query for messages in the store, according to some parameters

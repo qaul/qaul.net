@@ -42,7 +42,7 @@
 //! When receiving a message for a room ID where the sender is not in
 //! the room: discard.
 
-use crate::{Chat, Room, RoomDiff, RoomId, RoomState};
+use crate::{Chat, ChatMessage, Room, RoomDiff, RoomId, RoomState};
 use async_std::sync::Arc;
 use chrono::Utc;
 use libqaul::{helpers::ItemDiff, users::UserAuth, Identity};
@@ -89,24 +89,53 @@ impl Room {
         RoomState::Create(room)
     }
 
-    /// Add room, update room list, return RoomState for message
-    pub(crate) async fn add_name(
-        self,
-        serv: Arc<Chat>,
-        user: UserAuth,
-        name: impl Into<String>,
-    ) -> RoomState {
-        let name = name.into();
-        let new = Self {
-            name: Some(name.clone()),
-            ..self
-        };
-        serv.rooms.insert(user, &new).await;
+    // /// Add room, update room list, return RoomState for message
+    // pub(crate) async fn add_name(
+    //     self,
+    //     serv: Arc<Chat>,
+    //     user: UserAuth,
+    //     name: impl Into<String>,
+    // ) -> RoomState {
+    //     let name = name.into();
+    //     let new = Self {
+    //         name: Some(name.clone()),
+    //         ..self
+    //     };
+    //     serv.rooms.insert(user, &new).await;
 
-        RoomState::Diff(RoomDiff {
-            id: self.id,
-            users: vec![],
-            name: ItemDiff::Set(name),
-        })
+    //     RoomState::Diff(RoomDiff {
+    //         id: self.id,
+    //         users: vec![],
+    //         name: ItemDiff::Set(name),
+    //     })
+    // }
+
+    /// Handle an incoming message
+    ///
+    /// This can be one of four states as outlined in the module docs:
+    ///
+    /// - Id: normal chat message, no actions needed
+    /// - Create: insert the provided room
+    /// - Confirm: set the room metadata to confirmed by sender
+    /// - Diff: apply the diff to the room
+    ///
+    /// In cases `Create` and `Diff` a Confirm will be generated
+    pub(crate) async fn handle(
+        serv: &Arc<Chat>,
+        user: UserAuth,
+        msg: &ChatMessage,
+    ) -> Option<RoomState> {
+        match msg.room {
+            RoomState::Id(_) => None,
+            RoomState::Create(ref room) => {
+                serv.rooms.insert(user, room).await;
+                Some(RoomState::Confirm(room.id, msg.id))
+            }
+            RoomState::Confirm(_, _) => None, // TODO: set state confirmed
+            RoomState::Diff(ref diff) => {
+                serv.rooms.apply_diff(user, diff).await;
+                Some(RoomState::Confirm(diff.id, msg.id))
+            }
+        }
     }
 }

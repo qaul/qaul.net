@@ -64,7 +64,6 @@ impl Discovery {
                 qaul.messages
                     .insert_remote(recp, Arc::clone(&msg))
                     .await;
-                qaul.services.push_for(associator, msg).unwrap();
                 info!("Finished processing incoming message!");
             }
         });

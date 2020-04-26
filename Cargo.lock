@@ -1159,6 +1159,7 @@ dependencies = [
  "futures 0.3.4",
  "hex",
  "mime",
+ "netmod-mem",
  "rand 0.7.3",
  "ratman",
  "serde",
@@ -1689,8 +1690,11 @@ dependencies = [
  "conjoiner-engine",
  "futures 0.3.4",
  "libqaul",
+ "netmod-mem",
  "qaul-files",
+ "ratman",
  "serde",
+ "tempfile",
 ]
 
 [[package]]
