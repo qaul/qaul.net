@@ -1,20 +1,17 @@
 use super::*;
 use libqaul::{
-    helpers::SubId,
     contacts::ContactEntry,
+    helpers::SubId,
     messages::{Message, MsgId, MsgRef},
     users::{UserAuth, UserProfile},
     Identity,
 };
 
-#[feature(chat)]
-use qaul_chat::{
-    room::{Room, RoomId},
-    Chat, ChatMessage,
-};
+#[cfg(feature = "chat")]
+use qaul_chat::{Chat, ChatMessage, Room, RoomId};
 
-#[feature(voices)]
-use qaul_voices::api::{CallId, IncomingCall, StreamMetadata, CallStatus};
+#[cfg(feature = "voices")]
+use qaul_voices::api::{CallId, CallStatus, IncomingCall, StreamMetadata};
 
 use serde::{Deserialize, Serialize};
 use std::{error::Error, fmt::Display};
@@ -45,7 +42,7 @@ pub enum Request {
 
     /// Query the chat message store
     #[cfg(feature = "chat")]
-    ChatMsgQuery,
+    ChatLoadRoom(chat::messages::Get),
 
     /// List all available chat rooms
     #[cfg(feature = "chat")]
@@ -57,15 +54,7 @@ pub enum Request {
 
     /// Create a new chat room
     #[cfg(feature = "chat")]
-    ChatRoomCreate(chat::rooms::Create),
-
-    /// Modify a chat room
-    #[cfg(feature = "chat")]
-    ChatRoomModify(chat::rooms::Modify),
-
-    /// Delete a chat room
-    #[cfg(feature = "chat")]
-    ChatRoomDelete(chat::rooms::Delete),
+    ChatStart(chat::rooms::StartChat),
 
     /// Modify a user's contact
     ContactModify(contacts::Modify),
@@ -81,12 +70,6 @@ pub enum Request {
 
     /// Send a raw libqaul message
     MsgSend(messages::Send),
-
-    /// Create a subscription for raw libqaul messages
-    MsgSub(messages::Subscribe),
-
-    /// Query existing raw libqaul messages
-    MsgQuery(messages::Query),
 
     /// List all available users
     UserList(users::List),
@@ -210,11 +193,11 @@ pub enum Response {
     #[cfg(feature = "voices")]
     IncomingCall(IncomingCall),
 
-    /// Metadata about a voice stream 
+    /// Metadata about a voice stream
     #[cfg(feature = "voices")]
     StreamMetadata(StreamMetadata),
 
-    /// The status of a call 
+    /// The status of a call
     #[cfg(feature = "voices")]
     CallStatus(CallStatus),
 

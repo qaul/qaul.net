@@ -61,24 +61,18 @@ impl From<RequestEnv> for Envelope<Request> {
             id,
             data: match (kind.as_str(), method.as_str()) {
                 // chat service message functions
-                // #[cfg(feature = "chat")]
-                // ("chat-messages", "subscribe") => Request::ChatMsgSub(de_json(data, auth)),
+                #[cfg(feature = "chat")]
+                ("chat-messages", "subscribe") => Request::ChatMsgSub(de_json(data, auth)),
                 #[cfg(feature = "chat")]
                 ("chat-messages", "create") => Request::ChatMsgSend(de_json(data, auth)),
-                //#[cfg(feature = "chat")]
-                //("chat-messages", "query") => Request::ChatMsgQuery(de_json(data, auth)),
-
-                // chat service room management
+                #[cfg(feature = "chat")]
+                ("chat-rooms", "query") => Request::ChatLoadRoom(de_json(data, auth)),
                 #[cfg(feature = "chat")]
                 ("chat-rooms", "list") => Request::ChatRoomList(de_json(data, auth)),
                 #[cfg(feature = "chat")]
                 ("chat-rooms", "get") => Request::ChatRoomGet(de_json(data, auth)),
                 #[cfg(feature = "chat")]
-                ("chat-rooms", "create") => Request::ChatRoomCreate(de_json(data, auth)),
-                #[cfg(feature = "chat")]
-                ("chat-rooms", "modify") => Request::ChatRoomModify(de_json(data, auth)),
-                #[cfg(feature = "chat")]
-                ("chat-rooms", "delete") => Request::ChatRoomDelete(de_json(data, auth)),
+                ("chat-rooms", "create") => Request::ChatStart(de_json(data, auth)),
 
                 // libqaul contact functions
                 ("contacts", "list") => Request::ContactAll(de_json(data, auth)),

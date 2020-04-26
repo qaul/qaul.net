@@ -5,10 +5,10 @@ pub mod files;
 pub mod messages;
 pub mod users;
 
-#[feature(chat)]
+#[cfg(feature = "chat")]
 pub mod chat;
 
-#[feature(voices)]
+#[cfg(feature = "voices")]
 pub mod voices;
 
 mod envelope;

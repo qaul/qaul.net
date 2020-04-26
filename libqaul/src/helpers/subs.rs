@@ -35,7 +35,7 @@ where
     }
 
     /// Poll for the next return from the subscription
-    pub async fn next(&self) -> T {
+    pub async fn next(&self) -> Option<T> {
         let path = self.inner.next().await;
         match self
             .store
@@ -43,8 +43,8 @@ where
             .await
             .unwrap()
         {
-            QueryResult::Single(rec) => rec.into(),
-            _ => unreachable!(),
+            QueryResult::Single(rec) => Some(rec.into()),
+            _ => None,
         }
     }
 }

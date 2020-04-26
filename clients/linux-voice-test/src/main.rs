@@ -51,7 +51,7 @@ async fn run() {
 
     let dir = tempfile::tempdir().unwrap();
     let qaul = Qaul::new(router, dir.path());
-    qaul.services().register("HELLO").unwrap();
+    qaul.services().register("HELLO", |_| {}).await.unwrap();
 
     let user = qaul.users().create("test").await.unwrap();
 

@@ -60,7 +60,7 @@ async fn service_store_query() -> Result<()> {
     let q = harness();
     let auth = q.users().create("car horse battery staple").await?;
     let serv = "net.qaul._test";
-    q.services().register(serv)?;
+    q.services().register(serv, |_| {}).await?;
     q.services()
         .save(
             auth.clone(),
@@ -77,30 +77,24 @@ async fn service_store_query() -> Result<()> {
     Ok(())
 }
 
-
 #[async_std::test]
 async fn service_delete() -> Result<()> {
     let q = harness();
     let auth = q.users().create("car horse battery staple").await?;
     let serv = "net.qaul._test";
     let data = MetadataMap::new("cool-data");
-    q.services().register(serv)?;
+    q.services().register(serv, |_| {}).await?;
     q.services()
-        .save(
-            auth.clone(),
-            serv,
-            data.clone(),
-            TagSet::empty(),
-        )
+        .save(auth.clone(), serv, data.clone(), TagSet::empty())
         .await?;
 
     q.services().delete(auth.clone(), serv, "cool-data").await?;
 
-    let query = q.services()
+    let query = q
+        .services()
         .query(auth.clone(), serv, TagSet::empty())
         .await?;
-    
+
     assert_eq!(query.len(), 0);
     Ok(())
 }
-

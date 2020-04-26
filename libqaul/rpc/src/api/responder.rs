@@ -40,7 +40,7 @@ impl Responder {
         R: ChatRpc<Response = T> + Send + Sync,
         T: Send + Sync,
     {
-        self.chat.apply(request).await
+        (&self.chat).apply(request).await
     }
 
     #[cfg(feature = "chat")]
@@ -69,20 +69,16 @@ impl Responder {
             Request::ChatMsgSend(r) => self.respond_chat(r).await.into(),
 
             // =^-^= Chat Rooms =^-^=
-            #[cfg(feature = "chat")]
-            Request::ChatRoomList(r) => Response::RoomId(self.respond_chat(r).await),
+            //#[cfg(feature = "chat")]
+            //Request::ChatRoomList(r) => self.respond_chat(r).await.into(),
             #[cfg(feature = "chat")]
             Request::ChatRoomGet(r) => self.respond_chat(r).await.into(),
             #[cfg(feature = "chat")]
-            Request::ChatRoomCreate(r) => self
+            Request::ChatStart(r) => self
                 .respond_chat(r)
                 .await
                 .map(|id| Response::RoomId(vec![id]))
                 .unwrap_or_else(|e| Response::Error(e.to_string())),
-            #[cfg(feature = "chat")]
-            Request::ChatRoomModify(r) => self.respond_chat(r).await.into(),
-            #[cfg(feature = "chat")]
-            Request::ChatRoomDelete(r) => self.respond_chat(r).await.into(),
 
             // =^-^= Contacts =^-^=
             Request::ContactModify(r) => self.respond_qaul(r).await.into(),
@@ -113,7 +109,6 @@ impl Responder {
                 Ok(id) => Response::MsgId(id),
                 Err(e) => Response::Error(e.to_string()),
             },
-            Request::MsgQuery(r) => self.respond_qaul(r).await.into(),
 
             // =^-^= Users =^-^=
             Request::UserList(r) => self.respond_qaul(r).await.into(),

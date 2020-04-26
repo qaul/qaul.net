@@ -98,8 +98,8 @@ async fn user_delete() {
     use qaul_voices::Voices;
 
     let qaul = Arc::new(Qaul::dummy());
-    let chat = Chat::new(qaul.clone()).unwrap();
-    let voices = Voices::new(qaul.clone()).unwrap();
+    let chat = Chat::new(qaul.clone()).await.unwrap();
+    let voices = Voices::new(qaul.clone()).await.unwrap();
     let auth = block_on(qaul.users().create("blep")).unwrap();
     assert_eq!(qaul.users().list().await.len(), 1);
 

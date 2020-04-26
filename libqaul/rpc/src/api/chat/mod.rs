@@ -1,4 +1,6 @@
-use {async_trait::async_trait, qaul_chat::Chat};
+use async_std::sync::Arc;
+use async_trait::async_trait;
+use qaul_chat::Chat;
 
 pub mod messages;
 pub mod rooms;
@@ -13,7 +15,7 @@ pub trait ChatExt {
 }
 
 #[async_trait]
-impl ChatExt for Chat {
+impl<'a> ChatExt for &'a Arc<Chat> {
     async fn apply<R, T>(&self, r: T) -> R
     where
         R: Send + Sync,
@@ -27,5 +29,5 @@ impl ChatExt for Chat {
 #[async_trait]
 pub trait ChatRpc {
     type Response;
-    async fn apply(self, chat: &Chat) -> Self::Response;
+    async fn apply(self, chat: &Arc<Chat>) -> Self::Response;
 }

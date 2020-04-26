@@ -10,10 +10,11 @@ async fn create_room() -> Result<()> {
     let ua = net.a.users().create("abc").await?;
     let ub = net.a.users().create("acab").await?;
 
-    let chat_a = Chat::new(Arc::clone(&net.a))?;
+    let chat_a = Chat::new(Arc::clone(&net.a)).await?;
+    let chat_b = Chat::new(Arc::clone(&net.b)).await?;
+
     chat_a.start_chat(ua.clone(), vec![ub.0]).await?;
 
-    let chat_b = Chat::new(Arc::clone(&net.b))?;
-
+    assert_eq!(chat_b.rooms(ub).await.unwrap().len(), 1);
     Ok(())
 }

@@ -1,14 +1,15 @@
-use futures::{executor::block_on, join, stream::StreamExt};
-use libqaul::{helpers::TagSet, messages::Mode, Qaul};
+use futures::join;
+use libqaul::{error::Result, helpers::TagSet, messages::Mode, Qaul};
 use ratman::Router;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[async_std::main]
+async fn main() -> Result<()> {
     let r = Router::new();
     // TDOD: Add network drivers
 
     let dir = tempfile::tempdir().unwrap();
     let q = Qaul::new(r, dir.path());
-    let user = block_on(async { q.users().create("password").await })?;
+    let user = q.users().create("password").await?;
 
     let msg = q.messages();
     let send = msg.send(
@@ -18,11 +19,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         TagSet::empty(),
         vec![1, 2, 3, 4],
     );
-    let mut subscriber = msg.subscribe(user, "de.spacekookie.myapp", None)?;
+    let subscriber = msg
+        .subscribe(user, "de.spacekookie.myapp", TagSet::empty())
+        .await?;
 
-    block_on(async { join!(send, subscriber.next(),) })
-        .0
-        .unwrap();
-
+    join!(send, subscriber.next(),).0.unwrap();
     Ok(())
 }

@@ -45,8 +45,8 @@ pub struct Voices {
 }
 
 impl Voices {
-    pub fn new(qaul: Arc<Qaul>) -> Result<Arc<Self>> {
-        qaul.services().register(ASC_NAME)?;
+    pub async fn new(qaul: Arc<Qaul>) -> Result<Arc<Self>> {
+        qaul.services().register(ASC_NAME, |_| {}).await?;
         Ok(Arc::new(Self {
             calls: Arc::new(Mutex::new(BTreeMap::new())),
             qaul,
@@ -69,15 +69,19 @@ impl Voices {
         res
     }
 
-    fn start_call(&self, id: CallId, auth: UserAuth) -> Result<()> {
-        let mut subscription = self.qaul.messages().subscribe(
-            auth.clone(),
-            ASC_NAME,
-            vec![
-                Tag::new("call_id", id.clone()),
-                Tag::new("kind", b"packet".to_vec()),
-            ],
-        )?;
+    async fn start_call(&self, id: CallId, auth: UserAuth) -> Result<()> {
+        let mut subscription = self
+            .qaul
+            .messages()
+            .subscribe(
+                auth.clone(),
+                ASC_NAME,
+                vec![
+                    Tag::new("call_id", id.clone()),
+                    Tag::new("kind", b"packet".to_vec()),
+                ],
+            )
+            .await?;
         let voices = self.clone();
         // the connector taking incoming messages and turning them into packets
         task::spawn(async move {

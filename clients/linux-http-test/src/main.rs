@@ -6,7 +6,8 @@ use {
     qaul_voices::Voices,
 };
 
-fn main() {
+#[async_std::main]
+async fn main() {
     let assets = match env::args().nth(1) {
         Some(p) => p,
         None => {
@@ -19,8 +20,8 @@ fn main() {
     let rat = Router::new();
     let dir = tempfile::tempdir().unwrap();
     let qaul = Qaul::new(rat, dir.path());
-    let chat = Chat::new(Arc::clone(&qaul)).unwrap();
-    let voices = Voices::new(Arc::clone(&qaul)).unwrap();
+    let chat = Chat::new(Arc::clone(&qaul)).await.unwrap();
+    let voices = Voices::new(Arc::clone(&qaul)).await.unwrap();
 
     // print the path to the static
     println!("Path to static web content: {}", assets);

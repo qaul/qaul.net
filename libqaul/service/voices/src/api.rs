@@ -177,7 +177,7 @@ impl Voices {
                 (state, res)
             })
             .await?;
-        self.start_call(call.clone(), auth.clone())?;
+        self.start_call(call.clone(), auth.clone()).await?;
         VoiceMessage {
             call,
             kind: VoiceMessageKind::Accept(metadata),

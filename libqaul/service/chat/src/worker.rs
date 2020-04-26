@@ -55,25 +55,24 @@ pub(crate) async fn run_user(user: UserAuth, serv: Arc<Chat>, run: RunMap) {
         .unwrap();
 
     while run.read().await.contains(&user) {
-        let msg = sub.next().await;
-        let chat_msg: ChatMessage = msg.into();
-        println!("Handling incoming text message in service worker");
+        if let Some(msg) = sub.next().await {
+            let chat_msg: ChatMessage = msg.into();
+            println!("Handling incoming text message in service worker");
 
-        // If we get a room state back, we send a reply message
-        if let Some(rs) = Room::handle(&serv, user.clone(), &chat_msg).await {
-            let friends = serv.rooms.get(user.clone(), rs.id()).await.unwrap().users;
-            let room_id = rs.id();
-            msg::dispatch_to(
-                &serv,
-                user.clone(),
-                friends,
-                msg::gen_payload("", rs),
-                room_id,
-            )
-            .await
-            .unwrap();
-
-            // TODO: Notify subscribers
+            // If we get a room state back, we send a reply message
+            if let Some(rs) = Room::handle(&serv, user.clone(), &chat_msg).await {
+                let friends = serv.rooms.get(user.clone(), rs.id()).await.unwrap().users;
+                let room_id = rs.id();
+                msg::dispatch_to(
+                    &serv,
+                    user.clone(),
+                    friends,
+                    msg::gen_payload("", rs),
+                    room_id,
+                )
+                .await
+                .unwrap();
+            }
         }
     }
 }

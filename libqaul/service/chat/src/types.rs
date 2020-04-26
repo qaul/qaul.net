@@ -123,6 +123,6 @@ pub struct Subscription {
 impl Subscription {
     /// Get the next chat message
     pub async fn next(&self) -> ChatMessage {
-        self.inner.next().await.into()
+        self.inner.next().await.unwrap().into()
     }
 }

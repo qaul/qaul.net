@@ -64,7 +64,7 @@ impl Chat {
     /// The data returned is not comprehensive but considered enough
     /// to render a list of available rooms with how many messages
     /// they have available each.
-    pub async fn rooms(self: Arc<Chat>, user: UserAuth) -> Result<Vec<RoomMeta>> {
+    pub async fn rooms(self: &Arc<Chat>, user: UserAuth) -> Result<Vec<RoomMeta>> {
         let msgs = msg::unread(&self, user.clone()).await?;
         let rooms = utils::room_map(self.rooms.get_all(user).await);
 

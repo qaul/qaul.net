@@ -1,98 +1,53 @@
-use {
-    super::ChatRpc,
-    async_trait::async_trait,
-    libqaul::{
-        helpers::{ItemDiff, ItemDiffExt, SetDiff, SetDiffExt},
-        error::Result,
-        users::UserAuth,
-        Identity,
-    },
-    qaul_chat::{
-        room::{Room, RoomId},
-        Chat,
-    },
-    serde::{Deserialize, Serialize},
+use super::ChatRpc;
+use async_std::sync::Arc;
+use async_trait::async_trait;
+use libqaul::{
+    error::Result,
+    helpers::{ItemDiff, ItemDiffExt, SetDiff, SetDiffExt},
+    users::UserAuth,
+    Identity,
 };
+use qaul_chat::{Chat, Room, RoomId, RoomMeta};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
-pub struct List;
+pub struct List {
+    auth: UserAuth,
+}
 
 #[async_trait]
 impl ChatRpc for List {
-    type Response = Vec<RoomId>;
-    async fn apply(self, chat: &Chat) -> Self::Response {
-        chat.rooms().list().await
+    type Response = Result<Vec<RoomMeta>>;
+    async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
+        chat.rooms(self.auth).await
     }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Get {
     id: RoomId,
+    auth: UserAuth,
 }
 
 #[async_trait]
 impl ChatRpc for Get {
-    type Response = Room;
-    async fn apply(self, chat: &Chat) -> Self::Response {
-        chat.rooms().get(self.id).await
+    type Response = Result<Room>;
+    async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
+        chat.get_room(self.auth, self.id).await
     }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
-pub struct Create {
+pub struct StartChat {
     auth: UserAuth,
     #[serde(default)]
     users: Vec<Identity>,
 }
 
 #[async_trait]
-impl ChatRpc for Create {
+impl ChatRpc for StartChat {
     type Response = Result<RoomId>;
-    async fn apply(self, chat: &Chat) -> Self::Response {
-        chat.rooms().create(self.auth, self.users).await
-    }
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
-pub struct Modify {
-    auth: UserAuth,
-    id: RoomId,
-    #[serde(default)]
-    users: Vec<SetDiff<Identity>>,
-    #[serde(default)]
-    name: ItemDiff<String>,
-}
-
-#[async_trait]
-impl ChatRpc for Modify {
-    type Response = Result<()>;
-    async fn apply(self, chat: &Chat) -> Self::Response {
-        let Modify {
-            auth,
-            id,
-            users,
-            name,
-        } = self;
-        chat.rooms()
-            .modify(auth, id, move |room| {
-                name.apply(&mut room.name);
-                room.users.apply(users);
-                Ok(())
-            })
-            .await
-    }
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
-pub struct Delete {
-    auth: UserAuth,
-    id: RoomId,
-}
-
-#[async_trait]
-impl ChatRpc for Delete {
-    type Response = Result<()>;
-    async fn apply(self, chat: &Chat) -> Self::Response {
-        chat.rooms().delete(self.auth, self.id).await
+    async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
+        chat.start_chat(self.auth, self.users).await
     }
 }
