@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use libqaul::{
-    helpers::{ItemDiff, SetDiff},
-    messages::MsgId,
+    helpers::{ItemDiff, SetDiff, Subscription as Sub},
+    messages::{Message, MsgId},
     Identity,
 };
 use serde::{Deserialize, Serialize};
@@ -113,4 +113,16 @@ pub struct RoomDiff {
     pub users: Vec<SetDiff<Identity>>,
     /// Changes to room name
     pub name: ItemDiff<String>,
+}
+
+/// A subscription handler that pushes out updates
+pub struct Subscription {
+    pub(crate) inner: Sub<Message>,
+}
+
+impl Subscription {
+    /// Get the next chat message
+    pub async fn next(&self) -> ChatMessage {
+        self.inner.next().await.into()
+    }
 }

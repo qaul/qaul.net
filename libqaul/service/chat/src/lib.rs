@@ -5,17 +5,15 @@ use directory::RoomDirectory;
 
 mod msg;
 mod protocol;
+mod subs;
 mod utils;
 mod worker;
 
 mod types;
 pub(crate) use types::RoomState;
-pub use types::{ChatMessage, Room, RoomDiff, RoomId, RoomMeta};
+pub use types::{ChatMessage, Room, RoomDiff, RoomId, RoomMeta, Subscription};
 
-use async_std::{
-    sync::{Arc, Sender},
-    task,
-};
+use async_std::{sync::Arc, task};
 use libqaul::{error::Result, services::ServiceEvent, users::UserAuth, Identity, Qaul};
 use std::collections::BTreeMap;
 
@@ -123,17 +121,16 @@ impl Chat {
     }
 
     /// Subscribe to push updates for a particular room
-    pub async fn subscribe(&self, auth: UserAuth, room: RoomId) -> Result<()> {
-        unimplemented!()
-    }
-
-    /// Stop receiving push updates for a room
-    pub async fn unsubscribe(&self, auth: UserAuth, room: RoomId) -> Result<()> {
-        unimplemented!()
+    pub async fn subscribe(self: &Arc<Self>, user: UserAuth, room: RoomId) -> Result<Subscription> {
+        msg::subscribe_for(self, user, room).await
     }
 
     /// Get all messages from a room
-    pub fn get_messages(&self, user: UserAuth, room: RoomId) -> Result<Vec<ChatMessage>> {
-        unimplemented!()
+    pub async fn load_messages(
+        self: &Arc<Self>,
+        user: UserAuth,
+        room: RoomId,
+    ) -> Result<Vec<ChatMessage>> {
+        msg::fetch_for(self, user, room).await
     }
 }

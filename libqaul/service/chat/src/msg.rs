@@ -1,6 +1,6 @@
 //! A helper to deal with unread counts and messages
 
-use crate::{tags, Chat, ChatMessage, RoomId, RoomState, ASC_NAME};
+use crate::{tags, Chat, ChatMessage, RoomId, RoomState, Subscription, ASC_NAME};
 use async_std::sync::Arc;
 use chrono::Utc;
 use conjoiner::{deserialise, serialise};
@@ -76,4 +76,33 @@ pub(crate) async fn dispatch_to(
     }
 
     Ok(())
+}
+
+pub(crate) async fn subscribe_for(
+    serv: &Arc<Chat>,
+    user: UserAuth,
+    room: RoomId,
+) -> Result<Subscription> {
+    let inner = serv
+        .qaul
+        .messages()
+        .subscribe(user, ASC_NAME, tags::room_id(room))
+        .await?;
+    Ok(Subscription { inner })
+}
+
+pub(crate) async fn fetch_for(
+    serv: &Arc<Chat>,
+    user: UserAuth,
+    room: RoomId,
+) -> Result<Vec<ChatMessage>> {
+    serv.qaul
+        .messages()
+        .query(user, ASC_NAME, MsgQuery::new().tag(tags::room_id(room)))
+        .await?
+        .all()
+        .await?
+        .into_iter()
+        .map(|msg| Ok(msg.into()))
+        .collect()
 }
