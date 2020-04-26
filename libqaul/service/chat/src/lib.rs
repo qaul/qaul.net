@@ -18,8 +18,12 @@ use std::collections::BTreeMap;
 const ASC_NAME: &'static str = "net.qaul.chat";
 
 pub(crate) mod tags {
+    use {crate::RoomId, libqaul::helpers::Tag};
     pub(crate) const _META_NAME: &'static str = "room_list";
     pub(crate) const ROOM_LIST: &'static str = "net.qaul.chat.room_list";
+    pub(crate) fn room_id(id: RoomId) -> Tag {
+        Tag::new("room-id", id.as_bytes().to_vec())
+    }
 }
 
 /// Messaging service state
@@ -68,13 +72,34 @@ impl Chat {
     }
 
     /// Start a new chat
-    pub fn start_chat(&self, user: UserAuth, friends: Vec<Identity>) -> Result<RoomId> {
-        unimplemented!()
+    pub async fn start_chat(
+        self: &Arc<Self>,
+        user: UserAuth,
+        friends: Vec<Identity>,
+    ) -> Result<RoomId> {
+        let friends = friends.into_iter().collect();
+
+        if let Some(id) = Room::check(self, user.clone(), &friends).await {
+            return Ok(id);
+        }
+
+        let room = Room::create(self, user.clone(), friends.clone(), None).await;
+        let room_id = room.id();
+        let payload = msg::gen_payload("", room);
+        msg::dispatch_to(self, user, friends, payload, room_id).await?;
+        Ok(room_id)
     }
 
     /// Send a normal chat message to a room
-    pub fn send_message(&self, user: UserAuth, room: RoomId, content: String) -> Result<()> {
-        unimplemented!()
+    pub async fn send_message(
+        self: &Arc<Self>,
+        user: UserAuth,
+        room: RoomId,
+        content: String,
+    ) -> Result<()> {
+        let friends = self.rooms.get(user.clone(), room).await.unwrap().users;
+        let payload = msg::gen_payload(content, Room::resume(room));
+        msg::dispatch_to(self, user, friends, payload, room).await
     }
 
     /// Subscribe to push updates for a particular room

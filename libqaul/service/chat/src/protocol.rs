@@ -49,9 +49,31 @@ use libqaul::{helpers::ItemDiff, users::UserAuth, Identity};
 use std::collections::BTreeSet;
 
 impl Room {
+    pub(crate) async fn check(
+        serv: &Arc<Chat>,
+        user: UserAuth,
+        friends: &BTreeSet<Identity>,
+    ) -> Option<RoomId> {
+        let all = serv.rooms.get_all(user.clone()).await;
+        all.into_iter().fold(None, |val, room| {
+            val.or_else(|| {
+                if &room.users == friends {
+                    Some(room.id)
+                } else {
+                    None
+                }
+            })
+        })
+    }
+
+    /// Continue a conversation in a room
+    pub(crate) fn resume(id: RoomId) -> RoomState {
+        RoomState::Id(id)
+    }
+
     /// Create room, update room list, return RoomState for message
     pub(crate) async fn create(
-        serv: Arc<Chat>,
+        serv: &Arc<Chat>,
         user: UserAuth,
         users: BTreeSet<Identity>,
         name: Option<String>,
