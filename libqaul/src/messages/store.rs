@@ -14,7 +14,7 @@ use alexandria::{
 use async_std::sync::Arc;
 
 pub(crate) const TAG_FLOOD: &'static str = "libqaul._int.flood";
-pub(crate) const TAG_READ: &'static str = "libqaul._int.read";
+pub(crate) const TAG_UNREAD: &'static str = "libqaul._int.unread";
 pub(crate) const TAG_SENDER: &'static str = "libqaul._int.sender";
 pub(crate) const TAG_SERVICE: &'static str = "libqaul._int.service";
 
@@ -42,11 +42,11 @@ impl MsgStore {
 
     /// Insert a message that was sent locally
     ///
-    /// This message will be marked as "read" immediately, and
-    /// inserted into either the user or global store, depending on
-    /// wether it was a Flooded message.
+    /// This message will not be marked with "unread", and inserted
+    /// into either the user or global store, depending on wether it
+    /// was a Flooded message.
     pub(crate) async fn insert_local(&self, user: Identity, msg: MsgRef, mode: Mode) {
-        let mut tags = msg.tags.clone().merge(Tag::empty(TAG_READ));
+        let mut tags = msg.tags.clone();
         tags.insert(sender_tag(user));
         tags.insert(service_tag(msg.associator.clone()));
 
@@ -68,10 +68,10 @@ impl MsgStore {
     /// Insert a message captured from the network
     ///
     /// The primary difference to `insert_local()` is that the
-    /// inserted message will not be marked as "read" and can be
+    /// inserted message will be marked as "unread" and can be
     /// retrieved via the "unread messages" query.
     pub(crate) async fn insert_remote(&self, recipient: Option<Identity>, msg: MsgRef) {
-        let mut tags = msg.tags.clone();
+        let mut tags = msg.tags.clone().merge(Tag::empty(TAG_UNREAD));
         tags.insert(sender_tag(msg.sender));
         tags.insert(service_tag(msg.associator.clone()));
 

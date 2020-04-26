@@ -1,7 +1,7 @@
 use crate::{
     error::{Error, Result},
     helpers::{QueryResult, Subscription, Tag, TagSet},
-    messages::{Envelope, MsgUtils, RatMessageProto},
+    messages::{Envelope, MsgUtils, RatMessageProto, TAG_UNREAD},
     qaul::{Identity, Qaul},
     services::Service,
     users::UserAuth,
@@ -120,6 +120,11 @@ impl MsgQuery {
     pub fn tag(mut self, t: Tag) -> Self {
         self.tags.insert(t);
         self
+    }
+
+    /// A convenience function for addding the "unread" tag
+    pub fn unread(self) -> Self {
+        self.tag(Tag::empty(TAG_UNREAD))
     }
 }
 

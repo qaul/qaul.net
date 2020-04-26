@@ -65,4 +65,13 @@ where
 
         Ok(vec)
     }
+
+    /// Take all elements from this result set at once
+    pub async fn all(&self) -> Result<Vec<T>> {
+        let mut vec = vec![];
+        while let Ok(Some(rec)) = self.inner.next().await {
+            vec.push(rec.into());
+        }
+        Ok(vec)
+    }
 }
