@@ -16,18 +16,18 @@ use std::collections::BTreeSet;
 /// into the message.  The chat service API returns this
 /// representation when sending a message, but manages rooms via a
 /// separate interface.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ChatMessage {
     /// Unique message ID
     pub id: MsgId,
     /// Message sender ID
     pub sender: Identity,
-    /// Embedded or linked  information
-    room: RoomState,
     /// The timestamp at which the message was received (in utc)
     pub timestamp: DateTime<Utc>,
     /// Text payload
     pub content: String,
+    /// Embedded or linked  information
+    pub(crate) room: RoomState,
 }
 
 /// A unique identifier for a room
@@ -38,20 +38,32 @@ pub type RoomId = Identity;
 /// The room diff should be embedded into a message when updates are
 /// sent across a room, or new people are invited (new invites get a
 /// create, everyone else gets a Diff
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) enum RoomState {
     /// A simple chat message just needs the Room ID
     Id(RoomId),
     /// When creating a room while sending the first message
     Create(Room),
     /// A simple confirmation for receiving a particular command
-    Confirm(MsgId),
+    Confirm(RoomId, MsgId),
     /// Changes made to a room
     Diff(RoomDiff),
 }
 
+impl RoomState {
+    /// Get the room ID from the RoomState state-machine
+    pub(crate) fn id(&self) -> RoomId {
+        match self {
+            Self::Id(id) => *id,
+            Self::Create(r) => r.id,
+            Self::Confirm(id, _) => *id,
+            Self::Diff(d) => d.id,
+        }
+    }
+}
+
 /// Some metadata for indexing rooms
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RoomMeta {
     /// Room ID
     pub id: Identity,
@@ -62,7 +74,7 @@ pub struct RoomMeta {
 }
 
 /// Abstraction over a chat room
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Room {
     /// The room ID
     pub id: RoomId,
@@ -75,7 +87,7 @@ pub struct Room {
 }
 
 /// A set of changes made to a room
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RoomDiff {
     /// Associated room ID
     pub id: RoomId,

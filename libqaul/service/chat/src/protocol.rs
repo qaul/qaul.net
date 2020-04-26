@@ -42,4 +42,49 @@
 //! When receiving a message for a room ID where the sender is not in
 //! the room: discard.
 
+use crate::{Chat, Room, RoomDiff, RoomId, RoomState};
+use async_std::sync::Arc;
+use chrono::Utc;
+use libqaul::{helpers::ItemDiff, users::UserAuth, Identity};
+use std::collections::BTreeSet;
 
+impl Room {
+    /// Create room, update room list, return RoomState for message
+    pub(crate) async fn create(
+        serv: Arc<Chat>,
+        user: UserAuth,
+        users: BTreeSet<Identity>,
+        name: Option<String>,
+    ) -> RoomState {
+        let room = Self {
+            id: RoomId::random(),
+            users,
+            name,
+            create_time: Utc::now(),
+        };
+
+        serv.rooms.insert(user, &room).await;
+        RoomState::Create(room)
+    }
+
+    /// Add room, update room list, return RoomState for message
+    pub(crate) async fn add_name(
+        self,
+        serv: Arc<Chat>,
+        user: UserAuth,
+        name: impl Into<String>,
+    ) -> RoomState {
+        let name = name.into();
+        let new = Self {
+            name: Some(name.clone()),
+            ..self
+        };
+        serv.rooms.insert(user, &new).await;
+
+        RoomState::Diff(RoomDiff {
+            id: self.id,
+            users: vec![],
+            name: ItemDiff::Set(name),
+        })
+    }
+}
