@@ -16,3 +16,4 @@ tide = { version = "0.6", features = ["unstable"] }
 #tide-naive-static-files = "2.2.0"
 tide-naive-static-files = { path = "../tide-naive-static-files" }
 futures = "0.3.4"
+mime = "0.3.16"

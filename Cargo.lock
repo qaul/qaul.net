@@ -1177,6 +1177,7 @@ dependencies = [
  "futures 0.3.4",
  "libqaul",
  "libqaul-rpc",
+ "mime",
  "serde_json",
  "tide",
  "tide-naive-static-files",

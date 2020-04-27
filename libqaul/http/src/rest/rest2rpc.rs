@@ -10,6 +10,7 @@ use libqaul_rpc::{
     json::{JsonAuth, JsonMap, RequestEnv, ResponseEnv},
     Envelope, Responder,
 };
+use mime::APPLICATION_JSON;
 use serde_json;
 use std::collections::BTreeMap;
 use tide::{self, Request, Response};
@@ -27,13 +28,18 @@ pub async fn rest2rpc_params(
     uri_params: Option<Vec<&str>>,
 ) -> Response {
     // get Authorization from header
-    // TODO: Error handling when JSON is malformed
     let auth: Option<JsonAuth> = match r.header("Authorization") {
         None => None,
         Some(s) => {
-            let json_auth: JsonAuth =
-                serde_json::from_str(s).expect("Malformed json in authentication header");
-            Some(json_auth)
+            if let Ok(json_auth) = serde_json::from_str(s) {
+                Some(json_auth)
+            } else {
+                return Response::new(400)
+                    .body_string(
+                        "{\"Error\":\"Malformed json in authentication header\"}".to_string(),
+                    )
+                    .set_mime(APPLICATION_JSON);
+            }
         }
     };
 
@@ -53,7 +59,9 @@ pub async fn rest2rpc_params(
             if let Ok(x) = r.param(v) {
                 data.insert(v.to_string(), serde_json::Value::String(x));
             } else {
-                // TODO: return HTTP error
+                // return Response::new(400)
+                //     .body_string("{\"Error\":\"URI parameter parsing error.\"}".to_string())
+                //     .set_mime(APPLICATION_JSON);
             }
         });
     }
