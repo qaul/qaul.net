@@ -36,9 +36,66 @@ impl HttpServer {
             .nest(rpc::rpc_routes(rpc_state));
 
         // static file handler for the webui, assumes the webui exists
-        app.at("/")
-            .strip_prefix() // needed for static file server to function correctly
-            .get(StaticEp { root: path.into() });
+        let fav_path = path.clone();
+        let mut assets_path = path.clone();
+        assets_path.push_str("/assets");
+        let feed_path = path.clone();
+        let feed_path_2 = path.clone();
+        let messenger_path = path.clone();
+        let messenger_path_2 = path.clone();
+        let users_path = path.clone();
+        let users_path_2 = path.clone();
+        let files_path = path.clone();
+        let files_path_2 = path.clone();
+        let settings_path = path.clone();
+        let settings_path_2 = path.clone();
+        let info_path = path.clone();
+        let info_path_2 = path.clone();
+
+        app.at("/").get(StaticEp { root: path.into() });
+        app.at("/favicon.ico").get(StaticEp {
+            root: fav_path.into(),
+        });
+        app.at("/assets/").strip_prefix().get(StaticEp {
+            root: assets_path.into(),
+        });
+        // WebGUI virtual routes
+        app.at("/feed").strip_prefix().get(StaticEp {
+            root: feed_path.into(),
+        });
+        app.at("/feed/*").strip_prefix().get(StaticEp {
+            root: feed_path_2.into(),
+        });
+        app.at("/messenger").strip_prefix().get(StaticEp {
+            root: messenger_path.into(),
+        });
+        app.at("/messenger/*").strip_prefix().get(StaticEp {
+            root: messenger_path_2.into(),
+        });
+        app.at("/users").strip_prefix().get(StaticEp {
+            root: users_path.into(),
+        });
+        app.at("/users/*").strip_prefix().get(StaticEp {
+            root: users_path_2.into(),
+        });
+        app.at("/files").strip_prefix().get(StaticEp {
+            root: files_path.into(),
+        });
+        app.at("/files/*").strip_prefix().get(StaticEp {
+            root: files_path_2.into(),
+        });
+        app.at("/settings").strip_prefix().get(StaticEp {
+            root: settings_path.into(),
+        });
+        app.at("/settings/*").strip_prefix().get(StaticEp {
+            root: settings_path_2.into(),
+        });
+        app.at("/info").strip_prefix().get(StaticEp {
+            root: info_path.into(),
+        });
+        app.at("/info/*").strip_prefix().get(StaticEp {
+            root: info_path_2.into(),
+        });
 
         task::block_on(async move { app.listen(addr).await }).unwrap();
     }
