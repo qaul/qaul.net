@@ -14,30 +14,27 @@ export default class RegisterController extends Controller {
   async register(event) {
     event.preventDefault();
 
-    const secretRequest = await fetch('/api/secrets', {
+    const createUserResponse = await fetch('/rest/users', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/vnd.api+json' },
       body: JSON.stringify({
-        data: {
-          type: 'secret',
-          attributes: { value: this.password }
-        }
-      })
+        pw: this.password,
+      }),
     });
-
-    if(secretRequest.status !== 201) {
-      throw "can not create secret";
+    if(createUserResponse.status < 200 || createUserResponse.status > 300) {
+      console.error("Error while creating a user: " + createUserResponse.status, await createUserResponse.text());
+      return;
     }
+    const { auth } = await createUserResponse.json();
+    const token = auth.token;
+    const userId = auth.id.replace(/ /g, '');
 
-    const secretData = await secretRequest.json();
-    const userId = secretData.data.relationships.user.data.id;
-
-    await this.session.authenticate('authenticator:qaul', userId, this.password);
+    await this.session.authenticate('authenticator:qaul', userId, token);
 
     const user = await this.store.findRecord('user', userId);
-    user.realName = this.realName;
-    user.displayName = this.displayName,
+    debugger;
+    // user.realName = this.realName;
+    // user.displayName = this.displayName,
 
-    await user.save();
+    // await user.save();
   }
 }
