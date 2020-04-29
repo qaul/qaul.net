@@ -9,7 +9,10 @@ export default class ApplicationAdapter extends RESTAdapter {
   get headers() {
     if(this.session.isAuthenticated) {
       return {
-        Authorization: `{"id":"${this.session.data.authenticated.id}","token":"${this.session.data.authenticated.token}"}`,
+        Authorization: JSON.stringify({
+          id: this.session.data.authenticated.id,
+          token: this.session.data.authenticated.token,
+        }),
       }
     }
 
