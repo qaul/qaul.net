@@ -31,12 +31,16 @@ export default class ApplicationAdapter extends RESTAdapter {
     return {};
   }
 
-  updateRecord(store, type, snapshot) {
+  async updateRecord(store, type, snapshot) {
     const data = serializeIntoHash(store, type, snapshot, {});
 
     let id = snapshot.id;
     let url = this.buildURL(type.modelName, id, snapshot, 'updateRecord');
 
-    return this.ajax(url, 'PATCH', { data });
+    const response = await this.ajax(url, 'PATCH', { data });
+    if(response === "success") {
+      return undefined;
+    }
+    return response;
   }
 }
