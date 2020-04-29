@@ -1,0 +1,12 @@
+[package]
+name = "ratman-harness"
+description = "A testing harness for applications that use ratman networks in memory"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+
+[dependencies]
+arbitrary = "*"
+ratman = { path = ".." }
+netmod-mem = { path = "../../netmod-mem" }
+tempfile = "3.0"

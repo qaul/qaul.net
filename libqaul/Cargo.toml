@@ -8,8 +8,6 @@ edition = "2018"
 
 [dependencies]
 alexandria = { version = "0.2", path = "../alexandria" }
-ratman = { path = "../ratman" }
-
 async-std = { version = "1.0", features = ["attributes", "unstable"] }
 base64 = "0.10"
 blake2 = "0.8"
@@ -19,16 +17,18 @@ ed25519-dalek = "1.0.0-pre.3"
 futures = "0.3"
 hex = "0.4"
 mime = "0.3"
+netmod-mem = { path = "../netmod-mem", optional = true }
 rand = "0.7"
+ratman = { path = "../ratman" }
 serde = { version = "1.0", features = [ "derive" ] }
 tempfile = { version = "3.0", optional = true }
 tracing = "0.1"
 tracing-futures = "0.2"
-netmod-mem = { path = "../netmod-mem", optional = true }
 
 [dev-dependencies]
-serde_json = "1.0"
 bincode = "1.0"
+ratman-harness = { path = "../ratman/harness" }
+serde_json = "1.0"
 tempfile = "3.0"
 
 [features]

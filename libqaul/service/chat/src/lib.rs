@@ -71,7 +71,7 @@ impl Chat {
         Ok(msgs
             .into_iter()
             .fold(BTreeMap::new(), |mut map, msg| {
-                let room_id = msg.room.id();
+                let room_id = dbg!(msg).room.id();
                 *map.entry(room_id).or_default() += 1;
                 map
             })
