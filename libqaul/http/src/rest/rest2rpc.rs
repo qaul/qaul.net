@@ -95,10 +95,5 @@ pub async fn rest2rpc_params(
         _ => 200,
     };
 
-    let env = Envelope { id, data: resp };
-
-    // Build the reply envelope
-    let resp_env: ResponseEnv = (env, rpc_req).into();
-
-    Response::new(return_code).body_json(&resp_env).unwrap()
+    Response::new(return_code).body_json(&resp).unwrap()
 }
