@@ -16,11 +16,12 @@ curl -i  \
             \"display_name\": {
 				\"set\": \"testuser\"
 			},
-            \"real_name\": \"unset\"
+            \"realname\": \"unset\"
         },
         \"auth\": {
             \"id\":\"$QAUL_ID\",
             \"token\":\"$QAUL_TOKEN\"
         }
     }" \
-    "http://127.0.0.1:9900/api"
+    "http://127.0.0.1:9900/rpc"
+
