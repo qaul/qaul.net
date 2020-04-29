@@ -1,12 +1,12 @@
-import JSONAPISerializer from '@ember-data/serializer/json-api';
+import JSONSerializer from '@ember-data/serializer/json';
 import { underscore } from '@ember/string';
-import { singularize } from 'ember-inflector';
 
-export default class ApplicationSerializer extends JSONAPISerializer {
+export default class ApplicationSerializer extends JSONSerializer {
   keyForAttribute(attr) {
     return underscore(attr);
   }
-  payloadKeyFromModelName(modelName) {
-    return singularize(modelName);
+  normalizeSingleResponse (store, primaryModelClass, payload, id, requestType) {
+    // we convert from { user: [ { ...data... } ] } to { ...data... }
+    return super.normalizeSingleResponse(store, primaryModelClass, payload[primaryModelClass.modelName][0], id, requestType);
   }
 }
