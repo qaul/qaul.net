@@ -47,7 +47,7 @@ impl Protocol {
     /// Dispatch a task to announce a user periodically
     pub(crate) async fn online(self: Arc<Self>, id: Identity, core: Arc<Core>) -> Result<()> {
         let mut map = self.online.lock().await;
-        if map.contains_key(&id) {
+        if map.get(&id).map(|arc| arc.load(Ordering::Relaxed)) == Some(true) {
             return Err(Error::DuplicateUser);
         }
 
