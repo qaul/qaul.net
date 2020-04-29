@@ -97,7 +97,7 @@ impl QaulRpc for ChangePw {
 /// Create a new session for a user
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct Login {
-    user: Identity,
+    id: Identity,
     pw: String,
 }
 
@@ -105,7 +105,7 @@ pub struct Login {
 impl QaulRpc for Login {
     type Response = Result<UserAuth>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users().login(self.user, &self.pw).await
+        qaul.users().login(self.id, &self.pw).await
     }
 }
 

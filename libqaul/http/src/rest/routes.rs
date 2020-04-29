@@ -15,7 +15,7 @@ pub fn rest_routes(rest_state: Arc<Responder>) -> Server<Arc<Responder>> {
     // authentication
     app_rest
         .at("/login")
-        .get(|req| async move { rest2rpc::rest2rpc(req, "users", "login").await });
+        .post(|req| async move { rest2rpc::rest2rpc(req, "users", "login").await });
     app_rest
         .at("/logout")
         .get(|req| async move { rest2rpc::rest2rpc(req, "users", "logout").await });
