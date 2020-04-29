@@ -31,10 +31,10 @@ export default class RegisterController extends Controller {
     await this.session.authenticate('authenticator:qaul', userId, token);
 
     const user = await this.store.findRecord('user', userId);
-    debugger;
-    // user.realName = this.realName;
-    // user.displayName = this.displayName,
 
-    // await user.save();
+    user.realName = this.realName;
+    user.displayName = this.displayName,
+
+    await user.save();
   }
 }
