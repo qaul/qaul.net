@@ -1,5 +1,7 @@
 import RESTAdapter from '@ember-data/adapter/rest';
 import { inject as service } from '@ember/service';
+import { dasherize } from '@ember/string';
+import { pluralize } from 'ember-inflector';
 
 function serializeIntoHash(store, modelClass, snapshot, options = { includeId: true }) {
   const serializer = store.serializerFor(modelClass.modelName);
@@ -29,6 +31,10 @@ export default class ApplicationAdapter extends RESTAdapter {
     }
 
     return {};
+  }
+
+  pathForType(modelName) {
+    return pluralize(dasherize(modelName)).replace(/-/g, '/');
   }
 
   async updateRecord(store, type, snapshot) {

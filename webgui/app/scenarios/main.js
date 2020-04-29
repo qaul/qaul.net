@@ -15,7 +15,7 @@ export default class extends Scenario {
       //   this.mockFindRecord('user').returns({ id });
       // })
     this.mockFindAll('file', 15);
-    this.mockFindAll('chat-room', 10);
+    // this.mockFindAll('chat-room', 10);
 
     // for(let i = 0; i < 15; i++) {
     this.mockFindRecord('chat-room'); // seems not to work?
