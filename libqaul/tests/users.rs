@@ -56,3 +56,19 @@ async fn change_pw() {
         .change_pw(auth, "new and better password")
         .unwrap();
 }
+
+#[async_std::test]
+async fn logout_login() {
+    let net = harness::init().await;
+
+    // Create a user
+    let auth = net.a().users().create("abcdefg").await.unwrap();
+    let id = auth.0;
+    assert_eq!(net.a().users().list().await.len(), 1);
+
+    // Yield user session
+    net.a().users().logout(auth).await.unwrap();
+
+    // Login again
+    net.a().users().login(id, "abcdefg").await.unwrap();
+}

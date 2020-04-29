@@ -133,7 +133,8 @@
 //! See the main qaul.net repository README for additional permissions
 //! granted by the authors for this code.
 
-#[macro_use] extern crate tracing;
+#[macro_use]
+extern crate tracing;
 
 pub mod clock;
 mod core;
@@ -156,7 +157,7 @@ pub use identity::{Identity, ID_LEN};
 pub use netmod;
 
 use crate::core::Core;
-use async_std::sync::{Arc, Sender, Receiver};
+use async_std::sync::{Arc, Receiver, Sender};
 use clock::{ClockCtrl, Tasks};
 use netmod::Endpoint;
 
@@ -225,7 +226,7 @@ impl Router {
     /// Set a user ID as online and broadcast announcements
     ///
     /// This function will return an error if the user is already
-    /// marked as offline, or if no such user is known to the router
+    /// marked as online, or if no such user is known to the router
     pub async fn online(&self, id: Identity) -> Result<()> {
         self.inner.known(id, true).await?;
         Arc::clone(&self.proto)
