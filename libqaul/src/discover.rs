@@ -1,7 +1,4 @@
-use crate::{
-    messages::{MsgUtils},
-    Qaul,
-};
+use crate::{messages::MsgUtils, users::TAG_PROFILE, Qaul};
 use alexandria::utils::Tag;
 use async_std::task;
 use ratman::{netmod::Recipient, Router};
@@ -36,11 +33,15 @@ impl Discovery {
         // Handle new users
         task::spawn(async move {
             loop {
-                let id = router.discover().await; // FIXME: Do we still need this?
-                info!(id = id.to_string().as_str(), "Discovered user!");
-                qaul.users
-                    .insert_profile(id, vec![Tag::empty("profile")])
-                    .await;
+                let id = router.discover().await;
+                debug!(id = id.to_string().as_str(), "Received announcement!");
+
+                if !qaul.users.known_remote().await.contains(&id) {
+                    info!(id = id.to_string().as_str(), "Discovered new user!");
+                    qaul.users
+                        .insert_profile(id, vec![Tag::empty(TAG_PROFILE)])
+                        .await;
+                }
             }
         });
     }
@@ -67,9 +68,7 @@ impl Discovery {
                     }
                 };
 
-                qaul.messages
-                    .insert_remote(recp, Arc::clone(&msg))
-                    .await;
+                qaul.messages.insert_remote(recp, Arc::clone(&msg)).await;
                 info!("Finished processing incoming message!");
             }
         });

@@ -13,7 +13,7 @@ use alexandria::{
     Library, Session, GLOBAL,
 };
 
-use std::sync::Arc;
+use std::{collections::BTreeSet, sync::Arc};
 
 pub(crate) const TAG_PROFILE: &'static str = "libqaul.user.profile";
 pub(crate) const TAG_LOCAL: &'static str = "libqaul.user.local";
@@ -133,6 +133,10 @@ impl UserStore {
                 .collect(),
             _ => unreachable!(),
         }
+    }
+
+    pub(crate) async fn known_remote(&self) -> BTreeSet<Identity> {
+        self.all_remote().await.into_iter().map(|p| p.id).collect()
     }
 
     /// Get all remote users this device knows about

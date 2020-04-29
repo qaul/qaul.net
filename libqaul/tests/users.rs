@@ -1,6 +1,7 @@
 //! libqaul user tests
 
 mod harness;
+use harness::{sec1, sec5};
 
 #[async_std::test]
 async fn user_create() {
@@ -71,4 +72,78 @@ async fn logout_login() {
 
     // Login again
     net.a().users().login(id, "abcdefg").await.unwrap();
+}
+
+#[async_std::test]
+async fn login_changed_pw() {
+    let net = harness::init().await;
+
+    // Create a user
+    let auth = net.a().users().create("abcdefg").await.unwrap();
+    let id = auth.0;
+    assert_eq!(net.a().users().list().await.len(), 1);
+
+    net.a()
+        .users()
+        .change_pw(auth.clone(), "new and better password")
+        .unwrap();
+
+    // Yield user session
+    net.a().users().logout(auth).await.unwrap();
+
+    // Login again
+    net.a()
+        .users()
+        .login(id, "new and better password")
+        .await
+        .unwrap();
+}
+
+#[async_std::test]
+async fn get_user_profile() {
+    use libqaul::users::UserProfile;
+    let net = harness::init().await;
+
+    // Create a user
+    let auth = net.a().users().create("abcdefg").await.unwrap();
+    assert_eq!(net.a().users().list().await.len(), 1);
+
+    let profile = net.a().users().get(auth.0).await.unwrap();
+    assert_eq!(
+        profile,
+        UserProfile {
+            id: auth.0,
+            display_name: None,
+            real_name: None,
+            bio: Default::default(),
+            services: Default::default(),
+            avatar: None,
+        }
+    );
+}
+
+#[async_std::test]
+async fn simple_network_announce() {
+    use libqaul::users::UserProfile;
+    use std::{sync::Arc, time::{Instant, Duration}};
+    let net = harness::init().await;
+
+    // Create a user on node A
+    let auth = net.a().users().create("abcdefg").await.unwrap();
+    assert_eq!(net.a().users().list().await.len(), 1);
+
+    let t1 = Instant::now();
+    harness::timeout(sec5(), async {
+        let b = Arc::clone(net.b());
+        loop {
+            harness::zzz(Duration::from_millis(20)).await;
+            if b.users().list_remote().await.len() != 0 {
+                let diff = Instant::now() - t1;
+                println!("Listened for {} millis", diff.as_millis());
+                break;
+            }
+        }
+    })
+    .await
+    .unwrap();
 }
