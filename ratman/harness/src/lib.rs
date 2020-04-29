@@ -11,12 +11,25 @@
 
 use netmod_mem::MemMod;
 use ratman::Router;
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 use tempfile::{tempdir, TempDir};
 
 pub fn temp() -> TempDir {
     tempdir().unwrap()
 }
+
+pub fn sec1() -> Duration {
+    Duration::from_secs(1)
+}
+
+pub fn sec5() -> Duration {
+    Duration::from_secs(5)
+}
+
+pub fn sec10() -> Duration {
+    Duration::from_secs(10)
+}
+
 
 /// Initialise a network with some application state
 pub trait Initialize<T> {

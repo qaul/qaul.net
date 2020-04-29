@@ -14,7 +14,7 @@ use alexandria::{
 };
 use ed25519_dalek::Keypair;
 
-use std::sync::Arc;
+use std::{collections::BTreeSet, sync::Arc};
 
 const KEY_PATH: &'static str = "/meta:keys";
 pub(crate) const TAG_PROFILE: &'static str = "libqaul.user.profile";
@@ -131,6 +131,10 @@ impl UserStore {
                 .collect(),
             _ => unreachable!(),
         }
+    }
+
+    pub(crate) async fn known_remote(&self) -> BTreeSet<Identity> {
+        self.all_remote().await.into_iter().map(|p| p.id).collect()
     }
 
     /// Get all remote users this device knows about

@@ -38,11 +38,6 @@ impl<'qaul> Users<'qaul> {
         self.q.users.all_local().await
     }
 
-    /// Enumerate locally stored users available
-    pub async fn list_local(&self) -> Vec<UserProfile> {
-        self.q.users.all_local().await
-    }
-
     /// Enumerate remote stored users available
     pub async fn list_remote(&self) -> Vec<UserProfile> {
         self.q.users.all_remote().await

@@ -13,7 +13,7 @@ use std::collections::{BTreeMap, BTreeSet};
 /// The user profile itself makes no destinction between local, remote
 /// or self users (the latter being the currently active user in a
 /// session)
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UserProfile {
     /// A user's network (node) ID
     pub id: Identity,
