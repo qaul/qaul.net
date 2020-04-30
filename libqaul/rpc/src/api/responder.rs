@@ -74,7 +74,7 @@ impl Responder {
             #[cfg(feature = "chat")]
             Request::ChatRoomGet(r) => self.respond_chat(r).await.into(),
             #[cfg(feature = "chat")]
-            Request::ChatStart(r) => self
+            Request::ChatRoomCreate(r) => self
                 .respond_chat(r)
                 .await
                 .map(|id| Response::RoomId(vec![id]))

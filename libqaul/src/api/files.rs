@@ -40,6 +40,7 @@ pub enum FileMeta {
 /// Filter functions for each time exist and enable
 /// different sub-services based on which phase they
 /// aim for.
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum FileFilter {
     Local,
     Available,

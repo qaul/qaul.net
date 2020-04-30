@@ -15,7 +15,7 @@ use {
 pub type CallId = Identity;
 
 /// The number of channels in the incoming stream
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum Channels {
     Mono,
     Stereo,
@@ -40,7 +40,7 @@ impl From<Channels> for opus::Channels {
 }
 
 /// The metadata needed to decode incoming packets
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct StreamMetadata {
     /// The sample rate of the stream
     pub sample_rate: u32,

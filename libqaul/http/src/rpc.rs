@@ -16,7 +16,12 @@ pub fn rpc_routes(rpc_state: Arc<Responder>) -> Server<Arc<Responder>> {
             let hopefully_json: String = dbg!(r.body_string().await).unwrap();
             let req_env: RequestEnv =
                 serde_json::from_str(hopefully_json.as_str()).expect("Malformed json envelope");
-            let Envelope { id, data: req } = req_env.clone().into();
+            let Envelope { id, data: req } = match req_env.clone().generate_envelope() {
+                Ok(env) => env,
+                Err(e) => {
+                    return Response::new(500).body_string(e);
+                }
+            };
 
             // Call into libqaul via the rpc utilities
             let responder: Arc<_> = Arc::clone(r.state());

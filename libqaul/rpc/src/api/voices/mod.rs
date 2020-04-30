@@ -41,7 +41,7 @@ pub trait VoicesRpc {
     async fn apply(self, voices: &Voices) -> Self::Response;
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct MakeCall {
     auth: UserAuth,
     user: Identity,
@@ -56,7 +56,7 @@ impl VoicesRpc for MakeCall {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct AcceptCall {
     auth: UserAuth,
     call: CallId,
@@ -71,7 +71,7 @@ impl VoicesRpc for AcceptCall {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct RejectCall {
     auth: UserAuth,
     call: CallId,
@@ -85,7 +85,7 @@ impl VoicesRpc for RejectCall {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct HangUp {
     auth: UserAuth,
     call: CallId,
@@ -99,7 +99,7 @@ impl VoicesRpc for HangUp {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct NextIncoming {
     auth: UserAuth,
 }
@@ -112,7 +112,7 @@ impl VoicesRpc for NextIncoming {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct GetMetadata {
     auth: UserAuth,
     call: CallId,
@@ -126,7 +126,7 @@ impl VoicesRpc for GetMetadata {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct PushVoice {
     auth: UserAuth,
     call: CallId,
@@ -144,7 +144,7 @@ impl VoicesRpc for PushVoice {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct GetStatus {
     auth: UserAuth,
     call: CallId,
@@ -158,7 +158,7 @@ impl VoicesRpc for GetStatus {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct NextVoice {
     auth: UserAuth,
     call: CallId,
@@ -176,7 +176,7 @@ impl VoicesRpc for NextVoice {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct OnHangup {
     auth: UserAuth,
     call: CallId,

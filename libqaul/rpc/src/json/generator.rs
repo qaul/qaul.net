@@ -5,6 +5,7 @@ use crate::{
     Envelope, Response,
 };
 use serde_json::{self, Map, Value as JsonValue};
+use std::convert::TryFrom;
 
 impl From<(Envelope<Response>, RequestEnv)> for ResponseEnv {
     fn from(env: (Envelope<Response>, RequestEnv)) -> ResponseEnv {
@@ -15,14 +16,10 @@ impl From<(Envelope<Response>, RequestEnv)> for ResponseEnv {
 
         // Turn the response into a map object
         let mut data: Map<String, JsonValue> = match serde_json::to_value(data).unwrap() {
-            JsonValue::Object(mut obj) => {
-                obj
-            },
-            JsonValue::String(s) => {
-                Some(("type".into(), "success".into()))
-                    .into_iter()
-                    .collect()
-            }
+            JsonValue::Object(mut obj) => obj,
+            JsonValue::String(s) => Some(("type".into(), "success".into()))
+                .into_iter()
+                .collect(),
             s => panic!("Unexpected value: {:?}", s),
         };
 
@@ -41,9 +38,9 @@ impl From<(Envelope<Response>, RequestEnv)> for ResponseEnv {
 
 #[test]
 fn get_auth() {
-    use libqaul::{users::UserAuth, Identity};
     use crate::api::{Envelope, Response};
     use crate::json::{RequestEnv, ResponseEnv};
+    use libqaul::{users::UserAuth, Identity};
 
     let ua = UserAuth(Identity::random(), "my-token-is-great".into());
     let data = Response::Auth(ua);
@@ -73,8 +70,8 @@ fn get_auth() {
 
 #[test]
 fn user_list() {
-    use libqaul::{users::UserProfile, Identity};
     use crate::api::Response;
+    use libqaul::{users::UserProfile, Identity};
 
     let users = vec![
         UserProfile::new(Identity::random()),
@@ -89,13 +86,13 @@ fn user_list() {
 
 #[async_std::test]
 async fn user_delete() {
-    use libqaul::Qaul;
-    use async_std::task::block_on;
+    use crate::json::{JsonAuth, RequestEnv};
     use crate::{Envelope, Responder};
-    use crate::json::{RequestEnv, JsonAuth};
-    use std::sync::Arc;
+    use async_std::task::block_on;
+    use libqaul::Qaul;
     use qaul_chat::Chat;
     use qaul_voices::Voices;
+    use std::sync::Arc;
 
     let qaul = Arc::new(Qaul::dummy());
     let chat = Chat::new(qaul.clone()).await.unwrap();
@@ -118,18 +115,13 @@ async fn user_delete() {
         page: None,
         method: "delete".into(),
         kind: "users".into(),
-        data: vec![("purge".into(), true.into())]
-            .into_iter()
-            .collect(),
+        data: vec![("purge".into(), true.into())].into_iter().collect(),
     };
 
-    let Envelope { id, data } = req_env.clone().into();
+    let Envelope { id, data } = req_env.clone().generate_envelope().unwrap();
 
     let resp = block_on(responder.respond(data));
-    let env = Envelope {
-        id,
-        data: resp,
-    };
+    let env = Envelope { id, data: resp };
 
     let resp_env: ResponseEnv = (env, req_env).into();
 

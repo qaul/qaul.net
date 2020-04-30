@@ -27,7 +27,7 @@ pub struct ContactEntry {
 /// A query is always applied to a field that is present in
 /// `ContactEntry`, and will filter contacts by what set of
 /// prerequisites they fulfill.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum ContactQuery {
     /// A fuzzy nickname search
     Nick(String),
