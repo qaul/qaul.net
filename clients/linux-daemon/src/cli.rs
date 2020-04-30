@@ -8,7 +8,7 @@ use structopt::StructOpt;
 
 /// Serde default functions
 mod defaults {
-    pub const DEFAULT_SYSTEM_CFG_PATH: &'static str = "/etc/qauld/config.toml";
+    pub const DEFAULT_SYSTEM_CFG_PATH: &'static str = "/etc/qauld/config.json";
 }
 
 #[derive(Debug, StructOpt)]
@@ -26,7 +26,7 @@ pub async fn inflate_options() -> Config {
     let user_path = config_dir().map(|d| {
         let mut p = PathBuf::from(d);
         p.push("qauld");
-        p.push("config.toml");
+        p.push("config.json");
         p
     });
 
