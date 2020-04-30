@@ -64,7 +64,7 @@ impl From<RequestEnv> for Envelope<Request> {
                 #[cfg(feature = "chat")]
                 ("chat-messages", "subscribe") => Request::ChatMsgSub(de_json(data, auth)),
                 #[cfg(feature = "chat")]
-                ("chat-messages", "create") => Request::ChatMsgSend(de_json(data, auth)),
+                ("chat-messages", "create") => Request::ChatMsgCreate(de_json(data, auth)),
                 #[cfg(feature = "chat")]
                 ("chat-rooms", "query") => Request::ChatLoadRoom(de_json(data, auth)),
                 #[cfg(feature = "chat")]

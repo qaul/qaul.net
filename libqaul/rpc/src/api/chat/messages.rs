@@ -35,14 +35,14 @@ impl ChatRpc for Get {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
-pub struct Send {
+pub struct Create {
     pub auth: UserAuth,
     pub room: RoomId,
     pub text: String,
 }
 
 #[async_trait]
-impl ChatRpc for Send {
+impl ChatRpc for Create {
     type Response = Result<()>;
     async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
         chat.send_message(self.auth, self.room, self.text).await
