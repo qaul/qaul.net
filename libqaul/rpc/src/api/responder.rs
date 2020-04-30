@@ -66,7 +66,7 @@ impl Responder {
         match req {
             // =^-^= Chat Messages =^-^=
             #[cfg(feature = "chat")]
-            Request::ChatMsgSend(r) => self.respond_chat(r).await.into(),
+            Request::ChatMsgCreate(r) => self.respond_chat(r).await.into(),
 
             // =^-^= Chat Rooms =^-^=
             //#[cfg(feature = "chat")]

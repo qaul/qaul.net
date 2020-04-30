@@ -38,7 +38,7 @@ pub enum Request {
 
     /// Send a chat message
     #[cfg(feature = "chat")]
-    ChatMsgSend(chat::messages::Send),
+    ChatMsgCreate(chat::messages::Create),
 
     /// Query the chat message store
     #[cfg(feature = "chat")]
