@@ -24,18 +24,6 @@ impl QaulRpc for List {
     }
 }
 
-/// Enumerate all publicly known locally stored users
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
-pub struct ListLocal {}
-
-#[async_trait]
-impl QaulRpc for ListLocal {
-    type Response = Vec<UserProfile>;
-    async fn apply(self, qaul: &Qaul) -> Self::Response {
-        qaul.users().list_local().await
-    }
-}
-
 /// Enumerate all publicly known remote users
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct ListRemote {}

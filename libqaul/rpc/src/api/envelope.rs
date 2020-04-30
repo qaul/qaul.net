@@ -74,9 +74,6 @@ pub enum Request {
     /// List all available users
     UserList(users::List),
 
-    /// List locally available users
-    UserListLocal(users::ListLocal),
-
     /// List remote available users
     UserListRemote(users::ListRemote),
 
