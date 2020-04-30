@@ -18,8 +18,8 @@ pub fn temp() -> TempDir {
     tempdir().unwrap()
 }
 
-pub fn sec1() -> Duration {
-    Duration::from_secs(1)
+pub fn millis(m: u64) -> Duration {
+    Duration::from_millis(m)
 }
 
 pub fn sec5() -> Duration {
@@ -29,7 +29,6 @@ pub fn sec5() -> Duration {
 pub fn sec10() -> Duration {
     Duration::from_secs(10)
 }
-
 
 /// Initialise a network with some application state
 pub trait Initialize<T> {

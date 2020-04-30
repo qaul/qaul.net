@@ -1,7 +1,7 @@
 //! libqaul user tests
 
 mod harness;
-use harness::{sec1, sec5};
+use harness::sec5;
 
 #[async_std::test]
 async fn user_create() {
@@ -125,7 +125,10 @@ async fn get_user_profile() {
 #[async_std::test]
 async fn simple_network_announce() {
     use libqaul::users::UserProfile;
-    use std::{sync::Arc, time::{Instant, Duration}};
+    use std::{
+        sync::Arc,
+        time::{Duration, Instant},
+    };
     let net = harness::init().await;
 
     // Create a user on node A
