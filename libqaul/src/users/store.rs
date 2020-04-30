@@ -97,7 +97,7 @@ impl UserStore {
             .await
         {
             Ok(QueryResult::Single(rec)) => KeyWrap::from(&*rec).0,
-            _ => panic!("Key not properly stored in the database"),
+            _ => panic!("Local encryption key not known!"),
         }
     }
 
