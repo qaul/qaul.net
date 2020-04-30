@@ -26,9 +26,6 @@ pub struct MsgBuilder {
     tags: Option<TagSet>,
     /// A raw byte `Message` payload
     payload: Option<Vec<u8>>,
-    /// Attached `Message` signature, for all fields in a message
-    /// If not set, this defaults to Unverified.
-    sign: Option<SigTrust>,
 }
 
 impl MsgBuilder {
@@ -61,12 +58,6 @@ impl MsgBuilder {
         self
     }
 
-    /// Set the signature (`SigAuth`) of the resulting message.
-    pub fn with_sign(mut self, sign: SigTrust) -> Self {
-        self.sign = Some(sign);
-        self
-    }
-
     pub fn with_tags(mut self, tags: impl Into<TagSet>) -> Self {
         self.tags = Some(tags.into());
         self
@@ -95,7 +86,6 @@ impl MsgBuilder {
             associator,
             sender,
             tags,
-            sign: self.sign.clone().unwrap_or(SigTrust::Unverified),
             payload,
         }
     }

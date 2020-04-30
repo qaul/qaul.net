@@ -6,7 +6,7 @@ use alexandria::utils::Tag;
 use async_std::task;
 use ratman::{netmod::Recipient, Router};
 use std::sync::Arc;
-use tracing::info;
+use tracing::{info, warn, debug};
 
 /// A thread-detached discovery service running inside libqaul
 ///
@@ -51,15 +51,21 @@ impl Discovery {
         task::spawn(async move {
             loop {
                 let msg = router.next().await;
+                let sender = msg.sender;
 
-                info!("Receiving message...");
+                info!("Receiving message by `{}`...", sender);
                 let recp = match msg.recipient {
                     Recipient::User(id) => Some(id),
                     Recipient::Flood => None,
                 };
 
-                let msg = Arc::new(MsgUtils::process(msg));
-                let associator = msg.associator.clone();
+                let msg = match MsgUtils::process(msg, &qaul.users).await {
+                    Ok(msg) => Arc::new(msg),
+                    Err(_) => {
+                        warn!("Skipping malformed message by `{}`", sender);
+                        continue;
+                    }
+                };
 
                 qaul.messages
                     .insert_remote(recp, Arc::clone(&msg))
