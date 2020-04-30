@@ -19,8 +19,8 @@ use std::time::Duration;
 /// This is the actual mechanism by which data is moved around between `MemMod`s in
 /// different places.
 pub(crate) mod io;
-/// Simulated transmission media.
-pub mod media;
+// Simulated transmission media.
+// pub mod media;
 
 /// Represents a single netmod endpoint that can connect to exactly one other, either
 /// as a 1-to-1 link between libqaul instances or as a link into a transmission
@@ -103,41 +103,21 @@ impl Endpoint for MemMod {
     /// Returns `OperationNotSupported` if attempting to send through
     /// a connection that is not yet connected.
     async fn send(&self, frame: Frame, _: Target) -> NetResult<()> {
-        let mut lock = self.io.write().await;
-        match *lock {
+        let io = self.io.read().await;
+        match *io {
             None => Err(NetError::NotSupported),
-            Some(ref mut io) => match io.out.send(frame) {
-                Ok(_) => Ok(()),
-                Err(_) => Err(NetError::ConnectionLost),
-            },
+            Some(ref io) => Ok(io.out.send(frame).await),
         }
     }
 
     async fn next(&self) -> NetResult<(Frame, Target)> {
-        future::poll_fn(|ctx| {
-            let lock = &mut self.io.write();
-            let waker = ctx.waker().clone();
-
-            match unsafe { Pin::new_unchecked(lock).poll(ctx) } {
-                Poll::Ready(mut io_opt) => match &mut *io_opt {
-                    Some(ref mut io) => match io.inc.try_recv() {
-                        Ok(v) => Poll::Ready(Ok((v, Target::default()))),
-                        Err(TryRecvError::Empty) => {
-                            let w = waker.clone();
-                            task::spawn(async move {
-                                task::sleep(Duration::from_millis(20)).await;
-                                w.wake();
-                            });
-
-                            Poll::Pending
-                        }
-                        Err(_) => Poll::Ready(Err(NetError::ConnectionLost)),
-                    },
-                    None => Poll::Ready(Err(NetError::ConnectionLost)),
-                },
-                Poll::Pending => Poll::Pending,
-            }
-        })
-        .await
+        let io = self.io.read().await;
+        match *io {
+            None => Err(NetError::NotSupported),
+            Some(ref io) => match io.inc.recv().await {
+                Some(f) => Ok((f, Target::default())),
+                None => Err(NetError::ConnectionLost),
+            },
+        }
     }
 }
