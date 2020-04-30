@@ -1749,6 +1749,8 @@ dependencies = [
  "libqaul",
  "netmod-udp",
  "ratman",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
