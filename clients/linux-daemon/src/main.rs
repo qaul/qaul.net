@@ -6,6 +6,7 @@ use std::sync::Arc;
 use alexandria::utils::Tag;
 
 mod config;
+mod spawn;
 
 const IPC_SERVICE_NAME: &'static str = "qaul.qauld.server-ipc";
 const IPC_SERVICE_TAG: &'static str = "ipc-control-message";
