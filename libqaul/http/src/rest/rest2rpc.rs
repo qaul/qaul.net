@@ -69,7 +69,13 @@ pub async fn rest2rpc_params(
         data: data,
     };
 
-    let Envelope { id, data: req } = rpc_req.clone().into();
+    let Envelope { id, data: req } = match rpc_req.clone().generate_envelope() {
+        Ok(env) => env,
+        Err(e) => {
+            // If there was an error parsing the envelope, return it
+            return Response::new(500).body_string(e);
+        }
+    };
 
     // Call into libqaul via the rpc utilities
     let responder: Arc<_> = Arc::clone(r.state());

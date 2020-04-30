@@ -10,9 +10,9 @@ use libqaul::{
 use qaul_chat::{Chat, Room, RoomId, RoomMeta};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct List {
-    auth: UserAuth,
+    pub auth: UserAuth,
 }
 
 #[async_trait]
@@ -23,10 +23,10 @@ impl ChatRpc for List {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Get {
-    id: RoomId,
-    auth: UserAuth,
+    pub id: RoomId,
+    pub auth: UserAuth,
 }
 
 #[async_trait]
@@ -37,15 +37,15 @@ impl ChatRpc for Get {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
-pub struct StartChat {
-    auth: UserAuth,
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+pub struct Create {
+    pub auth: UserAuth,
     #[serde(default)]
-    users: Vec<Identity>,
+    pub users: Vec<Identity>,
 }
 
 #[async_trait]
-impl ChatRpc for StartChat {
+impl ChatRpc for Create {
     type Response = Result<RoomId>;
     async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
         chat.start_chat(self.auth, self.users).await

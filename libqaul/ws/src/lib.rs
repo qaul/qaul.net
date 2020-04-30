@@ -29,8 +29,12 @@ pub struct WsServer {
 
 impl WsServer {
     /// Create a websocket server with a libqaul instance and services
-    pub fn new<S: Into<String>>(addr: S, qaul: Arc<Qaul>, chat: Arc<Chat>, voices: Arc<Voices>) 
-    -> Arc<Self> {
+    pub fn new<S: Into<String>>(
+        addr: S,
+        qaul: Arc<Qaul>,
+        chat: Arc<Chat>,
+        voices: Arc<Voices>,
+    ) -> Arc<Self> {
         Arc::new(Self {
             running: AtomicBool::from(true),
             addr: addr.into(),
@@ -81,14 +85,19 @@ impl WsServer {
         // Read messages from this stream
         while let Some(Ok(Message::Text(msg))) = rx.next().await {
             let req_env: RequestEnv = serde_json::from_str(&msg).expect("Malformed json envelope");
-            let Envelope { id, data: req } = req_env.clone().into();
+            let Envelope { id, data: req } = match req_env.clone().generate_envelope() {
+                Ok(env) => env,
+                Err(e) => {
+                    tx.send(Message::Text(e))
+                        .await
+                        .expect("Failed to send error message!");
+                    continue;
+                }
+            };
 
             // Call into libqaul via the rpc utilities
             let resp = self.rpc.respond(req).await;
-            let env = Envelope {
-                id,
-                data: resp,
-            };
+            let env = Envelope { id, data: resp };
 
             // Build the reply envelope
             let resp_env: ResponseEnv = (env, req_env).into();

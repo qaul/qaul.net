@@ -6,7 +6,7 @@ use libqaul::{error::Result, users::UserAuth};
 use qaul_chat::{Chat, ChatMessage, RoomId, Subscription};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Subscribe {
     pub auth: UserAuth,
     pub room: RoomId,
@@ -20,7 +20,7 @@ impl ChatRpc for Subscribe {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Get {
     pub auth: UserAuth,
     pub room: RoomId,
@@ -34,7 +34,7 @@ impl ChatRpc for Get {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Create {
     pub auth: UserAuth,
     pub room: RoomId,

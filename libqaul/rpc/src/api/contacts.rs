@@ -70,7 +70,7 @@ impl QaulRpc for Get {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct Query {
     auth: UserAuth,
     query: ContactQuery,

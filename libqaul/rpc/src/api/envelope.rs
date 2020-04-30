@@ -29,7 +29,7 @@ pub struct Envelope<D> {
 }
 
 /// A wrapper enum to disambiguate request types in the envelope.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Request {
     /// Create a subscription for chat messages
@@ -54,7 +54,7 @@ pub enum Request {
 
     /// Create a new chat room
     #[cfg(feature = "chat")]
-    ChatStart(chat::rooms::StartChat),
+    ChatRoomCreate(chat::rooms::Create),
 
     /// Modify a user's contact
     ContactModify(contacts::Modify),

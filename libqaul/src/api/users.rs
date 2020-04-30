@@ -16,6 +16,12 @@ pub type Token = String;
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct UserAuth(pub Identity, pub Token);
 
+impl UserAuth {
+    pub fn test() -> Self {
+        Self(Identity::random(), "<fake-token>".into())
+    }
+}
+
 /// Local user data and session management
 ///
 /// Used entirely to namespace API endpoints on `Qaul` instance,
