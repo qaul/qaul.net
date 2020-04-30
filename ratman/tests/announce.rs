@@ -16,7 +16,8 @@ use async_std::task;
 use netmod_mem::MemMod;
 use ratman::{Identity, Result, Router};
 
-async fn testing() -> Result<()> {
+#[async_std::test]
+async fn announce_and_discover() -> Result<()> {
     // Build two channels in memory
     let mm1 = MemMod::new();
     let mm2_1 = MemMod::new();
@@ -53,7 +54,45 @@ async fn testing() -> Result<()> {
     Ok(())
 }
 
-#[test]
-fn announce_and_discover() {
-    task::block_on(testing()).unwrap();
+#[async_std::test]
+async fn message_id_check() -> Result<()> {
+    use ratman::Message;
+    
+    // Build two channels in memory
+    let mm1 = MemMod::new();
+    let mm2_1 = MemMod::new();
+    let mm2_3 = MemMod::new();
+    let mm3 = MemMod::new();
+    mm1.link(&mm2_1);
+    mm2_3.link(&mm3);
+
+    // Initialise three empty routers
+    let r1 = Router::new();
+    let r2 = Router::new();
+    let r3 = Router::new();
+
+    // Attach endpoints so the topology is r1 - r2 - r3
+    r1.add_endpoint(mm1).await;
+    r2.add_endpoint(mm2_1).await;
+    r2.add_endpoint(mm2_3).await;
+    r3.add_endpoint(mm3).await;
+
+    // Create two users and add them to the routers
+    let u1 = Identity::random();
+    r1.add_user(u1).await?;
+
+    let u3 = Identity::random();
+    r3.add_user(u3).await?;
+
+    // And mark them "online"
+    r1.online(u1).await?;
+    r3.online(u3).await?;
+
+    Messa
+        id: MsgId::random(),
+        recipient,
+        sender,
+        payload,
+        sign: vec![],
+    }
 }

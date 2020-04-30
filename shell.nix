@@ -5,19 +5,23 @@ with import <nixpkgs> {
 stdenv.mkDerivation {
   name = "qaul";
   buildInputs = with pkgs; [
-    rustracer rustup clangStdenv
 
-    cargo-watch
+    # General rust stuff
+    rustracer rustup clangStdenv cargo-watch
 
     # Required for the docs
     mdbook graphviz
 
+    # Required for Android integration
     cmake
     
-    # Required for the Android builds
-    androidenv.androidPkgs_9_0.androidsdk
+    # Required for Android builds
+    # androidenv.androidPkgs_9_0.androidsdk
 
     # Required for libqaul-voice
     libopus pkg-config
+
+    # Required for the code coverage and stuff
+    openssl
   ];
 }

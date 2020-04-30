@@ -5,7 +5,7 @@ use ratman_harness::{temp, Initialize, ThreePoint};
 use std::{sync::Arc, time::Duration};
 
 pub use async_std::future::timeout;
-pub use ratman_harness::{sec1, sec10, sec5};
+pub use ratman_harness::{sec10, sec5, millis};
 
 pub async fn zzz(dur: Duration) {
     async_std::task::sleep(dur).await
