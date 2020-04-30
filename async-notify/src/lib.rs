@@ -28,6 +28,10 @@ impl<T> DerefMut for Notify<T> {
 }
 
 impl<T> Notify<T> {
+    pub fn new(inner: T) -> Self {
+        Self { inner, waker: None }
+    }
+
     /// Check whether or not this `Notify` has a registered `Waker`.
     ///
     /// This function is implemented as an associated function rather than a
@@ -87,14 +91,5 @@ impl<T> Notify<T> {
     /// Call it as `Notify::into_inner()`.
     pub fn into_inner(ptr: Notify<T>) -> T {
         ptr.inner
-    }
-
-    /// Notifies any registered `Waker` immediately.
-    ///
-    /// This function is implemented as an associated function rather than a
-    /// method to avoid conflicts with methods on the wrapped type.
-    /// Call it as `Notify::notify()`.
-    pub fn notify(ptr: &Notify<T>) {
-        ptr.waker.as_ref().map(|w| w.wake_by_ref());
     }
 }
