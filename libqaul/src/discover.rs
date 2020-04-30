@@ -3,7 +3,7 @@ use alexandria::utils::Tag;
 use async_std::task;
 use ratman::{netmod::Recipient, Router};
 use std::sync::Arc;
-use tracing::info;
+use tracing::{info, warn, debug};
 
 /// A thread-detached discovery service running inside libqaul
 ///
