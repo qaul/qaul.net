@@ -1,12 +1,15 @@
 //! User profile database wrappers (models)
 
 use super::Conv;
-use crate::users::{UserProfile, UserUpdate};
+use crate::{
+    security::Keypair,
+    users::{UserProfile, UserUpdate},
+};
 use alexandria::{
     record::{kv::Value, Record},
     utils::Diff,
 };
-use ed25519_dalek::Keypair;
+use bincode;
 use std::collections::BTreeMap;
 
 const KPAIR: &'static str = "keypair";
@@ -22,14 +25,14 @@ pub(crate) struct KeyWrap(pub(crate) Keypair);
 impl KeyWrap {
     /// Generate the initial diff of metadata
     pub(crate) fn make_diff(&self) -> Diff {
-        Diff::map().insert(KPAIR, self.0.to_bytes().to_vec())
+        Diff::map().insert(KPAIR, bincode::serialize(&self.0).unwrap())
     }
 }
 
 impl From<&Record> for KeyWrap {
     fn from(rec: &Record) -> Self {
         KeyWrap(
-            Keypair::from_bytes(
+            bincode::deserialize(
                 rec.kv()
                     .get(KPAIR)
                     .map(|v| match v {

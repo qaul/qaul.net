@@ -19,7 +19,6 @@ impl From<RecordRef> for Message {
             sender: Conv::id(kv.get(SENDER).unwrap()),
             associator: Conv::string(kv.get(ASSOC).unwrap()),
             tags: rec.header.tags.clone(),
-            sign: Conv::sig_trust(kv.get(SIGN).unwrap()),
             payload: Conv::binvec(kv.get(PLOAD).unwrap()),
         }
     }
@@ -32,14 +31,6 @@ impl Message {
             Diff::map().insert(MID, self.id.as_bytes().to_vec()),
             Diff::map().insert(SENDER, self.sender.as_bytes().to_vec()),
             Diff::map().insert(ASSOC, self.associator.as_str()),
-            Diff::map().insert(
-                SIGN,
-                match self.sign {
-                    SigTrust::Trusted => "trusted",
-                    SigTrust::Unverified => "unverified",
-                    SigTrust::Invalid => "invalid",
-                },
-            ),
             Diff::map().insert(PLOAD, self.payload.clone()),
         ]
     }

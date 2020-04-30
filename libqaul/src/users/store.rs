@@ -3,7 +3,7 @@
 use crate::{
     error::{Error, Result},
     qaul::Identity,
-    security::KeyId,
+    security::{KeyId, Keypair},
     store::KeyWrap,
     users::{UserProfile, UserUpdate},
 };
@@ -12,13 +12,15 @@ use alexandria::{
     utils::{Id, Path, Tag, TagSet},
     Library, Session, GLOBAL,
 };
-use ed25519_dalek::Keypair;
 
 use std::{collections::BTreeSet, sync::Arc};
 
-const KEY_PATH: &'static str = "/meta:keys";
 pub(crate) const TAG_PROFILE: &'static str = "libqaul.user.profile";
 pub(crate) const TAG_LOCAL: &'static str = "libqaul.user.local";
+
+fn key_path(id: Id) -> Path {
+    Path::from(format!("/users/keys:{}", id))
+}
 
 fn profile_path(id: Id) -> Path {
     Path::from(format!("/users:{}", id))
@@ -46,7 +48,7 @@ impl UserStore {
         self.inner
             .insert(
                 Session::Id(id),
-                Path::from(KEY_PATH),
+                key_path(id),
                 TagSet::empty(),
                 wrapped.make_diff(),
             )
@@ -71,7 +73,7 @@ impl UserStore {
         self.get(id).await.unwrap();
 
         self.inner
-            .delete(Session::Id(id), Path::from(KEY_PATH))
+            .delete(Session::Id(id), key_path(id))
             .await
             .unwrap();
 
@@ -93,7 +95,7 @@ impl UserStore {
     pub(crate) async fn get_key(&self, id: Identity) -> Keypair {
         match self
             .inner
-            .query(Session::Id(id), Query::Path(Path::from(KEY_PATH)))
+            .query(Session::Id(dbg!(id)), Query::Path(key_path(id)))
             .await
         {
             Ok(QueryResult::Single(rec)) => KeyWrap::from(&*rec).0,

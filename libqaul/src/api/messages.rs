@@ -150,8 +150,6 @@ pub struct Message {
     pub associator: String,
     /// A tag store for persistent message metadata
     pub tags: TagSet,
-    /// Verified signature data
-    pub sign: SigTrust,
     /// A raw byte `Message` payload
     pub payload: Vec<u8>,
 }
@@ -229,7 +227,6 @@ impl<'qaul> Messages<'qaul> {
                     associator,
                     tags,
                     payload,
-                    sign,
                 }),
                 mode,
             )

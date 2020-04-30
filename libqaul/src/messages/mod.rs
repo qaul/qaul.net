@@ -39,17 +39,18 @@ pub(crate) struct RatMessageProto {
 }
 
 impl RatMessageProto {
-    pub(crate) fn build(&self, store: &UserStore) -> RatMessage {
-        let id = self.env.sender.clone().into();
-        let keypair = async_std::task::block_on(async { store.get_key(id).await });
+    pub(crate) async fn build(&self, store: &UserStore) -> RatMessage {
+        let sender = self.env.sender;
+        let keypair = store.get_key(sender).await;
 
-        let payload = conjoiner::serialise(&self.env).unwrap();
-        let sign: Vec<_> = keypair
-            .sign(payload.as_slice())
-            .to_bytes()
-            .iter()
-            .cloned()
-            .collect();
+        let id = self.env.id;
+        let raw_payload = conjoiner::serialise(&self.env).unwrap();
+
+        // Encrypt the payload only if the message isn't being flooded
+        let payload = match self.recipient {
+            RatRecipient::User(id) => Sec::encrypt(keypair.clone(), id, &raw_payload),
+            RatRecipient::Flood => raw_payload,
+        };
 
         let sender = self.env.sender;
         let recipient = self.recipient;
@@ -59,7 +60,13 @@ impl RatMessageProto {
             sender,
             recipient,
             payload,
-            sign,
+
+            // Payloads are encrypted and signed via libnacl, which
+            // means that no payload can be forged. Ratman still takes
+            // a signature argument at the moment for other
+            // applications, and to keep the possibility to add
+            // further verifications down the line.
+            sign: vec![],
         }
     }
 }
@@ -73,18 +80,32 @@ impl MsgUtils {
         router: &Router,
         msg: RatMessageProto,
     ) -> Result<()> {
-        Ok(router.send(msg.build(store)).await?)
+        Ok(router.send(msg.build(store).await).await?)
     }
 
     /// Process incoming RATMAN message, verifying it's signature and payload
-    pub(crate) fn process(msg: RatMessage) -> Message {
+    pub(crate) async fn process(msg: RatMessage, store: &UserStore) -> Result<Message> {
         let RatMessage {
             id,
             sender,
-            recipient: _,
-            ref payload,
-            ref sign,
+            recipient,
+            payload,
+            sign: _,
         } = msg;
+
+        // Decrypt only if the message was directly addressed
+        let payload = match recipient {
+            RatRecipient::User(recp) => {
+                let keypair = store.get_key(recp).await;
+
+                // Decrypting the message makes sure the inner payload
+                // structure was intact, as well as making sure the
+                // signature is unharmed.  We want to drop a message
+                // when the signature verification fails.
+                Sec::decrypt(keypair, sender, &payload)?
+            }
+            RatRecipient::Flood => payload,
+        };
 
         let Envelope {
             id: _,
@@ -94,16 +115,12 @@ impl MsgUtils {
             tags: _,
         } = conjoiner::deserialise(&payload).unwrap();
 
-        // Verify signature
-        let sign = Sec::verify(id, payload.as_slice(), sign.as_slice());
-
-        Message {
+        Ok(Message {
             id: id.into(),
             sender,
             associator,
             tags: Default::default(),
-            sign,
             payload,
-        }
+        })
     }
 }
