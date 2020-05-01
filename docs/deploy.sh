@@ -19,5 +19,5 @@ cd ..
 cd ..
 cargo doc --no-deps
 cp target/doc/settings.html target/doc/index.html
-rsync -azhe "ssh -p 2222" ./target/doc/ admin@docs.qaul.net:/home/admin/api
+rsync -azzhe "ssh -p 2222" ./target/doc/ admin@docs.qaul.net:/home/admin/api
 cd docs

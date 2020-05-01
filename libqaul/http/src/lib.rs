@@ -6,6 +6,9 @@
 //! * the REST API for the webGUI
 //! * the RPC API
 
+#![doc(html_favicon_url = "https://qaul.net/favicon.ico")]
+#![doc(html_logo_url = "https://qaul.net/img/qaul_icon-128.png")]
+
 use async_std::{sync::Arc, task, task::JoinHandle};
 use std::io::Result;
 

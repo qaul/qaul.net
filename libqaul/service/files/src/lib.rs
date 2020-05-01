@@ -1,5 +1,9 @@
 //! `qaul.net` filesharing service
 
+// #![allow(unused)]
+#![doc(html_favicon_url = "https://qaul.net/favicon.ico")]
+#![doc(html_logo_url = "https://qaul.net/img/qaul_icon-128.png")]
+
 use async_std::{sync::Arc, task};
 use mime::Mime;
 

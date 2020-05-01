@@ -1,5 +1,8 @@
 //! `qaul.net` chat service
 
+#![doc(html_favicon_url = "https://qaul.net/favicon.ico")]
+#![doc(html_logo_url = "https://qaul.net/img/qaul_icon-128.png")]
+
 mod directory;
 use directory::RoomDirectory;
 

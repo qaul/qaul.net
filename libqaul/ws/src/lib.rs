@@ -1,5 +1,8 @@
 //! Websocket accept server
 
+#![doc(html_favicon_url = "https://qaul.net/favicon.ico")]
+#![doc(html_logo_url = "https://qaul.net/img/qaul_icon-128.png")]
+
 use libqaul::Qaul;
 use libqaul_rpc::{
     json::{RequestEnv, ResponseEnv},

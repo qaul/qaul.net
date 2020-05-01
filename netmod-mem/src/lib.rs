@@ -3,6 +3,9 @@
 //! This aims to make testing any structure that binds against
 //! `netmod` easier and reproducable.
 
+#![doc(html_favicon_url = "https://qaul.net/favicon.ico")]
+#![doc(html_logo_url = "https://qaul.net/img/qaul_icon-128.png")]
+
 use async_std::{
     sync::{Arc, RwLock},
     task,

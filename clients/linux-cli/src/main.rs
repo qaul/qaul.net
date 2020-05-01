@@ -1,3 +1,6 @@
+#![doc(html_favicon_url = "https://qaul.net/favicon.ico")]
+#![doc(html_logo_url = "https://qaul.net/img/qaul_icon-128.png")]
+
 use futures::join;
 use libqaul::{error::Result, helpers::TagSet, messages::{Mode, IdType}, Qaul};
 use ratman::Router;

@@ -15,7 +15,10 @@
 //! In order to use this RPC crate correctly you will also have to
 //! depend on the `libqaul` crate for structure, error, and return
 //! type definitions.
+
 #![allow(unused)]
+#![doc(html_favicon_url = "https://qaul.net/favicon.ico")]
+#![doc(html_logo_url = "https://qaul.net/img/qaul_icon-128.png")]
 
 mod api;
 pub use api::{

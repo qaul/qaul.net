@@ -38,6 +38,9 @@
 //! point. This initialisation option is available before starting
 //! network bindings.
 
+#![doc(html_favicon_url = "https://qaul.net/favicon.ico")]
+#![doc(html_logo_url = "https://qaul.net/img/qaul_icon-128.png")]
+
 // Internal modules
 mod auth;
 mod crypto;

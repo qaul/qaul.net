@@ -84,4 +84,7 @@
 //     std::thread::sleep_ms(5000);
 // }
 
+#![doc(html_favicon_url = "https://qaul.net/favicon.ico")]
+#![doc(html_logo_url = "https://qaul.net/img/qaul_icon-128.png")]
+
 fn main() {}
