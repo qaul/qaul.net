@@ -3,13 +3,13 @@ members = [
     # Main storage database
     "alexandria",
 
-    # qaul.net service library
+    # main qaul.net service library
     "libqaul",
 
     # libqaul additions
     "libqaul/http",
-    "libqaul/rpc",
     "libqaul/ipc",
+    "libqaul/rpc",
     "libqaul/ws",
 
     # qaul.net main services
@@ -24,31 +24,27 @@ members = [
     "ratman/identity",
     "ratman/netmod",
 
-    # Various utility crates
+    # various utility crates
+    "async-notify",
     "clockctrl",
     "permute",
     "visn",
-    "async-notify",
     
-    # Available netmod drivers
+    # available netmod drivers
     "netmod-mem",
+    "netmod-tcp",
     "netmod-udp",
     "netmod-wd",
-    "netmod-overlay",
 
-    # infrastructure crates
-    "qaulhubd",
-
-    # Client specific targets
-    "clients/linux",
-    "clients/linux-cli",
-    "clients/linux-daemon",
-
-    # Android specifics
+    # android build support
     "librobot",
 
     # test binaries
+    # "clients/http-test"
     "clients/linux-http-test",
     "clients/linux-voice-test",
-    # "clients/http-test"
+
+    # Actual target binaries
+    "clients/linux-cli",
+    "clients/hubd",
 ]
