@@ -230,12 +230,12 @@ impl<'s> PacketBuilder<'s> {
 async fn simple_send() {
     use std::net::{Ipv4Addr, SocketAddrV4};
 
-    let s1 = Socket::new("127.0.0.1", 8000, "A =").await.unwrap();
-    let s1_addr = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8000);
+    let s1 = Socket::new("127.0.0.1", 10010, "A =").await.unwrap();
+    let s1_addr = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 10010);
     let p1 = PeerList::new();
 
-    let s2 = Socket::new("127.0.0.1", 9000, "B =").await.unwrap();
-    let s2_addr = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 9000);
+    let s2 = Socket::new("127.0.0.1", 10011, "B =").await.unwrap();
+    let s2_addr = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 10011);
     let p2 = PeerList::new();
 
     // Make p1 load p2's address, and vice versa

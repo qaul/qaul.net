@@ -17,7 +17,7 @@ pub(crate) struct State {
 impl State {
     /// Create a new run state
     pub(crate) async fn new(cfg: &Config) -> State {
-        let mut ep = Endpoint::new(&cfg.addr, cfg.port, "").await.unwrap();
+        let mut ep = Endpoint::new(&cfg.addr, cfg.port, "qaul-hubd").await.unwrap();
         ep.mode(match cfg.mode.as_str() {
             "dynamic" => Mode::Dynamic,
             _ => Mode::Static,
