@@ -1,4 +1,4 @@
-use crate::{Mode, Packet, PeerList, Result};
+use crate::{Mode, Packet, PeerList, PeerState, Result};
 use async_std::{
     io::{
         self,
@@ -19,10 +19,11 @@ pub(crate) struct Socket {
     inner: TcpListener,
     streams: RwLock<BTreeMap<usize, TcpStream>>,
     port: u16,
+    pub id: String,
 }
 
 impl Socket {
-    pub(crate) async fn new(addr: &str, port: u16) -> Result<Arc<Self>> {
+    pub(crate) async fn new(addr: &str, port: u16, id: &str) -> Result<Arc<Self>> {
         Ok(TcpListener::bind(format!("{}:{}", addr, port))
             .await
             .map(|inner| {
@@ -30,6 +31,7 @@ impl Socket {
                     inner,
                     streams: RwLock::new(BTreeMap::new()),
                     port,
+                    id: id.into(),
                 })
             })?)
     }
@@ -41,16 +43,17 @@ impl Socket {
     }
 
     /// Start peering by sending a Hello packet
-    pub(crate) async fn introduce(self: &Arc<Self>, id: usize, ip: SocketAddr) {
+    pub(crate) async fn introduce(self: &Arc<Self>, id: usize, ip: SocketAddr) -> Option<()> {
         if self.streams.read().await.contains_key(&id) {
-            return;
+            return None;
         }
 
         let mut s = TcpStream::connect(ip).await.unwrap();
         self.streams.write().await.insert(id, s.clone());
 
         &self.streams.read().await;
-        send_packet(&mut s, Packet::Hello { port: self.port }).await;
+        send_packet(&mut s, Packet::Hello { port: self.port }, &self.id).await;
+        Some(())
     }
 
     /// Run the async
@@ -65,57 +68,89 @@ impl Socket {
     async fn run(tx: Sender<Frame>, mode: Mode, socket: Arc<Self>, peers: Arc<PeerList>) {
         let mut inc = socket.inner.incoming();
 
-        println!("Listening for: {:?}", socket.inner.local_addr());
+        println!(
+            "{} Listening for: {:?}",
+            socket.id,
+            socket.inner.local_addr()
+        );
         while let Some(Ok(mut stream)) = inc.next().await {
-            let mut addr = match stream.peer_addr() {
-                Ok(a) => a,
-                Err(_) => continue,
-            };
+            loop {
+                let addr = match stream.peer_addr() {
+                    Ok(a) => a,
+                    Err(_) => continue,
+                };
 
-            // Drop unknown connections
-            if !peers.is_peer(&addr.ip()).await && !mode.dynamic() {
-                println!("Connection from unknown peer `{}`, closing!", addr);
-                break;
-            }
+                // Drop unknown connections
+                let state = peers.peer_state(&addr).await;
+                if state == PeerState::Unknown && !mode.dynamic() {
+                    println!(
+                        "{} Connection from unknown peer `{}`, closing!",
+                        socket.id, addr
+                    );
+                    break;
+                }
 
-            // Try to read a packet
-            let mut fb = PacketBuilder::new(&mut stream);
-            fb.parse().await.unwrap(); // TODO: Don't panic!
-            let f = fb.build().unwrap();
+                // Try to read a packet
+                let mut fb = PacketBuilder::new(&mut stream);
+                fb.parse().await.unwrap(); // TODO: Don't panic!
+                let f = fb.build().unwrap();
 
-            println!("Full packet `{:?}` received!", f);
+                println!("{} Full packet `{:?}` received!", socket.id, f);
 
-            // Disambiguate differente packet types
-            match f {
-                // Forward to inbox
-                Packet::Frame(f) => tx.send(f).await,
+                // Disambiguate differente packet types
+                match (f, state) {
+                    // Forward to inbox
+                    (Packet::Frame(f), PeerState::Valid) => tx.send(f).await,
+                    (Packet::Frame(_), PeerState::Unverified) => {
+                        println!(
+                            "Dropping incoming packet because peer {:?} is unverified!",
+                            &addr
+                        );
+                    }
 
-                // Add to stream/ peer list
-                Packet::Hello { port } => {
-                    addr.set_port(port);
-                    match peers.add(&addr).await {
-                        Some(id) => socket.introduce(id, addr).await,
-                        None => {
-                            let id = peers.get_id(&addr.ip()).await.unwrap();
+                    // Add to stream/ peer list
+                    (Packet::Hello { port }, PeerState::Unverified) => {
+                        let id = peers.add_src(&addr, port).await.unwrap();
+                        let dst = peers.get_dst_by_src(&addr).await.unwrap();
+
+                        // When we have already introduced ourselves, but
+                        // the peer wasn't previously verified because we
+                        // hadn't gotten a message from them, we need to
+                        // cancel introduction and just switch to sending
+                        // a keep-alive.
+                        if socket.introduce(id, dst).await.is_none() {
                             let mut stream = get_stream(&socket.streams, id).await;
-                            send_packet(&mut stream, Packet::KeepAlive).await;
+                            send_packet(&mut stream, Packet::KeepAlive, &socket.id).await;
                         }
                     }
-                }
+                    (Packet::Hello { port: _ }, PeerState::Valid) => {
+                        let id = peers.get_id_by_src(&addr).await.unwrap();
+                        let mut stream = get_stream(&socket.streams, id).await;
+                        send_packet(&mut stream, Packet::KeepAlive, &socket.id).await;
+                    }
 
-                // Reply to a keep-alive with 2seconds delay
-                Packet::KeepAlive => {
-                    let peers = Arc::clone(&peers);
-                    let id = peers.get_id(&addr.ip()).await.unwrap();
-                    let mut stream = get_stream(&socket.streams, id).await;
-                    task::spawn(async move {
-                        task::sleep(Duration::from_secs(1)).await;
-                        println!("Replying to keep-alive!");
-                        send_packet(&mut stream, Packet::KeepAlive).await;
-                    });
+                    // Reply to a keep-alive with 2seconds delay
+                    (Packet::KeepAlive, _) => {
+                        let peers = Arc::clone(&peers);
+                        let id = peers.get_id_by_src(&addr).await.unwrap();
+                        let mut stream = get_stream(&socket.streams, id).await;
+                        let node_id = socket.id.clone();
+                        task::spawn(async move {
+                            task::sleep(Duration::from_secs(2)).await;
+                            println!("{} Replying to keep-alive!", node_id);
+                            send_packet(&mut stream, Packet::KeepAlive, &node_id).await;
+                        });
+                    }
+                    (packet, state) => {
+                        panic!(format!("Failed with tuple: {:?}, {:?}", packet, state))
+                    }
                 }
             }
+
+            println!("{} Exited read-work loop!", socket.id);
         }
+
+        println!("{} Exited listen loop!", socket.id);
     }
 }
 
@@ -126,20 +161,20 @@ async fn get_stream(streams: &RwLock<BTreeMap<usize, TcpStream>>, id: usize) -> 
         .clone()
 }
 
-async fn send_packet(stream: &mut TcpStream, packet: Packet) {
-    let vec = serialize(&packet).unwrap();
+async fn send_packet(stream: &mut TcpStream, packet: Packet, id: &str) {
+    let mut vec = serialize(&packet).unwrap();
     match packet {
-        Packet::Hello { .. } => println!("Sending HELLO to {:?}", stream.peer_addr()),
-        Packet::KeepAlive => println!("Sending KEEP-ALIVE to {:?}", stream.peer_addr()),
+        Packet::Hello { .. } => println!("{} Sending HELLO to {:?}", id, stream.peer_addr()),
+        Packet::KeepAlive => println!("{} Sending KEEP-ALIVE to {:?}", id, stream.peer_addr()),
         _ => {}
     }
 
-    let mut buf = [0; 8];
+    let mut buf = vec![0; 8];
     BigEndian::write_u64(&mut buf, vec.len() as u64);
-    stream.write_all(&buf).await.unwrap();
+    buf.append(&mut vec);
 
-    if let Err(_) = stream.write_all(&vec).await {
-        println!("Failed to send data");
+    if let Err(e) = stream.write_all(&buf).await {
+        println!("{} Failed to send data: {:?}", id, e);
     }
 }
 
@@ -176,21 +211,25 @@ impl<'s> PacketBuilder<'s> {
 async fn simple_send() {
     use std::net::{Ipv4Addr, SocketAddrV4};
 
-    let s1 = Socket::new("127.0.0.1", 8000).await.unwrap();
+    let s1 = Socket::new("127.0.0.1", 8000, "A =").await.unwrap();
     let s1_addr = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8000);
     let p1 = PeerList::new();
-    p1.load(vec![s1_addr]).await.unwrap();
-    s1.start(Mode::Static, &p1);
 
-    let s2 = Socket::new("127.0.0.1", 9000).await.unwrap();
+    let s2 = Socket::new("127.0.0.1", 9000, "B =").await.unwrap();
     let s2_addr = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 9000);
     let p2 = PeerList::new();
-    p2.load(vec![s2_addr]).await.unwrap();
+
+    // Make p1 load p2's address, and vice versa
+    p1.load(vec![s2_addr]).await.unwrap();
+    p2.load(vec![s1_addr]).await.unwrap();
+
+    s1.start(Mode::Static, &p1);
     s2.start(Mode::Static, &p2);
 
-    // Let s1 -> s2
-    let id = dbg!(p1.add(&s2_addr.clone().into()).await.unwrap());
+    // Make p1 introduce itself to p2
+    let id = p1.get_id_by_dst(&s2_addr.into()).await.unwrap();
     s1.introduce(id, s2_addr.into()).await;
 
+    // Give the test some time to run
     task::sleep(Duration::from_secs(10)).await;
 }

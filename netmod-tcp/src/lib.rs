@@ -7,7 +7,7 @@ mod socket;
 
 pub use error::{Error, Result};
 
-pub(crate) use peers::PeerList;
+pub(crate) use peers::{PeerList, PeerState};
 pub(crate) use proto::Packet;
 pub(crate) use socket::Socket;
 
@@ -42,7 +42,7 @@ impl Endpoint {
     pub async fn new(addr: &str, port: u16) -> Result<Self> {
         Ok(Self {
             mode: Arc::new(RwLock::new(Mode::Static)),
-            socket: Socket::new(addr, port).await?,
+            socket: Socket::new(addr, port, "").await?,
             peers: PeerList::new(),
             inbox: None,
         })

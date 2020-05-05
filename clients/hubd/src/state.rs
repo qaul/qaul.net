@@ -8,6 +8,7 @@ use ratman::Router;
 use std::collections::HashSet;
 use std::{fs::File, io::Read, net::SocketAddr, str::FromStr, sync::Arc};
 
+#[allow(unused)]
 pub(crate) struct State {
     qaul: Arc<Qaul>,
     router: Arc<Router>,
