@@ -38,9 +38,19 @@ impl Socket {
 
     /// Send a fully encoded packet to a peer.  At this point
     /// connection checking has already been done
-    pub(crate) async fn send(self: Arc<Self>, peer: usize, data: Frame) -> Result<()> {
+    pub(crate) async fn send(self: &Arc<Self>, peer: usize, data: Frame) -> Result<()> {
         let mut stream = get_stream(&self.streams, peer).await;
         send_packet(&mut stream, Packet::Frame(data), &self.id).await;
+        Ok(())
+    }
+
+    pub(crate) async fn send_all(self: &Arc<Self>, data: Frame) -> Result<()> {
+        let streams = self.streams.read().await;
+        let ids: Vec<_> = streams.iter().map(|(id, _)| id).collect();
+        for id in ids {
+            self.send(*id, data.clone()).await?;
+        }
+
         Ok(())
     }
 
@@ -50,7 +60,7 @@ impl Socket {
             return None;
         }
 
-        let mut s = TcpStream::connect(ip).await.unwrap();
+        let mut s = TcpStream::connect(dbg!(ip)).await.unwrap();
         self.streams.write().await.insert(id, s.clone());
 
         &self.streams.read().await;
@@ -59,7 +69,11 @@ impl Socket {
     }
 
     /// Run the async
-    pub(crate) fn start(self: &Arc<Self>, mode: Mode, peers: &Arc<PeerList>) -> Receiver<Frame> {
+    pub(crate) fn start(
+        self: &Arc<Self>,
+        mode: Mode,
+        peers: &Arc<PeerList>,
+    ) -> Receiver<(Frame, usize)> {
         let socket = Arc::clone(&self);
         let peers = Arc::clone(peers);
         let (tx, rx) = channel(1);
@@ -67,7 +81,7 @@ impl Socket {
         rx
     }
 
-    async fn run(tx: Sender<Frame>, mode: Mode, socket: Arc<Self>, peers: Arc<PeerList>) {
+    async fn run(tx: Sender<(Frame, usize)>, mode: Mode, socket: Arc<Self>, peers: Arc<PeerList>) {
         let mut inc = socket.inner.incoming();
 
         println!(
@@ -102,7 +116,10 @@ impl Socket {
                 // Disambiguate differente packet types
                 match (f, state) {
                     // Forward to inbox
-                    (Packet::Frame(f), PeerState::Valid) => tx.send(f).await,
+                    (Packet::Frame(f), PeerState::Valid) => {
+                        let id = peers.get_id_by_src(&addr).await.unwrap();
+                        tx.send((f, id)).await;
+                    }
                     (Packet::Frame(_), PeerState::Unverified) => {
                         println!(
                             "Dropping incoming packet because peer {:?} is unverified!",

@@ -48,7 +48,16 @@ impl PeerList {
         Default::default()
     }
 
-    ///
+    pub(crate) async fn all_known(self: &Arc<Self>) -> Vec<(usize, SocketAddr)> {
+        self.id_map
+            .read()
+            .await
+            .iter()
+            .map(|(id, peer)| (*id, peer.dst.clone()))
+            .collect()
+    }
+
+    /// Get the state of a peer (unknown, unverified, or valid)
     pub(crate) async fn peer_state(self: &Arc<Self>, src: &SourceAddr) -> PeerState {
         let peers = self.peers.read().await;
         let id_map = self.id_map.read().await;
@@ -89,15 +98,6 @@ impl PeerList {
             .map(|peer| peer.dst.clone())
     }
 
-    /// Get the destination address based on the source address
-    pub(crate) async fn get_dst_by_id(self: &Arc<Self>, id: usize) -> Option<DstAddr> {
-        self.id_map
-            .read()
-            .await
-            .get(&id)
-            .map(|peer| peer.dst.clone())
-    }
-
     /// Add the source part of a peer based on the ip and dst port
     pub(crate) async fn add_src(
         self: &Arc<Self>,
@@ -129,50 +129,6 @@ impl PeerList {
         addr_map.insert(src.clone(), peer.clone());
         Some(*id)
     }
-
-    // /// Add a new peer with it's source addr and destination port
-    // ///
-    // /// This function is only used in the DYNAMIC run mode.
-    // ///
-    // /// The source address is taken from the incoming stream (from
-    // /// where the message was sent), and the destination port is where
-    // /// the peer is listening to incoming messages for itself.
-    // pub(crate) async fn add(self: &Arc<Self>, src: &SourceAddr, dst_port: u16) -> Option<usize> {
-    //     let dst = {
-    //         let mut s = src.clone();
-    //         s.set_port(dst_port);
-    //         s
-    //     };
-
-    //     // Create a peer
-    //     let peer = Peer {
-    //         src: Some(src.clone()),
-    //         dst,
-    //     };
-
-    //     // Lock all data stores
-    //     let mut addr_map = self.addr_map.write().await;
-    //     let mut id_map = self.id_map.write().await;
-    //     let mut peers = self.peers.write().await;
-    //     let mut curr = self.curr.write().await;
-
-    //     // Return None if the peer is already known
-    //     if peers.get(&src).is_none() {
-    //         return None;
-    //     }
-
-    //     // Insert the peer
-    //     let new_id = *curr;
-    //     addr_map.insert(src.clone(), peer.clone());
-    //     id_map.insert(new_id, peer.clone());
-    //     peers.insert(src.clone(), new_id);
-
-    //     // Increment ID
-    //     *curr += 1;
-
-    //     // Return ID
-    //     Some(new_id)
-    // }
 
     pub(crate) async fn load<I: Into<SocketAddr>>(
         self: &Arc<Self>,
@@ -212,6 +168,16 @@ impl PeerList {
                 err
             }
         })
+    }
+
+    /// Get the destination address based on the source address
+    #[cfg(test)]
+    pub(crate) async fn get_dst_by_id(self: &Arc<Self>, id: usize) -> Option<DstAddr> {
+        self.id_map
+            .read()
+            .await
+            .get(&id)
+            .map(|peer| peer.dst.clone())
     }
 }
 
