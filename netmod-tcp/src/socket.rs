@@ -38,8 +38,10 @@ impl Socket {
 
     /// Send a fully encoded packet to a peer.  At this point
     /// connection checking has already been done
-    pub(crate) async fn send(self: Arc<Self>, peer: SocketAddr, data: Frame) -> Result<()> {
-        unimplemented!()
+    pub(crate) async fn send(self: Arc<Self>, peer: usize, data: Frame) -> Result<()> {
+        let mut stream = get_stream(&self.streams, peer).await;
+        send_packet(&mut stream, Packet::Frame(data), &self.id).await;
+        Ok(())
     }
 
     /// Start peering by sending a Hello packet
@@ -231,5 +233,7 @@ async fn simple_send() {
     s1.introduce(id, s2_addr.into()).await;
 
     // Give the test some time to run
-    task::sleep(Duration::from_secs(10)).await;
+    task::sleep(Duration::from_secs(2)).await;
+
+    assert_eq!(p1.peer_state(&s2_addr.into()).await, PeerState::Valid);
 }
