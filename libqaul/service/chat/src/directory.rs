@@ -14,12 +14,22 @@ impl RoomDirectory {
     }
 
     async fn get_inner(&self, user: UserAuth) -> MetadataMap {
-        self.qaul
-            .services()
-            .query(user, ASC_NAME, Tag::empty(tags::ROOM_LIST))
-            .await
-            .unwrap()
-            .remove(0)
+        let map_result = self.qaul
+        .services()
+        .query(user, ASC_NAME, Tag::empty(tags::ROOM_LIST))
+        .await;
+
+        match map_result {
+            Ok(mut map) if map.len() > 0 => map.remove(0),
+            Ok(_) => {
+                println!("Empty MetadataMap");
+                MetadataMap::new(ASC_NAME)
+            },
+            Err(e) => {
+                println!("Error: in get_inner occured: {}", e);
+                MetadataMap::new(ASC_NAME)
+            }
+        }
     }
 
     /// Get all known rooms for a user
