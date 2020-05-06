@@ -1,6 +1,6 @@
 use crate::{tags, Room, RoomDiff, RoomId, ASC_NAME};
 use async_std::sync::Arc;
-use conjoiner;
+use bincode;
 use libqaul::{helpers::Tag, services::MetadataMap, users::UserAuth, Qaul};
 
 /// Keeps track of known rooms via the service metadata API
@@ -31,7 +31,7 @@ impl RoomDirectory {
         let meta = self.get_inner(user).await;
 
         meta.iter()
-            .map(|(_, v)| conjoiner::deserialise(v).unwrap())
+            .map(|(_, v)| bincode::deserialize(v).unwrap())
             .collect()
     }
 
@@ -41,7 +41,7 @@ impl RoomDirectory {
         meta.iter().fold(None, |opt, (id_, vec)| {
             opt.or_else(|| {
                 if id_ == &id.to_string() {
-                    Some(conjoiner::deserialise(vec).unwrap())
+                    Some(bincode::deserialize(vec).unwrap())
                 } else {
                     None
                 }
@@ -58,7 +58,7 @@ impl RoomDirectory {
                 ASC_NAME,
                 self.get_inner(user)
                     .await
-                    .add(room.id.to_string(), conjoiner::serialise(room).unwrap()),
+                    .add(room.id.to_string(), bincode::serialize(room).unwrap()),
                 Tag::empty(tags::ROOM_LIST),
             )
             .await

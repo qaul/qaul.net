@@ -3,7 +3,7 @@
 use crate::{tags, Chat, ChatMessage, RoomId, RoomState, Subscription, ASC_NAME};
 use async_std::sync::Arc;
 use chrono::Utc;
-use conjoiner::{deserialise, serialise};
+use bincode::{deserialize, serialize};
 use libqaul::{
     error::Result,
     messages::{Message, Mode, MsgQuery},
@@ -36,7 +36,7 @@ struct Meta {
 
 impl From<Message> for ChatMessage {
     fn from(msg: Message) -> Self {
-        let Meta { content, room } = deserialise(&msg.payload).unwrap();
+        let Meta { content, room } = deserialize(&msg.payload).unwrap();
         Self {
             id: msg.id,
             sender: msg.sender,
@@ -50,7 +50,7 @@ impl From<Message> for ChatMessage {
 /// Generate a multiplexed payload for a libqaul message
 pub(crate) fn gen_payload(content: impl Into<String>, room: RoomState) -> Vec<u8> {
     let content = content.into();
-    serialise(&Meta { content, room }).unwrap()
+    serialize(&Meta { content, room }).unwrap()
 }
 
 /// Simple looping helper function that dispatches messages
