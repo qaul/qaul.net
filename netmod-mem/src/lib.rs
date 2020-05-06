@@ -4,15 +4,11 @@
 //! `netmod` easier and reproducable.
 
 use async_std::{
-    future::{self, Future},
-    pin::Pin,
     sync::{Arc, RwLock},
-    task::{self, Poll},
+    task,
 };
 use async_trait::async_trait;
-use crossbeam_channel::TryRecvError;
 use ratman_netmod::{Endpoint, Error as NetError, Frame, Result as NetResult, Target};
-use std::time::Duration;
 
 /// An input/output pair of `mpsc::channel`s.
 ///
