@@ -23,6 +23,7 @@ members = [
     "ratman/harness",
     "ratman/identity",
     "ratman/netmod",
+    "ratman/configure",
 
     # various utility crates
     "async-notify",

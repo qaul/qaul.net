@@ -1,0 +1,10 @@
+[package]
+name = "ratman-configure"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+
+[dependencies]
+ratman = { version = "0.1", path = ".." }
+netmod-tcp = { version = "0.1", path = "../../netmod-tcp" }
+netmod-udp = { version = "0.1", path = "../../netmod-udp" }

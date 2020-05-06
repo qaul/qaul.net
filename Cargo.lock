@@ -1918,6 +1918,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ratman-configure"
+version = "0.1.0"
+dependencies = [
+ "netmod-tcp",
+ "netmod-udp",
+ "ratman",
+]
+
+[[package]]
 name = "ratman-harness"
 version = "0.1.0"
 dependencies = [
