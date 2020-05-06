@@ -14,13 +14,14 @@ impl RoomDirectory {
     }
 
     async fn get_inner(&self, user: UserAuth) -> MetadataMap {
-        let map_result = self.qaul
-        .services()
-        .query(user, ASC_NAME, Tag::empty(tags::ROOM_LIST))
-        .await;
-
+        let mut map_result = self
+            .qaul
+            .services()
+            .query(user, ASC_NAME, Tag::empty(tags::ROOM_LIST))
+            .await
+            .unwrap();
+        map_result.reverse();
         map_result
-            .reverse()
             .pop()
             .unwrap_or_else(|| MetadataMap::new(ASC_NAME))
     }
