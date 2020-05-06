@@ -82,7 +82,7 @@ impl Room {
             id: RoomId::random(),
             users,
             name,
-            create_time: Utc::now(),
+            //create_time: Utc::now(),
         };
 
         serv.rooms.insert(user, &room).await;
