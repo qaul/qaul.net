@@ -1924,6 +1924,8 @@ dependencies = [
  "netmod-tcp",
  "netmod-udp",
  "ratman",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
