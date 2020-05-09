@@ -37,7 +37,7 @@ pub trait Initialize<T> {
 
 /// A very simple three-point network
 ///
-/// This notwork consists of three nodes, `A`, `middle`, and `B`, that
+/// This network consists of three nodes, `A`, `middle`, and `B`, that
 /// are topologically layed out as follows: `A` - `middle` - `B`.
 /// Only A and B are exposed from this struct, and initialised under
 /// the hood.

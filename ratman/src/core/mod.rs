@@ -72,7 +72,7 @@ impl Core {
         self.dispatch.send_msg(msg).await
     }
 
-    /// Send a frame direncly, without message slicing
+    /// Send a frame directly, without message slicing
     ///
     /// Some components in Ratman, outside of the routing core, need
     /// access to direct frame intercepts, because protocol logic
