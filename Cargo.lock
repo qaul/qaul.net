@@ -1805,6 +1805,7 @@ dependencies = [
  "libqaul",
  "netmod-tcp",
  "ratman",
+ "ratman-configure",
 ]
 
 [[package]]

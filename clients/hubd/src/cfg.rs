@@ -1,5 +1,8 @@
 use clap::{App, Arg};
-use std::{env, path::PathBuf};
+use ratman::Router;
+use ratman_configure::config::{Endpoint, Network, Params};
+use std::collections::BTreeMap;
+use std::{env, fs::File, io::Read, path::PathBuf, sync::Arc};
 
 /// The hub configuration
 pub(crate) struct Config {
@@ -13,8 +16,42 @@ pub(crate) struct Config {
     pub(crate) port: u16,
 }
 
+impl Config {
+    /// Consume the application config into a fully initialised router
+    pub(crate) fn into_router(self) -> Arc<Router> {
+        let mut buf = String::new();
+        let mut f = File::open(self.peers).expect("Peers configuration not found!");
+        f.read_to_string(&mut buf).unwrap();
+
+        let ep = Endpoint {
+            id: 0,
+            params: Params::Tcp {
+                addr: self.addr,
+                port: self.port,
+                peers: buf
+                    .split("\n")
+                    .map(|s| s.parse().expect("Invalid peer port-address format!"))
+                    .collect(),
+                dynamic: false,
+            },
+        };
+
+        Network {
+            endpoints: {
+                let mut map = BTreeMap::new();
+                map.insert(0, ep);
+                map
+            },
+            patches: Default::default(),
+        }
+        .into_router()
+    }
+}
+
 pub(crate) fn cli<'a>() -> App<'a, 'a> {
-    App::new("hubd")
+    App::new("qaul-hubd")
+        .about("Routing and state handling daemon for qaul.net and ratman networks")
+        .version("0.1.0")
         .arg(
             Arg::with_name("PEERS_PATH")
                 .short("p")
@@ -35,7 +72,7 @@ pub(crate) fn cli<'a>() -> App<'a, 'a> {
         )
         .arg(
             Arg::with_name("SOCKET_PORT")
-                .short("p")
+                .short("o")
                 .long("port")
                 .help("The hub's bound socket port"),
         )
@@ -74,72 +111,3 @@ pub(crate) fn match_fold<'a>(app: App<'a, 'a>) -> Config {
             .unwrap_or(9001),
     }
 }
-
-// use crate::config::Config;
-// use async_std::path::PathBuf;
-// use dirs::config_dir;
-
-// use quicli::prelude::*;
-// use serde_json;
-// use structopt::StructOpt;
-
-// /// Serde default functions
-// mod defaults {
-//     pub const DEFAULT_SYSTEM_CFG_PATH: &'static str = "/etc/qauld/config.json";
-// }
-
-// #[derive(Debug, StructOpt)]
-// #[structopt(name = "qauld", about = "daemon service for qaul.net")]
-// struct CommandLineOptions {
-//     #[structopt(short = "c", long = "config", parse(from_os_str))]
-//     configuration_file_path: Option<PathBuf>,
-// }
-
-// pub async fn inflate_options() -> Config {
-//     let cli_opts = CommandLineOptions::from_args();
-//     use async_std::fs::File;
-//     use async_std::prelude::*;
-//     let system_path = PathBuf::from(defaults::DEFAULT_SYSTEM_CFG_PATH);
-//     let user_path = config_dir().map(|d| {
-//         let mut p = PathBuf::from(d);
-//         p.push("qauld");
-//         p.push("config.json");
-//         p
-//     });
-
-//     let cfg_file_path = {
-//         if let Some(cli_path) = cli_opts.configuration_file_path {
-//             Some(cli_path)
-//         } else if user_path.is_some() && user_path.clone().unwrap().as_path().is_file().await {
-//             Some(user_path.clone().unwrap())
-//         } else if system_path.as_path().is_file().await {
-//             Some(system_path.clone())
-//         } else {
-//             None
-//         }
-//     };
-
-//     let cfg_file_contents = match cfg_file_path {
-//         Some(pathbuf) => {
-//             let mut contents = Vec::new();
-//             let mut file = File::open(&pathbuf).await.expect(&format!(
-//                 "Could not open configuration file at '{}'. Error",
-//                 pathbuf.display()
-//             ));
-//             file.read_to_end(&mut contents).await.expect(&format!(
-//                 "Could not read configuration file at '{}'. Error",
-//                 pathbuf.display()
-//             ));
-//             contents
-//         }
-//         None => {
-//             warn!("No configuration file found; both system path {} and user path {:?} are not readable or do not exist.",
-//                 system_path.display(),
-//                 user_path.map(|p| p.display().to_string()));
-//             vec![]
-//         }
-//     };
-
-//     serde_json::from_slice(&cfg_file_contents[..])
-//         .expect("Could not understand configuration file. Error")
-// }
