@@ -1511,6 +1511,8 @@ dependencies = [
  "ratman-identity",
  "ratman-netmod",
  "serde",
+ "tracing",
+ "tracing-futures",
 ]
 
 [[package]]
@@ -1806,6 +1808,8 @@ dependencies = [
  "netmod-tcp",
  "ratman",
  "ratman-configure",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

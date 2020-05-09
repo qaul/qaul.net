@@ -56,24 +56,37 @@ pub(crate) fn cli<'a>() -> App<'a, 'a> {
             Arg::with_name("PEERS_PATH")
                 .short("p")
                 .long("peers")
-                .help("The path to initial peers"),
+                .takes_value(true)
+                .required(true)
+                .value_name("PATH")
+                .help("The path to a file, containing a list of newline separated initial peers"),
         )
         .arg(
             Arg::with_name("RUN_MODE")
                 .short("m")
                 .long("mode")
+                .takes_value(true)
+                .value_name("MODE")
+                .default_value("static")
+                .possible_values(&["static", "dynamic"])
                 .help("The hub's run mode"),
         )
         .arg(
             Arg::with_name("SOCKET_ADDR")
                 .short("a")
                 .long("addr")
+                .takes_value(true)
+                .value_name("ADDR")
+                .default_value("0.0.0.0")
                 .help("The hub's bound socket address"),
         )
         .arg(
             Arg::with_name("SOCKET_PORT")
                 .short("o")
                 .long("port")
+                .takes_value(true)
+                .required(true)
+                .value_name("PORT")
                 .help("The hub's bound socket port"),
         )
 }
@@ -83,11 +96,7 @@ pub(crate) fn match_fold<'a>(app: App<'a, 'a>) -> Config {
 
     Config {
         peers: {
-            let p = m
-                .value_of("PEERS_PATH")
-                .map(|s| s.to_owned())
-                .or(env::var("QAUL_HUBD_PEERS").ok())
-                .expect("No initial peer set provided!");
+            let p = m.value_of("PEERS_PATH").map(|s| s.to_owned()).unwrap();
             let mut buf = PathBuf::new();
             buf.push(p);
             buf

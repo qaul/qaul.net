@@ -1,14 +1,19 @@
 [package]
 name = "qaul-hubd"
+description = "Routing, data, and state daemon for libqaul applications"
 version = "0.1.0"
 authors = ["Leonora Tindall <nora@nora.codes>", "Katharina Fey <kookie@spacekookie>"]
+license = "AGPL-3.0-or-later"
 edition = "2018"
 
 [dependencies]
-async-std = { version = "1.0", features = ["attributes"] }
-clap = { version = "2.0", features = ["wrap_help", "color"] }
-directories = "2.0"
 libqaul = { path = "../../libqaul" }
 netmod-tcp = { path = "../../netmod-tcp" }
 ratman = { path = "../../ratman" }
 ratman-configure = { path = "../../ratman/configure" }
+
+async-std = { version = "1.0", features = ["attributes"] }
+clap = { version = "2.0", features = ["wrap_help", "color"] }
+directories = "2.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.2s", features = ["fmt"] }

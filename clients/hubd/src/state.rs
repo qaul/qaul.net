@@ -17,7 +17,9 @@ pub(crate) struct State {
 impl State {
     /// Create a new run state
     pub(crate) async fn new(cfg: &Config) -> State {
-        let mut ep = Endpoint::new(&cfg.addr, cfg.port, "qaul-hubd").await.unwrap();
+        let mut ep = Endpoint::new(&cfg.addr, cfg.port, "qaul-hubd")
+            .await
+            .unwrap();
         ep.mode(match cfg.mode.as_str() {
             "dynamic" => Mode::Dynamic,
             _ => Mode::Static,
@@ -32,7 +34,12 @@ impl State {
             .split("\n")
             .into_iter()
             .fold(HashSet::new(), |mut set, peer| {
-                set.insert(SocketAddr::from_str(&peer).unwrap());
+                if peer != "" {
+                    set.insert(
+                        SocketAddr::from_str(&peer)
+                            .expect(&format!("Peer `{}` had a bad format!", &peer)),
+                    );
+                }
                 set
             });
 
