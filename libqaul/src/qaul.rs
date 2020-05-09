@@ -15,6 +15,7 @@ use crate::{
 use alexandria::{Builder, Library};
 use ratman::Router;
 use std::{path::Path, sync::Arc};
+use tracing::{error, info};
 
 /// Primary context structure for `libqaul`
 ///
@@ -104,11 +105,22 @@ impl Qaul {
     /// that the main thread will take over execution of some other
     /// application loop so to enable further API abstractions to hook
     /// into the service API.
+    #[tracing::instrument(skip(router), level = "info")]
     pub fn new<'p, P>(router: Arc<Router>, store_path: P) -> Arc<Self>
     where
-        P: Into<&'p Path>,
+        P: Into<&'p Path> + std::fmt::Debug,
     {
-        let store = Builder::new().offset(store_path).build().unwrap();
+        let path = store_path.into();
+        info!("Initialising libqaul with storage path `{:?}`", path);
+
+        let store = match Builder::new().offset(path).build() {
+            Ok(s) => s,
+            Err(e) => {
+                error!("Failed to create backing store: {}", e.to_string());
+                std::process::exit(2);
+            }
+        };
+        
         let q = Arc::new(Self {
             router: Arc::clone(&router),
             users: UserStore::new(Arc::clone(&store)),
