@@ -1,8 +1,9 @@
 //!
 
-use ratman::Identity;
-use std::collections::{BTreeMap, BTreeSet};
-use std::{net::SocketAddr, ops::Deref};
+use async_std::task::block_on;
+use ratman::Router;
+use std::collections::BTreeMap;
+use std::{net::SocketAddr, ops::Deref, sync::Arc};
 
 pub type Id = usize;
 
@@ -77,6 +78,40 @@ pub struct Network {
 impl Network {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Consume the `Network` instance to initialise a Router
+    pub fn into_router(self) -> Arc<Router> {
+        let _p = self.patches;
+
+        self.endpoints
+            .into_iter()
+            .fold(Router::new(), |router, (_, ep)| {
+                match ep.params {
+                    // FIXME: Figure out what the udp module actually needs
+                    Params::LocalUpd { addr: _ } => {
+                        use netmod_udp::Endpoint;
+                        let ep = Endpoint::spawn(9000);
+                        block_on(async { router.add_endpoint(ep).await });
+                    }
+                    Params::Tcp {
+                        addr,
+                        port,
+                        peers,
+                        dynamic: _,
+                    } => {
+                        use netmod_tcp::Endpoint;
+                        block_on(async {
+                            let ep = Endpoint::new(&addr, port, "qauld").await.unwrap();
+                            ep.load_peers(peers).await.unwrap();
+                            router.add_endpoint(ep).await;
+                        });
+                    }
+                    _ => unimplemented!(),
+                }
+
+                router
+            })
     }
 }
 

@@ -1921,6 +1921,8 @@ dependencies = [
 name = "ratman-configure"
 version = "0.1.0"
 dependencies = [
+ "async-std",
+ "netmod-mem",
  "netmod-tcp",
  "netmod-udp",
  "ratman",
