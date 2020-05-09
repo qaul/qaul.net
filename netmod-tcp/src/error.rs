@@ -13,6 +13,8 @@ pub enum Error {
     InvalidMode,
     #[fail(display = "failed to initialise socket: invalid address")]
     InvalidAddr,
+    #[fail(display = "failed to send packet!")]
+    FailedToSend
 }
 
 use std::net::SocketAddr;

@@ -1,4 +1,4 @@
-use crate::{Mode, Packet, PeerList, PeerState, Result};
+use crate::{Error, Mode, Packet, PeerList, PeerState, Result};
 use async_std::{
     io::{
         self,
@@ -13,6 +13,7 @@ use bincode::{deserialize, serialize};
 use byteorder::{BigEndian, ByteOrder};
 use netmod::Frame;
 use std::{collections::BTreeMap, net::SocketAddr, time::Duration};
+use tracing::{debug, error};
 
 /// A wrapper around tcp socket logic
 pub(crate) struct Socket {
@@ -40,8 +41,9 @@ impl Socket {
     /// connection checking has already been done
     pub(crate) async fn send(self: &Arc<Self>, peer: usize, data: Frame) -> Result<()> {
         let mut stream = get_stream(&self.streams, peer).await;
-        send_packet(&mut stream, Packet::Frame(data), &self.id).await;
-        Ok(())
+        send_packet(&mut stream, Packet::Frame(data), &self.id)
+            .await
+            .map_err(|_| Error::FailedToSend)
     }
 
     pub(crate) async fn send_all(self: &Arc<Self>, data: Frame) -> Result<()> {
@@ -60,11 +62,45 @@ impl Socket {
             return None;
         }
 
-        let mut s = TcpStream::connect(dbg!(ip)).await.unwrap();
-        self.streams.write().await.insert(id, s.clone());
+        // In case we fail to immediately connect, we want to just
+        // retry the same peer again and again, until it works.  We
+        // spawn a long-running task here to accomplish this.
+        let socket = Arc::clone(&self);
+        task::spawn(async move {
+            let mut ctr: u16 = 0;
 
-        &self.streams.read().await;
-        send_packet(&mut s, Packet::Hello { port: self.port }, &self.id).await;
+            loop {
+                let pre = match ctr {
+                    0 => "".into(),
+                    n => format!("[retry #{}]", n),
+                };
+
+                debug!("{}, Attempting connection to peer: {}", pre, ip.to_string());
+                let mut s = match TcpStream::connect(ip).await {
+                    Ok(s) => s,
+                    Err(e) => {
+                        error!("Failed to connect: {}", e.to_string());
+                        task::sleep(Duration::from_secs(30)).await;
+                        ctr += 1;
+                        continue;
+                    }
+                };
+
+                socket.streams.write().await.insert(id, s.clone());
+                &socket.streams.read().await;
+
+                match send_packet(&mut s, Packet::Hello { port: socket.port }, &socket.id).await {
+                    Ok(()) => break,
+                    Err(e) => {
+                        error!("Failed to send packet: {}", e.to_string());
+                        task::sleep(Duration::from_secs(10)).await;
+                        ctr += 1;
+                        continue;
+                    }
+                }
+            }
+        });
+
         Some(())
     }
 
@@ -180,11 +216,20 @@ async fn get_stream(streams: &RwLock<BTreeMap<usize, TcpStream>>, id: usize) -> 
         .clone()
 }
 
-async fn send_packet(stream: &mut TcpStream, packet: Packet, id: &str) {
+#[tracing::instrument(skip(stream, packet), level = "debug")]
+async fn send_packet(stream: &mut TcpStream, packet: Packet, id: &str) -> io::Result<()> {
     let mut vec = serialize(&packet).unwrap();
     match packet {
-        Packet::Hello { .. } => println!("{} Sending HELLO to {:?}", id, stream.peer_addr()),
-        Packet::KeepAlive => println!("{} Sending KEEP-ALIVE to {:?}", id, stream.peer_addr()),
+        Packet::Hello { .. } => debug!(
+            "{} Sending HELLO to {:?}",
+            id,
+            stream.peer_addr()?.to_string()
+        ),
+        Packet::KeepAlive => debug!(
+            "{} Sending KEEP-ALIVE to {:?}",
+            id,
+            stream.peer_addr()?.to_string()
+        ),
         _ => {}
     }
 
@@ -192,9 +237,7 @@ async fn send_packet(stream: &mut TcpStream, packet: Packet, id: &str) {
     BigEndian::write_u64(&mut buf, vec.len() as u64);
     buf.append(&mut vec);
 
-    if let Err(e) = stream.write_all(&buf).await {
-        println!("{} Failed to send data: {:?}", id, e);
-    }
+    stream.write_all(&buf).await
 }
 
 struct PacketBuilder<'s> {

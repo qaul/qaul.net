@@ -39,6 +39,7 @@ pub struct Endpoint {
 
 impl Endpoint {
     /// Create a new endpoint on an interface and port
+    #[tracing::instrument(level = "info")]
     pub async fn new(addr: &str, port: u16, name: &str) -> Result<Self> {
         Ok(Self {
             mode: Arc::new(RwLock::new(Mode::Static)),
@@ -49,11 +50,13 @@ impl Endpoint {
     }
 
     /// Set the runtime mode
+    #[tracing::instrument(skip(self), level = "info")]
     pub async fn mode(&self, mode: Mode) {
         *self.mode.write().await = mode;
     }
 
     /// Load a set of peers, replacing the old peer list
+    #[tracing::instrument(skip(self, peers), level = "info")]
     pub async fn load_peers<I: Into<SocketAddr>>(&self, peers: Vec<I>) -> Result<()> {
         self.peers.load(peers).await?;
         if let Some(_) = self.inbox {
@@ -63,6 +66,7 @@ impl Endpoint {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self), level = "info")]
     pub async fn start(&mut self) {
         self.inbox = Some(self.socket.start(*self.mode.read().await, &self.peers));
         self.update_peers().await;
@@ -82,6 +86,7 @@ impl EndpointExt for Endpoint {
         0
     }
 
+    #[tracing::instrument(skip(self, frame), level = "info")]
     async fn send(&self, frame: Frame, target: Target) -> netmod::Result<()> {
         match target {
             Target::Single(t) => self.socket.send(t as usize, frame).await.unwrap(),
@@ -91,6 +96,7 @@ impl EndpointExt for Endpoint {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self), level = "info")]
     async fn next(&self) -> netmod::Result<(Frame, Target)> {
         match self.inbox {
             Some(ref ib) => match ib.recv().await {
