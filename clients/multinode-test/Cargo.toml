@@ -1,0 +1,19 @@
+[package]
+name = "multinode-test"
+description = "Local 3-Node test binary"
+version = "0.1.0"
+authors = ["qaul.net community"]
+edition = "2018"
+
+[dependencies]
+ratman = { path = "../../ratman" }
+ratman-harness = { path = "../../ratman/harness" }
+libqaul = { path = "../../libqaul" }
+libqaul-rpc = { path = "../../libqaul/rpc", features = ["voices", "chat", "json"] }
+libqaul-http = { path = "../../libqaul/http" }
+qaul-chat = { path = "../../libqaul/service/chat" }
+qaul-voices = { path = "../../libqaul/service/voices" }
+
+async-std = { version = "1.0", features = ["attributes"] }
+futures = "0.3"
+tempfile = "3.0"
