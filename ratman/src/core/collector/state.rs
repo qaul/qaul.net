@@ -25,14 +25,19 @@ impl State {
     }
 
     /// Poll for completed messages from teh outside world
+    #[tracing::instrument(skip(self), level = "trace")]
     pub(super) async fn completed(&self) -> Message {
         let done = Arc::clone(&self.done);
         future::poll_fn(|ctx| {
             let lock = &mut done.lock();
             match unsafe { Pin::new_unchecked(lock).poll(ctx) } {
                 Poll::Ready(ref mut not) => match not.pop_front() {
-                    Some(f) => Poll::Ready(f),
+                    Some(f) => {
+                        info!("Received new message for local service");
+                        Poll::Ready(f)
+                    }
                     None => {
+                        trace!("No new frames; registering waker");
                         Notify::register_waker(not, ctx.waker());
                         Poll::Pending
                     }
@@ -64,7 +69,9 @@ impl State {
     }
 
     /// Yield a finished message to the state
+    #[tracing::instrument(skip(self), level = "trace")]
     pub(super) async fn finish(&self, msg: Message) {
+        info!("Finishing up message collection");
         let mut done = self.done.lock().await;
         done.push_back(msg);
         Notify::wake(&mut *done);

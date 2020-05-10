@@ -21,6 +21,7 @@ impl Dispatch {
 
     pub(crate) async fn send_msg(&self, msg: Message) -> Result<()> {
         let r = msg.recipient;
+        println!("[RATMAN] dispatching message to recpient: {:?}", r);
 
         // This is a hardcoded MTU for now.  We need to adapt the MTU
         // to the interface we're broadcasting on and we potentially

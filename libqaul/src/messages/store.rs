@@ -12,6 +12,7 @@ use alexandria::{
     Library, Session, GLOBAL,
 };
 use async_std::sync::Arc;
+use tracing::debug;
 
 pub(crate) const TAG_FLOOD: &'static str = "libqaul._int.flood";
 pub(crate) const TAG_UNREAD: &'static str = "libqaul._int.unread";
@@ -70,6 +71,7 @@ impl MsgStore {
     /// The primary difference to `insert_local()` is that the
     /// inserted message will be marked as "unread" and can be
     /// retrieved via the "unread messages" query.
+    #[tracing::instrument(skip(self, msg), level = "debug")]
     pub(crate) async fn insert_remote(&self, recipient: Option<Identity>, msg: MsgRef) {
         let mut tags = msg.tags.clone().merge(Tag::empty(TAG_UNREAD));
         tags.insert(sender_tag(msg.sender));
@@ -84,6 +86,7 @@ impl MsgStore {
             }
         };
 
+        debug!("Inserting remote message to store");
         self.inner
             .batch(session, msg_path(msg.id), tags, diffs)
             .await

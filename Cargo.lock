@@ -1800,11 +1800,13 @@ dependencies = [
  "chrono",
  "futures 0.3.4",
  "libqaul",
- "netmod-mem",
  "qaul-files",
- "ratman",
+ "ratman-harness",
  "serde",
  "tempfile",
+ "tracing",
+ "tracing-futures",
+ "tracing-subscriber",
 ]
 
 [[package]]

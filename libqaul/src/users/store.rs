@@ -95,7 +95,7 @@ impl UserStore {
     pub(crate) async fn get_key(&self, id: Identity) -> Keypair {
         match self
             .inner
-            .query(Session::Id(dbg!(id)), Query::Path(key_path(id)))
+            .query(Session::Id(id), Query::Path(key_path(id)))
             .await
         {
             Ok(QueryResult::Single(rec)) => KeyWrap::from(&*rec).0,

@@ -10,11 +10,22 @@ use async_std::{
 };
 use libqaul::{helpers::TagSet, users::UserAuth};
 use std::collections::BTreeSet;
+use tracing::{trace, debug};
 
 /// A command to the internal worker
 pub(crate) enum Command {
     Start(UserAuth),
     Stop(UserAuth),
+}
+
+impl Command {
+    #[inline]
+    fn to_str(&self) -> &'static str {
+        match self {
+            Self::Start(_) => "START",
+            Self::Stop(_) => "STOP",
+        }
+    }
 }
 
 type RunMap = Arc<RwLock<BTreeSet<UserAuth>>>;
@@ -29,10 +40,12 @@ pub(crate) fn run_asnc(serv: Arc<Chat>) -> Sender<Command> {
         if let Some(cmd) = rx.recv().await {
             match cmd {
                 Command::Start(auth) => {
+                    trace!("Receiving libqaul user {} START event!", auth.0);
                     map.write().await.insert(auth.clone());
                     task::spawn(run_user(auth, Arc::clone(&serv), Arc::clone(&map)));
                 }
                 Command::Stop(auth) => {
+                    trace!("Receiving libqaul user {} STOP event!", auth.0);
                     map.write().await.remove(&auth);
                 }
             }
@@ -46,6 +59,7 @@ pub(crate) fn run_asnc(serv: Arc<Chat>) -> Sender<Command> {
 }
 
 /// Run a worker that subscribes to all events for a user
+#[tracing::instrument(skip(serv, run, user), level = "trace")]
 pub(crate) async fn run_user(user: UserAuth, serv: Arc<Chat>, run: RunMap) {
     let sub = serv
         .qaul
@@ -53,11 +67,12 @@ pub(crate) async fn run_user(user: UserAuth, serv: Arc<Chat>, run: RunMap) {
         .subscribe(user.clone(), ASC_NAME, TagSet::empty())
         .await
         .unwrap();
+    trace!("Creating message subscription!");
 
     while run.read().await.contains(&user) {
         if let Some(msg) = sub.next().await {
             let chat_msg: ChatMessage = msg.into();
-            println!("Handling incoming text message in service worker");
+            debug!("Handling incoming text message in service worker");
 
             // If we get a room state back, we send a reply message
             if let Some(rs) = Room::handle(&serv, user.clone(), &chat_msg).await {

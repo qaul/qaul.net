@@ -217,6 +217,8 @@ impl<'qaul> Messages<'qaul> {
             tags: tags.iter().cloned().collect(),
         };
 
+        println!("Sending message to {:?}", recipient);
+
         self.q
             .messages
             .insert_local(

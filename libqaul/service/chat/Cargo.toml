@@ -6,16 +6,18 @@ edition = "2018"
 license = "AGPL-3.0"
 
 [dependencies]
-libqaul = { path = "../../", features = ["testing"] }
 files = { path = "../files", package = "qaul-files" }
+libqaul = { path = "../../", features = ["testing"] }
 
 async-std = "1.0"
 bincode = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 futures = "0.3"
 serde = { version = "1.0", features = ["derive"] }
+tracing = "0.1"
+tracing-futures = "0.2" 
 
 [dev-dependencies]
-netmod-mem = { path = "../../../netmod-mem" }
-ratman = { path = "../../../ratman" }
+tracing-subscriber = "0.2"
+ratman-harness = { path = "../../../ratman/harness" }
 tempfile = "3.0"

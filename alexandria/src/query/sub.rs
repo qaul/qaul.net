@@ -11,6 +11,7 @@ use std::{
     collections::BTreeMap,
     sync::atomic::{AtomicUsize, Ordering},
 };
+use tracing::{debug, trace};
 
 pub type SubId = usize;
 
@@ -87,12 +88,14 @@ impl Drop for Subscription {
 }
 
 impl Subscription {
+    #[tracing::instrument(skip(hub, id, notify), level = "debug")]
     pub(crate) fn new(hub: &Arc<SubHub>, id: SubId, query: Query, notify: Receiver<Delta>) -> Self {
         let query = query;
         let (re_notify, poll) = channel(1);
 
         {
             let query = query.clone();
+            debug!("Spawning new subscription handler");
             task::spawn(async move {
                 while let Some(d) = notify.recv().await {
                     let d: Delta = d;
@@ -106,6 +109,7 @@ impl Subscription {
                         },
                         _ => unimplemented!(),
                     } {
+                        trace!("Waking subscription!");
                         re_notify.send(d.path).await;
                     }
                 }

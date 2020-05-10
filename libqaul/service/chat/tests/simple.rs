@@ -1,31 +1,68 @@
 //! Some simple integration tests for the qaul.net chat service
 
-// use async_std::sync::Arc;
-// use libqaul::{error::Result, harness::ThreePoint};
-// use qaul_chat::Chat;
+use libqaul::{error::Result, Qaul};
+use qaul_chat::{Chat, RoomId};
+use ratman_harness::{temp, Initialize, ThreePoint};
+use std::sync::Arc;
+use tracing::Level;
+use tracing_subscriber;
 
-// /// We are expecting to be running on a large network and things will
-// /// take time to move around.  We're using hardcoded events here and
-// /// not reacing so sometimes we just gotta sleep
-// async fn zzz() {
-//     async_std::task::sleep(std::time::Duration::from_secs(1)).await;
-// }
+pub use async_std::future::timeout;
+pub use ratman_harness::{millis, sec10, sec5};
+
+/// We are expecting to be running on a large network and things will
+/// take time to move around.  We're using hardcoded events here and
+/// not reacing so sometimes we just gotta sleep
+async fn zzz() {
+    async_std::task::sleep(std::time::Duration::from_secs(1)).await;
+}
+
+struct ChatPair {
+    qaul: Arc<Qaul>,
+    chat: Arc<Chat>,
+}
+
+async fn init() -> ThreePoint<ChatPair> {
+    let mut tp = ThreePoint::new().await;
+    tp.init_with(|_, arc| {
+        let qaul = Qaul::new(arc, temp().path());
+        let chat = async_std::task::block_on(async { Chat::new(Arc::clone(&qaul)).await }).unwrap();
+        ChatPair { qaul, chat }
+    });
+    tp
+}
+
+async fn room_setup() -> Result<RoomId> {
+    let net = init().await;
+
+    let alice = dbg!(net.a().qaul.users().create("abc").await?);
+    let bob = dbg!(net.b().qaul.users().create("acab").await?);
+
+    // Wait for user propagations
+    zzz().await;
+
+    let room_id = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
+
+    zzz().await;
+    println!("\n===============================================\n");
+
+    let mut rooms = net.b().chat.rooms(bob.clone()).await?;
+    assert!(rooms.len() == 1);
+    assert_eq!(rooms.remove(0).id, room_id);
+    Ok(room_id)
+}
+
+#[async_std::test]
+async fn create_room() -> Result<()> {
+    let _sub = tracing_subscriber::fmt()
+        .with_max_level(Level::TRACE)
+        .init();
+    let _ = room_setup().await?;
+    Ok(())
+}
 
 // #[async_std::test]
-// #[ignore]
-// async fn create_room() -> Result<()> {
-//     let net = ThreePoint::new().await;
-//     let ua = net.a.users().create("abc").await?;
-//     let ub = net.b.users().create("acab").await?;
-
-//     zzz().await;
-
-//     let chat_a = Chat::new(Arc::clone(&net.a)).await?;
-//     let chat_b = Chat::new(Arc::clone(&net.b)).await?;
-
-//     chat_a.start_chat(ua.clone(), vec![ub.0]).await?;
-//     zzz().await;
-
-//     assert_eq!(chat_b.rooms(ub).await.unwrap().len(), 1);
+// async fn send_message() -> Result<()> {
+//     let _ = room_setup().await?;
 //     Ok(())
 // }

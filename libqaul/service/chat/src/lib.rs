@@ -66,7 +66,7 @@ impl Chat {
     /// they have available each.
     pub async fn rooms(self: &Arc<Chat>, user: UserAuth) -> Result<Vec<RoomMeta>> {
         let msgs = msg::unread(&self, user.clone()).await?;
-        let rooms = utils::room_map(self.rooms.get_all(user).await);
+        let rooms = dbg!(utils::room_map(self.rooms.get_all(user).await));
 
         Ok(msgs
             .into_iter()
