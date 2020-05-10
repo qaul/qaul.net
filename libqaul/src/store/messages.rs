@@ -1,28 +1,14 @@
 //! Handling message interaction with Alexandria
 
 use super::Conv;
-use crate::messages::Message;
-use alexandria::{record::RecordRef, utils::Diff};
+use crate::{messages::Message, helpers::Tagged};
+use alexandria::{record::RecordRef, utils::{Diff, Tag}};
 
 const MID: &'static str = "id";
 const SENDER: &'static str = "sender";
 const ASSOC: &'static str = "associate";
 const SIGN: &'static str = "sign";
 const PLOAD: &'static str = "payload";
-
-// impl TakeMessage for RecordRef {
-//     fn take_mesage(self) -> Option<Message> {
-//         let kv = self.kv();
-
-//         Some(Self {
-//             id: Conv::id(kv.get(MID)?),
-//             sender: Conv::id(kv.get(SENDER)?),
-//             associator: Conv::string(kv.get(ASSOC)?),
-//             tags: rec.header.tags.clone(),
-//             payload: Conv::binvec(kv.get(PLOAD)?),
-//         })
-//     }
-// }
 
 impl From<RecordRef> for Message {
     fn from(rec: RecordRef) -> Self {
@@ -47,5 +33,11 @@ impl Message {
             Diff::map().insert(ASSOC, self.associator.as_str()),
             Diff::map().insert(PLOAD, self.payload.clone()),
         ]
+    }
+}
+
+impl Tagged for Message {
+    fn tag() -> Tag {
+        Tag::empty("message")
     }
 }

@@ -1,7 +1,7 @@
 //! Internal message store wrapper
 
 use crate::{
-    helpers::{QueryResult, Subscription},
+    helpers::{QueryResult, Subscription, Tagged},
     messages::{Message, Mode, MsgQuery, MsgRef},
     services::Service,
     Identity,
@@ -50,6 +50,7 @@ impl MsgStore {
         let mut tags = msg.tags.clone();
         tags.insert(sender_tag(user));
         tags.insert(service_tag(msg.associator.clone()));
+        tags.insert(Message::tag());
 
         let diffs = msg.diff();
         let session = match mode {
@@ -76,6 +77,7 @@ impl MsgStore {
         let mut tags = msg.tags.clone().merge(Tag::empty(TAG_UNREAD));
         tags.insert(sender_tag(msg.sender));
         tags.insert(service_tag(msg.associator.clone()));
+        tags.insert(Message::tag());
 
         let diffs = msg.diff();
         let session = match recipient {
@@ -104,7 +106,8 @@ impl MsgStore {
         let mut meta = match service {
             Service::Name(s) => service_tag(s).into(),
             Service::God => TagSet::empty(),
-        };
+        }
+        .merge(Message::tag());
 
         // Add the sender tag to the query
         if let Some(sender) = query.sender {
@@ -145,7 +148,8 @@ impl MsgStore {
                         Service::Name(s) => service_tag(s).into(),
                         Service::God => TagSet::empty(),
                     }
-                    .merge(tags),
+                    .merge(tags)
+                    .merge(Message::tag()),
                 ),
             )
             .await

@@ -42,10 +42,9 @@
 //! When receiving a message for a room ID where the sender is not in
 //! the room: discard.
 
-use crate::{Chat, ChatMessage, Room, RoomDiff, RoomId, RoomState};
+use crate::{Chat, ChatMessage, Room, RoomId, RoomState};
 use async_std::sync::Arc;
-use chrono::Utc;
-use libqaul::{helpers::ItemDiff, users::UserAuth, Identity};
+use libqaul::{users::UserAuth, Identity};
 use std::collections::BTreeSet;
 
 impl Room {

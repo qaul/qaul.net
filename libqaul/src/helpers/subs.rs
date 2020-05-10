@@ -1,11 +1,11 @@
-use crate::Identity;
+use crate::{helpers::Tagged, Identity};
 use alexandria::{
     query::{Query, QueryResult, Subscription as Sub},
     record::RecordRef,
     Library, Session,
 };
 use async_std::sync::Arc;
-use std::{convert::TryFrom, marker::PhantomData};
+use std::marker::PhantomData;
 use tracing::trace;
 
 /// A unique, randomly generated subscriber ID
@@ -14,7 +14,7 @@ pub type SubId = Identity;
 /// A generic subscription which can stream data from libqaul
 pub struct Subscription<T>
 where
-    T: TryFrom<RecordRef>,
+    T: From<RecordRef> + Tagged,
 {
     store: Arc<Library>,
     session: Session,
@@ -24,7 +24,7 @@ where
 
 impl<T> Subscription<T>
 where
-    T: From<RecordRef>,
+    T: From<RecordRef> + Tagged,
 {
     pub(crate) fn new(store: &Arc<Library>, session: Session, inner: Sub) -> Self {
         Self {
@@ -45,7 +45,7 @@ where
             .await
             .unwrap()
         {
-            QueryResult::Single(rec) => T::try_from(rec).ok(),
+            QueryResult::Single(rec) => Some(rec.into()),
             _ => None,
         }
     }
