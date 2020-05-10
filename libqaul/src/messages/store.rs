@@ -12,7 +12,7 @@ use alexandria::{
     Library, Session, GLOBAL,
 };
 use async_std::sync::Arc;
-use tracing::debug;
+use tracing::trace;
 
 pub(crate) const TAG_FLOOD: &'static str = "libqaul._int.flood";
 pub(crate) const TAG_UNREAD: &'static str = "libqaul._int.unread";
@@ -71,7 +71,7 @@ impl MsgStore {
     /// The primary difference to `insert_local()` is that the
     /// inserted message will be marked as "unread" and can be
     /// retrieved via the "unread messages" query.
-    #[tracing::instrument(skip(self, msg), level = "debug")]
+    #[tracing::instrument(skip(self, msg), level = "trace")]
     pub(crate) async fn insert_remote(&self, recipient: Option<Identity>, msg: MsgRef) {
         let mut tags = msg.tags.clone().merge(Tag::empty(TAG_UNREAD));
         tags.insert(sender_tag(msg.sender));
@@ -86,7 +86,7 @@ impl MsgStore {
             }
         };
 
-        debug!("Inserting remote message to store");
+        trace!("Inserting remote message to store");
         self.inner
             .batch(session, msg_path(msg.id), tags, diffs)
             .await
@@ -136,23 +136,23 @@ impl MsgStore {
         service: Service,
         tags: TagSet,
     ) -> Subscription<Message> {
-        Subscription::new(
-            &self.inner,
-            Session::Id(user),
-            self.inner
-                .subscribe(
-                    Session::Id(user),
-                    Query::tags().subset(
-                        match service {
-                            Service::Name(s) => service_tag(s).into(),
-                            Service::God => TagSet::empty(),
-                        }
-                        .merge(tags),
-                    ),
-                )
-                .await
-                .unwrap(),
-        )
+        let inner_sub = self
+            .inner
+            .subscribe(
+                Session::Id(user),
+                Query::tags().subset(
+                    match service {
+                        Service::Name(s) => service_tag(s).into(),
+                        Service::God => TagSet::empty(),
+                    }
+                    .merge(tags),
+                ),
+            )
+            .await
+            .unwrap();
+
+        trace!("Creating libqaul specific subscription type");
+        Subscription::new(&self.inner, Session::Id(user), inner_sub)
     }
 }
 

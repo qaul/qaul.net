@@ -32,7 +32,7 @@ async fn subscribe_one() {
     let auth_b = net.b().users().create("abc").await.unwrap();
 
     // The announcements need to spread
-    zzz(millis(2000)).await;
+    // zzz(millis(2000)).await;
 
     // Send a message from a
     let id = send_simple(net.a(), &auth_a, auth_b.0).await;

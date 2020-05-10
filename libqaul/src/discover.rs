@@ -54,7 +54,7 @@ impl Discovery {
                 let msg = router.next().await;
                 let sender = msg.sender;
 
-                info!("Receiving message by `{}`...", sender);
+                println!("Receiving message by `{}`...", sender);
                 let recp = match msg.recipient {
                     Recipient::User(id) => Some(id),
                     Recipient::Flood => None,
@@ -63,13 +63,13 @@ impl Discovery {
                 let msg = match MsgUtils::process(msg, &qaul.users).await {
                     Ok(msg) => Arc::new(msg),
                     Err(_) => {
-                        warn!("Skipping malformed message by `{}`", sender);
+                        println!("Skipping malformed message by `{}`", sender);
                         continue;
                     }
                 };
 
                 qaul.messages.insert_remote(recp, Arc::clone(&msg)).await;
-                info!("Finished processing incoming message!");
+                println!("Finished processing incoming message!");
             }
         });
     }

@@ -5,7 +5,8 @@ use alexandria::{
     Library, Session,
 };
 use async_std::sync::Arc;
-use std::marker::PhantomData;
+use std::{convert::TryFrom, marker::PhantomData};
+use tracing::trace;
 
 /// A unique, randomly generated subscriber ID
 pub type SubId = Identity;
@@ -13,7 +14,7 @@ pub type SubId = Identity;
 /// A generic subscription which can stream data from libqaul
 pub struct Subscription<T>
 where
-    T: From<RecordRef>,
+    T: TryFrom<RecordRef>,
 {
     store: Arc<Library>,
     session: Session,
@@ -37,13 +38,14 @@ where
     /// Poll for the next return from the subscription
     pub async fn next(&self) -> Option<T> {
         let path = self.inner.next().await;
+        trace!("Querying new path {}", path.to_string());
         match self
             .store
             .query(self.session, Query::path(path))
             .await
             .unwrap()
         {
-            QueryResult::Single(rec) => Some(rec.into()),
+            QueryResult::Single(rec) => T::try_from(rec).ok(),
             _ => None,
         }
     }

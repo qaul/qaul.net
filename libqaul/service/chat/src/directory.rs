@@ -23,7 +23,7 @@ impl RoomDirectory {
         map_result.reverse();
         map_result
             .pop()
-            .unwrap_or_else(|| MetadataMap::new(ASC_NAME))
+            .unwrap_or_else(|| MetadataMap::new(tags::ROOM_LIST))
     }
 
     /// Get all known rooms for a user

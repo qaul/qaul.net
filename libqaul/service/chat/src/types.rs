@@ -121,8 +121,12 @@ pub struct Subscription {
 }
 
 impl Subscription {
+    pub(crate) fn new(inner: Sub<Message>) -> Self {
+        Self { inner }
+    }
+
     /// Get the next chat message
-    pub async fn next(&self) -> ChatMessage {
-        self.inner.next().await.unwrap().into()
+    pub async fn next(&self) -> Option<ChatMessage> {
+        self.inner.next().await.map(Into::into)
     }
 }

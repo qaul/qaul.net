@@ -13,7 +13,7 @@ pub type Token = String;
 /// This structure can be aquired by challenging an authentication
 /// endpoint, such as `User::login` to yield a token. If a session for
 /// this `Identity` already exists, it will be re-used.
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct UserAuth(pub Identity, pub Token);
 
 impl UserAuth {

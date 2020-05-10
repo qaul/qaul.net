@@ -145,15 +145,19 @@ impl MetadataStore {
         tags.insert(tag_service(&serv));
         tags.insert(Tag::empty(TAG_METADATA));
 
-        self.inner
-            .batch(
-                Session::Id(user),
-                gen_path(&serv, &k),
-                TagSet::empty(),
-                diffs,
-            )
+        // Try to insert, otherwise update
+        if let Err(_) = self
+            .inner
+            .batch(Session::Id(user), gen_path(&serv, &k), tags, diffs.clone())
             .await
-            .unwrap();
+        {
+            for diff in diffs {
+                self.inner
+                    .update(Session::Id(user), gen_path(&serv, &k), diff)
+                    .await
+                    .unwrap();
+            }
+        }
         Ok(())
     }
 

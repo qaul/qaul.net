@@ -1,13 +1,13 @@
 //! A utility module to query messages
 
 use crate::error::{Error, Result};
-use alexandria::{query::QueryIterator, record::Record};
-use std::{marker::PhantomData, sync::Arc};
+use alexandria::{query::QueryIterator, record::RecordRef};
+use std::marker::PhantomData;
 
 /// The resulting set of a query operation
 pub struct QueryResult<T>
 where
-    T: From<Arc<Record>>,
+    T: From<RecordRef>,
 {
     inner: QueryIterator,
     _type: PhantomData<T>,
@@ -15,7 +15,7 @@ where
 
 impl<T> QueryResult<T>
 where
-    T: From<Arc<Record>>,
+    T: From<RecordRef>,
 {
     pub(crate) fn new(inner: QueryIterator) -> Self {
         Self {

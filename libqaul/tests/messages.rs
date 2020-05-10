@@ -5,7 +5,7 @@ use harness::{millis, sec10, sec5, zzz};
 
 use libqaul::{
     helpers::TagSet,
-    messages::{Message, Mode, MsgQuery},
+    messages::{Mode, MsgQuery},
     users::UserAuth,
     Identity, Qaul,
 };

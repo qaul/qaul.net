@@ -35,10 +35,15 @@ async fn init() -> ThreePoint<ChatPair> {
 async fn room_setup() -> Result<RoomId> {
     let net = init().await;
 
-    let alice = dbg!(net.a().qaul.users().create("abc").await?);
-    let bob = dbg!(net.b().qaul.users().create("acab").await?);
+    let alice = net.a().qaul.users().create("abc").await?;
+    let bob = net.b().qaul.users().create("acab").await?;
 
+    println!("ALICE = {}", alice.0);
+    println!("BOB   = {}", bob.0);
+    
     // Wait for user propagations
+    zzz().await;
+    zzz().await;
     zzz().await;
 
     let room_id = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
@@ -54,9 +59,9 @@ async fn room_setup() -> Result<RoomId> {
 
 #[async_std::test]
 async fn create_room() -> Result<()> {
-    let _sub = tracing_subscriber::fmt()
-        .with_max_level(Level::TRACE)
-        .init();
+    // let _sub = tracing_subscriber::fmt()
+    //     .with_max_level(Level::TRACE)
+    //     .init();
     let _ = room_setup().await?;
     Ok(())
 }

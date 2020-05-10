@@ -9,7 +9,7 @@ use crate::{
 
 use ratman::netmod::Recipient;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+use std::{sync::Arc, convert::TryFrom};
 
 /// A reference to an internally stored message object
 pub type MsgRef = Arc<Message>;

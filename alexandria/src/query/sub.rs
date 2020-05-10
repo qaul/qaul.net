@@ -11,7 +11,7 @@ use std::{
     collections::BTreeMap,
     sync::atomic::{AtomicUsize, Ordering},
 };
-use tracing::{debug, trace};
+use tracing::{debug, trace, warn};
 
 pub type SubId = usize;
 
@@ -29,7 +29,7 @@ pub(crate) struct SubHub {
 
 impl SubHub {
     pub(crate) fn new() -> Arc<Self> {
-        let (inbox, notify) = channel(2);
+        let (inbox, notify) = channel(1);
 
         let arc = Arc::new(Self {
             curr: 0.into(),
@@ -80,7 +80,9 @@ pub struct Subscription {
 }
 
 impl Drop for Subscription {
+    #[tracing::instrument(skip(self), level = "error")]
     fn drop(&mut self) {
+        warn!("Subscription type has been dropped - deallocating subscriber stream!");
         task::block_on(async move {
             self.cb_hub.rm_sub(self.id).await;
         })
@@ -109,7 +111,7 @@ impl Subscription {
                         },
                         _ => unimplemented!(),
                     } {
-                        trace!("Waking subscription!");
+                        trace!("Waking subscribers!");
                         re_notify.send(d.path).await;
                     }
                 }
