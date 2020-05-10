@@ -62,7 +62,7 @@ pub(crate) async fn run_user(user: UserAuth, serv: Arc<Chat>, run: RunMap) {
     );
     println!("Creating message subscription!");
 
-    while dbg!(run.read().await.contains(&user.0)) {
+    while run.read().await.contains(&user.0) {
         trace!("Running loop!");
         if let Some(chat_msg) = dbg!(sub.next().await) {
             println!("Handling incoming text message");

@@ -128,9 +128,9 @@ impl Room {
             RoomState::Id(_) => None,
             RoomState::Create(ref room) => {
                 serv.rooms.insert(user, room).await;
-                Some(RoomState::Confirm(room.id, msg.id))
+                None
             }
-            RoomState::Confirm(_, _) => None, // TODO: set state confirmed
+            RoomState::Confirm(_, _) => None,
             RoomState::Diff(ref diff) => {
                 serv.rooms.apply_diff(user, diff).await;
                 Some(RoomState::Confirm(diff.id, msg.id))
