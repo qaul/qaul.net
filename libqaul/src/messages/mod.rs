@@ -112,14 +112,14 @@ impl MsgUtils {
             sender: _,
             associator,
             payload,
-            tags: _,
+            tags,
         } = conjoiner::deserialise(&payload).unwrap();
 
         Ok(Message {
             id: id.into(),
             sender,
             associator,
-            tags: Default::default(),
+            tags: tags.into(),
             payload,
         })
     }

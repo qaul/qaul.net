@@ -2,8 +2,8 @@
 
 use crate::{tags, Chat, ChatMessage, RoomId, RoomState, Subscription, ASC_NAME};
 use async_std::sync::Arc;
-use chrono::Utc;
 use bincode::{deserialize, serialize};
+use chrono::Utc;
 use libqaul::{
     error::Result,
     messages::{Message, Mode, MsgQuery},
@@ -62,6 +62,11 @@ pub(crate) async fn dispatch_to(
     room: RoomId,
 ) -> Result<()> {
     for recp in friends {
+        // Skip self
+        if recp == user.0 {
+            continue;
+        }
+
         let mode = Mode::Std(recp);
         serv.qaul
             .messages()

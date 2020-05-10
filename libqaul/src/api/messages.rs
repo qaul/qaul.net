@@ -9,7 +9,7 @@ use crate::{
 
 use ratman::netmod::Recipient;
 use serde::{Deserialize, Serialize};
-use std::{sync::Arc, convert::TryFrom};
+use std::{convert::TryFrom, sync::Arc};
 
 /// A reference to an internally stored message object
 pub type MsgRef = Arc<Message>;
@@ -206,8 +206,8 @@ impl<'qaul> Messages<'qaul> {
         let recipient = mode.into();
         let associator = service.into();
         let id = MsgId::random();
-        let sign = SigTrust::Trusted;
         let tags: TagSet = tags.into();
+        println!("Sending `{}` with tags {:?}", id, tags);
 
         let env = Envelope {
             id,
@@ -217,6 +217,7 @@ impl<'qaul> Messages<'qaul> {
             tags: tags.iter().cloned().collect(),
         };
 
+        println!("Sending message with ID `{:?}`", id);
         println!("Sending message to {:?}", recipient);
 
         self.q

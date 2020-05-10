@@ -1,11 +1,7 @@
-//! Some simple integration tests for the qaul.net chat service
-
 use libqaul::{error::Result, Qaul};
-use qaul_chat::{Chat, RoomId};
+use qaul_chat::Chat;
 use ratman_harness::{temp, Initialize, ThreePoint};
 use std::sync::Arc;
-use tracing::Level;
-use tracing_subscriber;
 
 pub use async_std::future::timeout;
 pub use ratman_harness::{millis, sec10, sec5};
@@ -32,7 +28,28 @@ async fn init() -> ThreePoint<ChatPair> {
     tp
 }
 
-async fn room_setup() -> Result<RoomId> {
+#[async_std::test]
+async fn create_room() -> Result<()> {
+    let net = init().await;
+
+    let alice = net.a().qaul.users().create("abc").await?;
+    let bob = net.b().qaul.users().create("acab").await?;
+
+    // Wait for user propagations
+    zzz().await;
+
+    let room_id = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
+
+    zzz().await;
+
+    let mut rooms = net.b().chat.rooms(bob.clone()).await?;
+    assert!(rooms.len() == 1);
+    assert_eq!(rooms.remove(0).id, room_id);
+    Ok(())
+}
+
+#[async_std::test]
+async fn send_message() -> Result<()> {
     let net = init().await;
 
     let alice = net.a().qaul.users().create("abc").await?;
@@ -40,34 +57,77 @@ async fn room_setup() -> Result<RoomId> {
 
     println!("ALICE = {}", alice.0);
     println!("BOB   = {}", bob.0);
-    
+
     // Wait for user propagations
     zzz().await;
+
+    let room_id = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
+    println!("ROOM ID = {}", room_id);
+
     zzz().await;
+
+    let room = net.b().chat.get_room(bob.clone(), room_id).await.unwrap();
+    assert_eq!(room.users, vec![alice.0, bob.0].into_iter().collect());
+
+    net.b()
+        .chat
+        .send_message(bob.clone(), room_id, "Hello Alice, how are you?".into())
+        .await
+        .unwrap();
+
+    zzz().await;
+
+    let msg = net
+        .a()
+        .chat
+        .load_messages(alice.clone(), room_id)
+        .await
+        .unwrap()
+        .into_iter()
+        .find(|msg| msg.content.as_str() != "")
+        .unwrap();
+    assert_eq!(msg.content, String::from("Hello Alice, how are you?"));
+    Ok(())
+}
+
+#[async_std::test]
+async fn send_message_subscribe() -> Result<()> {
+    let net = init().await;
+
+    let alice = net.a().qaul.users().create("abc").await?;
+    let bob = net.b().qaul.users().create("acab").await?;
+
+    println!("ALICE = {}", alice.0);
+    println!("BOB   = {}", bob.0);
+
+    // Wait for user propagations
     zzz().await;
 
     let room_id = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
 
     zzz().await;
-    println!("\n===============================================\n");
 
-    let mut rooms = net.b().chat.rooms(bob.clone()).await?;
-    assert!(rooms.len() == 1);
-    assert_eq!(rooms.remove(0).id, room_id);
-    Ok(room_id)
-}
+    let room = net.b().chat.get_room(bob.clone(), room_id).await.unwrap();
+    assert_eq!(room.users, vec![alice.0, bob.0].into_iter().collect());
 
-#[async_std::test]
-async fn create_room() -> Result<()> {
-    // let _sub = tracing_subscriber::fmt()
-    //     .with_max_level(Level::TRACE)
-    //     .init();
-    let _ = room_setup().await?;
+    net.b()
+        .chat
+        .send_message(bob.clone(), room_id, "Hello Alice, how are you?".into())
+        .await
+        .unwrap();
+
+    let msg = timeout(sec5(), async {
+        let sub = net
+            .a()
+            .chat
+            .subscribe(alice.clone(), room_id)
+            .await
+            .unwrap();
+        sub.next().await.unwrap()
+    })
+    .await
+    .unwrap();
+
+    assert_eq!(msg.content, String::from("Hello Alice, how are you?"));
     Ok(())
 }
-
-// #[async_std::test]
-// async fn send_message() -> Result<()> {
-//     let _ = room_setup().await?;
-//     Ok(())
-// }

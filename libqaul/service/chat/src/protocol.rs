@@ -15,14 +15,14 @@
 //!
 //! When receiving a message with `RoomState::Create` => check if a
 //! room already exists with that set of users.  If yes, compare the
-//! create times.
+//! room IDs numerically.
 //!
-//! If self time is older, discard chat message and wait for
-//! re-transmit.  Don't reply to Create request.
+//! If self id is larger, discard chat message.  Don't reply to Create
+//! request.  It's assumed that self create message is still in
+//! transit.
 //!
-//! If self time is younger, take messages from self from old room,
+//! If self id is smaller, take messages from self from old room,
 //! insert them into new room, swap room stored in libqaul storage.
-//! Send Confirm message with MsgId of create request.
 //!
 //! ## Add or remove a person to a room
 //!
@@ -74,9 +74,11 @@ impl Room {
     pub(crate) async fn create(
         serv: &Arc<Chat>,
         user: UserAuth,
-        users: BTreeSet<Identity>,
+        mut users: BTreeSet<Identity>,
         name: Option<String>,
     ) -> RoomState {
+        users.insert(user.0);
+
         let room = Self {
             id: RoomId::random(),
             users,

@@ -21,7 +21,7 @@ pub(crate) enum Command {
 type RunMap = Arc<RwLock<BTreeSet<Identity>>>;
 
 /// Spawn the async machinery that runs the chat service
-#[tracing::instrument(skip(serv), level = "debug")]
+#[tracing::instrument(skip(serv), level = "trace")]
 pub(crate) fn run_asnc(serv: Arc<Chat>) -> Sender<Command> {
     let (tx, rx) = channel(1);
 
@@ -31,12 +31,12 @@ pub(crate) fn run_asnc(serv: Arc<Chat>) -> Sender<Command> {
             let map = Arc::clone(&map);
             match cmd {
                 Command::Start(auth) => {
-                    println!("Receiving libqaul user {} START event!", auth.0);
+                    trace!("Receiving libqaul user {} START event!", auth.0);
                     map.write().await.insert(auth.0);
                     task::spawn(run_user(auth, Arc::clone(&serv), Arc::clone(&map)));
                 }
                 Command::Stop(auth) => {
-                    println!("Receiving libqaul user {} STOP event!", auth.0);
+                    trace!("Receiving libqaul user {} STOP event!", auth.0);
                     map.write().await.remove(&auth.0);
                 }
             }
@@ -60,15 +60,15 @@ pub(crate) async fn run_user(user: UserAuth, serv: Arc<Chat>, run: RunMap) {
             .await
             .unwrap(),
     );
-    println!("Creating message subscription!");
+    trace!("Creating message subscription!");
 
     while run.read().await.contains(&user.0) {
-        trace!("Running loop!");
-        if let Some(chat_msg) = dbg!(sub.next().await) {
-            println!("Handling incoming text message");
-            
+        if let Some(chat_msg) = sub.next().await {
+            if chat_msg.sender == user.0 && continue {}
+
             // If we get a room state back, we send a reply message
             if let Some(rs) = Room::handle(&serv, user.clone(), &chat_msg).await {
+                trace!("Handling incoming text message");
                 let friends = serv.rooms.get(user.clone(), rs.id()).await.unwrap().users;
                 let room_id = rs.id();
                 msg::dispatch_to(
