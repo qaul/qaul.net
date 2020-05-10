@@ -1278,8 +1278,11 @@ dependencies = [
  "libqaul",
  "qaul-chat",
  "qaul-voices",
+ "ratman",
+ "ratman-harness",
  "serde",
  "serde_json",
+ "tempfile",
 ]
 
 [[package]]
