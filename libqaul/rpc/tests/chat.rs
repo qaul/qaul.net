@@ -15,19 +15,25 @@ async fn rpc_chatrooms_create() {
     let user_b = rpc.network.b().users().create("123456").await.unwrap();
 
     // RPC JSON input
-    let json_string = format!("{{
-        \"id\": \"/chat-rooms/create\",
-        \"kind\": \"chat-rooms\",
-        \"method\": \"create\",
-        \"data\": {{
-            \"users\": [\"{}\",\"{}\"]
+    let json_string = format!(
+        r#"{{
+        "id": "/chat-rooms/create",
+        "kind": "chat-rooms",
+        "method": "create",
+        "data": {{
+            "users": ["{friend}"]
         }},
-        \"auth\": {{
-            \"id\": \"{}\",
-            \"token\": \"{}\"
+        "auth": {{
+            "id": "{a_id}",
+            "token": "{a_token}"
         }}
-    }}", user_a.0, user_b.0, user_a.0, user_b.1);
+    }}"#,
+        friend = user_b.0,
+        a_id = user_a.0,
+        a_token = user_a.1
+    );
 
     // create a chat room
     let resp = rpc.send_a(json_string.as_str()).await;
+    dbg!(resp);
 }
