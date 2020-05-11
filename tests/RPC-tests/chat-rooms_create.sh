@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# creates a new user with password '123456'
+# creates a new chat room
 # 
 # usage:
-# ./chat-rooms_create.sh
+# ./chat-rooms_create.sh <USER_ID>
 
 curl -i  \
     -H "Content-Type: application/json" \
@@ -11,7 +11,7 @@ curl -i  \
           \"kind\": \"chat-rooms\", 
           \"method\": \"create\",
           \"data\": {
-            
+            \"users\": [\"$1\"]
           },
           \"auth\": {
             \"id\":\"$QAUL_ID\",
