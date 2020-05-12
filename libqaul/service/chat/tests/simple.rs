@@ -1,5 +1,5 @@
-use libqaul::{error::Result, Qaul};
-use qaul_chat::Chat;
+use libqaul::Qaul;
+use qaul_chat::{Chat, Result};
 use ratman_harness::{temp, Initialize, ThreePoint};
 use std::sync::Arc;
 

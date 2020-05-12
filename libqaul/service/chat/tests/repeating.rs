@@ -1,5 +1,5 @@
-use libqaul::{error::Result, Qaul};
-use qaul_chat::Chat;
+use libqaul::Qaul;
+use qaul_chat::{Chat, Result};
 use ratman_harness::{temp, Initialize, ThreePoint};
 use std::sync::Arc;
 
@@ -28,7 +28,6 @@ async fn init() -> ThreePoint<ChatPair> {
     tp
 }
 
-
 #[async_std::test]
 async fn rooms_for_different_people() -> Result<()> {
     let net = init().await;
@@ -48,20 +47,83 @@ async fn rooms_for_different_people() -> Result<()> {
     assert_eq!(rooms.remove(0).id, room_1);
 
     ///// And do it again
-    
+
     let charlie = net.a().qaul.users().create("abc").await?;
     let david = net.b().qaul.users().create("acab").await?;
 
     // Wait for user propagations
     zzz().await;
 
-    let room_2 = net.a().chat.start_chat(charlie.clone(), vec![david.0]).await?;
+    let room_2 = net
+        .a()
+        .chat
+        .start_chat(charlie.clone(), vec![david.0])
+        .await?;
 
     zzz().await;
 
     let mut rooms = net.b().chat.rooms(david.clone()).await?;
     assert!(rooms.len() == 1);
     assert_eq!(rooms.remove(0).id, room_2);
-    
+
+    Ok(())
+}
+
+#[async_std::test]
+async fn send_messages_for_different_people() -> Result<()> {
+    let net = init().await;
+
+    let alice = net.a().qaul.users().create("abc").await?;
+    let bob = net.b().qaul.users().create("acab").await?;
+
+    // Wait for user propagations
+    zzz().await;
+
+    let room_1 = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
+    net.a()
+        .chat
+        .send_message(alice.clone(), room_1, "Hello Bob, how are you?".into())
+        .await
+        .unwrap();
+
+    zzz().await;
+
+    let mut rooms = net.b().chat.rooms(bob.clone()).await?;
+    assert!(rooms.len() == 1);
+    assert_eq!(rooms.remove(0).id, room_1);
+
+    let mut msgs1 = dbg!(net.b().chat.load_messages(bob.clone(), room_1).await?);
+    assert_eq!(msgs1[0].content, "".to_string());
+    assert_eq!(msgs1[1].content, "Hello Bob, how are you?".to_string());
+
+    ///// And do it again
+
+    let charlie = net.a().qaul.users().create("abc").await?;
+    let david = net.b().qaul.users().create("acab").await?;
+
+    // Wait for user propagations
+    zzz().await;
+
+    let room_2 = net
+        .a()
+        .chat
+        .start_chat(charlie.clone(), vec![david.0])
+        .await?;
+
+    zzz().await;
+
+    net.b()
+        .chat
+        .send_message(david.clone(), room_1, "Hello Charlie, how are you?".into())
+        .await
+        .unwrap();
+
+    let mut rooms = net.b().chat.rooms(david.clone()).await?;
+    assert!(rooms.len() == 1);
+    assert_eq!(rooms.remove(0).id, room_2);
+
+    let mut msgs2 = net.b().chat.load_messages(bob.clone(), room_1).await?;
+    assert_eq!(msgs2[0].content, "".to_string());
+    assert_eq!(msgs2[1].content, "Hello Charlie, how are you?".to_string());
     Ok(())
 }

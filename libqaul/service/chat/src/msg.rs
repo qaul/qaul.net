@@ -1,11 +1,10 @@
 //! A helper to deal with unread counts and messages
 
-use crate::{tags, Chat, ChatMessage, RoomId, RoomState, Subscription, ASC_NAME};
+use crate::{tags, Chat, ChatMessage, Result, RoomId, RoomState, Subscription, ASC_NAME};
 use async_std::sync::Arc;
 use bincode::{deserialize, serialize};
 use chrono::Utc;
 use libqaul::{
-    error::Result,
     messages::{Message, Mode, MsgQuery},
     users::UserAuth,
     Identity,
@@ -63,7 +62,7 @@ pub(crate) async fn dispatch_to(
     room: RoomId,
 ) -> Result<()> {
     trace!("Creating room with {:?}", friends);
-    
+
     for recp in friends {
         // Skip self
         if recp == user.0 {
@@ -112,5 +111,49 @@ pub(crate) async fn fetch_for(
         .await?
         .into_iter()
         .map(|msg| Ok(msg.into()))
-        .collect()
+        .collect::<Result<Vec<_>>>()
+        .map(|mut ok: Vec<ChatMessage>| {
+            ok.sort_by_key(|msg| msg.timestamp);
+            ok
+        })
+}
+
+#[test]
+fn sort_messages() {
+    use crate::RoomState;
+    use chrono::prelude::*;
+    use libqaul::messages::MsgId;
+
+    let room = RoomId::random();
+    let friend = Identity::random();
+
+    let mut msgs = vec![
+        ChatMessage {
+            id: MsgId::random(),
+            sender: friend,
+            room: RoomState::Id(room),
+            content: "This is a middle message".into(),
+            timestamp: Utc.ymd(2020, 5, 12).and_hms(14, 13, 23),
+        },
+        ChatMessage {
+            id: MsgId::random(),
+            sender: friend,
+            room: RoomState::Id(room),
+            content: "This is an old message".into(),
+            timestamp: Utc.ymd(2020, 5, 12).and_hms(14, 13, 12),
+        },
+        ChatMessage {
+            id: MsgId::random(),
+            sender: friend,
+            room: RoomState::Id(room),
+            content: "This is a new message".into(),
+            timestamp: Utc.ymd(2020, 5, 12).and_hms(14, 13, 37),
+        },
+    ];
+
+    msgs.sort_by_key(|msg| msg.timestamp);
+
+    assert_eq!(msgs[0].content, "This is an old message".to_owned());
+    assert_eq!(msgs[1].content, "This is a middle message".to_owned());
+    assert_eq!(msgs[2].content, "This is a new message".to_owned());
 }

@@ -1,4 +1,4 @@
-use crate::{tags, Room, RoomDiff, RoomId, ASC_NAME};
+use crate::{tags, Error, Result, Room, RoomDiff, RoomId, ASC_NAME};
 use async_std::sync::Arc;
 use bincode;
 use libqaul::{helpers::Tag, services::MetadataMap, users::UserAuth, Qaul};
@@ -36,14 +36,14 @@ impl RoomDirectory {
     }
 
     /// Get just one room, by Id
-    pub(crate) async fn get(&self, user: UserAuth, id: RoomId) -> Option<Room> {
+    pub(crate) async fn get(&self, user: UserAuth, id: RoomId) -> Result<Room> {
         let meta = self.get_inner(user).await;
-        meta.iter().fold(None, |opt, (id_, vec)| {
-            opt.or_else(|| {
+        meta.iter().fold(Err(Error::NoSuchRoom), |opt, (id_, vec)| {
+            opt.or_else(|prev| {
                 if id_ == &id.to_string() {
-                    Some(bincode::deserialize(vec).unwrap())
+                    Ok(bincode::deserialize(vec).unwrap())
                 } else {
-                    None
+                    Err(prev)
                 }
             })
         })

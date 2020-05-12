@@ -9,12 +9,15 @@ mod subs;
 mod utils;
 mod worker;
 
+mod error;
+pub use error::{Error, Result};
+
 mod types;
 pub(crate) use types::RoomState;
 pub use types::{ChatMessage, Room, RoomDiff, RoomId, RoomMeta, Subscription};
 
 use async_std::{sync::Arc, task};
-use libqaul::{error::Result, services::ServiceEvent, users::UserAuth, Identity, Qaul};
+use libqaul::{services::ServiceEvent, users::UserAuth, Identity, Qaul};
 use std::collections::BTreeMap;
 
 const ASC_NAME: &'static str = "net.qaul.chat";
@@ -115,7 +118,7 @@ impl Chat {
         room: RoomId,
         content: String,
     ) -> Result<()> {
-        let friends = self.rooms.get(user.clone(), room).await.unwrap().users;
+        let friends = self.rooms.get(user.clone(), room).await?.users;
         let payload = msg::gen_payload(content, Room::resume(room));
         msg::dispatch_to(self, user, friends, payload, room).await
     }
