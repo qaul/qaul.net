@@ -45,7 +45,7 @@ pub trait Endpoint {
 
     /// Poll for the next available Frame from this interface
     ///
-    /// It's recomended to return transmission errors, even if there
+    /// It's recommended to return transmission errors, even if there
     /// are no ways to correct the situation from the router's POV,
     /// simply to feed packet drop metrics.
     async fn next(&self) -> Result<(Frame, Target)>;

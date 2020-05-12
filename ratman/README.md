@@ -28,8 +28,8 @@ crate.
 
 The interface that binds the Ratman router to underlying drivers is
 called `netmod`, which handles sending and receiving frames.  A frame
-is a piece of data, which a checksum, which may be part of a larger
-mesage.  In the qaul.net repository, you can find several driver
+is a piece of data, whith a checksum, which may be part of a larger
+message.  In the qaul.net repository, you can find several driver
 implementations for various platforms.  If you need to write your own,
 don't hesitate to ask for help.
 
