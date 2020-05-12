@@ -69,10 +69,12 @@ impl Responder {
             Request::ChatMsgCreate(r) => self.respond_chat(r).await.into(),
 
             // =^-^= Chat Rooms =^-^=
-            //#[cfg(feature = "chat")]
-            //Request::ChatRoomList(r) => self.respond_chat(r).await.into(),
+            // #[cfg(feature = "chat")]
+            // Request::ChatRoomList(r) => self.respond_chat(r).await.into(),
             #[cfg(feature = "chat")]
             Request::ChatRoomGet(r) => self.respond_chat(r).await.into(),
+            #[cfg(feature = "chat")]
+            Request::ChatLoadRoom(r) => self.respond_chat(r).await.into(),
             #[cfg(feature = "chat")]
             Request::ChatRoomCreate(r) => self
                 .respond_chat(r)
@@ -151,7 +153,10 @@ impl Responder {
                 .map(|samples| Response::VoiceData(samples))
                 .unwrap_or_else(|e| Response::Error(e.to_string())),
 
-            _ => unimplemented!(),
+            tt => panic!(
+                "Encountered unimplemented parse type: {:#?}\n...so sorry",
+                tt
+            ),
         }
     }
 }

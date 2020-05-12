@@ -48,6 +48,6 @@ pub struct Create {
 impl ChatRpc for Create {
     type Response = Result<RoomId>;
     async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
-        chat.start_chat(self.auth, self.users).await
+        chat.start_chat(self.auth, dbg!(self.users)).await
     }
 }
