@@ -124,7 +124,6 @@ async fn get_user_profile() {
 
 #[async_std::test]
 async fn simple_network_announce() {
-    use libqaul::users::UserProfile;
     use std::{
         sync::Arc,
         time::{Duration, Instant},
@@ -141,6 +140,37 @@ async fn simple_network_announce() {
         loop {
             harness::zzz(Duration::from_millis(20)).await;
             if b.users().list_remote().await.len() != 0 {
+                let diff = Instant::now() - t1;
+                println!("Listened for {} millis", diff.as_millis());
+                break;
+            }
+        }
+    })
+    .await
+    .unwrap();
+}
+
+#[async_std::test]
+async fn simple_network_announce_reverse() {
+    use std::{
+        sync::Arc,
+        time::{Duration, Instant},
+    };
+    let net = harness::init().await;
+
+    // Create a user on node A
+    let _auth = net.a().users().create("abcdefg").await.unwrap();
+
+    // And then on b
+    let _auth = net.b().users().create("abcdefg").await.unwrap();
+    assert_eq!(net.b().users().list().await.len(), 1);
+
+    let t1 = Instant::now();
+    harness::timeout(sec5(), async {
+        let a = Arc::clone(net.a());
+        loop {
+            harness::zzz(Duration::from_millis(20)).await;
+            if a.users().list_remote().await.len() != 0 {
                 let diff = Instant::now() - t1;
                 println!("Listened for {} millis", diff.as_millis());
                 break;
