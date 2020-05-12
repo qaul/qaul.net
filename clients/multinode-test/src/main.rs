@@ -8,8 +8,16 @@ use {
     qaul_voices::Voices,
 };
 
+use tracing::Level;
+use tracing_subscriber::fmt;
+
 #[async_std::main]
 async fn main() {
+    let _s = fmt()
+        .with_env_filter("async_std=error,mio=error,alexandria=error,tide=error")
+        .with_max_level(Level::TRACE)
+        .init();
+
     let assets = match env::args().nth(1) {
         Some(p) => p,
         None => {
@@ -24,14 +32,12 @@ async fn main() {
     tp.init_with(|_, arc| Qaul::new(arc, temp().path()));
 
     // services for Node A
-    let qaul_a = tp.a.1.unwrap().clone();
-    let chat_a = Chat::new(Arc::clone(&qaul_a)).await.unwrap();
-    let voices_a = Voices::new(Arc::clone(&qaul_a)).await.unwrap();
+    let chat_a = Chat::new(Arc::clone(&tp.a())).await.unwrap();
+    let voices_a = Voices::new(Arc::clone(&tp.a())).await.unwrap();
 
     // services for Node B
-    let qaul_b = tp.b.1.unwrap().clone();
-    let chat_b = Chat::new(Arc::clone(&qaul_b)).await.unwrap();
-    let voices_b = Voices::new(Arc::clone(&qaul_b)).await.unwrap();
+    let chat_b = Chat::new(Arc::clone(&tp.b())).await.unwrap();
+    let voices_b = Voices::new(Arc::clone(&tp.b())).await.unwrap();
 
     // print information for the user
     println!("Path to static web content: {}", assets);
@@ -43,7 +49,7 @@ async fn main() {
     let server_a = HttpServer::set_paths(
         assets,
         Responder {
-            qaul: qaul_a,
+            qaul: Arc::clone(tp.a()),
             chat: chat_a,
             voices: voices_a,
         },
@@ -51,7 +57,7 @@ async fn main() {
     let server_b = HttpServer::set_paths(
         assets_b,
         Responder {
-            qaul: qaul_b,
+            qaul: Arc::clone(tp.b()),
             chat: chat_b,
             voices: voices_b,
         },

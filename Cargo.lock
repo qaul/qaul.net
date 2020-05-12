@@ -1494,6 +1494,8 @@ dependencies = [
  "ratman",
  "ratman-harness",
  "tempfile",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
