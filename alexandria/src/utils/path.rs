@@ -49,6 +49,12 @@ pub struct Path {
     seq: Vec<String>,
 }
 
+impl Path {
+    pub fn leaf(&self) -> &str {
+        self.leaf.as_str()
+    }
+}
+
 impl Display for Path {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", String::from(self))

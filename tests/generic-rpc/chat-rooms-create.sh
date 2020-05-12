@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 source ./bootstrap-users.sh
+
+echo "Creating room for $A_ID"
 
 # creates a new chat room
 # 

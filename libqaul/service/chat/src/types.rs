@@ -126,7 +126,7 @@ impl Subscription {
     }
 
     /// Get the next chat message
-    pub async fn next(&self) -> Option<ChatMessage> {
-        self.inner.next().await.map(Into::into)
+    pub async fn next(&self) -> ChatMessage {
+        self.inner.next().await.into()
     }
 }

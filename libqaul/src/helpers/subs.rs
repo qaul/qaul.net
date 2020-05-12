@@ -36,17 +36,19 @@ where
     }
 
     /// Poll for the next return from the subscription
-    pub async fn next(&self) -> Option<T> {
-        let path = self.inner.next().await;
-        trace!("Querying new path {}", path.to_string());
-        match self
-            .store
-            .query(self.session, Query::path(path))
-            .await
-            .unwrap()
-        {
-            QueryResult::Single(rec) => Some(rec.into()),
-            _ => None,
+    pub async fn next(&self) -> T {
+        // Because subscriptions also get notified about deletions we
+        // basically internally drop objects that don't exist anymore
+        // because it means there was probably a deletion
+        loop {
+            let path = self.inner.next().await;
+            trace!("Querying new path {}", path.to_string());
+
+            let rec = self.store.query(self.session, Query::path(path)).await;
+
+            if let Ok(QueryResult::Single(rec)) = rec {
+                break rec.into();
+            }
         }
     }
 }

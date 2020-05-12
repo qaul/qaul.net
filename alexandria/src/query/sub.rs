@@ -101,6 +101,7 @@ impl Subscription {
             task::spawn(async move {
                 while let Some(d) = notify.recv().await {
                     let d: Delta = d;
+                    trace!("{:#?}", d);
                     if match query {
                         Query::Path(ref p) => p == &d.path,
                         Query::Tag(ref tq) => match tq {

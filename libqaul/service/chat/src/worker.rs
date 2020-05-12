@@ -63,24 +63,23 @@ pub(crate) async fn run_user(user: UserAuth, serv: Arc<Chat>, run: RunMap) {
     trace!("Creating message subscription!");
 
     while run.read().await.contains(&user.0) {
-        if let Some(chat_msg) = sub.next().await {
-            if chat_msg.sender == user.0 && continue {}
+        let chat_msg = sub.next().await;
+        if chat_msg.sender == user.0 && continue {}
 
-            // If we get a room state back, we send a reply message
-            if let Some(rs) = Room::handle(&serv, user.clone(), &chat_msg).await {
-                trace!("Handling incoming text message");
-                let friends = serv.rooms.get(user.clone(), rs.id()).await.unwrap().users;
-                let room_id = rs.id();
-                msg::dispatch_to(
-                    &serv,
-                    user.clone(),
-                    friends,
-                    msg::gen_payload("", rs),
-                    room_id,
-                )
-                .await
-                .unwrap();
-            }
+        // If we get a room state back, we send a reply message
+        if let Some(rs) = Room::handle(&serv, user.clone(), &chat_msg).await {
+            trace!("Handling incoming text message");
+            let friends = serv.rooms.get(user.clone(), rs.id()).await.unwrap().users;
+            let room_id = rs.id();
+            msg::dispatch_to(
+                &serv,
+                user.clone(),
+                friends,
+                msg::gen_payload("", rs),
+                room_id,
+            )
+            .await
+            .unwrap();
         }
     }
 }

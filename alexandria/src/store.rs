@@ -53,6 +53,7 @@ impl Store {
     /// If providing a user ID, check the user store first, before
     /// checking the shared store.
     pub(crate) fn get_path(&self, id: Session, path: &Path) -> Result<Arc<Record>> {
+        trace!("Getting path `{}`", path);
         id.id()
             .and_then(|ref id| self.usrd.get(id))
             .and_then(|tree| {
@@ -92,7 +93,7 @@ impl Store {
         let mut rec = Record::create(tags, initial)?;
         let rec_id = rec.header.id;
         trace!("Created skeleton record `{}`", rec_id.to_string());
-        
+
         for d in ulterior {
             rec.apply(d)?;
         }

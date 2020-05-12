@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -x
+set -e
 
 ## Create user on node A
 
@@ -38,3 +38,8 @@ export B_TOKEN=$(echo $NODE_B | jq '.data.auth.token' | sed -e 's/"//g')
 
 ## Wait just a little bit
 sleep 1
+
+## For debugging the logs
+echo "ID A: $A_ID"
+echo "ID B: $B_ID"
+

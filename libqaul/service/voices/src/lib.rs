@@ -90,63 +90,63 @@ impl Voices {
             // forever
             //
             // it should do not that
-            while let Some(msg) = subscription.next().await {
-                if !task_spawned {
-                    // the decoder heartbeat, decoding a packet every 20 ms
-                    let voices = voices.clone();
-                    task::spawn(async move {
-                        task::sleep(Duration::from_millis(JITTER_DELAY as u64)).await;
+            // while let msg = subscription.next().await {
+            //     if !task_spawned {
+            //         // the decoder heartbeat, decoding a packet every 20 ms
+            //         let voices = voices.clone();
+            //         task::spawn(async move {
+            //             task::sleep(Duration::from_millis(JITTER_DELAY as u64)).await;
 
-                        let mut next_tick = Instant::now();
-                        loop {
-                            {
-                                let mut calls = voices.calls.lock().await;
-                                let call = if let Some(call) = calls.get_mut(&id) {
-                                    call
-                                } else {
-                                    break;
-                                };
+            //             let mut next_tick = Instant::now();
+            //             loop {
+            //                 {
+            //                     let mut calls = voices.calls.lock().await;
+            //                     let call = if let Some(call) = calls.get_mut(&id) {
+            //                         call
+            //                     } else {
+            //                         break;
+            //                     };
 
-                                if call.decode_packet().is_err() {
-                                    break;
-                                }
-                            }
+            //                     if call.decode_packet().is_err() {
+            //                         break;
+            //                     }
+            //                 }
 
-                            // this looks a little silly but it helps prevent errors
-                            // from accumulating and causing us to needlessly miss packets
-                            next_tick += Duration::from_millis(PACKET_DURATION as u64);
-                            task::sleep(next_tick.duration_since(Instant::now())).await;
-                        }
-                    });
-                    task_spawned = true;
-                }
-                let msg: VoiceMessage = match conjoiner::deserialise(&msg.payload) {
-                    Ok(msg) => msg,
-                    Err(_) => {
-                        break;
-                    }
-                };
-                let packet = match msg.kind {
-                    VoiceMessageKind::Packet(p) => p,
-                    _ => {
-                        break;
-                    }
-                };
+            //                 // this looks a little silly but it helps prevent errors
+            //                 // from accumulating and causing us to needlessly miss packets
+            //                 next_tick += Duration::from_millis(PACKET_DURATION as u64);
+            //                 task::sleep(next_tick.duration_since(Instant::now())).await;
+            //             }
+            //         });
+            //         task_spawned = true;
+            //     }
+            //     let msg: VoiceMessage = match conjoiner::deserialise(&msg.payload) {
+            //         Ok(msg) => msg,
+            //         Err(_) => {
+            //             break;
+            //         }
+            //     };
+            //     let packet = match msg.kind {
+            //         VoiceMessageKind::Packet(p) => p,
+            //         _ => {
+            //             break;
+            //         }
+            //     };
 
-                let mut calls = voices.calls.lock().await;
-                let call = if let Some(call) = calls.get_mut(&id) {
-                    call
-                } else {
-                    break;
-                };
+            //     let mut calls = voices.calls.lock().await;
+            //     let call = if let Some(call) = calls.get_mut(&id) {
+            //         call
+            //     } else {
+            //         break;
+            //     };
 
-                match call.push_packet(packet) {
-                    Ok(_) => {}
-                    Err(_) => {
-                        break;
-                    }
-                };
-            }
+            //     match call.push_packet(packet) {
+            //         Ok(_) => {}
+            //         Err(_) => {
+            //             break;
+            //         }
+            //     };
+            // }
         });
 
         let voices = self.clone();

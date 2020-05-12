@@ -1,14 +1,9 @@
 //! libqaul message tests
 
 mod harness;
-use harness::{millis, sec10, sec5, zzz};
+use harness::sec5;
 
-use libqaul::{
-    helpers::TagSet,
-    messages::{Mode, MsgQuery},
-    users::UserAuth,
-    Identity, Qaul,
-};
+use libqaul::{helpers::TagSet, messages::Mode, users::UserAuth, Identity, Qaul};
 use std::{sync::Arc, time::Instant};
 
 async fn send_simple(q: &Arc<Qaul>, auth: &UserAuth, target: Identity) -> Identity {
@@ -44,7 +39,7 @@ async fn subscribe_one() {
             .subscribe(auth_b.clone(), "net.qaul.testing", TagSet::empty())
             .await
             .unwrap();
-        sub.next().await.unwrap()
+        sub.next().await
     })
     .await
     .unwrap();

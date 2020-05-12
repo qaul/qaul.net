@@ -123,7 +123,7 @@ async fn send_message_subscribe() -> Result<()> {
             .subscribe(alice.clone(), room_id)
             .await
             .unwrap();
-        sub.next().await.unwrap()
+        sub.next().await
     })
     .await
     .unwrap();

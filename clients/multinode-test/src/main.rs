@@ -14,7 +14,7 @@ use tracing_subscriber::fmt;
 #[async_std::main]
 async fn main() {
     let _s = fmt()
-        .with_env_filter("async_std=error,mio=error,alexandria=error,tide=error")
+        .with_env_filter("async_std=error,mio=error,tide=error")
         .with_max_level(Level::TRACE)
         .init();
 
