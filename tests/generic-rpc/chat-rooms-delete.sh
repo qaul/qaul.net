@@ -1,17 +1,21 @@
 #!/bin/bash
 
-# creates a new chat room
+set -ex
+
+source ./chat-room-create.sh
+
+# delete a chatroom by id
 # 
 # usage:
-# ./chat-rooms_create.sh <USER_ID>
+# ./chat-rooms_delete.sh
 
 curl -i  \
     -H "Content-Type: application/json" \
     -d "{ \"id\": \"1\", 
           \"kind\": \"chat-rooms\", 
-          \"method\": \"create\",
+          \"method\": \"delete\",
           \"data\": {
-            \"users\": [\"$1\"]
+            \"id\": \"$1\"
           },
           \"auth\": {
             \"id\":\"$QAUL_ID\",
@@ -19,3 +23,4 @@ curl -i  \
           }
         }" \
     "http://127.0.0.1:9900/rpc"
+
