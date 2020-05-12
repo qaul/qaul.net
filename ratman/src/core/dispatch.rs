@@ -52,7 +52,6 @@ impl Dispatch {
     }
 
     pub(crate) async fn flood(&self, frame: Frame) -> Result<()> {
-        
         for ep in self.drivers.get_all().await.into_iter() {
             let f = frame.clone();
             ep.send(f, Target::Flood).await.unwrap();
@@ -63,12 +62,9 @@ impl Dispatch {
 
     /// Reflood a message to the network, except the previous interface
     pub(crate) async fn reflood(&self, frame: Frame, ep: usize) {
-        future::join_all(self.drivers.get_without(ep).await.into_iter().map(|ep| {
+        for ep in self.drivers.get_without(ep).await.into_iter() {
             let f = frame.clone();
-            task::spawn(async move {
-                ep.send(f, Target::Flood).await.unwrap();
-            })
-        }))
-        .await;
+            task::spawn(async move { ep.send(f, Target::Flood).await.unwrap() });
+        }
     }
 }

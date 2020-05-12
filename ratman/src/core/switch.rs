@@ -71,6 +71,8 @@ impl Switch {
                 _ => continue,
             };
 
+            trace!("Receiving frame...");
+
             // Switch the traffic to the appropriate place
             use {Recipient::*, RouteType::*};
             match f.recipient {
@@ -91,6 +93,7 @@ impl Switch {
                     None => self.journal.queue(f).await,
                 },
             }
+
         }
     }
 }

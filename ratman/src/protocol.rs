@@ -51,12 +51,15 @@ impl Protocol {
             return Err(Error::DuplicateUser);
         }
 
+        debug!("Marking user identity `{}` as online", id);
+        
         let b = Arc::new(AtomicBool::new(true));
         map.insert(id, Arc::clone(&b));
         drop(map);
 
         task::spawn(async move {
             loop {
+                trace!("Sending announcement `{}`", id);
                 core.raw_flood(Self::announce(id)).await.unwrap();
                 task::sleep(Duration::from_secs(2)).await;
 
@@ -71,6 +74,7 @@ impl Protocol {
     }
 
     pub(crate) async fn offline(&self, id: Identity) -> Result<()> {
+        debug!("Marking user identity `{}` as offline", id);
         self.online
             .lock()
             .await

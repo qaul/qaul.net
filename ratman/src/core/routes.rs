@@ -1,7 +1,10 @@
 //! Routing table module
 
-use crate::{Error, Result, IoPair};
-use async_std::sync::{channel, Arc, Mutex};
+use crate::{Error, IoPair, Result};
+use async_std::{
+    sync::{channel, Arc, Mutex},
+    task,
+};
 use std::collections::BTreeMap;
 use {identity::Identity, netmod::Target};
 
@@ -30,7 +33,7 @@ impl RouteTable {
     pub(crate) fn new() -> Arc<Self> {
         Arc::new(Self {
             routes: Default::default(),
-            new: channel(2),
+            new: channel(1),
         })
     }
 
@@ -38,11 +41,14 @@ impl RouteTable {
     ///
     /// If the Id was not previously known to the router, it is queued
     /// to the `new` set which can be polled by calling `discovered().await`.
-    pub(crate) async fn update(&self, if_: u8, t: Target, id: Identity) {
+    pub(crate) async fn update(self: &Arc<Self>, if_: u8, t: Target, id: Identity) {
         let mut tbl = self.routes.lock().await;
         let route = RouteType::Remote(EpTargetPair(if_, t));
-        if tbl.insert(id, route).is_some() {
-            self.new.0.send(id).await;
+
+        // Only "announce" a new user if it was not known before
+        if tbl.insert(id, route).is_none() {
+            let s = Arc::clone(&self);
+            task::spawn(async move { s.new.0.send(id).await });
         }
     }
 
