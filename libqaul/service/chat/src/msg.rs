@@ -12,6 +12,7 @@ use libqaul::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
+use tracing::trace;
 
 /// Get all chat messages for this service that are marked as "unread"
 pub(crate) async fn unread(serv: &Arc<Chat>, user: UserAuth) -> Result<Vec<ChatMessage>> {
@@ -61,6 +62,8 @@ pub(crate) async fn dispatch_to(
     payload: Vec<u8>,
     room: RoomId,
 ) -> Result<()> {
+    trace!("Creating room with {:?}", friends);
+    
     for recp in friends {
         // Skip self
         if recp == user.0 {

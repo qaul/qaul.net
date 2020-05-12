@@ -37,7 +37,10 @@ impl State {
                         Poll::Ready(f)
                     }
                     None => {
-                        trace!("No new frames; registering waker");
+                        if !Notify::has_waker(not) {
+                            trace!("No new frames; registering waker");
+                        }
+
                         Notify::register_waker(not, ctx.waker());
                         Poll::Pending
                     }
