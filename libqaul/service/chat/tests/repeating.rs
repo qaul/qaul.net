@@ -114,15 +114,17 @@ async fn send_messages_for_different_people() -> Result<()> {
 
     net.b()
         .chat
-        .send_message(david.clone(), room_1, "Hello Charlie, how are you?".into())
+        .send_message(david.clone(), room_2, "Hello Charlie, how are you?".into())
         .await
         .unwrap();
+
+    zzz().await;
 
     let mut rooms = net.b().chat.rooms(david.clone()).await?;
     assert!(rooms.len() == 1);
     assert_eq!(rooms.remove(0).id, room_2);
 
-    let mut msgs2 = net.b().chat.load_messages(bob.clone(), room_1).await?;
+    let mut msgs2 = net.b().chat.load_messages(david.clone(), room_2).await?;
     assert_eq!(msgs2[0].content, "".to_string());
     assert_eq!(msgs2[1].content, "Hello Charlie, how are you?".to_string());
     Ok(())
