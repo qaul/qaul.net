@@ -77,22 +77,30 @@ async fn send_messages_for_different_people() -> Result<()> {
     let bob = net.b().qaul.users().create("acab").await?;
 
     // Wait for user propagations
+    // FIXME: replace with libqaul announcement subscription
     zzz().await;
 
     let room_1 = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
+    timeout(sec5(), async {
+        net.b().chat.next_rooms(bob.clone()).await;
+        zzz().await;
+    })
+    .await?;
+    let b_sub = net.b().chat.subscribe(bob.clone(), room_1).await?;
+
     net.a()
         .chat
         .send_message(alice.clone(), room_1, "Hello Bob, how are you?".into())
         .await
         .unwrap();
 
-    zzz().await;
+    timeout(sec5(), async { b_sub.next().await }).await?;
 
     let mut rooms = net.b().chat.rooms(bob.clone()).await?;
     assert!(rooms.len() == 1);
     assert_eq!(rooms.remove(0).id, room_1);
 
-    let mut msgs1 = dbg!(net.b().chat.load_messages(bob.clone(), room_1).await?);
+    let msgs1 = net.b().chat.load_messages(bob.clone(), room_1).await?;
     assert_eq!(msgs1[0].content, "".to_string());
     assert_eq!(msgs1[1].content, "Hello Bob, how are you?".to_string());
 
@@ -110,7 +118,12 @@ async fn send_messages_for_different_people() -> Result<()> {
         .start_chat(charlie.clone(), vec![david.0])
         .await?;
 
-    zzz().await;
+    timeout(sec5(), async {
+        net.b().chat.next_rooms(david.clone()).await;
+        zzz().await;
+    })
+    .await?;
+    let a_sub = net.a().chat.subscribe(charlie.clone(), room_2).await?;
 
     net.b()
         .chat
@@ -118,13 +131,13 @@ async fn send_messages_for_different_people() -> Result<()> {
         .await
         .unwrap();
 
-    zzz().await;
+    timeout(sec5(), async { a_sub.next().await }).await?;
 
-    let mut rooms = net.b().chat.rooms(david.clone()).await?;
+    let mut rooms = net.a().chat.rooms(charlie.clone()).await?;
     assert!(rooms.len() == 1);
     assert_eq!(rooms.remove(0).id, room_2);
 
-    let mut msgs2 = net.b().chat.load_messages(david.clone(), room_2).await?;
+    let msgs2 = net.a().chat.load_messages(charlie.clone(), room_2).await?;
     assert_eq!(msgs2[0].content, "".to_string());
     assert_eq!(msgs2[1].content, "Hello Charlie, how are you?".to_string());
     Ok(())

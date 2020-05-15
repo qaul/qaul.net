@@ -128,6 +128,11 @@ impl Chat {
         msg::subscribe_for(self, user, room).await
     }
 
+    /// A subscriber that notifies the caller when a new room is discovered
+    pub async fn next_rooms(self: &Arc<Self>, user: UserAuth) -> RoomId {
+        self.rooms.poll_new().await
+    }
+
     /// Get all messages from a room
     pub async fn load_messages(
         self: &Arc<Self>,

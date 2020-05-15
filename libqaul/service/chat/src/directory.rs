@@ -1,16 +1,23 @@
 use crate::{tags, Error, Result, Room, RoomDiff, RoomId, ASC_NAME};
-use async_std::sync::Arc;
+use async_std::{
+    sync::{channel, Arc, Receiver, Sender},
+    task,
+};
 use bincode;
 use libqaul::{helpers::Tag, services::MetadataMap, users::UserAuth, Qaul};
 
 /// Keeps track of known rooms via the service metadata API
 pub(crate) struct RoomDirectory {
     qaul: Arc<Qaul>,
+    notify: (Sender<RoomId>, Receiver<RoomId>),
 }
 
 impl RoomDirectory {
     pub(crate) fn new(qaul: Arc<Qaul>) -> Self {
-        Self { qaul }
+        Self {
+            qaul,
+            notify: channel(1),
+        }
     }
 
     async fn get_inner(&self, user: UserAuth) -> MetadataMap {
@@ -63,6 +70,14 @@ impl RoomDirectory {
             )
             .await
             .unwrap();
+
+        let room_id = room.id;
+        let sender = self.notify.0.clone();
+        task::spawn(async move { sender.send(room_id).await });
+    }
+
+    pub(crate) async fn poll_new(self: &Arc<Self>) -> RoomId {
+        self.notify.1.recv().await.unwrap()
     }
 
     /// Apply a diff to a room

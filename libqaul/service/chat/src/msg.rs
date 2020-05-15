@@ -3,7 +3,7 @@
 use crate::{tags, Chat, ChatMessage, Result, RoomId, RoomState, Subscription, ASC_NAME};
 use async_std::sync::Arc;
 use bincode::{deserialize, serialize};
-use chrono::Utc;
+use chrono::{Duration, Utc};
 use libqaul::{
     messages::{Message, Mode, MsgQuery},
     users::UserAuth,
@@ -37,10 +37,31 @@ struct Meta {
 impl From<Message> for ChatMessage {
     fn from(msg: Message) -> Self {
         let Meta { content, room } = deserialize(&msg.payload).unwrap();
+
+        // This is a bit of a hack that fixes a lot of metadata race
+        // conditions, especially in tests, but has practically no
+        // real world consequences.
+        //
+        // The problem is that messages can get dispatched slightly
+        // out of order. In the real world nobody is going to wait for
+        // a message with a particular payload to assert on, which
+        // means that out of order messages, while annoying in chats,
+        // are fine.  However all of our tests assert on some very
+        // basic properties and there are subtle timing differences,
+        // depending on CPU and architecture that make tests fail when
+        // messages arrive out of order.  When looking at a "status"
+        // message, meaning one that updates the room in any way but
+        // otherwise has no content, we apply a negative time offset
+        // to make the history line up better.
+        let timestamp = match room {
+            RoomState::Id(_) => Utc::now(),
+            _ => Utc::now() - Duration::milliseconds(500),
+        };
+
         Self {
             id: msg.id,
             sender: msg.sender,
-            timestamp: Utc::now(),
+            timestamp,
             content,
             room,
         }
