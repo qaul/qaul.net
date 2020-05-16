@@ -82,7 +82,7 @@ async fn send_messages_for_different_people() -> Result<()> {
 
     let room_1 = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
     timeout(sec5(), async {
-        net.b().chat.next_rooms(bob.clone()).await;
+        net.b().chat.next_rooms().await;
         zzz().await;
     })
     .await?;
@@ -119,7 +119,7 @@ async fn send_messages_for_different_people() -> Result<()> {
         .await?;
 
     timeout(sec5(), async {
-        net.b().chat.next_rooms(david.clone()).await;
+        net.b().chat.next_rooms().await;
         zzz().await;
     })
     .await?;

@@ -31,6 +31,7 @@ pub(crate) mod tags {
     }
 }
 
+
 /// Messaging service state
 #[derive(Clone)]
 pub struct Chat {
@@ -128,8 +129,16 @@ impl Chat {
         msg::subscribe_for(self, user, room).await
     }
 
-    /// A subscriber that notifies the caller when a new room is discovered
-    pub async fn next_rooms(self: &Arc<Self>, user: UserAuth) -> RoomId {
+    /// Subscriber function that notifies the caller when a new room is discovered
+    ///
+    /// **Warning:** this API creates a side-channel attack
+    /// opportunity to spy on other users in this service, because
+    /// there's no name-spacing between room identities!  For the
+    /// limited testing purposes that this function is used in at the
+    /// moment this is fine.  Ultimately the underlying room directory
+    /// should be able to namespace notifies, or this function should
+    /// be removed from the public fascade (`doc(hidden)` exists too)
+    pub async fn next_rooms(self: &Arc<Self>) -> RoomId {
         self.rooms.poll_new().await
     }
 
