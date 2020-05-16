@@ -2,12 +2,11 @@ use super::ChatRpc;
 use async_std::sync::Arc;
 use async_trait::async_trait;
 use libqaul::{
-    error::Result,
     helpers::{ItemDiff, ItemDiffExt, SetDiff, SetDiffExt},
     users::UserAuth,
     Identity,
 };
-use qaul_chat::{Chat, Room, RoomId, RoomMeta};
+use qaul_chat::{Chat, Result, Room, RoomId, RoomMeta};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]

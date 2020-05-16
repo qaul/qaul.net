@@ -2,8 +2,8 @@ use super::ChatRpc;
 use async_std::sync::Arc;
 use async_trait::async_trait;
 use futures::{future::FutureExt, stream::Stream};
-use libqaul::{error::Result, users::UserAuth};
-use qaul_chat::{Chat, ChatMessage, RoomId, Subscription};
+use libqaul::users::UserAuth;
+use qaul_chat::{Result, Chat, ChatMessage, RoomId, Subscription};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
