@@ -13,12 +13,13 @@ use tracing_subscriber::fmt;
 
 #[async_std::main]
 async fn main() {
-    // Initialise the logger first
+    let app = cfg::cli();
+    let cfg = cfg::match_fold(app);
+
+    // Initialise the logger after CLI validation
     let _subscriber = fmt().with_max_level(Level::DEBUG).init();
     info!("Initialised logger: welcome to qauld!");
 
-    let app = cfg::cli();
-    let cfg = cfg::match_fold(app);
     let _state = State::new(&cfg).await;
 
     // Never return the main thread or it all dies

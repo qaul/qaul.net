@@ -110,17 +110,23 @@ impl Qaul {
     where
         P: Into<&'p Path> + std::fmt::Debug,
     {
-        let path = store_path.into();
-        info!("Initialising libqaul with storage path `{:?}`", path);
+        let store = Builder::inspect_path(store_path.into(), "").map_or_else(
+            |b| match b.build() {
+                Ok(s) => {
+                    info!("Creating new backing store");
+                    s
+                },
+                Err(e) => {
+                    error!("Failed to create backing store: {}", e.to_string());
+                    std::process::exit(2);
+                }
+            },
+            |s| {
+                info!("Loading existing store from disk");
+                s
+            },
+        );
 
-        let store = match Builder::new().offset(path).build() {
-            Ok(s) => s,
-            Err(e) => {
-                error!("Failed to create backing store: {}", e.to_string());
-                std::process::exit(2);
-            }
-        };
-        
         let q = Arc::new(Self {
             router: Arc::clone(&router),
             users: UserStore::new(Arc::clone(&store)),

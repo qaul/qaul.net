@@ -7,7 +7,7 @@ use crate::{
     Library,
 };
 use async_std::sync::{Arc, RwLock};
-use std::path::Path;
+use std::{path::Path, result::Result as StdResult};
 
 /// A utility to configure and initialise an alexandria database
 ///
@@ -37,6 +37,42 @@ pub struct Builder {
 impl Builder {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Inspect a path to load an existing alexandria library
+    ///
+    /// If no library exists at the path yet (or the path doesn't
+    /// exist), the `Err(_)` variant is a new builder with an
+    /// initialised `offset` that can then be used to create a new
+    /// database.
+    pub fn inspect_path<'tmp, P, S>(offset: P, _: S) -> StdResult<Arc<Library>, Self>
+    where
+        P: Into<&'tmp Path>,
+        S: Into<String>,
+    {
+        let p: &Path = offset.into();
+
+        // If the path doesn't exist it can't be a database
+        if !p.exists() {
+            return Err(Self::new().offset(p));
+        }
+
+        // TODO: Check for a magic file here
+        // TODO: load database with provided root secret
+
+        let root = Dirs::new(p);
+        let users = RwLock::new(UserTable::new());
+        let tag_cache = RwLock::new(TagCache::new());
+
+        let store = RwLock::new(Store::new());
+        let subs = SubHub::new();
+        Ok(Arc::new(Library {
+            root,
+            users,
+            tag_cache,
+            store,
+            subs,
+        }))
     }
 
     /// Specify a normal path offset
