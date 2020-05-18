@@ -48,11 +48,12 @@ impl Protocol {
     pub(crate) async fn online(self: Arc<Self>, id: Identity, core: Arc<Core>) -> Result<()> {
         let mut map = self.online.lock().await;
         if map.get(&id).map(|arc| arc.load(Ordering::Relaxed)) == Some(true) {
-            return Err(Error::DuplicateUser);
+            // If a user is already online we don't have to do anything
+            return Ok(());
         }
 
         debug!("Marking user identity `{}` as online", id);
-        
+
         let b = Arc::new(AtomicBool::new(true));
         map.insert(id, Arc::clone(&b));
         drop(map);

@@ -25,7 +25,7 @@ use std::{
 /// sure that users are valid.
 #[derive(Clone)]
 pub(crate) struct AuthStore {
-    tokens: Arc<Mutex<BTreeMap<Identity, Token>>>,
+    tokens: Arc<Mutex<BTreeMap<Token, Identity>>>,
     hashes: Arc<Mutex<BTreeMap<Identity, PwHash>>>,
 }
 
@@ -65,24 +65,20 @@ impl AuthStore {
             .map_or(Err(Error::NoUser), |_| Ok(()))?;
 
         let mut tokens = self.tokens.lock().expect("Failed to lock token store!");
-        let token = tokens
-            .get(&user)
-            .cloned()
-            .map_or_else(|| Self::generate(), |t| t);
-
-        tokens.insert(user, token.clone());
+        let token = Self::generate();
+        tokens.insert(token.clone(), user);
         Ok(token)
     }
 
     /// Yield a token for a session, logging out a user
     pub(crate) fn logout(&self, user: &Identity, token: &Token) -> Result<()> {
-        match self
-            .tokens
-            .lock()
-            .expect("Failed to lock token store")
-            .remove(user)
-        {
-            Some(ref t) if t == token => Ok(()),
+        let mut tokens = self.tokens.lock().expect("Failed to lock token store");
+
+        match tokens.get(token) {
+            Some(u) if u == user => {
+                tokens.remove(token);
+                Ok(())
+            }
             Some(_) | None => Err(Error::NotAuthorised),
         }
     }
@@ -92,8 +88,8 @@ impl AuthStore {
         self.tokens
             .lock()
             .expect("Failed to lock token store")
-            .get(user)
-            .map(|t| t == token)
+            .get(token)
+            .map(|u| u == user)
             .map_or(Err(Error::NotAuthorised), |_| Ok(()))?;
         Ok(())
     }
