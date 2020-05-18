@@ -44,6 +44,7 @@ members = [
     "clients/multinode-test",
     "clients/linux-http-test",
     "clients/linux-voice-test",
+    "clients/mini-tcp",
 
     # Actual target binaries
     "clients/linux-cli",

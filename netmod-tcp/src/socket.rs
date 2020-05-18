@@ -144,7 +144,11 @@ impl Socket {
 
                 // Try to read a packet
                 let mut fb = PacketBuilder::new(&mut stream);
-                fb.parse().await.unwrap(); // TODO: Don't panic!
+                if let Err(e) = fb.parse().await {
+                    error!("Failed to parse incoming message: {:?}... dropping connection", e);
+                    break;
+                }
+
                 let f = fb.build().unwrap();
 
                 println!("{} Full packet `{:?}` received!", socket.id, f);

@@ -1,0 +1,10 @@
+[package]
+name = "mini-tcp"
+version = "0.1.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+
+[dependencies]
+netmod-tcp = { path = "../../netmod-tcp" }
+ratman = { path = "../../ratman" }
+async-std = { version = "1.0", features = ["attributes"] }

@@ -139,3 +139,34 @@ async fn trivial() {
     .await
     .unwrap();
 }
+
+/// This test establishes a connection between two peers and then
+/// let's them bounce keep-alive's back and forth for about 1 minute
+/// to test stability.
+///
+/// This test should usually be ignored!
+#[async_std::test]
+#[ignore]
+async fn akward_silence() {
+    use async_std::task;
+    use std::{
+        net::{Ipv4Addr, SocketAddrV4},
+        time::Duration,
+    };
+
+    println!("Starting two sockets to talk to each other now...");
+    let mut a = Endpoint::new("127.0.0.1", 10000, ">> A").await.unwrap();
+    let mut b = Endpoint::new("127.0.0.1", 11000, "> B").await.unwrap();
+
+    a.load_peers(vec![SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 11000)])
+        .await
+        .unwrap();
+    a.start().await;
+
+    b.load_peers(vec![SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 10000)])
+        .await
+        .unwrap();
+    b.start().await;
+
+    task::sleep(Duration::from_secs(120)).await;
+}

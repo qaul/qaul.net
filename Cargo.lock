@@ -1439,6 +1439,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mini-tcp"
+version = "0.1.0"
+dependencies = [
+ "async-std",
+ "netmod-tcp",
+ "ratman",
+]
+
+[[package]]
 name = "mio"
 version = "0.6.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
