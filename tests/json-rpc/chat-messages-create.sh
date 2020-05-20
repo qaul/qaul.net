@@ -2,7 +2,7 @@
 
 set -ex
 
-source ./chat-rooms-create.sh 
+source src/chat-rooms-create.sh 
 
 # creates and sends a new chat message to a specific room
 # 

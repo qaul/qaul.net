@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# returns a list of all users
+# delete the authentiticated user
 #
 # usage:
-# ./users_list.sh
+# ./users_delete.sh <USER_ID> <USER_TOKEN>
 
 curl -i  \
     -H "Content-Type: application/json" \
@@ -14,9 +14,8 @@ curl -i  \
             \"purge\": true
           },
           \"auth\": {
-            \"id\":\"$QAUL_ID\",
-            \"token\":\"$QAUL_TOKEN\"
+            \"id\":\"$1\",
+            \"token\":\"$2\"
           }
         }" \
     "http://127.0.0.1:9900/rpc"
-

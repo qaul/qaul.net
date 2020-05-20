@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Set `dispaly_name` 'testuser' and unset `real_name`
+# Set `dispaly_name` and `real_name` of authenticated user
 # 
 # usage
 # ./users_modify.sh
 #
 
-curl -i  \
+curl -iv  \
     -H "Content-Type: application/json" \
     -d "{ 
         \"id\": \"1\", 
@@ -16,11 +16,13 @@ curl -i  \
             \"display_name\": {
 				\"set\": \"testuser\"
 			},
-            \"realname\": \"unset\"
+            \"real_name\": {
+                \"set\": \"Test User\"
+            }
         },
         \"auth\": {
-            \"id\":\"$QAUL_ID\",
-            \"token\":\"$QAUL_TOKEN\"
+            \"id\":\"$A_ID\",
+            \"token\":\"$A_TOKEN\"
         }
     }" \
     "http://127.0.0.1:9900/rpc"

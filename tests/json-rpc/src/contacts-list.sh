@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# returns a list of all users
+# returns a list of all contacts of node A
 #
 # usage:
-# ./users_list.sh
+# ./contacts_list.sh
 
-curl -iv  \
+curl -i  \
     -H "Content-Type: application/json" \
     -d "{ \"id\": \"1\", 
-          \"kind\": \"users\", 
+          \"kind\": \"contacts\", 
           \"method\": \"list\",
           \"auth\": {
-            \"id\":\"$QAUL_ID\",
-            \"token\":\"$QAUL_TOKEN\"
+            \"id\":\"$A_ID\",
+            \"token\":\"$A_TOKEN\"
           }
         }" \
     "http://127.0.0.1:9900/rpc"

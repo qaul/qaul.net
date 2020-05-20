@@ -1,25 +1,21 @@
 #!/bin/bash
 
-set -ex
-
-source ./chat-room-create.sh
-
-# delete a chatroom by id
+# get a chatroom by id
 # 
 # usage:
-# ./chat-rooms_delete.sh
+# ./chat-rooms_get.sh <ROOM_ID> <USER_ID> <USER_TOKEN>
 
 curl -i  \
     -H "Content-Type: application/json" \
     -d "{ \"id\": \"1\", 
           \"kind\": \"chat-rooms\", 
-          \"method\": \"delete\",
+          \"method\": \"get\",
           \"data\": {
             \"id\": \"$1\"
           },
           \"auth\": {
-            \"id\":\"$QAUL_ID\",
-            \"token\":\"$QAUL_TOKEN\"
+            \"id\":\"$2\",
+            \"token\":\"$3\"
           }
         }" \
     "http://127.0.0.1:9900/rpc"

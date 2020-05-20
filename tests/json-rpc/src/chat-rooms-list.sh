@@ -1,9 +1,11 @@
 #!/bin/bash
 
-# returns a list of all chat-rooms
+# returns a list of all chat-rooms for authenticated user
 #
 # usage:
-# ./chat-rooms_list.sh
+# ./chat-rooms-list.sh <USER_ID> <USER_TOKEN>
+
+echo "list chat-rooms for user: $1"
 
 curl -i  \
     -H "Content-Type: application/json" \
@@ -11,8 +13,8 @@ curl -i  \
           \"kind\": \"chat-rooms\", 
           \"method\": \"list\",
           \"auth\": {
-            \"id\":\"$QAUL_ID\",
-            \"token\":\"$QAUL_TOKEN\"
+            \"id\":\"$1\",
+            \"token\":\"$2\"
           }
         }" \
     "http://127.0.0.1:9900/rpc"

@@ -8,7 +8,7 @@ use libqaul::{
 };
 
 #[cfg(feature = "chat")]
-use qaul_chat::{Chat, ChatMessage, Room, RoomId};
+use qaul_chat::{Chat, ChatMessage, Room, RoomId, RoomMeta};
 
 // #[cfg(feature = "voices")]
 // use qaul_voices::api::{CallId, CallStatus, IncomingCall, StreamMetadata};
@@ -56,6 +56,10 @@ pub enum Request {
     #[cfg(feature = "chat")]
     ChatRoomCreate(chat::rooms::Create),
 
+    /// Modfiy a chat room
+    // #[cfg(feature = "chat")]
+    // ChatRoomModify(chat::rooms::Modify),
+    
     /// Modify a user's contact
     ContactModify(contacts::Modify),
 
@@ -170,6 +174,10 @@ pub enum Response {
     #[cfg(feature = "chat")]
     RoomId(Vec<RoomId>),
 
+    /// Get a list of all chat rooms with read / unread messages
+    #[cfg(feature = "chat")]
+    Rooms(Vec<RoomMeta>),
+
     /// Confirmation for a new subscription
     Subscription(SubId),
 
@@ -206,6 +214,20 @@ pub enum Response {
 impl From<UserAuth> for Response {
     fn from(auth: UserAuth) -> Self {
         Response::Auth(auth)
+    }
+}
+
+#[cfg(feature = "chat")]
+impl From<RoomMeta> for Response {
+    fn from(room: RoomMeta) -> Self {
+        Response::Rooms(vec![room])
+    }
+}
+
+#[cfg(feature = "chat")]
+impl From<Vec<RoomMeta>> for Response {
+    fn from(rooms: Vec<RoomMeta>) -> Self {
+        Response::Rooms(rooms)
     }
 }
 

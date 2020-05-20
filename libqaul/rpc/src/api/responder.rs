@@ -69,9 +69,9 @@ impl Responder {
             Request::ChatMsgCreate(r) => self.respond_chat(r).await.into(),
 
             // =^-^= Chat Rooms =^-^=
-            // #[cfg(feature = "chat")]
-            // Request::ChatRoomList(r) => self.respond_chat(r).await.into(),
-            //#[cfg(feature = "chat")]
+            #[cfg(feature = "chat")]
+            Request::ChatRoomList(r) => self.respond_chat(r).await.into(),
+            #[cfg(feature = "chat")]
             Request::ChatRoomGet(r) => self.respond_chat(r).await.into(),
             //#[cfg(feature = "chat")]
             Request::ChatLoadRoom(r) => self.respond_chat(r).await.into(),
