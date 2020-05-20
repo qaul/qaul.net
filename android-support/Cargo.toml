@@ -1,5 +1,5 @@
 [package]
-name = "librobot"
+name = "libqauldroid"
 description = "A libqaul and ratman shim for Android"
 version = "0.1.0"
 license = "APGL-3.0-or-later"
@@ -7,7 +7,7 @@ authors = ["Katharina Fey <kookie@spacekookie.de>", "Leonora Tindall <nora@nora.
 edition = "2018"
 
 [lib]
-name = "robot"
+name = "qauldroid"
 crate-type = ["cdylib"]
 
 [dependencies]
@@ -16,4 +16,4 @@ jni = { version = "0.14", default-features = false }
 libqaul = { path = "../libqaul" }
 ratman = { path = "../ratman" }
 ratman-configure = { path = "../ratman/configure" }
-netmod-wd = { path = "../netmod-wd" }
+netmod-wd = { path = "../netmod-wd" }1

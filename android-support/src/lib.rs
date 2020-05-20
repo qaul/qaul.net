@@ -1,3 +1,15 @@
+//! qaul.net android interop library
+//!
+//! A lot of functions are handled internally, for example after
+//! spawning the http server, the main way of communicating with the
+//! libqaul stack is via the http api.  Some functions need to be
+//! exposed from the services, for example for more efficient audio
+//! streaming or notifications, and those are handled via this
+//! library.
+//!
+//! It can depend on any library in the qaul.net ecosystem, and can
+//! also handle initialisation for the hardware drivers on android.
+
 #![cfg(target_os = "android")]
 #![allow(non_snake_case)]
 
