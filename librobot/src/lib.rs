@@ -21,3 +21,14 @@ pub unsafe extern "C" fn Java_net_qaul_app_MainActivity_hello(
         .unwrap();
     output.into_inner()
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_MainActivity_start_server(
+    env: JNIEnv,
+    _: JObject,
+) -> jint{
+    let output = env
+        .new_string("Hello ".to_owned())
+        .unwrap();
+    output.into_inner()
+}

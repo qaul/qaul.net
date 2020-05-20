@@ -15,4 +15,5 @@ jni = { version = "0.14", default-features = false }
 
 libqaul = { path = "../libqaul" }
 ratman = { path = "../ratman" }
+ratman-configure = { path = "../ratman/configure" }
 netmod-wd = { path = "../netmod-wd" }

@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+    FROM ubuntu:18.04
 
 MAINTAINER Katharina Fey
 
@@ -34,7 +34,7 @@ ENV ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
 
 ENV PATH="$PATH:$ANDROID_SDK_HOME/emulator:$ANDROID_SDK_HOME/tools/bin:$ANDROID_SDK_HOME/tools:$ANDROID_SDK_HOME/platform-tools:$ANDROID_NDK:$FLUTTER_HOME/bin:$FLUTTER_HOME/bin/cache/dart-sdk/bin"
 
-WORKDIR /tmp
+WORKDIR /qaul.net/clients/android
 
 # Installing packages
 RUN apt-get update -qq > /dev/null && \

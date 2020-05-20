@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
 
 android {
+    ndkVersion "21.1.6352462"
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
     defaultConfig {
@@ -37,7 +38,8 @@ dependencies {
 cargo {
     module  = "../../../librobot"
     targetDirectory = "../../../target"
-    libname = "librobot"
+    libname = "robot"
     targetIncludes = ['librobot.so']
-    targets = ["arm", "arm64", "x86", "x86_64"]
+    targets = ["arm64"]
+    targets = ["arm64"]
 }
