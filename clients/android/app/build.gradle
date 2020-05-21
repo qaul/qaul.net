@@ -36,10 +36,10 @@ dependencies {
 }
 
 cargo {
-    module  = "../../../librobot"
+    module  = "../../../android-support"
     targetDirectory = "../../../target"
-    libname = "robot"
-    targetIncludes = ['librobot.so']
+    libname = "qauldroid"
+    targetIncludes = ['libqauldroid.so']
     targets = ["arm64"]
     targets = ["arm64"]
 }

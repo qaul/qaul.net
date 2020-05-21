@@ -38,7 +38,7 @@ Run the following command to just build the Rust code.
 
 ```console
 $ docker run --rm -it -v /path/to/qaul.net:/qaul.net \
-    qaulnet/android-build-env /qaul.net/clients/android/gradlew cargoBuild
+    qaulnet/android-build-env cd /qaul.net && clients/android/gradlew cargoBuild
 ```
 
 Remember that you are root in the container (meaning uid 0), meaning

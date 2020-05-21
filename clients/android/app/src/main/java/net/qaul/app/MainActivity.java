@@ -8,9 +8,11 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Used to load the native library on application startup.
     static {
-        System.loadLibrary("robot");
+        // The "android-support" crate creates a dynamic library called "libqauldroid"
+        // which we can include here simply via "qauldroid" because it's being put
+        // into the library search path via ~ m a g i c ~
+        System.loadLibrary("qauldroid");
     }
 
     @Override
@@ -20,9 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Example of a call to a native method
         TextView tv = findViewById(R.id.sample_text);
-        tv.setText("qaul.net");
-
-        Log.d("rust", hello("World"));
+        tv.setText(hello("qaul.net"));
     }
 
     public native String hello(String to);

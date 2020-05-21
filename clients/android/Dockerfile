@@ -11,7 +11,7 @@ ENV ANDROID_HOME="/opt/android-sdk" \
 ENV ANDROID_SDK_TOOLS_VERSION="4333796"
 
 # Get the latest version from https://developer.android.com/ndk/downloads/index.html
-ENV ANDROID_NDK_VERSION="21"
+ENV ANDROID_NDK_VERSION="21b"
 
 # nodejs version
 ENV NODE_VERSION="10.x"
@@ -163,19 +163,7 @@ RUN echo "Installing sdk tools ${ANDROID_SDK_TOOLS_VERSION}" && \
         "add-ons;addon-google_apis-google-19" \
         "add-ons;addon-google_apis-google-18" \
         "add-ons;addon-google_apis-google-17" \
-        "add-ons;addon-google_apis-google-16" > /dev/null && \
-    echo "Installing emulator " && \
-    yes | "$ANDROID_HOME"/tools/bin/sdkmanager "emulator" > /dev/null && \
-    echo "Installing kotlin" && \
-    wget --quiet -O sdk.install.sh "https://get.sdkman.io" && \
-    bash -c "bash ./sdk.install.sh > /dev/null && source ~/.sdkman/bin/sdkman-init.sh && sdk install kotlin" && \
-    rm -f sdk.install.sh && \
-    # Install Flutter sdk
-    cd /opt && \
-    wget --quiet https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_v1.5.4-hotfix.2-stable.tar.xz -O flutter.tar.xz && \
-    tar xf flutter.tar.xz && \
-    rm -f flutter.tar.xz && \
-    flutter config --no-analytics
+        "add-ons;addon-google_apis-google-16" > /dev/null
 
 # Install Rust toolchains
 RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable -y
