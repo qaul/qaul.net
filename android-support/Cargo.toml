@@ -12,8 +12,12 @@ crate-type = ["cdylib"]
 
 [dependencies]
 jni = { version = "0.14", default-features = false }
+tempfile = "3.0"
 
 libqaul = { path = "../libqaul" }
+libqaul-http = { path = "../libqaul/http" }
+qaul-chat = { path = "../libqaul/service/chat" }
+
+netmod-wd = { path = "../netmod-wd" }
 ratman = { path = "../ratman" }
-ratman-configure = { path = "../ratman/configure" }
-netmod-wd = { path = "../netmod-wd" }1
+ratman-configure = { path = "../ratman/configure", features = ["android"] }

@@ -14,7 +14,6 @@ members = [
 
     # qaul.net main services
     "libqaul/service/chat",
-    # "libqaul/service/feed",
     "libqaul/service/files",
     "libqaul/service/voices",
 
@@ -38,7 +37,7 @@ members = [
     "netmod-wd",
 
     # android build support
-    "librobot",
+    "android-support",
 
     # test binaries
     "clients/multinode-test",

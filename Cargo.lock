@@ -1301,13 +1301,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "librobot"
+name = "libqauldroid"
 version = "0.1.0"
 dependencies = [
  "jni",
  "libqaul",
+ "libqaul-http",
  "netmod-wd",
+ "qaul-chat",
  "ratman",
+ "ratman-configure",
+ "tempfile",
 ]
 
 [[package]]
