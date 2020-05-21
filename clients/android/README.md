@@ -37,17 +37,11 @@ help you configure them.
 Run the following command to just build the Rust code.
 
 ```console
-$ docker run --rm -it -v /path/to/qaul.net:/qaul.net \
-    qaulnet/android-build-env cd /qaul.net && clients/android/gradlew cargoBuild
+$ clients/android/build.sh
 ```
 
-Remember that you are root in the container (meaning uid 0), meaning
-that you will have to chown the build files to avoid permission errors
-in the next step:
-
-```console
-$ sudo chown your_user:your_group -R clients/android
-```
+This script will take care of permission issues caused by the
+container building everything as root already.
 
 - TODO: build the webui
 
@@ -57,7 +51,7 @@ command-line to build an app for publishing.
 
 ```console
 $ cd clients/android
-$ ./gradlew assemble
+$ clients/android/gradlew assemble
 ```
 
 A finished APK will appear in in `clients/android/app/build/outputs/apk/debug`.
