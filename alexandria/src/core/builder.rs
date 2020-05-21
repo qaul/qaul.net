@@ -67,7 +67,7 @@ impl Builder {
         let store = RwLock::new(Store::new());
         let subs = SubHub::new();
         Ok(Arc::new(Library {
-            root,
+            // root,
             users,
             tag_cache,
             store,
@@ -98,17 +98,17 @@ impl Builder {
 
     /// Consume the builder and create a Library
     pub fn build(self) -> Result<Arc<Library>> {
-        let root = Dirs::new(
-            self.offset
-                .expect("Builder without `offset` cannot be built"),
-        );
+        // let root = Dirs::new(
+        //     self.offset
+        //         .expect("Builder without `offset` cannot be built"),
+        // );
         let users = RwLock::new(UserTable::new());
         let tag_cache = RwLock::new(TagCache::new());
 
         let store = RwLock::new(Store::new());
         let subs = SubHub::new();
         Library {
-            root,
+            // root,
             users,
             tag_cache,
             store,

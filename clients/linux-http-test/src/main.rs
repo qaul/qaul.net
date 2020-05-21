@@ -21,8 +21,7 @@ async fn main() {
 
     // Init a basic libqaul stack with no interfaces
     let rat = Router::new();
-    let dir = tempfile::tempdir().unwrap();
-    let qaul = Qaul::new(rat, dir.path());
+    let qaul = Qaul::new(rat);
     let chat = Chat::new(Arc::clone(&qaul)).await.unwrap();
     // let voices = Voices::new(Arc::clone(&qaul)).await.unwrap();
 

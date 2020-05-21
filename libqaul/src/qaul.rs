@@ -77,7 +77,7 @@ impl Qaul {
         use tempfile;
         let router = Router::new();
         let temp = tempfile::tempdir().unwrap();
-        let store = Builder::new().offset(temp.path()).build().unwrap();
+        let store = Builder::new().build().unwrap();
 
         Self {
             router,
@@ -106,26 +106,26 @@ impl Qaul {
     /// application loop so to enable further API abstractions to hook
     /// into the service API.
     #[tracing::instrument(skip(router), level = "info")]
-    pub fn new<'p, P>(router: Arc<Router>, store_path: P) -> Arc<Self>
-    where
-        P: Into<&'p Path> + std::fmt::Debug,
+    pub fn new(router: Arc<Router>) -> Arc<Self>
     {
-        let store = Builder::inspect_path(store_path.into(), "").map_or_else(
-            |b| match b.build() {
-                Ok(s) => {
-                    info!("Creating new backing store");
-                    s
-                },
-                Err(e) => {
-                    error!("Failed to create backing store: {}", e.to_string());
-                    std::process::exit(2);
-                }
-            },
-            |s| {
-                info!("Loading existing store from disk");
-                s
-            },
-        );
+        // let store = Builder::inspect_path(store_path.into(), "").map_or_else(
+        //     |b| match b.build() {
+        //         Ok(s) => {
+        //             info!("Creating new backing store");
+        //             s
+        //         },
+        //         Err(e) => {
+        //             error!("Failed to create backing store: {}", e.to_string());
+        //             std::process::exit(2);
+        //         }
+        //     },
+        //     |s| {
+        //         info!("Loading existing store from disk");
+        //         s
+        //     },
+        // );
+
+        let store = Builder::new().build().unwrap();
 
         let q = Arc::new(Self {
             router: Arc::clone(&router),

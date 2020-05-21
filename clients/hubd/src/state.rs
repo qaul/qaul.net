@@ -50,7 +50,7 @@ impl State {
         router.add_endpoint(ep).await;
 
         let dirs = ProjectDirs::from("net", "qaul", "hubd").unwrap();
-        let qaul = Qaul::new(Arc::clone(&router), dirs.data_dir());
+        let qaul = Qaul::new(Arc::clone(&router));
 
         Self { qaul, router }
     }

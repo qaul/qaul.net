@@ -32,7 +32,7 @@ async fn main() {
 
     // Initialize a 3 node local qaul network
     let mut tp = ThreePoint::new().await;
-    tp.init_with(|_, arc| Qaul::new(arc, temp().path()));
+    tp.init_with(|_, arc| Qaul::new(arc));
 
     // services for Node A
     let chat_a = Chat::new(Arc::clone(&tp.a())).await.unwrap();

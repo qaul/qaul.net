@@ -26,7 +26,8 @@ public class MainActivity extends AppCompatActivity {
         tv.setText(hello("qaul.net"));
 
         // Start the libqaul machinery under the hood
-        this.libqaulState = this.startServer(5000, "");
+        this.libqaulState = this.startServer(5000, "/");
+        System.out.println(this.libqaulState);
     }
 
     public native String hello(String to);

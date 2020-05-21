@@ -49,8 +49,7 @@ async fn run() {
     let router = Router::new();
     router.add_endpoint(endpoint).await;
 
-    let dir = tempfile::tempdir().unwrap();
-    let qaul = Qaul::new(router, dir.path());
+    let qaul = Qaul::new(router);
     qaul.services().register("HELLO", |_| {}).await.unwrap();
 
     let user = qaul.users().create("test").await.unwrap();

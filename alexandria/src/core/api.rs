@@ -19,8 +19,8 @@ use tracing::info;
 ///
 /// [builder]: struct.Builder.html
 pub struct Library {
-    /// The main management path
-    pub(crate) root: Dirs,
+    // /// The main management path
+    // pub(crate) root: Dirs,
     /// Table with encrypted user metadata
     pub(crate) users: RwLock<UserTable>,
     /// Cache of tag/path mappings
@@ -34,7 +34,7 @@ pub struct Library {
 impl Library {
     /// Internally called setup function
     pub(crate) fn init(self) -> Result<Self> {
-        self.root.scaffold()?;
+        // self.root.scaffold()?;
         Ok(self)
     }
 

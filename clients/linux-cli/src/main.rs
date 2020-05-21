@@ -7,8 +7,7 @@ async fn main() -> Result<()> {
     let r = Router::new();
     // TDOD: Add network drivers
 
-    let dir = tempfile::tempdir().unwrap();
-    let q = Qaul::new(r, dir.path());
+    let q = Qaul::new(r);
     let user = q.users().create("password").await?;
 
     let msg = q.messages();

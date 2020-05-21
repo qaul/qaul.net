@@ -55,12 +55,12 @@ impl EpBuilder {
         Self { p: Params::Virtual }
     }
 
-    pub fn tcp<I: Into<SocketAddr>>(addr: String, port: u16, peers: Vec<I>, dynamic: bool) -> Self {
+    pub fn tcp(addr: String, port: u16, dynamic: bool) -> Self {
         Self {
             p: Params::Tcp {
                 addr,
                 port,
-                peers: peers.into_iter().map(Into::into).collect(),
+                peers: vec![],
                 dynamic,
             },
         }

@@ -14,6 +14,8 @@ crate-type = ["cdylib"]
 async-std = "1.5"
 jni = { version = "0.14", default-features = false }
 tempfile = "3.0"
+tracing-subscriber = { version = "0.2", features = ["fmt"] }
+tracing = "0.1"
 
 libqaul = { path = "../libqaul" }
 libqaul-http = { path = "../libqaul/http" }
@@ -23,3 +25,8 @@ qaul-chat = { path = "../libqaul/service/chat" }
 netmod-wd = { path = "../netmod-wd" }
 ratman = { path = "../ratman" }
 ratman-configure = { path = "../ratman/configure", features = ["android"] }
+
+log = "*"
+
+[target.'cfg(target_os = "android")'.dependencies]
+android_logger = "0.8"

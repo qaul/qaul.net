@@ -19,9 +19,19 @@ use jni::sys::{jint, jlong, jstring};
 use jni::JNIEnv;
 use std::{
     ffi::{CStr, CString},
+    net::{Ipv4Addr, SocketAddrV4},
     sync::Arc,
 };
 use tempfile::tempdir;
+// use tracing_subscriber::fmt;
+// use tracing::Level;
+
+#[macro_use]
+extern crate log;
+extern crate android_logger;
+
+use android_logger::{Config, FilterBuilder};
+use log::Level;
 
 use libqaul::Qaul;
 use libqaul_http::HttpServer;
@@ -40,6 +50,28 @@ unsafe fn conv_jstring(env: &JNIEnv, s: JString) -> String {
         .into()
 }
 
+// Set a panic handler that will logcan print stacktraces
+fn init_panic_handling_once() {
+    use std::sync::Once;
+    static INIT_BACKTRACES: Once = Once::new();
+    INIT_BACKTRACES.call_once(move || {
+        std::panic::set_hook(Box::new(move |panic_info| {
+            let (file, line) = if let Some(loc) = panic_info.location() {
+                (loc.file(), loc.line())
+            } else {
+                ("<unknown>", 0)
+            };
+            let reason = panic_info.to_string();
+
+            log::error!(
+                "### Rust `panic!` hit at file '{}', line {}: `{}`",
+                file,
+                line,
+                reason
+            );
+        }));
+    });
+}
 #[no_mangle]
 pub unsafe extern "C" fn Java_net_qaul_app_MainActivity_hello(
     env: JNIEnv,
@@ -53,6 +85,7 @@ pub unsafe extern "C" fn Java_net_qaul_app_MainActivity_hello(
         .unwrap();
     output.into_inner()
 }
+
 /// Function "start_server" that takes a port and path
 ///
 /// The port is used to listen on for the http api, the path is the
@@ -65,19 +98,30 @@ pub unsafe extern "C" fn Java_net_qaul_app_MainActivity_startServer(
     port: jint,
     path: JString,
 ) -> jlong {
+    android_logger::init_once(Config::default().with_min_level(Level::Trace));
+    init_panic_handling_once();
+
+    trace!("Hello from Rust, about to bootstrap the code, yo");
+
     let port = port as u16;
     let path = conv_jstring(&env, path);
 
     let net = NetBuilder::new()
-        //         .endpoint(EpBuilder::tcp("0.0.0.0".into(), port + 1, vec![], false))
-        .endpoint(EpBuilder::wifi_direct())
+        .endpoint(EpBuilder::tcp("0.0.0.0".into(), port + 1, false))
+        //.endpoint(EpBuilder::wifi_direct())
         .build();
 
-    let tmp_dir = tempdir().unwrap();
+    trace!("Network builder done: {:?}", net);
+
     let router = net.into_router();
-    let libqaul = Qaul::new(router, tmp_dir.path());
+    trace!("Router done");
+
+    let libqaul = Qaul::new(router);
 
     let chat = block_on(async { Chat::new(Arc::clone(&libqaul)).await }).unwrap();
+
+    trace!("Chat service done");
+
     let http = HttpServer::set_paths(
         path,
         Responder {
@@ -86,8 +130,12 @@ pub unsafe extern "C" fn Java_net_qaul_app_MainActivity_startServer(
         },
     );
 
+    trace!("Http server done");
+
     // Spawn the http server off into the background
     spawn(async move { http.listen(&format!("127.0.0.1:{}", port)) });
+
+    trace!("Chat service listening done");
 
     let boxed = Box::new(AndroidState { libqaul });
     Box::into_raw(boxed) as i64
