@@ -6,7 +6,7 @@ authors = ["Katharina Fey <kookie@spacekookie.de>", "jess 3jane <me@jess.coffee>
 edition = "2018"
 
 [features]
-default = ["proto", "json", "chat", "voices"]
+default = ["proto", "json", "chat"]
 proto = ["capnp"]
 json = ["serde_json"]
 chat = ["qaul-chat"]

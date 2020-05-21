@@ -35,7 +35,7 @@ pub enum Params {
     /// same time for testing purposes, without network namespaces.
     LocalUpd { addr: String },
     /// Android wifi direct support
-    #[cfg(features = "android")]
+    #[cfg(feature = "android")]
     WifiDirect,
 }
 

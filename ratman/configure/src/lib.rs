@@ -11,7 +11,7 @@ pub use parser::parse_json;
 
 pub mod config;
 
-use config::{Endpoint, Id, Network, Params, Patch};
+use config::{Endpoint, Id, Network, Params};
 use std::{collections::BTreeMap, net::SocketAddr};
 
 /// A rust API builder equivalent of the json parser
@@ -72,7 +72,7 @@ impl EpBuilder {
         }
     }
 
-    #[cfg(features = "android")]
+    #[cfg(feature = "android")]
     pub fn wifi_direct() -> Self {
         Self {
             p: Params::WifiDirect,

@@ -9,7 +9,8 @@ stdenv.mkDerivation {
 
     # General rust stuff
     rustracer rustup clangStdenv cargo-watch
-
+    binutils
+    
     # Required for the docs
     mdbook graphviz
 

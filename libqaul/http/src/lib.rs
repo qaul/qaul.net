@@ -8,7 +8,8 @@
 
 use libqaul_rpc::Responder;
 
-use async_std::{sync::Arc, task};
+use async_std::{sync::Arc, task, task::JoinHandle};
+use std::io::Result;
 
 use tide::{self, server::Server};
 use tide_naive_static_files::StaticFilesEndpoint as StaticEp;
@@ -17,19 +18,27 @@ mod rest;
 mod rpc;
 
 /// State structure for the libqaul http server
-pub struct HttpServer;
+pub struct HttpServer {
+    inner: Server<()>,
+}
 
 impl HttpServer {
     /// open a blocking http connection
     pub fn block(addr: &str, path: String, rpc: Responder) {
-        let app = HttpServer::set_paths(path, rpc);
+        let Self { inner } = HttpServer::set_paths(path, rpc);
 
         // run server in blocking task
-        task::block_on(async move { app.listen(addr).await }).unwrap();
+        task::block_on(async move { inner.listen(addr).await }).unwrap();
+    }
+
+    pub fn listen(self, addr: &str) -> JoinHandle<Result<()>> {
+        let Self { inner } = self;
+        let addr = String::from(addr);
+        task::spawn(async move { inner.listen(&addr).await })
     }
 
     /// set http endpoints and paths that returns the http server
-    pub fn set_paths(path: String, rpc: Responder) -> Server<()> {
+    pub fn set_paths(path: String, rpc: Responder) -> Self {
         let mut app = tide::new();
         let rpc_state = Arc::new(rpc);
         let rest_state = rpc_state.clone();
@@ -106,6 +115,6 @@ impl HttpServer {
             root: info_path_2.into(),
         });
 
-        app
+        Self { inner: app }
     }
 }

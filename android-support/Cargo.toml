@@ -11,11 +11,13 @@ name = "qauldroid"
 crate-type = ["cdylib"]
 
 [dependencies]
+async-std = "1.5"
 jni = { version = "0.14", default-features = false }
 tempfile = "3.0"
 
 libqaul = { path = "../libqaul" }
 libqaul-http = { path = "../libqaul/http" }
+libqaul-rpc = { path = "../libqaul/rpc" }     
 qaul-chat = { path = "../libqaul/service/chat" }
 
 netmod-wd = { path = "../netmod-wd" }

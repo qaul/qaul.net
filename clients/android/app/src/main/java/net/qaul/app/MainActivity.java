@@ -3,10 +3,11 @@ package net.qaul.app;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+
+    protected long libqaulState;
 
     static {
         // The "android-support" crate creates a dynamic library called "libqauldroid"
@@ -23,7 +24,12 @@ public class MainActivity extends AppCompatActivity {
         // Example of a call to a native method
         TextView tv = findViewById(R.id.sample_text);
         tv.setText(hello("qaul.net"));
+
+        // Start the libqaul machinery under the hood
+        this.libqaulState = this.startServer(5000, "");
     }
 
     public native String hello(String to);
+
+    public native long startServer(int port, String path);
 }

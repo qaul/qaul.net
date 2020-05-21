@@ -8,8 +8,8 @@ pub mod users;
 #[cfg(feature = "chat")]
 pub mod chat;
 
-#[cfg(feature = "voices")]
-pub mod voices;
+// #[cfg(feature = "voices")]
+// pub mod voices;
 
 mod envelope;
 pub use envelope::{Envelope, Request, Response};

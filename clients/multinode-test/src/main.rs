@@ -4,8 +4,11 @@ use futures::try_join;
 use ratman_harness::{temp, Initialize, ThreePoint};
 use std::{env, process};
 use {
-    libqaul::Qaul, libqaul_http::HttpServer, libqaul_rpc::Responder, qaul_chat::Chat,
-    qaul_voices::Voices,
+    libqaul::Qaul,
+    libqaul_http::HttpServer,
+    libqaul_rpc::Responder,
+    qaul_chat::Chat,
+    // qaul_voices::Voices,
 };
 
 use tracing::Level;
@@ -33,11 +36,11 @@ async fn main() {
 
     // services for Node A
     let chat_a = Chat::new(Arc::clone(&tp.a())).await.unwrap();
-    let voices_a = Voices::new(Arc::clone(&tp.a())).await.unwrap();
+    // let voices_a = Voices::new(Arc::clone(&tp.a())).await.unwrap();
 
     // services for Node B
     let chat_b = Chat::new(Arc::clone(&tp.b())).await.unwrap();
-    let voices_b = Voices::new(Arc::clone(&tp.b())).await.unwrap();
+    // let voices_b = Voices::new(Arc::clone(&tp.b())).await.unwrap();
 
     // print information for the user
     println!("Path to static web content: {}", assets);
@@ -51,7 +54,7 @@ async fn main() {
         Responder {
             qaul: Arc::clone(tp.a()),
             chat: chat_a,
-            voices: voices_a,
+            // voices: voices_a,
         },
     );
     let server_b = HttpServer::set_paths(
@@ -59,7 +62,7 @@ async fn main() {
         Responder {
             qaul: Arc::clone(tp.b()),
             chat: chat_b,
-            voices: voices_b,
+            // voices: voices_b,
         },
     );
 

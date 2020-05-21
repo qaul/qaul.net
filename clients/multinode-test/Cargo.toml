@@ -9,7 +9,7 @@ edition = "2018"
 ratman = { path = "../../ratman" }
 ratman-harness = { path = "../../ratman/harness" }
 libqaul = { path = "../../libqaul" }
-libqaul-rpc = { path = "../../libqaul/rpc", features = ["voices", "chat", "json"] }
+libqaul-rpc = { path = "../../libqaul/rpc", features = ["chat", "json"] }
 libqaul-http = { path = "../../libqaul/http" }
 qaul-chat = { path = "../../libqaul/service/chat" }
 qaul-voices = { path = "../../libqaul/service/voices" }

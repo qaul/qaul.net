@@ -7,7 +7,7 @@ use libqaul_rpc::{
 };
 // TODO: these will break if we turn features off
 use qaul_chat::Chat;
-use qaul_voices::Voices;
+// use qaul_voices::Voices;
 
 use async_std::{
     net::{TcpListener, TcpStream},
@@ -33,12 +33,12 @@ impl WsServer {
         addr: S,
         qaul: Arc<Qaul>,
         chat: Arc<Chat>,
-        voices: Arc<Voices>,
+        //         voices: Arc<Voices>,
     ) -> Arc<Self> {
         Arc::new(Self {
             running: AtomicBool::from(true),
             addr: addr.into(),
-            rpc: Responder { qaul, chat, voices },
+            rpc: Responder { qaul, chat },
         })
     }
 
