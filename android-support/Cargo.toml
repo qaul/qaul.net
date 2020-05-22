@@ -14,8 +14,8 @@ crate-type = ["cdylib"]
 async-std = "1.5"
 jni = { version = "0.14", default-features = false }
 tempfile = "3.0"
-tracing-subscriber = { version = "0.2", features = ["fmt"] }
-tracing = "0.1"
+# tracing-subscriber = { version = "0.2", features = ["fmt"] }
+tracing = { version = "0.1", features = ["log", "log-always"] }
 
 libqaul = { path = "../libqaul" }
 libqaul-http = { path = "../libqaul/http" }
