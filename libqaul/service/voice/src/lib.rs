@@ -4,23 +4,32 @@
 
 mod directory;
 mod error;
+mod subs;
 mod types;
 mod worker;
 
-pub use self::error::Result;
+pub use self::{
+    error::Result,
+    subs::InvitationSubscription,
+    types::{Call, CallId, CallEvent},
+};
 pub(crate) use self::{
-    types::{Call, CallId, CallMessage, CallInvitation},
+    types::{CallMessage, CallInvitation, CallUser},
 };
 use {
     async_std::{
-        sync::Mutex,
+        sync::{Mutex, RwLock},
         task,
     },
-    futures::future::{
-        abortable,
-        AbortHandle,
+    futures::{
+        channel::mpsc::channel,
+        future::{
+            abortable,
+            AbortHandle,
+        },
     },
     libqaul::{
+        error::Error as QaulError,
         services::ServiceEvent,
         users::UserAuth,
         Identity, Qaul,
@@ -46,14 +55,17 @@ pub(crate) mod tags {
 pub struct Voice {
     pub(crate) qaul: Arc<Qaul>,
     pub(crate) calls: Arc<Mutex<CallDirectory>>,
+    pub(crate) users: Arc<RwLock<BTreeMap<Identity, Arc<CallUser>>>>,
 }
 
 impl Voice {
     pub async fn new(qaul: Arc<Qaul>) -> Result<Arc<Self>> {
         let calls = Arc::new(Mutex::new(CallDirectory::new(qaul.clone())));
+        let users = Arc::new(RwLock::new(BTreeMap::new()));
         let this = Arc::new(Self { 
             qaul, 
             calls,
+            users,
         });
 
         let client_message_handles = SyncMutex::new(BTreeMap::new());
@@ -70,6 +82,7 @@ impl Voice {
                     client_message_handles.lock().unwrap().insert(auth.0, handle);
                 },
                 ServiceEvent::Close(auth) => {
+                    task::block_on(_this.users.write()).remove(&auth.0);
                     if let Some(handle) = client_message_handles.lock().unwrap().remove(&auth.0) {
                         handle.abort();
                     }
@@ -121,5 +134,16 @@ impl Voice {
         let call = self.get_call(user.clone(), id.clone()).await?;
         let message = CallMessage::Part;
         message.send_to(user, &call.invitees, id, &self.qaul).await
+    }
+
+    pub async fn subscribe_invites(&self, user: UserAuth) -> Result<InvitationSubscription> {
+        let (sender, receiver) = channel(1);
+        let user = self.users.read().await.get(&user.0).ok_or(QaulError::NoUser)?.clone();
+        user.invitation_subs.write().await.push(sender);
+        Ok(receiver)
+    }
+
+    pub async fn subscribe_call_events(&self, user: UserAuth, id: CallId) -> Result<()> {
+        unimplemented!()
     }
 }

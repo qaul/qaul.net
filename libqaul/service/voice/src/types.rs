@@ -1,6 +1,8 @@
 use {
+    async_std::sync::RwLock,
     conjoiner,
-    crate::{ASC_NAME, Result, tags},
+    crate::{ASC_NAME, Result, tags, InvitationSubscription},
+    futures::channel::mpsc::Sender,
     libqaul::{
         messages::{Mode, Message},
         users::UserAuth,
@@ -95,4 +97,16 @@ pub(crate) struct CallInvitation {
 pub(crate) struct CallData {
     pub(crate) data: Vec<u8>,
     pub(crate) sequence_number: u64,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub enum CallEvent {
+    UserInvited(Identity),
+    UserJoined(Identity),
+    UserParted(Identity),
+}
+
+pub(crate) struct CallUser {
+    pub(crate) auth: UserAuth,
+    pub(crate) invitation_subs: RwLock<Vec<Sender<Call>>>,
 }

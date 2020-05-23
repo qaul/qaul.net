@@ -23,7 +23,7 @@ struct VoicePair {
 }
 
 async fn init() -> ThreePoint<VoicePair> {
-    tracing_subscriber::fmt().with_max_level(Level::TRACE).init();
+    //tracing_subscriber::fmt().with_max_level(Level::TRACE).init();
     let mut tp = ThreePoint::new().await;
     tp.init_with(|_, arc| {
         let qaul = Qaul::new(arc);
@@ -34,7 +34,7 @@ async fn init() -> ThreePoint<VoicePair> {
 }
 
 #[async_std::test]
-async fn test() -> Result<()> {
+async fn call_state() -> Result<()> {
     let net = init().await;
 
     let alice = net.a().qaul.users().create("abc").await?;
@@ -110,7 +110,6 @@ async fn test() -> Result<()> {
     warn!("Bob Left");
 
     let call_a = net.a().voice.get_call(alice.clone(), call_id).await?;
-    let call_b = net.b().voice.get_call(bob.clone(), call_id).await?;
     assert_eq!(call_a.participants, participants);
     assert_eq!(call_a.invitees, invitees);
 

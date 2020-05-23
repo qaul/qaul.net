@@ -1,6 +1,8 @@
 use {
-    crate::{ASC_NAME, Call, CallId, CallMessage, Voice},
+    async_std::sync::RwLock,
+    crate::{ASC_NAME, Call, CallId, CallMessage, Voice, CallUser},
     conjoiner,
+    futures::sink::SinkExt,
     libqaul::{
         helpers::TagSet,
         messages::ID_LEN,
@@ -10,11 +12,17 @@ use {
     std::sync::Arc,
 };
 
-#[tracing::instrument(skip(user, voices), level = "trace")]
-pub(crate) async fn client_message_worker(user: UserAuth, voices: Arc<Voice>) {
+#[tracing::instrument(skip(auth, voices), level = "trace")]
+pub(crate) async fn client_message_worker(auth: UserAuth, voices: Arc<Voice>) {
+    let user = Arc::new(CallUser {
+        auth,
+        invitation_subs: RwLock::new(Vec::new()),
+    });
+    voices.users.write().await.insert(user.auth.0, Arc::clone(&user));
+
     let sub = voices.qaul
         .messages()
-        .subscribe(user.clone(), ASC_NAME, TagSet::empty())
+        .subscribe(user.auth.clone(), ASC_NAME, TagSet::empty())
         .await
         .unwrap();
     trace!("Creating message subscription!");
@@ -44,20 +52,32 @@ pub(crate) async fn client_message_worker(user: UserAuth, voices: Arc<Voice>) {
                     participants: inv.participants,
                     invitees: inv.invitees,
                 };
+
                 let res = voices.calls
                     .lock()
                     .await
-                    .insert(user.clone(), &call)
+                    .insert(user.auth.clone(), &call)
                     .await;
                 if let Err(e) = res {
                     warn!("Failed to insert new call into directory (this might be due to the client exiting?): {}", e);
+                }
+
+                let mut subs = user.invitation_subs.write().await;
+                // oh how i long for `drain_filter`
+                let mut i = 0;
+                while i != subs.len() {
+                    if let Err(_) = subs[i].send(call.clone()).await {
+                        subs.remove(i);
+                    } else {
+                        i += 1;
+                    }
                 }
             },
             Ok(CallMessage::InvitationSent(to)) => {
                 let res = voices.calls
                     .lock()
                     .await
-                    .update(user.clone(), id, |mut call| {
+                    .update(user.auth.clone(), id, |mut call| {
                         call.invitees.insert(to);
                         call
                     })
@@ -71,7 +91,7 @@ pub(crate) async fn client_message_worker(user: UserAuth, voices: Arc<Voice>) {
                 let res = voices.calls
                     .lock()
                     .await
-                    .update(user.clone(), id, |mut call| {
+                    .update(user.auth.clone(), id, |mut call| {
                         call.participants.insert(joined_user);
                         call.invitees.insert(joined_user);
                         call
@@ -86,7 +106,7 @@ pub(crate) async fn client_message_worker(user: UserAuth, voices: Arc<Voice>) {
                 let res = voices.calls
                     .lock()
                     .await
-                    .update(user.clone(), id, |mut call| {
+                    .update(user.auth.clone(), id, |mut call| {
                         call.participants.remove(&parting_user);
                         call.invitees.remove(&parting_user);
                         call
