@@ -9,7 +9,7 @@ license = "AGPL-3.0"
 files = { path = "../files", package = "qaul-files" }
 libqaul = { path = "../../", features = ["testing"] }
 
-async-std = "1.0"
+async-std = "=1.5"
 bincode = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 futures = "0.3"

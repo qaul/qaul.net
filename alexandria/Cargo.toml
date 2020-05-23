@@ -11,7 +11,7 @@ edition = "2018"
 [dependencies]
 id = { version = "0.4", path = "../ratman/identity", features = ["digest", "random", "aligned"], package = "ratman-identity" }
 
-async-std = { version = "1.0", features = ["unstable", "attributes"] }
+async-std = { version = "=1.5", features = ["unstable", "attributes"] }
 bincode = "1.0"
 failure = "0.1"
 hex = "0.4"

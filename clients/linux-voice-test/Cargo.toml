@@ -12,7 +12,7 @@ libqaul = { path = "../../libqaul" }
 qaul-voices = { path = "../../libqaul/service/voices" }
 netmod-udp = { path = "../../netmod-udp" }
 
-async-std = "1.0"
+async-std = "=1.5"
 futures = "0.3"
 failure = "0.1"
 libpulse-binding = { version = "2.15", features = [] }

@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 alexandria = { version = "0.2", path = "../alexandria" }
-async-std = { version = "1.0", features = ["attributes", "unstable"] }
+async-std = { version = "=1.5", features = ["attributes", "unstable"] }
 base64 = "0.10"
 bincode = "1.0"
 blake2 = "0.8"

@@ -10,7 +10,7 @@ license = "AGPL-3.0"
 identity = { path = "../ratman/identity", package = "ratman-identity" }
 netmod = { path = "../ratman/netmod", package = "ratman-netmod" }
 
-async-std = { version = "1.5", features = ["attributes", "unstable"] }
+async-std = { version = "=1.5", features = ["attributes", "unstable"] }
 async-trait = "0.1"
 bincode = "1.0"
 byteorder = "1.0"
