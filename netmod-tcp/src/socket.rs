@@ -75,13 +75,18 @@ impl Socket {
                     n => format!("[retry #{}]", n),
                 };
 
-                debug!("{}, Attempting connection to peer: {}", pre, ip.to_string());
+                if socket.streams.read().await.contains_key(&id) {
+                    debug!("Peer '{}' (ID {}) appears to already have a connection. Ceasing reconnect loop.", ip.to_string(), id);
+                    break;
+                }
+
+                debug!("{}, Attempting connection to peer '{}'", pre, ip.to_string());
                 let mut s = match TcpStream::connect(ip).await {
-                    Ok(s) => s,
+                    Ok(s) => { debug!("Successfully connected to peer '{}'", ip.to_string()); s },
                     Err(e) => {
-                        error!("Failed to connect: {}", e.to_string());
+                        error!("Failed to connect to peer '{}': {}", ip.to_string(), e.to_string());
                         task::sleep(Duration::from_secs(30)).await;
-                        ctr += 1;
+                        debug!("Retry timeout expired for peer '{}', proceeding with retry {}", ip.to_string(), ctr);
                         continue;
                     }
                 };
@@ -179,13 +184,19 @@ impl Socket {
                         // a keep-alive.
                         if socket.introduce(id, dst).await.is_none() {
                             let mut stream = get_stream(&socket.streams, id).await;
-                            send_packet(&mut stream, Packet::KeepAlive, &socket.id).await;
+                            match send_packet(&mut stream, Packet::KeepAlive, &socket.id).await {
+                                Ok(_) => (),
+                                Err(e) => error!("Failed to send KeepAlive packet to newly introduced socket ID {}: {}", socket.id, e.to_string())
+                            };
                         }
                     }
                     (Packet::Hello { port: _ }, PeerState::Valid) => {
                         let id = peers.get_id_by_src(&addr).await.unwrap();
                         let mut stream = get_stream(&socket.streams, id).await;
-                        send_packet(&mut stream, Packet::KeepAlive, &socket.id).await;
+                        match send_packet(&mut stream, Packet::KeepAlive, &socket.id).await {
+                            Ok(_) => (),
+                            Err(e) => error!("Failed to send KeepAlive packet to known valid socket ID {}: {}", socket.id, e.to_string())
+                        };
                     }
 
                     // Reply to a keep-alive with 2seconds delay
@@ -197,7 +208,10 @@ impl Socket {
                         task::spawn(async move {
                             task::sleep(Duration::from_secs(2)).await;
                             println!("{} Replying to keep-alive!", node_id);
-                            send_packet(&mut stream, Packet::KeepAlive, &node_id).await;
+                            match send_packet(&mut stream, Packet::KeepAlive, &node_id).await {
+                                Ok(_) => (),
+                                Err(e) => error!("Failed to reply to KeepAlive packet from socket ID {}: {}", node_id, e.to_string())
+                            };
                         });
                     }
                     (packet, state) => {
