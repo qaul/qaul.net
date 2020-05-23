@@ -26,3 +26,10 @@ seed-list of peers can then introduce an endpoint to new endpoints if
 it thinks they should know about each other (the parameters being: it
 knowing both endpoints, neither setting "DO_NOT_ADVERTISE", and
 non-trivial packet numbers flowing from one to the other).
+
+## Current Testing Methods
+
+Working using qaul-hubd rn:
+
+`cargo run -p qaul-hubd -- --peers clients/hubd/peers.txt --port 9001` on one and
+`cargo run -p qaul-hubd -- --peers clients/hubd/peers2.txt --port 9000` on the other.
