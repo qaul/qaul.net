@@ -15,7 +15,7 @@ members = [
     # qaul.net main services
     "libqaul/service/chat",
     "libqaul/service/files",
-    "libqaul/service/voices",
+    "libqaul/service/voice",
 
     # decentralised routing protocol
     "ratman",

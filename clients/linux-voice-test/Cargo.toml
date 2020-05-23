@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 ratman = { path = "../../ratman" }
 libqaul = { path = "../../libqaul" }
-qaul-voices = { path = "../../libqaul/service/voices" }
+qaul-voice = { path = "../../libqaul/service/voice" }
 netmod-udp = { path = "../../netmod-udp" }
 
 async-std = "=1.5"

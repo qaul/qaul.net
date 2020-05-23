@@ -12,7 +12,7 @@ libqaul = { path = "../../libqaul" }
 libqaul-rpc = { path = "../../libqaul/rpc", features = ["chat", "json"] }
 libqaul-http = { path = "../../libqaul/http" }
 qaul-chat = { path = "../../libqaul/service/chat" }
-qaul-voices = { path = "../../libqaul/service/voices" }
+qaul-voice = { path = "../../libqaul/service/voice" }
 
 async-std = { version = "=1.5", features = ["attributes"] }
 futures = "0.3"
