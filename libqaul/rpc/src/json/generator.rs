@@ -91,19 +91,16 @@ async fn user_delete() {
     use async_std::task::block_on;
     use libqaul::Qaul;
     use qaul_chat::Chat;
-    use qaul_voices::Voices;
     use std::sync::Arc;
 
     let qaul = Arc::new(Qaul::dummy());
     let chat = Chat::new(qaul.clone()).await.unwrap();
-    let voices = Voices::new(qaul.clone()).await.unwrap();
     let auth = block_on(qaul.users().create("blep")).unwrap();
     assert_eq!(qaul.users().list().await.len(), 1);
 
     let responder = Responder {
         qaul: qaul.clone(),
         chat: chat,
-        voices: voices,
     };
 
     let req_env = RequestEnv {

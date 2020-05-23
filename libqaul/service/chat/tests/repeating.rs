@@ -21,7 +21,7 @@ struct ChatPair {
 async fn init() -> ThreePoint<ChatPair> {
     let mut tp = ThreePoint::new().await;
     tp.init_with(|_, arc| {
-        let qaul = Qaul::new(arc, temp().path());
+        let qaul = Qaul::new(arc);
         let chat = async_std::task::block_on(async { Chat::new(Arc::clone(&qaul)).await }).unwrap();
         ChatPair { qaul, chat }
     });
