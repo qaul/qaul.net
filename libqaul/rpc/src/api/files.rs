@@ -2,7 +2,8 @@
 
 use crate::QaulRpc;
 use async_trait::async_trait;
-use libqaul::{files::FileFilter, users::UserAuth, Identity};
+use libqaul::{users::UserAuth, Identity};
+use qaul_files::types::FileFilter;
 
 /// Send a file store query
 #[derive(PartialEq)]

@@ -9,3 +9,4 @@ license = "AGPL-3.0"
 identity = { path = "../../../ratman/identity", package = "ratman-identity" }
 libqaul = { path = "../../" }
 mime = "0.3"
+serde = { version = "1.0" }

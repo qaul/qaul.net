@@ -21,9 +21,6 @@
 pub use contacts::Contacts;
 pub(crate) mod contacts;
 
-pub use files::Files;
-pub(crate) mod files;
-
 pub use messages::Messages;
 pub(crate) mod messages;
 

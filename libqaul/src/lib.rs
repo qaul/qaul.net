@@ -50,7 +50,6 @@ mod utils;
 pub mod api;
 pub mod contacts;
 pub mod error;
-pub mod files;
 pub mod messages;
 pub mod services;
 pub mod users;
