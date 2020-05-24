@@ -1,6 +1,6 @@
 use {
     async_std::sync::RwLock,
-    crate::{ASC_NAME, Call, CallId, CallMessage, Voice, CallUser},
+    crate::{ASC_NAME, Call, CallId, CallMessage, Voice, CallUser, CallEvent},
     conjoiner,
     futures::sink::SinkExt,
     libqaul::{
@@ -9,14 +9,18 @@ use {
         users::UserAuth,
         Identity,
     },
-    std::sync::Arc,
+    std::{
+        collections::BTreeMap,
+        sync::Arc,
+    },
 };
 
-#[tracing::instrument(skip(auth, voices), level = "trace")]
-pub(crate) async fn client_message_worker(auth: UserAuth, voices: Arc<Voice>) {
+#[tracing::instrument(skip(auth, voices), level = "info")]
+pub(crate) async fn client_message_worker(auth: UserAuth, voices: Arc<Voice>, user: Identity) {
     let user = Arc::new(CallUser {
         auth,
         invitation_subs: RwLock::new(Vec::new()),
+        call_event_subs: RwLock::new(BTreeMap::new()),
     });
     voices.users.write().await.insert(user.auth.0, Arc::clone(&user));
 
@@ -29,7 +33,10 @@ pub(crate) async fn client_message_worker(auth: UserAuth, voices: Arc<Voice>) {
 
     loop {
         let msg = sub.next().await;
-        trace!("received message");
+
+        if msg.sender == user.auth.0 {
+            continue;
+        }
 
         let id = msg.tags
             .iter()
@@ -47,11 +54,13 @@ pub(crate) async fn client_message_worker(auth: UserAuth, voices: Arc<Voice>) {
 
         match conjoiner::deserialise(&msg.payload) {
             Ok(CallMessage::Invitation(inv)) => {
-                let call = Call {
+                info!("Received invitation to {:?}", id);
+                let mut call = Call {
                     id,
                     participants: inv.participants,
                     invitees: inv.invitees,
                 };
+                call.invitees.insert(user.auth.0);
 
                 let res = voices.calls
                     .lock()
@@ -74,6 +83,7 @@ pub(crate) async fn client_message_worker(auth: UserAuth, voices: Arc<Voice>) {
                 }
             },
             Ok(CallMessage::InvitationSent(to)) => {
+                info!("Recieved invitation notification for user {:?} on call {:?}", to, id);
                 let res = voices.calls
                     .lock()
                     .await
@@ -85,9 +95,22 @@ pub(crate) async fn client_message_worker(auth: UserAuth, voices: Arc<Voice>) {
                 if let Err(e) = res {
                     warn!("Failed to update call in directory (this might be due to the client exiting?): {}", e);
                 }
+
+                let event = CallEvent::UserInvited(to);
+                if let Some(mut subs) = user.call_event_subs.write().await.get_mut(&id) {
+                    let mut i = 0;
+                    while i != subs.len() {
+                        if let Err(_) = subs[i].send(event.clone()).await {
+                            subs.remove(i);
+                        } else {
+                            i += 1;
+                        }
+                    }
+                }
             },
             Ok(CallMessage::Join) => {
-                let joined_user = msg.sender.clone();
+                let joined_user = msg.sender;
+                info!("Recieved join message for user {:?} on call {:?}", joined_user, id);
                 let res = voices.calls
                     .lock()
                     .await
@@ -100,9 +123,22 @@ pub(crate) async fn client_message_worker(auth: UserAuth, voices: Arc<Voice>) {
                 if let Err(e) = res {
                     warn!("Failed to update call in directory (this might be due to the client exiting?): {}", e);
                 }
+
+                let event = CallEvent::UserJoined(joined_user);
+                if let Some(mut subs) = user.call_event_subs.write().await.get_mut(&id) {
+                    let mut i = 0;
+                    while i != subs.len() {
+                        if let Err(_) = subs[i].send(event.clone()).await {
+                            subs.remove(i);
+                        } else {
+                            i += 1;
+                        }
+                    }
+                }
             },
             Ok(CallMessage::Part) => {
                 let parting_user = msg.sender;
+                info!("Receieved part message for user {:?} on call {:?}", parting_user, id);
                 let res = voices.calls
                     .lock()
                     .await
@@ -114,6 +150,18 @@ pub(crate) async fn client_message_worker(auth: UserAuth, voices: Arc<Voice>) {
                     .await;
                 if let Err(e) = res {
                     warn!("Failed to update call in directory (this might be due to the client exiting?): {}", e);
+                }
+
+                let event = CallEvent::UserParted(parting_user);
+                if let Some(mut subs) = user.call_event_subs.write().await.get_mut(&id) {
+                    let mut i = 0;
+                    while i != subs.len() {
+                        if let Err(_) = subs[i].send(event.clone()).await {
+                            subs.remove(i);
+                        } else {
+                            i += 1;
+                        }
+                    }
                 }
             },
             Ok(CallMessage::Data(_)) => { unimplemented!(); },

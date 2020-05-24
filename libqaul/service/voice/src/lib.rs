@@ -10,7 +10,7 @@ mod worker;
 
 pub use self::{
     error::Result,
-    subs::InvitationSubscription,
+    subs::{InvitationSubscription, CallEventSubscription},
     types::{Call, CallId, CallEvent},
 };
 pub(crate) use self::{
@@ -76,7 +76,8 @@ impl Voice {
                 ServiceEvent::Open(auth) => {
                     let (fut, handle) = abortable(worker::client_message_worker(
                         auth.clone(), 
-                        _this.clone()
+                        _this.clone(),
+                        auth.0,
                     ));
                     task::spawn(fut);
                     client_message_handles.lock().unwrap().insert(auth.0, handle);
@@ -99,6 +100,7 @@ impl Voice {
             invitees: Some(user.0).into_iter().collect(),
         };
         let call_id = call.id.clone();
+        info!("User {:?} created call {:?}", user.0, call_id);
         self.calls.lock().await.insert(user, &call).await?;
         Ok(call_id)
     }
@@ -112,6 +114,7 @@ impl Voice {
     }
 
     pub async fn invite_to_call(&self, user: UserAuth, friend: Identity, id: CallId) -> Result<()> {
+        info!("{:?} is inviting {:?} to call {:?}", user.0, friend, id);
         let call = self.get_call(user.clone(), id).await?;
 
         let message = CallMessage::Invitation(CallInvitation {
@@ -120,18 +123,32 @@ impl Voice {
         });
         message.send(user.clone(), friend, id, &self.qaul).await?;
 
+        let call = self.calls.lock().await.update(user.clone(), id, |mut call| {
+            call.invitees.insert(friend);
+            call
+        }).await?;
+
         let message = CallMessage::InvitationSent(friend);
-        message.send(user, friend, id, &self.qaul).await
+        message.send_to(user.clone(), &call.invitees, id, &self.qaul).await
     }
 
     pub async fn join_call(&self, user: UserAuth, id: CallId) -> Result<()> {
-        let call = self.get_call(user.clone(), id.clone()).await?;
+        info!("{:?} is joining call {:?}", user.0, id);
+        let call = self.calls.lock().await.update(user.clone(), id, |mut call| {
+            call.participants.insert(user.0);
+            call
+        }).await?;
         let message = CallMessage::Join;
         message.send_to(user, &call.invitees, id, &self.qaul).await
     }
 
     pub async fn leave_call(&self, user: UserAuth, id: CallId) -> Result<()> {
-        let call = self.get_call(user.clone(), id.clone()).await?;
+        info!("{:?} is leaving call {:?}", user.0, id);
+        let call = self.calls.lock().await.update(user.clone(), id, |mut call| {
+            call.participants.remove(&user.0);
+            call.invitees.remove(&user.0);
+            call
+        }).await?;
         let message = CallMessage::Part;
         message.send_to(user, &call.invitees, id, &self.qaul).await
     }
@@ -143,7 +160,16 @@ impl Voice {
         Ok(receiver)
     }
 
-    pub async fn subscribe_call_events(&self, user: UserAuth, id: CallId) -> Result<()> {
-        unimplemented!()
+    pub async fn subscribe_call_events(&self, user: UserAuth, id: CallId) 
+    -> Result<CallEventSubscription> {
+        let (sender, receiver) = channel(1);
+        let user = self.users.read().await.get(&user.0).ok_or(QaulError::NoUser)?.clone();
+        let mut subs = user.call_event_subs.write().await;
+        if let Some(mut v) = subs.get_mut(&id) {
+            v.push(sender); 
+        } else {
+            subs.insert(id, vec![sender]);
+        }
+        Ok(receiver)
     }
 }

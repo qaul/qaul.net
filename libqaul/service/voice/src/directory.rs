@@ -70,12 +70,13 @@ impl CallDirectory {
         Ok(())
     }
 
-    pub(crate) async fn update<F>(&self, user: UserAuth, id: CallId, f: F) -> Result<()> 
+    pub(crate) async fn update<F>(&self, user: UserAuth, id: CallId, f: F) -> Result<Call> 
     where
         F: FnOnce(Call) -> Call
     {
         let call = self.get(user.clone(), id).await?;
         let call = f(call);
-        self.insert(user, &call).await
+        self.insert(user, &call).await?;
+        Ok(call)
     }
 }

@@ -9,7 +9,7 @@ use {
         Identity, Qaul,
     },
     serde::{Serialize, Deserialize},
-    std::collections::BTreeSet,
+    std::collections::{BTreeSet, BTreeMap},
 };
 
 pub type CallId = Identity;
@@ -99,7 +99,7 @@ pub(crate) struct CallData {
     pub(crate) sequence_number: u64,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Eq, PartialEq, Clone, Serialize, Deserialize, Debug)]
 pub enum CallEvent {
     UserInvited(Identity),
     UserJoined(Identity),
@@ -109,4 +109,5 @@ pub enum CallEvent {
 pub(crate) struct CallUser {
     pub(crate) auth: UserAuth,
     pub(crate) invitation_subs: RwLock<Vec<Sender<Call>>>,
+    pub(crate) call_event_subs: RwLock<BTreeMap<CallId, Vec<Sender<CallEvent>>>>,
 }
