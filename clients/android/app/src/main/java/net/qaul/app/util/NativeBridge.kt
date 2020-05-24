@@ -1,4 +1,4 @@
-package net.qaul.app
+package net.qaul.app.util
 
 /** A bridge interface for native initialisation */
 class NativeBridge {

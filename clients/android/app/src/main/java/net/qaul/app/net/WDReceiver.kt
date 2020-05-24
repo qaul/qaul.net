@@ -1,4 +1,4 @@
-package net.qaul.app
+package net.qaul.app.net
 
 import android.content.BroadcastReceiver
 import android.content.Context
