@@ -1,12 +1,8 @@
-package net.qaul.app.ui.main
+package net.qaul.app
 
 import android.os.Bundle
-import android.text.Layout
-import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import net.qaul.app.R
 import java.io.*
 
 class MainActivity : AppCompatActivity() {
@@ -27,14 +23,12 @@ class MainActivity : AppCompatActivity() {
         // Example of a call to a native method
         val tv = findViewById<TextView>(R.id.sample_text)
         tv.text = hello("qaul.net")
-
         var assetsPath: String? = null
         try {
             assetsPath = unpackAssets("")
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
         // Start the libqaul machinery under the hood
         libqaulState = startServer(5000, "$assetsPath/webgui")
         println(libqaulState)
@@ -86,7 +80,6 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
     }
-
 
     external fun hello(to: String?): String?
     external fun startServer(port: Int, path: String?): Long

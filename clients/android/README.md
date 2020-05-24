@@ -43,7 +43,13 @@ $ clients/android/build.sh
 This script will take care of permission issues caused by the
 container building everything as root already.
 
-- TODO: build the webui
+Follow the build instructions for the webgui.  You can find them in
+the contributors guide.  After that, run the "pre-bundle" step of the
+build.
+
+```console
+$ client/android/pre-bundle.sh
+```
 
 Finally you can finish the assembly process either in Android Studio
 (and run it live on your phone or an emulator), or just use the
@@ -54,7 +60,7 @@ $ cd clients/android
 $ clients/android/gradlew assemble
 ```
 
-A finished APK will appear in in `clients/android/app/build/outputs/apk/debug`.
+A finished APK will appear in in `clients/android/app/build/outputs/apk/release`.
 
 If you have questions about the build process, or if you're hitting
 some problem, feel free to e-mail us on the mailing list, or just our

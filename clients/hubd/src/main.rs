@@ -17,7 +17,10 @@ async fn main() {
     let cfg = cfg::match_fold(app);
 
     // Initialise the logger after CLI validation
-    let _subscriber = fmt().with_env_filter("async-std=error").with_max_level(Level::DEBUG).init();
+    let _subscriber = fmt()
+        .with_env_filter("async-std=error")
+        .with_max_level(Level::DEBUG)
+        .init();
     info!("Initialised logger: welcome to qauld!");
 
     let _state = State::new(&cfg).await;
