@@ -1,15 +1,9 @@
-use {
-    async_std::sync::RwLock,
-    conjoiner,
-    crate::{ASC_NAME, Result, tags, InvitationSubscription},
-    futures::channel::mpsc::Sender,
-    libqaul::{
-        messages::{Mode, Message},
-        users::UserAuth,
-        Identity, Qaul,
-    },
-    serde::{Serialize, Deserialize},
-    std::collections::{BTreeSet, BTreeMap},
+use async_std::sync::{Arc, RwLock, Sender};
+use libqaul::{users::UserAuth, Identity};
+use serde::{Deserialize, Serialize};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    sync::atomic::{AtomicUsize, Ordering},
 };
 
 pub type CallId = Identity;
@@ -17,74 +11,24 @@ pub type CallId = Identity;
 #[derive(Eq, PartialEq, Clone, Debug, Serialize, Deserialize)]
 pub struct Call {
     pub id: CallId,
-    pub participants: BTreeSet<Identity>, 
+    /// Who has joined the call?
+    pub participants: BTreeSet<Identity>,
+    /// Who has been invited to the call?
     pub invitees: BTreeSet<Identity>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub(crate) enum CallMessage {
+    /// invite a user
     Invitation(CallInvitation),
+    /// note that you have invited a user
     InvitationSent(Identity),
+    /// join a call
     Join,
+    /// leave a call
     Part,
+    /// send some data to the call
     Data(CallData),
-}
-
-impl CallMessage {
-    pub(crate) async fn send_to(
-        &self, 
-        user: UserAuth, 
-        to: &BTreeSet<Identity>,
-        call: CallId,
-        qaul: &Qaul,
-    ) -> Result<()> {
-        let messages = qaul.messages();
-        let payload = conjoiner::serialise(self).unwrap(); 
-        for dest in to {
-            if *dest == user.0 {
-                continue;
-            }
-            
-            messages
-                .send(
-                    user.clone(),
-                    Mode::Std(dest.clone()),
-                    ASC_NAME,
-                    tags::call_id(call),
-                    payload.clone(),
-                )
-                .await?;
-        }
-
-        Ok(())
-    }
-
-    pub(crate) async fn send(
-        &self, 
-        user: UserAuth, 
-        to: Identity,
-        call: CallId,
-        qaul: &Qaul,
-    ) -> Result<()> {
-        let messages = qaul.messages();
-        let payload = conjoiner::serialise(self).unwrap(); 
-        messages
-            .send(
-                user,
-                Mode::Std(to),
-                ASC_NAME,
-                tags::call_id(call),
-                payload,
-            )
-            .await?;
-
-        Ok(())
-    }
-
-    pub(crate) fn from_payload(message: &Message) -> Result<Self> {
-        let this = conjoiner::deserialise(&message.payload)?;
-        Ok(this)
-    }
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -108,6 +52,35 @@ pub enum CallEvent {
 
 pub(crate) struct CallUser {
     pub(crate) auth: UserAuth,
-    pub(crate) invitation_subs: RwLock<Vec<Sender<Call>>>,
-    pub(crate) call_event_subs: RwLock<BTreeMap<CallId, Vec<Sender<CallEvent>>>>,
+    pub(crate) invitation_subs: RwLock<BTreeMap<usize, Sender<Call>>>,
+    pub(crate) call_event_subs: RwLock<BTreeMap<CallId, BTreeMap<usize, Sender<CallEvent>>>>,
+    sub_id: AtomicUsize,
+}
+
+impl CallUser {
+    pub(crate) fn new(auth: UserAuth) -> Arc<Self> {
+        Arc::new(Self {
+            auth,
+            invitation_subs: Default::default(),
+            call_event_subs: Default::default(),
+            sub_id: 0.into(),
+        })
+    }
+
+    pub(crate) async fn add_invitation_sub(&self, sender: Sender<Call>) -> usize {
+        let id = self.sub_id.fetch_add(1, Ordering::Relaxed);
+        self.invitation_subs.write().await.insert(id, sender);
+        id
+    }
+
+    pub(crate) async fn add_event_sub(&self, call_id: CallId, sender: Sender<CallEvent>) -> usize {
+        let id = self.sub_id.fetch_add(1, Ordering::Relaxed);
+        self.call_event_subs
+            .write()
+            .await
+            .entry(call_id)
+            .or_default()
+            .insert(id, sender);
+        id
+    }
 }

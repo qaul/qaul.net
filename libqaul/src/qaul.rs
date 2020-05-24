@@ -17,6 +17,9 @@ use ratman::Router;
 use std::{path::Path, sync::Arc};
 use tracing::{error, info};
 
+/// An atomic reference counted pointer to a running libqaul instance
+pub type QaulRef = Arc<Qaul>;
+
 /// Primary context structure for `libqaul`
 ///
 /// Handles user state, secret storage, network state,
@@ -73,13 +76,13 @@ impl Qaul {
     #[doc(hidden)]
     #[allow(warnings)]
     #[cfg(feature = "testing")]
-    pub fn dummy() -> Self {
+    pub fn dummy() -> QaulRef {
         use tempfile;
         let router = Router::new();
         let temp = tempfile::tempdir().unwrap();
         let store = Builder::new().build().unwrap();
 
-        Self {
+        Arc::new(Self {
             router,
             users: UserStore::new(Arc::clone(&store)),
             auth: AuthStore::new(),
@@ -88,7 +91,7 @@ impl Qaul {
             services: ServiceRegistry::new(Arc::clone(&store)),
             sec: Arc::new(Sec::new()),
             store,
-        }
+        })
     }
 
     /// Get access to the inner Router
@@ -106,8 +109,7 @@ impl Qaul {
     /// application loop so to enable further API abstractions to hook
     /// into the service API.
     #[tracing::instrument(skip(router), level = "info")]
-    pub fn new(router: Arc<Router>) -> Arc<Self>
-    {
+    pub fn new(router: Arc<Router>) -> QaulRef {
         // let store = Builder::inspect_path(store_path.into(), "").map_or_else(
         //     |b| match b.build() {
         //         Ok(s) => {

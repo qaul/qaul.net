@@ -1,7 +1,7 @@
 [package]
 name = "qaul-voice"
 version = "0.1.0"
-authors = ["Jess 3Jane <me@jess.coffee>"]
+authors = ["Jess 3Jane <me@jess.coffee>", "Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 license = "AGPL-3.0"
 

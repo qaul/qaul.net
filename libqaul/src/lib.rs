@@ -57,4 +57,4 @@ pub mod helpers;
 
 // Core state should be in the root
 mod qaul;
-pub use qaul::{Identity, Qaul};
+pub use qaul::{Identity, Qaul, QaulRef};
