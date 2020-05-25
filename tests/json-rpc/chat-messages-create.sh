@@ -2,47 +2,17 @@
 
 set -ex
 
-source src/chat-rooms-create.sh 
+# Create users
+source src/users-bootstrap.sh
 
-# creates and sends a new chat message to a specific room
-# 
-# usage:
-# ./chat-messages_create.sh
+# Create a chat-room for user A
+source src/chat-rooms-create.sh "$B_ID" "$A_ID" $A_TOKEN
 
-curl -i  \
-    -H "Content-Type: application/json" \
-    -d "{
-        \"id\": \"1\",
-        \"kind\": \"chat-messages\",
-        \"method\": \"create\",
-        \"data\": {
-            \"text\": \"hello world!\",
-            \"room\": \"$ROOM_ID\"
-        },
-        \"auth\": {
-            \"id\":\"$A_ID\",
-            \"token\":\"$A_TOKEN\"
-        }
-    }" \
-    "http://127.0.0.1:9900/rpc"
+# Send a message from user A
+source src/chat-messages-create.sh "$ROOM_ID" "$A_ID" $A_TOKEN
 
 ## Sleep a bit
 sleep 1;
 
-## Hard mode: get the message from B!
-
-echo "Was your message..." $(curl -i  \
-    -H "Content-Type: application/json" \
-    -d "{
-        \"id\": \"1\",
-        \"kind\": \"chat-messages\",
-        \"method\": \"get\",
-        \"data\": {
-            \"room\": \"$ROOM_ID\"
-        },
-        \"auth\": {
-            \"id\":\"$B_ID\",
-            \"token\":\"$B_TOKEN\"
-        }
-    }" \
-    "http://127.0.0.1:9901/rpc" 2>/dev/null | tail -n 1 | jq '.data.chat_message[0].content') "?"
+# Receive the message from user B
+source src/chat-messages-get.sh "$ROOM_ID" "$B_ID" $B_TOKEN

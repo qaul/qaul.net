@@ -1,4 +1,4 @@
-//! RPC chat tests
+//! RPC chat-rooms tests
 
 #[cfg(test)]
 mod harness;
