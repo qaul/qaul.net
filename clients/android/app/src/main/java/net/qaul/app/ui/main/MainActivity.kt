@@ -1,16 +1,13 @@
 package net.qaul.app.ui.main
 
 import android.os.Bundle
-import android.text.Layout
-import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import net.qaul.app.R
 import java.io.*
 
 class MainActivity : AppCompatActivity() {
-    protected var libqaulState: Long = 0
+    protected var libqaulState: Long? = null
 
     companion object {
         init {
@@ -35,9 +32,16 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
 
-        // Start the libqaul machinery under the hood
-        libqaulState = startServer(5000, "$assetsPath/webgui")
-        println(libqaulState)
+        // Setup the libqaul state
+        this.setup(5000, assetsPath);
+        assert(this.libqaulState != null);
+
+
+
+
+//        // Start the libqaul machinery under the hood
+//        libqaulState = startServer(5000, "$assetsPath/webgui")
+//        println(libqaulState)
     }
 
     @Throws(Exception::class)
@@ -87,6 +91,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    external fun setup(port: Int, root_path: String?);
 
     external fun hello(to: String?): String?
     external fun startServer(port: Int, path: String?): Long

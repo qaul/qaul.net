@@ -23,8 +23,6 @@ use std::{
     sync::Arc,
 };
 use tempfile::tempdir;
-// use tracing_subscriber::fmt;
-// use tracing::Level;
 
 #[macro_use]
 extern crate log;
@@ -43,8 +41,8 @@ struct AndroidState {
     libqaul: Arc<Qaul>,
 }
 
-unsafe fn conv_jstring(env: &JNIEnv, s: JString) -> String {
-    CString::from(CStr::from_ptr(env.get_string(s).unwrap().as_ptr()))
+fn conv_jstring(env: &JNIEnv, s: JString) -> String {
+    CString::from(unsafe { CStr::from_ptr(env.get_string(s).unwrap().as_ptr()) })
         .to_str()
         .unwrap()
         .into()
@@ -72,8 +70,9 @@ fn init_panic_handling_once() {
         }));
     });
 }
+
 #[no_mangle]
-pub unsafe extern "C" fn Java_net_qaul_app_MainActivity_hello(
+pub unsafe extern "C" fn Java_net_qaul_app_ui_main_MainActivity_hello(
     env: JNIEnv,
     _: JObject,
     j_recipient: JString,
@@ -86,19 +85,40 @@ pub unsafe extern "C" fn Java_net_qaul_app_MainActivity_hello(
     output.into_inner()
 }
 
+/// Setup the android application state
+///
+/// This function internally assigns `libqaulState`.  If it is `null`
+/// after calling this function an error has occured.  All parameters
+/// required for bootup need to be provided with this function call.
+/// This function should only be called once, based on `libqaulState`,
+/// and might lead to crashes if called multiple times.
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ui_main_MainActivity_setup(
+    env: JNIEnv,
+    this: JObject,
+    port: jint,
+    root_path: JString,
+) {
+
+}
+
 /// Function "start_server" that takes a port and path
 ///
 /// The port is used to listen on for the http api, the path is the
 /// location of the compiled webui assets.  This function bootstraps
 /// the qaul.net stack via ratman-configure and libqaul-http.
 #[no_mangle]
-pub unsafe extern "C" fn Java_net_qaul_app_MainActivity_startServer(
+pub unsafe extern "C" fn Java_net_qaul_app_ui_main_MainActivity_startServer(
     env: JNIEnv,
     _: JObject,
     port: jint,
     path: JString,
 ) -> jlong {
-    android_logger::init_once(Config::default().with_min_level(Level::Trace));
+    android_logger::init_once(
+        Config::default()
+            .with_filter("async-std=error")
+            .with_min_level(Level::Trace),
+    );
     init_panic_handling_once();
 
     trace!("Hello from Rust, about to bootstrap the code, yo");

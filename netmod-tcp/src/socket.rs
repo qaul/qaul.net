@@ -13,7 +13,7 @@ use bincode::{deserialize, serialize};
 use byteorder::{BigEndian, ByteOrder};
 use netmod::Frame;
 use std::{collections::BTreeMap, net::SocketAddr, time::Duration};
-use tracing::{debug, error};
+use tracing::{error, info, trace};
 
 /// A wrapper around tcp socket logic
 pub(crate) struct Socket {
@@ -76,23 +76,32 @@ impl Socket {
                 };
 
                 if socket.streams.read().await.contains_key(&id) {
-                    debug!("Peer '{}' (ID {}) appears to already have a connection. Ceasing reconnect loop.", ip.to_string(), id);
+                    trace!(
+                        "Peer '{}' (ID {}) is already connected!",
+                        ip.to_string(),
+                        id
+                    );
                     break;
                 }
 
-                debug!("{}, Attempting connection to peer '{}'", pre, ip.to_string());
+                trace!("{}, Connecting to peer '{}'", pre, ip.to_string());
                 let mut s = match TcpStream::connect(ip).await {
-                    Ok(s) => { debug!("Successfully connected to peer '{}'", ip.to_string()); s },
+                    Ok(s) => {
+                        trace!("Successfully connected to peer '{}'", ip.to_string());
+                        s
+                    }
                     Err(e) => {
-                        error!("Failed to connect to peer '{}': {}", ip.to_string(), e.to_string());
+                        error!(
+                            "Failed to connect to peer '{}': {}",
+                            ip.to_string(),
+                            e.to_string()
+                        );
                         task::sleep(Duration::from_secs(30)).await;
-                        debug!("Retry timeout expired for peer '{}', proceeding with retry {}", ip.to_string(), ctr);
                         continue;
                     }
                 };
 
                 socket.streams.write().await.insert(id, s.clone());
-                &socket.streams.read().await;
 
                 match send_packet(&mut s, Packet::Hello { port: socket.port }, &socket.id).await {
                     Ok(()) => break,
@@ -125,7 +134,7 @@ impl Socket {
     async fn run(tx: Sender<(Frame, usize)>, mode: Mode, socket: Arc<Self>, peers: Arc<PeerList>) {
         let mut inc = socket.inner.incoming();
 
-        println!(
+        info!(
             "{} Listening for: {:?}",
             socket.id,
             socket.inner.local_addr()
@@ -140,9 +149,10 @@ impl Socket {
                 // Drop unknown connections
                 let state = peers.peer_state(&addr).await;
                 if state == PeerState::Unknown && !mode.dynamic() {
-                    println!(
+                    trace!(
                         "{} Connection from unknown peer `{}`, closing!",
-                        socket.id, addr
+                        socket.id,
+                        addr
                     );
                     break;
                 }
@@ -150,13 +160,14 @@ impl Socket {
                 // Try to read a packet
                 let mut fb = PacketBuilder::new(&mut stream);
                 if let Err(e) = fb.parse().await {
-                    error!("Failed to parse incoming message: {:?}... dropping connection", e);
+                    error!(
+                        "Failed to parse incoming message: {:?}... dropping connection",
+                        e
+                    );
                     break;
                 }
 
                 let f = fb.build().unwrap();
-
-                println!("{} Full packet `{:?}` received!", socket.id, f);
 
                 // Disambiguate differente packet types
                 match (f, state) {
@@ -166,7 +177,7 @@ impl Socket {
                         tx.send((f, id)).await;
                     }
                     (Packet::Frame(_), PeerState::Unverified) => {
-                        println!(
+                        trace!(
                             "Dropping incoming packet because peer {:?} is unverified!",
                             &addr
                         );
@@ -195,7 +206,11 @@ impl Socket {
                         let mut stream = get_stream(&socket.streams, id).await;
                         match send_packet(&mut stream, Packet::KeepAlive, &socket.id).await {
                             Ok(_) => (),
-                            Err(e) => error!("Failed to send KeepAlive packet to known valid socket ID {}: {}", socket.id, e.to_string())
+                            Err(e) => error!(
+                                "Failed to send KeepAlive packet to known valid socket ID {}: {}",
+                                socket.id,
+                                e.to_string()
+                            ),
                         };
                     }
 
@@ -210,7 +225,11 @@ impl Socket {
                             println!("{} Replying to keep-alive!", node_id);
                             match send_packet(&mut stream, Packet::KeepAlive, &node_id).await {
                                 Ok(_) => (),
-                                Err(e) => error!("Failed to reply to KeepAlive packet from socket ID {}: {}", node_id, e.to_string())
+                                Err(e) => error!(
+                                    "Failed to reply to KeepAlive packet from socket ID {}: {}",
+                                    node_id,
+                                    e.to_string()
+                                ),
                             };
                         });
                     }
@@ -220,10 +239,10 @@ impl Socket {
                 }
             }
 
-            println!("{} Exited read-work loop!", socket.id);
+            info!("{} Exited read-work loop!", socket.id);
         }
 
-        println!("{} Exited listen loop!", socket.id);
+        info!("{} Exited listen loop!", socket.id);
     }
 }
 
@@ -238,12 +257,12 @@ async fn get_stream(streams: &RwLock<BTreeMap<usize, TcpStream>>, id: usize) -> 
 async fn send_packet(stream: &mut TcpStream, packet: Packet, id: &str) -> io::Result<()> {
     let mut vec = serialize(&packet).unwrap();
     match packet {
-        Packet::Hello { .. } => debug!(
+        Packet::Hello { .. } => trace!(
             "{} Sending HELLO to {:?}",
             id,
             stream.peer_addr()?.to_string()
         ),
-        Packet::KeepAlive => debug!(
+        Packet::KeepAlive => trace!(
             "{} Sending KEEP-ALIVE to {:?}",
             id,
             stream.peer_addr()?.to_string()

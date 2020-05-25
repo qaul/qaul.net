@@ -86,7 +86,7 @@ impl EndpointExt for Endpoint {
         0
     }
 
-    #[tracing::instrument(skip(self, frame), level = "info")]
+    #[tracing::instrument(skip(self, frame), level = "trace")]
     async fn send(&self, frame: Frame, target: Target) -> netmod::Result<()> {
         match target {
             Target::Single(t) => self.socket.send(t as usize, frame).await.unwrap(),
@@ -96,7 +96,7 @@ impl EndpointExt for Endpoint {
         Ok(())
     }
 
-    #[tracing::instrument(skip(self), level = "info")]
+    #[tracing::instrument(skip(self), level = "trace")]
     async fn next(&self) -> netmod::Result<(Frame, Target)> {
         match self.inbox {
             Some(ref ib) => match ib.recv().await {
