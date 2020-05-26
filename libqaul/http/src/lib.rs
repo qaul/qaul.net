@@ -114,6 +114,10 @@ impl HttpServer {
         app.at("/info/*").strip_prefix().get(StaticEp {
             root: info_path_2.into(),
         });
+        app.at("/login").strip_prefix().get(StaticEp {
+            root: users_path.into(),
+        });
+
 
         Self { inner: app }
     }
