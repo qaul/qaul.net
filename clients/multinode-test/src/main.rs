@@ -1,5 +1,4 @@
 use async_std::{sync::Arc, task};
-//use async_std::future;
 use futures::try_join;
 use ratman_harness::{temp, Initialize, ThreePoint};
 use std::{env, process};
@@ -21,18 +20,15 @@ async fn main() {
         .with_max_level(Level::TRACE)
         .init();
 
-    let assets = match env::args().nth(1) {
-        Some(p) => p,
-        None => {
-            eprintln!("Usage: linux-http-test <path-to-static-webgui-directory>");
-            process::exit(2);
-        }
-    };
+    let assets = env::args().nth(1).unwrap_or("".into());
     let assets_b = assets.clone();
 
     // Initialize a 3 node local qaul network
     let mut tp = ThreePoint::new().await;
-    tp.init_with(|_, arc| Qaul::new(arc));
+    tp.init_with(|_, arc| {
+        let q = Qaul::new(arc);
+        task::block_on(async { q.users().create("1234").await });
+    });
 
     // services for Node A
     let chat_a = Chat::new(Arc::clone(&tp.a())).await.unwrap();
@@ -57,6 +53,7 @@ async fn main() {
             // voices: voices_a,
         },
     );
+
     let server_b = HttpServer::set_paths(
         assets_b,
         Responder {
