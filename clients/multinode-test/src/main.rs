@@ -28,6 +28,7 @@ async fn main() {
     tp.init_with(|_, arc| {
         let q = Qaul::new(arc);
         task::block_on(async { q.users().create("1234").await });
+        q
     });
 
     // services for Node A
