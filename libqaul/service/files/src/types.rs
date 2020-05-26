@@ -3,13 +3,17 @@ use serde::{Deserialize, Serialize};
 use libqaul::error::Result;
 use libqaul::Identity;
 use libqaul::users::UserAuth;
+use libqaul::messages::{Message, MsgId};
+use libqaul::helpers::{Subscription as Sub};
 
 pub type FileId = Identity;
 
 /// Local file abstraction
 pub struct File {
-    pub name: String,
+    pub name: Option<String>,
+    pub id: FileId,
     pub data: Option<Vec<u8>>,
+    pub owner: Identity,
 }
 
 /// Describe a file's lifecycle
@@ -70,40 +74,18 @@ pub struct Files<'chain> {
     pub(crate) q: &'chain crate::Qaul,
 }
 
-impl<'qaul> Files<'qaul> {
-    /// Query the local file store for a specific constraint
-    pub fn query<I>(&self, user: UserAuth, filter: FileFilter) -> Result<I>
-        where
-            I: Iterator<Item=FileMeta>,
-    {
-        // self.q.auth.trusted(user)?;
-        unimplemented!()
+/// A subscription handler that pushes out updates
+pub struct Subscription {
+    pub(crate) inner: Sub<Message>,
+}
+
+impl Subscription {
+    pub(crate) fn new(inner: Sub<Message>) -> Self {
+        Self { inner }
     }
 
-    /// List all available files
-    pub fn list<I>(&self, user: UserAuth) -> Result<I>
-        where
-            I: Iterator<Item=FileMeta>,
-    {
-        // self.q.auth.trusted(user)?;
-        unimplemented!()
-    }
-
-    /// Stream one particular file from storage
-    pub async fn get(&self, user: UserAuth, file: FileId) -> Result<File> {
-        // self.q.auth.trusted(user)?;
-        unimplemented!()
-    }
-
-    /// Adds a new file to the local user's storage
-    pub fn add(&self, user: UserAuth, name: &str, file: File) -> Result<FileId> {
-        // self.q.auth.trusted(user)?;
-        unimplemented!()
-    }
-
-    /// Delete a file from the local user store
-    pub fn delete(&self, user: UserAuth, name: FileId) -> Result<()> {
-        // self.q.auth.trusted(user)?;
-        unimplemented!()
+    /// Get the next chat message
+    pub async fn next(&self) -> File {
+        self.inner.next().await.into()
     }
 }

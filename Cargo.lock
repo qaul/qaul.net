@@ -1877,10 +1877,14 @@ dependencies = [
 name = "qaul-files"
 version = "0.1.0"
 dependencies = [
+ "async-std",
  "libqaul",
  "mime",
+ "mime_guess",
  "ratman-identity",
  "serde",
+ "tracing",
+ "tracing-futures",
 ]
 
 [[package]]
