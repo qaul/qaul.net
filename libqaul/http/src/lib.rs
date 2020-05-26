@@ -69,6 +69,7 @@ impl HttpServer {
         let settings_path_2 = path.clone();
         let info_path = path.clone();
         let info_path_2 = path.clone();
+        let login_path = path.clone();
 
         app.at("/").get(StaticEp { root: path.into() });
         app.at("/favicon.ico").get(StaticEp {
@@ -115,7 +116,7 @@ impl HttpServer {
             root: info_path_2.into(),
         });
         app.at("/login").strip_prefix().get(StaticEp {
-            root: users_path.into(),
+            root: login_path.into(),
         });
 
 
