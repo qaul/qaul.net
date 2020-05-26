@@ -51,25 +51,26 @@ pub fn rest_routes(rest_state: Arc<Responder>) -> Server<Arc<Responder>> {
     // chat service
     // chat-rooms
     app_rest
-        .at("/chat/rooms")
+        .at("/chat-rooms")
         .get(|req| async move { rest2rpc::rest2rpc(req, "chat-rooms", "list").await })
         .post(|req| async move { rest2rpc::rest2rpc(req, "chat-rooms", "create").await });
     app_rest
-        .at("/chat/rooms/:id")
+        .at("/chat-rooms/:id")
         .get(|req| async move {
             let params = vec!["id"];
             rest2rpc::rest2rpc_params(req, "chat-rooms", "get", Some(params)).await
         })
         .patch(|req| async move { rest2rpc::rest2rpc(req, "chat-rooms", "modify").await })
-        .delete(|req| async move { rest2rpc::rest2rpc(req, "chat-rooms", "delete").await });
+        //.delete(|req| async move { rest2rpc::rest2rpc(req, "chat-rooms", "delete").await })
+        ;
 
     // chat-messages
     app_rest
-        .at("/chat/messages")
+        .at("/chat-messages/:id")
         .get(|req| async move { rest2rpc::rest2rpc(req, "chat-messages", "query").await })
         .post(|req| async move { rest2rpc::rest2rpc(req, "chat-messages", "create").await });
     app_rest
-        .at("/chat/messages/next")
+        .at("/chat-messages/:id/next")
         .get(|req| async move { rest2rpc::rest2rpc(req, "chat-messages", "next").await });
 
     app_rest
