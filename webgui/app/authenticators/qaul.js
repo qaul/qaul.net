@@ -1,7 +1,7 @@
 import Base from 'ember-simple-auth/authenticators/base';
 
 export default class QaulAuthenticator extends Base {
-  restore(data) {
+  async restore(data) {
     return data;
   }
 

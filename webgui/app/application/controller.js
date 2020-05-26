@@ -4,6 +4,7 @@ import { inject as service } from '@ember/service';
 export default Controller.extend({
   style: service(),
   intl: service(),
+  session: service(),
   actions: {
     show(what) {
       this.set('shownav', false);
