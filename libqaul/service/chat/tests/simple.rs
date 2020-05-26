@@ -38,7 +38,11 @@ async fn create_room() -> Result<()> {
     // Wait for user propagations
     zzz().await;
 
-    let room_id = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
+    let room_id = net
+        .a()
+        .chat
+        .start_chat(alice.clone(), vec![bob.0], None)
+        .await?;
 
     zzz().await;
 
@@ -61,7 +65,11 @@ async fn send_message() -> Result<()> {
     // Wait for user propagations
     zzz().await;
 
-    let room_id = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
+    let room_id = net
+        .a()
+        .chat
+        .start_chat(alice.clone(), vec![bob.0], None)
+        .await?;
     println!("ROOM ID = {}", room_id);
 
     zzz().await;
@@ -103,7 +111,11 @@ async fn send_message_subscribe() -> Result<()> {
     // Wait for user propagations
     zzz().await;
 
-    let room_id = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
+    let room_id = net
+        .a()
+        .chat
+        .start_chat(alice.clone(), vec![bob.0], None)
+        .await?;
 
     zzz().await;
 
@@ -129,5 +141,67 @@ async fn send_message_subscribe() -> Result<()> {
     .unwrap();
 
     assert_eq!(msg.content, String::from("Hello Alice, how are you?"));
+    Ok(())
+}
+
+#[async_std::test]
+async fn change_room_name() -> Result<()> {
+    let net = init().await;
+
+    let alice = net.a().qaul.users().create("abc").await?;
+    let bob = net.b().qaul.users().create("acab").await?;
+
+    println!("ALICE = {}", alice.0);
+    println!("BOB   = {}", bob.0);
+
+    let room_name = "Super Fun Chat".to_owned();
+
+    zzz().await;
+
+    let room_id = net
+        .a()
+        .chat
+        .start_chat(alice.clone(), vec![bob.0], None)
+        .await?;
+
+    zzz().await;
+
+    net.b()
+        .chat
+        .set_name(bob.clone(), room_id, room_name.clone())
+        .await?;
+
+    zzz().await;
+
+    let room = net.a().chat.get_room(alice, room_id).await?;
+    assert_eq!(room.name, Some(room_name));
+    Ok(())
+}
+
+
+#[async_std::test]
+async fn create_room_with_name() -> Result<()> {
+    let net = init().await;
+
+    let alice = net.a().qaul.users().create("abc").await?;
+    let bob = net.b().qaul.users().create("acab").await?;
+
+    println!("ALICE = {}", alice.0);
+    println!("BOB   = {}", bob.0);
+
+    let room_name = "Super Fun Chat".to_owned();
+
+    zzz().await;
+
+    let room_id = net
+        .a()
+        .chat
+        .start_chat(alice.clone(), vec![bob.0], Some(room_name.clone()))
+        .await?;
+
+    zzz().await;
+
+    let room = net.b().chat.get_room(bob, room_id).await?;
+    assert_eq!(room.name, Some(room_name));
     Ok(())
 }

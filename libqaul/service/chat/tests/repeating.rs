@@ -38,7 +38,7 @@ async fn rooms_for_different_people() -> Result<()> {
     // Wait for user propagations
     zzz().await;
 
-    let room_1 = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
+    let room_1 = net.a().chat.start_chat(alice.clone(), vec![bob.0], None).await?;
 
     zzz().await;
 
@@ -57,7 +57,7 @@ async fn rooms_for_different_people() -> Result<()> {
     let room_2 = net
         .a()
         .chat
-        .start_chat(charlie.clone(), vec![david.0])
+        .start_chat(charlie.clone(), vec![david.0], None)
         .await?;
 
     zzz().await;
@@ -80,7 +80,7 @@ async fn send_messages_for_different_people() -> Result<()> {
     // FIXME: replace with libqaul announcement subscription
     zzz().await;
 
-    let room_1 = net.a().chat.start_chat(alice.clone(), vec![bob.0]).await?;
+    let room_1 = net.a().chat.start_chat(alice.clone(), vec![bob.0], None).await?;
     timeout(sec5(), async {
         net.b().chat.next_rooms().await;
         zzz().await;
@@ -115,7 +115,7 @@ async fn send_messages_for_different_people() -> Result<()> {
     let room_2 = net
         .a()
         .chat
-        .start_chat(charlie.clone(), vec![david.0])
+        .start_chat(charlie.clone(), vec![david.0], None)
         .await?;
 
     timeout(sec5(), async {

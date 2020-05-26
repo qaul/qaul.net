@@ -82,8 +82,8 @@ pub struct Room {
     pub users: BTreeSet<Identity>,
     /// A clear text room name
     pub name: Option<String>,
-    // / The time at which this room was created
-    //pub create_time: DateTime<Utc>,
+    /// The time at which this room was created
+    pub create_time: DateTime<Utc>,
 }
 
 impl Room {

@@ -68,18 +68,11 @@ pub(crate) async fn run_user(user: UserAuth, serv: Arc<Chat>, run: RunMap) {
 
         // If we get a room state back, we send a reply message
         if let Some(rs) = Room::handle(&serv, user.clone(), &chat_msg).await {
-            trace!("Handling incoming text message");
-            let friends = serv.rooms.get(user.clone(), rs.id()).await.unwrap().users;
-            let room_id = rs.id();
-            msg::dispatch_to(
-                &serv,
-                user.clone(),
-                friends,
-                msg::gen_payload("", rs),
-                room_id,
-            )
-            .await
-            .unwrap();
+            trace!("Sending confirmation message to room state change");
+            let room = serv.rooms.get(user.clone(), rs.id()).await.unwrap();
+            room.send_to_participants(&serv, user.clone(), rs)
+                .await
+                .unwrap();
         }
     }
 }

@@ -31,7 +31,6 @@ pub(crate) mod tags {
     }
 }
 
-
 /// Messaging service state
 #[derive(Clone)]
 pub struct Chat {
@@ -93,11 +92,15 @@ impl Chat {
         self.rooms.get(user, room).await.map(|r| Ok(r)).unwrap()
     }
 
-    /// Start a new chat
+    /// Create a chat with a group of people
+    ///
+    /// A chat has to be between at least two people, meaning that the
+    /// set of friends given to this function needs to not be empty.
     pub async fn start_chat(
         self: &Arc<Self>,
         user: UserAuth,
         friends: Vec<Identity>,
+        name: Option<String>,
     ) -> Result<RoomId> {
         let friends = friends.into_iter().collect();
 
@@ -105,7 +108,7 @@ impl Chat {
             return Ok(id);
         }
 
-        let room = Room::create(self, user.clone(), friends.clone(), None).await;
+        let room = Room::create(self, user.clone(), friends.clone(), name).await;
         let room_id = room.id();
         let payload = msg::gen_payload("", room);
         msg::dispatch_to(self, user, friends, payload, room_id).await?;
@@ -127,6 +130,19 @@ impl Chat {
     /// Subscribe to push updates for a particular room
     pub async fn subscribe(self: &Arc<Self>, user: UserAuth, room: RoomId) -> Result<Subscription> {
         msg::subscribe_for(self, user, room).await
+    }
+
+    /// Set a name for an existing room, overriding the previous name
+    pub async fn set_name(
+        self: &Arc<Self>,
+        user: UserAuth,
+        room: RoomId,
+        name: String,
+    ) -> Result<()> {
+        let room = self.get_room(user.clone(), room).await?;
+        let state = room.add_name(self, user.clone(), name).await;
+        room.send_to_participants(self, user, state).await?;
+        Ok(())
     }
 
     /// Subscriber function that notifies the caller when a new room is discovered

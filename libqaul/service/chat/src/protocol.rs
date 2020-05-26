@@ -42,9 +42,10 @@
 //! When receiving a message for a room ID where the sender is not in
 //! the room: discard.
 
-use crate::{Chat, ChatMessage, Room, RoomId, RoomState};
+use crate::{msg, Chat, ChatMessage, Result, Room, RoomDiff, RoomId, RoomState};
 use async_std::sync::Arc;
-use libqaul::{users::UserAuth, Identity};
+use chrono::Utc;
+use libqaul::{helpers::ItemDiff, users::UserAuth, Identity};
 use std::collections::BTreeSet;
 
 impl Room {
@@ -83,33 +84,49 @@ impl Room {
             id: RoomId::random(),
             users,
             name,
-            //create_time: Utc::now(),
+            create_time: Utc::now(),
         };
 
         serv.rooms.insert(user, &room).await;
         RoomState::Create(room)
     }
 
-    // /// Add room, update room list, return RoomState for message
-    // pub(crate) async fn add_name(
-    //     self,
-    //     serv: Arc<Chat>,
-    //     user: UserAuth,
-    //     name: impl Into<String>,
-    // ) -> RoomState {
-    //     let name = name.into();
-    //     let new = Self {
-    //         name: Some(name.clone()),
-    //         ..self
-    //     };
-    //     serv.rooms.insert(user, &new).await;
+    /// Send a room state as an update to all participants in a room
+    pub(crate) async fn send_to_participants(
+        &self,
+        serv: &Arc<Chat>,
+        user: UserAuth,
+        state: RoomState,
+    ) -> Result<()> {
+        let friends = &self.users;
+        let room_id = self.id;
+        let payload = msg::gen_payload("", state);
 
-    //     RoomState::Diff(RoomDiff {
-    //         id: self.id,
-    //         users: vec![],
-    //         name: ItemDiff::Set(name),
-    //     })
-    // }
+        msg::dispatch_to(&serv, user.clone(), friends.clone(), payload, room_id).await?;
+
+        Ok(())
+    }
+
+    /// Add room, update room list, return RoomState for message
+    pub(crate) async fn add_name(
+        &self,
+        serv: &Arc<Chat>,
+        user: UserAuth,
+        name: impl Into<String>,
+    ) -> RoomState {
+        let name = name.into();
+        let new = Self {
+            name: Some(name.clone()),
+            ..self.clone()
+        };
+        serv.rooms.insert(user, &new).await;
+
+        RoomState::Diff(RoomDiff {
+            id: self.id,
+            users: vec![],
+            name: ItemDiff::Set(name),
+        })
+    }
 
     /// Handle an incoming message
     ///
