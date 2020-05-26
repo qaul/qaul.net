@@ -1,9 +1,12 @@
 use async_std::{sync::Arc, task};
 use futures::try_join;
 use ratman_harness::{temp, Initialize, ThreePoint};
-use std::{env, process};
+use std::{
+    env, process,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 use {
-    libqaul::Qaul,
+    libqaul::{users::UserUpdate, Qaul},
     libqaul_http::HttpServer,
     libqaul_rpc::Responder,
     qaul_chat::Chat,
@@ -25,9 +28,20 @@ async fn main() {
 
     // Initialize a 3 node local qaul network
     let mut tp = ThreePoint::new().await;
+    let names = ["florp", "", "beegleboop"];
+    let mut count = Arc::new(AtomicUsize::new(0));
+
     tp.init_with(|_, arc| {
+        let count = Arc::clone(&count);
         let q = Qaul::new(arc);
-        task::block_on(async { q.users().create("1234").await });
+        task::block_on(async {
+            let auth = q.users().create("1234").await.unwrap();
+            let num = count.fetch_add(1, Ordering::Relaxed);
+            q.users()
+                .update(auth, UserUpdate::DisplayName(Some(names[num].to_owned())))
+                .await
+                .unwrap();
+        });
         q
     });
 
