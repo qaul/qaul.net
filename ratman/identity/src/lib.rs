@@ -62,7 +62,7 @@ impl Display for Identity {
                 .map(std::str::from_utf8)
                 .collect::<Result<Vec<_>, _>>()
                 .unwrap()
-                .join(" ")
+                .join("-")
         )
     }
 }
@@ -232,7 +232,7 @@ impl<'de> Deserialize<'de> for Identity {
         impl IdentityVisitor {
             fn from_str<E: Error>(v: &str) -> Result<Identity, E> {
                 let v: Vec<u8> = v
-                    .split(" ")
+                    .split("-")
                     .map(|s| hex::decode(s).map_err(|e| E::custom(e)))
                     // I don't like this way of propagating errors up but the alternative
                     // is a for loop which i also don't like
@@ -326,7 +326,7 @@ mod test {
         let v = serde_json::to_string(&i).unwrap();
         assert_eq!(
             v,
-            "\"5965 732C 2077 6520 7769 6C6C 206D 616B 6520 746F 7461 6C20 6465 7374 726F 792E\""
+            "\"5965-732C-2077-6520-7769-6C6C-206D-616B-6520-746F-7461-6C20-6465-7374-726F-792E\""
         );
         let i2 = serde_json::from_str(&v).unwrap();
         assert_eq!(i, i2);
