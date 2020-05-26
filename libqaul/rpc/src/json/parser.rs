@@ -75,14 +75,14 @@ impl RequestEnv {
                 ("chat-rooms", "get") => Request::ChatRoomGet(de_json(data, auth)?),
                 #[cfg(feature = "chat")]
                 ("chat-rooms", "create") => Request::ChatRoomCreate(de_json(data, auth)?),
-                //#[cfg(feature = "chat")]
-                //("chat-rooms", "modify") => Request::ChatRoomModify(de_json(data, auth)?),
+                // #[cfg(feature = "chat")]
+                // ("chat-rooms", "modify") => Request::ChatRoomModify(de_json(data, auth)?),
 
                 // libqaul contact functions
-                ("contacts", "list") => Request::ContactAll(de_json(data, auth)?),
-                ("contacts", "get") => Request::ContactGet(de_json(data, auth)?),
-                ("contacts", "query") => Request::ContactQuery(de_json(data, auth)?),
-                ("contacts", "modify") => Request::ContactQuery(de_json(data, auth)?),
+                ("contacts", "list") => Request::UserListRemote(de_json(data, auth)?),
+                // ("contacts", "get") => Request::ContactGet(de_json(data, auth)?),
+                // ("contacts", "query") => Request::ContactQuery(de_json(data, auth)?),
+                // ("contacts", "modify") => Request::ContactQuery(de_json(data, auth)?),
 
                 // libqaul user functions
                 ("users", "list") => Request::UserList(de_json(data, auth)?),

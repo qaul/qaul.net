@@ -21,6 +21,8 @@ stdenv.mkDerivation {
     libopus pkg-config
     steam-run
 
+    httpie
+
     # Required for the code coverage and stuff
     openssl
   ] ++ (with androidenv.androidPkgs_9_0; [

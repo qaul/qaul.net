@@ -142,7 +142,8 @@ impl Chat {
         name: String,
     ) -> Result<()> {
         self.modify_room(user, room, RoomDiff::named(room, name))
-            .await
+            .await?;
+        Ok(())
     }
 
     /// Apply some changes to a room
@@ -151,11 +152,11 @@ impl Chat {
         user: UserAuth,
         room: RoomId,
         diff: RoomDiff,
-    ) -> Result<()> {
+    ) -> Result<Room> {
         let mut room = self.get_room(user.clone(), room).await?;
         let state = room.modify(self, user.clone(), diff).await;
         room.send_to_participants(self, user, state).await?;
-        Ok(())
+        Ok(room)
     }
 
     /// Subscriber function that notifies the caller when a new room is discovered
