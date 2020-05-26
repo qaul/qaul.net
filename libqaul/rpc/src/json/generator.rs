@@ -93,13 +93,13 @@ async fn user_delete() {
     use qaul_chat::Chat;
     use std::sync::Arc;
 
-    let qaul = Arc::new(Qaul::dummy());
-    let chat = Chat::new(qaul.clone()).await.unwrap();
+    let qaul = Qaul::dummy();
+    let chat = Chat::new(Arc::clone(&qaul)).await.unwrap();
     let auth = block_on(qaul.users().create("blep")).unwrap();
     assert_eq!(qaul.users().list().await.len(), 1);
 
     let responder = Responder {
-        qaul: qaul.clone(),
+        qaul: Arc::clone(&qaul),
         chat: chat,
     };
 
