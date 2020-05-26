@@ -45,7 +45,11 @@
 use crate::{msg, Chat, ChatMessage, Result, Room, RoomDiff, RoomId, RoomState};
 use async_std::sync::Arc;
 use chrono::Utc;
-use libqaul::{helpers::ItemDiff, users::UserAuth, Identity};
+use libqaul::{
+    helpers::{ItemDiff, SetDiff},
+    users::UserAuth,
+    Identity,
+};
 use std::collections::BTreeSet;
 
 impl Room {
@@ -89,6 +93,34 @@ impl Room {
 
         serv.rooms.insert(user, &room).await;
         RoomState::Create(room)
+    }
+
+    /// Apply a diff to a room and generate a roomstate update
+    pub(crate) async fn modify(
+        &mut self,
+        serv: &Arc<Chat>,
+        user: UserAuth,
+        diff: RoomDiff,
+    ) -> RoomState {
+        diff.users.iter().for_each(|sd| match sd {
+            SetDiff::Add(id) => {
+                self.users.insert(*id);
+            }
+            SetDiff::Remove(id) => {
+                self.users.remove(id);
+            }
+            _ => {}
+        });
+
+        match diff.name {
+            ItemDiff::Set(ref name) => self.name = Some(name.clone()),
+            ItemDiff::Unset => self.name = None,
+            ItemDiff::Ignore => {}
+        }
+
+        // Commit the changes and generate roomstate
+        serv.rooms.insert(user, &self).await;
+        RoomState::Diff(diff)
     }
 
     /// Send a room state as an update to all participants in a room

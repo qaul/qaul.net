@@ -115,6 +115,16 @@ pub struct RoomDiff {
     pub name: ItemDiff<String>,
 }
 
+impl RoomDiff {
+    pub(crate) fn named(id: RoomId, name: String) -> Self {
+        Self {
+            id,
+            users: vec![],
+            name: ItemDiff::Set(name),
+        }
+    }
+}
+
 /// A subscription handler that pushes out updates
 pub struct Subscription {
     pub(crate) inner: Sub<Message>,

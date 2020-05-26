@@ -228,6 +228,7 @@ fn envelope_chat_room_create() {
         Request::ChatRoomCreate(crate::api::chat::rooms::Create {
             auth,
             users: vec![friend],
+            name: None,
         })
     );
 }

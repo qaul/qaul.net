@@ -3,14 +3,14 @@
 //! This stateless worker is given UserAuth objects to subscribe on,
 //! then spawns extra tasks to listen for messages.
 
-use crate::{msg, Chat, Room, Subscription, ASC_NAME};
+use crate::{Chat, Room, Subscription, ASC_NAME};
 use async_std::{
     sync::{channel, Arc, RwLock, Sender},
     task,
 };
 use libqaul::{helpers::TagSet, users::UserAuth, Identity};
 use std::collections::BTreeSet;
-use tracing::{debug, info, trace};
+use tracing::{info, trace};
 
 /// A command to the internal worker
 pub(crate) enum Command {

@@ -5,7 +5,6 @@ mod harness;
 use harness::rpc_harness::RPC;
 use std::time::Duration;
 
-
 // chat-messages send and receive
 #[async_std::test]
 async fn rpc_chatmessages_create() {
@@ -17,7 +16,12 @@ async fn rpc_chatmessages_create() {
     let user_b = rpc.network.b().users().create("123456").await.unwrap();
 
     // create a chat room
-    let room = rpc.responder_a.chat.start_chat(user_a.clone(), vec![user_b.0]).await.unwrap();
+    let room = rpc
+        .responder_a
+        .chat
+        .start_chat(user_a.clone(), vec![user_b.0], None)
+        .await
+        .unwrap();
 
     // Send Message from user A
     // RPC JSON input
@@ -49,7 +53,6 @@ async fn rpc_chatmessages_create() {
     assert_eq!(resp.data.get("type").unwrap(), "success");
 }
 
-
 // chat-messages send and receive
 #[async_std::test]
 async fn rpc_chatmessages_get() {
@@ -61,12 +64,20 @@ async fn rpc_chatmessages_get() {
     let user_b = rpc.network.b().users().create("123456").await.unwrap();
 
     // create a chat room
-    let room = rpc.responder_a.chat.start_chat(user_a.clone(), vec![user_b.0]).await.unwrap();
+    let room = rpc
+        .responder_a
+        .chat
+        .start_chat(user_a.clone(), vec![user_b.0], None)
+        .await
+        .unwrap();
 
     // Send Message from user A
-    let msg = rpc.responder_a.chat
-        .send_message(user_b.clone(), room.clone(), "hello world!".to_string())
-        .await.unwrap();
+    let _msg = rpc
+        .responder_a
+        .chat
+        .send_message(user_a.clone(), room.clone(), "hello world!".to_string())
+        .await
+        .unwrap();
 
     // wait until message is delivered
     async_std::task::sleep(Duration::from_secs(1)).await;

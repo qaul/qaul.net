@@ -133,14 +133,27 @@ impl Chat {
     }
 
     /// Set a name for an existing room, overriding the previous name
+    ///
+    /// This is a convenience function for `modify_room(self, user, room, diff)`!
     pub async fn set_name(
         self: &Arc<Self>,
         user: UserAuth,
         room: RoomId,
         name: String,
     ) -> Result<()> {
-        let room = self.get_room(user.clone(), room).await?;
-        let state = room.add_name(self, user.clone(), name).await;
+        self.modify_room(user, room, RoomDiff::named(room, name))
+            .await
+    }
+
+    /// Apply some changes to a room
+    pub async fn modify_room(
+        self: &Arc<Self>,
+        user: UserAuth,
+        room: RoomId,
+        diff: RoomDiff,
+    ) -> Result<()> {
+        let mut room = self.get_room(user.clone(), room).await?;
+        let state = room.modify(self, user.clone(), diff).await;
         room.send_to_participants(self, user, state).await?;
         Ok(())
     }

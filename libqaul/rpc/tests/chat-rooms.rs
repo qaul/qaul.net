@@ -52,7 +52,12 @@ async fn rpc_chatrooms_get() {
     let user_b = rpc.network.b().users().create("123456").await.unwrap();
 
     // create a chat room
-    let room = rpc.responder_a.chat.start_chat(user_a.clone(), vec![user_b.0]).await.unwrap();
+    let room = rpc
+        .responder_a
+        .chat
+        .start_chat(user_a.clone(), vec![user_b.0], None)
+        .await
+        .unwrap();
 
     // RPC JSON input
     let json_string = format!(
@@ -80,7 +85,15 @@ async fn rpc_chatrooms_get() {
     dbg!(resp.clone());
     assert!(resp.data.contains_key("room"));
     assert_eq!(
-        String::from(resp.data.get("room").unwrap().get("id").unwrap().as_str().unwrap()),
+        String::from(
+            resp.data
+                .get("room")
+                .unwrap()
+                .get("id")
+                .unwrap()
+                .as_str()
+                .unwrap()
+        ),
         room.to_string()
     );
 }
@@ -96,7 +109,12 @@ async fn rpc_chatrooms_modify() {
     let user_b = rpc.network.b().users().create("123456").await.unwrap();
 
     // create a chat room
-    let room = rpc.responder_a.chat.start_chat(user_a.clone(), vec![user_b.0]).await.unwrap();
+    let room = rpc
+        .responder_a
+        .chat
+        .start_chat(user_a.clone(), vec![user_b.0], None)
+        .await
+        .unwrap();
 
     // RPC JSON input
     let json_string = format!(
@@ -138,7 +156,12 @@ async fn rpc_chatrooms_list() {
     let user_b = rpc.network.b().users().create("123456").await.unwrap();
 
     // create a chat room
-    let room = rpc.responder_a.chat.start_chat(user_a.clone(), vec![user_b.0]).await.unwrap();
+    let room = rpc
+        .responder_a
+        .chat
+        .start_chat(user_a.clone(), vec![user_b.0], None)
+        .await
+        .unwrap();
 
     // RPC JSON input
     let json_string = format!(

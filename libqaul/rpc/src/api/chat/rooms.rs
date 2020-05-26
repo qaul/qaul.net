@@ -39,14 +39,32 @@ impl ChatRpc for Get {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Create {
     pub auth: UserAuth,
-    #[serde(default)]
     pub users: Vec<Identity>,
+    #[serde(default)]
+    pub name: Option<String>,
 }
 
 #[async_trait]
 impl ChatRpc for Create {
     type Response = Result<RoomId>;
     async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
-        chat.start_chat(self.auth, dbg!(self.users)).await
+        chat.start_chat(self.auth, self.users, self.name).await
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+pub struct Modify {
+    pub auth: UserAuth,
+    #[serde(default]
+    pub users: Vec<SetDiff<Identity>>,
+    #[serde(default]
+    pub name: ItemDiff<String>,
+}
+
+#[async_trait]
+impl ChatRpc for Modify {
+    type Response = Result<Room>;
+    async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
+        chat.start_chat(self.auth, self.users, self.name).await
     }
 }
