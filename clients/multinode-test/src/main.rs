@@ -28,7 +28,7 @@ async fn main() {
 
     // Initialize a 3 node local qaul network
     let mut tp = ThreePoint::new().await;
-    let names = ["florp", "", "beegleboop"];
+    let names = ["florp", "beegleboop"];
     let mut count = Arc::new(AtomicUsize::new(0));
 
     tp.init_with(|_, arc| {
