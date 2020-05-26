@@ -8,20 +8,20 @@ Scenario.settings({
 
 export default class extends Scenario {
   run() {
-    this.mockFindAll('feed-message', 20);
-    this.mockFindAll('user', 15)
-      // .get()
-      // .forEach(({ id }) => {
-      //   this.mockFindRecord('user').returns({ id });
-      // })
-    this.mockFindAll('file', 15);
-    // this.mockFindAll('chat-room', 10);
+  //   this.mockFindAll('feed-message', 20);
+  //   this.mockFindAll('user', 15)
+  //     // .get()
+  //     // .forEach(({ id }) => {
+  //     //   this.mockFindRecord('user').returns({ id });
+  //     // })
+  //   this.mockFindAll('file', 15);
+  //   // this.mockFindAll('chat-room', 10);
 
-    // for(let i = 0; i < 15; i++) {
-    this.mockFindRecord('chat-room'); // seems not to work?
-    // }
+  //   // for(let i = 0; i < 15; i++) {
+  //   this.mockFindRecord('chat-room'); // seems not to work?
+  //   // }
 
-    this.mockQuery('chat-message').returns({ json: this.buildList('chat-message', 10) });
+  //   this.mockQuery('chat-message').returns({ json: this.buildList('chat-message', 10) });
 
     getPretender().post('*', getPretender().passthrough);
     getPretender().get('*', getPretender().passthrough);

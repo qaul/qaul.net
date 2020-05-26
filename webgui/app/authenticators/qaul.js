@@ -5,44 +5,17 @@ export default class QaulAuthenticator extends Base {
     return data;
   }
 
-  async authenticate(userId, token) {
-    // a bit hacky for now
-    return { userId, token };
+  async authenticate(id, pw) {
+    const loginResponse = await fetch('/rest/login', {
+      method: 'POST',
+      body: JSON.stringify({ id, pw }),
+    });
+    if(loginResponse.status < 200 || loginResponse.status >= 300) {
+      throw new Error("error during login" + await loginResponse.text());
+    }
+
+    return (await loginResponse.json()).auth;
   }
-  // async authenticate(userId, password) {
-  //   const grantResponse = await fetch('/api/grants', {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/vnd.api+json' },
-  //     body: JSON.stringify({
-  //         data: {
-  //           type: 'grant',
-  //           attributes: {
-  //             secret: password
-  //           },
-  //           relationships: {
-  //             user: {
-  //               data: {
-  //                 type: 'user',
-  //                 id: userId
-  //               }
-  //             }
-  //           }
-  //         }
-  //       })
-  //   });
-
-  //   if(grantResponse.status !== 201) {
-  //     throw "can not create grant";
-  //   }
-
-  //   const grantData = await grantResponse.json();
-  //   const token = grantData.data.id;
-
-  //   return {
-  //     token,
-  //     userId,
-  //   };
-  // }
 
   async invalidate({ token }) {
     await fetch(`/api/grants/${token}`, {

@@ -19,4 +19,5 @@ Router.map(function() {
   this.route('settings/language');
   this.route('info');
   this.route('register');
+  this.route('login');
 });

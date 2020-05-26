@@ -24,7 +24,7 @@ export default class ApplicationAdapter extends RESTAdapter {
     if(this.session.isAuthenticated) {
       return {
         Authorization: JSON.stringify({
-          id: this.session.data.authenticated.userId,
+          id: this.session.data.authenticated.id,
           token: this.session.data.authenticated.token,
         }),
       }
@@ -34,7 +34,7 @@ export default class ApplicationAdapter extends RESTAdapter {
   }
 
   pathForType(modelName) {
-    return pluralize(dasherize(modelName)).replace(/-/g, '/');
+    return pluralize(dasherize(modelName))
   }
 
   async updateRecord(store, type, snapshot) {

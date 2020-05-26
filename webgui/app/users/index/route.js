@@ -1,7 +1,8 @@
 import Route from '@ember/routing/route';
+import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 
-export default Route.extend({
-    model() {
-        return this.store.findAll('user');
-    },
-});
+export default class UsersIndexRoute extends Route.extend(AuthenticatedRouteMixin) {
+  model() {
+    return this.store.query('user', { type: 'contact' });
+  }
+}

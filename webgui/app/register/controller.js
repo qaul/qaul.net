@@ -25,12 +25,9 @@ export default class RegisterController extends Controller {
       return;
     }
     const { auth } = await createUserResponse.json();
-    const token = auth.token;
-    const userId = auth.id.replace(/ /g, '');
+    await this.session.authenticate('authenticator:qaul', auth.id, this.password);
 
-    await this.session.authenticate('authenticator:qaul', userId, token);
-
-    const user = await this.store.findRecord('user', userId);
+    const user = await this.store.findRecord('user', auth.id);
 
     user.realName = this.realName;
     user.displayName = this.displayName,

@@ -9,6 +9,9 @@ export default class ApplicationSerializer extends JSONSerializer {
     // we convert from { user: [ { ...data... } ] } to { ...data... }
     return super.normalizeSingleResponse(store, primaryModelClass, payload[primaryModelClass.modelName][0], id, requestType);
   }
+  normalizeArrayResponse(store, primaryModelClass, payload, id, requestType) {
+    return super.normalizeArrayResponse(store, primaryModelClass, payload[primaryModelClass.modelName], id, requestType);
+  }
   serializeAttribute(snapshot, json, key) {
     super.serializeAttribute(...arguments);
     json[this.keyForAttribute(key)] = { set: json[this.keyForAttribute(key)] };
