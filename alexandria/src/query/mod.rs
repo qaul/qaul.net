@@ -19,7 +19,10 @@ mod sub;
 pub(crate) use sub::SubHub;
 pub use sub::Subscription;
 
-use crate::{utils::{Id, Path, TagSet}, record::RecordRef};
+use crate::{
+    record::RecordRef,
+    utils::{Id, Path, TagSet},
+};
 
 /// A one-dimentional database query
 ///
@@ -128,6 +131,14 @@ pub enum QueryResult {
 }
 
 impl QueryResult {
+    /// A simple check if the result only contains one record
+    pub fn single(&self) -> bool {
+        match self {
+            Self::Single(_) => true,
+            Self::Many(_) => false,
+        }
+    }
+
     pub fn merge(self, o: QueryResult) -> Self {
         use self::QueryResult::*;
 

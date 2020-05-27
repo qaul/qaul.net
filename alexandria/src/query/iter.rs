@@ -8,9 +8,10 @@ use crate::{
     Library, Session,
 };
 use async_std::sync::Arc;
-use std::mem;
 use std::{
     collections::BTreeSet,
+    fmt::{self, Debug, Formatter},
+    mem,
     sync::atomic::{AtomicUsize, Ordering},
 };
 
@@ -24,6 +25,12 @@ pub struct QueryIterator {
     paths: Vec<(Path, Session)>,
     inner: Arc<Library>,
     query: Query,
+}
+
+impl Debug for QueryIterator {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self.paths)
+    }
 }
 
 impl QueryIterator {

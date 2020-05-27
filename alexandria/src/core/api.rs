@@ -383,4 +383,19 @@ impl Library {
 
         Ok(self.subs.add_sub(q).await)
     }
+
+    /// Check if a path exists for a particular session
+    ///
+    /// When inserting data, sometimes it's useful to check the path
+    /// that was just inserted, or was inserted by a previous
+    /// operation.  Because this is such a common operation, this
+    /// utility function aims to make this workflow easier.
+    ///
+    /// If you want the actual type of a path node, use `query()` instead!
+    pub async fn path_exists<S>(&self, id: S, p: Path) -> Result<bool>
+    where
+        S: Into<Session> + Debug,
+    {
+        self.query(id, Query::path(p)).await.map(|res| res.single())
+    }
 }
