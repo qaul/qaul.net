@@ -38,7 +38,7 @@ async fn create_room() -> Result<()> {
     // Wait for user propagations
     zzz().await;
 
-    let room_id = net
+    let room = net
         .a()
         .chat
         .start_chat(alice.clone(), vec![bob.0], None)
@@ -48,7 +48,7 @@ async fn create_room() -> Result<()> {
 
     let mut rooms = net.b().chat.rooms(bob.clone()).await?;
     assert!(rooms.len() == 1);
-    assert_eq!(rooms.remove(0).id, room_id);
+    assert_eq!(rooms.remove(0).id, room.id);
     Ok(())
 }
 
@@ -65,21 +65,21 @@ async fn send_message() -> Result<()> {
     // Wait for user propagations
     zzz().await;
 
-    let room_id = net
+    let room = net
         .a()
         .chat
         .start_chat(alice.clone(), vec![bob.0], None)
         .await?;
-    println!("ROOM ID = {}", room_id);
+    println!("ROOM ID = {}", room.id);
 
     zzz().await;
 
-    let room = net.b().chat.get_room(bob.clone(), room_id).await.unwrap();
+    let room = net.b().chat.get_room(bob.clone(), room.id).await.unwrap();
     assert_eq!(room.users, vec![alice.0, bob.0].into_iter().collect());
 
     net.b()
         .chat
-        .send_message(bob.clone(), room_id, "Hello Alice, how are you?".into())
+        .send_message(bob.clone(), room.id, "Hello Alice, how are you?".into())
         .await
         .unwrap();
 
@@ -88,7 +88,7 @@ async fn send_message() -> Result<()> {
     let msg = net
         .a()
         .chat
-        .load_messages(alice.clone(), room_id)
+        .load_messages(alice.clone(), room.id)
         .await
         .unwrap()
         .into_iter()
@@ -111,7 +111,7 @@ async fn send_message_subscribe() -> Result<()> {
     // Wait for user propagations
     zzz().await;
 
-    let room_id = net
+    let room = net
         .a()
         .chat
         .start_chat(alice.clone(), vec![bob.0], None)
@@ -119,12 +119,12 @@ async fn send_message_subscribe() -> Result<()> {
 
     zzz().await;
 
-    let room = net.b().chat.get_room(bob.clone(), room_id).await.unwrap();
+    let room = net.b().chat.get_room(bob.clone(), room.id).await.unwrap();
     assert_eq!(room.users, vec![alice.0, bob.0].into_iter().collect());
 
     net.b()
         .chat
-        .send_message(bob.clone(), room_id, "Hello Alice, how are you?".into())
+        .send_message(bob.clone(), room.id, "Hello Alice, how are you?".into())
         .await
         .unwrap();
 
@@ -132,7 +132,7 @@ async fn send_message_subscribe() -> Result<()> {
         let sub = net
             .a()
             .chat
-            .subscribe(alice.clone(), room_id)
+            .subscribe(alice.clone(), room.id)
             .await
             .unwrap();
         sub.next().await
@@ -158,7 +158,7 @@ async fn change_room_name() -> Result<()> {
 
     zzz().await;
 
-    let room_id = net
+    let room = net
         .a()
         .chat
         .start_chat(alice.clone(), vec![bob.0], None)
@@ -168,12 +168,12 @@ async fn change_room_name() -> Result<()> {
 
     net.b()
         .chat
-        .set_name(bob.clone(), room_id, room_name.clone())
+        .set_name(bob.clone(), room.id, room_name.clone())
         .await?;
 
     zzz().await;
 
-    let room = net.a().chat.get_room(alice, room_id).await?;
+    let room = net.a().chat.get_room(alice, room.id).await?;
     assert_eq!(room.name, Some(room_name));
     Ok(())
 }
@@ -193,7 +193,7 @@ async fn create_room_with_name() -> Result<()> {
 
     zzz().await;
 
-    let room_id = net
+    let room = net
         .a()
         .chat
         .start_chat(alice.clone(), vec![bob.0], Some(room_name.clone()))
@@ -201,7 +201,7 @@ async fn create_room_with_name() -> Result<()> {
 
     zzz().await;
 
-    let room = net.b().chat.get_room(bob, room_id).await?;
+    let room = net.b().chat.get_room(bob, room.id).await?;
     assert_eq!(room.name, Some(room_name));
     Ok(())
 }

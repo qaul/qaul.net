@@ -7,7 +7,7 @@ use {
     futures::stream::StreamExt,
     libqaul::{
         helpers::TagSet,
-        messages::{Mode, MsgRef},
+        messages::{Mode, MsgRef, IdType},
         Qaul,
     },
     linux_voice_test::event::Events,
@@ -116,6 +116,7 @@ async fn run() {
                                 .send(
                                     user.clone(),
                                     Mode::Std(dest.id),
+                                    IdType::unique(),
                                     "HELLO",
                                     TagSet::empty(),
                                     Vec::new(),

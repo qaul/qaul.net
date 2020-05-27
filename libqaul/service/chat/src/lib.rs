@@ -101,18 +101,18 @@ impl Chat {
         user: UserAuth,
         friends: Vec<Identity>,
         name: Option<String>,
-    ) -> Result<RoomId> {
+    ) -> Result<Room> {
         let friends = friends.into_iter().collect();
 
         if let Some(id) = Room::check(self, user.clone(), &friends).await {
-            return Ok(id);
+            return self.get_room(user.clone(), id).await;
         }
 
         let room = Room::create(self, user.clone(), friends.clone(), name).await;
         let room_id = room.id();
         let payload = msg::gen_payload("", room);
-        msg::dispatch_to(self, user, friends, payload, room_id).await?;
-        Ok(room_id)
+        msg::dispatch_to(self, user.clone(), friends, payload, room_id).await?;
+        self.get_room(user, room_id).await
     }
 
     /// Send a normal chat message to a room
@@ -121,7 +121,7 @@ impl Chat {
         user: UserAuth,
         room: RoomId,
         content: String,
-    ) -> Result<()> {
+    ) -> Result<ChatMessage> {
         let friends = self.rooms.get(user.clone(), room).await?.users;
         let payload = msg::gen_payload(content, Room::resume(room));
         msg::dispatch_to(self, user, friends, payload, room).await

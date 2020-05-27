@@ -3,7 +3,7 @@
 use crate::{error::Result, tags, CallId, CallMessage, ASC_NAME};
 use conjoiner;
 use libqaul::{
-    messages::{Message, Mode, ID_LEN},
+    messages::{Message, Mode, ID_LEN, IdType},
     users::UserAuth,
     Identity, Qaul,
 };
@@ -20,6 +20,7 @@ impl CallMessage {
     ) -> Result<()> {
         let messages = qaul.messages();
         let payload = conjoiner::serialise(self).unwrap();
+        let id_type = IdType::create_group();
         for dest in to {
             if *dest == user.0 {
                 continue;
@@ -29,6 +30,7 @@ impl CallMessage {
                 .send(
                     user.clone(),
                     Mode::Std(dest.clone()),
+                    id_type,
                     ASC_NAME,
                     tags::call_id(call),
                     payload.clone(),
@@ -50,7 +52,7 @@ impl CallMessage {
         let messages = qaul.messages();
         let payload = conjoiner::serialise(self).unwrap();
         messages
-            .send(user, Mode::Std(to), ASC_NAME, tags::call_id(call), payload)
+            .send(user, Mode::Std(to), IdType::unique(), ASC_NAME, tags::call_id(call), payload)
             .await?;
 
         Ok(())

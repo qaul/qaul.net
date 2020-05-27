@@ -5,17 +5,19 @@ use harness::{millis, sec10, sec5, zzz};
 
 use libqaul::{
     helpers::TagSet,
-    messages::{Mode, MsgQuery},
+    messages::{IdType, Mode, MsgQuery},
     users::UserAuth,
     Identity, Qaul,
 };
 use std::{sync::Arc, time::Instant};
 
 async fn send_simple(q: &Arc<Qaul>, auth: &UserAuth, target: Identity) -> Identity {
-    dbg!(q.messages()
+    dbg!(q
+        .messages()
         .send(
             auth.clone(),
             Mode::Std(target),
+            IdType::unique(),
             "net.qaul.testing",
             TagSet::empty(),
             vec![1 as u8, 3, 1, 2],
@@ -101,4 +103,43 @@ async fn send_three() {
     })
     .await
     .unwrap();
+}
+
+#[async_std::test]
+async fn grouped_send_ids() {
+    let net = harness::init().await;
+    let auth_a = net.a().users().create("abc").await.unwrap();
+    let auth_b = net.b().users().create("abc").await.unwrap();
+
+    zzz(millis(2000)).await;
+
+    let id_type = IdType::group(Identity::random());
+
+    let id = net
+        .a()
+        .messages()
+        .send(
+            auth_a.clone(),
+            Mode::Std(auth_b.0),
+            id_type,
+            "net.qaul.testing",
+            TagSet::empty(),
+            vec![1 as u8, 3, 1, 2],
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(id, id_type.consume());
+
+    let msg = net
+        .a()
+        .messages()
+        .query(auth_a.clone(), "net.qaul.testing", MsgQuery::id(id))
+        .await
+        .unwrap()
+        .resolve()
+        .await
+        .remove(0);
+
+    assert_eq!(msg.id, id_type.consume());
 }

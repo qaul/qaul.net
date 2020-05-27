@@ -44,6 +44,37 @@ where
         self.inner.skip(num);
     }
 
+    /// Try to get a single element from the query iterator
+    pub async fn next(&self) -> Result<T> {
+        match self.inner.next().await {
+            Ok(Some(rec)) => Ok(rec.into()),
+            _ => Err(Error::NoData),
+        }
+    }
+
+    /// Take all elements from the iterator and drop invalid reads
+    ///
+    /// This is a semi-destructive operation because read errors will
+    /// be dropped, but sometimes that is exactly what you want.
+    /// Because libqaul stores messages for users separately from the
+    /// "global" scope (i.e. flooded messages), a specific path query
+    /// will return two paths: one will fail, the other will not.
+    ///
+    /// Instead of having to filter the query results manually, this
+    /// function does it internally and folds into an empty vector,
+    /// meaning: if both reads fail, the resolved set will be empty.
+    pub async fn resolve(&self) -> Vec<T> {
+        let mut vec = vec![];
+
+        for _ in 0..self.inner.remaining() {
+            if let Ok(t) = self.next().await {
+                vec.push(t);
+            }
+        }
+
+        vec
+    }
+
     /// Take a number of items from the iterator to advance
     ///
     /// If no more items are present, this function will return
@@ -66,7 +97,11 @@ where
         Ok(vec)
     }
 
-    /// Take all elements from this result set at once
+    /// Take elements from the iterator until a read fails
+    ///
+    /// Once a read fails that does't mean that there's no more data
+    /// left, just that a read was unsuccessful.  If you want to
+    /// quietly drop errors, use `resolve()` instead!
     pub async fn all(&self) -> Result<Vec<T>> {
         let mut vec = vec![];
         while let Ok(Some(rec)) = self.inner.next().await {

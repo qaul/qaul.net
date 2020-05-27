@@ -3,8 +3,13 @@
 mod harness;
 use harness::sec5;
 
-use libqaul::{helpers::TagSet, messages::Mode, users::UserAuth, Identity, Qaul};
-use std::{sync::Arc, time::Instant};
+use libqaul::{
+    helpers::TagSet,
+    messages::{IdType, Mode},
+    users::UserAuth,
+    Identity, Qaul,
+};
+use std::sync::Arc;
 
 async fn send_simple(q: &Arc<Qaul>, auth: &UserAuth, target: Identity) -> Identity {
     dbg!(q
@@ -12,6 +17,7 @@ async fn send_simple(q: &Arc<Qaul>, auth: &UserAuth, target: Identity) -> Identi
         .send(
             auth.clone(),
             Mode::Std(target),
+            IdType::unique(),
             "net.qaul.testing",
             TagSet::empty(),
             vec![1 as u8, 3, 1, 2],

@@ -1,5 +1,5 @@
 use futures::join;
-use libqaul::{error::Result, helpers::TagSet, messages::Mode, Qaul};
+use libqaul::{error::Result, helpers::TagSet, messages::{Mode, IdType}, Qaul};
 use ratman::Router;
 
 #[async_std::main]
@@ -14,6 +14,7 @@ async fn main() -> Result<()> {
     let send = msg.send(
         user.clone(),
         Mode::Flood,
+        IdType::unique(),
         "de.spacekookie.myapp",
         TagSet::empty(),
         vec![1, 2, 3, 4],

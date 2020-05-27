@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use libqaul::{
     error::{Error, Result},
     helpers::{Subscription, Tag},
-    messages::{Mode, MsgId, MsgQuery, MsgRef},
+    messages::{IdType, Mode, MsgId, MsgQuery, MsgRef},
     users::UserAuth,
     Qaul,
 };
@@ -16,6 +16,7 @@ use serde::{Deserialize, Serialize};
 pub struct Send {
     auth: UserAuth,
     mode: Mode,
+    id_type: IdType,
     service: String,
     #[serde(default)]
     tags: Vec<Tag>,
@@ -26,8 +27,17 @@ pub struct Send {
 impl QaulRpc for Send {
     type Response = Result<MsgId>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
+        let Self {
+            auth,
+            mode,
+            id_type,
+            service,
+            tags,
+            payload,
+        } = self;
+
         qaul.messages()
-            .send(self.auth, self.mode, self.service, self.tags, self.payload)
+            .send(auth, mode, id_type, service, tags, payload)
             .await
     }
 }

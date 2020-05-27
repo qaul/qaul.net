@@ -5,7 +5,7 @@ use async_std::sync::Arc;
 use bincode::{deserialize, serialize};
 use chrono::{Duration, Utc};
 use libqaul::{
-    messages::{Message, Mode, MsgQuery},
+    messages::{IdType, Message, Mode, MsgQuery},
     users::UserAuth,
     Identity,
 };
@@ -74,6 +74,28 @@ pub(crate) fn gen_payload(content: impl Into<String>, room: RoomState) -> Vec<u8
     serialize(&Meta { content, room }).unwrap()
 }
 
+/// Get a chat message via a specific Id
+///
+/// This function is very unstable and should only be called
+/// immediately after inserting a message.  On the flip-side, if this
+/// function ever panics, it indicates a deeper problem in the service
+/// or even libqaul code.  This set of queries should never fail!
+pub(crate) async fn fetch_chat_message(
+    serv: &Arc<Chat>,
+    user: UserAuth,
+    id: Identity,
+) -> ChatMessage {
+    serv.qaul
+        .messages()
+        .query(user, ASC_NAME, MsgQuery::id(id))
+        .await
+        .unwrap()
+        .resolve()
+        .await
+        .remove(0)
+        .into()
+}
+
 /// Simple looping helper function that dispatches messages
 pub(crate) async fn dispatch_to(
     serv: &Arc<Chat>,
@@ -81,8 +103,10 @@ pub(crate) async fn dispatch_to(
     friends: BTreeSet<Identity>,
     payload: Vec<u8>,
     room: RoomId,
-) -> Result<()> {
+) -> Result<ChatMessage> {
     trace!("Creating room with {:?}", friends);
+
+    let id_type = IdType::create_group();
 
     for recp in friends {
         // Skip self
@@ -96,6 +120,7 @@ pub(crate) async fn dispatch_to(
             .send(
                 user.clone(),
                 mode,
+                id_type,
                 ASC_NAME,
                 tags::room_id(room),
                 payload.clone(),
@@ -103,7 +128,7 @@ pub(crate) async fn dispatch_to(
             .await?;
     }
 
-    Ok(())
+    Ok(fetch_chat_message(serv, user, id_type.consume()).await)
 }
 
 pub(crate) async fn subscribe_for(

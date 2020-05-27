@@ -1,7 +1,7 @@
 //! Network message types and utilities
 
 // Public exports
-pub use crate::api::messages::{Message, Mode, MsgId, MsgQuery, MsgRef, SigTrust, ID_LEN};
+pub use crate::api::messages::{IdType, Message, Mode, MsgId, MsgQuery, MsgRef, SigTrust, ID_LEN};
 
 mod store;
 pub(crate) use self::store::{MsgStore, TAG_UNREAD};
@@ -56,7 +56,10 @@ impl RatMessageProto {
         let recipient = self.recipient;
 
         RatMessage {
-            id,
+            // Ratman generates a new message ID here to keep the real
+            // message ID a secret and prevents header inspection to
+            // figure out who is talking to whom.
+            id: MsgId::random(),
             sender,
             recipient,
             payload,
@@ -86,7 +89,7 @@ impl MsgUtils {
     /// Process incoming RATMAN message, verifying it's signature and payload
     pub(crate) async fn process(msg: RatMessage, store: &UserStore) -> Result<Message> {
         let RatMessage {
-            id,
+            id: _,
             sender,
             recipient,
             payload,
@@ -108,7 +111,7 @@ impl MsgUtils {
         };
 
         let Envelope {
-            id: _,
+            id,
             sender: _,
             associator,
             payload,

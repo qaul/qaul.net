@@ -7,7 +7,7 @@ use crate::{
     Identity,
 };
 use alexandria::{
-    query::Query,
+    query::{Query, QueryResult as AQResult},
     utils::{Path, Tag, TagSet},
     Library, Session, GLOBAL,
 };
@@ -95,6 +95,33 @@ impl MsgStore {
             .unwrap();
     }
 
+    /// Check if a message for a service with a particular Id exists
+    ///
+    /// This is required to avoid duplicate insertions when sending
+    /// messages to a group of people from a service.
+    pub(crate) async fn probe_id(&self, user: Identity, msg_id: Identity) -> bool {
+        self.inner
+            .path_exists(user, msg_path(msg_id))
+            .await
+            .unwrap_or(false)
+    }
+
+    /// Query a message only via the message Id the path
+    pub(crate) async fn query_path(
+        &self,
+        user: Identity,
+        msg_id: Identity,
+    ) -> QueryResult<Message> {
+        let q = Query::path(msg_path(msg_id));
+
+        // Make db query
+        let mut glb = self.inner.query_iter(GLOBAL, q.clone()).await.unwrap();
+        let usr = self.inner.query_iter(user, q).await.unwrap();
+
+        glb.merge(usr).unwrap();
+        QueryResult::new(glb)
+    }
+
     /// Return items from alexandria via a user query
     pub(crate) async fn query(
         &self,
@@ -102,6 +129,11 @@ impl MsgStore {
         service: Service,
         query: MsgQuery,
     ) -> QueryResult<Message> {
+        // Check if we are dealing with an Id query
+        if let Some(id) = query.id {
+            return self.query_path(user, id).await;
+        }
+
         // Add the service tag to the set
         let mut meta = match service {
             Service::Name(s) => service_tag(s).into(),

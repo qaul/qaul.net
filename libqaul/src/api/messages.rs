@@ -9,7 +9,7 @@ use crate::{
 
 use ratman::netmod::Recipient;
 use serde::{Deserialize, Serialize};
-use std::{convert::TryFrom, sync::Arc};
+use std::sync::Arc;
 
 /// A reference to an internally stored message object
 pub type MsgRef = Arc<Message>;
@@ -89,10 +89,62 @@ impl From<Mode> for Recipient {
     }
 }
 
+/// Specify the id type for a message dispatch
+///
+/// Because libqaul doesn't implement recipient groups it's up to a
+/// service to create useful categorisations for groups of users.
+/// This means that a service might send the same message to different
+/// users, that are then receiving technically different messages.
+/// This can cause all sorts of issues for services because now the
+/// database is keeping track of a message many times (for each user
+/// it was sent to).
+///
+/// This is what this type aims to circumvent: a message id can be
+/// randomised during delivery, or fixed as a group to ensure that a
+/// set of messages are all assigned the same Id.
+///
+/// **This comes with some caveats:** when inserting into the
+/// database, the message Id will already exist, and so further
+/// messages will not be stored.  If you are using the grouped
+/// constraint on an unequal message set (meaning that payloads
+/// differ), this will result in data loss!
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum IdType {
+    /// A unique message ID will be generated on dispatch
+    Unique,
+    /// Create a grouped message ID constraint
+    Grouped(MsgId),
+}
+
+impl IdType {
+    pub fn consume(self) -> MsgId {
+        match self {
+            Self::Unique => MsgId::random(),
+            Self::Grouped(id) => id,
+        }
+    }
+
+    /// Create an ID type that is constrained for a group
+    pub fn group(id: MsgId) -> Self {
+        Self::Grouped(id)
+    }
+
+    /// Create a new message group with a random Id
+    pub fn create_group() -> Self {
+        Self::Grouped(MsgId::random())
+    }
+
+    /// Create a new message ID for every message dispatched
+    pub fn unique() -> Self {
+        Self::Unique
+    }
+}
+
 /// A query interface for the local message store
 #[derive(Clone, Default, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct MsgQuery {
+    pub(crate) id: Option<MsgId>,
     pub(crate) sender: Option<Identity>,
     pub(crate) tags: TagSet,
     pub(crate) skip: usize,
@@ -102,6 +154,14 @@ impl MsgQuery {
     /// Create a new, empty query
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// An override query, that only searches for a specific Id
+    ///
+    /// Ignores all other values passed into the query
+    pub fn id(id: MsgId) -> Self {
+        let id = Some(id);
+        Self { id, ..Self::new() }
     }
 
     /// Query for messages by a specific sender
@@ -194,6 +254,7 @@ impl<'qaul> Messages<'qaul> {
         &self,
         user: UserAuth,
         mode: Mode,
+        id_type: IdType,
         service: S,
         tags: T,
         payload: Vec<u8>,
@@ -205,7 +266,7 @@ impl<'qaul> Messages<'qaul> {
         let (sender, _) = self.q.auth.trusted(user)?;
         let recipient = mode.into();
         let associator = service.into();
-        let id = MsgId::random();
+        let id = id_type.consume();
         let tags: TagSet = tags.into();
         println!("Sending `{}` with tags {:?}", id, tags);
 
@@ -220,20 +281,25 @@ impl<'qaul> Messages<'qaul> {
         println!("Sending message with ID `{:?}`", id);
         println!("Sending message to {:?}", recipient);
 
-        self.q
-            .messages
-            .insert_local(
-                sender,
-                Arc::new(Message {
-                    id,
+        // Only insert the message into the store if the Id is unique!
+        if !self.q.messages.probe_id(sender, id).await {
+            self.q
+                .messages
+                .insert_local(
                     sender,
-                    associator,
-                    tags,
-                    payload,
-                }),
-                mode,
-            )
-            .await;
+                    Arc::new(Message {
+                        id,
+                        sender,
+                        associator,
+                        tags,
+                        payload,
+                    }),
+                    mode,
+                )
+                .await;
+
+            assert!(self.q.messages.probe_id(sender, id).await);
+        }
 
         MsgUtils::send(
             &self.q.users,
