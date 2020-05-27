@@ -1,8 +1,8 @@
 use async_std::{sync::Arc, task};
 use futures::try_join;
-use ratman_harness::{temp, Initialize, ThreePoint};
+use ratman_harness::{Initialize, ThreePoint};
 use std::{
-    env, process,
+    env,
     sync::atomic::{AtomicUsize, Ordering},
 };
 use {
@@ -19,7 +19,7 @@ use tracing_subscriber::fmt;
 #[async_std::main]
 async fn main() {
     let _s = fmt()
-        .with_env_filter("async_std=error,mio=error,tide=error")
+        .with_env_filter("async_std=warn")
         .with_max_level(Level::TRACE)
         .init();
 
@@ -29,7 +29,7 @@ async fn main() {
     // Initialize a 3 node local qaul network
     let mut tp = ThreePoint::new().await;
     let names = ["florp", "beegleboop"];
-    let mut count = Arc::new(AtomicUsize::new(0));
+    let count = Arc::new(AtomicUsize::new(0));
 
     tp.init_with(|_, arc| {
         let count = Arc::clone(&count);

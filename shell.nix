@@ -21,7 +21,9 @@ stdenv.mkDerivation {
     libopus pkg-config
     steam-run
 
+    # webgui debugging and development
     httpie
+    nodejs
 
     # Required for the code coverage and stuff
     openssl
