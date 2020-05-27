@@ -6,7 +6,7 @@ use libqaul::{
     users::UserAuth,
     Identity,
 };
-use qaul_chat::{Chat, Result, Room, RoomId, RoomMeta, RoomDiff};
+use qaul_chat::{Chat, Result, Room, RoomDiff, RoomId, RoomMeta};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
@@ -46,7 +46,7 @@ pub struct Create {
 
 #[async_trait]
 impl ChatRpc for Create {
-    type Response = Result<RoomId>;
+    type Response = Result<Room>;
     async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
         chat.start_chat(self.auth, self.users, self.name).await
     }
@@ -55,7 +55,7 @@ impl ChatRpc for Create {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Modify {
     pub auth: UserAuth,
-    pub room_id: RoomId,
+    pub id: RoomId,
     #[serde(default)]
     pub users: Vec<SetDiff<Identity>>,
     #[serde(default)]
@@ -68,13 +68,13 @@ impl ChatRpc for Modify {
     async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
         chat.modify_room(
             self.auth,
-            self.room_id,
+            self.id,
             RoomDiff {
-                id: self.room_id,
+                id: self.id,
                 users: self.users,
                 name: self.name,
             },
         )
-            .await
+        .await
     }
 }

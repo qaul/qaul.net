@@ -57,8 +57,8 @@ pub enum Request {
     ChatRoomCreate(chat::rooms::Create),
 
     /// Modfiy a chat room
-    // #[cfg(feature = "chat")]
-    // ChatRoomModify(chat::rooms::Modify),
+    #[cfg(feature = "chat")]
+    ChatRoomModify(chat::rooms::Modify),
     
     /// Modify a user's contact
     ContactModify(contacts::Modify),

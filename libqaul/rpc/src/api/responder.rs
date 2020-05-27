@@ -20,7 +20,6 @@ pub struct Responder {
 
     #[cfg(feature = "chat")]
     pub chat: Arc<Chat>,
-
     // #[cfg(feature = "voices")]
     // pub voices: Arc<Voices>,
 }
@@ -73,18 +72,16 @@ impl Responder {
             Request::ChatRoomList(r) => self.respond_chat(r).await.into(),
             #[cfg(feature = "chat")]
             Request::ChatRoomGet(r) => self.respond_chat(r).await.into(),
-            //#[cfg(feature = "chat")]
+            #[cfg(feature = "chat")]
             Request::ChatLoadRoom(r) => self.respond_chat(r).await.into(),
-            //#[cfg(feature = "chat")]
-            Request::ChatRoomCreate(r) => self
-                .respond_chat(r)
-                .await
-                .map(|id| Response::RoomId(vec![id]))
-                .unwrap_or_else(|e| Response::Error(e.to_string())),
+            #[cfg(feature = "chat")]
+            Request::ChatRoomCreate(r) => self.respond_chat(r).await.into(),
 
             // =^-^= Contacts =^-^=
-            Request::ContactModify(r) => self.respond_qaul(r).await.into(),
-            Request::ContactGet(r) => self.respond_qaul(r).await.into(),
+            // FIXME: this should be a contacts type!
+            Request::UserListRemote(r) => self.respond_qaul(r).await.into(),
+            // Request::ContactModify(r) => self.respond_qaul(r).await.into(),
+            // Request::ContactGet(r) => self.respond_qaul(r).await.into(),
 
             // TODO: Currently the "query" functions don't return
             // actual data, but just the IDs.  Maybe we should change
@@ -114,7 +111,6 @@ impl Responder {
 
             // =^-^= Users =^-^=
             Request::UserList(r) => self.respond_qaul(r).await.into(),
-            Request::UserListRemote(r) => self.respond_qaul(r).await.into(),
             Request::UserCreate(r) => self.respond_qaul(r).await.into(),
             Request::UserDelete(r) => self.respond_qaul(r).await.into(),
             Request::UserChangePw(r) => self.respond_qaul(r).await.into(),
@@ -152,7 +148,6 @@ impl Responder {
             //     .await
             //     .map(|samples| Response::VoiceData(samples))
             //     .unwrap_or_else(|e| Response::Error(e.to_string())),
-
             tt => panic!(
                 "Encountered unimplemented parse type: {:#?}\n...so sorry",
                 tt

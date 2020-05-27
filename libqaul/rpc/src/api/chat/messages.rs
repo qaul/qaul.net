@@ -43,7 +43,7 @@ pub struct Create {
 
 #[async_trait]
 impl ChatRpc for Create {
-    type Response = Result<()>;
+    type Response = Result<ChatMessage>;
     async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
         chat.send_message(self.auth, self.room, self.text).await
     }

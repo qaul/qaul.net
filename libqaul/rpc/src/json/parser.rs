@@ -2,8 +2,9 @@ use crate::{
     json::{JsonAuth, JsonMap, RequestEnv},
     Envelope, Request,
 };
-use libqaul::users::UserAuth;
+use libqaul::{users::UserAuth, helpers::ItemDiff};
 use serde::de::DeserializeOwned;
+use serde_json::json;
 
 #[derive(Debug)]
 pub(crate) struct AuthInject<'env> {
@@ -38,8 +39,12 @@ fn de_json<'env, T: DeserializeOwned>(
         }
     };
 
-    serde_json::from_value(serde_json::to_value(&data).unwrap())
-        .map_err(|_| format!("Failed to parse json data payload `{:#?}`", &data))
+    serde_json::from_value(dbg!(serde_json::to_value(&data).unwrap())).map_err(|e| {
+        format!(
+            "Failed to parse json data payload `{:#?}`. Error: {}",
+            &data, e
+        )
+    })
 }
 
 impl RequestEnv {
@@ -75,8 +80,8 @@ impl RequestEnv {
                 ("chat-rooms", "get") => Request::ChatRoomGet(de_json(data, auth)?),
                 #[cfg(feature = "chat")]
                 ("chat-rooms", "create") => Request::ChatRoomCreate(de_json(data, auth)?),
-                // #[cfg(feature = "chat")]
-                // ("chat-rooms", "modify") => Request::ChatRoomModify(de_json(data, auth)?),
+                #[cfg(feature = "chat")]
+                ("chat-rooms", "modify") => Request::ChatRoomModify(de_json(data, auth)?),
 
                 // libqaul contact functions
                 ("contacts", "list") => Request::UserListRemote(de_json(data, auth)?),
@@ -144,12 +149,7 @@ fn json_builder(
                         .enumerate()
                         .fold(String::new(), |prev, (num, (k, v))| {
                             match num {
-                                0 => format!(
-                                    r#"{} "{}": {}"#,
-                                    if len == 1 { "" } else { "," },
-                                    k.to_owned(),
-                                    v
-                                ),
+                                0 => format!(r#""{}": {}"#, k.to_owned(), v),
                                 _ => format!(r#"{}, "{}": {}"#, prev, k, v),
                             }
                         })
@@ -269,5 +269,37 @@ fn envelope_chat_room_get() {
     assert_eq!(
         env.data,
         Request::ChatRoomGet(crate::api::chat::rooms::Get { auth, id: room })
+    );
+}
+
+#[test]
+fn envelope_chat_room_modify() {
+    use libqaul::Identity;
+
+    let room = Identity::random();
+    let auth = UserAuth::test();
+    let json = json_builder(
+        "chat-rooms",
+        "modify",
+        Some(auth.clone()),
+        Some(vec![
+            ("id", Value::String(room.to_string())),
+            ("name", json!({ "set": "Cool Name" })),
+        ]),
+    );
+
+    println!("{}", json);
+
+    let je: RequestEnv = serde_json::from_str(&json).expect("JsonEnvelope failed");
+    let env = je.generate_envelope().unwrap();
+
+    assert_eq!(
+        env.data,
+        Request::ChatRoomModify(crate::api::chat::rooms::Modify {
+            auth,
+            id: room,
+            users: vec![],
+            name: ItemDiff::Set("Cool Name".into())
+        })
     );
 }
