@@ -71,18 +71,18 @@ impl Chat {
         let msgs = msg::unread(&self, user.clone()).await?;
         let rooms = utils::room_map(self.rooms.get_all(user).await);
 
-        Ok(msgs
+        let smsg = msgs.into_iter().fold(BTreeMap::new(), |mut map, msg| {
+            let room_id = msg.room.id();
+            *map.entry(room_id).or_default() += 1;
+            map
+        });
+
+        Ok(rooms
             .into_iter()
-            .fold(BTreeMap::new(), |mut map, msg| {
-                let room_id = dbg!(msg).room.id();
-                *map.entry(room_id).or_default() += 1;
-                map
-            })
-            .into_iter()
-            .map(|(id, unread)| RoomMeta {
+            .map(|(id, room)| RoomMeta {
                 id,
-                unread,
-                name: rooms.get(&id).unwrap().name.clone(),
+                unread: *smsg.get(&id).unwrap_or(&0),
+                name: room.name.clone(),
             })
             .collect())
     }
