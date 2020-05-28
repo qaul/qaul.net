@@ -36,9 +36,9 @@ pub fn rest_routes(rest_state: Arc<Responder>) -> Server<Arc<Responder>> {
 
     // contacts
     // TODO: contacts query
-    app_rest.at("/contacts").get(|req| async move {
-        rest2rpc::rest2rpc(req, "contacts", "list").await
-    });
+    app_rest
+        .at("/contacts")
+        .get(|req| async move { rest2rpc::rest2rpc(req, "contacts", "list").await });
 
     // chat service
     // chat-rooms
@@ -59,7 +59,10 @@ pub fn rest_routes(rest_state: Arc<Responder>) -> Server<Arc<Responder>> {
     // chat-messages
     app_rest
         .at("/chat-messages/:id")
-        .get(|req| async move { rest2rpc::rest2rpc(req, "chat-messages", "get").await })
+        .get(|req| async move {
+            let params = vec!["id"];
+            rest2rpc::rest2rpc_params(req, "chat-messages", "get", Some(params)).await
+        })
         .post(|req| async move { rest2rpc::rest2rpc(req, "chat-messages", "create").await });
     app_rest
         .at("/chat-messages/:id/next")
