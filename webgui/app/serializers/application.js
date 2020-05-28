@@ -7,10 +7,10 @@ export default class ApplicationSerializer extends JSONSerializer {
   }
   normalizeSingleResponse (store, primaryModelClass, payload, id, requestType) {
     // we convert from { user: [ { ...data... } ] } to { ...data... }
-    return super.normalizeSingleResponse(store, primaryModelClass, payload[primaryModelClass.modelName], id, requestType);
+    return super.normalizeSingleResponse(store, primaryModelClass, payload[underscore(primaryModelClass.modelName)], id, requestType);
   }
   normalizeArrayResponse(store, primaryModelClass, payload, id, requestType) {
-    return super.normalizeArrayResponse(store, primaryModelClass, payload[primaryModelClass.modelName], id, requestType);
+    return super.normalizeArrayResponse(store, primaryModelClass, payload[underscore(primaryModelClass.modelName)], id, requestType);
   }
 
   serialize(snapshot, options) {
