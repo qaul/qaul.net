@@ -5,55 +5,55 @@ mod harness;
 use harness::rpc_harness::RPC;
 use std::time::Duration;
 
-// // chat-messages send and receive
-// #[async_std::test]
-// async fn rpc_chatmessages_create() {
-//     // create RPC environment
-//     let rpc = RPC::init().await;
+// chat-messages send
+#[async_std::test]
+async fn rpc_chatmessages_create() {
+    // create RPC environment
+    let rpc = RPC::init().await;
 
-//     // create a user on each node
-//     let user_a = rpc.network.a().users().create("123456").await.unwrap();
-//     let user_b = rpc.network.b().users().create("123456").await.unwrap();
+    // create a user on each node
+    let user_a = rpc.network.a().users().create("123456").await.unwrap();
+    let user_b = rpc.network.b().users().create("123456").await.unwrap();
 
-//     // create a chat room
-//     let room = rpc
-//         .responder_a
-//         .chat
-//         .start_chat(user_a.clone(), vec![user_b.0], None)
-//         .await
-//         .unwrap();
+    // create a chat room
+    let room = rpc
+        .responder_a
+        .chat
+        .start_chat(user_a.clone(), vec![user_b.0], None)
+        .await
+        .unwrap();
 
-//     // Send Message from user A
-//     // RPC JSON input
-//     let json_string = format!(
-//         r#"{{
-//         "id": "/chat-messages/create",
-//         "kind": "chat-messages",
-//         "method": "create",
-//         "data": {{
-//             "text": "hello world!",
-//             "room": "{room_id}"
-//         }},
-//         "auth": {{
-//             "id": "{a_id}",
-//             "token": "{a_token}"
-//         }}
-//     }}"#,
-//         room_id = room.id,
-//         a_id = user_a.0,
-//         a_token = user_a.1
-//     );
+    // Send Message from user A
+    // RPC JSON input
+    let json_string = format!(
+        r#"{{
+        "id": "/chat-messages/create",
+        "kind": "chat-messages",
+        "method": "create",
+        "data": {{
+            "text": "hello world!",
+            "room": "{room_id}"
+        }},
+        "auth": {{
+            "id": "{a_id}",
+            "token": "{a_token}"
+        }}
+    }}"#,
+        room_id = room.id,
+        a_id = user_a.0,
+        a_token = user_a.1
+    );
 
-//     // send JSON
-//     let resp = rpc.send_a(json_string.as_str()).await;
+    // send JSON
+    let resp = rpc.send_a(json_string.as_str()).await;
 
-//     // check result
-//     dbg!(resp.clone());
-//     assert!(resp.data.contains_key("type"));
-//     assert_eq!(resp.data.get("type").unwrap(), "success");
-// }
+    // check result
+    dbg!(resp.clone());
+    assert!(resp.data.contains_key("chat_message"));
+    assert_eq!(resp.data.get("chat_message").unwrap().get(0).unwrap().get("content").unwrap(), "hello world!");
+}
 
-// chat-messages send and receive
+// chat-messages receive
 #[async_std::test]
 async fn rpc_chatmessages_get() {
     // create RPC environment
@@ -108,4 +108,6 @@ async fn rpc_chatmessages_get() {
 
     // check result
     dbg!(resp.clone());
+    assert!(resp.data.contains_key("chat_message"));
+    assert_eq!(resp.data.get("chat_message").unwrap().get(0).unwrap().get("content").unwrap(), "hello world!");
 }
