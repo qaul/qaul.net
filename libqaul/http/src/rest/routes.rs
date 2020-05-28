@@ -20,6 +20,10 @@ pub fn rest_routes(rest_state: Arc<Responder>) -> Server<Arc<Responder>> {
         .at("/logout")
         .get(|req| async move { rest2rpc::rest2rpc(req, "users", "logout").await });
 
+    app_rest
+        .at("/validate_token")
+        .get(|req| async move { rest2rpc::rest2rpc(req, "users", "validate").await });
+
     // user management
     app_rest
         .at("/users")

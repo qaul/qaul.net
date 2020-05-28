@@ -2,7 +2,7 @@ use crate::{
     json::{JsonAuth, JsonMap, RequestEnv},
     Envelope, Request,
 };
-use libqaul::{users::UserAuth, helpers::ItemDiff};
+use libqaul::{helpers::ItemDiff, users::UserAuth};
 use serde::de::DeserializeOwned;
 use serde_json::json;
 
@@ -27,6 +27,7 @@ fn de_json<'env, T: DeserializeOwned>(
         // We don't want to inject the auth info for a few cases
         ("users", "list")
         | ("users", "login")
+        | ("users", "validate")
         | ("users", "create")
         | ("users", "get")
         | ("files", "list") => {}
@@ -96,6 +97,7 @@ impl RequestEnv {
                 ("users", "repass") => Request::UserChangePw(de_json(data, auth)?),
                 ("users", "login") => Request::UserLogin(de_json(data, auth)?),
                 ("users", "logout") => Request::UserLogout(de_json(data, auth)?),
+                ("users", "validate") => Request::UserIsAuthenticated(de_json(data, auth)?),
                 ("users", "get") => Request::UserGet(de_json(data, auth)?),
                 ("users", "modify") => Request::UserUpdate(de_json(data, auth)?),
                 (kind, method) => {
