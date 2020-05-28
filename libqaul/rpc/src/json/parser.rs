@@ -27,7 +27,6 @@ fn de_json<'env, T: DeserializeOwned>(
         // We don't want to inject the auth info for a few cases
         ("users", "list")
         | ("users", "login")
-        | ("users", "validate")
         | ("users", "create")
         | ("users", "get")
         | ("files", "list") => {}
