@@ -73,8 +73,8 @@ pub async fn rest2rpc_params(
         kind: kind.to_string(),
         method: method.to_string(),
         page: None,
-        auth: auth,
-        data: data,
+        auth,
+        data,
     };
 
     let Envelope { id: _, data: req } = match rpc_req.clone().generate_envelope() {

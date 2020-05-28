@@ -23,6 +23,7 @@ impl ChatRpc for Subscribe {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Get {
     pub auth: UserAuth,
+    #[serde(rename = "id")]
     pub room: RoomId,
 }
 
