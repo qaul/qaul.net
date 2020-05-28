@@ -87,7 +87,7 @@ async fn rpc_chatrooms_get() {
     assert_eq!(
         String::from(
             resp.data
-                .get("room")
+                .get("chat_room")
                 .unwrap()
                 .get("id")
                 .unwrap()

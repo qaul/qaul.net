@@ -77,7 +77,7 @@ pub async fn rest2rpc_params(
         data: data,
     };
 
-    let Envelope { id, data: req } = match rpc_req.clone().generate_envelope() {
+    let Envelope { id: _, data: req } = match rpc_req.clone().generate_envelope() {
         Ok(env) => env,
         Err(e) => {
             // If there was an error parsing the envelope, return it
@@ -93,7 +93,7 @@ pub async fn rest2rpc_params(
     let return_code = match &resp {
         libqaul_rpc::Response::Error(s) => {
             if s.starts_with("Not authorised") {
-                403
+                401
             } else {
                 400
             }

@@ -111,6 +111,10 @@ impl Responder {
 
             // =^-^= Users =^-^=
             Request::UserList(r) => self.respond_qaul(r).await.into(),
+            Request::UserIsAuthenticated(r) => match self.respond_qaul(r).await {
+                Ok(()) => Response::Success,
+                Err(_) => Response::Error("Not authorised".into()),
+            },
             Request::UserCreate(r) => self.respond_qaul(r).await.into(),
             Request::UserDelete(r) => self.respond_qaul(r).await.into(),
             Request::UserChangePw(r) => self.respond_qaul(r).await.into(),

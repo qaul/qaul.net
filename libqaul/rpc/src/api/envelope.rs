@@ -81,6 +81,9 @@ pub enum Request {
     /// List remote available users
     UserListRemote(users::ListRemote),
 
+    /// Check if a user's token is still valid
+    UserIsAuthenticated(users::IsAuthenticated),
+    
     /// Create a new user
     UserCreate(users::Create),
 
@@ -176,7 +179,7 @@ pub enum Response {
 
     /// Get a list of all chat rooms with read / unread messages
     #[cfg(feature = "chat")]
-    Rooms(Vec<RoomMeta>),
+    ChatRooms(Vec<RoomMeta>),
 
     /// Confirmation for a new subscription
     Subscription(SubId),
@@ -220,14 +223,14 @@ impl From<UserAuth> for Response {
 #[cfg(feature = "chat")]
 impl From<RoomMeta> for Response {
     fn from(room: RoomMeta) -> Self {
-        Response::Rooms(vec![room])
+        Response::ChatRooms(vec![room])
     }
 }
 
 #[cfg(feature = "chat")]
 impl From<Vec<RoomMeta>> for Response {
     fn from(rooms: Vec<RoomMeta>) -> Self {
-        Response::Rooms(rooms)
+        Response::ChatRooms(rooms)
     }
 }
 

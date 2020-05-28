@@ -49,6 +49,11 @@ impl<'qaul> Users<'qaul> {
         self.q.users.all_remote().await
     }
 
+    /// Check if a user ID and token combination is valid
+    pub async fn is_authenticated(&self, user: UserAuth) -> Result<()> {
+        self.q.auth.trusted(user).map(|_| ())
+    }
+
     /// Create a new user and authenticated session
     ///
     /// The specified password `pw` is used to encrypt the user's

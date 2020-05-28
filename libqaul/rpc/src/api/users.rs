@@ -4,8 +4,8 @@ use crate::QaulRpc;
 use async_trait::async_trait;
 use futures::future;
 use libqaul::{
-    helpers::{ItemDiff, ItemDiffExt, MapDiff, MapDiffExt, SetDiff, SetDiffExt},
     error::Result,
+    helpers::{ItemDiff, ItemDiffExt, MapDiff, MapDiffExt, SetDiff, SetDiffExt},
     users::{UserAuth, UserProfile, UserUpdate},
     Identity, Qaul,
 };
@@ -33,6 +33,20 @@ impl QaulRpc for ListRemote {
     type Response = Vec<UserProfile>;
     async fn apply(self, qaul: &Qaul) -> Self::Response {
         qaul.users().list_remote().await
+    }
+}
+
+/// Check if a user's token is still valid
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+pub struct IsAuthenticated {
+    auth: UserAuth,
+}
+
+#[async_trait]
+impl QaulRpc for IsAuthenticated {
+    type Response = Result<()>;
+    async fn apply(self, qaul: &Qaul) -> Self::Response {
+        qaul.users().is_authenticated(self.auth).await
     }
 }
 
