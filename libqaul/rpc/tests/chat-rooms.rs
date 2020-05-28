@@ -83,7 +83,7 @@ async fn rpc_chatrooms_get() {
 
     // check result
     dbg!(resp.clone());
-    assert!(resp.data.contains_key("room"));
+    assert!(resp.data.contains_key("chat_room"));
     assert_eq!(
         String::from(
             resp.data

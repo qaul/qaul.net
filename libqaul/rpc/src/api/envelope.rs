@@ -168,7 +168,7 @@ pub enum Response {
 
     /// Return chat room data
     #[cfg(feature = "chat")]
-    Room(Room),
+    ChatRoom(Room),
 
     /// Get a set of chat room IDs
     #[cfg(feature = "chat")]
@@ -281,7 +281,7 @@ impl From<Vec<MsgRef>> for Response {
 #[cfg(feature = "chat")]
 impl From<Room> for Response {
     fn from(room: Room) -> Self {
-        Response::Room(room)
+        Response::ChatRoom(room)
     }
 }
 
