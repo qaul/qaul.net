@@ -2,6 +2,15 @@ import Base from 'ember-simple-auth/authenticators/base';
 
 export default class QaulAuthenticator extends Base {
   async restore(data) {
+    const validateTokenResponse = await fetch('/rest/validate_token', {
+      headers: {
+        Authorization: JSON.stringify(data),
+      }
+    });
+    if(validateTokenResponse.status !== 200) {
+      throw "login not valid"
+    }
+
     return data;
   }
 
