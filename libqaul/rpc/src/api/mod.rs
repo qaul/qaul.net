@@ -17,6 +17,10 @@ pub use envelope::{Envelope, Request, Response};
 mod responder;
 pub use responder::Responder;
 
+mod streamer;
+pub use streamer::{StreamResponder, Streamer, SubId};
+pub(crate) use streamer::{Subscriber};
+
 use async_trait::async_trait;
 use libqaul::Qaul;
 

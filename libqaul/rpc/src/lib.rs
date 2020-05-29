@@ -19,8 +19,8 @@
 
 mod api;
 pub use api::{
-    contacts, files, messages, users, Envelope, QaulExt, QaulRpc, Request, Responder,
-    Response,
+    contacts, files, messages, users, Envelope, QaulExt, QaulRpc, Request, Responder, Response,
+    StreamResponder, Streamer, SubId,
 };
 
 #[cfg(feature = "chat")]

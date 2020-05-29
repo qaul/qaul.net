@@ -1,9 +1,10 @@
 use super::ChatRpc;
+use crate::{api::Subscriber, Response, SubId};
 use async_std::sync::Arc;
 use async_trait::async_trait;
 use futures::{future::FutureExt, stream::Stream};
 use libqaul::users::UserAuth;
-use qaul_chat::{Result, Chat, ChatMessage, RoomId, Subscription};
+use qaul_chat::{Chat, ChatMessage, Result, RoomId, Subscription};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
@@ -18,6 +19,18 @@ impl ChatRpc for Subscribe {
     async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
         chat.subscribe(self.auth, self.room).await
     }
+}
+
+#[async_trait]
+impl Subscriber for Subscription {
+    async fn next(&self) -> Option<Response> {
+        Some(self.next().await.into())
+    }
+}
+
+pub struct CancelSub {
+    pub auth: UserAuth,
+    pub id: SubId,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]

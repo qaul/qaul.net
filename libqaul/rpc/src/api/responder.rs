@@ -1,6 +1,4 @@
-//!
-
-use crate::{QaulExt, QaulRpc, Request, Response};
+use crate::{api::Subscriber, QaulExt, QaulRpc, Request, Response, StreamResponder, Streamer};
 use async_std::sync::Arc;
 use libqaul::Qaul;
 
@@ -15,7 +13,10 @@ use qaul_chat::Chat;
 // use qaul_voices::Voices;
 
 /// A type mapper to map RPC requests to libqaul and services
-pub struct Responder {
+pub struct Responder<K: StreamResponder + Send + Sync + 'static> {
+    /// Keeps track of subscription runs
+    pub streamer: Arc<Streamer<K>>,
+
     pub qaul: Arc<Qaul>,
 
     #[cfg(feature = "chat")]
@@ -24,7 +25,7 @@ pub struct Responder {
     // pub voices: Arc<Voices>,
 }
 
-impl Responder {
+impl<K: StreamResponder + Send + Sync + 'static> Responder<K> {
     async fn respond_qaul<R, T>(&self, request: R) -> T
     where
         R: QaulRpc<Response = T> + Send + Sync,
@@ -58,14 +59,23 @@ impl Responder {
     ///
     // With this function we avoid having 100 functions that all do
     // basically the same thing, and the switching logic stays in one
-    // place.  When touching this function, try to leave comments for
+    // place.  If you need some context as to why this is required,
+    // what it does, and how it actually works, there's an RPC chapter
+    // in the contributors guide for you to read up on these things.
+    // If you have more questions afterwards, feel free to reach out
+    // to us.  When touching this function, try to leave comments for
     // anything that's not immediatly obvious.  Also: =^-^=!
     pub async fn respond(&self, req: Request) -> Response {
         // TODO: currently the ids all map into Response::UserId which is wrong
         match req {
             // =^-^= Chat Messages =^-^=
-            //#[cfg(feature = "chat")]
+            #[cfg(feature = "chat")]
             Request::ChatMsgCreate(r) => self.respond_chat(r).await.into(),
+            Request::ChatMsgSub(r) => self
+                .respond_chat(r)
+                .await
+                .map(|sub| Response::Subscription(self.streamer.start(sub)))
+                .unwrap_or_else(|e| Response::Error(e.to_string())),
 
             // =^-^= Chat Rooms =^-^=
             #[cfg(feature = "chat")]

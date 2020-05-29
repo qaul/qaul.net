@@ -1,7 +1,6 @@
 use super::*;
 use libqaul::{
     contacts::ContactEntry,
-    helpers::SubId,
     messages::{Message, MsgId, MsgRef},
     users::{UserAuth, UserProfile},
     Identity,
@@ -59,7 +58,7 @@ pub enum Request {
     /// Modfiy a chat room
     #[cfg(feature = "chat")]
     ChatRoomModify(chat::rooms::Modify),
-    
+
     /// Modify a user's contact
     ContactModify(contacts::Modify),
 
@@ -83,7 +82,7 @@ pub enum Request {
 
     /// Check if a user's token is still valid
     UserIsAuthenticated(users::IsAuthenticated),
-    
+
     /// Create a new user
     UserCreate(users::Create),
 
@@ -104,7 +103,6 @@ pub enum Request {
 
     /// Update a user
     UserUpdate(users::Update),
-
     // #[cfg(feature = "voices")]
     // /// Initiate a call to a remote user
     // VoicesMakeCall(voices::MakeCall),
@@ -192,7 +190,6 @@ pub enum Response {
 
     /// Return available user IDs
     UserId(Vec<Identity>),
-
     // /// A call id
     // #[cfg(feature = "voices")]
     // CallId(CallId),
