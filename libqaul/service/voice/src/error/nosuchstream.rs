@@ -15,4 +15,3 @@ impl Display for NoSuchStream {
         write!(f, "No such stream with id '{}'", self.0)
     }
 }
-

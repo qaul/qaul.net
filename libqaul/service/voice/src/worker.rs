@@ -1,24 +1,16 @@
 use {
+    crate::{
+        Call, CallData, CallEvent, CallId, CallMessage, CallUser, StreamState, Voice, VoiceData,
+        VoiceDataPacket, ASC_NAME,
+    },
     async_std::{
-        stream::interval, 
+        stream::interval,
         sync::{Mutex, RwLock},
     },
-    crate::{
-        ASC_NAME, Call, CallId, CallMessage, Voice, CallUser, 
-        CallEvent, StreamState, VoiceDataPacket, VoiceData, CallData,
-    },
     conjoiner,
-    futures::{
-        sink::SinkExt,
-        stream::StreamExt,
-    },
-    libqaul::{
-        helpers::TagSet,
-        messages::ID_LEN,
-        users::UserAuth,
-        Identity,
-    },
-    opus::{Decoder, Channels},
+    futures::{sink::SinkExt, stream::StreamExt},
+    libqaul::{helpers::TagSet, messages::ID_LEN, users::UserAuth, Identity},
+    opus::{Channels, Decoder},
     rubato::Resampler,
     std::{
         collections::BTreeMap,
@@ -33,7 +25,8 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
     let user = { Arc::clone(voice.users.read().await.get(&user).unwrap()) };
 
     // subscribe to incoming messages
-    let sub = voice.qaul
+    let sub = voice
+        .qaul
         .messages()
         .subscribe(user.auth.clone(), ASC_NAME, TagSet::empty())
         .await
@@ -49,7 +42,8 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
         }
 
         // call id is carried in a tag so grab and deserialize that
-        let id = msg.tags
+        let id = msg
+            .tags
             .iter()
             .filter(|tag| tag.key == "call-id")
             .filter(|tag| tag.val.len() != ID_LEN)
@@ -60,12 +54,11 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
             None => {
                 warn!("Call message recieved with no call id tag");
                 continue;
-            },
+            }
         };
 
         // next match on the message payload
         match conjoiner::deserialise(&msg.payload) {
-
             // if we have been invited to a call...
             Ok(CallMessage::Invitation(inv)) => {
                 info!("Received invitation to {:?}", id);
@@ -77,7 +70,8 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
                     invitees: inv.invitees,
                 };
                 call.invitees.insert(user.auth.0);
-                let res = voice.calls
+                let res = voice
+                    .calls
                     .lock()
                     .await
                     .insert(user.auth.clone(), &call)
@@ -97,14 +91,18 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
                         i += 1;
                     }
                 }
-            },
+            }
 
             // if someone else has been invited to a call...
             Ok(CallMessage::InvitationSent(to)) => {
-                info!("Recieved invitation notification for user {:?} on call {:?}", to, id);
+                info!(
+                    "Recieved invitation notification for user {:?} on call {:?}",
+                    to, id
+                );
 
                 // update the call in our database
-                let res = voice.calls
+                let res = voice
+                    .calls
                     .lock()
                     .await
                     .update(user.auth.clone(), id, |mut call| {
@@ -128,17 +126,21 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
                         }
                     }
                 }
-            },
+            }
 
             // if someone has joined the call...
             Ok(CallMessage::Join) => {
                 // note who it is
                 let joined_user = msg.sender;
 
-                info!("Recieved join message for user {:?} on call {:?}", joined_user, id);
+                info!(
+                    "Recieved join message for user {:?} on call {:?}",
+                    joined_user, id
+                );
 
                 // update the call in our database
-                let res = voice.calls
+                let res = voice
+                    .calls
                     .lock()
                     .await
                     .update(user.auth.clone(), id, |mut call| {
@@ -163,17 +165,21 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
                         }
                     }
                 }
-            },
+            }
 
             // if a user has left a call
             Ok(CallMessage::Part) => {
                 // note who they are
                 let parting_user = msg.sender;
 
-                info!("Receieved part message for user {:?} on call {:?}", parting_user, id);
+                info!(
+                    "Receieved part message for user {:?} on call {:?}",
+                    parting_user, id
+                );
 
                 // update our call database
-                let res = voice.calls
+                let res = voice
+                    .calls
                     .lock()
                     .await
                     .update(user.auth.clone(), id, |mut call| {
@@ -198,7 +204,7 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
                         }
                     }
                 }
-            },
+            }
 
             // if a use is sending us voice data
             Ok(CallMessage::Data(data)) => {
@@ -223,8 +229,8 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
                         //
                         // this makes sure we start at the earliest packet we have availible when
                         // the stream goes live
-                        state.next_sequence_number = state.next_sequence_number
-                            .min(data.sequence_number);
+                        state.next_sequence_number =
+                            state.next_sequence_number.min(data.sequence_number);
                     } else if state.next_sequence_number > data.sequence_number {
                         // otherwise discard this packet if it comes before the current
                         // sequence number
@@ -237,7 +243,7 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
                         continue;
                     }
 
-                    // then queue the packet in the jitter buffer 
+                    // then queue the packet in the jitter buffer
                     state.jitter_buffer.insert(data.sequence_number, data.data);
                 } else {
                     // if we don't know about the stream try to make a new decoder for it
@@ -245,12 +251,11 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
                         Ok(decoder) => decoder,
                         Err(e) => {
                             warn!(
-                                "Incoming data packet for stream {} failed to create decoder: {}", 
-                                data.stream,
-                                e,
+                                "Incoming data packet for stream {} failed to create decoder: {}",
+                                data.stream, e,
                             );
                             continue;
-                        },
+                        }
                     };
 
                     // then build a jitter buffer and insert this packet
@@ -271,7 +276,7 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
                     };
                     streams.insert(data.stream, stream);
                 }
-            },
+            }
 
             Err(_) => {
                 warn!("Failed to deserialize message");
@@ -303,21 +308,31 @@ pub async fn voice_worker(user: Identity, voice: Arc<Voice>) {
         // now for each stream
         for (id, state) in streams.iter_mut() {
             // if we're in the startup window don't do anything
-            if state.startup_timeout.map(|time| now >= time).unwrap_or(false) {
+            if state
+                .startup_timeout
+                .map(|time| now >= time)
+                .unwrap_or(false)
+            {
                 continue;
             }
             state.startup_timeout = None;
 
             // if the shutdown window has passed
-            if state.shutdown_timeout.map(|time| now < time).unwrap_or(false) {
+            if state
+                .shutdown_timeout
+                .map(|time| now < time)
+                .unwrap_or(false)
+            {
                 // check if we can save the stream by making a time jump
                 //
                 // TODO: there's a better way to handle this i'm sure
-                let (to_remove, to_keep) = state.jitter_buffer
-                    .keys()
-                    .partition::<Vec<_>, _>(
-                        |sequence_number| **sequence_number < state.next_sequence_number
-                    );
+                let (to_remove, to_keep) =
+                    state
+                        .jitter_buffer
+                        .keys()
+                        .partition::<Vec<_>, _>(|sequence_number| {
+                            **sequence_number < state.next_sequence_number
+                        });
 
                 if let Some(sequence_number) = to_keep.into_iter().min() {
                     // jump to the nearest packet after the time split
@@ -328,16 +343,15 @@ pub async fn voice_worker(user: Identity, voice: Arc<Voice>) {
                     continue;
                 }
 
-                // and remove the packets before the time split 
-                to_remove
-                    .into_iter()
-                    .for_each(|sequence_number| {
-                        state.jitter_buffer.remove(&sequence_number);
-                    });
+                // and remove the packets before the time split
+                to_remove.into_iter().for_each(|sequence_number| {
+                    state.jitter_buffer.remove(&sequence_number);
+                });
             }
 
             // get the next packet if it has been recieved
-            let data = if let Some(packet) = state.jitter_buffer.remove(&state.next_sequence_number) {
+            let data = if let Some(packet) = state.jitter_buffer.remove(&state.next_sequence_number)
+            {
                 state.shutdown_timeout = None;
                 state.next_sequence_number += 1;
                 packet
@@ -351,13 +365,20 @@ pub async fn voice_worker(user: Identity, voice: Arc<Voice>) {
 
             // next we decode the data packet
             let mut samples = vec![0.0; 48000 / 50];
-            match state.decoder.lock().await.decode_float(&data, &mut samples, false) {
-                Ok(index) => { samples.truncate(index); },
+            match state
+                .decoder
+                .lock()
+                .await
+                .decode_float(&data, &mut samples, false)
+            {
+                Ok(index) => {
+                    samples.truncate(index);
+                }
                 Err(e) => {
                     warn!("Could not decode packet for stream {}: {}", id, e);
                     expired_streams.push(*id);
                     continue;
-                },
+                }
             }
 
             // then we add it to this frame's data for it's call
@@ -387,9 +408,7 @@ pub async fn voice_worker(user: Identity, voice: Arc<Voice>) {
         let mut empty_calls = Vec::new();
         for (call, subs) in stream_subs.iter_mut() {
             let _default = BTreeMap::new();
-            let frame = voice_data
-                .get(call)
-                .unwrap_or(&_default);
+            let frame = voice_data.get(call).unwrap_or(&_default);
 
             let mut i = 0;
             while i != subs.len() {
@@ -435,18 +454,25 @@ pub async fn voice_worker(user: Identity, voice: Arc<Voice>) {
                     warn!("Could not resample packet for stream {}: {}", id, e);
                     errored_streams.push(*id);
                     continue;
-                },
+                }
             };
 
             // encode the samples into a byte buffer
             let mut data = vec![0; 256];
-            match state.encoder.lock().await.encode_float(&samples[0][..], &mut data) {
-                Ok(index) => { data.truncate(index); },
+            match state
+                .encoder
+                .lock()
+                .await
+                .encode_float(&samples[0][..], &mut data)
+            {
+                Ok(index) => {
+                    data.truncate(index);
+                }
                 Err(e) => {
                     warn!("Could not encode packet for stream {}: {}", id, e);
                     errored_streams.push(*id);
                     continue;
-                },
+                }
             }
 
             // construct the message and try to send it
@@ -456,20 +482,22 @@ pub async fn voice_worker(user: Identity, voice: Arc<Voice>) {
                 sequence_number: state.next_sequence_number,
             });
             let call = match voice.get_call(user.auth.clone(), state.call).await {
-                Ok(call) =>  call,
+                Ok(call) => call,
                 Err(_) => {
                     warn!("Could not get call {} for stream {}", state.call, id);
                     errored_streams.push(*id);
                     continue;
-                },
+                }
             };
-            let res = msg.send_to(
-                user.auth.clone(),
-                &call.participants,
-                state.call,
-                &voice.qaul,
-            ).await;
-            
+            let res = msg
+                .send_to(
+                    user.auth.clone(),
+                    &call.participants,
+                    state.call,
+                    &voice.qaul,
+                )
+                .await;
+
             if let Err(e) = res {
                 warn!("Failed to send audio for stream {}: {}", id, e);
                 errored_streams.push(*id);
@@ -480,7 +508,7 @@ pub async fn voice_worker(user: Identity, voice: Arc<Voice>) {
             }
         }
 
-        // and remove any broken streams 
+        // and remove any broken streams
         for id in errored_streams.iter() {
             streams.remove(id);
         }

@@ -1,21 +1,18 @@
 use {
+    crate::{tags, InvitationSubscription, Result, ASC_NAME},
     async_std::sync::{Mutex, RwLock},
     conjoiner,
-    crate::{ASC_NAME, Result, tags, InvitationSubscription},
-    futures::{
-        channel::mpsc::Sender,
-        future::AbortHandle,
-    },
+    futures::{channel::mpsc::Sender, future::AbortHandle},
     libqaul::{
-        messages::{Mode, IdType},
+        messages::{IdType, Mode},
         users::UserAuth,
         Identity, Qaul,
     },
     opus::{Decoder, Encoder},
     rubato::SincFixedOut,
-    serde::{Serialize, Deserialize},
+    serde::{Deserialize, Serialize},
     std::{
-        collections::{BTreeSet, BTreeMap, VecDeque},
+        collections::{BTreeMap, BTreeSet, VecDeque},
         time::Instant,
     },
 };
@@ -27,7 +24,7 @@ pub type StreamId = Identity;
 pub struct Call {
     pub id: CallId,
     /// Who has joined the call?
-    pub participants: BTreeSet<Identity>, 
+    pub participants: BTreeSet<Identity>,
     /// Who has been invited to the call?
     pub invitees: BTreeSet<Identity>,
 }
@@ -49,8 +46,8 @@ pub(crate) enum CallMessage {
 impl CallMessage {
     /// send to a group of users
     pub(crate) async fn send_to(
-        &self, 
-        user: UserAuth, 
+        &self,
+        user: UserAuth,
         to: &BTreeSet<Identity>,
         call: CallId,
         qaul: &Qaul,
@@ -62,13 +59,14 @@ impl CallMessage {
             if *dest == user.0 {
                 continue;
             }
-            
+
             messages
                 .send(
                     user.clone(),
                     Mode::Std(dest.clone()),
-                    id
-                    ASC_NAME,
+                    id,
+                    A
+                        SC_NAME,
                     tags::call_id(call),
                     payload.clone(),
                 )
@@ -80,14 +78,14 @@ impl CallMessage {
 
     /// send to a specific user
     pub(crate) async fn send(
-        &self, 
-        user: UserAuth, 
+        &self,
+        user: UserAuth,
         to: Identity,
         call: CallId,
         qaul: &Qaul,
     ) -> Result<()> {
         let messages = qaul.messages();
-        let payload = conjoiner::serialise(self).unwrap(); 
+        let payload = conjoiner::serialise(self).unwrap();
         messages
             .send(
                 user,
@@ -149,7 +147,7 @@ pub(crate) struct StreamState {
     /// what call does this stream belong to?
     pub(crate) call: CallId,
     /// and what user is sending it?
-    pub(crate) user: Identity, 
+    pub(crate) user: Identity,
     /// a buffer of packets indexed by sequence numbers
     ///
     /// this is where new incoming packets are stored to allow
@@ -164,7 +162,7 @@ pub(crate) struct StreamState {
     pub(crate) startup_timeout: Option<Instant>,
     /// an instant representing when the stream will shutdown
     ///
-    /// this field will be set when the decoder tries to decode a 
+    /// this field will be set when the decoder tries to decode a
     /// packet and can't find one. it will be cleared if a packet is
     /// found but if the timer is allowed to expire the stream will be
     /// flushed from memory.

@@ -1,6 +1,7 @@
 //! `qaul.net` voice service
 
-#[macro_use] extern crate tracing;
+#[macro_use]
+extern crate tracing;
 
 mod directory;
 mod error;
@@ -8,37 +9,29 @@ mod subs;
 mod types;
 mod worker;
 
+pub(crate) use self::types::{
+    CallData, CallInvitation, CallMessage, CallUser, EncoderStreamState, StreamState,
+};
 pub use self::{
     error::Result,
-    subs::{InvitationSubscription, CallEventSubscription, VoiceSubscription},
-    types::{Call, CallId, CallEvent, VoiceData, VoiceDataPacket, StreamId},
-};
-pub(crate) use self::{
-    types::{CallMessage, CallInvitation, CallUser, StreamState, EncoderStreamState, CallData},
+    subs::{CallEventSubscription, InvitationSubscription, VoiceSubscription},
+    types::{Call, CallEvent, CallId, StreamId, VoiceData, VoiceDataPacket},
 };
 use {
+    self::directory::CallDirectory,
     async_std::{
         sync::{Mutex, RwLock},
         task,
     },
     futures::{
         channel::mpsc::channel,
-        future::{
-            abortable,
-            AbortHandle,
-        },
+        future::{abortable, AbortHandle},
     },
-    libqaul::{
-        error::Error as QaulError,
-        services::ServiceEvent,
-        users::UserAuth,
-        Identity, Qaul,
-    },
-    opus::{Encoder, Channels, Application},
-    rubato::{SincFixedOut, InterpolationParameters, WindowFunction, InterpolationType},
-    self::directory::CallDirectory,
+    libqaul::{error::Error as QaulError, services::ServiceEvent, users::UserAuth, Identity, Qaul},
+    opus::{Application, Channels, Encoder},
+    rubato::{InterpolationParameters, InterpolationType, SincFixedOut, WindowFunction},
     std::{
-        collections::{BTreeSet, BTreeMap, VecDeque},
+        collections::{BTreeMap, BTreeSet, VecDeque},
         sync::{Arc, Mutex as SyncMutex},
     },
 };
@@ -51,7 +44,7 @@ pub(crate) mod tags {
     pub(crate) fn call_id(id: CallId) -> Tag {
         Tag::new("call-id", id.as_bytes().to_vec())
     }
-} 
+}
 
 /// Voice service state
 #[derive(Clone)]
@@ -72,11 +65,7 @@ impl Voice {
     pub async fn new(qaul: Arc<Qaul>) -> Result<Arc<Self>> {
         let calls = Arc::new(Mutex::new(CallDirectory::new(qaul.clone())));
         let users = Arc::new(RwLock::new(BTreeMap::new()));
-        let this = Arc::new(Self { 
-            qaul, 
-            calls,
-            users,
-        });
+        let this = Arc::new(Self { qaul, calls, users });
 
         // this is where we store the per-client worker abort handles to
         // allow future cleanup when the client logs out
@@ -89,15 +78,10 @@ impl Voice {
             .register(ASC_NAME, move |cmd| match cmd {
                 // when a client logs in...
                 ServiceEvent::Open(auth) => {
-                    let (fut_1, handle_1) = abortable(worker::client_message_worker(
-                        auth.0,
-                        _this.clone(),
-                    ));
+                    let (fut_1, handle_1) =
+                        abortable(worker::client_message_worker(auth.0, _this.clone()));
 
-                    let (fut_2, handle_2) = abortable(worker::voice_worker(
-                        auth.0,
-                        _this.clone(),
-                    ));
+                    let (fut_2, handle_2) = abortable(worker::voice_worker(auth.0, _this.clone()));
 
                     let user = Arc::new(CallUser {
                         auth,
@@ -112,7 +96,7 @@ impl Voice {
 
                     task::spawn(fut_1);
                     task::spawn(fut_2);
-                },
+                }
                 // when a client logs out...
                 ServiceEvent::Close(auth) => {
                     if let Some(user) = task::block_on(_this.users.write()).remove(&auth.0) {
@@ -120,7 +104,7 @@ impl Voice {
                             handle.abort();
                         }
                     }
-                },
+                }
             })
             .await?;
         Ok(this)
@@ -165,14 +149,19 @@ impl Voice {
         message.send(user.clone(), friend, id, &self.qaul).await?;
 
         // then add the user to the call's invitee list
-        let call = self.calls.lock().await.update(user.clone(), id, |mut call| {
-            call.invitees.insert(friend);
-            call
-        }).await?;
+        let call = self
+            .calls
+            .lock()
+            .await
+            .update(user.clone(), id, |mut call| {
+                call.invitees.insert(friend);
+                call
+            })
+            .await?;
 
         // and tell others that the user was invited to the call
         //
-        // this is crucial because it allows the users of the call to 
+        // this is crucial because it allows the users of the call to
         // completely change by the time the user joins the call and still
         // have them know who to talk to
         //
@@ -181,7 +170,9 @@ impl Voice {
         // this could be resolved by having users occasionally randomly update
         // eachother on who they think is in the call
         let message = CallMessage::InvitationSent(friend);
-        message.send_to(user.clone(), &call.invitees, id, &self.qaul).await
+        message
+            .send_to(user.clone(), &call.invitees, id, &self.qaul)
+            .await
     }
 
     /// Join a call in progress
@@ -189,10 +180,15 @@ impl Voice {
         info!("{:?} is joining call {:?}", user.0, id);
 
         // we join ourselves
-        let call = self.calls.lock().await.update(user.clone(), id, |mut call| {
-            call.participants.insert(user.0);
-            call
-        }).await?;
+        let call = self
+            .calls
+            .lock()
+            .await
+            .update(user.clone(), id, |mut call| {
+                call.participants.insert(user.0);
+                call
+            })
+            .await?;
 
         // and notify our peers
         let message = CallMessage::Join;
@@ -207,11 +203,16 @@ impl Voice {
         //
         // TODO: this should actually delete the call but...
         // i don't think alexandria can do that rn
-        let call = self.calls.lock().await.update(user.clone(), id, |mut call| {
-            call.participants.remove(&user.0);
-            call.invitees.remove(&user.0);
-            call
-        }).await?;
+        let call = self
+            .calls
+            .lock()
+            .await
+            .update(user.clone(), id, |mut call| {
+                call.participants.remove(&user.0);
+                call.invitees.remove(&user.0);
+                call
+            })
+            .await?;
 
         // send a goodbye to other members of the call
         let message = CallMessage::Part;
@@ -223,7 +224,13 @@ impl Voice {
     /// NOTE: This will not notify you about the creation of your own calls, only
     /// external invites
     pub async fn subscribe_invites(&self, user: UserAuth) -> Result<InvitationSubscription> {
-        let user = self.users.read().await.get(&user.0).ok_or(QaulError::NoUser)?.clone();
+        let user = self
+            .users
+            .read()
+            .await
+            .get(&user.0)
+            .ok_or(QaulError::NoUser)?
+            .clone();
 
         // make the channel and add the sender to the user's subscription list
         let (sender, receiver) = channel(1);
@@ -238,16 +245,25 @@ impl Voice {
     ///
     /// NOTE: This will not notify you about locally caused call events, only events
     /// caused by external users
-    pub async fn subscribe_call_events(&self, user: UserAuth, id: CallId) 
-    -> Result<CallEventSubscription> {
-        let user = self.users.read().await.get(&user.0).ok_or(QaulError::NoUser)?.clone();
+    pub async fn subscribe_call_events(
+        &self,
+        user: UserAuth,
+        id: CallId,
+    ) -> Result<CallEventSubscription> {
+        let user = self
+            .users
+            .read()
+            .await
+            .get(&user.0)
+            .ok_or(QaulError::NoUser)?
+            .clone();
 
         // make the channel and add it to the call's subscription list
         // if the call doesn't have one, make a new subscription list for this call
         let (sender, receiver) = channel(1);
         let mut subs = user.call_event_subs.write().await;
         if let Some(mut v) = subs.get_mut(&id) {
-            v.push(sender); 
+            v.push(sender);
         } else {
             subs.insert(id, vec![sender]);
         }
@@ -258,16 +274,25 @@ impl Voice {
     /// Subscribe to incoming frames of voice data
     ///
     /// NOTE: All incoming voice data is a 48khz until need proves otherwise or a refactor
-    pub async fn subscribe_call_audio(&self, user: UserAuth, id: CallId)
-    -> Result<VoiceSubscription> {
-        let user = self.users.read().await.get(&user.0).ok_or(QaulError::NoUser)?.clone();
+    pub async fn subscribe_call_audio(
+        &self,
+        user: UserAuth,
+        id: CallId,
+    ) -> Result<VoiceSubscription> {
+        let user = self
+            .users
+            .read()
+            .await
+            .get(&user.0)
+            .ok_or(QaulError::NoUser)?
+            .clone();
 
         // make the channel and add it to the call's subscription list
         // if the call doesn't have one, make a new subscription list for this call
         let (sender, receiver) = channel(1);
         let mut subs = user.stream_subs.write().await;
         if let Some(mut v) = subs.get_mut(&id) {
-            v.push(sender); 
+            v.push(sender);
         } else {
             subs.insert(id, vec![sender]);
         }
@@ -276,8 +301,12 @@ impl Voice {
     }
 
     /// Create a new audio stream on a call
-    pub async fn create_stream(&self, user: UserAuth, call: CallId, sample_rate: u32) 
-    -> Result<StreamId> {
+    pub async fn create_stream(
+        &self,
+        user: UserAuth,
+        call: CallId,
+        sample_rate: u32,
+    ) -> Result<StreamId> {
         let id = StreamId::random();
 
         let encoder = Encoder::new(48000, Channels::Mono, Application::Voip)?;
@@ -301,8 +330,17 @@ impl Voice {
             resampler,
         };
 
-        let user = self.users.read().await.get(&user.0).ok_or(QaulError::NoUser)?.clone();
-        user.outgoing_streams.write().await.insert(id, encoder_state);
+        let user = self
+            .users
+            .read()
+            .await
+            .get(&user.0)
+            .ok_or(QaulError::NoUser)?
+            .clone();
+        user.outgoing_streams
+            .write()
+            .await
+            .insert(id, encoder_state);
 
         Ok(id)
     }
@@ -310,7 +348,12 @@ impl Voice {
     /// Enqueue some audio samples to be sent over the given stream
     ///
     /// The stream will stall until a full frame of samples is availible
-    pub async fn push_samples(&self, user: UserAuth, stream: StreamId, samples: &[f32]) -> Result<()> {
+    pub async fn push_samples(
+        &self,
+        user: UserAuth,
+        stream: StreamId,
+        samples: &[f32],
+    ) -> Result<()> {
         // you were so busy figuring out if you could you never stopped to ask if you should
         self.users
             .read()
