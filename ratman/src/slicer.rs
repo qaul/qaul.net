@@ -1,7 +1,6 @@
 //! Slices `Message` into a series of Frames
 
 use crate::{Message, Payload};
-use conjoiner;
 use netmod::{Frame, SeqBuilder};
 
 /// Slices messages into managable chunks
@@ -10,7 +9,7 @@ pub(crate) struct Slicer;
 impl Slicer {
     /// Take a `Message` and split it into a list of `Frames`
     pub(crate) fn slice(max: usize, msg: Message) -> Vec<Frame> {
-        let payload = conjoiner::serialise(&Payload {
+        let payload = bincode::serialize(&Payload {
             payload: msg.payload,
             sign: msg.sign,
         })

@@ -62,7 +62,7 @@ fn join_frames(buf: &mut Vec<Frame>, new: Frame) -> Option<Message> {
         let sender = buf[0].sender;
         let recipient = buf[0].recipient;
         let layered = SeqBuilder::restore(buf);
-        let Payload { payload, sign } = conjoiner::deserialise(&layered).unwrap();
+        let Payload { payload, sign } = bincode::deserialize(&layered).unwrap();
 
         Some(Message {
             id,

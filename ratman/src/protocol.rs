@@ -16,7 +16,6 @@ use async_std::{
     sync::{Arc, Mutex},
     task,
 };
-use conjoiner;
 use identity::Identity;
 use netmod::Frame;
 use serde::{Deserialize, Serialize};
@@ -88,7 +87,7 @@ impl Protocol {
     pub(crate) fn is_announce(f: &Frame) -> Option<Identity> {
         let Frame { ref payload, .. } = f;
 
-        conjoiner::deserialise(payload)
+        bincode::deserialize(payload)
             .map(|p| match p {
                 ProtoPayload::Announce { id, .. } => id,
             })
@@ -97,7 +96,7 @@ impl Protocol {
 
     /// Build an announcement message for a user
     fn announce(sender: Identity) -> Frame {
-        let payload = conjoiner::serialise(&ProtoPayload::Announce {
+        let payload = bincode::serialize(&ProtoPayload::Announce {
             id: sender,
             no_sync: true,
         })
