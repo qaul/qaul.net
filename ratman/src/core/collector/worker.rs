@@ -81,13 +81,18 @@ use identity::Identity;
 #[cfg(test)]
 use netmod::Recipient;
 
+// This test is broken because currently it just creates a sequence of
+// bytes that can then not be deserialised by bincode into a Payload
+// type.  The problem is that we want to manually build up a sequence
+// of three frames to not rely on the Slicer in this test.
+#[ignore]
 #[test]
 fn join_frame_simple() {
     let sender = Identity::random();
-    let resp = Identity::random();
+    let recp = Identity::random();
     let seqid = Identity::random();
 
-    let mut seq = SeqBuilder::new(sender, Recipient::User(resp), seqid)
+    let mut seq = SeqBuilder::new(sender, Recipient::User(recp), seqid)
         .add((0..10).into_iter().collect())
         .add((10..20).into_iter().collect())
         .add((20..30).into_iter().collect())
