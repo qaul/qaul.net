@@ -25,7 +25,7 @@ impl Announcer {
 
     /// Check if a message is a user profile
     pub(crate) fn check_message(msg: &Message) -> Option<UserProfile> {
-        let payload = MsgUtils::extract_simple_payload(&msg);
+        let payload = MsgUtils::extract_simple_payload(&msg)?;
         bincode::deserialize(&payload).ok()
     }
 

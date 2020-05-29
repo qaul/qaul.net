@@ -85,10 +85,10 @@ impl MsgUtils {
         Ok(router.send(msg.build(store).await).await?)
     }
 
-    pub(crate) fn extract_simple_payload(msg: &RatMessage) -> Vec<u8> {
+    pub(crate) fn extract_simple_payload(msg: &RatMessage) -> Option<Vec<u8>> {
         let RatMessage { payload, .. } = msg;
-        let Envelope { payload, .. } = bincode::deserialize(&payload).unwrap();
-        payload
+        let Envelope { payload, .. } = bincode::deserialize(&payload).ok()?;
+        Some(payload)
     }
 
     /// Process incoming RATMAN message, verifying it's signature and payload

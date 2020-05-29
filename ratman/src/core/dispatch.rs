@@ -5,7 +5,6 @@ use crate::{
     Message, Result, Slicer,
 };
 use async_std::{sync::Arc, task};
-use futures::future;
 use netmod::{Frame, Recipient, Target};
 
 pub(crate) struct Dispatch {
@@ -21,7 +20,7 @@ impl Dispatch {
 
     pub(crate) async fn send_msg(&self, msg: Message) -> Result<()> {
         let r = msg.recipient;
-        println!("[RATMAN] dispatching message to recpient: {:?}", r);
+        trace!("dispatching message to recpient: {:?}", r);
 
         // This is a hardcoded MTU for now.  We need to adapt the MTU
         // to the interface we're broadcasting on and we potentially
