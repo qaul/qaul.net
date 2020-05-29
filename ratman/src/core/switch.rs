@@ -81,9 +81,10 @@ impl Switch {
                     if self.journal.unknown(&seqid).await {
                         if let Some(sender) = Protocol::is_announce(&f) {
                             self.routes.update(id as u8, t, sender).await;
+                        } else {
+                            self.collector.queue_and_spawn(f.seqid(), f.clone()).await;
                         }
 
-                        self.journal.save(&seqid).await;
                         self.dispatch.reflood(f, id).await;
                     }
                 }
