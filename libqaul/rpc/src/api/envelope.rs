@@ -70,6 +70,7 @@ pub enum Request {
     UserLogout(users::Logout),
     UserGet(users::Get),
     UserUpdate(users::Update),
+
     // =^-^= Voice calls =^-^=
     // #[cfg(feature = "voices")]
     // VoicesMakeCall(voices::MakeCall),
