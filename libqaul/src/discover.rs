@@ -1,9 +1,13 @@
-use crate::{messages::MsgUtils, users::TAG_PROFILE, Qaul};
+use crate::{
+    messages::MsgUtils,
+    users::{Announcer, TAG_PROFILE},
+    Qaul,
+};
 use alexandria::utils::Tag;
 use async_std::task;
 use ratman::{netmod::Recipient, Router};
 use std::sync::Arc;
-use tracing::{info, warn, debug};
+use tracing::{debug, info, warn};
 
 /// A thread-detached discovery service running inside libqaul
 ///
@@ -59,6 +63,21 @@ impl Discovery {
                     Recipient::User(id) => Some(id),
                     Recipient::Flood => None,
                 };
+
+                // Filter internal status messages
+                // panic!("Getting an announcer message!!!!");
+                if let Some(profile) = Announcer::check_message(&msg) {
+                    // If we had a previous version, generate diffs for update
+                    if let Some(old) = qaul.users.get(msg.sender).await.ok() {
+                        let diffs = old.generate_updates(profile);
+
+                        for update in diffs.into_iter() {
+                            qaul.users.modify(msg.sender, update).await.unwrap();
+                        }
+                    }
+
+                    continue;
+                }
 
                 let msg = match MsgUtils::process(msg, &qaul.users).await {
                     Ok(msg) => Arc::new(msg),

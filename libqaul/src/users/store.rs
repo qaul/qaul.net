@@ -27,6 +27,7 @@ fn profile_path(id: Id) -> Path {
 }
 
 /// A type wrapper around the alexandria storage library
+// FIXME: make this not clone, explicitly Arc or UserStoreRef
 #[derive(Clone)]
 pub(crate) struct UserStore {
     inner: Arc<Library>,

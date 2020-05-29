@@ -1,7 +1,9 @@
 //! libqaul user tests
 
 mod harness;
-use harness::sec5;
+use harness::{sec5, sec10};
+
+use libqaul::users::UserUpdate;
 
 #[async_std::test]
 async fn user_create() {
@@ -27,6 +29,33 @@ async fn user_delete() {
 
     // There should be 0 users
     assert_eq!(net.a().users().list().await.len(), 0);
+}
+
+#[ignore]
+#[async_std::test]
+async fn modify_user() {
+    let net = harness::init().await;
+
+    // Create a user
+    let auth_a = net.a().users().create("abcdefg").await.unwrap();
+    assert_eq!(net.a().users().list().await.len(), 1);
+
+    net.a()
+        .users()
+        .update(
+            auth_a.clone(),
+            UserUpdate::DisplayName(Some("spacekookie".to_owned())),
+        )
+        .await
+        .unwrap();
+
+    harness::zzz(sec10()).await;
+    harness::zzz(sec10()).await;
+    harness::zzz(sec10()).await;
+    harness::zzz(sec10()).await;
+
+    let profile = net.b().users().get(auth_a.0).await.unwrap();
+    assert_eq!(profile.display_name, Some("spacekookie".to_owned()));
 }
 
 #[async_std::test]

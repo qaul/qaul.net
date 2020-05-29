@@ -78,6 +78,12 @@ impl<'qaul> Users<'qaul> {
         self.q.auth.set_pw(id, pw);
         let auth = self.q.auth.new_login(id, pw).map(|t| UserAuth(id, t))?;
         self.q.services.open_user(&auth).await;
+
+        // Start announcing user profile changes
+        self.q
+            .announcer
+            .online(&self.q.router, self.q.users.clone(), auth.0)
+            .await;
         Ok(auth)
     }
 
@@ -90,6 +96,7 @@ impl<'qaul> Users<'qaul> {
         let id = user.0;
 
         // If logout succeeds, we can delete the user
+        self.q.announcer.offline(id).await;
         self.logout(user).await?;
         self.q.router.del_user(id, true).await?;
         self.q.users.delete_local(id).await;
@@ -109,6 +116,12 @@ impl<'qaul> Users<'qaul> {
         self.q.router.online(user).await?;
         let auth = UserAuth(user, token);
         self.q.services.open_user(&auth).await;
+
+        // This service starts syncing user profile changes across the network
+        self.q
+            .announcer
+            .online(&self.q.router, self.q.users.clone(), auth.0)
+            .await;
         Ok(auth)
     }
 
@@ -116,6 +129,7 @@ impl<'qaul> Users<'qaul> {
     pub async fn logout(&self, user: UserAuth) -> Result<()> {
         let (ref id, ref token) = self.q.auth.trusted(user.clone())?;
         self.q.services.close_user(&user).await;
+        self.q.announcer.offline(*id).await;
         self.q.router.offline(*id).await?;
         self.q.auth.logout(id, token)?;
         Ok(())

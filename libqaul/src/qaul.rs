@@ -9,7 +9,7 @@ use crate::{
     messages::MsgStore,
     security::Sec,
     services::ServiceRegistry,
-    users::UserStore,
+    users::{UserStore, Announcer},
 };
 
 use alexandria::{Builder, Library};
@@ -49,6 +49,10 @@ pub struct Qaul {
     /// Store available user profile data
     pub(crate) users: UserStore,
 
+    /// A user profile changes service announcer
+    // TODO: this might work better as part of the user-store?
+    pub(crate) announcer: Arc<Announcer>,
+
     /// Handles user tokens and pw hashes
     pub(crate) auth: AuthStore,
 
@@ -85,6 +89,7 @@ impl Qaul {
         Arc::new(Self {
             router,
             users: UserStore::new(Arc::clone(&store)),
+            announcer: Announcer::new(),
             auth: AuthStore::new(),
             contacts: ContactStore::new(),
             messages: MsgStore::new(Arc::clone(&store)),
@@ -132,6 +137,7 @@ impl Qaul {
         let q = Arc::new(Self {
             router: Arc::clone(&router),
             users: UserStore::new(Arc::clone(&store)),
+            announcer: Announcer::new(),
             auth: AuthStore::new(),
             contacts: ContactStore::new(),
             messages: MsgStore::new(Arc::clone(&store)),

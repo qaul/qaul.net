@@ -75,6 +75,29 @@ impl UserProfile {
     pub fn fuzzy_query(&self, _query: &str) -> bool {
         unimplemented!()
     }
+
+    pub(crate) fn generate_updates(&self, new: Self) -> Vec<UserUpdate> {
+        let mut updates = vec![];
+        use UserUpdate::*;
+
+        // Update the display name
+        match (self.real_name.clone(), new.real_name.clone()) {
+            (Some(n), Some(m)) if n == m => {}
+            (_, Some(m)) => updates.push(RealName(Some(m))),
+            (Some(_), None) => updates.push(RealName(None)),
+            (_, _) => {}
+        }
+
+        // Update the real name
+        match (self.display_name.clone(), new.display_name.clone()) {
+            (Some(n), Some(m)) if n == m => {}
+            (_, Some(m)) => updates.push(DisplayName(Some(m))),
+            (Some(_), None) => updates.push(DisplayName(None)),
+            (_, _) => {}
+        }
+
+        updates
+    }
 }
 
 /// All the ways a UserData can change, as individual events.

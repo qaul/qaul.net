@@ -43,7 +43,6 @@ impl RatMessageProto {
         let sender = self.env.sender;
         let keypair = store.get_key(sender).await;
 
-        let id = self.env.id;
         let raw_payload = conjoiner::serialise(&self.env).unwrap();
 
         // Encrypt the payload only if the message isn't being flooded
@@ -84,6 +83,12 @@ impl MsgUtils {
         msg: RatMessageProto,
     ) -> Result<()> {
         Ok(router.send(msg.build(store).await).await?)
+    }
+
+    pub(crate) fn extract_simple_payload(msg: &RatMessage) -> Vec<u8> {
+        let RatMessage { payload, .. } = msg;
+        let Envelope { payload, .. } = conjoiner::deserialise(&payload).unwrap();
+        payload
     }
 
     /// Process incoming RATMAN message, verifying it's signature and payload
