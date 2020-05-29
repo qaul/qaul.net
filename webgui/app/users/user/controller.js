@@ -13,9 +13,6 @@ export default class UserController extends Controller {
     })
     await room.save();
 
-    this.store.createRecord('chat-message', {
-      room,
-      text: 'hallo du',
-    }).save();
+    this.transitionToRoute('messenger.chat', room.id);
   }
 }
