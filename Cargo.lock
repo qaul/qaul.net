@@ -1913,6 +1913,7 @@ dependencies = [
  "libqaul",
  "opus",
  "ratman-harness",
+ "rubato",
  "serde",
  "tempfile",
  "tracing",
@@ -2139,6 +2140,16 @@ name = "route-recognizer"
 version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea509065eb0b3c446acdd0102f0d46567dc30902dc0be91d6552035d92b0f4f8"
+
+[[package]]
+name = "rubato"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7fa068ee8d7d8e4e58f56927c302258437c6a14b1b5f23f993521f215bb0322f"
+dependencies = [
+ "log",
+ "num-traits",
+]
 
 [[package]]
 name = "rust-argon2"
