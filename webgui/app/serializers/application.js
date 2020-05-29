@@ -1,4 +1,5 @@
 import JSONSerializer from '@ember-data/serializer/json';
+import { pluralize } from 'ember-inflector';
 import { underscore } from '@ember/string';
 
 export default class ApplicationSerializer extends JSONSerializer {
@@ -10,7 +11,9 @@ export default class ApplicationSerializer extends JSONSerializer {
     return super.normalizeSingleResponse(store, primaryModelClass, payload[underscore(primaryModelClass.modelName)], id, requestType);
   }
   normalizeArrayResponse(store, primaryModelClass, payload, id, requestType) {
-    return super.normalizeArrayResponse(store, primaryModelClass, payload[underscore(primaryModelClass.modelName)], id, requestType);
+    const primary = payload[underscore(primaryModelClass.modelName)] || payload[underscore(pluralize(primaryModelClass.modelName))] || payload[Object.keys(payload)[0]];
+
+    return super.normalizeArrayResponse(store, primaryModelClass, primary, id, requestType);
   }
 
   serialize(snapshot, options) {
