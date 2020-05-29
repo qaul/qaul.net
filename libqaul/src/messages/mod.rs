@@ -43,9 +43,13 @@ impl RatMessageProto {
         let sender = self.env.sender;
         let keypair = store.get_key(sender).await;
 
+        // Serialise the envelope into a temporary payload.  The
+        // envelope contains all data that is libqaul specific and
+        // can't (or shouldn't) be taken from the ratman message
+        // headers.
         let raw_payload = bincode::serialize(&self.env).unwrap();
 
-        // Encrypt the payload only if the message isn't being flooded
+        // Encrypt the payload only if the recipient is a single user
         let payload = match self.recipient {
             RatRecipient::User(id) => Sec::encrypt(keypair.clone(), id, &raw_payload),
             RatRecipient::Flood => raw_payload,
