@@ -68,6 +68,15 @@ impl<K: StreamResponder + Send + Sync + 'static> Responder<K> {
     pub async fn respond(&self, req: Request) -> Response {
         // TODO: currently the ids all map into Response::UserId which is wrong
         match req {
+            // =^-^= Generic RPC commands =^-^=
+            Request::CancelSub(r) => match self.respond_qaul(r).await {
+                Ok(id) => {
+                    self.streamer.stop(id).await;
+                    Response::Success
+                }
+                Err(e) => Response::Error(e.to_string()),
+            },
+
             // =^-^= Chat Messages =^-^=
             #[cfg(feature = "chat")]
             Request::ChatMsgCreate(r) => self.respond_chat(r).await.into(),

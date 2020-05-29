@@ -31,116 +31,65 @@ pub struct Envelope<D> {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Request {
-    /// Create a subscription for chat messages
+    // =^-^= Chat Messages =^-^=
     #[cfg(feature = "chat")]
     ChatMsgSub(chat::messages::Subscribe),
-
-    /// Send a chat message
     #[cfg(feature = "chat")]
     ChatMsgCreate(chat::messages::Create),
-
-    /// Query the chat message store
     #[cfg(feature = "chat")]
     ChatLoadRoom(chat::messages::Get),
 
-    /// List all available chat rooms
+    // =^-^= Chat Rooms =^-^=
     #[cfg(feature = "chat")]
     ChatRoomList(chat::rooms::List),
-
-    /// Get data about a chat room
     #[cfg(feature = "chat")]
     ChatRoomGet(chat::rooms::Get),
-
-    /// Create a new chat room
     #[cfg(feature = "chat")]
     ChatRoomCreate(chat::rooms::Create),
-
-    /// Modfiy a chat room
     #[cfg(feature = "chat")]
     ChatRoomModify(chat::rooms::Modify),
 
-    /// Modify a user's contact
+    // =^-^= Contacts =^-^=
     ContactModify(contacts::Modify),
-
-    /// Get a user contact
     ContactGet(contacts::Get),
-
-    /// Query a user's contacts
     ContactQuery(contacts::Query),
-
-    /// Get all user contacts
     ContactAll(contacts::All),
 
-    /// Send a raw libqaul message
+    // =^-^= Generic/ low level commands =^-^=
     MsgSend(messages::Send),
+    CancelSub(streamer::CancelSub),
 
-    /// List all available users
+    // =^-^= Users =^-^=
     UserList(users::List),
-
-    /// List remote available users
     UserListRemote(users::ListRemote),
-
-    /// Check if a user's token is still valid
     UserIsAuthenticated(users::IsAuthenticated),
-
-    /// Create a new user
     UserCreate(users::Create),
-
-    /// Delete a local user
     UserDelete(users::Delete),
-
-    /// Change a user's passphrase
     UserChangePw(users::ChangePw),
-
-    /// Login as a user to get an auth token
     UserLogin(users::Login),
-
-    /// End a user session
     UserLogout(users::Logout),
-
-    /// Get data on a particular user
     UserGet(users::Get),
-
-    /// Update a user
     UserUpdate(users::Update),
+    // =^-^= Voice calls =^-^=
     // #[cfg(feature = "voices")]
-    // /// Initiate a call to a remote user
     // VoicesMakeCall(voices::MakeCall),
-
     // #[cfg(feature = "voices")]
-    // /// Accept a call from a remote user
     // VoicesAcceptCall(voices::AcceptCall),
-
     // #[cfg(feature = "voices")]
-    // /// Reject a call
     // VoicesRejectCall(voices::RejectCall),
-
     // #[cfg(feature = "voices")]
-    // /// Terminate a call
     // VoicesHangUp(voices::HangUp),
-
     // #[cfg(feature = "voices")]
-    // /// Wait for the next incoming call
     // VoicesNextIncoming(voices::NextIncoming),
-
     // #[cfg(feature = "voices")]
-    // /// Get the stream metadata for the remote end of a call
     // VoicesGetMetadata(voices::GetMetadata),
-
     // #[cfg(feature = "voices")]
-    // /// Push voice samples on to the outgoing call buffer
     // VoicesPushVoice(voices::PushVoice),
-
     // #[cfg(feature = "voices")]
-    // /// Get the status of a call
     // VoicesGetStatus(voices::GetStatus),
-
     // #[cfg(feature = "voices")]
-    // /// Subscribe to the incoming voice samples of a call
     // VoicesNextVoice(voices::NextVoice),
-
     // #[cfg(feature = "voices")]
-    // /// Await the termination of a call
     // VoicesOnHangup(voices::OnHangup),
 }
 

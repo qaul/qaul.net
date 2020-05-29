@@ -28,11 +28,6 @@ impl Subscriber for Subscription {
     }
 }
 
-pub struct CancelSub {
-    pub auth: UserAuth,
-    pub id: SubId,
-}
-
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Get {
     pub auth: UserAuth,
