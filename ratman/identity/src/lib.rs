@@ -351,25 +351,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(not(features = "aligned"))]
-    fn conjoiner_serde() {
-        let s = b"Yes, we will make total destroy.";
-        let i = Identity::truncate(&s.to_vec());
-        let v: Vec<u8> = conjoiner_engine::serialise(&i).unwrap();
-        assert_eq!(
-            v,
-            vec![
-                79, 53, 57, 54, 53, 45, 55, 51, 50, 67, 45, 50, 48, 55, 55, 45, 54, 53, 50, 48, 45,
-                55, 55, 54, 57, 45, 54, 67, 54, 67, 45, 50, 48, 54, 68, 45, 54, 49, 54, 66, 45, 54,
-                53, 50, 48, 45, 55, 52, 54, 70, 45, 55, 52, 54, 49, 45, 54, 67, 50, 48, 45, 54, 52,
-                54, 53, 45, 55, 51, 55, 52, 45, 55, 50, 54, 70, 45, 55, 57, 50, 69
-            ],
-        );
-        let i2 = conjoiner_engine::deserialise(&v).unwrap();
-        assert_eq!(i, i2);
-    }
-
-    #[test]
     #[cfg(features = "aligned")]
     fn sized() {
         assert_eq!(crate::ID_LEN, size_of::<usize>());

@@ -9,7 +9,6 @@ use async_std::{
     sync::{Arc, RwLock},
     task::{self, Poll},
 };
-use conjoiner;
 use netmod::{Frame, Target};
 use std::collections::VecDeque;
 

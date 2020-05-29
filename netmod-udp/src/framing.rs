@@ -1,6 +1,5 @@
 //! UDP overlay protocol and framing
 
-use conjoiner;
 use netmod::{Frame, Target};
 use serde::{Deserialize, Serialize};
 
@@ -27,34 +26,34 @@ pub(crate) enum Envelope {
 
 impl Envelope {
     pub(crate) fn frame(f: &Frame) -> Vec<u8> {
-        let inner = conjoiner::serialise(f).unwrap();
+        let inner = bincode::serialize(f).unwrap();
         let env = Envelope::Data(inner);
-        conjoiner::serialise(&env).unwrap()
+        bincode::serialize(&env).unwrap()
     }
 
     pub(crate) fn get_frame(&self) -> Frame {
         match self {
-            Self::Data(ref vec) => conjoiner::deserialise(vec).unwrap(),
+            Self::Data(ref vec) => bincode::deserialize(vec).unwrap(),
             _ => unreachable!(),
         }
     }
 
     pub(crate) fn announce() -> Vec<u8> {
         let env = Envelope::Announce;
-        conjoiner::serialise(&env).unwrap()
+        bincode::serialize(&env).unwrap()
     }
 
     pub(crate) fn reply() -> Vec<u8> {
         let env = Envelope::Reply;
-        conjoiner::serialise(&env).unwrap()
+        bincode::serialize(&env).unwrap()
     }
 
     pub(crate) fn as_bytes(&self) -> Vec<u8> {
-        conjoiner::serialise(self).unwrap()
+        bincode::serialize(self).unwrap()
     }
 
     pub(crate) fn from_bytes(vec: &Vec<u8>) -> Self {
-        conjoiner::deserialise(&vec).unwrap()
+        bincode::deserialize(&vec).unwrap()
     }
 }
 

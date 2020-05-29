@@ -1598,7 +1598,7 @@ dependencies = [
  "async-notify",
  "async-std",
  "async-trait",
- "conjoiner-engine",
+ "bincode",
  "ratman-identity",
  "ratman-netmod",
  "serde",
@@ -1612,7 +1612,7 @@ version = "0.1.0"
 dependencies = [
  "async-std",
  "async-trait",
- "conjoiner-engine",
+ "bincode",
  "ratman-netmod",
 ]
 

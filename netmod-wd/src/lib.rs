@@ -7,7 +7,6 @@ use async_std::{
     task::{self, Poll},
 };
 use async_trait::async_trait;
-use conjoiner;
 use netmod::{Endpoint, Error, Frame, Result, Target};
 use std::{collections::VecDeque, ffi::c_void};
 
@@ -33,7 +32,7 @@ pub extern "C" fn give(this: *mut wifid_t, f: *const c_void, len: usize) {
     let this = unsafe { Box::from_raw(this) };
     let buf = unsafe { *(f as *const &[u8]) };
     let vec: Vec<u8> = buf.into_iter().take(len).cloned().collect();
-    let frame = conjoiner::deserialise(&vec).unwrap();
+    let frame = bincode::deserialize(&vec).unwrap();
 
     task::spawn(async move {
         this.inc.lock().await.push_back(Ok(frame));
@@ -55,7 +54,7 @@ impl Endpoint for wifid_t {
     }
 
     async fn send(&self, frame: Frame, _: Target) -> Result<()> {
-        let buf = Box::new(conjoiner::serialise(&frame).unwrap());
+        let buf = Box::new(bincode::serialize(&frame).unwrap());
         let len = buf.len();
         let c = unsafe { send_raw(Box::into_raw(buf) as *const c_void, len, 0) };
         match c {
