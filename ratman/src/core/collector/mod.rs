@@ -176,7 +176,7 @@ fn queue_many() {
     
     let seqid = id;
     let len = seq.len();
-    assert_eq!(len, 2);
+    assert_eq!(len, 4);
     
     task::block_on(async move {
         let c = Collector::new();
@@ -186,15 +186,17 @@ fn queue_many() {
         }
 
         // There is n queued frames
-        assert!(c.num_queued().await == 2);
+        assert_eq!(c.num_queued().await, len);
 
         let w = c.get_worker(seqid).await;
 
-        // We can twice three times before the worker dies
-        assert!(w.poll().await == Some(()));
-        assert!(w.poll().await == None);
+	// There will be len - 1 items, followed by a None.
+	for _ in 1..len {
+            assert_eq!(w.poll().await, Some(()));
+	}
+        assert_eq!(w.poll().await, None);
 
         // Now get the finished message
-        assert!(c.completed().await.id == seqid);
+        assert_eq!(c.completed().await.id, seqid);
     });
 }
