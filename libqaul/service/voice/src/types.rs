@@ -7,7 +7,7 @@ use {
         future::AbortHandle,
     },
     libqaul::{
-        messages::{Mode, Message},
+        messages::{Mode, IdType},
         users::UserAuth,
         Identity, Qaul,
     },
@@ -56,7 +56,8 @@ impl CallMessage {
         qaul: &Qaul,
     ) -> Result<()> {
         let messages = qaul.messages();
-        let payload = conjoiner::serialise(self).unwrap(); 
+        let payload = conjoiner::serialise(self).unwrap();
+        let id = IdType::create_group();
         for dest in to {
             if *dest == user.0 {
                 continue;
@@ -66,6 +67,7 @@ impl CallMessage {
                 .send(
                     user.clone(),
                     Mode::Std(dest.clone()),
+                    id
                     ASC_NAME,
                     tags::call_id(call),
                     payload.clone(),
@@ -90,6 +92,7 @@ impl CallMessage {
             .send(
                 user,
                 Mode::Std(to),
+                IdType::unique(),
                 ASC_NAME,
                 tags::call_id(call),
                 payload,
