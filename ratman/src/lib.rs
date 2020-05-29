@@ -289,3 +289,42 @@ impl Router {
         self.inner.get_users().await
     }
 }
+
+/// A very simple API level test to make sure that payloads remain the same
+#[async_std::test]
+async fn matching_payloads() {
+    use netmod_mem::MemMod;
+    let (m1, m2) = MemMod::make_pair();
+
+    let r1 = Router::new();
+    let r2 = Router::new();
+
+    r1.add_endpoint(m1).await;
+    r2.add_endpoint(m2).await;
+
+    let u1 = Identity::random();
+    let u2 = Identity::random();
+
+    r1.add_user(u1).await.unwrap();
+    r2.add_user(u2).await.unwrap();
+
+    r1.online(u1).await.unwrap();
+    r2.online(u2).await.unwrap();
+
+    let msg = Message {
+        id: Identity::random(),
+        sender: u1,
+        recipient: Recipient::User(u2),
+        payload: vec![1, 3, 1, 2],
+        sign: vec!['a' as u8, 'c' as u8, 'a' as u8, 'b' as u8],
+    };
+
+    // Wait for the announcement to sync
+    let _ = r1.discover().await;
+
+    // Then send a message
+    r1.send(msg.clone()).await.unwrap();
+
+    let msg2 = r2.next().await;
+    assert_eq!(msg, msg2);
+}

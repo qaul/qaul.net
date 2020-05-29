@@ -19,7 +19,6 @@
 //! set `QAUL_LANG=ar` (or others) as an environment variable to get
 //! translations of these messages, with `en` being the fallback.
 
-use conjoiner::Error as ConjError;
 use ratman::Error as RatError;
 use std::{
     error::Error as StdError,
@@ -122,8 +121,8 @@ impl Display for Error {
 
 impl StdError for Error {}
 
-impl From<ConjError> for Error {
-    fn from(_: ConjError) -> Self {
+impl From<bincode::Error> for Error {
+    fn from(_: bincode::Error) -> Self {
         Error::BadSerialise
     }
 }

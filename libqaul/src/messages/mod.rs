@@ -43,7 +43,7 @@ impl RatMessageProto {
         let sender = self.env.sender;
         let keypair = store.get_key(sender).await;
 
-        let raw_payload = conjoiner::serialise(&self.env).unwrap();
+        let raw_payload = bincode::serialize(&self.env).unwrap();
 
         // Encrypt the payload only if the message isn't being flooded
         let payload = match self.recipient {
@@ -87,7 +87,7 @@ impl MsgUtils {
 
     pub(crate) fn extract_simple_payload(msg: &RatMessage) -> Vec<u8> {
         let RatMessage { payload, .. } = msg;
-        let Envelope { payload, .. } = conjoiner::deserialise(&payload).unwrap();
+        let Envelope { payload, .. } = bincode::deserialize(&payload).unwrap();
         payload
     }
 
@@ -121,7 +121,7 @@ impl MsgUtils {
             associator,
             payload,
             tags,
-        } = conjoiner::deserialise(&payload).unwrap();
+        } = bincode::deserialize(&payload).unwrap();
 
         Ok(Message {
             id: id.into(),

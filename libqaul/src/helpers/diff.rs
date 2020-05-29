@@ -142,7 +142,6 @@ impl<K: Ord, V> MapDiffExt<K, V> for BTreeMap<K, V> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use conjoiner;
     use serde_json;
 
     #[test]
@@ -162,17 +161,17 @@ mod test {
     }
 
     #[test]
-    fn conjoiner_serde() {
+    fn bincode_serde() {
         let variants = [
-            (ItemDiff::Ignore, vec![0_u8]),
-            (ItemDiff::Set(true), vec![1, 1]),
-            (ItemDiff::Unset, vec![2]),
+            (ItemDiff::Ignore, vec![0, 0, 0, 0]),
+            (ItemDiff::Set(true), vec![1, 0, 0, 0, 1]),
+            (ItemDiff::Unset, vec![2, 0, 0, 0]),
         ];
 
         for (v, s) in variants.iter() {
-            let data = conjoiner::serialise(v).unwrap();
+            let data = bincode::serialize(v).unwrap();
             assert_eq!(&data, s);
-            let value: ItemDiff<bool> = conjoiner::deserialise(&data).unwrap();
+            let value: ItemDiff<bool> = bincode::deserialize(&data).unwrap();
             assert_eq!(value, *v);
         }
     }

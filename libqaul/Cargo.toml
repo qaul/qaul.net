@@ -8,18 +8,18 @@ edition = "2018"
 
 [dependencies]
 alexandria = { version = "0.2", path = "../alexandria" }
+netmod-mem = { path = "../netmod-mem", optional = true }
+ratman = { path = "../ratman" }
+
 async-std = { version = "=1.5", features = ["attributes", "unstable"] }
 base64 = "0.10"
 bincode = "1.0"
 blake2 = "0.8"
-conjoiner = { version = "1.2", package = "conjoiner-engine" }
 crossbeam-channel = "0.4"
 futures = "0.3"
 hex = "0.4"
 mime = "0.3"
-netmod-mem = { path = "../netmod-mem", optional = true }
 rand = "0.7"
-ratman = { path = "../ratman" }
 serde = { version = "1.0", features = [ "derive" ] }
 sodiumoxide = "0.2.5"
 tempfile = { version = "3.0", optional = true }
