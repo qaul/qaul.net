@@ -11,14 +11,14 @@ license = "AGPL-3.0"
 libqaul = { path = "../../" }
 
 async-std = "1.5"
-serde = { version = "1.0", features = ["derive"] }
-futures = "0.3"
+bincode = "1.0"
 failure = "0.1"
-conjoiner = { version = "1.2", package = "conjoiner-engine" }
+futures = "0.3"
 opus = "0.2"
+rubato = "0.2"
+serde = { version = "1.0", features = ["derive"] }
 tracing = "0.1"
 tracing-futures = "0.2"
-rubato = "0.2"
 
 [dev-dependencies]
 tracing-subscriber = "0.2"

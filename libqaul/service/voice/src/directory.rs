@@ -1,6 +1,5 @@
 use {
     crate::{error, tags, Call, CallId, Result, ASC_NAME},
-    conjoiner,
     libqaul::{helpers::Tag, services::MetadataMap, users::UserAuth, Qaul},
     std::sync::Arc,
 };
@@ -33,7 +32,7 @@ impl CallDirectory {
             .get_inner(user)
             .await?
             .iter()
-            .map(|(_, v)| conjoiner::deserialise(v).unwrap())
+            .map(|(_, v)| bincode::deserialize(v).unwrap())
             .collect())
     }
 
@@ -44,7 +43,7 @@ impl CallDirectory {
             |opt, (this_id, vec)| {
                 opt.or_else(|prev| {
                     if this_id == &id.to_string() {
-                        Ok(conjoiner::deserialise(vec).unwrap())
+                        Ok(bincode::deserialize(vec).unwrap())
                     } else {
                         Err(prev)
                     }
@@ -62,7 +61,7 @@ impl CallDirectory {
                 ASC_NAME,
                 self.get_inner(user)
                     .await?
-                    .add(call.id.to_string(), conjoiner::serialise(call).unwrap()),
+                    .add(call.id.to_string(), bincode::serialize(call).unwrap()),
                 Tag::empty(tags::CALL_LIST),
             )
             .await?;

@@ -1,22 +1,16 @@
-use {
-    crate::{
-        Call, CallData, CallEvent, CallId, CallMessage, CallUser, StreamState, Voice, VoiceData,
-        VoiceDataPacket, ASC_NAME,
-    },
-    async_std::{
-        stream::interval,
-        sync::{Mutex, RwLock},
-    },
-    conjoiner,
-    futures::{sink::SinkExt, stream::StreamExt},
-    libqaul::{helpers::TagSet, messages::ID_LEN, users::UserAuth, Identity},
-    opus::{Channels, Decoder},
-    rubato::Resampler,
-    std::{
-        collections::BTreeMap,
-        sync::Arc,
-        time::{Duration, Instant},
-    },
+use crate::{
+    Call, CallData, CallEvent, CallId, CallMessage, StreamState, Voice, VoiceData, VoiceDataPacket,
+    ASC_NAME,
+};
+use async_std::{stream::interval, sync::Mutex};
+use futures::{sink::SinkExt, stream::StreamExt};
+use libqaul::{helpers::TagSet, messages::ID_LEN, Identity};
+use opus::{Channels, Decoder};
+use rubato::Resampler;
+use std::{
+    collections::BTreeMap,
+    sync::Arc,
+    time::{Duration, Instant},
 };
 
 /// The worker that handles incoming messages for a client
@@ -58,7 +52,7 @@ pub(crate) async fn client_message_worker(user: Identity, voice: Arc<Voice>) {
         };
 
         // next match on the message payload
-        match conjoiner::deserialise(&msg.payload) {
+        match bincode::deserialize(&msg.payload) {
             // if we have been invited to a call...
             Ok(CallMessage::Invitation(inv)) => {
                 info!("Received invitation to {:?}", id);

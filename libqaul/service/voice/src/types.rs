@@ -1,7 +1,6 @@
 use {
     crate::{tags, Result, ASC_NAME},
     async_std::sync::{Mutex, RwLock},
-    conjoiner,
     futures::{channel::mpsc::Sender, future::AbortHandle},
     libqaul::{
         messages::{IdType, Mode},
@@ -53,7 +52,7 @@ impl CallMessage {
         qaul: &Qaul,
     ) -> Result<()> {
         let messages = qaul.messages();
-        let payload = conjoiner::serialise(self).unwrap();
+        let payload = bincode::serialize(self).unwrap();
         let id = IdType::create_group();
         for dest in to {
             if *dest == user.0 {
@@ -84,7 +83,7 @@ impl CallMessage {
         qaul: &Qaul,
     ) -> Result<()> {
         let messages = qaul.messages();
-        let payload = conjoiner::serialise(self).unwrap();
+        let payload = bincode::serialize(self).unwrap();
         messages
             .send(
                 user,

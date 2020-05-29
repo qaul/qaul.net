@@ -1906,7 +1906,7 @@ name = "qaul-voice"
 version = "0.1.0"
 dependencies = [
  "async-std",
- "conjoiner-engine",
+ "bincode",
  "failure",
  "futures 0.3.5",
  "libqaul",
@@ -2046,7 +2046,6 @@ dependencies = [
  "bincode",
  "blake2 0.8.1",
  "cfg-if",
- "conjoiner-engine",
  "hex",
  "rand 0.7.3",
  "serde",
