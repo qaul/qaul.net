@@ -14,15 +14,13 @@ crate-type = ["cdylib"]
 async-std = "1.5"
 jni = { version = "0.14", default-features = false }
 tempfile = "3.0"
-# tracing-subscriber = { version = "0.2", features = ["fmt"] }
 tracing = { version = "0.1", features = ["log", "log-always"] }
 
-libqaul = { path = "../libqaul" }
+libqaul = { path = "../libqaul", features = ["ffi-java"] }
 libqaul-http = { path = "../libqaul/http" }
 libqaul-rpc = { path = "../libqaul/rpc" }     
-qaul-chat = { path = "../libqaul/service/chat" }
-
 netmod-wd = { path = "../netmod-wd" }
+qaul-chat = { path = "../libqaul/service/chat", features = ["ffi-java"] }
 ratman = { path = "../ratman" }
 ratman-configure = { path = "../ratman/configure", features = ["android"] }
 
