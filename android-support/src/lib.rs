@@ -1,38 +1,26 @@
 //! qaul.net android interop library
-//!
-//! A lot of functions are handled internally, for example after
-//! spawning the http server, the main way of communicating with the
-//! libqaul stack is via the http api.  Some functions need to be
-//! exposed from the services, for example for more efficient audio
-//! streaming or notifications, and those are handled via this
-//! library.
-//!
-//! It can depend on any library in the qaul.net ecosystem, and can
-//! also handle initialisation for the hardware drivers on android.
 
 #![cfg(target_os = "android")]
 #![allow(non_snake_case)]
-
-use async_std::task::{block_on, spawn};
-use jni::objects::{JObject, JString};
-use jni::sys::{jint, jlong, jstring};
-use jni::JNIEnv;
-use std::{
-    ffi::{CStr, CString},
-    net::{Ipv4Addr, SocketAddrV4},
-    sync::Arc,
-};
-use tempfile::tempdir;
 
 #[macro_use]
 extern crate log;
 extern crate android_logger;
 
+use async_std::task::{block_on, spawn};
+use jni::objects::{JList, JObject, JString};
+use jni::sys::{jboolean, jint};
+use jni::JNIEnv;
+use std::{
+    ffi::{CStr, CString},
+    sync::Arc,
+};
+
 use android_logger::{Config, FilterBuilder};
 use log::Level;
 
 use libqaul::Qaul;
-use libqaul_http::HttpServer;
+use libqaul_http::{stream, HttpServer};
 use libqaul_rpc::Responder;
 use qaul_chat::Chat;
 use ratman_configure::{EpBuilder, NetBuilder};
@@ -72,51 +60,15 @@ fn init_panic_handling_once() {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_net_qaul_app_ui_main_MainActivity_hello(
-    env: JNIEnv,
-    _: JObject,
-    j_recipient: JString,
-) -> jstring {
-    let recipient = conv_jstring(&env, j_recipient);
-
-    let output = env
-        .new_string("Hello ".to_owned() + recipient.as_str())
-        .unwrap();
-    output.into_inner()
-}
-
-/// Setup the android application state
-///
-/// This function internally assigns `libqaulState`.  If it is `null`
-/// after calling this function an error has occured.  All parameters
-/// required for bootup need to be provided with this function call.
-/// This function should only be called once, based on `libqaulState`,
-/// and might lead to crashes if called multiple times.
-#[no_mangle]
-pub unsafe extern "C" fn Java_net_qaul_app_ui_main_MainActivity_setup(
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_startServer(
     env: JNIEnv,
     this: JObject,
     port: jint,
-    root_path: JString,
-) {
-
-}
-
-/// Function "start_server" that takes a port and path
-///
-/// The port is used to listen on for the http api, the path is the
-/// location of the compiled webui assets.  This function bootstraps
-/// the qaul.net stack via ratman-configure and libqaul-http.
-#[no_mangle]
-pub unsafe extern "C" fn Java_net_qaul_app_ui_main_MainActivity_startServer(
-    env: JNIEnv,
-    _: JObject,
-    port: jint,
     path: JString,
-) -> jlong {
+) {
     android_logger::init_once(
         Config::default()
-            .with_filter("async-std=error")
+            .with_filter(FilterBuilder::new().parse("async-std=error").build())
             .with_min_level(Level::Trace),
     );
     init_panic_handling_once();
@@ -145,6 +97,7 @@ pub unsafe extern "C" fn Java_net_qaul_app_ui_main_MainActivity_startServer(
     let http = HttpServer::set_paths(
         path,
         Responder {
+            streamer: stream::setup_streamer(),
             qaul: Arc::clone(&libqaul),
             chat: chat,
         },
@@ -157,6 +110,61 @@ pub unsafe extern "C" fn Java_net_qaul_app_ui_main_MainActivity_startServer(
 
     trace!("Chat service listening done");
 
-    let boxed = Box::new(AndroidState { libqaul });
-    Box::into_raw(boxed) as i64
+    // let boxed = Box::new(AndroidState { libqaul });
+    // Box::into_raw(boxed) as i64
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_checkLogin(
+    env: JNIEnv,
+    _: JObject,
+) -> jboolean {
+    0
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_userRegister<'this>(
+    env: JNIEnv<'this>,
+    _: JObject,
+    name: JString,
+    pw: JString,
+) -> JObject<'this> {
+    JObject::null()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatList<'this>(
+    env: JNIEnv<'this>,
+    _: JObject,
+) -> JObject<'this> {
+    JObject::null()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatStart<'this>(
+    env: JNIEnv<'this>,
+    _: JObject,
+    name: JString,
+    friends: JList,
+) -> JObject<'this> {
+    JObject::null()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatSendMessage<'this>(
+    env: JNIEnv<'this>,
+    _: JObject,
+    room_id: JString,
+    content: JString,
+) -> JObject<'this> {
+    JObject::null()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatLoadMessages<'this>(
+    env: JNIEnv<'this>,
+    _: JObject,
+    room_id: JString,
+) -> JObject<'this> {
+    JObject::null()
 }

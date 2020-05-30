@@ -3,10 +3,11 @@ package net.qaul.app
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import net.qaul.app.ffi.NativeQaul
 import java.io.*
 
 class MainActivity : AppCompatActivity() {
-    protected var libqaulState: Long = 0
+    protected var libqaul: NativeQaul? = null;
 
     companion object {
         init {
@@ -22,16 +23,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         // Example of a call to a native method
         val tv = findViewById<TextView>(R.id.sample_text)
-        tv.text = hello("qaul.net")
+        tv.text = "hello kotlin";
         var assetsPath: String? = null
         try {
             assetsPath = unpackAssets("")
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        // Start the libqaul machinery under the hood
-        libqaulState = startServer(5000, "$assetsPath/webgui")
-        println(libqaulState)
+
+        this.libqaul = NativeQaul(9999, assetsPath);
+
     }
 
     @Throws(Exception::class)
@@ -80,7 +81,4 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
     }
-
-    external fun hello(to: String?): String?
-    external fun startServer(port: Int, path: String?): Long
 }

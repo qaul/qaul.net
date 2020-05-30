@@ -18,6 +18,13 @@ public class NativeQaul {
 
     public NativeQaul(int port, String path) {
         this.startServer(port, path);
+
+        this.checkLogin();
+        this.chatLoadMessages("");
+        this.chatSendMessage("", "");
+        this.chatStart("", null);
+        this.userRegister("", "");
+        this.chatList();
     }
 
     /**
