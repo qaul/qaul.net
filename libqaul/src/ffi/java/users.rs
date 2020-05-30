@@ -36,7 +36,9 @@ pub unsafe extern "C" fn create(
 pub fn list<'env>(env: &'env JNIEnv<'env>, q: Arc<Qaul>) -> JList<'env, 'env> {
     let users = block_on(async { q.users().list().await });
     let class = env.find_class("java/util/ArrayList").unwrap();
-    let list = JList::from_env(env, *class).unwrap();
+
+    let arraylist = env.new_object(class, "()V", &[]).unwrap();
+    let list = JList::from_env(env, arraylist).unwrap();
 
     users
         .into_iter()
