@@ -18,6 +18,7 @@ blake2 = "0.8"
 crossbeam-channel = "0.4"
 futures = "0.3"
 hex = "0.4"
+jni = { version = "0.14", optional = true, default-features = false }
 mime = "0.3"
 rand = "0.7"
 serde = { version = "1.0", features = [ "derive" ] }
@@ -35,5 +36,5 @@ tempfile = "3.0"
 default = ["generate-message", "testing"]
 generate-message = []
 testing = ["tempfile", "netmod-mem"]
-ffi-java = []
+ffi-java = ["jni"]
 

@@ -17,5 +17,5 @@
 //! via compile-time feature flags given to cargo.
 
 
-#[cfg(feature = "ffi-java"])
+#[cfg(feature = "ffi-java")]
 pub mod java;

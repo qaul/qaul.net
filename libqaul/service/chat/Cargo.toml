@@ -13,6 +13,7 @@ async-std = "=1.5"
 bincode = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 futures = "0.3"
+jni = { version = "0.14", optional = true, default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 tracing = "0.1"
 tracing-futures = "0.2" 
@@ -21,3 +22,6 @@ tracing-futures = "0.2"
 tracing-subscriber = "0.2"
 ratman-harness = { path = "../../../ratman/harness" }
 tempfile = "3.0"
+
+[features]
+ffi-java = ["jni"]
