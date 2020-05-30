@@ -8,13 +8,22 @@
 #[cfg(test)]
 pub(crate) mod rpc_harness {
     use async_std::sync::Arc;
-    use libqaul::{Identity, Qaul};
+    use libqaul::Qaul;
     use libqaul_rpc::{
         json::{RequestEnv, ResponseEnv},
-        Envelope, Responder,
+        Envelope, Response, StreamResponder, Streamer,
     };
     use qaul_chat::Chat;
-    use ratman_harness::{temp, Initialize, ThreePoint};
+    use ratman_harness::{Initialize, ThreePoint};
+
+    pub struct FakeStream;
+
+    #[async_trait::async_trait]
+    impl StreamResponder for FakeStream {
+        async fn respond(self: Arc<Self>, _: Response) {}
+    }
+
+    pub type Responder = libqaul_rpc::Responder<FakeStream>;
 
     /// RPC test state
     pub(crate) struct RPC {
@@ -42,10 +51,12 @@ pub(crate) mod rpc_harness {
 
             RPC {
                 responder_a: Responder {
+                    streamer: Streamer::new(FakeStream),
                     qaul: qaul_a,
                     chat: chat_a,
                 },
                 responder_b: Responder {
+                    streamer: Streamer::new(FakeStream),
                     qaul: qaul_b,
                     chat: chat_b,
                 },

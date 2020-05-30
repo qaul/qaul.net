@@ -98,7 +98,15 @@ async fn user_delete() {
     let auth = block_on(qaul.users().create("blep")).unwrap();
     assert_eq!(qaul.users().list().await.len(), 1);
 
+    struct FakeStream;
+
+    #[async_trait::async_trait]
+    impl crate::StreamResponder for FakeStream {
+        async fn respond(self: Arc<Self>, _: Response) {}
+    }
+
     let responder = Responder {
+        streamer: crate::Streamer::new(FakeStream),
         qaul: Arc::clone(&qaul),
         chat: chat,
     };
