@@ -6,8 +6,6 @@
 //! * the REST API for the webGUI
 //! * the RPC API
 
-use libqaul_rpc::Responder;
-
 use async_std::{sync::Arc, task, task::JoinHandle};
 use std::io::Result;
 
@@ -16,6 +14,15 @@ use tide_naive_static_files::StaticFilesEndpoint as StaticEp;
 
 mod rest;
 mod rpc;
+mod stream;
+
+pub(crate) use stream::StreamResp;
+
+/// An http specific responder type
+///
+/// This type hides generics on the Responder type to make it easier
+/// to initialise the streaming context for Http purposes.
+pub type Responder = libqaul_rpc::Responder<StreamResp>;
 
 /// State structure for the libqaul http server
 pub struct HttpServer {
@@ -118,7 +125,6 @@ impl HttpServer {
         app.at("/login").strip_prefix().get(StaticEp {
             root: login_path.into(),
         });
-
 
         Self { inner: app }
     }

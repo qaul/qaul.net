@@ -2,18 +2,19 @@
 name = "libqaul-http"
 description = "An translation layer for the libqaul (and services) RPC interfaces"
 version = "0.1.0"
-authors = ["Jess 3Jane <me@jess.coffee>", "Katharina Fey <kookie@spacekookie.de>"]
+authors = ["Jess 3Jane <me@jess.coffee>", "Katharina Fey <kookie@spacekookie.de>", "Math Jud <jud@wachter-jud.net>"]
 edition = "2018"
 license = "AGPL-3.0"
 
 [dependencies]
 libqaul = { path = ".." }
 libqaul-rpc = { path = "../rpc" }
-serde_json = "1.0"
-async-std = "1.0"
 
-tide = { version = "0.6", features = ["unstable"] }
-#tide-naive-static-files = "2.2.0"
-tide-naive-static-files = { path = "../tide-naive-static-files" }
+async-std = "1.0"
+async-trait = "0.1"
 futures = "0.3.4"
 mime = "0.3.16"
+serde_json = "1.0"
+tide = { version = "0.6", features = ["unstable"] }
+tide-naive-static-files = { path = "../tide-naive-static-files" }
+tracing = "0.1"

@@ -3,10 +3,9 @@
 //! Adds REST Routes for WebGUI
 
 use async_std::sync::Arc;
-use libqaul_rpc::Responder;
 use tide::Server;
 
-use crate::rest::rest2rpc;
+use crate::{rest::rest2rpc, Responder};
 
 /// Creates the Tide server and routes for the REST endpoint
 pub fn rest_routes(rest_state: Arc<Responder>) -> Server<Arc<Responder>> {
