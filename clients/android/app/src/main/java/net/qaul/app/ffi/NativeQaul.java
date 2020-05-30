@@ -2,7 +2,9 @@ package net.qaul.app.ffi;
 
 import net.qaul.app.ffi.models.ChatMessage;
 import net.qaul.app.ffi.models.ChatRoom;
+import net.qaul.app.ffi.models.UserProfile;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -14,17 +16,12 @@ import java.util.ArrayList;
  * this should definitely remain the only Java code, but this is simpler for now.
  */
 public class NativeQaul {
-    private Long QaulState = null;
+    private long libqaulState = 0;
 
     public NativeQaul(int port, String path) {
-        this.startServer(port, path);
+        this.libqaulState = startServer(port, path);
 
-        this.checkLogin();
-        this.chatLoadMessages("");
-        this.chatSendMessage("", "");
-        this.chatStart("", null);
-        this.userRegister("", "");
-        this.chatList();
+        this.usersList(libqaulState);
     }
 
     /**
@@ -37,14 +34,21 @@ public class NativeQaul {
      * @param port the port to run the webgui http server on
      * @param path the path to the webgui sources in internal storage
      */
-    private native void startServer(int port, String path);
+    public native long startServer(int port, String path);
 
     /**
      * Check if the instance has a valid login
      *
      * @return true if login is valid
      */
-    private native boolean checkLogin();
+    private native boolean checkLogin(long qaul);
+
+    /**
+     * List available users
+     *
+     * @return List of local users
+     */
+    public native ArrayList<UserProfile> usersList(long qaul);
 
     /**
      * Register a new user on the local instance
@@ -56,14 +60,14 @@ public class NativeQaul {
      * @param name optional name on the network advertised to others
      * @param password used to protect local files and assets
      */
-    public native void userRegister(String name, String password);
+    public native void userRegister(long qaul, String name, String password);
 
     /**
      * List available chat rooms for the current session
      *
      * @return a list of available chat rooms
      */
-    public native ArrayList<ChatRoom> chatList();
+    public native ArrayList<ChatRoom> chatList(long qaul);
 
     /**
      * Start a new chat with some friends.
@@ -74,7 +78,7 @@ public class NativeQaul {
      * @param friends a set of remote users on the network to talk to
      * @return the room ID for further commands
      */
-    public native String chatStart(String name, ArrayList<String> friends);
+    public native String chatStart(long qaul, String name, ArrayList<String> friends);
 
     /**
      * Send a text message to a room
@@ -83,7 +87,7 @@ public class NativeQaul {
      * @param content the chat message content
      * @return the created chat message to display
      */
-    public native ChatMessage chatSendMessage(String room, String content);
+    public native ChatMessage chatSendMessage(long qaul, String room, String content);
 
     /**
      * Load all messages from a chat room
@@ -91,5 +95,5 @@ public class NativeQaul {
      * @param room the room ID to load
      * @return a list of messages in this room
      */
-    public native ArrayList<ChatMessage> chatLoadMessages(String room);
+    public native ArrayList<ChatMessage> chatLoadMessages(long qaul, String room);
 }

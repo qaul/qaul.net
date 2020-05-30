@@ -3,8 +3,10 @@ package net.qaul.app
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import net.qaul.app.R
 import net.qaul.app.ffi.NativeQaul
 import java.io.*
+import java.lang.StringBuilder
 
 class MainActivity : AppCompatActivity() {
     protected var libqaul: NativeQaul? = null;
@@ -22,17 +24,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         // Example of a call to a native method
-        val tv = findViewById<TextView>(R.id.sample_text)
-        tv.text = "hello kotlin";
-        var assetsPath: String? = null
+        val tv = findViewById<TextView>(R.id.sample_text);
+        var assetsPath: String? = null;
         try {
-            assetsPath = unpackAssets("")
+            assetsPath = unpackAssets("");
         } catch (e: Exception) {
-            e.printStackTrace()
+            e.printStackTrace();
         }
 
         this.libqaul = NativeQaul(9999, assetsPath);
 
+//        val sb = StringBuilder();
+//        for (user in this.libqaul!!.usersList()) {
+//            sb.append("User: " + user.displayName + " | ");
+//        }
+//
+//        tv.text = sb;
     }
 
     @Throws(Exception::class)
