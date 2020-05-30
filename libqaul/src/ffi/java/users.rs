@@ -1,13 +1,15 @@
 //! libqaul users module
 
+use super::ToJObject;
 use crate::{
     error::Result,
     users::{UserAuth, UserUpdate},
     Qaul,
 };
+
 use async_std::task::block_on;
 use jni::{
-    objects::{JList, JString},
+    objects::{JClass, JList, JObject, JString},
     JNIEnv,
 };
 use std::sync::Arc;
@@ -31,12 +33,16 @@ pub unsafe extern "C" fn create(
     Ok(auth)
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn list<'this>(
-    this: &JNIEnv<'this>,
-    q: Arc<Qaul>,
-) -> Result<JList<'this, 'this>> {
+pub fn list<'env>(env: &'env JNIEnv<'env>, q: Arc<Qaul>) -> JList<'env, 'env> {
     let users = block_on(async { q.users().list().await });
+    let class = env.find_class("java/util/ArrayList").unwrap();
+    let list = JList::from_env(env, *class).unwrap();
 
-    unimplemented!()
+    users
+        .into_iter()
+        .map(|user| user.to_jobject(&env))
+        .fold(list, |list, jobj| {
+            list.add(jobj);
+            list
+        })
 }
