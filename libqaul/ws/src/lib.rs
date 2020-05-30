@@ -3,7 +3,7 @@
 use libqaul::Qaul;
 use libqaul_rpc::{
     json::{RequestEnv, ResponseEnv},
-    Envelope, Responder,
+    Envelope,
 };
 // TODO: these will break if we turn features off
 use qaul_chat::Chat;
@@ -18,6 +18,11 @@ use async_tungstenite::tungstenite::Message;
 use futures::prelude::*;
 use serde_json;
 use std::sync::atomic::{AtomicBool, Ordering};
+
+mod stream;
+pub use stream::StreamResp;
+
+pub type Responder = libqaul_rpc::Responder<StreamResp>;
 
 /// Websocket server structure
 pub struct WsServer {
@@ -38,7 +43,11 @@ impl WsServer {
         Arc::new(Self {
             running: AtomicBool::from(true),
             addr: addr.into(),
-            rpc: Responder { qaul, chat },
+            rpc: Responder {
+                streamer: stream::setup_streamer(),
+                qaul,
+                chat,
+            },
         })
     }
 

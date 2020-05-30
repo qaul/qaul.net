@@ -7,7 +7,7 @@ use std::{
 };
 use {
     libqaul::{users::UserUpdate, Qaul},
-    libqaul_http::HttpServer,
+    libqaul_http::{stream, HttpServer},
     libqaul_rpc::Responder,
     qaul_chat::Chat,
     // qaul_voices::Voices,
@@ -63,6 +63,7 @@ async fn main() {
     let server_a = HttpServer::set_paths(
         assets,
         Responder {
+            streamer: stream::setup_streamer(),
             qaul: Arc::clone(tp.a()),
             chat: chat_a,
             // voices: voices_a,
@@ -72,6 +73,7 @@ async fn main() {
     let server_b = HttpServer::set_paths(
         assets_b,
         Responder {
+            streamer: stream::setup_streamer(),
             qaul: Arc::clone(tp.b()),
             chat: chat_b,
             // voices: voices_b,

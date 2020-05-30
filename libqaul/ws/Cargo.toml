@@ -12,15 +12,15 @@ chat = ["qaul-chat"]
 default = ["chat"]
 
 [dependencies]
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-
-futures = "0.3"
-async-std = "=1.5"
-async-tungstenite = { version = "0.4", features = ["async-std-runtime"] }
-
 libqaul = { path = ".." }
 libqaul-rpc = { path = "../rpc" }
-
 qaul-chat = { path = "../service/chat", optional = true }
 # qaul-voices = { path = "../service/voices", optional = true }
+
+async-std = "=1.5"
+async-trait = "0.1"
+async-tungstenite = { version = "0.4", features = ["async-std-runtime"] }
+futures = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tracing = "0.1"

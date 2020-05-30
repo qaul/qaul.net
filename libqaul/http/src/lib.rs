@@ -14,7 +14,7 @@ use tide_naive_static_files::StaticFilesEndpoint as StaticEp;
 
 mod rest;
 mod rpc;
-mod stream;
+pub mod stream;
 
 pub(crate) use stream::StreamResp;
 

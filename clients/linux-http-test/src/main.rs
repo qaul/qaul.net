@@ -3,7 +3,7 @@ use ratman::Router;
 use std::{env, process};
 use {
     libqaul::Qaul,
-    libqaul_http::HttpServer,
+    libqaul_http::{stream, HttpServer},
     libqaul_rpc::Responder,
     qaul_chat::Chat,
     // qaul_voices::Voices,
@@ -30,5 +30,13 @@ async fn main() {
     println!("Open http://127.0.0.1:9900 in your web browser");
 
     // Start the websocket server
-    HttpServer::block("127.0.0.1:9900", assets, Responder { qaul, chat });
+    HttpServer::block(
+        "127.0.0.1:9900",
+        assets,
+        Responder {
+            streamer: stream::setup_streamer(),
+            qaul,
+            chat,
+        },
+    );
 }
