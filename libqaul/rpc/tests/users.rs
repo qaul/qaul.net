@@ -51,7 +51,14 @@ async fn rpc_users_list() {
     dbg!(resp.clone());
     assert!(resp.data.contains_key("user"));
     assert_eq!(
-        resp.data.get("user").unwrap().get(0).unwrap().get("id").unwrap().to_string(), 
+        resp.data
+            .get("user")
+            .unwrap()
+            .get(0)
+            .unwrap()
+            .get("id")
+            .unwrap()
+            .to_string(),
         serde_json::to_string(&user_a.0).unwrap()
     );
 }
@@ -64,7 +71,7 @@ async fn rpc_users_modify() {
     let network_a = rpc.network.a().clone();
 
     // create a user
-    let user_a = rpc.network.a().users().create("123456").await.unwrap();    
+    let user_a = rpc.network.a().users().create("123456").await.unwrap();
 
     // RPC JSON input
     let json_string = format!(
@@ -88,14 +95,23 @@ async fn rpc_users_modify() {
         a_id = user_a.0,
         a_token = user_a.1
     );
-    
+
     // send JSON
     let resp = rpc.send_a(json_string.as_str()).await;
 
     dbg!(resp.clone());
     assert!(resp.data.contains_key("type"));
     assert_eq!(resp.data.get("type").unwrap(), "success");
-    assert_eq!(network_a.users().get(user_a.0).await.unwrap().display_name.unwrap(), "my_username");
+    assert_eq!(
+        network_a
+            .users()
+            .get(user_a.0)
+            .await
+            .unwrap()
+            .display_name
+            .unwrap(),
+        "my_username"
+    );
 }
 
 // users delete
@@ -105,7 +121,7 @@ async fn rpc_users_delete() {
     let rpc = RPC::init().await;
 
     // create a user
-    let user_a = rpc.network.a().users().create("123456").await.unwrap();    
+    let user_a = rpc.network.a().users().create("123456").await.unwrap();
 
     // RPC JSON input
     let json_string = format!(
@@ -124,7 +140,7 @@ async fn rpc_users_delete() {
         a_id = user_a.0,
         a_token = user_a.1
     );
-    
+
     // send JSON
     let resp = rpc.send_a(json_string.as_str()).await;
 

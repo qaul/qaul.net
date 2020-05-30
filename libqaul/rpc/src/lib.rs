@@ -26,7 +26,7 @@ pub use api::{
 #[cfg(feature = "chat")]
 pub use api::{chat, chat::ChatExt, chat::ChatRpc};
 
-// #[cfg(feature = "voices")]
-// pub use api::{voices, voices::VoicesExt, voices::VoicesRpc};
+#[cfg(feature = "voice")]
+pub use api::{voice, voice::VoiceExt, voice::VoiceRpc};
 
 pub mod json;

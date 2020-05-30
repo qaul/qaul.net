@@ -3,9 +3,9 @@
 use crate::QaulRpc;
 use async_trait::async_trait;
 use libqaul::{
-    helpers::{ItemDiff, ItemDiffExt},
     contacts::{ContactEntry, ContactQuery},
     error::Result,
+    helpers::{ItemDiff, ItemDiffExt},
     users::UserAuth,
     Identity, Qaul,
 };

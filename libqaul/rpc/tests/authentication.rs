@@ -11,7 +11,7 @@ async fn rpc_authentication_login() {
     let rpc = RPC::init().await;
 
     // create a user
-    let user_a = rpc.network.a().users().create("123456").await.unwrap();    
+    let user_a = rpc.network.a().users().create("123456").await.unwrap();
 
     // RPC JSON input
     let json_string = format!(
@@ -42,7 +42,7 @@ async fn rpc_authentication_logout() {
     let rpc = RPC::init().await;
 
     // create a user
-    let user_a = rpc.network.a().users().create("123456").await.unwrap();    
+    let user_a = rpc.network.a().users().create("123456").await.unwrap();
 
     // RPC JSON input
     let json_string = format!(
@@ -58,7 +58,7 @@ async fn rpc_authentication_logout() {
         a_id = user_a.0,
         a_token = user_a.1
     );
-    
+
     // send JSON
     let resp = rpc.send_a(json_string.as_str()).await;
 

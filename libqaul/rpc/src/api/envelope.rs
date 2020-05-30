@@ -9,8 +9,8 @@ use libqaul::{
 #[cfg(feature = "chat")]
 use qaul_chat::{Chat, ChatMessage, Room, RoomId, RoomMeta};
 
-// #[cfg(feature = "voices")]
-// use qaul_voices::api::{CallId, CallStatus, IncomingCall, StreamMetadata};
+#[cfg(feature = "voice")]
+use qaul_voice::{Call, CallEvent, CallId};
 
 use serde::{Deserialize, Serialize};
 use std::{error::Error, fmt::Display};
@@ -72,26 +72,22 @@ pub enum Request {
     UserUpdate(users::Update),
 
     // =^-^= Voice calls =^-^=
-    // #[cfg(feature = "voices")]
-    // VoicesMakeCall(voices::MakeCall),
-    // #[cfg(feature = "voices")]
-    // VoicesAcceptCall(voices::AcceptCall),
-    // #[cfg(feature = "voices")]
-    // VoicesRejectCall(voices::RejectCall),
-    // #[cfg(feature = "voices")]
-    // VoicesHangUp(voices::HangUp),
-    // #[cfg(feature = "voices")]
-    // VoicesNextIncoming(voices::NextIncoming),
-    // #[cfg(feature = "voices")]
-    // VoicesGetMetadata(voices::GetMetadata),
-    // #[cfg(feature = "voices")]
-    // VoicesPushVoice(voices::PushVoice),
-    // #[cfg(feature = "voices")]
-    // VoicesGetStatus(voices::GetStatus),
-    // #[cfg(feature = "voices")]
-    // VoicesNextVoice(voices::NextVoice),
-    // #[cfg(feature = "voices")]
-    // VoicesOnHangup(voices::OnHangup),
+    #[cfg(feature = "voice")]
+    VoiceStartCall(voice::call_state::StartCall),
+    #[cfg(feature = "voice")]
+    VoiceGetCalls(voice::call_state::GetCalls),
+    #[cfg(feature = "voice")]
+    VoiceGetCall(voice::call_state::GetCall),
+    #[cfg(feature = "voice")]
+    VoiceInviteToCall(voice::call_state::InviteToCall),
+    #[cfg(feature = "voice")]
+    VoiceJoinCall(voice::call_state::JoinCall),
+    #[cfg(feature = "voice")]
+    VoiceLeaveCall(voice::call_state::LeaveCall),
+    #[cfg(feature = "voice")]
+    VoiceSubscribeInvites(voice::call_state::SubscribeInvites),
+    #[cfg(feature = "voice")]
+    VoiceSubscribeCallEvents(voice::call_state::SubscribeCallEvents),
 }
 
 /// Wrap around all possible response values for piped Rpc protocols
@@ -140,25 +136,15 @@ pub enum Response {
 
     /// Return available user IDs
     UserId(Vec<Identity>),
-    // /// A call id
-    // #[cfg(feature = "voices")]
-    // CallId(CallId),
 
-    // /// An incoming call
-    // #[cfg(feature = "voices")]
-    // IncomingCall(IncomingCall),
+    #[cfg(feature = "voice")]
+    CallId(CallId),
 
-    // /// Metadata about a voice stream
-    // #[cfg(feature = "voices")]
-    // StreamMetadata(StreamMetadata),
+    #[cfg(feature = "voice")]
+    Call(Vec<Call>),
 
-    // /// The status of a call
-    // #[cfg(feature = "voices")]
-    // CallStatus(CallStatus),
-
-    // /// A set of voice samples
-    // #[cfg(feature = "voices")]
-    // VoiceData(Vec<i16>),
+    #[cfg(feature = "voice")]
+    CallEvent(CallEvent),
 }
 
 impl From<UserAuth> for Response {
@@ -253,23 +239,23 @@ impl From<Vec<UserProfile>> for Response {
     }
 }
 
-// #[cfg(feature = "voices")]
-// impl From<IncomingCall> for Response {
-//     fn from(incoming: IncomingCall) -> Self {
-//         Response::IncomingCall(incoming)
-//     }
-// }
+#[cfg(feature = "voice")]
+impl From<Call> for Response {
+    fn from(call: Call) -> Self {
+        Response::Call(vec![call])
+    }
+}
 
-// #[cfg(feature = "voices")]
-// impl From<StreamMetadata> for Response {
-//     fn from(metadata: StreamMetadata) -> Self {
-//         Response::StreamMetadata(metadata)
-//     }
-// }
+#[cfg(feature = "voice")]
+impl From<Vec<Call>> for Response {
+    fn from(calls: Vec<Call>) -> Self {
+        Response::Call(calls)
+    }
+}
 
-// #[cfg(feature = "voices")]
-// impl From<CallStatus> for Response {
-//     fn from(status: CallStatus) -> Self {
-//         Response::CallStatus(status)
-//     }
-// }
+#[cfg(feature = "voice")]
+impl From<CallEvent> for Response {
+    fn from(call_event: CallEvent) -> Self {
+        Response::CallEvent(call_event)
+    }
+}

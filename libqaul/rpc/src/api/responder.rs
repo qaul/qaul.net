@@ -7,10 +7,10 @@ use crate::{ChatExt, ChatRpc};
 #[cfg(feature = "chat")]
 use qaul_chat::Chat;
 
-// #[cfg(feature = "voices")]
-// use crate::{VoicesExt, VoicesRpc};
-// #[cfg(feature = "voices")]
-// use qaul_voices::Voices;
+#[cfg(feature = "voice")]
+use crate::{VoiceExt, VoiceRpc};
+#[cfg(feature = "voice")]
+use qaul_voice::Voice;
 
 /// A type mapper to map RPC requests to libqaul and services
 pub struct Responder<K: StreamResponder + Send + Sync + 'static> {
@@ -21,8 +21,9 @@ pub struct Responder<K: StreamResponder + Send + Sync + 'static> {
 
     #[cfg(feature = "chat")]
     pub chat: Arc<Chat>,
-    // #[cfg(feature = "voices")]
-    // pub voices: Arc<Voices>,
+
+    #[cfg(feature = "voice")]
+    pub voice: Arc<Voice>,
 }
 
 impl<K: StreamResponder + Send + Sync + 'static> Responder<K> {
@@ -43,14 +44,14 @@ impl<K: StreamResponder + Send + Sync + 'static> Responder<K> {
         (&self.chat).apply(request).await
     }
 
-    // #[cfg(feature = "voices")]
-    // async fn respond_voices<R, T>(&self, request: R) -> T
-    // where
-    //     R: VoicesRpc<Response = T> + Send + Sync,
-    //     T: Send + Sync,
-    // {
-    //     self.voices.apply(request).await
-    // }
+    #[cfg(feature = "voice")]
+    async fn respond_voice<R, T>(&self, request: R) -> T
+    where
+        R: VoiceRpc<Response = T> + Send + Sync,
+        T: Send + Sync,
+    {
+        (&self.voice).apply(request).await
+    }
 
     /// Primary responder matcher
     ///
@@ -142,35 +143,36 @@ impl<K: StreamResponder + Send + Sync + 'static> Responder<K> {
             Request::UserGet(r) => self.respond_qaul(r).await.into(),
             Request::UserUpdate(r) => self.respond_qaul(r).await.into(),
 
-            // // =^-^= Voices =^-^=
-            // #[cfg(feature = "voices")]
-            // Request::VoicesMakeCall(r) => self
-            //     .respond_voices(r)
-            //     .await
-            //     .map(|id| Response::CallId(id))
-            //     .unwrap_or_else(|e| Response::Error(e.to_string())),
-            // #[cfg(feature = "voices")]
-            // Request::VoicesAcceptCall(r) => self.respond_voices(r).await.into(),
-            // #[cfg(feature = "voices")]
-            // Request::VoicesRejectCall(r) => self.respond_voices(r).await.into(),
-            // #[cfg(feature = "voices")]
-            // Request::VoicesHangUp(r) => self.respond_voices(r).await.into(),
-            // #[cfg(feature = "voices")]
-            // Request::VoicesNextIncoming(r) => self.respond_voices(r).await.into(),
-            // #[cfg(feature = "voices")]
-            // Request::VoicesGetMetadata(r) => self.respond_voices(r).await.into(),
-            // #[cfg(feature = "voices")]
-            // Request::VoicesPushVoice(r) => self.respond_voices(r).await.into(),
-            // #[cfg(feature = "voices")]
-            // Request::VoicesGetStatus(r) => self.respond_voices(r).await.into(),
-            // #[cfg(feature = "voices")]
-            // Request::VoicesOnHangup(r) => self.respond_voices(r).await.into(),
-            // #[cfg(feature = "voices")]
-            // Request::VoicesNextVoice(r) => self
-            //     .respond_voices(r)
-            //     .await
-            //     .map(|samples| Response::VoiceData(samples))
-            //     .unwrap_or_else(|e| Response::Error(e.to_string())),
+            // =^-^= Voices =^-^=
+            #[cfg(feature = "voice")]
+            Request::VoiceStartCall(r) => self
+                .respond_voice(r)
+                .await
+                .map(|call_id| Response::CallId(call_id))
+                .unwrap_or_else(|e| Response::Error(e.to_string())),
+            #[cfg(feature = "voice")]
+            Request::VoiceGetCalls(r) => self.respond_voice(r).await.into(),
+            #[cfg(feature = "voice")]
+            Request::VoiceGetCall(r) => self.respond_voice(r).await.into(),
+            #[cfg(feature = "voice")]
+            Request::VoiceInviteToCall(r) => self.respond_voice(r).await.into(),
+            #[cfg(feature = "voice")]
+            Request::VoiceJoinCall(r) => self.respond_voice(r).await.into(),
+            #[cfg(feature = "voice")]
+            Request::VoiceLeaveCall(r) => self.respond_voice(r).await.into(),
+            #[cfg(feature = "voice")]
+            Request::VoiceSubscribeInvites(r) => self
+                .respond_voice(r)
+                .await
+                .map(|sub| Response::Subscription(self.streamer.start(sub)))
+                .unwrap_or_else(|e| Response::Error(e.to_string())),
+            #[cfg(feature = "voice")]
+            Request::VoiceSubscribeCallEvents(r) => self
+                .respond_voice(r)
+                .await
+                .map(|sub| Response::Subscription(self.streamer.start(sub)))
+                .unwrap_or_else(|e| Response::Error(e.to_string())),
+
             tt => panic!(
                 "Encountered unimplemented parse type: {:#?}\n...so sorry",
                 tt

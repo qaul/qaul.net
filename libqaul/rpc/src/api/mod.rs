@@ -8,8 +8,8 @@ pub mod users;
 #[cfg(feature = "chat")]
 pub mod chat;
 
-// #[cfg(feature = "voices")]
-// pub mod voices;
+#[cfg(feature = "voice")]
+pub mod voice;
 
 mod envelope;
 pub use envelope::{Envelope, Request, Response};
@@ -18,8 +18,8 @@ mod responder;
 pub use responder::Responder;
 
 mod streamer;
+pub(crate) use streamer::Subscriber;
 pub use streamer::{StreamResponder, Streamer, SubId};
-pub(crate) use streamer::{Subscriber};
 
 use async_trait::async_trait;
 use libqaul::Qaul;

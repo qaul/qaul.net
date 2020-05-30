@@ -15,7 +15,6 @@ type Atomic = Arc<AtomicBool>;
 /// A unique subscription Id
 pub type SubId = Identity;
 
-
 /// Cancel any subscription via it's ID
 ///
 /// The implementation of QaulRPC handles verifying the token first.
