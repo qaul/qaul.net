@@ -1,5 +1,5 @@
 [book]
-authors = ["Jess 3Jane"]
+authors = ["Jess 3Jane", "qaul.net Community"]
 multilingual = false
 src = "src"
-title = "HTTP Api Documentation"
+title = "HTTP API Documentation"

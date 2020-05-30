@@ -1,20 +1,22 @@
-# HTTP Api Documentation
+# UI API Documentation
 
-This guide documents the qaul.net HTTP Api. The Api primarily speaks [JSON:API](https://jsonapi.org/) 
-which has its own [Documentation](https://jsonapi.org/format/).
+**There are several ways to communicate with the qaul.net daemon. They all have the same functionality and communicate via JSON over http. If you want to create a UI client for qaul.net this guide documents how to interact with the daemon.**
 
-This documentation is **highly out of date** and will be updated in the future. If you wish to use
-the HTTP Api in the mean time I recommend you check out the [Example Session] for an example
-of the Api in action. If you have any questions, please feel free to ping me, jess3jane, in the
-IRC channel. 
 
-This guide is divided into three sections:
+## [JSON-RPC API]
 
-- [Topics] which provides a structured walkthrough of some of the core components of the Api
-- [Entities] which documents the various JSON:API entities used throughout the Api
-- [Endpoints] which documents the behavior of individual endpoints of the Api
+The [JSON-RPC API] uses a single http endpoint for the communication with qaul daemon. It is our main API for UI's.
 
-[Topics]: /topics/_intro.html
-[Entities]: /entities/_intro.html
-[Endpoints]: /endpoints/_intro.html
-[Example Session]: /example_session.md
+[Read more >>](./json-rpc/_intro.md)
+
+
+## [HTTP-API]
+
+The [HTTP-API] is the main entry point for the Web-GUI. 
+It uses the http protocol for the communcation and communicates with the EmberJS REST module.
+
+[Read more >>](./http-api/_intro.md)
+
+
+[JSON-RPC API]: ./json-rpc/_intro.md
+[HTTP-API]: ./http-api/_intro.md
