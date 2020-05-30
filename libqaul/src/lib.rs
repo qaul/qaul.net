@@ -50,10 +50,13 @@ mod utils;
 pub mod api;
 pub mod contacts;
 pub mod error;
+pub mod helpers;
 pub mod messages;
 pub mod services;
 pub mod users;
-pub mod helpers;
+
+#[cfg(feature = "ffi-java")]
+pub mod ffi;
 
 // Core state should be in the root
 mod qaul;
