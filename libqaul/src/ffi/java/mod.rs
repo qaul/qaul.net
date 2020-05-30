@@ -44,7 +44,7 @@ impl ToJObject for UserProfile {
 
         env.new_object(
             class,
-            "(L/lang/java/String;L/lang/java/String;L/lang/java/String;)V",
+            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
             &[
                 JValue::Object(*id),
                 JValue::Object(*display_name),
