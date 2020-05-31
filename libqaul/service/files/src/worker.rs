@@ -1,9 +1,9 @@
-use crate::{ASC_NAME, Fileshare, Subscription};
-use libqaul::{users::UserAuth, Identity, helpers::TagSet};
+use crate::{Fileshare, Subscription, ASC_NAME};
 use async_std::{
     sync::{channel, Arc, RwLock, Sender},
     task,
 };
+use libqaul::{helpers::TagSet, users::UserAuth, Identity};
 use std::collections::BTreeSet;
 use tracing::{debug, info, trace};
 
@@ -44,7 +44,8 @@ pub(crate) fn run_asnc(file_serv: Arc<Fileshare>) -> Sender<Command> {
 
 pub(crate) async fn run_user(user: UserAuth, file_serv: Arc<Fileshare>, run: RunMap) {
     let sub = Subscription::new(
-        file_serv.qaul
+        file_serv
+            .qaul
             .messages()
             .subscribe(user.clone(), ASC_NAME, TagSet::empty())
             .await
@@ -53,8 +54,8 @@ pub(crate) async fn run_user(user: UserAuth, file_serv: Arc<Fileshare>, run: Run
     trace!("Creating message subscription!");
 
     while run.read().await.contains(&user.0) {
-        let file = sub.next().await;
-        if file.owner() == user.0 && continue {}
+        let f_msg = sub.next().await;
+        if f_msg.sender == user.0 && continue {}
     }
 
     // TODO: what the hell should this do?

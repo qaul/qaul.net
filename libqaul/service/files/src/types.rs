@@ -29,22 +29,9 @@ pub enum FileMeta {
         name: String,
         size: u64,
     },
-}
-
-impl FileMeta {
-    pub(crate) fn owner(&self) -> Identity {
-        match self {
-            Self::Advertised { owner, .. } => *owner,
-            Self::File(ref f) => f.owner,
-        }
-    }
-
-    pub(crate) fn id(&self) -> FileId {
-        match self {
-            Self::Advertised { hash_id, .. } => *hash_id,
-            Self::File(ref f) => f.hash_id,
-        }
-    }
+    Request {
+        hash_id: Identity,
+    },
 }
 
 /// Describe a file's lifecycle
@@ -60,7 +47,8 @@ pub enum FileFilter {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub(crate) struct FileMessage {
+pub struct FileMessage {
+    pub(crate) sender: Identity,
     pub(crate) recipient: Option<Identity>,
     pub(crate) meta: FileMeta,
 }
@@ -76,9 +64,8 @@ impl Subscription {
     }
 
     /// Get the next chat message
-    pub async fn next(&self) -> FileMeta {
+    pub async fn next(&self) -> FileMessage {
         let Message { payload, .. } = self.inner.next().await;
-        let fm: FileMessage = bincode::deserialize(&payload).unwrap();
-        fm.meta
+        bincode::deserialize(&payload).unwrap()
     }
 }

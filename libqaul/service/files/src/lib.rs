@@ -5,8 +5,6 @@
 #![doc(html_logo_url = "https://qaul.net/img/qaul_icon-128.png")]
 
 use async_std::{sync::Arc, task};
-use mime::Mime;
-
 use libqaul::{
     error::Result,
     messages::{Message, MsgQuery},
@@ -14,6 +12,7 @@ use libqaul::{
     users::UserAuth,
     Identity, Qaul,
 };
+use mime::Mime;
 
 pub use crate::types::{File, FileFilter, FileId, FileMeta, Subscription};
 pub mod error;
@@ -64,31 +63,60 @@ impl Fileshare {
     }
 
     /// Advertise a file into a network
-    pub fn advertise(
+    pub async fn advertise(
         &self,
-        file_name: String,
-        file_id: FileId,
-        file_size: usize,
-        file_type: Mime,
-    ) -> Result<Arc<Vec<FileId>>> {
-        // TODO: Check if ok that it returns the `advertised` vector
+        auth: UserAuth,
+        name: String,
+        size: u64,
+        payload: Vec<u8>,
+        // _mime: Mime, // TODO: implement mime stuff
+    ) -> Result<FileId> {
+        let hash_id = Identity::with_digest(&payload);
 
-        unimplemented!()
+        let meta = FileMeta::build_ad(auth.0, hash_id, name, size);
+        let msg = meta.make_message(auth.0, None);
+        msg.send_off(auth, Arc::clone(&self.qaul)).await?;
+
+        Ok(hash_id)
     }
 
-    // Advertise to a single user
-    pub fn advertise_to_user(
+    /// Advertise a file into a network
+    pub async fn advertise_to_user(
         &self,
-        file_name: String,
-        file_size: usize,
-        file_type: Mime,
-        send_to: UserAuth,
-    ) -> Result<Arc<Vec<FileId>>> {
-        unimplemented!()
+        auth: UserAuth,
+        friend: Identity,
+        name: String,
+        size: u64,
+        payload: Vec<u8>,
+        mime: Mime,
+    ) -> Result<FileId> {
+        let hash_id = Identity::with_digest(&payload);
+
+        // Build an advertising meta
+        let meta = FileMeta::build_ad(auth.0, hash_id, name, size);
+        let msg = meta.make_message(auth.0, Some(friend));
+        msg.send_off(auth, Arc::clone(&self.qaul)).await?;
+
+        Ok(hash_id)
     }
 
     /// Request a file with a given file id
-    pub fn request(&self, file_id: FileId) -> Result<File> {
-        unimplemented!()
+    pub async fn request(&self, auth: UserAuth, file_id: FileId) -> Result<()> {
+        let meta = FileMeta::build_request(file_id);
+        let msg = meta.make_message(auth.0, None);
+        msg.send_off(auth, Arc::clone(&self.qaul)).await?;
+        Ok(())
+    }
+
+    /// Request a file transfer from a specific user
+    pub async fn request_from_user(
+        &self,
+        auth: UserAuth,
+        friend: Identity,
+        file_id: FileId,
+    ) -> Result<()> {
+        let meta = FileMeta::build_request(file_id);
+        let msg = meta.make_message(auth.0, Some(friend));
+        Ok(())
     }
 }

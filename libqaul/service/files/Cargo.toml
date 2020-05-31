@@ -6,8 +6,9 @@ edition = "2018"
 license = "AGPL-3.0"
 
 [dependencies]
-identity = { path = "../../../ratman/identity", package = "ratman-identity" }
+identity = { path = "../../../ratman/identity", features = ["digest"], package = "ratman-identity" }
 libqaul = { path = "../../" }
+
 
 async-std = "=1.5"
 bincode = "1.0"
