@@ -2,6 +2,7 @@ package net.qaul.app.ffi;
 
 import net.qaul.app.ffi.models.ChatMessage;
 import net.qaul.app.ffi.models.ChatRoom;
+import net.qaul.app.ffi.models.Frame;
 import net.qaul.app.ffi.models.UserProfile;
 
 import java.util.ArrayList;
@@ -58,7 +59,9 @@ public class NativeQaul {
      * @param pw the user password
      * @return indicate whether the
      */
-    public boolean usersLogin(String id, String pw) { return usersLogin(libqaulState, id, pw); }
+    public boolean usersLogin(String id, String pw) {
+        return usersLogin(libqaulState, id, pw);
+    }
 
     private native boolean usersLogin(long qaul, String id, String pw);
 
@@ -108,4 +111,29 @@ public class NativeQaul {
      * @return a list of messages in this room
      */
     public native ArrayList<ChatMessage> chatLoadMessages(long qaul, String room);
+
+    /**
+     * Receive a data frame via wifi direct
+     * <p>
+     * The ID is the sender identity
+     *
+     * @param target       interface specific mapping information if this endpoint is one-to-many
+     * @param encodedFrame encoded data frame, ignored by Java code and passed into Rust
+     */
+    public void wdReceiveFrame(int target, char[] encodedFrame) {
+        wdReceiveFrame(this.libqaulState, target, encodedFrame);
+    }
+
+    private native void wdReceiveFrame(long qaul, int target, char[] encodedFrame);
+
+    /**
+     * Get a frame from the Rust code to send off to someone special
+     *
+     * @return the next frame to send off with target informatieon
+     */
+    public Frame wdSendFrame() {
+        return wdSendFrame(this.libqaulState);
+    }
+
+    private native Frame wdSendFrame(long qaul);
 }

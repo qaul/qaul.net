@@ -32,6 +32,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- TODO: figure out if this is the best way of doing this -->
+        <service android:name=".net.WDService" />
     </application>
 
 </manifest>
