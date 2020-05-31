@@ -7,25 +7,32 @@
 use async_std::{sync::Arc, task};
 use mime::Mime;
 
-use libqaul::messages::{Message, MsgQuery};
-use libqaul::users::UserAuth;
-use libqaul::Identity;
-use libqaul::{error::Result, Qaul};
-use libqaul::services::ServiceEvent;
+use libqaul::{
+    error::Result,
+    messages::{Message, MsgQuery},
+    services::ServiceEvent,
+    users::UserAuth,
+    Identity, Qaul,
+};
 
-pub use crate::types::{File, FileFilter, FileId, Subscription, Files};
+pub use crate::types::{File, FileFilter, FileId, FileMeta, Subscription};
+pub mod error;
 
-mod msg;
+mod directory;
 mod protocol;
-pub mod types;
+mod types;
 mod worker;
 
-// these are original TODOs
-// TODO: Partial files
-// TODO: file progress
-// TODO: Download links with tokens
-
 const ASC_NAME: &'static str = "net.qaul.fileshare";
+
+pub(crate) mod tags {
+    use {crate::FileId, libqaul::helpers::Tag};
+    pub(crate) const _META_NAME: &'static str = "file_list";
+    pub(crate) const FILE_LIST: &'static str = "net.qaul.files.file_list";
+    pub(crate) fn file_id(id: FileId) -> Tag {
+        Tag::new("file-id", id.as_bytes().to_vec())
+    }
+}
 
 /// Filesharing service state
 #[derive(Clone)]
@@ -40,7 +47,7 @@ impl Fileshare {
     /// In order to initialise, a valid and running
     /// `Qaul` reference needs to be provided.
     pub fn new(qaul: Arc<Qaul>, advertised: Arc<Vec<FileId>>) -> Result<Arc<Self>> {
-        let this = Arc::new(Self {qaul, advertised});
+        let this = Arc::new(Self { qaul, advertised });
         let sender = Arc::new(worker::run_asnc(Arc::clone(&this)));
 
         this.qaul.services().register(ASC_NAME, move |cmd| {
@@ -85,20 +92,3 @@ impl Fileshare {
         unimplemented!()
     }
 }
-
-// impl<'q> Filesharing<'q> {
-//     /// Send a single file to a group of people
-//     pub fn send_file(
-//         &self,
-//         user: UserAuth,
-//         recipients: Vec<Identity>,
-//         file: File,
-//     ) -> QaulResult<()> {
-//         unimplemented!()
-//     }
-
-//     /// Get all files that were received since the last poll
-//     pub fn poll_files(&self, user: UserAuth) -> QaulResult<Vec<File>> {
-//         unimplemented!()
-//     }
-// }

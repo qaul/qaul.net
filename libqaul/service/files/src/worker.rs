@@ -54,7 +54,7 @@ pub(crate) async fn run_user(user: UserAuth, file_serv: Arc<Fileshare>, run: Run
 
     while run.read().await.contains(&user.0) {
         let file = sub.next().await;
-        if file.owner == user.0 && continue {}
+        if file.owner() == user.0 && continue {}
     }
 
     // TODO: what the hell should this do?

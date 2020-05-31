@@ -1822,6 +1822,7 @@ name = "qaul-files"
 version = "0.1.0"
 dependencies = [
  "async-std",
+ "bincode",
  "libqaul",
  "mime",
  "mime_guess",

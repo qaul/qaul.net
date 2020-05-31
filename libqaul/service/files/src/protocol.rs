@@ -5,50 +5,47 @@
 //! the dynamics of the protocol, what parts are implemented here, and
 //! what parts are implemented via libqaul.
 
-use libqaul::error::Result;
-use libqaul::Identity;
-use libqaul::users::UserAuth;
+use crate::{
+    types::{File, FileFilter, FileId, FileMessage, FileMeta},
+    ASC_NAME,
+};
+use libqaul::{
+    error::Result,
+    helpers::TagSet,
+    messages::{IdType, Mode},
+    users::UserAuth,
+    Qaul,
+};
+use std::sync::Arc;
 
-use crate::types::File;
-use crate::types::FileFilter;
-use crate::types::FileId;
-use crate::types::FileMeta;
-use crate::types::Files;
+impl FileMessage {
+    pub(crate) async fn send_off(&self, user: UserAuth, qaul: Arc<Qaul>) -> Result<()> {
+        let payload = bincode::serialize(&self).unwrap();
+        if let ad @ FileMeta::Advertised { .. } = &self.meta {
+            qaul.messages()
+                .send(
+                    user,
+                    Mode::Flood,
+                    IdType::unique(),
+                    ASC_NAME,
+                    TagSet::empty(),
+                    payload,
+                )
+                .await?;
+        } else if let file @ FileMeta::File(_) = &self.meta {
+            let mode = Mode::Std(self.recipient.unwrap());
+            qaul.messages()
+                .send(
+                    user,
+                    mode,
+                    IdType::unique(),
+                    ASC_NAME,
+                    TagSet::empty(),
+                    payload,
+                )
+                .await?;
+        }
 
-impl<'qaul> Files<'qaul> {
-    /// Query the local file store for a specific constraint
-    pub fn query<I>(&self, user: UserAuth, filter: FileFilter) -> Result<I>
-        where
-            I: Iterator<Item=FileMeta>,
-    {
-        // self.q.auth.trusted(user)?;
-        unimplemented!()
-    }
-
-    /// List all available files
-    pub fn list<I>(&self, user: UserAuth) -> Result<I>
-        where
-            I: Iterator<Item=FileMeta>,
-    {
-        // self.q.auth.trusted(user)?;
-        unimplemented!()
-    }
-
-    /// Stream one particular file from storage
-    pub async fn get(&self, user: UserAuth, file: FileId) -> Result<File> {
-        // self.q.auth.trusted(user)?;
-        unimplemented!()
-    }
-
-    /// Adds a new file to the local user's storage
-    pub fn add(&self, user: UserAuth, name: &str, file: File) -> Result<FileId> {
-        // self.q.auth.trusted(user)?;
-        unimplemented!()
-    }
-
-    /// Delete a file from the local user store
-    pub fn delete(&self, user: UserAuth, name: FileId) -> Result<()> {
-        // self.q.auth.trusted(user)?;
-        unimplemented!()
+        Ok(())
     }
 }

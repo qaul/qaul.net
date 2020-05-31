@@ -1,7 +1,7 @@
 //! API wrapper structures
 
 pub mod contacts;
-pub mod files;
+// pub mod files;
 pub mod messages;
 pub mod users;
 

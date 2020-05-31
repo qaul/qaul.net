@@ -1,41 +1,50 @@
 use serde::{Deserialize, Serialize};
 
 use libqaul::error::Result;
-use libqaul::Identity;
-use libqaul::users::UserAuth;
+use libqaul::helpers::Subscription as Sub;
 use libqaul::messages::{Message, MsgId};
-use libqaul::helpers::{Subscription as Sub};
+use libqaul::users::UserAuth;
+use libqaul::Identity;
 
 pub type FileId = Identity;
 
 /// Local file abstraction
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct File {
-    pub name: Option<String>,
-    pub id: FileId,
-    pub data: Option<Vec<u8>>,
     pub owner: Identity,
+    pub hash_id: Identity, // hex
+    pub name: String,
+    pub data: Vec<u8>,
 }
 
 /// Describe a file's lifecycle
-///
-/// Not to be confused with `FileFilter`, which is part of public API
-/// functions to allow users to easily filter for only certain types
-/// of file data.
-///
-/// Filter functions then take a `Filter` and return a `Meta`.
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum FileMeta {
-    /// Files owned by the current user
-    Local(File),
-    /// Network files, fully locally mirrored
-    Available(File),
-    /// Network files, still downloading
-    InProgress {
-        size: usize,
-        local: usize,
-        stalled: bool,
+    /// Sending a file
+    File(File),
+    /// Telling poeple about files
+    Advertised {
+        owner: Identity,
+        hash_id: Identity,
+        name: String,
+        size: u64,
     },
-    /// A network advertised file that hasn't started downloading
-    Advertised { size: usize },
+}
+
+impl FileMeta {
+    pub(crate) fn owner(&self) -> Identity {
+        match self {
+            Self::Advertised { owner, .. } => *owner,
+            Self::File(ref f) => f.owner,
+        }
+    }
+
+    pub(crate) fn id(&self) -> FileId {
+        match self {
+            Self::Advertised { hash_id, .. } => *hash_id,
+            Self::File(ref f) => f.hash_id,
+        }
+    }
 }
 
 /// Describe a file's lifecycle
@@ -46,32 +55,14 @@ pub enum FileMeta {
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum FileFilter {
     Local,
-    Available,
+    Advertised,
     InProgress,
 }
 
-/// Interface to access files from the network
-///
-/// Used entirely to namespace API endpoints on `Qaul` instance,
-/// without having long type identifiers.
-///
-/// ```norun
-/// # use libqaul::{Qaul, Files};
-/// # let user = unimplemented!();
-/// let q = Qaul::default();
-/// q.files().list(user)?;
-/// ```
-///
-/// It's also possible to `drop` the current scope, back into the
-/// primary `Qaul` scope, although this is not often useful.
-///
-/// ```norun
-/// # use libqaul::{Qaul, Messages};
-/// # let q = Qaul::default();
-/// q.files().drop(); // Returns `&Qaul` again
-/// ```
-pub struct Files<'chain> {
-    pub(crate) q: &'chain crate::Qaul,
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub(crate) struct FileMessage {
+    pub(crate) recipient: Option<Identity>,
+    pub(crate) meta: FileMeta,
 }
 
 /// A subscription handler that pushes out updates
@@ -85,7 +76,9 @@ impl Subscription {
     }
 
     /// Get the next chat message
-    pub async fn next(&self) -> File {
-        self.inner.next().await.into()
+    pub async fn next(&self) -> FileMeta {
+        let Message { payload, .. } = self.inner.next().await;
+        let fm: FileMessage = bincode::deserialize(&payload).unwrap();
+        fm.meta
     }
 }
