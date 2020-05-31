@@ -55,8 +55,16 @@ pub(crate) async fn run_user(user: UserAuth, file_serv: Arc<Fileshare>, run: Run
 
     while run.read().await.contains(&user.0) {
         let f_msg = sub.next().await;
-        if f_msg.sender == user.0 && continue {}
-    }
 
-    // TODO: what the hell should this do?
+        // Skip messages that we sent (this is a libqaul bug)
+        if f_msg.sender == user.0 && continue {}
+
+        trace!("Receiving file message from: {}", f_msg.sender);
+
+        // Handling the message does some weird I/O so we spawn an I/O
+        // task here to not block our main subscriber.
+        let auth = user.clone();
+        let serv = Arc::clone(&file_serv);
+        task::spawn(async move { f_msg.handle_incoming(auth, serv).await });
+    }
 }

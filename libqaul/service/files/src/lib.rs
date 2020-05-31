@@ -120,6 +120,31 @@ impl Fileshare {
     ) -> Result<()> {
         let meta = FileMeta::build_request(file_id);
         let msg = meta.make_message(auth.0, Some(friend));
+        msg.send_off(auth, Arc::clone(&self.qaul)).await?;
         Ok(())
+    }
+
+    pub async fn get_all_advertised(&self, auth: UserAuth) -> Vec<FileMeta> {
+        self.directory
+            .get_all(auth)
+            .await
+            .into_iter()
+            .filter(|meta| match meta {
+                FileMeta::Advertised { .. } => true,
+                _ => false,
+            })
+            .collect()
+    }
+
+    pub async fn get_all_available(&self, auth: UserAuth) -> Vec<FileMeta> {
+        self.directory
+            .get_all(auth)
+            .await
+            .into_iter()
+            .filter(|meta| match meta {
+                FileMeta::Available { .. } => true,
+                _ => false,
+            })
+            .collect()
     }
 }

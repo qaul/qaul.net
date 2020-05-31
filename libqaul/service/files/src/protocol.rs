@@ -9,6 +9,7 @@ use crate::{
     types::{File, FileFilter, FileId, FileMessage, FileMeta},
     Fileshare, ASC_NAME,
 };
+use async_std::task;
 use libqaul::{
     error::Result,
     helpers::TagSet,
@@ -71,17 +72,12 @@ impl FileMessage {
     /// Option questions:
     ///
     /// - how do we stop others from sending their files?
-    pub(crate) async fn handle_incoming(
-        self,
-        auth: UserAuth,
-        serv: Arc<Fileshare>,
-        msg: FileMessage,
-    ) {
+    pub(crate) async fn handle_incoming(self, auth: UserAuth, serv: Arc<Fileshare>) {
         let FileMessage {
             sender: friend,
             meta,
             ..
-        } = msg;
+        } = self;
 
         match meta {
             // FIXME: we want to write ref meta @ here but we can't
@@ -90,7 +86,10 @@ impl FileMessage {
             FileMeta::File(file) => {
                 let path = serv.path.join(&file.name);
                 if let Ok(mut f) = fs::File::create(path) {
-                    f.write_all(&file.data).unwrap();
+                    let data = file.data;
+                    task::spawn_blocking(move || f.write_all(&data))
+                        .await
+                        .unwrap();
 
                     // The type we store is "available", meaning the
                     // data is stored extrenally but we know about it
@@ -120,8 +119,12 @@ impl FileMessage {
                 {
                     let path = serv.path.join(&name);
                     if let Ok(mut f) = fs::File::open(path) {
-                        let mut data = vec![];
-                        f.read_to_end(&mut data).unwrap();
+                        let data = task::spawn_blocking(move || {
+                            let mut data = vec![];
+                            f.read_to_end(&mut data).unwrap();
+                            data
+                        })
+                        .await;
 
                         // Build a reply file
                         let meta = FileMeta::File(File {
@@ -138,8 +141,7 @@ impl FileMessage {
                     } else {
                         // In this block we want to delete the
                         // "available" flag from the database because
-                        // the user deleted the file already
-
+                        // the user deleted the file on disk.
                         serv.directory.delete(auth, &hash_id).await;
                     }
                 }
