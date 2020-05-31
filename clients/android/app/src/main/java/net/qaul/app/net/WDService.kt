@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.wifi.p2p.WifiP2pConfig
 import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pManager
 import android.os.IBinder
@@ -12,6 +13,12 @@ import android.widget.Toast
 
 /** A handler for wifi direct messages and state */
 class WDService : Service() {
+    private var wifiP2pEnabled: Boolean = false
+
+    public fun setState(state: Boolean) {
+        this.wifiP2pEnabled = state
+    }
+
     private val intentFilter = IntentFilter()
     private lateinit var channel: WifiP2pManager.Channel
     private lateinit var manager: WifiP2pManager
@@ -33,7 +40,7 @@ class WDService : Service() {
         channel = manager.initialize(this, mainLooper, null)
 
         // Register the broadcast receiver
-        val receiver = WDReceiver(applicationContext, manager, channel)
+        val receiver = WDReceiver(this, manager, channel)
         applicationContext.registerReceiver(receiver, intentFilter)
 
         // Start looking for peers
@@ -51,7 +58,13 @@ class WDService : Service() {
         })
     }
 
-    val channelListener = WifiP2pManager.ChannelListener {
+    fun connect(config: WifiP2pConfig) {
+        manager.connect(channel, config, object: WifiP2pManager.ActionListener {
+            override fun onSuccess() { /* broadcast receiver goes brrr */ }
 
+            override fun onFailure(reason: Int) {
+                Log.e("WD", "Failed to connect. Log this in the UI somewhere?")
+            }
+        })
     }
 }

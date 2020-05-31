@@ -54,10 +54,10 @@ dependencies {
 
     // Koin for Android
     koin_version = "2.1.5"
-    compile "org.koin:koin-android:$koin_version"
-    compile "org.koin:koin-androidx-scope:$koin_version"
-    compile "org.koin:koin-androidx-viewmodel:$koin_version"
-    compile "org.koin:koin-androidx-fragment:$koin_version"
+    implementation "org.koin:koin-android:$koin_version"
+    implementation "org.koin:koin-androidx-scope:$koin_version"
+    implementation "org.koin:koin-androidx-viewmodel:$koin_version"
+    implementation "org.koin:koin-androidx-fragment:$koin_version"
 }
 
 cargo {
