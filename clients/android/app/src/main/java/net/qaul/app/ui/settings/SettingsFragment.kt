@@ -1,4 +1,4 @@
-package net.qaul.app.ui.users
+package net.qaul.app.ui.settings
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,16 +10,19 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import net.qaul.app.R
 
-class UsersFragment : Fragment() {
-    private lateinit var usersFragment: UsersViewModel
+class SettingsFragment : Fragment() {
 
-    override fun onCreateView(inflater: LayoutInflater,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        usersFragment = ViewModelProviders.of(this).get(UsersViewModel::class.java)
+    private lateinit var settingsFragment: SettingsViewModel
+
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ): View? {
+        settingsFragment = ViewModelProviders.of(this).get(SettingsViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_files, container, false)
         val textView: TextView = root.findViewById(R.id.text_files)
-        usersFragment.text.observe(viewLifecycleOwner, Observer {
+        settingsFragment.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })
         return root
