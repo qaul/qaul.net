@@ -254,15 +254,15 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatLoadMessages<'env>
     JObject::null()
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_wdReceiveFrame<'env>(
-    env: JNIEnv<'env>,
-    _: JObject,
-    qaul: jlong,
-    target: jint,
-    data: jchatArray,
-){
+// #[no_mangle]
+// pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_wdReceiveFrame<'env>(
+//     env: JNIEnv<'env>,
+//     _: JObject,
+//     qaul: jlong,
+//     target: jint,
+//     data: jchatArray,
+// ){
     
-}
+// }
 
 

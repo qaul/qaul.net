@@ -84,13 +84,12 @@ class WDReceiver(val serv: WDService,
                     if (info?.isConnected!!) {
                         manager.requestConnectionInfo(channel, connectionListener)
                     }
-
                 }
 
                 // FIXME: replace with a NetworkCallback
-                val net: NetworkInfo = intent.getParcelableExtra()!!
+                val net: NetworkInfo? = intent.getParcelableExtra("")
 
-                if (net.isConnected()) {
+                if (net?.isConnected == true) {
                     Log.i("WD", "Connected to a peer!")
                 } else {
                     Log.i("WD", "Disconnected from a peer")

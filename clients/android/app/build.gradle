@@ -11,7 +11,7 @@ android {
     buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "net.qaul.app"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -54,10 +54,10 @@ dependencies {
 
     // Koin for Android
     koin_version = "2.1.5"
-    implementation "org.koin:koin-android:$koin_version"
-    implementation "org.koin:koin-androidx-scope:$koin_version"
-    implementation "org.koin:koin-androidx-viewmodel:$koin_version"
-    implementation "org.koin:koin-androidx-fragment:$koin_version"
+    compile "org.koin:koin-android:$koin_version"
+    compile "org.koin:koin-androidx-scope:$koin_version"
+    compile "org.koin:koin-androidx-viewmodel:$koin_version"
+    compile "org.koin:koin-androidx-fragment:$koin_version"
 }
 
 cargo {
