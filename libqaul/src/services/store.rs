@@ -83,6 +83,12 @@ impl MetadataMap {
         self.map.insert(k.into(), v.into());
         self
     }
+
+    /// Delete a key and return the modified map
+    pub fn delete<K: Into<String>>(mut self, k: K) -> Self {
+        self.map.remove(&k.into());
+        self
+    }
 }
 
 impl Deref for MetadataMap {

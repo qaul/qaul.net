@@ -9,6 +9,8 @@ use async_std::{
 use bincode;
 use libqaul::{helpers::Tag, services::MetadataMap, users::UserAuth, Qaul};
 
+pub(crate) type DirectoryRef = Arc<FileDirectory>;
+
 /// Keeps track of known rooms via the service metadata API
 pub(crate) struct FileDirectory {
     qaul: Arc<Qaul>,
@@ -16,11 +18,11 @@ pub(crate) struct FileDirectory {
 }
 
 impl FileDirectory {
-    pub(crate) fn new(qaul: Arc<Qaul>) -> Self {
-        Self {
+    pub(crate) fn new(qaul: Arc<Qaul>) -> Arc<Self> {
+        Arc::new(Self {
             qaul,
             notify: channel(1),
-        }
+        })
     }
 
     async fn get_inner(&self, user: UserAuth) -> MetadataMap {
@@ -77,6 +79,20 @@ impl FileDirectory {
         let file_id = meta.id();
         let sender = self.notify.0.clone();
         task::spawn(async move { sender.send(file_id).await });
+    }
+
+    /// Delete database information about a file for whatever reason
+    pub(crate) async fn delete(&self, user: UserAuth, id: &FileId) {
+        self.qaul
+            .services()
+            .save(
+                user.clone(),
+                ASC_NAME,
+                self.get_inner(user).await.delete(id.to_string()),
+                Tag::empty(tags::FILE_LIST),
+            )
+            .await
+            .unwrap();
     }
 
     pub(crate) async fn poll_new(self: &Arc<Self>) -> FileId {

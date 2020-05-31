@@ -20,8 +20,13 @@ pub struct File {
 /// Describe a file's lifecycle
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum FileMeta {
-    /// Sending a file
+    /// The raw file payload going across the wire
     File(File),
+    /// A file that's locally available but stored externally
+    Available {
+        hash_id: Identity,
+        name: String,
+    },
     /// Telling poeple about files
     Advertised {
         owner: Identity,

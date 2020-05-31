@@ -4,23 +4,20 @@
 #![doc(html_favicon_url = "https://qaul.net/favicon.ico")]
 #![doc(html_logo_url = "https://qaul.net/img/qaul_icon-128.png")]
 
-use async_std::{sync::Arc, task};
-use libqaul::{
-    error::Result,
-    messages::{Message, MsgQuery},
-    services::ServiceEvent,
-    users::UserAuth,
-    Identity, Qaul,
-};
-use mime::Mime;
-
-pub use crate::types::{File, FileFilter, FileId, FileMeta, Subscription};
-pub mod error;
 
 mod directory;
 mod protocol;
 mod types;
 mod worker;
+
+use crate::directory::{DirectoryRef, FileDirectory};
+use async_std::{sync::Arc, task};
+use libqaul::{error::Result, services::ServiceEvent, users::UserAuth, Identity, Qaul};
+use mime::Mime;
+use std::path::PathBuf;
+
+pub use crate::types::{File, FileFilter, FileId, FileMeta, Subscription};
+pub mod error;
 
 const ASC_NAME: &'static str = "net.qaul.fileshare";
 
@@ -37,7 +34,8 @@ pub(crate) mod tags {
 #[derive(Clone)]
 pub struct Fileshare {
     qaul: Arc<Qaul>,
-    advertised: Arc<Vec<FileId>>,
+    directory: DirectoryRef,
+    path: PathBuf,
 }
 
 impl Fileshare {
@@ -45,8 +43,13 @@ impl Fileshare {
     ///
     /// In order to initialise, a valid and running
     /// `Qaul` reference needs to be provided.
-    pub fn new(qaul: Arc<Qaul>, advertised: Arc<Vec<FileId>>) -> Result<Arc<Self>> {
-        let this = Arc::new(Self { qaul, advertised });
+    pub fn new(qaul: Arc<Qaul>, path: PathBuf) -> Result<Arc<Self>> {
+        let directory = FileDirectory::new(Arc::clone(&qaul));
+        let this = Arc::new(Self {
+            qaul,
+            directory,
+            path,
+        });
         let sender = Arc::new(worker::run_asnc(Arc::clone(&this)));
 
         this.qaul.services().register(ASC_NAME, move |cmd| {
