@@ -21,6 +21,7 @@ libqaul-http = { path = "../libqaul/http" }
 libqaul-rpc = { path = "../libqaul/rpc" }     
 netmod-wd = { path = "../netmod-wd" }
 qaul-chat = { path = "../libqaul/service/chat", features = ["ffi-java"] }
+qaul-voice = { path = "../libqaul/service/voice" }
 ratman = { path = "../ratman" }
 ratman-configure = { path = "../ratman/configure", features = ["android"] }
 

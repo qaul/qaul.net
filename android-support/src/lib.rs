@@ -23,6 +23,7 @@ use libqaul::Qaul;
 use libqaul_http::{stream, HttpServer};
 use libqaul_rpc::Responder;
 use qaul_chat::Chat;
+use qaul_voice::Voice;
 use ratman_configure::{EpBuilder, NetBuilder};
 
 struct AndroidState {
@@ -112,7 +113,8 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_startServer(
     });
 
     let chat = block_on(async { Chat::new(Arc::clone(&libqaul)).await }).unwrap();
-
+    let voice = block_on(async { Voice::new(Arc::clone(&libqaul)).await }).unwrap();
+    
     info!("Chat service done");
 
     let http = HttpServer::set_paths(
@@ -120,7 +122,8 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_startServer(
         Responder {
             streamer: stream::setup_streamer(),
             qaul: Arc::clone(&libqaul),
-            chat: chat,
+            chat,
+            voice,
         },
     );
 
