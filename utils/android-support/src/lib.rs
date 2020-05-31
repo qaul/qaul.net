@@ -4,7 +4,7 @@
 #![allow(non_snake_case)]
 
 #[macro_use]
-extern crate log;
+extern crate tracing;
 extern crate android_logger;
 
 use async_std::{
@@ -28,6 +28,8 @@ use libqaul_rpc::Responder;
 use qaul_chat::Chat;
 use qaul_voice::Voice;
 use ratman_configure::{EpBuilder, NetBuilder};
+
+use tracing_subscriber::{layer::SubscriberExt, EnvFilter};
 
 struct AndroidState {
     libqaul: Arc<Qaul>,
@@ -76,12 +78,14 @@ fn init_panic_handling_once() {
             };
             let reason = panic_info.to_string();
 
-            log::error!(
+            let err = format!(
                 "### Rust `panic!` hit at file '{}', line {}: `{}`",
                 file,
                 line,
-                reason
+                reason,
             );
+
+            android_tracing::AndroidWriter::log("panic".into(), err, &tracing::Level::ERROR);
         }));
     });
 }
@@ -93,8 +97,11 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_startServer(
     port: jint,
     path: JString,
 ) -> jlong {
-    android_logger::init_once(Config::default().with_min_level(Level::Info));
+    //android_logger::init_once(Config::default().with_min_level(Level::Info));
     init_panic_handling_once();
+    let subscriber = android_tracing::AndroidSubscriber::new("qaul")
+        .with(EvnFilter::new("android_support=trace,[]=warn"));
+    tracing::subscriber::set_global_default(subscriber).unwrap();
 
     info!("Hello from Rust, about to bootstrap the code, yo");
 

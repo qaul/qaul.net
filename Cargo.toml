@@ -39,6 +39,9 @@ members = [
     # android build support
     "utils/android-support",
 
+    # android logging support
+    "utils/android-tracing",
+
     # test binaries
     "clients/multinode-test",
     "clients/linux-http-test",
