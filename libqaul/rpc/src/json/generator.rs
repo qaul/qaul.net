@@ -6,6 +6,7 @@ use crate::{
 };
 use serde_json::{self, Map, Value as JsonValue};
 use std::convert::TryFrom;
+use qaul_voice::Voice;
 
 impl From<(Envelope<Response>, RequestEnv)> for ResponseEnv {
     fn from(env: (Envelope<Response>, RequestEnv)) -> ResponseEnv {
@@ -95,6 +96,7 @@ async fn user_delete() {
 
     let qaul = Qaul::dummy();
     let chat = Chat::new(Arc::clone(&qaul)).await.unwrap();
+    let voice = Voice::new(Arc::clone(&qaul)).await.unwrap();
     let auth = block_on(qaul.users().create("blep")).unwrap();
     assert_eq!(qaul.users().list().await.len(), 1);
 
@@ -109,6 +111,7 @@ async fn user_delete() {
         streamer: crate::Streamer::new(FakeStream),
         qaul: Arc::clone(&qaul),
         chat: chat,
+        voice: voice,
     };
 
     let req_env = RequestEnv {

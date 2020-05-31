@@ -14,6 +14,7 @@ pub(crate) mod rpc_harness {
         Envelope, Response, StreamResponder, Streamer,
     };
     use qaul_chat::Chat;
+    use qaul_voice::Voice;
     use ratman_harness::{Initialize, ThreePoint};
 
     pub struct FakeStream;
@@ -43,22 +44,26 @@ pub(crate) mod rpc_harness {
             let tp_a = tp.a.clone();
             let qaul_a = tp_a.1.unwrap().clone();
             let chat_a = Chat::new(Arc::clone(&qaul_a)).await.unwrap();
+            let voice_a = Voice::new(Arc::clone(&tp.a())).await.unwrap();
 
             // services for Node B
             let tp_b = tp.b.clone();
             let qaul_b = tp_b.1.unwrap().clone();
             let chat_b = Chat::new(Arc::clone(&qaul_b)).await.unwrap();
+            let voice_b = Voice::new(Arc::clone(&tp.b())).await.unwrap();
 
             RPC {
                 responder_a: Responder {
                     streamer: Streamer::new(FakeStream),
                     qaul: qaul_a,
                     chat: chat_a,
+                    voice: voice_a,
                 },
                 responder_b: Responder {
                     streamer: Streamer::new(FakeStream),
                     qaul: qaul_b,
                     chat: chat_b,
+                    voice: voice_b,
                 },
                 network: tp,
             }

@@ -39,7 +39,7 @@ async fn rpc_chatrooms_create() {
 
     // check result
     dbg!(resp.clone());
-    assert!(resp.data.contains_key("room"));
+    assert!(resp.data.contains_key("chat_room"));
 }
 
 // chat-rooms get
@@ -184,8 +184,8 @@ async fn rpc_chatrooms_list() {
 
     // check result
     dbg!(resp.clone());
-    assert!(resp.data.contains_key("rooms"));
-    assert!(resp.data["rooms"].as_array().unwrap().len() > 0);
+    assert!(resp.data.contains_key("chat_rooms"));
+    assert!(resp.data["chat_rooms"].as_array().unwrap().len() > 0);
 }
 
 // // TODO: There is no way at the moment ot delete a chat room
