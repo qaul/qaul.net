@@ -81,6 +81,7 @@ impl<K: StreamResponder + Send + Sync + 'static> Responder<K> {
             // =^-^= Chat Messages =^-^=
             #[cfg(feature = "chat")]
             Request::ChatMsgCreate(r) => self.respond_chat(r).await.into(),
+            #[cfg(feature = "chat")]
             Request::ChatMsgSub(r) => self
                 .respond_chat(r)
                 .await
@@ -96,12 +97,13 @@ impl<K: StreamResponder + Send + Sync + 'static> Responder<K> {
             Request::ChatLoadRoom(r) => self.respond_chat(r).await.into(),
             #[cfg(feature = "chat")]
             Request::ChatRoomCreate(r) => self.respond_chat(r).await.into(),
+            #[cfg(feature = "chat")]
+            Request::ChatRoomModify(r) => self.respond_chat(r).await.into(),
 
             // =^-^= Contacts =^-^=
             // FIXME: this should be a contacts type!
             Request::UserListRemote(r) => self.respond_qaul(r).await.into(),
-            // Request::ContactModify(r) => self.respond_qaul(r).await.into(),
-            // Request::ContactGet(r) => self.respond_qaul(r).await.into(),
+            Request::ContactGet(r) => self.respond_qaul(r).await.into(),
 
             // TODO: Currently the "query" functions don't return
             // actual data, but just the IDs.  Maybe we should change
