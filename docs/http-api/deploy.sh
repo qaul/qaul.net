@@ -4,4 +4,4 @@
 ./build.sh
 
 # upload book to web server
-rsync -azhe "ssh -p 2222" ./book/ admin@docs.qaul.net:/home/admin/http-api
+rsync -azzhe "ssh -p 2222" ./book/ admin@docs.qaul.net:/home/admin/http-api
