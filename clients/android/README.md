@@ -43,14 +43,6 @@ $ clients/android/build.sh
 This script will take care of permission issues caused by the
 container building everything as root already.
 
-Follow the build instructions for the webgui.  You can find them in
-the contributors guide.  After that, run the "pre-bundle" step of the
-build.
-
-```console
-$ client/android/pre-bundle.sh
-```
-
 Finally you can finish the assembly process either in Android Studio
 (and run it live on your phone or an emulator), or just use the
 command-line to build an app for publishing.
