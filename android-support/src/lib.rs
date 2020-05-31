@@ -12,7 +12,7 @@ use async_std::{
     task::{block_on, spawn},
 };
 use jni::objects::{JList, JObject, JString, JValue};
-use jni::sys::{jboolean, jint, jlong, jobject};
+use jni::sys::{jboolean, jint, jlong, jobject, jcharArray};
 use jni::JNIEnv;
 use std::{
     ffi::{CStr, CString},
@@ -253,3 +253,16 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatLoadMessages<'env>
 ) -> JObject<'env> {
     JObject::null()
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_wdReceiveFrame<'env>(
+    env: JNIEnv<'env>,
+    _: JObject,
+    qaul: jlong,
+    target: jint,
+    data: jchatArray,
+){
+    
+}
+
+

@@ -5,10 +5,8 @@ version = "0.1.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
-[lib]
-crate-type = ["staticlib"]
-
 [dependencies]
+jni = { version = "0.14", default-features = false }
 bincode = "1.0"
 netmod = { path = "../ratman/netmod", package = "ratman-netmod" }
 async-std = { version = "1.0", features = ["unstable"] }

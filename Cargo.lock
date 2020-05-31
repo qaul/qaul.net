@@ -1555,6 +1555,7 @@ dependencies = [
  "async-std",
  "async-trait",
  "bincode",
+ "jni",
  "ratman-netmod",
 ]
 
