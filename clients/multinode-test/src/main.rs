@@ -10,7 +10,7 @@ use {
     libqaul_http::{stream, HttpServer},
     libqaul_rpc::Responder,
     qaul_chat::Chat,
-    // qaul_voices::Voices,
+    qaul_voice::Voice,
 };
 
 use tracing::Level;
@@ -47,11 +47,11 @@ async fn main() {
 
     // services for Node A
     let chat_a = Chat::new(Arc::clone(&tp.a())).await.unwrap();
-    // let voices_a = Voices::new(Arc::clone(&tp.a())).await.unwrap();
+    let voices_a = Voice::new(Arc::clone(&tp.a())).await.unwrap();
 
     // services for Node B
     let chat_b = Chat::new(Arc::clone(&tp.b())).await.unwrap();
-    // let voices_b = Voices::new(Arc::clone(&tp.b())).await.unwrap();
+    let voices_b = Voice::new(Arc::clone(&tp.b())).await.unwrap();
 
     // print information for the user
     println!("Path to static web content: {}", assets);
@@ -66,7 +66,7 @@ async fn main() {
             streamer: stream::setup_streamer(),
             qaul: Arc::clone(tp.a()),
             chat: chat_a,
-            // voices: voices_a,
+            voice: voices_a,
         },
     );
 
@@ -76,7 +76,7 @@ async fn main() {
             streamer: stream::setup_streamer(),
             qaul: Arc::clone(tp.b()),
             chat: chat_b,
-            // voices: voices_b,
+            voice: voices_b,
         },
     );
 

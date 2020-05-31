@@ -9,7 +9,7 @@ use {
     libqaul_http::{stream, HttpServer},
     libqaul_rpc::Responder,
     qaul_chat::Chat,
-    // qaul_voices::Voices,
+    qaul_voice::Voice,
 };
 
 #[async_std::main]
@@ -26,7 +26,7 @@ async fn main() {
     let rat = Router::new();
     let qaul = Qaul::new(rat);
     let chat = Chat::new(Arc::clone(&qaul)).await.unwrap();
-    // let voices = Voices::new(Arc::clone(&qaul)).await.unwrap();
+    let voice = Voice::new(Arc::clone(&qaul)).await.unwrap();
 
     // print the path to the static
     println!("Path to static web content: {}", assets);
@@ -40,6 +40,7 @@ async fn main() {
             streamer: stream::setup_streamer(),
             qaul,
             chat,
+            voice,
         },
     );
 }
