@@ -104,6 +104,21 @@ impl Identity {
         )
     }
 
+    pub fn from_string(s: &String) -> Self {
+        let v: Vec<u8> = s
+            .split("-")
+            .map(|s| {
+                hex::decode(s).expect(
+                    "Don't call from_string() on input that was not serialised by to_string()!",
+                )
+            })
+            .collect::<Vec<Vec<u8>>>()
+            .into_iter()
+            .flatten()
+            .collect();
+        Self::from_bytes(&v)
+    }
+
     pub fn as_bytes(&self) -> &[u8] {
         &self.0
     }

@@ -6,17 +6,17 @@ authors = ["Katharina Fey <kookie@spacekookie.de>", "jess 3jane <me@jess.coffee>
 edition = "2018"
 
 [features]
-default = ["proto", "json", "chat", "files", "voice"]
+default = ["proto", "json", "chat", "files"]
 proto = ["capnp"]
 json = ["serde_json"]
 chat = ["qaul-chat"]
 files = ["qaul-files"]
-voice = ["qaul-voice"]
+# voice = ["qaul-voice"]
 
 [dependencies]
 qaul-chat = { path = "../service/chat", optional = true }
 qaul-files = { path = "../service/files", optional = true }
-qaul-voice = { path = "../service/voice", optional = true }
+# qaul-voice = { path = "../service/voice", optional = true }
 
 libqaul = { version = "*", path = ".." }
 capnp = { version = "0.12", optional = true }

@@ -4,7 +4,7 @@ use super::ToJObject;
 use crate::{
     error::Result,
     users::{UserAuth, UserUpdate},
-    Qaul,
+    Identity, Qaul,
 };
 
 use async_std::task::block_on;
@@ -31,6 +31,18 @@ pub unsafe extern "C" fn create(
     })?;
 
     Ok(auth)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn login(
+    env: &JNIEnv,
+    q: Arc<Qaul>,
+    id: JString,
+    pw: JString,
+) -> Result<UserAuth> {
+    let id = Identity::from_string(&super::conv_jstring(env, id));
+    let pw = super::conv_jstring(env, pw);
+    block_on(async { q.users().login(id, &pw).await })
 }
 
 pub fn list<'env>(env: &'env JNIEnv<'env>, q: Arc<Qaul>) -> JList<'env, 'env> {
