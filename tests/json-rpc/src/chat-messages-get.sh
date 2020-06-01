@@ -12,7 +12,7 @@ RETURN=$(curl -i  \
         \"kind\": \"chat-messages\",
         \"method\": \"get\",
         \"data\": {
-            \"room\": \"$1\"
+            \"id\": \"$1\"
         },
         \"auth\": {
             \"id\":\"$2\",

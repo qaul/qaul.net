@@ -10,6 +10,6 @@ RETURN=$(http POST 127.0.0.1:9900/rest/chat-rooms \
     name="Test Name" \
     "Authorization:{\"id\":\"$2\",\"token\":\"$3\"}" 2>/dev/null | tail -n 1)
 
-export ROOM_ID=$(echo $RETURN | jq '.room.id' | sed -e 's/"//g')
+export ROOM_ID=$(echo $RETURN | jq '.chat_room.id' | sed -e 's/"//g')
 
 echo "Created room: $ROOM_ID"

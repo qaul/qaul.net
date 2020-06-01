@@ -21,6 +21,6 @@ RETURN=$(curl -i  \
         }" \
     "http://127.0.0.1:9900/rpc" 2>/dev/null | tail -n 1)
 
-export ROOM_ID=$(echo $RETURN | jq '.data.room.id' | sed -e 's/"//g')
+export ROOM_ID=$(echo $RETURN | jq '.data.chat_room.id' | sed -e 's/"//g')
 
 echo "Created room: $ROOM_ID"

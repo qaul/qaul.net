@@ -86,12 +86,11 @@ async fn rpc_chatmessages_get() {
     // RPC JSON input
     let json_string = format!(
         r#"{{
-        "id": "/chat-messages/create",
+        "id": "/chat-messages/get",
         "kind": "chat-messages",
-        "method": "create",
+        "method": "get",
         "data": {{
-            "text": "hello world!",
-            "room": "{room_id}"
+            "id": "{room_id}"
         }},
         "auth": {{
             "id": "{b_id}",
@@ -109,5 +108,6 @@ async fn rpc_chatmessages_get() {
     // check result
     dbg!(resp.clone());
     assert!(resp.data.contains_key("chat_message"));
-    assert_eq!(resp.data.get("chat_message").unwrap().get(0).unwrap().get("content").unwrap(), "hello world!");
+    assert!(resp.data["chat_message"].as_array().unwrap().len() > 1);
+    assert_eq!(resp.data.get("chat_message").unwrap().get(1).unwrap().get("content").unwrap(), "hello world!");
 }
