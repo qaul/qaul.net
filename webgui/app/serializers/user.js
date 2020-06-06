@@ -1,4 +1,5 @@
 import ApplicationSerializer from './application';
+import { underscore } from '@ember/string';
 
 export default class UserSerializer extends ApplicationSerializer {
   normalizeSingleResponse (store, primaryModelClass, payload, id, requestType) {
