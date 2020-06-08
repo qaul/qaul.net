@@ -9,6 +9,6 @@
 TRIMMED_ID=$(echo $1 | tr -d ' ')
 
 http PATCH 127.0.0.1:9900/rest/users/$TRIMMED_ID \
-    display_name:='{"set":"testuser"}' \
-    real_name=unset \
+    display_name=testuser \
+    real_name="" \
     "Authorization:{\"id\":\"$1\",\"token\":\"$2\"}"

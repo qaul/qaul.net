@@ -12,7 +12,7 @@ use libqaul_rpc::{
     Envelope,
 };
 use mime::APPLICATION_JSON;
-use serde_json;
+use serde_json::json;
 use std::collections::BTreeMap;
 use tide::{self, Request, Response};
 
@@ -53,6 +53,15 @@ pub async fn rest2rpc_params(
         },
         Err(_) => BTreeMap::new(),
     };
+
+    // change data to diff if it is a PATCH request
+    if method == "modify" {
+        for (key, value) in data.iter_mut() {
+            if key != "id" {
+                *value = json!({ "set": value });
+            }
+        }
+    }
 
     // get values from URI parameters
     if let Some(params) = uri_params {
