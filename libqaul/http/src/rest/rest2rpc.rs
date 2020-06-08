@@ -28,6 +28,9 @@ pub async fn rest2rpc_params(
     method: &str,
     uri_params: Option<Vec<&str>>,
 ) -> Response {
+    // display debugging information about the 
+    println!("rest2rpc_params {} {}", kind, method);
+
     // get Authorization from header
     let auth: Option<JsonAuth> = match r.header("Authorization") {
         None => None,
@@ -62,6 +65,11 @@ pub async fn rest2rpc_params(
             }
         }
     }
+
+    // debug information
+    println!("--------- data ---------");
+    println!("{:?}", data.clone());
+    println!("--------- end data ---------");
 
     // get values from URI parameters
     if let Some(params) = uri_params {

@@ -1,7 +1,7 @@
-//! RPC Debugging tests
+//! RPC Users Debugging tests
 //! 
-//! In this file are tests that input wrong values into
-//! the system and lead to crashes or unexpected behaviour.
+//! This file tests the RPC users communication with data
+//! that leads to crashes or unexpected behaviour.
 //! The tests shall make it easier to track and fix these bugs.
 
 #[cfg(test)]
@@ -57,11 +57,3 @@ async fn rpc_users_modify_with_unset_value() {
     );
 }
 
-
-// missing values
-
-
-// wrong values
-
-
-// send messages for unauthenticated user
