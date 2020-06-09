@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 
-# receives a new chat message from a specific room
+# queries all chat messages of a specific chat room
 # 
 # usage:
-# ./chat-messages_get.sh <ROOM_ID> <USER_ID> <USER_TOKEN>
+# ./chat-messages-query.sh <ROOM_ID> <USER_ID> <USER_TOKEN>
 
 RETURN=$(curl -i  \
     -H "Content-Type: application/json" \
     -d "{
         \"id\": \"1\",
         \"kind\": \"chat-messages\",
-        \"method\": \"get\",
+        \"method\": \"query\",
         \"data\": {
-            \"id\": \"$1\"
+            \"chat-room\": \"$1\"
         },
         \"auth\": {
             \"id\":\"$2\",

@@ -73,7 +73,7 @@ impl RequestEnv {
                 #[cfg(feature = "chat")]
                 ("chat-messages", "create") => Request::ChatMsgCreate(de_json(data, auth)?),
                 #[cfg(feature = "chat")]
-                ("chat-messages", "get") => Request::ChatLoadRoom(de_json(data, auth)?),
+                ("chat-messages", "query") => Request::ChatLoadRoom(de_json(data, auth)?),
                 #[cfg(feature = "chat")]
                 ("chat-rooms", "list") => Request::ChatRoomList(de_json(data, auth)?),
                 #[cfg(feature = "chat")]

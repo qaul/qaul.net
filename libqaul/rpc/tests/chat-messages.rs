@@ -88,9 +88,9 @@ async fn rpc_chatmessages_get() {
         r#"{{
         "id": "/chat-messages/get",
         "kind": "chat-messages",
-        "method": "get",
+        "method": "query",
         "data": {{
-            "id": "{room_id}"
+            "chat-room": "{room_id}"
         }},
         "auth": {{
             "id": "{b_id}",

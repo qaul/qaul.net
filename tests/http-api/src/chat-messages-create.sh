@@ -5,9 +5,7 @@
 # usage:
 # ./chat-messages-create.sh <ROOM_ID> <USER_ID> <USER_TOKEN>
 
-TRIMMED_ID=$(echo $1 | tr -d ' ')
-
-http POST 127.0.0.1:9900/rest/chat-messages/$TRIMMED_ID \
+http POST 127.0.0.1:9900/rest/chat-messages \
     room="$1" \
     text="hello world!" \
     "Authorization:{\"id\":\"$2\",\"token\":\"$3\"}"

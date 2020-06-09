@@ -15,4 +15,4 @@ source src/chat-messages-create.sh "$ROOM_ID" "$A_ID" $A_TOKEN
 sleep 1;
 
 # Receive the message from user B
-source src/chat-messages-get.sh "$ROOM_ID" "$B_ID" $B_TOKEN
+source src/chat-messages-query.sh "$ROOM_ID" "$B_ID" $B_TOKEN

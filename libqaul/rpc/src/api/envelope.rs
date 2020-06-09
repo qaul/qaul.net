@@ -37,7 +37,7 @@ pub enum Request {
     #[cfg(feature = "chat")]
     ChatMsgCreate(chat::messages::Create),
     #[cfg(feature = "chat")]
-    ChatLoadRoom(chat::messages::Get),
+    ChatLoadRoom(chat::messages::Query),
 
     // =^-^= Chat Rooms =^-^=
     #[cfg(feature = "chat")]

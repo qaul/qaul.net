@@ -29,14 +29,14 @@ impl Subscriber for Subscription {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
-pub struct Get {
+pub struct Query {
     pub auth: UserAuth,
-    #[serde(rename = "id")]
+    #[serde(rename = "chat-room")]
     pub room: RoomId,
 }
 
 #[async_trait]
-impl ChatRpc for Get {
+impl ChatRpc for Query {
     type Response = Result<Vec<ChatMessage>>;
     async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
         chat.load_messages(self.auth, self.room).await

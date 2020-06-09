@@ -61,15 +61,14 @@ pub fn rest_routes(rest_state: Arc<Responder>) -> Server<Arc<Responder>> {
 
     // chat-messages
     app_rest
-        .at("/chat-messages/:id")
+        .at("/chat-messages")
         .get(|req| async move {
-            let params = vec!["id"];
-            rest2rpc::rest2rpc_params(req, "chat-messages", "get", Some(params)).await
+            rest2rpc::rest2rpc_query(req, "chat-messages", "query").await
         })
         .post(|req| async move { rest2rpc::rest2rpc(req, "chat-messages", "create").await });
     app_rest
-        .at("/chat-messages/:id/next")
-        .get(|req| async move { rest2rpc::rest2rpc(req, "chat-messages", "next").await });
+        .at("/chat-messages/next")
+        .get(|req| async move { rest2rpc::rest2rpc_query(req, "chat-messages", "next").await });
 
     app_rest
 }

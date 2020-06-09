@@ -16,17 +16,35 @@ use serde_json::json;
 use std::collections::BTreeMap;
 use tide::{self, Request, Response};
 
-/// Convert the REST call to RPC
+/// Convert the http-api call to RPC
 pub async fn rest2rpc(r: Request<Arc<Responder>>, kind: &str, method: &str) -> Response {
-    rest2rpc_params(r, kind, method, None).await
+    rest2rpc_params_query(r, kind, method, None, false).await
 }
 
-/// Convert the REST call to RPC with inserting the URI paramters into the data BTree
+/// Convert the http-api call to RPC convert the query string to params
+pub async fn rest2rpc_query(r: Request<Arc<Responder>>, kind: &str, method: &str) -> Response {
+    rest2rpc_params_query(r, kind, method, None, true).await
+}
+
+/// Convert the http-api call to RPC with inserting the URI paramters 
+/// into the data BTree
 pub async fn rest2rpc_params(
     mut r: Request<Arc<Responder>>,
     kind: &str,
     method: &str,
     uri_params: Option<Vec<&str>>,
+) -> Response {
+    rest2rpc_params_query(r, kind, method, uri_params, false).await
+}
+
+/// Convert the http-api call to RPC with inserting the URI paramters 
+/// and query parameters into the data BTree
+pub async fn rest2rpc_params_query(
+    mut r: Request<Arc<Responder>>,
+    kind: &str,
+    method: &str,
+    uri_params: Option<Vec<&str>>,
+    uri_query: bool,
 ) -> Response {
     // display debugging information about the 
     println!("rest2rpc_params {} {}", kind, method);
@@ -84,8 +102,19 @@ pub async fn rest2rpc_params(
         });
     }
 
-    // TODO: query parameters for query/list requests
+    // query parameters for query/list requests
+    if uri_query {
+        if let Some(query) = r.uri().query() {
+            query.split("&").collect::<Vec<&str>>().iter().for_each(|tuple| {
+                let q_item = tuple.split("=").collect::<Vec<&str>>();
+                if q_item.len() == 2 {
+                    data.insert(q_item[0].to_string(), serde_json::Value::String(q_item[1].to_string()));
+                }
+            });
+        }
+    };
 
+    // create RPC structure
     let rpc_req = RequestEnv {
         id: String::from(r.uri().path()),
         kind: kind.to_string(),
