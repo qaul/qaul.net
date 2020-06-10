@@ -62,12 +62,20 @@ fn join_frames(buf: &mut Vec<Frame>, new: Frame) -> Option<Message> {
         let sender = buf[0].sender;
         let recipient = buf[0].recipient;
         let layered = SeqBuilder::restore(buf);
-        let Payload { payload, sign } = bincode::deserialize(&layered).unwrap();
+        let Payload {
+            payload,
+            mut timesig,
+            sign,
+        } = bincode::deserialize(&layered).unwrap();
 
+        // Update the received timestamp in the message
+        timesig.receive();
+        
         Some(Message {
             id,
             sender,
             recipient,
+            timesig,
             payload,
             sign,
         })

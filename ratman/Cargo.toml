@@ -8,11 +8,13 @@ authors = ["Katharina Fey <kookie@spacekookie.de>", "Leonora Tindall <nora@nora.
 edition = "2018"
 
 [dependencies]
-bincode = "1.0"
-serde = { version = "1.0", features = ["derive"] }
 async-std = { version = "1.0", features = ["std", "unstable"] }
+bincode = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
 futures = "0.3"
-
+serde = { version = "1.0", features = ["derive"] }
+tracing = "0.1"
+tracing-futures = "0.2"
 twox-hash = "1.5"
 
 # Sub-components
@@ -20,8 +22,6 @@ identity = { version = "0.4", path = "identity", package = "ratman-identity", fe
 netmod = { version = "0.3", path = "netmod", package = "ratman-netmod"}
 clockctrl = { version = "0.1", path = "../clockctrl" }
 async-notify = { path = "../async-notify" }
-tracing = "0.1"
-tracing-futures = "0.2"
 
 [dev-dependencies]
 netmod-mem = { path = "../netmod-mem" }

@@ -11,6 +11,7 @@ impl Slicer {
     pub(crate) fn slice(max: usize, msg: Message) -> Vec<Frame> {
         let payload = bincode::serialize(&Payload {
             payload: msg.payload,
+            timesig: msg.timesig,
             sign: msg.sign,
         })
         .unwrap();

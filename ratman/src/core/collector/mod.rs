@@ -77,7 +77,7 @@ impl Collector {
             self.spawn_worker(seq).await;
         }
     }
-    
+
     /// Get any message that has been completed
     pub(crate) async fn completed(&self) -> Message {
         self.state.completed().await
@@ -109,37 +109,43 @@ impl Collector {
             Arc::clone(&map.get(&seq).unwrap())
         };
 
-        task::spawn(async move {
-            info!("Spawning worker");
-            
-            // This loop breaks when the worker is done
-            while let Some(()) = worker.poll().await {}
+        task::spawn(
+            async move {
+                info!("Spawning worker");
 
-            // Then remove it
-            let mut map = workers.lock().await;
-            map.remove(&seq).unwrap();
-        }.instrument(info_span!("Worker", seq = seq.to_string().as_str())));
+                // This loop breaks when the worker is done
+                while let Some(()) = worker.poll().await {}
+
+                // Then remove it
+                let mut map = workers.lock().await;
+                map.remove(&seq).unwrap();
+            }
+            .instrument(info_span!("Worker", seq = seq.to_string().as_str())),
+        );
     }
 }
-
 
 #[cfg(test)]
 use crate::Identity;
 
 #[test]
 fn queue_one() {
+    use crate::{Slicer, TimePair};
     use netmod::Recipient;
-    use crate::Slicer;
-    
+
     let (sender, recipient, id) = (Identity::random(), Identity::random(), Identity::random());
-    let mut seq = Slicer::slice(128, Message {
-        id,
-        sender,
-        recipient: Recipient::User(recipient),
-        payload: vec![0, 1, 2, 3, 1, 3, 1, 2, 1, 3, 3, 7],
-        sign: vec![0, 1],
-    });
-    
+    let mut seq = Slicer::slice(
+        128,
+        Message {
+            id,
+            sender,
+            recipient: Recipient::User(recipient),
+            payload: vec![0, 1, 2, 3, 1, 3, 1, 2, 1, 3, 3, 7],
+            timesig: TimePair::sending(),
+            sign: vec![0, 1],
+        },
+    );
+
     assert_eq!(seq.len(), 1);
     let frame = seq.remove(0);
     let seqid = id;
@@ -162,22 +168,26 @@ fn queue_one() {
 
 #[test]
 fn queue_many() {
+    use crate::{Slicer, TimePair};
     use netmod::Recipient;
-    use crate::Slicer;
-    
+
     let (sender, recipient, id) = (Identity::random(), Identity::random(), Identity::random());
-    let seq = Slicer::slice(8, Message {
-        id,
-        sender,
-        recipient: Recipient::User(recipient),
-        payload: vec![0, 1, 2, 3, 1, 3, 1, 2, 1, 3, 3, 7],
-        sign: vec![],
-    });
-    
+    let seq = Slicer::slice(
+        8,
+        Message {
+            id,
+            sender,
+            recipient: Recipient::User(recipient),
+            payload: vec![0, 1, 2, 3, 1, 3, 1, 2, 1, 3, 3, 7],
+            timesig: TimePair::sending(),
+            sign: vec![],
+        },
+    );
+
     let seqid = id;
     let len = seq.len();
-    assert_eq!(len, 4);
-    
+    assert_eq!(len, 9);
+
     task::block_on(async move {
         let c = Collector::new();
 
@@ -190,10 +200,10 @@ fn queue_many() {
 
         let w = c.get_worker(seqid).await;
 
-	// There will be len - 1 items, followed by a None.
-	for _ in 1..len {
+        // There will be len - 1 items, followed by a None.
+        for _ in 1..len {
             assert_eq!(w.poll().await, Some(()));
-	}
+        }
         assert_eq!(w.poll().await, None);
 
         // Now get the finished message

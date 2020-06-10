@@ -149,7 +149,7 @@ pub(crate) type IoPair<T> = (Sender<T>, Receiver<T>);
 
 // Public API facade
 pub use crate::{
-    data::{Message, MsgId},
+    data::{Message, MsgId, TimePair},
     error::{Error, Result},
     netmod::Recipient,
 };
@@ -293,6 +293,7 @@ impl Router {
 /// A very simple API level test to make sure that payloads remain the same
 #[async_std::test]
 async fn matching_payloads() {
+    use crate::TimePair;
     use netmod_mem::MemMod;
     let (m1, m2) = MemMod::make_pair();
 
@@ -316,6 +317,7 @@ async fn matching_payloads() {
         sender: u1,
         recipient: Recipient::User(u2),
         payload: vec![1, 3, 1, 2],
+        timesig: TimePair::sending(),
         sign: vec!['a' as u8, 'c' as u8, 'a' as u8, 'b' as u8],
     };
 
@@ -326,5 +328,12 @@ async fn matching_payloads() {
     r1.send(msg.clone()).await.unwrap();
 
     let msg2 = r2.next().await;
-    assert_eq!(msg, msg2);
+
+    // We can't just compare the messages, because the time signatures
+    // will be different but that's okay!
+    assert_eq!(msg.id, msg2.id);
+    assert_eq!(msg.sender, msg2.sender);
+    assert_eq!(msg.recipient, msg2.recipient);
+    assert_eq!(msg.payload, msg2.payload);
+    assert_eq!(msg.sign, msg2.sign);
 }

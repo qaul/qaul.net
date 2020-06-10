@@ -13,7 +13,7 @@
 use async_std::task;
 use bincode;
 use netmod_mem::MemMod;
-use ratman::{Identity, Message, MsgId, Recipient, Result, Router};
+use ratman::{Identity, Message, MsgId, Recipient, Result, Router, TimePair};
 use serde::{Deserialize, Serialize};
 
 /// A message from someone
@@ -33,6 +33,7 @@ impl ChatMessage {
             recipient,
             sender,
             payload,
+            timesig: TimePair::sending(),
             sign: vec![],
         }
     }
@@ -83,7 +84,7 @@ async fn build_network() -> Result<()> {
     let msg = hello.to_msg(u1, u3);
 
     r1.send(msg.clone()).await?;
-    assert_eq!(r3.next().await, msg);
+    assert_eq!(r3.next().await.remove_recv_time(), msg);
     Ok(())
 }
 
