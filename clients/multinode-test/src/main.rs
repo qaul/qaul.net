@@ -20,7 +20,7 @@ use tracing_subscriber::fmt;
 async fn main() {
     let _s = fmt()
         .with_env_filter("async_std=warn")
-        .with_max_level(Level::TRACE)
+        .with_max_level(Level::WARN)
         .init();
 
     let assets = env::args().nth(1).unwrap_or("".into());
