@@ -1,7 +1,2 @@
 <Settings::Title @title={{t "settings.configuration"}} />
-
-<Settings::Container>
-  <Settings::Item @icon="language" @title={{t "settings.setLanguage"}} @route="settings/language" />
-  <Settings::Item @icon="user" @title={{t "settings.userProfile"}} @route="settings" />
-  <Settings::ItemTheme />
-</Settings::Container>
+{{outlet}}

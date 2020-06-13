@@ -16,7 +16,9 @@ Router.map(function() {
   });
   this.route('files');
   this.route('settings');
-  this.route('settings/language');
+  this.route('settings', function() {
+    this.route('language');
+  });
   this.route('info');
   this.route('register');
   this.route('login');
