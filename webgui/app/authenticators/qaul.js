@@ -26,13 +26,12 @@ export default class QaulAuthenticator extends Base {
     return (await loginResponse.json()).auth;
   }
 
-  async invalidate({ token }) {
-    await fetch(`/api/grants/${token}`, {
-      method: 'DELETE',
+  async invalidate({ id, token }) {
+    await fetch(`/rest/logout`, {
+      method: 'POST',
       headers: {
-        'Content-Type': 'application/vnd.api+json',
-        Authorization: `Bearer ${token}`
-      },
+        Authorization: JSON.stringify({ id, token }),
+      }
     });
   }
 }
