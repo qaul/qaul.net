@@ -43,6 +43,7 @@ RUN apt-get update -qq > /dev/null && \
     apt-get install -qq --no-install-recommends \
         build-essential \
         autoconf \
+        cmake \
         curl \
         git \
         file \
