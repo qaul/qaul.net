@@ -54,7 +54,7 @@ impl HttpServer {
         let http_state = rpc_state.clone();
 
         // REST Endpoint
-        app.at("/rest")
+        app.at("/http")
             .strip_prefix()
             .nest(http::routes::http_routes(http_state));
 

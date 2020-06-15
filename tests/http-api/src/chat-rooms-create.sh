@@ -5,7 +5,7 @@
 # usage:
 # ./chat-rooms_create.sh <FRIEND_ID> <USER_ID> <USER_TOKEN>
 
-RETURN=$(http POST 127.0.0.1:9900/rest/chat-rooms \
+RETURN=$(http POST 127.0.0.1:9900/http/chat-rooms \
     users:="[\"$1\"]" \
     name="Test Name" \
     "Authorization:{\"id\":\"$2\",\"token\":\"$3\"}" 2>/dev/null | tail -n 1)

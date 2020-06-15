@@ -5,7 +5,7 @@
 # usage:
 # ./chat-messages-create.sh <ROOM_ID> <USER_ID> <USER_TOKEN>
 
-http POST 127.0.0.1:9900/rest/chat-messages \
+http POST 127.0.0.1:9900/http/chat-messages \
     room="$1" \
     text="hello world!" \
     "Authorization:{\"id\":\"$2\",\"token\":\"$3\"}"

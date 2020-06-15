@@ -7,6 +7,6 @@
 
 TRIMMED_ID=$(echo $1 | tr -d ' ')
 
-http DELETE 127.0.0.1:9900/rest/users/$TRIMMED_ID \
+http DELETE 127.0.0.1:9900/http/users/$TRIMMED_ID \
   purge:=true \
   "Authorization:{\"id\":\"$1\",\"token\":\"$2\"}"

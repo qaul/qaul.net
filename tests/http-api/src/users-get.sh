@@ -8,5 +8,5 @@
 
 TRIMMED_ID=$(echo $1 | tr -d ' ')
 
-http GET 127.0.0.1:9900/rest/users/$TRIMMED_ID \
+http GET 127.0.0.1:9900/http/users/$TRIMMED_ID \
     "Authorization:{\"id\":\"$1\",\"token\":\"$2\"}"

@@ -14,7 +14,7 @@ export default class RegisterController extends Controller {
   async register(event) {
     event.preventDefault();
 
-    const createUserResponse = await fetch('/rest/users', {
+    const createUserResponse = await fetch('/http/users', {
       method: 'POST',
       body: JSON.stringify({
         pw: this.password,

@@ -5,6 +5,6 @@
 # usage:
 # ./login.sh <USER_ID>
 
-http POST 127.0.0.1:9900/rest/login \
+http POST 127.0.0.1:9900/http/login \
     id="$1" \
     pw=123456

@@ -16,7 +16,7 @@ function serializeIntoHash(store, modelClass, snapshot, options = { includeId: t
 }
 
 export default class ApplicationAdapter extends RESTAdapter {
-  namespace = 'rest';
+  namespace = 'http';
 
   @service() session;
 

@@ -5,5 +5,5 @@
 # usage:
 # ./users-create.sh
 
-http POST 127.0.0.1:9901/rest/users \
+http POST 127.0.0.1:9901/http/users \
     pw=123456
