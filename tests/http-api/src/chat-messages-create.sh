@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # creates and sends a new chat message to a specific room
 # 

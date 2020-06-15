@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # creates a new chat room with user <FRIEND_ID>
 # 

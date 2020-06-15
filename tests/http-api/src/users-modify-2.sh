@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Set `dispaly_name` and unset `real_name`
 # 
