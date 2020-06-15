@@ -432,6 +432,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "cmake"
+version = "0.1.44"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e56268c17a6248366d66d4a47a3381369d068cce8409bb1716ed77ea32163bb"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "combine"
 version = "3.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1378,6 +1387,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "magnum-opus"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ff49ad2a7313ae476b292c1e1b6bf17ad0542fc1d24880d85d455d8547a3ecc2"
+dependencies = [
+ "libc",
+ "opusic-sys",
+]
+
+[[package]]
 name = "matchers"
 version = "0.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1616,23 +1635,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2839e79665f131bdb5782e51f2c6c9599c133c6098982a54c794358bf432529c"
 
 [[package]]
-name = "opus"
-version = "0.2.1"
+name = "opusic-sys"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e9059a7daf1e6665eb88c4a95ca9ff393a6d276fd66e9d85191280d7e5ec18b"
+checksum = "a2f96f3537123e0c29418ddfb980d1d73f42fb33151f3544a6215b7e423ee9bf"
 dependencies = [
- "libc",
- "opus-sys",
-]
-
-[[package]]
-name = "opus-sys"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fad8b294f482f7972fa466b1c64d5a564e4ee6975599d80483ee4fa83f25b6ec"
-dependencies = [
- "libc",
- "pkg-config",
+ "cmake",
 ]
 
 [[package]]
@@ -1858,7 +1866,7 @@ dependencies = [
  "failure",
  "futures 0.3.5",
  "libqaul",
- "opus",
+ "magnum-opus",
  "ratman-harness",
  "rubato",
  "serde",
