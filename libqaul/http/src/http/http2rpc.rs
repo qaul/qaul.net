@@ -17,29 +17,29 @@ use std::collections::BTreeMap;
 use tide::{self, Request, Response};
 
 /// Convert the http-api call to RPC
-pub async fn rest2rpc(r: Request<Arc<Responder>>, kind: &str, method: &str) -> Response {
-    rest2rpc_params_query(r, kind, method, None, false).await
+pub async fn http2rpc(r: Request<Arc<Responder>>, kind: &str, method: &str) -> Response {
+    http2rpc_params_query(r, kind, method, None, false).await
 }
 
 /// Convert the http-api call to RPC convert the query string to params
-pub async fn rest2rpc_query(r: Request<Arc<Responder>>, kind: &str, method: &str) -> Response {
-    rest2rpc_params_query(r, kind, method, None, true).await
+pub async fn http2rpc_query(r: Request<Arc<Responder>>, kind: &str, method: &str) -> Response {
+    http2rpc_params_query(r, kind, method, None, true).await
 }
 
 /// Convert the http-api call to RPC with inserting the URI paramters 
 /// into the data BTree
-pub async fn rest2rpc_params(
+pub async fn http2rpc_params(
     mut r: Request<Arc<Responder>>,
     kind: &str,
     method: &str,
     uri_params: Option<Vec<&str>>,
 ) -> Response {
-    rest2rpc_params_query(r, kind, method, uri_params, false).await
+    http2rpc_params_query(r, kind, method, uri_params, false).await
 }
 
 /// Convert the http-api call to RPC with inserting the URI paramters 
 /// and query parameters into the data BTree
-pub async fn rest2rpc_params_query(
+pub async fn http2rpc_params_query(
     mut r: Request<Arc<Responder>>,
     kind: &str,
     method: &str,
@@ -47,7 +47,7 @@ pub async fn rest2rpc_params_query(
     uri_query: bool,
 ) -> Response {
     // display debugging information about the 
-    println!("rest2rpc_params {} {}", kind, method);
+    println!("http2rpc_params {} {}", kind, method);
 
     // get Authorization from header
     let auth: Option<JsonAuth> = match r.header("Authorization") {

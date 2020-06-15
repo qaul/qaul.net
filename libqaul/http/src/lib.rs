@@ -3,7 +3,7 @@
 //! The web server serves the following things
 //!
 //! * the static files of the EmberJS webGUI
-//! * the REST API for the webGUI
+//! * the HTTP API for the webGUI
 //! * the RPC API
 
 #![doc(html_favicon_url = "https://qaul.net/favicon.ico")]
@@ -15,7 +15,7 @@ use std::io::Result;
 use tide::{self, server::Server};
 use tide_naive_static_files::StaticFilesEndpoint as StaticEp;
 
-mod rest;
+mod http;
 mod rpc;
 pub mod stream;
 
@@ -51,12 +51,12 @@ impl HttpServer {
     pub fn set_paths(path: String, rpc: Responder) -> Self {
         let mut app = tide::new();
         let rpc_state = Arc::new(rpc);
-        let rest_state = rpc_state.clone();
+        let http_state = rpc_state.clone();
 
         // REST Endpoint
         app.at("/rest")
             .strip_prefix()
-            .nest(rest::routes::rest_routes(rest_state));
+            .nest(http::routes::http_routes(http_state));
 
         // RPC Endpoint
         app.at("/rpc")

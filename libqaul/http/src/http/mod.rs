@@ -2,5 +2,5 @@
 //!
 //! http -> REST -> RPC -> libqaul
 
-pub mod rest2rpc;
+pub mod http2rpc;
 pub mod routes;
