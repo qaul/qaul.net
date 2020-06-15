@@ -363,8 +363,7 @@ checksum = "b9fc62803d62905cdc62628699ef104177bab00250e24e37f70051b440f1d46e"
 [[package]]
 name = "cc"
 version = "1.0.54"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7bbb73db36c1246e9034e307d0fba23f9a2e251faa47ade70c1bd252220c8311"
+source = "git+https://github.com/alexcrichton/cc-rs#78596975e2366665e7d44afe81ce4e3d2fc11147"
 
 [[package]]
 name = "cesu8"
