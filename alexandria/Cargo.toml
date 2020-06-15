@@ -13,6 +13,7 @@ id = { version = "0.4", path = "../ratman/identity", features = ["digest", "rand
 
 async-std = { version = "=1.5", features = ["unstable", "attributes"] }
 bincode = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
 failure = "0.1"
 hex = "0.4"
 keybob = "0.3"

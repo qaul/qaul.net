@@ -10,7 +10,9 @@ pub(crate) use self::store::{MsgStore, TAG_UNREAD};
 pub(crate) mod generator;
 
 use crate::{error::Result, helpers::Tag, security::Sec, users::UserStore};
-use ratman::{netmod::Recipient as RatRecipient, Identity, Message as RatMessage, Router};
+use ratman::{
+    netmod::Recipient as RatRecipient, Identity, Message as RatMessage, Router, TimePair,
+};
 use serde::{Deserialize, Serialize};
 
 /// An internal wrapper around an incomplete Message
@@ -66,6 +68,7 @@ impl RatMessageProto {
             sender,
             recipient,
             payload,
+            timesig: TimePair::sending(),
 
             // Payloads are encrypted and signed via libnacl, which
             // means that no payload can be forged. Ratman still takes
@@ -102,6 +105,7 @@ impl MsgUtils {
             sender,
             recipient,
             payload,
+            timesig: _, // TODO: use!
             sign: _,
         } = msg;
 

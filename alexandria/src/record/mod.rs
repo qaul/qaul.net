@@ -23,6 +23,7 @@ use crate::{
 };
 
 use async_std::sync::Arc;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 /// A record header
@@ -31,7 +32,7 @@ pub struct Header {
     /// A unique record ID
     pub id: Id,
     /// Public set of search tags
-    pub tags: TagSet,
+    pub tags: TagSet, // TODO: can we move this into the secheader?
     /// The encrypted header
     sec: Encrypted<SecHeader, KeyPair>,
 }
@@ -45,11 +46,34 @@ pub(crate) enum Type {
     Bin,
 }
 
+/// A record's creation and update times
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub(crate) struct Timestamp {
+    pub(crate) created: DateTime<Utc>,
+    pub(crate) updated: DateTime<Utc>,
+}
+
+impl Timestamp {
+    pub(crate) fn create() -> Self {
+        let now = Utc::now();
+        Self {
+            created: now,
+            updated: now,
+        }
+    }
+
+    pub(crate) fn update(&mut self) {
+        self.updated = Utc::now();
+    }
+}
+
 /// The secret header is encrypted
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct SecHeader {
     /// Record type
     pub(crate) t: Type,
+    /// Timestamp information
+    time: Timestamp,
     /// Total payload size
     pub(crate) size: u64,
     /// Beginning chunk markers
@@ -101,6 +125,7 @@ impl Record {
         // Secret header with no disk info present
         let sec = Encrypted::new(SecHeader {
             t,
+            time: Timestamp::create(),
             size: 0,
             chunks: vec![],
         });
@@ -118,7 +143,9 @@ impl Record {
     /// Apply a diff to a record
     pub(crate) fn apply(&mut self, diff: Diff) -> Result<()> {
         match self.body.deref_mut()? {
-            Body::Kv(kv) => kv.apply(diff),
+            Body::Kv(kv) => kv
+                .apply(diff)
+                .map(|_| self.header.sec.deref_mut().unwrap().time.update()),
             Body::Bin(_) => unimplemented!(),
         }
     }

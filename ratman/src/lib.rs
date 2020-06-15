@@ -329,11 +329,5 @@ async fn matching_payloads() {
 
     let msg2 = r2.next().await;
 
-    // We can't just compare the messages, because the time signatures
-    // will be different but that's okay!
-    assert_eq!(msg.id, msg2.id);
-    assert_eq!(msg.sender, msg2.sender);
-    assert_eq!(msg.recipient, msg2.recipient);
-    assert_eq!(msg.payload, msg2.payload);
-    assert_eq!(msg.sign, msg2.sign);
+    assert_eq!(msg2.remove_recv_time(), msg);
 }
