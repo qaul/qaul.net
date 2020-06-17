@@ -11,7 +11,7 @@ libqaul = { path = "../../libqaul" }
 libqaul-rpc = { path = "../../libqaul/rpc", features = ["chat", "json"] }
 libqaul-http = { path = "../../libqaul/http" }
 qaul-chat = { path = "../../libqaul/service/chat" }
-# qaul-voice = { path = "../../libqaul/service/voice" }
+qaul-voice = { path = "../../libqaul/service/voice" }
 
 async-std = { version = "=1.5", features = ["attributes"] }
 tempfile = "3.0"
