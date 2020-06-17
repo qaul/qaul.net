@@ -1,0 +1,30 @@
+[package]
+name = "alexandria"
+description = "An encrypted document-oriented database with tag based query support"
+version = "0.2.0"
+authors = ["Katharina Fey <kookie@spacekookie.de>"]
+repository = "https://git.open-communication.net/qaul/alexandria"
+documentation = "https://docs.rs/alexandria"
+license = "GPL-3.0-or-later"
+edition = "2018"
+
+[dependencies]
+id = { version = "0.4", path = "../../ratman/identity", features = ["digest", "random", "aligned"], package = "ratman-identity" }
+
+async-std = { version = "=1.5", features = ["unstable", "attributes"] }
+bincode = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+failure = "0.1"
+hex = "0.4"
+keybob = "0.3"
+serde = { version = "1.0", features = ["derive", "rc"] }
+sodiumoxide = "0.2.5"
+tracing = "0.1"
+tracing-futures = "0.2"
+
+[dev-dependencies]
+bincode = "1.0"
+ed25519-dalek = "1.0.0-pre.3"
+rand = "0.7"
+serde_json = "1.0"
+tempfile = "3.0"

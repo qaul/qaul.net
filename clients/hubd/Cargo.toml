@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 libqaul = { path = "../../libqaul" }
-netmod-tcp = { path = "../../netmod-tcp" }
+netmod-tcp = { path = "../../netmods/netmod-tcp" }
 ratman = { path = "../../ratman" }
 ratman-configure = { path = "../../ratman/configure" }
 

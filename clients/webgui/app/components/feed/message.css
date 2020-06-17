@@ -1,0 +1,27 @@
+.message {
+  color: var(--q-color);
+  padding: 1rem 0.8rem;
+  border-top: 1px solid var(--q-border-light);
+}
+
+.head {
+  display: flex;
+  margin-bottom: 0.8rem;
+}
+.icon {
+  font-size: 2rem;
+  margin-inline-end: 1rem;
+}
+.sender {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--q-a);
+}
+.time {
+  font-size: 1rem;
+}
+
+.content {
+  font-size: 1.5rem;
+  clear: both;
+}

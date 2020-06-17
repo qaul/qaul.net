@@ -1,0 +1,36 @@
+.conversation {
+  display: flex;
+  flex-direction: row;
+  padding: 1rem 0.5rem;
+  width: 100%;
+  border-bottom: 1px solid var(--q-border-light);
+}
+.conversation:hover {
+  background-color: var(--q-bg-hover);
+  text-decoration: none;
+}
+
+.icon {
+  font-size: 2.8rem;
+  padding: 0.5rem;
+  margin-inline-end: 1rem;
+}
+.content {
+  width: 100%;
+  color: var(--q-color);
+  padding: 0.5rem;
+}
+
+
+.head {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.name {
+  color: var(--q-a);
+  font-weight: bold;
+}
+.time {
+  font-size: 1rem;
+}

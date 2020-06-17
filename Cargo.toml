@@ -1,7 +1,7 @@
 [workspace]
 members = [
     # Main storage database
-    "alexandria",
+    "utils/alexandria",
 
     # main qaul.net service library
     "libqaul",
@@ -25,19 +25,19 @@ members = [
     "ratman/configure",
 
     # various utility crates
-    "async-notify",
-    "clockctrl",
-    "permute",
-    "visn",
+    "utils/async-notify",
+    "utils/clockctrl",
+    "utils/permute",
+    "utils/visn",
     
     # available netmod drivers
-    "netmod-mem",
-    "netmod-tcp",
-    "netmod-udp",
-    "netmod-wd",
+    "netmods/netmod-mem",
+    "netmods/netmod-tcp",
+    "netmods/netmod-udp",
+    "netmods/netmod-wd",
 
     # android build support
-    "android-support",
+    "utils/android-support",
 
     # test binaries
     "clients/multinode-test",

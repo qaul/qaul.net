@@ -7,8 +7,8 @@ license = "AGPL-3.0"
 edition = "2018"
 
 [dependencies]
-alexandria = { version = "0.2", path = "../alexandria" }
-netmod-mem = { path = "../netmod-mem", optional = true }
+alexandria = { version = "0.2", path = "../utils/alexandria" }
+netmod-mem = { path = "../netmods/netmod-mem", optional = true }
 ratman = { path = "../ratman" }
 
 async-std = { version = "=1.5", features = ["attributes", "unstable"] }

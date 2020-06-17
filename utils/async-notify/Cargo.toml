@@ -1,0 +1,7 @@
+[package]
+name = "async-notify"
+version = "0.1.0"
+authors = ["Leonora Tindall <nora@nora.codes>", "Katharina Fey <kookie@spacekookie.de>"]
+edition = "2018"
+description = "Notify async tasks when someone mutates data they're interested in."
+license = "AGPL-3.0"

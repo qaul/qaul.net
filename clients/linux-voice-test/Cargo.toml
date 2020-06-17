@@ -10,7 +10,7 @@ edition = "2018"
 ratman = { path = "../../ratman" }
 libqaul = { path = "../../libqaul" }
 qaul-voice = { path = "../../libqaul/service/voice" }
-netmod-udp = { path = "../../netmod-udp" }
+netmod-udp = { path = "../../netmods/netmod-udp" }
 
 async-std = "=1.5"
 futures = "0.3"

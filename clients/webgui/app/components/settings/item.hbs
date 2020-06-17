@@ -1,0 +1,15 @@
+<LinkTo type="button" local-class="button" class="settings-item" @route={{@route}}>
+  <span class="icon" ><FaIcon @icon={{@icon}} /></span>
+  <span class="text">
+    <span class="title" local-class="title">{{@title}}</span>
+    {{#if @description}}
+      <span class="description" local-class="description">{{@description}}</span>
+    {{/if}}
+  </span>
+</LinkTo>
+
+{{!
+<button type="button" {{on "click" (fn this.setLanguage "en")}\}>EN</button>
+<button type="button" {{on "click" (fn this.setLanguage "de")}\}>DE</button>
+<button type="button" {{on "click" (fn this.setLanguage "ar")}\}>AR</button>
+}}

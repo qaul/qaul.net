@@ -1,0 +1,9 @@
+<div ...attributes>
+  {{#if this.session.isAuthenticated}}
+    {{#component this.layoutComponentName}}
+      {{yield}}
+    {{/component}}
+  {{else}}
+    {{yield}}
+  {{/if}}
+</div>

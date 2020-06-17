@@ -1,0 +1,6 @@
+<LinkTo local-class="list-item" @route="users.user" @model={{@user}}>
+  <div local-class="icon">
+    <User::Icon @user={{@user}} />
+  </div>
+  <div local-class="text">{{@user.realName}}</div>
+</LinkTo>

@@ -1,0 +1,20 @@
+[package]
+name = "netmod-tcp"
+description = "An internet overlay netmod endpoint driver"
+version = "0.1.0"
+authors = ["Leonora Tindall <nora@nora.codes>", "Katharina Fey <kookie@spacekookie>"]
+edition = "2018"
+license = "AGPL-3.0"
+
+[dependencies]
+identity = { path = "../../ratman/identity", package = "ratman-identity" }
+netmod = { path = "../../ratman/netmod", package = "ratman-netmod" }
+
+async-std = { version = "=1.5", features = ["attributes", "unstable"] }
+async-trait = "0.1"
+bincode = "1.0"
+byteorder = "1.0"
+failure = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+tracing = "0.1"
+tracing-futures = "0.2"

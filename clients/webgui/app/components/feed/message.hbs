@@ -1,0 +1,13 @@
+<div local-class="message">
+  <div local-class="head">
+    <div local-class="icon">
+      <User::Icon @user={{@message.sender}} />
+    </div>
+    <div local-class="head-text">
+      <div local-class="sender">DummyName{{@message.sender.realName}}</div>
+      <div local-class="time">{{moment-from-now @message.timestamp}}</div>
+    </div>
+  </div>
+
+  <div local-class="content">{{@message.content}}</div>
+</div>

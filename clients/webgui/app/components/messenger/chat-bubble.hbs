@@ -1,0 +1,12 @@
+<div local-class="message {{if @me 'my'}}">
+  {{#if @me}}
+  {{else}}
+    <div local-class="icon">
+      <User::Icon @user={{@message.sender}} />
+    </div>
+  {{/if}}
+  <div local-class="bubble">
+    {{@message.content}}
+    <div local-class="time">{{moment-from-now @message.timestamp}}</div>
+  </div>
+</div>

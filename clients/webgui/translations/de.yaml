@@ -1,0 +1,22 @@
+send: Senden
+search: Suchbegriff Eingeben ...
+settings:
+  configuration: Konfiguration
+  setLanguage: Sprache wählen
+  selectTheme: Anzeige Thema
+  theme:
+    dark: Dunkles Profil
+    light: Helles Profil
+  userProfile: Dein Nutzerprofil
+info:
+  information: Informationen
+  aboutQaulNet: Über qaul.net
+  howto: Nutzer*innenanleitung
+  debug: Debugging Informationen
+nav:
+  feed: Feed
+  messenger: Mitteilungen
+  users: Kontakte
+  files: Dateien
+  settings: Konfiguration
+  info: Informationen

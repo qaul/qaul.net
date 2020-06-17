@@ -5,6 +5,6 @@ authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
 [dependencies]
-netmod-tcp = { path = "../../netmod-tcp" }
+netmod-tcp = { path = "../../netmods/netmod-tcp" }
 ratman = { path = "../../ratman" }
 async-std = { version = "=1.5", features = ["attributes"] }

@@ -8,5 +8,5 @@ edition = "2018"
 [dependencies]
 arbitrary = "*"
 ratman = { path = ".." }
-netmod-mem = { path = "../../netmod-mem" }
+netmod-mem = { path = "../../netmods/netmod-mem" }
 tempfile = "3.0"
