@@ -28,16 +28,16 @@ class ChatFragment : Fragment() {
         val root = inflater.inflate(R.layout.fragment_chat, container, false)
         layouter = LinearLayoutManager(context)
 
-        val list = view?.findViewById<RecyclerView>(R.id.chat_room_list)
+        val list = root?.findViewById<RecyclerView>(R.id.chat_room_list)
         list!!.layoutManager = layouter
-        
-        val rooms = listOf<ChatRoom>(ChatRoom("id1", "Alice Anonymous", "2020-05-31 13:12", 5, ArrayList()),
+
+        val rooms: List<ChatRoom> = listOf(ChatRoom("id1", "Alice Anonymous", "2020-05-31 13:12", 5, ArrayList()),
                 ChatRoom("id2", "Caren Cop", "2008-01-01 00:33", 0, ArrayList()),
                 ChatRoom("id3", "Danni Default", "2020-05-31 13:37", 2, ArrayList()))
 
-        adapter = ChatListAdapter(rooms as ArrayList<ChatRoom>)
-        chat_room_list.adapter = adapter
-
+        adapter = ChatListAdapter(rooms)
+        val chatRoomList = root.findViewById<RecyclerView>(R.id.chat_room_list)
+        chatRoomList.adapter = adapter
 
         return root
     }
