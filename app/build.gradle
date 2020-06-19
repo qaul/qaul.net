@@ -1,7 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
@@ -24,9 +23,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-    }
-    sourceSets {
-        main { assets { srcDirs 'src/main/assets', 'src/main/webgui' } }
     }
 
     compileOptions {
@@ -60,14 +56,6 @@ dependencies {
     compile "org.koin:koin-androidx-fragment:$koin_version"
 }
 
-cargo {
-    module = "../../../android-support"
-    targetDirectory = "../../../target"
-    libname = "qauldroid"
-    targetIncludes = ['libqauldroid.so']
-    targets = ["arm64"]
-    targets = ["arm64"]
-}
 buildscript {
     ext.kotlin_version = '1.3.72'
     ext.koin_version = "2.1.5"
