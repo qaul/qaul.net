@@ -1,6 +1,5 @@
 package net.qaul.app.ui.chat
 
-import android.content.Context
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,7 @@ import net.qaul.app.R
 import net.qaul.app.ffi.models.ChatRoom
 import net.qaul.app.util.inflate
 
-class ChatListAdapter(private val rooms: ArrayList<ChatRoom>)
+class ChatListAdapter(private val rooms: List<ChatRoom>)
     : RecyclerView.Adapter<ChatListAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
