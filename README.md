@@ -9,51 +9,49 @@ WiFi networks can enable people to avoid censorship and surveillence.
 
 At the moment the qaul.net android client is a prototype!
 
-## How to build
 
-Building the Android client is a multi-step process.  Namely, it has
-two external build dependencies: the Rust code, built via an
-additional gradle task, and the ember.js ui, built entirely
-independently.
+## Things to do
 
-Because cross-compiling for Android (on arm) can be a bit of a pain,
-we provide a docker build environment.  The following command will
-pull down the image, and build the Rust code.
-
-### Full docker build
-
-In this case you build the entire app inside docker.
-
-(TODO, not fully tested)
+This app is by no means even functional, and so needs a lot of work.
+If you know about Android and would like to help, cool!  There are
+some things below you can work on.
 
 
-### Partial docker build
+### Make the bottom navigation layout work
 
-In this case you only build the Rust code inside the docker env.  The
-Java/ Kotlin dependencies are much easier to fetch as long as you have
-the Android SDK installed.  But tools like Android Studio will also
-help you configure them.
+The idea is to have four main screens, that can be switched between
+with a bottom navigation.  This is partially implemented, but doesn't
+really work. It crashes when trying to open one of the custom views.
 
-Run the following command to just build the Rust code.
 
-```console
-$ clients/android/build.sh
-```
+### Chat view and chat list view
 
-This script will take care of permission issues caused by the
-container building everything as root already.
+One of the main abilities of the qaul.net app is a chat.  There are
+already fragment layout XML files for the actual chat view, and the
+chat list view, but none of that is working.
 
-Finally you can finish the assembly process either in Android Studio
-(and run it live on your phone or an emulator), or just use the
-command-line to build an app for publishing.
 
-```console
-$ cd clients/android
-$ clients/android/gradlew assemble
-```
+### Call log view
 
-A finished APK will appear in in `clients/android/app/build/outputs/apk/release`.
+Similar to the chat list view, but for calls and different metadata
+when opening the view.  none of these exist yet
 
-If you have questions about the build process, or if you're hitting
-some problem, feel free to e-mail us on the mailing list, or just our
-IRC channel on freenode: #qaul.net
+
+### Contacts view
+
+A view to list other users on the network with their names ("handle"
+and "real name"), plus their ID and maybe avatar.  When opening
+a user profile a screen should open with more details, and buttons to
+start a chat, call, befriend, block, etc.
+
+The list itself should be able to filter for "only friends", and similar,
+maybe with sliding side tabs?  Maybe something else works better.
+
+
+### Filesharing view
+
+The filesharing view shows all advertised and local files that are known by
+qaul.net.  Files that are only advertised should have a "get" button,
+and files that are local should be able to be swiped away.
+
+The list should be filterable by "files by friends"
