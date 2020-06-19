@@ -55,3 +55,14 @@ qaul.net.  Files that are only advertised should have a "get" button,
 and files that are local should be able to be swiped away.
 
 The list should be filterable by "files by friends"
+
+
+### Wifi Direct 
+
+The app needs to be able to connect to other WiFi Direct devices around it
+and establish a simple protocol by which they keep pinging each other to 
+see if they are in range, and can transfer "Frames", which are opaque and
+encrypted shards of data.
+
+Currently the WiFi Direct code starts looking for peers, but never finds
+any, and also there's no service to actually use this to transfer any data.
