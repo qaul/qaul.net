@@ -10,23 +10,31 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.wifi.aware.*
+import android.net.wifi.p2p.WifiP2pDevice
+import android.net.wifi.p2p.WifiP2pDeviceList
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.wifiscanner.listener.WifiP2PConnectionCallback
+import com.wifiscanner.service.WifiP2PService
+import com.wifiscanner.service.WifiP2PServiceImpl
 import net.qaul.app.net.WDService
 import java.net.ServerSocket
 import java.net.Socket
 
 class LoginActivity : AppCompatActivity() {
 
+    lateinit var service: WifiP2PServiceImpl
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.fragment_login)
+        setContentView(R.layout.activity_debug)
 
         // Start our Wifi Direct service
         startService(Intent(this, WDService::class.java))
@@ -181,13 +189,79 @@ class LoginActivity : AppCompatActivity() {
         }
 
 
+        // Debug printer
+        val text = findViewById<TextView>(R.id.debugText)
+        text.text = ""
 
+        val appendLog = { s: String -> text.append(s + "\n") }
+        appendLog("--- Welcome to the qaul.net automated test ---\n")
 
-        val butt = findViewById<Button>(R.id.button_login)
-        butt.setOnClickListener {
-            Log.i("login", "Successfully logged in!")
-            val i = Intent(this, MainActivity::class.java)
-            startActivity(i)
+        val callback = object : WifiP2PConnectionCallback {
+            override fun onDataReceiving() {
+                appendLog("Receivig data")
+            }
+
+            override fun onInitiateDiscovery() {
+                appendLog("Initiated discovery")
+            }
+
+            override fun onDataReceivedSuccess(p0: String?) {
+                appendLog("Data received: " + p0)
+            }
+
+            override fun onPeerConnectionFailure() {
+                appendLog("Connection failed")
+            }
+
+            override fun onPeerDisconnectionFailure() {
+                appendLog("Peer failed to connect")
+            }
+
+            override fun onPeerAvailable(p0: WifiP2pDeviceList?) {
+                appendLog("Peer now available: " + p0)
+            }
+
+            override fun onDataTransferredSuccess() {
+                appendLog("Data transfer success")
+            }
+
+            override fun onDiscoverySuccess() {
+                appendLog("Discovery success")
+            }
+
+            override fun onDiscoveryFailure() {
+                appendLog("Discovery failed")
+            }
+
+            override fun onPeerConnectionSuccess() {
+                appendLog("Peer connection success")
+            }
+
+            override fun onDataTransferring() {
+                appendLog("Data transfering...")
+            }
+
+            override fun onDataReceivedFailure() {
+                appendLog("Data receive failed")
+            }
+
+            override fun onPeerDisconnectionSuccess() {
+                appendLog("Peer disconnected!")
+            }
+
+            override fun onDataTransferredFailure() {
+                appendLog("Data transfer failed")
+            }
+
+            override fun onPeerStatusChanged(p0: WifiP2pDevice?) {
+                appendLog("Peer status changed: " + p0)
+            }
         }
+
+        this.service = WifiP2PServiceImpl.Builder()
+                .setSender(this)
+                .setWifiP2PConnectionCallback(callback)
+                .build()
+        service.onCreate()
     }
 }
