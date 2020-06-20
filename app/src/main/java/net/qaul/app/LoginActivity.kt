@@ -32,7 +32,10 @@ class LoginActivity : AppCompatActivity() {
         startService(Intent(this, WDService::class.java))
 
         // Check if we can do Wifi Aware
-        if (applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_WIFI_AWARE)) {
+        val canDoWA = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_WIFI_AWARE)
+        Log.i("wifiaware", "Can we do wifi aware? ... " + if (canDoWA) "YES" else "No...")
+
+        if (canDoWA) {
             val wMan = applicationContext.getSystemService(Context.WIFI_AWARE_SERVICE) as WifiAwareManager?
             val filter = IntentFilter(WifiAwareManager.ACTION_WIFI_AWARE_STATE_CHANGED)
 
