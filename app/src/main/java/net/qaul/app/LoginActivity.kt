@@ -39,9 +39,9 @@ class LoginActivity : AppCompatActivity() {
             val recv = object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
                     if (wMan!!.isAvailable) {
-                        Log.i("login", "WE CAN DO WIFI AWARE!")
+                        Log.i("wifiaware", "WE CAN DO WIFI AWARE!")
                     } else {
-                        Log.w("login", "WiFi Aware is not available (anymore)!")
+                        Log.w("wifiaware", "WiFi Aware is not available (anymore)!")
                     }
                 }
             }
