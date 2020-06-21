@@ -12,10 +12,11 @@ import android.util.Log
 import android.widget.Toast
 
 // TODO: pause the receiver on activity pause
-class WDReceiver(val serv: WDService,
-                 val manager: WifiP2pManager,
-                 val channel: WifiP2pManager.Channel)
-    : BroadcastReceiver() {
+class WDReceiver(
+    val serv: WDService,
+    val manager: WifiP2pManager,
+    val channel: WifiP2pManager.Channel
+) : BroadcastReceiver() {
     private val peers = mutableListOf<WifiP2pDevice>()
 
     private val peerListListener = WifiP2pManager.PeerListListener { peerList ->
@@ -28,10 +29,12 @@ class WDReceiver(val serv: WDService,
 
             // FIXME: get a change-set of devices
 
-            peers.map { WifiP2pConfig().apply {
-                deviceAddress = it.deviceAddress
-                wps.setup = WpsInfo.PBC
-            } }.forEach {
+            peers.map {
+                WifiP2pConfig().apply {
+                    deviceAddress = it.deviceAddress
+                    wps.setup = WpsInfo.PBC
+                }
+            }.forEach {
                 serv.connect(it) // Then connect!
             }
 
@@ -42,9 +45,11 @@ class WDReceiver(val serv: WDService,
         }
 
         if (peers.isEmpty()) {
-            Toast.makeText(serv.applicationContext,
-                    "No more peers around to connect to...",
-                    Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                serv.applicationContext,
+                "No more peers around to connect to...",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
@@ -60,6 +65,8 @@ class WDReceiver(val serv: WDService,
         }
     }
 
+    // FIXME: 21.06.20 should be extracted in smaller methods
+    @Suppress("LongMethod", "ComplexMethod")
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION -> {

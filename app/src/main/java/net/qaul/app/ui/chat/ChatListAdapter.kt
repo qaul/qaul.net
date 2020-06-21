@@ -9,8 +9,7 @@ import net.qaul.app.R
 import net.qaul.app.ffi.models.ChatRoom
 import net.qaul.app.util.inflate
 
-class ChatListAdapter(private val rooms: List<ChatRoom>)
-    : RecyclerView.Adapter<ChatListAdapter.ViewHolder>() {
+class ChatListAdapter(private val rooms: List<ChatRoom>) : RecyclerView.Adapter<ChatListAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflated = parent.inflate(R.layout.item_chat_room, false)
@@ -43,7 +42,7 @@ class ChatListAdapter(private val rooms: List<ChatRoom>)
         }
 
         companion object {
-            private val ROOM_KEY = "ROOM"
+            private const val ROOM_KEY = "ROOM"
         }
     }
 }
