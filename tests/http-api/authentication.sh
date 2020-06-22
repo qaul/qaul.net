@@ -8,12 +8,15 @@
 set -ex
 
 # Create users
-source src/users-bootstrap.sh
+source src/user-bootstrap.sh
+
+# Validate the authentication token
+source src/auth-validate.sh "$A_ID" $A_TOKEN
 
 # Logout
-source src/logout.sh "$A_ID" $A_TOKEN
+source src/auth-logout.sh "$A_ID" $A_TOKEN
 
 # Login
-source src/login.sh "$A_ID"
+source src/auth-login.sh "$A_ID"
 
 echo "Done"

@@ -1,14 +1,13 @@
 # JSON RPC Communication with qaul-http-RPC Interface
 
-The scripts in this folder can be used to 
+The scripts in this folder can be used to test all the functions of the 
+JSON RPC interface.
 
 ## Usage
 
-Make sure you have a test server running for these tests.  While in
-the cargo workspace you can just run `cargo run --bin multinode-test
-<PATH>`, where `PATH` is the path to the assembled webgui (FIXME:
-currently that's not the case - it will accept any path because the
-webgui isn't used).
+Make sure you have a test server running for these tests. 
+While in the cargo workspace you can just run `cargo run --bin multinode-test <PATH>`, where `PATH` is the path to the assembled webgui. 
+The default path to the 
 
 Note: if you want to run multiple tests in succession manually, make
 sure to do it in the same shell.  Some of them export env variables
@@ -42,41 +41,42 @@ problem.
 Following is a list of tests (please try to keep it up to date), with
 comments and notes for tests that require them.
 
-#### Set User Name
+#### Users
+
+This test will create a user, modify this user, list all users on the instance and delete the created user.
 
 ```bash
-./users_modify.sh
+./users_crud.sh
 ```
 
-#### Get a List of all Users
+### Chat Rooms
+
+Only create a chat room
 
 ```bash
-./users_list.sh
+./chat-room-create.sh
 ```
 
-### Chat-Rooms
-
-#### Create a Chat-Room
-
-Creates a chat room
+Create a chat room, list all chat rooms for the authenticated user, modify the chat room and get the chat room.
 
 ```bash
-./chat-rooms-create.sh
+./chat-room-crud.sh
 ```
+
 
 #### Send a Message
 
-Creates a chat room and sends a message into it
+Creates a chat room and sends a message from node A to node B, it the receives the message on node B.
 
 ```bash
-./chat-messages-create.sh
+./chat-message-create.sh
 ```
 
-#### List all Chat-Rooms
+#### List all Chat Rooms
 
 This will create a chat room, send a message and then list it's data back.
 
 ```bash
-./chat-rooms-list.sh
+./chat-room-list.sh
 ```
 

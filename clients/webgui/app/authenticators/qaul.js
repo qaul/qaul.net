@@ -2,7 +2,7 @@ import Base from 'ember-simple-auth/authenticators/base';
 
 export default class QaulAuthenticator extends Base {
   async restore(data) {
-    const validateTokenResponse = await fetch('/http/validate_token', {
+    const validateTokenResponse = await fetch('/http/auth', {
       headers: {
         Authorization: JSON.stringify(data),
       }
@@ -15,7 +15,7 @@ export default class QaulAuthenticator extends Base {
   }
 
   async authenticate(id, pw) {
-    const loginResponse = await fetch('/http/login', {
+    const loginResponse = await fetch('/http/auth', {
       method: 'POST',
       body: JSON.stringify({ id, pw }),
     });
@@ -27,8 +27,8 @@ export default class QaulAuthenticator extends Base {
   }
 
   async invalidate({ id, token }) {
-    await fetch(`/http/logout`, {
-      method: 'POST',
+    await fetch(`/http/auth`, {
+      method: 'DELETE',
       headers: {
         Authorization: JSON.stringify({ id, token }),
       }

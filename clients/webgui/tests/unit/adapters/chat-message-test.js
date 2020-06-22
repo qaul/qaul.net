@@ -6,7 +6,7 @@ module('Unit | Adapter | chat message', function(hooks) {
 
   // Replace this with your real tests.
   test('it exists', function(assert) {
-    let adapter = this.owner.lookup('adapter:chat-message');
+    let adapter = this.owner.lookup('adapter:chat_message');
     assert.ok(adapter);
   });
 });

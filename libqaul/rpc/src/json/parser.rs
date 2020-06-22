@@ -25,11 +25,11 @@ fn de_json<'env, T: DeserializeOwned>(
 ) -> Result<T, String> {
     match (auth.kind, auth.method) {
         // We don't want to inject the auth info for a few cases
-        ("users", "list")
-        | ("users", "login")
-        | ("users", "create")
-        | ("users", "get")
-        | ("files", "list") => {}
+        ("user", "list")
+        | ("user", "login")
+        | ("user", "create")
+        | ("user", "get")
+        | ("file", "list") => {}
         (_, _) => {
             data.insert(
                 "auth".into(),
@@ -69,36 +69,36 @@ impl RequestEnv {
             data: match (kind.as_str(), method.as_str()) {
                 // chat service message functions
                 #[cfg(feature = "chat")]
-                ("chat-messages", "subscribe") => Request::ChatMsgSub(de_json(data, auth)?),
+                ("chat_message", "subscribe") => Request::ChatMsgSub(de_json(data, auth)?),
                 #[cfg(feature = "chat")]
-                ("chat-messages", "create") => Request::ChatMsgCreate(de_json(data, auth)?),
+                ("chat_message", "create") => Request::ChatMsgCreate(de_json(data, auth)?),
                 #[cfg(feature = "chat")]
-                ("chat-messages", "query") => Request::ChatLoadRoom(de_json(data, auth)?),
+                ("chat_message", "query") => Request::ChatLoadRoom(de_json(data, auth)?),
                 #[cfg(feature = "chat")]
-                ("chat-rooms", "list") => Request::ChatRoomList(de_json(data, auth)?),
+                ("chat_room", "list") => Request::ChatRoomList(de_json(data, auth)?),
                 #[cfg(feature = "chat")]
-                ("chat-rooms", "get") => Request::ChatRoomGet(de_json(data, auth)?),
+                ("chat_room", "get") => Request::ChatRoomGet(de_json(data, auth)?),
                 #[cfg(feature = "chat")]
-                ("chat-rooms", "create") => Request::ChatRoomCreate(de_json(data, auth)?),
+                ("chat_room", "create") => Request::ChatRoomCreate(de_json(data, auth)?),
                 #[cfg(feature = "chat")]
-                ("chat-rooms", "modify") => Request::ChatRoomModify(de_json(data, auth)?),
+                ("chat_room", "modify") => Request::ChatRoomModify(de_json(data, auth)?),
 
                 // libqaul contact functions
-                ("contacts", "list") => Request::UserListRemote(de_json(data, auth)?),
-                // ("contacts", "get") => Request::ContactGet(de_json(data, auth)?),
-                // ("contacts", "query") => Request::ContactQuery(de_json(data, auth)?),
-                // ("contacts", "modify") => Request::ContactQuery(de_json(data, auth)?),
+                ("contact", "list") => Request::UserListRemote(de_json(data, auth)?),
+                // ("contact", "get") => Request::ContactGet(de_json(data, auth)?),
+                // ("contact", "query") => Request::ContactQuery(de_json(data, auth)?),
+                // ("contact", "modify") => Request::ContactQuery(de_json(data, auth)?),
 
                 // libqaul user functions
-                ("users", "list") => Request::UserList(de_json(data, auth)?),
-                ("users", "create") => Request::UserCreate(de_json(data, auth)?),
-                ("users", "delete") => Request::UserDelete(de_json(data, auth)?),
-                ("users", "repass") => Request::UserChangePw(de_json(data, auth)?),
-                ("users", "login") => Request::UserLogin(de_json(data, auth)?),
-                ("users", "logout") => Request::UserLogout(de_json(data, auth)?),
-                ("users", "validate") => Request::UserIsAuthenticated(de_json(data, auth)?),
-                ("users", "get") => Request::UserGet(de_json(data, auth)?),
-                ("users", "modify") => Request::UserUpdate(de_json(data, auth)?),
+                ("user", "list") => Request::UserList(de_json(data, auth)?),
+                ("user", "create") => Request::UserCreate(de_json(data, auth)?),
+                ("user", "delete") => Request::UserDelete(de_json(data, auth)?),
+                ("user", "repass") => Request::UserChangePw(de_json(data, auth)?),
+                ("user", "login") => Request::UserLogin(de_json(data, auth)?),
+                ("user", "logout") => Request::UserLogout(de_json(data, auth)?),
+                ("user", "validate") => Request::UserIsAuthenticated(de_json(data, auth)?),
+                ("user", "get") => Request::UserGet(de_json(data, auth)?),
+                ("user", "modify") => Request::UserUpdate(de_json(data, auth)?),
                 (kind, method) => {
                     return Err(format!("Unknown parse tuple: ({}, {})", kind, method));
                 }
@@ -163,8 +163,8 @@ fn json_builder(
 
 #[test]
 fn test_builder() {
-    let json: JsonMap = serde_json::from_str(&json_builder("users", "list", None, None)).unwrap();
-    assert_eq!(json.get("kind").unwrap(), "users");
+    let json: JsonMap = serde_json::from_str(&json_builder("user", "list", None, None)).unwrap();
+    assert_eq!(json.get("kind").unwrap(), "user");
     assert_eq!(json.get("method").unwrap(), "list");
     assert_eq!(json.get("auth"), None);
 }
@@ -177,8 +177,8 @@ fn test_builder_with_auth() {
 
     let auth = UserAuth::test();
     let json: JsonMap =
-        serde_json::from_str(&json_builder("users", "list", Some(auth.clone()), None)).unwrap();
-    assert_eq!(json.get("kind").unwrap(), "users");
+        serde_json::from_str(&json_builder("user", "list", Some(auth.clone()), None)).unwrap();
+    assert_eq!(json.get("kind").unwrap(), "user");
     assert_eq!(json.get("method").unwrap(), "list");
     assert_eq!(
         json.get("auth").unwrap(),
@@ -198,7 +198,7 @@ fn test_builder_with_auth() {
 /// get's sad otherwise.
 #[test]
 fn envelope_chat_user_list() {
-    let json = json_builder("users", "list", None, None);
+    let json = json_builder("user", "list", None, None);
 
     let je: RequestEnv = serde_json::from_str(&json).expect("JsonEnvelope failed");
     let env = je.generate_envelope().unwrap();
@@ -212,7 +212,7 @@ fn envelope_chat_room_create() {
     let friend = Identity::random();
     let auth = UserAuth::test();
     let json = json_builder(
-        "chat-rooms",
+        "chat_room",
         "create",
         Some(auth.clone()),
         Some(vec![(
@@ -240,7 +240,7 @@ fn envelope_chat_room_list() {
 
     let friend = Identity::random();
     let auth = UserAuth::test();
-    let json = json_builder("chat-rooms", "list", Some(auth.clone()), None);
+    let json = json_builder("chat_room", "list", Some(auth.clone()), None);
 
     let je: RequestEnv = serde_json::from_str(&json).expect("JsonEnvelope failed");
     let env = je.generate_envelope().unwrap();
@@ -258,7 +258,7 @@ fn envelope_chat_room_get() {
     let room = Identity::random();
     let auth = UserAuth::test();
     let json = json_builder(
-        "chat-rooms",
+        "chat_room",
         "get",
         Some(auth.clone()),
         Some(vec![("id", Value::String(room.to_string()))]),
@@ -280,7 +280,7 @@ fn envelope_chat_room_modify() {
     let room = Identity::random();
     let auth = UserAuth::test();
     let json = json_builder(
-        "chat-rooms",
+        "chat_room",
         "modify",
         Some(auth.clone()),
         Some(vec![

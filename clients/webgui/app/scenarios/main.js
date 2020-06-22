@@ -15,13 +15,13 @@ export default class extends Scenario {
   //     //   this.mockFindRecord('user').returns({ id });
   //     // })
   //   this.mockFindAll('file', 15);
-  //   // this.mockFindAll('chat-room', 10);
+  //   // this.mockFindAll('chat_room', 10);
 
   //   // for(let i = 0; i < 15; i++) {
-  //   this.mockFindRecord('chat-room'); // seems not to work?
+  //   this.mockFindRecord('chat_room'); // seems not to work?
   //   // }
 
-  //   this.mockQuery('chat-message').returns({ json: this.buildList('chat-message', 10) });
+  //   this.mockQuery('chat_message').returns({ json: this.buildList('chat_message', 10) });
 
     getPretender().post('*', getPretender().passthrough);
     getPretender().get('*', getPretender().passthrough);

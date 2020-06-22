@@ -1,9 +1,5 @@
-//! # REST to RPC transformation
-//!
-//! TODOs:
-//! * Error Handling: there should be no panic anymore
-//!   * Return early with error when wrong input is delivered
-//!
+//! # HTTP-API to RPC transformation
+
 
 use crate::Responder;
 use async_std::sync::Arc;
@@ -75,14 +71,14 @@ pub async fn http2rpc_params_query(
         Err(_) => BTreeMap::new(),
     };
 
-    // change data to diff if it is a PATCH request
-    if method == "modify" {
-        for (key, value) in data.iter_mut() {
-            if key != "id" {
-                *value = json!({ "set": value });
-            }
-        }
-    }
+    // // change data to diff if it is a PATCH request
+    // if method == "modify" {
+    //     for (key, value) in data.iter_mut() {
+    //         if key != "id" {
+    //             *value = json!({ "set": value });
+    //         }
+    //     }
+    // }
 
     // debug information
     println!("--------- data ---------");
@@ -144,6 +140,10 @@ pub async fn http2rpc_params_query(
             } else {
                 400
             }
+        }
+        libqaul_rpc::Response::Success => {
+            // return empty body when there is only the generic Success message
+            return Response::new(204).body_string("".to_string());
         }
         _ => 200,
     };

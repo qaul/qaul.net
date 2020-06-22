@@ -7,7 +7,7 @@ export default class UserController extends Controller {
   }
 
   @action async startChart() {
-    const room = this.store.createRecord('chat-room', {
+    const room = this.store.createRecord('chat_room', {
       name: 'foo',
       users: [this.user],
     })

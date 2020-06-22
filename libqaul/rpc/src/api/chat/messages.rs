@@ -31,7 +31,7 @@ impl Subscriber for Subscription {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Query {
     pub auth: UserAuth,
-    #[serde(rename = "chat-room")]
+    #[serde(rename = "chat_room")]
     pub room: RoomId,
 }
 

@@ -13,62 +13,57 @@ pub fn http_routes(http_state: Arc<Responder>) -> Server<Arc<Responder>> {
 
     // authentication
     app_http
-        .at("/login")
-        .post(|req| async move { http2rpc::http2rpc(req, "users", "login").await });
-    app_http
-        .at("/logout")
-        .post(|req| async move { http2rpc::http2rpc(req, "users", "logout").await });
-
-    app_http
-        .at("/validate_token")
-        .get(|req| async move { http2rpc::http2rpc(req, "users", "validate").await });
+        .at("/auth")
+        .get(|req| async move { http2rpc::http2rpc(req, "user", "validate").await })
+        .post(|req| async move { http2rpc::http2rpc(req, "user", "login").await })
+        .delete(|req| async move { http2rpc::http2rpc(req, "user", "logout").await });
 
     // user management
     app_http
-        .at("/users")
-        .get(|req| async move { http2rpc::http2rpc(req, "users", "list").await })
-        .post(|req| async move { http2rpc::http2rpc(req, "users", "create").await });
+        .at("/user")
+        .get(|req| async move { http2rpc::http2rpc(req, "user", "list").await })
+        .post(|req| async move { http2rpc::http2rpc(req, "user", "create").await });
     app_http
-        .at("/users/:id")
+        .at("/user/:id")
         .get(|req| async move {
             let params = vec!["id"];
-            http2rpc::http2rpc_params(req, "users", "get", Some(params)).await
+            http2rpc::http2rpc_params(req, "user", "get", Some(params)).await
         })
-        .patch(|req| async move { http2rpc::http2rpc(req, "users", "modify").await })
-        .delete(|req| async move { http2rpc::http2rpc(req, "users", "delete").await });
+        .patch(|req| async move { http2rpc::http2rpc(req, "user", "modify").await })
+        .delete(|req| async move { http2rpc::http2rpc(req, "user", "delete").await });
 
     // contacts
     // TODO: contacts query
     app_http
-        .at("/contacts")
-        .get(|req| async move { http2rpc::http2rpc(req, "contacts", "list").await });
+        .at("/contact")
+        .get(|req| async move { http2rpc::http2rpc(req, "contact", "list").await });
 
     // chat service
-    // chat-rooms
+    // chat_room
     app_http
-        .at("/chat-rooms")
-        .get(|req| async move { http2rpc::http2rpc(req, "chat-rooms", "list").await })
-        .post(|req| async move { http2rpc::http2rpc(req, "chat-rooms", "create").await });
+        .at("/chat_room")
+        .get(|req| async move { http2rpc::http2rpc(req, "chat_room", "list").await })
+        .post(|req| async move { http2rpc::http2rpc(req, "chat_room", "create").await });
     app_http
-        .at("/chat-rooms/:id")
+        .at("/chat_room/:id")
         .get(|req| async move {
             let params = vec!["id"];
-            http2rpc::http2rpc_params(req, "chat-rooms", "get", Some(params)).await
+            http2rpc::http2rpc_params(req, "chat_room", "get", Some(params)).await
         })
-        .patch(|req| async move { http2rpc::http2rpc(req, "chat-rooms", "modify").await })
-        //.delete(|req| async move { http2rpc::http2rpc(req, "chat-rooms", "delete").await })
+        .patch(|req| async move { http2rpc::http2rpc(req, "chat_room", "modify").await })
+        //.delete(|req| async move { http2rpc::http2rpc(req, "chat_room", "delete").await })
         ;
 
-    // chat-messages
+    // chat_message
     app_http
-        .at("/chat-messages")
+        .at("/chat_message")
         .get(|req| async move {
-            http2rpc::http2rpc_query(req, "chat-messages", "query").await
+            http2rpc::http2rpc_query(req, "chat_message", "query").await
         })
-        .post(|req| async move { http2rpc::http2rpc(req, "chat-messages", "create").await });
+        .post(|req| async move { http2rpc::http2rpc(req, "chat_message", "create").await });
     app_http
-        .at("/chat-messages/next")
-        .get(|req| async move { http2rpc::http2rpc_query(req, "chat-messages", "next").await });
+        .at("/chat_message/next")
+        .get(|req| async move { http2rpc::http2rpc_query(req, "chat_message", "next").await });
 
     app_http
 }

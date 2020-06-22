@@ -17,7 +17,7 @@ async fn rpc_authentication_login() {
     let json_string = format!(
         r#"{{
         "id": "/login",
-        "kind": "users",
+        "kind": "user",
         "method": "login",
         "data": {{
             "id": "{a_id}",
@@ -48,7 +48,7 @@ async fn rpc_authentication_logout() {
     let json_string = format!(
         r#"{{
         "id": "/logout",
-        "kind": "users",
+        "kind": "user",
         "method": "logout",
         "auth": {{
             "id": "{a_id}",

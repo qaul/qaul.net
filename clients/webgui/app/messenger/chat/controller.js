@@ -12,7 +12,7 @@ export default class MessengerController extends Controller {
   }
 
   @action async sendMessage(text) {
-    await this.store.createRecord('chat-message', {
+    await this.store.createRecord('chat_message', {
       room: this.room,
       text,
     }).save();

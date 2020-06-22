@@ -122,7 +122,7 @@ async fn user_delete() {
         }),
         page: None,
         method: "delete".into(),
-        kind: "users".into(),
+        kind: "user".into(),
         data: vec![("purge".into(), true.into())].into_iter().collect(),
     };
 
