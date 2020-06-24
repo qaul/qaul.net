@@ -8,37 +8,73 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+<<<<<<< HEAD
+=======
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+>>>>>>> 38edde2... Adding new chat room list layout and animated buttons
 import net.qaul.app.R
 import net.qaul.app.ffi.models.ChatRoom
+import net.qaul.app.util.defanSubFabs
+import net.qaul.app.util.fanSubFabs
+import net.qaul.app.util.rotateFab
 
 class ChatFragment : Fragment() {
 
     // He's the layer-outer
     private lateinit var layouter: LinearLayoutManager
     private lateinit var adapter: ChatListAdapter
-    private lateinit var chatFragment: ChatViewModel
+
+    var fabRotated: Boolean = false
+    var originFab: Float = 0.0f
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        chatFragment = ViewModelProviders.of(this).get(ChatViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_chat, container, false)
         layouter = LinearLayoutManager(context)
 
-        val list = root?.findViewById<RecyclerView>(R.id.chat_room_list)
-        list!!.layoutManager = layouter
+        val list = root!!.findViewById<RecyclerView>(R.id.chat_room_list)!!
+        list.layoutManager = layouter
 
-        val rooms: List<ChatRoom> = listOf(
-            ChatRoom("id1", "Alice Anonymous", "2020-05-31 13:12", 5, ArrayList()),
-            ChatRoom("id2", "Caren Cop", "2008-01-01 00:33", 0, ArrayList()),
-            ChatRoom("id3", "Danni Default", "2020-05-31 13:37", 2, ArrayList())
+        val rooms: MutableList<ChatRoom> = mutableListOf(
+                ChatRoom("id1", "Alice Anonymous", "2020-05-31 13:12", 5, ArrayList()),
+                ChatRoom("id2", "Caren Cop", "2008-01-01 00:33", 0, ArrayList()),
+                ChatRoom("id3", "Danni Default", "2020-05-31 13:37", 2, ArrayList())
         )
 
-        adapter = ChatListAdapter(rooms)
+        adapter = ChatListAdapter(parentFragmentManager, rooms)
         val chatRoomList = root.findViewById<RecyclerView>(R.id.chat_room_list)
         chatRoomList.adapter = adapter
+        chatRoomList.layoutManager = LinearLayoutManager(context)
+
+        // Do the FAB stuff
+        val fab = root.findViewById<FloatingActionButton>(R.id.chat_room_list_start)
+        val fab_single = root.findViewById<FloatingActionButton>(R.id.chat_room_list_start_chat)
+        val fab_group = root.findViewById<FloatingActionButton>(R.id.chat_room_list_start_group)
+
+        originFab = fab_single.y
+
+        fab.setOnClickListener {
+            fabRotated = !fabRotated
+            rotateFab(fab, fabRotated)
+
+            if(fabRotated) {
+                val yOffset = ((fab.height - fab_single.height) / 2) + fab_single.height
+                fanSubFabs(listOf(fab_single, fab_group), 15, yOffset)
+            } else {
+                defanSubFabs(listOf(fab_single, fab_group), originFab)
+            }
+        }
+
+        fab_single.setOnClickListener {
+            // Select a user
+        }
+
+        fab_group.setOnClickListener {
+            // Select multiple users
+        }
 
         return root
     }

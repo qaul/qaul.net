@@ -11,17 +11,18 @@ import androidx.lifecycle.ViewModelProviders
 import net.qaul.app.R
 
 class UsersFragment : Fragment() {
-    private lateinit var usersFragment: UsersViewModel
+//    private lateinit var usersFragment: UsersViewModel
 
-    override fun onCreateView(inflater: LayoutInflater,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        usersFragment = ViewModelProviders.of(this).get(UsersViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_files, container, false)
-        val textView: TextView = root.findViewById(R.id.text_files)
-        usersFragment.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
-        return root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, bundle: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_users, container, false)
+
+
+//        usersFragment = ViewModelProviders.of(this).get(UsersViewModel::class.java)
+//        val textView: TextView = root.findViewById(R.id.text_files)
+
+//        usersFragment.text.observe(viewLifecycleOwner, Observer {
+//            textView.text = it
+//        })
+
     }
 }

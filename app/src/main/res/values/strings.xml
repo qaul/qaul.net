@@ -22,4 +22,8 @@
     <string name="chatroom_send">Send</string>
     <string name="placeholder_chatroom_name">Chat Room Name</string>
     <string name="placeholder_chatroom_timestamp">2020-05-31 13:12</string>
+
+    <string name="peering_button_connect">Connect</string>
+    <string name="peering_button_disconnect">Disconnect</string>
+    <string name="peering_server_hint"><![CDATA[Server <ip>:<port>]]></string>
 </resources>
