@@ -8,12 +8,9 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chatroom_message_list"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:scrollbars="vertical"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical" />
 
     <!-- A horizontal line between the chatbox and RecyclerView -->
     <View
@@ -46,7 +43,9 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:maxLines="6"/>
+            android:maxLines="6"
+            android:autofillHints=""
+            android:inputType="text" />
 
         <Button
             android:id="@+id/button_chatbox_send"

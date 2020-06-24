@@ -9,8 +9,8 @@
     android:paddingTop="8dp">
 
     <TextView
-        android:id="@+id/text_message_body"
-        android:text="hello, hello!"
+        android:id="@+id/chat_message_body"
+        android:text="All cops are bastards"
         android:background="@drawable/chat_blob_blue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -22,12 +22,12 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/text_message_time"
+        android:id="@+id/chat_message_time"
         android:text="11:40"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="10sp"
         android:layout_marginRight="4dp"
-        app:layout_constraintBottom_toBottomOf="@+id/text_message_body"
-        app:layout_constraintRight_toLeftOf="@+id/text_message_body" />
+        app:layout_constraintBottom_toBottomOf="@+id/chat_message_body"
+        app:layout_constraintRight_toLeftOf="@+id/chat_message_body" />
 </androidx.constraintlayout.widget.ConstraintLayout>

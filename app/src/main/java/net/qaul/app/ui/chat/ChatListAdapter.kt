@@ -46,11 +46,12 @@ class ChatListAdapter(private val rooms: MutableList<ChatRoom>, private val frag
         }
 
         override fun onClick(v: View?) {
-            Log.d("ChatRooms", "Selecting room: " + room!!.name)
-            val trans = man.beginTransaction()
             val fragment = ChatRoomFragment(room!!)
+
+            // Create transaction to replace main container view
+            val trans = man.beginTransaction()
             trans.replace(R.id.nav_host_fragment, fragment).addToBackStack(null)
-            trans.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN )
+            trans.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
             trans.commit()
         }
 

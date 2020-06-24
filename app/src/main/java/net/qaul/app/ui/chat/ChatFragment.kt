@@ -55,7 +55,6 @@ class ChatFragment : Fragment() {
         val fab_group = root.findViewById<FloatingActionButton>(R.id.chat_room_list_start_group)
 
         originFab = fab_single.y
-
         fab.setOnClickListener {
             fabRotated = !fabRotated
             rotateFab(fab, fabRotated)
