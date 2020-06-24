@@ -5,13 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-<<<<<<< HEAD
-=======
 import com.google.android.material.floatingactionbutton.FloatingActionButton
->>>>>>> 38edde2... Adding new chat room list layout and animated buttons
 import net.qaul.app.R
 import net.qaul.app.ffi.models.ChatRoom
 import net.qaul.app.util.defanSubFabs
@@ -27,6 +24,8 @@ class ChatFragment : Fragment() {
     var fabRotated: Boolean = false
     var originFab: Float = 0.0f
 
+    lateinit var fragMan: FragmentManager
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -34,6 +33,7 @@ class ChatFragment : Fragment() {
     ): View? {
         val root = inflater.inflate(R.layout.fragment_chat, container, false)
         layouter = LinearLayoutManager(context)
+        fragMan = parentFragmentManager
 
         val list = root!!.findViewById<RecyclerView>(R.id.chat_room_list)!!
         list.layoutManager = layouter
@@ -44,7 +44,7 @@ class ChatFragment : Fragment() {
                 ChatRoom("id3", "Danni Default", "2020-05-31 13:37", 2, ArrayList())
         )
 
-        adapter = ChatListAdapter(parentFragmentManager, rooms)
+        adapter = ChatListAdapter(rooms, fragMan)
         val chatRoomList = root.findViewById<RecyclerView>(R.id.chat_room_list)
         chatRoomList.adapter = adapter
         chatRoomList.layoutManager = LinearLayoutManager(context)

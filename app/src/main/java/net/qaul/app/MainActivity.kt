@@ -17,13 +17,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
 
-        val navController = findNavController(R.id.nav_host_fragment)
-        val appBarConfiguration = AppBarConfiguration(setOf(
+        val navCtrl = findNavController(R.id.nav_host_fragment)
+        val appBarCfg = AppBarConfiguration(setOf(
                 R.id.navigation_chat,
                 R.id.navigation_files,
                 R.id.navigation_users,
                 R.id.navigation_settings))
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+        setupActionBarWithNavController(navCtrl, appBarCfg)
+        navView.setupWithNavController(navCtrl)
     }
 }
