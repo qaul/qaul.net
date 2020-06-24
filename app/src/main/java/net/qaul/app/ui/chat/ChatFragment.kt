@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.fragment_chat.*
 import net.qaul.app.R
 import net.qaul.app.ffi.models.ChatRoom
 
@@ -20,9 +19,9 @@ class ChatFragment : Fragment() {
     private lateinit var chatFragment: ChatViewModel
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         chatFragment = ViewModelProviders.of(this).get(ChatViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_chat, container, false)
@@ -31,9 +30,11 @@ class ChatFragment : Fragment() {
         val list = root?.findViewById<RecyclerView>(R.id.chat_room_list)
         list!!.layoutManager = layouter
 
-        val rooms: List<ChatRoom> = listOf(ChatRoom("id1", "Alice Anonymous", "2020-05-31 13:12", 5, ArrayList()),
-                ChatRoom("id2", "Caren Cop", "2008-01-01 00:33", 0, ArrayList()),
-                ChatRoom("id3", "Danni Default", "2020-05-31 13:37", 2, ArrayList()))
+        val rooms: List<ChatRoom> = listOf(
+            ChatRoom("id1", "Alice Anonymous", "2020-05-31 13:12", 5, ArrayList()),
+            ChatRoom("id2", "Caren Cop", "2008-01-01 00:33", 0, ArrayList()),
+            ChatRoom("id3", "Danni Default", "2020-05-31 13:37", 2, ArrayList())
+        )
 
         adapter = ChatListAdapter(rooms)
         val chatRoomList = root.findViewById<RecyclerView>(R.id.chat_room_list)

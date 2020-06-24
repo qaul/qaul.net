@@ -5,11 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.wifi.p2p.WifiP2pConfig
-import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pManager
 import android.os.IBinder
 import android.util.Log
-import android.widget.Toast
 
 /** A handler for wifi direct messages and state */
 class WDService : Service() {
@@ -47,20 +45,19 @@ class WDService : Service() {
         manager.discoverPeers(channel, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
                 Log.i("WD", "onSuccess() of discoverPeers")
-
             }
 
             override fun onFailure(reason: Int) {
                 // if 2 == turn on wifi here
-
                 Log.i("WD", "onFailure(`" + reason + "`) of discoverPeers")
             }
         })
     }
 
     fun connect(config: WifiP2pConfig) {
-        manager.connect(channel, config, object: WifiP2pManager.ActionListener {
-            override fun onSuccess() { /* broadcast receiver goes brrr */ }
+        manager.connect(channel, config, object : WifiP2pManager.ActionListener {
+            /* broadcast receiver goes brrr */
+            override fun onSuccess() = Unit
 
             override fun onFailure(reason: Int) {
                 Log.e("WD", "Failed to connect. Log this in the UI somewhere?")
