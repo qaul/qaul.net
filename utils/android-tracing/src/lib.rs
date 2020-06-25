@@ -5,6 +5,7 @@ use tracing::{
     field::{Field, Visit},
     Event, Id, Level, Metadata, Subscriber, 
 };
+use serde_json::{map::Map, json, Value};
 use std::{
     cell::RefCell,
     collections::HashMap,
@@ -70,22 +71,22 @@ impl CurrentSpanPerThread {
 }
 
 pub struct AndroidSubscriber {
-    base_path: String,
+    log_fields: bool,
     current: CurrentSpanPerThread,
     spans: RwLock<HashMap<Id, Span>>,
     ids: AtomicU64,
 }
 
 impl AndroidSubscriber {
-    pub fn new<S: Into<String>>(base_path: S) -> Self {
+    pub fn new(log_fields: bool) -> Self {
         let s = Self {
-            base_path: base_path.into(),
+            log_fields,
             current: CurrentSpanPerThread::new(),
             spans: RwLock::new(HashMap::new()),
             ids: AtomicU64::new(1),
         };
         AndroidWriter::log(
-            s.base_path.clone(), 
+            "android-tracing".into(),
             "Logger started, listening to the world go by".into(), 
             &Level::INFO
         );
@@ -123,29 +124,57 @@ impl Subscriber for AndroidSubscriber {
 
     fn event(&self, event: &Event<'_>) {
         let spans = self.spans.read().unwrap();
-        let mut path = self.base_path.clone();
-        path.push_str(&self.current.current.with(|current| {
-            let current = current.borrow(); 
-            if current.len() == 0 { return String::new(); }
-            let mut s = String::new();
-            for id in current.iter() {
-                s.push(':');
-                s.push(':');
-                if let Some(span) = spans.get(&id) {
-                    s.push_str(&format!("{}", span));
+        let mut span_string = String::new();
+        self.current.current.with(|current| {
+            for (i, id) in current.borrow().iter().enumerate() {
+                if i != 0 {
+                    span_string.push(':');
+                    span_string.push(':');
+                }
+                if let Some(span) = spans.get(id) {
+                    span_string.push_str(&format!("{}", span.name));
                 }
             }
-            s
-        }));
-        std::mem::drop(spans);
+        });
+
+        let metadata = event.metadata();
+        let file = metadata.file().unwrap_or_else(|| metadata.target());
+        let line = metadata.line().map_or_else(|| "[Unknown]".to_string(), |line| line.to_string());
 
         let mut fields = FieldVisitor::new();
         event.record(&mut fields);
-        let content = format!("{}", fields);
 
-        let level = event.metadata().level();
+        let mut path = format!("{} ({}:{})", span_string, file, line);
 
-        AndroidWriter::log(path, content, level);
+        let mut message = if let Some(msg) = &fields.message {
+            msg.clone()
+        } else {
+            String::new()
+        };
+
+        if self.log_fields {
+            let obj = self
+                .current
+                .current
+                .with(|current| {
+                    current.borrow()
+                        .iter()
+                        .rev()
+                        .fold(fields.to_object(), |prev, id| {
+                            if let Some(span) = spans.get(id) {
+                                span.to_object(prev)
+                            } else {
+                                json!({ "id": id.into_u64(), "child": prev })
+                            }
+                        })
+                });
+            let obj = serde_json::to_string(&obj).unwrap();
+
+            message.push('\n');
+            message.push_str(&obj);
+        }
+
+        AndroidWriter::log(path, message, metadata.level());
     }
 
     fn exit(&self, _: &Id) {
@@ -165,30 +194,41 @@ impl Subscriber for AndroidSubscriber {
     }
 }
 
-pub(crate) struct FieldVisitor(Vec<(&'static str, String)>);
+pub(crate) struct FieldVisitor {
+    fields: Vec<(&'static str, String)>,
+    message: Option<String>,
+}
 
 impl FieldVisitor {
     pub(crate) fn new() -> Self {
-        Self(Vec::new())
-    }
-}
-
-impl fmt::Display for FieldVisitor {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{{")?;
-        for (i, (k, v)) in self.0.iter().enumerate() {
-            if i != 0 {
-                write!(f, ", ")?;
-            }
-            write!(f, "{}: [{}]", k, v)?;
+        Self {
+            fields: Vec::new(),
+            message: None,
         }
-        write!(f, "}}")
+    }
+
+    pub(crate) fn to_object(&self) -> Value {
+        let mut map = Map::new();
+
+        if let Some(msg) = &self.message {
+            map.insert("message".to_string(), Value::String(msg.clone()));
+        }
+
+        for (key, val) in self.fields.iter() {
+            map.insert(key.to_string(), Value::String(val.clone()));
+        }
+
+        Value::Object(map)
     }
 }
 
 impl Visit for FieldVisitor {
     fn record_debug(&mut self, field: &Field, value: &dyn fmt::Debug) {
-        self.0.push((field.name(), format!("{:?}", value)));
+        if field.name() == "message" {
+            self.message = Some(format!("{:?}", value));
+        } else {
+            self.fields.push((field.name(), format!("{:?}", value)));
+        }
     }
 }
 
@@ -218,14 +258,12 @@ impl Span {
     pub(crate) fn drop(&self) -> bool {
         self.copies.fetch_sub(1, Relaxed) == 0
     }
-}
 
-impl fmt::Display for Span {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.name)?;
-        if self.fields.0.len() > 0 {
-            write!(f, "{}", self.fields)?;
-        }
-        Ok(())
+    pub(crate) fn to_object(&self, prev: Value) -> Value {
+        let mut obj = self.fields.to_object();
+        let mut map = obj.as_object_mut().unwrap();
+        map.insert("name".to_string(), self.name.into());
+        map.insert("child".to_string(), prev);
+        obj
     }
 }

@@ -3,7 +3,7 @@
 use android_tracing::AndroidSubscriber;
 
 fn main() {
-    let sub = AndroidSubscriber::new("qaul");
+    let sub = AndroidSubscriber::new(true);
     tracing::subscriber::set_global_default(sub).unwrap();
 
     info!("Hey");

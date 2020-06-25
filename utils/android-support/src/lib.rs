@@ -99,8 +99,8 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_startServer(
 ) -> jlong {
     //android_logger::init_once(Config::default().with_min_level(Level::Info));
     init_panic_handling_once();
-    let subscriber = android_tracing::AndroidSubscriber::new("qaul")
-        .with(EvnFilter::new("android_support=trace,[]=warn"));
+    let subscriber = android_tracing::AndroidSubscriber::new(true)
+        .with(EnvFilter::new("android_support=trace,[]=warn"));
     tracing::subscriber::set_global_default(subscriber).unwrap();
 
     info!("Hello from Rust, about to bootstrap the code, yo");

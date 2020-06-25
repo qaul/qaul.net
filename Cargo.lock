@@ -50,6 +50,7 @@ name = "android-tracing"
 version = "0.1.0"
 dependencies = [
  "android_log-sys",
+ "serde_json",
  "tracing",
  "tracing-core",
  "tracing-subscriber",
