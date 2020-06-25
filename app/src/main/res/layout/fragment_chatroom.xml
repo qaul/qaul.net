@@ -34,7 +34,7 @@
         app:layout_constraintLeft_toLeftOf="parent">
 
         <EditText
-            android:id="@+id/edittext_chatbox"
+            android:id="@+id/chatroom_message_box"
             android:hint="@string/chatroom_send_hint"
             android:background="@android:color/transparent"
             android:layout_gravity="center"
@@ -48,7 +48,7 @@
             android:inputType="text" />
 
         <Button
-            android:id="@+id/button_chatbox_send"
+            android:id="@+id/chatroom_message_send"
             android:text="@string/chatroom_send"
             android:textSize="15sp"
             android:background="?attr/selectableItemBackground"

@@ -21,6 +21,10 @@ const val MESSAGE_TYPE_RECV: Int = 2
 class ChatRoomAdapter(private val self: UserProfile, private val messages: MutableList<ChatMessage>)
     : RecyclerView.Adapter<ChatRoomAdapter.MsgHolder>() {
 
+    fun addMessage(msg: ChatMessage) {
+        messages.add(msg)
+    }
+
     override fun getItemViewType(position: Int): Int {
         if (messages[position].author == self.displayName) {
             return MESSAGE_TYPE_SENT

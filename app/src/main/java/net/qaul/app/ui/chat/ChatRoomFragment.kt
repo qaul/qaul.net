@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,17 +32,26 @@ class ChatRoomFragment(val room: ChatRoom) : Fragment() {
                 ChatMessage("", "15:32", "Not bad, kinda stressed", "spacekookie"),
                 ChatMessage("", "15:33", "Trying to get this app to work", "spacekookie"),
                 ChatMessage("", "15:36", "Yea? What's the problem?", "alice"),
-                ChatMessage("", "15:41", "There's just so many things that don't work properly and Android has the tendency to layer lots of abstractions on top of each other, and trying to get them all to play nice is really annoying." +
-                        "" +
+                ChatMessage("", "15:41", "There's just so many things that don't work properly and Android " +
+                        "has the tendency to layer lots of abstractions on top of each other, and trying to get them all to play nice is really annoying." +
+                        "\n\n" +
                         "Really, I wish I could just not do any of this >.>", "spacekookie")
         )
 
         val self = UserProfile("", "spacekookie", "Katharina Fey")
 
         adapter = ChatRoomAdapter(self, messages)
-        val chatRoomList = root.findViewById<RecyclerView>(R.id.chatroom_message_list)
-        chatRoomList.adapter = adapter
-        chatRoomList.layoutManager = LinearLayoutManager(context)
+        val chatMessageList = root.findViewById<RecyclerView>(R.id.chatroom_message_list)
+        chatMessageList.adapter = adapter
+        chatMessageList.layoutManager = LinearLayoutManager(context)
+
+        val textBox = root.findViewById<EditText>(R.id.chatroom_message_box)
+        val sendButton = root.findViewById<Button>(R.id.chatroom_message_send)
+        sendButton.setOnClickListener {
+            val msg = ChatMessage("", "Now", textBox.text.toString(), self.displayName)
+            adapter.addMessage(msg)
+            textBox.text.clear()
+        }
 
         return root
     }
