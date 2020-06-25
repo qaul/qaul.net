@@ -14,6 +14,7 @@ import net.qaul.app.R
 import net.qaul.app.ffi.models.ChatMessage
 import net.qaul.app.ffi.models.ChatRoom
 import net.qaul.app.ffi.models.UserProfile
+import net.qaul.app.util.AppState
 
 
 class ChatRoomFragment(val room: ChatRoom) : Fragment() {
@@ -38,9 +39,7 @@ class ChatRoomFragment(val room: ChatRoom) : Fragment() {
                         "Really, I wish I could just not do any of this >.>", "spacekookie")
         )
 
-        val self = UserProfile("", "spacekookie", "Katharina Fey", false)
-
-        adapter = ChatRoomAdapter(self, messages)
+        adapter = ChatRoomAdapter(messages)
         val chatMessageList = root.findViewById<RecyclerView>(R.id.chatroom_message_list)
         chatMessageList.adapter = adapter
         chatMessageList.layoutManager = LinearLayoutManager(context)
@@ -48,7 +47,7 @@ class ChatRoomFragment(val room: ChatRoom) : Fragment() {
         val textBox = root.findViewById<EditText>(R.id.chatroom_message_box)
         val sendButton = root.findViewById<Button>(R.id.chatroom_message_send)
         sendButton.setOnClickListener {
-            val msg = ChatMessage("", "Now", textBox.text.toString(), self.displayName)
+            val msg = ChatMessage("", "Now", textBox.text.toString(), AppState.self.displayName)
             adapter.addMessage(msg)
             textBox.text.clear()
         }

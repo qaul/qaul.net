@@ -10,8 +10,6 @@ import androidx.navigation.ui.setupWithNavController
 import net.qaul.app.util.AppState
 
 class MainActivity : AppCompatActivity() {
-    val state: AppState = AppState()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)

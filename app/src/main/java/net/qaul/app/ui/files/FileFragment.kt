@@ -4,27 +4,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.FragmentManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import net.qaul.app.R
 
 class FileFragment : Fragment() {
+    private lateinit var adapter: FileListAdapter
+    private lateinit var fragMan: FragmentManager
+    private lateinit var layouter: LinearLayoutManager
 
-    private lateinit var fileFragment: FileViewModel
-
-    override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View? {
-        fileFragment = ViewModelProviders.of(this).get(FileViewModel::class.java)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, bundle: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_files, container, false)
-        val textView: TextView = root.findViewById(R.id.text_files)
-        fileFragment.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
+        layouter = LinearLayoutManager(context)
+        fragMan = parentFragmentManager
+        adapter = FileListAdapter(fragMan)
+
+        val list = root!!.findViewById<RecyclerView>(R.id.file_list)!!
+        list.layoutManager = layouter
+        list.adapter = adapter
+
         return root
     }
 }

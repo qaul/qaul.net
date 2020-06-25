@@ -12,13 +12,14 @@ import kotlinx.android.synthetic.main.item_chat_message_sent.view.chat_message_t
 import net.qaul.app.R
 import net.qaul.app.ffi.models.ChatMessage
 import net.qaul.app.ffi.models.UserProfile
+import net.qaul.app.util.AppState
 import net.qaul.app.util.inflate
 import java.lang.Exception
 
 const val MESSAGE_TYPE_SENT: Int = 1
 const val MESSAGE_TYPE_RECV: Int = 2
 
-class ChatRoomAdapter(private val self: UserProfile, private val messages: MutableList<ChatMessage>)
+class ChatRoomAdapter(private val messages: MutableList<ChatMessage>)
     : RecyclerView.Adapter<ChatRoomAdapter.MsgHolder>() {
 
     fun addMessage(msg: ChatMessage) {
@@ -26,7 +27,7 @@ class ChatRoomAdapter(private val self: UserProfile, private val messages: Mutab
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (messages[position].author == self.displayName) {
+        if (messages[position].author == AppState.self.displayName) {
             return MESSAGE_TYPE_SENT
         } else {
             return MESSAGE_TYPE_RECV

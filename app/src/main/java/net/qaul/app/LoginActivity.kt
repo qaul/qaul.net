@@ -7,6 +7,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import net.qaul.app.ffi.models.UserProfile
+import net.qaul.app.util.AppState
 
 class LoginActivity : AppCompatActivity() {
     var connected = true
@@ -31,6 +33,7 @@ class LoginActivity : AppCompatActivity() {
             if (!connected) {
                 Toast.makeText(baseContext, "Can't login, not peered!", Toast.LENGTH_LONG).show()
             } else {
+                AppState.self = UserProfile("0", "@tester", "Tony Tester", false)
                 Log.i("login", "Successfully logged in!")
                 val i = Intent(this, MainActivity::class.java)
                 startActivity(i)
