@@ -23,4 +23,8 @@
     <string name="peering_button_connect">Connect</string>
     <string name="peering_button_disconnect">Disconnect</string>
     <string name="peering_server_hint"><![CDATA[Server <ip>:<port>]]></string>
+    <string name="users_all">All Users</string>
+    <string name="users_friends">Friends</string>
+    <string name="placeholder_username">Katharina Fey</string>
+    <string name="placeholder_last_seen">Last seen: 25. June 2020 07:58</string>
 </resources>

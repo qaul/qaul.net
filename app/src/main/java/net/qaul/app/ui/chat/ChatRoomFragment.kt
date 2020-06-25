@@ -38,7 +38,7 @@ class ChatRoomFragment(val room: ChatRoom) : Fragment() {
                         "Really, I wish I could just not do any of this >.>", "spacekookie")
         )
 
-        val self = UserProfile("", "spacekookie", "Katharina Fey")
+        val self = UserProfile("", "spacekookie", "Katharina Fey", false)
 
         adapter = ChatRoomAdapter(self, messages)
         val chatMessageList = root.findViewById<RecyclerView>(R.id.chatroom_message_list)
