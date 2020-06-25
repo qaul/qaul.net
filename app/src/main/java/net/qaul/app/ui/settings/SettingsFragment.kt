@@ -4,27 +4,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.EditText
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import net.qaul.app.R
+import net.qaul.app.ffi.models.UserProfile
 
 class SettingsFragment : Fragment() {
 
-    private lateinit var settingsFragment: SettingsViewModel
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, bundle: Bundle?): View? {
+        val root = inflater.inflate(R.layout.fragment_settings, container, false)
+        val self = UserProfile("", "@spacekookie", "Katharina Fey", false)
 
-    override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View? {
-        settingsFragment = ViewModelProviders.of(this).get(SettingsViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_files, container, false)
-        val textView: TextView = root.findViewById(R.id.text_files)
-        settingsFragment.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
+        val handle = root.findViewById<EditText>(R.id.user_profile_set_handle)
+        handle.setText(self.displayName)
+
+        val name = root.findViewById<EditText>(R.id.user_profile_set_name)
+        name.setText(self.realName)
+
         return root
     }
 }

@@ -46,8 +46,8 @@ class UsersTabsAdapter(val fm: FragmentManager)
             ), fm)
         } else {
             return UsersListFragment(mutableListOf<UserProfile>(
-                    UserProfile("", "danni","Danni Default", true),
-                    UserProfile("", "alice","Alice Anonymous", true)
+                    UserProfile("", "@danni","Danni Default", true),
+                    UserProfile("", "@alice","Alice Anonymous", true)
             ), fm)
         }
     }
