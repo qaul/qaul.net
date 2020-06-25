@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.mikhaellopez.circularimageview.CircularImageView
+        android:id="@+id/item_users_list_avi"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:soundEffectsEnabled="false"
+        app:civ_border="true"
+        app:civ_border_color="#3D5AFE"
+        app:civ_border_width="2dp"
+        app:civ_circle_color="#B2000000"
+        app:civ_shadow="true"
+        app:civ_shadow_gravity="bottom|center"
+        app:civ_shadow_radius="2dp"
+        tools:ignore="MissingConstraints"
+        app:srcCompat="@drawable/sample_avi1_foreground" />
+
+    <TextView
+        android:id="@+id/item_users_list_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/placeholder_username"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintStart_toEndOf="@+id/item_users_list_avi"
+        app:layout_constraintTop_toTopOf="@+id/item_users_list_avi" />
+
+    <TextView
+        android:id="@+id/item_users_list_online"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/placeholder_last_seen"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/item_users_list_name"
+        app:layout_constraintTop_toBottomOf="@+id/item_users_list_name"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/item_users_list_avi" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

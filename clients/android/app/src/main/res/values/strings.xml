@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">qaul.net</string>
+    <string name="title_activity_login">Join qaul.net</string>
+    <string name="prompt_password">Password</string>
+    <string name="welcome">Welcome to qaul.net!</string>
+
+    <string name="button_login">Login</string>
+
+    <string name="title_chat">Chat</string>
+    <string name="title_files">Files</string>
+    <string name="title_users">Users</string>
+    <string name="title_settings">Settings</string>
+
+    <!-- Strings used for fragments for navigation -->
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="chatroom_send_hint">Enter chat message</string>
+    <string name="chatroom_send">Send</string>
+    <string name="placeholder_chatroom_name">Chat Room Name</string>
+    <string name="placeholder_chatroom_timestamp">2020-05-31 13:12</string>
+
+    <string name="peering_button_connect">Connect</string>
+    <string name="peering_button_disconnect">Disconnect</string>
+    <string name="peering_server_hint"><![CDATA[Server <ip>:<port>]]></string>
+    <string name="users_all">All Users</string>
+    <string name="users_friends">Friends</string>
+    <string name="placeholder_username">Katharina Fey</string>
+    <string name="placeholder_last_seen">Last seen: 25. June 2020 07:58</string>
+</resources>

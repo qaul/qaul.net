@@ -1,0 +1,20 @@
+apply plugin: 'io.gitlab.arturbosch.detekt'
+
+repositories {
+    jcenter()
+}
+
+detekt {
+    config = files("../scripts/static-analysis/detekt-config.yml")
+    parallel = true
+    reports {
+        xml {
+            enabled = true
+        }
+        html {
+            enabled = true
+        }
+    }
+}
+
+tasks.detekt.jvmTarget = "1.8"

@@ -1,0 +1,57 @@
+package net.qaul.app.ui.chat
+
+import android.app.ActionBar
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import net.qaul.app.R
+import net.qaul.app.ffi.models.ChatMessage
+import net.qaul.app.ffi.models.ChatRoom
+import net.qaul.app.ffi.models.UserProfile
+import net.qaul.app.util.AppState
+
+
+class ChatRoomFragment(val room: ChatRoom) : Fragment() {
+    private lateinit var layouter: LinearLayoutManager
+    private lateinit var adapter: ChatRoomAdapter
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, bundle: Bundle?): View? {
+        val root = inflater.inflate(R.layout.fragment_chatroom, container, false)
+        layouter = LinearLayoutManager(context)
+
+        // TODO: add a back button maybe?
+
+        // Some messages
+        val messages: MutableList<ChatMessage> = mutableListOf(
+                ChatMessage("", "15:11", "Hey, how are you?", "alice"),
+                ChatMessage("", "15:32", "Not bad, kinda stressed", "spacekookie"),
+                ChatMessage("", "15:33", "Trying to get this app to work", "spacekookie"),
+                ChatMessage("", "15:36", "Yea? What's the problem?", "alice"),
+                ChatMessage("", "15:41", "There's just so many things that don't work properly and Android " +
+                        "has the tendency to layer lots of abstractions on top of each other, and trying to get them all to play nice is really annoying." +
+                        "\n\n" +
+                        "Really, I wish I could just not do any of this >.>", "spacekookie")
+        )
+
+        adapter = ChatRoomAdapter(messages)
+        val chatMessageList = root.findViewById<RecyclerView>(R.id.chatroom_message_list)
+        chatMessageList.adapter = adapter
+        chatMessageList.layoutManager = LinearLayoutManager(context)
+
+        val textBox = root.findViewById<EditText>(R.id.chatroom_message_box)
+        val sendButton = root.findViewById<Button>(R.id.chatroom_message_send)
+        sendButton.setOnClickListener {
+            val msg = ChatMessage("", "Now", textBox.text.toString(), AppState.self.displayName)
+            adapter.addMessage(msg)
+            textBox.text.clear()
+        }
+
+        return root
+    }
+}

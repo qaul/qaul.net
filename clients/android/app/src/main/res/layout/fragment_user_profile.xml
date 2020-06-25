@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.mikhaellopez.circularimageview.CircularImageView
+        android:id="@+id/user_profile_avi"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:contentDescription="An avatar example"
+        android:scaleType="fitCenter"
+        android:soundEffectsEnabled="false"
+        app:civ_border="true"
+        app:civ_border_color="#3D5AFE"
+        app:civ_border_width="7dp"
+        app:civ_circle_color="#B2000000"
+        app:civ_shadow="true"
+        app:civ_shadow_gravity="bottom|center"
+        app:civ_shadow_radius="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.1"
+        app:srcCompat="@drawable/sample_avi1_foreground" />
+
+    <TextView
+        android:id="@+id/user_profile_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Kaiden Fey"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        app:layout_constraintStart_toStartOf="@+id/user_profile_avi"
+        app:layout_constraintTop_toBottomOf="@+id/user_profile_avi" />
+
+    <TextView
+        android:id="@+id/user_profile_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="\@spacekookie"
+        app:layout_constraintStart_toStartOf="@+id/user_profile_name"
+        app:layout_constraintTop_toBottomOf="@+id/user_profile_name" />
+
+    <TextView
+        android:id="@+id/user_profile_last_online"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="116dp"
+        android:text="Last seen: 22.06.2020"
+        android:textColor="#CACACA"
+        app:layout_constraintEnd_toEndOf="@+id/user_profile_avi"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/user_profile_handle"
+        app:layout_constraintTop_toTopOf="@+id/user_profile_handle" />
+
+    <Button
+        android:id="@+id/user_profile_open_chat"
+        android:layout_width="122dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="112dp"
+        android:backgroundTint="#3D5AFE"
+        android:text="Open Chat"
+        android:textColor="#FFFFFF"
+        app:layout_constraintStart_toStartOf="@+id/user_profile_avi"
+        app:layout_constraintTop_toBottomOf="@+id/user_profile_avi"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/user_profile_open_call"
+        android:layout_width="122dp"
+        android:layout_height="45dp"
+        android:backgroundTint="#3D5AFE"
+        android:text="Call"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="@+id/circularImageView"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/user_profile_open_chat"
+        app:layout_constraintTop_toTopOf="@+id/user_profile_open_chat" />
+
+    <Button
+        android:id="@+id/user_profile_send_file"
+        android:layout_width="122dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="4dp"
+        android:backgroundTint="#3D5AFE"
+        android:text="Send File"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="@+id/user_profile_open_call"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/user_profile_open_chat"
+        app:layout_constraintTop_toBottomOf="@+id/user_profile_open_chat" />
+
+    <Button
+        android:id="@+id/user_profile_mark_friend"
+        android:layout_width="122dp"
+        android:layout_height="45dp"
+        android:backgroundTint="#3D5AFE"
+        android:text="Mark Friend"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="@+id/user_profile_open_call"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toTopOf="@+id/user_profile_send_file" />
+
+    <ImageView
+        android:id="@+id/user_profile_friend_status"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="#00FFFFFF"
+        android:fadingEdge="horizontal|vertical"
+        android:scaleType="fitCenter"
+        android:tint="@color/heartRed"
+        app:layout_constraintBottom_toBottomOf="@+id/user_profile_name"
+        app:layout_constraintEnd_toEndOf="@+id/user_profile_avi"
+        app:layout_constraintTop_toTopOf="@+id/user_profile_name"
+        app:srcCompat="@drawable/ic_heart" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
