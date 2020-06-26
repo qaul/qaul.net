@@ -7,7 +7,7 @@ use libqaul::{
 };
 
 #[cfg(feature = "chat")]
-use qaul_chat::{Chat, ChatMessage, Room, RoomId, RoomMeta};
+use qaul_chat::{Chat, ChatMessage, RoomId, RoomMeta};
 
 #[cfg(feature = "voice")]
 use qaul_voice::{Call, CallEvent, CallId};
@@ -120,16 +120,14 @@ pub enum Response {
 
     // =^-^= one or many chat rooms =^-^=
     #[cfg(feature = "chat")]
-    ChatRoom(Room),
+    ChatRoom(RoomMeta),
     #[cfg(feature = "chat")]
-    ChatRooms(Vec<Room>),
+    ChatRooms(Vec<RoomMeta>),
 
     // =^-^= one or many chat room ids =^-^=
     #[cfg(feature = "chat")]
-    #[serde(flatten)]
     RoomId(RoomId),
     #[cfg(feature = "chat")]
-    #[serde(flatten)]
     RoomIds(Vec<RoomId>),
 
     // =^-^= a single subscription id =^-^=
@@ -257,13 +255,13 @@ impl From<Vec<Identity>> for Response {
 }
 
 ////
-//// =^-^= Binary message responses
+//// =^-^= Chat service respenses
 ////
 
 #[cfg(feature = "chat")]
 impl From<RoomMeta> for Response {
     fn from(room: RoomMeta) -> Self {
-        Response::ChatRooms(vec![room])
+        Response::ChatRoom(room)
     }
 }
 
@@ -275,37 +273,34 @@ impl From<Vec<RoomMeta>> for Response {
 }
 
 #[cfg(feature = "chat")]
-impl From<ChatMessages> for Response {
-    fn from(msg: ChatMessages) -> Self {
-        Response::ChatMessages(vec![msg])
+impl From<ChatMessage> for Response {
+    fn from(msg: ChatMessage) -> Self {
+        Response::ChatMessage(msg)
     }
 }
 
 #[cfg(feature = "chat")]
 impl From<Vec<ChatMessage>> for Response {
     fn from(msgs: Vec<ChatMessage>) -> Self {
-        Response::ChatMessage(msgs)
+        Response::ChatMessages(msgs)
     }
 }
 
-#[cfg(feature = "chat")]
-impl From<Room> for Response {
-    fn from(room: Room) -> Self {
-        Response::ChatRoom(room)
-    }
-}
+////
+//// =^-^= Voice service responses
+////
 
 #[cfg(feature = "voice")]
 impl From<Call> for Response {
     fn from(call: Call) -> Self {
-        Response::Call(vec![call])
+        Response::Call(call)
     }
 }
 
 #[cfg(feature = "voice")]
 impl From<Vec<Call>> for Response {
     fn from(calls: Vec<Call>) -> Self {
-        Response::Call(calls)
+        Response::Calls(calls)
     }
 }
 

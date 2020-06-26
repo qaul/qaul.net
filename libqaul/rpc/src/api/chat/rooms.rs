@@ -30,7 +30,7 @@ pub struct Get {
 
 #[async_trait]
 impl ChatRpc for Get {
-    type Response = Result<Room>;
+    type Response = Result<RoomMeta>;
     async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
         chat.get_room(self.auth, self.id).await
     }
@@ -46,7 +46,7 @@ pub struct Create {
 
 #[async_trait]
 impl ChatRpc for Create {
-    type Response = Result<Room>;
+    type Response = Result<RoomMeta>;
     async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
         chat.start_chat(self.auth, self.users, self.name).await
     }
@@ -64,7 +64,7 @@ pub struct Modify {
 
 #[async_trait]
 impl ChatRpc for Modify {
-    type Response = Result<Room>;
+    type Response = Result<RoomMeta>;
     async fn apply(self, chat: &Arc<Chat>) -> Self::Response {
         chat.modify_room(
             self.auth,
