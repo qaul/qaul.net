@@ -55,4 +55,3 @@ members = [
 
 [patch.crates-io]
 cc = { git = "https://github.com/alexcrichton/cc-rs" }
-magnum-opus = { path = "../magnum-opus" }

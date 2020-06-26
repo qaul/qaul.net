@@ -5,7 +5,7 @@ use crate::{
 use async_std::{stream::interval, sync::Mutex};
 use futures::{sink::SinkExt, stream::StreamExt};
 use libqaul::{helpers::TagSet, messages::ID_LEN, Identity};
-use magnum_opus::{Channels, Decoder};
+use opus_rs::{Channels, Decoder};
 use rubato::Resampler;
 use std::{
     collections::BTreeMap,

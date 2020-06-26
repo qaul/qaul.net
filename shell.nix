@@ -18,8 +18,8 @@ stdenv.mkDerivation {
     cmake
 
     # Required for libqaul-voice
-    libopus pkg-config
-    steam-run
+    pkg-config llvm clang 
+    llvmPackages.clang-unwrapped
 
     # webgui debugging and development
     httpie

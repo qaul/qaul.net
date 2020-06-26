@@ -28,7 +28,7 @@ use {
         future::{abortable, AbortHandle},
     },
     libqaul::{error::Error as QaulError, services::ServiceEvent, users::UserAuth, Identity, Qaul},
-    magnum_opus::{Application, Channels, Encoder},
+    opus_rs::{Application, Channels, Encoder},
     rubato::{InterpolationParameters, InterpolationType, SincFixedOut, WindowFunction},
     std::{
         collections::{BTreeMap, BTreeSet, VecDeque},

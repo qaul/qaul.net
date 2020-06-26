@@ -7,7 +7,7 @@ use {
         users::UserAuth,
         Identity, Qaul,
     },
-    magnum_opus::{Decoder, Encoder},
+    opus_rs::{Decoder, Encoder},
     rubato::SincFixedOut,
     serde::{Deserialize, Serialize},
     std::{
