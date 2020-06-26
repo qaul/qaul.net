@@ -42,7 +42,7 @@
 //! When receiving a message for a room ID where the sender is not in
 //! the room: discard.
 
-use crate::{msg, Chat, ChatMessage, Result, Room, RoomDiff, RoomId, RoomState};
+use crate::{msg, Chat, ChatMessage, Result, RoomMeta, Room, RoomDiff, RoomId, RoomState};
 use async_std::sync::Arc;
 use chrono::Utc;
 use libqaul::{
@@ -52,7 +52,7 @@ use libqaul::{
 };
 use std::collections::BTreeSet;
 
-impl Room {
+impl RoomMeta {
     pub(crate) async fn check(
         serv: &Arc<Chat>,
         user: UserAuth,
@@ -84,7 +84,7 @@ impl Room {
     ) -> RoomState {
         users.insert(user.0);
 
-        let room = Self {
+        let room = Room {
             id: RoomId::random(),
             users,
             name,
@@ -119,7 +119,7 @@ impl Room {
         }
 
         // Commit the changes and generate roomstate
-        serv.rooms.insert(user, &self).await;
+        serv.rooms.insert(user, &self.clone().into()).await;
         RoomState::Diff(diff)
     }
 
@@ -147,9 +147,9 @@ impl Room {
         name: impl Into<String>,
     ) -> RoomState {
         let name = name.into();
-        let new = Self {
+        let new = Room {
             name: Some(name.clone()),
-            ..self.clone()
+            ..self.clone().into()
         };
         serv.rooms.insert(user, &new).await;
 

@@ -94,57 +94,91 @@ pub enum Request {
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Response {
-    /// Return an auth object
-    Auth(UserAuth),
-
-    /// Return a set of chat messages
-    #[cfg(feature = "chat")]
-    ChatMessage(Vec<ChatMessage>),
-
-    /// Return a set of contact entries
-    Contact(Vec<ContactEntry>),
-
-    /// Return an error type
+    // =^-^= generic message results =^-^=
+    Success,
     Error(String),
 
-    /// Return a set of message
-    Message(Vec<Message>),
+    // =^-^= authentication data =^-^=
+    Auth(UserAuth),
 
-    /// Return a message ID
+    // =^-^= additional user contact data =^-^=
+    Contact(ContactEntry),
+    Contacts(Vec<ContactEntry>),
+
+    // =^-^= binary payload messages =^-^=
+    Message(Message),
+    Messages(Vec<Message>),
+
+    // =^-^= a single message id =^-^=
     MsgId(MsgId),
 
-    /// Return chat room data
+    // =^-^= one or many chat messages =^-^=
+    #[cfg(feature = "chat")]
+    ChatMessage(ChatMessage),
+    #[cfg(feature = "chat")]
+    ChatMessages(Vec<ChatMessage>),
+
+    // =^-^= one or many chat rooms =^-^=
     #[cfg(feature = "chat")]
     ChatRoom(Room),
-
-    /// Get a set of chat room IDs
     #[cfg(feature = "chat")]
-    RoomId(Vec<RoomId>),
+    ChatRooms(Vec<Room>),
 
-    /// Get a list of all chat rooms with read / unread messages
+    // =^-^= one or many chat room ids =^-^=
     #[cfg(feature = "chat")]
-    ChatRooms(Vec<RoomMeta>),
+    #[serde(flatten)]
+    RoomId(RoomId),
+    #[cfg(feature = "chat")]
+    #[serde(flatten)]
+    RoomIds(Vec<RoomId>),
 
-    /// Confirmation for a new subscription
+    // =^-^= a single subscription id =^-^=
     Subscription(SubId),
 
-    /// A generic success message
-    Success,
+    // =^-^= one or mary user profiles =^-^=
+    User(UserProfile),
+    Users(Vec<UserProfile>),
 
-    /// Return a set of user profiles
-    User(Vec<UserProfile>),
+    // =^-^= one or many user ids =^-^=
+    UserId(Identity),
+    UserIds(Vec<Identity>),
 
-    /// Return available user IDs
-    UserId(Vec<Identity>),
-
+    // =^-^= a single call id =^-^=
     #[cfg(feature = "voice")]
     CallId(CallId),
 
+    // =^-^= one or many voice callls =^-^=
     #[cfg(feature = "voice")]
-    Call(Vec<Call>),
+    Call(Call),
+    #[cfg(feature = "voice")]
+    Calls(Vec<Call>),
 
+    // =^-^= a single voice call event =^-^=
     #[cfg(feature = "voice")]
     CallEvent(CallEvent),
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+//////////////// Mapping libqaul responses to the Response envelope ////////////////
+//
+//
+// This is essentially the primary mapper between the libqaul types
+// and the fascade of types that is exposed.  For any type there
+// should be a singular and a plural mapping, where the plural is
+// simply a Vec<T> of whatever the main type is.
+//
+// When editing this file, try to cluster use cases together and
+// insert comments between sections to make it clear where things
+// start and end.
+
+////
+//// =^-^= Handle nested responses with errors and generic auth
+////
+
+impl From<()> for Response {
+    fn from(_: ()) -> Self {
+        Self::Success
+    }
 }
 
 impl From<UserAuth> for Response {
@@ -152,6 +186,79 @@ impl From<UserAuth> for Response {
         Response::Auth(auth)
     }
 }
+
+impl<T: Into<Response>, E: Display> From<Result<T, E>> for Response {
+    fn from(result: Result<T, E>) -> Self {
+        match result {
+            Ok(t) => t.into(),
+            Err(e) => Response::Error(e.to_string()),
+        }
+    }
+}
+
+////
+//// =^-^= Contact entry responses
+////
+
+impl From<ContactEntry> for Response {
+    fn from(contact: ContactEntry) -> Self {
+        Response::Contact(contact)
+    }
+}
+
+impl From<Vec<ContactEntry>> for Response {
+    fn from(contacts: Vec<ContactEntry>) -> Self {
+        Response::Contacts(contacts)
+    }
+}
+
+////
+//// =^-^= Binary message responses
+////
+
+impl From<MsgRef> for Response {
+    fn from(msg: MsgRef) -> Self {
+        Response::Message(msg.as_ref().clone())
+    }
+}
+
+impl From<Vec<MsgRef>> for Response {
+    fn from(msgs: Vec<MsgRef>) -> Self {
+        Response::Messages(msgs.into_iter().map(|msg| msg.as_ref().clone()).collect())
+    }
+}
+
+////
+//// =^-^= User profile data and id responses
+////
+
+impl From<UserProfile> for Response {
+    fn from(user: UserProfile) -> Self {
+        Response::User(user)
+    }
+}
+
+impl From<Vec<UserProfile>> for Response {
+    fn from(users: Vec<UserProfile>) -> Self {
+        Response::Users(users)
+    }
+}
+
+impl From<Identity> for Response {
+    fn from(id: Identity) -> Self {
+        Self::UserId(id)
+    }
+}
+
+impl From<Vec<Identity>> for Response {
+    fn from(ids: Vec<Identity>) -> Self {
+        Self::UserIds(ids)
+    }
+}
+
+////
+//// =^-^= Binary message responses
+////
 
 #[cfg(feature = "chat")]
 impl From<RoomMeta> for Response {
@@ -168,9 +275,9 @@ impl From<Vec<RoomMeta>> for Response {
 }
 
 #[cfg(feature = "chat")]
-impl From<ChatMessage> for Response {
-    fn from(msg: ChatMessage) -> Self {
-        Response::ChatMessage(vec![msg])
+impl From<ChatMessages> for Response {
+    fn from(msg: ChatMessages) -> Self {
+        Response::ChatMessages(vec![msg])
     }
 }
 
@@ -181,61 +288,10 @@ impl From<Vec<ChatMessage>> for Response {
     }
 }
 
-impl From<ContactEntry> for Response {
-    fn from(contact: ContactEntry) -> Self {
-        Response::Contact(vec![contact])
-    }
-}
-
-impl From<Vec<ContactEntry>> for Response {
-    fn from(contacts: Vec<ContactEntry>) -> Self {
-        Response::Contact(contacts)
-    }
-}
-
-impl<T: Into<Response>, E: Display> From<Result<T, E>> for Response {
-    fn from(result: Result<T, E>) -> Self {
-        match result {
-            Ok(t) => t.into(),
-            Err(e) => Response::Error(e.to_string()),
-        }
-    }
-}
-
-impl From<MsgRef> for Response {
-    fn from(msg: MsgRef) -> Self {
-        Response::Message(vec![msg.as_ref().clone()])
-    }
-}
-
-impl From<Vec<MsgRef>> for Response {
-    fn from(msgs: Vec<MsgRef>) -> Self {
-        Response::Message(msgs.into_iter().map(|msg| msg.as_ref().clone()).collect())
-    }
-}
-
 #[cfg(feature = "chat")]
 impl From<Room> for Response {
     fn from(room: Room) -> Self {
         Response::ChatRoom(room)
-    }
-}
-
-impl From<()> for Response {
-    fn from(_: ()) -> Self {
-        Self::Success
-    }
-}
-
-impl From<UserProfile> for Response {
-    fn from(user: UserProfile) -> Self {
-        Response::User(vec![user])
-    }
-}
-
-impl From<Vec<UserProfile>> for Response {
-    fn from(users: Vec<UserProfile>) -> Self {
-        Response::User(users)
     }
 }
 

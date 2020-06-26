@@ -86,13 +86,27 @@ impl Chat {
                 id,
                 unread: *smsg.get(&id).unwrap_or(&0),
                 name: room.name.clone(),
+                users: room.users,
+                create_time: room.create_time,
             })
             .collect())
     }
 
     /// Get all metadata about a specific room
-    pub async fn get_room(&self, user: UserAuth, room: RoomId) -> Result<Room> {
-        self.rooms.get(user, room).await.map(|r| Ok(r)).unwrap()
+    pub async fn get_room(self: &Arc<Chat>, user: UserAuth, room: RoomId) -> Result<RoomMeta> {
+        self.rooms
+            .get(user.clone(), room)
+            .await
+            .map(|r| {
+                Ok(RoomMeta {
+                    id: r.id,
+                    unread: utils::get_unread_message_count(self, user, room),
+                    name: r.name,
+                    users: r.users,
+                    create_time: r.create_time,
+                })
+            })
+            .unwrap()
     }
 
     /// Create a chat with a group of people
@@ -104,14 +118,14 @@ impl Chat {
         user: UserAuth,
         friends: Vec<Identity>,
         name: Option<String>,
-    ) -> Result<Room> {
+    ) -> Result<RoomMeta> {
         let friends = friends.into_iter().collect();
 
-        if let Some(id) = Room::check(self, user.clone(), &friends).await {
+        if let Some(id) = RoomMeta::check(self, user.clone(), &friends).await {
             return self.get_room(user.clone(), id).await;
         }
 
-        let room = Room::create(self, user.clone(), friends.clone(), name).await;
+        let room = RoomMeta::create(self, user.clone(), friends.clone(), name).await;
         let room_id = room.id();
         let payload = msg::gen_payload("", room);
         msg::dispatch_to(self, user.clone(), friends, payload, room_id).await?;
@@ -126,7 +140,7 @@ impl Chat {
         content: String,
     ) -> Result<ChatMessage> {
         let friends = self.rooms.get(user.clone(), room).await?.users;
-        let payload = msg::gen_payload(content, Room::resume(room));
+        let payload = msg::gen_payload(content, RoomMeta::resume(room));
         msg::dispatch_to(self, user, friends, payload, room).await
     }
 
@@ -155,7 +169,7 @@ impl Chat {
         user: UserAuth,
         room: RoomId,
         diff: RoomDiff,
-    ) -> Result<Room> {
+    ) -> Result<RoomMeta> {
         let mut room = self.get_room(user.clone(), room).await?;
         let state = room.modify(self, user.clone(), diff).await;
         room.send_to_participants(self, user, state).await?;

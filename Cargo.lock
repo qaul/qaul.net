@@ -1866,7 +1866,6 @@ dependencies = [
  "futures 0.3.5",
  "jni",
  "libqaul",
- "qaul-files",
  "ratman-harness",
  "serde",
  "tempfile",

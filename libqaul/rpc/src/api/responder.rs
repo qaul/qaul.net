@@ -117,13 +117,11 @@ impl<K: StreamResponder + Send + Sync + 'static> Responder<K> {
             Request::ContactQuery(r) => self
                 .respond_qaul(r)
                 .await
-                .map(|ids| Response::UserId(ids))
-                .unwrap_or_else(|e| Response::Error(e.to_string())),
+                .into()
             Request::ContactAll(r) => self
                 .respond_qaul(r)
                 .await
-                .map(|ids| Response::UserId(ids))
-                .unwrap_or_else(|e| Response::Error(e.to_string())),
+                .into()
 
             // =^-^= Messages =^-^=
             Request::MsgSend(r) => match self.respond_qaul(r).await {

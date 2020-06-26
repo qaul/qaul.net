@@ -62,15 +62,30 @@ impl RoomState {
     }
 }
 
-/// Some metadata for indexing rooms
+/// Local room metadata
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RoomMeta {
     /// Room ID
     pub id: Identity,
     /// Optional human readable room name
     pub name: Option<String>,
+    /// Participants in this room
+    pub users: BTreeSet<Identity>,
     /// Number of unread messages in a room
     pub unread: usize,
+    /// Time this room was created
+    pub create_time: DateTime<Utc>,
+}
+
+impl From<RoomMeta> for Room {
+    fn from(meta: RoomMeta) -> Room {
+        Room {
+            id: meta.id,
+            users: meta.users,
+            name: meta.name,
+            create_time: meta.create_time,
+        }
+    }
 }
 
 /// Abstraction over a chat room

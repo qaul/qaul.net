@@ -6,7 +6,7 @@ edition = "2018"
 license = "AGPL-3.0"
 
 [dependencies]
-files = { path = "../files", package = "qaul-files" }
+# files = { path = "../files", package = "qaul-files" }
 libqaul = { path = "../../", features = ["testing"] }
 
 async-std = "=1.5"

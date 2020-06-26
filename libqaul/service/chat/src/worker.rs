@@ -3,7 +3,7 @@
 //! This stateless worker is given UserAuth objects to subscribe on,
 //! then spawns extra tasks to listen for messages.
 
-use crate::{Chat, Room, Subscription, ASC_NAME};
+use crate::{utils, Chat, RoomMeta, Subscription, ASC_NAME};
 use async_std::{
     sync::{channel, Arc, RwLock, Sender},
     task,
@@ -67,9 +67,13 @@ pub(crate) async fn run_user(user: UserAuth, serv: Arc<Chat>, run: RunMap) {
         if chat_msg.sender == user.0 && continue {}
 
         // If we get a room state back, we send a reply message
-        if let Some(rs) = Room::handle(&serv, user.clone(), &chat_msg).await {
+        if let Some(rs) = RoomMeta::handle(&serv, user.clone(), &chat_msg).await {
             trace!("Sending confirmation message to room state change");
-            let room = serv.rooms.get(user.clone(), rs.id()).await.unwrap();
+            let pre_room = serv.rooms.get(user.clone(), rs.id()).await.unwrap();
+
+            let unread = utils::get_unread_message_count(&serv, user.clone(), pre_room.id);
+            let room = utils::get_chat_room(pre_room, unread);
+
             room.send_to_participants(&serv, user.clone(), rs)
                 .await
                 .unwrap();
