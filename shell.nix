@@ -8,8 +8,8 @@ stdenv.mkDerivation {
   buildInputs = with pkgs; [
 
     # General rust stuff
-    rustracer rustup clangStdenv cargo-watch
-    binutils
+    rustup clangStdenv cargo-watch
+    binutils # rustracer -- currently broken
     
     # Required for the docs
     mdbook graphviz
