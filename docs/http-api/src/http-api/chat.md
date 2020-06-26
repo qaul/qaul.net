@@ -130,13 +130,28 @@ Response payload: Array of chat rooms
 Request payload:
 
 ```json
-
+{
+    "room": "CHAT_ROOM_ID",
+    "text": "MESSAGE_TEXT"
+}
 ```
 
 Response payload: returns created chat message
 
 ```json
-
+{
+    "chat_message": [
+        {
+            "content": "MESSAGE_TEXT",
+            "id": "CHAT_MESSAGE_ID",
+            "room": {
+                "Id": "CHAT_ROOM_ID"
+            },
+            "sender": "USER_ID",
+            "timestamp": "2020-06-22T16:46:03.317992177Z"
+        }
+    ]
+}
 ```
 
 ### List all Chat Messages of a Specific Chat Room
@@ -147,5 +162,9 @@ Response payload: returns created chat message
 Response payload: Array of chat messages
 
 ```json
-
+{
+    "chat_message": [
+        "ARRAY_OF_CHAT_MESSAGE_OBJECTS"
+    ]
+}
 ```

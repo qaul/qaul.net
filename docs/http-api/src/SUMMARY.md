@@ -7,5 +7,5 @@
 - [HTTP-API](./http-api/_intro.md)
   - [Authentication](./http-api/authentication.md)
   - [Users & Contacts](./http-api/user.md)
-  - [Messenger](./http-api/chat.md)
+  - [Chat Messenger](./http-api/chat.md)
   - [Test the API](./http-api/test.md)

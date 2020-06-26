@@ -79,6 +79,23 @@ Response: same as create user
 Response: same as create user
 
 
+## Delete a User
+
+`DELETE /http/user/USER_ID`
+
+Request payload: 
+There needs to be sent the field "purge", which can be set to the string values "true" or "false".
+If the value is "true", all data of the user is deleted from the node. 
+
+```json
+{
+    "purge": "true"
+}
+```
+
+Response: empty response with http code 204
+
+
 ## Query Users
 
 Get an array of all users
