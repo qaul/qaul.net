@@ -52,6 +52,3 @@ members = [
     "clients/linux-cli",
     "clients/hubd",
 ]
-
-[patch.crates-io]
-cc = { git = "https://github.com/alexcrichton/cc-rs" }

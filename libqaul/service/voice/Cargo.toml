@@ -14,7 +14,7 @@ async-std = "1.5"
 bincode = "1.0"
 failure = "0.1"
 futures = "0.3"
-opus-rs = { git = "https://git.open-communication.net/qaul/opus-rs" }
+opus-rs = { git = "https://git.open-communication.net/qaul/opus-rs", rev = "develop" }
 rubato = "0.2"
 serde = { version = "1.0", features = ["derive"] }
 tracing = "0.1"
