@@ -7,7 +7,7 @@ stages:
 build:
   image: rust:1.42.0-buster
   script:
-    - cargo test
+    - cargo test --job 1
     - cargo build
 
 # Run test suite
