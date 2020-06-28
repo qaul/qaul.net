@@ -5,7 +5,7 @@ able to create mesh networks with people around you, without needing
 dedicated infrastructure was born out of the idea that a lot of people
 have phones, and that creating small scale networks with phones around
 you, without having to rely to SIM cards, cell towers or pre-setup
-WiFi networks can enable people to avoid censorship and surveillence.
+WiFi networks can enable people to avoid censorship and surveillance.
 
 At the moment the qaul.net android client is a prototype!
 
