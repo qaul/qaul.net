@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import net.qaul.app.R
 import net.qaul.app.ffi.models.ChatRoom
+import net.qaul.app.ffi.models.Id
 import net.qaul.app.util.defanSubFabs
 import net.qaul.app.util.fanSubFabs
 import net.qaul.app.util.rotateFab
@@ -39,9 +40,9 @@ class ChatFragment : Fragment() {
         list.layoutManager = layouter
 
         val rooms: MutableList<ChatRoom> = mutableListOf(
-                ChatRoom("id1", "Alice Anonymous", "2020-05-31 13:12", 5, ArrayList()),
-                ChatRoom("id2", "Caren Cop", "2008-01-01 00:33", 0, ArrayList()),
-                ChatRoom("id3", "Danni Default", "2020-05-31 13:37", 2, ArrayList())
+                ChatRoom(Id("id1"), "Alice Anonymous", "2020-05-31 13:12", 5, ArrayList()),
+                ChatRoom(Id("id2"), "Caren Cop", "2008-01-01 00:33", 0, ArrayList()),
+                ChatRoom(Id("id3"), "Danni Default", "2020-05-31 13:37", 2, ArrayList())
         )
 
         adapter = ChatListAdapter(rooms, fragMan)

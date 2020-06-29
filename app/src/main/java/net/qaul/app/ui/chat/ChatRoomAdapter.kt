@@ -27,7 +27,7 @@ class ChatRoomAdapter(private val messages: MutableList<ChatMessage>)
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (messages[position].author == AppState.self.displayName) {
+        if (messages[position].author == AppState.self) {
             return MESSAGE_TYPE_SENT
         } else {
             return MESSAGE_TYPE_RECV
@@ -70,7 +70,7 @@ class ChatRoomAdapter(private val messages: MutableList<ChatMessage>)
             view.chat_message_time.text = msg.timestamp!!
 
             if (received) {
-                view.chat_message_name.text = msg.author!!
+                view.chat_message_name.text = AppState.getUserProfile(msg.author)?.handle
             }
         }
 

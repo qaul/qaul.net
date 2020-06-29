@@ -7,7 +7,6 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import net.qaul.app.util.AppState
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,9 +17,9 @@ class MainActivity : AppCompatActivity() {
         val navCtrl = findNavController(R.id.nav_host_fragment)
         val appBarCfg = AppBarConfiguration(setOf(
                 R.id.navigation_chat,
+                R.id.navigation_voice,
                 R.id.navigation_files,
-                R.id.navigation_users,
-                R.id.navigation_settings))
+                R.id.navigation_users))
         setupActionBarWithNavController(navCtrl, appBarCfg)
         navView.setupWithNavController(navCtrl)
     }

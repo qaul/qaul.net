@@ -1,23 +1,19 @@
 package net.qaul.app.net
 
-import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.NetworkInfo
-import android.net.wifi.WpsInfo
 import android.net.wifi.p2p.*
 import android.net.wifi.p2p.WifiP2pManager.*
 import android.util.Log
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import net.qaul.app.LoginActivity
 
+/** A broadcast receiver that reacts to WifiP2P events */
 class WifiDirectBroadcastReceiver(
         private val manager: WifiP2pManager,
-        private val channel: WifiP2pManager.Channel,
-        private val activity: LoginActivity
+        private val channel: Channel,
+        private val service: WifiP2PService
 ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
@@ -50,7 +46,7 @@ class WifiDirectBroadcastReceiver(
 
                 if (networkInfo.isConnected) {
                     Log.d("WD", "Connection is up!")
-                    manager.requestConnectionInfo(channel, activity)
+                    manager.requestConnectionInfo(channel, service)
                 } else {
                     Log.d("WD", "Connection is down")
                 }
@@ -65,5 +61,4 @@ class WifiDirectBroadcastReceiver(
             }
         }
     }
-
 }

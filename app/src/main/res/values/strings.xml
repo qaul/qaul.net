@@ -7,9 +7,9 @@
     <string name="button_login">Login</string>
 
     <string name="title_chat">Chat</string>
+    <string name="title_voice">Voice</string>
     <string name="title_files">Files</string>
     <string name="title_users">Users</string>
-    <string name="title_settings">Settings</string>
 
     <!-- Strings used for fragments for navigation -->
     <string name="next">Next</string>

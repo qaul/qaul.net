@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply from: '../scripts/build_detekt.gradle'
+//apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
+
 
 android {
     ndkVersion "21.1.6352462"
@@ -60,7 +62,6 @@ dependencies {
     compile "org.koin:koin-androidx-viewmodel:$koin_version"
     compile "org.koin:koin-androidx-fragment:$koin_version"
 
-    implementation 'com.wifiscanner:wifiscanner:0.1.2'
     implementation 'com.mikhaellopez:circularimageview:4.2.0'
 }
 
@@ -74,6 +75,17 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
+
+
+//cargo {
+//    module = "../../../utils/android-support"
+//    targetDirectory = "../../../target"
+//    libname = "qauldroid"
+//    targetIncludes = ['libqauldroid.so']
+//    targets = ["arm64"]
+//}
+
+
 repositories {
     mavenCentral()
 }

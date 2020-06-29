@@ -53,6 +53,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:rippleColor="@color/white"
+        app:backgroundTint="@color/colorPrimaryDark"
         tools:ignore="RtlHardcoded" />
 
 

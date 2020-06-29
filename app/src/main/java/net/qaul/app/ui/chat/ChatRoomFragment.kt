@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import net.qaul.app.R
 import net.qaul.app.ffi.models.ChatMessage
 import net.qaul.app.ffi.models.ChatRoom
+import net.qaul.app.ffi.models.Id
 import net.qaul.app.ffi.models.UserProfile
 import net.qaul.app.util.AppState
 
@@ -29,14 +30,14 @@ class ChatRoomFragment(val room: ChatRoom) : Fragment() {
 
         // Some messages
         val messages: MutableList<ChatMessage> = mutableListOf(
-                ChatMessage("", "15:11", "Hey, how are you?", "alice"),
-                ChatMessage("", "15:32", "Not bad, kinda stressed", "spacekookie"),
-                ChatMessage("", "15:33", "Trying to get this app to work", "spacekookie"),
-                ChatMessage("", "15:36", "Yea? What's the problem?", "alice"),
-                ChatMessage("", "15:41", "There's just so many things that don't work properly and Android " +
+                ChatMessage(Id(""), "15:11", "Hey, how are you?", Id("1")),
+                ChatMessage(Id(""), "15:32", "Not bad, kinda stressed", Id("0")),
+                ChatMessage(Id(""), "15:33", "Trying to get this app to work", Id("0")),
+                ChatMessage(Id(""), "15:36", "Yea? What's the problem?", Id("1")),
+                ChatMessage(Id(""), "15:41", "There's just so many things that don't work properly and Android " +
                         "has the tendency to layer lots of abstractions on top of each other, and trying to get them all to play nice is really annoying." +
                         "\n\n" +
-                        "Really, I wish I could just not do any of this >.>", "spacekookie")
+                        "Really, I wish I could just not do any of this >.>", Id("0"))
         )
 
         adapter = ChatRoomAdapter(messages)
@@ -47,7 +48,7 @@ class ChatRoomFragment(val room: ChatRoom) : Fragment() {
         val textBox = root.findViewById<EditText>(R.id.chatroom_message_box)
         val sendButton = root.findViewById<Button>(R.id.chatroom_message_send)
         sendButton.setOnClickListener {
-            val msg = ChatMessage("", "Now", textBox.text.toString(), AppState.self.displayName)
+            val msg = ChatMessage(Id(""), "Now", textBox.text.toString(), AppState.self.id)
             adapter.addMessage(msg)
             textBox.text.clear()
         }
