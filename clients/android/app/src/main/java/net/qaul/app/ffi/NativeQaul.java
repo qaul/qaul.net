@@ -21,21 +21,30 @@ import java.util.ArrayList;
 public class NativeQaul {
     private long libqaulState = 0;
 
-    public NativeQaul(int port, String path) {
-        this.libqaulState = startServer(port, path);
+    public NativeQaul(int port) {
+        this.libqaulState = setupState(port);
     }
 
+    public NativeQaul() {}
+
+    public native void idTest(Id id);
+
     /**
-     * Start the main application server.
-     * <p>
-     * This will bootstrap the libqaul service stack from the bottom up,
-     * starting with the router and network modules.  Make sure that
-     * #{wdSetup} and #{wdSendHook} are available to the native run context.
-     *
-     * @param port the port to run the webgui http server on
-     * @param path the path to the webgui sources in internal storage
+     * Setup the main
      */
-    public native long startServer(int port, String path);
+    private native long setupState(int port);
+
+    /**
+     * Start peering the TCP endpoint to a particular server
+     *
+     * @param addr the remote server address
+     * @param port the remote server port
+     */
+    public void connectTpc(String addr, int port) {
+        connectTcp(libqaulState, addr, port);
+    }
+
+    private native void connectTcp(long qaul, String addr, int port);
 
     /**
      * Check if the instance has a valid login
@@ -48,11 +57,11 @@ public class NativeQaul {
      * Create a new user
      *
      */
-    public void usersCreate(String handle, String name, String password) {
-        usersCreate(libqaulState, handle, name, password);
+    public Id usersCreate(String handle, String name, String password) {
+        return usersCreate(libqaulState, handle, name, password);
     }
 
-    private native void usersCreate(long qaul, String handle, String name, String password);
+    private native Id usersCreate(long qaul, String handle, String name, String password);
 
     /**
      * List available users

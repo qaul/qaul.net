@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply from: '../scripts/build_detekt.gradle'
-//apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
+apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
 
 
 android {
@@ -83,16 +83,6 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
-
-
-//cargo {
-//    module = "../../../utils/android-support"
-//    targetDirectory = "../../../target"
-//    libname = "qauldroid"
-//    targetIncludes = ['libqauldroid.so']
-//    targets = ["arm64"]
-//}
-
 
 repositories {
     mavenCentral()

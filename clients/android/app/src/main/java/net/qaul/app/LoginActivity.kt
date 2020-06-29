@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import net.qaul.app.ffi.NativeQaul
 import net.qaul.app.ffi.models.Id
 import net.qaul.app.ffi.models.UserProfile
 import net.qaul.app.net.WifiP2PService
@@ -15,6 +16,15 @@ import net.qaul.app.util.AppState
 
 /** The main login activity */
 class LoginActivity : AppCompatActivity() {
+    companion object {
+        init {
+            // The "android-support" crate creates a dynamic library called "libqauldroid"
+            // which we can include here simply via "qauldroid" because it's being put
+            // into the library search path via ~ m a g i c ~
+            System.loadLibrary("qauldroid")
+        }
+    }
+
     var tcpConnected = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,8 +33,10 @@ class LoginActivity : AppCompatActivity() {
 
         // TODO: Request permissions
 
+        NativeQaul().idTest(Id("hello world!"))
+
         // Start the wifi service
-        startService(Intent(this, WifiP2PService::class.java))
+        // startService(Intent(this, WifiP2PService::class.java))
 
         // Connect the TCP stack to the selected peering server
         val peerEntry = findViewById<EditText>(R.id.app_peering_server)
