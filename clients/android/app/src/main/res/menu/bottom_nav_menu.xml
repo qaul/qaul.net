@@ -7,6 +7,11 @@
         android:title="@string/title_chat" />
 
     <item
+        android:id="@+id/navigation_voice"
+        android:icon="@drawable/nav_voice"
+        android:title="@string/title_voice" />
+
+    <item
         android:id="@+id/navigation_files"
         android:icon="@drawable/nav_files"
         android:title="@string/title_files" />
@@ -15,10 +20,5 @@
         android:id="@+id/navigation_users"
         android:icon="@drawable/nav_users"
         android:title="@string/title_users" />
-
-    <item
-        android:id="@+id/navigation_settings"
-        android:icon="@drawable/nav_settings"
-        android:title="@string/title_settings" />
 
 </menu>

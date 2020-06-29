@@ -11,4 +11,13 @@ public class Frame {
         this.target = target;
         this.data = data;
     }
+
+    /**
+     * Get the on-wire representation of this frame
+     *
+     * @return an array of bytes with the length first
+     */
+    public byte[] toWire() {
+        return new byte[]{ 1, 3, 1, 2 };
+    }
 }

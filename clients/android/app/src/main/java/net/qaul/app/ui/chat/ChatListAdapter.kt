@@ -54,9 +54,5 @@ class ChatListAdapter(private val rooms: MutableList<ChatRoom>, private val frag
             trans.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
             trans.commit()
         }
-
-        companion object {
-            private const val ROOM_KEY = "ROOM"
-        }
     }
 }

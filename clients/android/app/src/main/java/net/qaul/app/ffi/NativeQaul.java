@@ -1,8 +1,11 @@
 package net.qaul.app.ffi;
 
+import android.view.View;
+
 import net.qaul.app.ffi.models.ChatMessage;
 import net.qaul.app.ffi.models.ChatRoom;
 import net.qaul.app.ffi.models.Frame;
+import net.qaul.app.ffi.models.Id;
 import net.qaul.app.ffi.models.UserProfile;
 
 import java.util.ArrayList;
@@ -42,15 +45,38 @@ public class NativeQaul {
     private native boolean checkLogin(long qaul);
 
     /**
+     * Create a new user
+     *
+     */
+    public void usersCreate(String handle, String name, String password) {
+        usersCreate(libqaulState, handle, name, password);
+    }
+
+    private native void usersCreate(long qaul, String handle, String name, String password);
+
+    /**
      * List available users
+     *
+     * @local indicate whether only to list local users
      *
      * @return List of local users
      */
-    public ArrayList<UserProfile> usersList() {
-        return usersList(libqaulState);
+    public ArrayList<UserProfile> usersList(boolean local) {
+        return usersList(libqaulState, local);
     }
 
-    private native ArrayList<UserProfile> usersList(long qaul);
+    private native ArrayList<UserProfile> usersList(long qaul, boolean local);
+
+    /**
+     * Get a particular user profile by ID
+     *
+     * @return List of local users
+     */
+    public UserProfile usersGet(Id id) {
+        return usersGet(libqaulState, id);
+    }
+
+    private native UserProfile usersGet(long qaul, Id id);
 
     /**
      * Login as an existing user via their ID and password
@@ -66,23 +92,15 @@ public class NativeQaul {
     private native boolean usersLogin(long qaul, String id, String pw);
 
     /**
-     * Register a new user on the local instance
-     * <p>
-     * This also logs-in the user and starts advertising the ID across
-     * the network.  This will allow others on the network to route packets
-     * to this user.
-     *
-     * @param name     optional name on the network advertised to others
-     * @param password used to protect local files and assets
-     */
-    public native void userRegister(long qaul, String name, String password);
-
-    /**
      * List available chat rooms for the current session
      *
      * @return a list of available chat rooms
      */
-    public native ArrayList<ChatRoom> chatList(long qaul);
+    public ArrayList<ChatRoom> chatList() {
+        return chatList(libqaulState);
+    }
+
+    private native ArrayList<ChatRoom> chatList(long qaul);
 
     /**
      * Start a new chat with some friends.
@@ -93,7 +111,11 @@ public class NativeQaul {
      * @param friends a set of remote users on the network to talk to
      * @return the room ID for further commands
      */
-    public native String chatStart(long qaul, String name, ArrayList<String> friends);
+    public Id chatStart(String name, ArrayList<String> friends) {
+        return chatStart(libqaulState, name, friends);
+    }
+
+    private native Id chatStart(long qaul, String name, ArrayList<String> friends);
 
     /**
      * Send a text message to a room
@@ -102,7 +124,11 @@ public class NativeQaul {
      * @param content the chat message content
      * @return the created chat message to display
      */
-    public native ChatMessage chatSendMessage(long qaul, String room, String content);
+    public ChatMessage chatSendMessage(Id room, String content) {
+        return chatSendMessage(libqaulState, room, content);
+    }
+
+    private native ChatMessage chatSendMessage(long qaul, Id room, String content);
 
     /**
      * Load all messages from a chat room
@@ -110,7 +136,11 @@ public class NativeQaul {
      * @param room the room ID to load
      * @return a list of messages in this room
      */
-    public native ArrayList<ChatMessage> chatLoadMessages(long qaul, String room);
+    public ArrayList<ChatMessage> chatLoadMessages(Id room) {
+        return chatLoadMessages(libqaulState, room);
+    }
+
+    private native ArrayList<ChatMessage> chatLoadMessages(long qaul, Id room);
 
     /**
      * Receive a data frame via wifi direct
@@ -120,11 +150,11 @@ public class NativeQaul {
      * @param target       interface specific mapping information if this endpoint is one-to-many
      * @param encodedFrame encoded data frame, ignored by Java code and passed into Rust
      */
-    public void wdReceiveFrame(int target, char[] encodedFrame) {
+    public void wdReceiveFrame(int target, byte[] encodedFrame) {
         wdReceiveFrame(this.libqaulState, target, encodedFrame);
     }
 
-    private native void wdReceiveFrame(long qaul, int target, char[] encodedFrame);
+    private native void wdReceiveFrame(long qaul, int target, byte[] encodedFrame);
 
     /**
      * Get a frame from the Rust code to send off to someone special

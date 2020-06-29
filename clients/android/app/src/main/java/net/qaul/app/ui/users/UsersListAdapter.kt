@@ -37,8 +37,8 @@ open class UsersListAdapter(private val rooms: MutableList<UserProfile>, private
         fun bindUser(profile: UserProfile) {
             this.profile = profile
 
-            view.item_users_list_name.text = profile.realName
-            view.item_users_list_online.text = profile.displayName
+            view.item_users_list_name.text = profile.name
+            view.item_users_list_online.text = profile.handle
         }
 
         override fun onClick(v: View?) {

@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import net.qaul.app.R
+import net.qaul.app.ffi.models.Id
 import net.qaul.app.ffi.models.UserProfile
 
 class UsersFragment : Fragment() {
@@ -40,14 +41,14 @@ class UsersTabsAdapter(val fm: FragmentManager)
     override fun getItem(position: Int): Fragment {
         if (position == 1) {
             return UsersListFragment(mutableListOf<UserProfile>(
-                    UserProfile("", "@carencop","Caren Cop", false),
-                    UserProfile("", "@bob","Bob Beligerant", false),
-                    UserProfile("", "@eve","Eve Evergreen", false)
+                    UserProfile(Id(""), "@carencop","Caren Cop", false),
+                    UserProfile(Id(""), "@bob","Bob Beligerant", false),
+                    UserProfile(Id(""), "@eve","Eve Evergreen", false)
             ), fm)
         } else {
             return UsersListFragment(mutableListOf<UserProfile>(
-                    UserProfile("", "@danni","Danni Default", true),
-                    UserProfile("", "@alice","Alice Anonymous", true)
+                    UserProfile(Id(""), "@danni","Danni Default", true),
+                    UserProfile(Id(""), "@alice","Alice Anonymous", true)
             ), fm)
         }
     }

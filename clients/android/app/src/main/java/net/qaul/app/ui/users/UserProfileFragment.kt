@@ -31,8 +31,8 @@ class UserProfileFragment(val profile: UserProfile) : Fragment() {
         val avi = root.findViewById<ImageView>(R.id.user_profile_avi)
         avi.setVisibility(View.VISIBLE)
 
-        name.text = profile.realName
-        handle.text = profile.displayName
+        name.text = profile.name
+        handle.text = profile.handle
         lastOnline.text = "now"
 
 
