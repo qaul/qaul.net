@@ -28,6 +28,7 @@ class WifiP2PService : Service(), WifiP2pManager.ConnectionInfoListener {
     private lateinit var receiver: BroadcastReceiver
 
     private val serverPort = 1602;
+    private val peers: MutableMap<Int, PeerHandler> = mutableMapOf()
 
     override fun onBind(intent: Intent?): IBinder? {
         return null

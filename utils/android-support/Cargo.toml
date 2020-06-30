@@ -11,8 +11,10 @@ name = "qauldroid"
 crate-type = ["cdylib"]
 
 [dependencies]
-async-std = "1.5"
+async-std = "=1.5"
+bincode = "1.0"
 jni = { version = "0.14", default-features = false }
+log = "*"
 tempfile = "3.0"
 tracing = { version = "0.1" }
 
@@ -25,8 +27,9 @@ qaul-chat = { path = "../../libqaul/service/chat", features = ["ffi-java"] }
 qaul-voice = { path = "../../libqaul/service/voice" }
 ratman = { path = "../../ratman" }
 ratman-configure = { path = "../../ratman/configure", features = ["android"] }
+ratman-netmod = { path = "../../ratman/netmod" }
 
-log = "*"
+
 
 [target.'cfg(target_os = "android")'.dependencies]
 android_logger = "0.8"

@@ -1335,6 +1335,7 @@ dependencies = [
  "android-tracing",
  "android_logger",
  "async-std",
+ "bincode",
  "jni",
  "libqaul",
  "libqaul-http",
@@ -1346,6 +1347,7 @@ dependencies = [
  "qaul-voice",
  "ratman",
  "ratman-configure",
+ "ratman-netmod",
  "tempfile",
  "tracing",
 ]

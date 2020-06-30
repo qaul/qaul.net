@@ -9,8 +9,8 @@ use async_std::{
     task::block_on,
 };
 use jni::{
-    objects::{JObject, JString},
-    sys::{jboolean, jint, jlong},
+    objects::{JClass, JObject, JString, JValue},
+    sys::{jboolean, jint, jlong, jobject},
     JNIEnv,
 };
 
@@ -20,6 +20,7 @@ use log::Level;
 use qaul_chat::Chat;
 use qaul_voice::Voice;
 use ratman::Router;
+use ratman_netmod::{Frame, Target};
 
 /// Setup the main database and router state
 #[no_mangle]
@@ -143,4 +144,87 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_connectTcp(
         )])
         .await;
     });
+}
+
+fn frame_to_jframe<'env>(env: &'env JNIEnv, f: Frame, t: Target) -> JObject<'env> {
+    let vec = bincode::serialize(&f).unwrap();
+    let array = env.new_byte_array(vec.len() as i32).unwrap();
+
+    env.set_byte_array_region(
+        array,
+        0,
+        vec.into_iter()
+            .map(|u| u as i8)
+            .collect::<Vec<_>>()
+            .as_slice(),
+    )
+    .unwrap();
+
+    let target: i32 = match t {
+        Target::Flood => -1,
+        Target::Single(id) => id as i32,
+    };
+
+    let class: JClass<'env> = env.find_class("net/qaul/app/ffi/models/Frame").unwrap();
+    env.new_object(
+        class,
+        "([BI)V",
+        &[JValue::Object(array.into()), JValue::Int(target)],
+    )
+    .unwrap()
+}
+
+fn from_jframe<'env>(env: &'env JNIEnv, jframe: JObject<'env>) -> (Frame, Target) {
+    let bytes = match env.get_field(jframe, "data", "[B").unwrap() {
+        JValue::Object(o) => o,
+        _ => unreachable!(),
+    };
+    let target = env.get_field(jframe, "target", "I").unwrap();
+
+    let len = env.get_array_length(*bytes).unwrap() as usize;
+    let mut buf: Vec<i8> = (0..).take(len).map(|_| 0_i8).collect();
+    env.get_byte_array_region(*bytes, 0, buf.as_mut_slice())
+        .unwrap();
+
+    (
+        bincode::deserialize(&buf.into_iter().map(|u| u as u8).collect::<Vec<u8>>()).unwrap(),
+        match target {
+            JValue::Int(-1) => Target::Flood,
+            JValue::Int(id) => Target::Single(id as u16),
+            _ => unreachable!(),
+        },
+    )
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_wdToSend(
+    env: JNIEnv,
+    _: JObject,
+    qaul: jlong,
+) -> jobject {
+    info!("Rust FFI wdToSend");
+    let state = GcWrapped::from_ptr(qaul as i64);
+    let wd = state.get_wd();
+
+    // Blocks until a new frame should be sent
+    let (frame, target) = wd.take();
+
+    // Convert to Java types
+    frame_to_jframe(&env, frame, target).into_inner()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_wdReceived(
+    env: JNIEnv,
+    _: JObject,
+    qaul: jlong,
+    frame: JObject,
+) {
+    info!("Rust FFI wdReceived");
+    let state = GcWrapped::from_ptr(qaul as i64);
+    let wd = state.get_wd();
+    let (f, t) = from_jframe(&env, frame);
+
+    // Pass the frame to the router - not our problem anymore :)
+    wd.give(f, t);
 }

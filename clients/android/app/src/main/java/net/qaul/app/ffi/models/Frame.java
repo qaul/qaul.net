@@ -1,5 +1,8 @@
 package net.qaul.app.ffi.models;
 
+import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
+
 /**
  * A mostly opaque mapping type to enable Java to receive two fields
  */
@@ -18,6 +21,22 @@ public class Frame {
      * @return an array of bytes with the length first
      */
     public byte[] toWire() {
-        return new byte[]{ 1, 3, 1, 2 };
+        ByteBuffer b = ByteBuffer.allocate(8);
+        b.putInt(this.data.length);
+        byte[] length = b.array();
+
+        byte[] combine = new byte[length.length + data.length];
+        int idx = 0;
+
+        for (;idx < length.length; idx++) {
+            combine[idx] = length[idx];
+        }
+
+        for (byte datum : data) {
+            combine[idx] = datum;
+            idx++;
+        }
+
+        return combine;
     }
 }

@@ -178,23 +178,22 @@ public class NativeQaul {
      * <p>
      * The ID is the sender identity
      *
-     * @param target       interface specific mapping information if this endpoint is one-to-many
      * @param encodedFrame encoded data frame, ignored by Java code and passed into Rust
      */
-    public void wdReceiveFrame(int target, byte[] encodedFrame) {
-        wdReceiveFrame(this.libqaulState, target, encodedFrame);
+    public void wdReceived(byte[] encodedFrame) {
+        wdReceived(this.libqaulState, encodedFrame);
     }
 
-    private native void wdReceiveFrame(long qaul, int target, byte[] encodedFrame);
+    private native void wdReceived(long qaul, byte[] encodedFrame);
 
     /**
      * Get a frame from the Rust code to send off to someone special
      *
      * @return the next frame to send off with target informatieon
      */
-    public Frame wdSendFrame() {
-        return wdSendFrame(this.libqaulState);
+    public Frame wdToSend() {
+        return wdToSend(this.libqaulState);
     }
 
-    private native Frame wdSendFrame(long qaul);
+    private native Frame wdToSend(long qaul);
 }
