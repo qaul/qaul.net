@@ -8,14 +8,14 @@ package net.qaul.app.ffi.models;
  */
 public class ChatMessage {
     public Id id;
+    public Id sender;
     public String timestamp;
     public String content;
-    public Id author;
 
-    public ChatMessage(Id id, String timestamp, String content, Id author) {
+    public ChatMessage(Id id, Id sender, String timestamp, String content) {
         this.id = id;
+        this.sender = sender;
         this.timestamp = timestamp;
         this.content = content;
-        this.author = author;
     }
 }

@@ -6,7 +6,7 @@ use jni::{
     JNIEnv,
 };
 use libqaul::{ffi::java::ToJObject, Identity};
-use qaul_chat::RoomMeta;
+use qaul_chat::{ChatMessage, RoomMeta};
 
 fn room_to_jobject<'env>(env: &'env JNIEnv, room: RoomMeta) -> JObject<'env> {
     let id = JavaId::from_identity(room.id).into_obj(env);
@@ -114,21 +114,75 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatStart<'env>(
     jroom.into_inner()
 }
 
-// #[no_mangle]
-// pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatSendMessage<'env>(
-//     env: JNIEnv<'env>,
-//     _: JObject,
-//     room_id: JString,
-//     content: JString,
-// ) -> JObject<'env> {
-//     JObject::null()
-// }
+fn chat_message_to_jobject<'env>(env: &'env JNIEnv, msg: ChatMessage) -> JObject<'env> {
+    let id = JavaId::from_identity(msg.id).into_obj(env);
+    let sender = JavaId::from_identity(msg.sender).into_obj(env);
+    let timestamp = utils::into_jstring(env, format!("{}", msg.timestamp));
+    let content = utils::into_jstring(env, msg.content);
 
-// #[no_mangle]
-// pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatLoadMessages<'env>(
-//     env: JNIEnv<'env>,
-//     _: JObject,
-//     room_id: JString,
-// ) -> JObject<'env> {
-//     JObject::null()
-// }
+    let class: JClass<'env> = env
+        .find_class("net/qaul/app/ffi/models/ChatMessage")
+        .unwrap();
+
+    env.new_object(
+        class,
+        "(Lnet/qaul/app/ffi/models/Id;Lnet/qaul/app/ffi/models/Id;Ljava/lang/String;Ljava/lang/String;)V",
+        &[
+            JValue::Object(id),
+            JValue::Object(sender),
+            JValue::Object(*timestamp),
+            JValue::Object(*content),
+        ],
+    )
+    .unwrap()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatSendMessage<'env>(
+    env: JNIEnv<'env>,
+    _: JObject,
+    qaul: jlong,
+    room_id: JObject,
+    content: JString,
+) -> jobject {
+    let state = GcWrapped::from_ptr(qaul as i64);
+    let w = state.get_inner();
+    let auth = state.get_auth().unwrap();
+
+    let room_id = JavaId::from_obj(&env, room_id).into_identity();
+    let content = utils::conv_jstring(&env, content);
+
+    let chat_message =
+        block_on(async { w.chat().send_message(auth, room_id, content).await.unwrap() });
+
+    chat_message_to_jobject(&env, chat_message).into_inner()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatLoadMessages<'env>(
+    env: JNIEnv<'env>,
+    _: JObject,
+    qaul: jlong,
+    room_id: JObject,
+) -> jobject {
+    let state = GcWrapped::from_ptr(qaul as i64);
+    let w = state.get_inner();
+    let auth = state.get_auth().unwrap();
+
+    let room_id = JavaId::from_obj(&env, room_id).into_identity();
+
+    let messages = block_on(async { w.chat().load_messages(auth, room_id).await.unwrap() });
+
+    let list_class = env.find_class("java/util/ArrayList").unwrap();
+    let arraylist = env.new_object(list_class, "()V", &[]).unwrap();
+    let list = JList::from_env(&env, arraylist).unwrap();
+
+    messages
+        .into_iter()
+        .map(|message| chat_message_to_jobject(&env, message))
+        .fold(list, |list, jobj| {
+            list.add(jobj);
+            list
+        })
+        .into_inner()
+}
