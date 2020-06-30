@@ -62,8 +62,8 @@ pub fn list<'env>(local: jboolean, env: &'env JNIEnv<'env>, q: Arc<Qaul>) -> JLi
             q.users().list_remote().await
         }
     });
+    
     let class = env.find_class("java/util/ArrayList").unwrap();
-
     let arraylist = env.new_object(class, "()V", &[]).unwrap();
     let list = JList::from_env(env, arraylist).unwrap();
 

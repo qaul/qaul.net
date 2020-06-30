@@ -1,7 +1,7 @@
 //! qaul.net android interop library
 
 #![cfg(target_os = "android")]
-#![allow(non_snake_case)]
+#![allow(warnings)]
 
 #[macro_use]
 extern crate log;

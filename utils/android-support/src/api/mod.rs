@@ -7,6 +7,6 @@
 //! or confusing.  Any shared code is kept in the `utils` module in
 //! the root of the crate.
 
-
 pub mod base;
+pub mod chat;
 pub mod users;

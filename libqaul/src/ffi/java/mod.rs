@@ -29,7 +29,7 @@ pub(crate) fn to_jstring<'env>(env: &'env JNIEnv, s: Option<String>) -> JString<
 
 pub mod users;
 
-pub(self) trait ToJObject {
+pub trait ToJObject {
     fn to_jobject<'env>(self, env: &'env JNIEnv) -> JObject<'env>;
 }
 

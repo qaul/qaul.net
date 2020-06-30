@@ -29,8 +29,8 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_usersList(
 ) -> jobject {
     info!("Rust FFI usersList");
     let state = GcWrapped::from_ptr(qaul as i64);
-    let qaul = state.get_inner();
-    let obj = (*libqaul::ffi::java::users::list(local, &env, qaul)).into_inner();
+    let w = state.get_inner();
+    let obj = (*libqaul::ffi::java::users::list(local, &env, w.qaul())).into_inner();
     std::mem::forget(state);
     obj
 }
@@ -46,9 +46,9 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_usersCreate<'env>(
 ) -> jobject {
     info!("Rust FFI usersCreate");
     let state = GcWrapped::from_ptr(qaul as i64);
-    let qaul = state.get_inner();
+    let w = state.get_inner();
 
-    match libqaul::ffi::java::users::create(&env, qaul, handle, name, pw) {
+    match libqaul::ffi::java::users::create(&env, w.qaul(), handle, name, pw) {
         Err(e) => {
             error!("Error occured while creating user: {:?}", e);
             std::mem::forget(state); // FIXME
@@ -77,7 +77,7 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_usersModify<'env>(
     info!("Rust FFI usersModify");
     let state = GcWrapped::from_ptr(qaul as i64);
     let auth = state.get_auth().unwrap();
-    let qaul = state.get_inner();
+    let w = state.get_inner();
 
     let handle = utils::maybe_conv_jstring(&env, handle);
     let name = utils::maybe_conv_jstring(&env, name);
@@ -87,13 +87,13 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_usersModify<'env>(
         let updates = vec![UserUpdate::DisplayName(handle), UserUpdate::RealName(name)];
 
         for u in updates {
-            match qaul.users().update(auth.clone(), u).await {
+            match w.qaul().users().update(auth.clone(), u).await {
                 Ok(_) => continue,
                 Err(e) => error!("Failure: {}", e), // TODO: return proper failure?
             }
         }
 
-        libqaul::ffi::java::users::get(&env, qaul, auth.0).into_inner()
+        libqaul::ffi::java::users::get(&env, w.qaul(), auth.0).into_inner()
     })
 }
 
@@ -107,11 +107,11 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_usersLogin(
 ) -> jboolean {
     info!("Rust FFI usersLogin");
     let state = GcWrapped::from_ptr(qaul as i64);
-    let qaul = state.get_inner();
+    let w = state.get_inner();
 
     let id = JavaId::from_obj(&env, id).into_identity();
 
-    let b = (match libqaul::ffi::java::users::login(&env, Arc::clone(&qaul), id, pw) {
+    let b = (match libqaul::ffi::java::users::login(&env, w.qaul(), id, pw) {
         Ok(auth) => {
             state.set_auth(Some(auth));
             true
@@ -119,7 +119,7 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_usersLogin(
         Err(_) => false,
     }) as jboolean;
 
-    std::mem::forget(qaul);
+    std::mem::forget(w);
     std::mem::forget(state);
 
     b

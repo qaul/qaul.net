@@ -7,17 +7,19 @@ use jni::{
     JNIEnv,
 };
 use libqaul::{users::UserAuth, Identity, Qaul};
+use qaul_chat::Chat;
+use qaul_voice::Voice;
 use std::{
     ffi::{CStr, CString},
     ops::Deref,
 };
 
 pub(crate) struct AndroidState {
-    libqaul: QaulWrapped,
+    libqaul: Arc<QaulWrapped>,
     auth: Option<UserAuth>,
 }
 
-pub(crate) struct QaulWrapped(Arc<Qaul>);
+pub(crate) struct QaulWrapped(Arc<Qaul>, pub(crate) Arc<Chat>, pub(crate) Arc<Voice>);
 
 impl Drop for QaulWrapped {
     fn drop(&mut self) {
@@ -26,10 +28,17 @@ impl Drop for QaulWrapped {
     }
 }
 
-impl Deref for QaulWrapped {
-    type Target = Arc<Qaul>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
+impl QaulWrapped {
+    pub(crate) fn qaul(&self) -> Arc<Qaul> {
+        Arc::clone(&self.0)
+    }
+
+    pub(crate) fn chat(&self) -> Arc<Chat> {
+        Arc::clone(&self.1)
+    }
+
+    pub(crate) fn voice(&self) -> Arc<Voice> {
+        Arc::clone(&self.2)
     }
 }
 
@@ -48,9 +57,9 @@ impl Drop for GcWrapped {
 }
 
 impl GcWrapped {
-    pub(crate) fn new(libqaul: Arc<Qaul>) -> Self {
+    pub(crate) fn new(libqaul: Arc<Qaul>, chat: Arc<Chat>, voice: Arc<Voice>) -> Self {
         Self(Arc::new(RwLock::new(AndroidState {
-            libqaul: QaulWrapped(libqaul),
+            libqaul: Arc::new(QaulWrapped(libqaul, chat, voice)),
             auth: None,
         })))
     }
@@ -67,7 +76,7 @@ impl GcWrapped {
     }
 
     /// Get the inner state representation from the wrapper
-    pub(crate) fn get_inner(&self) -> Arc<Qaul> {
+    pub(crate) fn get_inner(&self) -> Arc<QaulWrapped> {
         block_on(async { Arc::clone(&self.0.read().await.libqaul) })
     }
 

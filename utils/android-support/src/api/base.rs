@@ -80,7 +80,7 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_setupState(
     // storing the state directly in the instance variable doesn't
     // work, or didn't work when I last tried it.  Patches to change
     // this very welcome, if they work!
-    GcWrapped::new(libqaul).into_ptr()
+    GcWrapped::new(libqaul, chat, voice).into_ptr()
 }
 
 /// Check if an auth token is still valid
@@ -95,8 +95,9 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_checkLogin(
     match state.get_auth() {
         None => false,
         Some(auth) => block_on(async {
-            let qaul = state.get_inner();
-            qaul.users()
+            let w = state.get_inner();
+            w.qaul()
+                .users()
                 .is_authenticated(auth)
                 .await
                 .map(|_| true)

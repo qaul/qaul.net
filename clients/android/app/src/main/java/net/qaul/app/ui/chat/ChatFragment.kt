@@ -47,8 +47,8 @@ class ChatFragment : Fragment() {
         val list = root!!.findViewById<RecyclerView>(R.id.chat_room_list)!!
         list.layoutManager = LinearLayoutManager(context)
 
-        val chatRoomList = root.findViewById<RecyclerView>(R.id.chat_room_list)
-        chatRoomList.layoutManager = LinearLayoutManager(context)
+        chatList = root.findViewById<RecyclerView>(R.id.chat_room_list)
+        chatList.layoutManager = LinearLayoutManager(context)
         updateRooms()
 
         // Do the FAB stuff
