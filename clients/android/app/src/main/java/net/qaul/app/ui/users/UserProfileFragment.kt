@@ -9,7 +9,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import net.qaul.app.R
+import net.qaul.app.ffi.models.Id
 import net.qaul.app.ffi.models.UserProfile
+import net.qaul.app.ui.chat.ChatRoomFragment
+import net.qaul.app.util.AppState
+import java.util.ArrayList
 
 class UserProfileFragment(val profile: UserProfile) : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -27,7 +31,6 @@ class UserProfileFragment(val profile: UserProfile) : Fragment() {
 
         update_friend_status(root, markFriend)
 
-
         val avi = root.findViewById<ImageView>(R.id.user_profile_avi)
         avi.setVisibility(View.VISIBLE)
 
@@ -35,6 +38,12 @@ class UserProfileFragment(val profile: UserProfile) : Fragment() {
         handle.text = profile.handle
         lastOnline.text = "now"
 
+        // Setup button listeners
+        val startChat = root.findViewById<Button>(R.id.user_profile_open_chat)
+        startChat.setOnClickListener {
+            val room = AppState.get().chatStart(profile.handle, listOf<Id>(profile.id) as ArrayList<Id>?)
+            ChatRoomFragment(room).transitionInto(parentFragmentManager)
+        }
 
         return root
     }

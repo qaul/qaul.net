@@ -5,7 +5,7 @@ use jni::{
     sys::{jboolean, jint, jlong, jobject},
     JNIEnv,
 };
-use libqaul::ffi::java::ToJObject;
+use libqaul::{ffi::java::ToJObject, Identity};
 use qaul_chat::RoomMeta;
 
 fn room_to_jobject<'env>(env: &'env JNIEnv, room: RoomMeta) -> JObject<'env> {
@@ -80,15 +80,39 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatList<'env>(
     chat_list.into_inner()
 }
 
-// #[no_mangle]
-// pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatStart<'env>(
-//     env: JNIEnv<'env>,
-//     _: JObject,
-//     name: JString,
-//     friends: JList,
-// ) -> JObject<'env> {
-//     JObject::null()
-// }
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatStart<'env>(
+    env: JNIEnv<'env>,
+    _: JObject,
+    qaul: jlong,
+    name: JString,
+    friends: JList,
+) -> jobject {
+    let state = GcWrapped::from_ptr(qaul as i64);
+    let w = state.get_inner();
+    let auth = state.get_auth().unwrap();
+
+    let friends: Vec<Identity> = friends
+        .iter()
+        .unwrap()
+        .map(|id| JavaId::from_obj(&env, id).into_identity())
+        .collect();
+
+    let chat_name = utils::conv_jstring(&env, name);
+
+    let room = block_on(async {
+        w.chat()
+            .start_chat(auth.clone(), friends, Some(chat_name))
+            .await
+            .unwrap()
+    });
+
+    let jroom = room_to_jobject(&env, room);
+    std::mem::forget(qaul);
+    std::mem::forget(state);
+
+    jroom.into_inner()
+}
 
 // #[no_mangle]
 // pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_chatSendMessage<'env>(

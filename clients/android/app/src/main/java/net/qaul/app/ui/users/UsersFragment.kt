@@ -14,12 +14,12 @@ import com.google.android.material.tabs.TabLayout
 import net.qaul.app.R
 import net.qaul.app.ffi.models.Id
 import net.qaul.app.ffi.models.UserProfile
+import net.qaul.app.util.AppState
 
 class UsersFragment : Fragment() {
 
     private lateinit var adapter: UsersTabsAdapter
     private lateinit var pager: ViewPager
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, bundle: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_users, container, false)
@@ -35,21 +35,13 @@ class UsersFragment : Fragment() {
     }
 }
 
-
 class UsersTabsAdapter(val fm: FragmentManager)
     : FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
     override fun getItem(position: Int): Fragment {
         if (position == 1) {
-            return UsersListFragment(mutableListOf<UserProfile>(
-                    UserProfile(Id(""), "@carencop","Caren Cop", false),
-                    UserProfile(Id(""), "@bob","Bob Beligerant", false),
-                    UserProfile(Id(""), "@eve","Eve Evergreen", false)
-            ), fm)
+            return UsersListFragment(true, fm)
         } else {
-            return UsersListFragment(mutableListOf<UserProfile>(
-                    UserProfile(Id(""), "@danni","Danni Default", true),
-                    UserProfile(Id(""), "@alice","Alice Anonymous", true)
-            ), fm)
+            return UsersListFragment(false, fm)
         }
     }
 
@@ -62,22 +54,29 @@ class UsersTabsAdapter(val fm: FragmentManager)
     }
 
     override fun getCount(): Int = 2
-
 }
 
-class UsersListFragment(private val users: MutableList<UserProfile>, val fm: FragmentManager) : Fragment() {
-    private lateinit var adapter: UsersListAdapter
-    private lateinit var layouter: LinearLayoutManager
+class UsersListFragment(val friends: Boolean, val fm: FragmentManager) : Fragment() {
+    private lateinit var list: RecyclerView
+    val users: MutableList<UserProfile> = mutableListOf()
+
+    // This function should be called whenever the view is updated
+    fun updateUsers() {
+        users.clear()
+        if (!friends) {
+            for(u in AppState.get().usersList(false)) {
+                users.add(u)
+            }
+        }
+
+        list.adapter = UsersListAdapter(users, fm)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_users_list, container, false)
-        adapter = UsersListAdapter(users, fm)
-        layouter = LinearLayoutManager(context)
-
-        val list = root!!.findViewById<RecyclerView>(R.id.users_list)!!
-        list.adapter = adapter
-        list.layoutManager = layouter
-
+        list = root!!.findViewById<RecyclerView>(R.id.users_list)!!
+        list.layoutManager = LinearLayoutManager(context)
+        updateUsers()
         return root
     }
 }

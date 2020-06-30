@@ -1,5 +1,6 @@
 package net.qaul.app.ui.chat
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -36,6 +37,7 @@ class ChatFragment : Fragment() {
         chatList.adapter = ChatListAdapter(chatRooms, fragMan)
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -55,6 +57,10 @@ class ChatFragment : Fragment() {
         val fab = root.findViewById<FloatingActionButton>(R.id.chat_room_list_start)
         val fab_single = root.findViewById<FloatingActionButton>(R.id.chat_room_list_start_chat)
         val fab_group = root.findViewById<FloatingActionButton>(R.id.chat_room_list_start_group)
+
+        fab.visibility = View.INVISIBLE
+        fab_single.visibility = View.INVISIBLE
+        fab_group.visibility = View.INVISIBLE
 
         originFab = fab_single.y
         fab.setOnClickListener {

@@ -43,6 +43,19 @@
         app:layout_constraintTop_toBottomOf="@+id/item_users_list_name"
         app:layout_constraintVertical_bias="0.0" />
 
+    <ImageView
+        android:id="@+id/user_selected_check"
+        android:layout_width="40dp"
+        android:layout_height="41dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.745"
+        app:layout_constraintStart_toEndOf="@+id/item_users_list_name"
+        app:layout_constraintTop_toTopOf="@+id/item_users_list_name"
+        app:layout_constraintVertical_bias="0.25"
+        app:srcCompat="@drawable/ic_baseline_check_24" />
+
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"

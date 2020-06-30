@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.qaul.app.R
@@ -21,6 +23,14 @@ import net.qaul.app.util.AppState
 class ChatRoomFragment(val room: ChatRoom) : Fragment() {
     private lateinit var layouter: LinearLayoutManager
     private lateinit var adapter: ChatRoomAdapter
+
+    fun transitionInto(man: FragmentManager) {
+        // Create transaction to replace main container view
+        val trans = man.beginTransaction()
+        trans.replace(R.id.nav_host_fragment, this).addToBackStack(null)
+        trans.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+        trans.commit()
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, bundle: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_chatroom, container, false)

@@ -130,11 +130,23 @@ public class NativeQaul {
      * @param friends a set of remote users on the network to talk to
      * @return the room ID for further commands
      */
-    public Id chatStart(String name, ArrayList<String> friends) {
+    public ChatRoom chatStart(String name, ArrayList<Id> friends) {
         return chatStart(libqaulState, name, friends);
     }
 
-    private native Id chatStart(long qaul, String name, ArrayList<String> friends);
+    private native ChatRoom chatStart(long qaul, String name, ArrayList<Id> friends);
+
+    /**
+     * Get a room object for a particular Id
+     *
+     * @param id the room identifier
+     * @return The room associated with the given id
+     */
+    public ChatRoom chatGetRoom(Id id) {
+        return chatGetRoom(libqaulState, id);
+    }
+
+    private native ChatRoom chatGetRoom(long qaul, Id id);
 
     /**
      * Send a text message to a room
