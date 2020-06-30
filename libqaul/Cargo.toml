@@ -27,6 +27,8 @@ tempfile = { version = "3.0", optional = true }
 tracing = "0.1"
 tracing-futures = "0.2"
 
+log = "*" # FIXME: remove again!
+
 [dev-dependencies]
 ratman-harness = { path = "../ratman/harness" }
 serde_json = "1.0"

@@ -27,4 +27,12 @@
     <string name="users_friends">Friends</string>
     <string name="placeholder_username">Katharina Fey</string>
     <string name="placeholder_last_seen">Last seen: 25. June 2020 07:58</string>
+    <string name="button_register">Register</string>
+
+    <string name="register_hello">Create user identity</string>
+    <string name="register_hello2">All user identities in qaul.net are cryptographically random. For people to know who you are you will need to set a handle and/or name. But note: this is optional! The app is perfectly usable if you\'re just a number</string>
+    <string name="prompt_handle">\@handle</string>
+    <string name="prompt_name">Display Name</string>
+    <string name="placeholder_id">5555-4444-3333-2222-1111-ACAB</string>
+    <string name="placeholder_handle">\@spacekookie</string>
 </resources>

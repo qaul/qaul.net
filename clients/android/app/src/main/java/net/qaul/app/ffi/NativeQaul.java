@@ -25,9 +25,7 @@ public class NativeQaul {
         this.libqaulState = setupState(port);
     }
 
-    public NativeQaul() {}
-
-    public native void idTest(Id id);
+    public native Id idTest(Id id);
 
     /**
      * Setup the main
@@ -54,16 +52,6 @@ public class NativeQaul {
     private native boolean checkLogin(long qaul);
 
     /**
-     * Create a new user
-     *
-     */
-    public Id usersCreate(String handle, String name, String password) {
-        return usersCreate(libqaulState, handle, name, password);
-    }
-
-    private native Id usersCreate(long qaul, String handle, String name, String password);
-
-    /**
      * List available users
      *
      * @local indicate whether only to list local users
@@ -77,6 +65,16 @@ public class NativeQaul {
     private native ArrayList<UserProfile> usersList(long qaul, boolean local);
 
     /**
+     * Create a new user
+     *
+     */
+    public Id usersCreate(String handle, String name, String password) {
+        return usersCreate(libqaulState, handle, name, password);
+    }
+
+    private native Id usersCreate(long qaul, String handle, String name, String password);
+
+    /**
      * Get a particular user profile by ID
      *
      * @return List of local users
@@ -86,6 +84,18 @@ public class NativeQaul {
     }
 
     private native UserProfile usersGet(long qaul, Id id);
+
+    /**
+     * Modify the local user profile and return the new data
+     *
+     * @return Modified user profile
+     */
+    public UserProfile usersModify(String handle, String name) {
+        return usersModify(libqaulState, handle, name);
+    }
+
+    private native UserProfile usersModify(long qaul, String handle, String name);
+
 
     /**
      * Login as an existing user via their ID and password

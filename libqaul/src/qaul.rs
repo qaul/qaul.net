@@ -100,7 +100,8 @@ impl Qaul {
     }
 
     /// Get access to the inner Router
-    #[deprecated]
+    // TODO: figure out a better way of doing this!
+    #[doc(hidden)]
     pub fn router(&self) -> &Router {
         &self.router
     }

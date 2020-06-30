@@ -4,62 +4,40 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    tools:context=".ui.login.LoginFragment">
-
+    tools:context=".ui.UserCreateFragment">
 
     <LinearLayout
-        android:id="@+id/login_container_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="vertical">
-
+        android:orientation="vertical"
+        android:paddingStart="25dp"
+        android:paddingEnd="25dp"
+        tools:ignore="UselessParent">
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/welcome"
+            android:text="@string/register_hello"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="25dp" />
 
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/app_peering_server"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:autofillHints="url"
-                android:ems="10"
-                android:hint="@string/peering_server_hint"
-                android:inputType="textUri" />
-
-            <Button
-                android:id="@+id/peering_connect"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/peering_button_connect" />
-        </LinearLayout>
-
+            android:text="@string/register_hello2" />
 
         <Space
-            android:layout_width="match_parent"
-            android:layout_height="25dp" />
-
-        <Spinner
-            android:id="@+id/user_list_picker"
             android:layout_width="match_parent"
             android:layout_height="50dp" />
 
         <EditText
-            android:id="@+id/user_password_entry"
+            android:id="@+id/registry_password_entry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:autofillHints="password"
@@ -67,17 +45,28 @@
             android:hint="@string/prompt_password"
             android:inputType="textPassword" />
 
+        <EditText
+            android:id="@+id/registry_handle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="handle"
+            android:ems="10"
+            android:hint="@string/prompt_handle"
+            android:inputType="textAutoComplete" />
+
+        <EditText
+            android:id="@+id/registry_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="name"
+            android:ems="10"
+            android:hint="@string/prompt_name"
+            android:inputType="textAutoComplete" />
+
         <Button
-            android:id="@+id/button_register"
+            android:id="@+id/registry_create"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/button_register" />
-
-        <Button
-            android:id="@+id/button_login"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/button_login" />
     </LinearLayout>
-
 </LinearLayout>

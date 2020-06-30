@@ -1268,6 +1268,7 @@ dependencies = [
  "futures 0.3.5",
  "hex",
  "jni",
+ "log",
  "mime",
  "netmod-mem",
  "rand 0.7.3",

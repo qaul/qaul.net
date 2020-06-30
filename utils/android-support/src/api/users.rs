@@ -3,14 +3,14 @@
 //! This API is responsible for creating, listing and managing local
 //! and remote users.
 
-use crate::utils::{self, JavaId, StateWrapped};
+use crate::utils::{self, GcWrapped, JavaId};
 use async_std::{
     sync::{Arc, RwLock},
     task::block_on,
 };
 use jni::{
     objects::{JObject, JString},
-    sys::{jlong, jobject},
+    sys::{jboolean, jlong, jobject},
     JNIEnv,
 };
 
@@ -25,9 +25,14 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_usersList(
     env: JNIEnv,
     _: JObject,
     qaul: jlong,
+    local: jboolean,
 ) -> jobject {
-    let state = StateWrapped::from_ptr(qaul as i64).get_inner();
-    (*libqaul::ffi::java::users::list(&env, Arc::clone(&state))).into_inner()
+    info!("Rust FFI usersList");
+    let state = GcWrapped::from_ptr(qaul as i64);
+    let qaul = state.get_inner();
+    let obj = (*libqaul::ffi::java::users::list(local, &env, qaul)).into_inner();
+    std::mem::forget(state);
+    obj
 }
 
 #[no_mangle]
@@ -35,58 +40,83 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_usersCreate<'env>(
     env: JNIEnv,
     _: JObject,
     qaul: jlong,
+    handle: JString,
     name: JString,
     pw: JString,
 ) -> jobject {
-    let state = StateWrapped::from_ptr(qaul as i64);
-    match libqaul::ffi::java::users::create(&env, state.get_inner(), name, pw) {
+    info!("Rust FFI usersCreate");
+    let state = GcWrapped::from_ptr(qaul as i64);
+    let qaul = state.get_inner();
+
+    match libqaul::ffi::java::users::create(&env, qaul, handle, name, pw) {
         Err(e) => {
             error!("Error occured while creating user: {:?}", e);
+            std::mem::forget(state); // FIXME
             *JObject::null()
         }
         Ok(auth) => {
+            info!("6");
             let id = auth.0;
+            info!("7");
             state.set_auth(Some(auth));
-            *JObject::null()
+            info!("8");
+            std::mem::forget(state); // FIXME
+            JavaId::from_identity(id).into_obj(&env).into_inner()
         }
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_idTest(
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_usersModify<'env>(
     env: JNIEnv,
     _: JObject,
-    id: JObject,
-) {
-    let rust_id = JavaId::from_obj(&env, id);
-    
-    info!("Successfully extracted ID object: '{}'", rust_id.0);
+    qaul: jlong,
+    handle: JString,
+    name: JString,
+) -> jobject {
+    info!("Rust FFI usersModify");
+    let state = GcWrapped::from_ptr(qaul as i64);
+    let auth = state.get_auth().unwrap();
+    let qaul = state.get_inner();
+
+    let handle = utils::maybe_conv_jstring(&env, handle);
+    let name = utils::maybe_conv_jstring(&env, name);
+
+    block_on(async {
+        use libqaul::users::UserUpdate;
+        let updates = vec![UserUpdate::DisplayName(handle), UserUpdate::RealName(name)];
+
+        for u in updates {
+            match qaul.users().update(auth.clone(), u).await {
+                Ok(_) => continue,
+                Err(e) => error!("Failure: {}", e), // TODO: return proper failure?
+            }
+        }
+
+        libqaul::ffi::java::users::get(&env, qaul, auth.0).into_inner()
+    })
 }
 
-// #[no_mangle]
-// pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_usersLogin(
-//     env: JNIEnv,
-//     _this: JObject,
-//     qaul: jlong,
-//     id: JString,
-//     pw: JString,
-// ) -> jboolean {
-//     info!("Getting login request...");
-//     let mut android_state = get_android_state(qaul);
-//     let mut state = block_on(async { android_state.write().await });
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_usersLogin(
+    env: JNIEnv,
+    _this: JObject,
+    qaul: jlong,
+    id: JObject,
+    pw: JString,
+) -> jboolean {
+    info!("Rust FFI usersLogin");
+    let state = GcWrapped::from_ptr(qaul as i64);
+    info!("1");
+    let qaul = state.get_inner();
+    info!("2");
 
-//     let success = match libqaul::ffi::java::users::login(&env, Arc::clone(&state.libqaul), id, pw) {
-//         Ok(auth) => {
-//             state.auth = Some(auth);
-//             true
-//         }
-//         Err(_) => false,
-//     };
-
-//     drop(state);
-//     // Don't drop the outer wrapper
-//     std::mem::forget(android_state);
-
-//     // Communicate happiness
-//     success as u8
-// }
+    let id = JavaId::from_obj(&env, id).into_identity();
+    (match libqaul::ffi::java::users::login(&env, qaul, id, pw) {
+        Ok(auth) => {
+            state.set_auth(Some(auth));
+            true
+        }
+        Err(_) => false,
+    }) as jboolean
+}

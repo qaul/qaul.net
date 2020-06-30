@@ -3,18 +3,20 @@
 //! This module provides some simple utilities for setting up the
 //! libqaul and router state, and adding new TCP routes to the driver.
 
-use crate::utils::{self, StateWrapped};
+use crate::utils::{self, GcWrapped};
 use async_std::{
     sync::{Arc, RwLock},
     task::block_on,
 };
 use jni::{
-    objects::JObject,
+    objects::{JObject, JString},
     sys::{jboolean, jint, jlong},
     JNIEnv,
 };
 
+use android_logger::{Config, FilterBuilder};
 use libqaul::{users::UserAuth, Qaul};
+use log::Level;
 use qaul_chat::Chat;
 use qaul_voice::Voice;
 use ratman_configure::{EpBuilder, NetBuilder};
@@ -22,15 +24,22 @@ use ratman_configure::{EpBuilder, NetBuilder};
 /// Setup the main database and router state
 #[no_mangle]
 pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_setupState(
-    env: JNIEnv,
-    this: JObject,
+    _: JNIEnv,
+    _: JObject,
     port: jint,
 ) -> jlong {
-    //android_logger::init_once(Config::default().with_min_level(Level::Info));
+    info!("Rust FFI setupState");
+    println!("Setting up android logger and panic hook!");
+    android_logger::init_once(
+        Config::default()
+            .with_tag("rust")
+            .with_min_level(Level::Debug),
+    );
     utils::init_panic_handling_once();
+
+    // tracing::subscriber::set_global_default(subscriber).unwrap();
     // let subscriber = android_tracing::AndroidSubscriber::new(true)
     //     .with(EnvFilter::new("android_support=trace,[]=warn"));
-    // tracing::subscriber::set_global_default(subscriber).unwrap();
 
     info!("Running ratman-configure and libqaul bootstrap code...");
 
@@ -55,17 +64,18 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_setupState(
     // storing the state directly in the instance variable doesn't
     // work, or didn't work when I last tried it.  Patches to change
     // this very welcome, if they work!
-    StateWrapped::new(libqaul).into_ptr()
+    GcWrapped::new(libqaul).into_ptr()
 }
 
 /// Check if an auth token is still valid
 #[no_mangle]
 pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_checkLogin(
-    env: JNIEnv,
+    _: JNIEnv,
     _: JObject,
     qaul: jlong,
 ) -> jboolean {
-    let state = StateWrapped::from_ptr(qaul as i64);
+    info!("Rust FFI checkLogin");
+    let state = GcWrapped::from_ptr(qaul as i64);
     match state.get_auth() {
         None => false,
         Some(auth) => block_on(async {
@@ -78,4 +88,24 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_checkLogin(
         }),
     }
     .into()
+}
+
+/// Check if an auth token is still valid
+#[no_mangle]
+pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_connectTcp(
+    env: JNIEnv,
+    _: JObject,
+    _qaul: jlong,
+    _addr: JString,
+    _port: jint,
+) {
+    info!("Rust FFI connectTcp");
+    // let qaul = GcWrapped::from_ptr(qaul as i64).get_qaul();
+    // let router = qaul.router();
+
+    // block_on(async {
+    //     let ep: Arc<dyn netmod_tcp::Endpoint> = router.get_endpoint(0).await;
+
+    // })
+    todo!()
 }

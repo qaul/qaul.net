@@ -197,6 +197,12 @@ impl Router {
         self.inner.add_ep(ep).await
     }
 
+    /// **Unstable fn:** get an endpoint from the driver set by ID
+    #[doc(hidden)]
+    pub async fn get_endpoint(&self, id: usize) -> Arc<dyn Endpoint + 'static + Send + Sync> {
+        self.inner.get_ep(id).await
+    }
+
     /// Remove an endpoint from the router by ID
     ///
     /// This function is primarily meant for testing purposes, and

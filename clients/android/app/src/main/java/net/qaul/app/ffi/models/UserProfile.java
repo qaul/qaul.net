@@ -1,5 +1,7 @@
 package net.qaul.app.ffi.models;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Represent a user profile with ID and metadata
  */
@@ -14,5 +16,11 @@ public class UserProfile {
             this.handle = handle;
             this.name = name;
             this.friend = friend;
+    }
+
+    @NotNull
+    @Override
+    public String toString() {
+        return "@" + handle + " | " + name;
     }
 }

@@ -18,7 +18,7 @@ pub(self) use journal::Journal;
 pub(self) use routes::{EpTargetPair, RouteTable, RouteType};
 pub(self) use switch::Switch;
 
-use crate::{Endpoint, Identity, Message, Result, Error};
+use crate::{Endpoint, Error, Identity, Message, Result};
 use async_std::sync::Arc;
 use netmod::Frame;
 
@@ -56,7 +56,7 @@ impl Core {
         // Dispatch the runners
         Arc::clone(&switch).run();
         Arc::clone(&_journal).run();
-        
+
         Self {
             dispatch,
             routes,
@@ -80,7 +80,7 @@ impl Core {
     pub(crate) async fn raw_flood(&self, f: Frame) -> Result<()> {
         self.dispatch.flood(f).await
     }
-    
+
     /// Poll for the incoming Message
     pub(crate) async fn next(&self) -> Message {
         self.collector.completed().await
@@ -91,7 +91,10 @@ impl Core {
         if local {
             self.routes.local(id).await
         } else {
-            self.routes.resolve(id).await.map_or(Err(Error::NoUser), |_| Ok(()))
+            self.routes
+                .resolve(id)
+                .await
+                .map_or(Err(Error::NoUser), |_| Ok(()))
         }
     }
 
@@ -99,7 +102,7 @@ impl Core {
     pub(crate) async fn discover(&self) -> Identity {
         self.routes.discover().await
     }
-    
+
     /// Insert a new endpoint
     pub(crate) async fn add_ep(&self, ep: impl Endpoint + 'static + Send + Sync) -> usize {
         let id = self.drivers.add(ep).await;
@@ -107,11 +110,16 @@ impl Core {
         id
     }
 
+    /// Get an endpoint back from the driver set via it's ID
+    pub(crate) async fn get_ep(&self, id: usize) -> Arc<dyn Endpoint + 'static + Send + Sync> {
+        self.drivers.get(id).await
+    }
+
     /// Remove an endpoint
     pub(crate) async fn rm_ep(&self, id: usize) {
         self.drivers.remove(id).await;
     }
-    
+
     /// Add a local user endpoint
     pub(crate) async fn add_local(&self, id: Identity) -> Result<()> {
         self.routes.add_local(id).await

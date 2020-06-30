@@ -3,68 +3,107 @@ use async_std::{
     task::block_on,
 };
 use jni::{
-    objects::{JObject, JString, JValue},
+    objects::{JClass, JObject, JString, JValue},
     JNIEnv,
 };
-use libqaul::{users::UserAuth, Qaul};
-use std::ffi::{CStr, CString};
+use libqaul::{users::UserAuth, Identity, Qaul};
+use std::{
+    ffi::{CStr, CString},
+    ops::Deref,
+};
 
 pub(crate) struct AndroidState {
-    libqaul: Arc<Qaul>,
+    libqaul: QaulWrapped,
     auth: Option<UserAuth>,
 }
 
-/// A wrapped state making sure that auth information is thread-safe
-pub(crate) struct StateWrapped(Arc<RwLock<AndroidState>>);
+pub(crate) struct QaulWrapped(Arc<Qaul>);
 
-impl StateWrapped {
-    pub(crate) fn new(libqaul: Arc<Qaul>) -> Box<Self> {
-        Box::new(Self(Arc::new(RwLock::new(AndroidState {
-            libqaul,
+impl Drop for QaulWrapped {
+    fn drop(&mut self) {
+        debug!("Calling drop() on QaulWrapped: running std::mem::forget(...)");
+        std::mem::forget(&self.0);
+    }
+}
+
+impl Deref for QaulWrapped {
+    type Target = Arc<Qaul>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+type StateWrapped = Arc<RwLock<AndroidState>>;
+
+/// A state wrapper to provide thread and ffi-memory safety
+pub(crate) struct GcWrapped(StateWrapped);
+
+impl Drop for GcWrapped {
+    fn drop(&mut self) {
+        // We forget the wrapped state here instead of dropping it to
+        // keep it valid for future Java FFI calls.
+        debug!("Calling drop() on GcWrapped: running std::mem::forget(...)");
+        std::mem::forget(&self.0);
+    }
+}
+
+impl GcWrapped {
+    pub(crate) fn new(libqaul: Arc<Qaul>) -> Self {
+        Self(Arc::new(RwLock::new(AndroidState {
+            libqaul: QaulWrapped(libqaul),
             auth: None,
-        }))))
+        })))
     }
 
     /// Dissolve the state box and turn it into a raw pointer
-    pub(crate) fn into_ptr(self: Box<Self>) -> i64 {
-        Box::into_raw(self) as i64
+    pub(crate) fn into_ptr(self) -> i64 {
+        debug!("Turning state into pointer...");
+        Arc::into_raw(Arc::clone(&self.0)) as i64
     }
 
-    pub(crate) unsafe fn from_ptr(ptr: i64) -> Box<Self> {
-        Box::from_raw(ptr as *mut Self)
+    pub(crate) unsafe fn from_ptr(ptr: i64) -> Self {
+        debug!("Trying to get state object from pointer...");
+        Self(Arc::from_raw(ptr as *const RwLock<AndroidState>))
     }
 
     /// Get the inner state representation from the wrapper
-    pub(crate) fn get_inner(self: &Box<Self>) -> Arc<Qaul> {
+    pub(crate) fn get_inner(&self) -> Arc<Qaul> {
         block_on(async { Arc::clone(&self.0.read().await.libqaul) })
     }
 
     /// Get current auth information from the FFI state
-    pub(crate) fn get_auth(self: &Box<Self>) -> Option<UserAuth> {
+    pub(crate) fn get_auth(&self) -> Option<UserAuth> {
         block_on(async { self.0.read().await.auth.clone() })
     }
 
     /// Set the auth information
-    pub(crate) fn set_auth(self: &Box<Self>, auth: Option<UserAuth>) {
+    pub(crate) fn set_auth(&self, auth: Option<UserAuth>) {
         block_on(async { self.0.write().await.auth = auth });
     }
 }
 
-impl Drop for StateWrapped {
-    fn drop(&mut self) {
-        // We need to forget the state instead of actually cleaning it
-        // up!  If we clean it up after a function runs, we will loose
-        // data and cause memory-unsafety in the next ffi call
-        info!("Forgetting state object - not dropping it!");
-        std::mem::forget(self);
-    }
-}
-
+#[deprecated]
 pub(crate) fn conv_jstring(env: &JNIEnv, s: JString) -> String {
     CString::from(unsafe { CStr::from_ptr(env.get_string(s).unwrap().as_ptr()) })
         .to_str()
         .unwrap()
         .into()
+}
+
+pub(crate) fn maybe_conv_jstring(env: &JNIEnv, s: JString) -> Option<String> {
+    match env.get_string(s) {
+        Ok(ref s) => Some(
+            CString::from(unsafe { CStr::from_ptr(s.as_ptr()) })
+                .to_str()
+                .unwrap()
+                .into(),
+        ),
+        _ => None,
+    }
+}
+
+pub(crate) fn into_jstring<'a>(env: &'a JNIEnv, s: String) -> JString<'a> {
+    env.new_string(s).unwrap()
 }
 
 /// Don't call this function when the JValue isn't a string!
@@ -83,6 +122,25 @@ impl JavaId {
         let jstring = jvalue_to_jstring(jval);
         let id = conv_jstring(env, jstring);
         Self(id)
+    }
+
+    pub(crate) fn into_obj<'a>(self, env: &'a JNIEnv) -> JObject<'a> {
+        let class: JClass<'a> = env.find_class("net/qaul/app/ffi/models/Id").unwrap();
+
+        env.new_object(
+            class,
+            "(Ljava/lang/String;)V",
+            &[JValue::Object(into_jstring(env, self.0).into())],
+        )
+        .unwrap()
+    }
+
+    pub(crate) fn from_identity(id: Identity) -> Self {
+        Self(id.to_string())
+    }
+
+    pub(crate) fn into_identity(self) -> Identity {
+        Identity::from_string(&self.0)
     }
 }
 
