@@ -12,20 +12,29 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import net.qaul.app.R
 import net.qaul.app.ffi.models.ChatRoom
 import net.qaul.app.ffi.models.Id
+import net.qaul.app.util.AppState
 import net.qaul.app.util.defanSubFabs
 import net.qaul.app.util.fanSubFabs
 import net.qaul.app.util.rotateFab
 
 class ChatFragment : Fragment() {
 
-    // He's the layer-outer
-    private lateinit var layouter: LinearLayoutManager
-    private lateinit var adapter: ChatListAdapter
-
     var fabRotated: Boolean = false
     var originFab: Float = 0.0f
 
     lateinit var fragMan: FragmentManager
+
+    val chatRooms: MutableList<ChatRoom> = mutableListOf()
+    lateinit var chatList: RecyclerView
+
+    fun updateRooms() {
+        chatRooms.clear()
+        for(r in AppState.get().chatList()) {
+            chatRooms.add(r)
+        }
+
+        chatList.adapter = ChatListAdapter(chatRooms, fragMan)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,22 +42,14 @@ class ChatFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_chat, container, false)
-        layouter = LinearLayoutManager(context)
         fragMan = parentFragmentManager
 
         val list = root!!.findViewById<RecyclerView>(R.id.chat_room_list)!!
-        list.layoutManager = layouter
+        list.layoutManager = LinearLayoutManager(context)
 
-        val rooms: MutableList<ChatRoom> = mutableListOf(
-                ChatRoom(Id("id1"), "Alice Anonymous", "2020-05-31 13:12", 5, ArrayList()),
-                ChatRoom(Id("id2"), "Caren Cop", "2008-01-01 00:33", 0, ArrayList()),
-                ChatRoom(Id("id3"), "Danni Default", "2020-05-31 13:37", 2, ArrayList())
-        )
-
-        adapter = ChatListAdapter(rooms, fragMan)
         val chatRoomList = root.findViewById<RecyclerView>(R.id.chat_room_list)
-        chatRoomList.adapter = adapter
         chatRoomList.layoutManager = LinearLayoutManager(context)
+        updateRooms()
 
         // Do the FAB stuff
         val fab = root.findViewById<FloatingActionButton>(R.id.chat_room_list_start)

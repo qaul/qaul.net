@@ -56,6 +56,22 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_setupState(
     let libqaul = Qaul::new(router);
     info!("libqaul init...done");
 
+    block_on(async {
+        use libqaul::users::UserUpdate;
+        let auth = libqaul.users().create("1234").await.unwrap();
+        libqaul
+            .users()
+            .update(
+                auth.clone(),
+                UserUpdate::RealName(Some("Alice Anonymous".into())),
+            )
+            .await;
+        libqaul
+            .users()
+            .update(auth.clone(), UserUpdate::DisplayName(Some("alice".into())))
+            .await;
+    });
+
     let chat = block_on(async { Chat::new(Arc::clone(&libqaul)).await }).unwrap();
     let voice = block_on(async { Voice::new(Arc::clone(&libqaul)).await }).unwrap();
     info!("Service init: done");

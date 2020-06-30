@@ -107,16 +107,20 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_usersLogin(
 ) -> jboolean {
     info!("Rust FFI usersLogin");
     let state = GcWrapped::from_ptr(qaul as i64);
-    info!("1");
     let qaul = state.get_inner();
-    info!("2");
 
     let id = JavaId::from_obj(&env, id).into_identity();
-    (match libqaul::ffi::java::users::login(&env, qaul, id, pw) {
+
+    let b = (match libqaul::ffi::java::users::login(&env, Arc::clone(&qaul), id, pw) {
         Ok(auth) => {
             state.set_auth(Some(auth));
             true
         }
         Err(_) => false,
-    }) as jboolean
+    }) as jboolean;
+
+    std::mem::forget(qaul);
+    std::mem::forget(state);
+
+    b
 }

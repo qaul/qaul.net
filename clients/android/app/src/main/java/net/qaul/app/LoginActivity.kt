@@ -70,17 +70,21 @@ class LoginActivity : AppCompatActivity() {
             Toast.makeText(baseContext, "Connected to server...", Toast.LENGTH_LONG).show()
         }
 
-//        val login = findViewById<Button>(R.id.button_login)
-//        login.setOnClickListener {
-//            if (!tcpConnected) {
-//                Toast.makeText(baseContext, "Can't login, not peered!", Toast.LENGTH_LONG).show()
-//            } else {
-//                AppState.self = UserProfile(Id("0"), "@tester", "Tony Tester", false)
-//                Log.i(LOG_TAG, "Successfully logged in!")
-//                val i = Intent(this, MainActivity::class.java)
-//                startActivity(i)
-//            }
-//        }
+        val pwEntry = findViewById<EditText>(R.id.user_password_entry)
+        val login = findViewById<Button>(R.id.button_login)
+        login.setOnClickListener {
+            if (spinner.selectedItem != null) {
+                val selected = spinner.selectedItem as UserProfile
+                if (AppState.get().usersLogin(selected.id, pwEntry.text.toString())) {
+                    Toast.makeText(baseContext, "Successfully logged in!", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, MainActivity::class.java))
+                } else {
+                    Toast.makeText(baseContext, "Wrong password!!", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            Log.d(LOG_TAG, "Nothing selected, can't log-in!")
+        }
     }
 
     fun makeAdapter(): ArrayAdapter<UserProfile> {

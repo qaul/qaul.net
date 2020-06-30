@@ -104,11 +104,11 @@ public class NativeQaul {
      * @param pw the user password
      * @return indicate whether the
      */
-    public boolean usersLogin(String id, String pw) {
+    public boolean usersLogin(Id id, String pw) {
         return usersLogin(libqaulState, id, pw);
     }
 
-    private native boolean usersLogin(long qaul, String id, String pw);
+    private native boolean usersLogin(long qaul, Id id, String pw);
 
     /**
      * List available chat rooms for the current session
