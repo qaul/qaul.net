@@ -193,7 +193,7 @@ impl Router {
     /// recreated without the endpoint you wish to remove.
     ///
     /// [`Endpoint`]: https://docs.rs/ratman-netmod/0.1.0/ratman_netmod/trait.Endpoint.html
-    pub async fn add_endpoint(&self, ep: impl Endpoint + 'static + Send + Sync) -> usize {
+    pub async fn add_endpoint(&self, ep: Arc<impl Endpoint + 'static + Send + Sync>) -> usize {
         self.inner.add_ep(ep).await
     }
 

@@ -19,7 +19,7 @@ use libqaul::{users::UserAuth, Qaul};
 use log::Level;
 use qaul_chat::Chat;
 use qaul_voice::Voice;
-use ratman_configure::{EpBuilder, NetBuilder};
+use ratman::Router;
 
 /// Setup the main database and router state
 #[no_mangle]
@@ -43,14 +43,23 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_setupState(
 
     info!("Running ratman-configure and libqaul bootstrap code...");
 
-    let port = port as u16;
-    let net = NetBuilder::new()
-        .endpoint(EpBuilder::tcp("0.0.0.0".into(), port, false))
-        //.endpoint(EpBuilder::wifi_direct())
-        .build();
-    info!("Network builder...done: {:?}", net);
+    let router = Router::new();
 
-    let router = net.into_router();
+    let tcp = block_on(async {
+        use netmod_tcp::Endpoint;
+        let ep = Endpoint::new("0.0.0.0", port as u16, "qauld")
+            .await
+            .unwrap();
+        router.add_endpoint(Arc::clone(&ep)).await;
+        ep
+    });
+
+    let wd = block_on(async {
+        use netmod_wd::WdMod;
+        let ep = WdMod::new();
+        router.add_endpoint(Arc::clone(&ep)).await;
+        ep
+    });
     info!("Router init...done");
 
     let libqaul = Qaul::new(router);
@@ -80,7 +89,7 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_setupState(
     // storing the state directly in the instance variable doesn't
     // work, or didn't work when I last tried it.  Patches to change
     // this very welcome, if they work!
-    GcWrapped::new(libqaul, chat, voice).into_ptr()
+    GcWrapped::new(tcp, wd, libqaul, chat, voice).into_ptr()
 }
 
 /// Check if an auth token is still valid
@@ -112,17 +121,26 @@ pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_checkLogin(
 pub unsafe extern "C" fn Java_net_qaul_app_ffi_NativeQaul_connectTcp(
     env: JNIEnv,
     _: JObject,
-    _qaul: jlong,
-    _addr: JString,
-    _port: jint,
+    qaul: jlong,
+    addr: JString,
+    port: jint,
 ) {
     info!("Rust FFI connectTcp");
-    // let qaul = GcWrapped::from_ptr(qaul as i64).get_qaul();
-    // let router = qaul.router();
+    let state = GcWrapped::from_ptr(qaul as i64);
+    let tcp = state.get_tcp();
 
-    // block_on(async {
-    //     let ep: Arc<dyn netmod_tcp::Endpoint> = router.get_endpoint(0).await;
+    let addr: Vec<u8> = utils::conv_jstring(&env, addr)
+        .split(".")
+        .map(|s| s.parse().unwrap())
+        .collect();
+    let port = port as u16;
 
-    // })
-    todo!()
+    block_on(async {
+        use std::net::{Ipv4Addr, SocketAddrV4};
+        tcp.load_peers(vec![SocketAddrV4::new(
+            Ipv4Addr::new(addr[0], addr[1], addr[2], addr[3]),
+            port,
+        )])
+        .await;
+    });
 }

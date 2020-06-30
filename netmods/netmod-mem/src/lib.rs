@@ -31,14 +31,14 @@ pub struct MemMod {
 
 impl MemMod {
     /// Create a new, unpaired `MemMod`.
-    pub fn new() -> Self {
-        Self {
+    pub fn new() -> Arc<Self> {
+        Arc::new(Self {
             io: Default::default(),
-        }
+        })
     }
 
     /// Create two already-paired `MemMod`s, ready for use.
-    pub fn make_pair() -> (Self, Self) {
+    pub fn make_pair() -> (Arc<Self>, Arc<Self>) {
         let (a, b) = (MemMod::new(), MemMod::new());
         a.link(&b);
         (a, b)

@@ -40,13 +40,16 @@ pub struct Endpoint {
 impl Endpoint {
     /// Create a new endpoint on an interface and port
     #[tracing::instrument(level = "info")]
-    pub async fn new(addr: &str, port: u16, name: &str) -> Result<Self> {
-        Ok(Self {
+    pub async fn new(addr: &str, port: u16, name: &str) -> Result<Arc<Self>> {
+        let mut this = Self {
             mode: Arc::new(RwLock::new(Mode::Static)),
             socket: Socket::new(addr, port, name).await?,
             peers: PeerList::new(),
             inbox: None,
-        })
+        };
+
+        this.start();
+        Ok(Arc::new(this))
     }
 
     /// Set the runtime mode
@@ -67,7 +70,7 @@ impl Endpoint {
     }
 
     #[tracing::instrument(skip(self), level = "info")]
-    pub async fn start(&mut self) {
+    async fn start(&mut self) {
         self.inbox = Some(self.socket.start(*self.mode.read().await, &self.peers));
         self.update_peers().await;
     }

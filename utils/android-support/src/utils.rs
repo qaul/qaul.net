@@ -16,6 +16,8 @@ use std::{
 
 pub(crate) struct AndroidState {
     libqaul: Arc<QaulWrapped>,
+    tcp: Arc<netmod_tcp::Endpoint>,
+    wd: Arc<netmod_wd::WdMod>,
     auth: Option<UserAuth>,
 }
 
@@ -57,9 +59,17 @@ impl Drop for GcWrapped {
 }
 
 impl GcWrapped {
-    pub(crate) fn new(libqaul: Arc<Qaul>, chat: Arc<Chat>, voice: Arc<Voice>) -> Self {
+    pub(crate) fn new(
+        tcp: Arc<netmod_tcp::Endpoint>,
+        wd: Arc<netmod_wd::WdMod>,
+        libqaul: Arc<Qaul>,
+        chat: Arc<Chat>,
+        voice: Arc<Voice>,
+    ) -> Self {
         Self(Arc::new(RwLock::new(AndroidState {
             libqaul: Arc::new(QaulWrapped(libqaul, chat, voice)),
+            tcp,
+            wd,
             auth: None,
         })))
     }
@@ -78,6 +88,14 @@ impl GcWrapped {
     /// Get the inner state representation from the wrapper
     pub(crate) fn get_inner(&self) -> Arc<QaulWrapped> {
         block_on(async { Arc::clone(&self.0.read().await.libqaul) })
+    }
+
+    pub(crate) fn get_tcp(&self) -> Arc<netmod_tcp::Endpoint> {
+        block_on(async { Arc::clone(&self.0.read().await.tcp) })
+    }
+
+    pub(crate) fn get_wd(&self) -> Arc<netmod_wd::WdMod> {
+        block_on(async { Arc::clone(&self.0.read().await.wd) })
     }
 
     /// Get current auth information from the FFI state

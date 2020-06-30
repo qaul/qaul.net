@@ -44,7 +44,6 @@ impl State {
             });
 
         ep.load_peers(peers.into_iter().collect()).await.unwrap();
-        ep.start().await;
 
         let router = Router::new();
         router.add_endpoint(ep).await;

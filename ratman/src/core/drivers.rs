@@ -31,13 +31,13 @@ impl DriverMap {
     }
 
     /// Insert a new endpoint to the set of known endpoints
-    pub(crate) async fn add<E>(&self, ep: E) -> usize
+    pub(crate) async fn add<E>(&self, ep: Arc<E>) -> usize
     where
         E: Endpoint + 'static + Send + Sync,
     {
         let mut map = self.map.write().await;
         let curr = self.curr.fetch_add(1, Ordering::Relaxed);
-        map.push(EpWrap::Used(Arc::new(ep)));
+        map.push(EpWrap::Used(ep));
         curr
     }
 

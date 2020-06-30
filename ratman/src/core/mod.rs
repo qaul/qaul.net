@@ -104,7 +104,7 @@ impl Core {
     }
 
     /// Insert a new endpoint
-    pub(crate) async fn add_ep(&self, ep: impl Endpoint + 'static + Send + Sync) -> usize {
+    pub(crate) async fn add_ep(&self, ep: Arc<impl Endpoint + 'static + Send + Sync>) -> usize {
         let id = self.drivers.add(ep).await;
         self.switch.add(id).await;
         id

@@ -21,8 +21,6 @@ async fn main() {
     .await
     .unwrap();
 
-    ep.start().await;
-
     let r = Router::new();
     r.add_endpoint(ep).await;
 

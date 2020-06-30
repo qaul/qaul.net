@@ -14,11 +14,11 @@ pub struct WdMod {
 }
 
 impl WdMod {
-    pub fn new() -> Self {
-        Self {
+    pub fn new() -> Arc<Self> {
+        Arc::new(Self {
             recv_queue: channel(1),
             send_queue: channel(1),
-        }
+        })
     }
 
     /// Give some data to this netmod, receiving it on the device
@@ -38,30 +38,6 @@ impl WdMod {
     }
 }
 
-// /// Give a Frame to the driver state
-// ///
-// /// This function will append to a queue that is polled from the
-// /// ratman runtime.  The name of the function is written from the
-// /// perspective of the ffi components (giving to Rust)
-// pub extern "C" fn give(this: *mut wifid_t, f: *const c_void, len: usize) {
-//     let this = unsafe { Box::from_raw(this) };
-//     let buf = unsafe { *(f as *const &[u8]) };
-//     let vec: Vec<u8> = buf.into_iter().take(len).cloned().collect();
-//     let frame = bincode::deserialize(&vec).unwrap();
-
-//     task::spawn(async move {
-//         this.inc.lock().await.push_back(Ok(frame));
-//     });
-// }
-
-// extern "C" {
-//     /// Send off a frame over a specific interface
-//     ///
-//     /// Hands off a const buffer with a length and target specifier.
-//     /// Is not responsible for encoding data.
-//     fn send_raw(f: *const c_void, length: usize, target: i16) -> u16;
-// }
-
 #[async_trait]
 impl Endpoint for WdMod {
     fn size_hint(&self) -> usize {
@@ -71,32 +47,9 @@ impl Endpoint for WdMod {
     async fn send(&self, frame: Frame, t: Target) -> Result<()> {
         self.send_queue.0.send((frame, t)).await;
         Ok(())
-
-        // let buf = Box::new(bincode::serialize(&frame).unwrap());
-        // let len = buf.len();
-        // let c = unsafe { send_raw(Box::into_raw(buf) as *const c_void, len, 0) };
-        // match c {
-        //     0 => Ok(()),
-        //     // TODO: disambiguate errors here (create error mapping?)
-        //     _ => Err(Error::ConnectionLost),
-        // }
     }
 
     async fn next(&self) -> Result<(Frame, Target)> {
         Ok(self.recv_queue.1.recv().await.unwrap())
-
-        // let inc = Arc::clone(&self.inc);
-        // future::poll_fn(|ctx| {
-        //     let lock = &mut inc.lock();
-        //     match unsafe { Pin::new_unchecked(lock).poll(ctx) } {
-        //         Poll::Ready(mut inc) => match inc.pop_front() {
-        //             Some(Ok(f)) => Poll::Ready(Ok((f, Target::default()))),
-        //             Some(Err(e)) => Poll::Ready(Err(e)),
-        //             None => Poll::Pending,
-        //         },
-        //         Poll::Pending => Poll::Pending,
-        //     }
-        // })
-        // .await
     }
 }

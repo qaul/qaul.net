@@ -26,13 +26,13 @@ pub struct Endpoint {
 
 impl Endpoint {
     /// Create a new endpoint and spawn a dispatch task
-    pub fn spawn(port: u16) -> Self {
+    pub fn spawn(port: u16) -> Arc<Self> {
         task::block_on(async move {
             let addrs = Arc::new(AddrTable::new());
-            Self {
+            Arc::new(Self {
                 socket: Socket::with_port(port, Arc::clone(&addrs)).await,
                 addrs,
-            }
+            })
         })
     }
 
