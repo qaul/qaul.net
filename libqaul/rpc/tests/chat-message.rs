@@ -50,7 +50,7 @@ async fn rpc_chat_message_create() {
     // check result
     dbg!(resp.clone());
     assert!(resp.data.contains_key("chat_message"));
-    assert_eq!(resp.data.get("chat_message").unwrap().get(0).unwrap().get("content").unwrap(), "hello world!");
+    assert_eq!(resp.data.get("chat_message").unwrap().get("content").unwrap(), "hello world!");
 }
 
 // chat_message receive
@@ -107,7 +107,7 @@ async fn rpc_chat_message_list() {
 
     // check result
     dbg!(resp.clone());
-    assert!(resp.data.contains_key("chat_message"));
-    assert!(resp.data["chat_message"].as_array().unwrap().len() > 1);
-    assert_eq!(resp.data.get("chat_message").unwrap().get(1).unwrap().get("content").unwrap(), "hello world!");
+    assert!(resp.data.contains_key("chat_messages"));
+    assert!(resp.data["chat_messages"].as_array().unwrap().len() > 1);
+    assert_eq!(resp.data.get("chat_messages").unwrap().get(1).unwrap().get("content").unwrap(), "hello world!");
 }
