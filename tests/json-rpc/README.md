@@ -1,22 +1,60 @@
 # JSON RPC Communication with qaul-http-RPC Interface
 
-The scripts in this folder can be used to test all the functions of the 
-JSON RPC interface.
+The scripts in this folder can be used to test all the functions of the JSON RPC interface.
+
+The JSON RPC interface is documented in the http-api guide: 
+https://docs.qaul.net/http-api/json-rpc/_intro.html
+
+
+## Structure of the Tests
+
+Every function has it's own test script in the `src` sub-folder. The script is named after the function and can be used as a reference to see how the function is used. In order for these scripts to work they need to be called with the correct command line values.
+
+In order to use the tests as easily as possible all the scripts in the main folder are high level scripts that call the function scripts in the sub folder with the correct input values.
+
+
+## Prerequisites
+
+To be able to run the test scripts you need to have the following programs installed:
+
+* curl: a CLI tool for transferring data specified with URL syntax
+* jp: a CLI JSON parser
+
 
 ## Usage
 
-Make sure you have a test server running for these tests. 
-While in the cargo workspace you can just run `cargo run --bin multinode-test <PATH>`, where `PATH` is the path to the assembled webgui. 
-The default path to the 
+The scripts expect a locally running qaul.net daemon. In order to be able to test the sending as well as the receiving of messages, we use the `multinode-test` binary. 
+The `multinode-test` set's up several qaul.net instances locally that communicate directly with each other. In this set up the sending as well as the receiving of messages can be tested. The instances can be accessed via different port numbers.
+Instance **A** listens on port `9900` on localhost. Instance **B** listens on port `9901`.
 
-Note: if you want to run multiple tests in succession manually, make
-sure to do it in the same shell.  Some of them export env variables
-for other tests, which will break if you run them in separate shell
-instances.
+
+First you need to start the qaul.net daemon:
+
+```bash
+cargo run --bin multinode-test webgui/dist
+```
+
+
+Run the high level test scripts:
+
+```bash
+# test all user functions
+./user-crud.sh
+
+## Chat Service:
+# test chat room functions
+./chat-room-crud.sh
+
+# send a chat message
+./chat-message-create.sh
+```
+
+
+
 
 ## How to write a test
 
-Each test should setup as much of the context as it needs.  If a test
+Each high level test should setup as much of the context as it needs.  If a test
 is designed to run after a specific test, then it should call that
 test.  Ultimately some code-paths will be tested more than once this
 way.
