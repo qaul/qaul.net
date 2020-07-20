@@ -107,7 +107,7 @@ Response payload: array of users
 
 ```json
 {
-    "user": [
+    "users": [
         {
             "avatar": null,
             "bio": {},

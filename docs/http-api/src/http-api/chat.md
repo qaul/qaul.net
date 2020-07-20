@@ -24,17 +24,15 @@ Chat message model
 
 ```json
 {
-    "chat_message": [
-        {
-            "content": "TEXT_MESSAGE",
-            "id": "CHAT_MESSAGE_ID",
-            "room": {
-                "Id": "CHAT_ROOM_ID"
-            },
-            "sender": "USER_ID",
-            "timestamp": "2020-06-22T13:26:37.478641925Z"
-        }
-    ]
+    "chat_message": {
+        "content": "TEXT_MESSAGE",
+        "id": "CHAT_MESSAGE_ID",
+        "room": {
+            "Id": "CHAT_ROOM_ID"
+        },
+        "sender": "USER_ID",
+        "timestamp": "2020-06-22T13:26:37.478641925Z"
+    }
 }
 ```
 
@@ -140,17 +138,15 @@ Response payload: returns created chat message
 
 ```json
 {
-    "chat_message": [
-        {
-            "content": "MESSAGE_TEXT",
-            "id": "CHAT_MESSAGE_ID",
-            "room": {
-                "Id": "CHAT_ROOM_ID"
-            },
-            "sender": "USER_ID",
-            "timestamp": "2020-06-22T16:46:03.317992177Z"
-        }
-    ]
+    "chat_message": {
+        "content": "MESSAGE_TEXT",
+        "id": "CHAT_MESSAGE_ID",
+        "room": {
+            "Id": "CHAT_ROOM_ID"
+        },
+        "sender": "USER_ID",
+        "timestamp": "2020-06-22T16:46:03.317992177Z"
+    }
 }
 ```
 
@@ -163,7 +159,7 @@ Response payload: Array of chat messages
 
 ```json
 {
-    "chat_message": [
+    "chat_messages": [
         "ARRAY_OF_CHAT_MESSAGE_OBJECTS"
     ]
 }

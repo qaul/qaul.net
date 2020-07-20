@@ -8,6 +8,8 @@
 The HTTP API's prefix is `/http`.
 
 Model names and field id's use snake case in singular. 
+URL's always use the model name in singular.
+If the return is an array of multiple objects or object id's then the field name is in plural.
 
 
 ### Request
