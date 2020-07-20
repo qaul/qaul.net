@@ -80,7 +80,7 @@ fn user_list() {
         UserProfile::new(Identity::random()),
     ];
 
-    let resp = Response::User(users);
+    let resp = Response::Users(users);
 
     println!("{}", serde_json::to_string_pretty(&resp).unwrap());
 }
