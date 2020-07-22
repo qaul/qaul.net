@@ -11,6 +11,11 @@ Model names and field id's use snake case in singular.
 URL's always use the model name in singular.
 If the return is an array of multiple objects or object id's then the field name is in plural.
 
+The model content has the following JSON structure:
+
+* `id` contains the model ID as a string: `"id": "ID_STRING"`
+* one to one relationships should reference the model name in singular with the referenced ID string: `"model_name": "ID_STRING"`
+* one to many relationships should be built using the model name in plural followed by an array of the referenced ID's: `"model_names": [ ARRAY_OF_ID_STINGS ]`
 
 ### Request
 
@@ -95,7 +100,7 @@ When you're receiving a list of entries, you're receiving the following structur
 
 ```json
 {
-    "model_name": [
+    "model_names": [
         {
             "id": "ITEM_ID",
             "field_name": "FIELD_CONTENT"

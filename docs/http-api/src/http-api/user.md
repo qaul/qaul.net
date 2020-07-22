@@ -1,6 +1,6 @@
 # User HTTP-API Interface
 
-The user api reflects all user accounts in the system.
+The user api reflects all user accounts on the local the node.
 All information except password is available to other users.
 
 ## User Model
@@ -74,7 +74,7 @@ Response: same as create user
 
 ## Get Information of a Specific User
 
-`POST /http/user/USER_ID`
+`GET /http/user/USER_ID`
 
 Response: same as create user
 
@@ -98,7 +98,7 @@ Response: empty response with http code 204
 
 ## Query Users
 
-Get an array of all users
+Get an array of all users on the local node.
 
 `GET /http/user`
 

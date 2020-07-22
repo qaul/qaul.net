@@ -36,6 +36,10 @@ Chat message model
 }
 ```
 
+**Non standard behaviour:** Please be aware that the chat_room relationship has a non standard notation: 
+```"room": {"Id": "CHAT_ROOM_ID"}```
+This will hopefully change in the future.
+
 ## Chat Room
 
 ### Create Chat Room

@@ -3,3 +3,11 @@ authors = ["Jess 3Jane", "qaul.net Community"]
 multilingual = false
 src = "src"
 title = "HTTP API Documentation"
+
+[build]
+create-missing = false
+
+[output.html]
+preferred-dark-theme = "navy"
+git-repository-url = "https://git.open-communication.net/qaul/qaul.net/-/tree/master/docs%2Fhttp-api"
+git-repository-icon = "fa-git"
