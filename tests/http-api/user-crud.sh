@@ -17,6 +17,9 @@ source src/user-bootstrap.sh
 # Modify user A
 source src/user-modify.sh "$A_ID" $A_TOKEN
 
+# Get user A
+source src/user-get.sh "$A_ID" $A_TOKEN
+
 # List all users on node A
 source src/user-list.sh
 
