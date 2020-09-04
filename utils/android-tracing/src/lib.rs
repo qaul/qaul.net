@@ -33,7 +33,7 @@ impl AndroidWriter {
         let ret = unsafe { __android_log_write(prio as _, tag.as_ptr(), text.as_ptr()) };
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
     pub fn log(path: String, content: String, level: &Level) {
         println!("path = {}, content = {}, level = {}", path, content, level);
     }
