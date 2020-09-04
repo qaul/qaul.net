@@ -11,7 +11,7 @@ Node A <-> Middle Node <-> Node B
 
 ## Start Test
 
-To start the test invoike the program from the shell with the relative path to the built Ember UI
+To start the test invoke the program from the shell with the relative path to the built Ember UI
 
 ```bash
 # General Example
