@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-MAINTAINER Katharina Fey
+LABEL maintainer="Katharina Fey, qaul.net community"
 
 ENV ANDROID_HOME="/opt/android-sdk" \
     ANDROID_NDK="/opt/android-ndk" \
@@ -43,6 +43,7 @@ RUN apt-get update -qq > /dev/null && \
     apt-get install -qq --no-install-recommends \
         build-essential \
         autoconf \
+        cmake \
         curl \
         git \
         file \
@@ -147,7 +148,7 @@ RUN echo "Installing sdk tools ${ANDROID_SDK_TOOLS_VERSION}" && \
         "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.1" > /dev/null && \
     echo "Installing Google APIs" && \
     yes | "$ANDROID_HOME"/tools/bin/sdkmanager \
-        "add-ons;addon-google_apis-google-29" \
+        "add-ons;addon-google_apis-google-24" \
         "add-ons;addon-google_apis-google-21" > /dev/null
 
 # Install Rust toolchains
