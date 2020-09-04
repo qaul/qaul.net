@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+$PWD/node_modules/ember-cli/bin/ember "$@"

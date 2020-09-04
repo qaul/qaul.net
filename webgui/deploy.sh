@@ -4,7 +4,7 @@
 # https://ember-gui.qaul.net
 
 # Build ember test
-ember build
+./ember build
 
 # Deploy to server
 rsync -azzhe "ssh -p 2422" ./dist/ admin@ember-gui.qaul.net:/home/admin/
