@@ -1,4 +1,7 @@
-# Build qaul.net on Linux
+# Build qaul.net on Raspberry Pi running Raspberry OS
+
+This guide will give you a step by step instruction to build qaul.net running Raspberry OS.
+
 
 ## Prerequisites
 
@@ -13,17 +16,14 @@ Use this web site to install [Rust]: [Rust installation instructions]
 **Build Tools**
 
 There are some other build tools that need to be installed.
-Here an hopefully complete list of all prerequisites:
-
-* make
-* GCC
-* cmake
-
-To install it on Debian / Ubuntu / Linux Mint run:
+Run this command in your terminal to install them:
 
 ```sh
 # to download and build qaul.net install the following:
 sudo apt install make gcc cmake git 
+
+# to execute the cli test scripts install the following:
+sudo apt install jq httpi
 ```
 
 

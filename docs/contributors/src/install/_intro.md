@@ -7,6 +7,8 @@ installation of qaul.net.
 ## Build qaul.net for your Operating Systems
 
 * [Linux](linux.md)
+* [MacOS](macos.md)
+* [Raspberry Pi (with Raspberry OS)](raspberry.md)
 
 
 ## Special Parts of qaul.net

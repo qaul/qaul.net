@@ -13,6 +13,8 @@
     - [GNU GENERAL PUBLIC LICENSE](./legal/gpl-3.0.md)
 - [Build & Install](./install/_intro.md)
   - [Linux](./install/linux.md)
+  - [MacOS](./install/macos.md)
+  - [Raspberry](./install/raspberry.md)
 - [Technical](./technical/index.md)
   - [qaul.net](./technical/qaul.net/index.md)
     - [Services](./technical/qaul.net/services.md)
