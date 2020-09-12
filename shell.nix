@@ -27,6 +27,7 @@ stdenv.mkDerivation {
 
     # Required for the code coverage and stuff
     openssl
+
   ] ++ (with androidenv.androidPkgs_9_0; [
     # Required for Android builds
     androidsdk
@@ -35,5 +36,8 @@ stdenv.mkDerivation {
     platform-tools
 
     pkgs.openjdk
-  ]);
+  ]) ++ lib.optionals stdenv.isDarwin [
+    # Used to build on MacOS
+    darwin.apple_sdk.frameworks.Security
+  ];
 }
