@@ -105,7 +105,6 @@ impl Peers {
     /// Check if a peer is already stored via it's src or dst addr
     #[tracing::instrument(skip(self), level = "trace")]
     pub(crate) async fn filter_peer(self: &Arc<Self>, peer: &Peer) -> Result<(), PeerInsertError> {
-        trace!("Attempting to filter peer");
         match peer.src {
             Some(src) if self.peer_by_src(&src).await.is_some() => {
                 trace!("Peer with same source address exists");
@@ -134,23 +133,25 @@ impl Peers {
         self.filter_peer(&peer).await?;
         let mut curr = self.curr.write().await;
         *curr += 1;
-
         peer.id = *curr;
+
+        self.peers.write().await.insert(*curr, peer.clone());
 
         // insert to src-map if src addr is known
         if let Some(src) = peer.src {
-            self.src_to_id.write().await.insert(src, *curr);
+            self.src_to_id.write().await.insert(src.clone(), *curr);
         }
 
         // insert to dst-map if dst addr is known
         if let Some(dst) = peer.dst {
-            self.dst_to_id.write().await.insert(dst, *curr);
+            self.dst_to_id.write().await.insert(dst.clone(), *curr);
         }
 
         Ok(*curr)
     }
 
     /// Change the destination address on an existing peer connection
+    #[tracing::instrument(skip(self), level = "trace")]
     pub(crate) async fn change_dst(
         self: &Arc<Self>,
         id: usize,
@@ -196,6 +197,11 @@ impl Peers {
         }
     }
 
+    /// Load a set of peers into the peer lookup table
+    ///
+    /// By default every peer will have a dst address, which is what
+    /// is passed into the driver as the peer-set.  Based on the given
+    /// dst address, hello packets will be dispatched
     #[tracing::instrument(skip(self, peers), level = "trace")]
     pub(crate) async fn load<I: Into<SocketAddr>>(
         self: &Arc<Self>,

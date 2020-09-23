@@ -110,6 +110,8 @@ impl Socket {
                         );
                         // FIXME: make this configurable
                         task::sleep(Duration::from_secs(5)).await;
+                        ctr += 1;
+
                         trace!(
                             "Retry timeout expired for peer '{}', proceeding with retry {}",
                             ip.to_string(),
