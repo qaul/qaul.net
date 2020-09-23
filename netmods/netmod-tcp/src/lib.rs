@@ -7,7 +7,7 @@ mod socket;
 
 pub use error::{Error, Result};
 
-pub(crate) use peers::{PeerList, PeerState};
+pub(crate) use peers::{LinkState, Peer, Peers};
 pub(crate) use proto::Packet;
 pub(crate) use socket::Socket;
 
@@ -34,7 +34,7 @@ impl Mode {
 pub struct Endpoint {
     mode: Arc<RwLock<Mode>>,
     socket: Arc<Socket>,
-    peers: Arc<PeerList>,
+    peers: Arc<Peers>,
     inbox: Option<Receiver<(Frame, usize)>>,
 }
 
@@ -46,7 +46,7 @@ impl Endpoint {
         let mut this = Self {
             mode: Arc::new(RwLock::new(Mode::Static)),
             socket: Socket::new(addr, port, name).await?,
-            peers: PeerList::new(),
+            peers: Peers::new(),
             inbox: None,
         };
 
@@ -78,10 +78,13 @@ impl Endpoint {
         self.update_peers().await;
     }
 
+    /// Get all known peers and introduce this node to them
     async fn update_peers(&self) {
         let known = self.peers.all_known().await;
-        for (id, addr) in known {
-            self.socket.introduce(id, addr).await;
+        for peer in known {
+            if let Some(dst) = peer.dst {
+                self.socket.introduce(peer.id, dst).await;
+            }
         }
     }
 }
@@ -94,7 +97,17 @@ impl EndpointExt for Endpoint {
 
     async fn send(&self, frame: Frame, target: Target) -> netmod::Result<()> {
         match target {
-            Target::Single(t) => self.socket.send(t as usize, frame).await.unwrap(),
+            Target::Single(t) => {
+                let addr = match self.peers.peer_by_id(t as usize).await {
+                    Some(p) => match p.dst {
+                        Some(dst) => dst,
+                        None => return Err(netmod::Error::ConnectionLost),
+                    },
+                    None => return Err(netmod::Error::ConnectionLost),
+                };
+
+                self.socket.send(addr, frame).await.unwrap()
+            }
             Target::Flood => self.socket.send_all(frame).await.unwrap(),
         }
 

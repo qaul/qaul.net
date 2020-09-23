@@ -2,229 +2,257 @@
 
 use crate::error::PeerErrs;
 use async_std::sync::{Arc, RwLock};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::net::SocketAddr;
+use tracing::{error, trace, warn};
 
 type SourceAddr = SocketAddr;
 type DstAddr = SocketAddr;
 
-#[derive(Clone, Debug)]
-struct Peer {
-    src: Option<SocketAddr>,
-    dst: SocketAddr,
-    verified: bool,
+/// A set of errors that can occur when dealing with peer states
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum PeerInsertError {
+    /// A peer with matching source address already exists
+    SameSrcAddr,
+    /// A peer with matching dst address already exists
+    SameDstAddr,
+    /// The requested peer (via Id) was not found
+    NoSuchPeer,
 }
 
-/// Map the source port to the destination port of a target
-type AddrMap = HashMap<SourceAddr, Peer>;
+#[derive(Clone, Debug)]
+pub(crate) struct Peer {
+    pub id: usize,
+    pub src: Option<SocketAddr>,
+    pub dst: Option<SocketAddr>,
+    pub known: bool,
+}
 
-/// Maps the interface specific target id to the peers listening port
-type IdMap = BTreeMap<usize, Peer>;
-
-/// For quick queries if a peer is valid
-type PeerMap = HashMap<DstAddr, usize>;
+impl Peer {
+    /// Get the current peer's LinkState
+    pub(crate) fn link_state(&self) -> LinkState {
+        use LinkState::*;
+        match (self.src, self.dst) {
+            (None, None) => NoLink,
+            (Some(_), None) => DownOnly,
+            (None, Some(_)) => UpOnly,
+            (Some(_), Some(_)) => Duplex,
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum PeerState {
-    /// We're friends actually
-    Valid,
-    /// New connection, but we know the IP
-    Unverified,
-    /// Unknown IP, ignore
-    Unknown,
+pub(crate) enum LinkState {
+    /// No established link with this peer
+    NoLink,
+    /// This peer can send us data, but we have no return channel
+    DownOnly,
+    /// We can send this peer data, but they have no return channel
+    UpOnly,
+    /// A bi-directional link
+    Duplex,
 }
 
-#[derive(Default)]
-pub(crate) struct PeerList {
-    addr_map: RwLock<AddrMap>,
-    id_map: RwLock<IdMap>,
-    peers: RwLock<PeerMap>,
+#[derive(Debug, Default)]
+pub(crate) struct Peers {
+    /// Lookup table by source address
+    src_to_id: RwLock<HashMap<SourceAddr, usize>>,
+    /// Lookup table by destination address
+    dst_to_id: RwLock<HashMap<DstAddr, usize>>,
+    /// Mapping from Ids to peer data
+    peers: RwLock<HashMap<usize, Peer>>,
+    /// Used to monotonically create Ids
     curr: RwLock<usize>,
 }
 
-impl PeerList {
+impl Peers {
     /// Create a new empty peer list
     pub(crate) fn new() -> Arc<Self> {
         Default::default()
     }
 
-    pub(crate) async fn all_known(self: &Arc<Self>) -> Vec<(usize, SocketAddr)> {
-        self.id_map
+    /// Get all peers currently known to this server
+    pub(crate) async fn all_known(self: &Arc<Self>) -> Vec<Peer> {
+        self.peers
             .read()
             .await
             .iter()
-            .map(|(id, peer)| (*id, peer.dst.clone()))
+            .map(|(_, p)| p.clone())
             .collect()
     }
 
-    /// Get the state of a peer (unknown, unverified, or valid)
-    pub(crate) async fn peer_state(self: &Arc<Self>, src: &SourceAddr) -> PeerState {
-        let peers = self.peers.read().await;
-        let id_map = self.id_map.read().await;
+    /// Get a peer by it's unique numerical Id
+    pub(crate) async fn peer_by_id(self: &Arc<Self>, id: usize) -> Option<Peer> {
+        self.peers.read().await.get(&id).map(|v| v.clone())
+    }
 
-        use PeerState::*;
-        peers.iter().fold(Unknown, |prev, (src_, id)| {
-            let verified = match id_map.get(id) {
-                Some(peer) => peer.verified,
-                None => false,
-            };
-            match prev {
-                Unknown if src_.ip() == src.ip() && verified => Valid,
-                Unknown if src_.ip() == src.ip() => Unverified,
-                found => found,
+    /// Get a peer via it's source socket address
+    pub(crate) async fn peer_by_src(self: &Arc<Self>, src: &SourceAddr) -> Option<Peer> {
+        match self.src_to_id.read().await.get(src) {
+            Some(id) => self.peers.read().await.get(&id).cloned(),
+            None => None,
+        }
+    }
+
+    /// Get a peer via it's destination socket address
+    pub(crate) async fn peer_by_dst(self: &Arc<Self>, dst: &DstAddr) -> Option<Peer> {
+        match self.dst_to_id.read().await.get(dst) {
+            Some(id) => self.peers.read().await.get(&id).cloned(),
+            None => None,
+        }
+    }
+
+    /// Check if a peer is already stored via it's src or dst addr
+    #[tracing::instrument(skip(self), level = "trace")]
+    pub(crate) async fn filter_peer(self: &Arc<Self>, peer: &Peer) -> Result<(), PeerInsertError> {
+        trace!("Attempting to filter peer");
+        match peer.src {
+            Some(src) if self.peer_by_src(&src).await.is_some() => {
+                trace!("Peer with same source address exists");
+                Err(PeerInsertError::SameSrcAddr)
             }
-        })
+            _ => Ok(()),
+        }?;
+
+        match peer.dst {
+            Some(dst) if self.peer_by_dst(&dst).await.is_some() => {
+                trace!("Peer with same dst address exists");
+                Err(PeerInsertError::SameDstAddr)
+            }
+            _ => Ok(()),
+        }?;
+
+        Ok(())
     }
 
-    /// Get the ID of a peer with the source socket address
-    pub(crate) async fn get_id_by_src(self: &Arc<Self>, src: &SourceAddr) -> Option<usize> {
-        self.addr_map
-            .read()
-            .await
-            .get(src)
-            .and_then(|Peer { dst, .. }| {
-                async_std::task::block_on(async { self.get_id_by_dst(dst).await })
-            })
-    }
-
-    /// Get the ID of a peer with the source socket address
-    pub(crate) async fn get_id_by_dst(self: &Arc<Self>, src: &DstAddr) -> Option<usize> {
-        self.peers.read().await.get(src).map(|id| *id)
-    }
-
-    /// Get the destination address based on the source address
-    pub(crate) async fn get_dst_by_src(self: &Arc<Self>, src: &SourceAddr) -> Option<DstAddr> {
-        self.addr_map
-            .read()
-            .await
-            .get(src)
-            .map(|peer| peer.dst.clone())
-    }
-
-    /// Add the source part of a peer based on the ip and dst port
-    pub(crate) async fn add_src(
+    /// Add a new peer into the store
+    #[tracing::instrument(skip(self), level = "trace")]
+    pub(crate) async fn add_peer(
         self: &Arc<Self>,
-        src: &SourceAddr,
-        dst_port: u16,
-    ) -> Option<usize> {
-        let dst = {
-            let mut s = src.clone();
-            s.set_port(dst_port);
-            s
-        };
-
-        // Lock all data stores
-        let mut addr_map = self.addr_map.write().await;
-        let mut id_map = self.id_map.write().await;
-        let peers = self.peers.write().await;
+        mut peer: Peer,
+    ) -> Result<usize, PeerInsertError> {
+        self.filter_peer(&peer).await?;
         let mut curr = self.curr.write().await;
+        *curr += 1;
 
-        // Return None if the peer is not known
-        if peers.get(&dst).is_none() {
-            return None;
+        peer.id = *curr;
+
+        // insert to src-map if src addr is known
+        if let Some(src) = peer.src {
+            self.src_to_id.write().await.insert(src, *curr);
         }
 
-        // Either get a pre-assigned ID, or cerate a new one
-        let id = match peers.get(&dst) {
-            Some(id) => *id,
-            None => {
-                *curr += 1;
-                *curr
-            }
-        };
+        // insert to dst-map if dst addr is known
+        if let Some(dst) = peer.dst {
+            self.dst_to_id.write().await.insert(dst, *curr);
+        }
 
-        let peer = match id_map.get_mut(&id) {
-            Some(peer) => {
-                peer.src = Some(src.clone());
-                peer.verified = true;
-                peer.clone()
-            }
-            None => Peer {
-                src: Some(src.clone()),
-                dst: dst.clone(),
-                verified: true,
-            },
-        };
+        Ok(*curr)
+    }
 
-        addr_map.insert(src.clone(), peer.clone());
-        Some(id)
+    /// Change the destination address on an existing peer connection
+    pub(crate) async fn change_dst(
+        self: &Arc<Self>,
+        id: usize,
+        dst: &DstAddr,
+    ) -> Result<Peer, PeerInsertError> {
+        // Get the peer by Id and change it's dst field
+        let mut peer = self
+            .peer_by_id(id)
+            .await
+            .map_or(Err(PeerInsertError::NoSuchPeer), |p| Ok(p))?;
+        peer.dst = Some(dst.clone());
+
+        // Get an existing peer with this destination
+        let ghost = self.peer_by_dst(dst).await;
+
+        // Copy the "known" status from the ghost identity
+        // FIXME: Why? -- spacekookie
+        if let Some(ghost) = ghost {
+            peer.known = peer.known || ghost.known;
+            self.del_peer(ghost.id).await;
+        }
+
+        // Update peer data in peer maps
+        self.del_peer(peer.id).await;
+        self.add_peer(peer.clone()).await?;
+        Ok(peer)
     }
 
     /// Remove a peer by Id, and do nothing if the peer doens't exist
-    pub(crate) async fn del_peer(self: Arc<Self>, id: usize) {
-        let mut addr_map = self.addr_map.write().await;
-        let mut id_map = self.id_map.write().await;
+    #[tracing::instrument(skip(self), level = "trace")]
+    pub(crate) async fn del_peer(self: &Arc<Self>, id: usize) {
+        let mut peers = self.peers.write().await;
+        let mut src_to_id = self.src_to_id.write().await;
+        let mut dst_to_id = self.dst_to_id.write().await;
 
-        if let Some(peer) = id_map.get(&id) {
-            if let Some(src_addr) = peer.src {
-                addr_map.remove(&src_addr);
+        if let Some(peer) = peers.remove(&id) {
+            if let Some(src) = peer.src {
+                src_to_id.remove(&src);
+            }
+            if let Some(dst) = peer.dst {
+                dst_to_id.remove(&dst);
             }
         }
-
-        id_map.remove(&id);
     }
 
+    #[tracing::instrument(skip(self, peers), level = "trace")]
     pub(crate) async fn load<I: Into<SocketAddr>>(
         self: &Arc<Self>,
         peers: Vec<I>,
     ) -> Result<(), PeerErrs> {
         let new_peers: Vec<_> = peers.into_iter().map(Into::into).collect();
 
-        let mut id_map = self.id_map.write().await;
+        // Lock all required data stores
         let mut peers = self.peers.write().await;
+        let mut dst_to_id = self.dst_to_id.write().await;
         let mut curr = self.curr.write().await;
 
-        new_peers.into_iter().fold(Ok(()), |prev, addr| match prev {
-            Ok(_) if peers.contains_key(&addr) => PeerErrs::new(addr),
-            Err(e) if peers.contains_key(&addr) => Err(e.append(addr)),
-            Ok(()) => {
-                peers.insert(addr.clone(), *curr);
-                let peer = Peer {
-                    src: None,
-                    dst: addr,
-                    verified: false,
+        new_peers.into_iter().fold(Ok(()), |prev, addr| {
+            // Utility closure to insert a new peer
+            macro_rules! insert_new_peer {
+                () => {
+                    dst_to_id.insert(addr.clone(), *curr);
+                    peers.insert(
+                        *curr,
+                        Peer {
+                            id: *curr,
+                            src: None,
+                            dst: Some(addr),
+                            known: true,
+                        },
+                    );
                 };
-                id_map.insert(*curr, peer.clone());
+            };
 
-                *curr += 1;
-                Ok(())
-            }
-            err @ Err(_) => {
-                peers.insert(addr.clone(), *curr);
-                let peer = Peer {
-                    src: None,
-                    dst: addr,
-                    verified: false,
-                };
-                id_map.insert(*curr, peer);
-
-                *curr += 1;
-                err
+            match prev {
+                Ok(_) if dst_to_id.contains_key(&addr) => PeerErrs::new(addr),
+                Err(e) if dst_to_id.contains_key(&addr) => Err(e.append(addr)),
+                Ok(()) => {
+                    insert_new_peer!();
+                    *curr += 1;
+                    Ok(())
+                }
+                err @ Err(_) => {
+                    insert_new_peer!();
+                    *curr += 1;
+                    err
+                }
             }
         })
     }
-
-    /// Get the destination address based on the source address
-    #[cfg(test)]
-    pub(crate) async fn get_dst_by_id(self: &Arc<Self>, id: usize) -> Option<DstAddr> {
-        self.id_map
-            .read()
-            .await
-            .get(&id)
-            .map(|peer| peer.dst.clone())
-    }
 }
 
-#[async_std::test]
-async fn load_peers() {
-    use std::net::{Ipv4Addr, SocketAddrV4};
+// #[async_std::test]
+// async fn load_peers() {
+//     use std::net::{Ipv4Addr, SocketAddrV4};
 
-    let a1 = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8000);
-    let a2 = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 9000);
+//     let a1 = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8000);
+//     let a2 = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 9000);
 
-    let peers = PeerList::new();
-    peers.load(vec![a1.clone(), a2.clone()]).await.unwrap();
+//     let peers = Peers::new();
+//     peers.load(vec![a1.clone(), a2.clone()]).await.unwrap();
 
-    let id = peers.get_id_by_dst(&a1.into()).await.unwrap();
-    assert_eq!(peers.get_dst_by_id(id).await, Some(a1.into()));
-}
+//     let id = peers.id_by_dst(&a1.into()).await.unwrap();
+//     assert_eq!(peers.dst_by_id(id).await, Some(a1.into()));
+// }
