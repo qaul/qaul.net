@@ -1,14 +1,15 @@
 [package]
 name = "qaul-hubd"
-description = "Routing, data, and state daemon for libqaul applications"
+description = "A modular and configurable internet overlay router for qaul.net"
 version = "0.1.0"
-authors = ["Leonora Tindall <nora@nora.codes>", "Katharina Fey <kookie@spacekookie>"]
+authors = ["Katharina Fey <kookie@spacekookie>", "Leonora Tindall <nora@nora.codes>"]
 license = "AGPL-3.0-or-later"
 edition = "2018"
 
 [dependencies]
 libqaul = { path = "../../libqaul" }
 netmod-tcp = { path = "../../netmods/netmod-tcp" }
+netmod-udp = { path = "../../netmods/netmod-udp" }
 ratman = { path = "../../ratman" }
 ratman-configure = { path = "../../ratman/configure" }
 

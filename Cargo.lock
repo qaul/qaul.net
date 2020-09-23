@@ -1902,6 +1902,7 @@ dependencies = [
  "directories",
  "libqaul",
  "netmod-tcp",
+ "netmod-udp",
  "ratman",
  "ratman-configure",
  "tracing",

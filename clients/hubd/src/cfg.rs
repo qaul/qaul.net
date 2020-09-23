@@ -91,6 +91,12 @@ pub(crate) fn cli<'a>() -> App<'a, 'a> {
         )
 }
 
+/// Generate an application config from arguments and env vars
+///
+/// Environment variables are available for all parameters and will
+/// override any default value.  Program arguments (commandline
+/// parameters) will override env variable settings.  Any setting that
+/// _must_ be present will be enforced in this function.
 pub(crate) fn match_fold<'a>(app: App<'a, 'a>) -> Config {
     let m = app.get_matches();
 
@@ -109,12 +115,12 @@ pub(crate) fn match_fold<'a>(app: App<'a, 'a>) -> Config {
         addr: m
             .value_of("SOCKET_ADDR")
             .map(|s| s.to_owned())
-            .or(env::var("QAUL_HUBD_MODE").ok())
+            .or(env::var("QAUL_HUBD_ADDR").ok())
             .unwrap_or("0.0.0.0".into()),
         port: m
             .value_of("SOCKET_PORT")
             .map(|s| str::parse(s).unwrap())
-            .or(env::var("QAUL_HUBD_MODE")
+            .or(env::var("QAUL_HUBD_PORThat")
                 .ok()
                 .map(|s| str::parse(&s).unwrap()))
             .unwrap_or(9001),
