@@ -24,7 +24,7 @@ type IdMap = BTreeMap<usize, Peer>;
 /// For quick queries if a peer is valid
 type PeerMap = HashMap<DstAddr, usize>;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum PeerState {
     /// We're friends actually
     Valid,
@@ -64,9 +64,12 @@ impl PeerList {
 
         use PeerState::*;
         peers.iter().fold(Unknown, |prev, (src_, id)| {
-            let peer = id_map.get(id).unwrap();
+            let verified = match id_map.get(id) {
+                Some(peer) => peer.verified,
+                None => false,
+            };
             match prev {
-                Unknown if src_.ip() == src.ip() && peer.verified => Valid,
+                Unknown if src_.ip() == src.ip() && verified => Valid,
                 Unknown if src_.ip() == src.ip() => Unverified,
                 found => found,
             }
@@ -114,20 +117,51 @@ impl PeerList {
         let mut addr_map = self.addr_map.write().await;
         let mut id_map = self.id_map.write().await;
         let peers = self.peers.write().await;
+        let mut curr = self.curr.write().await;
 
         // Return None if the peer is not known
         if peers.get(&dst).is_none() {
             return None;
         }
 
-        // Add the source address to the peer
-        let id = peers.get(&dst).unwrap();
-        let peer = id_map.get_mut(id).unwrap();
-        peer.src = Some(src.clone());
-        peer.verified = true;
+        // Either get a pre-assigned ID, or cerate a new one
+        let id = match peers.get(&dst) {
+            Some(id) => *id,
+            None => {
+                *curr += 1;
+                *curr
+            }
+        };
+
+        let peer = match id_map.get_mut(&id) {
+            Some(peer) => {
+                peer.src = Some(src.clone());
+                peer.verified = true;
+                peer.clone()
+            }
+            None => Peer {
+                src: Some(src.clone()),
+                dst: dst.clone(),
+                verified: true,
+            },
+        };
 
         addr_map.insert(src.clone(), peer.clone());
-        Some(*id)
+        Some(id)
+    }
+
+    /// Remove a peer by Id, and do nothing if the peer doens't exist
+    pub(crate) async fn del_peer(self: Arc<Self>, id: usize) {
+        let mut addr_map = self.addr_map.write().await;
+        let mut id_map = self.id_map.write().await;
+
+        if let Some(peer) = id_map.get(&id) {
+            if let Some(src_addr) = peer.src {
+                addr_map.remove(&src_addr);
+            }
+        }
+
+        id_map.remove(&id);
     }
 
     pub(crate) async fn load<I: Into<SocketAddr>>(
