@@ -127,6 +127,7 @@ impl Socket {
         let socket = Arc::clone(&self);
         let peers = Arc::clone(peers);
         let (tx, rx) = channel(1);
+        trace!("Spawning tcp handler...");
         task::spawn(Self::run(tx, mode, socket, peers));
         rx
     }

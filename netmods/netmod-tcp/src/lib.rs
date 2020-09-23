@@ -15,6 +15,7 @@ use async_std::sync::{Arc, Receiver, RwLock};
 use async_trait::async_trait;
 use netmod::{self, Endpoint as EndpointExt, Frame, Target};
 use std::net::SocketAddr;
+use tracing::{info, trace};
 
 /// Define the runtime mode for this endpount
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -41,6 +42,7 @@ impl Endpoint {
     /// Create a new endpoint on an interface and port
     #[tracing::instrument(level = "info")]
     pub async fn new(addr: &str, port: u16, name: &str) -> Result<Arc<Self>> {
+        info!("Initialising Tcp backend");
         let mut this = Self {
             mode: Arc::new(RwLock::new(Mode::Static)),
             socket: Socket::new(addr, port, name).await?,
@@ -48,7 +50,8 @@ impl Endpoint {
             inbox: None,
         };
 
-        this.start();
+        trace!("Starting tcp router");
+        this.start().await;
         Ok(Arc::new(this))
     }
 
