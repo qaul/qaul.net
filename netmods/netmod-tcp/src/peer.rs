@@ -139,31 +139,35 @@ impl Peer {
                     while self.alive() {
                         s = self.sender.write().await;
                         if s.is_none() {
+                            // We need to drop `s` here because the
+                            // introduction loop will want to have
+                            // access to it to initialise the stream.
+                            // Otherwise we will create a deadlock!
+                            drop(s);
+
                             // Run introduction again
                             Arc::clone(&self).introduce_blocking(port).await;
-                            continue;
+                        } else {
+                            // At this point we should have a valid stream
+                            let addr = s.as_ref().unwrap().peer_addr().unwrap().to_string();
+                            match packet {
+                                Packet::Hello { .. } => trace!("Sending HELLO to {}", addr),
+                                Packet::KeepAlive => trace!("Sending KEEP-ALIVE to {}", addr),
+                                _ => {}
+                            }
+
+                            // Serialise the payload and pre-pend the length
+                            let mut vec = serialize(&packet).unwrap();
+                            let mut buf = vec![0; 8];
+                            BigEndian::write_u64(&mut buf, vec.len() as u64);
+                            buf.append(&mut vec);
+
+                            // And woosh!
+                            s.as_mut().unwrap().write_all(&buf).await;
+                            break;
                         }
-                        break;
                     }
-
-                    let mut stream = &mut s.as_ref().unwrap();
-
-                    // At this point we should have a valid stream
-                    let addr = stream.peer_addr().unwrap().to_string();
-                    match packet {
-                        Packet::Hello { .. } => trace!("Sending HELLO to {}", addr),
-                        Packet::KeepAlive => trace!("Sending KEEP-ALIVE to {}", addr),
-                        _ => {}
-                    }
-
-                    // Serialise the payload and pre-pend the length
-                    let mut vec = serialize(&packet).unwrap();
-                    let mut buf = vec![0; 8];
-                    BigEndian::write_u64(&mut buf, vec.len() as u64);
-                    buf.append(&mut vec);
-
-                    // And woosh!
-                    stream.write_all(&buf).await;
+                    
                 }
             }
         });
