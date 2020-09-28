@@ -5,6 +5,8 @@ mod peers;
 mod proto;
 mod socket;
 
+mod peer;
+
 pub use error::{Error, Result};
 
 pub(crate) use peers::{LinkState, Peer, Peers};
