@@ -1,10 +1,5 @@
 #!/bin/sh
 
-# upload the overview
-cd index
-./deploy.sh
-cd ..
-
 # build and upload the contributors manual
 cd contributors
 ./deploy.sh
