@@ -1,12 +1,11 @@
-# qaul.net Contributors Guide
+# qaul.net contributors manual
 
-Welcome to the *qaul.net Contributors Guide*!
+Welcome to the contributors manual.  The purpose of this document is
+to explain qaul.net internal concepts, structures, and protocols.
+It's source code can be [found][repo] in the main qaul.net code repo.
+If you find any issues with it (typos, outdated sections, unclear
+sections), [open an MR], or [send us a patch]!
 
-This guide is open and publicly editable. You can find it's sources 
-in our [gitlab repository].
-
-If you find any section of this guide lacking, don't hesitate to update this guide, [open a PR] or [send us a patch]!
-
-[gitlab repository]: https://git.open-communication.net/qaul/qaul.net/tree/master/docs/contributors
-[open a PR]: social/contributions.html#submitting-a-pr
+[repo]: https://git.open-communication.net/qaul/qaul.net/tree/master/docs/contributors
+[open an MR]: social/contributions.html#submitting-a-pr
 [send us a patch]: social/contributions.html#submitting-an-e-mail-patch

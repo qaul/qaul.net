@@ -2,7 +2,7 @@
 authors = ["Katharina Fey", "Mathias Jud", "Jess 3Jane"]
 multilingual = false
 src = "src"
-title = "qaul.net Contributors Guide"
+title = "qaul.net Contributors Manual"
 
 [build]
 create-missing = false

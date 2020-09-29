@@ -1,12 +1,11 @@
 # Overview of Crates
 
-The qaul.net project mostly uses a monorepo approach, meaning that all
-libraries relevant to the application, library, and service ecosystem
-live in the same repository.  Because it can be quite daunting to
-touch an unfamiliar codebase without knowing what does what, ever
-while there are lot's of API docs, there's an overview here.
+The qaul.net project largely exists in one mono-repo, meaning that all
+relevant components are stored in the same git repository.  This makes
+testing easier, but can make it daunting to look at because of the
+sheer volume of code involved.
 
-The list goes through the qaul.net application stack, starting at the
+This list goes through the qaul.net application stack, starting at the
 _bottom_ (driver/routing layer).
 
 **Some of the crates in this list are WIP or don't yet fully exist, as
@@ -62,11 +61,11 @@ of 2020-02-08**
   interface, that can be used from any language that has convenient
   http client libs, as well as used for debugging via tools like curL.
   
-* **clients/ipc** is a client library for libqaul, that creates the
+* **utils/ipc** is a client library for libqaul, that creates the
   sending end of the `libqaul-ipc` interface.
   
-* **clients/ws.js** is a javascript wrapper for the websockets API,
+* **utils/ws.js** is a javascript wrapper for the websockets API,
   used mainly in the qaul.net web interface
 
-* **clients/linux** is a linux UI to run the qaul.net application,
-  with bundled services.
+* **clients/desktop-cli** is desktop CLI to run the qaul.net
+  application, with an external service bundle

@@ -5,13 +5,18 @@ cd index
 ./deploy.sh
 cd ..
 
-# build and upload the contributors' guide
+# build and upload the contributors manual
 cd contributors
 ./deploy.sh
 cd ..
 
 # build and upload the HTTP-API documentation
 cd http-api
+./deploy.sh
+cd ..
+
+# build and upload the users manual
+cd users/
 ./deploy.sh
 cd ..
 

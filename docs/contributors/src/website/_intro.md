@@ -58,9 +58,9 @@ Here a quick overview of the web sites file structure:
 * Web site content
   * The markdown content files and the images are all residing in the `content` folder.
   * The start page content can be found in the `content/index.md` file and in the `content/home` folder. There is a file for each section of the start page.
-  * All the tutorials are in sub folders of `content/tutorials`. Please see the chapter [Write a qaul.net Tutorial](/web-site/tutorials.md).
+  * All the tutorials are in sub folders of `content/tutorials`. Please see the chapter [Write a qaul.net Tutorial](/website/tutorials.md).
 
-For translating the web site see the chapter [Translate the qaul.net Web Site](/web-site/translate.md).
+For translating the web site see the chapter [Translate the qaul.net Web Site](/website/translate.md).
 
 
 [https://qaul.net]: https://qaul.net

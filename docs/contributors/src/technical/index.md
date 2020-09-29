@@ -1,55 +1,70 @@
 # Technical Documentation
 
-Welcome to the qaul.net technical documentation!
+This is an introductory chapter into the technical layers of qaul.net!
+It is aimed at two different types of people:
 
-This section is aimed at two different types of people:
+1. People wanting to contribute to the qaul.net core
+2. People wanting to write apps for a qaul network
 
-1. People wanting to contribute to qaul.net and it's libraries
-2. People wanting to write their own apps for a qaul network
-
-This page will offer a short introduction to the project structure to
-get you started.  On each section in this document there are pages and
-chapters that go into more detail than is required here.
+Before getting started, we need to cover a few basics in project
+structure.  Each section in this document has it's own sub-chapter
+that will go into more details.
 
 
 ## Introduction
 
-Fundamentally, qaul.net is a highly distributed system.  As such, it
-is not accountable to a single set of rules across all devices that
-are part of this system.  It is important to make the distinction
-between "qaul.net", the application, "qaul network", the distributed
-network of devices, and other components provided by the project that
-can be used to write decentralised applications.
+Fundamentally, qaul.net is a highly distributed system.  It is not
+accountable to a single set of rules across all devices that are part
+of this system.  It is important to make the distinction between
+"qaul.net", the application, "qaul network", the distributed network
+of devices, and other components provided by the project that can be
+used to write decentralised applications.
 
-The primary component in this ecosystem is called libqaul.  It
+The primary component in this ecosystem is called `libqaul`.  It
 provides an abstraction layer for a distributed network of devices,
-the users that interact with each other and the messages and data that
-can be exchanged.  The API of this library is called the "service API"
-in other parts of the docs.
+user profiles that interact with each other, and the messages and data
+that are exchanged.  The API of this library is called the "libqaul
+service API" in other parts of the docs.  An application written to
+use `libqaul` is called a "service".
 
-Built on top of it are services (or apps), that provide more specific
-functionality, such as text messaging or file sharing.  qaul.net (the
-app) is merely a GUI and collection of a few different services all
-running on the same libqaul instance on one device.
+A service provicdes more specific functionality.  Not all services are
+user-facing.  For example, a service can provide an easy interface to
+send rich-payload messages, that operates on a higher level than the
+libqaul service API.  Other services can then depend on this
+high-level API.
+
+qaul.net (the app bundle) is primarily a GUI for a collection of
+services, that all run on the same libqaul instance under the hood.
+
+Unless otherwise stated, all code is written in Rust.
 
 
 ## Layers
 
-The following sections will outline the different layers present in
-qaul.net (the application), then there are pages for more details on
-how to interact with each of these layers.
+The qaul.net stack is heavily abstracted into layers to keep logic
+simple on each layer.  No layer should have to care about data that is
+not meant to be consumed by it.
+
+- **User Interfaces**: users interact with these clients
+- **RPC broker**: allows remote clients to connect to the same daemon,
+  without having to bundle their own libraries.
+- **App services**: a set of services that provide user-facing
+  functionality (text messaging, file sharing, ...)
+- **Core services**: utility services that extend the `libqaul` API
+- **libqaul**: primary user profile, and database handler
+- **ratman**: decentralised packet router, responsible for dispatching
+  and receiving messages.
+- **Network Modules**: driver plugins for `ratman` that implement the
+  actual wire-formats for networking
+- **Platform Support**: os-specific utilities and tools
 
 
 ### Services & apps
 
-As mentioned in the introduction it is possible to build applications
-(or "services") with libqaul, that can interact with each other on a
-distributed network.  These services provide high level functionality
-such as sending text messages, a collaborative public feed (similar to
-mastodon), and voice calls.
-
-Following is a list of all the services that come bundled in qaul.net
-by default (more details [here][services]).
+A service (app) provides it's own API to clients, either via native
+bindings, or via the common rpc-broker system.  Following is a list of
+all the services that come bundled in qaul.net by default (more
+details [here][services]).
 
 - feed
 - messages
@@ -59,52 +74,57 @@ by default (more details [here][services]).
 
 [services]: ./qaul.net/services.html
 
-The reason why qaul.net is built in such a modular way is to allow you
-to write your own services, with their own functionality and UI, that
-gets to interact with an existing service and user ecosystem.  libqaul
-also helps you to build your application in a way where it doesn't
-rely on central servers on a network and keeping your users' data
-safe.
+When connecting your own apps to a `libqaul` instance you can check
+for the existence of other services, meaning that your application can
+rely on extrenal functionality.  This way the binary bundles can be
+kept small and focussed.
 
 
-### libqaul
+### RPC broker
 
-#### Service API
+To allow external applications to integrate with an existing qaul.net/
+`libqaul` stack, the RPC message broker provides various interfaces to
+integrate with.
 
-The interface to libqaul is called the service API, and a versatile
-abstraction over a decentralised network.  It handles local user
-authentication, network user discovery, binary payload messages,
-contact data, and even encrypted file storage at rest.
-
-The API itself is available as an async Rust library and ffi C
-interface, with some optional IPC add-ons:
-
-- [http/json:api] - this is how the qaul.net GUI is hooked up
-- [socket-ipc] - using a cap'n proto ipc protocol over unix sockets
-- [android-ipc] - implementing an Android specific ipc interface
+- **[http/json]** - http server for `libqaul` and associated services
+- **[socket-ipc]** - unix ipc socket interface with binary payloads
+- **[android-ipc]** - a specific ipc implementation for Android
 
 [http/json:api]: https://docs.qaul.net/http-api/
 [socket-ipc]: ./libqaul/ipc/socket.html
 [android-ipc]: ./libqaul/ipc/android.html
 
-The idea behind the variety of IPC interfaces is that your application
-can bundle it's own copy of libqaul, to provide the network backends
-required to join a mesh network, however it can also connect with a
-running instance if one is available, seeing as only one daemon can
-concurrently have access to the networking backends.
 
-This way resources, user profiles and social graphs can be shared.
-Furthermore, it's possible for your application to use services that
-are bundled in with a qaul.net application stack, meaning that there's
-a lot of functionality that you don't have to replicate in your own
-apps.
+### libqaul
 
+The primary state handler is called `libqaul`.  It handles database
+transactions, local and remote user profiles, and connections to the
+router.  Services can register themselves with a running instance for
+authentication, to gain access to a per-service encrypted backing
+storage.
 
-#### Internals
+While the main API is written (and accessible) in Rust, most services
+will likely use the RPC broker system built on top of `libqaul`.
 
-The internals of libqaul are intirely written in Rust, and hook into
-various storage and networking abstractions.  libqaul primarily uses
-two libraries, also written as part of this project, to do it's job:
-alexandria, and ratman.
 
 ### ratman
+
+A decentralised packet router, modelled partially on BATMAN-adv.  It
+provides an API that takes messages to send to peers on the network,
+and returns messages received from the network.  It handles network
+announcements, network segmentation, message journaling, route
+updates, and networked archive storage.  It's the main driver behind
+qaul.net, and flexible enough to embed into various other use-cases.
+
+Addresses on a ratman network are 32-byte ed25516 public keys, meaning
+that all messages are automatically encrypted.  Additionally this
+means that the valid address space isn't modelled on IP addresses, or
+similar, and is nearly un-exhaustable.
+
+
+### Network Modules
+
+When sending messages over an internet overlay network, translation
+between ratman IDs (provided by the `ratman-identity` crate) and the
+various IP spaces needs to be performed.  This logic is implemented in
+the network driver plugins (called "netmods").
