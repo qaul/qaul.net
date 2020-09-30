@@ -1,5 +1,11 @@
 //! TCP internal protocol used to share connection state
 
+use async_std::{
+    io::{self, prelude::ReadExt},
+    net::TcpStream,
+};
+use bincode::deserialize;
+use byteorder::{BigEndian, ByteOrder};
 use netmod::Frame;
 use serde::{Deserialize, Serialize};
 
@@ -16,4 +22,34 @@ pub(crate) enum Packet {
     KeepAlive,
     /// An actual data packet
     Frame(Frame),
+}
+
+/// A utility to read packets from an incoming TCP stream
+pub(crate) struct PacketBuilder<'s> {
+    stream: &'s mut TcpStream,
+    data: Option<Vec<u8>>,
+}
+
+impl<'s> PacketBuilder<'s> {
+    /// Create a new frame builder from a stream
+    pub(crate) fn new(stream: &'s mut TcpStream) -> Self {
+        Self { stream, data: None }
+    }
+
+    /// Parse incoming data and initialise the builder
+    pub(crate) async fn parse(&mut self) -> io::Result<()> {
+        let mut len_buf = [0; 8];
+        self.stream.read_exact(&mut len_buf).await?;
+        let len = BigEndian::read_u64(&len_buf);
+
+        let mut data_buf = vec![0; len as usize];
+        self.stream.read_exact(&mut data_buf).await?;
+        self.data = Some(data_buf);
+        Ok(())
+    }
+
+    /// Consume the builder and maybe return a frame
+    pub(crate) fn build(self) -> Option<Packet> {
+        self.data.and_then(|vec| deserialize(&vec).ok())
+    }
 }

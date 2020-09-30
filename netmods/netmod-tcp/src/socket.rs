@@ -166,7 +166,7 @@ impl Socket {
             socket.inner.local_addr()
         );
 
-        while let Some(Ok(mut stream)) = inc.next().await {
+        while let Some(Ok(stream)) = inc.next().await {
             task::spawn(handle_incoming_stream(
                 socket.clone(),
                 stream,
@@ -392,98 +392,4 @@ async fn handle_incoming_stream(
         socket.id,
         src_addr
     );
-}
-
-/// Get the upload stream for a particular socket address
-async fn get_stream(
-    streams: &RwLock<HashMap<SocketAddr, TcpStream>>,
-    addr: &SocketAddr,
-) -> TcpStream {
-    let s = streams.read().await;
-    s.get(addr)
-        .expect(&format!("No stream for addr: {}", addr))
-        .clone()
-}
-
-/// Send a packet to a particular stream
-#[tracing::instrument(skip(stream, packet), level = "trace")]
-async fn send_packet(stream: &mut TcpStream, packet: Packet, id: &str) -> io::Result<()> {
-    let mut vec = serialize(&packet).unwrap();
-    match packet {
-        Packet::Hello { .. } => trace!(
-            "{} Sending HELLO to {:?}",
-            id,
-            stream.peer_addr()?.to_string()
-        ),
-        Packet::KeepAlive => trace!(
-            "{} Sending KEEP-ALIVE to {:?}",
-            id,
-            stream.peer_addr()?.to_string()
-        ),
-        _ => {}
-    }
-
-    let mut buf = vec![0; 8];
-    BigEndian::write_u64(&mut buf, vec.len() as u64);
-    buf.append(&mut vec);
-
-    stream.write_all(&buf).await
-}
-
-struct PacketBuilder<'s> {
-    stream: &'s mut TcpStream,
-    data: Option<Vec<u8>>,
-}
-
-impl<'s> PacketBuilder<'s> {
-    /// Create a new frame builder from a stream
-    fn new(stream: &'s mut TcpStream) -> Self {
-        Self { stream, data: None }
-    }
-
-    /// Parse incoming data and initialise the builder
-    async fn parse(&mut self) -> io::Result<()> {
-        let mut len_buf = [0; 8];
-        self.stream.read_exact(&mut len_buf).await?;
-        let len = BigEndian::read_u64(&len_buf);
-
-        let mut data_buf = vec![0; len as usize];
-        self.stream.read_exact(&mut data_buf).await?;
-        self.data = Some(data_buf);
-        Ok(())
-    }
-
-    /// Consume the builder and maybe return a frame
-    fn build(self) -> Option<Packet> {
-        self.data.and_then(|vec| deserialize(&vec).ok())
-    }
-}
-
-#[async_std::test]
-async fn simple_send() {
-    use std::net::{Ipv4Addr, SocketAddrV4};
-
-    let s1 = Socket::new("127.0.0.1", 10010, "A =").await.unwrap();
-    let s1_addr = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 10010);
-    let p1 = PeerList::new();
-
-    let s2 = Socket::new("127.0.0.1", 10011, "B =").await.unwrap();
-    let s2_addr = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 10011);
-    let p2 = PeerList::new();
-
-    // Make p1 load p2's address, and vice versa
-    p1.load(vec![s2_addr]).await.unwrap();
-    p2.load(vec![s1_addr]).await.unwrap();
-
-    s1.start(Mode::Static, &p1);
-    s2.start(Mode::Static, &p2);
-
-    // Make p1 introduce itself to p2
-    let id = p1.get_id_by_dst(&s2_addr.into()).await.unwrap();
-    s1.introduce(id, s2_addr.into()).await;
-
-    // Give the test some time to run
-    task::sleep(Duration::from_secs(2)).await;
-
-    assert_eq!(p1.peer_state(&s2_addr.into()).await, PeerState::Valid);
 }

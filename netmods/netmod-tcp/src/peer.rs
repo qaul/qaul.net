@@ -2,7 +2,7 @@
 //!
 //! The lifecycle of a peer is encoded is the following flow-chart:
 //!
-//! ```norun
+//! ```text
 //!                               +-> Failed to -+
 //!                               |    connect   |
 //!                               |              v
@@ -27,9 +27,9 @@
 //! channel, which means they will return immediately, even if the
 //! connection is currently down.
 
-use crate::Packet;
+use crate::{AtomPtr, Packet, Ref};
 use async_std::{
-    io::prelude::{ReadExt, WriteExt},
+    io::prelude::WriteExt,
     net::TcpStream,
     sync::{channel, Arc, Receiver, RwLock, Sender},
     task,
@@ -54,10 +54,10 @@ mod id {
 static CHANNEL_WIDTH: usize = 3;
 
 /// Address from which packets are sent
-type SourceAddr = SocketAddr;
+pub(crate) type SourceAddr = SocketAddr;
 
 /// Address to which packets are sent
-type DstAddr = SocketAddr;
+pub(crate) type DstAddr = SocketAddr;
 
 /// A thread-safe locked sending stream
 type LockedStream = Arc<RwLock<Option<TcpStream>>>;
@@ -75,12 +75,30 @@ impl Default for IoPair {
     }
 }
 
+/// Encode the different states a `Peer` can be in
+pub(crate) enum PeerState {
+    /// Only a receiving channel exists
+    ///
+    /// This is either the case for unknown dynamic peers, or a
+    /// race-condition on static peers.
+    RxOnly,
+    /// Only a transmission channel exists
+    ///
+    /// This is the inverse of RxOnly, and usually a race-condition,
+    /// unless the local node is running in DYNAMIC mode
+    TxOnly,
+    /// A valid two-way connection
+    Duplex,
+    /// Something has gone really wrong
+    Invalid,
+}
+
 #[derive(Clone, Debug, Default)]
 pub(crate) struct Peer {
     /// Unique numeric Id for each peer
-    id: usize,
+    pub(crate) id: usize,
     /// Peer source address
-    src: Option<SourceAddr>,
+    src: AtomPtr<Option<SourceAddr>>,
     /// Peer destination address
     dst: Option<DstAddr>,
     /// Sending stream for this peer (if it existst)
@@ -94,28 +112,26 @@ pub(crate) struct Peer {
 
 impl Peer {
     /// Initialise a new peer only with it's source address
+    ///
+    /// This function is meant to initialise a peer who has introduced
+    /// itself to this node, but where an outgoing connection couldn't
+    /// be established yet.  This indicates either a race condition
+    /// which will be resolved soon (because the local peer
+    /// initialisation loop hasn't spawned the sending channel yet),
+    /// or an unknown peer when running in `dynamic` mode
     pub(crate) fn from_src(src: SourceAddr) -> Arc<Self> {
         Arc::new(Self {
             id: id::next(),
-            src: Some(src),
+            src: AtomPtr::new(Some(src)),
             ..Default::default()
         })
-    }
-
-    /// Stop all tasks associated with this peer
-    pub(crate) fn stop(&self) {
-        self._run.fetch_and(false, Ordering::Relaxed);
-    }
-
-    fn alive(&self) -> bool {
-        self._run.load(Ordering::Relaxed)
     }
 
     /// Open a connection to this peer
     ///
     /// While this function returns immediately, it spawns an async
     /// worker that will try to establish a connection to the peer,
-    /// exiting until `Drop` is called on this peer
+    /// exiting until `stop()` is called on this peer
     pub(crate) fn open(dst: DstAddr, port: u16) -> Arc<Self> {
         let p = Arc::new(Self {
             id: id::next(),
@@ -129,7 +145,39 @@ impl Peer {
         return p;
     }
 
+    /// Set this peer's source address
+    pub(crate) fn set_src(&self, src: SourceAddr) {
+        self.src.swap(Some(src));
+    }
+
+    /// Stop all tasks associated with this peer
+    pub(crate) fn stop(&self) {
+        self._run.fetch_and(false, Ordering::Relaxed);
+    }
+
+    /// Get the current state for this peer
+    pub(crate) fn state(&self) -> PeerState {
+        match (self.get_src(), self.dst) {
+            (Some(_), Some(_)) => PeerState::Duplex,
+            (Some(_), None) => PeerState::RxOnly,
+            (None, Some(_)) => PeerState::TxOnly,
+            (None, None) => PeerState::Invalid,
+        }
+    }
+
+    /// Internal utility to verify that this peer is still alive
+    fn alive(&self) -> bool {
+        self._run.load(Ordering::Relaxed)
+    }
+
     /// Start an async worker to send packets to this peer
+    ///
+    /// The worker can be stopped after spawning by calling `stop()`.
+    /// If at any time sending was'n successful, this loop will
+    /// automatically re-init the connection.
+    ///
+    /// There's currently no way to get diagnostics from failed sends
+    /// back to ratman.  **FIXME**: implement this!
     pub(crate) fn run_io_sender(self: Arc<Self>, port: u16) {
         task::spawn(async move {
             while self.alive() {
@@ -163,13 +211,19 @@ impl Peer {
                             buf.append(&mut vec);
 
                             // And woosh!
-                            s.as_mut().unwrap().write_all(&buf).await;
+                            if let Err(e) = s.as_mut().unwrap().write_all(&buf).await {
+                                error!("Failed to send message: {}!", e.to_string());
+                                continue; // try again?
+                            }
+
+                            // If we reach this point we're good to go
                             break;
                         }
                     }
-                    
                 }
             }
+
+            trace!("Shutting down packet sender for peer {}", self.id);
         });
     }
 
@@ -205,7 +259,6 @@ impl Peer {
 
             // Exit if we are already connected
             if sender.read().await.is_some() {
-                ctr = 0;
                 trace!(
                     "Peer `{}` (ID: {}) is already connected!",
                     dst.to_string(),
@@ -219,13 +272,14 @@ impl Peer {
                 pre,
                 dst.to_string()
             );
-            let mut s = match TcpStream::connect(dst).await {
+            let s = match TcpStream::connect(dst).await {
                 Ok(s) => s,
-                Err(e) => {
+                Err(_) => {
                     error!(
                         "Failed to connect to peer `{}`.  Starting timeout...",
                         dst.to_string()
                     );
+
                     // FIXME: Make this configurable
                     task::sleep(Duration::from_secs(20)).await;
                     continue;
@@ -254,6 +308,14 @@ impl Peer {
 
     /// Check if this peer has completed it's reverse handshake
     pub(crate) fn known(&self) -> bool {
-        self.src.is_some()
+        self.get_src().is_some()
+    }
+
+    pub(crate) fn get_src(&self) -> Option<SourceAddr> {
+        *self.src.get_ref().clone()
+    }
+
+    pub(crate) fn get_dst(&self) -> Option<DstAddr> {
+        self.dst.clone()
     }
 }

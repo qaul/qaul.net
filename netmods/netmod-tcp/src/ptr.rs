@@ -78,11 +78,11 @@ fn cloned() {
 #[test]
 fn swap() {
     let ts1 = TestStruct {
-        name: "Hello".into(),
+        name: "Hello 1".into(),
     };
 
     let ts2 = TestStruct {
-        name: "Hello".into(),
+        name: "Hello 2".into(),
     };
 
     let ptr = AtomPtr::new(ts1.clone());
