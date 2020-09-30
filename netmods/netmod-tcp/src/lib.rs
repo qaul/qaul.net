@@ -1,22 +1,21 @@
 //! A tcp overlay netmod to connect router across the internet
 
 mod error;
+mod io;
 mod peer;
 mod proto;
 mod ptr;
 mod routes;
 mod server;
 
-// mod peers;
-// mod socket;
-
 pub use error::{Error, Result};
 
-pub(crate) use peer::{DstAddr, Peer, SourceAddr};
+pub(crate) use io::IoPair;
+pub(crate) use peer::{DstAddr, Peer, PeerState, SourceAddr};
 pub(crate) use proto::{Packet, PacketBuilder};
+pub(crate) use ptr::{AtomPtr, Ref};
 pub(crate) use routes::Routes;
 pub(crate) use server::Server;
-pub(crate) use ptr::{AtomPtr, Ref};
 
 use async_std::sync::{Arc, Receiver, RwLock};
 use async_trait::async_trait;

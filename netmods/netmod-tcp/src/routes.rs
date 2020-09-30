@@ -44,6 +44,9 @@ impl Routes {
     }
 
     /// Add a new peer to the system with a destination address
+    ///
+    /// This function is called when adding a peer via the static set
+    /// of peers to connect to.
     pub(crate) async fn add_via_dst(self: &Arc<Self>, dst: DstAddr) -> usize {
         let p = Peer::open(dst.clone(), self.port);
         let id = p.id;
@@ -73,6 +76,18 @@ impl Routes {
         self.src_map.read().await.get(src).map(|id| *id)
     }
 
+    /// Perform a peer lookup via it's source address and port
+    ///
+    /// This function is called when receiving a HELLO packet to
+    /// verify whether or not this peer is theoretically known to the
+    /// system.  If a peer says hello, and we know the destination
+    /// address (and we're running in STATIC mode), then we can safely
+    /// peer with it.
+    pub(crate) async fn find_via_srcport(self: &Arc<Self>, src: &SourceAddr, port: u16) -> Option<usize> {
+        let imply_dst = DstAddr::new(src.ip(), port);
+        self.dst_map.read().await.get(&imply_dst).map(|id| *id)
+    }
+    
     /// Upgrade an existing peer with a destination address
     ///
     /// The existing src peer will be dropped.  If a dst peer is

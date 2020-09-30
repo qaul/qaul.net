@@ -27,7 +27,7 @@
 //! channel, which means they will return immediately, even if the
 //! connection is currently down.
 
-use crate::{AtomPtr, Packet, Ref};
+use crate::{AtomPtr, IoPair, Packet, Ref};
 use async_std::{
     io::prelude::WriteExt,
     net::TcpStream,
@@ -51,8 +51,6 @@ mod id {
     }
 }
 
-static CHANNEL_WIDTH: usize = 3;
-
 /// Address from which packets are sent
 pub(crate) type SourceAddr = SocketAddr;
 
@@ -61,19 +59,6 @@ pub(crate) type DstAddr = SocketAddr;
 
 /// A thread-safe locked sending stream
 type LockedStream = Arc<RwLock<Option<TcpStream>>>;
-
-#[derive(Debug)]
-struct IoPair {
-    pub(self) rx: Receiver<Packet>,
-    pub(self) tx: Sender<Packet>,
-}
-
-impl Default for IoPair {
-    fn default() -> Self {
-        let (tx, rx) = channel(CHANNEL_WIDTH);
-        Self { tx, rx }
-    }
-}
 
 /// Encode the different states a `Peer` can be in
 pub(crate) enum PeerState {
@@ -107,7 +92,7 @@ pub(crate) struct Peer {
     #[doc(hidden)]
     _run: Arc<AtomicBool>,
     /// Store packets until they can be delivered
-    io: Arc<IoPair>,
+    io: Arc<IoPair<Packet>>,
 }
 
 impl Peer {
@@ -166,7 +151,7 @@ impl Peer {
     }
 
     /// Internal utility to verify that this peer is still alive
-    fn alive(&self) -> bool {
+    pub(crate) fn alive(&self) -> bool {
         self._run.load(Ordering::Relaxed)
     }
 
@@ -213,6 +198,7 @@ impl Peer {
                             // And woosh!
                             if let Err(e) = s.as_mut().unwrap().write_all(&buf).await {
                                 error!("Failed to send message: {}!", e.to_string());
+                                *s = None; // We mark ourselves as missing uplink
                                 continue; // try again?
                             }
 
