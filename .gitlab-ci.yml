@@ -11,29 +11,29 @@ build:
     - cargo build
 
 # Run test suite
-test_webgui:
+test_emberweb:
   stage: test
   image: circleci/node:12-browsers
   cache:
     key: yarn
     paths:
-      - webgui/.yarn
+      - emberweb/.yarn
   script:
-    - cd webgui
+    - cd emberweb
     - yarn install --pure-lockfile --cache-folder .yarn
     - yarn run test
     - yarn run lint:hbs
     - yarn run lint:js
 
-build_webgui:
+build_emberweb:
   stage: build
   image: node:12
   cache:
     key: yarn
     paths:
-      - webgui/.yarn
+      - emberweb/.yarn
   script:
-    - cd webgui
+    - cd emberweb
     - yarn install --pure-lockfile --cache-folder .yarn
     - yarn run build --prod
   artifacts:
