@@ -17,14 +17,17 @@ pub(crate) struct State {
 impl State {
     /// Create a new run state
     pub(crate) async fn new(cfg: &Config) -> State {
-        let ep = Endpoint::new(&cfg.addr, cfg.port, "qaul-hubd")
-            .await
-            .unwrap();
-        ep.mode(match cfg.mode.as_str() {
-            "dynamic" => Mode::Dynamic,
-            _ => Mode::Static,
-        })
-        .await;
+        let ep = Endpoint::new(
+            &cfg.addr,
+            cfg.port,
+            "qaul-hubd",
+            match cfg.mode.as_str() {
+                "dynamic" => Mode::Dynamic,
+                _ => Mode::Static,
+            },
+        )
+        .await
+        .unwrap();
 
         let mut buf = String::new();
         let mut peersfd = File::open(&cfg.peers).unwrap();
@@ -43,7 +46,7 @@ impl State {
                 set
             });
 
-        ep.load_peers(peers.into_iter().collect()).await.unwrap();
+        ep.add_peers(peers.into_iter().collect()).await.unwrap();
 
         let router = Router::new();
         router.add_endpoint(ep).await;

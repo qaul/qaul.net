@@ -1,5 +1,5 @@
 use async_std::task;
-use netmod_tcp::Endpoint;
+use netmod_tcp::{Endpoint, Mode};
 use ratman::Router;
 use std::{
     env,
@@ -13,8 +13,8 @@ async fn main() {
     let port = str::parse(&args.remove(1)).unwrap();
     let peer_port = str::parse(&args.remove(1)).unwrap();
 
-    let mut ep = Endpoint::new("0.0.0.0", port, "").await.unwrap();
-    ep.load_peers(vec![SocketAddrV4::new(
+    let mut ep = Endpoint::new("0.0.0.0", port, "", Mode::Static).await.unwrap();
+    ep.add_peers(vec![SocketAddrV4::new(
         Ipv4Addr::new(127, 0, 0, 1),
         peer_port,
     )])

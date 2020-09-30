@@ -98,12 +98,19 @@ impl Network {
                         addr,
                         port,
                         peers,
-                        dynamic: _,
+                        dynamic,
                     } => {
-                        use netmod_tcp::Endpoint;
+                        use netmod_tcp::{Endpoint, Mode};
                         block_on(async {
-                            let ep = Endpoint::new(&addr, port, "qauld").await.unwrap();
-                            ep.load_peers(peers).await.unwrap();
+                            let ep = Endpoint::new(
+                                &addr,
+                                port,
+                                "qauld",
+                                if dynamic { Mode::Dynamic } else { Mode::Static },
+                            )
+                            .await
+                            .unwrap();
+                            ep.add_peers(peers).await.unwrap();
                             router.add_endpoint(ep).await;
                         });
                     }
