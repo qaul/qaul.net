@@ -4,6 +4,7 @@ mod error;
 mod peers;
 mod proto;
 mod socket;
+mod ptr;
 
 mod peer;
 
@@ -12,6 +13,7 @@ pub use error::{Error, Result};
 pub(crate) use peers::{LinkState, Peer, Peers};
 pub(crate) use proto::Packet;
 pub(crate) use socket::Socket;
+pub(crate) use ptr::{AtomPtr, Ref};
 
 use async_std::sync::{Arc, Receiver, RwLock};
 use async_trait::async_trait;
