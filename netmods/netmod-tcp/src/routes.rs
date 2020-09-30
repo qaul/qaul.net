@@ -14,7 +14,7 @@
 use crate::{DstAddr, Peer, SourceAddr};
 use async_std::sync::{Arc, RwLock};
 use std::collections::BTreeMap;
-use tracing::{error, trace};
+use tracing::trace;
 
 /// Routing table for local IP scope
 #[derive(Clone, Default)]
@@ -36,6 +36,25 @@ impl Routes {
             port,
             ..Self::default()
         })
+    }
+
+    pub(crate) async fn stop_all(self: &Arc<Self>) {
+        for (_, peer) in self.peers.read().await.iter() {
+            peer.stop();
+        }
+    }
+
+    /// Get all peers that are currently connected via a DST link
+    pub(crate) async fn all_dst(self: &Arc<Self>) -> Vec<Arc<Peer>> {
+        self.peers
+            .read()
+            .await
+            .iter()
+            .filter_map(|(_, p)| match p.get_dst() {
+                Some(_) => Some(Arc::clone(&p)),
+                None => None,
+            })
+            .collect()
     }
 
     /// Get the underlying peer for an ID
@@ -83,11 +102,15 @@ impl Routes {
     /// system.  If a peer says hello, and we know the destination
     /// address (and we're running in STATIC mode), then we can safely
     /// peer with it.
-    pub(crate) async fn find_via_srcport(self: &Arc<Self>, src: &SourceAddr, port: u16) -> Option<usize> {
+    pub(crate) async fn find_via_srcport(
+        self: &Arc<Self>,
+        src: &SourceAddr,
+        port: u16,
+    ) -> Option<usize> {
         let imply_dst = DstAddr::new(src.ip(), port);
         self.dst_map.read().await.get(&imply_dst).map(|id| *id)
     }
-    
+
     /// Upgrade an existing peer with a destination address
     ///
     /// The existing src peer will be dropped.  If a dst peer is

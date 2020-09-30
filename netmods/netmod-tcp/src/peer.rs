@@ -27,11 +27,11 @@
 //! channel, which means they will return immediately, even if the
 //! connection is currently down.
 
-use crate::{AtomPtr, IoPair, Packet, Ref};
+use crate::{AtomPtr, IoPair, Packet};
 use async_std::{
     io::prelude::WriteExt,
     net::TcpStream,
-    sync::{channel, Arc, Receiver, RwLock, Sender},
+    sync::{Arc, RwLock},
     task,
 };
 use bincode::serialize;
@@ -290,11 +290,6 @@ impl Peer {
     /// successfully delivered.
     pub(crate) async fn send(&self, packet: Packet) {
         self.io.tx.send(packet).await;
-    }
-
-    /// Check if this peer has completed it's reverse handshake
-    pub(crate) fn known(&self) -> bool {
-        self.get_src().is_some()
     }
 
     pub(crate) fn get_src(&self) -> Option<SourceAddr> {

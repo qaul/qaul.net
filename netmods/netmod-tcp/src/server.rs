@@ -6,7 +6,7 @@ use async_std::{
     stream::StreamExt,
     task,
 };
-use netmod::Frame;
+use netmod::{Frame, Target};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -19,9 +19,9 @@ pub(crate) struct Server {
     alive: Arc<AtomicBool>,
     inner: TcpListener,
     routes: Arc<Routes>,
-    port: u16,
+    _port: u16,
     mode: Mode,
-    incoming: IoPair<Frame>,
+    incoming: IoPair<(Frame, usize)>,
 }
 
 impl Server {
@@ -29,10 +29,10 @@ impl Server {
     pub(crate) async fn new(
         routes: Arc<Routes>,
         addr: &str,
-        port: u16,
+        _port: u16,
         mode: Mode,
     ) -> Result<Arc<Self>> {
-        Ok(TcpListener::bind(format!("{}:{}", addr, port))
+        Ok(TcpListener::bind(format!("{}:{}", addr, _port))
             .await
             .map(|inner| {
                 Arc::new(Self {
@@ -40,7 +40,7 @@ impl Server {
                     incoming: IoPair::default(),
                     inner,
                     routes,
-                    port,
+                    _port,
                     mode,
                 })
             })?)
@@ -50,14 +50,23 @@ impl Server {
         self.alive.load(Ordering::Relaxed)
     }
 
+    pub(crate) fn mode(&self) -> Mode {
+        self.mode.clone()
+    }
+
     /// Shut down the listening server
     pub(crate) fn stop(self: &Arc<Self>) {
         self.alive.fetch_and(false, Ordering::Relaxed);
     }
 
     /// Get the next available frame
-    pub(crate) async fn next(self: &Arc<Self>) -> Frame {
-        self.incoming.rx.recv().await.unwrap()
+    pub(crate) async fn next(self: &Arc<Self>) -> (Frame, Target) {
+        self.incoming
+            .rx
+            .recv()
+            .await
+            .map(|(f, t)| (f, Target::Single(t as u16)))
+            .unwrap()
     }
 
     /// Spawn a handler task for incoming connections
@@ -127,7 +136,7 @@ impl Server {
             use Packet::*;
             use PeerState::*;
             match (peer.state(), f) {
-                (Duplex, Frame(f)) | (RxOnly, Frame(f)) => self.handle_frame(f).await,
+                (Duplex, Frame(f)) | (RxOnly, Frame(f)) => self.handle_frame(peer.id, f).await,
                 (_, Hello { port }) => self.handle_hello(&src_addr, port).await,
                 (RxOnly, KeepAlive) => self.rx_keepalive(),
                 (Duplex, KeepAlive) => self.dup_keepalive(Arc::clone(&peer)),
@@ -139,8 +148,8 @@ impl Server {
     }
 
     /// Handle an incoming frame message
-    async fn handle_frame(self: &Arc<Self>, p: Frame) {
-        self.incoming.tx.send(p).await;
+    async fn handle_frame(self: &Arc<Self>, peer_id: usize, p: Frame) {
+        self.incoming.tx.send((p, peer_id)).await;
     }
 
     /// A keepalive on an RXonly connection
