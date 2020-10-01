@@ -1,7 +1,7 @@
 [package]
 name = "qaul-hubd"
-description = "A modular and configurable internet overlay router for qaul.net"
-version = "0.1.0"
+description = "A modular and easy to use internet overlay router for qaul.net"
+version = "0.2.0"
 authors = ["Katharina Fey <kookie@spacekookie>", "Leonora Tindall <nora@nora.codes>"]
 license = "AGPL-3.0-or-later"
 edition = "2018"
@@ -16,5 +16,8 @@ ratman-configure = { path = "../../ratman/configure" }
 async-std = { version = "=1.5", features = ["attributes"] }
 clap = { version = "2.0", features = ["wrap_help", "color"] }
 directories = "2.0"
+igd = "0.11"
 tracing = "0.1"
 tracing-subscriber = { version = "0.2", features = ["fmt", "env-filter"] }
+pnet = "0.26"
+ipnetwork = "0.16"

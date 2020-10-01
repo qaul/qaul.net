@@ -14,13 +14,18 @@ pub(crate) struct Config {
     pub(crate) addr: String,
     /// What port to bind on
     pub(crate) port: u16,
+    /// Disable upnp port forwarding
+    pub(crate) no_upnp: bool,
+    /// Disable multicast local discovery
+    pub(crate) no_multicast: bool,
 }
 
 impl Config {
     /// Consume the application config into a fully initialised router
     pub(crate) fn into_router(self) -> Arc<Router> {
         let mut buf = String::new();
-        let mut f = File::open(self.peers).expect("Peers configuration not found!");
+        let mut f = File::open(self.peers)
+            .unwrap_or_else(|_| crate::elog("Peers configuration not found!", 128));
         f.read_to_string(&mut buf).unwrap();
 
         let ep = Endpoint {
@@ -30,7 +35,10 @@ impl Config {
                 port: self.port,
                 peers: buf
                     .split("\n")
-                    .map(|s| s.parse().expect("Invalid peer port-address format!"))
+                    .map(|s| {
+                        s.parse()
+                            .unwrap_or_else(|_| crate::elog("Invalid peer port-address format!", 2))
+                    })
                     .collect(),
                 dynamic: false,
             },
@@ -50,8 +58,8 @@ impl Config {
 
 pub(crate) fn cli<'a>() -> App<'a, 'a> {
     App::new("qaul-hubd")
-        .about("Routing and state handling daemon for qaul.net and ratman networks")
-        .version("0.1.0")
+        .about(env!("CARGO_PKG_DESCRIPTION"))
+        .version(env!("CARGO_PKG_VERSION"))
         .arg(
             Arg::with_name("PEERS_PATH")
                 .short("p")
@@ -89,6 +97,15 @@ pub(crate) fn cli<'a>() -> App<'a, 'a> {
                 .value_name("PORT")
                 .help("The hub's bound socket port"),
         )
+        .arg(
+            Arg::with_name("NO_UPNP")
+                .long("no-upnp")
+                .help("Disable automatic UPNP port forwarding")
+        ).arg(
+            Arg::with_name("NO_UDP_DISCOVER")
+                .long("no-udp-discover")
+                .help("Prevent qaul-hubd from registering a multicast address to find other clients on the same network")
+        )
 }
 
 /// Generate an application config from arguments and env vars
@@ -124,5 +141,7 @@ pub(crate) fn match_fold<'a>(app: App<'a, 'a>) -> Config {
                 .ok()
                 .map(|s| str::parse(&s).unwrap()))
             .unwrap_or(9001),
+        no_upnp: m.is_present("NO_UPNP"),
+        no_multicast: m.is_present("NO_UDP_DISCOVER"),
     }
 }
