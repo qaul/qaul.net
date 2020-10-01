@@ -103,18 +103,19 @@ impl Server {
             }
         };
 
-        // Find the correct peer or create a temporary one.  If we
-        // create a temporary one, we will need to upgrade it before
-        // being able to accept valid connections
-        let pid = self
-            .routes
-            .find_via_src(&src_addr)
-            .await
-            .unwrap_or_else(|| task::block_on(async { self.routes.add_via_src(&src_addr).await }));
-        let peer = self.routes.get_peer(pid).await.unwrap();
-
-        // Loop forever
         loop {
+            // Find the correct peer or create a temporary one.  If we
+            // create a temporary one, we will need to upgrade it
+            // before being able to accept valid connections.  We
+            // update the peer on every iteration of the loop because
+            // a previous packet might have upgraded the connection.
+            let pid = self
+                .routes
+                .find_via_src(&src_addr)
+                .await
+                .unwrap_or_else(|| task::block_on(async { self.routes.add_via_src(&src_addr).await }));
+            let peer = self.routes.get_peer(pid).await.unwrap();
+            
             let mut fb = PacketBuilder::new(&mut stream);
             if let Err(_) = fb.parse().await {
                 error!("Failed to read from incoming packet stream; dropping connection!");
@@ -139,8 +140,8 @@ impl Server {
                 (Duplex, Frame(f)) | (RxOnly, Frame(f)) => self.handle_frame(peer.id, f).await,
                 (_, Hello { port }) => self.handle_hello(&src_addr, port).await,
                 (RxOnly, KeepAlive) => self.rx_keepalive(),
-                (Duplex, KeepAlive) => self.dup_keepalive(Arc::clone(&peer)),
-                _ => todo!(),
+                (Duplex, KeepAlive) | (TxOnly, KeepAlive) => self.dup_keepalive(Arc::clone(&peer)),
+                (state, packet) => panic!(format!("state={:?}, packte={:?}", state, packet)),
             }
         }
 
@@ -205,7 +206,7 @@ impl Server {
 
     /// Wait n seconds and then reply to a keep-alive
     async fn send_keepalive(peer: Arc<Peer>) {
-        task::sleep(Duration::from_secs(10)).await;
+        task::sleep(Duration::from_secs(2)).await;
         peer.send(Packet::KeepAlive).await;
     }
 }

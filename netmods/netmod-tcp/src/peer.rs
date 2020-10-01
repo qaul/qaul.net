@@ -61,6 +61,7 @@ pub(crate) type DstAddr = SocketAddr;
 type LockedStream = Arc<RwLock<Option<TcpStream>>>;
 
 /// Encode the different states a `Peer` can be in
+#[derive(Debug)]
 pub(crate) enum PeerState {
     /// Only a receiving channel exists
     ///
@@ -233,11 +234,12 @@ impl Peer {
     /// it's impossible for the other side to associate an incoming
     /// stream to a destination stream.
     pub(crate) fn introduce(self: Arc<Self>, port: u16) {
-        let _self = Arc::clone(&self);
+        // let _self = Arc::clone(&self);
+        // if !_self.get_intro() {
+        //     _self.introduce_blocking(port).await
+        // }
         task::spawn(async move {
-            if !_self.get_intro() {
-                _self.introduce_blocking(port).await
-            }
+            self.send(Packet::Hello { port }).await
         });
     }
 
@@ -281,7 +283,7 @@ impl Peer {
                     );
 
                     // FIXME: Make this configurable
-                    task::sleep(Duration::from_secs(20)).await;
+                    task::sleep(Duration::from_secs(5)).await;
                     ctr += 1;
                     continue;
                 }
