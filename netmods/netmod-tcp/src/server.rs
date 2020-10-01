@@ -85,6 +85,7 @@ impl Server {
                     break;
                 }
 
+                trace!("Accepting new connection...");
                 let s = Arc::clone(&s);
                 task::spawn(async move { s.accept_connection(stream).await });
             }
@@ -113,9 +114,11 @@ impl Server {
                 .routes
                 .find_via_src(&src_addr)
                 .await
-                .unwrap_or_else(|| task::block_on(async { self.routes.add_via_src(&src_addr).await }));
+                .unwrap_or_else(|| {
+                    task::block_on(async { self.routes.add_via_src(&src_addr).await })
+                });
             let peer = self.routes.get_peer(pid).await.unwrap();
-            
+
             let mut fb = PacketBuilder::new(&mut stream);
             if let Err(_) = fb.parse().await {
                 error!("Failed to read from incoming packet stream; dropping connection!");
@@ -138,35 +141,18 @@ impl Server {
             use PeerState::*;
             match (peer.state(), f) {
                 (Duplex, Frame(f)) | (RxOnly, Frame(f)) => self.handle_frame(peer.id, f).await,
-                (_, Hello { port }) => self.handle_hello(&src_addr, port).await,
-                (RxOnly, KeepAlive) => self.rx_keepalive(),
-                (Duplex, KeepAlive) | (TxOnly, KeepAlive) => self.dup_keepalive(Arc::clone(&peer)),
+                (state, Hello { port }) => self.handle_hello(peer.id, state, &src_addr, port).await,
                 (state, packet) => panic!(format!("state={:?}, packte={:?}", state, packet)),
             }
         }
 
-        trace!("Exiting connetion work-loop; was there a connection drop?");
+        self.routes.purge_src(src_addr).await;
+        info!("Exiting connetion work-loop; was there a connection drop?");
     }
 
     /// Handle an incoming frame message
     async fn handle_frame(self: &Arc<Self>, peer_id: usize, p: Frame) {
         self.incoming.tx.send((p, peer_id)).await;
-    }
-
-    /// A keepalive on an RXonly connection
-    ///
-    /// It means that currently the TX connection is down.  This
-    /// function can't really do anything about that though, so we log
-    /// the incident and hope that we will re-establish a connection
-    /// soon.
-    fn rx_keepalive(self: &Arc<Self>) {
-        warn!("Received a Keep-alive, but don't have TX link! Waiting for introducer to do it's job...");
-    }
-
-    /// A keepalive on a valid duplex connection
-    fn dup_keepalive(self: &Arc<Self>, peer: Arc<Peer>) {
-        trace!("Receiving keep-alive and queueing reply!");
-        task::spawn(async move { Self::send_keepalive(peer).await });
     }
 
     /// Handle an incoming HELLO message on Tx, or Rx only connections
@@ -176,37 +162,59 @@ impl Server {
     /// knowing it before (RxOnly).  If the node is running in dynamic
     /// mode, check if the peer is in the set of "theoretically known
     /// peers" before accepting the hello.
-    async fn handle_hello(self: &Arc<Self>, src_addr: &SourceAddr, port: u16) {
-        let maybe_id = self.routes.find_via_srcport(src_addr, port).await;
+    async fn handle_hello(
+        self: &Arc<Self>,
+        rx_peer: usize,
+        state: PeerState,
+        src: &SourceAddr,
+        port: u16,
+    ) {
+        let maybe_id = self.routes.find_via_srcport(src, port).await;
         let upm = "Received HELLO from unknown peer.";
 
-        match (self.mode, maybe_id) {
-            (Mode::Static, None) => {
+        use PeerState::*;
+        let _self = Arc::clone(self);
+        match (state, self.mode, maybe_id) {
+            // A peer we didn't know before, while running in static mode
+            (RxOnly, Mode::Static, None) => {
                 info!("{} Running STATIC: dropping packet!", upm);
                 return;
             }
-            (Mode::Dynamic, None) => {
+            // A peer we didn't know before, while running in dynamic mode
+            (RxOnly, Mode::Dynamic, None) => {
                 trace!("{} Running DYNAMIC: establishing reverse connection!", upm);
-                let id = self.routes.find_via_src(src_addr).await.unwrap();
-                self.routes.upgrade(id, port).await;
+                self.routes.upgrade(rx_peer, port).await;
+
+                let id = self.routes.find_via_srcport(src, port).await.unwrap();
+                self.send_hello(id);
             }
-            (mode, Some(id)) => {
-                trace!(
-                    "[Mode: {}] Received HELLO from known peer; responding with keep-alive",
-                    match mode {
-                        Mode::Dynamic => "dynamic",
-                        Mode::Static => "static",
-                    }
-                );
-                let peer = self.routes.get_peer(id).await.unwrap();
-                task::spawn(async move { Self::send_keepalive(peer).await });
+            // Reverse connection of a peer we have known before
+            (RxOnly, _, Some(_)) => {
+                self.routes.upgrade(rx_peer, port).await;
+                dbg!();
+                let id = self.routes.find_via_srcport(src, port).await.unwrap();
+                dbg!();
+                self.send_hello(id);
             }
+            (TxOnly, _, Some(id)) => {
+                self.routes.add_src(id, *src).await;
+                self.send_hello(id);
+            }
+            (link, mode, id) => panic!("{:?} {:?} {:?}", link, mode, id),
         }
     }
 
-    /// Wait n seconds and then reply to a keep-alive
-    async fn send_keepalive(peer: Arc<Peer>) {
-        task::sleep(Duration::from_secs(2)).await;
-        peer.send(Packet::KeepAlive).await;
+    fn send_hello(self: &Arc<Self>, id: usize) {
+        let s = Arc::clone(self);
+        dbg!();
+        task::spawn(async move {
+            dbg!();
+            let peer = s.routes.get_peer(id).await.unwrap();
+            dbg!();
+            task::sleep(Duration::from_secs(2)).await;
+            dbg!();
+            peer.send(Packet::Hello { port: s._port }).await;
+            dbg!();
+        });
     }
 }

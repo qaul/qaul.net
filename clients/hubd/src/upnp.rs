@@ -47,18 +47,18 @@ fn find_local_ip() -> Option<Ipv4Addr> {
 }
 
 pub(crate) fn open_port(port: u16) {
-    let gw = search_gateway(Default::default()).unwrap();
+    // let gw = search_gateway(Default::default()).unwrap();
 
-    let ip = gw.get_external_ip().unwrap();
-    trace!("Publicly accessible via: {}", ip);
+    // let ip = gw.get_external_ip().unwrap();
+    // trace!("Publicly accessible via: {}", ip);
 
-    let local_ip =
-        find_local_ip().unwrap_or_else(|| crate::elog("Couldn't find IP to bind to", 128));
-    trace!("Local ip: {}", local_ip);
+    // let local_ip =
+    //     find_local_ip().unwrap_or_else(|| crate::elog("Couldn't find IP to bind to", 128));
+    // trace!("Local ip: {}", local_ip);
 
-    let local_addr = SocketAddrV4::new(local_ip, 8080);
+    // let local_addr = SocketAddrV4::new(local_ip, 8080);
 
-    gw.add_port(Protocol::TCP, port, local_addr, 0, "qaul-hubd tcp driver")
-        .unwrap_or_else(|e| crate::elog(format!("{:?}", e), 128));
-    trace!("UPNP port {} opened with infinite lease!", port);
+    // gw.add_port(Protocol::TCP, port, local_addr, 0, "qaul-hubd tcp driver")
+    //     .unwrap_or_else(|e| crate::elog(format!("{:?}", e), 128));
+    // trace!("UPNP port {} opened with infinite lease!", port);
 }

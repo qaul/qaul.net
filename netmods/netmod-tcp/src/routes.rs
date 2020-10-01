@@ -62,6 +62,19 @@ impl Routes {
         self.peers.read().await.get(&id).map(|p| Arc::clone(&p))
     }
 
+    /// Find all parts of the SRC peer and delete them from the
+    /// routing table
+    pub(crate) async fn purge_src(self: &Arc<Self>, src: SourceAddr) {
+        if let Some(id) = self.find_via_src(&src).await {
+            let peers = self.peers.read().await;
+            let p = peers.get(&id).unwrap();
+            p.set_src(None);
+        }
+
+        trace!("Removing existing SRC accociation: {:?}", src);
+        self.src_map.write().await.remove(&src);
+    }
+
     /// Add a new peer to the system with a destination address
     ///
     /// This function is called when adding a peer via the static set
@@ -88,6 +101,11 @@ impl Routes {
         self.peers.write().await.insert(id, p);
         self.src_map.write().await.insert(src.clone(), id);
         id
+    }
+
+    /// For a DST peer, simply add the SRC address to the mops
+    pub(crate) async fn add_src(self: &Arc<Self>, id: usize, src: SourceAddr) {
+        self.src_map.write().await.insert(src, id);
     }
 
     /// Perform a peer lookup via source address
@@ -175,6 +193,7 @@ impl Routes {
             Some(id) => {
                 trace!("Upgrading peer {} with SRC address", id);
                 let peer = peers.get(&id).unwrap();
+                src_map.insert(src, peer.id);
                 peer.set_src(src);
             }
             // If no such peer exists, we create one with SRC and DST addresses

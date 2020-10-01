@@ -94,8 +94,6 @@ pub(crate) struct Peer {
     _run: Arc<AtomicBool>,
     /// Store packets until they can be delivered
     io: Arc<IoPair<Packet>>,
-    /// Lock this peer from re-introducing multiple times
-    introducing: Arc<AtomicBool>,
 }
 
 impl Peer {
@@ -129,15 +127,16 @@ impl Peer {
             ..Default::default()
         });
 
-        // Start introduction loop
-        Arc::clone(&p).introduce(port);
+        // Start sender loop and send a hello
         Arc::clone(&p).run_io_sender(port);
+        task::block_on(async { Arc::clone(&p).send(Packet::Hello { port }).await });
+
         return p;
     }
 
     /// Set this peer's source address
-    pub(crate) fn set_src(&self, src: SourceAddr) {
-        self.src.swap(Some(src));
+    pub(crate) fn set_src<O: Into<Option<SourceAddr>>>(&self, src: O) {
+        self.src.swap(src.into());
     }
 
     /// Stop all tasks associated with this peer
@@ -160,6 +159,60 @@ impl Peer {
         self._run.load(Ordering::Relaxed)
     }
 
+    /// Call for each packet in the output stream
+    async fn send_packet(self: &Arc<Self>, p: &Packet) -> Option<()> {
+        let mut s = self.sender.write().await;
+        match *s {
+            Some(ref mut stream) => {
+                let addr = match stream.peer_addr() {
+                    Ok(addr) => addr.to_string(),
+                    Err(_) => return None,
+                };
+
+                // Serialise the payload and pre-pend the length
+                let mut vec = serialize(p).unwrap();
+                let mut buf = vec![0; 8];
+                BigEndian::write_u64(&mut buf, vec.len() as u64);
+                buf.append(&mut vec);
+
+                // And woosh!
+                if let Err(e) = stream.write_all(&buf).await {
+                    error!("Failed to send message: {}!", e.to_string());
+                    *s = None; // We mark ourselves as missing uplink
+                    return None;
+                }
+
+                match p {
+                    Packet::Hello { .. } => trace!("Sending HELLO to {}", addr),
+                    _ => {}
+                }
+
+                Some(())
+            }
+            None => return None,
+        }
+    }
+
+    /// This function will try sending a packet, initialising the
+    /// output stream if it doesn't yet exist
+    async fn send_or_introduce(self: &Arc<Self>, p: Packet, port: u16) {
+        loop {
+            if { self.sender.write().await.is_some() } {
+                // Send the packet and re-run the loop if we failed to send
+                match self.send_packet(&p).await {
+                    Some(_) => break,
+                    None => {
+                        dbg!();
+                        continue;
+                    }
+                }
+            } else {
+                trace!("Sender is None, opening a connection first...");
+                Arc::clone(&self).introduce_blocking(port).await;
+            }
+        }
+    }
+
     /// Start an async worker to send packets to this peer
     ///
     /// The worker can be stopped after spawning by calling `stop()`.
@@ -170,53 +223,11 @@ impl Peer {
     /// back to ratman.  **FIXME**: implement this!
     pub(crate) fn run_io_sender(self: Arc<Self>, port: u16) {
         task::spawn(async move {
-            while self.alive() {
-                if let Some(packet) = self.io.rx.recv().await {
-                    // Check if the stream is still there
-                    let mut s;
-                    while self.alive() {
-                        s = self.sender.write().await;
-                        trace!("{:?}", s);
-                        
-                        if s.is_none() {
-                            // We need to drop `s` here because the
-                            // introduction loop will want to have
-                            // access to it to initialise the stream.
-                            // Otherwise we will create a deadlock!
-                            drop(s);
+            while let Some(p) = self.io.rx.recv().await {
+                self.send_or_introduce(p, port).await;
 
-                            // Run introduction again if it's not already happening
-                            if !self.get_intro() {
-                                trace!("Sending stream doesn't exist! Re-introducing...");
-                                Arc::clone(&self).introduce_blocking(port).await;                                
-                            }
-                        } else {
-                            // At this point we should have a valid stream
-                            let addr = s.as_ref().unwrap().peer_addr().unwrap().to_string();
-                            match packet {
-                                Packet::Hello { .. } => trace!("Sending HELLO to {}", addr),
-                                Packet::KeepAlive => trace!("Sending KEEP-ALIVE to {}", addr),
-                                _ => {}
-                            }
-
-                            // Serialise the payload and pre-pend the length
-                            let mut vec = serialize(&packet).unwrap();
-                            let mut buf = vec![0; 8];
-                            BigEndian::write_u64(&mut buf, vec.len() as u64);
-                            buf.append(&mut vec);
-
-                            // And woosh!
-                            if let Err(e) = s.as_mut().unwrap().write_all(&buf).await {
-                                error!("Failed to send message: {}!", e.to_string());
-                                *s = None; // We mark ourselves as missing uplink
-                                continue; // try again?
-                            }
-
-                            // If we reach this point we're good to go
-                            trace!("Successfully sent...");
-                            break;
-                        }
-                    }
+                if !self.alive() {
+                    break;
                 }
             }
 
@@ -224,26 +235,7 @@ impl Peer {
         });
     }
 
-    /// Run this Peer's initialisation sequence
-    ///
-    /// When creating a new connection, or an existing connection has
-    /// been lost, call this function to re-establish the DUPLEX link
-    /// with this peer.
-    ///
-    /// Takes it's own listening port as a parameter because otherwise
-    /// it's impossible for the other side to associate an incoming
-    /// stream to a destination stream.
-    pub(crate) fn introduce(self: Arc<Self>, port: u16) {
-        // let _self = Arc::clone(&self);
-        // if !_self.get_intro() {
-        //     _self.introduce_blocking(port).await
-        // }
-        task::spawn(async move {
-            self.send(Packet::Hello { port }).await
-        });
-    }
-
-    /// The same as `introduce()` but without spawning a new task
+    /// Loop on a connection until it could be established!
     async fn introduce_blocking(self: Arc<Self>, port: u16) {
         let id = self.id.clone();
         let dst = self.dst.clone().unwrap();
@@ -251,7 +243,6 @@ impl Peer {
         let run = Arc::clone(&self._run);
         let sender = Arc::clone(&self.sender);
         let mut ctr = 0;
-        self.intro(true);
 
         while run.load(Ordering::Relaxed) {
             let pre = match ctr {
@@ -289,12 +280,11 @@ impl Peer {
                 }
             };
 
-            trace!("Successfully connected to peer `{}`", &dst);
-            *sender.write().await = Some(s);
+            s.set_nodelay(true);
 
-            // Queue a HELLO sending and exit this loop
-            self.send(Packet::Hello { port }).await;
-            self.intro(false);
+            trace!("Successfully connected to peer `{}`", &dst);
+            let mut sender = sender.write().await;
+            *sender = Some(s);
             break;
         }
     }
@@ -316,13 +306,5 @@ impl Peer {
 
     pub(crate) fn get_dst(&self) -> Option<DstAddr> {
         self.dst.clone()
-    }
-
-    fn intro(&self, f: bool) {
-        self.introducing.swap(f, Ordering::Relaxed);
-    }
-
-    fn get_intro(&self) -> bool {
-        self.introducing.load(Ordering::Relaxed)
     }
 }
