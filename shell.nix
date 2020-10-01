@@ -22,8 +22,7 @@ stdenv.mkDerivation {
     llvmPackages.clang-unwrapped
 
     # webgui debugging and development
-    httpie
-    nodejs
+    httpie nodejs yarn
 
     # Required for the code coverage and stuff
     openssl

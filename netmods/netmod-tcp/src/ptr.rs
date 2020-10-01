@@ -4,19 +4,29 @@
 //! in this file, so we should pull it out into it's own crate at some
 //! point.  But for now...
 
-use std::cmp::PartialEq;
+use std::{ops::Deref, cmp::PartialEq};
 use std::sync::{
     atomic::{AtomicPtr, Ordering},
     Arc,
 };
 
 /// An alias for a referenced pointer
-pub(crate) type Ref<T> = Box<T>;
+pub(crate) struct Ref<T> {
+    inner: Box<Arc<T>>,
+}
+
+impl<T> Deref for Ref<T> {
+    type Target = Arc<T>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
 
 /// A safe atomic pointer wrapper
 #[derive(Clone, Debug)]
 pub(crate) struct AtomPtr<T> {
-    inner: Arc<AtomicPtr<T>>,
+    inner: Arc<AtomicPtr<Arc<T>>>,
 }
 
 // Implement Default for all T that implement default
@@ -28,17 +38,15 @@ impl<T: Default> Default for AtomPtr<T> {
 
 impl<T> PartialEq for AtomPtr<T> {
     fn eq(&self, other: &Self) -> bool {
-        let a = Box::into_raw(self.get_ref());
-        let b = Box::into_raw(other.get_ref());
-
-        a == b
+        Arc::ptr_eq(&self.get_ref().inner, &other.get_ref().inner)
     }
 }
 
 impl<T> AtomPtr<T> {
     /// Create a new atomic pointer for a type
     pub(crate) fn new(t: T) -> Self {
-        let ptr = Box::into_raw(Box::new(t));
+        let arc = Arc::new(t);
+        let ptr = Box::into_raw(Box::new(arc));
         let inner = Arc::new(AtomicPtr::from(ptr));
         Self { inner }
     }
@@ -46,14 +54,24 @@ impl<T> AtomPtr<T> {
     /// Get an immutable reference to the current value
     pub(crate) fn get_ref(&self) -> Ref<T> {
         let ptr = self.inner.load(Ordering::Relaxed);
-        unsafe { Box::from_raw(ptr) }
+        let b = unsafe { Box::from_raw(ptr) };
+
+        let arc = Arc::clone(&*b);
+        std::mem::forget(b);
+
+        Ref { inner: Box::new(arc) }
     }
 
     /// Swap the data entry with a new value, returning the old
     pub(crate) fn swap(&self, new: T) -> Ref<T> {
-        let ptr = Box::into_raw(Box::new(new));
-        let prev = self.inner.swap(ptr, Ordering::Relaxed);
-        unsafe { Box::from_raw(prev) }
+        let ptr = self.inner.load(Ordering::Relaxed);
+        self.inner.swap(ptr, Ordering::Relaxed);
+
+        let b = unsafe { Box::from_raw(ptr) };
+        let arc = Arc::clone(&*b);
+        std::mem::forget(b);
+
+        Ref { inner: Box::new(arc) }
     }
 }
 

@@ -8,6 +8,7 @@ use bincode::deserialize;
 use byteorder::{BigEndian, ByteOrder};
 use netmod::Frame;
 use serde::{Deserialize, Serialize};
+use tracing::trace;
 
 /// An internally used packet format
 #[derive(Debug, Serialize, Deserialize)]
@@ -33,23 +34,29 @@ pub(crate) struct PacketBuilder<'s> {
 impl<'s> PacketBuilder<'s> {
     /// Create a new frame builder from a stream
     pub(crate) fn new(stream: &'s mut TcpStream) -> Self {
+        tracing::warn!("Creating a parser...");
         Self { stream, data: None }
     }
 
     /// Parse incoming data and initialise the builder
     pub(crate) async fn parse(&mut self) -> io::Result<()> {
+        trace!("Starting to parse a packet!");
         let mut len_buf = [0; 8];
         self.stream.read_exact(&mut len_buf).await?;
         let len = BigEndian::read_u64(&len_buf);
 
+        trace!("Got length of {}", len);
+        
         let mut data_buf = vec![0; len as usize];
         self.stream.read_exact(&mut data_buf).await?;
         self.data = Some(data_buf);
+        trace!("Read data to buffer!");
         Ok(())
     }
 
     /// Consume the builder and maybe return a frame
     pub(crate) fn build(self) -> Option<Packet> {
+        trace!("Building packet from stream...");
         self.data.and_then(|vec| deserialize(&vec).ok())
     }
 }

@@ -93,6 +93,8 @@ pub(crate) struct Peer {
     _run: Arc<AtomicBool>,
     /// Store packets until they can be delivered
     io: Arc<IoPair<Packet>>,
+    /// Lock this peer from re-introducing multiple times
+    introducing: Arc<AtomicBool>,
 }
 
 impl Peer {
@@ -108,6 +110,7 @@ impl Peer {
         Arc::new(Self {
             id: id::next(),
             src: AtomPtr::new(Some(src)),
+            _run: Arc::new(true.into()),
             ..Default::default()
         })
     }
@@ -121,6 +124,7 @@ impl Peer {
         let p = Arc::new(Self {
             id: id::next(),
             dst: Some(dst),
+            _run: Arc::new(true.into()),
             ..Default::default()
         });
 
@@ -171,6 +175,8 @@ impl Peer {
                     let mut s;
                     while self.alive() {
                         s = self.sender.write().await;
+                        trace!("{:?}", s);
+                        
                         if s.is_none() {
                             // We need to drop `s` here because the
                             // introduction loop will want to have
@@ -178,8 +184,11 @@ impl Peer {
                             // Otherwise we will create a deadlock!
                             drop(s);
 
-                            // Run introduction again
-                            Arc::clone(&self).introduce_blocking(port).await;
+                            // Run introduction again if it's not already happening
+                            if !self.get_intro() {
+                                trace!("Sending stream doesn't exist! Re-introducing...");
+                                Arc::clone(&self).introduce_blocking(port).await;                                
+                            }
                         } else {
                             // At this point we should have a valid stream
                             let addr = s.as_ref().unwrap().peer_addr().unwrap().to_string();
@@ -203,6 +212,7 @@ impl Peer {
                             }
 
                             // If we reach this point we're good to go
+                            trace!("Successfully sent...");
                             break;
                         }
                     }
@@ -224,7 +234,11 @@ impl Peer {
     /// stream to a destination stream.
     pub(crate) fn introduce(self: Arc<Self>, port: u16) {
         let _self = Arc::clone(&self);
-        task::spawn(async move { _self.introduce_blocking(port).await });
+        task::spawn(async move {
+            if !_self.get_intro() {
+                _self.introduce_blocking(port).await
+            }
+        });
     }
 
     /// The same as `introduce()` but without spawning a new task
@@ -235,9 +249,9 @@ impl Peer {
         let run = Arc::clone(&self._run);
         let sender = Arc::clone(&self.sender);
         let mut ctr = 0;
+        self.intro(true);
 
         while run.load(Ordering::Relaxed) {
-            ctr += 1; // increment the attempt counter
             let pre = match ctr {
                 0 => "".into(),
                 n => format!("[retry #{}]", n),
@@ -268,6 +282,7 @@ impl Peer {
 
                     // FIXME: Make this configurable
                     task::sleep(Duration::from_secs(20)).await;
+                    ctr += 1;
                     continue;
                 }
             };
@@ -277,6 +292,7 @@ impl Peer {
 
             // Queue a HELLO sending and exit this loop
             self.send(Packet::Hello { port }).await;
+            self.intro(false);
             break;
         }
     }
@@ -298,5 +314,13 @@ impl Peer {
 
     pub(crate) fn get_dst(&self) -> Option<DstAddr> {
         self.dst.clone()
+    }
+
+    fn intro(&self, f: bool) {
+        self.introducing.swap(f, Ordering::Relaxed);
+    }
+
+    fn get_intro(&self) -> bool {
+        self.introducing.load(Ordering::Relaxed)
     }
 }

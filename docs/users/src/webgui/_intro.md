@@ -1,6 +1,7 @@
-# Web GUI
+# qaul-emberweb
 
-The **web GUI** is the **HTML5 GUI** for qaul.net. It is 
-built using [EmberJS](https://emberjs.com/).
+This is a web client written in ember.js.  It's meant to be installed
+on a communal computer and can provide multiple users access to an
+underlying qaul.net instance.
 
-* [Install EmberJS & Test Web GUI](install.md)
+Requires a running `qaul-hubd` instance to connect to.

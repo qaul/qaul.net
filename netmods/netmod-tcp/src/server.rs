@@ -36,7 +36,7 @@ impl Server {
             .await
             .map(|inner| {
                 Arc::new(Self {
-                    alive: Default::default(),
+                    alive: Arc::new(true.into()),
                     incoming: IoPair::default(),
                     inner,
                     routes,
@@ -198,7 +198,7 @@ impl Server {
                     }
                 );
                 let peer = self.routes.get_peer(id).await.unwrap();
-                task::spawn(async move { Self::send_keepalive(peer) });
+                task::spawn(async move { Self::send_keepalive(peer).await });
             }
         }
     }
