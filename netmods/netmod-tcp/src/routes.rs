@@ -195,6 +195,7 @@ impl Routes {
                 let peer = peers.get(&id).unwrap();
                 src_map.insert(src, peer.id);
                 peer.set_src(src);
+                peer.id
             }
             // If no such peer exists, we create one with SRC and DST addresses
             None => {
@@ -205,6 +206,7 @@ impl Routes {
                 src_map.insert(src, p.id);
                 dst_map.insert(dst, p.id);
                 peers.insert(p.id, p);
+                peer.id
             }
         }
     }

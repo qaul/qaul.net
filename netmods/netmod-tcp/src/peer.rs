@@ -150,7 +150,7 @@ impl Peer {
             (Some(_), Some(_)) => PeerState::Duplex,
             (Some(_), None) => PeerState::RxOnly,
             (None, Some(_)) => PeerState::TxOnly,
-            (None, None) => PeerState::Invalid,
+            (None, None) => unreachable!(),
         }
     }
 
@@ -166,7 +166,10 @@ impl Peer {
             Some(ref mut stream) => {
                 let addr = match stream.peer_addr() {
                     Ok(addr) => addr.to_string(),
-                    Err(_) => return None,
+                    Err(_) => {
+                        std::mem::swap(&mut *s, &mut None);
+                        return None;
+                    }
                 };
 
                 // Serialise the payload and pre-pend the length
@@ -178,7 +181,10 @@ impl Peer {
                 // And woosh!
                 if let Err(e) = stream.write_all(&buf).await {
                     error!("Failed to send message: {}!", e.to_string());
-                    *s = None; // We mark ourselves as missing uplink
+
+                    // We mark ourselves as missing uplink
+                    std::mem::swap(&mut *s, &mut None);
+                    
                     return None;
                 }
 
@@ -189,7 +195,7 @@ impl Peer {
 
                 Some(())
             }
-            None => return None,
+            None => unreachable!(),
         }
     }
 

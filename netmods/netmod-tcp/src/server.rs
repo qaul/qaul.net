@@ -140,9 +140,9 @@ impl Server {
             use Packet::*;
             use PeerState::*;
             match (peer.state(), f) {
-                (Duplex, Frame(f)) | (RxOnly, Frame(f)) => self.handle_frame(peer.id, f).await,
+                (_, Frame(f)) => self.handle_frame(peer.id, f).await,
                 (state, Hello { port }) => self.handle_hello(peer.id, state, &src_addr, port).await,
-                (state, packet) => panic!(format!("state={:?}, packte={:?}", state, packet)),
+                (state, packet) => panic!(format!("state={:?}, packet={:?}", state, packet)),
             }
         }
 
@@ -176,24 +176,21 @@ impl Server {
         let _self = Arc::clone(self);
         match (state, self.mode, maybe_id) {
             // A peer we didn't know before, while running in static mode
-            (RxOnly, Mode::Static, None) => {
+            (_, Mode::Static, None) => {
                 info!("{} Running STATIC: dropping packet!", upm);
                 return;
             }
             // A peer we didn't know before, while running in dynamic mode
             (RxOnly, Mode::Dynamic, None) => {
                 trace!("{} Running DYNAMIC: establishing reverse connection!", upm);
-                self.routes.upgrade(rx_peer, port).await;
-
-                let id = self.routes.find_via_srcport(src, port).await.unwrap();
+                let id = self.routes.upgrade(rx_peer, port).await;
+                trace!("Sending a hello...");
                 self.send_hello(id);
             }
             // Reverse connection of a peer we have known before
-            (RxOnly, _, Some(_)) => {
-                self.routes.upgrade(rx_peer, port).await;
-                dbg!();
-                let id = self.routes.find_via_srcport(src, port).await.unwrap();
-                dbg!();
+            (RxOnly, _, Some(id)) => {
+                let id = self.routes.upgrade(rx_peer, port).await;
+                trace!("Sending a hello...");
                 self.send_hello(id);
             }
             (TxOnly, _, Some(id)) => {
@@ -206,15 +203,10 @@ impl Server {
 
     fn send_hello(self: &Arc<Self>, id: usize) {
         let s = Arc::clone(self);
-        dbg!();
         task::spawn(async move {
-            dbg!();
             let peer = s.routes.get_peer(id).await.unwrap();
-            dbg!();
             task::sleep(Duration::from_secs(2)).await;
-            dbg!();
             peer.send(Packet::Hello { port: s._port }).await;
-            dbg!();
         });
     }
 }
