@@ -23,16 +23,15 @@ async fn main() {
 
     let app = cfg::cli();
     let cfg = cfg::match_fold(app);
-    if upnp::open_port(cfg.port).is_none() {
-        error!("Failed to open UPNP port; your router probably doesn't support it...");
-    }
-
-    // let _state = State::new(&cfg).await;
+    let _state = State::new(&cfg).await;
 
     // !no_upnp means upnp has _not_ been disabled
-    // if !cfg.no_upnp {
-    // }
+    if !cfg.no_upnp {
+        if upnp::open_port(cfg.port).is_none() {
+            error!("Failed to open UPNP port; your router probably doesn't support it...");
+        }
+    }
 
-    // // Never return the main thread or it all dies
-    // let _: () = future::poll_fn(|_| Poll::Pending).await;
+    // Never return the main thread or it all dies
+    let _: () = future::poll_fn(|_| Poll::Pending).await;
 }

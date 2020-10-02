@@ -220,9 +220,10 @@ impl Server {
 
         let s = Arc::clone(self);
         task::spawn(async move {
-            let peer = s.routes.get_peer(id).await.unwrap();
-            task::sleep(Duration::from_secs(2)).await;
-            peer.send(Packet::Hello { port: s._port }).await;
+            if let Some(peer) = s.routes.get_peer(id).await {
+                task::sleep(Duration::from_secs(2)).await;
+                peer.send(Packet::Hello { port: s._port }).await;
+            }
         });
     }
 }
