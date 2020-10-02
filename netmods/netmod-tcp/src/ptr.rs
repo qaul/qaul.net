@@ -4,11 +4,11 @@
 //! in this file, so we should pull it out into it's own crate at some
 //! point.  But for now...
 
-use std::{ops::Deref, cmp::PartialEq};
 use std::sync::{
     atomic::{AtomicPtr, Ordering},
     Arc,
 };
+use std::{cmp::PartialEq, ops::Deref};
 
 /// An alias for a referenced pointer
 pub(crate) struct Ref<T> {
@@ -59,7 +59,9 @@ impl<T> AtomPtr<T> {
         let arc = Arc::clone(&*b);
         std::mem::forget(b);
 
-        Ref { inner: Box::new(arc) }
+        Ref {
+            inner: Box::new(arc),
+        }
     }
 
     /// Swap the data entry with a new value, returning the old
@@ -71,7 +73,9 @@ impl<T> AtomPtr<T> {
         let arc = Arc::clone(&*b);
         std::mem::forget(b);
 
-        Ref { inner: Box::new(arc) }
+        Ref {
+            inner: Box::new(arc),
+        }
     }
 }
 

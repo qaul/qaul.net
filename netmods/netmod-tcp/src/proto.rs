@@ -1,5 +1,6 @@
 //! TCP internal protocol used to share connection state
 
+use crate::LinkType;
 use async_std::{
     io::{self, prelude::ReadExt},
     net::TcpStream,
@@ -20,7 +21,7 @@ pub(crate) enum Packet {
     /// network we create reverse connections.  When establishing a
     /// connection, the hello message contains the port which is
     /// swapped into the source address to connect to.
-    Hello { port: u16 },
+    Hello { port: u16, _type: LinkType },
     /// Response to a Hello on the sending stream
     Ack,
     /// An actual data packet

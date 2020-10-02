@@ -11,10 +11,10 @@
 //! this table, and introduced to.  Once a peer worker has been
 //! spawned, it will make sure the duplex link is never dropped.
 
-use crate::{DstAddr, Peer, SourceAddr};
+use crate::{DstAddr, LinkType, LockedStream, Peer, SourceAddr};
 use async_std::sync::{Arc, RwLock};
 use std::collections::BTreeMap;
-use tracing::trace;
+use tracing::{trace, warn};
 
 /// Routing table for local IP scope
 #[derive(Clone, Debug, Default)]
@@ -79,8 +79,8 @@ impl Routes {
     ///
     /// This function is called when adding a peer via the static set
     /// of peers to connect to.
-    pub(crate) async fn add_via_dst(self: &Arc<Self>, dst: DstAddr) -> usize {
-        let p = Peer::open(dst.clone(), self.port);
+    pub(crate) async fn add_via_dst(self: &Arc<Self>, dst: DstAddr, _type: LinkType) -> usize {
+        let p = Peer::open(dst.clone(), self.port, _type);
         let id = p.id;
 
         self.peers.write().await.insert(id, p);
@@ -165,7 +165,12 @@ impl Routes {
     ///    This indicates some bad state and we panic.  This _should_
     ///    never happen, but might when calling this function in the
     ///    wrong position in the accept loop.
-    pub(crate) async fn upgrade(self: &Arc<Self>, id: usize, port: u16) -> usize {
+    pub(crate) async fn upgrade(
+        self: &Arc<Self>,
+        id: usize,
+        port: u16,
+        stream: Option<LockedStream>,
+    ) -> usize {
         let mut peers = self.peers.write().await;
         let mut src_map = self.src_map.write().await;
         let mut dst_map = self.dst_map.write().await;
@@ -191,6 +196,10 @@ impl Routes {
             // If a peer with the implied DST address exists, we drop the
             // SRC peer, and upgrade this to a duplex connection.
             Some(id) => {
+                if stream.is_some() {
+                    warn!("An outgoing stream exists for a LIMITED incoming stream! ignoring...");
+                }
+
                 trace!("Upgrading peer {} with SRC address", id);
                 let peer = peers.get(&id).unwrap();
                 src_map.insert(src, peer.id);
@@ -199,8 +208,11 @@ impl Routes {
             }
             // If no such peer exists, we create one with SRC and DST addresses
             None => {
-                let p = Peer::open(dst, port);
+                let p = Peer::open(dst, port, LinkType::Bidirect);
                 p.set_src(src);
+                if let Some(s) = stream {
+                    p.set_stream(s).await;
+                }
 
                 // Insert peer into lookup tables
                 src_map.insert(src, p.id);

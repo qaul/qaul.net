@@ -15,13 +15,14 @@ pub(crate) use peer::{DstAddr, Peer, PeerState, SourceAddr};
 pub(crate) use proto::{Packet, PacketBuilder};
 pub(crate) use ptr::AtomPtr;
 pub(crate) use routes::Routes;
-pub(crate) use server::Server;
+pub(crate) use server::{LockedStream, Server};
 
 use async_std::sync::Arc;
 use async_trait::async_trait;
 use netmod::{self, Endpoint as EndpointExt, Frame, Target};
+use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
-use tracing::info;
+use tracing::{error, info};
 
 /// Define the runtime mode for this endpount
 ///
@@ -31,6 +32,31 @@ use tracing::info;
 pub enum Mode {
     Static,
     Dynamic,
+}
+
+/// Specify the conneciton types used by this node
+///
+/// By default netmod-tcp tries to establish bi-directional
+/// connections, meaning that two nodes each have a dedicated
+/// transmission (tx) and receiving (rx) channels.  However on some
+/// networks this isn't possible.  While `Bidirect` is a good default,
+/// it's possible to override this behaviour.
+///
+/// `Limited` will open connections to peers with a special flag that
+/// makes it use a different reverse-channel strategy.  The server
+/// won't try to create full reverse channels, and instead use the
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub enum LinkType {
+    /// Default connection type
+    Bidirect,
+    /// Fallback connection type
+    Limited,
+}
+
+impl Default for LinkType {
+    fn default() -> Self {
+        Self::Bidirect
+    }
 }
 
 #[derive(Clone)]
@@ -68,9 +94,28 @@ impl Endpoint {
     /// connect to it.  Connections might not be recipricated if the
     /// peer doesn't know the local IP or is rejecting unknown
     /// connections.
-    pub async fn add_peers<I: Into<SocketAddr>>(&self, peers: Vec<I>) -> Result<()> {
-        for peer in peers.into_iter() {
-            self.routes.add_via_dst(peer.into()).await;
+    pub async fn add_peers(&self, peers: Vec<String>) -> Result<()> {
+        for p in peers.into_iter() {
+            let mut parts: Vec<_> = p.split(|x| x == ' ').collect();
+            let _type = parts.remove(1);
+            let peer = match parts[0].parse().ok() {
+                Some(s) => s,
+                None => {
+                    error!("Failed to parse peer info `{}`", parts[0]);
+                    continue;
+                }
+            };
+
+            self.routes
+                .add_via_dst(
+                    peer,
+                    if _type == "limited" {
+                        LinkType::Limited
+                    } else {
+                        LinkType::Bidirect
+                    },
+                )
+                .await;
         }
 
         Ok(())

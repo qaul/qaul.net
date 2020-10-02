@@ -27,7 +27,7 @@
 //! channel, which means they will return immediately, even if the
 //! connection is currently down.
 
-use crate::{AtomPtr, IoPair, Packet, PacketBuilder};
+use crate::{AtomPtr, IoPair, LinkType, LockedStream, Packet, PacketBuilder};
 use async_std::{
     future::timeout,
     io::prelude::WriteExt,
@@ -58,9 +58,6 @@ pub(crate) type SourceAddr = SocketAddr;
 /// Address to which packets are sent
 pub(crate) type DstAddr = SocketAddr;
 
-/// A thread-safe locked sending stream
-type LockedStream = Arc<RwLock<Option<TcpStream>>>;
-
 /// Encode the different states a `Peer` can be in
 #[derive(Debug)]
 pub(crate) enum PeerState {
@@ -89,7 +86,9 @@ pub(crate) struct Peer {
     /// Peer destination address
     dst: Option<DstAddr>,
     /// Sending stream for this peer (if it existst)
-    sender: LockedStream,
+    sender: AtomPtr<LockedStream>,
+    /// The type of link this maintains
+    _type: LinkType,
     /// Secret run condition
     #[doc(hidden)]
     _run: Arc<AtomicBool>,
@@ -121,17 +120,18 @@ impl Peer {
     /// worker that will try to establish a connection to the peer,
     /// exiting until `stop()` is called on this peer
     #[tracing::instrument(level = "trace")]
-    pub(crate) fn open(dst: DstAddr, port: u16) -> Arc<Self> {
+    pub(crate) fn open(dst: DstAddr, port: u16, _type: LinkType) -> Arc<Self> {
         let p = Arc::new(Self {
             id: id::next(),
             dst: Some(dst),
             _run: Arc::new(true.into()),
+            _type,
             ..Default::default()
         });
 
         // Start sender loop and send a hello
         Arc::clone(&p).run_io_sender(port);
-        task::block_on(async { Arc::clone(&p).send(Packet::Hello { port }).await });
+        task::block_on(async { Arc::clone(&p).send(Packet::Hello { port, _type }).await });
 
         return p;
     }
@@ -139,6 +139,10 @@ impl Peer {
     /// Set this peer's source address
     pub(crate) fn set_src<O: Into<Option<SourceAddr>>>(&self, src: O) {
         self.src.swap(src.into());
+    }
+
+    pub(crate) async fn set_stream(&self, s: LockedStream) {
+        self.sender.swap(s);
     }
 
     /// Stop all tasks associated with this peer
@@ -156,6 +160,11 @@ impl Peer {
         }
     }
 
+    /// Get the type for this link
+    pub(crate) fn link_type(&self) -> LinkType {
+        self._type
+    }
+
     /// Internal utility to verify that this peer is still alive
     pub(crate) fn alive(&self) -> bool {
         self._run.load(Ordering::Relaxed)
@@ -163,7 +172,8 @@ impl Peer {
 
     /// Call for each packet in the output stream
     async fn send_packet(self: &Arc<Self>, p: &Packet) -> Option<()> {
-        let mut s = self.sender.write().await;
+        let r = self.sender.get_ref();
+        let mut s = r.write().await;
         match *s {
             Some(ref mut stream) => {
                 let addr = match stream.peer_addr() {
@@ -203,7 +213,8 @@ impl Peer {
     async fn wait_for_ack(self: Arc<Self>) {
         let t = timeout(Duration::from_secs(10), async {
             loop {
-                let mut s = self.sender.write().await;
+                let r = self.sender.get_ref();
+                let mut s = r.write().await;
                 if s.is_none() {
                     break;
                 }
@@ -216,7 +227,6 @@ impl Peer {
                             _ => error!("Invalid data (only ACKs)!"),
                         },
                         _ => {
-                            let mut s = self.sender.write().await;
                             std::mem::swap(&mut *s, &mut None);
                             error!("Failed to read ACK from sender stream");
                         }
@@ -238,7 +248,8 @@ impl Peer {
             Ok(_) => {}
             Err(_) => {
                 // Remove the stream because it's probably dead
-                let mut s = self.sender.write().await;
+                let _ref = self.sender.get_ref();
+                let mut s = _ref.write().await;
                 std::mem::swap(&mut *s, &mut None);
             }
         }
@@ -248,7 +259,7 @@ impl Peer {
     /// output stream if it doesn't yet exist
     async fn send_or_introduce(self: &Arc<Self>, p: Packet, port: u16) {
         loop {
-            if { self.sender.read().await.is_some() } {
+            if { self.sender.get_ref().read().await.is_some() } {
                 // Send the packet and re-run the loop if we failed to send
                 match self.send_packet(&p).await {
                     Some(_) => break,
@@ -293,7 +304,7 @@ impl Peer {
         let dst = self.dst.clone().unwrap();
 
         let run = Arc::clone(&self._run);
-        let sender = Arc::clone(&self.sender);
+        let sender = Arc::clone(&self.sender.get_ref());
         let mut ctr = 0;
 
         while run.load(Ordering::Relaxed) {

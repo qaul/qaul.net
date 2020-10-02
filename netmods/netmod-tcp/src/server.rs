@@ -1,22 +1,25 @@
 //! TCP incoming connection server
 
-use crate::{IoPair, Mode, Packet, PacketBuilder, Peer, PeerState, Result, Routes, SourceAddr};
+use crate::{
+    IoPair, LinkType, Mode, Packet, PacketBuilder, Peer, PeerState, Result, Routes, SourceAddr,
+};
 use async_std::{
     io::prelude::*,
     net::{TcpListener, TcpStream},
     stream::StreamExt,
-    sync::Mutex,
+    sync::{Arc, RwLock},
     task,
 };
 use netmod::{Frame, Target};
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
-use tracing::{error, info, trace, warn};
+use tracing::{debug, error, info, trace, warn};
 
-type LockedStream = Arc<Mutex<TcpStream>>;
+pub(crate) type LockedStream = Arc<RwLock<Option<TcpStream>>>;
+
+fn locked_stream(s: TcpStream) -> LockedStream {
+    Arc::new(RwLock::new(Some(s)))
+}
 
 /// The listening server part of the tcp driver
 pub(crate) struct Server {
@@ -91,7 +94,7 @@ impl Server {
 
                 trace!("Accepting new connection...");
                 let s = Arc::clone(&s);
-                task::spawn(async move { s.accept_connection(Arc::new(Mutex::new(stream))).await });
+                task::spawn(async move { s.accept_connection(locked_stream(stream)).await });
             }
 
             info!("Terminating tcp accept loop!");
@@ -100,7 +103,7 @@ impl Server {
 
     /// loop over a stream of incoming data
     async fn accept_connection(self: Arc<Self>, stream: LockedStream) {
-        let src_addr = match stream.lock().await.peer_addr() {
+        let src_addr = match stream.write().await.as_mut().unwrap().peer_addr() {
             Ok(a) => a,
             Err(_) => {
                 error!("Missing peer addr in stream; exiting!");
@@ -124,9 +127,9 @@ impl Server {
             let peer = self.routes.get_peer(pid).await.unwrap();
 
             let f = {
-                let mut stream = stream.lock().await;
+                let mut stream = stream.write().await;
 
-                let mut fb = PacketBuilder::new(&mut stream);
+                let mut fb = PacketBuilder::new(stream.as_mut().unwrap());
                 if let Err(_) = fb.parse().await {
                     error!("Failed to read from incoming packet stream; dropping connection!");
                     break;
@@ -149,8 +152,8 @@ impl Server {
             use PeerState::*;
             match (peer.state(), f) {
                 (_, Frame(f)) => self.handle_frame(peer.id, f).await,
-                (state, Hello { port }) => {
-                    self.handle_hello(peer.id, state, &src_addr, port, Arc::clone(&stream))
+                (state, Hello { port, _type }) => {
+                    self.handle_hello(peer.id, state, &src_addr, port, _type, Arc::clone(&stream))
                         .await
                 }
                 (state, packet) => panic!(format!("state={:?}, packet={:?}", state, packet)),
@@ -179,29 +182,40 @@ impl Server {
         state: PeerState,
         src: &SourceAddr,
         port: u16,
+        _type: LinkType,
         stream: LockedStream,
     ) {
         let maybe_id = self.routes.find_via_srcport(src, port).await;
         let upm = "Received HELLO from unknown peer.";
+
+        let s = match _type {
+            // This connection needs to be established as the
+            // reverse channel on this stream
+            LinkType::Limited => {
+                debug!("Receiving a limited incoming connection...");
+                Some(Arc::clone(&stream))
+            }
+            // This is the default outgoing stream
+            LinkType::Bidirect => None,
+        };
 
         use PeerState::*;
         let _self = Arc::clone(self);
         match (state, self.mode, maybe_id) {
             // A peer we didn't know before, while running in static mode
             (_, Mode::Static, None) => {
-                info!("{} Running STATIC: dropping packet!", upm);
+                debug!("{} Running STATIC: dropping packet!", upm);
                 return;
             }
             // A peer we didn't know before, while running in dynamic mode
             (RxOnly, Mode::Dynamic, None) => {
-                trace!("{} Running DYNAMIC: establishing reverse connection!", upm);
-                let id = self.routes.upgrade(rx_peer, port).await;
+                let id = self.routes.upgrade(rx_peer, port, s).await;
                 trace!("Sending a hello...");
                 self.send_hello(id, stream).await;
             }
             // Reverse connection of a peer we have known before
             (RxOnly, _, Some(id)) => {
-                let id = self.routes.upgrade(rx_peer, port).await;
+                let id = self.routes.upgrade(rx_peer, port, s).await;
                 trace!("Sending a hello...");
                 self.send_hello(id, stream).await;
             }
@@ -214,15 +228,19 @@ impl Server {
     }
 
     async fn send_hello(self: &Arc<Self>, id: usize, stream: LockedStream) {
-        let mut stream = stream.lock().await;
+        let mut stream = stream.write().await;
         let buf = Packet::Ack.serialize();
-        (*stream).write_all(&buf).await.unwrap();
+        (*stream.as_mut().unwrap()).write_all(&buf).await.unwrap();
 
         let s = Arc::clone(self);
         task::spawn(async move {
             if let Some(peer) = s.routes.get_peer(id).await {
                 task::sleep(Duration::from_secs(2)).await;
-                peer.send(Packet::Hello { port: s._port }).await;
+                peer.send(Packet::Hello {
+                    port: s._port,
+                    _type: peer.link_type(),
+                })
+                .await;
             }
         });
     }
