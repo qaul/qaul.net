@@ -17,7 +17,7 @@ use std::collections::BTreeMap;
 use tracing::trace;
 
 /// Routing table for local IP scope
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub(crate) struct Routes {
     /// Store which port this instance is listening to
     port: u16,
@@ -165,7 +165,7 @@ impl Routes {
     ///    This indicates some bad state and we panic.  This _should_
     ///    never happen, but might when calling this function in the
     ///    wrong position in the accept loop.
-    pub(crate) async fn upgrade(self: &Arc<Self>, id: usize, port: u16) {
+    pub(crate) async fn upgrade(self: &Arc<Self>, id: usize, port: u16) -> usize {
         let mut peers = self.peers.write().await;
         let mut src_map = self.src_map.write().await;
         let mut dst_map = self.dst_map.write().await;

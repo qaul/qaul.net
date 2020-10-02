@@ -27,8 +27,9 @@
 //! channel, which means they will return immediately, even if the
 //! connection is currently down.
 
-use crate::{AtomPtr, IoPair, Packet};
+use crate::{AtomPtr, IoPair, Packet, PacketBuilder};
 use async_std::{
+    future::timeout,
     io::prelude::WriteExt,
     net::TcpStream,
     sync::{Arc, RwLock},
@@ -119,6 +120,7 @@ impl Peer {
     /// While this function returns immediately, it spawns an async
     /// worker that will try to establish a connection to the peer,
     /// exiting until `stop()` is called on this peer
+    #[tracing::instrument(level = "trace")]
     pub(crate) fn open(dst: DstAddr, port: u16) -> Arc<Self> {
         let p = Arc::new(Self {
             id: id::next(),
@@ -172,24 +174,23 @@ impl Peer {
                     }
                 };
 
-                // Serialise the payload and pre-pend the length
-                let mut vec = serialize(p).unwrap();
-                let mut buf = vec![0; 8];
-                BigEndian::write_u64(&mut buf, vec.len() as u64);
-                buf.append(&mut vec);
-
                 // And woosh!
+                let buf = p.serialize();
                 if let Err(e) = stream.write_all(&buf).await {
                     error!("Failed to send message: {}!", e.to_string());
 
                     // We mark ourselves as missing uplink
                     std::mem::swap(&mut *s, &mut None);
-                    
+
                     return None;
                 }
 
                 match p {
-                    Packet::Hello { .. } => trace!("Sending HELLO to {}", addr),
+                    Packet::Hello { .. } => {
+                        trace!("Sending HELLO to {}", addr);
+                        let _self = Arc::clone(self);
+                        task::spawn(_self.wait_for_ack());
+                    }
                     _ => {}
                 }
 
@@ -199,18 +200,59 @@ impl Peer {
         }
     }
 
+    async fn wait_for_ack(self: Arc<Self>) {
+        let t = timeout(Duration::from_secs(10), async {
+            loop {
+                let mut s = self.sender.write().await;
+                if s.is_none() {
+                    break;
+                }
+
+                if timeout(Duration::from_millis(1), async {
+                    let mut pb = PacketBuilder::new((*s).as_mut().unwrap());
+                    match pb.parse().await {
+                        Ok(_) => match pb.build() {
+                            Some(Packet::Ack) => trace!("Received an ACK."),
+                            _ => error!("Invalid data (only ACKs)!"),
+                        },
+                        _ => {
+                            let mut s = self.sender.write().await;
+                            std::mem::swap(&mut *s, &mut None);
+                            error!("Failed to read ACK from sender stream");
+                        }
+                    }
+                })
+                .await
+                .is_ok()
+                {
+                    break;
+                }
+
+                drop(s);
+                task::sleep(Duration::from_millis(50)).await;
+            }
+        });
+
+        // If the top-level timeout is ever hit...
+        match t.await {
+            Ok(_) => {}
+            Err(_) => {
+                // Remove the stream because it's probably dead
+                let mut s = self.sender.write().await;
+                std::mem::swap(&mut *s, &mut None);
+            }
+        }
+    }
+
     /// This function will try sending a packet, initialising the
     /// output stream if it doesn't yet exist
     async fn send_or_introduce(self: &Arc<Self>, p: Packet, port: u16) {
         loop {
-            if { self.sender.write().await.is_some() } {
+            if { self.sender.read().await.is_some() } {
                 // Send the packet and re-run the loop if we failed to send
                 match self.send_packet(&p).await {
                     Some(_) => break,
-                    None => {
-                        dbg!();
-                        continue;
-                    }
+                    None => continue, // send_packet sets sender = None if failed
                 }
             } else {
                 trace!("Sender is None, opening a connection first...");
@@ -228,8 +270,10 @@ impl Peer {
     /// There's currently no way to get diagnostics from failed sends
     /// back to ratman.  **FIXME**: implement this!
     pub(crate) fn run_io_sender(self: Arc<Self>, port: u16) {
+        trace!("Running IO sender");
         task::spawn(async move {
             while let Some(p) = self.io.rx.recv().await {
+                trace!("Queued packet {:?}", p);
                 self.send_or_introduce(p, port).await;
 
                 if !self.alive() {
@@ -240,6 +284,8 @@ impl Peer {
             trace!("Shutting down packet sender for peer {}", self.id);
         });
     }
+
+    fn register_revhello(self: &Arc<Self>) {}
 
     /// Loop on a connection until it could be established!
     async fn introduce_blocking(self: Arc<Self>, port: u16) {

@@ -4,7 +4,7 @@ use async_std::{
     io::{self, prelude::ReadExt},
     net::TcpStream,
 };
-use bincode::deserialize;
+use bincode::{deserialize, serialize};
 use byteorder::{BigEndian, ByteOrder};
 use netmod::Frame;
 use serde::{Deserialize, Serialize};
@@ -21,8 +21,21 @@ pub(crate) enum Packet {
     /// connection, the hello message contains the port which is
     /// swapped into the source address to connect to.
     Hello { port: u16 },
+    /// Response to a Hello on the sending stream
+    Ack,
     /// An actual data packet
     Frame(Frame),
+}
+
+impl Packet {
+    /// Serialises the packet into a length prepended data stream
+    pub(crate) fn serialize(&self) -> Vec<u8> {
+        let mut vec = serialize(self).unwrap();
+        let mut buf = vec![0; 8];
+        BigEndian::write_u64(&mut buf, vec.len() as u64);
+        buf.append(&mut vec);
+        buf
+    }
 }
 
 /// A utility to read packets from an incoming TCP stream
@@ -42,7 +55,7 @@ impl<'s> PacketBuilder<'s> {
         let mut len_buf = [0; 8];
         self.stream.read_exact(&mut len_buf).await?;
         let len = BigEndian::read_u64(&len_buf);
-        
+
         let mut data_buf = vec![0; len as usize];
         self.stream.read_exact(&mut data_buf).await?;
         self.data = Some(data_buf);

@@ -2,8 +2,10 @@
 
 use crate::{IoPair, Mode, Packet, PacketBuilder, Peer, PeerState, Result, Routes, SourceAddr};
 use async_std::{
+    io::prelude::*,
     net::{TcpListener, TcpStream},
     stream::StreamExt,
+    sync::Mutex,
     task,
 };
 use netmod::{Frame, Target};
@@ -13,6 +15,8 @@ use std::sync::{
 };
 use std::time::Duration;
 use tracing::{error, info, trace, warn};
+
+type LockedStream = Arc<Mutex<TcpStream>>;
 
 /// The listening server part of the tcp driver
 pub(crate) struct Server {
@@ -87,7 +91,7 @@ impl Server {
 
                 trace!("Accepting new connection...");
                 let s = Arc::clone(&s);
-                task::spawn(async move { s.accept_connection(stream).await });
+                task::spawn(async move { s.accept_connection(Arc::new(Mutex::new(stream))).await });
             }
 
             info!("Terminating tcp accept loop!");
@@ -95,8 +99,8 @@ impl Server {
     }
 
     /// loop over a stream of incoming data
-    async fn accept_connection(self: Arc<Self>, mut stream: TcpStream) {
-        let src_addr = match stream.peer_addr() {
+    async fn accept_connection(self: Arc<Self>, stream: LockedStream) {
+        let src_addr = match stream.lock().await.peer_addr() {
             Ok(a) => a,
             Err(_) => {
                 error!("Missing peer addr in stream; exiting!");
@@ -119,17 +123,21 @@ impl Server {
                 });
             let peer = self.routes.get_peer(pid).await.unwrap();
 
-            let mut fb = PacketBuilder::new(&mut stream);
-            if let Err(_) = fb.parse().await {
-                error!("Failed to read from incoming packet stream; dropping connection!");
-                break;
-            }
+            let f = {
+                let mut stream = stream.lock().await;
 
-            let f = match fb.build() {
-                Some(f) => f,
-                None => {
-                    error!("Malformed frame; skipping!");
-                    continue;
+                let mut fb = PacketBuilder::new(&mut stream);
+                if let Err(_) = fb.parse().await {
+                    error!("Failed to read from incoming packet stream; dropping connection!");
+                    break;
+                }
+
+                match fb.build() {
+                    Some(f) => f,
+                    None => {
+                        error!("Malformed frame; skipping!");
+                        continue;
+                    }
                 }
             };
 
@@ -141,7 +149,10 @@ impl Server {
             use PeerState::*;
             match (peer.state(), f) {
                 (_, Frame(f)) => self.handle_frame(peer.id, f).await,
-                (state, Hello { port }) => self.handle_hello(peer.id, state, &src_addr, port).await,
+                (state, Hello { port }) => {
+                    self.handle_hello(peer.id, state, &src_addr, port, Arc::clone(&stream))
+                        .await
+                }
                 (state, packet) => panic!(format!("state={:?}, packet={:?}", state, packet)),
             }
         }
@@ -168,6 +179,7 @@ impl Server {
         state: PeerState,
         src: &SourceAddr,
         port: u16,
+        stream: LockedStream,
     ) {
         let maybe_id = self.routes.find_via_srcport(src, port).await;
         let upm = "Received HELLO from unknown peer.";
@@ -185,23 +197,27 @@ impl Server {
                 trace!("{} Running DYNAMIC: establishing reverse connection!", upm);
                 let id = self.routes.upgrade(rx_peer, port).await;
                 trace!("Sending a hello...");
-                self.send_hello(id);
+                self.send_hello(id, stream).await;
             }
             // Reverse connection of a peer we have known before
             (RxOnly, _, Some(id)) => {
                 let id = self.routes.upgrade(rx_peer, port).await;
                 trace!("Sending a hello...");
-                self.send_hello(id);
+                self.send_hello(id, stream).await;
             }
             (TxOnly, _, Some(id)) => {
                 self.routes.add_src(id, *src).await;
-                self.send_hello(id);
+                self.send_hello(id, stream).await;
             }
             (link, mode, id) => panic!("{:?} {:?} {:?}", link, mode, id),
         }
     }
 
-    fn send_hello(self: &Arc<Self>, id: usize) {
+    async fn send_hello(self: &Arc<Self>, id: usize, stream: LockedStream) {
+        let mut stream = stream.lock().await;
+        let buf = Packet::Ack.serialize();
+        (*stream).write_all(&buf).await.unwrap();
+
         let s = Arc::clone(self);
         task::spawn(async move {
             let peer = s.routes.get_peer(id).await.unwrap();
