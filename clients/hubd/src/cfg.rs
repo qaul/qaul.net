@@ -62,7 +62,7 @@ pub(crate) fn cli<'a>() -> App<'a, 'a> {
         .version(env!("CARGO_PKG_VERSION"))
         .arg(
             Arg::with_name("PEERS_PATH")
-                .short("p")
+                .short("P")
                 .long("peers")
                 .takes_value(true)
                 .required(true)
@@ -90,7 +90,7 @@ pub(crate) fn cli<'a>() -> App<'a, 'a> {
         )
         .arg(
             Arg::with_name("SOCKET_PORT")
-                .short("o")
+                .short("p")
                 .long("port")
                 .takes_value(true)
                 .required(true)
