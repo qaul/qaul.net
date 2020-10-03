@@ -96,6 +96,8 @@ impl Endpoint {
     /// connections.
     pub async fn add_peers(&self, peers: Vec<String>) -> Result<()> {
         for p in peers.into_iter() {
+            if &p == "" && continue {}
+            
             let mut parts: Vec<_> = p.split(|x| x == ' ').collect();
             let _type = parts.get(1);
             let peer = match parts[0].parse().ok() {
