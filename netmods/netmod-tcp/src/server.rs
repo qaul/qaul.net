@@ -156,6 +156,7 @@ impl Server {
                     self.handle_hello(peer.id, state, &src_addr, port, _type, Arc::clone(&stream))
                         .await
                 }
+                (state, Ack) => trace!("Received ACK packet on wrong i/o stream. woops"),
                 (state, packet) => panic!(format!("state={:?}, packet={:?}", state, packet)),
             }
         }
