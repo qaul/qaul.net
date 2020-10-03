@@ -49,6 +49,6 @@ members = [
     "clients/mini-tcp",
 
     # Actual target binaries
-    "clients/linux-cli",
+    "clients/hubdctl",
     "clients/hubd",
 ]
