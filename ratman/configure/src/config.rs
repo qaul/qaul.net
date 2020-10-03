@@ -24,7 +24,7 @@ pub enum Params {
     Tcp {
         addr: String,
         port: u16,
-        peers: Vec<SocketAddr>,
+        peers: Vec<String>,
         dynamic: bool,
     },
     /// Purely local udp broadcast endpoint

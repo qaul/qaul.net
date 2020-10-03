@@ -33,20 +33,8 @@ impl State {
         let mut peersfd = File::open(&cfg.peers).unwrap();
         peersfd.read_to_string(&mut buf).unwrap();
 
-        let peers = buf
-            .split("\n")
-            .into_iter()
-            .fold(HashSet::new(), |mut set, peer| {
-                if peer != "" {
-                    set.insert(
-                        SocketAddr::from_str(&peer)
-                            .expect(&format!("Peer `{}` had a bad format!", &peer)),
-                    );
-                }
-                set
-            });
-
-        ep.add_peers(peers.into_iter().collect()).await.unwrap();
+        let peers = buf.split("\n").map(|s| s.to_string()).collect();
+        ep.add_peers(peers).await.unwrap();
 
         let router = Router::new();
         router.add_endpoint(ep).await;
