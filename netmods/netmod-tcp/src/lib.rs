@@ -22,7 +22,7 @@ use async_trait::async_trait;
 use netmod::{self, Endpoint as EndpointExt, Frame, Target};
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
-use tracing::{error, info};
+use tracing::{error, info, trace};
 
 /// Define the runtime mode for this endpount
 ///
@@ -108,15 +108,17 @@ impl Endpoint {
                 }
             };
 
-            self.routes
-                .add_via_dst(
-                    peer,
-                    match _type {
-                        Some(t) if t == &"limited" => LinkType::Limited,
-                        _ => LinkType::Bidirect,
-                    },
-                )
-                .await;
+            let t = match _type {
+                Some(&"limited") => LinkType::Limited,
+                _ => LinkType::Bidirect,
+            };
+
+            trace!("Adding peer: {} ({})", peer, match t {
+                LinkType::Limited => "limited",
+                LinkType::Bidirect => "",
+            });
+            
+            self.routes.add_via_dst(peer, t).await;
         }
 
         Ok(())

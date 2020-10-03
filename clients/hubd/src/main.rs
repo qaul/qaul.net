@@ -7,7 +7,8 @@ mod log;
 mod state;
 mod upnp;
 
-use async_std::{future, task::Poll};
+use std::time::Duration;
+use async_std::{task, future, task::Poll};
 use state::State;
 
 use tracing::error;
@@ -32,6 +33,7 @@ async fn main() {
         }
     }
 
-    // Never return the main thread or it all dies
-    let _: () = future::poll_fn(|_| Poll::Pending).await;
+    let _ = future::timeout(Duration::from_secs(10), async {
+        let _: () = future::poll_fn(|_| Poll::Pending).await;
+    }).await;
 }
