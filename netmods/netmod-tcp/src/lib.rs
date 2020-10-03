@@ -97,7 +97,7 @@ impl Endpoint {
     pub async fn add_peers(&self, peers: Vec<String>) -> Result<()> {
         for p in peers.into_iter() {
             let mut parts: Vec<_> = p.split(|x| x == ' ').collect();
-            let _type = parts.remove(1);
+            let _type = parts.get(1);
             let peer = match parts[0].parse().ok() {
                 Some(s) => s,
                 None => {
@@ -109,10 +109,9 @@ impl Endpoint {
             self.routes
                 .add_via_dst(
                     peer,
-                    if _type == "limited" {
-                        LinkType::Limited
-                    } else {
-                        LinkType::Bidirect
+                    match _type {
+                        Some(t) if t == &"limited" => LinkType::Limited,
+                        _ => LinkType::Bidirect,
                     },
                 )
                 .await;
