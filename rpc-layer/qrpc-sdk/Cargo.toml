@@ -6,3 +6,4 @@ authors = ["Kaiden Fey <kookie@spacekookie.de>"]
 edition = "2018"
 
 [dependencies]
+capnp = "*"

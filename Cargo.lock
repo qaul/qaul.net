@@ -347,6 +347,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "capnp"
+version = "0.13.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "739fa606458e49df64116a3cda1bf711ada360ce714357674d0950ed2132a6a1"
+
+[[package]]
 name = "cc"
 version = "1.0.55"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1869,6 +1875,10 @@ checksum = "cabe4fa914dec5870285fa7f71f602645da47c486e68486d2b4ceb4a343e90ac"
 [[package]]
 name = "rpc-broker"
 version = "0.1.0"
+dependencies = [
+ "capnp",
+ "qrpc-sdk",
+]
 
 [[package]]
 name = "rubato"

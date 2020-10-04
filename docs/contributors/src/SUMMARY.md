@@ -5,23 +5,27 @@
 - [Social](./social/_intro.md)
   - [Contributions](./social/contributions.md)
   - [Code of Conduct](./social/code-of-conduct.md)
-- [Building this manual](./manuals/_intro.md)
+- [Manuals & websites](./manuals/_intro.md)
 - [Technical](./technical/index.md)
   - [qaul.net Services](./technical/services.md)
-  - [Overview of Crates](./technical/crates.md)
-  - [libqaul](./technical/libqaul/index.md)
-    - [libqaul Internals](./technical/libqaul/internals.md)
-    - [Service API](./technical/libqaul/api.md)
-    - [libqaul IPC Interfaces](./technical/libqaul/ipc/index.md)
-      - [socket-ipc](./technical/libqaul/ipc/socket.md)
-      - [android-ipc](./technical/libqaul/ipc/android.md)
-  - [Ratman](./technical/ratman/index.md)
-    - [Ratman API](./technical/ratman/api.md)
-    - [Netmod](./technical/ratman/netmod.md)
-    - [Ratman Internals](./technical/ratman/internals/index.md)
-      - [Routing](./technical/ratman/internals/routing.md)
-      - [Journal](./technical/ratman/internals/journal.md)
-  - [Development Interfaces](./technical/api/_intro.md)
+  - [RPC layer](./technical/rpc-layer/index.md)
+    - [qrpc-sdk](./technical/rpc-layer/sdk.md)
+  
+  
+  <!-- - [Overview of Crates](./technical/crates.md) -->
+  <!-- - [libqaul](./technical/libqaul/index.md) -->
+  <!--   - [libqaul Internals](./technical/libqaul/internals.md) -->
+  <!--   - [Service API](./technical/libqaul/api.md) -->
+  <!--   - [libqaul IPC Interfaces](./technical/libqaul/ipc/index.md) -->
+  <!--     - [socket-ipc](./technical/libqaul/ipc/socket.md) -->
+  <!--     - [android-ipc](./technical/libqaul/ipc/android.md) -->
+  <!-- - [Ratman](./technical/ratman/index.md) -->
+  <!--   - [Ratman API](./technical/ratman/api.md) -->
+  <!--   - [Netmod](./technical/ratman/netmod.md) -->
+  <!--   - [Ratman Internals](./technical/ratman/internals/index.md) -->
+  <!--     - [Routing](./technical/ratman/internals/routing.md) -->
+  <!--     - [Journal](./technical/ratman/internals/journal.md) -->
+  <!-- - [Development Interfaces](./technical/api/_intro.md) -->
 - [Testing](./test/index.md)
   - [linux-http-test](./test/linux-http-test.md)
 - [Translations](./translations/_intro.md)

@@ -17,3 +17,8 @@ functions, and type serialisation data.
                      Your app UI      Deserialise types
 ```
 
+You can find more information about this layer in the [contributors
+guide][guide].
+
+
+[guide]: https://docs.qaul.net/contributors/technical
