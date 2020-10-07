@@ -18,22 +18,26 @@ pub(crate) fn elog<S: Into<String>>(msg: S, code: u16) -> ! {
     std::process::exit(code.into());
 }
 
+use qrpc_sdk::{RpcSocket, };
+
 #[async_std::main]
 async fn main() {
     log::parse_log_level();
 
-    let app = cfg::cli();
-    let cfg = cfg::match_fold(app);
-    let _state = State::new(&cfg).await;
+    
+    
+    // let app = cfg::cli();
+    // let cfg = cfg::match_fold(app);
+    // let _state = State::new(&cfg).await;
 
-    // !no_upnp means upnp has _not_ been disabled
-    if !cfg.no_upnp {
-        if upnp::open_port(cfg.port).is_none() {
-            error!("Failed to open UPNP port; your router probably doesn't support it...");
-        }
-    }
+    // // !no_upnp means upnp has _not_ been disabled
+    // if !cfg.no_upnp {
+    //     if upnp::open_port(cfg.port).is_none() {
+    //         error!("Failed to open UPNP port; your router probably doesn't support it...");
+    //     }
+    // }
 
-    let _ = future::timeout(Duration::from_secs(10), async {
-        let _: () = future::poll_fn(|_| Poll::Pending).await;
-    }).await;
+    // let _ = future::timeout(Duration::from_secs(10), async {
+    //     let _: () = future::poll_fn(|_| Poll::Pending).await;
+    // }).await;
 }
