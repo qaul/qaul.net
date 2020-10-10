@@ -3,7 +3,7 @@ name = "ratman"
 description = "A delay tolerant, journaled and distributed userspace packet router"
 license = "AGPL-3.0"
 homepage = "https://qaul.net"
-version = "0.1.1"
+version = "0.5.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>", "Leonora Tindall <nora@nora.codes>"]
 edition = "2018"
 
@@ -18,9 +18,9 @@ tracing-futures = "0.2"
 twox-hash = "1.5"
 
 # Sub-components
-identity = { version = "0.4", path = "identity", package = "ratman-identity", features = ["digest", "random"] }
-netmod = { version = "0.3", path = "netmod", package = "ratman-netmod"}
-clockctrl = { version = "0.1", path = "../utils/clockctrl" }
+identity = { version = "0.5.0", path = "identity", package = "ratman-identity", features = ["digest", "random"] }
+netmod = { version = "0.5.0", path = "netmod", package = "ratman-netmod"}
+clockctrl = { version = "0.5.0", path = "../utils/clockctrl" }
 async-notify = { path = "../utils/async-notify" }
 
 [dev-dependencies]

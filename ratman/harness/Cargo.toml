@@ -1,7 +1,7 @@
 [package]
 name = "ratman-harness"
 description = "A testing harness for applications that use ratman networks in memory"
-version = "0.1.0"
+version = "0.5.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 

@@ -1,7 +1,7 @@
 [package]
 name = "netmod-wd"
 description = "A native network driver that binds wifi direct"
-version = "0.1.0"
+version = "0.5.0"
 authors = ["Katharina Fey <kookie@spacekookie.de>"]
 edition = "2018"
 

@@ -1,13 +1,13 @@
 [package]
 name = "libqaul"
 description = "Abstraction for building services over internet independent networks"
-version = "0.1.0"
+version = "0.5.0"
 authors = [ "Katharina Fey <kookie@spacekookie.de>"]
 license = "AGPL-3.0"
 edition = "2018"
 
 [dependencies]
-alexandria = { version = "0.2", path = "../utils/alexandria" }
+alexandria = { version = "0.5.0", path = "../utils/alexandria" }
 netmod-mem = { path = "../netmods/netmod-mem", optional = true }
 ratman = { path = "../ratman" }
 

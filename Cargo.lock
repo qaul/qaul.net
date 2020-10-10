@@ -26,7 +26,7 @@ dependencies = [
 
 [[package]]
 name = "alexandria"
-version = "0.2.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "bincode",
@@ -101,7 +101,7 @@ dependencies = [
 
 [[package]]
 name = "async-notify"
-version = "0.1.0"
+version = "0.5.0"
 
 [[package]]
 name = "async-std"
@@ -418,7 +418,7 @@ dependencies = [
 
 [[package]]
 name = "clockctrl"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
 ]
@@ -927,7 +927,7 @@ dependencies = [
 
 [[package]]
 name = "hubdctl"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "futures",
@@ -1072,7 +1072,7 @@ dependencies = [
 
 [[package]]
 name = "libqaul"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "alexandria",
  "async-std",
@@ -1083,7 +1083,7 @@ dependencies = [
  "futures",
  "hex",
  "jni",
- "log 0.4.8",
+ "log 0.3.9",
  "mime",
  "netmod-mem",
  "rand 0.7.3",
@@ -1099,7 +1099,7 @@ dependencies = [
 
 [[package]]
 name = "libqaul-rpc"
-version = "0.1.0"
+version = "0.5.0"
 
 [[package]]
 name = "libsodium-sys"
@@ -1269,7 +1269,7 @@ dependencies = [
 
 [[package]]
 name = "netmod-mem"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "async-trait",
@@ -1280,7 +1280,7 @@ dependencies = [
 
 [[package]]
 name = "netmod-tcp"
-version = "0.2.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "async-trait",
@@ -1296,7 +1296,7 @@ dependencies = [
 
 [[package]]
 name = "netmod-udp"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "async-notify",
  "async-std",
@@ -1311,7 +1311,7 @@ dependencies = [
 
 [[package]]
 name = "netmod-wd"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "async-trait",
@@ -1424,7 +1424,7 @@ checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 
 [[package]]
 name = "permute"
-version = "0.1.0"
+version = "0.5.0"
 
 [[package]]
 name = "pin-project"
@@ -1460,7 +1460,7 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
 name = "ping"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "qrpc-sdk",
@@ -1608,7 +1608,7 @@ dependencies = [
 
 [[package]]
 name = "qaul-chat"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "bincode",
@@ -1626,7 +1626,7 @@ dependencies = [
 
 [[package]]
 name = "qaul-files"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "bincode",
@@ -1641,7 +1641,7 @@ dependencies = [
 
 [[package]]
 name = "qaul-hubd"
-version = "0.2.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "clap",
@@ -1661,7 +1661,7 @@ dependencies = [
 
 [[package]]
 name = "qaul-voice"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "bincode",
@@ -1680,7 +1680,7 @@ dependencies = [
 
 [[package]]
 name = "qrpc-sdk"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "async-trait",
@@ -1772,7 +1772,7 @@ dependencies = [
 
 [[package]]
 name = "ratman"
-version = "0.1.1"
+version = "0.5.0"
 dependencies = [
  "async-notify",
  "async-std",
@@ -1791,7 +1791,7 @@ dependencies = [
 
 [[package]]
 name = "ratman-configure"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "netmod-mem",
@@ -1804,7 +1804,7 @@ dependencies = [
 
 [[package]]
 name = "ratman-harness"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "arbitrary",
  "netmod-mem",
@@ -1814,7 +1814,7 @@ dependencies = [
 
 [[package]]
 name = "ratman-identity"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "bincode",
  "blake2 0.8.1",
@@ -1827,7 +1827,7 @@ dependencies = [
 
 [[package]]
 name = "ratman-netmod"
-version = "0.3.0"
+version = "0.5.0"
 dependencies = [
  "async-trait",
  "conjoiner-engine",
@@ -1838,7 +1838,7 @@ dependencies = [
 
 [[package]]
 name = "ratman-rpc"
-version = "0.1.0"
+version = "0.5.0"
 
 [[package]]
 name = "redox_syscall"
@@ -1902,7 +1902,7 @@ checksum = "cabe4fa914dec5870285fa7f71f602645da47c486e68486d2b4ceb4a343e90ac"
 
 [[package]]
 name = "rpc-broker"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "async-std",
  "byteorder",
@@ -2037,7 +2037,7 @@ dependencies = [
 
 [[package]]
 name = "service-rpc"
-version = "0.1.0"
+version = "0.5.0"
 
 [[package]]
 name = "sha2"
@@ -2378,7 +2378,7 @@ version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3bfd5b7557925ce778ff9b9ef90e3ade34c524b5ff10e239c69a42d546d2af56"
 dependencies = [
- "rand 0.7.3",
+ "rand 0.5.6",
 ]
 
 [[package]]
@@ -2472,7 +2472,7 @@ checksum = "b5a972e5669d67ba988ce3dc826706fb0a8b01471c088cb0b6110b805cc36aed"
 
 [[package]]
 name = "visn"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "permute",
 ]
