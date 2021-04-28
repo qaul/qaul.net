@@ -1,0 +1,11 @@
+[package]
+name = "qaul-cli"
+version = "0.2.0"
+authors = ["qaul.net community <contact@qaul.net>"]
+edition = "2018"
+
+[dependencies]
+libqaul = { path = "../../libqaul"}
+async-std = { version = "1.9", features = ["attributes"] }
+log = "0.4"
+pretty_env_logger = "0.4"

@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    # qaul.net library
+    "libqaul",
+
+    # binaries
+    "clients/cli",
+]
