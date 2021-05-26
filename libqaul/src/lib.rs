@@ -18,11 +18,13 @@ use futures::prelude::*;
 use futures::{ pin_mut, select, future::FutureExt };
 
 mod node;
+use node::Node;
 use node::mdns;
 mod services;
 use services::page;
 use services::feed;
-
+mod configuration;
+use configuration::Configuration;
 
 pub enum EventType {
     Response(mdns::QaulMessage),
@@ -33,14 +35,31 @@ pub enum EventType {
 pub async fn init() {
     pretty_env_logger::init();
 
-    // Node ID
-    info!("Peer Id: {}", node::get_id());
+    // Load configuration
+    let mut config = Configuration::new().unwrap();
+    println!("{:?}", config);
+
+    // initialize node or create a new one
+    if config.node.initialized == 0 {
+        // create a new node and save it to configuration
+        config = Node::new(config);
+    }
+    else {
+        // instantiate node from configuration
+        Node::init(config);
+    }
+
+    // create transport excryption keys for noise protocol
+    let auth_keys = Keypair::<X25519Spec>::new()
+    .into_authentic(Node::get_keys())
+    .expect("can create auth keys");
+
+    // create a multiproducer, single consumer queue
     let (response_sender, mut response_rcv) = mpsc::unbounded();
 
-    // create user ID/keys
-    let auth_keys = Keypair::<X25519Spec>::new()
-        .into_authentic(node::get_keys())
-        .expect("can create auth keys");
+    // create a default user if needed
+
+
     
     // create a TCP transport
     let transp = TcpConfig::new()
@@ -51,18 +70,18 @@ pub async fn init() {
 
     // create mDNS advertising, libp2p NetworkBehaviour
     let mut behaviour = mdns::QaulBehaviour {
-        floodsub: Floodsub::new(node::get_id()),
+        floodsub: Floodsub::new(Node::get_id()),
         // TODO: most probably without the await.expect ...? maybe await.unwrap_or
         mdns: Mdns::new(MdnsConfig::default()).await.expect("can create mdns"),
         response_sender,
     };
-    behaviour.floodsub.subscribe(node::get_topic());
+    behaviour.floodsub.subscribe(Node::get_topic());
 
     // listen for new commands from CLI
     let mut stdin = io::BufReader::new(io::stdin()).lines();
 
     // swarm libp2p connection management
-    let mut swarm = SwarmBuilder::new(transp, behaviour, node::get_id())
+    let mut swarm = SwarmBuilder::new(transp, behaviour, Node::get_id())
         .executor(Box::new(|fut| {
             task::spawn(fut);
         }))
@@ -102,7 +121,7 @@ pub async fn init() {
             match event {
                 EventType::Response(resp) => {
                     let json = serde_json::to_string(&resp).expect("can jsonify response");
-                    swarm.behaviour_mut().floodsub.publish(node::get_topic(), json.as_bytes());
+                    swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
                 }
                 EventType::Input(line) => match line.as_str() {
                     // node functions

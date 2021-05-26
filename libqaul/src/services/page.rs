@@ -9,7 +9,7 @@ use log::{error, info};
 use async_std::{task, fs};
 use futures::channel::mpsc;
 
-use crate::node;
+use crate::node::Node;
 use crate::node::mdns::{
     QaulMessage, 
     QaulMessageType,
@@ -165,14 +165,14 @@ pub async fn handle_list_pages(cmd: &str, swarm: &mut Swarm<QaulBehaviour>) {
                 mode: PageMode::ALL,
             };
             let json = serde_json::to_string(&req).expect("can jsonify request");
-            swarm.behaviour_mut().floodsub.publish(node::get_topic(), json.as_bytes());
+            swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
         }
         Some(pages_peer_id) => {
             let req = PageRequest {
                 mode: PageMode::One(pages_peer_id.to_owned()),
             };
             let json = serde_json::to_string(&req).expect("can jsonify request");
-            swarm.behaviour_mut().floodsub.publish(node::get_topic(), json.as_bytes());
+            swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
         }
         None => {
             match read_local_pages().await {

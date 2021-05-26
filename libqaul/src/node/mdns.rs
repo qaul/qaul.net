@@ -8,7 +8,7 @@ use libp2p::{
 use futures::channel::mpsc;
 use log::info;
 
-use crate::node;
+use crate::node::Node;
 use crate::services::page;
 use crate::services::page::{
     PageRequest, PageResponse, PageMode
@@ -82,7 +82,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulBehaviour {
                             );
                         }
                         PageMode::One(ref peer_id) => {
-                            if peer_id == &node::get_id_string() {
+                            if peer_id.to_string() == Node::get_id_string() {
                                 info!("Received req: {:?} from {:?}", req, msg.source);
                                 page::respond_with_public_pages(
                                     self.response_sender.clone(),

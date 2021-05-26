@@ -6,7 +6,7 @@ use serde::{Serialize, Deserialize};
 // https://runrust.miraheze.org/wiki/Async_crate_comparison
 // MPSC = Multi-Producer, Single-Consumer FiFo
 
-use crate::node;
+use crate::node::Node;
 use crate::node::mdns::{
     QaulBehaviour
 };
@@ -27,5 +27,5 @@ pub fn send(cmd: &str, swarm: &mut Swarm<QaulBehaviour>) {
 
     // fload via MDNS
     let json = serde_json::to_string(&msg).expect("can jsonify request");
-    swarm.behaviour_mut().floodsub.publish(node::get_topic(), json.as_bytes());
+    swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
 }
