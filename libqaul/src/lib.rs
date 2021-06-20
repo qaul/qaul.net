@@ -88,9 +88,11 @@ pub async fn init() {
         }))
         .build();
     
+    // connect swarm to the first interface listed in 
+    // the configuration config.node.connections
     Swarm::listen_on(
         &mut swarm,
-        "/ip4/0.0.0.0/tcp/0"
+        config.node.connections.first().unwrap()
             .parse()
             .expect("can get a local socket"),
     )
