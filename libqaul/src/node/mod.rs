@@ -11,6 +11,7 @@ use state;
 
 pub mod mdns;
 use mdns::QaulBehaviour;
+pub mod overlay;
 
 use crate::configuration::Configuration;
 
@@ -23,32 +24,17 @@ pub struct Node {
 
 static STATE: state::Storage<Node> = state::Storage::new();
 
-// struct Node_State {
-//     node: Option<Node>,
-// }
-//static mut NODE_STATE: Node_State = Node_State { node: None };
-
-
 impl Node {
     // create a new node and save the parameters into config
     pub fn new(mut config: Configuration) -> Configuration {
+        // create node & configuration
         let keys_ed25519 = ed25519::Keypair::generate();
         config.node.keys = base64::encode(keys_ed25519.encode());
-
-        //let keys = Keypair::generate_ed25519();
         let keys = Keypair::Ed25519(keys_ed25519);
         let id = PeerId::from(keys.public());
         let topic = Topic::new("pages");
-
         let node = Node {id, keys, topic};
-        
-        // write keys & ID into the configuration
         config.node.id = id.to_string();
-        
-
-        // if let Keypair::Ed25519(edkeys) = keys {
-        //     config.node.keys = base64::encode(edkeys.encode());
-        // }
         config.node.initialized = 1;
 
         // save configuration file
@@ -64,7 +50,7 @@ impl Node {
     }
 
     // start an existing node from the config parameters
-    pub fn init(config: Configuration) {
+    pub fn init(config: Configuration) -> Configuration {
         let mut basedecode = base64::decode(&config.node.keys).unwrap();
         let keys = Keypair::Ed25519(ed25519::Keypair::decode( &mut basedecode).unwrap());
         let id = PeerId::from(keys.public());
@@ -83,6 +69,8 @@ impl Node {
 
         let node = Node {id, keys, topic};
         STATE.set(node);
+
+        config
     }
 
     /**
@@ -91,13 +79,6 @@ impl Node {
     pub fn get_id() -> PeerId {
         let node = STATE.get();
         node.id.clone()
-
-        // if let Some(node) = NODE_STATE.node {
-        //     node.id.clone()
-        // }
-        // else {
-        //     panic!("node not initialized")
-        // }
     }
 
     /**
@@ -106,13 +87,6 @@ impl Node {
     pub fn get_id_string() -> String {
         let node = STATE.get();
         node.id.to_string()
-        
-        // if let Some(node) = NODE_STATE.node {
-        //     node.id.to_string()
-        // }
-        // else {
-        //     panic!("node not initialized")
-        // }
     }
 
     /**
@@ -121,13 +95,6 @@ impl Node {
     pub fn get_keys<'a>() -> &'a Keypair {
         let node = STATE.get();
         &node.keys
-                
-        // if let Some(node) = NODE_STATE.node {
-        //     &node.keys
-        // }
-        // else {
-        //     panic!("node not initialized")
-        // }
     }
 
     /**
@@ -136,13 +103,6 @@ impl Node {
     pub fn get_topic() -> Topic {
         let node = STATE.get();
         node.topic.clone()
-        
-        // if let Some(node) = NODE_STATE.node {
-        //     node.topic.clone()
-        // }
-        // else {
-        //     panic!("node not initialized")
-        // }
     }
 }
 

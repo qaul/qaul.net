@@ -4,7 +4,7 @@ use libp2p::{
     tcp::TcpConfig,
     mplex,
     mdns::{Mdns, MdnsConfig},
-    floodsub::{Floodsub},
+    floodsub::Floodsub,
     swarm::{Swarm, SwarmBuilder},
     Transport,
 };
@@ -20,6 +20,7 @@ use futures::{ pin_mut, select, future::FutureExt };
 mod node;
 use node::Node;
 use node::mdns;
+use node::overlay::Overlay;
 mod services;
 use services::page;
 use services::feed;
@@ -46,15 +47,15 @@ pub async fn init() {
     }
     else {
         // instantiate node from configuration
-        Node::init(config);
+        config = Node::init(config);
     }
 
-    // create transport excryption keys for noise protocol
+    // create transport encryption keys for noise protocol
     let auth_keys = Keypair::<X25519Spec>::new()
     .into_authentic(Node::get_keys())
     .expect("can create auth keys");
 
-    // create a multiproducer, single consumer queue
+    // create a multi producer, single consumer queue
     let (response_sender, mut response_rcv) = mpsc::unbounded();
 
     // create a default user if needed
@@ -96,6 +97,9 @@ pub async fn init() {
     .expect("swarm can be started");
 
 
+    Overlay::init(&config, &mut swarm);
+
+    
     // event loop: listen STDIN, Swarm & Channel responses
     loop {
         let evt = {

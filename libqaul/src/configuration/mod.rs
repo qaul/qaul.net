@@ -2,7 +2,7 @@ use config::{Config, ConfigError, Environment, File};
 use serde::{Deserialize, Serialize};
 use toml;
 use std::{fs};
-use log::{error};
+use log::{error, info};
 
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
@@ -11,6 +11,7 @@ pub struct Node {
     pub id: String,
     pub keys: String,
     pub peers: Vec<String>,
+    pub connections: Vec<String>,
 }
 
 impl Default for Node {
@@ -20,6 +21,7 @@ impl Default for Node {
             id: String::from(""),
             keys: String::from(""),
             peers: vec![String::from(""); 0],
+            connections: vec![String::from("/ip4/0.0.0.0/tcp/0")],
         }
     }
 }
@@ -61,13 +63,6 @@ impl Configuration {
     pub fn new() -> Result<Self, ConfigError> {
         let mut s = Config::new();
 
-        // set default values
-        // for node
-        s.set_default("node.initialized", 0 ).unwrap();
-        s.set_default("node.id", "" ).unwrap();
-        s.set_default("node.keys", "" ).unwrap();
-        s.set_default("node.peers", vec![String::from(""); 0]).unwrap();
-
         // FIXME: There is a problem in the rs-config library, that empty vectors of 
         //       structs cannot be initialized. The only way to do that is to load
         //       a json file. 
@@ -87,7 +82,9 @@ impl Configuration {
         let mut c = s.clone();
         match c.merge(File::with_name("config")) {
             Ok(conf) => s = conf.clone(),
-            Err(e) => error!("./config.toml {:?}", e),
+            Err(e) => {
+                info!("./config.toml {:?}", e);
+            },
         }
 
         // Add configuration options from environment variables (with a prefix of QAUL)
@@ -126,7 +123,7 @@ impl Configuration {
      */
     fn create_default_json() {
         // default json configuration string
-        let json_string = "{\"node\":{\"initialized\":0,\"id\":\"\",\"keys\":\"\",\"peers\":[]},\"users\":[]}".to_string();
+        let json_string = "{\"node\":{\"initialized\":0,\"id\":\"\",\"keys\":\"\",\"peers\":[],\"connections\":[\"/ip4/0.0.0.0/tcp/0\"]},\"users\":[]}".to_string();
         // save file
         fs::write("default.json", json_string).expect("Could not write to file!"); 
     }

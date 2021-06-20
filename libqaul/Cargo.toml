@@ -18,7 +18,7 @@ config = "0.11"
 lazy_static = "1.4"
 toml = "0.5"
 base64 = "0.13"
-state = "0.4"
+state = "0.5"
 
 # internal references
 #qaul_node = { path = "node" }
