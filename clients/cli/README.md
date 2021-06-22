@@ -40,7 +40,7 @@ You can run as many instances on as many machines as you like. the machines just
 There are several commands:
 
 * qaul network
-  * `q ls` - list all peers
+  * `q peers` - list all peers
 * feed service
   * `f {FeedMessage}` - sends the {FeedMessage} into the network and displays it on all nodes
 * page service

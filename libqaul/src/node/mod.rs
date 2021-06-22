@@ -110,8 +110,17 @@ impl Node {
 /**
  * print peers
  */
-pub async fn handle_list_peers(swarm: &mut Swarm<QaulBehaviour>) {
-    info!("Discovered Peers:");
+pub async fn print_peers(swarm: &mut Swarm<QaulBehaviour>) {
+    // List all connections
+    println!("{} peer(s) connected", swarm.network_info().num_peers());
+/*    
+    // Problem: swarm.network is private
+    for peer in swarm.network.connected_peers() {
+        println!("{}", peer);
+    }
+*/
+    // List mdns peers
+    println!("Discovered mdns peers:");
     let nodes = swarm.behaviour().mdns.discovered_nodes();
     let mut unique_peers = HashSet::new();
     for peer in nodes {

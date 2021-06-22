@@ -131,7 +131,7 @@ pub async fn init() {
                 }
                 EventType::Input(line) => match line.as_str() {
                     // node functions
-                    "q ls" => node::handle_list_peers(&mut swarm).await,
+                    "q peers" => node::print_peers(&mut swarm).await,
                     // feed functions
                     cmd if cmd.starts_with("f ") => feed::send(cmd, &mut swarm),
                     // pages functions
