@@ -10,11 +10,8 @@ use async_std::{task, fs};
 use futures::channel::mpsc;
 
 use crate::node::Node;
-use crate::node::mdns::{
-    QaulMessage, 
-    QaulMessageType,
-    QaulBehaviour
-};
+use crate::types::{QaulMessage, QaulMessageType};
+use crate::connections::lan::QaulLanBehaviour;
 
 const STORAGE_FILE_PATH: &str = "./pages.json";
 
@@ -157,7 +154,7 @@ async fn write_local_pages(pages: &Pages) -> Result<()> {
 }
 
 
-pub async fn handle_list_pages(cmd: &str, swarm: &mut Swarm<QaulBehaviour>) {
+pub async fn handle_list_pages(cmd: &str, swarm: &mut Swarm<QaulLanBehaviour>) {
     let rest = cmd.strip_prefix("p ls ");
     match rest {
         Some("all") => {

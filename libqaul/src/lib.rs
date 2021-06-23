@@ -17,20 +17,21 @@ use futures::channel::mpsc;
 use futures::prelude::*;
 use futures::{ pin_mut, select, future::FutureExt };
 
+// create modules
+mod configuration;
+mod connections;
 mod node;
-use node::Node;
-use node::mdns;
-use node::overlay::Overlay;
 mod services;
+mod types;
+
+use types::EventType;
+use node::Node;
+use connections::lan::QaulLanBehaviour;
+use connections::internet::Overlay;
 use services::page;
 use services::feed;
-mod configuration;
 use configuration::Configuration;
 
-pub enum EventType {
-    Response(mdns::QaulMessage),
-    Input(String),
-}
 
 
 pub async fn init() {
@@ -70,7 +71,7 @@ pub async fn init() {
         .boxed();
 
     // create mDNS advertising, libp2p NetworkBehaviour
-    let mut behaviour = mdns::QaulBehaviour {
+    let mut behaviour = QaulLanBehaviour {
         floodsub: Floodsub::new(Node::get_id()),
         // TODO: most probably without the await.expect ...? maybe await.unwrap_or
         mdns: Mdns::new(MdnsConfig::default()).await.expect("can create mdns"),

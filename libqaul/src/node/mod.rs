@@ -8,12 +8,8 @@ use std::collections::HashSet;
 use log::info;
 use base64;
 use state;
-
-pub mod mdns;
-use mdns::QaulBehaviour;
-pub mod overlay;
-
 use crate::configuration::Configuration;
+use crate::connections::lan::QaulLanBehaviour;
 
 
 pub struct Node {
@@ -110,7 +106,7 @@ impl Node {
 /**
  * print peers
  */
-pub async fn print_peers(swarm: &mut Swarm<QaulBehaviour>) {
+pub async fn print_peers(swarm: &mut Swarm<QaulLanBehaviour>) {
     // List all connections
     println!("{} peer(s) connected", swarm.network_info().num_peers());
 /*    

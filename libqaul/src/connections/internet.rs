@@ -15,9 +15,7 @@ use libp2p::{
     swarm::Swarm,
 };
 use log::info;
-use crate::node::mdns::{
-    QaulBehaviour
-};
+use crate::connections::lan::QaulLanBehaviour;
 use crate::configuration::Configuration;
 
 #[derive(Debug)]
@@ -26,7 +24,7 @@ pub struct Overlay {
 }
 
 impl Overlay {
-    pub fn init( config: &Configuration, swarm: &mut Swarm<QaulBehaviour> ) {
+    pub fn init( config: &Configuration, swarm: &mut Swarm<QaulLanBehaviour> ) {
         for addr in &config.node.peers {
             match addr.parse() {
                 Ok(addr) => match swarm.dial_addr(addr) {

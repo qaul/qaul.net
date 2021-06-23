@@ -1,4 +1,3 @@
-use serde::{Serialize, Deserialize};
 use libp2p::{
     mdns::{MdnsEvent, Mdns},
     floodsub::{Floodsub, FloodsubEvent},
@@ -7,38 +6,23 @@ use libp2p::{
 };
 use futures::channel::mpsc;
 use log::info;
-
+use crate::types::QaulMessage;
 use crate::node::Node;
-use crate::services::page;
-use crate::services::page::{
-    PageRequest, PageResponse, PageMode
+use crate::services::{
+    page,
+    page::{PageMode, PageRequest, PageResponse},
+    feed::FeedMessage,
 };
-use crate::services::feed::{
-    FeedMessage
-};
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum QaulMessageType {
-    Page(PageResponse),
-    Feed(FeedMessage)
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct QaulMessage {
-    pub sender: String,
-    pub receiver: String,
-    pub data: QaulMessageType,
-}
 
 #[derive(NetworkBehaviour)]
-pub struct QaulBehaviour {
+pub struct QaulLanBehaviour {
     pub floodsub: Floodsub,
     pub mdns: Mdns,
     #[behaviour(ignore)]
     pub response_sender: mpsc::UnboundedSender<QaulMessage>,
 }
 
-impl NetworkBehaviourEventProcess<MdnsEvent> for QaulBehaviour {
+impl NetworkBehaviourEventProcess<MdnsEvent> for QaulLanBehaviour {
     fn inject_event(&mut self, event: MdnsEvent) {
         match event {
             MdnsEvent::Discovered(discovered_list) => {
@@ -57,7 +41,7 @@ impl NetworkBehaviourEventProcess<MdnsEvent> for QaulBehaviour {
     }
 }
 
-impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulBehaviour {
+impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulLanBehaviour {
     fn inject_event(&mut self, event: FloodsubEvent) {
         match event {
             FloodsubEvent::Message(msg) => {

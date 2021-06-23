@@ -7,9 +7,7 @@ use serde::{Serialize, Deserialize};
 // MPSC = Multi-Producer, Single-Consumer FiFo
 
 use crate::node::Node;
-use crate::node::mdns::{
-    QaulBehaviour
-};
+use crate::connections::lan::QaulLanBehaviour;
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -18,7 +16,7 @@ pub struct FeedMessage {
 }
 
 
-pub fn send(cmd: &str, swarm: &mut Swarm<QaulBehaviour>) {
+pub fn send(cmd: &str, swarm: &mut Swarm<QaulLanBehaviour>) {
     let rest = cmd.strip_prefix("f ");
 
     let msg = FeedMessage {
