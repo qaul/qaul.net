@@ -90,10 +90,10 @@ pub async fn init() {
         .build();
     
     // connect swarm to the first interface listed in 
-    // the configuration config.node.connections
+    // the configuration config.lan.listen
     Swarm::listen_on(
         &mut swarm,
-        config.node.connections.first().unwrap()
+        config.lan.listen
             .parse()
             .expect("can get a local socket"),
     )

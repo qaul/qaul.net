@@ -1,17 +1,22 @@
 use config::{Config, ConfigError, Environment, File};
 use serde::{Deserialize, Serialize};
 use toml;
-use std::{fs};
+use std::fs;
 use log::{error, info};
 
 
+/**
+ * Configuration of the local Node
+ * 
+ * Here the keys and identity are stored
+ */
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Node {
     pub initialized: u8,
     pub id: String,
     pub keys: String,
     pub peers: Vec<String>,
-    pub connections: Vec<String>,
+    pub listen: String,
 }
 
 impl Default for Node {
@@ -21,11 +26,52 @@ impl Default for Node {
             id: String::from(""),
             keys: String::from(""),
             peers: vec![String::from(""); 0],
-            connections: vec![String::from("/ip4/0.0.0.0/tcp/0")],
+            listen: String::from("/ip4/0.0.0.0/tcp/0"),
         }
     }
 }
 
+/**
+ * LAN Connection Module
+ */
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Lan {
+    pub active: bool,
+    pub listen: String,
+}
+
+impl Default for Lan {
+    fn default() -> Self {
+        Lan {
+            active: true,
+            listen: String::from("/ip4/0.0.0.0/tcp/0"),
+        }
+    }
+}
+
+/**
+ * Internet Overlay Connection Module
+ */
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Internet {
+    pub active: bool,
+    pub peers: Vec<String>,
+    pub listen: String,
+}
+
+impl Default for Internet {
+    fn default() -> Self {
+        Internet {
+            active: true,
+            peers: vec![String::from(""); 0],
+            listen: String::from("/ip4/0.0.0.0/tcp/0"),
+        }
+    }
+}
+
+/**
+ * local user accounts that are stored on this node
+ */
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct User {
     pub name: String,
@@ -46,6 +92,8 @@ impl Default for User {
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Configuration {
     pub node: Node,
+    pub lan: Lan,
+    pub internet: Internet,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub users: Vec<User>,
 }
@@ -54,6 +102,8 @@ impl Default for Configuration {
     fn default() -> Self {
         Configuration {
             node: Node::default(),
+            lan: Lan::default(),
+            internet: Internet::default(),
             users: vec![User::default(); 0],
         }
     }
@@ -123,7 +173,12 @@ impl Configuration {
      */
     fn create_default_json() {
         // default json configuration string
-        let json_string = "{\"node\":{\"initialized\":0,\"id\":\"\",\"keys\":\"\",\"peers\":[],\"connections\":[\"/ip4/0.0.0.0/tcp/0\"]},\"users\":[]}".to_string();
+        let json_string = "{
+            \"node\":{\"initialized\":0,\"id\":\"\",\"keys\":\"\"},
+            \"lan\":{\"active\":true,\"listen\":\"/ip4/0.0.0.0/tcp/0\"},
+            \"internet\":{\"active\":true,\"peers\":[],\"accept_incoming\":false,\"listen\":\"/ip4/0.0.0.0/tcp/9229\"},
+            \"users\":[]
+        }".to_string();
         // save file
         fs::write("default.json", json_string).expect("Could not write to file!"); 
     }
