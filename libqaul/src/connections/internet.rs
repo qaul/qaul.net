@@ -1,31 +1,114 @@
 /**
- * # Internet Overlay Module
+ * # Internet Overlay Connection Module
  * 
- * **Statically connect to peers in the Internet.**
+ * **Statically connect to nodes in the Internet.**
  * 
- * This module connects to static peers in the internet.
- * The overlay peers are read from the config file:
+ * This module connects to predefined nodes in the internet.
+ * The addresses of the peers to connect to are read from 
+ * the config file:
  * 
  * ```toml
- * [node]
+ * [internet]
+ * active = true
  * peers = ["/ip4/144.91.74.192/tcp/9229"]
+ * do_listen = false
+ * listen = "/ip4/0.0.0.0/tcp/9229"
  * ```
  */
+
 use libp2p::{
-    swarm::Swarm,
+    core::upgrade,
+    noise::{NoiseConfig, X25519Spec, AuthenticKeypair},
+    tcp::TcpConfig,
+    mplex,
+    identify::{Identify, IdentifyConfig, IdentifyEvent},
+    Transport,
+    floodsub::{Floodsub, FloodsubEvent},
+    swarm::{
+        Swarm, NetworkBehaviourEventProcess, SwarmBuilder, ExpandedSwarm,
+        protocols_handler::ProtocolsHandler,
+        IntoProtocolsHandler, NetworkBehaviour,
+    },
+    NetworkBehaviour,
 };
 use log::info;
-use crate::connections::lan::QaulLanBehaviour;
+use async_std::task;
+use futures::channel::mpsc;
+use mpsc::{UnboundedReceiver, UnboundedSender};
+use crate::types::QaulMessage;
+use crate::node::Node;
+use crate::services::{
+    page,
+    page::{PageMode, PageRequest, PageResponse},
+    feed::FeedMessage,
+};
 use crate::configuration::Configuration;
 
-#[derive(Debug)]
-pub struct Overlay {
 
+#[derive(NetworkBehaviour)]
+pub struct QaulInternetBehaviour {
+    pub floodsub: Floodsub,
+    pub identify: Identify,
+    #[behaviour(ignore)]
+    pub response_sender: UnboundedSender<QaulMessage>,
 }
 
-impl Overlay {
-    pub fn init( config: &Configuration, swarm: &mut Swarm<QaulLanBehaviour> ) {
-        for addr in &config.node.peers {
+pub struct Internet {
+    pub swarm: ExpandedSwarm<QaulInternetBehaviour, <<<QaulInternetBehaviour as NetworkBehaviour>::ProtocolsHandler as IntoProtocolsHandler>::Handler as ProtocolsHandler>::InEvent, <<<QaulInternetBehaviour as NetworkBehaviour>::ProtocolsHandler as IntoProtocolsHandler>::Handler as ProtocolsHandler>::OutEvent, <QaulInternetBehaviour as NetworkBehaviour>::ProtocolsHandler>, 
+    pub receiver: UnboundedReceiver<QaulMessage>,
+}
+
+impl Internet {
+    /**
+     * Initialize swarm for Internet overlay connection module
+     */
+    pub async fn init(config: Configuration, auth_keys: AuthenticKeypair<X25519Spec>) -> (Configuration, Self) {
+        // create a multi producer, single consumer queue
+        let (response_sender, mut response_rcv) = mpsc::unbounded();
+    
+        // create a TCP transport
+        let transp = TcpConfig::new()
+            .upgrade(upgrade::Version::V1)
+            .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
+            .multiplex(mplex::MplexConfig::new())
+            .boxed();
+
+        // create behaviour
+        let mut behaviour = QaulInternetBehaviour {
+            floodsub: Floodsub::new(Node::get_id()),
+            identify: Identify::new(IdentifyConfig::new("/ipfs/0.1.0".into(), Node::get_keys().public())),
+            response_sender,
+        }; 
+        behaviour.floodsub.subscribe(Node::get_topic());
+
+        // swarm libp2p connection management
+        let mut swarm = SwarmBuilder::new(transp, behaviour, Node::get_id())
+            .executor(Box::new(|fut| {
+                task::spawn(fut);
+            }))
+            .build();
+        
+        // connect swarm to the listening interface in 
+        // the configuration config.internet.listen
+        Swarm::listen_on(
+            &mut swarm,
+            config.internet.listen
+                .parse()
+                .expect("can get a local socket"),
+        )
+        .expect("swarm can be started");
+
+        // connect to configured remote peers
+        Self::peer_connect(&config, &mut swarm);
+
+        // construct internet object
+        let internet = Internet { swarm: swarm, receiver: response_rcv };
+
+        (config, internet)
+    }
+
+    pub fn peer_connect( config: &Configuration, swarm: &mut Swarm<QaulInternetBehaviour> ) {
+        for addr in &config.internet.peers {
             match addr.parse() {
                 Ok(addr) => match swarm.dial_addr(addr) {
                     Ok(_) => info!("peer connected"),
@@ -33,6 +116,53 @@ impl Overlay {
                 },
                 Err(error) => info!("peer address parse error: {:?}", error),
             }
+        }
+    }
+}
+
+impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
+    fn inject_event(&mut self, event: IdentifyEvent) {
+        info!("{:?}", event);
+    }
+}
+
+impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulInternetBehaviour {
+    fn inject_event(&mut self, event: FloodsubEvent) {
+        match event {
+            FloodsubEvent::Message(msg) => {
+                // feed Message
+                if let Ok(resp) = serde_json::from_slice::<FeedMessage>(&msg.data) {
+                    info!("Feed from {}", msg.source);
+                    info!("{}", resp.message);
+                }
+                // Pages Messages
+                else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
+                    //if resp.receiver == node::get_id_string() {
+                        info!("Response from {}", msg.source);
+                        resp.data.iter().for_each(|r| info!("{:?}", r));
+                    //}
+                } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
+                    match req.mode {
+                        PageMode::ALL => {
+                            info!("Received All req: {:?} from {:?}", req, msg.source);
+                            page::respond_with_public_pages(
+                                self.response_sender.clone(),
+                                msg.source.to_string(),
+                            );
+                        }
+                        PageMode::One(ref peer_id) => {
+                            if peer_id.to_string() == Node::get_id_string() {
+                                info!("Received req: {:?} from {:?}", req, msg.source);
+                                page::respond_with_public_pages(
+                                    self.response_sender.clone(),
+                                    msg.source.to_string(),
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+            _ => (),
         }
     }
 }

@@ -1,3 +1,13 @@
+/**
+ * # Configuration
+ * 
+ * **Configure qaul.net via a config file, or from the commandline.**
+ * 
+ * On the first startup a `config.toml` file is saved.
+ * It can be configured and will be read on the next startup.
+ * All options are configurable from the commandline too.
+ */
+
 use config::{Config, ConfigError, Environment, File};
 use serde::{Deserialize, Serialize};
 use toml;
@@ -15,8 +25,6 @@ pub struct Node {
     pub initialized: u8,
     pub id: String,
     pub keys: String,
-    pub peers: Vec<String>,
-    pub listen: String,
 }
 
 impl Default for Node {
@@ -25,8 +33,6 @@ impl Default for Node {
             initialized: 0,
             id: String::from(""),
             keys: String::from(""),
-            peers: vec![String::from(""); 0],
-            listen: String::from("/ip4/0.0.0.0/tcp/0"),
         }
     }
 }
@@ -56,6 +62,7 @@ impl Default for Lan {
 pub struct Internet {
     pub active: bool,
     pub peers: Vec<String>,
+    pub do_listen: bool,
     pub listen: String,
 }
 
@@ -64,7 +71,8 @@ impl Default for Internet {
         Internet {
             active: true,
             peers: vec![String::from(""); 0],
-            listen: String::from("/ip4/0.0.0.0/tcp/0"),
+            do_listen: false,
+            listen: String::from("/ip4/0.0.0.0/tcp/9229"),
         }
     }
 }
@@ -176,7 +184,7 @@ impl Configuration {
         let json_string = "{
             \"node\":{\"initialized\":0,\"id\":\"\",\"keys\":\"\"},
             \"lan\":{\"active\":true,\"listen\":\"/ip4/0.0.0.0/tcp/0\"},
-            \"internet\":{\"active\":true,\"peers\":[],\"accept_incoming\":false,\"listen\":\"/ip4/0.0.0.0/tcp/9229\"},
+            \"internet\":{\"active\":true,\"peers\":[],\"do_listen\":false,\"listen\":\"/ip4/0.0.0.0/tcp/9229\"},
             \"users\":[]
         }".to_string();
         // save file

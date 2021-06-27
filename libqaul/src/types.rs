@@ -16,6 +16,6 @@ pub struct QaulMessage {
 }
 
 pub enum EventType {
-    Response(QaulMessage),
-    Input(String),
+    Message(QaulMessage),
+    Cli(String),
 }

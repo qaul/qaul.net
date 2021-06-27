@@ -21,8 +21,22 @@ pub struct Node {
 static STATE: state::Storage<Node> = state::Storage::new();
 
 impl Node {
+    // start an existing node from the config parameters
+    pub fn init( mut config: Configuration) -> Configuration {
+        if config.node.initialized == 0 {
+            // create a new node and save it to configuration
+            config = Self::new(config);
+        }
+        else {
+            // instantiate node from configuration
+            config = Self::from_config(config);
+        }
+
+        config
+    }
+
     // create a new node and save the parameters into config
-    pub fn new(mut config: Configuration) -> Configuration {
+    fn new(mut config: Configuration) -> Configuration {
         // create node & configuration
         let keys_ed25519 = ed25519::Keypair::generate();
         config.node.keys = base64::encode(keys_ed25519.encode());
@@ -46,7 +60,7 @@ impl Node {
     }
 
     // start an existing node from the config parameters
-    pub fn init(config: Configuration) -> Configuration {
+    fn from_config(config: Configuration) -> Configuration {
         let mut basedecode = base64::decode(&config.node.keys).unwrap();
         let keys = Keypair::Ed25519(ed25519::Keypair::decode( &mut basedecode).unwrap());
         let id = PeerId::from(keys.public());
@@ -109,12 +123,7 @@ impl Node {
 pub async fn print_peers(swarm: &mut Swarm<QaulLanBehaviour>) {
     // List all connections
     println!("{} peer(s) connected", swarm.network_info().num_peers());
-/*    
-    // Problem: swarm.network is private
-    for peer in swarm.network.connected_peers() {
-        println!("{}", peer);
-    }
-*/
+
     // List mdns peers
     println!("Discovered mdns peers:");
     let nodes = swarm.behaviour().mdns.discovered_nodes();

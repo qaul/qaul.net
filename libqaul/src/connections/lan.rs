@@ -1,11 +1,39 @@
+/**
+ * # LAN Connection Module
+ * 
+ * **Discover other qaul nodes on the local LAN and connect to them.**
+ * 
+ * This module advertises the node via mdns in the local network.
+ * By default it listens to all interfaces and connects to a random port.
+ * 
+ * The module is configured in the configuration file:
+ * 
+ * ```toml
+ * [lan]
+ * active = true
+ * listen = "/ip4/0.0.0.0/tcp/0"
+ * ```
+ */
+
 use libp2p::{
-    mdns::{MdnsEvent, Mdns},
+    core::upgrade,
+    noise::{NoiseConfig, X25519Spec, AuthenticKeypair},
+    tcp::TcpConfig,
+    mplex,
+    mdns::{Mdns, MdnsConfig, MdnsEvent},
+    Transport,
     floodsub::{Floodsub, FloodsubEvent},
-    swarm::NetworkBehaviourEventProcess,
+    swarm::{
+        Swarm, NetworkBehaviourEventProcess, SwarmBuilder, ExpandedSwarm,
+        protocols_handler::ProtocolsHandler,
+        IntoProtocolsHandler, NetworkBehaviour
+    },
     NetworkBehaviour,
 };
 use futures::channel::mpsc;
 use log::info;
+use async_std::task;
+use mpsc::UnboundedReceiver;
 use crate::types::QaulMessage;
 use crate::node::Node;
 use crate::services::{
@@ -13,6 +41,8 @@ use crate::services::{
     page::{PageMode, PageRequest, PageResponse},
     feed::FeedMessage,
 };
+use crate::configuration::Configuration;
+
 
 #[derive(NetworkBehaviour)]
 pub struct QaulLanBehaviour {
@@ -20,6 +50,55 @@ pub struct QaulLanBehaviour {
     pub mdns: Mdns,
     #[behaviour(ignore)]
     pub response_sender: mpsc::UnboundedSender<QaulMessage>,
+}
+
+pub struct Lan {
+    pub swarm: ExpandedSwarm<QaulLanBehaviour, <<<QaulLanBehaviour as NetworkBehaviour>::ProtocolsHandler as IntoProtocolsHandler>::Handler as ProtocolsHandler>::InEvent, <<<QaulLanBehaviour as NetworkBehaviour>::ProtocolsHandler as IntoProtocolsHandler>::Handler as ProtocolsHandler>::OutEvent, <QaulLanBehaviour as NetworkBehaviour>::ProtocolsHandler>, 
+    pub receiver: UnboundedReceiver<QaulMessage>,
+}
+
+/**
+ * Initialize swarm for LAN connection module
+ */
+pub async fn init(config: Configuration, auth_keys: AuthenticKeypair<X25519Spec>) -> (Configuration, Lan) {
+    // create a multi producer, single consumer queue
+    let (response_sender, mut response_rcv) = mpsc::unbounded();
+   
+    // create a TCP transport
+    let transp = TcpConfig::new()
+        .upgrade(upgrade::Version::V1)
+        .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
+        .multiplex(mplex::MplexConfig::new())
+        .boxed();
+
+    // create behaviour
+    let mut behaviour = QaulLanBehaviour {
+        floodsub: Floodsub::new(Node::get_id()),
+        mdns: Mdns::new(MdnsConfig::default()).await.expect("can create mdns"),
+        response_sender,
+    }; 
+    behaviour.floodsub.subscribe(Node::get_topic());
+
+    // swarm libp2p connection management
+    let mut swarm = SwarmBuilder::new(transp, behaviour, Node::get_id())
+        .executor(Box::new(|fut| {
+            task::spawn(fut);
+        }))
+        .build();
+    
+    // connect swarm to the listening interface in 
+    // the configuration config.lan.listen
+    Swarm::listen_on(
+        &mut swarm,
+        config.lan.listen
+            .parse()
+            .expect("can get a local socket"),
+    )
+    .expect("swarm can be started");
+
+    let lan = Lan { swarm: swarm, receiver: response_rcv };
+
+    (config, lan)
 }
 
 impl NetworkBehaviourEventProcess<MdnsEvent> for QaulLanBehaviour {
