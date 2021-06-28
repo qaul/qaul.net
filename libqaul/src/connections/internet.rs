@@ -98,7 +98,8 @@ impl Internet {
         )
         .expect("swarm can be started");
 
-        // connect to configured remote peers
+        // connect to remote peers that are specified in 
+        // the configuration config.internet.peers
         Self::peer_connect(&config, &mut swarm);
 
         // construct internet object
@@ -107,22 +108,43 @@ impl Internet {
         (config, internet)
     }
 
+    /**
+     * connect to remote peers that are specified in 
+     * the configuration config.internet.peers
+     */
     pub fn peer_connect( config: &Configuration, swarm: &mut Swarm<QaulInternetBehaviour> ) {
         for addr in &config.internet.peers {
+            let tried = addr.clone();
             match addr.parse() {
                 Ok(addr) => match swarm.dial_addr(addr) {
-                    Ok(_) => info!("peer connected"),
-                    Err(error) => info!("peer swarm dial error: {:?}", error),
+                    Ok(_) => info!("peer {:?} dialed", tried),
+                    Err(error) => info!("peer {} swarm dial error: {:?}", tried, error),
                 },
-                Err(error) => info!("peer address parse error: {:?}", error),
+                Err(error) => info!("peer address {} parse error: {:?}", tried, error),
             }
         }
+    }
+
+    /**
+     * Print information about this connection
+     */
+    pub fn info(&self) {
+        println!("# Internet Connection Module");
+        // number of peers connected
+        println!("{} peer(s) connected", self.swarm.network_info().num_peers());
     }
 }
 
 impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
     fn inject_event(&mut self, event: IdentifyEvent) {
         info!("{:?}", event);
+        match event {
+            IdentifyEvent::Received { peer_id, info } => {
+                self.floodsub.add_node_to_partial_view(peer_id);
+                info!("added peer_id {:?} to floodsub", peer_id);
+            },
+            _ => info!("unhandled event"),
+        }
     }
 }
 

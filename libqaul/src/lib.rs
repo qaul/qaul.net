@@ -79,9 +79,9 @@ pub async fn init() -> ! {
                 EventType::Cli(cli) => match cli.as_str() {
                     // node functions
                     "q peers" => {
-                        info!("TODO 'q peers' command not yet implemented");
-                        // TODO
-                        //node::print_peers(&mut conn.lan.swarm).await,
+                        // print information about the connections
+                        conn.internet.info();
+                        conn.lan.info();
                     }
                     // feed functions
                     cmd if cmd.starts_with("f ") => {

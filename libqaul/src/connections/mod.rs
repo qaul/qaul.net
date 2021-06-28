@@ -6,11 +6,9 @@
 
 use libp2p::{
     noise::{Keypair, X25519Spec},
-    PeerId
 };
 use crate::node::Node;
 use crate::configuration::Configuration;
-use futures::executor::block_on;
 
 pub mod lan;
 use lan::Lan;
@@ -31,7 +29,7 @@ impl Connections {
         .expect("can create auth keys");
 
         // initialize Lan module
-        let (config, lan) = lan::init(config, auth_keys.clone()).await;
+        let (config, lan) = Lan::init(config, auth_keys.clone()).await;
 
         // initialize Internet overlay module
         let (config, internet) = Internet::init(config, auth_keys).await;

@@ -31,6 +31,7 @@ use libp2p::{
     NetworkBehaviour,
 };
 use futures::channel::mpsc;
+use std::collections::HashSet;
 use log::info;
 use async_std::task;
 use mpsc::UnboundedReceiver;
@@ -57,48 +58,68 @@ pub struct Lan {
     pub receiver: UnboundedReceiver<QaulMessage>,
 }
 
-/**
- * Initialize swarm for LAN connection module
- */
-pub async fn init(config: Configuration, auth_keys: AuthenticKeypair<X25519Spec>) -> (Configuration, Lan) {
-    // create a multi producer, single consumer queue
-    let (response_sender, mut response_rcv) = mpsc::unbounded();
-   
-    // create a TCP transport
-    let transp = TcpConfig::new()
-        .upgrade(upgrade::Version::V1)
-        .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
-        .multiplex(mplex::MplexConfig::new())
-        .boxed();
-
-    // create behaviour
-    let mut behaviour = QaulLanBehaviour {
-        floodsub: Floodsub::new(Node::get_id()),
-        mdns: Mdns::new(MdnsConfig::default()).await.expect("can create mdns"),
-        response_sender,
-    }; 
-    behaviour.floodsub.subscribe(Node::get_topic());
-
-    // swarm libp2p connection management
-    let mut swarm = SwarmBuilder::new(transp, behaviour, Node::get_id())
-        .executor(Box::new(|fut| {
-            task::spawn(fut);
-        }))
-        .build();
+impl Lan {
+    /**
+     * Initialize swarm for LAN connection module
+     */
+    pub async fn init(config: Configuration, auth_keys: AuthenticKeypair<X25519Spec>) -> (Configuration, Lan) {
+        // create a multi producer, single consumer queue
+        let (response_sender, mut response_rcv) = mpsc::unbounded();
     
-    // connect swarm to the listening interface in 
-    // the configuration config.lan.listen
-    Swarm::listen_on(
-        &mut swarm,
-        config.lan.listen
-            .parse()
-            .expect("can get a local socket"),
-    )
-    .expect("swarm can be started");
+        // create a TCP transport
+        let transp = TcpConfig::new()
+            .upgrade(upgrade::Version::V1)
+            .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
+            .multiplex(mplex::MplexConfig::new())
+            .boxed();
 
-    let lan = Lan { swarm: swarm, receiver: response_rcv };
+        // create behaviour
+        let mut behaviour = QaulLanBehaviour {
+            floodsub: Floodsub::new(Node::get_id()),
+            mdns: Mdns::new(MdnsConfig::default()).await.expect("can create mdns"),
+            response_sender,
+        }; 
+        behaviour.floodsub.subscribe(Node::get_topic());
 
-    (config, lan)
+        // swarm libp2p connection management
+        let mut swarm = SwarmBuilder::new(transp, behaviour, Node::get_id())
+            .executor(Box::new(|fut| {
+                task::spawn(fut);
+            }))
+            .build();
+        
+        // connect swarm to the listening interface in 
+        // the configuration config.lan.listen
+        Swarm::listen_on(
+            &mut swarm,
+            config.lan.listen
+                .parse()
+                .expect("can get a local socket"),
+        )
+        .expect("swarm can be started");
+
+        let lan = Lan { swarm: swarm, receiver: response_rcv };
+
+        (config, lan)
+    }
+
+    /**
+     * Print information about this connection
+     */
+    pub fn info(&self) {
+        println!("# Lan Connection Module");
+        // number of peers connected
+        println!("{} peer(s) connected", self.swarm.network_info().num_peers());
+
+        // List mdns peers
+        println!("Discovered mdns peers:");
+        let nodes = self.swarm.behaviour().mdns.discovered_nodes();
+        let mut unique_peers = HashSet::new();
+        for peer in nodes {
+            unique_peers.insert(peer);
+        }
+        unique_peers.iter().for_each(|p| info!("{}", p));
+    }
 }
 
 impl NetworkBehaviourEventProcess<MdnsEvent> for QaulLanBehaviour {
