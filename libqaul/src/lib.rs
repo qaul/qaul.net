@@ -48,18 +48,25 @@ pub async fn init() -> ! {
             let cli_fut = stdin.next().fuse();
             let lan_event_fut = conn.lan.swarm.next().fuse();
             let lan_message_fut = conn.lan.receiver.next().fuse();
+            let internet_event_fut = conn.internet.swarm.next().fuse();
+            let internet_message_fut = conn.internet.receiver.next().fuse();
 
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
             // You need to downgrade to version 0.2.400 if this happens to you
-            pin_mut!(cli_fut, lan_event_fut, lan_message_fut);
+            pin_mut!(cli_fut, lan_event_fut, lan_message_fut, internet_event_fut, internet_message_fut);
 
             select! {
                 cli = cli_fut => Some(EventType::Cli(cli.expect("can get line").expect("can read line from stdin"))),
                 lan_event = lan_event_fut => {
-                    info!("Unhandled Swarm Event: {:?}", lan_event);
+                    info!("Unhandled Lan Swarm Event: {:?}", lan_event);
                     None
                 },
                 lan_message = lan_message_fut => Some(EventType::Message(lan_message.expect("response exists"))),
+                internet_event = internet_event_fut => {
+                    info!("Unhandled Internet Swarm Event: {:?}", internet_event);
+                    None
+                },
+                internet_message = internet_message_fut => Some(EventType::Message(internet_message.expect("response exists"))),
             }
         };
 
@@ -78,7 +85,7 @@ pub async fn init() -> ! {
                     }
                     // feed functions
                     cmd if cmd.starts_with("f ") => {
-                        feed::send(cmd, &mut conn.lan.swarm)
+                        feed::send(cmd, &mut conn.lan.swarm, &mut conn.internet.swarm);
                     },
                     // pages functions
                     cmd if cmd.starts_with("p ls") => {

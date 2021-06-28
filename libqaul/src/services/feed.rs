@@ -1,12 +1,11 @@
-use libp2p::{
-    swarm::Swarm,
-};
+use libp2p::{swarm::{NetworkBehaviour, Swarm}};
 use serde::{Serialize, Deserialize};
 // Async comparison
 // https://runrust.miraheze.org/wiki/Async_crate_comparison
 // MPSC = Multi-Producer, Single-Consumer FiFo
 
-use crate::node::Node;
+use crate::node::Node; 
+use crate::connections::internet::QaulInternetBehaviour;
 use crate::connections::lan::QaulLanBehaviour;
 
 
@@ -16,14 +15,18 @@ pub struct FeedMessage {
 }
 
 
-pub fn send(cmd: &str, swarm: &mut Swarm<QaulLanBehaviour>) {
+pub fn send(cmd: &str, lan: &mut Swarm<QaulLanBehaviour>, internet: &mut Swarm<QaulInternetBehaviour>)
+{
     let rest = cmd.strip_prefix("f ");
 
     let msg = FeedMessage {
         message: rest.unwrap().to_string(),
     };
 
-    // fload via MDNS
     let json = serde_json::to_string(&msg).expect("can jsonify request");
-    swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
+
+    // flood via floodsub
+    lan.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
+    internet.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
 }
+
