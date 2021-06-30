@@ -118,7 +118,7 @@ impl Lan {
         for peer in nodes {
             unique_peers.insert(peer);
         }
-        unique_peers.iter().for_each(|p| info!("{}", p));
+        unique_peers.iter().for_each(|p| println!("  {}", p));
     }
 }
 
