@@ -75,6 +75,7 @@ pub async fn init() -> ! {
                 EventType::Message(resp) => {
                     let json = serde_json::to_string(&resp).expect("can jsonify response");
                     conn.lan.swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
+                    conn.internet.swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
                 }
                 EventType::Cli(cli) => match cli.as_str() {
                     // node functions
@@ -89,7 +90,7 @@ pub async fn init() -> ! {
                     },
                     // pages functions
                     cmd if cmd.starts_with("p ls") => {
-                        page::handle_list_pages(cmd, &mut conn.lan.swarm).await
+                        page::handle_list_pages(cmd, &mut conn.lan.swarm, &mut conn.internet.swarm).await
 
                     },
                     cmd if cmd.starts_with("p create") => page::handle_create_page(cmd).await,

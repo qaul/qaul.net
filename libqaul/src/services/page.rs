@@ -12,6 +12,7 @@ use futures::channel::mpsc;
 use crate::node::Node;
 use crate::types::{QaulMessage, QaulMessageType};
 use crate::connections::lan::QaulLanBehaviour;
+use crate::connections::internet::QaulInternetBehaviour;
 
 const STORAGE_FILE_PATH: &str = "./pages.json";
 
@@ -154,7 +155,7 @@ async fn write_local_pages(pages: &Pages) -> Result<()> {
 }
 
 
-pub async fn handle_list_pages(cmd: &str, swarm: &mut Swarm<QaulLanBehaviour>) {
+pub async fn handle_list_pages(cmd: &str, lan: &mut Swarm<QaulLanBehaviour>, internet: &mut Swarm<QaulInternetBehaviour>) {
     let rest = cmd.strip_prefix("p ls ");
     match rest {
         Some("all") => {
@@ -162,14 +163,16 @@ pub async fn handle_list_pages(cmd: &str, swarm: &mut Swarm<QaulLanBehaviour>) {
                 mode: PageMode::ALL,
             };
             let json = serde_json::to_string(&req).expect("can jsonify request");
-            swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
+            lan.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
+            internet.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
         }
         Some(pages_peer_id) => {
             let req = PageRequest {
                 mode: PageMode::One(pages_peer_id.to_owned()),
             };
             let json = serde_json::to_string(&req).expect("can jsonify request");
-            swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
+            lan.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
+            internet.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
         }
         None => {
             match read_local_pages().await {
