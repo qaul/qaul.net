@@ -64,7 +64,7 @@ impl Internet {
      */
     pub async fn init(config: Configuration, auth_keys: AuthenticKeypair<X25519Spec>) -> (Configuration, Self) {
         // create a multi producer, single consumer queue
-        let (response_sender, mut response_rcv) = mpsc::unbounded();
+        let (response_sender, response_rcv) = mpsc::unbounded();
     
         // create a TCP transport
         let transp = TcpConfig::new()
@@ -137,13 +137,20 @@ impl Internet {
 
 impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
     fn inject_event(&mut self, event: IdentifyEvent) {
-        info!("{:?}", event);
+        //info!("{:?}", event);
         match event {
             IdentifyEvent::Received { peer_id, info } => {
                 self.floodsub.add_node_to_partial_view(peer_id);
+                info!("IdentifyEvent received");
                 info!("added peer_id {:?} to floodsub", peer_id);
+                info!("  public key: {:?}", info.public_key);
+                info!("  protocol version: {:?}", info.protocol_version);
+                info!("  agent version: {:?}", info.agent_version);
+                info!("  listen addresses: {:?}", info.listen_addrs);
+                info!("  protocols: {:?}", info.protocols);
+                info!("  observed address: {:?}", info.observed_addr);
             },
-            _ => info!("unhandled event"),
+            _ => info!("unhandled IdentifyEvent event received: {:?}", event),
         }
     }
 }

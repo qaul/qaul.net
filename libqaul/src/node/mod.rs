@@ -2,14 +2,11 @@ use libp2p::{
     PeerId,
     identity::{Keypair, ed25519},
     floodsub::Topic,
-    swarm::Swarm,
 };
-use std::collections::HashSet;
 use log::info;
 use base64;
 use state;
 use crate::configuration::Configuration;
-use crate::connections::lan::QaulLanBehaviour;
 
 
 pub struct Node {

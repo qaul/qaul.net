@@ -1,6 +1,3 @@
-use libp2p::{
-    Transport,
-};
 use log::{error, info};
 // Async comparison
 // https://runrust.miraheze.org/wiki/Async_crate_comparison
@@ -36,7 +33,7 @@ pub async fn init() -> ! {
     config = Node::init(config);
 
     // Initialize Connection Modules
-    let (config, mut conn) = Connections::init(config).await;
+    let (_config, mut conn) = Connections::init(config).await;
 
     // listen for new commands from CLI
     let mut stdin = io::BufReader::new(io::stdin()).lines();

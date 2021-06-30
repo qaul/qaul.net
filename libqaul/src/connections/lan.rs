@@ -64,7 +64,7 @@ impl Lan {
      */
     pub async fn init(config: Configuration, auth_keys: AuthenticKeypair<X25519Spec>) -> (Configuration, Lan) {
         // create a multi producer, single consumer queue
-        let (response_sender, mut response_rcv) = mpsc::unbounded();
+        let (response_sender, response_rcv) = mpsc::unbounded();
     
         // create a TCP transport
         let transp = TcpConfig::new()

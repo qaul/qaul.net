@@ -1,4 +1,4 @@
-use libp2p::{swarm::{NetworkBehaviour, Swarm}};
+use libp2p::swarm::Swarm;
 use serde::{Serialize, Deserialize};
 // Async comparison
 // https://runrust.miraheze.org/wiki/Async_crate_comparison
