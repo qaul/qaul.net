@@ -78,7 +78,7 @@ impl Lan {
             floodsub: Floodsub::new(Node::get_id()),
             mdns: Mdns::new(MdnsConfig::default()).await.expect("can create mdns"),
             response_sender,
-        }; 
+        };
         behaviour.floodsub.subscribe(Node::get_topic());
 
         // swarm libp2p connection management
@@ -127,12 +127,14 @@ impl NetworkBehaviourEventProcess<MdnsEvent> for QaulLanBehaviour {
         match event {
             MdnsEvent::Discovered(discovered_list) => {
                 for (peer, _addr) in discovered_list {
+                    info!("MdnsEvent::Discovered, peer {:?} to floodsub added", peer);
                     self.floodsub.add_node_to_partial_view(peer);
                 }
             }
             MdnsEvent::Expired(expired_list) => {
                 for (peer, _addr) in expired_list {
                     if !self.mdns.has_node(&peer) {
+                        info!("MdnsEvent::Expired, peer {:?} from floodsub removed", peer);
                         self.floodsub.remove_node_from_partial_view(&peer);
                     }
                 }
