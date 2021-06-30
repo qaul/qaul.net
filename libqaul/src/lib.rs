@@ -2,103 +2,130 @@ use log::{error, info};
 // Async comparison
 // https://runrust.miraheze.org/wiki/Async_crate_comparison
 // MPSC = Multi-Producer, Single-Consumer FiFo
-use async_std::io;
+use async_std::{task, io};
 use futures::prelude::*;
-use futures::{ pin_mut, select, future::FutureExt };
+use std::task::{Context, Poll};
 
 // create modules
 mod configuration;
 mod connections;
 mod node;
+mod router;
 mod services;
 mod types;
-
-use types::EventType;
 use node::Node;
-use connections::Connections;
-use services::page;
+use node::users::Users;
+use router::Router;
+use router::flooder;
+use crate::connections::{Connections, ConnectionModule};
+use services::Services;
 use services::feed;
 use configuration::Configuration;
 
 
 
-pub async fn init() -> ! {
+pub async fn init() -> () {
     pretty_env_logger::init();
 
-    // Load configuration
-    let mut config = Configuration::new().unwrap();
-    println!("{:?}", config);
+    // initialize & load configuration
+    Configuration::init();
 
-    // initialize node
-    config = Node::init(config);
+    // initialize users
+    Router::init();
 
-    // Initialize Connection Modules
-    let (_config, mut conn) = Connections::init(config).await;
+    // initialize node & user accounts
+    Node::init();
+
+    // initialize Connection Modules
+    let mut conn = Connections::init().await;
+
+    // initialize services
+    Services::init();
 
     // listen for new commands from CLI
     let mut stdin = io::BufReader::new(io::stdin()).lines();
 
-
-    // event loop: listen STDIN, Swarm & Channel responses
-    loop {
-        let evt = {
-            let cli_fut = stdin.next().fuse();
-            let lan_event_fut = conn.lan.swarm.next().fuse();
-            let lan_message_fut = conn.lan.receiver.next().fuse();
-            let internet_event_fut = conn.internet.swarm.next().fuse();
-            let internet_message_fut = conn.internet.receiver.next().fuse();
-
-            // This Macro is shown wrong by Rust-Language-Server > 0.2.400
-            // You need to downgrade to version 0.2.400 if this happens to you
-            pin_mut!(cli_fut, lan_event_fut, lan_message_fut, internet_event_fut, internet_message_fut);
-
-            select! {
-                cli = cli_fut => Some(EventType::Cli(cli.expect("can get line").expect("can read line from stdin"))),
-                lan_event = lan_event_fut => {
-                    info!("Unhandled Lan Swarm Event: {:?}", lan_event);
-                    None
-                },
-                lan_message = lan_message_fut => Some(EventType::Message(lan_message.expect("response exists"))),
-                internet_event = internet_event_fut => {
-                    info!("Unhandled Internet Swarm Event: {:?}", internet_event);
-                    None
-                },
-                internet_message = internet_message_fut => Some(EventType::Message(internet_message.expect("response exists"))),
-            }
-        };
-
-        if let Some(event) = evt {
-            match event {
-                EventType::Message(resp) => {
-                    let json = serde_json::to_string(&resp).expect("can jsonify response");
-                    conn.lan.swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
-                    conn.internet.swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
-                }
-                EventType::Cli(cli) => match cli.as_str() {
-                    // node functions
-                    "q peers" => {
-                        // print information about the connections
-                        conn.internet.info();
-                        conn.lan.info();
+    // loop & poll network and CLI
+    task::block_on(future::poll_fn(move |cx: &mut Context<'_>| {
+        // poll CLI
+        loop {
+            match stdin.poll_next_unpin(cx) {
+                Poll::Ready(Some(input)) => {
+                    if let Ok(line) = input {
+                        match line.as_str() {
+                            // node functions
+                            "qaul peers" => {
+                                // print information about the connections
+                                conn.internet.info();
+                                conn.lan.info();
+                            }
+                            // user functions
+                            cmd if cmd.starts_with("user ") => {
+                                Users::cli(cmd.strip_prefix("user ").unwrap());
+                            },
+                            // neighbours functions
+                            cmd if cmd.starts_with("neighbours ") => {
+                                router::neighbours::Neighbours::cli(cmd.strip_prefix("neighbours ").unwrap());
+                            },
+                            // send feed message
+                            cmd if cmd.starts_with("feed ") => {
+                                feed::Feed::cli(cmd.strip_prefix("feed ").unwrap(), &mut conn);
+                            },
+                            _ => error!("unknown command"),
+                        }
                     }
-                    // feed functions
-                    cmd if cmd.starts_with("f ") => {
-                        feed::send(cmd, &mut conn.lan.swarm, &mut conn.internet.swarm);
-                    },
-                    // pages functions
-                    cmd if cmd.starts_with("p ls") => {
-                        page::handle_list_pages(cmd, &mut conn.lan.swarm, &mut conn.internet.swarm).await
-
-                    },
-                    cmd if cmd.starts_with("p create") => page::handle_create_page(cmd).await,
-                    cmd if cmd.starts_with("p publish") => page::handle_publish_page(cmd).await,
-                    // unknown command
-                    _ => error!("unknown command"),
+                    else {
+                        error!("CLI input error: {:?}", input);
+                    }
                 },
+                Poll::Ready(None) => panic!("Stdin closed"),
+                Poll::Pending => break
             }
         }
-    }
+        // poll LAN connection
+        loop {
+            match conn.lan.swarm.poll_next_unpin(cx) {
+                Poll::Ready(Some(event)) => {
+                    info!("Lan SwarmEvent: {:?}", event);
+                    // if let SwarmEvent::NewListenAddr(addr) = event {
+                    //     println!("Listening on {:?}", addr);
+                    // }
+                }
+                Poll::Ready(None) => return Poll::Ready(()),
+                Poll::Pending => break,
+            }
+        }
+        // poll Internet connection
+        loop {
+            match conn.internet.swarm.poll_next_unpin(cx) {
+                Poll::Ready(Some(event)) => {
+                    info!("Internet SwarmEvent: {:?}", event);
+                    // if let SwarmEvent::NewListenAddr(addr) = event {
+                    //     println!("Listening on {:?}", addr);
+                    // }
+                }
+                Poll::Ready(None) => return Poll::Ready(()),
+                Poll::Pending => break,
+            }
+        }
+        // send messages in the flooding queue
+        loop {
+            // get sending queue
+            let mut flooder = flooder::FLOODER.get().write().unwrap();
+
+            // loop over messages to send & flood them
+            while let Some(msg) = flooder.to_send.pop_front() {
+                // check which swarm to send to
+                if !matches!(msg.incoming_via, ConnectionModule::Lan) {
+                    conn.lan.swarm.behaviour_mut().floodsub.publish( msg.topic.clone(), msg.message.clone());
+                }
+                if !matches!(msg.incoming_via, ConnectionModule::Internet) {
+                    conn.internet.swarm.behaviour_mut().floodsub.publish( msg.topic, msg.message);
+                }
+            }
+            break
+        }
+
+        Poll::Pending
+    }));
 }
-
-
-

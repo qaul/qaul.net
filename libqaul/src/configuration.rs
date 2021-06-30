@@ -8,12 +8,18 @@
  * All options are configurable from the commandline too.
  */
 
-use config::{Config, ConfigError, Environment, File};
+use config::{Config, Environment, File};
 use serde::{Deserialize, Serialize};
 use toml;
-use std::fs;
+use std::{
+    fs, 
+    sync::{RwLock, RwLockReadGuard, RwLockWriteGuard},
+};
 use log::{error, info};
+use state::Storage;
 
+// make configuration globally accessible mutable state
+static CONFIG: Storage<RwLock<Configuration>> = Storage::new();
 
 /**
  * Configuration of the local Node
@@ -70,7 +76,8 @@ impl Default for Internet {
     fn default() -> Self {
         Internet {
             active: true,
-            peers: vec![String::from(""); 0],
+            //peers: vec![String::from(""); 0],
+            peers: Vec::new(),
             do_listen: false,
             listen: String::from("/ip4/0.0.0.0/tcp/9229"),
         }
@@ -112,13 +119,14 @@ impl Default for Configuration {
             node: Node::default(),
             lan: Lan::default(),
             internet: Internet::default(),
-            users: vec![User::default(); 0],
+            //users: vec![User::default(); 0],
+            users: Vec::new(),
         }
     }
 }
 
 impl Configuration {
-    pub fn new() -> Result<Self, ConfigError> {
+    pub fn init() {
         let mut s = Config::new();
 
         // FIXME: There is a problem in the rs-config library, that empty vectors of 
@@ -154,23 +162,46 @@ impl Configuration {
             Err(e) => error!("Environment {:?}", e),
         }
 
-        // // deserialize configuration
-        // //s.try_into()
-        // let return_conf: Configuration;
-        // let t = s.clone();
-        // match t.into() {
-        //     Ok(myconf) => return_conf = myconf,
-        //     Err(e) => error!("try_into() {:?}", e),
-        // }
+        let config: Configuration = s.try_into().unwrap();
+        
+        // put configuration to state
+        CONFIG.set(RwLock::new(config));
+    }
 
-        s.try_into()
+    /**
+     * lend configuration for reading
+     */
+    pub fn get<'a>() -> RwLockReadGuard<'a, Configuration> {
+        let config = CONFIG.get().read().unwrap();
+        config
+    }
+
+    /**
+     * lend configuration for writing
+     */
+    pub fn get_mut<'a>() -> RwLockWriteGuard<'a, Configuration> {
+        let config_mutable = CONFIG.get().write().unwrap();
+        config_mutable
+    }
+
+    /**
+     * Returns true/false whether this node has been initialized, 
+     * or needs to be created for the first time.
+     */
+    pub fn is_node_initialized() -> bool {
+        let config = CONFIG.get().read().unwrap();
+        if config.node.initialized == 0 {
+            return false
+        }
+        true
     }
 
     /**
      * Save current configuration to config.toml file
      */
-    pub fn save(self: &Self) {
-        let toml_string = toml::to_string(&self).expect("Could not encode TOML value");
+    pub fn save() {
+        let config = CONFIG.get();
+        let toml_string = toml::to_string(config).expect("Could not encode TOML value");
         println!("{}", toml_string);
         fs::write("config.toml", toml_string).expect("Could not write to file!"); 
     }
@@ -184,7 +215,7 @@ impl Configuration {
         let json_string = "{
             \"node\":{\"initialized\":0,\"id\":\"\",\"keys\":\"\"},
             \"lan\":{\"active\":true,\"listen\":\"/ip4/0.0.0.0/tcp/0\"},
-            \"internet\":{\"active\":true,\"peers\":[],\"do_listen\":false,\"listen\":\"/ip4/0.0.0.0/tcp/9229\"},
+            \"internet\":{\"active\":true,\"peers\":[],\"do_listen\":false,\"listen\":\"/ip4/0.0.0.0/tcp/0\"},
             \"users\":[]
         }".to_string();
         // save file

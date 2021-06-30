@@ -17,17 +17,20 @@
 
 use libp2p::{
     core::upgrade,
+    dns::DnsConfig,
     noise::{NoiseConfig, X25519Spec, AuthenticKeypair},
+    ping::{Ping, PingConfig, PingEvent},
     tcp::TcpConfig,
-    mplex,
+    mplex, yamux,
     mdns::{Mdns, MdnsConfig, MdnsEvent},
     Transport,
     floodsub::{Floodsub, FloodsubEvent},
     swarm::{
-        Swarm, NetworkBehaviourEventProcess, SwarmBuilder, ExpandedSwarm,
+        Swarm, NetworkBehaviourEventProcess, ExpandedSwarm,
         protocols_handler::ProtocolsHandler,
         IntoProtocolsHandler, NetworkBehaviour
     },
+    websocket::WsConfig,
     NetworkBehaviour,
 };
 use futures::channel::mpsc;
@@ -40,15 +43,20 @@ use crate::node::Node;
 use crate::services::{
     page,
     page::{PageMode, PageRequest, PageResponse},
-    feed::FeedMessage,
+    feed::{Feed, FeedMessageSendContainer},
 };
 use crate::configuration::Configuration;
+use crate::connections::{
+    ConnectionModule,
+    events,
+};
 
 
 #[derive(NetworkBehaviour)]
 pub struct QaulLanBehaviour {
     pub floodsub: Floodsub,
     pub mdns: Mdns,
+    pub ping: Ping,
     #[behaviour(ignore)]
     pub response_sender: mpsc::UnboundedSender<QaulMessage>,
 }
@@ -62,34 +70,48 @@ impl Lan {
     /**
      * Initialize swarm for LAN connection module
      */
-    pub async fn init(config: Configuration, auth_keys: AuthenticKeypair<X25519Spec>) -> (Configuration, Lan) {
+    pub async fn init(auth_keys: AuthenticKeypair<X25519Spec>) -> Lan {
         // create a multi producer, single consumer queue
         let (response_sender, response_rcv) = mpsc::unbounded();
     
         // create a TCP transport
-        let transp = TcpConfig::new()
+        // let transport = TcpConfig::new()
+        //     .upgrade(upgrade::Version::V1)
+        //     .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
+        //     .multiplex(mplex::MplexConfig::new())
+        //     .boxed();
+        let transport = {
+            let tcp = TcpConfig::new().nodelay(true);
+            let dns_tcp = DnsConfig::system(tcp).await.unwrap();
+            let ws_dns_tcp = WsConfig::new(dns_tcp.clone());
+            dns_tcp.or_transport(ws_dns_tcp)
+        };
+
+        let transport_upgraded = transport
             .upgrade(upgrade::Version::V1)
             .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
-            .multiplex(mplex::MplexConfig::new())
+            .multiplex(upgrade::SelectUpgrade::new(yamux::YamuxConfig::default(), mplex::MplexConfig::default()))
+            //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
             .boxed();
 
-        // create behaviour
-        let mut behaviour = QaulLanBehaviour {
-            floodsub: Floodsub::new(Node::get_id()),
-            mdns: Mdns::new(MdnsConfig::default()).await.expect("can create mdns"),
-            response_sender,
+        let mut swarm = {
+            // TODO: set shorter readvertisment time
+            //       see here: libp2p-mdns/src/behaviour.rs
+            //       * create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
+            let mdns = task::block_on(Mdns::new(MdnsConfig::default())).unwrap();
+            let mut behaviour = QaulLanBehaviour {
+                floodsub: Floodsub::new(Node::get_id()),
+                mdns,
+                ping: Ping::new(PingConfig::new()),
+                response_sender,
+            };
+            behaviour.floodsub.subscribe(Node::get_topic());
+            Swarm::new(transport_upgraded, behaviour, Node::get_id())
         };
-        behaviour.floodsub.subscribe(Node::get_topic());
-
-        // swarm libp2p connection management
-        let mut swarm = SwarmBuilder::new(transp, behaviour, Node::get_id())
-            .executor(Box::new(|fut| {
-                task::spawn(fut);
-            }))
-            .build();
-        
+            
         // connect swarm to the listening interface in 
         // the configuration config.lan.listen
+        let config = Configuration::get();
         Swarm::listen_on(
             &mut swarm,
             config.lan.listen
@@ -100,7 +122,7 @@ impl Lan {
 
         let lan = Lan { swarm: swarm, receiver: response_rcv };
 
-        (config, lan)
+        lan
     }
 
     /**
@@ -119,6 +141,12 @@ impl Lan {
             unique_peers.insert(peer);
         }
         unique_peers.iter().for_each(|p| println!("  {}", p));
+    }
+}
+
+impl NetworkBehaviourEventProcess<PingEvent> for QaulLanBehaviour {
+    fn inject_event(&mut self, event: PingEvent) {
+        events::ping_event( event, ConnectionModule::Lan );
     }
 }
 
@@ -148,9 +176,8 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulLanBehaviour {
         match event {
             FloodsubEvent::Message(msg) => {
                 // feed Message
-                if let Ok(resp) = serde_json::from_slice::<FeedMessage>(&msg.data) {
-                    info!("Feed from {}", msg.source);
-                    info!("{}", resp.message);
+                if let Ok(resp) = serde_json::from_slice::<FeedMessageSendContainer>(&msg.data) {
+                    Feed::received( ConnectionModule::Lan, msg.source, resp);
                 }
                 // Pages Messages
                 else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {

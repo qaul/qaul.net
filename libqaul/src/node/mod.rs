@@ -1,12 +1,15 @@
+pub mod users;
+
 use libp2p::{
     PeerId,
     identity::{Keypair, ed25519},
     floodsub::Topic,
 };
-use log::info;
+use log::{error, info};
 use base64;
 use state;
 use crate::configuration::Configuration;
+use users::Users;
 
 
 pub struct Node {
@@ -19,45 +22,53 @@ static STATE: state::Storage<Node> = state::Storage::new();
 
 impl Node {
     // start an existing node from the config parameters
-    pub fn init( mut config: Configuration) -> Configuration {
-        if config.node.initialized == 0 {
-            // create a new node and save it to configuration
-            config = Self::new(config);
-        }
-        else {
-            // instantiate node from configuration
-            config = Self::from_config(config);
+    pub fn init() {
+        // initialize node
+        {
+            if !Configuration::is_node_initialized() {
+                // create a new node and save it to configuration
+                info!("Create a new node.");
+                Self::new();
+            }
+            else {
+                // instantiate node from configuration
+                info!("Setup node from configuration.");
+                Self::from_config();
+            }
         }
 
-        config
+        // initialize users of this node
+        Users::init();
     }
 
     // create a new node and save the parameters into config
-    fn new(mut config: Configuration) -> Configuration {
-        // create node & configuration
+    fn new() {
+        // create node
         let keys_ed25519 = ed25519::Keypair::generate();
-        config.node.keys = base64::encode(keys_ed25519.encode());
-        let keys = Keypair::Ed25519(keys_ed25519);
+        let keys = Keypair::Ed25519(keys_ed25519.clone());
         let id = PeerId::from(keys.public());
         let topic = Topic::new("pages");
         let node = Node {id, keys, topic};
-        config.node.id = id.to_string();
-        config.node.initialized = 1;
 
-        // save configuration file
-        Configuration::save(&config);
+        // save node to configuration file
+        {
+            let mut config = Configuration::get_mut();
+            config.node.keys = base64::encode(keys_ed25519.encode());
+            config.node.id = id.to_string();
+            config.node.initialized = 1;
+        }
+        Configuration::save();
 
         // display id
         info!("Peer Id: {}", node.id.clone());
 
         // save node to state
         STATE.set(node);
-
-        config
     }
 
     // start an existing node from the config parameters
-    fn from_config(config: Configuration) -> Configuration {
+    fn from_config() {
+        let config = Configuration::get();
         let mut basedecode = base64::decode(&config.node.keys).unwrap();
         let keys = Keypair::Ed25519(ed25519::Keypair::decode( &mut basedecode).unwrap());
         let id = PeerId::from(keys.public());
@@ -68,16 +79,14 @@ impl Node {
             info!("id's match {}", config.node.id);
         } 
         else {
-            info!("------------------------------------");
-            info!("ERROR: id's are not equal");
-            info!("{}  {}", id.to_string(), config.node.id);
-            info!("------------------------------------");
+            error!("------------------------------------");
+            error!("ERROR: id's are not equal");
+            error!("{}  {}", id.to_string(), config.node.id);
+            error!("------------------------------------");
         }
 
         let node = Node {id, keys, topic};
         STATE.set(node);
-
-        config
     }
 
     /**
@@ -97,7 +106,7 @@ impl Node {
     }
 
     /**
-     * Get the Keypair for of this node
+     * Get the Keypair of this node
      */
     pub fn get_keys<'a>() -> &'a Keypair {
         let node = STATE.get();

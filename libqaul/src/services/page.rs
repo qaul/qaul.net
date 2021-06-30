@@ -72,7 +72,7 @@ pub fn respond_with_public_pages(sender: mpsc::UnboundedSender<QaulMessage>, rec
     });
 }
 
-
+#[allow(dead_code)]
 pub async fn handle_create_page(cmd: &str) {
     if let Some(rest) = cmd.strip_prefix("p create") {
         let elements: Vec<&str> = rest.split("|").collect();
@@ -89,7 +89,7 @@ pub async fn handle_create_page(cmd: &str) {
     }
 }
 
-
+#[allow(dead_code)]
 pub async fn handle_publish_page(cmd: &str) {
     if let Some(rest) = cmd.strip_prefix("p publish") {
         match rest.trim().parse::<usize>() {
@@ -154,7 +154,7 @@ async fn write_local_pages(pages: &Pages) -> Result<()> {
     Ok(())
 }
 
-
+#[allow(dead_code)]
 pub async fn handle_list_pages(cmd: &str, lan: &mut Swarm<QaulLanBehaviour>, internet: &mut Swarm<QaulInternetBehaviour>) {
     let rest = cmd.strip_prefix("p ls ");
     match rest {

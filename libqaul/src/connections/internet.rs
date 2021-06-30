@@ -18,21 +18,23 @@
 
 use libp2p::{
     core::upgrade,
+    dns::DnsConfig,
     noise::{NoiseConfig, X25519Spec, AuthenticKeypair},
+    ping::{Ping, PingConfig, PingEvent},
     tcp::TcpConfig,
-    mplex,
+    mplex, yamux,
     identify::{Identify, IdentifyConfig, IdentifyEvent},
     Transport,
     floodsub::{Floodsub, FloodsubEvent},
     swarm::{
-        Swarm, NetworkBehaviourEventProcess, SwarmBuilder, ExpandedSwarm,
+        Swarm, NetworkBehaviourEventProcess, ExpandedSwarm,
         protocols_handler::ProtocolsHandler,
         IntoProtocolsHandler, NetworkBehaviour,
     },
+    websocket::WsConfig,
     NetworkBehaviour,
 };
 use log::info;
-use async_std::task;
 use futures::channel::mpsc;
 use mpsc::{UnboundedReceiver, UnboundedSender};
 use crate::types::QaulMessage;
@@ -40,15 +42,20 @@ use crate::node::Node;
 use crate::services::{
     page,
     page::{PageMode, PageRequest, PageResponse},
-    feed::FeedMessage,
+    feed::{Feed, FeedMessageSendContainer},
 };
 use crate::configuration::Configuration;
+use crate::connections::{
+    ConnectionModule,
+    events,
+};
 
 
 #[derive(NetworkBehaviour)]
 pub struct QaulInternetBehaviour {
     pub floodsub: Floodsub,
     pub identify: Identify,
+    pub ping: Ping,
     #[behaviour(ignore)]
     pub response_sender: UnboundedSender<QaulMessage>,
 }
@@ -62,34 +69,57 @@ impl Internet {
     /**
      * Initialize swarm for Internet overlay connection module
      */
-    pub async fn init(config: Configuration, auth_keys: AuthenticKeypair<X25519Spec>) -> (Configuration, Self) {
+    pub async fn init(auth_keys: AuthenticKeypair<X25519Spec>) -> Self {
         // create a multi producer, single consumer queue
         let (response_sender, response_rcv) = mpsc::unbounded();
     
         // create a TCP transport
-        let transp = TcpConfig::new()
+        let transport = {
+            let tcp = TcpConfig::new().nodelay(true);
+            let dns_tcp = DnsConfig::system(tcp).await.unwrap();
+            let ws_dns_tcp = WsConfig::new(dns_tcp.clone());
+            dns_tcp.or_transport(ws_dns_tcp)
+        };
+
+        let transport_upgraded = transport
             .upgrade(upgrade::Version::V1)
             .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
-            .multiplex(mplex::MplexConfig::new())
+            .multiplex(upgrade::SelectUpgrade::new(yamux::YamuxConfig::default(), mplex::MplexConfig::default()))
+            //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
             .boxed();
+        
+        // create ping configuration 
+        // with customized parameters
+        //
+        // * keep connection alive
+        // * set interval
+        // * set timeout
+        // * set maximal failures
+        let mut ping_config = PingConfig::new();
+        ping_config = ping_config.with_keep_alive(true);
+        //ping_config.with_interval(d: Duration);
+        //ping_config.with_timeout(d: Duration);
+        //ping_config.with_max_failures(n);
 
         // create behaviour
-        let mut behaviour = QaulInternetBehaviour {
-            floodsub: Floodsub::new(Node::get_id()),
-            identify: Identify::new(IdentifyConfig::new("/ipfs/0.1.0".into(), Node::get_keys().public())),
-            response_sender,
-        }; 
-        behaviour.floodsub.subscribe(Node::get_topic());
-
-        // swarm libp2p connection management
-        let mut swarm = SwarmBuilder::new(transp, behaviour, Node::get_id())
-            .executor(Box::new(|fut| {
-                task::spawn(fut);
-            }))
-            .build();
+        let mut swarm = {
+            let mut behaviour = QaulInternetBehaviour {
+                floodsub: Floodsub::new(Node::get_id()),
+                identify: Identify::new(
+                    IdentifyConfig::new("/ipfs/0.1.0".into(), 
+                    Node::get_keys().public())
+                ),
+                ping: Ping::new(ping_config),
+                response_sender,
+            };
+            behaviour.floodsub.subscribe(Node::get_topic());
+            Swarm::new(transport_upgraded, behaviour, Node::get_id())
+        };
+    
         
         // connect swarm to the listening interface in 
         // the configuration config.internet.listen
+        let config = Configuration::get();
         Swarm::listen_on(
             &mut swarm,
             config.internet.listen
@@ -105,7 +135,7 @@ impl Internet {
         // construct internet object
         let internet = Internet { swarm: swarm, receiver: response_rcv };
 
-        (config, internet)
+        internet
     }
 
     /**
@@ -137,12 +167,14 @@ impl Internet {
 
 impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
     fn inject_event(&mut self, event: IdentifyEvent) {
-        //info!("{:?}", event);
         match event {
             IdentifyEvent::Received { peer_id, info } => {
+                // add node to floodsub
                 self.floodsub.add_node_to_partial_view(peer_id);
-                info!("IdentifyEvent received");
-                info!("added peer_id {:?} to floodsub", peer_id);
+
+                // print received information
+                info!("IdentifyEvent::Received from {:?}", peer_id);
+                info!("  added peer_id {:?} to floodsub", peer_id);
                 info!("  public key: {:?}", info.public_key);
                 info!("  protocol version: {:?}", info.protocol_version);
                 info!("  agent version: {:?}", info.agent_version);
@@ -150,8 +182,22 @@ impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
                 info!("  protocols: {:?}", info.protocols);
                 info!("  observed address: {:?}", info.observed_addr);
             },
-            _ => info!("unhandled IdentifyEvent event received: {:?}", event),
+            IdentifyEvent::Sent { peer_id} => {
+                info!("IdentifyEvent::Sent to {:?}", peer_id);
+            },
+            IdentifyEvent::Pushed { peer_id} => {
+                info!("IdentifyEvent::Pushed {:?}", peer_id);
+            },
+            IdentifyEvent::Error { peer_id, error } => {
+                info!("IdentifyEvent::Error {:?} {:?}", peer_id, error);
+            },
         }
+    }
+}
+
+impl NetworkBehaviourEventProcess<PingEvent> for QaulInternetBehaviour {
+    fn inject_event(&mut self, event: PingEvent) {
+        events::ping_event( event, ConnectionModule::Internet );
     }
 }
 
@@ -160,9 +206,8 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulInternetBehaviour {
         match event {
             FloodsubEvent::Message(msg) => {
                 // feed Message
-                if let Ok(resp) = serde_json::from_slice::<FeedMessage>(&msg.data) {
-                    info!("Feed from {}", msg.source);
-                    info!("{}", resp.message);
+                if let Ok(resp) = serde_json::from_slice::<FeedMessageSendContainer>(&msg.data) {
+                    Feed::received( ConnectionModule::Internet, msg.source, resp);
                 }
                 // Pages Messages
                 else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
