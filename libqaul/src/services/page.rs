@@ -9,12 +9,10 @@ use log::{error, info};
 use async_std::{task, fs};
 use futures::channel::mpsc;
 
-use crate::node;
-use crate::node::mdns::{
-    QaulMessage, 
-    QaulMessageType,
-    QaulBehaviour
-};
+use crate::node::Node;
+use crate::types::{QaulMessage, QaulMessageType};
+use crate::connections::lan::QaulLanBehaviour;
+use crate::connections::internet::QaulInternetBehaviour;
 
 const STORAGE_FILE_PATH: &str = "./pages.json";
 
@@ -74,7 +72,7 @@ pub fn respond_with_public_pages(sender: mpsc::UnboundedSender<QaulMessage>, rec
     });
 }
 
-
+#[allow(dead_code)]
 pub async fn handle_create_page(cmd: &str) {
     if let Some(rest) = cmd.strip_prefix("p create") {
         let elements: Vec<&str> = rest.split("|").collect();
@@ -91,7 +89,7 @@ pub async fn handle_create_page(cmd: &str) {
     }
 }
 
-
+#[allow(dead_code)]
 pub async fn handle_publish_page(cmd: &str) {
     if let Some(rest) = cmd.strip_prefix("p publish") {
         match rest.trim().parse::<usize>() {
@@ -156,8 +154,8 @@ async fn write_local_pages(pages: &Pages) -> Result<()> {
     Ok(())
 }
 
-
-pub async fn handle_list_pages(cmd: &str, swarm: &mut Swarm<QaulBehaviour>) {
+#[allow(dead_code)]
+pub async fn handle_list_pages(cmd: &str, lan: &mut Swarm<QaulLanBehaviour>, internet: &mut Swarm<QaulInternetBehaviour>) {
     let rest = cmd.strip_prefix("p ls ");
     match rest {
         Some("all") => {
@@ -165,14 +163,16 @@ pub async fn handle_list_pages(cmd: &str, swarm: &mut Swarm<QaulBehaviour>) {
                 mode: PageMode::ALL,
             };
             let json = serde_json::to_string(&req).expect("can jsonify request");
-            swarm.behaviour_mut().floodsub.publish(node::get_topic(), json.as_bytes());
+            lan.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
+            internet.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
         }
         Some(pages_peer_id) => {
             let req = PageRequest {
                 mode: PageMode::One(pages_peer_id.to_owned()),
             };
             let json = serde_json::to_string(&req).expect("can jsonify request");
-            swarm.behaviour_mut().floodsub.publish(node::get_topic(), json.as_bytes());
+            lan.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
+            internet.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
         }
         None => {
             match read_local_pages().await {

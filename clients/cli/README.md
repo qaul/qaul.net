@@ -2,20 +2,25 @@
 
 **qaul CLI client**
 
-This client can: 
-* discover other peers in the same network
-* distribute and display feed-messages via mdns to all other peers in the network
-* create, save and distribute information pages
+This client can:
+
+* discover other nodes in the same network via mdns
+* connect to remote nodes via the internet overlay network.
+* list the network structure
+* create user accounts
+* publish, distribute and display feed-messages via floodsub protocol to all other nodes in the network.
+
 
 ## Run this Example
 
-Start two the same machine, from within the folders `node1` & `node2`. The pages are stored in the file `pages.json`.
+Start at least two instances of this program. Either on different machines or start from different folders on the same machine.
 
-**Start Node 1**
+You can run as many instances on as many machines as you like. the machines just need to be in the same network, or interconnected via the Internet overlay network.
+
+
+**Start Program**
 
 ```sh
-# move into the node1 one folder
-cd node1
 # start the program
 RUST_LOG=info cargo run
 ```
@@ -23,29 +28,37 @@ RUST_LOG=info cargo run
 Once the program is running, one can enter the commands documented in the CLI Manual below.
 
 
-**Start Node 2**
-
-```sh
-cd node2
-RUST_LOG=info cargo run
-```
-
-**More Nodes**
-
-You can run as many instances on as many machines as you like. the machines just need to be in the same network.
-
-
 ## CLI Commands when the Program is Running
 
 There are several commands:
 
 * qaul network
-  * `q ls` - list all peers
+  * `qaul peers` - list all peers
+* user accounts
+  * `user list` - list all local user accounts
+  * `user create {User Name}` - create a new user account with the name {User Name}
+* neighbours - information about the directly connected nodes
+  * `neighbours list` - list all neighbours and their connectivity
 * feed service
-  * `f {FeedMessage}` - sends the {FeedMessage} into the network and displays it on all nodes
-* page service
-  * `p ls` - list local pages
-  * `p ls all` - list all public pages from all known peers
-  * `p ls p {peerId}` - list all public pages from the given peer
-  * `p create Title|Description|Content` - create a new page with the given data, use the pipe symbol `|` to separate the fields
-  * `p publish {pageId}` - publish the page with the given page ID
+  * `feed send {FeedMessage}` - sends the {FeedMessage} to the network and distributes it to all connected nodes.
+    * the message is signed and can be validated.
+    * at least one user needs to be created.
+
+
+## Further Configuration
+
+On the first startup of the program, a configuration file `config.toml` 
+is generated in the local folder. 
+You can configure your node by editing it.
+
+
+### Connect to Nodes in the Internet
+
+You can run nodes online, to interconnect local networks and create an internet overlay network.
+
+To connect to one, you need to add it's address to the peers list of the `[internet]`  module in the configuration file `config.toml`. For example, for the IP address `144.91.74.192` on port `9229` it looks like this:
+
+```toml
+[internet]
+peers = ["/ip4/144.91.74.192/tcp/9229"]
+```
