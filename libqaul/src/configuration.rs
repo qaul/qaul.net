@@ -149,7 +149,7 @@ impl Configuration {
         match c.merge(File::with_name("config")) {
             Ok(conf) => s = conf.clone(),
             Err(e) => {
-                info!("./config.toml {:?}", e);
+                error!("./config.toml {:?}", e);
             },
         }
 

@@ -37,6 +37,7 @@ use libp2p::{
 use log::info;
 use futures::channel::mpsc;
 use mpsc::{UnboundedReceiver, UnboundedSender};
+
 use crate::types::QaulMessage;
 use crate::node::Node;
 use crate::services::{
@@ -49,6 +50,11 @@ use crate::connections::{
     ConnectionModule,
     events,
 };
+use crate::router_behaviour::{
+    QaulRouterBehaviour,
+    QaulRouterBehaviourConfig,
+    QaulRouterBehaviourEvent,
+};
 
 
 #[derive(NetworkBehaviour)]
@@ -56,6 +62,7 @@ pub struct QaulInternetBehaviour {
     pub floodsub: Floodsub,
     pub identify: Identify,
     pub ping: Ping,
+    pub qaul_router: QaulRouterBehaviour,
     #[behaviour(ignore)]
     pub response_sender: UnboundedSender<QaulMessage>,
 }
@@ -110,6 +117,7 @@ impl Internet {
                     Node::get_keys().public())
                 ),
                 ping: Ping::new(ping_config),
+                qaul_router: QaulRouterBehaviour::new(QaulRouterBehaviourConfig::new()),
                 response_sender,
             };
             behaviour.floodsub.subscribe(Node::get_topic());
@@ -192,6 +200,12 @@ impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
                 info!("IdentifyEvent::Error {:?} {:?}", peer_id, error);
             },
         }
+    }
+}
+
+impl NetworkBehaviourEventProcess<QaulRouterBehaviourEvent> for QaulInternetBehaviour {
+    fn inject_event(&mut self, event: QaulRouterBehaviourEvent) {
+        events::qaul_router_event( event, ConnectionModule::Internet );
     }
 }
 

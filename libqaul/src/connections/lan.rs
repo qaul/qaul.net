@@ -38,6 +38,7 @@ use std::collections::HashSet;
 use log::info;
 use async_std::task;
 use mpsc::UnboundedReceiver;
+
 use crate::types::QaulMessage;
 use crate::node::Node;
 use crate::services::{
@@ -50,13 +51,18 @@ use crate::connections::{
     ConnectionModule,
     events,
 };
-
+use crate::router_behaviour::{
+    QaulRouterBehaviour,
+    QaulRouterBehaviourConfig,
+    QaulRouterBehaviourEvent,
+};
 
 #[derive(NetworkBehaviour)]
 pub struct QaulLanBehaviour {
     pub floodsub: Floodsub,
     pub mdns: Mdns,
     pub ping: Ping,
+    pub qaul_router: QaulRouterBehaviour,
     #[behaviour(ignore)]
     pub response_sender: mpsc::UnboundedSender<QaulMessage>,
 }
@@ -103,6 +109,7 @@ impl Lan {
                 floodsub: Floodsub::new(Node::get_id()),
                 mdns,
                 ping: Ping::new(PingConfig::new()),
+                qaul_router: QaulRouterBehaviour::new(QaulRouterBehaviourConfig::new()),
                 response_sender,
             };
             behaviour.floodsub.subscribe(Node::get_topic());
@@ -141,6 +148,12 @@ impl Lan {
             unique_peers.insert(peer);
         }
         unique_peers.iter().for_each(|p| println!("  {}", p));
+    }
+}
+
+impl NetworkBehaviourEventProcess<QaulRouterBehaviourEvent> for QaulLanBehaviour {
+    fn inject_event(&mut self, event: QaulRouterBehaviourEvent) {
+        events::qaul_router_event( event, ConnectionModule::Lan );
     }
 }
 

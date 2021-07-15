@@ -11,6 +11,7 @@ mod configuration;
 mod connections;
 mod node;
 mod router;
+mod router_behaviour;
 mod services;
 mod types;
 use node::Node;
