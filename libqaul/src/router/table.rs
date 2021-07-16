@@ -72,6 +72,32 @@ impl RoutingTable {
         let mut table = ROUTINGTABLE.get().write().unwrap();
         table.table = new_table.table;
     }
+
+    /// create serializable routing info for a specific neighbour
+    pub fn create_routing_info( neighbour_id: PeerId ) -> TableSerde {
+        let mut table: Vec<TableEntrySerde> = Vec::new();
+
+        // get access to routing table
+        let routing_table = ROUTINGTABLE.get().read().unwrap();
+
+        // loop through routing table
+        for (user_id, user) in routing_table.table.iter() {
+            if user.connections.len() > 0 {
+                // get first entry
+                // check if neighbour is best connection to it
+                if neighbour_id != user.connections[0].node {
+                    table.push( TableEntrySerde {
+                        user: user_id.to_bytes(),
+                        rtt: user.connections[0].rtt,
+                        hc: user.connections[0].hc,
+                        pl: user.connections[0].pl,
+                    });
+                }
+            }
+        }
+
+        TableSerde(table)
+    }
 }
 
 
