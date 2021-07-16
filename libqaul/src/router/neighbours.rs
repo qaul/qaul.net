@@ -72,6 +72,30 @@ impl Neighbours {
     }
 
     /**
+     * get rtt for a neighbour
+     * returns the round trip time for the neighbour in the 
+     * connection module.
+     * If the neighbour does not exist, it returns None.
+     */
+    pub fn get_rtt( neighbour_id: &PeerId, module: &ConnectionModule ) -> Option<u32> {
+        // get table
+        let mut neighbours;
+        match module {
+            ConnectionModule::Lan => neighbours = LAN.get().read().unwrap(),
+            ConnectionModule::Internet => neighbours = INTERNET.get().read().unwrap(),
+            ConnectionModule::None => return None,
+        }
+
+        // search for neighbour
+        if let Some(neighbour) = neighbours.nodes.get(neighbour_id) {
+            return Some(neighbour.rtt)
+        } else {
+            return None
+        }
+    }
+
+
+    /**
      * neighbours CLI commands
      */
     pub fn cli(cmd: &str) {        

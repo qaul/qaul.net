@@ -101,9 +101,9 @@ pub struct User {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct UserSerde {
-    id: Vec<u8>,
-    key: Vec<u8>,
-    name: String,
+    pub id: Vec<u8>,
+    pub key: Vec<u8>,
+    pub name: String,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]

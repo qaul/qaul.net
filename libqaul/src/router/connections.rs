@@ -16,7 +16,14 @@ use state::Storage;
 use std::sync::RwLock;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
-use std::time::SystemTime;
+use std::time::{SystemTime, Duration};
+
+use crate::connections::ConnectionModule;
+use crate::router::{
+    table::{TableSerde, RoutingTable, RoutingUserEntry, RoutingConnectionEntry},
+    neighbours::Neighbours,
+};
+
 
 // mutable state of tables
 static INTERNET: Storage<RwLock<ConnectionTable>> = Storage::new();
@@ -31,9 +38,9 @@ static LAN: Storage<RwLock<ConnectionTable>> = Storage::new();
  */
 
 /// Connection entry for UserEntry
-pub struct NeighbourEntry {
+struct NeighbourEntry {
     /// node id of the neighbour
-    node: PeerId,
+    id: PeerId,
     /// round trip time
     rtt: u32,
     /// hop count
@@ -47,7 +54,7 @@ pub struct NeighbourEntry {
 /// user entry for ConnectionTable
 /// containing a BTreeMap of all neighbours over
 /// which this user can be reached
-pub struct UserEntry {
+struct UserEntry {
     /// user id
     id: PeerId,
     /// connection entries
@@ -61,14 +68,177 @@ pub struct ConnectionTable {
 }
 
 impl ConnectionTable {
+    /// Initialize connection tables
+    /// Creates a table for each ConnectionModule
+    /// and saves it to state.
     pub fn init() {
-        // create intermediary tables for eachConnectionModule
-        // and save it to state
         let internet = ConnectionTable { table: HashMap::new() };
         INTERNET.set(RwLock::new(internet));
 
         let lan = ConnectionTable { table: HashMap::new() };
-        INTERNET.set(RwLock::new(lan));
+        LAN.set(RwLock::new(lan));
+    }
+
+    /// populate connection table with incoming routing information
+    pub fn populate( conn: ConnectionModule, neighbour_id: PeerId, info: TableSerde ) {
+        // get round trip time for neighbour
+        if let Some(rtt) = Neighbours::get_rtt(&neighbour_id , &conn ){
+            // get access to the connection table
+            let mut connection_table;
+            match conn {
+                ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
+                ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
+                ConnectionModule::None => return
+            }
+
+            // loop through results and enter them to the table
+            for entry in info.0 {
+                if let Ok(user_id) = PeerId::from_bytes(&entry.user){
+                    let neighbour = NeighbourEntry {
+                        id: neighbour_id,
+                        rtt: entry.rtt +rtt,
+                        hc: entry.hc,
+                        pl: entry.pl,
+                        last_update: SystemTime::now(),
+                    };
+                    // add entry to table
+                    if let Some(user) = connection_table.table.get_mut(&user_id) {
+                        user.connections.insert(neighbour_id, neighbour);
+                    } else {
+                        let mut connections_map = BTreeMap::new();
+                        connections_map.insert(neighbour.id, neighbour);
+
+                        let user = UserEntry { 
+                            id: user_id,
+                            connections: connections_map,
+                        };
+
+                        connection_table.table.insert(user_id, user);
+                    }
+                }
+            }
+        }
+    }
+
+    /// Create a routing table and set it to active routing table
+    pub fn create_routing_table() {
+        // create a new table
+        let mut table = RoutingTable { table: HashMap::new() };
+
+        // calculate from lan module
+        table = Self::calculate_intermediary_table(table, ConnectionModule::Lan);
+
+        // calculate from internet module
+        table = Self::calculate_intermediary_table(table, ConnectionModule::Internet);
+
+        // set table as new active routing table
+        RoutingTable::set(table);
+    }
+
+    /// calculate a routing table for a module
+    fn calculate_intermediary_table(mut table: RoutingTable, conn: ConnectionModule) -> RoutingTable {
+        // create vector for users to remove
+        let mut expired_users: Vec<PeerId> = Vec::new();
+        
+        // get connections table
+        let mut connection_table;
+        match conn.clone() {
+            ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
+            ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
+            ConnectionModule::None => return table
+        }
+
+        // iterate over connection table
+        for (user_id,user) in connection_table.table.iter_mut() {
+            // find best entry
+            if let Some(connection) = Self::find_best_connection(user) {
+                // fill entry into routing table
+                let routing_connection_entry = RoutingConnectionEntry {
+                    module: conn.clone(),
+                    node: connection.id,
+                    rtt: connection.rtt,
+                    hc: connection.hc,
+                    pl: connection.pl,
+                };
+
+                // check if user entry already exists hashmap
+                if let Some(routing_user_entry) = table.table.get_mut(&user.id) {
+                    routing_user_entry.connections.push(routing_connection_entry);
+                } else {
+                    let mut connections = Vec::new();
+                    connections.push(routing_connection_entry);
+
+                    let routing_user_entry = RoutingUserEntry {
+                        id: user_id.to_owned(),
+                        connections: connections,
+                    };
+                    table.table.insert(user_id.to_owned(), routing_user_entry);
+                }
+            } else {
+                // put user for removal as there is no connection in it
+                expired_users.push(user_id.clone());
+            }
+        }
+
+        // remove expired users
+        for user_id in expired_users {
+            connection_table.table.remove(&user_id);
+        }
+        
+        table
+    }
+
+    /// find best entry
+    /// and remove all old entries
+    fn find_best_connection(user: &mut UserEntry) -> Option<NeighbourEntry> {
+        // initialize helper variables
+        let mut expired_connections: Vec<PeerId> = Vec::new();
+        let mut return_entry = None;
+        let mut rtt = u32::MAX;
+
+        // create return value
+        {
+            let mut entry_found = None;
+
+            // loop through all connections
+            for (key, value) in &user.connections {
+                let mut expired = true;
+
+                // check if entry is expired
+                if let Ok(duration) = value.last_update.elapsed() {
+                    if duration < Duration::new(20, 0) {
+                        expired = false;
+
+                        if value.rtt < rtt {
+                            rtt = value.rtt;
+                            entry_found = Some(value);
+                        }
+                    }
+                }
+
+                // put connection for removal if expired
+                if expired {
+                    expired_connections.push(key.clone());
+                }
+            }
+
+            if let Some(entry) = entry_found {
+                return_entry = Some(NeighbourEntry {
+                    id: entry.id.clone(),
+                    rtt: entry.rtt,
+                    hc: entry.hc,
+                    pl: entry.pl,
+                    last_update: entry.last_update.clone(),
+                })
+            }
+        }
+
+        // remove expired connections
+        for node_id in expired_connections {
+            user.connections.remove(&node_id);
+        }
+
+        return_entry
     }
 }
 

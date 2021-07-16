@@ -13,7 +13,7 @@ pub mod connections;
 use neighbours::Neighbours;
 use users::Users;
 use flooder::Flooder;
-use table::Table;
+use table::RoutingTable;
 use connections::ConnectionTable;
 
 
@@ -33,7 +33,7 @@ impl Router {
         Flooder::init();
 
         // initialize the global routing table
-        Table::init();
+        RoutingTable::init();
 
         // initialize the routing information collection
         // tables per connection module

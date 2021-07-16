@@ -13,38 +13,39 @@ use libp2p::PeerId;
 use state::Storage;
 use std::sync::RwLock;
 use std::collections::HashMap;
+use serde::{Serialize, Deserialize};
 
 use crate::connections::ConnectionModule;
 
 /// mutable state of table
-static TABLE: Storage<RwLock<Table>> = Storage::new();
+static ROUTINGTABLE: Storage<RwLock<RoutingTable>> = Storage::new();
 
 /// table entry per user
-pub struct UserEntry {
+pub struct RoutingUserEntry {
     /// user id
-    id: PeerId,
+    pub id: PeerId,
     /// best routing entry per connection module
-    connections: Vec<ConnectionEntry>,
+    pub connections: Vec<RoutingConnectionEntry>,
 }
 
 /// connection entry per 
-pub struct ConnectionEntry {
+pub struct RoutingConnectionEntry {
     /// connections module
-    module: ConnectionModule,
+    pub module: ConnectionModule,
     /// node id
     /// via which the user can be reached
-    node: PeerId,
+    pub node: PeerId,
     /// round trip time
     /// addition of all round trip times for all hops
-    rtt: u32,
+    pub rtt: u32,
     /// hop count
     /// how many hops has the connection
-    hc: u8,
+    pub hc: u8,
     /// Package loss
     /// how stable is the connection
     /// this only applies to modules where this is measured
     /// on all other modules this value is 0
-    pl: f32,
+    pub pl: f32,
 }
 
 /**
@@ -53,15 +54,23 @@ pub struct ConnectionEntry {
  * This is the table to turn to when checking where to send
  * a package.
  */
-pub struct Table {
-    table: HashMap<PeerId, UserEntry>
+pub struct RoutingTable {
+    pub table: HashMap<PeerId, RoutingUserEntry>
 }
 
-impl Table {
+impl RoutingTable {
+    /// Initialize routing table
+    /// Creates global routing table and saves it to state.
     pub fn init() {
         // create global routing table and save it to state
-        let table = Table { table: HashMap::new() };
-        TABLE.set(RwLock::new(table));
+        let table = RoutingTable { table: HashMap::new() };
+        ROUTINGTABLE.set(RwLock::new(table));
+    }
+
+    /// set and replace routing table with a new table
+    pub fn set(new_table: RoutingTable) {
+        let mut table = ROUTINGTABLE.get().write().unwrap();
+        table.table = new_table.table;
     }
 }
 
@@ -69,16 +78,18 @@ impl Table {
 /**
  * Serializable routing structures to send over the network
  */
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct TableEntrySerde {
     /// user id
-    user: Vec<u8>,
+    pub user: Vec<u8>,
     /// round trip time
-    rtt: u32,
+    pub rtt: u32,
     /// hop count
-    hc: u8,
+    pub hc: u8,
     /// package loss
-    pl: f32,
+    pub pl: f32,
 }
 
 /// serializable routing information to send to neighbours
-pub struct TableSerde (Vec<TableEntrySerde>);
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
+pub struct TableSerde (pub Vec<TableEntrySerde>);

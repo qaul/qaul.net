@@ -11,11 +11,14 @@ pub mod internet;
 use libp2p::{
     noise::{Keypair, X25519Spec},
 };
+use serde::{Serialize, Deserialize};
+
 use crate::node::Node;
 use lan::Lan;
 use internet::Internet;
 
 
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum ConnectionModule {
     Lan,
     Internet,
