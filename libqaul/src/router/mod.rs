@@ -10,6 +10,8 @@ pub mod users;
 pub mod flooder;
 pub mod table;
 pub mod connections;
+pub mod info;
+
 use neighbours::Neighbours;
 use users::Users;
 use flooder::Flooder;

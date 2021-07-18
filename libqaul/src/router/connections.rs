@@ -20,7 +20,7 @@ use std::time::{SystemTime, Duration};
 
 use crate::connections::ConnectionModule;
 use crate::router::{
-    table::{TableSerde, RoutingTable, RoutingUserEntry, RoutingConnectionEntry},
+    table::{RoutingInfoTable, RoutingTable, RoutingUserEntry, RoutingConnectionEntry},
     neighbours::Neighbours,
 };
 
@@ -80,7 +80,7 @@ impl ConnectionTable {
     }
 
     /// populate connection table with incoming routing information
-    pub fn populate( conn: ConnectionModule, neighbour_id: PeerId, info: TableSerde ) {
+    pub fn populate( conn: ConnectionModule, neighbour_id: PeerId, info: RoutingInfoTable ) {
         // get round trip time for neighbour
         if let Some(rtt) = Neighbours::get_rtt(&neighbour_id , &conn ){
             // get access to the connection table

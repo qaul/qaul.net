@@ -63,7 +63,7 @@ impl Users {
         let store = USERS.get().read().unwrap();
         let mut users = Vec::new();
         for (_id, value) in &store.users {
-            users.push(UserSerde {
+            users.push(UserInfo {
                 id: value.id.to_bytes(),
                 key: value.key.clone().into_protobuf_encoding(),
                 name: value.name.clone(),
@@ -74,7 +74,7 @@ impl Users {
     }
 
     pub fn add_from_bytes(data: Vec<u8>) {
-        let decoded: UserListSerde = bincode::deserialize(&data[..]).unwrap();
+        let decoded: UserInfoTable = bincode::deserialize(&data[..]).unwrap();
 
         // loop through it and add it to the users list
         for value in decoded.0.iter() {
@@ -100,11 +100,11 @@ pub struct User {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
-pub struct UserSerde {
+pub struct UserInfo {
     pub id: Vec<u8>,
     pub key: Vec<u8>,
     pub name: String,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
-pub struct UserListSerde(Vec<UserSerde>);
+pub struct UserInfoTable(pub Vec<UserInfo>);

@@ -3,14 +3,15 @@
  */
 
 use libp2p::{
+    PeerId,
     core::{InboundUpgrade, OutboundUpgrade, UpgradeInfo},
     swarm::NegotiatedSubstream,
 };
 use void::Void;
-use wasm_timer::Instant;
 use futures::prelude::*;
-use rand::{distributions, prelude::*};
 use std::{io, iter, time::Duration};
+
+use crate::router::info::RouterInfo;
 
 /**
  * # Qaul Router Behaviour Protocol
@@ -31,7 +32,7 @@ impl UpgradeInfo for QaulRouterBehaviour {
     type InfoIter = iter::Once<Self::Info>;
 
     fn protocol_info(&self) -> Self::InfoIter {
-        iter::once(b"/qaul/router/1.0.0")
+        iter::once(b"/qaul/router/0.1.0")
     }
 }
 
@@ -62,9 +63,11 @@ pub async fn send_routing_table<S>(mut stream: S) -> io::Result<(S, Duration)>
 where
     S: AsyncRead + AsyncWrite + Unpin
 {
-    let payload: [u8; BEHAVIOUR_SIZE] = thread_rng().sample(distributions::Standard);
-    log::debug!("Preparing ping payload {:?}", payload);
-    stream.write_all(&payload).await?;
+    // get routing table info from router
+    let data = RouterInfo::create(None);
+    log::debug!("Preparing routing table");    
+
+    stream.write_all(&data).await?;
     stream.flush().await?;
     let duration = Duration::new(0,0);
     Ok((stream, duration))
@@ -73,16 +76,15 @@ where
 /**
  * Receive routing table information
  */
-pub async fn recv_routing_table<S>(mut stream: S) -> io::Result<S>
+pub async fn receive_routing_info<S>(mut stream: S) -> io::Result<S>
 where
     S: AsyncRead + AsyncWrite + Unpin
 {
-    let mut payload = [0u8; BEHAVIOUR_SIZE];
-    log::debug!("Waiting for ping ...");
-    stream.read_exact(&mut payload).await?;
-    log::debug!("Sending pong for {:?}", payload);
-    stream.write_all(&payload).await?;
-    stream.flush().await?;
+    let mut data: Vec<u8> = Vec::new();
+    log::info!("Receiving router info message");
+    let read_result = stream.read_to_end(&mut data).await?;
+    // TODO: how many bytes?
+    log::info!("Router info message received: {:?}", read_result);
     Ok(stream)
 }
 

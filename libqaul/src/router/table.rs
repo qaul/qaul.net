@@ -74,8 +74,8 @@ impl RoutingTable {
     }
 
     /// create serializable routing info for a specific neighbour
-    pub fn create_routing_info( neighbour_id: PeerId ) -> TableSerde {
-        let mut table: Vec<TableEntrySerde> = Vec::new();
+    pub fn create_routing_info( neighbour: Option<PeerId> ) -> RoutingInfoTable {
+        let mut table: Vec<RoutingInfoEntry> = Vec::new();
 
         // get access to routing table
         let routing_table = ROUTINGTABLE.get().read().unwrap();
@@ -84,9 +84,18 @@ impl RoutingTable {
         for (user_id, user) in routing_table.table.iter() {
             if user.connections.len() > 0 {
                 // get first entry
-                // check if neighbour is best connection to it
-                if neighbour_id != user.connections[0].node {
-                    table.push( TableEntrySerde {
+                if let Some(neighbour_id) = neighbour {
+                    // check if neighbour is best connection to it
+                    if neighbour_id != user.connections[0].node {
+                        table.push( RoutingInfoEntry {
+                            user: user_id.to_bytes(),
+                            rtt: user.connections[0].rtt,
+                            hc: user.connections[0].hc,
+                            pl: user.connections[0].pl,
+                        });
+                    }
+                } else {
+                    table.push( RoutingInfoEntry {
                         user: user_id.to_bytes(),
                         rtt: user.connections[0].rtt,
                         hc: user.connections[0].hc,
@@ -96,7 +105,7 @@ impl RoutingTable {
             }
         }
 
-        TableSerde(table)
+        RoutingInfoTable(table)
     }
 }
 
@@ -105,7 +114,7 @@ impl RoutingTable {
  * Serializable routing structures to send over the network
  */
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
-pub struct TableEntrySerde {
+pub struct RoutingInfoEntry {
     /// user id
     pub user: Vec<u8>,
     /// round trip time
@@ -118,4 +127,4 @@ pub struct TableEntrySerde {
 
 /// serializable routing information to send to neighbours
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
-pub struct TableSerde (pub Vec<TableEntrySerde>);
+pub struct RoutingInfoTable (pub Vec<RoutingInfoEntry>);

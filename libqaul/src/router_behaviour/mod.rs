@@ -6,6 +6,9 @@
  * * send direct messages
  */
 
+pub mod protocol;
+pub mod handler;
+
 use libp2p::{
     core::{
         Multiaddr, 
@@ -28,15 +31,13 @@ use std::{
 use void::Void;
 use log::{info, error};
 
-pub mod protocol;
-pub mod handler;
 pub use handler::{
     QaulRouterBehaviourConfig, 
     QaulRouterBehaviourResult, 
     QaulRouterBehaviourSuccess, 
     QaulRouterBehaviourFailure,
+    QaulRouterBehaviourHandler,
 };
-use handler::QaulRouterBehaviourHandler;
 
 
 /** 

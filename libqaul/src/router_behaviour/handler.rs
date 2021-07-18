@@ -4,6 +4,7 @@
 
 use libp2p::{
     PeerId,
+    Multiaddr,
     identity::PublicKey,
     swarm::{
         KeepAlive,
@@ -201,11 +202,19 @@ pub struct QaulRouterBehaviourHandler {
     /// substream, this is always a future that waits for the
     /// next inbound user information request to be answered.
     inbound: Option<QaulRouterResponseFuture>,
+
+    //remote_address: Multiaddr,
+    //remote_peer_id: PeerId,
+    keep_alive: KeepAlive,
 }
 
 impl QaulRouterBehaviourHandler {
     /// Builds a new `QaulRouterBehaviourHandler` with the given configuration.
-    pub fn new(config: QaulRouterBehaviourConfig) -> Self {
+    pub fn new(
+        config: QaulRouterBehaviourConfig,
+        //remote_peer_id: PeerId,
+        //remote_address: Multiaddr,
+    ) -> Self {
         QaulRouterBehaviourHandler {
             config,
             timer: Delay::new(Duration::new(0, 0)),
@@ -213,6 +222,9 @@ impl QaulRouterBehaviourHandler {
             failures: 0,
             outbound: None,
             inbound: None,
+            //remote_peer_id,
+            //remote_address,
+            keep_alive: KeepAlive::Yes,
         }
     }
 }
@@ -231,7 +243,7 @@ impl ProtocolsHandler for QaulRouterBehaviourHandler {
     }
 
     fn inject_fully_negotiated_inbound(&mut self, stream: NegotiatedSubstream, (): ()) {
-        self.inbound = Some(protocol::recv_routing_table(stream).boxed());
+        self.inbound = Some(protocol::receive_routing_info(stream).boxed());
     }
 
     fn inject_fully_negotiated_outbound(&mut self, stream: NegotiatedSubstream, (): ()) {
@@ -276,9 +288,11 @@ impl ProtocolsHandler for QaulRouterBehaviourHandler {
                     self.inbound = None;
                 }
                 Poll::Ready(Ok(stream)) => {
-                    // A QaulRouterBehaviour from a remote peer has been processed, wait for the next.
-                    self.inbound = Some(protocol::recv_routing_table(stream).boxed());
-                    
+                    // A RouterInfo from a remote peer has been processed, wait for the next.
+                    self.inbound = Some(protocol::receive_routing_info(stream).boxed());
+
+                    // TODO: To remove:
+                    //       I guess this is not needed, as the data was handled in the receive_routing_info function?
                     //return Poll::Ready(ProtocolsHandlerEvent::Custom(Ok(QaulRouterBehaviourSuccess::InfoRequest { users: UserRequest { table: } })))
                 }
             }
