@@ -51,18 +51,18 @@ use crate::connections::{
     ConnectionModule,
     events,
 };
-use crate::router_behaviour::{
-    QaulRouterBehaviour,
-    QaulRouterBehaviourConfig,
-    QaulRouterBehaviourEvent,
+use qaul_info::{
+    QaulInfo,
+    QaulInfoEvent,
 };
+
 
 #[derive(NetworkBehaviour)]
 pub struct QaulLanBehaviour {
     pub floodsub: Floodsub,
     pub mdns: Mdns,
     pub ping: Ping,
-    pub qaul_router: QaulRouterBehaviour,
+    pub qaul_info: QaulInfo,
     #[behaviour(ignore)]
     pub response_sender: mpsc::UnboundedSender<QaulMessage>,
 }
@@ -109,7 +109,7 @@ impl Lan {
                 floodsub: Floodsub::new(Node::get_id()),
                 mdns,
                 ping: Ping::new(PingConfig::new()),
-                qaul_router: QaulRouterBehaviour::new(QaulRouterBehaviourConfig::new()),
+                qaul_info: QaulInfo::new(Node::get_id()),
                 response_sender,
             };
             behaviour.floodsub.subscribe(Node::get_topic());
@@ -151,9 +151,9 @@ impl Lan {
     }
 }
 
-impl NetworkBehaviourEventProcess<QaulRouterBehaviourEvent> for QaulLanBehaviour {
-    fn inject_event(&mut self, event: QaulRouterBehaviourEvent) {
-        events::qaul_router_event( event, ConnectionModule::Lan );
+impl NetworkBehaviourEventProcess<QaulInfoEvent> for QaulLanBehaviour {
+    fn inject_event(&mut self, event: QaulInfoEvent) {
+        events::qaul_info_event( event, ConnectionModule::Lan );
     }
 }
 

@@ -8,61 +8,36 @@ use libp2p::{
 use std::convert::TryFrom;
 use log::{info, error};
 
-use crate::connections::ConnectionModule;
-use crate::router::neighbours::Neighbours;
-use crate::router_behaviour::{
-    QaulRouterBehaviourEvent,
-    QaulRouterBehaviourSuccess,
-    QaulRouterBehaviourFailure,
+use qaul_info::{
+    QaulInfo,
+    QaulInfoConfig,
+    QaulInfoEvent,
+    QaulInfoSend,
+    QaulInfoReceived,
 };
 
-/**
- * Handle QaulRouter Communication
- */
-pub fn qaul_router_event( event: QaulRouterBehaviourEvent, module: ConnectionModule ) {
+use crate::connections::ConnectionModule;
+use crate::router::{
+    neighbours::Neighbours,
+    info::RouterInfo,
+};
+
+
+/// Handle incoming QaulInfo behaviour events
+pub fn qaul_info_event( event: QaulInfoEvent, module: ConnectionModule ) {
     match event {
         // received a RoutingInfo message
-        QaulRouterBehaviourEvent {
-            peer,
-            result: Result::Ok(QaulRouterBehaviourSuccess::RoutingInfo { routing, users }),
-        } => {
-            info!("QaulRouterBehaviourSuccess::RoutingInfo");
-        }
-        // received a InfoRequest
-        QaulRouterBehaviourEvent {
-            peer,
-            result: Result::Ok(QaulRouterBehaviourSuccess::InfoRequest { users }),
-        } => {
-            info!("QaulRouterBehaviourSuccess::InfoRequest");
-        }
-        // received an InfoResponse as an answer to my request
-        QaulRouterBehaviourEvent {
-            peer,
-            result: Result::Ok(QaulRouterBehaviourSuccess::InfoResponse { users }),
-        } => {
-            info!("QaulRouterBehaviourSuccess::InfoRequest");
-        }
-        // a time occurred
-        QaulRouterBehaviourEvent {
-            peer,
-            result: Result::Err(QaulRouterBehaviourFailure::Timeout),
-        } => {
-            error!("QaulRouterBehaviourFailure::Timeout to {}", peer);
-        }
-        // another error occurred
-        QaulRouterBehaviourEvent {
-            peer,
-            result: Result::Err(QaulRouterBehaviourFailure::Other { error }),
-        } => {
-            error!("QaulRouterBehaviourFailure::Other {} error: {}", peer, error);
+        QaulInfoEvent::Message(message) => {
+            info!("QaulInfoEvent::Message(QaulInfoReceived) from {}", message.received_from);
+
+            // forward to router
+            RouterInfo::received(message);
         }
     }
 }
 
 
-/**
- * Handle incoming ping event
- */
+/// Handle incoming ping event
 pub fn ping_event( event: PingEvent, module: ConnectionModule ) {
     match event {
         PingEvent {

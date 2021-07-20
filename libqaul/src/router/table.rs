@@ -21,6 +21,7 @@ use crate::connections::ConnectionModule;
 static ROUTINGTABLE: Storage<RwLock<RoutingTable>> = Storage::new();
 
 /// table entry per user
+#[derive(Debug, Clone)]
 pub struct RoutingUserEntry {
     /// user id
     pub id: PeerId,
@@ -28,7 +29,8 @@ pub struct RoutingUserEntry {
     pub connections: Vec<RoutingConnectionEntry>,
 }
 
-/// connection entry per 
+/// connection entry per connection module
+#[derive(Debug, Clone)]
 pub struct RoutingConnectionEntry {
     /// connections module
     pub module: ConnectionModule,
@@ -48,12 +50,10 @@ pub struct RoutingConnectionEntry {
     pub pl: f32,
 }
 
-/**
- * Global Routing Table Implementation
- * 
- * This is the table to turn to when checking where to send
- * a package.
- */
+/// Global Routing Table Implementation
+/// 
+/// This is the table to turn to when checking where to send
+/// a package.
 pub struct RoutingTable {
     pub table: HashMap<PeerId, RoutingUserEntry>
 }
@@ -107,13 +107,43 @@ impl RoutingTable {
 
         RoutingInfoTable(table)
     }
+
+    /// Routing table's CLI commands
+    /// 
+    /// you get here with the commands:
+    /// ```
+    /// router table list
+    /// ```
+    pub fn cli(cmd: &str) {        
+        match cmd {
+            // display routing table
+            cmd if cmd.starts_with("list") => {
+                println!("Routing Table");
+                println!("No. | User ID  | Connection Module | RTT in ms | Via Neighbour Node Id");
+
+                let mut line = 1;
+                let routing_table = ROUTINGTABLE.get().read().unwrap();
+
+                // loop through all user table entries
+                for (id, entry) in &routing_table.table {
+                    // loop through all connection entries in a user entry
+                    for connection in &entry.connections {
+                        println!("{} | {:?} | {:?} | {} | {:?}", line, id, connection.module, connection.rtt, connection.node);
+                        line += 1;    
+                    }
+                }
+            },
+            _ => log::error!("unknown user command"),
+        }
+    }
+
 }
 
 
 /**
  * Serializable routing structures to send over the network
  */
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct RoutingInfoEntry {
     /// user id
     pub user: Vec<u8>,
@@ -126,5 +156,5 @@ pub struct RoutingInfoEntry {
 }
 
 /// serializable routing information to send to neighbours
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct RoutingInfoTable (pub Vec<RoutingInfoEntry>);

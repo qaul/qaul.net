@@ -50,19 +50,17 @@ use crate::connections::{
     ConnectionModule,
     events,
 };
-use crate::router_behaviour::{
-    QaulRouterBehaviour,
-    QaulRouterBehaviourConfig,
-    QaulRouterBehaviourEvent,
+use qaul_info::{
+    QaulInfo,
+    QaulInfoEvent,
 };
-
 
 #[derive(NetworkBehaviour)]
 pub struct QaulInternetBehaviour {
     pub floodsub: Floodsub,
     pub identify: Identify,
     pub ping: Ping,
-    pub qaul_router: QaulRouterBehaviour,
+    pub qaul_info: QaulInfo,
     #[behaviour(ignore)]
     pub response_sender: UnboundedSender<QaulMessage>,
 }
@@ -117,7 +115,7 @@ impl Internet {
                     Node::get_keys().public())
                 ),
                 ping: Ping::new(ping_config),
-                qaul_router: QaulRouterBehaviour::new(QaulRouterBehaviourConfig::new()),
+                qaul_info: QaulInfo::new(Node::get_id()),
                 response_sender,
             };
             behaviour.floodsub.subscribe(Node::get_topic());
@@ -203,9 +201,9 @@ impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
     }
 }
 
-impl NetworkBehaviourEventProcess<QaulRouterBehaviourEvent> for QaulInternetBehaviour {
-    fn inject_event(&mut self, event: QaulRouterBehaviourEvent) {
-        events::qaul_router_event( event, ConnectionModule::Internet );
+impl NetworkBehaviourEventProcess<QaulInfoEvent> for QaulInternetBehaviour {
+    fn inject_event(&mut self, event: QaulInfoEvent) {
+        events::qaul_info_event( event, ConnectionModule::Internet );
     }
 }
 

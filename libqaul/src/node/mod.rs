@@ -23,6 +23,9 @@ static STATE: state::Storage<Node> = state::Storage::new();
 impl Node {
     // start an existing node from the config parameters
     pub fn init() {
+        // initialize users of this node
+        Users::init();
+        
         // initialize node
         {
             if !Configuration::is_node_initialized() {
@@ -36,9 +39,6 @@ impl Node {
                 Self::from_config();
             }
         }
-
-        // initialize users of this node
-        Users::init();
     }
 
     // create a new node and save the parameters into config

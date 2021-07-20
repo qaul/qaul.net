@@ -6,23 +6,22 @@ use async_std::{task, io};
 use futures::prelude::*;
 use std::task::{Context, Poll};
 
-// create modules
+// crate modules
 mod configuration;
 mod connections;
 mod node;
 mod router;
-mod router_behaviour;
 mod services;
 mod types;
+
 use node::Node;
 use node::users::Users;
-use router::Router;
+use router::{Router, info::RouterInfo};
 use router::flooder;
-use crate::connections::{Connections, ConnectionModule};
+use connections::{Connections, ConnectionModule};
 use services::Services;
 use services::feed;
 use configuration::Configuration;
-
 
 
 pub async fn init() -> () {
@@ -31,12 +30,12 @@ pub async fn init() -> () {
     // initialize & load configuration
     Configuration::init();
 
-    // initialize users
-    Router::init();
-
     // initialize node & user accounts
     Node::init();
 
+    // initialize router
+    Router::init();
+    
     // initialize Connection Modules
     let mut conn = Connections::init().await;
 
@@ -64,9 +63,9 @@ pub async fn init() -> () {
                             cmd if cmd.starts_with("user ") => {
                                 Users::cli(cmd.strip_prefix("user ").unwrap());
                             },
-                            // neighbours functions
-                            cmd if cmd.starts_with("neighbours ") => {
-                                router::neighbours::Neighbours::cli(cmd.strip_prefix("neighbours ").unwrap());
+                            // router module
+                            cmd if cmd.starts_with("router ") => {
+                                router::Router::cli(cmd.strip_prefix("router ").unwrap());
                             },
                             // send feed message
                             cmd if cmd.starts_with("feed ") => {
@@ -125,6 +124,18 @@ pub async fn init() -> () {
                 }
             }
             break
+        }
+        // send router info to neighbours
+        {
+            // check scheduler
+            if let Some((neighbour_id, connection_module, data)) = RouterInfo::check_scheduler() {
+                // send routing information
+                match connection_module {
+                    ConnectionModule::Lan => conn.lan.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
+                    ConnectionModule::Internet => conn.internet.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
+                    ConnectionModule::None => {},
+                }
+            }
         }
 
         Poll::Pending

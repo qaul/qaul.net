@@ -12,7 +12,8 @@ use std::collections::BTreeMap;
 use state::Storage;
 use std::sync::RwLock;
 use serde::{Serialize, Deserialize};
-//use log::{error, info};
+
+use crate::node;
 
 // mutable state of users table
 static USERS: Storage<RwLock<Users>> = Storage::new();
@@ -23,11 +24,16 @@ pub struct Users {
 
 impl Users {
     pub fn init() {
-        // create users table and save it to state
-        let users = Users { users: BTreeMap::new() };
-        USERS.set(RwLock::new(users));
+        {
+            // create users table and save it to state
+            let users = Users { users: BTreeMap::new() };
+            USERS.set(RwLock::new(users));
+        }
 
-        // TODO: fill BTreeMap from storage
+        // fill with locally registered users
+        for user in node::users::Users::get_user_info() {
+            Self::add(user.id, user.key, user.name.clone());
+        }
     }
 
     pub fn add( id: PeerId, key: PublicKey, name: String ) {

@@ -65,9 +65,6 @@ impl Users {
                     keys: keys.clone(),
                 }
             );
-
-            // add it to routers user table
-            router::users::Users::add( id, keys.public(), user.name );
         }
 
         // save users to state
@@ -123,7 +120,24 @@ impl Users {
         }
     }
 
-    // interpret CLI user commands
+    /// to fill the routing table get all users
+    pub fn get_user_info() -> Vec<router::users::User> {
+        let mut user_info = Vec::new();
+
+        let users = USERS.get().read().unwrap();
+        for user in &users.users {
+            user_info.push(router::users::User {
+                id: user.id,
+                key: user.keys.public(),
+                name: user.name.clone(),
+            });
+        }
+
+        user_info
+    }
+
+    /// Process command line instructions for the 
+    /// user accounts
     pub fn cli(cmd: &str) {        
         match cmd {
             // list all user accounts
@@ -140,6 +154,6 @@ impl Users {
             },
             _ => error!("unknown user command"),
         }
-    }    
+    }
 }
 

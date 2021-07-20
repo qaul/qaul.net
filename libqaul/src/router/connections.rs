@@ -1,15 +1,14 @@
-/**
- * # Connection Module Connectivity Collection Table
- * 
- * This file contains the collected collectivity information
- * per connection module
- * 
- *   * each connection module has it's own routing table containing
- *     all currently reachable users via this module.
- *   * Each user has an entry for each node over which it can be reached.
- *   * Out of this information the global table is constructed, 
- *     containing only the best entry.
- */
+//! # Connection Module Connectivity Collection Table
+//! 
+//! This file contains the collected connectivity information
+//! per connection module
+//! 
+//! * each connection module has it's own routing table containing
+//!   all currently reachable users via this module.
+//! * Each user has an entry for each node over which it can be reached.
+//! * Out of this information the global table is constructed,
+//!   containing only the best entry.
+
 
 use libp2p::PeerId;
 use state::Storage;
@@ -25,17 +24,11 @@ use crate::router::{
 };
 
 
-// mutable state of tables
+/// Mutable module state
+/// Tables with all stats for each connection module
 static INTERNET: Storage<RwLock<ConnectionTable>> = Storage::new();
 static LAN: Storage<RwLock<ConnectionTable>> = Storage::new();
 
-
-/**
- * Table with all stats for each connection module
- * 
- * The connectivity updates from each neighbour are collected here.
- * Out of this information the global routing table is generated.
- */
 
 /// Connection entry for UserEntry
 struct NeighbourEntry {
@@ -61,8 +54,9 @@ struct UserEntry {
     connections: BTreeMap<PeerId, NeighbourEntry>,
 }
 
-/// Connection table, 
-/// containing a hashed map of all reachable users
+/// Connection table contains a hashed map of all reachable users.
+/// The connectivity updates from each neighbour are collected here.
+/// Out of this information the global routing table is generated.
 pub struct ConnectionTable {
     table: HashMap<PeerId, UserEntry>,
 }
@@ -79,42 +73,53 @@ impl ConnectionTable {
         LAN.set(RwLock::new(lan));
     }
 
+    /// process received routing info table
+    /// enter it into all modules where we are connected to
+    pub fn process_received_routing_info( neighbour_id: PeerId, info: RoutingInfoTable ) {
+        // try Lan module
+        if let Some(rtt) = Neighbours::get_rtt(&neighbour_id , &ConnectionModule::Lan ){
+            Self::populate(ConnectionModule::Lan, neighbour_id, rtt, info.clone());
+        }
+
+        // try Internet module
+        if let Some(rtt) = Neighbours::get_rtt(&neighbour_id , &ConnectionModule::Internet ){
+            Self::populate(ConnectionModule::Internet, neighbour_id, rtt, info.clone());
+        }
+    }
+
     /// populate connection table with incoming routing information
-    pub fn populate( conn: ConnectionModule, neighbour_id: PeerId, info: RoutingInfoTable ) {
-        // get round trip time for neighbour
-        if let Some(rtt) = Neighbours::get_rtt(&neighbour_id , &conn ){
-            // get access to the connection table
-            let mut connection_table;
-            match conn {
-                ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
-                ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
-                ConnectionModule::None => return
-            }
+    pub fn populate( conn: ConnectionModule, neighbour_id: PeerId, rtt: u32, info: RoutingInfoTable ) {
+        // get access to the connection table
+        let mut connection_table;
+        match conn {
+            ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
+            ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
+            ConnectionModule::None => return
+        }
 
-            // loop through results and enter them to the table
-            for entry in info.0 {
-                if let Ok(user_id) = PeerId::from_bytes(&entry.user){
-                    let neighbour = NeighbourEntry {
-                        id: neighbour_id,
-                        rtt: entry.rtt +rtt,
-                        hc: entry.hc,
-                        pl: entry.pl,
-                        last_update: SystemTime::now(),
+        // loop through results and enter them to the table
+        for entry in info.0 {
+            if let Ok(user_id) = PeerId::from_bytes(&entry.user){
+                let neighbour = NeighbourEntry {
+                    id: neighbour_id,
+                    rtt: entry.rtt +rtt,
+                    hc: entry.hc,
+                    pl: entry.pl,
+                    last_update: SystemTime::now(),
+                };
+                // add entry to table
+                if let Some(user) = connection_table.table.get_mut(&user_id) {
+                    user.connections.insert(neighbour_id, neighbour);
+                } else {
+                    let mut connections_map = BTreeMap::new();
+                    connections_map.insert(neighbour.id, neighbour);
+
+                    let user = UserEntry { 
+                        id: user_id,
+                        connections: connections_map,
                     };
-                    // add entry to table
-                    if let Some(user) = connection_table.table.get_mut(&user_id) {
-                        user.connections.insert(neighbour_id, neighbour);
-                    } else {
-                        let mut connections_map = BTreeMap::new();
-                        connections_map.insert(neighbour.id, neighbour);
 
-                        let user = UserEntry { 
-                            id: user_id,
-                            connections: connections_map,
-                        };
-
-                        connection_table.table.insert(user_id, user);
-                    }
+                    connection_table.table.insert(user_id, user);
                 }
             }
         }
@@ -240,5 +245,52 @@ impl ConnectionTable {
 
         return_entry
     }
+
+    /// Connections table's CLI commands
+    /// 
+    /// you get here with the commands:
+    /// ```
+    /// router connections list
+    /// ```
+    pub fn cli(cmd: &str) {        
+        match cmd {
+            // display routing table
+            cmd if cmd.starts_with("list") => {
+                // display LAN table
+                Self::cli_display_list(ConnectionModule::Lan);
+
+                // display Inernet table
+                Self::cli_display_list(ConnectionModule::Internet);
+            },
+            _ => log::error!("unknown user command"),
+        }
+    }
+
+    /// print list of connection module on terminal 
+    fn cli_display_list( conn: ConnectionModule ) {
+        println!("{:?}", conn);
+        println!("No. | User ID");
+        println!("      * RTT in ms | hop count | Via Neighbour Node Id");
+
+        let mut line = 1;
+        let connection_table;
+        
+        match conn {
+            ConnectionModule::Lan => connection_table = LAN.get().read().unwrap(),
+            ConnectionModule::Internet => connection_table = INTERNET.get().read().unwrap(),
+            ConnectionModule::None => return,
+        }
+
+        // loop through all table entries per user
+        for (id, entry) in &connection_table.table {
+            println!("{} | {:?}", line, id);
+            // loop through all neighbour entries of a user entry
+            for (id, neighbour) in &entry.connections {
+                println!("      * {} | {} | {:?}", neighbour.rtt, neighbour.hc, id);
+            }
+            line += 1;
+        }
+    }
+
 }
 

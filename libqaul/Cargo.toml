@@ -3,6 +3,7 @@ name = "libqaul"
 version = "0.2.0"
 authors = ["qaul.net community <contact@qaul.net>"]
 edition = "2018"
+license = "AGPL"
 
 [dependencies]
 libp2p = { version = "0.39" }
@@ -26,6 +27,4 @@ wasm-timer = "0.2"
 rand = "0.8"
 
 # internal references
-#qaul_node = { path = "node" }
-#qaul_configuration = { path = "configuration" }
-#qaul_services = { path = "services" }
+qaul_info = { path = "src/libp2p_modules/qaul_info" }
