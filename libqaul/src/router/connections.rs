@@ -262,7 +262,7 @@ impl ConnectionTable {
                 // display Inernet table
                 Self::cli_display_list(ConnectionModule::Internet);
             },
-            _ => log::error!("unknown user command"),
+            _ => log::error!("unknown router connections command"),
         }
     }
 

@@ -133,7 +133,7 @@ impl RoutingTable {
                     }
                 }
             },
-            _ => log::error!("unknown user command"),
+            _ => log::error!("unknown router table command"),
         }
     }
 

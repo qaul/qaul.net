@@ -19,18 +19,10 @@ use libp2p::{
         ProtocolsHandler,
         OneShotHandler,
         NotifyHandler,
-        DialPeerCondition,
     }
 };
-use cuckoofilter::{CuckooError, CuckooFilter};
-use fnv::FnvHashSet;
-use log::warn;
-use smallvec::SmallVec;
 use std::{
-    collections::{
-        VecDeque,
-        hash_map::{DefaultHasher, HashMap},
-    },
+    collections::VecDeque,
     task::{Context, Poll}
 };
 

@@ -34,7 +34,7 @@ use crate::{
     router::{
         neighbours::Neighbours,
         table::{RoutingTable, RoutingInfoTable},
-        users::UserInfoTable,
+        users::{Users, UserInfoTable},
         connections::ConnectionTable,
     },
 };
@@ -139,6 +139,7 @@ impl RouterInfo {
             let mut scheduler = SCHEDULER.get().write().unwrap();
 
             if module == ConnectionModule::None {
+                log::error!("node is not a neighbour anymore: {:?}", node_id);
                 // delete this entry
                 scheduler.neighbours.remove(&node_id);
             }
@@ -161,8 +162,8 @@ impl RouterInfo {
 
     /// add new neighbour entry
     pub fn add_neighbour(node_id: PeerId) {
-        let mut exists;
-
+        let exists;
+        log::info!("add new neighbour {:?} to RouterInfo scheduler", node_id);
         // check if a neighbour entry exists
         {
             let scheduler = SCHEDULER.get().read().unwrap();
@@ -170,7 +171,7 @@ impl RouterInfo {
         }
 
         // if it does not exist add it to scheduler
-        if exists {
+        if !exists {
             let mut scheduler = SCHEDULER.get().write().unwrap();
             let interval = scheduler.interval.clone();
             scheduler.neighbours.insert(node_id, SchedulerEntry {
@@ -185,7 +186,7 @@ impl RouterInfo {
         // create RouterInfo
         let node_id = Node::get_id();
         let routes = RoutingTable::create_routing_info(neighbour);
-        let users = UserInfoTable(Vec::new());
+        let users = Users::get_user_info_table();
 
         let time = SystemTime::now();
         let duration = time.duration_since(UNIX_EPOCH).expect("Time went backwards");
@@ -227,10 +228,12 @@ impl RouterInfo {
                 // unstuff data
                 let message_result: Result<RouterInfoMessage, bincode::Error> = bincode::deserialize(&data[..]);
 
-                // process routing entry
+                // process received RouterInfoMessage
                 if let Ok(message) = message_result {
-                    // fill it into the connections tables
+                    // fill routes it into the connections tables
                     ConnectionTable::process_received_routing_info( received.received_from, message.routes );
+                    // add users to users list
+                    Users::add_user_info_table(message.users);
                 }
             },
             _ => {
@@ -238,16 +241,6 @@ impl RouterInfo {
                 return
             },
         }
-    }
-
-    /// send RouterInfo to neighbour
-    pub fn send( node_id: PeerId, conn: ConnectionModule ) {
-        // create signed router RouterInfoContainer
-        let data = Self::create(Some(node_id));
-
-        // send RouterInfoContainer
-        // TODO: how to send it to main lib?
-        //       spsc? mpsc?
     }
 
     /// RouterInfo table's CLI commands
@@ -270,12 +263,18 @@ impl RouterInfo {
 
                 // loop through all neighbour entries
                 for (id, entry) in &scheduler.neighbours {
-                    let scheduled_in = scheduler.interval - entry.timestamp.duration_since(SystemTime::now()).unwrap();
-                    println!("{} | {} | {:?}", line, scheduled_in.as_millis() , id);
+                    let now = SystemTime::now();
+                    let duration_result = now.duration_since(entry.timestamp);
+                    if let Ok(duration) = duration_result {
+                        let scheduled_in = scheduler.interval - duration;
+                        println!("{} | {} | {:?}", line, scheduled_in.as_millis() , id);
+                    } else {
+                        log::error!("entry.timestamp.duration_since() produced the following error: {:?}", duration_result);
+                    }
                     line += 1; 
                 }
             },
-            _ => log::error!("unknown user command"),
+            _ => log::error!("unknown router info command"),
         }
     }
 }

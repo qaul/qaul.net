@@ -23,6 +23,9 @@ pub struct Users {
 }
 
 impl Users {
+    /// Initialize the router::users::Users module
+    /// this module is automatically initialized
+    /// when the router module is initionalized
     pub fn init() {
         {
             // create users table and save it to state
@@ -36,11 +39,14 @@ impl Users {
         }
     }
 
+    /// add a new user to the users list
     pub fn add( id: PeerId, key: PublicKey, name: String ) {
         let mut users = USERS.get().write().unwrap();
         users.users.insert( id, User { id, key, name } );
     }
 
+    /// add a new user to the users list, and check whether the 
+    /// User ID matches the public key
     pub fn add_with_check( id: PeerId, key: PublicKey, name: String ) {
         // check if user is valid
         if id != key.clone().into_peer_id() { 
@@ -56,6 +62,7 @@ impl Users {
         users.users.insert( id, User { id, key, name } );
     }
 
+    /// get the public key of a known user
     pub fn get_pub_key( user_id: &PeerId ) -> Option<PublicKey> {
         let store = USERS.get().read().unwrap();
         let result = store.users.get(user_id);
@@ -65,7 +72,9 @@ impl Users {
         }
     }
 
-    pub fn get_as_bytes() -> Vec<u8> {
+    /// create and send the user info table for the
+    /// RouterInfo message which is sent regularily to neighbours
+    pub fn get_user_info_table() -> UserInfoTable {
         let store = USERS.get().read().unwrap();
         let mut users = Vec::new();
         for (_id, value) in &store.users {
@@ -75,15 +84,13 @@ impl Users {
                 name: value.name.clone(),
             });
         }
-        let encoded: Vec<u8> = bincode::serialize(&users).unwrap();
-        encoded
+        UserInfoTable(users)
     }
 
-    pub fn add_from_bytes(data: Vec<u8>) {
-        let decoded: UserInfoTable = bincode::deserialize(&data[..]).unwrap();
-
+    /// add new users from the received bytes of a UserInfoTable
+    pub fn add_user_info_table(users: UserInfoTable) {
         // loop through it and add it to the users list
-        for value in decoded.0.iter() {
+        for value in users.0.iter() {
             let id_result = PeerId::from_bytes(&value.id);
             let key_result = PublicKey::from_protobuf_encoding(&value.key);
 
@@ -94,6 +101,31 @@ impl Users {
                     value.name.clone()
                 );
             }
+        }
+    }
+
+    /// users CLI commands
+    /// 
+    /// you invoke this with the commands:
+    /// ```
+    /// router users list
+    /// ```
+    pub fn cli(cmd: &str) {        
+        match cmd {
+            // list all users
+            cmd if cmd.starts_with("list") => {
+                let mut line = 1;
+                println!("All known Users");
+                println!("No. | User Name | User Id | Public Key");
+
+                let users = USERS.get().read().unwrap();
+
+                for (id, user) in &users.users {
+                    println!("{} | {} | {:?} | {:?}", line, user.name, id, user.key);
+                    line += 1;
+                }
+            },
+            _ => log::error!("unknown router users command"),
         }
     }
 }

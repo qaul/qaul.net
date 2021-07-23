@@ -59,7 +59,7 @@ impl Neighbours {
             node.updated_at = SystemTime::now();
         }
         else {
-            log::debug!("add node {:?} to neighbours table", node_id);
+            log::info!("add node {:?} to neighbours table", node_id);
             neighbours.nodes.insert( node_id, Neighbour { rtt, updated_at: SystemTime::now() } );
 
             // add neighbour in RouterInfo neighbours table
@@ -158,7 +158,7 @@ impl Neighbours {
                     }
                 }
             },
-            _ => log::error!("unknown user command"),
+            _ => log::error!("unknown router neighbours command"),
         }
     }
 }

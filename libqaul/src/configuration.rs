@@ -15,7 +15,7 @@ use std::{
     fs, 
     sync::{RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
-use log::{error, info};
+use log::error;
 use state::Storage;
 
 // make configuration globally accessible mutable state

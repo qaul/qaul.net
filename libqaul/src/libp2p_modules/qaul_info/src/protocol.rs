@@ -1,20 +1,12 @@
-use libp2p::{
-    PeerId,
-    core::{InboundUpgrade, OutboundUpgrade, UpgradeInfo, upgrade},
-};
+use libp2p::core::{InboundUpgrade, OutboundUpgrade, UpgradeInfo, upgrade};
 use futures::{
     Future,
     io::{AsyncRead, AsyncWrite},
     AsyncWriteExt,
 };
-use std::{error, fmt, io, iter, pin::Pin
-};
+use std::{io, iter, pin::Pin};
 
-use crate::types::{
-    QaulInfoData,
-    QaulInfoReceived,
-    QaulInfoSend,
-};
+use crate::types::QaulInfoData;
 
 /// Implementation of `ConnectionUpgrade` for the qaul_info protocol.
 #[derive(Debug, Clone, Default)]

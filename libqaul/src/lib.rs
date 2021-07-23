@@ -86,7 +86,7 @@ pub async fn init() -> () {
         loop {
             match conn.lan.swarm.poll_next_unpin(cx) {
                 Poll::Ready(Some(event)) => {
-                    info!("Lan SwarmEvent: {:?}", event);
+                    log::debug!("Lan SwarmEvent: {:?}", event);
                     // if let SwarmEvent::NewListenAddr(addr) = event {
                     //     println!("Listening on {:?}", addr);
                     // }
@@ -99,7 +99,7 @@ pub async fn init() -> () {
         loop {
             match conn.internet.swarm.poll_next_unpin(cx) {
                 Poll::Ready(Some(event)) => {
-                    info!("Internet SwarmEvent: {:?}", event);
+                    log::debug!("Internet SwarmEvent: {:?}", event);
                     // if let SwarmEvent::NewListenAddr(addr) = event {
                     //     println!("Listening on {:?}", addr);
                     // }
@@ -129,6 +129,7 @@ pub async fn init() -> () {
         {
             // check scheduler
             if let Some((neighbour_id, connection_module, data)) = RouterInfo::check_scheduler() {
+                log::info!("sending routing information via {:?} to {:?}", connection_module, neighbour_id);
                 // send routing information
                 match connection_module {
                     ConnectionModule::Lan => conn.lan.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),

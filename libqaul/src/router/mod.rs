@@ -70,6 +70,9 @@ impl Router {
                 RoutingTable::cli(cmd.strip_prefix("table ").unwrap());
             },
             // users
+            cmd if cmd.starts_with("users ") => {
+                Users::cli(cmd.strip_prefix("users ").unwrap());
+            },
             // unhandled command
             _ => log::error!("unknown router command"),
         }
