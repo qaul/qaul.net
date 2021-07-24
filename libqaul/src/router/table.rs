@@ -1,13 +1,11 @@
-/**
- * # Global Routing Table
- * 
- * This file contains the global routing table
- * 
- *   * contains all currently reachable users.
- *   * There is an entry for each user over which connection modules 
- *     it can be reached. Each connection module only contains 
- *     information of the best node.
- */
+//! # Global Routing Table
+//! 
+//! This file contains the global routing table
+//! 
+//! * contains all currently reachable users.
+//! * There is an entry for each user over which connection modules
+//!   it can be reached. Each connection module only contains
+//!   information of the best node.
 
 use libp2p::PeerId;
 use state::Storage;

@@ -18,6 +18,7 @@ use std::collections::HashMap;
 use std::time::{SystemTime, Duration};
 
 use crate::connections::ConnectionModule;
+use crate::node;
 use crate::router::{
     table::{RoutingInfoTable, RoutingTable, RoutingUserEntry, RoutingConnectionEntry},
     neighbours::Neighbours,
@@ -26,6 +27,7 @@ use crate::router::{
 
 /// Mutable module state
 /// Tables with all stats for each connection module
+static LOCAL: Storage<RwLock<RoutingTable>> = Storage::new();
 static INTERNET: Storage<RwLock<ConnectionTable>> = Storage::new();
 static LAN: Storage<RwLock<ConnectionTable>> = Storage::new();
 
@@ -66,11 +68,45 @@ impl ConnectionTable {
     /// Creates a table for each ConnectionModule
     /// and saves it to state.
     pub fn init() {
-        let internet = ConnectionTable { table: HashMap::new() };
-        INTERNET.set(RwLock::new(internet));
+        {
+            let internet = ConnectionTable { table: HashMap::new() };
+            INTERNET.set(RwLock::new(internet));
 
-        let lan = ConnectionTable { table: HashMap::new() };
-        LAN.set(RwLock::new(lan));
+            let lan = ConnectionTable { table: HashMap::new() };
+            LAN.set(RwLock::new(lan));
+
+            let local = RoutingTable { table: HashMap::new() };
+            LOCAL.set(RwLock::new(local));
+        }
+
+        // create filled state for locally registered users
+        {
+            for user in node::users::Users::get_user_info() {
+                Self::add_local_user(user.id);
+            }
+        }
+    }
+
+    /// add a new local user to state
+    pub fn add_local_user(user_id: PeerId) {
+        let node_id = node::Node::get_id();
+        let mut routing_table = LOCAL.get().write().unwrap();
+
+        let mut connections = Vec::new();
+        connections.push(RoutingConnectionEntry {
+            module: ConnectionModule::Local,
+            node: node_id,
+            rtt: 0,
+            hc: 0,
+            pl: 0.0,
+        });
+
+        let routing_user_entry = RoutingUserEntry {
+            id: user_id.to_owned(),
+            connections: connections,
+        };
+
+        routing_table.table.insert(user_id, routing_user_entry);
     }
 
     /// process received routing info table
@@ -78,25 +114,17 @@ impl ConnectionTable {
     pub fn process_received_routing_info( neighbour_id: PeerId, info: RoutingInfoTable ) {
         // try Lan module
         if let Some(rtt) = Neighbours::get_rtt(&neighbour_id , &ConnectionModule::Lan ){
-            Self::populate(ConnectionModule::Lan, neighbour_id, rtt, info.clone());
+            Self::fill_received_routing_info(ConnectionModule::Lan, neighbour_id, rtt, info.clone());
         }
 
         // try Internet module
         if let Some(rtt) = Neighbours::get_rtt(&neighbour_id , &ConnectionModule::Internet ){
-            Self::populate(ConnectionModule::Internet, neighbour_id, rtt, info.clone());
+            Self::fill_received_routing_info(ConnectionModule::Internet, neighbour_id, rtt, info.clone());
         }
     }
 
     /// populate connection table with incoming routing information
-    pub fn populate( conn: ConnectionModule, neighbour_id: PeerId, rtt: u32, info: RoutingInfoTable ) {
-        // get access to the connection table
-        let mut connection_table;
-        match conn {
-            ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
-            ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
-            ConnectionModule::None => return
-        }
-
+    fn fill_received_routing_info( conn: ConnectionModule, neighbour_id: PeerId, rtt: u32, info: RoutingInfoTable ) {
         // loop through results and enter them to the table
         for entry in info.0 {
             if let Ok(user_id) = PeerId::from_bytes(&entry.user){
@@ -107,21 +135,36 @@ impl ConnectionTable {
                     pl: entry.pl,
                     last_update: SystemTime::now(),
                 };
-                // add entry to table
-                if let Some(user) = connection_table.table.get_mut(&user_id) {
-                    user.connections.insert(neighbour_id, neighbour);
-                } else {
-                    let mut connections_map = BTreeMap::new();
-                    connections_map.insert(neighbour.id, neighbour);
 
-                    let user = UserEntry { 
-                        id: user_id,
-                        connections: connections_map,
-                    };
-
-                    connection_table.table.insert(user_id, user);
-                }
+                Self::add_connection(user_id, neighbour, conn.clone());
             }
+        }
+    }
+
+    /// add connection to local state
+    fn add_connection(user_id: PeerId, connection: NeighbourEntry, module: ConnectionModule) {
+        // get access to the connection table
+        let mut connection_table;
+        match module {
+            ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
+            ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
+            ConnectionModule::Local => return,
+            ConnectionModule::None => return,
+        }        
+
+        // check if user already exists
+        if let Some(user) = connection_table.table.get_mut(&user_id) {
+            user.connections.insert(connection.id, connection);
+        } else {
+            let mut connections_map = BTreeMap::new();
+            connections_map.insert(connection.id, connection);
+
+            let user = UserEntry { 
+                id: user_id,
+                connections: connections_map,
+            };
+
+            connection_table.table.insert(user_id, user);
         }
     }
 
@@ -129,6 +172,12 @@ impl ConnectionTable {
     pub fn create_routing_table() {
         // create a new table
         let mut table = RoutingTable { table: HashMap::new() };
+
+        // set static routes for local users
+        // create them first, for that they are always routed to ourselves
+        {
+            table = Self::local_routes_to_intermediary_table(table);
+        }
 
         // calculate from lan module
         table = Self::calculate_intermediary_table(table, ConnectionModule::Lan);
@@ -138,6 +187,19 @@ impl ConnectionTable {
 
         // set table as new active routing table
         RoutingTable::set(table);
+    }
+
+    /// insert local routes into routing table
+    fn local_routes_to_intermediary_table(mut table: RoutingTable) -> RoutingTable {
+        // get local routes
+        let local = LOCAL.get().read().unwrap();
+
+        // fill it into routing table
+        for (user_id, user) in &local.table {
+            table.table.insert(user_id.to_owned(), user.to_owned());
+        }
+
+        table
     }
 
     /// calculate a routing table for a module
@@ -150,6 +212,7 @@ impl ConnectionTable {
         match conn.clone() {
             ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
             ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
+            ConnectionModule::Local => return table,
             ConnectionModule::None => return table
         }
 
@@ -278,6 +341,7 @@ impl ConnectionTable {
         match conn {
             ConnectionModule::Lan => connection_table = LAN.get().read().unwrap(),
             ConnectionModule::Internet => connection_table = INTERNET.get().read().unwrap(),
+            ConnectionModule::Local => return,
             ConnectionModule::None => return,
         }
 

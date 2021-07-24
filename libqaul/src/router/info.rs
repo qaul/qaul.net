@@ -230,10 +230,10 @@ impl RouterInfo {
 
                 // process received RouterInfoMessage
                 if let Ok(message) = message_result {
-                    // fill routes it into the connections tables
-                    ConnectionTable::process_received_routing_info( received.received_from, message.routes );
                     // add users to users list
                     Users::add_user_info_table(message.users);
+                    // fill routes it into the connections tables
+                    ConnectionTable::process_received_routing_info( received.received_from, message.routes );
                 }
             },
             _ => {

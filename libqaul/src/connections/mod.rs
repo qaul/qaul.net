@@ -18,10 +18,18 @@ use lan::Lan;
 use internet::Internet;
 
 
+/// enum with all connection modules
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum ConnectionModule {
+    /// This is a local user and does not need
+    /// any further routing.
+    Local,
+    /// Lan module, for all kind of lan connections,
+    /// neighbour nodes are found over mdns.
     Lan,
+    /// Connect statically to remote nodes.
     Internet,
+    /// no connection module known for this
     None,
 }
 

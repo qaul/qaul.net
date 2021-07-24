@@ -49,6 +49,7 @@ impl Neighbours {
         match module {
             ConnectionModule::Lan => neighbours = LAN.get().write().unwrap(),
             ConnectionModule::Internet => neighbours = INTERNET.get().write().unwrap(),
+            ConnectionModule::Local => return,
             ConnectionModule::None => return,
         }
 
@@ -74,6 +75,7 @@ impl Neighbours {
         match module {
             ConnectionModule::Lan => neighbours = LAN.get().write().unwrap(),
             ConnectionModule::Internet => neighbours = INTERNET.get().write().unwrap(),
+            ConnectionModule::Local => return,
             ConnectionModule::None => return,
         }
 
@@ -96,6 +98,7 @@ impl Neighbours {
         match module {
             ConnectionModule::Lan => neighbours = LAN.get().read().unwrap(),
             ConnectionModule::Internet => neighbours = INTERNET.get().read().unwrap(),
+            ConnectionModule::Local => return Some(0),
             ConnectionModule::None => return None,
         }
 

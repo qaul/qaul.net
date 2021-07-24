@@ -1,10 +1,15 @@
-use log::{error, info};
+//! # libqaul
+//! 
+//! Library for qaul.net
+
 // Async comparison
 // https://runrust.miraheze.org/wiki/Async_crate_comparison
 // MPSC = Multi-Producer, Single-Consumer FiFo
 use async_std::{task, io};
 use futures::prelude::*;
 use std::task::{Context, Poll};
+use std::time::{SystemTime, Duration};
+
 
 // crate modules
 mod configuration;
@@ -35,6 +40,8 @@ pub async fn init() -> () {
 
     // initialize router
     Router::init();
+    let router_interval = Duration::from_millis(1000);
+    let router_time = SystemTime::now();
     
     // initialize Connection Modules
     let mut conn = Connections::init().await;
@@ -71,11 +78,11 @@ pub async fn init() -> () {
                             cmd if cmd.starts_with("feed ") => {
                                 feed::Feed::cli(cmd.strip_prefix("feed ").unwrap(), &mut conn);
                             },
-                            _ => error!("unknown command"),
+                            _ => log::error!("unknown command"),
                         }
                     }
                     else {
-                        error!("CLI input error: {:?}", input);
+                        log::error!("CLI input error: {:?}", input);
                     }
                 },
                 Poll::Ready(None) => panic!("Stdin closed"),
@@ -134,8 +141,20 @@ pub async fn init() -> () {
                 match connection_module {
                     ConnectionModule::Lan => conn.lan.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
                     ConnectionModule::Internet => conn.internet.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
+                    ConnectionModule::Local => {},
                     ConnectionModule::None => {},
                 }
+            }
+        }
+        // create routing table periodically (every second)
+        {
+            let time_now = SystemTime::now();
+            if let Ok(passed) = time_now.duration_since(router_time) {
+                if passed > router_interval {
+                    router::connections::ConnectionTable::create_routing_table();
+                }
+            } else {
+                log::error!("error in time duration calculation");
             }
         }
 
