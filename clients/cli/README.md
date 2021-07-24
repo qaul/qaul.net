@@ -6,7 +6,7 @@ This client can:
 
 * discover other nodes in the same network via mdns
 * connect to remote nodes via the internet overlay network.
-* list the network structure
+* list the network structure & display router state
 * create user accounts
 * publish, distribute and display feed-messages via floodsub protocol to all other nodes in the network.
 
@@ -32,8 +32,6 @@ Once the program is running, one can enter the commands documented in the CLI Ma
 
 There are several commands:
 
-* qaul network
-  * `qaul peers` - list all peers
 * user accounts
   * `user list` - list all local user accounts
   * `user create {User Name}` - create a new user account with the name {User Name}
@@ -43,6 +41,18 @@ There are several commands:
   * `feed send {FeedMessage}` - sends the {FeedMessage} to the network and distributes it to all connected nodes.
     * the message is signed and can be validated.
     * at least one user needs to be created.
+* router info
+  * `router table list` - display routing table for all currently reachable users
+  * `router users list` - display all users known to this router
+  * `router neighbours list` - display all neighbour nodes per interface
+  * `router connections list` - display connection discovery table
+    * out of this information the routing table is generated
+  * `router info list` - display scheduler info
+    * Each neighbour receives routing info updates.
+      This list displays the scheduler information.
+* connection modules info
+  * `modules info` - display information of the connections modules
+    * list all neighbour nodes a module has a running tcp connection.
 
 
 ## Further Configuration

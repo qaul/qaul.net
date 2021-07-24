@@ -61,7 +61,7 @@ pub async fn init() -> () {
                     if let Ok(line) = input {
                         match line.as_str() {
                             // node functions
-                            "qaul peers" => {
+                            "modules info" => {
                                 // print information about the connections
                                 conn.internet.info();
                                 conn.lan.info();
