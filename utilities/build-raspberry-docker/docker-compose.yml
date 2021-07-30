@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  rust:
+    build: .
+    volumes:
+      - ../../.:/qaul
+    ## what user id / group id shall be used to build it
+    #user: 1000:1000
+    ## Build Debug version
+    #command: "cargo build --target=armv7-unknown-linux-gnueabihf"
+    ## Build release version
+    #command: "cargo build --release --target=armv7-unknown-linux-gnueabihf"
