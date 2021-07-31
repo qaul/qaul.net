@@ -1,0 +1,50 @@
+syntax = "proto3";
+package qaul_rpc.pb;
+
+// rpc message container to libqaul
+message ToLibqaul {
+  // kind of rpc message
+  oneof module {
+      ToNode node = 1;
+      ToRouter router = 2;
+      ToFeed feed = 3;
+  }
+}
+
+// node
+message ToNode {
+    // message type
+    oneof type {
+        bool start_session = 1;
+        CreateUser create_user = 2;
+    }
+}
+
+// create a new user on this node
+message CreateUser {
+    string name = 1;
+}
+
+// router info
+message ToRouter {
+    oneof type {
+        RequestUsers request_users = 1;
+    }
+}
+
+// request users
+message RequestUsers {
+
+}
+
+// feed service
+message ToFeed {
+    oneof type {
+        SendFeed send_feed = 1;
+    }
+}
+
+// send feed message
+message SendFeed {
+    string content = 1;
+}

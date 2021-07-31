@@ -16,7 +16,9 @@ mod configuration;
 mod connections;
 mod node;
 mod router;
+mod rpc;
 mod services;
+mod threaded;
 mod types;
 
 use node::Node;

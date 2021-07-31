@@ -1,0 +1,5 @@
+syntax = "proto3";
+package qaul_rpc.pb;
+
+import public "from_libqaul.proto";
+import public "to_libqaul.proto";
