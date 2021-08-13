@@ -149,7 +149,7 @@ impl Node {
                         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
                         // send message
-                        Rpc::send_message(buf, 2, "".to_string(), Vec::new());
+                        Rpc::send_message(buf, crate::rpc::proto::Modules::Node.into(), "".to_string(), Vec::new());
                     }
                     _ => {},
                 }    

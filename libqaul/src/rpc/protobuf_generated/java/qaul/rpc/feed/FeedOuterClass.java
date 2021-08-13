@@ -2720,42 +2720,66 @@ public final class FeedOuterClass {
     com.google.protobuf.ByteString getSenderId();
 
     /**
-     * <code>bytes message_id = 2;</code>
+     * <code>string sender_id_base58 = 2;</code>
+     * @return The senderIdBase58.
+     */
+    java.lang.String getSenderIdBase58();
+    /**
+     * <code>string sender_id_base58 = 2;</code>
+     * @return The bytes for senderIdBase58.
+     */
+    com.google.protobuf.ByteString
+        getSenderIdBase58Bytes();
+
+    /**
+     * <code>bytes message_id = 3;</code>
      * @return The messageId.
      */
     com.google.protobuf.ByteString getMessageId();
 
     /**
-     * <code>string time_sent = 3;</code>
+     * <code>string message_id_base58 = 4;</code>
+     * @return The messageIdBase58.
+     */
+    java.lang.String getMessageIdBase58();
+    /**
+     * <code>string message_id_base58 = 4;</code>
+     * @return The bytes for messageIdBase58.
+     */
+    com.google.protobuf.ByteString
+        getMessageIdBase58Bytes();
+
+    /**
+     * <code>string time_sent = 5;</code>
      * @return The timeSent.
      */
     java.lang.String getTimeSent();
     /**
-     * <code>string time_sent = 3;</code>
+     * <code>string time_sent = 5;</code>
      * @return The bytes for timeSent.
      */
     com.google.protobuf.ByteString
         getTimeSentBytes();
 
     /**
-     * <code>string time_received = 4;</code>
+     * <code>string time_received = 6;</code>
      * @return The timeReceived.
      */
     java.lang.String getTimeReceived();
     /**
-     * <code>string time_received = 4;</code>
+     * <code>string time_received = 6;</code>
      * @return The bytes for timeReceived.
      */
     com.google.protobuf.ByteString
         getTimeReceivedBytes();
 
     /**
-     * <code>string content = 5;</code>
+     * <code>string content = 7;</code>
      * @return The content.
      */
     java.lang.String getContent();
     /**
-     * <code>string content = 5;</code>
+     * <code>string content = 7;</code>
      * @return The bytes for content.
      */
     com.google.protobuf.ByteString
@@ -2779,7 +2803,9 @@ public final class FeedOuterClass {
     }
     private FeedMessage() {
       senderId_ = com.google.protobuf.ByteString.EMPTY;
+      senderIdBase58_ = "";
       messageId_ = com.google.protobuf.ByteString.EMPTY;
+      messageIdBase58_ = "";
       timeSent_ = "";
       timeReceived_ = "";
       content_ = "";
@@ -2821,23 +2847,35 @@ public final class FeedOuterClass {
               break;
             }
             case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
 
-              messageId_ = input.readBytes();
+              senderIdBase58_ = s;
               break;
             }
             case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
 
-              timeSent_ = s;
+              messageId_ = input.readBytes();
               break;
             }
             case 34: {
               java.lang.String s = input.readStringRequireUtf8();
 
-              timeReceived_ = s;
+              messageIdBase58_ = s;
               break;
             }
             case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              timeSent_ = s;
+              break;
+            }
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              timeReceived_ = s;
+              break;
+            }
+            case 58: {
               java.lang.String s = input.readStringRequireUtf8();
 
               content_ = s;
@@ -2886,10 +2924,48 @@ public final class FeedOuterClass {
       return senderId_;
     }
 
-    public static final int MESSAGE_ID_FIELD_NUMBER = 2;
+    public static final int SENDER_ID_BASE58_FIELD_NUMBER = 2;
+    private volatile java.lang.Object senderIdBase58_;
+    /**
+     * <code>string sender_id_base58 = 2;</code>
+     * @return The senderIdBase58.
+     */
+    @java.lang.Override
+    public java.lang.String getSenderIdBase58() {
+      java.lang.Object ref = senderIdBase58_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        senderIdBase58_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string sender_id_base58 = 2;</code>
+     * @return The bytes for senderIdBase58.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getSenderIdBase58Bytes() {
+      java.lang.Object ref = senderIdBase58_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        senderIdBase58_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int MESSAGE_ID_FIELD_NUMBER = 3;
     private com.google.protobuf.ByteString messageId_;
     /**
-     * <code>bytes message_id = 2;</code>
+     * <code>bytes message_id = 3;</code>
      * @return The messageId.
      */
     @java.lang.Override
@@ -2897,10 +2973,48 @@ public final class FeedOuterClass {
       return messageId_;
     }
 
-    public static final int TIME_SENT_FIELD_NUMBER = 3;
+    public static final int MESSAGE_ID_BASE58_FIELD_NUMBER = 4;
+    private volatile java.lang.Object messageIdBase58_;
+    /**
+     * <code>string message_id_base58 = 4;</code>
+     * @return The messageIdBase58.
+     */
+    @java.lang.Override
+    public java.lang.String getMessageIdBase58() {
+      java.lang.Object ref = messageIdBase58_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        messageIdBase58_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string message_id_base58 = 4;</code>
+     * @return The bytes for messageIdBase58.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getMessageIdBase58Bytes() {
+      java.lang.Object ref = messageIdBase58_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        messageIdBase58_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TIME_SENT_FIELD_NUMBER = 5;
     private volatile java.lang.Object timeSent_;
     /**
-     * <code>string time_sent = 3;</code>
+     * <code>string time_sent = 5;</code>
      * @return The timeSent.
      */
     @java.lang.Override
@@ -2917,7 +3031,7 @@ public final class FeedOuterClass {
       }
     }
     /**
-     * <code>string time_sent = 3;</code>
+     * <code>string time_sent = 5;</code>
      * @return The bytes for timeSent.
      */
     @java.lang.Override
@@ -2935,10 +3049,10 @@ public final class FeedOuterClass {
       }
     }
 
-    public static final int TIME_RECEIVED_FIELD_NUMBER = 4;
+    public static final int TIME_RECEIVED_FIELD_NUMBER = 6;
     private volatile java.lang.Object timeReceived_;
     /**
-     * <code>string time_received = 4;</code>
+     * <code>string time_received = 6;</code>
      * @return The timeReceived.
      */
     @java.lang.Override
@@ -2955,7 +3069,7 @@ public final class FeedOuterClass {
       }
     }
     /**
-     * <code>string time_received = 4;</code>
+     * <code>string time_received = 6;</code>
      * @return The bytes for timeReceived.
      */
     @java.lang.Override
@@ -2973,10 +3087,10 @@ public final class FeedOuterClass {
       }
     }
 
-    public static final int CONTENT_FIELD_NUMBER = 5;
+    public static final int CONTENT_FIELD_NUMBER = 7;
     private volatile java.lang.Object content_;
     /**
-     * <code>string content = 5;</code>
+     * <code>string content = 7;</code>
      * @return The content.
      */
     @java.lang.Override
@@ -2993,7 +3107,7 @@ public final class FeedOuterClass {
       }
     }
     /**
-     * <code>string content = 5;</code>
+     * <code>string content = 7;</code>
      * @return The bytes for content.
      */
     @java.lang.Override
@@ -3028,17 +3142,23 @@ public final class FeedOuterClass {
       if (!senderId_.isEmpty()) {
         output.writeBytes(1, senderId_);
       }
+      if (!getSenderIdBase58Bytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, senderIdBase58_);
+      }
       if (!messageId_.isEmpty()) {
-        output.writeBytes(2, messageId_);
+        output.writeBytes(3, messageId_);
+      }
+      if (!getMessageIdBase58Bytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, messageIdBase58_);
       }
       if (!getTimeSentBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, timeSent_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, timeSent_);
       }
       if (!getTimeReceivedBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, timeReceived_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, timeReceived_);
       }
       if (!getContentBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, content_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, content_);
       }
       unknownFields.writeTo(output);
     }
@@ -3053,18 +3173,24 @@ public final class FeedOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, senderId_);
       }
+      if (!getSenderIdBase58Bytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, senderIdBase58_);
+      }
       if (!messageId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, messageId_);
+          .computeBytesSize(3, messageId_);
+      }
+      if (!getMessageIdBase58Bytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, messageIdBase58_);
       }
       if (!getTimeSentBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, timeSent_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, timeSent_);
       }
       if (!getTimeReceivedBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, timeReceived_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, timeReceived_);
       }
       if (!getContentBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, content_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, content_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3083,8 +3209,12 @@ public final class FeedOuterClass {
 
       if (!getSenderId()
           .equals(other.getSenderId())) return false;
+      if (!getSenderIdBase58()
+          .equals(other.getSenderIdBase58())) return false;
       if (!getMessageId()
           .equals(other.getMessageId())) return false;
+      if (!getMessageIdBase58()
+          .equals(other.getMessageIdBase58())) return false;
       if (!getTimeSent()
           .equals(other.getTimeSent())) return false;
       if (!getTimeReceived()
@@ -3104,8 +3234,12 @@ public final class FeedOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + SENDER_ID_FIELD_NUMBER;
       hash = (53 * hash) + getSenderId().hashCode();
+      hash = (37 * hash) + SENDER_ID_BASE58_FIELD_NUMBER;
+      hash = (53 * hash) + getSenderIdBase58().hashCode();
       hash = (37 * hash) + MESSAGE_ID_FIELD_NUMBER;
       hash = (53 * hash) + getMessageId().hashCode();
+      hash = (37 * hash) + MESSAGE_ID_BASE58_FIELD_NUMBER;
+      hash = (53 * hash) + getMessageIdBase58().hashCode();
       hash = (37 * hash) + TIME_SENT_FIELD_NUMBER;
       hash = (53 * hash) + getTimeSent().hashCode();
       hash = (37 * hash) + TIME_RECEIVED_FIELD_NUMBER;
@@ -3251,7 +3385,11 @@ public final class FeedOuterClass {
         super.clear();
         senderId_ = com.google.protobuf.ByteString.EMPTY;
 
+        senderIdBase58_ = "";
+
         messageId_ = com.google.protobuf.ByteString.EMPTY;
+
+        messageIdBase58_ = "";
 
         timeSent_ = "";
 
@@ -3286,7 +3424,9 @@ public final class FeedOuterClass {
       public qaul.rpc.feed.FeedOuterClass.FeedMessage buildPartial() {
         qaul.rpc.feed.FeedOuterClass.FeedMessage result = new qaul.rpc.feed.FeedOuterClass.FeedMessage(this);
         result.senderId_ = senderId_;
+        result.senderIdBase58_ = senderIdBase58_;
         result.messageId_ = messageId_;
+        result.messageIdBase58_ = messageIdBase58_;
         result.timeSent_ = timeSent_;
         result.timeReceived_ = timeReceived_;
         result.content_ = content_;
@@ -3341,8 +3481,16 @@ public final class FeedOuterClass {
         if (other.getSenderId() != com.google.protobuf.ByteString.EMPTY) {
           setSenderId(other.getSenderId());
         }
+        if (!other.getSenderIdBase58().isEmpty()) {
+          senderIdBase58_ = other.senderIdBase58_;
+          onChanged();
+        }
         if (other.getMessageId() != com.google.protobuf.ByteString.EMPTY) {
           setMessageId(other.getMessageId());
+        }
+        if (!other.getMessageIdBase58().isEmpty()) {
+          messageIdBase58_ = other.messageIdBase58_;
+          onChanged();
         }
         if (!other.getTimeSent().isEmpty()) {
           timeSent_ = other.timeSent_;
@@ -3419,9 +3567,85 @@ public final class FeedOuterClass {
         return this;
       }
 
+      private java.lang.Object senderIdBase58_ = "";
+      /**
+       * <code>string sender_id_base58 = 2;</code>
+       * @return The senderIdBase58.
+       */
+      public java.lang.String getSenderIdBase58() {
+        java.lang.Object ref = senderIdBase58_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          senderIdBase58_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string sender_id_base58 = 2;</code>
+       * @return The bytes for senderIdBase58.
+       */
+      public com.google.protobuf.ByteString
+          getSenderIdBase58Bytes() {
+        java.lang.Object ref = senderIdBase58_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          senderIdBase58_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string sender_id_base58 = 2;</code>
+       * @param value The senderIdBase58 to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSenderIdBase58(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        senderIdBase58_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string sender_id_base58 = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSenderIdBase58() {
+        
+        senderIdBase58_ = getDefaultInstance().getSenderIdBase58();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string sender_id_base58 = 2;</code>
+       * @param value The bytes for senderIdBase58 to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSenderIdBase58Bytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        senderIdBase58_ = value;
+        onChanged();
+        return this;
+      }
+
       private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>bytes message_id = 2;</code>
+       * <code>bytes message_id = 3;</code>
        * @return The messageId.
        */
       @java.lang.Override
@@ -3429,7 +3653,7 @@ public final class FeedOuterClass {
         return messageId_;
       }
       /**
-       * <code>bytes message_id = 2;</code>
+       * <code>bytes message_id = 3;</code>
        * @param value The messageId to set.
        * @return This builder for chaining.
        */
@@ -3443,7 +3667,7 @@ public final class FeedOuterClass {
         return this;
       }
       /**
-       * <code>bytes message_id = 2;</code>
+       * <code>bytes message_id = 3;</code>
        * @return This builder for chaining.
        */
       public Builder clearMessageId() {
@@ -3453,9 +3677,85 @@ public final class FeedOuterClass {
         return this;
       }
 
+      private java.lang.Object messageIdBase58_ = "";
+      /**
+       * <code>string message_id_base58 = 4;</code>
+       * @return The messageIdBase58.
+       */
+      public java.lang.String getMessageIdBase58() {
+        java.lang.Object ref = messageIdBase58_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          messageIdBase58_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string message_id_base58 = 4;</code>
+       * @return The bytes for messageIdBase58.
+       */
+      public com.google.protobuf.ByteString
+          getMessageIdBase58Bytes() {
+        java.lang.Object ref = messageIdBase58_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          messageIdBase58_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string message_id_base58 = 4;</code>
+       * @param value The messageIdBase58 to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMessageIdBase58(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        messageIdBase58_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string message_id_base58 = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMessageIdBase58() {
+        
+        messageIdBase58_ = getDefaultInstance().getMessageIdBase58();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string message_id_base58 = 4;</code>
+       * @param value The bytes for messageIdBase58 to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMessageIdBase58Bytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        messageIdBase58_ = value;
+        onChanged();
+        return this;
+      }
+
       private java.lang.Object timeSent_ = "";
       /**
-       * <code>string time_sent = 3;</code>
+       * <code>string time_sent = 5;</code>
        * @return The timeSent.
        */
       public java.lang.String getTimeSent() {
@@ -3471,7 +3771,7 @@ public final class FeedOuterClass {
         }
       }
       /**
-       * <code>string time_sent = 3;</code>
+       * <code>string time_sent = 5;</code>
        * @return The bytes for timeSent.
        */
       public com.google.protobuf.ByteString
@@ -3488,7 +3788,7 @@ public final class FeedOuterClass {
         }
       }
       /**
-       * <code>string time_sent = 3;</code>
+       * <code>string time_sent = 5;</code>
        * @param value The timeSent to set.
        * @return This builder for chaining.
        */
@@ -3503,7 +3803,7 @@ public final class FeedOuterClass {
         return this;
       }
       /**
-       * <code>string time_sent = 3;</code>
+       * <code>string time_sent = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearTimeSent() {
@@ -3513,7 +3813,7 @@ public final class FeedOuterClass {
         return this;
       }
       /**
-       * <code>string time_sent = 3;</code>
+       * <code>string time_sent = 5;</code>
        * @param value The bytes for timeSent to set.
        * @return This builder for chaining.
        */
@@ -3531,7 +3831,7 @@ public final class FeedOuterClass {
 
       private java.lang.Object timeReceived_ = "";
       /**
-       * <code>string time_received = 4;</code>
+       * <code>string time_received = 6;</code>
        * @return The timeReceived.
        */
       public java.lang.String getTimeReceived() {
@@ -3547,7 +3847,7 @@ public final class FeedOuterClass {
         }
       }
       /**
-       * <code>string time_received = 4;</code>
+       * <code>string time_received = 6;</code>
        * @return The bytes for timeReceived.
        */
       public com.google.protobuf.ByteString
@@ -3564,7 +3864,7 @@ public final class FeedOuterClass {
         }
       }
       /**
-       * <code>string time_received = 4;</code>
+       * <code>string time_received = 6;</code>
        * @param value The timeReceived to set.
        * @return This builder for chaining.
        */
@@ -3579,7 +3879,7 @@ public final class FeedOuterClass {
         return this;
       }
       /**
-       * <code>string time_received = 4;</code>
+       * <code>string time_received = 6;</code>
        * @return This builder for chaining.
        */
       public Builder clearTimeReceived() {
@@ -3589,7 +3889,7 @@ public final class FeedOuterClass {
         return this;
       }
       /**
-       * <code>string time_received = 4;</code>
+       * <code>string time_received = 6;</code>
        * @param value The bytes for timeReceived to set.
        * @return This builder for chaining.
        */
@@ -3607,7 +3907,7 @@ public final class FeedOuterClass {
 
       private java.lang.Object content_ = "";
       /**
-       * <code>string content = 5;</code>
+       * <code>string content = 7;</code>
        * @return The content.
        */
       public java.lang.String getContent() {
@@ -3623,7 +3923,7 @@ public final class FeedOuterClass {
         }
       }
       /**
-       * <code>string content = 5;</code>
+       * <code>string content = 7;</code>
        * @return The bytes for content.
        */
       public com.google.protobuf.ByteString
@@ -3640,7 +3940,7 @@ public final class FeedOuterClass {
         }
       }
       /**
-       * <code>string content = 5;</code>
+       * <code>string content = 7;</code>
        * @param value The content to set.
        * @return This builder for chaining.
        */
@@ -3655,7 +3955,7 @@ public final class FeedOuterClass {
         return this;
       }
       /**
-       * <code>string content = 5;</code>
+       * <code>string content = 7;</code>
        * @return This builder for chaining.
        */
       public Builder clearContent() {
@@ -3665,7 +3965,7 @@ public final class FeedOuterClass {
         return this;
       }
       /**
-       * <code>string content = 5;</code>
+       * <code>string content = 7;</code>
        * @param value The bytes for content to set.
        * @return This builder for chaining.
        */
@@ -4351,10 +4651,12 @@ public final class FeedOuterClass {
       "B\t\n\007message\"+\n\022FeedMessageRequest\022\025\n\rlas" +
       "t_received\030\001 \001(\014\"C\n\017FeedMessageList\0220\n\014f" +
       "eed_message\030\001 \003(\0132\032.qaul.rpc.feed.FeedMe" +
-      "ssage\"o\n\013FeedMessage\022\021\n\tsender_id\030\001 \001(\014\022" +
-      "\022\n\nmessage_id\030\002 \001(\014\022\021\n\ttime_sent\030\003 \001(\t\022\025" +
-      "\n\rtime_received\030\004 \001(\t\022\017\n\007content\030\005 \001(\t\"\036" +
-      "\n\013SendMessage\022\017\n\007content\030\001 \001(\tb\006proto3"
+      "ssage\"\244\001\n\013FeedMessage\022\021\n\tsender_id\030\001 \001(\014" +
+      "\022\030\n\020sender_id_base58\030\002 \001(\t\022\022\n\nmessage_id" +
+      "\030\003 \001(\014\022\031\n\021message_id_base58\030\004 \001(\t\022\021\n\ttim" +
+      "e_sent\030\005 \001(\t\022\025\n\rtime_received\030\006 \001(\t\022\017\n\007c" +
+      "ontent\030\007 \001(\t\"\036\n\013SendMessage\022\017\n\007content\030\001" +
+      " \001(\tb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4383,7 +4685,7 @@ public final class FeedOuterClass {
     internal_static_qaul_rpc_feed_FeedMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_feed_FeedMessage_descriptor,
-        new java.lang.String[] { "SenderId", "MessageId", "TimeSent", "TimeReceived", "Content", });
+        new java.lang.String[] { "SenderId", "SenderIdBase58", "MessageId", "MessageIdBase58", "TimeSent", "TimeReceived", "Content", });
     internal_static_qaul_rpc_feed_SendMessage_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_qaul_rpc_feed_SendMessage_fieldAccessorTable = new

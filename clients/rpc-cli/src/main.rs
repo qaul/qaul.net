@@ -15,9 +15,13 @@ use libqaul;
 mod cli;
 mod rpc;
 mod node;
+mod user_accounts;
+mod router;
+mod feed;
 
 use cli::Cli;
 use rpc::Rpc;
+use user_accounts::UserAccounts;
 
 /// Events of the async loop
 enum EventType {
@@ -29,6 +33,9 @@ enum EventType {
 async fn main() {
     // start libqaul in new thread
     libqaul::threaded::start();
+
+    // initialize user accounts
+    UserAccounts::init();
 
     // listen for new commands from CLI
     let mut stdin = io::BufReader::new(io::stdin()).lines();

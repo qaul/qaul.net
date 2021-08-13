@@ -40,7 +40,24 @@ object FeedMessageKt {
     }
 
     /**
-     * <code>bytes message_id = 2;</code>
+     * <code>string sender_id_base58 = 2;</code>
+     */
+    var senderIdBase58: kotlin.String
+      @JvmName("getSenderIdBase58")
+      get() = _builder.getSenderIdBase58()
+      @JvmName("setSenderIdBase58")
+      set(value) {
+        _builder.setSenderIdBase58(value)
+      }
+    /**
+     * <code>string sender_id_base58 = 2;</code>
+     */
+    fun clearSenderIdBase58() {
+      _builder.clearSenderIdBase58()
+    }
+
+    /**
+     * <code>bytes message_id = 3;</code>
      */
     var messageId: com.google.protobuf.ByteString
       @JvmName("getMessageId")
@@ -50,14 +67,31 @@ object FeedMessageKt {
         _builder.setMessageId(value)
       }
     /**
-     * <code>bytes message_id = 2;</code>
+     * <code>bytes message_id = 3;</code>
      */
     fun clearMessageId() {
       _builder.clearMessageId()
     }
 
     /**
-     * <code>string time_sent = 3;</code>
+     * <code>string message_id_base58 = 4;</code>
+     */
+    var messageIdBase58: kotlin.String
+      @JvmName("getMessageIdBase58")
+      get() = _builder.getMessageIdBase58()
+      @JvmName("setMessageIdBase58")
+      set(value) {
+        _builder.setMessageIdBase58(value)
+      }
+    /**
+     * <code>string message_id_base58 = 4;</code>
+     */
+    fun clearMessageIdBase58() {
+      _builder.clearMessageIdBase58()
+    }
+
+    /**
+     * <code>string time_sent = 5;</code>
      */
     var timeSent: kotlin.String
       @JvmName("getTimeSent")
@@ -67,14 +101,14 @@ object FeedMessageKt {
         _builder.setTimeSent(value)
       }
     /**
-     * <code>string time_sent = 3;</code>
+     * <code>string time_sent = 5;</code>
      */
     fun clearTimeSent() {
       _builder.clearTimeSent()
     }
 
     /**
-     * <code>string time_received = 4;</code>
+     * <code>string time_received = 6;</code>
      */
     var timeReceived: kotlin.String
       @JvmName("getTimeReceived")
@@ -84,14 +118,14 @@ object FeedMessageKt {
         _builder.setTimeReceived(value)
       }
     /**
-     * <code>string time_received = 4;</code>
+     * <code>string time_received = 6;</code>
      */
     fun clearTimeReceived() {
       _builder.clearTimeReceived()
     }
 
     /**
-     * <code>string content = 5;</code>
+     * <code>string content = 7;</code>
      */
     var content: kotlin.String
       @JvmName("getContent")
@@ -101,7 +135,7 @@ object FeedMessageKt {
         _builder.setContent(value)
       }
     /**
-     * <code>string content = 5;</code>
+     * <code>string content = 7;</code>
      */
     fun clearContent() {
       _builder.clearContent()

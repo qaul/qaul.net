@@ -240,7 +240,7 @@ impl UserAccounts {
                         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
                         // send message
-                        Rpc::send_message(buf, 2, "".to_string(), Vec::new() );
+                        Rpc::send_message(buf, crate::rpc::proto::Modules::Useraccounts.into(), "".to_string(), Vec::new() );
                     },
                     Some(proto::user_accounts::Message::CreateUserAccount(create_user_account)) => {
                         // create user account
@@ -270,7 +270,7 @@ impl UserAccounts {
                         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
                         // send message
-                        Rpc::send_message(buf, 2, "".to_string(), Vec::new() );
+                        Rpc::send_message(buf, crate::rpc::proto::Modules::Useraccounts.into(), "".to_string(), Vec::new() );
                     },
                     _ => {},
                 }

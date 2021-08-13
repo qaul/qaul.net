@@ -41,13 +41,17 @@ pub struct FeedMessageList {
 pub struct FeedMessage {
     #[prost(bytes="vec", tag="1")]
     pub sender_id: ::prost::alloc::vec::Vec<u8>,
-    #[prost(bytes="vec", tag="2")]
+    #[prost(string, tag="2")]
+    pub sender_id_base58: ::prost::alloc::string::String,
+    #[prost(bytes="vec", tag="3")]
     pub message_id: ::prost::alloc::vec::Vec<u8>,
-    #[prost(string, tag="3")]
-    pub time_sent: ::prost::alloc::string::String,
     #[prost(string, tag="4")]
-    pub time_received: ::prost::alloc::string::String,
+    pub message_id_base58: ::prost::alloc::string::String,
     #[prost(string, tag="5")]
+    pub time_sent: ::prost::alloc::string::String,
+    #[prost(string, tag="6")]
+    pub time_received: ::prost::alloc::string::String,
+    #[prost(string, tag="7")]
     pub content: ::prost::alloc::string::String,
 }
 /// send feed message

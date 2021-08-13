@@ -13,7 +13,35 @@ pub struct Rpc {}
 
 impl Rpc {
     /// encode and send an rpc message to libqaul
-    pub fn send_message(data: Vec<u8>, module: i32, request_id: String, user_id: Vec<u8>) {
+    pub fn send_message(data: Vec<u8>, module: i32, request_id: String) {
+        // get user
+        let my_user_id = super::user_accounts::UserAccounts::get_user_id();
+
+        // check authorisation
+        if my_user_id == None {
+            if module == proto::Modules::Node as i32 {
+                // print message
+                println!("Operation not permitted");
+                println!("No user account set yet");
+                println!("Please create a user account");
+                println!("");
+                println!("    account create {{Your User Name}}");
+                println!("");
+
+                // stop here
+                return
+            }
+        }
+
+        // create user id
+        let user_id;
+        if let Some(data) = my_user_id {
+            user_id = data;
+        }
+        else {
+            user_id = Vec::new();
+        }
+        
         // Create RPC message container
         let proto_message = proto::QaulRpc {
             module,
@@ -44,13 +72,13 @@ impl Rpc {
                         // TODO: authorisation
                     },
                     Some(proto::Modules::Useraccounts) => {
-                        // TODO
+                        super::user_accounts::UserAccounts::rpc(message.data);
                     },
                     Some(proto::Modules::Router) => {
-                        // TODO
+                        super::router::Router::rpc(message.data);
                     },
                     Some(proto::Modules::Feed) => {
-                        // TODO
+                        super::feed::Feed::rpc(message.data);
                     },
                     Some(proto::Modules::None) => {},
                     None => {},

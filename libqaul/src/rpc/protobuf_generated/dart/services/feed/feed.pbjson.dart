@@ -48,15 +48,17 @@ const FeedMessage$json = const {
   '1': 'FeedMessage',
   '2': const [
     const {'1': 'sender_id', '3': 1, '4': 1, '5': 12, '10': 'senderId'},
-    const {'1': 'message_id', '3': 2, '4': 1, '5': 12, '10': 'messageId'},
-    const {'1': 'time_sent', '3': 3, '4': 1, '5': 9, '10': 'timeSent'},
-    const {'1': 'time_received', '3': 4, '4': 1, '5': 9, '10': 'timeReceived'},
-    const {'1': 'content', '3': 5, '4': 1, '5': 9, '10': 'content'},
+    const {'1': 'sender_id_base58', '3': 2, '4': 1, '5': 9, '10': 'senderIdBase58'},
+    const {'1': 'message_id', '3': 3, '4': 1, '5': 12, '10': 'messageId'},
+    const {'1': 'message_id_base58', '3': 4, '4': 1, '5': 9, '10': 'messageIdBase58'},
+    const {'1': 'time_sent', '3': 5, '4': 1, '5': 9, '10': 'timeSent'},
+    const {'1': 'time_received', '3': 6, '4': 1, '5': 9, '10': 'timeReceived'},
+    const {'1': 'content', '3': 7, '4': 1, '5': 9, '10': 'content'},
   ],
 };
 
 /// Descriptor for `FeedMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List feedMessageDescriptor = $convert.base64Decode('CgtGZWVkTWVzc2FnZRIbCglzZW5kZXJfaWQYASABKAxSCHNlbmRlcklkEh0KCm1lc3NhZ2VfaWQYAiABKAxSCW1lc3NhZ2VJZBIbCgl0aW1lX3NlbnQYAyABKAlSCHRpbWVTZW50EiMKDXRpbWVfcmVjZWl2ZWQYBCABKAlSDHRpbWVSZWNlaXZlZBIYCgdjb250ZW50GAUgASgJUgdjb250ZW50');
+final $typed_data.Uint8List feedMessageDescriptor = $convert.base64Decode('CgtGZWVkTWVzc2FnZRIbCglzZW5kZXJfaWQYASABKAxSCHNlbmRlcklkEigKEHNlbmRlcl9pZF9iYXNlNTgYAiABKAlSDnNlbmRlcklkQmFzZTU4Eh0KCm1lc3NhZ2VfaWQYAyABKAxSCW1lc3NhZ2VJZBIqChFtZXNzYWdlX2lkX2Jhc2U1OBgEIAEoCVIPbWVzc2FnZUlkQmFzZTU4EhsKCXRpbWVfc2VudBgFIAEoCVIIdGltZVNlbnQSIwoNdGltZV9yZWNlaXZlZBgGIAEoCVIMdGltZVJlY2VpdmVkEhgKB2NvbnRlbnQYByABKAlSB2NvbnRlbnQ=');
 @$core.Deprecated('Use sendMessageDescriptor instead')
 const SendMessage$json = const {
   '1': 'SendMessage',

@@ -198,17 +198,21 @@ class FeedMessageList extends $pb.GeneratedMessage {
 class FeedMessage extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.feed'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderId', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageId', $pb.PbFieldType.OY)
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timeSent')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timeReceived')
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderIdBase58')
+    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageId', $pb.PbFieldType.OY)
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageIdBase58')
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timeSent')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timeReceived')
+    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
     ..hasRequiredFields = false
   ;
 
   FeedMessage._() : super();
   factory FeedMessage({
     $core.List<$core.int>? senderId,
+    $core.String? senderIdBase58,
     $core.List<$core.int>? messageId,
+    $core.String? messageIdBase58,
     $core.String? timeSent,
     $core.String? timeReceived,
     $core.String? content,
@@ -217,8 +221,14 @@ class FeedMessage extends $pb.GeneratedMessage {
     if (senderId != null) {
       _result.senderId = senderId;
     }
+    if (senderIdBase58 != null) {
+      _result.senderIdBase58 = senderIdBase58;
+    }
     if (messageId != null) {
       _result.messageId = messageId;
+    }
+    if (messageIdBase58 != null) {
+      _result.messageIdBase58 = messageIdBase58;
     }
     if (timeSent != null) {
       _result.timeSent = timeSent;
@@ -262,40 +272,58 @@ class FeedMessage extends $pb.GeneratedMessage {
   void clearSenderId() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.List<$core.int> get messageId => $_getN(1);
+  $core.String get senderIdBase58 => $_getSZ(1);
   @$pb.TagNumber(2)
-  set messageId($core.List<$core.int> v) { $_setBytes(1, v); }
+  set senderIdBase58($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasMessageId() => $_has(1);
+  $core.bool hasSenderIdBase58() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessageId() => clearField(2);
+  void clearSenderIdBase58() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.String get timeSent => $_getSZ(2);
+  $core.List<$core.int> get messageId => $_getN(2);
   @$pb.TagNumber(3)
-  set timeSent($core.String v) { $_setString(2, v); }
+  set messageId($core.List<$core.int> v) { $_setBytes(2, v); }
   @$pb.TagNumber(3)
-  $core.bool hasTimeSent() => $_has(2);
+  $core.bool hasMessageId() => $_has(2);
   @$pb.TagNumber(3)
-  void clearTimeSent() => clearField(3);
+  void clearMessageId() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.String get timeReceived => $_getSZ(3);
+  $core.String get messageIdBase58 => $_getSZ(3);
   @$pb.TagNumber(4)
-  set timeReceived($core.String v) { $_setString(3, v); }
+  set messageIdBase58($core.String v) { $_setString(3, v); }
   @$pb.TagNumber(4)
-  $core.bool hasTimeReceived() => $_has(3);
+  $core.bool hasMessageIdBase58() => $_has(3);
   @$pb.TagNumber(4)
-  void clearTimeReceived() => clearField(4);
+  void clearMessageIdBase58() => clearField(4);
 
   @$pb.TagNumber(5)
-  $core.String get content => $_getSZ(4);
+  $core.String get timeSent => $_getSZ(4);
   @$pb.TagNumber(5)
-  set content($core.String v) { $_setString(4, v); }
+  set timeSent($core.String v) { $_setString(4, v); }
   @$pb.TagNumber(5)
-  $core.bool hasContent() => $_has(4);
+  $core.bool hasTimeSent() => $_has(4);
   @$pb.TagNumber(5)
-  void clearContent() => clearField(5);
+  void clearTimeSent() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get timeReceived => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set timeReceived($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasTimeReceived() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearTimeReceived() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.String get content => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set content($core.String v) { $_setString(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasContent() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearContent() => clearField(7);
 }
 
 class SendMessage extends $pb.GeneratedMessage {

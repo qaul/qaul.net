@@ -31,10 +31,12 @@ message FeedMessageList {
 // A single feed message
 message FeedMessage {
     bytes sender_id = 1;
-    bytes message_id = 2;
-    string time_sent = 3;
-    string time_received = 4;
-    string content = 5;
+    string sender_id_base58 = 2;
+    bytes message_id = 3;
+    string message_id_base58 = 4;
+    string time_sent = 5;
+    string time_received = 6;
+    string content = 7;
 }
 
 // send feed message

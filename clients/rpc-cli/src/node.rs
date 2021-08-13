@@ -4,7 +4,7 @@ use prost::Message;
 use super::rpc::Rpc;
 
 /// include generated protobuf RPC rust definition file
-pub mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.node.rs"); }
+mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.node.rs"); }
 
 /// node module function handling
 pub struct Node {}
@@ -36,7 +36,7 @@ impl Node {
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, 2, "".to_string(), Vec::new());
+        Rpc::send_message(buf, super::rpc::proto::Modules::Node.into(), "".to_string());
     }
 
     /// Process received RPC message

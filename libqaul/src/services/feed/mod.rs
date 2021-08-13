@@ -230,7 +230,9 @@ impl Feed {
                         for (id, message) in &feed.messages {
                             let feed_message = proto::FeedMessage {
                                 sender_id: message.sender.to_bytes(),
+                                sender_id_base58: message.sender.to_base58(),
                                 message_id: id.to_vec(),
+                                message_id_base58: bs58::encode(id).into_string(),
                                 time_sent: humantime::format_rfc3339(message.time).to_string(),
                                 time_received: humantime::format_rfc3339(message.time).to_string(),
                                 content: message.content.clone(),
@@ -250,7 +252,7 @@ impl Feed {
                         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
                         // send message
-                        Rpc::send_message(buf, 2, "".to_string(), Vec::new() );
+                        Rpc::send_message(buf, crate::rpc::proto::Modules::Feed.into(), "".to_string(), Vec::new() );
                     },
                     Some(proto::feed::Message::Send(send_feed)) => {
                         // get user account from user_id

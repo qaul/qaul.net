@@ -28,3 +28,13 @@ The following commands are available:
 
 * node
   * `node info` - prints the local node id
+* user accounts
+  * `account default` - get's and displays the default user account
+  * `account create {User Name}` - create a new user account with the name {User Name}
+* router
+  * `router users list` - display all users known to this router
+* feed
+  * `feed send {FeedMessage}` - sends the {FeedMessage} to the network and distributes it to all connected nodes
+    * the message is signed and can be validated
+    * at least one user needs to be created
+  * `feed list` - displays all feed messages
