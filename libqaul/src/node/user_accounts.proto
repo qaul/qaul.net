@@ -1,0 +1,34 @@
+syntax = "proto3";
+package qaul.rpc.user_accounts;
+
+
+// user account rpc message container
+message UserAccounts {
+    oneof message {
+        bool get_default_user_account = 1;
+        CreateUserAccount create_user_account = 2;
+        DefaultUserAccount default_user_account = 3;
+        MyUserAccount my_user_account = 4;
+    }
+}
+
+// create a new user on this node
+message CreateUserAccount {
+    string name = 1;
+}
+
+// Session Information
+message DefaultUserAccount {
+    bool user_account_exists = 1;
+    MyUserAccount my_user_account = 2;
+}
+
+// Information about my user
+message MyUserAccount {
+    string name = 1;
+    bytes id = 2;
+    string id_base58 = 3;
+    bytes key = 4;
+    string key_type = 5;
+    string key_base58 = 6;
+}

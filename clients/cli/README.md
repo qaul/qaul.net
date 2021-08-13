@@ -11,7 +11,7 @@ This client can:
 * publish, distribute and display feed-messages via floodsub protocol to all other nodes in the network.
 
 
-## Run this Example
+## Run qaul-cli
 
 Start at least two instances of this program. Either on different machines or start from different folders on the same machine.
 
@@ -30,13 +30,11 @@ Once the program is running, one can enter the commands documented in the CLI Ma
 
 ## CLI Commands when the Program is Running
 
-There are several commands:
+The following commands are available:
 
 * user accounts
   * `user list` - list all local user accounts
   * `user create {User Name}` - create a new user account with the name {User Name}
-* neighbours - information about the directly connected nodes
-  * `neighbours list` - list all neighbours and their connectivity
 * feed service
   * `feed send {FeedMessage}` - sends the {FeedMessage} to the network and distributes it to all connected nodes.
     * the message is signed and can be validated.

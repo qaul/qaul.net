@@ -1,0 +1,43 @@
+syntax = "proto3";
+package qaul.rpc.feed;
+
+
+// Feed service RPC message container
+message Feed {
+    // message type
+    oneof message {
+        // received messages
+        FeedMessageList received = 1;
+        // send a new feed message
+        SendMessage send = 2;
+        // request received messages
+        FeedMessageRequest request = 3;
+    }
+}
+
+// request feed messages
+message FeedMessageRequest {
+    // message id of the last received message
+    // this can be empty, then all last messages
+    // are sent.
+    bytes last_received = 1;
+}
+
+// List of feed messages
+message FeedMessageList {
+    repeated FeedMessage feed_message = 1;
+}
+
+// A single feed message
+message FeedMessage {
+    bytes sender_id = 1;
+    bytes message_id = 2;
+    string time_sent = 3;
+    string time_received = 4;
+    string content = 5;
+}
+
+// send feed message
+message SendMessage {
+    string content = 1;
+}

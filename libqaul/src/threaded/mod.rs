@@ -7,30 +7,27 @@
 //! libqaul. 
 //! The communication will happen via protbuf rpc messages.
 
-use crossbeam_channel::{unbounded, Sender, Receiver, RecvError};
+use crossbeam_channel::{unbounded, Sender, Receiver, TryRecvError};
 use state::Storage;
-use async_std::task;
+use futures_ticker::Ticker;
 use futures::prelude::*;
+use futures::{ pin_mut, select, future::FutureExt };
+use futures::executor::block_on;
 use std::{
-    task::{Context, Poll},
     thread,
     time::{SystemTime, Duration},
 };
 
+use crate::configuration::Configuration;
+use crate::connections::{Connections, ConnectionModule};
 use crate::node::Node;
 use crate::router;
 use crate::router::{Router, info::RouterInfo};
 use crate::router::flooder;
-use crate::connections::{Connections, ConnectionModule};
+use crate::rpc::Rpc;
 use crate::services::Services;
-use crate::configuration::Configuration;
 
 mod api;
-
-// pub struct RpcThread {
-//     sender: Sender<Vec<u8>>,
-//     receiver: Receiver<Vec<u8>>,
-// }
 
 
 /// receiving end of the mpsc channel
@@ -58,14 +55,16 @@ pub fn send_rpc_to_libqaul(binary_message: Vec<u8>) {
 /// check the receiving rpc channel if there
 /// are new messages from inside libqaul for 
 /// the outside.
-pub fn receive_rpc_from_libqaul() -> Result<Vec<u8>, RecvError> {
+pub fn receive_rpc_from_libqaul() -> Result<Vec<u8>, TryRecvError> {
     let receiver = EXTERN_RECEIVE.get().clone();
-    receiver.recv()
+    receiver.try_recv()
 }
 
 
 /// start libqaul in an own thread
 pub fn start() {
+    log::info!("start");
+
     // create channels
     let (libqaul_send, extern_receive) = unbounded();
     let (extern_send, libqaul_receive) = unbounded();
@@ -76,17 +75,29 @@ pub fn start() {
     LIBQAUL_SEND.set(libqaul_send.clone());
 
     // Spawn new thread
-    thread::spawn(move|| {
+    thread::spawn(move|| block_on(
         async move {
+            log::info!("spawn");
+
             let libqaul = LibqaulThread{
                 sender: libqaul_send,
                 receiver: libqaul_receive,
             };
+            log::info!("before start");
             libqaul.start().await;
         }
-    });
+    ));
+
+    log::info!("return start");
 }
 
+/// Events of the async loop
+enum EventType {
+    Rpc(bool),
+    Flooding(bool),
+    RoutingInfo(bool),
+    RoutingTable(bool),
+}
 
 /// The worker thread of libqaul
 struct LibqaulThread {
@@ -118,103 +129,116 @@ impl LibqaulThread {
         // initialize services
         Services::init();
 
-        // loop & poll network and CLI
-        task::block_on(future::poll_fn(move |cx: &mut Context<'_>| {
-            // poll LAN connection
-            loop {
-                match conn.lan.swarm.poll_next_unpin(cx) {
-                    Poll::Ready(Some(event)) => {
-                        log::debug!("Lan SwarmEvent: {:?}", event);
-                        // if let SwarmEvent::NewListenAddr(addr) = event {
-                        //     println!("Listening on {:?}", addr);
-                        // }
-                    }
-                    Poll::Ready(None) => return Poll::Ready(()),
-                    Poll::Pending => break,
-                }
-            }
-            // poll Internet connection
-            loop {
-                match conn.internet.swarm.poll_next_unpin(cx) {
-                    Poll::Ready(Some(event)) => {
-                        log::debug!("Internet SwarmEvent: {:?}", event);
-                        // if let SwarmEvent::NewListenAddr(addr) = event {
-                        //     println!("Listening on {:?}", addr);
-                        // }
-                    }
-                    Poll::Ready(None) => return Poll::Ready(()),
-                    Poll::Pending => break,
-                }
-            }
-            // send messages in the flooding queue
-            loop {
-                // get sending queue
-                let mut flooder = flooder::FLOODER.get().write().unwrap();
 
-                // loop over messages to send & flood them
-                while let Some(msg) = flooder.to_send.pop_front() {
-                    // check which swarm to send to
-                    if !matches!(msg.incoming_via, ConnectionModule::Lan) {
-                        conn.lan.swarm.behaviour_mut().floodsub.publish( msg.topic.clone(), msg.message.clone());
-                    }
-                    if !matches!(msg.incoming_via, ConnectionModule::Internet) {
-                        conn.internet.swarm.behaviour_mut().floodsub.publish( msg.topic, msg.message);
-                    }
+        // check RPC once every 10 milliseconds
+        // TODO: interval is only in unstable. Use it once it is stable. 
+        //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
+        //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
+        let mut rpc_ticker = Ticker::new(Duration::from_millis(10));
+
+        // check flooding message queue periodically
+        let mut flooding_ticker = Ticker::new(Duration::from_millis(100));
+
+        // send routing info periodically to neighbours
+        let mut routing_info_ticker = Ticker::new(Duration::from_millis(100));
+
+        // re-create routing table periodically
+        let mut routing_table_ticker = Ticker::new(Duration::from_millis(1000));
+
+        loop {
+            let evt = {
+                let lan_fut = conn.lan.swarm.next().fuse();
+                let internet_fut = conn.internet.swarm.next().fuse();
+                let rpc_fut = rpc_ticker.next().fuse();
+                let flooding_fut = flooding_ticker.next().fuse();
+                let routing_info_fut = routing_info_ticker.next().fuse();
+                let routing_table_fut = routing_table_ticker.next().fuse();
+
+                // This Macro is shown wrong by Rust-Language-Server > 0.2.400
+                // You need to downgrade to version 0.2.400 if this happens to you
+                pin_mut!(
+                    lan_fut, 
+                    internet_fut, 
+                    rpc_fut, 
+                    flooding_fut, 
+                    routing_info_fut, 
+                    routing_table_fut
+                );
+    
+                select! {
+                    lan_event = lan_fut => {
+                        log::info!("Unhandled lan connection module event: {:?}", lan_event);
+                        None
+                    },
+                    internet_event = internet_fut => {
+                        log::info!("Unhandled internet connection module event: {:?}", internet_event);
+                        None
+                    },
+                    _rpc_event = rpc_fut => Some(EventType::Rpc(true)),
+                    _flooding_event = flooding_fut => Some(EventType::Flooding(true)),
+                    _routing_info_event = routing_info_fut => Some(EventType::RoutingInfo(true)),
+                    _routing_table_event = routing_table_fut => Some(EventType::RoutingTable(true)),
                 }
-                break
-            }
-            // send router info to neighbours
-            {
-                // check scheduler
-                if let Some((neighbour_id, connection_module, data)) = RouterInfo::check_scheduler() {
-                    log::info!("sending routing information via {:?} to {:?}", connection_module, neighbour_id);
-                    // send routing information
-                    match connection_module {
-                        ConnectionModule::Lan => conn.lan.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
-                        ConnectionModule::Internet => conn.internet.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
-                        ConnectionModule::Local => {},
-                        ConnectionModule::None => {},
-                    }
-                }
-            }
-            // create routing table periodically (every second)
-            {
-                let time_now = SystemTime::now();
-                if let Ok(passed) = time_now.duration_since(router_time) {
-                    if passed > router_interval {
+            };
+
+            if let Some(event) = evt {
+                match event {
+                    EventType::Rpc(_) => {
+                        if let Ok(rpc_message) = self.receiver.try_recv() {
+                            // we received a message, send it to RPC crate
+                            Rpc::process_received_message(rpc_message, &mut conn);
+                        }
+                    },
+                    EventType::Flooding(_) => {
+                        // send messages in the flooding queue
+                        // get sending queue
+                        let mut flooder = flooder::FLOODER.get().write().unwrap();
+
+                        // loop over messages to send & flood them
+                        while let Some(msg) = flooder.to_send.pop_front() {
+                            // check which swarm to send to
+                            if !matches!(msg.incoming_via, ConnectionModule::Lan) {
+                                conn.lan.swarm.behaviour_mut().floodsub.publish( msg.topic.clone(), msg.message.clone());
+                            }
+                            if !matches!(msg.incoming_via, ConnectionModule::Internet) {
+                                conn.internet.swarm.behaviour_mut().floodsub.publish( msg.topic, msg.message);
+                            }
+                        }
+                    },
+                    EventType::RoutingInfo(_) => {
+                        // send routing info to neighbours
+                        // check scheduler
+                        if let Some((neighbour_id, connection_module, data)) = RouterInfo::check_scheduler() {
+                            log::info!("sending routing information via {:?} to {:?}", connection_module, neighbour_id);
+                            // send routing information
+                            match connection_module {
+                                ConnectionModule::Lan => conn.lan.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
+                                ConnectionModule::Internet => conn.internet.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
+                                ConnectionModule::Local => {},
+                                ConnectionModule::None => {},
+                            }
+                        }
+                    },
+                    EventType::RoutingTable(_) => {
+                        // create new routing table
                         router::connections::ConnectionTable::create_routing_table();
-                    }
-                } else {
-                    log::error!("error in time duration calculation");
-                }
-            }
-            // poll RPC
-            {
-                match self.receiver.try_recv() {
-                    Ok(rpc_message) => {
-                        // we received a message
-                        // better do this blocking and join the tasks afterwards
-                    },
-                    _ => {
-                        // we received an error
-                        // an error can happen, when the buffer was empty.
                     },
                 }
             }
-
-            Poll::Pending
-        }));
-    }
-
-    /// send an rpc message from inside libqaul thread
-    /// to the extern.
-    fn send_rpc_to_extern(&self, message: Vec<u8>) {
-        match self.sender.send(message) {
-            Ok(()) => {},
-            Err(err) => {
-                // log error message
-                log::error!("{:?}", err);
-            },
         }
     }
 }
+
+/// send an rpc message from inside libqaul thread
+/// to the extern.
+pub fn send_rpc_to_extern(message: Vec<u8>) {
+    let sender = LIBQAUL_SEND.get().clone();
+    match sender.send(message) {
+        Ok(()) => {},
+        Err(err) => {
+            // log error message
+            log::error!("{:?}", err);
+        },
+    }
+}
+

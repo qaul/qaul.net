@@ -88,15 +88,15 @@ impl Default for Internet {
  * local user accounts that are stored on this node
  */
 #[derive(Debug, Deserialize, Clone, Serialize)]
-pub struct User {
+pub struct UserAccount {
     pub name: String,
     pub id: String,
     pub keys: String,
 }
 
-impl Default for User {
+impl Default for UserAccount {
     fn default() -> Self {
-        User {
+        UserAccount {
             name: String::from(""),
             id: String::from(""),
             keys: String::from(""),
@@ -110,7 +110,7 @@ pub struct Configuration {
     pub lan: Lan,
     pub internet: Internet,
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub users: Vec<User>,
+    pub user_accounts: Vec<UserAccount>,
 }
 
 impl Default for Configuration {
@@ -119,8 +119,7 @@ impl Default for Configuration {
             node: Node::default(),
             lan: Lan::default(),
             internet: Internet::default(),
-            //users: vec![User::default(); 0],
-            users: Vec::new(),
+            user_accounts: Vec::new(),
         }
     }
 }
@@ -216,7 +215,7 @@ impl Configuration {
             \"node\":{\"initialized\":0,\"id\":\"\",\"keys\":\"\"},
             \"lan\":{\"active\":true,\"listen\":\"/ip4/0.0.0.0/tcp/0\"},
             \"internet\":{\"active\":true,\"peers\":[],\"do_listen\":false,\"listen\":\"/ip4/0.0.0.0/tcp/0\"},
-            \"users\":[]
+            \"user_accounts\":[]
         }".to_string();
         // save file
         fs::write("default.json", json_string).expect("Could not write to file!"); 

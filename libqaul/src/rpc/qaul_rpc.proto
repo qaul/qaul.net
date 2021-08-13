@@ -1,0 +1,34 @@
+syntax = "proto3";
+package qaul.rpc;
+
+// The main libqaul RPC message container.
+// All RPC messages from and to libqaul are packed 
+// into this container.
+message QaulRpc {
+    // which module to approach
+    Modules module = 1;
+    // can be used to identify responses
+    string request_id = 2;
+    // authorisation
+    // binary user id
+    bytes user_id = 3;
+    // the protobuf encoded binary message data
+    // which is passed to the module.
+    bytes data = 4;
+}
+
+// Identification to which module the message shall be 
+// handed to.
+enum Modules {
+    // default value, when nothing is defined. 
+    // drop this message
+    NONE = 0;
+    // RPC related messages
+    // such as authorisation etc.
+    RPC = 1;
+    // qaul modules
+    NODE = 2;
+    USERACCOUNTS = 3;
+    ROUTER = 4;
+    FEED = 5;
+}

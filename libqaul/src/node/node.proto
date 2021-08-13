@@ -1,0 +1,16 @@
+syntax = "proto3";
+package qaul.rpc.node;
+
+
+// node rpc message container
+message Node {
+    oneof message {
+        bool get_node_info = 1;
+        NodeInformation info = 2;
+    }
+}
+
+// node information
+message NodeInformation {
+    string id_base58 = 1;
+}

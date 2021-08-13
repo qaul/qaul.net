@@ -81,7 +81,7 @@ impl ConnectionTable {
 
         // create filled state for locally registered users
         {
-            for user in node::users::Users::get_user_info() {
+            for user in node::user_accounts::UserAccounts::get_user_info() {
                 Self::add_local_user(user.id);
             }
         }

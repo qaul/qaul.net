@@ -12,17 +12,17 @@ use std::time::{SystemTime, Duration};
 
 
 // crate modules
+pub mod threaded;
 mod configuration;
 mod connections;
 mod node;
 mod router;
 mod rpc;
 mod services;
-mod threaded;
 mod types;
 
 use node::Node;
-use node::users::Users;
+use node::user_accounts::UserAccounts;
 use router::{Router, info::RouterInfo};
 use router::flooder;
 use connections::{Connections, ConnectionModule};
@@ -70,7 +70,7 @@ pub async fn init() -> () {
                             }
                             // user functions
                             cmd if cmd.starts_with("user ") => {
-                                Users::cli(cmd.strip_prefix("user ").unwrap());
+                                UserAccounts::cli(cmd.strip_prefix("user ").unwrap());
                             },
                             // router module
                             cmd if cmd.starts_with("router ") => {

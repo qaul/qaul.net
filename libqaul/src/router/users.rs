@@ -1,23 +1,25 @@
-/**
- * Discovered user table
- * 
- * This table contains all users known to this node.
- */
+//! Discovered user table
+//! 
+//! This table contains all users known to this node.
 
 use libp2p::{
     PeerId,
     identity::PublicKey,
 };
-use std::collections::BTreeMap;
-use state::Storage;
-use std::sync::RwLock;
+use prost::Message;
 use serde::{Serialize, Deserialize};
+use state::Storage;
+use std::collections::BTreeMap;
+use std::sync::RwLock;
 
 use crate::node;
+use super::proto;
+use crate::rpc::Rpc;
 
-// mutable state of users table
+/// mutable state of users table
 static USERS: Storage<RwLock<Users>> = Storage::new();
 
+/// implementation of all known users for routing references
 pub struct Users {
     pub users: BTreeMap<PeerId, User>,
 }
@@ -25,7 +27,7 @@ pub struct Users {
 impl Users {
     /// Initialize the router::users::Users module
     /// this module is automatically initialized
-    /// when the router module is initionalized
+    /// when the router module is initialized
     pub fn init() {
         {
             // create users table and save it to state
@@ -34,7 +36,7 @@ impl Users {
         }
 
         // fill with locally registered users
-        for user in node::users::Users::get_user_info() {
+        for user in node::user_accounts::UserAccounts::get_user_info() {
             Self::add(user.id, user.key, user.name.clone());
         }
     }
@@ -127,6 +129,76 @@ impl Users {
             },
             _ => log::error!("unknown router users command"),
         }
+    }
+
+    /// Process RPC request and send reply
+    pub fn rpc(router_message: proto::Router) {
+        match router_message.message {
+            Some(proto::router::Message::UserRequest(_user_request)) => {
+                // get users store
+                let users = USERS.get().read().unwrap();
+
+                // fill them into the list
+                let mut user_list = proto::UserList {
+                    user: Vec::new(),
+                };
+                for (id, user) in &users.users {
+                    // get RPC key values
+                    let (key_type, key_base58) = Self::get_protobuf_public_key(user.key.clone());
+
+                    // create user entry message
+                    let user_entry = proto::UserEntry {
+                        name: user.name.clone(),
+                        id: id.to_bytes(),
+                        id_base58: id.to_base58(),
+                        key: user.key.clone().into_protobuf_encoding(),
+                        key_type,
+                        key_base58,
+                        connectivity: 0,
+                    };
+
+                    // add entry to list
+                    user_list.user.push(user_entry);
+                }
+
+                // create message
+                let proto_message = proto::Router{
+                    message: Some(proto::router::Message::UserList(
+                        user_list)),
+                };
+
+                // encode message
+                let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+                // send message
+                Rpc::send_message(buf, 2, "".to_string(), Vec::new() );
+            },
+            _ => {},
+        }
+    }
+
+    /// create the qaul RPC definitions of a public key
+    /// 
+    /// Returns a tuple with the key type & the base58 encoded
+    /// (key_type: String, key_base58: String)
+    fn get_protobuf_public_key(key: PublicKey) -> (String, String) {
+        // extract values
+        let key_type: String;
+        let key_base58: String;
+
+        match key {
+            PublicKey::Ed25519(key) => {
+                key_type = "Ed25519".to_owned();
+                key_base58 = bs58::encode(key.encode()).into_string();
+            }
+            _ => {
+                key_type = "UNDEFINED".to_owned();
+                key_base58 = "UNDEFINED".to_owned();
+            }
+        }
+
+        (key_type, key_base58)
     }
 }
 
