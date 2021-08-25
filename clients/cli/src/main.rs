@@ -4,6 +4,6 @@ use libqaul;
 
 #[async_std::main]
 async fn main() {
-    libqaul::init().await;
+    libqaul::start_cli().await;
 }
 

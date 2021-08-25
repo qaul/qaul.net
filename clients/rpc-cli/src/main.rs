@@ -32,7 +32,7 @@ enum EventType {
 #[async_std::main]
 async fn main() {
     // start libqaul in new thread
-    libqaul::threaded::start();
+    libqaul::api::start_threaded();
 
     // initialize user accounts
     UserAccounts::init();
@@ -70,7 +70,7 @@ async fn main() {
                     Cli::process_command(line);
                 },
                 EventType::Rpc(_) => {
-                    match libqaul::threaded::receive_rpc_from_libqaul() {
+                    match libqaul::api::receive_rpc() {
                         Ok(data) => {
                             Rpc::received_message(data);
                         },

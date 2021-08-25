@@ -55,7 +55,7 @@ impl Rpc {
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
         // send the message
-        libqaul::threaded::send_rpc_to_libqaul(buf);
+        libqaul::api::send_rpc(buf);
     }
 
     /// receive an rpc message from libqaul

@@ -3,10 +3,12 @@
 //! The RPC messages are defined in the protobuf format.
 //! The format is then translated to rust program code.
 
+use crossbeam_channel::{unbounded, Sender, Receiver, TryRecvError};
+use state::Storage;
+
 use prost::Message;
 
 use crate::connections::Connections;
-use crate::threaded;
 use crate::router::Router;
 use crate::node::Node;
 use crate::node::user_accounts::UserAccounts;
@@ -23,6 +25,14 @@ use proto::{QaulRpc, Modules};
 // }
 
 
+/// receiving end of the mpsc channel
+static EXTERN_RECEIVE: Storage<Receiver<Vec<u8>>> = Storage::new();
+/// sending end of the mpsc channel
+static EXTERN_SEND: Storage<Sender<Vec<u8>>> = Storage::new();
+/// sending end of th mpsc channel for libqaul to send
+static LIBQAUL_SEND: Storage<Sender<Vec<u8>>> = Storage::new();
+
+
 /// Handling of RPC messages of libqaul
 pub struct Rpc {
 
@@ -30,6 +40,57 @@ pub struct Rpc {
 
 
 impl Rpc {
+    /// Initialize RPC module 
+    /// Create the sending and receiving channels and put them to state.
+    /// Return the receiving channel for libqaul.
+    pub fn init() -> Receiver<Vec<u8>> {
+        // create channels
+        let (libqaul_send, extern_receive) = unbounded();
+        let (extern_send, libqaul_receive) = unbounded();
+
+        // save to state
+        EXTERN_RECEIVE.set(extern_receive);
+        EXTERN_SEND.set(extern_send);
+        LIBQAUL_SEND.set(libqaul_send.clone());
+
+        // return libqaul receiving channel
+        libqaul_receive
+    }
+
+    /// send rpc message from the outside to the inside 
+    /// of the worker thread of libqaul.
+    pub fn send_to_libqaul(binary_message: Vec<u8>) {
+        let sender = EXTERN_SEND.get().clone();
+        match sender.send(binary_message) {
+            Ok(()) => {},
+            Err(err) => {
+                // log error message
+                log::error!("{:?}", err);
+            },
+        }
+    }
+
+    /// check the receiving rpc channel if there
+    /// are new messages from inside libqaul for 
+    /// the outside.
+    pub fn receive_from_libqaul() -> Result<Vec<u8>, TryRecvError> {
+        let receiver = EXTERN_RECEIVE.get().clone();
+        receiver.try_recv()
+    }
+
+    /// send an rpc message from inside libqaul thread
+    /// to the extern.
+    pub fn send_to_extern(message: Vec<u8>) {
+        let sender = LIBQAUL_SEND.get().clone();
+        match sender.send(message) {
+            Ok(()) => {},
+            Err(err) => {
+                // log error message
+                log::error!("{:?}", err);
+            },
+        }
+    }
+
     /// Process received binary protobuf encoded RPC message
     /// 
     /// This function will decode the message from the binary
@@ -81,6 +142,6 @@ impl Rpc {
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
         // send the message
-        threaded::send_rpc_to_extern(buf);
+        Self::send_to_extern(buf);
     }
 }

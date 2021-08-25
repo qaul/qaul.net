@@ -6,6 +6,14 @@
 //! All functions are thread safe and can be
 //! called from any external thread.
 
+use std::ffi::CString;
+use std::os::raw::c_char;
+#[no_mangle]
+pub extern "C" fn hello() -> *mut c_char {
+    CString::new("Hello qaul!")
+        .unwrap()
+        .into_raw()
+}
 
 /// start libqaul in an own thread
 /// 
@@ -14,7 +22,7 @@
 /// of this API.
 #[no_mangle]
 pub extern "C" fn start() {
-    super::start();
+    super::start_threaded();
 }
 
 /// send RPC messages to libqaul
@@ -47,7 +55,7 @@ pub extern "C" fn send_rpc_to_libqaul(message: *const libc::c_uchar, message_len
     }
 
     // send it further to libqaul
-    super::send_rpc_to_libqaul(rust_buffer);
+    crate::rpc::Rpc::send_to_libqaul(rust_buffer);
 
     // return success
     0
@@ -71,7 +79,7 @@ pub extern "C" fn send_rpc_to_libqaul(message: *const libc::c_uchar, message_len
 #[no_mangle]
 pub extern "C" fn receive_rpc_from_libqaul(buffer: *mut libc::c_uchar, buffer_length: u32) -> i32 {
     // poll rpc channel
-    let received = super::receive_rpc_from_libqaul();
+    let received = crate::rpc::Rpc::receive_from_libqaul();
 
     match received {
         Ok(message) => {
