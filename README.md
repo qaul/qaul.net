@@ -1,41 +1,24 @@
-# qaul.net Example using libp2p
+# qaul.net – قول
+## Internet Independent Wireless Mesh Communication App
 
-qaul.net rust Prototype
-## Download and Install
-### Prerequisites
+![http://qaul.net/](docs/qaul-net.png)
 
-In order to build this prototype you need to install the following prerequisites:
+[qaul.net](https://qaul.net)
 
-**Rust programming language** with it's compiler cargo.
-Easiest install is via rustup: https://rustup.rs/
 
-Install compiler tool chain for C code
+## License
+**qaul is a fully free and open source software. It is published under the 
+[AGPLv3], the [GNU Affero General Public License version 3 or later].**
 
-```sh
-# Debian, Ubuntu, Mint
-sudo apt install build-essential
-```
+Please see the `licenses` folder for in depth information on qaul's licenses.
 
-### Get Repository
 
-```sh
-# clone repository
-git clone https://git.open-communication.net/qaul/experiments/qaul-libp2p.git
+## Committing and Contributing to qaul
 
-# move into project folder
-cd qaul-libp2p
-```
+Committing and contributing to this project, you agree to transfer the full copyright of all your contributions to the '[Verein zur Förderung von offenen Community-Projekten]' in Switzerland (English name: [Open Community Project Association]). This transfer includes the transfer of the following rights: the right to enforce the copyright, the right to relicense the work, the right to transfer ownership of the work as well as the exploitation rights of the work.
 
-## Build
 
-Run the following command from this folder.
-
-```sh
-# build the entire project
-cargo build
-```
-
-## Usage
-
-Please have a look at the client `clients/cli` on how to use this example.
-
+[Verein zur Förderung von offenen Community-Projekten]: https://ocpa.ch
+[Open Community Project Association]: https://ocpa.ch
+[AGPLv3]: agpl-3.0.md
+[GNU Affero General Public License version 3 or later]: agpl-3.0.md
