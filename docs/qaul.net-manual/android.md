@@ -1,0 +1,54 @@
+# Build qaul App for Android
+
+This Document describes how to build the qaul Android app.
+
+
+## Prerequisits
+
+### Android Studio
+
+To build the app you need to install Android Studio.
+Download and install it from it's official web page:
+
+https://developer.android.com/studio
+
+
+### Rust Cross Compilation for Android
+
+To build libqaul for android targets we are using mozilla's rust-android-gradle plugin for android studio.
+The instructions below are following the official plugin installation instructions:
+https://github.com/mozilla/rust-android-gradle
+
+
+install build targets for android in rust
+
+```sh
+rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+```
+
+Install cargo ndk in cargo
+
+```sh
+cargo install cargo-ndk
+```
+
+Set $ANDROID_NDK_HOME variable to the latest NDK
+
+```sh
+export ANDROID_SDK_ROOT=$HOME/Android/Sdk
+export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/22.1.7171670
+```
+
+PLEASE MAKE SURE NDK VERSION "22.1.7171670" IS INSTALLED!
+(This is statically set in the file android/libqaul/build.gradle on line 33)
+
+Build rust libqaul from QAUL_REPOSITORY/android folder, via the build.sh script
+
+```sh
+./build.sh
+```
+
+
+## Build App
+
+Now you can build and start the app from within Android Studio.

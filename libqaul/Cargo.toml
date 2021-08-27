@@ -34,6 +34,7 @@ libc = "0.2"
 crossbeam-channel = "0.5"
 bs58 = "0.4"
 futures-ticker = "0.0.1"
+jni = "0.19"
 
 # internal references
 qaul_info = { path = "src/libp2p_modules/qaul_info" }

@@ -16,11 +16,16 @@ use std::{
 
 use crate::rpc::Rpc;
 
+/// C API module
 mod c;
 
+/// android module
+/// The module only compiled, when the compile target is android.
+#[cfg(target_os = "android")]
+mod android;
 
 /// start libqaul in an own thread
-pub fn start_threaded() {
+pub fn start() {
     // Spawn new thread
     thread::spawn(move|| block_on(
         async move {

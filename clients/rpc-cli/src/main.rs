@@ -32,7 +32,7 @@ enum EventType {
 #[async_std::main]
 async fn main() {
     // start libqaul in new thread
-    libqaul::api::start_threaded();
+    libqaul::api::start();
 
     // initialize user accounts
     UserAccounts::init();

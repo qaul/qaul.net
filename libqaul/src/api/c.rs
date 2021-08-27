@@ -22,7 +22,7 @@ pub extern "C" fn hello() -> *mut c_char {
 /// of this API.
 #[no_mangle]
 pub extern "C" fn start() {
-    super::start_threaded();
+    super::start();
 }
 
 /// send RPC messages to libqaul
