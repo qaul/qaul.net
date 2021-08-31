@@ -39,16 +39,20 @@ export ANDROID_SDK_ROOT=$HOME/Android/Sdk
 export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/22.1.7171670
 ```
 
-PLEASE MAKE SURE NDK VERSION "22.1.7171670" IS INSTALLED!
-(This is statically set in the file android/libqaul/build.gradle on line 33)
-
-Build rust libqaul from QAUL_REPOSITORY/android folder, via the build.sh script
+Build rust libqaul from QAUL_REPOSITORY/libqaul folder, via the build_libqaul_android.sh script
 
 ```sh
-./build.sh
+# on linux run
+./build_libqaul_android.sh
+
+## the build scripts for other operating systems can be setup accordingly
 ```
+
+The build script builds the shared libqaul library for different android 
+targets and copies them to the appropriate location in the android folder 
+`android/app/src/main/jniLibs`.
 
 
 ## Build App
 
-Now you can build and start the app from within Android Studio.
+Now you can build and start the android app from within Android Studio.

@@ -22,7 +22,7 @@ You can run as many instances on as many machines as you like. the machines just
 
 ```sh
 # start the program
-RUST_LOG=info cargo run
+RUST_LOG=info cargo run --bin=qaul-cli
 ```
 
 Once the program is running, one can enter the commands documented in the CLI Manual below.

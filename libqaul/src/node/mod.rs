@@ -131,6 +131,8 @@ impl Node {
 
     /// Process incoming RPC request messages for node module
     pub fn rpc(data: Vec<u8>) {
+        log::info!("Node rpc message received");
+
         match proto::Node::decode(&data[..]) {
             Ok(node) => {
                 match node.message {
@@ -151,7 +153,9 @@ impl Node {
                         // send message
                         Rpc::send_message(buf, crate::rpc::proto::Modules::Node.into(), "".to_string(), Vec::new());
                     }
-                    _ => {},
+                    _ => {
+                        log::error!("rpc message undefined");
+                    },
                 }    
             },
             Err(error) => {

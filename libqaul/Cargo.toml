@@ -41,3 +41,17 @@ qaul_info = { path = "src/libp2p_modules/qaul_info" }
 
 [build-dependencies]
 prost-build = "0.8"
+
+
+# special setting for android
+[target.aarch64-linux-android.dependencies]
+openssl = { version = "*", features = ["vendored"] }
+
+[target.armv7-linux-androideabi.dependencies]
+openssl = { version = "*", features = ["vendored"] }
+
+[target.i686-linux-android.dependencies]
+openssl = { version = "*", features = ["vendored"] }
+
+[target.x86_64-linux-android.dependencies]
+openssl = { version = "*", features = ["vendored"] }

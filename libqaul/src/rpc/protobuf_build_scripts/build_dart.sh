@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-protoc --dart_out=../protobuf_generated/dart \
+protoc --dart_out=../../../../lib/rpc/protobuf_generated \
     --proto_path=../.. \
     \
     rpc/qaul_rpc.proto \

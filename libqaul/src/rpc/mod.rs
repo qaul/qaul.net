@@ -99,26 +99,35 @@ impl Rpc {
     pub fn process_received_message( data: Vec<u8>, connections: &mut Connections ) {
         match QaulRpc::decode(&data[..]) {
             Ok(message) => {
-                log::info!("qaul rpc message received");
+                log::info!("qaul rpc message received, with message module {}", message.module);
 
                 match Modules::from_i32(message.module) {
                     Some(Modules::Node) => {
+                        log::info!("Message Modules::Node received");
                         Node::rpc(message.data);
                     },
                     Some(Modules::Rpc) => {
+                        log::info!("Message Modules::Rpc received");
                         // TODO: authorisation
                     },
                     Some(Modules::Useraccounts) => {
+                        log::info!("Message Modules::Useraccounts received");
                         UserAccounts::rpc(message.data);
                     },
                     Some(Modules::Router) => {
+                        log::info!("Message Modules::Router received");
                         Router::rpc(message.data);
                     },
                     Some(Modules::Feed) => {
+                        log::info!("Message Modules::Feed received");
                         Feed::rpc(message.data, message.user_id, connections);
                     },
-                    Some(Modules::None) => {},
-                    None => {},
+                    Some(Modules::None) => {
+                        log::error!("Message Modules::None received");
+                    },
+                    None => {
+                        log::error!("Message module undefined");
+                    },
                 }
             },
             Err(error) => {

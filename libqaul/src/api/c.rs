@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! # C-API for the threaded libqaul
 //! 
 //! This is the C compatible FFI of libqaul.
@@ -8,6 +11,8 @@
 
 use std::ffi::CString;
 use std::os::raw::c_char;
+
+/// test function
 #[no_mangle]
 pub extern "C" fn hello() -> *mut c_char {
     CString::new("Hello qaul!")
@@ -33,7 +38,7 @@ pub extern "C" fn start() {
 /// -1 : pointer is null
 /// -2 : message is too big
 #[no_mangle]
-pub extern "C" fn send_rpc_to_libqaul(message: *const libc::c_uchar, message_length: u32) -> i32 {
+pub extern "C" fn send_rpc_to_libqaul(message: *const u8, message_length: u32) -> i32 {
     // message-pointer sanity check
     if message.is_null() {
         log::error!("message pointer is null");
@@ -48,14 +53,18 @@ pub extern "C" fn send_rpc_to_libqaul(message: *const libc::c_uchar, message_len
     }
 
     // copy input buffer to libqaul
+    log::info!("copy {} bytes of message buffer", message_length);
     let message_length_usize: usize = message_length as usize;
-    let mut rust_buffer: Vec<u8> = Vec::with_capacity(message_length_usize);
+    let mut rust_buffer_owned: Vec<u8>;
     unsafe {
-        std::ptr::copy_nonoverlapping(message, rust_buffer.as_mut_ptr(), message_length_usize);
+        //std::ptr::copy_nonoverlapping(message, rust_buffer.as_mut_ptr(), message_length_usize);
+        let rust_buffer = &std::slice::from_raw_parts(message, message_length_usize).to_vec();
+        rust_buffer_owned = rust_buffer.iter().cloned().collect();
     }
+    log::info!("received message: {:02x?}", rust_buffer_owned);
 
     // send it further to libqaul
-    crate::rpc::Rpc::send_to_libqaul(rust_buffer);
+    crate::rpc::Rpc::send_to_libqaul(rust_buffer_owned);
 
     // return success
     0
@@ -73,7 +82,7 @@ pub extern "C" fn send_rpc_to_libqaul(message: *const libc::c_uchar, message_len
 /// The return value '0' means no message was received. 
 /// 
 /// A negative value is an error.
-/// -1 : an error occured
+/// -1 : an error occurred
 /// -2 : buffer to small
 /// -3 : buffer pointer is null
 #[no_mangle]

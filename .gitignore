@@ -7,3 +7,32 @@ bak/
 # local configuration files
 config.toml
 default.json
+
+# flutter specific
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# flutter for web
+lib/generated_plugin_registrant.dart
+
+# android artifacts
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/app/src/main/jniLibs
+
+# android-studio specific
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# MacOS specific
+.DS_Store
