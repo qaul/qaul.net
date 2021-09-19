@@ -137,6 +137,8 @@ impl Node {
             Ok(node) => {
                 match node.message {
                     Some(proto::node::Message::GetNodeInfo(_)) => {
+                        Rpc::increase_message_counter();
+
                         // create response message
                         let proto_nodeinformation = proto::NodeInformation {
                             id_base58: Self::get_id_string(),

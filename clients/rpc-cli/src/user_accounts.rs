@@ -68,7 +68,7 @@ impl UserAccounts {
                 Self::create_user_account(cmd.strip_prefix("create ").unwrap().to_string());
             },
             // unknown command
-            _ => log::error!("unknown node command"),
+            _ => log::error!("unknown account command"),
         }
     }
 

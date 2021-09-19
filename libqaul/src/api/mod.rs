@@ -49,3 +49,13 @@ pub fn send_rpc(binary_message: Vec<u8>) {
 pub fn receive_rpc() -> Result<Vec<u8>, TryRecvError> {
     Rpc::receive_from_libqaul()
 }
+
+/// count of rpc messages to receive in the queue
+pub fn receive_rpc_queued() -> usize {
+    Rpc::receive_from_libqaul_queue_length()
+}
+
+/// count of sent rpc messages
+pub fn send_rpc_count() -> i32 {
+    Rpc::send_rpc_count()
+}

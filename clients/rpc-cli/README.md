@@ -38,3 +38,8 @@ The following commands are available:
     * the message is signed and can be validated
     * at least one user needs to be created
   * `feed list` - displays all feed messages
+* debug
+  * all these commands are for debugging purposes only
+  * `debug rpc sent` - displays the number of RPC messages sent to libqaul
+  * `debug rpc queued` - displays the number of messages in the RPC queue to be processed.
+    * This command will probably always return '0', as the messages are checked many times per second by this client.

@@ -9,10 +9,12 @@
     ],
     "cSpell.words": [
         "qaul",
+        "libqaul",
         "behaviour",
-        "BLEZ",
+        "BLE",
         "floodsub",
         "keypair",
-        "mpex"
+        "libp2p",
+        "protobuf"
     ]
 }

@@ -20,7 +20,7 @@ impl Router {
                 Self::request_user_list();
             },
             // unknown command
-            _ => log::error!("unknown node command"),
+            _ => log::error!("unknown router command"),
         }
     }
 

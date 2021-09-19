@@ -29,6 +29,18 @@ typedef StartFunctionDart = void Function();
 typedef HelloFunctionRust = Pointer<Utf8> Function();
 typedef HelloFunctionDart = Pointer<Utf8> Function();
 
+// Get the number of rpc messages ever sent.
+// C function definition:
+//   i32 send_rpc_to_libqaul_count();
+typedef SendRpcCounterRust = Int32 Function();
+typedef SendRpcCounterDart = int Function();
+
+// Get the number of rpc messages queued by libqaul to receive.
+// C function definition:
+//   i32 send_rpc_to_libqaul_count();
+typedef ReceiveRpcQueuedRust = Int32 Function();
+typedef ReceiveRpcQueuedDart = int Function();
+
 // send protobuf RPC message to libqaul
 // C function definition:
 //   int32 send_rpc_to_libqaul( *uchar, uint32);
@@ -101,6 +113,21 @@ class Libqaul {
     final helloMessage = ptr.toDartString();
     calloc.free(ptr);
     return helloMessage;
+  }
+
+  /// Debug function: how many rpc messages have been sent to libqaul
+  checkSendCounter() {
+    final _checkCounter = _lib!.lookupFunction<SendRpcCounterRust, SendRpcCounterDart>('send_rpc_to_libqaul_count');
+    final result = _checkCounter();
+    print("$result RPC messages sent to libqaul");
+  }
+
+  /// Debug function: How many rpc messages are queued by libqaul
+  int checkReceiveQueue() {
+    final _checkQueue = _lib!.lookupFunction<ReceiveRpcQueuedRust, ReceiveRpcQueuedDart>('receive_rpc_from_libqaul_queued_length');
+    final result = _checkQueue();
+    print("$result messages queued by libqaul RPC");
+    return result;
   }
 
   /// send binary protobuf RPC message to libqaul

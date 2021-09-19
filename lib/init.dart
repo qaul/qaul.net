@@ -40,7 +40,15 @@ class Init {
     // wait a bit
     await Future.delayed(Duration(seconds: 1));
 
+    // DEBUG: how many messages have been sent
+    libqaul.checkSendCounter();
+
+    // DEBUG: how many messages are queued by libqaul
+    final queued = libqaul.checkReceiveQueue();
+
     // check for rpc messages
-    libqaul.receiveRpc();
+    if(queued > 0) {
+      libqaul.receiveRpc();
+    }
   }
 }

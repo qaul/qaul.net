@@ -6,6 +6,7 @@ use super::node::Node;
 use super::user_accounts::UserAccounts;
 use super::router::Router;
 use super::feed::Feed;
+use super::debug::Debug;
 
 /// CLI command analizer and processing
 pub struct Cli {}
@@ -29,6 +30,10 @@ impl Cli {
             // feed functions
             cmd if cmd.starts_with("feed ") => {
                 Feed::cli(cmd.strip_prefix("feed ").unwrap());
+            },
+            // debugging functions
+            cmd if cmd.starts_with("debug ") => {
+                Debug::cli(cmd.strip_prefix("debug ").unwrap());
             },
             // unknown command
             _ => log::error!("unknown command"),

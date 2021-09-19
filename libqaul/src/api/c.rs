@@ -129,13 +129,29 @@ pub extern "C" fn receive_rpc_from_libqaul(buffer: *mut libc::c_uchar, buffer_le
 
             // return message length
             let len: i32 = message.len() as i32;
-            len
+            return len
         },
         Err(err) => {
             // log error message
             log::error!("{:?}", err);
             // return -1: an error occurred
-            -1
+            return -1
         },
+    }
+
+    /// Get the number of messages cued for receiving
+    #[no_mangle]
+    pub extern "C" fn receive_rpc_from_libqaul_queued_length() -> i32 {
+        // check rpc queue len
+        crate::rpc::Rpc::receive_from_libqaul_queue_length() as i32
+    }
+
+    /// Get the number of messages ever sent to rpc.
+    /// The counter is increased with every message sent to libqaul.
+    /// This function is mainly for debugging.
+    #[no_mangle]
+    pub extern "C" fn send_rpc_to_libqaul_count() -> i32 {
+        // get message count of messages sent to libqaul
+        crate::rpc::Rpc::send_rpc_count()
     }
 }

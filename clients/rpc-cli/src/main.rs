@@ -18,6 +18,7 @@ mod node;
 mod user_accounts;
 mod router;
 mod feed;
+mod debug;
 
 use cli::Cli;
 use rpc::Rpc;

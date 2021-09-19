@@ -5,6 +5,7 @@
 
 use crossbeam_channel::{unbounded, Sender, Receiver, TryRecvError};
 use state::Storage;
+use std::sync::RwLock;
 
 use prost::Message;
 
@@ -24,6 +25,13 @@ use proto::{QaulRpc, Modules};
 //     include!(concat!(env!("OUT_DIR"), "/qaul.rpc.rs"));
 // }
 
+/// counter of received messages
+/// this is for bug fixing only
+pub struct MessageCounter {
+    count: i32,
+}
+/// state of message counter
+static EXTERN_SEND_COUNT: Storage<RwLock<MessageCounter>> = Storage::new();
 
 /// receiving end of the mpsc channel
 static EXTERN_RECEIVE: Storage<Receiver<Vec<u8>>> = Storage::new();
@@ -53,6 +61,12 @@ impl Rpc {
         EXTERN_SEND.set(extern_send);
         LIBQAUL_SEND.set(libqaul_send.clone());
 
+        // create bug fixing counter
+        let message_counter = MessageCounter {
+            count: 0,
+        };
+        EXTERN_SEND_COUNT.set(RwLock::new(message_counter));
+
         // return libqaul receiving channel
         libqaul_receive
     }
@@ -78,6 +92,12 @@ impl Rpc {
         receiver.try_recv()
     }
 
+    /// get the number of messages in the receiving cue
+    pub fn receive_from_libqaul_queue_length() -> usize {
+        let receiver = EXTERN_RECEIVE.get().clone();
+        receiver.len()
+    }
+
     /// send an rpc message from inside libqaul thread
     /// to the extern.
     pub fn send_to_extern(message: Vec<u8>) {
@@ -97,12 +117,15 @@ impl Rpc {
     /// protobuf format to rust structures and send it to 
     /// the module responsible.
     pub fn process_received_message( data: Vec<u8>, connections: &mut Connections ) {
+        Self::increase_message_counter();
+
         match QaulRpc::decode(&data[..]) {
             Ok(message) => {
                 log::info!("qaul rpc message received, with message module {}", message.module);
 
                 match Modules::from_i32(message.module) {
                     Some(Modules::Node) => {
+                        Self::increase_message_counter();
                         log::info!("Message Modules::Node received");
                         Node::rpc(message.data);
                     },
@@ -152,5 +175,25 @@ impl Rpc {
 
         // send the message
         Self::send_to_extern(buf);
+    }
+
+    /// get message count of all messages sent to libqaul
+    /// 
+    /// This function is for bug fixing only, 
+    /// it changes and can be removed anytime.
+    /// Please don't use it for anything serious.
+    pub fn send_rpc_count() -> i32 {
+        let counter = EXTERN_SEND_COUNT.get().read().unwrap();
+        counter.count
+    }
+
+    /// increase message counter by one, of all messages sent to libqaul
+    /// 
+    /// This function is for bug fixing only, 
+    /// it changes and can be removed anytime.
+    /// Please don't use it for anything serious.
+    pub fn increase_message_counter() {
+        let mut counter = EXTERN_SEND_COUNT.get().write().unwrap();
+        counter.count = counter.count +1;
     }
 }

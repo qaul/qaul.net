@@ -24,7 +24,7 @@ impl Feed {
                 Self::request_feed_list();
             },
             // unknown command
-            _ => log::error!("unknown node command"),
+            _ => log::error!("unknown feed command"),
         }
     }
 
