@@ -53,6 +53,17 @@ targets and copies them to the appropriate location in the android folder
 `android/app/src/main/jniLibs`.
 
 
+## Build Android Libqaul AAR Library
+
+1) Open the `android` folder in android studio.
+2) In Android Studio do the following steps
+  * open the gradle tab
+  * in the gradle tab open the following path libqaul > Tasks > build
+  * run `assemble` script in the build folder
+3) now you can find the library files libqaul-target.aar and libqaul-debug.aar
+   in the folder `build/libqaul/outputs`.
+
+
 ## Build App
 
 Now you can build and start the android app from within Android Studio.

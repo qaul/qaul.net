@@ -3,7 +3,7 @@
 
 use crate::api;
 use jni::objects::{JClass, JString, JByteBuffer};
-use jni::sys::{jstring, jbyteArray};
+use jni::sys::{jstring, jbyteArray, jint};
 use jni::JNIEnv;
 use std::ffi::CString;
 
@@ -11,7 +11,7 @@ use std::ffi::CString;
 
 /// dummy function to test the functionality
 #[no_mangle]
-pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_dummy(
+pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_hello(
   env: JNIEnv,
   _: JClass,
 ) -> jstring {
@@ -32,6 +32,28 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_start(
 ) {
     // start libqaul in an own thread
     super::start();
+}
+
+/// get number of messages sent via RPC to libqaul from android
+/// this function is only for debugging
+#[no_mangle]
+pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sendcounter(
+    env: JNIEnv,
+    _: JClass,
+) -> jint {
+    // return number of RPC messages sent to libqaul
+    super::send_rpc_count() as jint
+}
+
+/// get number of messages queued to be received by this program
+/// from libqaul
+#[no_mangle]
+pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receivequeue(
+    env: JNIEnv,
+    _: JClass,
+) -> jint {
+    // start libqaul in an own thread
+    super::receive_rpc_queued() as jint
 }
 
 /// send an rpc message from android to libqaul

@@ -5,7 +5,7 @@
 
 # set build variables
 ## default android library location
-jniLibs=../android/app/src/main/jniLibs
+jniLibs=../android/libqaul/src/main/jniLibs
 libName=liblibqaul.so
 buildType=debug
 buildTypeCargo=

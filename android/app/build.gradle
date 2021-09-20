@@ -55,5 +55,6 @@ flutter {
 }
 
 dependencies {
+    implementation project(':libqaul')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
