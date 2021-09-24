@@ -9,7 +9,10 @@ use std::sync::RwLock;
 
 use prost::Message;
 
-use crate::connections::Connections;
+use crate::connections::{
+    lan::Lan,
+    internet::Internet,
+};
 use crate::router::Router;
 use crate::node::Node;
 use crate::node::user_accounts::UserAccounts;
@@ -116,7 +119,7 @@ impl Rpc {
     /// This function will decode the message from the binary
     /// protobuf format to rust structures and send it to 
     /// the module responsible.
-    pub fn process_received_message( data: Vec<u8>, connections: &mut Connections ) {
+    pub fn process_received_message( data: Vec<u8>, lan: Option<&mut Lan>, internet: Option<&mut Internet> ) {
         Self::increase_message_counter();
 
         match QaulRpc::decode(&data[..]) {
@@ -143,7 +146,7 @@ impl Rpc {
                     },
                     Some(Modules::Feed) => {
                         log::info!("Message Modules::Feed received");
-                        Feed::rpc(message.data, message.user_id, connections);
+                        Feed::rpc(message.data, message.user_id, lan, internet);
                     },
                     Some(Modules::None) => {
                         log::error!("Message Modules::None received");

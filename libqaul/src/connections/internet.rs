@@ -65,20 +65,34 @@ pub struct QaulInternetBehaviour {
     pub response_sender: UnboundedSender<QaulMessage>,
 }
 
+/// Internet Connection Module of libqaul
+/// 
+/// it creates a libp2p swarm
 pub struct Internet {
     pub swarm: ExpandedSwarm<QaulInternetBehaviour, <<<QaulInternetBehaviour as NetworkBehaviour>::ProtocolsHandler as IntoProtocolsHandler>::Handler as ProtocolsHandler>::InEvent, <<<QaulInternetBehaviour as NetworkBehaviour>::ProtocolsHandler as IntoProtocolsHandler>::Handler as ProtocolsHandler>::OutEvent, <QaulInternetBehaviour as NetworkBehaviour>::ProtocolsHandler>, 
     pub receiver: UnboundedReceiver<QaulMessage>,
 }
 
 impl Internet {
-    /**
-     * Initialize swarm for Internet overlay connection module
-     */
+    /// Initialize swarm for Internet overlay connection module
     pub async fn init(auth_keys: AuthenticKeypair<X25519Spec>) -> Self {
+        log::info!("Internet.init() start");
+
         // create a multi producer, single consumer queue
         let (response_sender, response_rcv) = mpsc::unbounded();
     
-        // create a TCP transport
+        log::info!("Internet.init() mpsc channels created");
+
+        // TCP transport for android without DNS resolution
+        // as the DNS module crashes on android due to a file system access
+        #[cfg(target_os = "android")]
+        let transport = {
+            let tcp = TcpConfig::new().nodelay(true);
+            let ws_tcp = WsConfig::new(tcp.clone());
+            tcp.or_transport(ws_tcp)
+        };
+        // create tcp transport with DNS for all other devices
+        #[cfg(not(target_os = "android"))]
         let transport = {
             let tcp = TcpConfig::new().nodelay(true);
             let dns_tcp = DnsConfig::system(tcp).await.unwrap();
@@ -86,12 +100,16 @@ impl Internet {
             dns_tcp.or_transport(ws_dns_tcp)
         };
 
+        log::info!("Internet.init() transport created");
+
         let transport_upgraded = transport
             .upgrade(upgrade::Version::V1)
             .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
             .multiplex(upgrade::SelectUpgrade::new(yamux::YamuxConfig::default(), mplex::MplexConfig::default()))
             //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
             .boxed();
+
+        log::info!("Internet.init() transport_upgraded");
         
         // create ping configuration 
         // with customized parameters
@@ -105,6 +123,8 @@ impl Internet {
         //ping_config.with_interval(d: Duration);
         //ping_config.with_timeout(d: Duration);
         //ping_config.with_max_failures(n);
+
+        log::info!("Internet.init() ping_config");
 
         // create behaviour
         let mut swarm = {
@@ -122,6 +142,7 @@ impl Internet {
             Swarm::new(transport_upgraded, behaviour, Node::get_id())
         };
     
+        log::info!("Internet.init() swarm created");
         
         // connect swarm to the listening interface in 
         // the configuration config.internet.listen
@@ -134,9 +155,13 @@ impl Internet {
         )
         .expect("swarm can be started");
 
+        log::info!("Internet.init() Swarm::listen_on");
+
         // connect to remote peers that are specified in 
         // the configuration config.internet.peers
         Self::peer_connect(&config, &mut swarm);
+
+        log::info!("Internet.init() peer_connect");
 
         // construct internet object
         let internet = Internet { swarm: swarm, receiver: response_rcv };

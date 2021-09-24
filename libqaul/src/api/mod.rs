@@ -32,13 +32,34 @@ pub fn start() {
             // start libqaul
             crate::start().await;
         }
-    ));
-
-    // wait until initialized ...
-    // TODO: make it better!
-    //       wait in RPC until initialized
-    std::thread::sleep(Duration::from_millis(5000));
+    ));    
 }
+
+/// start libqaul for android
+/// here for debugging and testing
+pub fn start_android() {
+    // Spawn new thread
+    thread::spawn(move|| block_on(
+        async move {
+            // start libqaul
+            crate::start_android().await;
+        }
+    ));
+}
+
+/// Check if libqaul finished initializing
+/// 
+/// The initialization of libqaul can take several seconds.
+/// If you send any message before it finished initializing, libqaul will crash.
+/// Wait therefore until this function returns true before sending anything to libqaul.
+pub fn initialization_finished() -> bool {
+    if let Some(_) = crate::INITIALIZED.try_get() {
+        return true
+    }
+    
+    false
+}
+
 
 /// send an RPC message to libqaul
 pub fn send_rpc(binary_message: Vec<u8>) {

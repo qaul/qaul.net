@@ -81,13 +81,13 @@ class Libqaul {
     if (Platform.isLinux) {
       // find the library in the rust target build folder
       // TODO: target Raspberry
-      _lib = DynamicLibrary.open('./target/$mode/liblibqaul.so');
+      _lib = DynamicLibrary.open('../target/$mode/liblibqaul.so');
     }  else if (Platform.isMacOS) {
       // find the library in the rust target build folder
-      _lib = DynamicLibrary.open('./target/$mode/liblibqaul.dylib');
+      _lib = DynamicLibrary.open('../target/$mode/liblibqaul.dylib');
     } else if (Platform.isWindows) {
       // find the library in the rust target build folder
-      _lib = DynamicLibrary.open('./target/$mode/liblibqaul.dll');
+      _lib = DynamicLibrary.open('../target/$mode/liblibqaul.dll');
     } else if (Platform.isAndroid) {
       // the android libraries are copied to the android directory after build
       _lib = DynamicLibrary.open('liblibqaul.so');

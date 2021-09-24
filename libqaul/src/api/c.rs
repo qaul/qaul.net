@@ -30,6 +30,23 @@ pub extern "C" fn start() {
     super::start();
 }
 
+/// check if libqaul finished initializing
+/// 
+/// Returns 1 when it finished, otherwise 0.
+/// 
+/// 1: initialization finished
+/// 0: libqaul not initialized
+/// 
+/// Don't send any messages to libqaul before it finished initializing.
+#[no_mangle]
+pub extern "C" fn initialized() -> i32 {
+    if super::initialization_finished() {
+        return 1
+    }
+
+    0
+}
+
 /// send RPC messages to libqaul
 /// 
 /// returns 0 on success and negative numbers on failure

@@ -1,12 +1,9 @@
-/**
- * # Configuration
- * 
- * **Configure qaul.net via a config file, or from the commandline.**
- * 
- * On the first startup a `config.toml` file is saved.
- * It can be configured and will be read on the next startup.
- * All options are configurable from the commandline too.
- */
+//! # Configuration
+//! **Configure qaul.net via a config file, or from the commandline.**
+//! 
+//! On the first startup a `config.toml` file is saved.
+//! It can be configured and will be read on the next startup.
+//! All options are configurable from the commandline too.
 
 use config::{Config, Environment, File};
 use serde::{Deserialize, Serialize};
@@ -18,14 +15,12 @@ use std::{
 use log::error;
 use state::Storage;
 
-// make configuration globally accessible mutable state
+/// make configuration globally accessible mutable state
 static CONFIG: Storage<RwLock<Configuration>> = Storage::new();
 
-/**
- * Configuration of the local Node
- * 
- * Here the keys and identity are stored
- */
+/// Configuration of the local Node
+/// 
+/// Here the keys and identity are stored
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Node {
     pub initialized: u8,
@@ -43,9 +38,7 @@ impl Default for Node {
     }
 }
 
-/**
- * LAN Connection Module
- */
+/// LAN Connection Module
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Lan {
     pub active: bool,
@@ -61,9 +54,7 @@ impl Default for Lan {
     }
 }
 
-/**
- * Internet Overlay Connection Module
- */
+/// Internet Overlay Connection Module
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Internet {
     pub active: bool,
@@ -84,9 +75,7 @@ impl Default for Internet {
     }
 }
 
-/**
- * local user accounts that are stored on this node
- */
+/// local user accounts that are stored on this node
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct UserAccount {
     pub name: String,
@@ -124,7 +113,9 @@ impl Default for Configuration {
     }
 }
 
+/// Configuration implementation of libqaul
 impl Configuration {
+    /// Initialize configuration
     pub fn init() {
         let mut s = Config::new();
 
@@ -167,26 +158,20 @@ impl Configuration {
         CONFIG.set(RwLock::new(config));
     }
 
-    /**
-     * lend configuration for reading
-     */
+    /// lend configuration for reading
     pub fn get<'a>() -> RwLockReadGuard<'a, Configuration> {
         let config = CONFIG.get().read().unwrap();
         config
     }
 
-    /**
-     * lend configuration for writing
-     */
+    /// lend configuration for writing
     pub fn get_mut<'a>() -> RwLockWriteGuard<'a, Configuration> {
         let config_mutable = CONFIG.get().write().unwrap();
         config_mutable
     }
 
-    /**
-     * Returns true/false whether this node has been initialized, 
-     * or needs to be created for the first time.
-     */
+    /// Returns true/false whether this node has been initialized, 
+    /// or needs to be created for the first time.
     pub fn is_node_initialized() -> bool {
         let config = CONFIG.get().read().unwrap();
         if config.node.initialized == 0 {
@@ -195,9 +180,7 @@ impl Configuration {
         true
     }
 
-    /**
-     * Save current configuration to config.toml file
-     */
+    /// Save current configuration to config.toml file
     pub fn save() {
         let config = CONFIG.get();
         let toml_string = toml::to_string(config).expect("Could not encode TOML value");
@@ -205,19 +188,72 @@ impl Configuration {
         fs::write("config.toml", toml_string).expect("Could not write to file!"); 
     }
 
-    /**
-     * Create a default.json configuration file.
-     * This is a workaround in order to be able to initialize an empty configuration.
-     */
+    /// Create a default.json configuration file.
+    /// This is a workaround in order to be able to initialize an empty configuration.
     fn create_default_json() {
         // default json configuration string
-        let json_string = "{
+        let json_string = Self::get_default_json();
+        // save file
+        fs::write("default.json", json_string).expect("Could not write to file!"); 
+    }
+
+
+    /// Get default configuration
+    /// 
+    /// Returns default configuration string
+    fn get_default_json() -> String {
+        "{
             \"node\":{\"initialized\":0,\"id\":\"\",\"keys\":\"\"},
             \"lan\":{\"active\":true,\"listen\":\"/ip4/0.0.0.0/tcp/0\"},
             \"internet\":{\"active\":true,\"peers\":[],\"do_listen\":false,\"listen\":\"/ip4/0.0.0.0/tcp/0\"},
             \"user_accounts\":[]
-        }".to_string();
-        // save file
-        fs::write("default.json", json_string).expect("Could not write to file!"); 
+        }".to_string()
     }
+
+    /// FOR DEBUGGING ANDROID
+    /// 
+    /// Initialize a default the configuration for android
+    pub fn init_android() {
+        // create Node configuration
+        let node = Node {
+            initialized: 1,
+            id: String::from("12D3KooWMRmfDGEuKWX6RRPrP2mVc293kfff7XuM1hP91HWr3HsS"),
+            keys: String::from("fBgCB+NsT0jEkOmfXRYyuH5ELCODSCDNbG7I8RdAnrSsgnIXOhLqpReH2hQRgDVcr0IzoTRNVkRXO+iN/m7NLQ=="),
+        };
+
+        // create Lan configuration
+        let lan = Lan {
+            active: true,
+            listen: String::from("/ip4/0.0.0.0/tcp/0"),
+        };
+
+        // create Internet configuration
+        let internet = Internet {
+            active: true,
+            peers: vec![String::from("/ip4/144.91.74.192/tcp/9229"); 1],
+            //peers: Vec::new(),
+            do_listen: false,
+            listen: String::from("/ip4/0.0.0.0/tcp/0"),
+        };
+
+        // create UserAccount configuration
+        let mut user_accounts = Vec::new();
+        user_accounts.push(UserAccount {
+            name: String::from("DEBUG ONLY"),
+            id: String::from("12D3KooWKAGBaQKMcGzpnrAYE8JQq2NmYnSYJMcBj8DdJ9QVDEPf"),
+            keys: String::from("POQCEaXwvi4P7V9VVu84fwhm3tEYzGIPQg4jw8LMuECK0gfQSROZJww/sN9dIqe7m33KcoriZe/ImV6XseQVdg=="),
+        });
+
+        // create Configuration structure
+        let config = Configuration {
+            node,
+            lan,
+            internet,
+            user_accounts,
+        };
+
+        // save to state
+        CONFIG.set(RwLock::new(config));
+    }
+
 }

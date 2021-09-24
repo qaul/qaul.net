@@ -35,6 +35,12 @@ async fn main() {
     // start libqaul in new thread
     libqaul::api::start();
 
+    // wait until libqaul finished initializing
+    while libqaul::api::initialization_finished() == false {
+        // wait a little while
+        std::thread::sleep(Duration::from_millis(10));
+    }
+
     // initialize user accounts
     UserAccounts::init();
 

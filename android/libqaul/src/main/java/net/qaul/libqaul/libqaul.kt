@@ -5,7 +5,11 @@ package net.qaul.libqaul
 external fun hello(): String
 
 /// start libqaul
+/// this also intializes the logging
 external fun start()
+
+/// check if libqaul has finished initializing
+external fun initialized(): Boolean
 
 /// get number of RPC messages sent to libqaul
 /// this function is only for testing

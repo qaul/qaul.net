@@ -16,7 +16,12 @@ use crate::node::{
     Node,
     user_accounts::{UserAccount, UserAccounts},
 }; 
-use crate::connections::{Connections, ConnectionModule};
+use crate::connections::{
+    Connections, 
+    ConnectionModule,
+    lan::Lan,
+    internet::Internet,
+};
 use crate::router;
 use crate::router::flooder::Flooder;
 use crate::rpc::Rpc;
@@ -94,7 +99,7 @@ impl Feed {
     }
 
     /// Send message via all swarms
-    pub fn send(user_account: &UserAccount, content: String,  conn: &mut Connections )
+    pub fn send(user_account: &UserAccount, content: String,  lan: Option<&mut Lan>, internet: Option<&mut Internet> )
     {
         let msg = FeedMessage {
             sender: user_account.id,
@@ -119,8 +124,12 @@ impl Feed {
         }
 
         // flood via floodsub
-        conn.lan.swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
-        conn.internet.swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
+        if lan.is_some() {
+            lan.unwrap().swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
+        }
+        if internet.is_some() {
+            internet.unwrap().swarm.behaviour_mut().floodsub.publish(Node::get_topic(), json.as_bytes());
+        }
     }
 
     /// Process a received message
@@ -182,7 +191,7 @@ impl Feed {
     }
 
     /// Process command line instructions for the feed module
-    pub fn cli(cmd: &str, connections: &mut Connections ) {        
+    pub fn cli(cmd: &str, lan: Option<&mut Lan>, internet: Option<&mut Internet> ) {        
         match cmd {
             // list all messages
             "list" => {
@@ -206,7 +215,7 @@ impl Feed {
                     },
                     Some(user_account) => {
                         // send the message
-                        Self::send( &user_account, cmd.strip_prefix("send ").unwrap().to_string(), connections );
+                        Self::send( &user_account, cmd.strip_prefix("send ").unwrap().to_string(), lan, internet );
                     },
                 }
             },
@@ -215,7 +224,7 @@ impl Feed {
     }
 
     /// Process incoming RPC request messages for node module
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, connections: &mut Connections) {
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, lan: Option<&mut Lan>, internet: Option<&mut Internet> ) {
         match proto::Feed::decode(&data[..]) {
             Ok(feed) => {
                 match feed.message {
@@ -262,7 +271,7 @@ impl Feed {
                                 Some(account) => {
                                     user_account = account;
                                     // send the message
-                                    Self::send( &user_account, send_feed.content, connections );
+                                    Self::send( &user_account, send_feed.content, lan, internet );
                                 },
                                 None => {
                                     return

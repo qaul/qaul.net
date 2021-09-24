@@ -30,8 +30,25 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_start(
   env: JNIEnv,
   _: JClass,
 ) {
+    // initialize logging for android
+    crate::initialize_android_logging();
+
+    // test log
+    log::info!("log::info start");
+
     // start libqaul in an own thread
-    super::start();
+    super::start_android();
+
+    log::info!("log::info start end");
+}
+
+/// check if libqaul finished initializing
+#[no_mangle]
+pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_initialized(
+  env: JNIEnv,
+  _: JClass,
+) -> bool {
+    super::initialization_finished()
 }
 
 /// get number of messages sent via RPC to libqaul from android

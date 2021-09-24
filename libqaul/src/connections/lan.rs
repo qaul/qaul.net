@@ -73,19 +73,25 @@ pub struct Lan {
 }
 
 impl Lan {
-    /**
-     * Initialize swarm for LAN connection module
-     */
+    /// Initialize swarm for LAN connection module
     pub async fn init(auth_keys: AuthenticKeypair<X25519Spec>) -> Lan {
+        log::info!("Lan::init() start");
+
         // create a multi producer, single consumer queue
         let (response_sender, response_rcv) = mpsc::unbounded();
     
-        // create a TCP transport
-        // let transport = TcpConfig::new()
-        //     .upgrade(upgrade::Version::V1)
-        //     .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
-        //     .multiplex(mplex::MplexConfig::new())
-        //     .boxed();
+        log::info!("Lan::init() mpsc channels created");
+
+        // TCP transport without DNS resolution on android
+        // as the DNS module crashes on android due to a file system access
+        #[cfg(target_os = "android")]
+        let transport = {
+            let tcp = TcpConfig::new().nodelay(true);
+            let ws_tcp = WsConfig::new(tcp.clone());
+            tcp.or_transport(ws_tcp)
+        };
+        // create tcp transport with DNS for all other devices
+        #[cfg(not(target_os = "android"))]
         let transport = {
             let tcp = TcpConfig::new().nodelay(true);
             let dns_tcp = DnsConfig::system(tcp).await.unwrap();
@@ -93,28 +99,55 @@ impl Lan {
             dns_tcp.or_transport(ws_dns_tcp)
         };
 
+        log::info!("Lan::init() transport created");
+
         let transport_upgraded = transport
             .upgrade(upgrade::Version::V1)
             .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
             .multiplex(upgrade::SelectUpgrade::new(yamux::YamuxConfig::default(), mplex::MplexConfig::default()))
             //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
             .boxed();
+        
+        log::info!("Lan::init() transport_upgraded");
+
+        // create ping configuration 
+        // with customized parameters
+        //
+        // * keep connection alive
+        let mut ping_config = PingConfig::new();
+        ping_config = ping_config.with_keep_alive(true);
+
+        log::info!("Internet.init() ping_config");
 
         let mut swarm = {
+            log::info!("Internet.init() swarm creation started");
+
+            // create MDNS behaviour
+            // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
+            let mdns = task::block_on(Mdns::new(MdnsConfig::default())).unwrap();
+
+            log::info!("Internet.init() swarm mdns module created");
+
             // TODO: set shorter readvertisment time
             //       see here: libp2p-mdns/src/behaviour.rs
-            //       * create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
-            let mdns = task::block_on(Mdns::new(MdnsConfig::default())).unwrap();
             let mut behaviour = QaulLanBehaviour {
                 floodsub: Floodsub::new(Node::get_id()),
                 mdns,
-                ping: Ping::new(PingConfig::new()),
+                ping: Ping::new(ping_config),
                 qaul_info: QaulInfo::new(Node::get_id()),
                 response_sender,
             };
+
+            log::info!("Internet.init() swarm behaviour defined");
+
             behaviour.floodsub.subscribe(Node::get_topic());
+
+            log::info!("Internet.init() swarm behaviour floodsub subscribed");
+
             Swarm::new(transport_upgraded, behaviour, Node::get_id())
         };
+
+        log::info!("Lan::init() swarm created");
             
         // connect swarm to the listening interface in 
         // the configuration config.lan.listen
@@ -126,6 +159,8 @@ impl Lan {
                 .expect("can get a local socket"),
         )
         .expect("swarm can be started");
+
+        log::info!("Lan::init() swarm connected");
 
         let lan = Lan { swarm: swarm, receiver: response_rcv };
 
