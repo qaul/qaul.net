@@ -27,6 +27,10 @@ pub extern "C" fn hello() -> *mut c_char {
 /// of this API.
 #[no_mangle]
 pub extern "C" fn start() {
+    #[cfg(target_os = "android")]
+    super::start_android();
+
+    #[cfg(not(target_os = "android"))]
     super::start();
 }
 

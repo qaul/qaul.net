@@ -23,9 +23,11 @@ class Init {
     libqaul.start();
     print("libqaul started");
 
-    // wait some seconds to properly get
-    // libqaul up and running
-    await Future.delayed(Duration(seconds: 3));
+    // check if libqaul finished initializing
+    //await Future.delayed(Duration(seconds: 3));
+    while (libqaul.initialized() == 0) {
+      await Future.delayed(Duration(milliseconds: 10));
+    }
 
     print("libqaul initialization finished");
 

@@ -22,6 +22,12 @@ import '/rpc/protobuf.dart';
 typedef StartFunctionRust = Void Function();
 typedef StartFunctionDart = void Function();
 
+// Check if libqaul finished initializing
+// C function definition:
+//   i32 initialization_finished();
+typedef InitializationFinishedRust = Int32 Function();
+typedef InitializationFinishedDart = int Function();
+
 // hello function for testing
 // Same signature for C and Dart.
 // C function definition:
@@ -104,6 +110,16 @@ class Libqaul {
   start() {
     final _start = _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
     _start();
+  }
+
+  /// check if libqaul finished initializing
+  ///
+  /// returns 1, when qaul finished initializing
+  /// otherwise it returns 0
+  int initialized() {
+    final _initialized = _lib!.lookupFunction<InitializationFinishedRust, InitializationFinishedDart>('initialized');
+    final result = _initialized();
+    return result;
   }
 
   /// hello function
