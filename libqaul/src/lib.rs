@@ -218,10 +218,6 @@ pub async fn start() -> () {
 /// This function is here to test the initialization of libqaul
 /// on android.
 pub async fn start_android() -> () {
-    // initialize logging on android
-    //#[cfg(target_os = "android")]
-    //initialize_android_logging();
-
     // does it log?
     log::info!("start_android");
 
@@ -329,7 +325,7 @@ pub async fn start_android() -> () {
                 EventType::Rpc(_) => {
                     if let Ok(rpc_message) = libqaul_receive.try_recv() {
                         // we received a message, send it to RPC crate
-                        //Rpc::process_received_message(rpc_message, &mut conn);
+                        Rpc::process_received_message(rpc_message, None, Some(&mut internet));
                     }
                 },
                 EventType::Flooding(_) => {

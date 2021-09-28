@@ -34,19 +34,19 @@ class RpcNode {
   }
 
   /// encode and send a message
-  encodeAndSendMessage(Node message) {
+  Future<void> encodeAndSendMessage(Node message) async {
     // send message via qaul RPC
     Rpc rpc = Rpc();
-    rpc.encodeAndSendMessage(Modules.NODE, message.writeToBuffer());
+    await rpc.encodeAndSendMessage(Modules.NODE, message.writeToBuffer());
   }
 
   /// send request node info message
-  getNodeInfo() {
+  Future<void> getNodeInfo() async {
     // create message
     Node message = Node();
     message.getNodeInfo = true;
 
     // send message
-    encodeAndSendMessage(message);
+    await encodeAndSendMessage(message);
   }
 }

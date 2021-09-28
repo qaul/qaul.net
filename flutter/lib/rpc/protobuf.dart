@@ -9,7 +9,7 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'node.dart';
-import '/libqaul.dart';
+import '../libqaul/libqaul.dart';
 
 // import pre-generated protobuf file
 import 'protobuf_generated/rpc/qaul_rpc.pb.dart';
@@ -46,7 +46,7 @@ class Rpc {
   }
 
   /// encode and send a message
-  encodeAndSendMessage (Modules module, Uint8List data) {
+  Future<void> encodeAndSendMessage(Modules module, Uint8List data) async {
     final data_length = data.length;
     print("encodeAndSendMessage: module $module, bytes $data_length");
 
@@ -64,6 +64,6 @@ class Rpc {
 
     // send it
     final libqaul = container.read (libqaulProvider);
-    libqaul.sendRpc(message_encoded);
+    await libqaul.sendRpc(message_encoded);
   }
 }

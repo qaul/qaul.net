@@ -55,6 +55,8 @@ flutter {
 }
 
 dependencies {
-    implementation project(':libqaul')
+    //implementation project(':libqaul')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation files('../../../android/libqaul/build/outputs/aar/libqaul-debug.aar')
+    //implementation files('../../../android/libqaul/build/outputs/aar/libqaul-release.aar')
 }

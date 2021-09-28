@@ -1,6 +1,6 @@
 rootProject.name = "qaul.net – قول"
 include ':app'
-include ':libqaul'
+//include ':libqaul'
 
 def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
 def properties = new Properties()

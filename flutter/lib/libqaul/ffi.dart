@@ -60,18 +60,18 @@ typedef ReceiveRpcFromLibqaulFunctionRust = Int32 Function(Pointer<Uint8>, Uint3
 typedef ReceiveRpcFromLibqaulFunctionDart = int Function(Pointer<Uint8>, int);
 
 /// define libqaul global state
-final libqaulProvider = Provider<Libqaul>((ref) => Libqaul(ref.read));
+final libqaulFfiProvider = Provider<LibqaulFfi>((ref) => LibqaulFfi(ref.read));
 
 /// libqaul dart class,
 /// loading dynamic libqaul library
 /// and accessing libqaul's C API ffi through dart
-class Libqaul {
+class LibqaulFfi {
   final Reader read;
   static DynamicLibrary? _lib;
 
   /// instantiate libqaul
   /// load dynamic library and initialize it
-  Libqaul(this.read) {
+  LibqaulFfi(this.read) {
     // check if library has already been loaded
     if (_lib != null) return;
 
@@ -95,8 +95,14 @@ class Libqaul {
       // find the library in the rust target build folder
       _lib = DynamicLibrary.open('../target/$mode/liblibqaul.dll');
     } else if (Platform.isAndroid) {
+      // version 1: load liblibqaul.so directly, we use version 2 now
+      //   problems:
+      //     libqaul was running in the GUI thread.
+      //     we got some errors from android about execution rights
       // the android libraries are copied to the android directory after build
       _lib = DynamicLibrary.open('liblibqaul.so');
+
+      // version 2: load libqaul as AAR library & communicate via system channels
     } else if (Platform.isIOS) {
       // no path as library is statically linked library
       _lib = DynamicLibrary.process();
@@ -106,7 +112,7 @@ class Libqaul {
     }
   }
 
-  /// start and initiate libqaul
+  /// start and initialize libqaul
   start() {
     final _start = _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
     _start();
@@ -132,10 +138,11 @@ class Libqaul {
   }
 
   /// Debug function: how many rpc messages have been sent to libqaul
-  checkSendCounter() {
+  int checkSendCounter() {
     final _checkCounter = _lib!.lookupFunction<SendRpcCounterRust, SendRpcCounterDart>('send_rpc_to_libqaul_count');
     final result = _checkCounter();
     print("$result RPC messages sent to libqaul");
+    return result;
   }
 
   /// Debug function: How many rpc messages are queued by libqaul

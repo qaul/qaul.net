@@ -13,12 +13,16 @@ import 'package:qaul_app/screens/main_screen.dart';
 import 'package:qaul_app/screens/start_screen.dart';
 
 void main() {
+  // need to call widgetsflutterbinding
+  // to ensure method channels are initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // run the app
   runApp(QaulApp());
 }
 
 class QaulApp extends StatelessWidget {
-  // app initialization state
-
+  // app initialization state (widgetsflutterbinding call needed)
   final Future _initFuture = Init.initialize();
 
   // show screen

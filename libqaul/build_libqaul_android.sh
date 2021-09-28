@@ -38,16 +38,3 @@ cp ../target/aarch64-linux-android/${buildType}/${libName} ${jniLibs}/arm64-v8a/
 cp ../target/armv7-linux-androideabi/${buildType}/${libName} ${jniLibs}/armeabi-v7a/${libName}
 cp ../target/i686-linux-android/${buildType}/${libName} ${jniLibs}/x86/${libName}
 cp ../target/x86_64-linux-android/${buildType}/${libName} ${jniLibs}/x86_64/${libName}
-
-## Copy to android AAR library location
-jniLibs=../flutter/android/libqaul/src/main/jniLibs
-rm -rf ${jniLibs}
-mkdir ${jniLibs}
-mkdir -p ${jniLibs}/arm64-v8a
-mkdir -p ${jniLibs}/armeabi-v7a
-mkdir -p ${jniLibs}/x86
-mkdir -p ${jniLibs}/x86_64
-cp ../target/aarch64-linux-android/${buildType}/${libName} ${jniLibs}/arm64-v8a/${libName}
-cp ../target/armv7-linux-androideabi/${buildType}/${libName} ${jniLibs}/armeabi-v7a/${libName}
-cp ../target/i686-linux-android/${buildType}/${libName} ${jniLibs}/x86/${libName}
-cp ../target/x86_64-linux-android/${buildType}/${libName} ${jniLibs}/x86_64/${libName}

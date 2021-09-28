@@ -15,13 +15,15 @@ external fun initialized(): Boolean
 /// this function is only for testing
 external fun sendcounter(): Int
 
-//external fun send()
+/// send an RPC message to libqaul
+external fun send(message: ByteArray)
 
 /// how many RPC messages are queued by libqaul
 /// to be received from this programme
 external fun receivequeue(): Int
 
-//external fun receive()
+/// receive an RPC message from libqaul
+external fun receive(): ByteArray
 
 fun loadLibqaul() {
     System.loadLibrary("libqaul")
