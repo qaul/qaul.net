@@ -10,7 +10,7 @@ In order to build the flutter toolchain, install the following packages on your 
 ### Install Flutter
 
 Please follow this guide to install flutter on your platform:
-https://flutter.dev/docs/get-started/install
+<https://flutter.dev/docs/get-started/install>
 
 
 Check your flutter installation in the terminal
@@ -32,7 +32,7 @@ flutter config --enable-linux-desktop
 In order to develop and test the qaul.net with it's flutter GUI we recommend to install Android Studio as an IDE.
 You can download and install it from it's official web page:
 
-https://developer.android.com/studio
+<https://developer.android.com/studio>
 
 
 In order to test and build flutter applications, please install the flutter plugin in the Android Studio.
@@ -47,7 +47,10 @@ In order to test and build flutter applications, please install the flutter plug
 
 ### Build Libqaul on your System
 
-See
+Check the following resources:
+
+* [Install rust](rust-install.md)
+* [Build rust code](rust-build.md)
 
 
 ## Build & Test qaul.net App on your System

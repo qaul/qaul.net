@@ -27,7 +27,7 @@ CARGO_TARGET_I686_LINUX_ANDROID_LINKER=$I686_LINKER cargo build --target=i686-li
 CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER=$X86_64_LINKER cargo build --target=x86_64-linux-android ${buildTypeCargo}
 
 # Copy to flutter shared library location for android
-jniLibs=../android/libqaul/src/main/jniLibs
+jniLibs=../../android/libqaul/src/main/jniLibs
 rm -rf ${jniLibs}
 mkdir ${jniLibs}
 mkdir -p ${jniLibs}/arm64-v8a

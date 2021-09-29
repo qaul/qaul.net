@@ -1,12 +1,15 @@
 # qaul.net – قول
+
 ## Internet Independent Wireless Mesh Communication App
 
 ![http://qaul.net/](docs/qaul-net.png)
 
 [qaul.net](https://qaul.net)
 
+To install and run qaul.net please see the [Documentation](docs/qaul.net-manual/README.md)
 
 ## License
+
 **qaul is a fully free and open source software. It is published under the 
 [AGPLv3], the [GNU Affero General Public License version 3 or later].**
 

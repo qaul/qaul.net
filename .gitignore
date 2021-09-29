@@ -1,9 +1,3 @@
-# rust specific files
-/target
-Cargo.lock
-**/*.rs.bk
-bak/
-
 # local configuration files
 config.toml
 default.json

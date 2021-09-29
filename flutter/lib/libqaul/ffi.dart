@@ -87,13 +87,13 @@ class LibqaulFfi {
     if (Platform.isLinux) {
       // find the library in the rust target build folder
       // TODO: target Raspberry
-      _lib = DynamicLibrary.open('../target/$mode/liblibqaul.so');
+      _lib = DynamicLibrary.open('../rust/target/$mode/liblibqaul.so');
     }  else if (Platform.isMacOS) {
       // find the library in the rust target build folder
-      _lib = DynamicLibrary.open('../target/$mode/liblibqaul.dylib');
+      _lib = DynamicLibrary.open('../rust/target/$mode/liblibqaul.dylib');
     } else if (Platform.isWindows) {
       // find the library in the rust target build folder
-      _lib = DynamicLibrary.open('../target/$mode/liblibqaul.dll');
+      _lib = DynamicLibrary.open('../rust/target/$mode/liblibqaul.dll');
     } else if (Platform.isAndroid) {
       // version 1: load liblibqaul.so directly, we use version 2 now
       //   problems:

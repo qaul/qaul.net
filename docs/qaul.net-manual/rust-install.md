@@ -4,7 +4,7 @@ the libqaul the core of qaul.net app is programmed in rust.
 In order to build it, you need to install rust on your computer.
 
 **Rust programming language** with it's compiler cargo.
-Easiest install is via rustup: https://rustup.rs/
+Easiest install is via rustup: <https://rustup.rs/>
 
 
 ## On Linux
