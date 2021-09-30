@@ -11,3 +11,7 @@
 
 # flutter for web
 lib/generated_plugin_registrant.dart
+
+
+# Cmake specific
+linux/out/build/
