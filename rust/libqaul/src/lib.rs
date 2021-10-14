@@ -1,16 +1,15 @@
 //! # libqaul
-//! 
+//!
 //! Library for qaul.net
 
 // Async comparison
 // https://runrust.miraheze.org/wiki/Async_crate_comparison
 // MPSC = Multi-Producer, Single-Consumer FiFo
-use futures_ticker::Ticker;
 use futures::prelude::*;
-use futures::{ pin_mut, select, future::FutureExt };
-use std::time::Duration;
+use futures::{future::FutureExt, pin_mut, select};
+use futures_ticker::Ticker;
 use state::Storage;
-
+use std::time::Duration;
 
 // crate modules
 pub mod api;
@@ -23,26 +22,21 @@ mod services;
 mod types;
 
 use configuration::Configuration;
-use connections::{
-    Connections, ConnectionModule,
-    lan::Lan,
-    internet::Internet,
-};
-use node::Node;
+use connections::{internet::Internet, lan::Lan, ConnectionModule, Connections};
 use node::user_accounts::UserAccounts;
-use router::{Router, info::RouterInfo};
+use node::Node;
 use router::flooder;
+use router::{info::RouterInfo, Router};
 use rpc::Rpc;
-use services::Services;
 use services::feed;
+use services::Services;
 
 /// check this when the library finished initializing
 static INITIALIZED: Storage<bool> = Storage::new();
 
-
 /// To see logs on android we need the android logger
 #[cfg(target_os = "android")]
-#[macro_use] 
+#[macro_use]
 extern crate log;
 #[cfg(target_os = "android")]
 use log::Level;
@@ -57,17 +51,15 @@ use android_logger::Config;
 /// the logs are not visible on android.
 /// This function is only activated on android OS
 #[cfg(target_os = "android")]
-pub fn initialize_android_logging(){
+pub fn initialize_android_logging() {
     android_logger::init_once(
         Config::default()
             // show all logs
-            .with_min_level(Level::Trace)
-            //.with_min_level(Level::Info)
-            // display them under the tag 'libqaul'
-            //.with_tag("libqaul")
+            .with_min_level(Level::Trace), //.with_min_level(Level::Info)
+                                           // display them under the tag 'libqaul'
+                                           //.with_tag("libqaul")
     );
 }
-
 
 /// Events of the async loop
 enum EventType {
@@ -98,7 +90,7 @@ pub async fn start() -> () {
 
     // initialize router
     Router::init();
-    
+
     // initialize Connection Modules
     let conn = Connections::init().await;
     let mut internet = conn.internet.unwrap();
@@ -107,9 +99,8 @@ pub async fn start() -> () {
     // initialize services
     Services::init();
 
-
     // check RPC once every 10 milliseconds
-    // TODO: interval is only in unstable. Use it once it is stable. 
+    // TODO: interval is only in unstable. Use it once it is stable.
     //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
     //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     let mut rpc_ticker = Ticker::new(Duration::from_millis(10));
@@ -126,7 +117,6 @@ pub async fn start() -> () {
     // set initialized flag
     INITIALIZED.set(true);
 
-
     loop {
         let evt = {
             let lan_fut = lan.swarm.next().fuse();
@@ -139,11 +129,11 @@ pub async fn start() -> () {
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
             // You need to downgrade to version 0.2.400 if this happens to you
             pin_mut!(
-                lan_fut, 
-                internet_fut, 
-                rpc_fut, 
-                flooding_fut, 
-                routing_info_fut, 
+                lan_fut,
+                internet_fut,
+                rpc_fut,
+                flooding_fut,
+                routing_info_fut,
                 routing_table_fut
             );
 
@@ -165,13 +155,17 @@ pub async fn start() -> () {
 
         if let Some(event) = evt {
             match event {
-                EventType::Cli(_line) => {},
+                EventType::Cli(_line) => {}
                 EventType::Rpc(_) => {
                     if let Ok(rpc_message) = libqaul_receive.try_recv() {
                         // we received a message, send it to RPC crate
-                        Rpc::process_received_message(rpc_message, Some(&mut lan), Some(&mut internet));
+                        Rpc::process_received_message(
+                            rpc_message,
+                            Some(&mut lan),
+                            Some(&mut internet),
+                        );
                     }
-                },
+                }
                 EventType::Flooding(_) => {
                     // send messages in the flooding queue
                     // get sending queue
@@ -181,31 +175,52 @@ pub async fn start() -> () {
                     while let Some(msg) = flooder.to_send.pop_front() {
                         // check which swarm to send to
                         if !matches!(msg.incoming_via, ConnectionModule::Lan) {
-                            lan.swarm.behaviour_mut().floodsub.publish( msg.topic.clone(), msg.message.clone());
+                            lan.swarm
+                                .behaviour_mut()
+                                .floodsub
+                                .publish(msg.topic.clone(), msg.message.clone());
                         }
                         if !matches!(msg.incoming_via, ConnectionModule::Internet) {
-                            internet.swarm.behaviour_mut().floodsub.publish( msg.topic, msg.message);
+                            internet
+                                .swarm
+                                .behaviour_mut()
+                                .floodsub
+                                .publish(msg.topic, msg.message);
                         }
                     }
-                },
+                }
                 EventType::RoutingInfo(_) => {
                     // send routing info to neighbours
                     // check scheduler
-                    if let Some((neighbour_id, connection_module, data)) = RouterInfo::check_scheduler() {
-                        log::info!("sending routing information via {:?} to {:?}", connection_module, neighbour_id);
+                    if let Some((neighbour_id, connection_module, data)) =
+                        RouterInfo::check_scheduler()
+                    {
+                        log::info!(
+                            "sending routing information via {:?} to {:?}",
+                            connection_module,
+                            neighbour_id
+                        );
                         // send routing information
                         match connection_module {
-                            ConnectionModule::Lan => lan.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
-                            ConnectionModule::Internet => internet.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
-                            ConnectionModule::Local => {},
-                            ConnectionModule::None => {},
+                            ConnectionModule::Lan => lan
+                                .swarm
+                                .behaviour_mut()
+                                .qaul_info
+                                .send_qaul_info_message(neighbour_id, data),
+                            ConnectionModule::Internet => internet
+                                .swarm
+                                .behaviour_mut()
+                                .qaul_info
+                                .send_qaul_info_message(neighbour_id, data),
+                            ConnectionModule::Local => {}
+                            ConnectionModule::None => {}
                         }
                     }
-                },
+                }
                 EventType::RoutingTable(_) => {
                     // create new routing table
                     router::connections::ConnectionTable::create_routing_table();
-                },
+                }
             }
         }
     }
@@ -214,7 +229,7 @@ pub async fn start() -> () {
 /// ANDROID TESTING
 /// initialize libqaul for android
 /// and poll all the necessary modules
-/// 
+///
 /// This function is here to test the initialization of libqaul
 /// on android.
 pub async fn start_android() -> () {
@@ -248,14 +263,13 @@ pub async fn start_android() -> () {
 
     log::info!("start_android Connections::init().await");
 
-
     // initialize services
     Services::init();
 
     log::info!("start_android Services::init()");
 
     // check RPC once every 10 milliseconds
-    // TODO: interval is only in unstable. Use it once it is stable. 
+    // TODO: interval is only in unstable. Use it once it is stable.
     //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
     //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     let mut rpc_ticker = Ticker::new(Duration::from_millis(10));
@@ -282,7 +296,6 @@ pub async fn start_android() -> () {
 
     log::info!("start_android INITIALIZED.set(true)");
 
-
     loop {
         let evt = {
             //let lan_fut = conn.lan.unwrap().swarm.next().fuse();
@@ -295,11 +308,11 @@ pub async fn start_android() -> () {
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
             // You need to downgrade to version 0.2.400 if this happens to you
             pin_mut!(
-                //lan_fut, 
-                internet_fut, 
-                rpc_fut, 
-                flooding_fut, 
-                routing_info_fut, 
+                //lan_fut,
+                internet_fut,
+                rpc_fut,
+                flooding_fut,
+                routing_info_fut,
                 routing_table_fut
             );
 
@@ -321,13 +334,13 @@ pub async fn start_android() -> () {
 
         if let Some(event) = evt {
             match event {
-                EventType::Cli(_line) => {},
+                EventType::Cli(_line) => {}
                 EventType::Rpc(_) => {
                     if let Ok(rpc_message) = libqaul_receive.try_recv() {
                         // we received a message, send it to RPC crate
                         Rpc::process_received_message(rpc_message, None, Some(&mut internet));
                     }
-                },
+                }
                 EventType::Flooding(_) => {
                     // send messages in the flooding queue
                     // get sending queue
@@ -340,33 +353,46 @@ pub async fn start_android() -> () {
                             //lan.swarm.behaviour_mut().floodsub.publish( msg.topic.clone(), msg.message.clone());
                         }
                         if !matches!(msg.incoming_via, ConnectionModule::Internet) {
-                            internet.swarm.behaviour_mut().floodsub.publish( msg.topic, msg.message);
+                            internet
+                                .swarm
+                                .behaviour_mut()
+                                .floodsub
+                                .publish(msg.topic, msg.message);
                         }
                     }
-                },
+                }
                 EventType::RoutingInfo(_) => {
                     // send routing info to neighbours
                     // check scheduler
-                    if let Some((neighbour_id, connection_module, data)) = RouterInfo::check_scheduler() {
-                        log::info!("sending routing information via {:?} to {:?}", connection_module, neighbour_id);
+                    if let Some((neighbour_id, connection_module, data)) =
+                        RouterInfo::check_scheduler()
+                    {
+                        log::info!(
+                            "sending routing information via {:?} to {:?}",
+                            connection_module,
+                            neighbour_id
+                        );
                         // send routing information
                         match connection_module {
-                            ConnectionModule::Lan => {}, //conn.lan.unwrap().swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
-                            ConnectionModule::Internet => internet.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
-                            ConnectionModule::Local => {},
-                            ConnectionModule::None => {},
+                            ConnectionModule::Lan => {} //conn.lan.unwrap().swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
+                            ConnectionModule::Internet => internet
+                                .swarm
+                                .behaviour_mut()
+                                .qaul_info
+                                .send_qaul_info_message(neighbour_id, data),
+                            ConnectionModule::Local => {}
+                            ConnectionModule::None => {}
                         }
                     }
-                },
+                }
                 EventType::RoutingTable(_) => {
                     // create new routing table
                     router::connections::ConnectionTable::create_routing_table();
-                },
+                }
             }
         }
     }
 }
-
 
 /// DEPRECATED! This function will be deleted soon
 /// initialize and start libqaul and read the CLI line in
@@ -384,7 +410,7 @@ pub async fn start_cli() -> () {
 
     // initialize router
     Router::init();
-    
+
     // initialize Connection Modules
     let conn = Connections::init().await;
     let mut internet = conn.internet.unwrap();
@@ -393,9 +419,8 @@ pub async fn start_cli() -> () {
     // initialize services
     Services::init();
 
-
     // check RPC once every 10 milliseconds
-    // TODO: interval is only in unstable. Use it once it is stable. 
+    // TODO: interval is only in unstable. Use it once it is stable.
     //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
     //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     let mut rpc_ticker = Ticker::new(Duration::from_millis(10));
@@ -427,11 +452,11 @@ pub async fn start_cli() -> () {
             // You need to downgrade to version 0.2.400 if this happens to you
             pin_mut!(
                 cli_fut,
-                lan_fut, 
-                internet_fut, 
-                rpc_fut, 
-                flooding_fut, 
-                routing_info_fut, 
+                lan_fut,
+                internet_fut,
+                rpc_fut,
+                flooding_fut,
+                routing_info_fut,
                 routing_table_fut
             );
 
@@ -461,9 +486,13 @@ pub async fn start_cli() -> () {
                 EventType::Rpc(_) => {
                     if let Ok(rpc_message) = libqaul_receive.try_recv() {
                         // we received a message, send it to RPC crate
-                        Rpc::process_received_message(rpc_message, Some(&mut lan), Some(&mut internet));
+                        Rpc::process_received_message(
+                            rpc_message,
+                            Some(&mut lan),
+                            Some(&mut internet),
+                        );
                     }
-                },
+                }
                 EventType::Flooding(_) => {
                     // send messages in the flooding queue
                     // get sending queue
@@ -473,31 +502,52 @@ pub async fn start_cli() -> () {
                     while let Some(msg) = flooder.to_send.pop_front() {
                         // check which swarm to send to
                         if !matches!(msg.incoming_via, ConnectionModule::Lan) {
-                            lan.swarm.behaviour_mut().floodsub.publish( msg.topic.clone(), msg.message.clone());
+                            lan.swarm
+                                .behaviour_mut()
+                                .floodsub
+                                .publish(msg.topic.clone(), msg.message.clone());
                         }
                         if !matches!(msg.incoming_via, ConnectionModule::Internet) {
-                            internet.swarm.behaviour_mut().floodsub.publish( msg.topic, msg.message);
+                            internet
+                                .swarm
+                                .behaviour_mut()
+                                .floodsub
+                                .publish(msg.topic, msg.message);
                         }
                     }
-                },
+                }
                 EventType::RoutingInfo(_) => {
                     // send routing info to neighbours
                     // check scheduler
-                    if let Some((neighbour_id, connection_module, data)) = RouterInfo::check_scheduler() {
-                        log::info!("sending routing information via {:?} to {:?}", connection_module, neighbour_id);
+                    if let Some((neighbour_id, connection_module, data)) =
+                        RouterInfo::check_scheduler()
+                    {
+                        log::info!(
+                            "sending routing information via {:?} to {:?}",
+                            connection_module,
+                            neighbour_id
+                        );
                         // send routing information
                         match connection_module {
-                            ConnectionModule::Lan => lan.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
-                            ConnectionModule::Internet => internet.swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
-                            ConnectionModule::Local => {},
-                            ConnectionModule::None => {},
+                            ConnectionModule::Lan => lan
+                                .swarm
+                                .behaviour_mut()
+                                .qaul_info
+                                .send_qaul_info_message(neighbour_id, data),
+                            ConnectionModule::Internet => internet
+                                .swarm
+                                .behaviour_mut()
+                                .qaul_info
+                                .send_qaul_info_message(neighbour_id, data),
+                            ConnectionModule::Local => {}
+                            ConnectionModule::None => {}
                         }
                     }
-                },
+                }
                 EventType::RoutingTable(_) => {
                     // create new routing table
                     router::connections::ConnectionTable::create_routing_table();
-                },
+                }
             }
         }
     }
@@ -505,7 +555,7 @@ pub async fn start_cli() -> () {
 
 /// DEPRECATED! this function will be deleted soon
 // TODO: get rid of this by implementing all functionality into rpc-cli
-async fn cli( line: String, lan: Option<&mut Lan>, internet: Option<&mut Internet> ) {
+async fn cli(line: String, lan: Option<&mut Lan>, internet: Option<&mut Internet>) {
     match line.as_str() {
         // node functions
         "modules info" => {
@@ -520,15 +570,15 @@ async fn cli( line: String, lan: Option<&mut Lan>, internet: Option<&mut Interne
         // user functions
         cmd if cmd.starts_with("user ") => {
             UserAccounts::cli(cmd.strip_prefix("user ").unwrap());
-        },
+        }
         // router module
         cmd if cmd.starts_with("router ") => {
             router::Router::cli(cmd.strip_prefix("router ").unwrap());
-        },
+        }
         // send feed message
         cmd if cmd.starts_with("feed ") => {
             feed::Feed::cli(cmd.strip_prefix("feed ").unwrap(), lan, internet);
-        },
+        }
         _ => log::error!("unknown command"),
     }
 }
