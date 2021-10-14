@@ -83,7 +83,7 @@ pub async fn start() -> () {
     pretty_env_logger::init();
 
     // initialize & load configuration
-    Configuration::init();
+    Configuration::init(None);
 
     // initialize node & user accounts
     Node::init();
@@ -403,7 +403,7 @@ pub async fn start_cli() -> () {
     pretty_env_logger::init();
 
     // initialize & load configuration
-    Configuration::init();
+    Configuration::init(None);
 
     // initialize node & user accounts
     Node::init();

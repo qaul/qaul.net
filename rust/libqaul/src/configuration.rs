@@ -1,25 +1,24 @@
 //! # Configuration
 //! **Configure qaul.net via a config file, or from the commandline.**
-//! 
+//!
 //! On the first startup a `config.toml` file is saved.
 //! It can be configured and will be read on the next startup.
 //! All options are configurable from the commandline too.
 
-use config::{Config, Environment, File};
+use config::{Config, File};
+use log::info;
 use serde::{Deserialize, Serialize};
-use toml;
+use state::Storage;
 use std::{
-    fs, 
+    fs,
     sync::{RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
-use log::error;
-use state::Storage;
 
 /// make configuration globally accessible mutable state
 static CONFIG: Storage<RwLock<Configuration>> = Storage::new();
 
 /// Configuration of the local Node
-/// 
+///
 /// Here the keys and identity are stored
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Node {
@@ -116,44 +115,32 @@ impl Default for Configuration {
 /// Configuration implementation of libqaul
 impl Configuration {
     /// Initialize configuration
-    pub fn init() {
-        let mut s = Config::new();
+    pub fn init(path: Option<&str>) {
+        let mut settings = Config::default();
 
-        // FIXME: There is a problem in the rs-config library, that empty vectors of 
-        //       structs cannot be initialized. The only way to do that is to load
-        //       a json file. 
-        // Workaround: In order to be able to start with an empty configuration we 
-        //       save a default.json file to initialize the config.
-        Configuration::create_default_json();
+        let config: Configuration = if let Some(path) = path {
+            // Merge config if a Config file exists
+            match settings.merge(File::with_name(path)) {
+                Err(_) => Configuration::default(),
+                Ok(c) => c
+                    .clone()
+                    .try_into()
+                    .expect("Couldn't Convert to `Configuration`, malformed config file."),
+            }
+        } else {
+            Configuration::default()
+        };
 
-        // set default values via `./default.json`
-        let mut d = s.clone();
-        match d.merge(File::with_name("default")) {
-            Ok(default) => s = default.clone(),
-            Err(e) => error!("./default.json {:?}", e),
-        }
-
-        // get `./config.toml`
-        //s.merge(File::with_name("config")).unwrap();
-        let mut c = s.clone();
-        match c.merge(File::with_name("config")) {
-            Ok(conf) => s = conf.clone(),
-            Err(e) => {
-                error!("./config.toml {:?}", e);
-            },
-        }
+        // There is no key for debug in the the configuration hence fails.
 
         // Add configuration options from environment variables (with a prefix of QAUL)
         // e.g. `QAUL_DEBUG=1 ./target/qaul` sets the `debug` key
-        //s.merge(Environment::with_prefix("QAUL")).unwrap();
-        let mut e = s.clone();
-        match e.merge(Environment::with_prefix("QAUL")) {
-            Ok(env) => s = env.clone(),
-            Err(e) => error!("Environment {:?}", e),
-        }
 
-        let config: Configuration = s.try_into().unwrap();
-        
+        // match e.merge(Environment::with_prefix("QAUL")) {
+        //     Ok(env) => settings = env.clone(),
+        //     Err(e) => error!("Environment {:?}", e),
+        // }
+
         // put configuration to state
         CONFIG.set(RwLock::new(config));
     }
@@ -170,12 +157,12 @@ impl Configuration {
         config_mutable
     }
 
-    /// Returns true/false whether this node has been initialized, 
+    /// Returns true/false whether this node has been initialized,
     /// or needs to be created for the first time.
     pub fn is_node_initialized() -> bool {
         let config = CONFIG.get().read().unwrap();
         if config.node.initialized == 0 {
-            return false
+            return false;
         }
         true
     }
@@ -183,35 +170,18 @@ impl Configuration {
     /// Save current configuration to config.toml file
     pub fn save() {
         let config = CONFIG.get();
-        let toml_string = toml::to_string(config).expect("Could not encode TOML value");
-        println!("{}", toml_string);
-        fs::write("config.toml", toml_string).expect("Could not write to file!"); 
-    }
 
-    /// Create a default.json configuration file.
-    /// This is a workaround in order to be able to initialize an empty configuration.
-    fn create_default_json() {
-        // default json configuration string
-        let json_string = Self::get_default_json();
-        // save file
-        fs::write("default.json", json_string).expect("Could not write to file!"); 
-    }
+        let yaml = serde_yaml::to_string(config).expect("Couldn't encode into YAML values.");
 
+        let path = format!("config.yaml");
 
-    /// Get default configuration
-    /// 
-    /// Returns default configuration string
-    fn get_default_json() -> String {
-        "{
-            \"node\":{\"initialized\":0,\"id\":\"\",\"keys\":\"\"},
-            \"lan\":{\"active\":true,\"listen\":\"/ip4/0.0.0.0/tcp/0\"},
-            \"internet\":{\"active\":true,\"peers\":[],\"do_listen\":false,\"listen\":\"/ip4/0.0.0.0/tcp/0\"},
-            \"user_accounts\":[]
-        }".to_string()
+        info!("Writing to Path : {:?}", path);
+
+        fs::write(path.as_str(), yaml).expect(&format!("Could not write config to {}.", path));
     }
 
     /// FOR DEBUGGING ANDROID
-    /// 
+    ///
     /// Initialize a default the configuration for android
     pub fn init_android() {
         // create Node configuration
@@ -255,5 +225,4 @@ impl Configuration {
         // save to state
         CONFIG.set(RwLock::new(config));
     }
-
 }
