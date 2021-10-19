@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! User Account Module
 //! 
 //! In qaul.net each user is defined by the following things
@@ -15,8 +18,8 @@ use state::Storage;
 use log::{error, info};
 use std::sync::RwLock;
 
-use crate::configuration;
-use crate::configuration::Configuration;
+use crate::storage::configuration;
+use crate::storage::configuration::Configuration;
 use crate::router;
 use crate::rpc::Rpc;
 

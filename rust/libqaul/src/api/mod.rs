@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! # Run Libqaul in an own Thread
 //! 
 //! Start libqaul in an own thread and communicate
@@ -11,7 +14,6 @@ use crossbeam_channel::TryRecvError;
 use futures::executor::block_on;
 use std::{
     thread,
-    time::Duration,
 };
 
 use crate::rpc::Rpc;
@@ -25,12 +27,14 @@ mod c;
 mod android;
 
 /// start libqaul in an own thread
-pub fn start() {
+/// 
+/// Provide the location for storage, all data of qaul will be saved there.
+pub fn start(storage_path: String) {
     // Spawn new thread
     thread::spawn(move|| block_on(
         async move {
             // start libqaul
-            crate::start().await;
+            crate::start(storage_path).await;
         }
     ));    
 }

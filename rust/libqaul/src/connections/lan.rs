@@ -1,19 +1,20 @@
-/**
- * # LAN Connection Module
- * 
- * **Discover other qaul nodes on the local LAN and connect to them.**
- * 
- * This module advertises the node via mdns in the local network.
- * By default it listens to all interfaces and connects to a random port.
- * 
- * The module is configured in the configuration file:
- * 
- * ```toml
- * [lan]
- * active = true
- * listen = "/ip4/0.0.0.0/tcp/0"
- * ```
- */
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! # LAN Connection Module
+//! 
+//! **Discover other qaul nodes on the local LAN and connect to them.**
+//! 
+//! This module advertises the node via mdns in the local network.
+//! By default it listens to all interfaces and connects to a random port.
+//! 
+//! The module is configured in the configuration file:
+//! 
+//! ```yaml
+//! [lan]
+//! active = true
+//! listen = "/ip4/0.0.0.0/tcp/0"
+//! ```
 
 use libp2p::{
     core::upgrade,
@@ -46,7 +47,7 @@ use crate::services::{
     page::{PageMode, PageRequest, PageResponse},
     feed::{Feed, FeedMessageSendContainer},
 };
-use crate::configuration::Configuration;
+use crate::storage::configuration::Configuration;
 use crate::connections::{
     ConnectionModule,
     events,

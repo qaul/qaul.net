@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! # Node Module
 //! 
 //! Creates a node on first startup.
@@ -17,7 +20,7 @@ use log::{error, info};
 use base64;
 use state;
 
-use crate::configuration::Configuration;
+use crate::storage::configuration::Configuration;
 use user_accounts::UserAccounts;
 use crate::rpc::Rpc;
 

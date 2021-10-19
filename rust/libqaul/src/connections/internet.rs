@@ -1,20 +1,22 @@
-/**
- * # Internet Overlay Connection Module
- * 
- * **Statically connect to nodes in the Internet.**
- * 
- * This module connects to predefined nodes in the internet.
- * The addresses of the peers to connect to are read from 
- * the config file:
- * 
- * ```toml
- * [internet]
- * active = true
- * peers = ["/ip4/144.91.74.192/tcp/9229"]
- * do_listen = false
- * listen = "/ip4/0.0.0.0/tcp/9229"
- * ```
- */
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! # Internet Overlay Connection Module
+//! 
+//! **Statically connect to nodes in the Internet.**
+//! 
+//! This module connects to predefined nodes in the internet.
+//! The addresses of the peers to connect to are read from 
+//! the config file:
+//! 
+//! ```yaml
+//! internet:
+//! active: true
+//! peers: 
+//!   - /ip4/144.91.74.192/tcp/9229
+//! do_listen: false
+//! listen: /ip4/0.0.0.0/tcp/9229
+//! ```
 
 use libp2p::{
     core::upgrade,
@@ -45,7 +47,7 @@ use crate::services::{
     page::{PageMode, PageRequest, PageResponse},
     feed::{Feed, FeedMessageSendContainer},
 };
-use crate::configuration::Configuration;
+use crate::storage::configuration::Configuration;
 use crate::connections::{
     ConnectionModule,
     events,

@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! # libqaul
 //!
 //! Library for qaul.net
@@ -13,7 +16,7 @@ use std::time::Duration;
 
 // crate modules
 pub mod api;
-mod configuration;
+pub mod storage;
 mod connections;
 mod node;
 mod router;
@@ -21,7 +24,7 @@ mod rpc;
 mod services;
 mod types;
 
-use configuration::Configuration;
+use storage::configuration::Configuration;
 use connections::{internet::Internet, lan::Lan, ConnectionModule, Connections};
 use node::user_accounts::UserAccounts;
 use node::Node;
@@ -72,7 +75,9 @@ enum EventType {
 
 /// initialize and start libqaul
 /// and poll all the necessary modules
-pub async fn start() -> () {
+/// 
+/// Provide a path where libqaul can save all data.
+pub async fn start(storage_path: String) -> () {
     // initialize logging on android
     #[cfg(target_os = "android")]
     initialize_android_logging();
@@ -82,8 +87,9 @@ pub async fn start() -> () {
 
     pretty_env_logger::init();
 
-    // initialize & load configuration
-    Configuration::init(None);
+    // initialize storage module.
+    // initializes configuration.
+    storage::Storage::init(storage_path);
 
     // initialize node & user accounts
     Node::init();
@@ -241,7 +247,8 @@ pub async fn start_android() -> () {
 
     log::info!("start_android Rpc::init()");
 
-    // initialize & load configuration
+    // initialize storage.
+    // initializes & loads configuration.
     Configuration::init_android();
 
     log::info!("start_android Configuration::init()");
@@ -402,8 +409,9 @@ pub async fn start_cli() -> () {
 
     pretty_env_logger::init();
 
+    // initialize storage.
     // initialize & load configuration
-    Configuration::init(None);
+    storage::Storage::init("".to_string());
 
     // initialize node & user accounts
     Node::init();

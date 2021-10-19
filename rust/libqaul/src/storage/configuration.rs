@@ -1,4 +1,8 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! # Configuration
+//! 
 //! **Configure qaul.net via a config file, or from the commandline.**
 //!
 //! On the first startup a `config.toml` file is saved.
@@ -69,7 +73,7 @@ impl Default for Internet {
             //peers: vec![String::from(""); 0],
             peers: Vec::new(),
             do_listen: false,
-            listen: String::from("/ip4/0.0.0.0/tcp/9229"),
+            listen: String::from("/ip4/0.0.0.0/tcp/0"),
         }
     }
 }
@@ -97,7 +101,6 @@ pub struct Configuration {
     pub node: Node,
     pub lan: Lan,
     pub internet: Internet,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub user_accounts: Vec<UserAccount>,
 }
 
@@ -115,20 +118,23 @@ impl Default for Configuration {
 /// Configuration implementation of libqaul
 impl Configuration {
     /// Initialize configuration
-    pub fn init(path: Option<&str>) {
+    pub fn init() {
         let mut settings = Config::default();
 
-        let config: Configuration = if let Some(path) = path {
-            // Merge config if a Config file exists
-            match settings.merge(File::with_name(path)) {
-                Err(_) => Configuration::default(),
-                Ok(c) => c
-                    .clone()
-                    .try_into()
-                    .expect("Couldn't Convert to `Configuration`, malformed config file."),
-            }
-        } else {
-            Configuration::default()
+        // create configuration path
+        let mut path = super::Storage::get_path();
+        path.push_str("config");
+
+        // Merge config if a Config file exists
+        let config: Configuration = match settings.merge(File::with_name(&path)) {
+            Err(_) => {
+                log::error!("no configuration file found, creating one.");
+                Configuration::default()
+            },
+            Ok(c) => c
+                .clone()
+                .try_into()
+                .expect("Couldn't Convert to `Configuration`, malformed config file."),
         };
 
         // There is no key for debug in the the configuration hence fails.
@@ -171,9 +177,12 @@ impl Configuration {
     pub fn save() {
         let config = CONFIG.get();
 
+        // create yaml configuration format
         let yaml = serde_yaml::to_string(config).expect("Couldn't encode into YAML values.");
 
-        let path = format!("config.yaml");
+        // create path to config file
+        let mut path = super::Storage::get_path();
+        path.push_str("config.yaml");
 
         info!("Writing to Path : {:?}", path);
 

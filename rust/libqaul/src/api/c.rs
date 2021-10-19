@@ -31,7 +31,7 @@ pub extern "C" fn start() {
     super::start_android();
 
     #[cfg(not(target_os = "android"))]
-    super::start();
+    super::start("".to_string());
 }
 
 /// check if libqaul finished initializing

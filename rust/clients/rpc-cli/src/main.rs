@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! # qaul RPC CLI Client
 //! 
 //! This client uses all the functionality of the qaul.net
@@ -32,8 +35,12 @@ enum EventType {
 
 #[async_std::main]
 async fn main() {
-    // start libqaul in new thread
-    libqaul::api::start();
+    // start libqaul in new thread and save configuration file to current working path
+    libqaul::api::start("".to_string());
+    //#[cfg(target_os = "windows")]
+    //libqaul::api::start(".\\".to_string());
+    //#[cfg(not(target_os = "windows"))]
+    //libqaul::api::start("./".to_string());
 
     // wait until libqaul finished initializing
     while libqaul::api::initialization_finished() == false {
