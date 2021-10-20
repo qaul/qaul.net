@@ -1,0 +1,93 @@
+syntax = "proto3";
+package qaul.rpc.chat;
+
+
+// Chat service RPC message container
+message Chat {
+    // message type
+    oneof message {
+        // request an overview over the last conversations
+        ChatOverviewRequest overview_request = 1;
+        // contains the overview list
+        ChatOverviewList overview_list = 2;
+
+        // request a specific conversation
+        ChatConversationRequest conversation_request = 3;
+        // list of a chat conversation
+        ChatConversationList conversation_list = 4;
+
+        // send a new chat message
+        ChatMessageSend send = 5;
+    }
+}
+
+// request for overview list of all conversations
+// this request shall be sent continously when the view is open
+message ChatOverviewRequest {
+    // send all messages
+    bool all = 1;
+    // send only changes that are newer than the last received
+    bytes last_received = 2;
+}
+
+// overview list of conversations
+// this can eighter be the entire list or the last updates
+message ChatOverviewList {
+    repeated ChatConversation conversation_list = 1;
+}
+
+// a chat conversation item
+message ChatConversation {
+    // id of the user
+    bytes conversation_id = 1;
+    // name of the user
+    string name = 2;
+    // time when last message was sent or received
+    string last_message_at = 3;
+    // when has the user last time invoked the conversation
+    string invoked_at = 4;
+    // unread messages
+    int32 unread = 5;
+    // preview text of the last message
+    string content = 6;
+}
+
+// request messages of a specific chat conversation
+message ChatConversationRequest {
+    bytes conversation_id = 1;
+    // send only changes that are newer than the last received
+    string last_received = 2;
+}
+
+// list of chat messages of a specific conversation
+message ChatConversationList {
+    bytes conversation_id = 1;
+    repeated ChatMessage message_list = 2;
+}
+
+// a single chat message
+message ChatMessage {
+    // id of the sending user
+    bytes sender_id = 1;
+    // message id
+    bytes message_id = 2;
+    // message status
+    // 0 = nothing
+    // 1 = sent
+    // 2 = received
+    int32 status = 3;
+    // time when the message was sent
+    string sent_at = 4;
+    // time when the message was received
+    string received_at = 5;
+    // content of the message
+    string content = 6;
+}
+
+// send chat message
+message ChatMessageSend {
+    // conversation id to which this message is sent
+    bytes conversation_id = 1;
+    // content of the message
+    string content = 2;
+}
