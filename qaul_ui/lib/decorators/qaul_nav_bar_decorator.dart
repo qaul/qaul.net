@@ -5,7 +5,9 @@ import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_ui/helpers/navigation_helper.dart';
+import 'package:qaul_ui/providers/providers.dart';
 
 class QaulNavBarDecorator extends StatefulWidget {
   const QaulNavBarDecorator({Key? key, required this.child}) : super(key: key);
@@ -60,11 +62,11 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
 
   List<Widget> get _tabBarContent {
     return [
-      const QaulNavBarItem(_TabType.account),
-      const QaulNavBarItem(_TabType.feed),
-      const QaulNavBarItem(_TabType.users),
-      const QaulNavBarItem(_TabType.chat),
-      const QaulNavBarItem(_TabType.network),
+      const QaulNavBarItem(TabType.account),
+      const QaulNavBarItem(TabType.feed),
+      const QaulNavBarItem(TabType.users),
+      const QaulNavBarItem(TabType.chat),
+      const QaulNavBarItem(TabType.network),
       const SizedBox(width: 40, height: 40),
       PopupMenuButton<String>(
         onSelected: _handleClick,
@@ -118,39 +120,47 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
       );
 }
 
-enum _TabType { account, feed, users, chat, network }
-
-class QaulNavBarItem extends StatelessWidget {
+class QaulNavBarItem extends ConsumerWidget {
   const QaulNavBarItem(this.tab, {Key? key}) : super(key: key);
-  final _TabType tab;
+  final TabType tab;
 
   final double _iconSize = 24.0;
 
+  int buildIndexOfTab() => TabType.values.indexOf(tab);
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(tabControllerProvider);
+
     String svgPath;
     switch (tab) {
-      case _TabType.account:
-        return Badge(
-          position: BadgePosition.bottomEnd(bottom: 0, end: 0),
-          badgeColor: Colors.greenAccent.shade700,
-          child: CircleAvatar(
-            child: const Text('BD'),
-            backgroundColor: Colors
-                .primaries[math.Random().nextInt(Colors.primaries.length)]
-                .shade700,
+      case TabType.account:
+        return GestureDetector(
+          onTap: () => controller.goToIndex(buildIndexOfTab()),
+          child: Badge(
+            position: BadgePosition.bottomEnd(bottom: 0, end: 0),
+            badgeColor: Colors.greenAccent.shade700,
+            child: CircleAvatar(
+              child: const Text('BD'),
+              backgroundColor: Colors
+                  .primaries[math.Random().nextInt(Colors.primaries.length)]
+                  .shade700,
+            ),
           ),
         );
-      case _TabType.users:
-        return IconButton(icon: const Icon(Icons.group), onPressed: () {});
-      case _TabType.feed:
+      case TabType.users:
+        return IconButton(
+          icon: const Icon(Icons.group),
+          onPressed: () => controller.goToIndex(buildIndexOfTab()),
+        );
+      case TabType.feed:
         svgPath = 'assets/icons/hashtag.svg';
         break;
-      case _TabType.chat:
-        svgPath = 'assets/icons/comments.svg';
-        break;
-      case _TabType.network:
+      case TabType.chat:
         svgPath = 'assets/icons/network.svg';
+        break;
+      case TabType.network:
+        svgPath = 'assets/icons/comments.svg';
         break;
     }
 
@@ -166,7 +176,7 @@ class QaulNavBarItem extends StatelessWidget {
               height: _iconSize,
               color: isDark ? Colors.white : Colors.black,
             ),
-            onPressed: () {},
+            onPressed: () => controller.goToIndex(buildIndexOfTab()),
           );
         });
   }

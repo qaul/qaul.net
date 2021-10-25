@@ -28,6 +28,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # ********
+  # UI Dependencies
+  # ********
   # Responsive UI Support => App Wrapper
   responsive_framework: ^0.1.4
   # Dynamic Theme Control => dark, light mode & so on
@@ -36,6 +39,12 @@ dependencies:
   flutter_svg: ^0.23.0+1
   # Notification bubbles on icons
   badges: ^2.0.1
+
+  # *******
+  # Business Logic Dependencies
+  # *******
+  flutter_hooks: ^0.18.0
+  hooks_riverpod: ^1.0.0-dev.11
 
   cupertino_icons: ^1.0.2
 

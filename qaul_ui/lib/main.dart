@@ -1,5 +1,6 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import 'helpers/navigation_helper.dart';
@@ -7,7 +8,7 @@ import 'helpers/navigation_helper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
-  runApp(QaulApp(themeMode: savedThemeMode));
+  runApp(ProviderScope(child: QaulApp(themeMode: savedThemeMode)));
 }
 
 class QaulApp extends StatelessWidget {
