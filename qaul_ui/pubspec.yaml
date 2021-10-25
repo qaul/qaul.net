@@ -30,6 +30,8 @@ dependencies:
 
   # Responsive UI Support => App Wrapper
   responsive_framework: ^0.1.4
+  # Dynamic Theme Control => dark, light mode & so on
+  adaptive_theme: ^2.3.0
   # Notification bubbles on icons
   badges: ^2.0.1
 

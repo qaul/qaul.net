@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qaul_ui/screens/create_account_screen.dart';
 import 'package:qaul_ui/screens/home_screen.dart';
+import 'package:qaul_ui/screens/settings_screen.dart';
 
 import '../screens/splash_screen.dart';
 
@@ -9,6 +10,7 @@ class NavigationHelper {
   static const initial = '/';
   static const createAccount = '/createAccount';
   static const home = '/home';
+  static const settings = '/settings';
 
   static Route<T> _buildRoute<T>(
           final RouteSettings settings, final WidgetBuilder page) =>
@@ -28,6 +30,9 @@ class NavigationHelper {
       case home:
         routeWidget = WillPopScope(
             onWillPop: () async => false, child: const HomeScreen());
+        break;
+      case settings:
+        routeWidget = const SettingsScreen();
         break;
       default:
         throw ArgumentError.value(_settings.name, 'Route name',

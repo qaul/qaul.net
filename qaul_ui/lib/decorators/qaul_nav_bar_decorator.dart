@@ -2,16 +2,23 @@ import 'dart:math' as math;
 
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
+import 'package:qaul_ui/helpers/navigation_helper.dart';
 
-class QaulNavBarDecorator extends StatelessWidget {
+class QaulNavBarDecorator extends StatefulWidget {
   const QaulNavBarDecorator({Key? key, required this.child}) : super(key: key);
   final Widget child;
 
+  @override
+  State<QaulNavBarDecorator> createState() => _QaulNavBarDecoratorState();
+}
+
+class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   static final _overflowMenuOptions = {'Settings', 'About'};
 
   void _handleClick(String value) {
     switch (value) {
       case 'Settings':
+        Navigator.pushNamed(context, NavigationHelper.settings);
         break;
       case 'About':
         break;
@@ -27,7 +34,7 @@ class QaulNavBarDecorator extends StatelessWidget {
               ? AlignmentDirectional.topCenter
               : AlignmentDirectional.topStart,
           children: [
-            child,
+            widget.child,
             orientation == Orientation.portrait
                 ? _buildHorizontalBar(context)
                 : _buildVerticalBar(context),
