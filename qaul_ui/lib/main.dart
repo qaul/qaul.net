@@ -26,8 +26,9 @@ class QaulApp extends StatelessWidget {
             breakpoints: const [
               ResponsiveBreakpoint.resize(350.0,
                   name: 'ANDROID', scaleFactor: 0.8),
-              ResponsiveBreakpoint.autoScaleDown(450.0, name: MOBILE),
-              ResponsiveBreakpoint.autoScale(760.0, name: TABLET),
+              ResponsiveBreakpoint.resize(480, name: MOBILE),
+              ResponsiveBreakpoint.autoScale(800, name: TABLET),
+              ResponsiveBreakpoint.resize(1000, name: DESKTOP),
             ],
           ),
         );
