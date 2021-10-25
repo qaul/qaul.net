@@ -21,6 +21,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
         Navigator.pushNamed(context, NavigationHelper.settings);
         break;
       case 'About':
+        Navigator.pushNamed(context, NavigationHelper.about);
         break;
     }
   }

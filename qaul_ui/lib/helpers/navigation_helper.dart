@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:qaul_ui/screens/about_screen.dart';
 import 'package:qaul_ui/screens/create_account_screen.dart';
 import 'package:qaul_ui/screens/home_screen.dart';
 import 'package:qaul_ui/screens/settings_screen.dart';
@@ -11,6 +12,7 @@ class NavigationHelper {
   static const createAccount = '/createAccount';
   static const home = '/home';
   static const settings = '/settings';
+  static const about = '/about';
 
   static Route<T> _buildRoute<T>(
           final RouteSettings settings, final WidgetBuilder page) =>
@@ -33,6 +35,9 @@ class NavigationHelper {
         break;
       case settings:
         routeWidget = const SettingsScreen();
+        break;
+      case about:
+        routeWidget = const AboutScreen();
         break;
       default:
         throw ArgumentError.value(_settings.name, 'Route name',
