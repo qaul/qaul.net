@@ -1,7 +1,10 @@
 import 'dart:math' as math;
 
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:badges/badges.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qaul_ui/helpers/navigation_helper.dart';
 
 class QaulNavBarDecorator extends StatefulWidget {
@@ -28,18 +31,28 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
 
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(
-      builder: (context, orientation) {
-        return Stack(
-          alignment: orientation == Orientation.portrait
-              ? AlignmentDirectional.topCenter
-              : AlignmentDirectional.topStart,
-          children: [
-            widget.child,
-            orientation == Orientation.portrait
-                ? _buildHorizontalBar(context)
-                : _buildVerticalBar(context),
-          ],
+    return ValueListenableBuilder<AdaptiveThemeMode>(
+      valueListenable: AdaptiveTheme.of(context).modeChangeNotifier,
+      builder: (_, mode, child) {
+        var isDark = mode == AdaptiveThemeMode.dark;
+
+        return DefaultSvgTheme(
+          theme: SvgTheme(currentColor: isDark ? Colors.white : Colors.black),
+          child: OrientationBuilder(
+            builder: (context, orientation) {
+              return Stack(
+                alignment: orientation == Orientation.portrait
+                    ? AlignmentDirectional.topCenter
+                    : AlignmentDirectional.topStart,
+                children: [
+                  widget.child,
+                  orientation == Orientation.portrait
+                      ? _buildHorizontalBar(context)
+                      : _buildVerticalBar(context),
+                ],
+              );
+            },
+          ),
         );
       },
     );
@@ -111,9 +124,11 @@ class QaulNavBarItem extends StatelessWidget {
   const QaulNavBarItem(this.tab, {Key? key}) : super(key: key);
   final _TabType tab;
 
+  final double _iconSize = 24.0;
+
   @override
   Widget build(BuildContext context) {
-    IconData icon;
+    String svgPath;
     switch (tab) {
       case _TabType.account:
         return Badge(
@@ -126,19 +141,33 @@ class QaulNavBarItem extends StatelessWidget {
                 .shade700,
           ),
         );
-      case _TabType.feed:
-        icon = Icons.tag;
-        break;
       case _TabType.users:
-        icon = Icons.group;
+        return IconButton(icon: const Icon(Icons.group), onPressed: () {});
+      case _TabType.feed:
+        svgPath = 'assets/icons/hashtag.svg';
         break;
       case _TabType.chat:
-        icon = Icons.comment;
+        svgPath = 'assets/icons/comments.svg';
         break;
       case _TabType.network:
-        icon = Icons.public;
+        svgPath = 'assets/icons/network.svg';
         break;
     }
-    return IconButton(icon: Icon(icon), onPressed: () {});
+
+    return ValueListenableBuilder<AdaptiveThemeMode>(
+        valueListenable: AdaptiveTheme.of(context).modeChangeNotifier,
+        builder: (_, mode, child) {
+          var isDark = mode == AdaptiveThemeMode.dark;
+
+          return IconButton(
+            icon: SvgPicture.asset(
+              svgPath,
+              width: _iconSize,
+              height: _iconSize,
+              color: isDark ? Colors.white : Colors.black,
+            ),
+            onPressed: () {},
+          );
+        });
   }
 }
