@@ -1,18 +1,18 @@
 part of 'providers.dart';
 
-final tabControllerProvider = ChangeNotifierProvider((ref) => TabController());
+final selectedTabProvider = Provider((ref) => SelectedTab());
 
 enum TabType { account, feed, users, chat, network }
 
-class TabController extends ChangeNotifier {
-  int get currentIndex => _index;
-  int _index = 0;
+class SelectedTab extends StateNotifier<int> {
+  SelectedTab() : super(0);
+
+  int get index => state;
 
   @protected
   void goToIndex(int index) {
     assert(!index.isNegative && index < TabType.values.length);
-    _index = index;
-    notifyListeners();
+    state = index;
   }
 
   void goToTab(TabType tab) => goToIndex(TabType.values.indexOf(tab));

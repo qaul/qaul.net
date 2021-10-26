@@ -128,7 +128,7 @@ class QaulNavBarItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.watch(tabControllerProvider);
+    final controller = ref.watch(selectedTabProvider);
 
     String svgPath;
     switch (tab) {
