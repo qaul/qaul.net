@@ -4,6 +4,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_ui/decorators/qaul_nav_bar_decorator.dart';
 import 'package:qaul_ui/providers/providers.dart';
 
+part 'tabs/chat_tab.dart';
+part 'tabs/feed_tab.dart';
+part 'tabs/network_tab.dart';
+part 'tabs/user_account_tab.dart';
+part 'tabs/users_tab.dart';
+
 class HomeScreen extends HookConsumerWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -27,12 +33,12 @@ class HomeScreen extends HookConsumerWidget {
       body: QaulNavBarDecorator(
         child: PageView(
           controller: pageCtrl,
-          children: [
-            Center(child: Text('home 😀')),
-            Center(child: Text('home 😁')),
-            Center(child: Text('home 😆')),
-            Center(child: Text('home 🤩')),
-            Center(child: Text('home 🥸')),
+          children: const [
+            _UserAccountTab(),
+            _FeedTab(),
+            _UsersTab(),
+            _ChatTab(),
+            _NetworkTab(),
           ],
         ),
       ),
