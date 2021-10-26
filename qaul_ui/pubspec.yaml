@@ -46,6 +46,12 @@ dependencies:
   flutter_hooks: ^0.18.0
   hooks_riverpod: ^1.0.0-dev.11
 
+  # *******
+  # Local Dependencies
+  # *******
+  qaul_rpc:
+    path: packages/qaul_rpc
+
   cupertino_icons: ^1.0.2
 
 dev_dependencies:

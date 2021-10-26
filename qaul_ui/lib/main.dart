@@ -1,12 +1,16 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import 'helpers/navigation_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Init.initialize();
+
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   runApp(ProviderScope(child: QaulApp(themeMode: savedThemeMode)));
 }
@@ -52,5 +56,59 @@ class QaulApp extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class Init {
+  static final container = ProviderContainer();
+
+  static Future<void> initialize() async {
+    print("initialize libqaul");
+    // load libqaul
+    // get it from provider
+    final libqaul = container.read(libqaulProvider);
+    print("libqaul loaded");
+
+    // test platform function
+    // final platform = await libqaul.getPlatformVersion();
+    // print(platform);
+
+    // call hello function
+    final hello = await libqaul.hello();
+    print(hello);
+
+    // start libqaul
+    await libqaul.start();
+    print("libqaul started");
+
+    // check if libqaul finished initializing
+    //await Future.delayed(Duration(seconds: 3));
+    while (libqaul.initialized() == 0) {
+      await Future.delayed(Duration(milliseconds: 10));
+    }
+
+    print("libqaul initialization finished");
+
+    // request node info
+    final rpcNode = RpcNode();
+    await rpcNode.getNodeInfo();
+
+    // wait a bit
+    await Future.delayed(Duration(seconds: 1));
+
+    // DEBUG: how many messages have been sent
+    final sent = await libqaul.checkSendCounter();
+    print("libqaul checkSendCounter: $sent");
+
+    // DEBUG: how many messages are queued by libqaul
+    final queued = await libqaul.checkReceiveQueue();
+    print("libqaul checkReceiveQueue: $queued");
+
+    // check for rpc messages
+    if(queued > 0) {
+      print("libqaul receiveRpc");
+      await libqaul.receiveRpc();
+      print("libqaul RPC receveid");
+    }
   }
 }
