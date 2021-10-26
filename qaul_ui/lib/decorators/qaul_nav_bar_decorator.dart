@@ -126,8 +126,6 @@ class QaulNavBarItem extends ConsumerWidget {
 
   final double _iconSize = 24.0;
 
-  int buildIndexOfTab() => TabType.values.indexOf(tab);
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.watch(tabControllerProvider);
@@ -136,7 +134,7 @@ class QaulNavBarItem extends ConsumerWidget {
     switch (tab) {
       case TabType.account:
         return GestureDetector(
-          onTap: () => controller.goToIndex(buildIndexOfTab()),
+          onTap: () => controller.goToTab(tab),
           child: Badge(
             position: BadgePosition.bottomEnd(bottom: 0, end: 0),
             badgeColor: Colors.greenAccent.shade700,
@@ -151,16 +149,16 @@ class QaulNavBarItem extends ConsumerWidget {
       case TabType.users:
         return IconButton(
           icon: const Icon(Icons.group),
-          onPressed: () => controller.goToIndex(buildIndexOfTab()),
+          onPressed: () => controller.goToTab(tab),
         );
       case TabType.feed:
         svgPath = 'assets/icons/hashtag.svg';
         break;
       case TabType.chat:
-        svgPath = 'assets/icons/network.svg';
+        svgPath = 'assets/icons/comments.svg';
         break;
       case TabType.network:
-        svgPath = 'assets/icons/comments.svg';
+        svgPath = 'assets/icons/network.svg';
         break;
     }
 
@@ -176,7 +174,7 @@ class QaulNavBarItem extends ConsumerWidget {
               height: _iconSize,
               color: isDark ? Colors.white : Colors.black,
             ),
-            onPressed: () => controller.goToIndex(buildIndexOfTab()),
+            onPressed: () => controller.goToTab(tab),
           );
         });
   }
