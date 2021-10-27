@@ -10,6 +10,7 @@ fn main() {
 		"node/user_accounts.proto",
 		"router/router.proto",
 		"services/feed/feed.proto",
+		"connections/ble/manager/ble.proto",
 		], 
 		&[
 			"src"
@@ -26,6 +27,7 @@ fn main() {
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.user_accounts.rs"), to.join("qaul.rpc.user_accounts.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.router.rs"), to.join("qaul.rpc.router.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.feed.rs"), to.join("qaul.rpc.feed.rs")).unwrap();
+	fs::copy(Path::new(&out_dir).join("qaul.sys.ble.rs"), to.join("qaul.sys.ble.rs")).unwrap();
 
 	// copy to modules
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.rs"), Path::new("src/rpc/qaul.rpc.rs")).unwrap();
@@ -33,4 +35,5 @@ fn main() {
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.user_accounts.rs"), Path::new("src/node/qaul.rpc.user_accounts.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.router.rs"), Path::new("src/router/qaul.rpc.router.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.feed.rs"), Path::new("src/services/feed/qaul.rpc.feed.rs")).unwrap();
+	fs::copy(&Path::new(&out_dir).join("qaul.sys.ble.rs"), Path::new("src/connections/ble/manager/qaul.sys.ble.rs")).unwrap();
 }

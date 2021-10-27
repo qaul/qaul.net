@@ -11,3 +11,5 @@ protoc \
     node/user_accounts.proto \
     router/router.proto \
     services/feed/feed.proto \
+    \
+    connections/ble/manager/ble.proto\
