@@ -8,5 +8,5 @@ members = [
     "clients/rpc-cli",
 
     # libp2p modules
-    "libqaul/src/libp2p_modules/qaul_info"
+    "libp2p_modules/qaul_info"
 ]
