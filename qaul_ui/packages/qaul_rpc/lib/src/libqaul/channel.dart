@@ -161,7 +161,7 @@ class LibqaulChannel {
         debugPrint("channel receiveRpcMessage before processing");
 
         // decode protobuf message
-        final rpc = Rpc();
+        final rpc = Rpc(read);
         rpc.decodeReceivedMessage(list);
         debugPrint("channel receiveRpcMessage processed");
 

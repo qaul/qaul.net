@@ -213,7 +213,7 @@ class LibqaulFfi {
       final message = buffer.asTypedList(result);
 
       // process message
-      final rpc = Rpc();
+      final rpc = Rpc(read);
       rpc.decodeReceivedMessage(message);
     } else {
       switch(result) {

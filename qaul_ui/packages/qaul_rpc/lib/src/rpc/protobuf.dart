@@ -8,12 +8,15 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
-import '../qaul_rpc.dart';
+import '../providers.dart';
 import 'node.dart';
 
 class Rpc {
-  final container = ProviderContainer();
+  Rpc(this.reader);
+  final Reader reader;
+
 
   /// decode a binary protobuf message and send it to
   /// the responsible module.
@@ -25,11 +28,13 @@ class Rpc {
     switch (message.module) {
       case Modules.NODE:
         debugPrint('NODE message received');
-        RpcNode rpcNode = RpcNode();
+        RpcNode rpcNode = RpcNode(reader);
         rpcNode.decodeReceivedMessage(message.data);
         break;
       case Modules.USERACCOUNTS:
         debugPrint('USERACCOUNTS message received');
+        RpcUserAccounts rpcNode = RpcUserAccounts(reader);
+        rpcNode.decodeReceivedMessage(message.data);
         break;
       case Modules.FEED:
         debugPrint('FEED message received');
@@ -59,7 +64,7 @@ class Rpc {
     debugPrint("message to send: ${hex.encode(messageEncoded)}");
 
     // send it
-    final libqaul = container.read(libqaulProvider);
+    final libqaul = reader(libqaulProvider);
     await libqaul.sendRpc(messageEncoded);
   }
 }

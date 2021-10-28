@@ -23,8 +23,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'libqaul/channel.dart';
 import 'libqaul/ffi.dart';
 
-/// define libqaul global state
-final libqaulProvider = Provider<Libqaul>((ref) => Libqaul(ref.read));
 
 /// libqaul dart class,
 /// loading dynamic libqaul library

@@ -6,13 +6,49 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import 'helpers/navigation_helper.dart';
 
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//
+//   await Init.initialize();
+//
+//   final savedThemeMode = await AdaptiveTheme.getThemeMode();
+//   runApp(ProviderScope(
+//       observers: [Logger()], child: QaulApp(themeMode: savedThemeMode)));
+// }
+
+/// file /state/container.dart
+final container = ProviderContainer();
+
+/// file /main.dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await Init.initialize();
+  await Init.initialize(container.read);
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
-  runApp(ProviderScope(child: QaulApp(themeMode: savedThemeMode)));
+  runApp(MyApp(QaulApp(themeMode: savedThemeMode)));
+}
+
+class MyApp extends StatefulWidget {
+  MyApp(this.app);
+
+  final Widget app;
+
+  @override
+  _MyApp createState() => _MyApp();
+}
+
+class _MyApp extends State<MyApp> {
+  @override
+  void dispose() {
+    super.dispose();
+    // disposing the globally self managed container.
+    container.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return UncontrolledProviderScope(container: container, child: widget.app);
+  }
 }
 
 class QaulApp extends StatelessWidget {
@@ -60,13 +96,12 @@ class QaulApp extends StatelessWidget {
 }
 
 class Init {
-  static final container = ProviderContainer();
-
-  static Future<void> initialize() async {
+  static Future<void> initialize(Reader read) async {
     print("initialize libqaul");
     // load libqaul
     // get it from provider
-    final libqaul = container.read(libqaulProvider);
+    final libqaul = read(libqaulProvider);
+
     print("libqaul loaded");
 
     // test platform function
@@ -90,7 +125,7 @@ class Init {
     print("libqaul initialization finished");
 
     // request node info
-    final rpcNode = RpcNode();
+    final rpcNode = RpcNode(read);
     await rpcNode.getNodeInfo();
 
     // wait a bit
@@ -105,7 +140,7 @@ class Init {
     print("libqaul checkReceiveQueue: $queued");
 
     // check for rpc messages
-    if(queued > 0) {
+    if (queued > 0) {
       print("libqaul receiveRpc");
       await libqaul.receiveRpc();
       print("libqaul RPC receveid");

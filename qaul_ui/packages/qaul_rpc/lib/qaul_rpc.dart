@@ -2,4 +2,9 @@ library qaul_rpc;
 
 export 'src/qaul_rpc.dart';
 
+export 'src/providers.dart';
+
+export 'src/models/user.dart';
+
 export 'src/rpc/node.dart';
+export 'src/rpc/user_accounts.dart';

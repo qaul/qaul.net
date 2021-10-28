@@ -8,11 +8,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:qaul_rpc/src/generated/node/node.pb.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
+import 'package:qaul_rpc/src/rpc/rpc_module.dart';
+import 'package:riverpod/src/framework.dart';
 import 'protobuf.dart';
 
-class RpcNode {
-  /// decode a binary node protobuf message and process it
-  decodeReceivedMessage(List<int> bytes) {
+class RpcNode extends RpcModule {
+  RpcNode(Reader read) : super(read);
+
+  @override
+  Modules get type => Modules.NODE;
+
+  @override
+  Future<void> decodeReceivedMessage(List<int> bytes) async {
     // decode bytes to message
     Node message = Node.fromBuffer(bytes);
 
@@ -25,16 +32,11 @@ class RpcNode {
         debugPrint('RpcNode node id: $nodeId');
         break;
       default:
-        debugPrint('UNHANDLED RpcNode protobuf message received');
-        break;
+        throw UnhandledRpcMessageException.value(
+          message.whichMessage().toString(),
+          runtimeType.toString(),
+        );
     }
-  }
-
-  /// encode and send a message
-  Future<void> encodeAndSendMessage(Node message) async {
-    // send message via qaul RPC
-    Rpc rpc = Rpc();
-    await rpc.encodeAndSendMessage(Modules.NODE, message.writeToBuffer());
   }
 
   /// send request node info message

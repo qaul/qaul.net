@@ -23,7 +23,7 @@ class NavigationHelper {
     switch (_settings.name) {
       case initial:
         routeWidget = WillPopScope(
-            onWillPop: () async => false, child: const SplashScreen());
+            onWillPop: () async => false, child: SplashScreen());
         break;
       case createAccount:
         routeWidget = WillPopScope(
