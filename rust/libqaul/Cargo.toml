@@ -37,6 +37,9 @@ futures-ticker = "0.0.1"
 jni = "0.19"
 serde_yaml = "0.8"
 
+# only for desktop platforms: Linux, Mac, Windows
+directories = "4.0"
+
 # internal references
 qaul_info = { path = "../libp2p_modules/qaul_info" }
 

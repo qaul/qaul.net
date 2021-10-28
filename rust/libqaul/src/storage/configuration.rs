@@ -5,7 +5,7 @@
 //! 
 //! **Configure qaul.net via a config file, or from the commandline.**
 //!
-//! On the first startup a `config.toml` file is saved.
+//! On the first startup a `config.yaml` file is saved.
 //! It can be configured and will be read on the next startup.
 //! All options are configurable from the commandline too.
 
@@ -15,6 +15,7 @@ use serde::{Deserialize, Serialize};
 use state::Storage;
 use std::{
     fs,
+    path::Path,
     sync::{RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
@@ -70,7 +71,9 @@ impl Default for Internet {
     fn default() -> Self {
         Internet {
             active: true,
-            //peers: vec![String::from(""); 0],
+            #[cfg(target_os = "android")]
+            peers: vec![String::from("/ip4/144.91.74.192/tcp/0"); 1],
+            #[cfg(not(target_os = "android"))]
             peers: Vec::new(),
             do_listen: false,
             listen: String::from("/ip4/0.0.0.0/tcp/0"),
@@ -122,11 +125,14 @@ impl Configuration {
         let mut settings = Config::default();
 
         // create configuration path
-        let mut path = super::Storage::get_path();
-        path.push_str("config");
+        //let mut path = super::Storage::get_path();
+        //path.push_str("config");
+        let path_string = super::Storage::get_path();
+        let path = Path::new(path_string.as_str());
+        let config_path = path.join("config.yaml");
 
         // Merge config if a Config file exists
-        let config: Configuration = match settings.merge(File::with_name(&path)) {
+        let config: Configuration = match settings.merge(File::with_name(&config_path.to_str().unwrap())) {
             Err(_) => {
                 log::error!("no configuration file found, creating one.");
                 Configuration::default()
@@ -173,7 +179,7 @@ impl Configuration {
         true
     }
 
-    /// Save current configuration to config.toml file
+    /// Save current configuration to config.yaml file
     pub fn save() {
         let config = CONFIG.get();
 
@@ -181,17 +187,19 @@ impl Configuration {
         let yaml = serde_yaml::to_string(config).expect("Couldn't encode into YAML values.");
 
         // create path to config file
-        let mut path = super::Storage::get_path();
-        path.push_str("config.yaml");
+        let path_string = super::Storage::get_path();
+        let path = Path::new(path_string.as_str());
+        let config_path = path.join("config.yaml");
 
-        info!("Writing to Path : {:?}", path);
+        info!("Writing to Path {:?}, {:?}", path, config_path);
 
-        fs::write(path.as_str(), yaml).expect(&format!("Could not write config to {}.", path));
+        fs::write(config_path.clone(), yaml).expect(&format!("Could not write config to {:?}.", config_path));
     }
 
+/*
     /// FOR DEBUGGING ANDROID
     ///
-    /// Initialize a default the configuration for android
+    /// Initialize a default configuration for android
     pub fn init_android() {
         // create Node configuration
         let node = Node {
@@ -234,4 +242,5 @@ impl Configuration {
         // save to state
         CONFIG.set(RwLock::new(config));
     }
+*/
 }

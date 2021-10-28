@@ -24,7 +24,6 @@ mod rpc;
 mod services;
 mod types;
 
-use storage::configuration::Configuration;
 use connections::{internet::Internet, lan::Lan, ConnectionModule, Connections};
 use node::user_accounts::UserAccounts;
 use node::Node;
@@ -238,7 +237,7 @@ pub async fn start(storage_path: String) -> () {
 ///
 /// This function is here to test the initialization of libqaul
 /// on android.
-pub async fn start_android() -> () {
+pub async fn start_android(storage_path: String) -> () {
     // does it log?
     log::info!("start_android");
 
@@ -249,7 +248,7 @@ pub async fn start_android() -> () {
 
     // initialize storage.
     // initializes & loads configuration.
-    Configuration::init_android();
+    storage::Storage::init(storage_path);
 
     log::info!("start_android Configuration::init()");
 
@@ -264,7 +263,7 @@ pub async fn start_android() -> () {
     log::info!("start_android Router::init()");
 
     // initialize Connection Modules
-    let mut conn = Connections::init_android().await;
+    let conn = Connections::init_android().await;
     let mut internet = conn.internet.unwrap();
     //let mut lan = conn.lan.unwrap();
 

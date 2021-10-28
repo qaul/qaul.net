@@ -1,6 +1,7 @@
 package net.qaul.qaul
 
 import android.os.Bundle
+import android.content.Context
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -36,10 +37,14 @@ class MainActivity : AppCompatActivity() {
         loadLibqaul()
         println("libqaul loaded")
 
+        // get app storage path
+        val storagePath = this.filesDir.absolutePath
+
         // start libqaul
         println("start libqaul")
+        println("libqaul storage path: $storagePath")
         println("from now on, the logging should work")
-        start()
+        start(storagePath)
         println("libqaul started 6")
 
         // print log "Hello qaul!"
