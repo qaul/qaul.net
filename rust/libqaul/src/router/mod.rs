@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! Qaul Community Router
 //! 
 //! This module implements all the tables and logic of the 
@@ -89,12 +92,17 @@ impl Router {
         match proto::Router::decode(&data[..]) {
             Ok(router) => {
                 match router.message {
-                    Some(proto::router::Message::UserRequest(user_request)) => {
-                        // send it to submodule
-                        Users::rpc( proto::Router{
-                            message: Some(proto::router::Message::UserRequest(
-                                user_request)),
-                        });
+                    Some(proto::router::Message::RoutingTableRequest(_request)) => {
+                        // send routing table list
+                        RoutingTable::rpc_send_routing_table();
+                    },
+                    Some(proto::router::Message::ConnectionsRequest(_request)) => {
+                        // send connections list
+                        ConnectionTable::rpc_send_connections_list();
+                    },
+                    Some(proto::router::Message::NeighboursRequest(_request)) => {
+                        // send neighbours list
+                        Neighbours::rpc_send_neighbours_list();
                     },
                     _ => {},
                 }

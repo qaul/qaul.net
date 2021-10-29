@@ -31,8 +31,14 @@ The following commands are available:
 * user accounts
   * `account default` - get's and displays the default user account
   * `account create {User Name}` - create a new user account with the name {User Name}
+* users - Functions for all users known by your node
+  * `users list` - display all users known to this router
+  * `users verify {User ID}` - verify user with {User ID}
+  * `users block {User ID}` - block user with {User ID}
 * router
-  * `router users list` - display all users known to this router
+  * `router table list` - request and display routing table with per module connectivity per user.
+  * `router neighbours list` - request and display neighbours list of all neighbouring nodes.
+  * `router connections list` - request and display connections table, with all known connections per connection module.
 * feed
   * `feed send {FeedMessage}` - sends the {FeedMessage} to the network and distributes it to all connected nodes
     * the message is signed and can be validated

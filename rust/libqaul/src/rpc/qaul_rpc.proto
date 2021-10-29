@@ -29,6 +29,7 @@ enum Modules {
     // qaul modules
     NODE = 2;
     USERACCOUNTS = 3;
-    ROUTER = 4;
-    FEED = 5;
+    USERS = 4;
+    ROUTER = 5;
+    FEED = 6;
 }

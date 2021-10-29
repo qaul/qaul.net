@@ -19,6 +19,7 @@ mod cli;
 mod rpc;
 mod node;
 mod user_accounts;
+mod users;
 mod router;
 mod feed;
 mod debug;

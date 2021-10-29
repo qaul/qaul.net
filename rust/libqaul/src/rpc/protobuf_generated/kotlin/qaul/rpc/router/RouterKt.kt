@@ -23,51 +23,147 @@ object RouterKt {
     internal fun _build(): qaul.rpc.router.RouterOuterClass.Router = _builder.build()
 
     /**
-     * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
+     * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
      */
-    var userRequest: qaul.rpc.router.RouterOuterClass.UserRequest
-      @JvmName("getUserRequest")
-      get() = _builder.getUserRequest()
-      @JvmName("setUserRequest")
+    var routingTableRequest: qaul.rpc.router.RouterOuterClass.RoutingTableRequest
+      @JvmName("getRoutingTableRequest")
+      get() = _builder.getRoutingTableRequest()
+      @JvmName("setRoutingTableRequest")
       set(value) {
-        _builder.setUserRequest(value)
+        _builder.setRoutingTableRequest(value)
       }
     /**
-     * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
+     * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
      */
-    fun clearUserRequest() {
-      _builder.clearUserRequest()
+    fun clearRoutingTableRequest() {
+      _builder.clearRoutingTableRequest()
     }
     /**
-     * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
-     * @return Whether the userRequest field is set.
+     * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
+     * @return Whether the routingTableRequest field is set.
      */
-    fun hasUserRequest(): kotlin.Boolean {
-      return _builder.hasUserRequest()
+    fun hasRoutingTableRequest(): kotlin.Boolean {
+      return _builder.hasRoutingTableRequest()
     }
 
     /**
-     * <code>.qaul.rpc.router.UserList user_list = 2;</code>
+     * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
      */
-    var userList: qaul.rpc.router.RouterOuterClass.UserList
-      @JvmName("getUserList")
-      get() = _builder.getUserList()
-      @JvmName("setUserList")
+    var routingTable: qaul.rpc.router.RouterOuterClass.RoutingTableList
+      @JvmName("getRoutingTable")
+      get() = _builder.getRoutingTable()
+      @JvmName("setRoutingTable")
       set(value) {
-        _builder.setUserList(value)
+        _builder.setRoutingTable(value)
       }
     /**
-     * <code>.qaul.rpc.router.UserList user_list = 2;</code>
+     * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
      */
-    fun clearUserList() {
-      _builder.clearUserList()
+    fun clearRoutingTable() {
+      _builder.clearRoutingTable()
     }
     /**
-     * <code>.qaul.rpc.router.UserList user_list = 2;</code>
-     * @return Whether the userList field is set.
+     * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
+     * @return Whether the routingTable field is set.
      */
-    fun hasUserList(): kotlin.Boolean {
-      return _builder.hasUserList()
+    fun hasRoutingTable(): kotlin.Boolean {
+      return _builder.hasRoutingTable()
+    }
+
+    /**
+     * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+     */
+    var connectionsRequest: qaul.rpc.router.RouterOuterClass.ConnectionsRequest
+      @JvmName("getConnectionsRequest")
+      get() = _builder.getConnectionsRequest()
+      @JvmName("setConnectionsRequest")
+      set(value) {
+        _builder.setConnectionsRequest(value)
+      }
+    /**
+     * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+     */
+    fun clearConnectionsRequest() {
+      _builder.clearConnectionsRequest()
+    }
+    /**
+     * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+     * @return Whether the connectionsRequest field is set.
+     */
+    fun hasConnectionsRequest(): kotlin.Boolean {
+      return _builder.hasConnectionsRequest()
+    }
+
+    /**
+     * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+     */
+    var connectionsList: qaul.rpc.router.RouterOuterClass.ConnectionsList
+      @JvmName("getConnectionsList")
+      get() = _builder.getConnectionsList()
+      @JvmName("setConnectionsList")
+      set(value) {
+        _builder.setConnectionsList(value)
+      }
+    /**
+     * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+     */
+    fun clearConnectionsList() {
+      _builder.clearConnectionsList()
+    }
+    /**
+     * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+     * @return Whether the connectionsList field is set.
+     */
+    fun hasConnectionsList(): kotlin.Boolean {
+      return _builder.hasConnectionsList()
+    }
+
+    /**
+     * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+     */
+    var neighboursRequest: qaul.rpc.router.RouterOuterClass.NeighboursRequest
+      @JvmName("getNeighboursRequest")
+      get() = _builder.getNeighboursRequest()
+      @JvmName("setNeighboursRequest")
+      set(value) {
+        _builder.setNeighboursRequest(value)
+      }
+    /**
+     * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+     */
+    fun clearNeighboursRequest() {
+      _builder.clearNeighboursRequest()
+    }
+    /**
+     * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+     * @return Whether the neighboursRequest field is set.
+     */
+    fun hasNeighboursRequest(): kotlin.Boolean {
+      return _builder.hasNeighboursRequest()
+    }
+
+    /**
+     * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+     */
+    var neighboursList: qaul.rpc.router.RouterOuterClass.NeighboursList
+      @JvmName("getNeighboursList")
+      get() = _builder.getNeighboursList()
+      @JvmName("setNeighboursList")
+      set(value) {
+        _builder.setNeighboursList(value)
+      }
+    /**
+     * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+     */
+    fun clearNeighboursList() {
+      _builder.clearNeighboursList()
+    }
+    /**
+     * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+     * @return Whether the neighboursList field is set.
+     */
+    fun hasNeighboursList(): kotlin.Boolean {
+      return _builder.hasNeighboursList()
     }
     val messageCase: qaul.rpc.router.RouterOuterClass.Router.MessageCase
       @JvmName("getMessageCase")

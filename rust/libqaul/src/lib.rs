@@ -217,6 +217,7 @@ pub async fn start(storage_path: String) -> () {
                                 .behaviour_mut()
                                 .qaul_info
                                 .send_qaul_info_message(neighbour_id, data),
+                            ConnectionModule::Ble => {}
                             ConnectionModule::Local => {}
                             ConnectionModule::None => {}
                         }
@@ -386,6 +387,7 @@ pub async fn start_android(storage_path: String) -> () {
                                 .behaviour_mut()
                                 .qaul_info
                                 .send_qaul_info_message(neighbour_id, data),
+                            ConnectionModule::Ble => {}
                             ConnectionModule::Local => {}
                             ConnectionModule::None => {}
                         }
@@ -546,6 +548,7 @@ pub async fn start_cli() -> () {
                                 .behaviour_mut()
                                 .qaul_info
                                 .send_qaul_info_message(neighbour_id, data),
+                            ConnectionModule::Ble => {}
                             ConnectionModule::Local => {}
                             ConnectionModule::None => {}
                         }

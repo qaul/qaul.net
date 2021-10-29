@@ -9,6 +9,7 @@ protoc \
     rpc/qaul_rpc.proto \
     node/node.proto \
     node/user_accounts.proto \
+    router/users.proto \
     router/router.proto \
     services/feed/feed.proto \
     \

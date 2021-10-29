@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! # Connection Module Connectivity Collection Table
 //! 
 //! This file contains the collected connectivity information
@@ -9,9 +12,9 @@
 //! * Out of this information the global table is constructed,
 //!   containing only the best entry.
 
-
 use libp2p::PeerId;
 use state::Storage;
+use prost::Message;
 use std::sync::RwLock;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -23,6 +26,8 @@ use crate::router::{
     table::{RoutingInfoTable, RoutingTable, RoutingUserEntry, RoutingConnectionEntry},
     neighbours::Neighbours,
 };
+use super::proto;
+use crate::rpc::Rpc;
 
 
 /// Mutable module state
@@ -148,6 +153,7 @@ impl ConnectionTable {
         match module {
             ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
             ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
+            ConnectionModule::Ble => return,
             ConnectionModule::Local => return,
             ConnectionModule::None => return,
         }        
@@ -212,6 +218,7 @@ impl ConnectionTable {
         match conn.clone() {
             ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
             ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
+            ConnectionModule::Ble => return table,
             ConnectionModule::Local => return table,
             ConnectionModule::None => return table
         }
@@ -309,6 +316,74 @@ impl ConnectionTable {
         return_entry
     }
 
+    /// send protobuf RPC connections list
+    pub fn rpc_send_connections_list() {
+        // create connections list
+        let connections_list = proto::ConnectionsList {
+            lan: Self::rpc_create_connection_module_list(ConnectionModule::Lan),
+            internet: Self::rpc_create_connection_module_list(ConnectionModule::Internet),
+            ble: Self::rpc_create_connection_module_list(ConnectionModule::Ble),
+            local: Self::rpc_create_connection_module_list(ConnectionModule::Local),
+        };
+
+        // create rpc connections list protobuf message
+        let proto_message = proto::Router {
+            message: Some(proto::router::Message::ConnectionsList(
+                connections_list
+            )),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(buf, crate::rpc::proto::Modules::Router.into(), "".to_string(), Vec::new() );
+    }
+
+    /// create rpc connection module list
+    fn rpc_create_connection_module_list( conn: ConnectionModule ) -> Vec<proto::ConnectionsUserEntry> {
+        // create entry vector
+        let mut connections_list: Vec<proto::ConnectionsUserEntry> = Vec::new();
+
+        // request connection table from state
+        let connection_table;
+        match conn {
+            ConnectionModule::Lan => connection_table = LAN.get().read().unwrap(),
+            ConnectionModule::Internet => connection_table = INTERNET.get().read().unwrap(),
+            ConnectionModule::Ble => return connections_list,
+            ConnectionModule::Local => return connections_list,
+            ConnectionModule::None => return connections_list,
+        }
+
+        // loop through all table entries per user
+        for (id, entry) in &connection_table.table {
+            // create user entry
+            let mut user_entry = proto::ConnectionsUserEntry {
+                user_id: id.to_bytes(),
+                connections: Vec::new(),
+            };
+
+            // loop through all neighbour entries of a user entry
+            for (id, neighbour) in &entry.connections {
+                // add connection
+                user_entry.connections.push(
+                    proto::ConnectionEntry {
+                        rtt: neighbour.rtt,
+                        hop_count: neighbour.hc as u32,
+                        via: id.to_bytes(),
+                    }
+                );
+            }
+
+            // add user entry to list
+            connections_list.push(user_entry);
+        }
+
+        // return list
+        connections_list
+    }
+
     /// Connections table's CLI commands
     /// 
     /// you get here with the commands:
@@ -322,7 +397,7 @@ impl ConnectionTable {
                 // display LAN table
                 Self::cli_display_list(ConnectionModule::Lan);
 
-                // display Inernet table
+                // display Internet table
                 Self::cli_display_list(ConnectionModule::Internet);
             },
             _ => log::error!("unknown router connections command"),
@@ -341,6 +416,7 @@ impl ConnectionTable {
         match conn {
             ConnectionModule::Lan => connection_table = LAN.get().read().unwrap(),
             ConnectionModule::Internet => connection_table = INTERNET.get().read().unwrap(),
+            ConnectionModule::Ble => return,
             ConnectionModule::Local => return,
             ConnectionModule::None => return,
         }

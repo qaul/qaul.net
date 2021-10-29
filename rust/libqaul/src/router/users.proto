@@ -1,0 +1,48 @@
+syntax = "proto3";
+package qaul.rpc.users;
+
+
+// users rpc message container
+message Users {
+    oneof message {
+        UserRequest user_request = 1;
+        UserList user_list = 2;
+        UserEntry user_update = 3;
+    }
+}
+
+// UI request for some users
+message UserRequest {
+
+}
+
+// user list
+message UserList {
+    repeated UserEntry user = 1;
+}
+
+// user entry
+message UserEntry {
+    string name = 1;
+    bytes id = 2;
+    string id_base58 = 4;
+    bytes key = 5; // protobuf encoded public key
+    string key_type = 6;
+    string key_base58 = 7;
+    Connectivity connectivity = 8;
+    bool verified = 9;
+    bool blocked = 10;
+}
+
+// how is the user connected
+enum Connectivity {
+    // The user is actively connected to the node
+    // and reachable for synchronous communication.
+    Online = 0;
+    // The node which hosts the user account is online 
+    // but the user is not actively connected to it.
+    // Messages can sent and will reach the node.
+    Reachable = 1;
+    // The user is currently not reachable.
+    Offline = 2;
+}

@@ -29,6 +29,8 @@ pub enum ConnectionModule {
     Lan,
     /// Connect statically to remote nodes.
     Internet,
+    /// BLE module
+    Ble,
     /// no connection module known for this
     None,
 }

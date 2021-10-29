@@ -16,13 +16,14 @@ const Modules$json = const {
     const {'1': 'RPC', '2': 1},
     const {'1': 'NODE', '2': 2},
     const {'1': 'USERACCOUNTS', '2': 3},
-    const {'1': 'ROUTER', '2': 4},
-    const {'1': 'FEED', '2': 5},
+    const {'1': 'USERS', '2': 4},
+    const {'1': 'ROUTER', '2': 5},
+    const {'1': 'FEED', '2': 6},
   ],
 };
 
 /// Descriptor for `Modules`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List modulesDescriptor = $convert.base64Decode('CgdNb2R1bGVzEggKBE5PTkUQABIHCgNSUEMQARIICgROT0RFEAISEAoMVVNFUkFDQ09VTlRTEAMSCgoGUk9VVEVSEAQSCAoERkVFRBAF');
+final $typed_data.Uint8List modulesDescriptor = $convert.base64Decode('CgdNb2R1bGVzEggKBE5PTkUQABIHCgNSUEMQARIICgROT0RFEAISEAoMVVNFUkFDQ09VTlRTEAMSCQoFVVNFUlMQBBIKCgZST1VURVIQBRIICgRGRUVEEAY=');
 @$core.Deprecated('Use qaulRpcDescriptor instead')
 const QaulRpc$json = const {
   '1': 'QaulRpc',

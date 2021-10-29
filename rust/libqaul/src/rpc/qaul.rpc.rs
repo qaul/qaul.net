@@ -32,6 +32,7 @@ pub enum Modules {
     /// qaul modules
     Node = 2,
     Useraccounts = 3,
-    Router = 4,
-    Feed = 5,
+    Users = 4,
+    Router = 5,
+    Feed = 6,
 }

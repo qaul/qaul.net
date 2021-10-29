@@ -16,70 +16,56 @@ public final class RouterOuterClass {
   }
   /**
    * <pre>
-   * how is the user connected
+   * Connection modules
    * </pre>
    *
-   * Protobuf enum {@code qaul.rpc.router.Connectivity}
+   * Protobuf enum {@code qaul.rpc.router.ConnectionModule}
    */
-  public enum Connectivity
+  public enum ConnectionModule
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
-     * <pre>
-     * The user is actively connected to the node
-     * and reachable for synchronous communication.
-     * </pre>
-     *
-     * <code>Online = 0;</code>
+     * <code>NONE = 0;</code>
      */
-    Online(0),
+    NONE(0),
     /**
-     * <pre>
-     * The node which hosts the user account is online 
-     * but the user is not actively connected to it.
-     * Messages can sent and will reach the node.
-     * </pre>
-     *
-     * <code>Reachable = 1;</code>
+     * <code>LAN = 1;</code>
      */
-    Reachable(1),
+    LAN(1),
     /**
-     * <pre>
-     * The user is currently not reachable.
-     * </pre>
-     *
-     * <code>Offline = 2;</code>
+     * <code>INTERNET = 2;</code>
      */
-    Offline(2),
+    INTERNET(2),
+    /**
+     * <code>BLE = 3;</code>
+     */
+    BLE(3),
+    /**
+     * <code>LOCAL = 4;</code>
+     */
+    LOCAL(4),
     UNRECOGNIZED(-1),
     ;
 
     /**
-     * <pre>
-     * The user is actively connected to the node
-     * and reachable for synchronous communication.
-     * </pre>
-     *
-     * <code>Online = 0;</code>
+     * <code>NONE = 0;</code>
      */
-    public static final int Online_VALUE = 0;
+    public static final int NONE_VALUE = 0;
     /**
-     * <pre>
-     * The node which hosts the user account is online 
-     * but the user is not actively connected to it.
-     * Messages can sent and will reach the node.
-     * </pre>
-     *
-     * <code>Reachable = 1;</code>
+     * <code>LAN = 1;</code>
      */
-    public static final int Reachable_VALUE = 1;
+    public static final int LAN_VALUE = 1;
     /**
-     * <pre>
-     * The user is currently not reachable.
-     * </pre>
-     *
-     * <code>Offline = 2;</code>
+     * <code>INTERNET = 2;</code>
      */
-    public static final int Offline_VALUE = 2;
+    public static final int INTERNET_VALUE = 2;
+    /**
+     * <code>BLE = 3;</code>
+     */
+    public static final int BLE_VALUE = 3;
+    /**
+     * <code>LOCAL = 4;</code>
+     */
+    public static final int LOCAL_VALUE = 4;
 
 
     public final int getNumber() {
@@ -96,7 +82,7 @@ public final class RouterOuterClass {
      * @deprecated Use {@link #forNumber(int)} instead.
      */
     @java.lang.Deprecated
-    public static Connectivity valueOf(int value) {
+    public static ConnectionModule valueOf(int value) {
       return forNumber(value);
     }
 
@@ -104,24 +90,26 @@ public final class RouterOuterClass {
      * @param value The numeric wire value of the corresponding enum entry.
      * @return The enum associated with the given numeric wire value.
      */
-    public static Connectivity forNumber(int value) {
+    public static ConnectionModule forNumber(int value) {
       switch (value) {
-        case 0: return Online;
-        case 1: return Reachable;
-        case 2: return Offline;
+        case 0: return NONE;
+        case 1: return LAN;
+        case 2: return INTERNET;
+        case 3: return BLE;
+        case 4: return LOCAL;
         default: return null;
       }
     }
 
-    public static com.google.protobuf.Internal.EnumLiteMap<Connectivity>
+    public static com.google.protobuf.Internal.EnumLiteMap<ConnectionModule>
         internalGetValueMap() {
       return internalValueMap;
     }
     private static final com.google.protobuf.Internal.EnumLiteMap<
-        Connectivity> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<Connectivity>() {
-            public Connectivity findValueByNumber(int number) {
-              return Connectivity.forNumber(number);
+        ConnectionModule> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<ConnectionModule>() {
+            public ConnectionModule findValueByNumber(int number) {
+              return ConnectionModule.forNumber(number);
             }
           };
 
@@ -142,9 +130,9 @@ public final class RouterOuterClass {
       return qaul.rpc.router.RouterOuterClass.getDescriptor().getEnumTypes().get(0);
     }
 
-    private static final Connectivity[] VALUES = values();
+    private static final ConnectionModule[] VALUES = values();
 
-    public static Connectivity valueOf(
+    public static ConnectionModule valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
       if (desc.getType() != getDescriptor()) {
         throw new java.lang.IllegalArgumentException(
@@ -158,11 +146,11 @@ public final class RouterOuterClass {
 
     private final int value;
 
-    private Connectivity(int value) {
+    private ConnectionModule(int value) {
       this.value = value;
     }
 
-    // @@protoc_insertion_point(enum_scope:qaul.rpc.router.Connectivity)
+    // @@protoc_insertion_point(enum_scope:qaul.rpc.router.ConnectionModule)
   }
 
   public interface RouterOrBuilder extends
@@ -170,34 +158,94 @@ public final class RouterOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
-     * @return Whether the userRequest field is set.
+     * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
+     * @return Whether the routingTableRequest field is set.
      */
-    boolean hasUserRequest();
+    boolean hasRoutingTableRequest();
     /**
-     * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
-     * @return The userRequest.
+     * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
+     * @return The routingTableRequest.
      */
-    qaul.rpc.router.RouterOuterClass.UserRequest getUserRequest();
+    qaul.rpc.router.RouterOuterClass.RoutingTableRequest getRoutingTableRequest();
     /**
-     * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
+     * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
      */
-    qaul.rpc.router.RouterOuterClass.UserRequestOrBuilder getUserRequestOrBuilder();
+    qaul.rpc.router.RouterOuterClass.RoutingTableRequestOrBuilder getRoutingTableRequestOrBuilder();
 
     /**
-     * <code>.qaul.rpc.router.UserList user_list = 2;</code>
-     * @return Whether the userList field is set.
+     * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
+     * @return Whether the routingTable field is set.
      */
-    boolean hasUserList();
+    boolean hasRoutingTable();
     /**
-     * <code>.qaul.rpc.router.UserList user_list = 2;</code>
-     * @return The userList.
+     * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
+     * @return The routingTable.
      */
-    qaul.rpc.router.RouterOuterClass.UserList getUserList();
+    qaul.rpc.router.RouterOuterClass.RoutingTableList getRoutingTable();
     /**
-     * <code>.qaul.rpc.router.UserList user_list = 2;</code>
+     * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
      */
-    qaul.rpc.router.RouterOuterClass.UserListOrBuilder getUserListOrBuilder();
+    qaul.rpc.router.RouterOuterClass.RoutingTableListOrBuilder getRoutingTableOrBuilder();
+
+    /**
+     * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+     * @return Whether the connectionsRequest field is set.
+     */
+    boolean hasConnectionsRequest();
+    /**
+     * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+     * @return The connectionsRequest.
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionsRequest getConnectionsRequest();
+    /**
+     * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionsRequestOrBuilder getConnectionsRequestOrBuilder();
+
+    /**
+     * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+     * @return Whether the connectionsList field is set.
+     */
+    boolean hasConnectionsList();
+    /**
+     * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+     * @return The connectionsList.
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionsList getConnectionsList();
+    /**
+     * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionsListOrBuilder getConnectionsListOrBuilder();
+
+    /**
+     * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+     * @return Whether the neighboursRequest field is set.
+     */
+    boolean hasNeighboursRequest();
+    /**
+     * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+     * @return The neighboursRequest.
+     */
+    qaul.rpc.router.RouterOuterClass.NeighboursRequest getNeighboursRequest();
+    /**
+     * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.NeighboursRequestOrBuilder getNeighboursRequestOrBuilder();
+
+    /**
+     * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+     * @return Whether the neighboursList field is set.
+     */
+    boolean hasNeighboursList();
+    /**
+     * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+     * @return The neighboursList.
+     */
+    qaul.rpc.router.RouterOuterClass.NeighboursList getNeighboursList();
+    /**
+     * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.NeighboursListOrBuilder getNeighboursListOrBuilder();
 
     public qaul.rpc.router.RouterOuterClass.Router.MessageCase getMessageCase();
   }
@@ -251,31 +299,87 @@ public final class RouterOuterClass {
               done = true;
               break;
             case 10: {
-              qaul.rpc.router.RouterOuterClass.UserRequest.Builder subBuilder = null;
+              qaul.rpc.router.RouterOuterClass.RoutingTableRequest.Builder subBuilder = null;
               if (messageCase_ == 1) {
-                subBuilder = ((qaul.rpc.router.RouterOuterClass.UserRequest) message_).toBuilder();
+                subBuilder = ((qaul.rpc.router.RouterOuterClass.RoutingTableRequest) message_).toBuilder();
               }
               message_ =
-                  input.readMessage(qaul.rpc.router.RouterOuterClass.UserRequest.parser(), extensionRegistry);
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.RoutingTableRequest.parser(), extensionRegistry);
               if (subBuilder != null) {
-                subBuilder.mergeFrom((qaul.rpc.router.RouterOuterClass.UserRequest) message_);
+                subBuilder.mergeFrom((qaul.rpc.router.RouterOuterClass.RoutingTableRequest) message_);
                 message_ = subBuilder.buildPartial();
               }
               messageCase_ = 1;
               break;
             }
             case 18: {
-              qaul.rpc.router.RouterOuterClass.UserList.Builder subBuilder = null;
+              qaul.rpc.router.RouterOuterClass.RoutingTableList.Builder subBuilder = null;
               if (messageCase_ == 2) {
-                subBuilder = ((qaul.rpc.router.RouterOuterClass.UserList) message_).toBuilder();
+                subBuilder = ((qaul.rpc.router.RouterOuterClass.RoutingTableList) message_).toBuilder();
               }
               message_ =
-                  input.readMessage(qaul.rpc.router.RouterOuterClass.UserList.parser(), extensionRegistry);
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.RoutingTableList.parser(), extensionRegistry);
               if (subBuilder != null) {
-                subBuilder.mergeFrom((qaul.rpc.router.RouterOuterClass.UserList) message_);
+                subBuilder.mergeFrom((qaul.rpc.router.RouterOuterClass.RoutingTableList) message_);
                 message_ = subBuilder.buildPartial();
               }
               messageCase_ = 2;
+              break;
+            }
+            case 26: {
+              qaul.rpc.router.RouterOuterClass.ConnectionsRequest.Builder subBuilder = null;
+              if (messageCase_ == 3) {
+                subBuilder = ((qaul.rpc.router.RouterOuterClass.ConnectionsRequest) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.ConnectionsRequest.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.router.RouterOuterClass.ConnectionsRequest) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 3;
+              break;
+            }
+            case 34: {
+              qaul.rpc.router.RouterOuterClass.ConnectionsList.Builder subBuilder = null;
+              if (messageCase_ == 4) {
+                subBuilder = ((qaul.rpc.router.RouterOuterClass.ConnectionsList) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.ConnectionsList.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.router.RouterOuterClass.ConnectionsList) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 4;
+              break;
+            }
+            case 42: {
+              qaul.rpc.router.RouterOuterClass.NeighboursRequest.Builder subBuilder = null;
+              if (messageCase_ == 5) {
+                subBuilder = ((qaul.rpc.router.RouterOuterClass.NeighboursRequest) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.NeighboursRequest.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.router.RouterOuterClass.NeighboursRequest) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 5;
+              break;
+            }
+            case 50: {
+              qaul.rpc.router.RouterOuterClass.NeighboursList.Builder subBuilder = null;
+              if (messageCase_ == 6) {
+                subBuilder = ((qaul.rpc.router.RouterOuterClass.NeighboursList) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.NeighboursList.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.router.RouterOuterClass.NeighboursList) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 6;
               break;
             }
             default: {
@@ -315,8 +419,12 @@ public final class RouterOuterClass {
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
             com.google.protobuf.AbstractMessage.InternalOneOfEnum {
-      USER_REQUEST(1),
-      USER_LIST(2),
+      ROUTING_TABLE_REQUEST(1),
+      ROUTING_TABLE(2),
+      CONNECTIONS_REQUEST(3),
+      CONNECTIONS_LIST(4),
+      NEIGHBOURS_REQUEST(5),
+      NEIGHBOURS_LIST(6),
       MESSAGE_NOT_SET(0);
       private final int value;
       private MessageCase(int value) {
@@ -334,8 +442,12 @@ public final class RouterOuterClass {
 
       public static MessageCase forNumber(int value) {
         switch (value) {
-          case 1: return USER_REQUEST;
-          case 2: return USER_LIST;
+          case 1: return ROUTING_TABLE_REQUEST;
+          case 2: return ROUTING_TABLE;
+          case 3: return CONNECTIONS_REQUEST;
+          case 4: return CONNECTIONS_LIST;
+          case 5: return NEIGHBOURS_REQUEST;
+          case 6: return NEIGHBOURS_LIST;
           case 0: return MESSAGE_NOT_SET;
           default: return null;
         }
@@ -351,66 +463,190 @@ public final class RouterOuterClass {
           messageCase_);
     }
 
-    public static final int USER_REQUEST_FIELD_NUMBER = 1;
+    public static final int ROUTING_TABLE_REQUEST_FIELD_NUMBER = 1;
     /**
-     * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
-     * @return Whether the userRequest field is set.
+     * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
+     * @return Whether the routingTableRequest field is set.
      */
     @java.lang.Override
-    public boolean hasUserRequest() {
+    public boolean hasRoutingTableRequest() {
       return messageCase_ == 1;
     }
     /**
-     * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
-     * @return The userRequest.
+     * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
+     * @return The routingTableRequest.
      */
     @java.lang.Override
-    public qaul.rpc.router.RouterOuterClass.UserRequest getUserRequest() {
+    public qaul.rpc.router.RouterOuterClass.RoutingTableRequest getRoutingTableRequest() {
       if (messageCase_ == 1) {
-         return (qaul.rpc.router.RouterOuterClass.UserRequest) message_;
+         return (qaul.rpc.router.RouterOuterClass.RoutingTableRequest) message_;
       }
-      return qaul.rpc.router.RouterOuterClass.UserRequest.getDefaultInstance();
+      return qaul.rpc.router.RouterOuterClass.RoutingTableRequest.getDefaultInstance();
     }
     /**
-     * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
+     * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
      */
     @java.lang.Override
-    public qaul.rpc.router.RouterOuterClass.UserRequestOrBuilder getUserRequestOrBuilder() {
+    public qaul.rpc.router.RouterOuterClass.RoutingTableRequestOrBuilder getRoutingTableRequestOrBuilder() {
       if (messageCase_ == 1) {
-         return (qaul.rpc.router.RouterOuterClass.UserRequest) message_;
+         return (qaul.rpc.router.RouterOuterClass.RoutingTableRequest) message_;
       }
-      return qaul.rpc.router.RouterOuterClass.UserRequest.getDefaultInstance();
+      return qaul.rpc.router.RouterOuterClass.RoutingTableRequest.getDefaultInstance();
     }
 
-    public static final int USER_LIST_FIELD_NUMBER = 2;
+    public static final int ROUTING_TABLE_FIELD_NUMBER = 2;
     /**
-     * <code>.qaul.rpc.router.UserList user_list = 2;</code>
-     * @return Whether the userList field is set.
+     * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
+     * @return Whether the routingTable field is set.
      */
     @java.lang.Override
-    public boolean hasUserList() {
+    public boolean hasRoutingTable() {
       return messageCase_ == 2;
     }
     /**
-     * <code>.qaul.rpc.router.UserList user_list = 2;</code>
-     * @return The userList.
+     * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
+     * @return The routingTable.
      */
     @java.lang.Override
-    public qaul.rpc.router.RouterOuterClass.UserList getUserList() {
+    public qaul.rpc.router.RouterOuterClass.RoutingTableList getRoutingTable() {
       if (messageCase_ == 2) {
-         return (qaul.rpc.router.RouterOuterClass.UserList) message_;
+         return (qaul.rpc.router.RouterOuterClass.RoutingTableList) message_;
       }
-      return qaul.rpc.router.RouterOuterClass.UserList.getDefaultInstance();
+      return qaul.rpc.router.RouterOuterClass.RoutingTableList.getDefaultInstance();
     }
     /**
-     * <code>.qaul.rpc.router.UserList user_list = 2;</code>
+     * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
      */
     @java.lang.Override
-    public qaul.rpc.router.RouterOuterClass.UserListOrBuilder getUserListOrBuilder() {
+    public qaul.rpc.router.RouterOuterClass.RoutingTableListOrBuilder getRoutingTableOrBuilder() {
       if (messageCase_ == 2) {
-         return (qaul.rpc.router.RouterOuterClass.UserList) message_;
+         return (qaul.rpc.router.RouterOuterClass.RoutingTableList) message_;
       }
-      return qaul.rpc.router.RouterOuterClass.UserList.getDefaultInstance();
+      return qaul.rpc.router.RouterOuterClass.RoutingTableList.getDefaultInstance();
+    }
+
+    public static final int CONNECTIONS_REQUEST_FIELD_NUMBER = 3;
+    /**
+     * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+     * @return Whether the connectionsRequest field is set.
+     */
+    @java.lang.Override
+    public boolean hasConnectionsRequest() {
+      return messageCase_ == 3;
+    }
+    /**
+     * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+     * @return The connectionsRequest.
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsRequest getConnectionsRequest() {
+      if (messageCase_ == 3) {
+         return (qaul.rpc.router.RouterOuterClass.ConnectionsRequest) message_;
+      }
+      return qaul.rpc.router.RouterOuterClass.ConnectionsRequest.getDefaultInstance();
+    }
+    /**
+     * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsRequestOrBuilder getConnectionsRequestOrBuilder() {
+      if (messageCase_ == 3) {
+         return (qaul.rpc.router.RouterOuterClass.ConnectionsRequest) message_;
+      }
+      return qaul.rpc.router.RouterOuterClass.ConnectionsRequest.getDefaultInstance();
+    }
+
+    public static final int CONNECTIONS_LIST_FIELD_NUMBER = 4;
+    /**
+     * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+     * @return Whether the connectionsList field is set.
+     */
+    @java.lang.Override
+    public boolean hasConnectionsList() {
+      return messageCase_ == 4;
+    }
+    /**
+     * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+     * @return The connectionsList.
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsList getConnectionsList() {
+      if (messageCase_ == 4) {
+         return (qaul.rpc.router.RouterOuterClass.ConnectionsList) message_;
+      }
+      return qaul.rpc.router.RouterOuterClass.ConnectionsList.getDefaultInstance();
+    }
+    /**
+     * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsListOrBuilder getConnectionsListOrBuilder() {
+      if (messageCase_ == 4) {
+         return (qaul.rpc.router.RouterOuterClass.ConnectionsList) message_;
+      }
+      return qaul.rpc.router.RouterOuterClass.ConnectionsList.getDefaultInstance();
+    }
+
+    public static final int NEIGHBOURS_REQUEST_FIELD_NUMBER = 5;
+    /**
+     * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+     * @return Whether the neighboursRequest field is set.
+     */
+    @java.lang.Override
+    public boolean hasNeighboursRequest() {
+      return messageCase_ == 5;
+    }
+    /**
+     * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+     * @return The neighboursRequest.
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursRequest getNeighboursRequest() {
+      if (messageCase_ == 5) {
+         return (qaul.rpc.router.RouterOuterClass.NeighboursRequest) message_;
+      }
+      return qaul.rpc.router.RouterOuterClass.NeighboursRequest.getDefaultInstance();
+    }
+    /**
+     * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursRequestOrBuilder getNeighboursRequestOrBuilder() {
+      if (messageCase_ == 5) {
+         return (qaul.rpc.router.RouterOuterClass.NeighboursRequest) message_;
+      }
+      return qaul.rpc.router.RouterOuterClass.NeighboursRequest.getDefaultInstance();
+    }
+
+    public static final int NEIGHBOURS_LIST_FIELD_NUMBER = 6;
+    /**
+     * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+     * @return Whether the neighboursList field is set.
+     */
+    @java.lang.Override
+    public boolean hasNeighboursList() {
+      return messageCase_ == 6;
+    }
+    /**
+     * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+     * @return The neighboursList.
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursList getNeighboursList() {
+      if (messageCase_ == 6) {
+         return (qaul.rpc.router.RouterOuterClass.NeighboursList) message_;
+      }
+      return qaul.rpc.router.RouterOuterClass.NeighboursList.getDefaultInstance();
+    }
+    /**
+     * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursListOrBuilder getNeighboursListOrBuilder() {
+      if (messageCase_ == 6) {
+         return (qaul.rpc.router.RouterOuterClass.NeighboursList) message_;
+      }
+      return qaul.rpc.router.RouterOuterClass.NeighboursList.getDefaultInstance();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -428,10 +664,22 @@ public final class RouterOuterClass {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (messageCase_ == 1) {
-        output.writeMessage(1, (qaul.rpc.router.RouterOuterClass.UserRequest) message_);
+        output.writeMessage(1, (qaul.rpc.router.RouterOuterClass.RoutingTableRequest) message_);
       }
       if (messageCase_ == 2) {
-        output.writeMessage(2, (qaul.rpc.router.RouterOuterClass.UserList) message_);
+        output.writeMessage(2, (qaul.rpc.router.RouterOuterClass.RoutingTableList) message_);
+      }
+      if (messageCase_ == 3) {
+        output.writeMessage(3, (qaul.rpc.router.RouterOuterClass.ConnectionsRequest) message_);
+      }
+      if (messageCase_ == 4) {
+        output.writeMessage(4, (qaul.rpc.router.RouterOuterClass.ConnectionsList) message_);
+      }
+      if (messageCase_ == 5) {
+        output.writeMessage(5, (qaul.rpc.router.RouterOuterClass.NeighboursRequest) message_);
+      }
+      if (messageCase_ == 6) {
+        output.writeMessage(6, (qaul.rpc.router.RouterOuterClass.NeighboursList) message_);
       }
       unknownFields.writeTo(output);
     }
@@ -444,11 +692,27 @@ public final class RouterOuterClass {
       size = 0;
       if (messageCase_ == 1) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, (qaul.rpc.router.RouterOuterClass.UserRequest) message_);
+          .computeMessageSize(1, (qaul.rpc.router.RouterOuterClass.RoutingTableRequest) message_);
       }
       if (messageCase_ == 2) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, (qaul.rpc.router.RouterOuterClass.UserList) message_);
+          .computeMessageSize(2, (qaul.rpc.router.RouterOuterClass.RoutingTableList) message_);
+      }
+      if (messageCase_ == 3) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, (qaul.rpc.router.RouterOuterClass.ConnectionsRequest) message_);
+      }
+      if (messageCase_ == 4) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, (qaul.rpc.router.RouterOuterClass.ConnectionsList) message_);
+      }
+      if (messageCase_ == 5) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, (qaul.rpc.router.RouterOuterClass.NeighboursRequest) message_);
+      }
+      if (messageCase_ == 6) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, (qaul.rpc.router.RouterOuterClass.NeighboursList) message_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -468,12 +732,28 @@ public final class RouterOuterClass {
       if (!getMessageCase().equals(other.getMessageCase())) return false;
       switch (messageCase_) {
         case 1:
-          if (!getUserRequest()
-              .equals(other.getUserRequest())) return false;
+          if (!getRoutingTableRequest()
+              .equals(other.getRoutingTableRequest())) return false;
           break;
         case 2:
-          if (!getUserList()
-              .equals(other.getUserList())) return false;
+          if (!getRoutingTable()
+              .equals(other.getRoutingTable())) return false;
+          break;
+        case 3:
+          if (!getConnectionsRequest()
+              .equals(other.getConnectionsRequest())) return false;
+          break;
+        case 4:
+          if (!getConnectionsList()
+              .equals(other.getConnectionsList())) return false;
+          break;
+        case 5:
+          if (!getNeighboursRequest()
+              .equals(other.getNeighboursRequest())) return false;
+          break;
+        case 6:
+          if (!getNeighboursList()
+              .equals(other.getNeighboursList())) return false;
           break;
         case 0:
         default:
@@ -491,12 +771,28 @@ public final class RouterOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       switch (messageCase_) {
         case 1:
-          hash = (37 * hash) + USER_REQUEST_FIELD_NUMBER;
-          hash = (53 * hash) + getUserRequest().hashCode();
+          hash = (37 * hash) + ROUTING_TABLE_REQUEST_FIELD_NUMBER;
+          hash = (53 * hash) + getRoutingTableRequest().hashCode();
           break;
         case 2:
-          hash = (37 * hash) + USER_LIST_FIELD_NUMBER;
-          hash = (53 * hash) + getUserList().hashCode();
+          hash = (37 * hash) + ROUTING_TABLE_FIELD_NUMBER;
+          hash = (53 * hash) + getRoutingTable().hashCode();
+          break;
+        case 3:
+          hash = (37 * hash) + CONNECTIONS_REQUEST_FIELD_NUMBER;
+          hash = (53 * hash) + getConnectionsRequest().hashCode();
+          break;
+        case 4:
+          hash = (37 * hash) + CONNECTIONS_LIST_FIELD_NUMBER;
+          hash = (53 * hash) + getConnectionsList().hashCode();
+          break;
+        case 5:
+          hash = (37 * hash) + NEIGHBOURS_REQUEST_FIELD_NUMBER;
+          hash = (53 * hash) + getNeighboursRequest().hashCode();
+          break;
+        case 6:
+          hash = (37 * hash) + NEIGHBOURS_LIST_FIELD_NUMBER;
+          hash = (53 * hash) + getNeighboursList().hashCode();
           break;
         case 0:
         default:
@@ -667,17 +963,45 @@ public final class RouterOuterClass {
       public qaul.rpc.router.RouterOuterClass.Router buildPartial() {
         qaul.rpc.router.RouterOuterClass.Router result = new qaul.rpc.router.RouterOuterClass.Router(this);
         if (messageCase_ == 1) {
-          if (userRequestBuilder_ == null) {
+          if (routingTableRequestBuilder_ == null) {
             result.message_ = message_;
           } else {
-            result.message_ = userRequestBuilder_.build();
+            result.message_ = routingTableRequestBuilder_.build();
           }
         }
         if (messageCase_ == 2) {
-          if (userListBuilder_ == null) {
+          if (routingTableBuilder_ == null) {
             result.message_ = message_;
           } else {
-            result.message_ = userListBuilder_.build();
+            result.message_ = routingTableBuilder_.build();
+          }
+        }
+        if (messageCase_ == 3) {
+          if (connectionsRequestBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = connectionsRequestBuilder_.build();
+          }
+        }
+        if (messageCase_ == 4) {
+          if (connectionsListBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = connectionsListBuilder_.build();
+          }
+        }
+        if (messageCase_ == 5) {
+          if (neighboursRequestBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = neighboursRequestBuilder_.build();
+          }
+        }
+        if (messageCase_ == 6) {
+          if (neighboursListBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = neighboursListBuilder_.build();
           }
         }
         result.messageCase_ = messageCase_;
@@ -730,12 +1054,28 @@ public final class RouterOuterClass {
       public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.Router other) {
         if (other == qaul.rpc.router.RouterOuterClass.Router.getDefaultInstance()) return this;
         switch (other.getMessageCase()) {
-          case USER_REQUEST: {
-            mergeUserRequest(other.getUserRequest());
+          case ROUTING_TABLE_REQUEST: {
+            mergeRoutingTableRequest(other.getRoutingTableRequest());
             break;
           }
-          case USER_LIST: {
-            mergeUserList(other.getUserList());
+          case ROUTING_TABLE: {
+            mergeRoutingTable(other.getRoutingTable());
+            break;
+          }
+          case CONNECTIONS_REQUEST: {
+            mergeConnectionsRequest(other.getConnectionsRequest());
+            break;
+          }
+          case CONNECTIONS_LIST: {
+            mergeConnectionsList(other.getConnectionsList());
+            break;
+          }
+          case NEIGHBOURS_REQUEST: {
+            mergeNeighboursRequest(other.getNeighboursRequest());
+            break;
+          }
+          case NEIGHBOURS_LIST: {
+            mergeNeighboursList(other.getNeighboursList());
             break;
           }
           case MESSAGE_NOT_SET: {
@@ -787,71 +1127,71 @@ public final class RouterOuterClass {
 
 
       private com.google.protobuf.SingleFieldBuilderV3<
-          qaul.rpc.router.RouterOuterClass.UserRequest, qaul.rpc.router.RouterOuterClass.UserRequest.Builder, qaul.rpc.router.RouterOuterClass.UserRequestOrBuilder> userRequestBuilder_;
+          qaul.rpc.router.RouterOuterClass.RoutingTableRequest, qaul.rpc.router.RouterOuterClass.RoutingTableRequest.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableRequestOrBuilder> routingTableRequestBuilder_;
       /**
-       * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
-       * @return Whether the userRequest field is set.
+       * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
+       * @return Whether the routingTableRequest field is set.
        */
       @java.lang.Override
-      public boolean hasUserRequest() {
+      public boolean hasRoutingTableRequest() {
         return messageCase_ == 1;
       }
       /**
-       * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
-       * @return The userRequest.
+       * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
+       * @return The routingTableRequest.
        */
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserRequest getUserRequest() {
-        if (userRequestBuilder_ == null) {
+      public qaul.rpc.router.RouterOuterClass.RoutingTableRequest getRoutingTableRequest() {
+        if (routingTableRequestBuilder_ == null) {
           if (messageCase_ == 1) {
-            return (qaul.rpc.router.RouterOuterClass.UserRequest) message_;
+            return (qaul.rpc.router.RouterOuterClass.RoutingTableRequest) message_;
           }
-          return qaul.rpc.router.RouterOuterClass.UserRequest.getDefaultInstance();
+          return qaul.rpc.router.RouterOuterClass.RoutingTableRequest.getDefaultInstance();
         } else {
           if (messageCase_ == 1) {
-            return userRequestBuilder_.getMessage();
+            return routingTableRequestBuilder_.getMessage();
           }
-          return qaul.rpc.router.RouterOuterClass.UserRequest.getDefaultInstance();
+          return qaul.rpc.router.RouterOuterClass.RoutingTableRequest.getDefaultInstance();
         }
       }
       /**
-       * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
+       * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
        */
-      public Builder setUserRequest(qaul.rpc.router.RouterOuterClass.UserRequest value) {
-        if (userRequestBuilder_ == null) {
+      public Builder setRoutingTableRequest(qaul.rpc.router.RouterOuterClass.RoutingTableRequest value) {
+        if (routingTableRequestBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
           message_ = value;
           onChanged();
         } else {
-          userRequestBuilder_.setMessage(value);
+          routingTableRequestBuilder_.setMessage(value);
         }
         messageCase_ = 1;
         return this;
       }
       /**
-       * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
+       * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
        */
-      public Builder setUserRequest(
-          qaul.rpc.router.RouterOuterClass.UserRequest.Builder builderForValue) {
-        if (userRequestBuilder_ == null) {
+      public Builder setRoutingTableRequest(
+          qaul.rpc.router.RouterOuterClass.RoutingTableRequest.Builder builderForValue) {
+        if (routingTableRequestBuilder_ == null) {
           message_ = builderForValue.build();
           onChanged();
         } else {
-          userRequestBuilder_.setMessage(builderForValue.build());
+          routingTableRequestBuilder_.setMessage(builderForValue.build());
         }
         messageCase_ = 1;
         return this;
       }
       /**
-       * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
+       * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
        */
-      public Builder mergeUserRequest(qaul.rpc.router.RouterOuterClass.UserRequest value) {
-        if (userRequestBuilder_ == null) {
+      public Builder mergeRoutingTableRequest(qaul.rpc.router.RouterOuterClass.RoutingTableRequest value) {
+        if (routingTableRequestBuilder_ == null) {
           if (messageCase_ == 1 &&
-              message_ != qaul.rpc.router.RouterOuterClass.UserRequest.getDefaultInstance()) {
-            message_ = qaul.rpc.router.RouterOuterClass.UserRequest.newBuilder((qaul.rpc.router.RouterOuterClass.UserRequest) message_)
+              message_ != qaul.rpc.router.RouterOuterClass.RoutingTableRequest.getDefaultInstance()) {
+            message_ = qaul.rpc.router.RouterOuterClass.RoutingTableRequest.newBuilder((qaul.rpc.router.RouterOuterClass.RoutingTableRequest) message_)
                 .mergeFrom(value).buildPartial();
           } else {
             message_ = value;
@@ -859,18 +1199,18 @@ public final class RouterOuterClass {
           onChanged();
         } else {
           if (messageCase_ == 1) {
-            userRequestBuilder_.mergeFrom(value);
+            routingTableRequestBuilder_.mergeFrom(value);
           }
-          userRequestBuilder_.setMessage(value);
+          routingTableRequestBuilder_.setMessage(value);
         }
         messageCase_ = 1;
         return this;
       }
       /**
-       * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
+       * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
        */
-      public Builder clearUserRequest() {
-        if (userRequestBuilder_ == null) {
+      public Builder clearRoutingTableRequest() {
+        if (routingTableRequestBuilder_ == null) {
           if (messageCase_ == 1) {
             messageCase_ = 0;
             message_ = null;
@@ -881,118 +1221,118 @@ public final class RouterOuterClass {
             messageCase_ = 0;
             message_ = null;
           }
-          userRequestBuilder_.clear();
+          routingTableRequestBuilder_.clear();
         }
         return this;
       }
       /**
-       * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
+       * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
        */
-      public qaul.rpc.router.RouterOuterClass.UserRequest.Builder getUserRequestBuilder() {
-        return getUserRequestFieldBuilder().getBuilder();
+      public qaul.rpc.router.RouterOuterClass.RoutingTableRequest.Builder getRoutingTableRequestBuilder() {
+        return getRoutingTableRequestFieldBuilder().getBuilder();
       }
       /**
-       * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
+       * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
        */
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserRequestOrBuilder getUserRequestOrBuilder() {
-        if ((messageCase_ == 1) && (userRequestBuilder_ != null)) {
-          return userRequestBuilder_.getMessageOrBuilder();
+      public qaul.rpc.router.RouterOuterClass.RoutingTableRequestOrBuilder getRoutingTableRequestOrBuilder() {
+        if ((messageCase_ == 1) && (routingTableRequestBuilder_ != null)) {
+          return routingTableRequestBuilder_.getMessageOrBuilder();
         } else {
           if (messageCase_ == 1) {
-            return (qaul.rpc.router.RouterOuterClass.UserRequest) message_;
+            return (qaul.rpc.router.RouterOuterClass.RoutingTableRequest) message_;
           }
-          return qaul.rpc.router.RouterOuterClass.UserRequest.getDefaultInstance();
+          return qaul.rpc.router.RouterOuterClass.RoutingTableRequest.getDefaultInstance();
         }
       }
       /**
-       * <code>.qaul.rpc.router.UserRequest user_request = 1;</code>
+       * <code>.qaul.rpc.router.RoutingTableRequest routing_table_request = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          qaul.rpc.router.RouterOuterClass.UserRequest, qaul.rpc.router.RouterOuterClass.UserRequest.Builder, qaul.rpc.router.RouterOuterClass.UserRequestOrBuilder> 
-          getUserRequestFieldBuilder() {
-        if (userRequestBuilder_ == null) {
+          qaul.rpc.router.RouterOuterClass.RoutingTableRequest, qaul.rpc.router.RouterOuterClass.RoutingTableRequest.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableRequestOrBuilder> 
+          getRoutingTableRequestFieldBuilder() {
+        if (routingTableRequestBuilder_ == null) {
           if (!(messageCase_ == 1)) {
-            message_ = qaul.rpc.router.RouterOuterClass.UserRequest.getDefaultInstance();
+            message_ = qaul.rpc.router.RouterOuterClass.RoutingTableRequest.getDefaultInstance();
           }
-          userRequestBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              qaul.rpc.router.RouterOuterClass.UserRequest, qaul.rpc.router.RouterOuterClass.UserRequest.Builder, qaul.rpc.router.RouterOuterClass.UserRequestOrBuilder>(
-                  (qaul.rpc.router.RouterOuterClass.UserRequest) message_,
+          routingTableRequestBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.RoutingTableRequest, qaul.rpc.router.RouterOuterClass.RoutingTableRequest.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableRequestOrBuilder>(
+                  (qaul.rpc.router.RouterOuterClass.RoutingTableRequest) message_,
                   getParentForChildren(),
                   isClean());
           message_ = null;
         }
         messageCase_ = 1;
         onChanged();;
-        return userRequestBuilder_;
+        return routingTableRequestBuilder_;
       }
 
       private com.google.protobuf.SingleFieldBuilderV3<
-          qaul.rpc.router.RouterOuterClass.UserList, qaul.rpc.router.RouterOuterClass.UserList.Builder, qaul.rpc.router.RouterOuterClass.UserListOrBuilder> userListBuilder_;
+          qaul.rpc.router.RouterOuterClass.RoutingTableList, qaul.rpc.router.RouterOuterClass.RoutingTableList.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableListOrBuilder> routingTableBuilder_;
       /**
-       * <code>.qaul.rpc.router.UserList user_list = 2;</code>
-       * @return Whether the userList field is set.
+       * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
+       * @return Whether the routingTable field is set.
        */
       @java.lang.Override
-      public boolean hasUserList() {
+      public boolean hasRoutingTable() {
         return messageCase_ == 2;
       }
       /**
-       * <code>.qaul.rpc.router.UserList user_list = 2;</code>
-       * @return The userList.
+       * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
+       * @return The routingTable.
        */
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserList getUserList() {
-        if (userListBuilder_ == null) {
+      public qaul.rpc.router.RouterOuterClass.RoutingTableList getRoutingTable() {
+        if (routingTableBuilder_ == null) {
           if (messageCase_ == 2) {
-            return (qaul.rpc.router.RouterOuterClass.UserList) message_;
+            return (qaul.rpc.router.RouterOuterClass.RoutingTableList) message_;
           }
-          return qaul.rpc.router.RouterOuterClass.UserList.getDefaultInstance();
+          return qaul.rpc.router.RouterOuterClass.RoutingTableList.getDefaultInstance();
         } else {
           if (messageCase_ == 2) {
-            return userListBuilder_.getMessage();
+            return routingTableBuilder_.getMessage();
           }
-          return qaul.rpc.router.RouterOuterClass.UserList.getDefaultInstance();
+          return qaul.rpc.router.RouterOuterClass.RoutingTableList.getDefaultInstance();
         }
       }
       /**
-       * <code>.qaul.rpc.router.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
        */
-      public Builder setUserList(qaul.rpc.router.RouterOuterClass.UserList value) {
-        if (userListBuilder_ == null) {
+      public Builder setRoutingTable(qaul.rpc.router.RouterOuterClass.RoutingTableList value) {
+        if (routingTableBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
           message_ = value;
           onChanged();
         } else {
-          userListBuilder_.setMessage(value);
+          routingTableBuilder_.setMessage(value);
         }
         messageCase_ = 2;
         return this;
       }
       /**
-       * <code>.qaul.rpc.router.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
        */
-      public Builder setUserList(
-          qaul.rpc.router.RouterOuterClass.UserList.Builder builderForValue) {
-        if (userListBuilder_ == null) {
+      public Builder setRoutingTable(
+          qaul.rpc.router.RouterOuterClass.RoutingTableList.Builder builderForValue) {
+        if (routingTableBuilder_ == null) {
           message_ = builderForValue.build();
           onChanged();
         } else {
-          userListBuilder_.setMessage(builderForValue.build());
+          routingTableBuilder_.setMessage(builderForValue.build());
         }
         messageCase_ = 2;
         return this;
       }
       /**
-       * <code>.qaul.rpc.router.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
        */
-      public Builder mergeUserList(qaul.rpc.router.RouterOuterClass.UserList value) {
-        if (userListBuilder_ == null) {
+      public Builder mergeRoutingTable(qaul.rpc.router.RouterOuterClass.RoutingTableList value) {
+        if (routingTableBuilder_ == null) {
           if (messageCase_ == 2 &&
-              message_ != qaul.rpc.router.RouterOuterClass.UserList.getDefaultInstance()) {
-            message_ = qaul.rpc.router.RouterOuterClass.UserList.newBuilder((qaul.rpc.router.RouterOuterClass.UserList) message_)
+              message_ != qaul.rpc.router.RouterOuterClass.RoutingTableList.getDefaultInstance()) {
+            message_ = qaul.rpc.router.RouterOuterClass.RoutingTableList.newBuilder((qaul.rpc.router.RouterOuterClass.RoutingTableList) message_)
                 .mergeFrom(value).buildPartial();
           } else {
             message_ = value;
@@ -1000,18 +1340,18 @@ public final class RouterOuterClass {
           onChanged();
         } else {
           if (messageCase_ == 2) {
-            userListBuilder_.mergeFrom(value);
+            routingTableBuilder_.mergeFrom(value);
           }
-          userListBuilder_.setMessage(value);
+          routingTableBuilder_.setMessage(value);
         }
         messageCase_ = 2;
         return this;
       }
       /**
-       * <code>.qaul.rpc.router.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
        */
-      public Builder clearUserList() {
-        if (userListBuilder_ == null) {
+      public Builder clearRoutingTable() {
+        if (routingTableBuilder_ == null) {
           if (messageCase_ == 2) {
             messageCase_ = 0;
             message_ = null;
@@ -1022,50 +1362,614 @@ public final class RouterOuterClass {
             messageCase_ = 0;
             message_ = null;
           }
-          userListBuilder_.clear();
+          routingTableBuilder_.clear();
         }
         return this;
       }
       /**
-       * <code>.qaul.rpc.router.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
        */
-      public qaul.rpc.router.RouterOuterClass.UserList.Builder getUserListBuilder() {
-        return getUserListFieldBuilder().getBuilder();
+      public qaul.rpc.router.RouterOuterClass.RoutingTableList.Builder getRoutingTableBuilder() {
+        return getRoutingTableFieldBuilder().getBuilder();
       }
       /**
-       * <code>.qaul.rpc.router.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
        */
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserListOrBuilder getUserListOrBuilder() {
-        if ((messageCase_ == 2) && (userListBuilder_ != null)) {
-          return userListBuilder_.getMessageOrBuilder();
+      public qaul.rpc.router.RouterOuterClass.RoutingTableListOrBuilder getRoutingTableOrBuilder() {
+        if ((messageCase_ == 2) && (routingTableBuilder_ != null)) {
+          return routingTableBuilder_.getMessageOrBuilder();
         } else {
           if (messageCase_ == 2) {
-            return (qaul.rpc.router.RouterOuterClass.UserList) message_;
+            return (qaul.rpc.router.RouterOuterClass.RoutingTableList) message_;
           }
-          return qaul.rpc.router.RouterOuterClass.UserList.getDefaultInstance();
+          return qaul.rpc.router.RouterOuterClass.RoutingTableList.getDefaultInstance();
         }
       }
       /**
-       * <code>.qaul.rpc.router.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.router.RoutingTableList routing_table = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          qaul.rpc.router.RouterOuterClass.UserList, qaul.rpc.router.RouterOuterClass.UserList.Builder, qaul.rpc.router.RouterOuterClass.UserListOrBuilder> 
-          getUserListFieldBuilder() {
-        if (userListBuilder_ == null) {
+          qaul.rpc.router.RouterOuterClass.RoutingTableList, qaul.rpc.router.RouterOuterClass.RoutingTableList.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableListOrBuilder> 
+          getRoutingTableFieldBuilder() {
+        if (routingTableBuilder_ == null) {
           if (!(messageCase_ == 2)) {
-            message_ = qaul.rpc.router.RouterOuterClass.UserList.getDefaultInstance();
+            message_ = qaul.rpc.router.RouterOuterClass.RoutingTableList.getDefaultInstance();
           }
-          userListBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              qaul.rpc.router.RouterOuterClass.UserList, qaul.rpc.router.RouterOuterClass.UserList.Builder, qaul.rpc.router.RouterOuterClass.UserListOrBuilder>(
-                  (qaul.rpc.router.RouterOuterClass.UserList) message_,
+          routingTableBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.RoutingTableList, qaul.rpc.router.RouterOuterClass.RoutingTableList.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableListOrBuilder>(
+                  (qaul.rpc.router.RouterOuterClass.RoutingTableList) message_,
                   getParentForChildren(),
                   isClean());
           message_ = null;
         }
         messageCase_ = 2;
         onChanged();;
-        return userListBuilder_;
+        return routingTableBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionsRequest, qaul.rpc.router.RouterOuterClass.ConnectionsRequest.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsRequestOrBuilder> connectionsRequestBuilder_;
+      /**
+       * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+       * @return Whether the connectionsRequest field is set.
+       */
+      @java.lang.Override
+      public boolean hasConnectionsRequest() {
+        return messageCase_ == 3;
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+       * @return The connectionsRequest.
+       */
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsRequest getConnectionsRequest() {
+        if (connectionsRequestBuilder_ == null) {
+          if (messageCase_ == 3) {
+            return (qaul.rpc.router.RouterOuterClass.ConnectionsRequest) message_;
+          }
+          return qaul.rpc.router.RouterOuterClass.ConnectionsRequest.getDefaultInstance();
+        } else {
+          if (messageCase_ == 3) {
+            return connectionsRequestBuilder_.getMessage();
+          }
+          return qaul.rpc.router.RouterOuterClass.ConnectionsRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+       */
+      public Builder setConnectionsRequest(qaul.rpc.router.RouterOuterClass.ConnectionsRequest value) {
+        if (connectionsRequestBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          connectionsRequestBuilder_.setMessage(value);
+        }
+        messageCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+       */
+      public Builder setConnectionsRequest(
+          qaul.rpc.router.RouterOuterClass.ConnectionsRequest.Builder builderForValue) {
+        if (connectionsRequestBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          connectionsRequestBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+       */
+      public Builder mergeConnectionsRequest(qaul.rpc.router.RouterOuterClass.ConnectionsRequest value) {
+        if (connectionsRequestBuilder_ == null) {
+          if (messageCase_ == 3 &&
+              message_ != qaul.rpc.router.RouterOuterClass.ConnectionsRequest.getDefaultInstance()) {
+            message_ = qaul.rpc.router.RouterOuterClass.ConnectionsRequest.newBuilder((qaul.rpc.router.RouterOuterClass.ConnectionsRequest) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 3) {
+            connectionsRequestBuilder_.mergeFrom(value);
+          }
+          connectionsRequestBuilder_.setMessage(value);
+        }
+        messageCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+       */
+      public Builder clearConnectionsRequest() {
+        if (connectionsRequestBuilder_ == null) {
+          if (messageCase_ == 3) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 3) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          connectionsRequestBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsRequest.Builder getConnectionsRequestBuilder() {
+        return getConnectionsRequestFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsRequestOrBuilder getConnectionsRequestOrBuilder() {
+        if ((messageCase_ == 3) && (connectionsRequestBuilder_ != null)) {
+          return connectionsRequestBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 3) {
+            return (qaul.rpc.router.RouterOuterClass.ConnectionsRequest) message_;
+          }
+          return qaul.rpc.router.RouterOuterClass.ConnectionsRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsRequest connections_request = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionsRequest, qaul.rpc.router.RouterOuterClass.ConnectionsRequest.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsRequestOrBuilder> 
+          getConnectionsRequestFieldBuilder() {
+        if (connectionsRequestBuilder_ == null) {
+          if (!(messageCase_ == 3)) {
+            message_ = qaul.rpc.router.RouterOuterClass.ConnectionsRequest.getDefaultInstance();
+          }
+          connectionsRequestBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.ConnectionsRequest, qaul.rpc.router.RouterOuterClass.ConnectionsRequest.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsRequestOrBuilder>(
+                  (qaul.rpc.router.RouterOuterClass.ConnectionsRequest) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 3;
+        onChanged();;
+        return connectionsRequestBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionsList, qaul.rpc.router.RouterOuterClass.ConnectionsList.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsListOrBuilder> connectionsListBuilder_;
+      /**
+       * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+       * @return Whether the connectionsList field is set.
+       */
+      @java.lang.Override
+      public boolean hasConnectionsList() {
+        return messageCase_ == 4;
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+       * @return The connectionsList.
+       */
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsList getConnectionsList() {
+        if (connectionsListBuilder_ == null) {
+          if (messageCase_ == 4) {
+            return (qaul.rpc.router.RouterOuterClass.ConnectionsList) message_;
+          }
+          return qaul.rpc.router.RouterOuterClass.ConnectionsList.getDefaultInstance();
+        } else {
+          if (messageCase_ == 4) {
+            return connectionsListBuilder_.getMessage();
+          }
+          return qaul.rpc.router.RouterOuterClass.ConnectionsList.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+       */
+      public Builder setConnectionsList(qaul.rpc.router.RouterOuterClass.ConnectionsList value) {
+        if (connectionsListBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          connectionsListBuilder_.setMessage(value);
+        }
+        messageCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+       */
+      public Builder setConnectionsList(
+          qaul.rpc.router.RouterOuterClass.ConnectionsList.Builder builderForValue) {
+        if (connectionsListBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          connectionsListBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+       */
+      public Builder mergeConnectionsList(qaul.rpc.router.RouterOuterClass.ConnectionsList value) {
+        if (connectionsListBuilder_ == null) {
+          if (messageCase_ == 4 &&
+              message_ != qaul.rpc.router.RouterOuterClass.ConnectionsList.getDefaultInstance()) {
+            message_ = qaul.rpc.router.RouterOuterClass.ConnectionsList.newBuilder((qaul.rpc.router.RouterOuterClass.ConnectionsList) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 4) {
+            connectionsListBuilder_.mergeFrom(value);
+          }
+          connectionsListBuilder_.setMessage(value);
+        }
+        messageCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+       */
+      public Builder clearConnectionsList() {
+        if (connectionsListBuilder_ == null) {
+          if (messageCase_ == 4) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 4) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          connectionsListBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsList.Builder getConnectionsListBuilder() {
+        return getConnectionsListFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsListOrBuilder getConnectionsListOrBuilder() {
+        if ((messageCase_ == 4) && (connectionsListBuilder_ != null)) {
+          return connectionsListBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 4) {
+            return (qaul.rpc.router.RouterOuterClass.ConnectionsList) message_;
+          }
+          return qaul.rpc.router.RouterOuterClass.ConnectionsList.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.router.ConnectionsList connections_list = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionsList, qaul.rpc.router.RouterOuterClass.ConnectionsList.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsListOrBuilder> 
+          getConnectionsListFieldBuilder() {
+        if (connectionsListBuilder_ == null) {
+          if (!(messageCase_ == 4)) {
+            message_ = qaul.rpc.router.RouterOuterClass.ConnectionsList.getDefaultInstance();
+          }
+          connectionsListBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.ConnectionsList, qaul.rpc.router.RouterOuterClass.ConnectionsList.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsListOrBuilder>(
+                  (qaul.rpc.router.RouterOuterClass.ConnectionsList) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 4;
+        onChanged();;
+        return connectionsListBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.NeighboursRequest, qaul.rpc.router.RouterOuterClass.NeighboursRequest.Builder, qaul.rpc.router.RouterOuterClass.NeighboursRequestOrBuilder> neighboursRequestBuilder_;
+      /**
+       * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+       * @return Whether the neighboursRequest field is set.
+       */
+      @java.lang.Override
+      public boolean hasNeighboursRequest() {
+        return messageCase_ == 5;
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+       * @return The neighboursRequest.
+       */
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursRequest getNeighboursRequest() {
+        if (neighboursRequestBuilder_ == null) {
+          if (messageCase_ == 5) {
+            return (qaul.rpc.router.RouterOuterClass.NeighboursRequest) message_;
+          }
+          return qaul.rpc.router.RouterOuterClass.NeighboursRequest.getDefaultInstance();
+        } else {
+          if (messageCase_ == 5) {
+            return neighboursRequestBuilder_.getMessage();
+          }
+          return qaul.rpc.router.RouterOuterClass.NeighboursRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+       */
+      public Builder setNeighboursRequest(qaul.rpc.router.RouterOuterClass.NeighboursRequest value) {
+        if (neighboursRequestBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          neighboursRequestBuilder_.setMessage(value);
+        }
+        messageCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+       */
+      public Builder setNeighboursRequest(
+          qaul.rpc.router.RouterOuterClass.NeighboursRequest.Builder builderForValue) {
+        if (neighboursRequestBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          neighboursRequestBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+       */
+      public Builder mergeNeighboursRequest(qaul.rpc.router.RouterOuterClass.NeighboursRequest value) {
+        if (neighboursRequestBuilder_ == null) {
+          if (messageCase_ == 5 &&
+              message_ != qaul.rpc.router.RouterOuterClass.NeighboursRequest.getDefaultInstance()) {
+            message_ = qaul.rpc.router.RouterOuterClass.NeighboursRequest.newBuilder((qaul.rpc.router.RouterOuterClass.NeighboursRequest) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 5) {
+            neighboursRequestBuilder_.mergeFrom(value);
+          }
+          neighboursRequestBuilder_.setMessage(value);
+        }
+        messageCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+       */
+      public Builder clearNeighboursRequest() {
+        if (neighboursRequestBuilder_ == null) {
+          if (messageCase_ == 5) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 5) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          neighboursRequestBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursRequest.Builder getNeighboursRequestBuilder() {
+        return getNeighboursRequestFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursRequestOrBuilder getNeighboursRequestOrBuilder() {
+        if ((messageCase_ == 5) && (neighboursRequestBuilder_ != null)) {
+          return neighboursRequestBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 5) {
+            return (qaul.rpc.router.RouterOuterClass.NeighboursRequest) message_;
+          }
+          return qaul.rpc.router.RouterOuterClass.NeighboursRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursRequest neighbours_request = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.NeighboursRequest, qaul.rpc.router.RouterOuterClass.NeighboursRequest.Builder, qaul.rpc.router.RouterOuterClass.NeighboursRequestOrBuilder> 
+          getNeighboursRequestFieldBuilder() {
+        if (neighboursRequestBuilder_ == null) {
+          if (!(messageCase_ == 5)) {
+            message_ = qaul.rpc.router.RouterOuterClass.NeighboursRequest.getDefaultInstance();
+          }
+          neighboursRequestBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.NeighboursRequest, qaul.rpc.router.RouterOuterClass.NeighboursRequest.Builder, qaul.rpc.router.RouterOuterClass.NeighboursRequestOrBuilder>(
+                  (qaul.rpc.router.RouterOuterClass.NeighboursRequest) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 5;
+        onChanged();;
+        return neighboursRequestBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.NeighboursList, qaul.rpc.router.RouterOuterClass.NeighboursList.Builder, qaul.rpc.router.RouterOuterClass.NeighboursListOrBuilder> neighboursListBuilder_;
+      /**
+       * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+       * @return Whether the neighboursList field is set.
+       */
+      @java.lang.Override
+      public boolean hasNeighboursList() {
+        return messageCase_ == 6;
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+       * @return The neighboursList.
+       */
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursList getNeighboursList() {
+        if (neighboursListBuilder_ == null) {
+          if (messageCase_ == 6) {
+            return (qaul.rpc.router.RouterOuterClass.NeighboursList) message_;
+          }
+          return qaul.rpc.router.RouterOuterClass.NeighboursList.getDefaultInstance();
+        } else {
+          if (messageCase_ == 6) {
+            return neighboursListBuilder_.getMessage();
+          }
+          return qaul.rpc.router.RouterOuterClass.NeighboursList.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+       */
+      public Builder setNeighboursList(qaul.rpc.router.RouterOuterClass.NeighboursList value) {
+        if (neighboursListBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          neighboursListBuilder_.setMessage(value);
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+       */
+      public Builder setNeighboursList(
+          qaul.rpc.router.RouterOuterClass.NeighboursList.Builder builderForValue) {
+        if (neighboursListBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          neighboursListBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+       */
+      public Builder mergeNeighboursList(qaul.rpc.router.RouterOuterClass.NeighboursList value) {
+        if (neighboursListBuilder_ == null) {
+          if (messageCase_ == 6 &&
+              message_ != qaul.rpc.router.RouterOuterClass.NeighboursList.getDefaultInstance()) {
+            message_ = qaul.rpc.router.RouterOuterClass.NeighboursList.newBuilder((qaul.rpc.router.RouterOuterClass.NeighboursList) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 6) {
+            neighboursListBuilder_.mergeFrom(value);
+          }
+          neighboursListBuilder_.setMessage(value);
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+       */
+      public Builder clearNeighboursList() {
+        if (neighboursListBuilder_ == null) {
+          if (messageCase_ == 6) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 6) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          neighboursListBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursList.Builder getNeighboursListBuilder() {
+        return getNeighboursListFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursListOrBuilder getNeighboursListOrBuilder() {
+        if ((messageCase_ == 6) && (neighboursListBuilder_ != null)) {
+          return neighboursListBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 6) {
+            return (qaul.rpc.router.RouterOuterClass.NeighboursList) message_;
+          }
+          return qaul.rpc.router.RouterOuterClass.NeighboursList.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.router.NeighboursList neighbours_list = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.NeighboursList, qaul.rpc.router.RouterOuterClass.NeighboursList.Builder, qaul.rpc.router.RouterOuterClass.NeighboursListOrBuilder> 
+          getNeighboursListFieldBuilder() {
+        if (neighboursListBuilder_ == null) {
+          if (!(messageCase_ == 6)) {
+            message_ = qaul.rpc.router.RouterOuterClass.NeighboursList.getDefaultInstance();
+          }
+          neighboursListBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.NeighboursList, qaul.rpc.router.RouterOuterClass.NeighboursList.Builder, qaul.rpc.router.RouterOuterClass.NeighboursListOrBuilder>(
+                  (qaul.rpc.router.RouterOuterClass.NeighboursList) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 6;
+        onChanged();;
+        return neighboursListBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -1120,34 +2024,34 @@ public final class RouterOuterClass {
 
   }
 
-  public interface UserRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.UserRequest)
+  public interface RoutingTableRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.RoutingTableRequest)
       com.google.protobuf.MessageOrBuilder {
   }
   /**
    * <pre>
-   * UI request for some users
+   * UI request for routing table list
    * </pre>
    *
-   * Protobuf type {@code qaul.rpc.router.UserRequest}
+   * Protobuf type {@code qaul.rpc.router.RoutingTableRequest}
    */
-  public static final class UserRequest extends
+  public static final class RoutingTableRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:qaul.rpc.router.UserRequest)
-      UserRequestOrBuilder {
+      // @@protoc_insertion_point(message_implements:qaul.rpc.router.RoutingTableRequest)
+      RoutingTableRequestOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use UserRequest.newBuilder() to construct.
-    private UserRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use RoutingTableRequest.newBuilder() to construct.
+    private RoutingTableRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private UserRequest() {
+    private RoutingTableRequest() {
     }
 
     @java.lang.Override
     @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
         UnusedPrivateParameter unused) {
-      return new UserRequest();
+      return new RoutingTableRequest();
     }
 
     @java.lang.Override
@@ -1155,7 +2059,7 @@ public final class RouterOuterClass {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private UserRequest(
+    private RoutingTableRequest(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1194,15 +2098,15 @@ public final class RouterOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserRequest_descriptor;
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserRequest_fieldAccessorTable
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              qaul.rpc.router.RouterOuterClass.UserRequest.class, qaul.rpc.router.RouterOuterClass.UserRequest.Builder.class);
+              qaul.rpc.router.RouterOuterClass.RoutingTableRequest.class, qaul.rpc.router.RouterOuterClass.RoutingTableRequest.Builder.class);
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1238,10 +2142,10 @@ public final class RouterOuterClass {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.UserRequest)) {
+      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.RoutingTableRequest)) {
         return super.equals(obj);
       }
-      qaul.rpc.router.RouterOuterClass.UserRequest other = (qaul.rpc.router.RouterOuterClass.UserRequest) obj;
+      qaul.rpc.router.RouterOuterClass.RoutingTableRequest other = (qaul.rpc.router.RouterOuterClass.RoutingTableRequest) obj;
 
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
@@ -1259,69 +2163,69 @@ public final class RouterOuterClass {
       return hash;
     }
 
-    public static qaul.rpc.router.RouterOuterClass.UserRequest parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserRequest parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserRequest parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserRequest parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserRequest parseFrom(byte[] data)
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserRequest parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserRequest parseFrom(java.io.InputStream input)
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserRequest parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserRequest parseDelimitedFrom(java.io.InputStream input)
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserRequest parseDelimitedFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserRequest parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserRequest parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1334,7 +2238,7 @@ public final class RouterOuterClass {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.UserRequest prototype) {
+    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.RoutingTableRequest prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -1351,29 +2255,29 @@ public final class RouterOuterClass {
     }
     /**
      * <pre>
-     * UI request for some users
+     * UI request for routing table list
      * </pre>
      *
-     * Protobuf type {@code qaul.rpc.router.UserRequest}
+     * Protobuf type {@code qaul.rpc.router.RoutingTableRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.UserRequest)
-        qaul.rpc.router.RouterOuterClass.UserRequestOrBuilder {
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.RoutingTableRequest)
+        qaul.rpc.router.RouterOuterClass.RoutingTableRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserRequest_descriptor;
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserRequest_fieldAccessorTable
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                qaul.rpc.router.RouterOuterClass.UserRequest.class, qaul.rpc.router.RouterOuterClass.UserRequest.Builder.class);
+                qaul.rpc.router.RouterOuterClass.RoutingTableRequest.class, qaul.rpc.router.RouterOuterClass.RoutingTableRequest.Builder.class);
       }
 
-      // Construct using qaul.rpc.router.RouterOuterClass.UserRequest.newBuilder()
+      // Construct using qaul.rpc.router.RouterOuterClass.RoutingTableRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -1397,17 +2301,17 @@ public final class RouterOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserRequest_descriptor;
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableRequest_descriptor;
       }
 
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserRequest getDefaultInstanceForType() {
-        return qaul.rpc.router.RouterOuterClass.UserRequest.getDefaultInstance();
+      public qaul.rpc.router.RouterOuterClass.RoutingTableRequest getDefaultInstanceForType() {
+        return qaul.rpc.router.RouterOuterClass.RoutingTableRequest.getDefaultInstance();
       }
 
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserRequest build() {
-        qaul.rpc.router.RouterOuterClass.UserRequest result = buildPartial();
+      public qaul.rpc.router.RouterOuterClass.RoutingTableRequest build() {
+        qaul.rpc.router.RouterOuterClass.RoutingTableRequest result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -1415,8 +2319,8 @@ public final class RouterOuterClass {
       }
 
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserRequest buildPartial() {
-        qaul.rpc.router.RouterOuterClass.UserRequest result = new qaul.rpc.router.RouterOuterClass.UserRequest(this);
+      public qaul.rpc.router.RouterOuterClass.RoutingTableRequest buildPartial() {
+        qaul.rpc.router.RouterOuterClass.RoutingTableRequest result = new qaul.rpc.router.RouterOuterClass.RoutingTableRequest(this);
         onBuilt();
         return result;
       }
@@ -1455,16 +2359,16 @@ public final class RouterOuterClass {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof qaul.rpc.router.RouterOuterClass.UserRequest) {
-          return mergeFrom((qaul.rpc.router.RouterOuterClass.UserRequest)other);
+        if (other instanceof qaul.rpc.router.RouterOuterClass.RoutingTableRequest) {
+          return mergeFrom((qaul.rpc.router.RouterOuterClass.RoutingTableRequest)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.UserRequest other) {
-        if (other == qaul.rpc.router.RouterOuterClass.UserRequest.getDefaultInstance()) return this;
+      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.RoutingTableRequest other) {
+        if (other == qaul.rpc.router.RouterOuterClass.RoutingTableRequest.getDefaultInstance()) return this;
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -1480,11 +2384,11 @@ public final class RouterOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        qaul.rpc.router.RouterOuterClass.UserRequest parsedMessage = null;
+        qaul.rpc.router.RouterOuterClass.RoutingTableRequest parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (qaul.rpc.router.RouterOuterClass.UserRequest) e.getUnfinishedMessage();
+          parsedMessage = (qaul.rpc.router.RouterOuterClass.RoutingTableRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -1506,99 +2410,102 @@ public final class RouterOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.UserRequest)
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.RoutingTableRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:qaul.rpc.router.UserRequest)
-    private static final qaul.rpc.router.RouterOuterClass.UserRequest DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:qaul.rpc.router.RoutingTableRequest)
+    private static final qaul.rpc.router.RouterOuterClass.RoutingTableRequest DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.UserRequest();
+      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.RoutingTableRequest();
     }
 
-    public static qaul.rpc.router.RouterOuterClass.UserRequest getDefaultInstance() {
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<UserRequest>
-        PARSER = new com.google.protobuf.AbstractParser<UserRequest>() {
+    private static final com.google.protobuf.Parser<RoutingTableRequest>
+        PARSER = new com.google.protobuf.AbstractParser<RoutingTableRequest>() {
       @java.lang.Override
-      public UserRequest parsePartialFrom(
+      public RoutingTableRequest parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UserRequest(input, extensionRegistry);
+        return new RoutingTableRequest(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<UserRequest> parser() {
+    public static com.google.protobuf.Parser<RoutingTableRequest> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<UserRequest> getParserForType() {
+    public com.google.protobuf.Parser<RoutingTableRequest> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public qaul.rpc.router.RouterOuterClass.UserRequest getDefaultInstanceForType() {
+    public qaul.rpc.router.RouterOuterClass.RoutingTableRequest getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface UserListOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.UserList)
+  public interface RoutingTableListOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.RoutingTableList)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+     * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
      */
-    java.util.List<qaul.rpc.router.RouterOuterClass.UserEntry> 
-        getUserList();
+    java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableEntry> 
+        getRoutingTableList();
     /**
-     * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+     * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
      */
-    qaul.rpc.router.RouterOuterClass.UserEntry getUser(int index);
+    qaul.rpc.router.RouterOuterClass.RoutingTableEntry getRoutingTable(int index);
     /**
-     * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+     * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
      */
-    int getUserCount();
+    int getRoutingTableCount();
     /**
-     * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+     * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
      */
-    java.util.List<? extends qaul.rpc.router.RouterOuterClass.UserEntryOrBuilder> 
-        getUserOrBuilderList();
+    java.util.List<? extends qaul.rpc.router.RouterOuterClass.RoutingTableEntryOrBuilder> 
+        getRoutingTableOrBuilderList();
     /**
-     * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+     * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
      */
-    qaul.rpc.router.RouterOuterClass.UserEntryOrBuilder getUserOrBuilder(
+    qaul.rpc.router.RouterOuterClass.RoutingTableEntryOrBuilder getRoutingTableOrBuilder(
         int index);
   }
   /**
    * <pre>
-   * user list
+   * Routing table list
+   * This table presents the best view for each user.
+   * It represents the decision the router takes
+   * when sending and routing packages
    * </pre>
    *
-   * Protobuf type {@code qaul.rpc.router.UserList}
+   * Protobuf type {@code qaul.rpc.router.RoutingTableList}
    */
-  public static final class UserList extends
+  public static final class RoutingTableList extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:qaul.rpc.router.UserList)
-      UserListOrBuilder {
+      // @@protoc_insertion_point(message_implements:qaul.rpc.router.RoutingTableList)
+      RoutingTableListOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use UserList.newBuilder() to construct.
-    private UserList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use RoutingTableList.newBuilder() to construct.
+    private RoutingTableList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private UserList() {
-      user_ = java.util.Collections.emptyList();
+    private RoutingTableList() {
+      routingTable_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
     @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
         UnusedPrivateParameter unused) {
-      return new UserList();
+      return new RoutingTableList();
     }
 
     @java.lang.Override
@@ -1606,7 +2513,7 @@ public final class RouterOuterClass {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private UserList(
+    private RoutingTableList(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1627,11 +2534,11 @@ public final class RouterOuterClass {
               break;
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                user_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.UserEntry>();
+                routingTable_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.RoutingTableEntry>();
                 mutable_bitField0_ |= 0x00000001;
               }
-              user_.add(
-                  input.readMessage(qaul.rpc.router.RouterOuterClass.UserEntry.parser(), extensionRegistry));
+              routingTable_.add(
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.RoutingTableEntry.parser(), extensionRegistry));
               break;
             }
             default: {
@@ -1650,7 +2557,7 @@ public final class RouterOuterClass {
             e).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          user_ = java.util.Collections.unmodifiableList(user_);
+          routingTable_ = java.util.Collections.unmodifiableList(routingTable_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -1658,55 +2565,55 @@ public final class RouterOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserList_descriptor;
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableList_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserList_fieldAccessorTable
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableList_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              qaul.rpc.router.RouterOuterClass.UserList.class, qaul.rpc.router.RouterOuterClass.UserList.Builder.class);
+              qaul.rpc.router.RouterOuterClass.RoutingTableList.class, qaul.rpc.router.RouterOuterClass.RoutingTableList.Builder.class);
     }
 
-    public static final int USER_FIELD_NUMBER = 1;
-    private java.util.List<qaul.rpc.router.RouterOuterClass.UserEntry> user_;
+    public static final int ROUTING_TABLE_FIELD_NUMBER = 1;
+    private java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableEntry> routingTable_;
     /**
-     * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+     * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
      */
     @java.lang.Override
-    public java.util.List<qaul.rpc.router.RouterOuterClass.UserEntry> getUserList() {
-      return user_;
+    public java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableEntry> getRoutingTableList() {
+      return routingTable_;
     }
     /**
-     * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+     * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
      */
     @java.lang.Override
-    public java.util.List<? extends qaul.rpc.router.RouterOuterClass.UserEntryOrBuilder> 
-        getUserOrBuilderList() {
-      return user_;
+    public java.util.List<? extends qaul.rpc.router.RouterOuterClass.RoutingTableEntryOrBuilder> 
+        getRoutingTableOrBuilderList() {
+      return routingTable_;
     }
     /**
-     * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+     * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
      */
     @java.lang.Override
-    public int getUserCount() {
-      return user_.size();
+    public int getRoutingTableCount() {
+      return routingTable_.size();
     }
     /**
-     * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+     * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
      */
     @java.lang.Override
-    public qaul.rpc.router.RouterOuterClass.UserEntry getUser(int index) {
-      return user_.get(index);
+    public qaul.rpc.router.RouterOuterClass.RoutingTableEntry getRoutingTable(int index) {
+      return routingTable_.get(index);
     }
     /**
-     * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+     * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
      */
     @java.lang.Override
-    public qaul.rpc.router.RouterOuterClass.UserEntryOrBuilder getUserOrBuilder(
+    public qaul.rpc.router.RouterOuterClass.RoutingTableEntryOrBuilder getRoutingTableOrBuilder(
         int index) {
-      return user_.get(index);
+      return routingTable_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1723,8 +2630,8 @@ public final class RouterOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      for (int i = 0; i < user_.size(); i++) {
-        output.writeMessage(1, user_.get(i));
+      for (int i = 0; i < routingTable_.size(); i++) {
+        output.writeMessage(1, routingTable_.get(i));
       }
       unknownFields.writeTo(output);
     }
@@ -1735,9 +2642,9 @@ public final class RouterOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      for (int i = 0; i < user_.size(); i++) {
+      for (int i = 0; i < routingTable_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, user_.get(i));
+          .computeMessageSize(1, routingTable_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1749,13 +2656,13 @@ public final class RouterOuterClass {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.UserList)) {
+      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.RoutingTableList)) {
         return super.equals(obj);
       }
-      qaul.rpc.router.RouterOuterClass.UserList other = (qaul.rpc.router.RouterOuterClass.UserList) obj;
+      qaul.rpc.router.RouterOuterClass.RoutingTableList other = (qaul.rpc.router.RouterOuterClass.RoutingTableList) obj;
 
-      if (!getUserList()
-          .equals(other.getUserList())) return false;
+      if (!getRoutingTableList()
+          .equals(other.getRoutingTableList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1767,78 +2674,78 @@ public final class RouterOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (getUserCount() > 0) {
-        hash = (37 * hash) + USER_FIELD_NUMBER;
-        hash = (53 * hash) + getUserList().hashCode();
+      if (getRoutingTableCount() > 0) {
+        hash = (37 * hash) + ROUTING_TABLE_FIELD_NUMBER;
+        hash = (53 * hash) + getRoutingTableList().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static qaul.rpc.router.RouterOuterClass.UserList parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserList parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserList parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserList parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserList parseFrom(byte[] data)
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserList parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserList parseFrom(java.io.InputStream input)
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserList parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserList parseDelimitedFrom(java.io.InputStream input)
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserList parseDelimitedFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserList parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserList parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1851,7 +2758,7 @@ public final class RouterOuterClass {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.UserList prototype) {
+    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.RoutingTableList prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -1868,29 +2775,32 @@ public final class RouterOuterClass {
     }
     /**
      * <pre>
-     * user list
+     * Routing table list
+     * This table presents the best view for each user.
+     * It represents the decision the router takes
+     * when sending and routing packages
      * </pre>
      *
-     * Protobuf type {@code qaul.rpc.router.UserList}
+     * Protobuf type {@code qaul.rpc.router.RoutingTableList}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.UserList)
-        qaul.rpc.router.RouterOuterClass.UserListOrBuilder {
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.RoutingTableList)
+        qaul.rpc.router.RouterOuterClass.RoutingTableListOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserList_descriptor;
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableList_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserList_fieldAccessorTable
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableList_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                qaul.rpc.router.RouterOuterClass.UserList.class, qaul.rpc.router.RouterOuterClass.UserList.Builder.class);
+                qaul.rpc.router.RouterOuterClass.RoutingTableList.class, qaul.rpc.router.RouterOuterClass.RoutingTableList.Builder.class);
       }
 
-      // Construct using qaul.rpc.router.RouterOuterClass.UserList.newBuilder()
+      // Construct using qaul.rpc.router.RouterOuterClass.RoutingTableList.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -1903,17 +2813,17 @@ public final class RouterOuterClass {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
-          getUserFieldBuilder();
+          getRoutingTableFieldBuilder();
         }
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        if (userBuilder_ == null) {
-          user_ = java.util.Collections.emptyList();
+        if (routingTableBuilder_ == null) {
+          routingTable_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000001);
         } else {
-          userBuilder_.clear();
+          routingTableBuilder_.clear();
         }
         return this;
       }
@@ -1921,17 +2831,17 @@ public final class RouterOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserList_descriptor;
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableList_descriptor;
       }
 
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserList getDefaultInstanceForType() {
-        return qaul.rpc.router.RouterOuterClass.UserList.getDefaultInstance();
+      public qaul.rpc.router.RouterOuterClass.RoutingTableList getDefaultInstanceForType() {
+        return qaul.rpc.router.RouterOuterClass.RoutingTableList.getDefaultInstance();
       }
 
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserList build() {
-        qaul.rpc.router.RouterOuterClass.UserList result = buildPartial();
+      public qaul.rpc.router.RouterOuterClass.RoutingTableList build() {
+        qaul.rpc.router.RouterOuterClass.RoutingTableList result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -1939,17 +2849,17 @@ public final class RouterOuterClass {
       }
 
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserList buildPartial() {
-        qaul.rpc.router.RouterOuterClass.UserList result = new qaul.rpc.router.RouterOuterClass.UserList(this);
+      public qaul.rpc.router.RouterOuterClass.RoutingTableList buildPartial() {
+        qaul.rpc.router.RouterOuterClass.RoutingTableList result = new qaul.rpc.router.RouterOuterClass.RoutingTableList(this);
         int from_bitField0_ = bitField0_;
-        if (userBuilder_ == null) {
+        if (routingTableBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
-            user_ = java.util.Collections.unmodifiableList(user_);
+            routingTable_ = java.util.Collections.unmodifiableList(routingTable_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
-          result.user_ = user_;
+          result.routingTable_ = routingTable_;
         } else {
-          result.user_ = userBuilder_.build();
+          result.routingTable_ = routingTableBuilder_.build();
         }
         onBuilt();
         return result;
@@ -1989,39 +2899,39 @@ public final class RouterOuterClass {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof qaul.rpc.router.RouterOuterClass.UserList) {
-          return mergeFrom((qaul.rpc.router.RouterOuterClass.UserList)other);
+        if (other instanceof qaul.rpc.router.RouterOuterClass.RoutingTableList) {
+          return mergeFrom((qaul.rpc.router.RouterOuterClass.RoutingTableList)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.UserList other) {
-        if (other == qaul.rpc.router.RouterOuterClass.UserList.getDefaultInstance()) return this;
-        if (userBuilder_ == null) {
-          if (!other.user_.isEmpty()) {
-            if (user_.isEmpty()) {
-              user_ = other.user_;
+      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.RoutingTableList other) {
+        if (other == qaul.rpc.router.RouterOuterClass.RoutingTableList.getDefaultInstance()) return this;
+        if (routingTableBuilder_ == null) {
+          if (!other.routingTable_.isEmpty()) {
+            if (routingTable_.isEmpty()) {
+              routingTable_ = other.routingTable_;
               bitField0_ = (bitField0_ & ~0x00000001);
             } else {
-              ensureUserIsMutable();
-              user_.addAll(other.user_);
+              ensureRoutingTableIsMutable();
+              routingTable_.addAll(other.routingTable_);
             }
             onChanged();
           }
         } else {
-          if (!other.user_.isEmpty()) {
-            if (userBuilder_.isEmpty()) {
-              userBuilder_.dispose();
-              userBuilder_ = null;
-              user_ = other.user_;
+          if (!other.routingTable_.isEmpty()) {
+            if (routingTableBuilder_.isEmpty()) {
+              routingTableBuilder_.dispose();
+              routingTableBuilder_ = null;
+              routingTable_ = other.routingTable_;
               bitField0_ = (bitField0_ & ~0x00000001);
-              userBuilder_ = 
+              routingTableBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getUserFieldBuilder() : null;
+                   getRoutingTableFieldBuilder() : null;
             } else {
-              userBuilder_.addAllMessages(other.user_);
+              routingTableBuilder_.addAllMessages(other.routingTable_);
             }
           }
         }
@@ -2040,11 +2950,11 @@ public final class RouterOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        qaul.rpc.router.RouterOuterClass.UserList parsedMessage = null;
+        qaul.rpc.router.RouterOuterClass.RoutingTableList parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (qaul.rpc.router.RouterOuterClass.UserList) e.getUnfinishedMessage();
+          parsedMessage = (qaul.rpc.router.RouterOuterClass.RoutingTableList) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -2055,244 +2965,244 @@ public final class RouterOuterClass {
       }
       private int bitField0_;
 
-      private java.util.List<qaul.rpc.router.RouterOuterClass.UserEntry> user_ =
+      private java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableEntry> routingTable_ =
         java.util.Collections.emptyList();
-      private void ensureUserIsMutable() {
+      private void ensureRoutingTableIsMutable() {
         if (!((bitField0_ & 0x00000001) != 0)) {
-          user_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.UserEntry>(user_);
+          routingTable_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.RoutingTableEntry>(routingTable_);
           bitField0_ |= 0x00000001;
          }
       }
 
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          qaul.rpc.router.RouterOuterClass.UserEntry, qaul.rpc.router.RouterOuterClass.UserEntry.Builder, qaul.rpc.router.RouterOuterClass.UserEntryOrBuilder> userBuilder_;
+          qaul.rpc.router.RouterOuterClass.RoutingTableEntry, qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableEntryOrBuilder> routingTableBuilder_;
 
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public java.util.List<qaul.rpc.router.RouterOuterClass.UserEntry> getUserList() {
-        if (userBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(user_);
+      public java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableEntry> getRoutingTableList() {
+        if (routingTableBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(routingTable_);
         } else {
-          return userBuilder_.getMessageList();
+          return routingTableBuilder_.getMessageList();
         }
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public int getUserCount() {
-        if (userBuilder_ == null) {
-          return user_.size();
+      public int getRoutingTableCount() {
+        if (routingTableBuilder_ == null) {
+          return routingTable_.size();
         } else {
-          return userBuilder_.getCount();
+          return routingTableBuilder_.getCount();
         }
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public qaul.rpc.router.RouterOuterClass.UserEntry getUser(int index) {
-        if (userBuilder_ == null) {
-          return user_.get(index);
+      public qaul.rpc.router.RouterOuterClass.RoutingTableEntry getRoutingTable(int index) {
+        if (routingTableBuilder_ == null) {
+          return routingTable_.get(index);
         } else {
-          return userBuilder_.getMessage(index);
+          return routingTableBuilder_.getMessage(index);
         }
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public Builder setUser(
-          int index, qaul.rpc.router.RouterOuterClass.UserEntry value) {
-        if (userBuilder_ == null) {
+      public Builder setRoutingTable(
+          int index, qaul.rpc.router.RouterOuterClass.RoutingTableEntry value) {
+        if (routingTableBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureUserIsMutable();
-          user_.set(index, value);
+          ensureRoutingTableIsMutable();
+          routingTable_.set(index, value);
           onChanged();
         } else {
-          userBuilder_.setMessage(index, value);
+          routingTableBuilder_.setMessage(index, value);
         }
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public Builder setUser(
-          int index, qaul.rpc.router.RouterOuterClass.UserEntry.Builder builderForValue) {
-        if (userBuilder_ == null) {
-          ensureUserIsMutable();
-          user_.set(index, builderForValue.build());
+      public Builder setRoutingTable(
+          int index, qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder builderForValue) {
+        if (routingTableBuilder_ == null) {
+          ensureRoutingTableIsMutable();
+          routingTable_.set(index, builderForValue.build());
           onChanged();
         } else {
-          userBuilder_.setMessage(index, builderForValue.build());
+          routingTableBuilder_.setMessage(index, builderForValue.build());
         }
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public Builder addUser(qaul.rpc.router.RouterOuterClass.UserEntry value) {
-        if (userBuilder_ == null) {
+      public Builder addRoutingTable(qaul.rpc.router.RouterOuterClass.RoutingTableEntry value) {
+        if (routingTableBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureUserIsMutable();
-          user_.add(value);
+          ensureRoutingTableIsMutable();
+          routingTable_.add(value);
           onChanged();
         } else {
-          userBuilder_.addMessage(value);
+          routingTableBuilder_.addMessage(value);
         }
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public Builder addUser(
-          int index, qaul.rpc.router.RouterOuterClass.UserEntry value) {
-        if (userBuilder_ == null) {
+      public Builder addRoutingTable(
+          int index, qaul.rpc.router.RouterOuterClass.RoutingTableEntry value) {
+        if (routingTableBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureUserIsMutable();
-          user_.add(index, value);
+          ensureRoutingTableIsMutable();
+          routingTable_.add(index, value);
           onChanged();
         } else {
-          userBuilder_.addMessage(index, value);
+          routingTableBuilder_.addMessage(index, value);
         }
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public Builder addUser(
-          qaul.rpc.router.RouterOuterClass.UserEntry.Builder builderForValue) {
-        if (userBuilder_ == null) {
-          ensureUserIsMutable();
-          user_.add(builderForValue.build());
+      public Builder addRoutingTable(
+          qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder builderForValue) {
+        if (routingTableBuilder_ == null) {
+          ensureRoutingTableIsMutable();
+          routingTable_.add(builderForValue.build());
           onChanged();
         } else {
-          userBuilder_.addMessage(builderForValue.build());
+          routingTableBuilder_.addMessage(builderForValue.build());
         }
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public Builder addUser(
-          int index, qaul.rpc.router.RouterOuterClass.UserEntry.Builder builderForValue) {
-        if (userBuilder_ == null) {
-          ensureUserIsMutable();
-          user_.add(index, builderForValue.build());
+      public Builder addRoutingTable(
+          int index, qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder builderForValue) {
+        if (routingTableBuilder_ == null) {
+          ensureRoutingTableIsMutable();
+          routingTable_.add(index, builderForValue.build());
           onChanged();
         } else {
-          userBuilder_.addMessage(index, builderForValue.build());
+          routingTableBuilder_.addMessage(index, builderForValue.build());
         }
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public Builder addAllUser(
-          java.lang.Iterable<? extends qaul.rpc.router.RouterOuterClass.UserEntry> values) {
-        if (userBuilder_ == null) {
-          ensureUserIsMutable();
+      public Builder addAllRoutingTable(
+          java.lang.Iterable<? extends qaul.rpc.router.RouterOuterClass.RoutingTableEntry> values) {
+        if (routingTableBuilder_ == null) {
+          ensureRoutingTableIsMutable();
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, user_);
+              values, routingTable_);
           onChanged();
         } else {
-          userBuilder_.addAllMessages(values);
+          routingTableBuilder_.addAllMessages(values);
         }
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public Builder clearUser() {
-        if (userBuilder_ == null) {
-          user_ = java.util.Collections.emptyList();
+      public Builder clearRoutingTable() {
+        if (routingTableBuilder_ == null) {
+          routingTable_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
         } else {
-          userBuilder_.clear();
+          routingTableBuilder_.clear();
         }
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public Builder removeUser(int index) {
-        if (userBuilder_ == null) {
-          ensureUserIsMutable();
-          user_.remove(index);
+      public Builder removeRoutingTable(int index) {
+        if (routingTableBuilder_ == null) {
+          ensureRoutingTableIsMutable();
+          routingTable_.remove(index);
           onChanged();
         } else {
-          userBuilder_.remove(index);
+          routingTableBuilder_.remove(index);
         }
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public qaul.rpc.router.RouterOuterClass.UserEntry.Builder getUserBuilder(
+      public qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder getRoutingTableBuilder(
           int index) {
-        return getUserFieldBuilder().getBuilder(index);
+        return getRoutingTableFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public qaul.rpc.router.RouterOuterClass.UserEntryOrBuilder getUserOrBuilder(
+      public qaul.rpc.router.RouterOuterClass.RoutingTableEntryOrBuilder getRoutingTableOrBuilder(
           int index) {
-        if (userBuilder_ == null) {
-          return user_.get(index);  } else {
-          return userBuilder_.getMessageOrBuilder(index);
+        if (routingTableBuilder_ == null) {
+          return routingTable_.get(index);  } else {
+          return routingTableBuilder_.getMessageOrBuilder(index);
         }
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public java.util.List<? extends qaul.rpc.router.RouterOuterClass.UserEntryOrBuilder> 
-           getUserOrBuilderList() {
-        if (userBuilder_ != null) {
-          return userBuilder_.getMessageOrBuilderList();
+      public java.util.List<? extends qaul.rpc.router.RouterOuterClass.RoutingTableEntryOrBuilder> 
+           getRoutingTableOrBuilderList() {
+        if (routingTableBuilder_ != null) {
+          return routingTableBuilder_.getMessageOrBuilderList();
         } else {
-          return java.util.Collections.unmodifiableList(user_);
+          return java.util.Collections.unmodifiableList(routingTable_);
         }
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public qaul.rpc.router.RouterOuterClass.UserEntry.Builder addUserBuilder() {
-        return getUserFieldBuilder().addBuilder(
-            qaul.rpc.router.RouterOuterClass.UserEntry.getDefaultInstance());
+      public qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder addRoutingTableBuilder() {
+        return getRoutingTableFieldBuilder().addBuilder(
+            qaul.rpc.router.RouterOuterClass.RoutingTableEntry.getDefaultInstance());
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public qaul.rpc.router.RouterOuterClass.UserEntry.Builder addUserBuilder(
+      public qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder addRoutingTableBuilder(
           int index) {
-        return getUserFieldBuilder().addBuilder(
-            index, qaul.rpc.router.RouterOuterClass.UserEntry.getDefaultInstance());
+        return getRoutingTableFieldBuilder().addBuilder(
+            index, qaul.rpc.router.RouterOuterClass.RoutingTableEntry.getDefaultInstance());
       }
       /**
-       * <code>repeated .qaul.rpc.router.UserEntry user = 1;</code>
+       * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
        */
-      public java.util.List<qaul.rpc.router.RouterOuterClass.UserEntry.Builder> 
-           getUserBuilderList() {
-        return getUserFieldBuilder().getBuilderList();
+      public java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder> 
+           getRoutingTableBuilderList() {
+        return getRoutingTableFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          qaul.rpc.router.RouterOuterClass.UserEntry, qaul.rpc.router.RouterOuterClass.UserEntry.Builder, qaul.rpc.router.RouterOuterClass.UserEntryOrBuilder> 
-          getUserFieldBuilder() {
-        if (userBuilder_ == null) {
-          userBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              qaul.rpc.router.RouterOuterClass.UserEntry, qaul.rpc.router.RouterOuterClass.UserEntry.Builder, qaul.rpc.router.RouterOuterClass.UserEntryOrBuilder>(
-                  user_,
+          qaul.rpc.router.RouterOuterClass.RoutingTableEntry, qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableEntryOrBuilder> 
+          getRoutingTableFieldBuilder() {
+        if (routingTableBuilder_ == null) {
+          routingTableBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.RoutingTableEntry, qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableEntryOrBuilder>(
+                  routingTable_,
                   ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
-          user_ = null;
+          routingTable_ = null;
         }
-        return userBuilder_;
+        return routingTableBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -2307,156 +3217,108 @@ public final class RouterOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.UserList)
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.RoutingTableList)
     }
 
-    // @@protoc_insertion_point(class_scope:qaul.rpc.router.UserList)
-    private static final qaul.rpc.router.RouterOuterClass.UserList DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:qaul.rpc.router.RoutingTableList)
+    private static final qaul.rpc.router.RouterOuterClass.RoutingTableList DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.UserList();
+      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.RoutingTableList();
     }
 
-    public static qaul.rpc.router.RouterOuterClass.UserList getDefaultInstance() {
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableList getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<UserList>
-        PARSER = new com.google.protobuf.AbstractParser<UserList>() {
+    private static final com.google.protobuf.Parser<RoutingTableList>
+        PARSER = new com.google.protobuf.AbstractParser<RoutingTableList>() {
       @java.lang.Override
-      public UserList parsePartialFrom(
+      public RoutingTableList parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UserList(input, extensionRegistry);
+        return new RoutingTableList(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<UserList> parser() {
+    public static com.google.protobuf.Parser<RoutingTableList> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<UserList> getParserForType() {
+    public com.google.protobuf.Parser<RoutingTableList> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public qaul.rpc.router.RouterOuterClass.UserList getDefaultInstanceForType() {
+    public qaul.rpc.router.RouterOuterClass.RoutingTableList getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface UserEntryOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.UserEntry)
+  public interface RoutingTableEntryOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.RoutingTableEntry)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string name = 1;</code>
-     * @return The name.
+     * <code>bytes user_id = 1;</code>
+     * @return The userId.
      */
-    java.lang.String getName();
-    /**
-     * <code>string name = 1;</code>
-     * @return The bytes for name.
-     */
-    com.google.protobuf.ByteString
-        getNameBytes();
+    com.google.protobuf.ByteString getUserId();
 
     /**
-     * <code>bytes id = 2;</code>
-     * @return The id.
+     * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
      */
-    com.google.protobuf.ByteString getId();
-
+    java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableConnection> 
+        getConnectionsList();
     /**
-     * <code>string id_base58 = 4;</code>
-     * @return The idBase58.
+     * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
      */
-    java.lang.String getIdBase58();
+    qaul.rpc.router.RouterOuterClass.RoutingTableConnection getConnections(int index);
     /**
-     * <code>string id_base58 = 4;</code>
-     * @return The bytes for idBase58.
+     * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
      */
-    com.google.protobuf.ByteString
-        getIdBase58Bytes();
-
+    int getConnectionsCount();
     /**
-     * <pre>
-     * protobuf encoded public key
-     * </pre>
-     *
-     * <code>bytes key = 5;</code>
-     * @return The key.
+     * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
      */
-    com.google.protobuf.ByteString getKey();
-
+    java.util.List<? extends qaul.rpc.router.RouterOuterClass.RoutingTableConnectionOrBuilder> 
+        getConnectionsOrBuilderList();
     /**
-     * <code>string key_type = 6;</code>
-     * @return The keyType.
+     * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
      */
-    java.lang.String getKeyType();
-    /**
-     * <code>string key_type = 6;</code>
-     * @return The bytes for keyType.
-     */
-    com.google.protobuf.ByteString
-        getKeyTypeBytes();
-
-    /**
-     * <code>string key_base58 = 7;</code>
-     * @return The keyBase58.
-     */
-    java.lang.String getKeyBase58();
-    /**
-     * <code>string key_base58 = 7;</code>
-     * @return The bytes for keyBase58.
-     */
-    com.google.protobuf.ByteString
-        getKeyBase58Bytes();
-
-    /**
-     * <code>.qaul.rpc.router.Connectivity connectivity = 8;</code>
-     * @return The enum numeric value on the wire for connectivity.
-     */
-    int getConnectivityValue();
-    /**
-     * <code>.qaul.rpc.router.Connectivity connectivity = 8;</code>
-     * @return The connectivity.
-     */
-    qaul.rpc.router.RouterOuterClass.Connectivity getConnectivity();
+    qaul.rpc.router.RouterOuterClass.RoutingTableConnectionOrBuilder getConnectionsOrBuilder(
+        int index);
   }
   /**
    * <pre>
-   * user entry
+   * Routing table user entry
+   * This message contains the best connection to this
+   * user per module
    * </pre>
    *
-   * Protobuf type {@code qaul.rpc.router.UserEntry}
+   * Protobuf type {@code qaul.rpc.router.RoutingTableEntry}
    */
-  public static final class UserEntry extends
+  public static final class RoutingTableEntry extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:qaul.rpc.router.UserEntry)
-      UserEntryOrBuilder {
+      // @@protoc_insertion_point(message_implements:qaul.rpc.router.RoutingTableEntry)
+      RoutingTableEntryOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use UserEntry.newBuilder() to construct.
-    private UserEntry(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use RoutingTableEntry.newBuilder() to construct.
+    private RoutingTableEntry(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private UserEntry() {
-      name_ = "";
-      id_ = com.google.protobuf.ByteString.EMPTY;
-      idBase58_ = "";
-      key_ = com.google.protobuf.ByteString.EMPTY;
-      keyType_ = "";
-      keyBase58_ = "";
-      connectivity_ = 0;
+    private RoutingTableEntry() {
+      userId_ = com.google.protobuf.ByteString.EMPTY;
+      connections_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
     @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
         UnusedPrivateParameter unused) {
-      return new UserEntry();
+      return new RoutingTableEntry();
     }
 
     @java.lang.Override
@@ -2464,7 +3326,894 @@ public final class RouterOuterClass {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private UserEntry(
+    private RoutingTableEntry(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+
+              userId_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                connections_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              connections_.add(
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.RoutingTableConnection.parser(), extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          connections_ = java.util.Collections.unmodifiableList(connections_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableEntry_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableEntry_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.router.RouterOuterClass.RoutingTableEntry.class, qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder.class);
+    }
+
+    public static final int USER_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString userId_;
+    /**
+     * <code>bytes user_id = 1;</code>
+     * @return The userId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getUserId() {
+      return userId_;
+    }
+
+    public static final int CONNECTIONS_FIELD_NUMBER = 2;
+    private java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableConnection> connections_;
+    /**
+     * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableConnection> getConnectionsList() {
+      return connections_;
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends qaul.rpc.router.RouterOuterClass.RoutingTableConnectionOrBuilder> 
+        getConnectionsOrBuilderList() {
+      return connections_;
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+     */
+    @java.lang.Override
+    public int getConnectionsCount() {
+      return connections_.size();
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.RoutingTableConnection getConnections(int index) {
+      return connections_.get(index);
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.RoutingTableConnectionOrBuilder getConnectionsOrBuilder(
+        int index) {
+      return connections_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!userId_.isEmpty()) {
+        output.writeBytes(1, userId_);
+      }
+      for (int i = 0; i < connections_.size(); i++) {
+        output.writeMessage(2, connections_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!userId_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, userId_);
+      }
+      for (int i = 0; i < connections_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, connections_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.RoutingTableEntry)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.router.RouterOuterClass.RoutingTableEntry other = (qaul.rpc.router.RouterOuterClass.RoutingTableEntry) obj;
+
+      if (!getUserId()
+          .equals(other.getUserId())) return false;
+      if (!getConnectionsList()
+          .equals(other.getConnectionsList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + USER_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getUserId().hashCode();
+      if (getConnectionsCount() > 0) {
+        hash = (37 * hash) + CONNECTIONS_FIELD_NUMBER;
+        hash = (53 * hash) + getConnectionsList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.RoutingTableEntry prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Routing table user entry
+     * This message contains the best connection to this
+     * user per module
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.router.RoutingTableEntry}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.RoutingTableEntry)
+        qaul.rpc.router.RouterOuterClass.RoutingTableEntryOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableEntry_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableEntry_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.router.RouterOuterClass.RoutingTableEntry.class, qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder.class);
+      }
+
+      // Construct using qaul.rpc.router.RouterOuterClass.RoutingTableEntry.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getConnectionsFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        userId_ = com.google.protobuf.ByteString.EMPTY;
+
+        if (connectionsBuilder_ == null) {
+          connections_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          connectionsBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableEntry_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.RoutingTableEntry getDefaultInstanceForType() {
+        return qaul.rpc.router.RouterOuterClass.RoutingTableEntry.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.RoutingTableEntry build() {
+        qaul.rpc.router.RouterOuterClass.RoutingTableEntry result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.RoutingTableEntry buildPartial() {
+        qaul.rpc.router.RouterOuterClass.RoutingTableEntry result = new qaul.rpc.router.RouterOuterClass.RoutingTableEntry(this);
+        int from_bitField0_ = bitField0_;
+        result.userId_ = userId_;
+        if (connectionsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            connections_ = java.util.Collections.unmodifiableList(connections_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.connections_ = connections_;
+        } else {
+          result.connections_ = connectionsBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.router.RouterOuterClass.RoutingTableEntry) {
+          return mergeFrom((qaul.rpc.router.RouterOuterClass.RoutingTableEntry)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.RoutingTableEntry other) {
+        if (other == qaul.rpc.router.RouterOuterClass.RoutingTableEntry.getDefaultInstance()) return this;
+        if (other.getUserId() != com.google.protobuf.ByteString.EMPTY) {
+          setUserId(other.getUserId());
+        }
+        if (connectionsBuilder_ == null) {
+          if (!other.connections_.isEmpty()) {
+            if (connections_.isEmpty()) {
+              connections_ = other.connections_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureConnectionsIsMutable();
+              connections_.addAll(other.connections_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.connections_.isEmpty()) {
+            if (connectionsBuilder_.isEmpty()) {
+              connectionsBuilder_.dispose();
+              connectionsBuilder_ = null;
+              connections_ = other.connections_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              connectionsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getConnectionsFieldBuilder() : null;
+            } else {
+              connectionsBuilder_.addAllMessages(other.connections_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.router.RouterOuterClass.RoutingTableEntry parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.router.RouterOuterClass.RoutingTableEntry) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>bytes user_id = 1;</code>
+       * @return The userId.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getUserId() {
+        return userId_;
+      }
+      /**
+       * <code>bytes user_id = 1;</code>
+       * @param value The userId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUserId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bytes user_id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUserId() {
+        
+        userId_ = getDefaultInstance().getUserId();
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableConnection> connections_ =
+        java.util.Collections.emptyList();
+      private void ensureConnectionsIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          connections_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection>(connections_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.RoutingTableConnection, qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableConnectionOrBuilder> connectionsBuilder_;
+
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableConnection> getConnectionsList() {
+        if (connectionsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(connections_);
+        } else {
+          return connectionsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public int getConnectionsCount() {
+        if (connectionsBuilder_ == null) {
+          return connections_.size();
+        } else {
+          return connectionsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.RoutingTableConnection getConnections(int index) {
+        if (connectionsBuilder_ == null) {
+          return connections_.get(index);
+        } else {
+          return connectionsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public Builder setConnections(
+          int index, qaul.rpc.router.RouterOuterClass.RoutingTableConnection value) {
+        if (connectionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConnectionsIsMutable();
+          connections_.set(index, value);
+          onChanged();
+        } else {
+          connectionsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public Builder setConnections(
+          int index, qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder builderForValue) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          connections_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          connectionsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public Builder addConnections(qaul.rpc.router.RouterOuterClass.RoutingTableConnection value) {
+        if (connectionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConnectionsIsMutable();
+          connections_.add(value);
+          onChanged();
+        } else {
+          connectionsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public Builder addConnections(
+          int index, qaul.rpc.router.RouterOuterClass.RoutingTableConnection value) {
+        if (connectionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConnectionsIsMutable();
+          connections_.add(index, value);
+          onChanged();
+        } else {
+          connectionsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public Builder addConnections(
+          qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder builderForValue) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          connections_.add(builderForValue.build());
+          onChanged();
+        } else {
+          connectionsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public Builder addConnections(
+          int index, qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder builderForValue) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          connections_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          connectionsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public Builder addAllConnections(
+          java.lang.Iterable<? extends qaul.rpc.router.RouterOuterClass.RoutingTableConnection> values) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, connections_);
+          onChanged();
+        } else {
+          connectionsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public Builder clearConnections() {
+        if (connectionsBuilder_ == null) {
+          connections_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          connectionsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public Builder removeConnections(int index) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          connections_.remove(index);
+          onChanged();
+        } else {
+          connectionsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder getConnectionsBuilder(
+          int index) {
+        return getConnectionsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.RoutingTableConnectionOrBuilder getConnectionsOrBuilder(
+          int index) {
+        if (connectionsBuilder_ == null) {
+          return connections_.get(index);  } else {
+          return connectionsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public java.util.List<? extends qaul.rpc.router.RouterOuterClass.RoutingTableConnectionOrBuilder> 
+           getConnectionsOrBuilderList() {
+        if (connectionsBuilder_ != null) {
+          return connectionsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(connections_);
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder addConnectionsBuilder() {
+        return getConnectionsFieldBuilder().addBuilder(
+            qaul.rpc.router.RouterOuterClass.RoutingTableConnection.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder addConnectionsBuilder(
+          int index) {
+        return getConnectionsFieldBuilder().addBuilder(
+            index, qaul.rpc.router.RouterOuterClass.RoutingTableConnection.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder> 
+           getConnectionsBuilderList() {
+        return getConnectionsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.RoutingTableConnection, qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableConnectionOrBuilder> 
+          getConnectionsFieldBuilder() {
+        if (connectionsBuilder_ == null) {
+          connectionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.RoutingTableConnection, qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableConnectionOrBuilder>(
+                  connections_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          connections_ = null;
+        }
+        return connectionsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.RoutingTableEntry)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.router.RoutingTableEntry)
+    private static final qaul.rpc.router.RouterOuterClass.RoutingTableEntry DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.RoutingTableEntry();
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RoutingTableEntry>
+        PARSER = new com.google.protobuf.AbstractParser<RoutingTableEntry>() {
+      @java.lang.Override
+      public RoutingTableEntry parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RoutingTableEntry(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RoutingTableEntry> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RoutingTableEntry> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.RoutingTableEntry getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RoutingTableConnectionOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.RoutingTableConnection)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * the connection module (LAN, Internet, BLE, etc.)
+     * </pre>
+     *
+     * <code>.qaul.rpc.router.ConnectionModule module = 2;</code>
+     * @return The enum numeric value on the wire for module.
+     */
+    int getModuleValue();
+    /**
+     * <pre>
+     * the connection module (LAN, Internet, BLE, etc.)
+     * </pre>
+     *
+     * <code>.qaul.rpc.router.ConnectionModule module = 2;</code>
+     * @return The module.
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionModule getModule();
+
+    /**
+     * <pre>
+     * the round trip time for this connection
+     * </pre>
+     *
+     * <code>uint32 rtt = 3;</code>
+     * @return The rtt.
+     */
+    int getRtt();
+
+    /**
+     * <pre>
+     * node id via which this connection is routed
+     * </pre>
+     *
+     * <code>bytes via = 4;</code>
+     * @return The via.
+     */
+    com.google.protobuf.ByteString getVia();
+  }
+  /**
+   * <pre>
+   * Routing table connection entry.
+   * This message contains a connection to a specific user.
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.router.RoutingTableConnection}
+   */
+  public static final class RoutingTableConnection extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.router.RoutingTableConnection)
+      RoutingTableConnectionOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RoutingTableConnection.newBuilder() to construct.
+    private RoutingTableConnection(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RoutingTableConnection() {
+      module_ = 0;
+      via_ = com.google.protobuf.ByteString.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RoutingTableConnection();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RoutingTableConnection(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2482,44 +4231,20 @@ public final class RouterOuterClass {
             case 0:
               done = true;
               break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 16: {
+              int rawValue = input.readEnum();
 
-              name_ = s;
+              module_ = rawValue;
               break;
             }
-            case 18: {
+            case 24: {
 
-              id_ = input.readBytes();
+              rtt_ = input.readUInt32();
               break;
             }
             case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
 
-              idBase58_ = s;
-              break;
-            }
-            case 42: {
-
-              key_ = input.readBytes();
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              keyType_ = s;
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              keyBase58_ = s;
-              break;
-            }
-            case 64: {
-              int rawValue = input.readEnum();
-
-              connectivity_ = rawValue;
+              via_ = input.readBytes();
               break;
             }
             default: {
@@ -2543,212 +4268,72 @@ public final class RouterOuterClass {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserEntry_descriptor;
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableConnection_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserEntry_fieldAccessorTable
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableConnection_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              qaul.rpc.router.RouterOuterClass.UserEntry.class, qaul.rpc.router.RouterOuterClass.UserEntry.Builder.class);
+              qaul.rpc.router.RouterOuterClass.RoutingTableConnection.class, qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder.class);
     }
 
-    public static final int NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object name_;
-    /**
-     * <code>string name = 1;</code>
-     * @return The name.
-     */
-    @java.lang.Override
-    public java.lang.String getName() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        name_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string name = 1;</code>
-     * @return The bytes for name.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getNameBytes() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        name_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString id_;
-    /**
-     * <code>bytes id = 2;</code>
-     * @return The id.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString getId() {
-      return id_;
-    }
-
-    public static final int ID_BASE58_FIELD_NUMBER = 4;
-    private volatile java.lang.Object idBase58_;
-    /**
-     * <code>string id_base58 = 4;</code>
-     * @return The idBase58.
-     */
-    @java.lang.Override
-    public java.lang.String getIdBase58() {
-      java.lang.Object ref = idBase58_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        idBase58_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string id_base58 = 4;</code>
-     * @return The bytes for idBase58.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getIdBase58Bytes() {
-      java.lang.Object ref = idBase58_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        idBase58_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int KEY_FIELD_NUMBER = 5;
-    private com.google.protobuf.ByteString key_;
+    public static final int MODULE_FIELD_NUMBER = 2;
+    private int module_;
     /**
      * <pre>
-     * protobuf encoded public key
+     * the connection module (LAN, Internet, BLE, etc.)
      * </pre>
      *
-     * <code>bytes key = 5;</code>
-     * @return The key.
+     * <code>.qaul.rpc.router.ConnectionModule module = 2;</code>
+     * @return The enum numeric value on the wire for module.
      */
-    @java.lang.Override
-    public com.google.protobuf.ByteString getKey() {
-      return key_;
-    }
-
-    public static final int KEY_TYPE_FIELD_NUMBER = 6;
-    private volatile java.lang.Object keyType_;
-    /**
-     * <code>string key_type = 6;</code>
-     * @return The keyType.
-     */
-    @java.lang.Override
-    public java.lang.String getKeyType() {
-      java.lang.Object ref = keyType_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        keyType_ = s;
-        return s;
-      }
+    @java.lang.Override public int getModuleValue() {
+      return module_;
     }
     /**
-     * <code>string key_type = 6;</code>
-     * @return The bytes for keyType.
+     * <pre>
+     * the connection module (LAN, Internet, BLE, etc.)
+     * </pre>
+     *
+     * <code>.qaul.rpc.router.ConnectionModule module = 2;</code>
+     * @return The module.
      */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getKeyTypeBytes() {
-      java.lang.Object ref = keyType_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        keyType_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int KEY_BASE58_FIELD_NUMBER = 7;
-    private volatile java.lang.Object keyBase58_;
-    /**
-     * <code>string key_base58 = 7;</code>
-     * @return The keyBase58.
-     */
-    @java.lang.Override
-    public java.lang.String getKeyBase58() {
-      java.lang.Object ref = keyBase58_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        keyBase58_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string key_base58 = 7;</code>
-     * @return The bytes for keyBase58.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getKeyBase58Bytes() {
-      java.lang.Object ref = keyBase58_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        keyBase58_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int CONNECTIVITY_FIELD_NUMBER = 8;
-    private int connectivity_;
-    /**
-     * <code>.qaul.rpc.router.Connectivity connectivity = 8;</code>
-     * @return The enum numeric value on the wire for connectivity.
-     */
-    @java.lang.Override public int getConnectivityValue() {
-      return connectivity_;
-    }
-    /**
-     * <code>.qaul.rpc.router.Connectivity connectivity = 8;</code>
-     * @return The connectivity.
-     */
-    @java.lang.Override public qaul.rpc.router.RouterOuterClass.Connectivity getConnectivity() {
+    @java.lang.Override public qaul.rpc.router.RouterOuterClass.ConnectionModule getModule() {
       @SuppressWarnings("deprecation")
-      qaul.rpc.router.RouterOuterClass.Connectivity result = qaul.rpc.router.RouterOuterClass.Connectivity.valueOf(connectivity_);
-      return result == null ? qaul.rpc.router.RouterOuterClass.Connectivity.UNRECOGNIZED : result;
+      qaul.rpc.router.RouterOuterClass.ConnectionModule result = qaul.rpc.router.RouterOuterClass.ConnectionModule.valueOf(module_);
+      return result == null ? qaul.rpc.router.RouterOuterClass.ConnectionModule.UNRECOGNIZED : result;
+    }
+
+    public static final int RTT_FIELD_NUMBER = 3;
+    private int rtt_;
+    /**
+     * <pre>
+     * the round trip time for this connection
+     * </pre>
+     *
+     * <code>uint32 rtt = 3;</code>
+     * @return The rtt.
+     */
+    @java.lang.Override
+    public int getRtt() {
+      return rtt_;
+    }
+
+    public static final int VIA_FIELD_NUMBER = 4;
+    private com.google.protobuf.ByteString via_;
+    /**
+     * <pre>
+     * node id via which this connection is routed
+     * </pre>
+     *
+     * <code>bytes via = 4;</code>
+     * @return The via.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getVia() {
+      return via_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -2765,26 +4350,14 @@ public final class RouterOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      if (module_ != qaul.rpc.router.RouterOuterClass.ConnectionModule.NONE.getNumber()) {
+        output.writeEnum(2, module_);
       }
-      if (!id_.isEmpty()) {
-        output.writeBytes(2, id_);
+      if (rtt_ != 0) {
+        output.writeUInt32(3, rtt_);
       }
-      if (!getIdBase58Bytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, idBase58_);
-      }
-      if (!key_.isEmpty()) {
-        output.writeBytes(5, key_);
-      }
-      if (!getKeyTypeBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, keyType_);
-      }
-      if (!getKeyBase58Bytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, keyBase58_);
-      }
-      if (connectivity_ != qaul.rpc.router.RouterOuterClass.Connectivity.Online.getNumber()) {
-        output.writeEnum(8, connectivity_);
+      if (!via_.isEmpty()) {
+        output.writeBytes(4, via_);
       }
       unknownFields.writeTo(output);
     }
@@ -2795,29 +4368,17 @@ public final class RouterOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!getNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
-      }
-      if (!id_.isEmpty()) {
+      if (module_ != qaul.rpc.router.RouterOuterClass.ConnectionModule.NONE.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, id_);
+          .computeEnumSize(2, module_);
       }
-      if (!getIdBase58Bytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, idBase58_);
-      }
-      if (!key_.isEmpty()) {
+      if (rtt_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(5, key_);
+          .computeUInt32Size(3, rtt_);
       }
-      if (!getKeyTypeBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, keyType_);
-      }
-      if (!getKeyBase58Bytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, keyBase58_);
-      }
-      if (connectivity_ != qaul.rpc.router.RouterOuterClass.Connectivity.Online.getNumber()) {
+      if (!via_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(8, connectivity_);
+          .computeBytesSize(4, via_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -2829,24 +4390,16 @@ public final class RouterOuterClass {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.UserEntry)) {
+      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.RoutingTableConnection)) {
         return super.equals(obj);
       }
-      qaul.rpc.router.RouterOuterClass.UserEntry other = (qaul.rpc.router.RouterOuterClass.UserEntry) obj;
+      qaul.rpc.router.RouterOuterClass.RoutingTableConnection other = (qaul.rpc.router.RouterOuterClass.RoutingTableConnection) obj;
 
-      if (!getName()
-          .equals(other.getName())) return false;
-      if (!getId()
-          .equals(other.getId())) return false;
-      if (!getIdBase58()
-          .equals(other.getIdBase58())) return false;
-      if (!getKey()
-          .equals(other.getKey())) return false;
-      if (!getKeyType()
-          .equals(other.getKeyType())) return false;
-      if (!getKeyBase58()
-          .equals(other.getKeyBase58())) return false;
-      if (connectivity_ != other.connectivity_) return false;
+      if (module_ != other.module_) return false;
+      if (getRtt()
+          != other.getRtt()) return false;
+      if (!getVia()
+          .equals(other.getVia())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -2858,88 +4411,80 @@ public final class RouterOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + NAME_FIELD_NUMBER;
-      hash = (53 * hash) + getName().hashCode();
-      hash = (37 * hash) + ID_FIELD_NUMBER;
-      hash = (53 * hash) + getId().hashCode();
-      hash = (37 * hash) + ID_BASE58_FIELD_NUMBER;
-      hash = (53 * hash) + getIdBase58().hashCode();
-      hash = (37 * hash) + KEY_FIELD_NUMBER;
-      hash = (53 * hash) + getKey().hashCode();
-      hash = (37 * hash) + KEY_TYPE_FIELD_NUMBER;
-      hash = (53 * hash) + getKeyType().hashCode();
-      hash = (37 * hash) + KEY_BASE58_FIELD_NUMBER;
-      hash = (53 * hash) + getKeyBase58().hashCode();
-      hash = (37 * hash) + CONNECTIVITY_FIELD_NUMBER;
-      hash = (53 * hash) + connectivity_;
+      hash = (37 * hash) + MODULE_FIELD_NUMBER;
+      hash = (53 * hash) + module_;
+      hash = (37 * hash) + RTT_FIELD_NUMBER;
+      hash = (53 * hash) + getRtt();
+      hash = (37 * hash) + VIA_FIELD_NUMBER;
+      hash = (53 * hash) + getVia().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static qaul.rpc.router.RouterOuterClass.UserEntry parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserEntry parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserEntry parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserEntry parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserEntry parseFrom(byte[] data)
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserEntry parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserEntry parseFrom(java.io.InputStream input)
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserEntry parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserEntry parseDelimitedFrom(java.io.InputStream input)
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserEntry parseDelimitedFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserEntry parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static qaul.rpc.router.RouterOuterClass.UserEntry parseFrom(
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2952,7 +4497,7 @@ public final class RouterOuterClass {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.UserEntry prototype) {
+    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.RoutingTableConnection prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -2969,29 +4514,30 @@ public final class RouterOuterClass {
     }
     /**
      * <pre>
-     * user entry
+     * Routing table connection entry.
+     * This message contains a connection to a specific user.
      * </pre>
      *
-     * Protobuf type {@code qaul.rpc.router.UserEntry}
+     * Protobuf type {@code qaul.rpc.router.RoutingTableConnection}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.UserEntry)
-        qaul.rpc.router.RouterOuterClass.UserEntryOrBuilder {
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.RoutingTableConnection)
+        qaul.rpc.router.RouterOuterClass.RoutingTableConnectionOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserEntry_descriptor;
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableConnection_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserEntry_fieldAccessorTable
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableConnection_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                qaul.rpc.router.RouterOuterClass.UserEntry.class, qaul.rpc.router.RouterOuterClass.UserEntry.Builder.class);
+                qaul.rpc.router.RouterOuterClass.RoutingTableConnection.class, qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder.class);
       }
 
-      // Construct using qaul.rpc.router.RouterOuterClass.UserEntry.newBuilder()
+      // Construct using qaul.rpc.router.RouterOuterClass.RoutingTableConnection.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -3009,19 +4555,11 @@ public final class RouterOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        name_ = "";
+        module_ = 0;
 
-        id_ = com.google.protobuf.ByteString.EMPTY;
+        rtt_ = 0;
 
-        idBase58_ = "";
-
-        key_ = com.google.protobuf.ByteString.EMPTY;
-
-        keyType_ = "";
-
-        keyBase58_ = "";
-
-        connectivity_ = 0;
+        via_ = com.google.protobuf.ByteString.EMPTY;
 
         return this;
       }
@@ -3029,17 +4567,17 @@ public final class RouterOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_UserEntry_descriptor;
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableConnection_descriptor;
       }
 
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserEntry getDefaultInstanceForType() {
-        return qaul.rpc.router.RouterOuterClass.UserEntry.getDefaultInstance();
+      public qaul.rpc.router.RouterOuterClass.RoutingTableConnection getDefaultInstanceForType() {
+        return qaul.rpc.router.RouterOuterClass.RoutingTableConnection.getDefaultInstance();
       }
 
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserEntry build() {
-        qaul.rpc.router.RouterOuterClass.UserEntry result = buildPartial();
+      public qaul.rpc.router.RouterOuterClass.RoutingTableConnection build() {
+        qaul.rpc.router.RouterOuterClass.RoutingTableConnection result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -3047,15 +4585,11 @@ public final class RouterOuterClass {
       }
 
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.UserEntry buildPartial() {
-        qaul.rpc.router.RouterOuterClass.UserEntry result = new qaul.rpc.router.RouterOuterClass.UserEntry(this);
-        result.name_ = name_;
-        result.id_ = id_;
-        result.idBase58_ = idBase58_;
-        result.key_ = key_;
-        result.keyType_ = keyType_;
-        result.keyBase58_ = keyBase58_;
-        result.connectivity_ = connectivity_;
+      public qaul.rpc.router.RouterOuterClass.RoutingTableConnection buildPartial() {
+        qaul.rpc.router.RouterOuterClass.RoutingTableConnection result = new qaul.rpc.router.RouterOuterClass.RoutingTableConnection(this);
+        result.module_ = module_;
+        result.rtt_ = rtt_;
+        result.via_ = via_;
         onBuilt();
         return result;
       }
@@ -3094,40 +4628,24 @@ public final class RouterOuterClass {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof qaul.rpc.router.RouterOuterClass.UserEntry) {
-          return mergeFrom((qaul.rpc.router.RouterOuterClass.UserEntry)other);
+        if (other instanceof qaul.rpc.router.RouterOuterClass.RoutingTableConnection) {
+          return mergeFrom((qaul.rpc.router.RouterOuterClass.RoutingTableConnection)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.UserEntry other) {
-        if (other == qaul.rpc.router.RouterOuterClass.UserEntry.getDefaultInstance()) return this;
-        if (!other.getName().isEmpty()) {
-          name_ = other.name_;
-          onChanged();
+      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.RoutingTableConnection other) {
+        if (other == qaul.rpc.router.RouterOuterClass.RoutingTableConnection.getDefaultInstance()) return this;
+        if (other.module_ != 0) {
+          setModuleValue(other.getModuleValue());
         }
-        if (other.getId() != com.google.protobuf.ByteString.EMPTY) {
-          setId(other.getId());
+        if (other.getRtt() != 0) {
+          setRtt(other.getRtt());
         }
-        if (!other.getIdBase58().isEmpty()) {
-          idBase58_ = other.idBase58_;
-          onChanged();
-        }
-        if (other.getKey() != com.google.protobuf.ByteString.EMPTY) {
-          setKey(other.getKey());
-        }
-        if (!other.getKeyType().isEmpty()) {
-          keyType_ = other.keyType_;
-          onChanged();
-        }
-        if (!other.getKeyBase58().isEmpty()) {
-          keyBase58_ = other.keyBase58_;
-          onChanged();
-        }
-        if (other.connectivity_ != 0) {
-          setConnectivityValue(other.getConnectivityValue());
+        if (other.getVia() != com.google.protobuf.ByteString.EMPTY) {
+          setVia(other.getVia());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -3144,11 +4662,11 @@ public final class RouterOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        qaul.rpc.router.RouterOuterClass.UserEntry parsedMessage = null;
+        qaul.rpc.router.RouterOuterClass.RoutingTableConnection parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (qaul.rpc.router.RouterOuterClass.UserEntry) e.getUnfinishedMessage();
+          parsedMessage = (qaul.rpc.router.RouterOuterClass.RoutingTableConnection) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -3158,440 +4676,165 @@ public final class RouterOuterClass {
         return this;
       }
 
-      private java.lang.Object name_ = "";
-      /**
-       * <code>string name = 1;</code>
-       * @return The name.
-       */
-      public java.lang.String getName() {
-        java.lang.Object ref = name_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          name_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string name = 1;</code>
-       * @return The bytes for name.
-       */
-      public com.google.protobuf.ByteString
-          getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          name_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string name = 1;</code>
-       * @param value The name to set.
-       * @return This builder for chaining.
-       */
-      public Builder setName(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        name_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string name = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearName() {
-        
-        name_ = getDefaultInstance().getName();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string name = 1;</code>
-       * @param value The bytes for name to set.
-       * @return This builder for chaining.
-       */
-      public Builder setNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        name_ = value;
-        onChanged();
-        return this;
-      }
-
-      private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>bytes id = 2;</code>
-       * @return The id.
-       */
-      @java.lang.Override
-      public com.google.protobuf.ByteString getId() {
-        return id_;
-      }
-      /**
-       * <code>bytes id = 2;</code>
-       * @param value The id to set.
-       * @return This builder for chaining.
-       */
-      public Builder setId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        id_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>bytes id = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearId() {
-        
-        id_ = getDefaultInstance().getId();
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object idBase58_ = "";
-      /**
-       * <code>string id_base58 = 4;</code>
-       * @return The idBase58.
-       */
-      public java.lang.String getIdBase58() {
-        java.lang.Object ref = idBase58_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          idBase58_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string id_base58 = 4;</code>
-       * @return The bytes for idBase58.
-       */
-      public com.google.protobuf.ByteString
-          getIdBase58Bytes() {
-        java.lang.Object ref = idBase58_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          idBase58_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string id_base58 = 4;</code>
-       * @param value The idBase58 to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIdBase58(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        idBase58_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string id_base58 = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearIdBase58() {
-        
-        idBase58_ = getDefaultInstance().getIdBase58();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string id_base58 = 4;</code>
-       * @param value The bytes for idBase58 to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIdBase58Bytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        idBase58_ = value;
-        onChanged();
-        return this;
-      }
-
-      private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
+      private int module_ = 0;
       /**
        * <pre>
-       * protobuf encoded public key
+       * the connection module (LAN, Internet, BLE, etc.)
        * </pre>
        *
-       * <code>bytes key = 5;</code>
-       * @return The key.
+       * <code>.qaul.rpc.router.ConnectionModule module = 2;</code>
+       * @return The enum numeric value on the wire for module.
        */
-      @java.lang.Override
-      public com.google.protobuf.ByteString getKey() {
-        return key_;
+      @java.lang.Override public int getModuleValue() {
+        return module_;
       }
       /**
        * <pre>
-       * protobuf encoded public key
+       * the connection module (LAN, Internet, BLE, etc.)
        * </pre>
        *
-       * <code>bytes key = 5;</code>
-       * @param value The key to set.
+       * <code>.qaul.rpc.router.ConnectionModule module = 2;</code>
+       * @param value The enum numeric value on the wire for module to set.
        * @return This builder for chaining.
        */
-      public Builder setKey(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        key_ = value;
+      public Builder setModuleValue(int value) {
+        
+        module_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * protobuf encoded public key
+       * the connection module (LAN, Internet, BLE, etc.)
        * </pre>
        *
-       * <code>bytes key = 5;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKey() {
-        
-        key_ = getDefaultInstance().getKey();
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object keyType_ = "";
-      /**
-       * <code>string key_type = 6;</code>
-       * @return The keyType.
-       */
-      public java.lang.String getKeyType() {
-        java.lang.Object ref = keyType_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          keyType_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string key_type = 6;</code>
-       * @return The bytes for keyType.
-       */
-      public com.google.protobuf.ByteString
-          getKeyTypeBytes() {
-        java.lang.Object ref = keyType_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          keyType_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string key_type = 6;</code>
-       * @param value The keyType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKeyType(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        keyType_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string key_type = 6;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKeyType() {
-        
-        keyType_ = getDefaultInstance().getKeyType();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string key_type = 6;</code>
-       * @param value The bytes for keyType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKeyTypeBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        keyType_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object keyBase58_ = "";
-      /**
-       * <code>string key_base58 = 7;</code>
-       * @return The keyBase58.
-       */
-      public java.lang.String getKeyBase58() {
-        java.lang.Object ref = keyBase58_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          keyBase58_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string key_base58 = 7;</code>
-       * @return The bytes for keyBase58.
-       */
-      public com.google.protobuf.ByteString
-          getKeyBase58Bytes() {
-        java.lang.Object ref = keyBase58_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          keyBase58_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string key_base58 = 7;</code>
-       * @param value The keyBase58 to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKeyBase58(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        keyBase58_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string key_base58 = 7;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKeyBase58() {
-        
-        keyBase58_ = getDefaultInstance().getKeyBase58();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string key_base58 = 7;</code>
-       * @param value The bytes for keyBase58 to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKeyBase58Bytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        keyBase58_ = value;
-        onChanged();
-        return this;
-      }
-
-      private int connectivity_ = 0;
-      /**
-       * <code>.qaul.rpc.router.Connectivity connectivity = 8;</code>
-       * @return The enum numeric value on the wire for connectivity.
-       */
-      @java.lang.Override public int getConnectivityValue() {
-        return connectivity_;
-      }
-      /**
-       * <code>.qaul.rpc.router.Connectivity connectivity = 8;</code>
-       * @param value The enum numeric value on the wire for connectivity to set.
-       * @return This builder for chaining.
-       */
-      public Builder setConnectivityValue(int value) {
-        
-        connectivity_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>.qaul.rpc.router.Connectivity connectivity = 8;</code>
-       * @return The connectivity.
+       * <code>.qaul.rpc.router.ConnectionModule module = 2;</code>
+       * @return The module.
        */
       @java.lang.Override
-      public qaul.rpc.router.RouterOuterClass.Connectivity getConnectivity() {
+      public qaul.rpc.router.RouterOuterClass.ConnectionModule getModule() {
         @SuppressWarnings("deprecation")
-        qaul.rpc.router.RouterOuterClass.Connectivity result = qaul.rpc.router.RouterOuterClass.Connectivity.valueOf(connectivity_);
-        return result == null ? qaul.rpc.router.RouterOuterClass.Connectivity.UNRECOGNIZED : result;
+        qaul.rpc.router.RouterOuterClass.ConnectionModule result = qaul.rpc.router.RouterOuterClass.ConnectionModule.valueOf(module_);
+        return result == null ? qaul.rpc.router.RouterOuterClass.ConnectionModule.UNRECOGNIZED : result;
       }
       /**
-       * <code>.qaul.rpc.router.Connectivity connectivity = 8;</code>
-       * @param value The connectivity to set.
+       * <pre>
+       * the connection module (LAN, Internet, BLE, etc.)
+       * </pre>
+       *
+       * <code>.qaul.rpc.router.ConnectionModule module = 2;</code>
+       * @param value The module to set.
        * @return This builder for chaining.
        */
-      public Builder setConnectivity(qaul.rpc.router.RouterOuterClass.Connectivity value) {
+      public Builder setModule(qaul.rpc.router.RouterOuterClass.ConnectionModule value) {
         if (value == null) {
           throw new NullPointerException();
         }
         
-        connectivity_ = value.getNumber();
+        module_ = value.getNumber();
         onChanged();
         return this;
       }
       /**
-       * <code>.qaul.rpc.router.Connectivity connectivity = 8;</code>
+       * <pre>
+       * the connection module (LAN, Internet, BLE, etc.)
+       * </pre>
+       *
+       * <code>.qaul.rpc.router.ConnectionModule module = 2;</code>
        * @return This builder for chaining.
        */
-      public Builder clearConnectivity() {
+      public Builder clearModule() {
         
-        connectivity_ = 0;
+        module_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int rtt_ ;
+      /**
+       * <pre>
+       * the round trip time for this connection
+       * </pre>
+       *
+       * <code>uint32 rtt = 3;</code>
+       * @return The rtt.
+       */
+      @java.lang.Override
+      public int getRtt() {
+        return rtt_;
+      }
+      /**
+       * <pre>
+       * the round trip time for this connection
+       * </pre>
+       *
+       * <code>uint32 rtt = 3;</code>
+       * @param value The rtt to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRtt(int value) {
+        
+        rtt_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the round trip time for this connection
+       * </pre>
+       *
+       * <code>uint32 rtt = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRtt() {
+        
+        rtt_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString via_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * node id via which this connection is routed
+       * </pre>
+       *
+       * <code>bytes via = 4;</code>
+       * @return The via.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getVia() {
+        return via_;
+      }
+      /**
+       * <pre>
+       * node id via which this connection is routed
+       * </pre>
+       *
+       * <code>bytes via = 4;</code>
+       * @param value The via to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVia(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        via_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * node id via which this connection is routed
+       * </pre>
+       *
+       * <code>bytes via = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVia() {
+        
+        via_ = getDefaultInstance().getVia();
         onChanged();
         return this;
       }
@@ -3608,41 +4851,6755 @@ public final class RouterOuterClass {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.UserEntry)
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.RoutingTableConnection)
     }
 
-    // @@protoc_insertion_point(class_scope:qaul.rpc.router.UserEntry)
-    private static final qaul.rpc.router.RouterOuterClass.UserEntry DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:qaul.rpc.router.RoutingTableConnection)
+    private static final qaul.rpc.router.RouterOuterClass.RoutingTableConnection DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.UserEntry();
+      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.RoutingTableConnection();
     }
 
-    public static qaul.rpc.router.RouterOuterClass.UserEntry getDefaultInstance() {
+    public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<UserEntry>
-        PARSER = new com.google.protobuf.AbstractParser<UserEntry>() {
+    private static final com.google.protobuf.Parser<RoutingTableConnection>
+        PARSER = new com.google.protobuf.AbstractParser<RoutingTableConnection>() {
       @java.lang.Override
-      public UserEntry parsePartialFrom(
+      public RoutingTableConnection parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UserEntry(input, extensionRegistry);
+        return new RoutingTableConnection(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<UserEntry> parser() {
+    public static com.google.protobuf.Parser<RoutingTableConnection> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<UserEntry> getParserForType() {
+    public com.google.protobuf.Parser<RoutingTableConnection> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public qaul.rpc.router.RouterOuterClass.UserEntry getDefaultInstanceForType() {
+    public qaul.rpc.router.RouterOuterClass.RoutingTableConnection getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ConnectionsRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.ConnectionsRequest)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * UI request for connections list
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.router.ConnectionsRequest}
+   */
+  public static final class ConnectionsRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.router.ConnectionsRequest)
+      ConnectionsRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ConnectionsRequest.newBuilder() to construct.
+    private ConnectionsRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ConnectionsRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ConnectionsRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ConnectionsRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.router.RouterOuterClass.ConnectionsRequest.class, qaul.rpc.router.RouterOuterClass.ConnectionsRequest.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.ConnectionsRequest)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.router.RouterOuterClass.ConnectionsRequest other = (qaul.rpc.router.RouterOuterClass.ConnectionsRequest) obj;
+
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.ConnectionsRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * UI request for connections list
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.router.ConnectionsRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.ConnectionsRequest)
+        qaul.rpc.router.RouterOuterClass.ConnectionsRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.router.RouterOuterClass.ConnectionsRequest.class, qaul.rpc.router.RouterOuterClass.ConnectionsRequest.Builder.class);
+      }
+
+      // Construct using qaul.rpc.router.RouterOuterClass.ConnectionsRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsRequest getDefaultInstanceForType() {
+        return qaul.rpc.router.RouterOuterClass.ConnectionsRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsRequest build() {
+        qaul.rpc.router.RouterOuterClass.ConnectionsRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsRequest buildPartial() {
+        qaul.rpc.router.RouterOuterClass.ConnectionsRequest result = new qaul.rpc.router.RouterOuterClass.ConnectionsRequest(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.router.RouterOuterClass.ConnectionsRequest) {
+          return mergeFrom((qaul.rpc.router.RouterOuterClass.ConnectionsRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.ConnectionsRequest other) {
+        if (other == qaul.rpc.router.RouterOuterClass.ConnectionsRequest.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.router.RouterOuterClass.ConnectionsRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.router.RouterOuterClass.ConnectionsRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.ConnectionsRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.router.ConnectionsRequest)
+    private static final qaul.rpc.router.RouterOuterClass.ConnectionsRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.ConnectionsRequest();
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ConnectionsRequest>
+        PARSER = new com.google.protobuf.AbstractParser<ConnectionsRequest>() {
+      @java.lang.Override
+      public ConnectionsRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ConnectionsRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ConnectionsRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ConnectionsRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ConnectionsListOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.ConnectionsList)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * users connected via the LAN module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+     */
+    java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> 
+        getLanList();
+    /**
+     * <pre>
+     * users connected via the LAN module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getLan(int index);
+    /**
+     * <pre>
+     * users connected via the LAN module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+     */
+    int getLanCount();
+    /**
+     * <pre>
+     * users connected via the LAN module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+     */
+    java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+        getLanOrBuilderList();
+    /**
+     * <pre>
+     * users connected via the LAN module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder getLanOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * users connected via the Internet module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+     */
+    java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> 
+        getInternetList();
+    /**
+     * <pre>
+     * users connected via the Internet module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getInternet(int index);
+    /**
+     * <pre>
+     * users connected via the Internet module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+     */
+    int getInternetCount();
+    /**
+     * <pre>
+     * users connected via the Internet module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+     */
+    java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+        getInternetOrBuilderList();
+    /**
+     * <pre>
+     * users connected via the Internet module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder getInternetOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * users connected via the BLE module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+     */
+    java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> 
+        getBleList();
+    /**
+     * <pre>
+     * users connected via the BLE module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getBle(int index);
+    /**
+     * <pre>
+     * users connected via the BLE module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+     */
+    int getBleCount();
+    /**
+     * <pre>
+     * users connected via the BLE module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+     */
+    java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+        getBleOrBuilderList();
+    /**
+     * <pre>
+     * users connected via the BLE module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder getBleOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * users connected locally (on the same node)
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+     */
+    java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> 
+        getLocalList();
+    /**
+     * <pre>
+     * users connected locally (on the same node)
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getLocal(int index);
+    /**
+     * <pre>
+     * users connected locally (on the same node)
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+     */
+    int getLocalCount();
+    /**
+     * <pre>
+     * users connected locally (on the same node)
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+     */
+    java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+        getLocalOrBuilderList();
+    /**
+     * <pre>
+     * users connected locally (on the same node)
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder getLocalOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * Connections list per module.
+   * All connections per user per module.
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.router.ConnectionsList}
+   */
+  public static final class ConnectionsList extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.router.ConnectionsList)
+      ConnectionsListOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ConnectionsList.newBuilder() to construct.
+    private ConnectionsList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ConnectionsList() {
+      lan_ = java.util.Collections.emptyList();
+      internet_ = java.util.Collections.emptyList();
+      ble_ = java.util.Collections.emptyList();
+      local_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ConnectionsList();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ConnectionsList(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                lan_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              lan_.add(
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.parser(), extensionRegistry));
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                internet_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              internet_.add(
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.parser(), extensionRegistry));
+              break;
+            }
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
+                ble_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              ble_.add(
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.parser(), extensionRegistry));
+              break;
+            }
+            case 34: {
+              if (!((mutable_bitField0_ & 0x00000008) != 0)) {
+                local_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              local_.add(
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.parser(), extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          lan_ = java.util.Collections.unmodifiableList(lan_);
+        }
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
+          internet_ = java.util.Collections.unmodifiableList(internet_);
+        }
+        if (((mutable_bitField0_ & 0x00000004) != 0)) {
+          ble_ = java.util.Collections.unmodifiableList(ble_);
+        }
+        if (((mutable_bitField0_ & 0x00000008) != 0)) {
+          local_ = java.util.Collections.unmodifiableList(local_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsList_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsList_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.router.RouterOuterClass.ConnectionsList.class, qaul.rpc.router.RouterOuterClass.ConnectionsList.Builder.class);
+    }
+
+    public static final int LAN_FIELD_NUMBER = 1;
+    private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> lan_;
+    /**
+     * <pre>
+     * users connected via the LAN module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> getLanList() {
+      return lan_;
+    }
+    /**
+     * <pre>
+     * users connected via the LAN module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+        getLanOrBuilderList() {
+      return lan_;
+    }
+    /**
+     * <pre>
+     * users connected via the LAN module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+     */
+    @java.lang.Override
+    public int getLanCount() {
+      return lan_.size();
+    }
+    /**
+     * <pre>
+     * users connected via the LAN module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getLan(int index) {
+      return lan_.get(index);
+    }
+    /**
+     * <pre>
+     * users connected via the LAN module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder getLanOrBuilder(
+        int index) {
+      return lan_.get(index);
+    }
+
+    public static final int INTERNET_FIELD_NUMBER = 2;
+    private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> internet_;
+    /**
+     * <pre>
+     * users connected via the Internet module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> getInternetList() {
+      return internet_;
+    }
+    /**
+     * <pre>
+     * users connected via the Internet module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+        getInternetOrBuilderList() {
+      return internet_;
+    }
+    /**
+     * <pre>
+     * users connected via the Internet module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+     */
+    @java.lang.Override
+    public int getInternetCount() {
+      return internet_.size();
+    }
+    /**
+     * <pre>
+     * users connected via the Internet module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getInternet(int index) {
+      return internet_.get(index);
+    }
+    /**
+     * <pre>
+     * users connected via the Internet module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder getInternetOrBuilder(
+        int index) {
+      return internet_.get(index);
+    }
+
+    public static final int BLE_FIELD_NUMBER = 3;
+    private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> ble_;
+    /**
+     * <pre>
+     * users connected via the BLE module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> getBleList() {
+      return ble_;
+    }
+    /**
+     * <pre>
+     * users connected via the BLE module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+        getBleOrBuilderList() {
+      return ble_;
+    }
+    /**
+     * <pre>
+     * users connected via the BLE module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+     */
+    @java.lang.Override
+    public int getBleCount() {
+      return ble_.size();
+    }
+    /**
+     * <pre>
+     * users connected via the BLE module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getBle(int index) {
+      return ble_.get(index);
+    }
+    /**
+     * <pre>
+     * users connected via the BLE module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder getBleOrBuilder(
+        int index) {
+      return ble_.get(index);
+    }
+
+    public static final int LOCAL_FIELD_NUMBER = 4;
+    private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> local_;
+    /**
+     * <pre>
+     * users connected locally (on the same node)
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+     */
+    @java.lang.Override
+    public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> getLocalList() {
+      return local_;
+    }
+    /**
+     * <pre>
+     * users connected locally (on the same node)
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+        getLocalOrBuilderList() {
+      return local_;
+    }
+    /**
+     * <pre>
+     * users connected locally (on the same node)
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+     */
+    @java.lang.Override
+    public int getLocalCount() {
+      return local_.size();
+    }
+    /**
+     * <pre>
+     * users connected locally (on the same node)
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getLocal(int index) {
+      return local_.get(index);
+    }
+    /**
+     * <pre>
+     * users connected locally (on the same node)
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder getLocalOrBuilder(
+        int index) {
+      return local_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < lan_.size(); i++) {
+        output.writeMessage(1, lan_.get(i));
+      }
+      for (int i = 0; i < internet_.size(); i++) {
+        output.writeMessage(2, internet_.get(i));
+      }
+      for (int i = 0; i < ble_.size(); i++) {
+        output.writeMessage(3, ble_.get(i));
+      }
+      for (int i = 0; i < local_.size(); i++) {
+        output.writeMessage(4, local_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < lan_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, lan_.get(i));
+      }
+      for (int i = 0; i < internet_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, internet_.get(i));
+      }
+      for (int i = 0; i < ble_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, ble_.get(i));
+      }
+      for (int i = 0; i < local_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, local_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.ConnectionsList)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.router.RouterOuterClass.ConnectionsList other = (qaul.rpc.router.RouterOuterClass.ConnectionsList) obj;
+
+      if (!getLanList()
+          .equals(other.getLanList())) return false;
+      if (!getInternetList()
+          .equals(other.getInternetList())) return false;
+      if (!getBleList()
+          .equals(other.getBleList())) return false;
+      if (!getLocalList()
+          .equals(other.getLocalList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getLanCount() > 0) {
+        hash = (37 * hash) + LAN_FIELD_NUMBER;
+        hash = (53 * hash) + getLanList().hashCode();
+      }
+      if (getInternetCount() > 0) {
+        hash = (37 * hash) + INTERNET_FIELD_NUMBER;
+        hash = (53 * hash) + getInternetList().hashCode();
+      }
+      if (getBleCount() > 0) {
+        hash = (37 * hash) + BLE_FIELD_NUMBER;
+        hash = (53 * hash) + getBleList().hashCode();
+      }
+      if (getLocalCount() > 0) {
+        hash = (37 * hash) + LOCAL_FIELD_NUMBER;
+        hash = (53 * hash) + getLocalList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.ConnectionsList prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Connections list per module.
+     * All connections per user per module.
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.router.ConnectionsList}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.ConnectionsList)
+        qaul.rpc.router.RouterOuterClass.ConnectionsListOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsList_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsList_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.router.RouterOuterClass.ConnectionsList.class, qaul.rpc.router.RouterOuterClass.ConnectionsList.Builder.class);
+      }
+
+      // Construct using qaul.rpc.router.RouterOuterClass.ConnectionsList.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getLanFieldBuilder();
+          getInternetFieldBuilder();
+          getBleFieldBuilder();
+          getLocalFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (lanBuilder_ == null) {
+          lan_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          lanBuilder_.clear();
+        }
+        if (internetBuilder_ == null) {
+          internet_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          internetBuilder_.clear();
+        }
+        if (bleBuilder_ == null) {
+          ble_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        } else {
+          bleBuilder_.clear();
+        }
+        if (localBuilder_ == null) {
+          local_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+        } else {
+          localBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsList_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsList getDefaultInstanceForType() {
+        return qaul.rpc.router.RouterOuterClass.ConnectionsList.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsList build() {
+        qaul.rpc.router.RouterOuterClass.ConnectionsList result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsList buildPartial() {
+        qaul.rpc.router.RouterOuterClass.ConnectionsList result = new qaul.rpc.router.RouterOuterClass.ConnectionsList(this);
+        int from_bitField0_ = bitField0_;
+        if (lanBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            lan_ = java.util.Collections.unmodifiableList(lan_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.lan_ = lan_;
+        } else {
+          result.lan_ = lanBuilder_.build();
+        }
+        if (internetBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0)) {
+            internet_ = java.util.Collections.unmodifiableList(internet_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.internet_ = internet_;
+        } else {
+          result.internet_ = internetBuilder_.build();
+        }
+        if (bleBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) != 0)) {
+            ble_ = java.util.Collections.unmodifiableList(ble_);
+            bitField0_ = (bitField0_ & ~0x00000004);
+          }
+          result.ble_ = ble_;
+        } else {
+          result.ble_ = bleBuilder_.build();
+        }
+        if (localBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) != 0)) {
+            local_ = java.util.Collections.unmodifiableList(local_);
+            bitField0_ = (bitField0_ & ~0x00000008);
+          }
+          result.local_ = local_;
+        } else {
+          result.local_ = localBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.router.RouterOuterClass.ConnectionsList) {
+          return mergeFrom((qaul.rpc.router.RouterOuterClass.ConnectionsList)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.ConnectionsList other) {
+        if (other == qaul.rpc.router.RouterOuterClass.ConnectionsList.getDefaultInstance()) return this;
+        if (lanBuilder_ == null) {
+          if (!other.lan_.isEmpty()) {
+            if (lan_.isEmpty()) {
+              lan_ = other.lan_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureLanIsMutable();
+              lan_.addAll(other.lan_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.lan_.isEmpty()) {
+            if (lanBuilder_.isEmpty()) {
+              lanBuilder_.dispose();
+              lanBuilder_ = null;
+              lan_ = other.lan_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              lanBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getLanFieldBuilder() : null;
+            } else {
+              lanBuilder_.addAllMessages(other.lan_);
+            }
+          }
+        }
+        if (internetBuilder_ == null) {
+          if (!other.internet_.isEmpty()) {
+            if (internet_.isEmpty()) {
+              internet_ = other.internet_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureInternetIsMutable();
+              internet_.addAll(other.internet_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.internet_.isEmpty()) {
+            if (internetBuilder_.isEmpty()) {
+              internetBuilder_.dispose();
+              internetBuilder_ = null;
+              internet_ = other.internet_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              internetBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getInternetFieldBuilder() : null;
+            } else {
+              internetBuilder_.addAllMessages(other.internet_);
+            }
+          }
+        }
+        if (bleBuilder_ == null) {
+          if (!other.ble_.isEmpty()) {
+            if (ble_.isEmpty()) {
+              ble_ = other.ble_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+            } else {
+              ensureBleIsMutable();
+              ble_.addAll(other.ble_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.ble_.isEmpty()) {
+            if (bleBuilder_.isEmpty()) {
+              bleBuilder_.dispose();
+              bleBuilder_ = null;
+              ble_ = other.ble_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+              bleBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getBleFieldBuilder() : null;
+            } else {
+              bleBuilder_.addAllMessages(other.ble_);
+            }
+          }
+        }
+        if (localBuilder_ == null) {
+          if (!other.local_.isEmpty()) {
+            if (local_.isEmpty()) {
+              local_ = other.local_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+            } else {
+              ensureLocalIsMutable();
+              local_.addAll(other.local_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.local_.isEmpty()) {
+            if (localBuilder_.isEmpty()) {
+              localBuilder_.dispose();
+              localBuilder_ = null;
+              local_ = other.local_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+              localBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getLocalFieldBuilder() : null;
+            } else {
+              localBuilder_.addAllMessages(other.local_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.router.RouterOuterClass.ConnectionsList parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.router.RouterOuterClass.ConnectionsList) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> lan_ =
+        java.util.Collections.emptyList();
+      private void ensureLanIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          lan_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>(lan_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> lanBuilder_;
+
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> getLanList() {
+        if (lanBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(lan_);
+        } else {
+          return lanBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public int getLanCount() {
+        if (lanBuilder_ == null) {
+          return lan_.size();
+        } else {
+          return lanBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getLan(int index) {
+        if (lanBuilder_ == null) {
+          return lan_.get(index);
+        } else {
+          return lanBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public Builder setLan(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry value) {
+        if (lanBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureLanIsMutable();
+          lan_.set(index, value);
+          onChanged();
+        } else {
+          lanBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public Builder setLan(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder builderForValue) {
+        if (lanBuilder_ == null) {
+          ensureLanIsMutable();
+          lan_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          lanBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public Builder addLan(qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry value) {
+        if (lanBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureLanIsMutable();
+          lan_.add(value);
+          onChanged();
+        } else {
+          lanBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public Builder addLan(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry value) {
+        if (lanBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureLanIsMutable();
+          lan_.add(index, value);
+          onChanged();
+        } else {
+          lanBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public Builder addLan(
+          qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder builderForValue) {
+        if (lanBuilder_ == null) {
+          ensureLanIsMutable();
+          lan_.add(builderForValue.build());
+          onChanged();
+        } else {
+          lanBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public Builder addLan(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder builderForValue) {
+        if (lanBuilder_ == null) {
+          ensureLanIsMutable();
+          lan_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          lanBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public Builder addAllLan(
+          java.lang.Iterable<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> values) {
+        if (lanBuilder_ == null) {
+          ensureLanIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, lan_);
+          onChanged();
+        } else {
+          lanBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public Builder clearLan() {
+        if (lanBuilder_ == null) {
+          lan_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          lanBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public Builder removeLan(int index) {
+        if (lanBuilder_ == null) {
+          ensureLanIsMutable();
+          lan_.remove(index);
+          onChanged();
+        } else {
+          lanBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder getLanBuilder(
+          int index) {
+        return getLanFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder getLanOrBuilder(
+          int index) {
+        if (lanBuilder_ == null) {
+          return lan_.get(index);  } else {
+          return lanBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+           getLanOrBuilderList() {
+        if (lanBuilder_ != null) {
+          return lanBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(lan_);
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder addLanBuilder() {
+        return getLanFieldBuilder().addBuilder(
+            qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder addLanBuilder(
+          int index) {
+        return getLanFieldBuilder().addBuilder(
+            index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * users connected via the LAN module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder> 
+           getLanBuilderList() {
+        return getLanFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+          getLanFieldBuilder() {
+        if (lanBuilder_ == null) {
+          lanBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder>(
+                  lan_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          lan_ = null;
+        }
+        return lanBuilder_;
+      }
+
+      private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> internet_ =
+        java.util.Collections.emptyList();
+      private void ensureInternetIsMutable() {
+        if (!((bitField0_ & 0x00000002) != 0)) {
+          internet_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>(internet_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> internetBuilder_;
+
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> getInternetList() {
+        if (internetBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(internet_);
+        } else {
+          return internetBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public int getInternetCount() {
+        if (internetBuilder_ == null) {
+          return internet_.size();
+        } else {
+          return internetBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getInternet(int index) {
+        if (internetBuilder_ == null) {
+          return internet_.get(index);
+        } else {
+          return internetBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public Builder setInternet(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry value) {
+        if (internetBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInternetIsMutable();
+          internet_.set(index, value);
+          onChanged();
+        } else {
+          internetBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public Builder setInternet(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder builderForValue) {
+        if (internetBuilder_ == null) {
+          ensureInternetIsMutable();
+          internet_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          internetBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public Builder addInternet(qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry value) {
+        if (internetBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInternetIsMutable();
+          internet_.add(value);
+          onChanged();
+        } else {
+          internetBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public Builder addInternet(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry value) {
+        if (internetBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInternetIsMutable();
+          internet_.add(index, value);
+          onChanged();
+        } else {
+          internetBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public Builder addInternet(
+          qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder builderForValue) {
+        if (internetBuilder_ == null) {
+          ensureInternetIsMutable();
+          internet_.add(builderForValue.build());
+          onChanged();
+        } else {
+          internetBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public Builder addInternet(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder builderForValue) {
+        if (internetBuilder_ == null) {
+          ensureInternetIsMutable();
+          internet_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          internetBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public Builder addAllInternet(
+          java.lang.Iterable<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> values) {
+        if (internetBuilder_ == null) {
+          ensureInternetIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, internet_);
+          onChanged();
+        } else {
+          internetBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public Builder clearInternet() {
+        if (internetBuilder_ == null) {
+          internet_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          internetBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public Builder removeInternet(int index) {
+        if (internetBuilder_ == null) {
+          ensureInternetIsMutable();
+          internet_.remove(index);
+          onChanged();
+        } else {
+          internetBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder getInternetBuilder(
+          int index) {
+        return getInternetFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder getInternetOrBuilder(
+          int index) {
+        if (internetBuilder_ == null) {
+          return internet_.get(index);  } else {
+          return internetBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+           getInternetOrBuilderList() {
+        if (internetBuilder_ != null) {
+          return internetBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(internet_);
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder addInternetBuilder() {
+        return getInternetFieldBuilder().addBuilder(
+            qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder addInternetBuilder(
+          int index) {
+        return getInternetFieldBuilder().addBuilder(
+            index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * users connected via the Internet module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder> 
+           getInternetBuilderList() {
+        return getInternetFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+          getInternetFieldBuilder() {
+        if (internetBuilder_ == null) {
+          internetBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder>(
+                  internet_,
+                  ((bitField0_ & 0x00000002) != 0),
+                  getParentForChildren(),
+                  isClean());
+          internet_ = null;
+        }
+        return internetBuilder_;
+      }
+
+      private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> ble_ =
+        java.util.Collections.emptyList();
+      private void ensureBleIsMutable() {
+        if (!((bitField0_ & 0x00000004) != 0)) {
+          ble_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>(ble_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> bleBuilder_;
+
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> getBleList() {
+        if (bleBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(ble_);
+        } else {
+          return bleBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public int getBleCount() {
+        if (bleBuilder_ == null) {
+          return ble_.size();
+        } else {
+          return bleBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getBle(int index) {
+        if (bleBuilder_ == null) {
+          return ble_.get(index);
+        } else {
+          return bleBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public Builder setBle(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry value) {
+        if (bleBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBleIsMutable();
+          ble_.set(index, value);
+          onChanged();
+        } else {
+          bleBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public Builder setBle(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder builderForValue) {
+        if (bleBuilder_ == null) {
+          ensureBleIsMutable();
+          ble_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          bleBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public Builder addBle(qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry value) {
+        if (bleBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBleIsMutable();
+          ble_.add(value);
+          onChanged();
+        } else {
+          bleBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public Builder addBle(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry value) {
+        if (bleBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBleIsMutable();
+          ble_.add(index, value);
+          onChanged();
+        } else {
+          bleBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public Builder addBle(
+          qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder builderForValue) {
+        if (bleBuilder_ == null) {
+          ensureBleIsMutable();
+          ble_.add(builderForValue.build());
+          onChanged();
+        } else {
+          bleBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public Builder addBle(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder builderForValue) {
+        if (bleBuilder_ == null) {
+          ensureBleIsMutable();
+          ble_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          bleBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public Builder addAllBle(
+          java.lang.Iterable<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> values) {
+        if (bleBuilder_ == null) {
+          ensureBleIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, ble_);
+          onChanged();
+        } else {
+          bleBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public Builder clearBle() {
+        if (bleBuilder_ == null) {
+          ble_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+          onChanged();
+        } else {
+          bleBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public Builder removeBle(int index) {
+        if (bleBuilder_ == null) {
+          ensureBleIsMutable();
+          ble_.remove(index);
+          onChanged();
+        } else {
+          bleBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder getBleBuilder(
+          int index) {
+        return getBleFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder getBleOrBuilder(
+          int index) {
+        if (bleBuilder_ == null) {
+          return ble_.get(index);  } else {
+          return bleBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+           getBleOrBuilderList() {
+        if (bleBuilder_ != null) {
+          return bleBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(ble_);
+        }
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder addBleBuilder() {
+        return getBleFieldBuilder().addBuilder(
+            qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder addBleBuilder(
+          int index) {
+        return getBleFieldBuilder().addBuilder(
+            index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * users connected via the BLE module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder> 
+           getBleBuilderList() {
+        return getBleFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+          getBleFieldBuilder() {
+        if (bleBuilder_ == null) {
+          bleBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder>(
+                  ble_,
+                  ((bitField0_ & 0x00000004) != 0),
+                  getParentForChildren(),
+                  isClean());
+          ble_ = null;
+        }
+        return bleBuilder_;
+      }
+
+      private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> local_ =
+        java.util.Collections.emptyList();
+      private void ensureLocalIsMutable() {
+        if (!((bitField0_ & 0x00000008) != 0)) {
+          local_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>(local_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> localBuilder_;
+
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> getLocalList() {
+        if (localBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(local_);
+        } else {
+          return localBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public int getLocalCount() {
+        if (localBuilder_ == null) {
+          return local_.size();
+        } else {
+          return localBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getLocal(int index) {
+        if (localBuilder_ == null) {
+          return local_.get(index);
+        } else {
+          return localBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public Builder setLocal(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry value) {
+        if (localBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureLocalIsMutable();
+          local_.set(index, value);
+          onChanged();
+        } else {
+          localBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public Builder setLocal(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder builderForValue) {
+        if (localBuilder_ == null) {
+          ensureLocalIsMutable();
+          local_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          localBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public Builder addLocal(qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry value) {
+        if (localBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureLocalIsMutable();
+          local_.add(value);
+          onChanged();
+        } else {
+          localBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public Builder addLocal(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry value) {
+        if (localBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureLocalIsMutable();
+          local_.add(index, value);
+          onChanged();
+        } else {
+          localBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public Builder addLocal(
+          qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder builderForValue) {
+        if (localBuilder_ == null) {
+          ensureLocalIsMutable();
+          local_.add(builderForValue.build());
+          onChanged();
+        } else {
+          localBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public Builder addLocal(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder builderForValue) {
+        if (localBuilder_ == null) {
+          ensureLocalIsMutable();
+          local_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          localBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public Builder addAllLocal(
+          java.lang.Iterable<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> values) {
+        if (localBuilder_ == null) {
+          ensureLocalIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, local_);
+          onChanged();
+        } else {
+          localBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public Builder clearLocal() {
+        if (localBuilder_ == null) {
+          local_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+          onChanged();
+        } else {
+          localBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public Builder removeLocal(int index) {
+        if (localBuilder_ == null) {
+          ensureLocalIsMutable();
+          local_.remove(index);
+          onChanged();
+        } else {
+          localBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder getLocalBuilder(
+          int index) {
+        return getLocalFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder getLocalOrBuilder(
+          int index) {
+        if (localBuilder_ == null) {
+          return local_.get(index);  } else {
+          return localBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+           getLocalOrBuilderList() {
+        if (localBuilder_ != null) {
+          return localBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(local_);
+        }
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder addLocalBuilder() {
+        return getLocalFieldBuilder().addBuilder(
+            qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder addLocalBuilder(
+          int index) {
+        return getLocalFieldBuilder().addBuilder(
+            index, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * users connected locally (on the same node)
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder> 
+           getLocalBuilderList() {
+        return getLocalFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder> 
+          getLocalFieldBuilder() {
+        if (localBuilder_ == null) {
+          localBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder>(
+                  local_,
+                  ((bitField0_ & 0x00000008) != 0),
+                  getParentForChildren(),
+                  isClean());
+          local_ = null;
+        }
+        return localBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.ConnectionsList)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.router.ConnectionsList)
+    private static final qaul.rpc.router.RouterOuterClass.ConnectionsList DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.ConnectionsList();
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsList getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ConnectionsList>
+        PARSER = new com.google.protobuf.AbstractParser<ConnectionsList>() {
+      @java.lang.Override
+      public ConnectionsList parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ConnectionsList(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ConnectionsList> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ConnectionsList> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsList getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ConnectionsUserEntryOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.ConnectionsUserEntry)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * the id of the user
+     * </pre>
+     *
+     * <code>bytes user_id = 1;</code>
+     * @return The userId.
+     */
+    com.google.protobuf.ByteString getUserId();
+
+    /**
+     * <pre>
+     * all connections to this user via this module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+     */
+    java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionEntry> 
+        getConnectionsList();
+    /**
+     * <pre>
+     * all connections to this user via this module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionEntry getConnections(int index);
+    /**
+     * <pre>
+     * all connections to this user via this module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+     */
+    int getConnectionsCount();
+    /**
+     * <pre>
+     * all connections to this user via this module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+     */
+    java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionEntryOrBuilder> 
+        getConnectionsOrBuilderList();
+    /**
+     * <pre>
+     * all connections to this user via this module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.ConnectionEntryOrBuilder getConnectionsOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * connections entry for a user
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.router.ConnectionsUserEntry}
+   */
+  public static final class ConnectionsUserEntry extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.router.ConnectionsUserEntry)
+      ConnectionsUserEntryOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ConnectionsUserEntry.newBuilder() to construct.
+    private ConnectionsUserEntry(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ConnectionsUserEntry() {
+      userId_ = com.google.protobuf.ByteString.EMPTY;
+      connections_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ConnectionsUserEntry();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ConnectionsUserEntry(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+
+              userId_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                connections_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.ConnectionEntry>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              connections_.add(
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.ConnectionEntry.parser(), extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          connections_ = java.util.Collections.unmodifiableList(connections_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsUserEntry_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsUserEntry_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.class, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder.class);
+    }
+
+    public static final int USER_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString userId_;
+    /**
+     * <pre>
+     * the id of the user
+     * </pre>
+     *
+     * <code>bytes user_id = 1;</code>
+     * @return The userId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getUserId() {
+      return userId_;
+    }
+
+    public static final int CONNECTIONS_FIELD_NUMBER = 2;
+    private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionEntry> connections_;
+    /**
+     * <pre>
+     * all connections to this user via this module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionEntry> getConnectionsList() {
+      return connections_;
+    }
+    /**
+     * <pre>
+     * all connections to this user via this module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionEntryOrBuilder> 
+        getConnectionsOrBuilderList() {
+      return connections_;
+    }
+    /**
+     * <pre>
+     * all connections to this user via this module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+     */
+    @java.lang.Override
+    public int getConnectionsCount() {
+      return connections_.size();
+    }
+    /**
+     * <pre>
+     * all connections to this user via this module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionEntry getConnections(int index) {
+      return connections_.get(index);
+    }
+    /**
+     * <pre>
+     * all connections to this user via this module
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionEntryOrBuilder getConnectionsOrBuilder(
+        int index) {
+      return connections_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!userId_.isEmpty()) {
+        output.writeBytes(1, userId_);
+      }
+      for (int i = 0; i < connections_.size(); i++) {
+        output.writeMessage(2, connections_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!userId_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, userId_);
+      }
+      for (int i = 0; i < connections_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, connections_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry other = (qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) obj;
+
+      if (!getUserId()
+          .equals(other.getUserId())) return false;
+      if (!getConnectionsList()
+          .equals(other.getConnectionsList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + USER_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getUserId().hashCode();
+      if (getConnectionsCount() > 0) {
+        hash = (37 * hash) + CONNECTIONS_FIELD_NUMBER;
+        hash = (53 * hash) + getConnectionsList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * connections entry for a user
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.router.ConnectionsUserEntry}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.ConnectionsUserEntry)
+        qaul.rpc.router.RouterOuterClass.ConnectionsUserEntryOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsUserEntry_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsUserEntry_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.class, qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.Builder.class);
+      }
+
+      // Construct using qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getConnectionsFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        userId_ = com.google.protobuf.ByteString.EMPTY;
+
+        if (connectionsBuilder_ == null) {
+          connections_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          connectionsBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsUserEntry_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getDefaultInstanceForType() {
+        return qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry build() {
+        qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry buildPartial() {
+        qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry result = new qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry(this);
+        int from_bitField0_ = bitField0_;
+        result.userId_ = userId_;
+        if (connectionsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            connections_ = java.util.Collections.unmodifiableList(connections_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.connections_ = connections_;
+        } else {
+          result.connections_ = connectionsBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+          return mergeFrom((qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry other) {
+        if (other == qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry.getDefaultInstance()) return this;
+        if (other.getUserId() != com.google.protobuf.ByteString.EMPTY) {
+          setUserId(other.getUserId());
+        }
+        if (connectionsBuilder_ == null) {
+          if (!other.connections_.isEmpty()) {
+            if (connections_.isEmpty()) {
+              connections_ = other.connections_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureConnectionsIsMutable();
+              connections_.addAll(other.connections_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.connections_.isEmpty()) {
+            if (connectionsBuilder_.isEmpty()) {
+              connectionsBuilder_.dispose();
+              connectionsBuilder_ = null;
+              connections_ = other.connections_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              connectionsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getConnectionsFieldBuilder() : null;
+            } else {
+              connectionsBuilder_.addAllMessages(other.connections_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * the id of the user
+       * </pre>
+       *
+       * <code>bytes user_id = 1;</code>
+       * @return The userId.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getUserId() {
+        return userId_;
+      }
+      /**
+       * <pre>
+       * the id of the user
+       * </pre>
+       *
+       * <code>bytes user_id = 1;</code>
+       * @param value The userId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUserId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the id of the user
+       * </pre>
+       *
+       * <code>bytes user_id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUserId() {
+        
+        userId_ = getDefaultInstance().getUserId();
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionEntry> connections_ =
+        java.util.Collections.emptyList();
+      private void ensureConnectionsIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          connections_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.ConnectionEntry>(connections_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionEntry, qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionEntryOrBuilder> connectionsBuilder_;
+
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionEntry> getConnectionsList() {
+        if (connectionsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(connections_);
+        } else {
+          return connectionsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public int getConnectionsCount() {
+        if (connectionsBuilder_ == null) {
+          return connections_.size();
+        } else {
+          return connectionsBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionEntry getConnections(int index) {
+        if (connectionsBuilder_ == null) {
+          return connections_.get(index);
+        } else {
+          return connectionsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public Builder setConnections(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionEntry value) {
+        if (connectionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConnectionsIsMutable();
+          connections_.set(index, value);
+          onChanged();
+        } else {
+          connectionsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public Builder setConnections(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder builderForValue) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          connections_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          connectionsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public Builder addConnections(qaul.rpc.router.RouterOuterClass.ConnectionEntry value) {
+        if (connectionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConnectionsIsMutable();
+          connections_.add(value);
+          onChanged();
+        } else {
+          connectionsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public Builder addConnections(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionEntry value) {
+        if (connectionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConnectionsIsMutable();
+          connections_.add(index, value);
+          onChanged();
+        } else {
+          connectionsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public Builder addConnections(
+          qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder builderForValue) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          connections_.add(builderForValue.build());
+          onChanged();
+        } else {
+          connectionsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public Builder addConnections(
+          int index, qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder builderForValue) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          connections_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          connectionsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public Builder addAllConnections(
+          java.lang.Iterable<? extends qaul.rpc.router.RouterOuterClass.ConnectionEntry> values) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, connections_);
+          onChanged();
+        } else {
+          connectionsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public Builder clearConnections() {
+        if (connectionsBuilder_ == null) {
+          connections_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          connectionsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public Builder removeConnections(int index) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          connections_.remove(index);
+          onChanged();
+        } else {
+          connectionsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder getConnectionsBuilder(
+          int index) {
+        return getConnectionsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionEntryOrBuilder getConnectionsOrBuilder(
+          int index) {
+        if (connectionsBuilder_ == null) {
+          return connections_.get(index);  } else {
+          return connectionsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public java.util.List<? extends qaul.rpc.router.RouterOuterClass.ConnectionEntryOrBuilder> 
+           getConnectionsOrBuilderList() {
+        if (connectionsBuilder_ != null) {
+          return connectionsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(connections_);
+        }
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder addConnectionsBuilder() {
+        return getConnectionsFieldBuilder().addBuilder(
+            qaul.rpc.router.RouterOuterClass.ConnectionEntry.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder addConnectionsBuilder(
+          int index) {
+        return getConnectionsFieldBuilder().addBuilder(
+            index, qaul.rpc.router.RouterOuterClass.ConnectionEntry.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * all connections to this user via this module
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.router.ConnectionEntry connections = 2;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder> 
+           getConnectionsBuilderList() {
+        return getConnectionsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.ConnectionEntry, qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionEntryOrBuilder> 
+          getConnectionsFieldBuilder() {
+        if (connectionsBuilder_ == null) {
+          connectionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.ConnectionEntry, qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionEntryOrBuilder>(
+                  connections_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          connections_ = null;
+        }
+        return connectionsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.ConnectionsUserEntry)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.router.ConnectionsUserEntry)
+    private static final qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry();
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ConnectionsUserEntry>
+        PARSER = new com.google.protobuf.AbstractParser<ConnectionsUserEntry>() {
+      @java.lang.Override
+      public ConnectionsUserEntry parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ConnectionsUserEntry(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ConnectionsUserEntry> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ConnectionsUserEntry> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ConnectionEntryOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.ConnectionEntry)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * round trip time in milli seconds
+     * </pre>
+     *
+     * <code>uint32 rtt = 1;</code>
+     * @return The rtt.
+     */
+    int getRtt();
+
+    /**
+     * <pre>
+     * hop count to the user.
+     * This represents the number of nodes between this node and the user.
+     * </pre>
+     *
+     * <code>uint32 hop_count = 2;</code>
+     * @return The hopCount.
+     */
+    int getHopCount();
+
+    /**
+     * <pre>
+     * connection can be established via the node with the following id
+     * </pre>
+     *
+     * <code>bytes via = 3;</code>
+     * @return The via.
+     */
+    com.google.protobuf.ByteString getVia();
+  }
+  /**
+   * <pre>
+   * all connections of this user
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.router.ConnectionEntry}
+   */
+  public static final class ConnectionEntry extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.router.ConnectionEntry)
+      ConnectionEntryOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ConnectionEntry.newBuilder() to construct.
+    private ConnectionEntry(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ConnectionEntry() {
+      via_ = com.google.protobuf.ByteString.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ConnectionEntry();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ConnectionEntry(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+
+              rtt_ = input.readUInt32();
+              break;
+            }
+            case 16: {
+
+              hopCount_ = input.readUInt32();
+              break;
+            }
+            case 26: {
+
+              via_ = input.readBytes();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionEntry_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionEntry_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.router.RouterOuterClass.ConnectionEntry.class, qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder.class);
+    }
+
+    public static final int RTT_FIELD_NUMBER = 1;
+    private int rtt_;
+    /**
+     * <pre>
+     * round trip time in milli seconds
+     * </pre>
+     *
+     * <code>uint32 rtt = 1;</code>
+     * @return The rtt.
+     */
+    @java.lang.Override
+    public int getRtt() {
+      return rtt_;
+    }
+
+    public static final int HOP_COUNT_FIELD_NUMBER = 2;
+    private int hopCount_;
+    /**
+     * <pre>
+     * hop count to the user.
+     * This represents the number of nodes between this node and the user.
+     * </pre>
+     *
+     * <code>uint32 hop_count = 2;</code>
+     * @return The hopCount.
+     */
+    @java.lang.Override
+    public int getHopCount() {
+      return hopCount_;
+    }
+
+    public static final int VIA_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString via_;
+    /**
+     * <pre>
+     * connection can be established via the node with the following id
+     * </pre>
+     *
+     * <code>bytes via = 3;</code>
+     * @return The via.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getVia() {
+      return via_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (rtt_ != 0) {
+        output.writeUInt32(1, rtt_);
+      }
+      if (hopCount_ != 0) {
+        output.writeUInt32(2, hopCount_);
+      }
+      if (!via_.isEmpty()) {
+        output.writeBytes(3, via_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (rtt_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(1, rtt_);
+      }
+      if (hopCount_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(2, hopCount_);
+      }
+      if (!via_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, via_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.ConnectionEntry)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.router.RouterOuterClass.ConnectionEntry other = (qaul.rpc.router.RouterOuterClass.ConnectionEntry) obj;
+
+      if (getRtt()
+          != other.getRtt()) return false;
+      if (getHopCount()
+          != other.getHopCount()) return false;
+      if (!getVia()
+          .equals(other.getVia())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + RTT_FIELD_NUMBER;
+      hash = (53 * hash) + getRtt();
+      hash = (37 * hash) + HOP_COUNT_FIELD_NUMBER;
+      hash = (53 * hash) + getHopCount();
+      hash = (37 * hash) + VIA_FIELD_NUMBER;
+      hash = (53 * hash) + getVia().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.ConnectionEntry prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * all connections of this user
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.router.ConnectionEntry}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.ConnectionEntry)
+        qaul.rpc.router.RouterOuterClass.ConnectionEntryOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionEntry_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionEntry_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.router.RouterOuterClass.ConnectionEntry.class, qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder.class);
+      }
+
+      // Construct using qaul.rpc.router.RouterOuterClass.ConnectionEntry.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        rtt_ = 0;
+
+        hopCount_ = 0;
+
+        via_ = com.google.protobuf.ByteString.EMPTY;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionEntry_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionEntry getDefaultInstanceForType() {
+        return qaul.rpc.router.RouterOuterClass.ConnectionEntry.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionEntry build() {
+        qaul.rpc.router.RouterOuterClass.ConnectionEntry result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.ConnectionEntry buildPartial() {
+        qaul.rpc.router.RouterOuterClass.ConnectionEntry result = new qaul.rpc.router.RouterOuterClass.ConnectionEntry(this);
+        result.rtt_ = rtt_;
+        result.hopCount_ = hopCount_;
+        result.via_ = via_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.router.RouterOuterClass.ConnectionEntry) {
+          return mergeFrom((qaul.rpc.router.RouterOuterClass.ConnectionEntry)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.ConnectionEntry other) {
+        if (other == qaul.rpc.router.RouterOuterClass.ConnectionEntry.getDefaultInstance()) return this;
+        if (other.getRtt() != 0) {
+          setRtt(other.getRtt());
+        }
+        if (other.getHopCount() != 0) {
+          setHopCount(other.getHopCount());
+        }
+        if (other.getVia() != com.google.protobuf.ByteString.EMPTY) {
+          setVia(other.getVia());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.router.RouterOuterClass.ConnectionEntry parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.router.RouterOuterClass.ConnectionEntry) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int rtt_ ;
+      /**
+       * <pre>
+       * round trip time in milli seconds
+       * </pre>
+       *
+       * <code>uint32 rtt = 1;</code>
+       * @return The rtt.
+       */
+      @java.lang.Override
+      public int getRtt() {
+        return rtt_;
+      }
+      /**
+       * <pre>
+       * round trip time in milli seconds
+       * </pre>
+       *
+       * <code>uint32 rtt = 1;</code>
+       * @param value The rtt to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRtt(int value) {
+        
+        rtt_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * round trip time in milli seconds
+       * </pre>
+       *
+       * <code>uint32 rtt = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRtt() {
+        
+        rtt_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int hopCount_ ;
+      /**
+       * <pre>
+       * hop count to the user.
+       * This represents the number of nodes between this node and the user.
+       * </pre>
+       *
+       * <code>uint32 hop_count = 2;</code>
+       * @return The hopCount.
+       */
+      @java.lang.Override
+      public int getHopCount() {
+        return hopCount_;
+      }
+      /**
+       * <pre>
+       * hop count to the user.
+       * This represents the number of nodes between this node and the user.
+       * </pre>
+       *
+       * <code>uint32 hop_count = 2;</code>
+       * @param value The hopCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHopCount(int value) {
+        
+        hopCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * hop count to the user.
+       * This represents the number of nodes between this node and the user.
+       * </pre>
+       *
+       * <code>uint32 hop_count = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHopCount() {
+        
+        hopCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString via_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * connection can be established via the node with the following id
+       * </pre>
+       *
+       * <code>bytes via = 3;</code>
+       * @return The via.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getVia() {
+        return via_;
+      }
+      /**
+       * <pre>
+       * connection can be established via the node with the following id
+       * </pre>
+       *
+       * <code>bytes via = 3;</code>
+       * @param value The via to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVia(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        via_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * connection can be established via the node with the following id
+       * </pre>
+       *
+       * <code>bytes via = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVia() {
+        
+        via_ = getDefaultInstance().getVia();
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.ConnectionEntry)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.router.ConnectionEntry)
+    private static final qaul.rpc.router.RouterOuterClass.ConnectionEntry DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.ConnectionEntry();
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.ConnectionEntry getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ConnectionEntry>
+        PARSER = new com.google.protobuf.AbstractParser<ConnectionEntry>() {
+      @java.lang.Override
+      public ConnectionEntry parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ConnectionEntry(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ConnectionEntry> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ConnectionEntry> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.ConnectionEntry getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface NeighboursRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.NeighboursRequest)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * UI request for neighbours list
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.router.NeighboursRequest}
+   */
+  public static final class NeighboursRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.router.NeighboursRequest)
+      NeighboursRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use NeighboursRequest.newBuilder() to construct.
+    private NeighboursRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private NeighboursRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new NeighboursRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private NeighboursRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.router.RouterOuterClass.NeighboursRequest.class, qaul.rpc.router.RouterOuterClass.NeighboursRequest.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.NeighboursRequest)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.router.RouterOuterClass.NeighboursRequest other = (qaul.rpc.router.RouterOuterClass.NeighboursRequest) obj;
+
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.NeighboursRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * UI request for neighbours list
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.router.NeighboursRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.NeighboursRequest)
+        qaul.rpc.router.RouterOuterClass.NeighboursRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.router.RouterOuterClass.NeighboursRequest.class, qaul.rpc.router.RouterOuterClass.NeighboursRequest.Builder.class);
+      }
+
+      // Construct using qaul.rpc.router.RouterOuterClass.NeighboursRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursRequest getDefaultInstanceForType() {
+        return qaul.rpc.router.RouterOuterClass.NeighboursRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursRequest build() {
+        qaul.rpc.router.RouterOuterClass.NeighboursRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursRequest buildPartial() {
+        qaul.rpc.router.RouterOuterClass.NeighboursRequest result = new qaul.rpc.router.RouterOuterClass.NeighboursRequest(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.router.RouterOuterClass.NeighboursRequest) {
+          return mergeFrom((qaul.rpc.router.RouterOuterClass.NeighboursRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.NeighboursRequest other) {
+        if (other == qaul.rpc.router.RouterOuterClass.NeighboursRequest.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.router.RouterOuterClass.NeighboursRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.router.RouterOuterClass.NeighboursRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.NeighboursRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.router.NeighboursRequest)
+    private static final qaul.rpc.router.RouterOuterClass.NeighboursRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.NeighboursRequest();
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.NeighboursRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<NeighboursRequest>
+        PARSER = new com.google.protobuf.AbstractParser<NeighboursRequest>() {
+      @java.lang.Override
+      public NeighboursRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new NeighboursRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<NeighboursRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<NeighboursRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface NeighboursListOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.NeighboursList)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+     */
+    java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> 
+        getLanList();
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.NeighboursEntry getLan(int index);
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+     */
+    int getLanCount();
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+     */
+    java.util.List<? extends qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> 
+        getLanOrBuilderList();
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder getLanOrBuilder(
+        int index);
+
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+     */
+    java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> 
+        getInternetList();
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.NeighboursEntry getInternet(int index);
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+     */
+    int getInternetCount();
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+     */
+    java.util.List<? extends qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> 
+        getInternetOrBuilderList();
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder getInternetOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * neighbours list per module
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.router.NeighboursList}
+   */
+  public static final class NeighboursList extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.router.NeighboursList)
+      NeighboursListOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use NeighboursList.newBuilder() to construct.
+    private NeighboursList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private NeighboursList() {
+      lan_ = java.util.Collections.emptyList();
+      internet_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new NeighboursList();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private NeighboursList(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                lan_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.NeighboursEntry>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              lan_.add(
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.NeighboursEntry.parser(), extensionRegistry));
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                internet_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.NeighboursEntry>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              internet_.add(
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.NeighboursEntry.parser(), extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          lan_ = java.util.Collections.unmodifiableList(lan_);
+        }
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
+          internet_ = java.util.Collections.unmodifiableList(internet_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursList_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursList_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.router.RouterOuterClass.NeighboursList.class, qaul.rpc.router.RouterOuterClass.NeighboursList.Builder.class);
+    }
+
+    public static final int LAN_FIELD_NUMBER = 1;
+    private java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> lan_;
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> getLanList() {
+      return lan_;
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> 
+        getLanOrBuilderList() {
+      return lan_;
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+     */
+    @java.lang.Override
+    public int getLanCount() {
+      return lan_.size();
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursEntry getLan(int index) {
+      return lan_.get(index);
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder getLanOrBuilder(
+        int index) {
+      return lan_.get(index);
+    }
+
+    public static final int INTERNET_FIELD_NUMBER = 2;
+    private java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> internet_;
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> getInternetList() {
+      return internet_;
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> 
+        getInternetOrBuilderList() {
+      return internet_;
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+     */
+    @java.lang.Override
+    public int getInternetCount() {
+      return internet_.size();
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursEntry getInternet(int index) {
+      return internet_.get(index);
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder getInternetOrBuilder(
+        int index) {
+      return internet_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < lan_.size(); i++) {
+        output.writeMessage(1, lan_.get(i));
+      }
+      for (int i = 0; i < internet_.size(); i++) {
+        output.writeMessage(2, internet_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < lan_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, lan_.get(i));
+      }
+      for (int i = 0; i < internet_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, internet_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.NeighboursList)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.router.RouterOuterClass.NeighboursList other = (qaul.rpc.router.RouterOuterClass.NeighboursList) obj;
+
+      if (!getLanList()
+          .equals(other.getLanList())) return false;
+      if (!getInternetList()
+          .equals(other.getInternetList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getLanCount() > 0) {
+        hash = (37 * hash) + LAN_FIELD_NUMBER;
+        hash = (53 * hash) + getLanList().hashCode();
+      }
+      if (getInternetCount() > 0) {
+        hash = (37 * hash) + INTERNET_FIELD_NUMBER;
+        hash = (53 * hash) + getInternetList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.NeighboursList prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * neighbours list per module
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.router.NeighboursList}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.NeighboursList)
+        qaul.rpc.router.RouterOuterClass.NeighboursListOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursList_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursList_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.router.RouterOuterClass.NeighboursList.class, qaul.rpc.router.RouterOuterClass.NeighboursList.Builder.class);
+      }
+
+      // Construct using qaul.rpc.router.RouterOuterClass.NeighboursList.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getLanFieldBuilder();
+          getInternetFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (lanBuilder_ == null) {
+          lan_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          lanBuilder_.clear();
+        }
+        if (internetBuilder_ == null) {
+          internet_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          internetBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursList_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursList getDefaultInstanceForType() {
+        return qaul.rpc.router.RouterOuterClass.NeighboursList.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursList build() {
+        qaul.rpc.router.RouterOuterClass.NeighboursList result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursList buildPartial() {
+        qaul.rpc.router.RouterOuterClass.NeighboursList result = new qaul.rpc.router.RouterOuterClass.NeighboursList(this);
+        int from_bitField0_ = bitField0_;
+        if (lanBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            lan_ = java.util.Collections.unmodifiableList(lan_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.lan_ = lan_;
+        } else {
+          result.lan_ = lanBuilder_.build();
+        }
+        if (internetBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0)) {
+            internet_ = java.util.Collections.unmodifiableList(internet_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.internet_ = internet_;
+        } else {
+          result.internet_ = internetBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.router.RouterOuterClass.NeighboursList) {
+          return mergeFrom((qaul.rpc.router.RouterOuterClass.NeighboursList)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.NeighboursList other) {
+        if (other == qaul.rpc.router.RouterOuterClass.NeighboursList.getDefaultInstance()) return this;
+        if (lanBuilder_ == null) {
+          if (!other.lan_.isEmpty()) {
+            if (lan_.isEmpty()) {
+              lan_ = other.lan_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureLanIsMutable();
+              lan_.addAll(other.lan_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.lan_.isEmpty()) {
+            if (lanBuilder_.isEmpty()) {
+              lanBuilder_.dispose();
+              lanBuilder_ = null;
+              lan_ = other.lan_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              lanBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getLanFieldBuilder() : null;
+            } else {
+              lanBuilder_.addAllMessages(other.lan_);
+            }
+          }
+        }
+        if (internetBuilder_ == null) {
+          if (!other.internet_.isEmpty()) {
+            if (internet_.isEmpty()) {
+              internet_ = other.internet_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureInternetIsMutable();
+              internet_.addAll(other.internet_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.internet_.isEmpty()) {
+            if (internetBuilder_.isEmpty()) {
+              internetBuilder_.dispose();
+              internetBuilder_ = null;
+              internet_ = other.internet_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              internetBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getInternetFieldBuilder() : null;
+            } else {
+              internetBuilder_.addAllMessages(other.internet_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.router.RouterOuterClass.NeighboursList parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.router.RouterOuterClass.NeighboursList) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> lan_ =
+        java.util.Collections.emptyList();
+      private void ensureLanIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          lan_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.NeighboursEntry>(lan_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.NeighboursEntry, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder, qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> lanBuilder_;
+
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> getLanList() {
+        if (lanBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(lan_);
+        } else {
+          return lanBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public int getLanCount() {
+        if (lanBuilder_ == null) {
+          return lan_.size();
+        } else {
+          return lanBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry getLan(int index) {
+        if (lanBuilder_ == null) {
+          return lan_.get(index);
+        } else {
+          return lanBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public Builder setLan(
+          int index, qaul.rpc.router.RouterOuterClass.NeighboursEntry value) {
+        if (lanBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureLanIsMutable();
+          lan_.set(index, value);
+          onChanged();
+        } else {
+          lanBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public Builder setLan(
+          int index, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder builderForValue) {
+        if (lanBuilder_ == null) {
+          ensureLanIsMutable();
+          lan_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          lanBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public Builder addLan(qaul.rpc.router.RouterOuterClass.NeighboursEntry value) {
+        if (lanBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureLanIsMutable();
+          lan_.add(value);
+          onChanged();
+        } else {
+          lanBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public Builder addLan(
+          int index, qaul.rpc.router.RouterOuterClass.NeighboursEntry value) {
+        if (lanBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureLanIsMutable();
+          lan_.add(index, value);
+          onChanged();
+        } else {
+          lanBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public Builder addLan(
+          qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder builderForValue) {
+        if (lanBuilder_ == null) {
+          ensureLanIsMutable();
+          lan_.add(builderForValue.build());
+          onChanged();
+        } else {
+          lanBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public Builder addLan(
+          int index, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder builderForValue) {
+        if (lanBuilder_ == null) {
+          ensureLanIsMutable();
+          lan_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          lanBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public Builder addAllLan(
+          java.lang.Iterable<? extends qaul.rpc.router.RouterOuterClass.NeighboursEntry> values) {
+        if (lanBuilder_ == null) {
+          ensureLanIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, lan_);
+          onChanged();
+        } else {
+          lanBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public Builder clearLan() {
+        if (lanBuilder_ == null) {
+          lan_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          lanBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public Builder removeLan(int index) {
+        if (lanBuilder_ == null) {
+          ensureLanIsMutable();
+          lan_.remove(index);
+          onChanged();
+        } else {
+          lanBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder getLanBuilder(
+          int index) {
+        return getLanFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder getLanOrBuilder(
+          int index) {
+        if (lanBuilder_ == null) {
+          return lan_.get(index);  } else {
+          return lanBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public java.util.List<? extends qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> 
+           getLanOrBuilderList() {
+        if (lanBuilder_ != null) {
+          return lanBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(lan_);
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder addLanBuilder() {
+        return getLanFieldBuilder().addBuilder(
+            qaul.rpc.router.RouterOuterClass.NeighboursEntry.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder addLanBuilder(
+          int index) {
+        return getLanFieldBuilder().addBuilder(
+            index, qaul.rpc.router.RouterOuterClass.NeighboursEntry.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder> 
+           getLanBuilderList() {
+        return getLanFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.NeighboursEntry, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder, qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> 
+          getLanFieldBuilder() {
+        if (lanBuilder_ == null) {
+          lanBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.NeighboursEntry, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder, qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder>(
+                  lan_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          lan_ = null;
+        }
+        return lanBuilder_;
+      }
+
+      private java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> internet_ =
+        java.util.Collections.emptyList();
+      private void ensureInternetIsMutable() {
+        if (!((bitField0_ & 0x00000002) != 0)) {
+          internet_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.NeighboursEntry>(internet_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.NeighboursEntry, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder, qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> internetBuilder_;
+
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> getInternetList() {
+        if (internetBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(internet_);
+        } else {
+          return internetBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public int getInternetCount() {
+        if (internetBuilder_ == null) {
+          return internet_.size();
+        } else {
+          return internetBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry getInternet(int index) {
+        if (internetBuilder_ == null) {
+          return internet_.get(index);
+        } else {
+          return internetBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public Builder setInternet(
+          int index, qaul.rpc.router.RouterOuterClass.NeighboursEntry value) {
+        if (internetBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInternetIsMutable();
+          internet_.set(index, value);
+          onChanged();
+        } else {
+          internetBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public Builder setInternet(
+          int index, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder builderForValue) {
+        if (internetBuilder_ == null) {
+          ensureInternetIsMutable();
+          internet_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          internetBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public Builder addInternet(qaul.rpc.router.RouterOuterClass.NeighboursEntry value) {
+        if (internetBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInternetIsMutable();
+          internet_.add(value);
+          onChanged();
+        } else {
+          internetBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public Builder addInternet(
+          int index, qaul.rpc.router.RouterOuterClass.NeighboursEntry value) {
+        if (internetBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInternetIsMutable();
+          internet_.add(index, value);
+          onChanged();
+        } else {
+          internetBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public Builder addInternet(
+          qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder builderForValue) {
+        if (internetBuilder_ == null) {
+          ensureInternetIsMutable();
+          internet_.add(builderForValue.build());
+          onChanged();
+        } else {
+          internetBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public Builder addInternet(
+          int index, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder builderForValue) {
+        if (internetBuilder_ == null) {
+          ensureInternetIsMutable();
+          internet_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          internetBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public Builder addAllInternet(
+          java.lang.Iterable<? extends qaul.rpc.router.RouterOuterClass.NeighboursEntry> values) {
+        if (internetBuilder_ == null) {
+          ensureInternetIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, internet_);
+          onChanged();
+        } else {
+          internetBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public Builder clearInternet() {
+        if (internetBuilder_ == null) {
+          internet_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          internetBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public Builder removeInternet(int index) {
+        if (internetBuilder_ == null) {
+          ensureInternetIsMutable();
+          internet_.remove(index);
+          onChanged();
+        } else {
+          internetBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder getInternetBuilder(
+          int index) {
+        return getInternetFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder getInternetOrBuilder(
+          int index) {
+        if (internetBuilder_ == null) {
+          return internet_.get(index);  } else {
+          return internetBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public java.util.List<? extends qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> 
+           getInternetOrBuilderList() {
+        if (internetBuilder_ != null) {
+          return internetBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(internet_);
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder addInternetBuilder() {
+        return getInternetFieldBuilder().addBuilder(
+            qaul.rpc.router.RouterOuterClass.NeighboursEntry.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder addInternetBuilder(
+          int index) {
+        return getInternetFieldBuilder().addBuilder(
+            index, qaul.rpc.router.RouterOuterClass.NeighboursEntry.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder> 
+           getInternetBuilderList() {
+        return getInternetFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.NeighboursEntry, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder, qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> 
+          getInternetFieldBuilder() {
+        if (internetBuilder_ == null) {
+          internetBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.NeighboursEntry, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder, qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder>(
+                  internet_,
+                  ((bitField0_ & 0x00000002) != 0),
+                  getParentForChildren(),
+                  isClean());
+          internet_ = null;
+        }
+        return internetBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.NeighboursList)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.router.NeighboursList)
+    private static final qaul.rpc.router.RouterOuterClass.NeighboursList DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.NeighboursList();
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.NeighboursList getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<NeighboursList>
+        PARSER = new com.google.protobuf.AbstractParser<NeighboursList>() {
+      @java.lang.Override
+      public NeighboursList parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new NeighboursList(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<NeighboursList> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<NeighboursList> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursList getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface NeighboursEntryOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.router.NeighboursEntry)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * the ID of the neighbour node
+     * </pre>
+     *
+     * <code>bytes node_id = 1;</code>
+     * @return The nodeId.
+     */
+    com.google.protobuf.ByteString getNodeId();
+
+    /**
+     * <pre>
+     * rtt to this neighbour
+     * </pre>
+     *
+     * <code>uint32 rtt = 2;</code>
+     * @return The rtt.
+     */
+    int getRtt();
+  }
+  /**
+   * <pre>
+   * neighbours entry
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.router.NeighboursEntry}
+   */
+  public static final class NeighboursEntry extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.router.NeighboursEntry)
+      NeighboursEntryOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use NeighboursEntry.newBuilder() to construct.
+    private NeighboursEntry(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private NeighboursEntry() {
+      nodeId_ = com.google.protobuf.ByteString.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new NeighboursEntry();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private NeighboursEntry(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+
+              nodeId_ = input.readBytes();
+              break;
+            }
+            case 16: {
+
+              rtt_ = input.readUInt32();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursEntry_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursEntry_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.router.RouterOuterClass.NeighboursEntry.class, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder.class);
+    }
+
+    public static final int NODE_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString nodeId_;
+    /**
+     * <pre>
+     * the ID of the neighbour node
+     * </pre>
+     *
+     * <code>bytes node_id = 1;</code>
+     * @return The nodeId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getNodeId() {
+      return nodeId_;
+    }
+
+    public static final int RTT_FIELD_NUMBER = 2;
+    private int rtt_;
+    /**
+     * <pre>
+     * rtt to this neighbour
+     * </pre>
+     *
+     * <code>uint32 rtt = 2;</code>
+     * @return The rtt.
+     */
+    @java.lang.Override
+    public int getRtt() {
+      return rtt_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!nodeId_.isEmpty()) {
+        output.writeBytes(1, nodeId_);
+      }
+      if (rtt_ != 0) {
+        output.writeUInt32(2, rtt_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!nodeId_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, nodeId_);
+      }
+      if (rtt_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(2, rtt_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.router.RouterOuterClass.NeighboursEntry)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.router.RouterOuterClass.NeighboursEntry other = (qaul.rpc.router.RouterOuterClass.NeighboursEntry) obj;
+
+      if (!getNodeId()
+          .equals(other.getNodeId())) return false;
+      if (getRtt()
+          != other.getRtt()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NODE_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getNodeId().hashCode();
+      hash = (37 * hash) + RTT_FIELD_NUMBER;
+      hash = (53 * hash) + getRtt();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.router.RouterOuterClass.NeighboursEntry prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * neighbours entry
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.router.NeighboursEntry}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.router.NeighboursEntry)
+        qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursEntry_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursEntry_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.router.RouterOuterClass.NeighboursEntry.class, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder.class);
+      }
+
+      // Construct using qaul.rpc.router.RouterOuterClass.NeighboursEntry.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        nodeId_ = com.google.protobuf.ByteString.EMPTY;
+
+        rtt_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursEntry_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry getDefaultInstanceForType() {
+        return qaul.rpc.router.RouterOuterClass.NeighboursEntry.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry build() {
+        qaul.rpc.router.RouterOuterClass.NeighboursEntry result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry buildPartial() {
+        qaul.rpc.router.RouterOuterClass.NeighboursEntry result = new qaul.rpc.router.RouterOuterClass.NeighboursEntry(this);
+        result.nodeId_ = nodeId_;
+        result.rtt_ = rtt_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
+          return mergeFrom((qaul.rpc.router.RouterOuterClass.NeighboursEntry)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.router.RouterOuterClass.NeighboursEntry other) {
+        if (other == qaul.rpc.router.RouterOuterClass.NeighboursEntry.getDefaultInstance()) return this;
+        if (other.getNodeId() != com.google.protobuf.ByteString.EMPTY) {
+          setNodeId(other.getNodeId());
+        }
+        if (other.getRtt() != 0) {
+          setRtt(other.getRtt());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.router.RouterOuterClass.NeighboursEntry parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.router.RouterOuterClass.NeighboursEntry) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.google.protobuf.ByteString nodeId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * the ID of the neighbour node
+       * </pre>
+       *
+       * <code>bytes node_id = 1;</code>
+       * @return The nodeId.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getNodeId() {
+        return nodeId_;
+      }
+      /**
+       * <pre>
+       * the ID of the neighbour node
+       * </pre>
+       *
+       * <code>bytes node_id = 1;</code>
+       * @param value The nodeId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNodeId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        nodeId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the ID of the neighbour node
+       * </pre>
+       *
+       * <code>bytes node_id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearNodeId() {
+        
+        nodeId_ = getDefaultInstance().getNodeId();
+        onChanged();
+        return this;
+      }
+
+      private int rtt_ ;
+      /**
+       * <pre>
+       * rtt to this neighbour
+       * </pre>
+       *
+       * <code>uint32 rtt = 2;</code>
+       * @return The rtt.
+       */
+      @java.lang.Override
+      public int getRtt() {
+        return rtt_;
+      }
+      /**
+       * <pre>
+       * rtt to this neighbour
+       * </pre>
+       *
+       * <code>uint32 rtt = 2;</code>
+       * @param value The rtt to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRtt(int value) {
+        
+        rtt_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * rtt to this neighbour
+       * </pre>
+       *
+       * <code>uint32 rtt = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRtt() {
+        
+        rtt_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.router.NeighboursEntry)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.router.NeighboursEntry)
+    private static final qaul.rpc.router.RouterOuterClass.NeighboursEntry DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.router.RouterOuterClass.NeighboursEntry();
+    }
+
+    public static qaul.rpc.router.RouterOuterClass.NeighboursEntry getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<NeighboursEntry>
+        PARSER = new com.google.protobuf.AbstractParser<NeighboursEntry>() {
+      @java.lang.Override
+      public NeighboursEntry parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new NeighboursEntry(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<NeighboursEntry> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<NeighboursEntry> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursEntry getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3654,20 +11611,60 @@ public final class RouterOuterClass {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_rpc_router_Router_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_qaul_rpc_router_UserRequest_descriptor;
+    internal_static_qaul_rpc_router_RoutingTableRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_qaul_rpc_router_UserRequest_fieldAccessorTable;
+      internal_static_qaul_rpc_router_RoutingTableRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_qaul_rpc_router_UserList_descriptor;
+    internal_static_qaul_rpc_router_RoutingTableList_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_qaul_rpc_router_UserList_fieldAccessorTable;
+      internal_static_qaul_rpc_router_RoutingTableList_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_qaul_rpc_router_UserEntry_descriptor;
+    internal_static_qaul_rpc_router_RoutingTableEntry_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_qaul_rpc_router_UserEntry_fieldAccessorTable;
+      internal_static_qaul_rpc_router_RoutingTableEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_router_RoutingTableConnection_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_router_RoutingTableConnection_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_router_ConnectionsRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_router_ConnectionsRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_router_ConnectionsList_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_router_ConnectionsList_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_router_ConnectionsUserEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_router_ConnectionsUserEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_router_ConnectionEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_router_ConnectionEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_router_NeighboursRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_router_NeighboursRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_router_NeighboursList_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_router_NeighboursList_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_router_NeighboursEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_router_NeighboursEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -3677,18 +11674,42 @@ public final class RouterOuterClass {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\023router/router.proto\022\017qaul.rpc.router\"y" +
-      "\n\006Router\0224\n\014user_request\030\001 \001(\0132\034.qaul.rp" +
-      "c.router.UserRequestH\000\022.\n\tuser_list\030\002 \001(" +
-      "\0132\031.qaul.rpc.router.UserListH\000B\t\n\007messag" +
-      "e\"\r\n\013UserRequest\"4\n\010UserList\022(\n\004user\030\001 \003" +
-      "(\0132\032.qaul.rpc.router.UserEntry\"\240\001\n\tUserE" +
-      "ntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001(\014\022\021\n\tid_bas" +
-      "e58\030\004 \001(\t\022\013\n\003key\030\005 \001(\014\022\020\n\010key_type\030\006 \001(\t" +
-      "\022\022\n\nkey_base58\030\007 \001(\t\0223\n\014connectivity\030\010 \001" +
-      "(\0162\035.qaul.rpc.router.Connectivity*6\n\014Con" +
-      "nectivity\022\n\n\006Online\020\000\022\r\n\tReachable\020\001\022\013\n\007" +
-      "Offline\020\002b\006proto3"
+      "\n\023router/router.proto\022\017qaul.rpc.router\"\226" +
+      "\003\n\006Router\022E\n\025routing_table_request\030\001 \001(\013" +
+      "2$.qaul.rpc.router.RoutingTableRequestH\000" +
+      "\022:\n\rrouting_table\030\002 \001(\0132!.qaul.rpc.route" +
+      "r.RoutingTableListH\000\022B\n\023connections_requ" +
+      "est\030\003 \001(\0132#.qaul.rpc.router.ConnectionsR" +
+      "equestH\000\022<\n\020connections_list\030\004 \001(\0132 .qau" +
+      "l.rpc.router.ConnectionsListH\000\022@\n\022neighb" +
+      "ours_request\030\005 \001(\0132\".qaul.rpc.router.Nei" +
+      "ghboursRequestH\000\022:\n\017neighbours_list\030\006 \001(" +
+      "\0132\037.qaul.rpc.router.NeighboursListH\000B\t\n\007" +
+      "message\"\025\n\023RoutingTableRequest\"M\n\020Routin" +
+      "gTableList\0229\n\rrouting_table\030\001 \003(\0132\".qaul" +
+      ".rpc.router.RoutingTableEntry\"b\n\021Routing" +
+      "TableEntry\022\017\n\007user_id\030\001 \001(\014\022<\n\013connectio" +
+      "ns\030\002 \003(\0132\'.qaul.rpc.router.RoutingTableC" +
+      "onnection\"e\n\026RoutingTableConnection\0221\n\006m" +
+      "odule\030\002 \001(\0162!.qaul.rpc.router.Connection" +
+      "Module\022\013\n\003rtt\030\003 \001(\r\022\013\n\003via\030\004 \001(\014\"\024\n\022Conn" +
+      "ectionsRequest\"\350\001\n\017ConnectionsList\0222\n\003la" +
+      "n\030\001 \003(\0132%.qaul.rpc.router.ConnectionsUse" +
+      "rEntry\0227\n\010internet\030\002 \003(\0132%.qaul.rpc.rout" +
+      "er.ConnectionsUserEntry\0222\n\003ble\030\003 \003(\0132%.q" +
+      "aul.rpc.router.ConnectionsUserEntry\0224\n\005l" +
+      "ocal\030\004 \003(\0132%.qaul.rpc.router.Connections" +
+      "UserEntry\"^\n\024ConnectionsUserEntry\022\017\n\007use" +
+      "r_id\030\001 \001(\014\0225\n\013connections\030\002 \003(\0132 .qaul.r" +
+      "pc.router.ConnectionEntry\">\n\017ConnectionE" +
+      "ntry\022\013\n\003rtt\030\001 \001(\r\022\021\n\thop_count\030\002 \001(\r\022\013\n\003" +
+      "via\030\003 \001(\014\"\023\n\021NeighboursRequest\"s\n\016Neighb" +
+      "oursList\022-\n\003lan\030\001 \003(\0132 .qaul.rpc.router." +
+      "NeighboursEntry\0222\n\010internet\030\002 \003(\0132 .qaul" +
+      ".rpc.router.NeighboursEntry\"/\n\017Neighbour" +
+      "sEntry\022\017\n\007node_id\030\001 \001(\014\022\013\n\003rtt\030\002 \001(\r*G\n\020" +
+      "ConnectionModule\022\010\n\004NONE\020\000\022\007\n\003LAN\020\001\022\014\n\010I" +
+      "NTERNET\020\002\022\007\n\003BLE\020\003\022\t\n\005LOCAL\020\004b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -3699,25 +11720,73 @@ public final class RouterOuterClass {
     internal_static_qaul_rpc_router_Router_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_router_Router_descriptor,
-        new java.lang.String[] { "UserRequest", "UserList", "Message", });
-    internal_static_qaul_rpc_router_UserRequest_descriptor =
+        new java.lang.String[] { "RoutingTableRequest", "RoutingTable", "ConnectionsRequest", "ConnectionsList", "NeighboursRequest", "NeighboursList", "Message", });
+    internal_static_qaul_rpc_router_RoutingTableRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
-    internal_static_qaul_rpc_router_UserRequest_fieldAccessorTable = new
+    internal_static_qaul_rpc_router_RoutingTableRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_qaul_rpc_router_UserRequest_descriptor,
+        internal_static_qaul_rpc_router_RoutingTableRequest_descriptor,
         new java.lang.String[] { });
-    internal_static_qaul_rpc_router_UserList_descriptor =
+    internal_static_qaul_rpc_router_RoutingTableList_descriptor =
       getDescriptor().getMessageTypes().get(2);
-    internal_static_qaul_rpc_router_UserList_fieldAccessorTable = new
+    internal_static_qaul_rpc_router_RoutingTableList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_qaul_rpc_router_UserList_descriptor,
-        new java.lang.String[] { "User", });
-    internal_static_qaul_rpc_router_UserEntry_descriptor =
+        internal_static_qaul_rpc_router_RoutingTableList_descriptor,
+        new java.lang.String[] { "RoutingTable", });
+    internal_static_qaul_rpc_router_RoutingTableEntry_descriptor =
       getDescriptor().getMessageTypes().get(3);
-    internal_static_qaul_rpc_router_UserEntry_fieldAccessorTable = new
+    internal_static_qaul_rpc_router_RoutingTableEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_qaul_rpc_router_UserEntry_descriptor,
-        new java.lang.String[] { "Name", "Id", "IdBase58", "Key", "KeyType", "KeyBase58", "Connectivity", });
+        internal_static_qaul_rpc_router_RoutingTableEntry_descriptor,
+        new java.lang.String[] { "UserId", "Connections", });
+    internal_static_qaul_rpc_router_RoutingTableConnection_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_qaul_rpc_router_RoutingTableConnection_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_router_RoutingTableConnection_descriptor,
+        new java.lang.String[] { "Module", "Rtt", "Via", });
+    internal_static_qaul_rpc_router_ConnectionsRequest_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_qaul_rpc_router_ConnectionsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_router_ConnectionsRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_qaul_rpc_router_ConnectionsList_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_qaul_rpc_router_ConnectionsList_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_router_ConnectionsList_descriptor,
+        new java.lang.String[] { "Lan", "Internet", "Ble", "Local", });
+    internal_static_qaul_rpc_router_ConnectionsUserEntry_descriptor =
+      getDescriptor().getMessageTypes().get(7);
+    internal_static_qaul_rpc_router_ConnectionsUserEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_router_ConnectionsUserEntry_descriptor,
+        new java.lang.String[] { "UserId", "Connections", });
+    internal_static_qaul_rpc_router_ConnectionEntry_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_qaul_rpc_router_ConnectionEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_router_ConnectionEntry_descriptor,
+        new java.lang.String[] { "Rtt", "HopCount", "Via", });
+    internal_static_qaul_rpc_router_NeighboursRequest_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_qaul_rpc_router_NeighboursRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_router_NeighboursRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_qaul_rpc_router_NeighboursList_descriptor =
+      getDescriptor().getMessageTypes().get(10);
+    internal_static_qaul_rpc_router_NeighboursList_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_router_NeighboursList_descriptor,
+        new java.lang.String[] { "Lan", "Internet", });
+    internal_static_qaul_rpc_router_NeighboursEntry_descriptor =
+      getDescriptor().getMessageTypes().get(11);
+    internal_static_qaul_rpc_router_NeighboursEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_router_NeighboursEntry_descriptor,
+        new java.lang.String[] { "NodeId", "Rtt", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

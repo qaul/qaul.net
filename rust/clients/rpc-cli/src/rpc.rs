@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! # RPC client functions
 
 use prost::Message;
@@ -73,6 +76,9 @@ impl Rpc {
                     },
                     Some(proto::Modules::Useraccounts) => {
                         super::user_accounts::UserAccounts::rpc(message.data);
+                    },
+                    Some(proto::Modules::Users) => {
+                        super::users::Users::rpc(message.data);
                     },
                     Some(proto::Modules::Router) => {
                         super::router::Router::rpc(message.data);

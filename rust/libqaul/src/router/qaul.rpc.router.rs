@@ -1,7 +1,7 @@
 /// router rpc message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Router {
-    #[prost(oneof="router::Message", tags="1, 2")]
+    #[prost(oneof="router::Message", tags="1, 2, 3, 4, 5, 6")]
     pub message: ::core::option::Option<router::Message>,
 }
 /// Nested message and enum types in `Router`.
@@ -9,51 +9,130 @@ pub mod router {
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Message {
         #[prost(message, tag="1")]
-        UserRequest(super::UserRequest),
+        RoutingTableRequest(super::RoutingTableRequest),
         #[prost(message, tag="2")]
-        UserList(super::UserList),
+        RoutingTable(super::RoutingTableList),
+        #[prost(message, tag="3")]
+        ConnectionsRequest(super::ConnectionsRequest),
+        #[prost(message, tag="4")]
+        ConnectionsList(super::ConnectionsList),
+        #[prost(message, tag="5")]
+        NeighboursRequest(super::NeighboursRequest),
+        #[prost(message, tag="6")]
+        NeighboursList(super::NeighboursList),
     }
 }
-/// UI request for some users
+/// UI request for routing table list
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct UserRequest {
+pub struct RoutingTableRequest {
 }
-/// user list
+/// Routing table list
+/// This table presents the best view for each user.
+/// It represents the decision the router takes
+/// when sending and routing packages
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct UserList {
+pub struct RoutingTableList {
     #[prost(message, repeated, tag="1")]
-    pub user: ::prost::alloc::vec::Vec<UserEntry>,
+    pub routing_table: ::prost::alloc::vec::Vec<RoutingTableEntry>,
 }
-/// user entry
+/// Routing table user entry
+/// This message contains the best connection to this
+/// user per module
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct UserEntry {
-    #[prost(string, tag="1")]
-    pub name: ::prost::alloc::string::String,
-    #[prost(bytes="vec", tag="2")]
-    pub id: ::prost::alloc::vec::Vec<u8>,
-    #[prost(string, tag="4")]
-    pub id_base58: ::prost::alloc::string::String,
-    /// protobuf encoded public key
-    #[prost(bytes="vec", tag="5")]
-    pub key: ::prost::alloc::vec::Vec<u8>,
-    #[prost(string, tag="6")]
-    pub key_type: ::prost::alloc::string::String,
-    #[prost(string, tag="7")]
-    pub key_base58: ::prost::alloc::string::String,
-    #[prost(enumeration="Connectivity", tag="8")]
-    pub connectivity: i32,
+pub struct RoutingTableEntry {
+    #[prost(bytes="vec", tag="1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(message, repeated, tag="2")]
+    pub connections: ::prost::alloc::vec::Vec<RoutingTableConnection>,
 }
-/// how is the user connected
+/// Routing table connection entry.
+/// This message contains a connection to a specific user.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RoutingTableConnection {
+    /// the connection module (LAN, Internet, BLE, etc.)
+    #[prost(enumeration="ConnectionModule", tag="2")]
+    pub module: i32,
+    /// the round trip time for this connection
+    #[prost(uint32, tag="3")]
+    pub rtt: u32,
+    /// node id via which this connection is routed
+    #[prost(bytes="vec", tag="4")]
+    pub via: ::prost::alloc::vec::Vec<u8>,
+}
+/// UI request for connections list
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ConnectionsRequest {
+}
+/// Connections list per module.
+/// All connections per user per module.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ConnectionsList {
+    /// users connected via the LAN module
+    #[prost(message, repeated, tag="1")]
+    pub lan: ::prost::alloc::vec::Vec<ConnectionsUserEntry>,
+    /// users connected via the Internet module
+    #[prost(message, repeated, tag="2")]
+    pub internet: ::prost::alloc::vec::Vec<ConnectionsUserEntry>,
+    /// users connected via the BLE module
+    #[prost(message, repeated, tag="3")]
+    pub ble: ::prost::alloc::vec::Vec<ConnectionsUserEntry>,
+    /// users connected locally (on the same node)
+    #[prost(message, repeated, tag="4")]
+    pub local: ::prost::alloc::vec::Vec<ConnectionsUserEntry>,
+}
+/// connections entry for a user
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ConnectionsUserEntry {
+    /// the id of the user
+    #[prost(bytes="vec", tag="1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    /// all connections to this user via this module
+    #[prost(message, repeated, tag="2")]
+    pub connections: ::prost::alloc::vec::Vec<ConnectionEntry>,
+}
+/// all connections of this user
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ConnectionEntry {
+    /// round trip time in milli seconds
+    #[prost(uint32, tag="1")]
+    pub rtt: u32,
+    /// hop count to the user.
+    /// This represents the number of nodes between this node and the user.
+    #[prost(uint32, tag="2")]
+    pub hop_count: u32,
+    /// connection can be established via the node with the following id
+    #[prost(bytes="vec", tag="3")]
+    pub via: ::prost::alloc::vec::Vec<u8>,
+}
+/// UI request for neighbours list
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct NeighboursRequest {
+}
+/// neighbours list per module
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct NeighboursList {
+    #[prost(message, repeated, tag="1")]
+    pub lan: ::prost::alloc::vec::Vec<NeighboursEntry>,
+    #[prost(message, repeated, tag="2")]
+    pub internet: ::prost::alloc::vec::Vec<NeighboursEntry>,
+}
+/// neighbours entry
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct NeighboursEntry {
+    /// the ID of the neighbour node
+    #[prost(bytes="vec", tag="1")]
+    pub node_id: ::prost::alloc::vec::Vec<u8>,
+    /// rtt to this neighbour
+    #[prost(uint32, tag="2")]
+    pub rtt: u32,
+}
+/// Connection modules
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
-pub enum Connectivity {
-    /// The user is actively connected to the node
-    /// and reachable for synchronous communication.
-    Online = 0,
-    /// The node which hosts the user account is online 
-    /// but the user is not actively connected to it.
-    /// Messages can sent and will reach the node.
-    Reachable = 1,
-    /// The user is currently not reachable.
-    Offline = 2,
+pub enum ConnectionModule {
+    None = 0,
+    Lan = 1,
+    Internet = 2,
+    Ble = 3,
+    Local = 4,
 }
