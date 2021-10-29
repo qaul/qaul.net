@@ -1,20 +1,14 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'helpers/navigation_helper.dart';
-
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//
-//   await Init.initialize();
-//
-//   final savedThemeMode = await AdaptiveTheme.getThemeMode();
-//   runApp(ProviderScope(
-//       observers: [Logger()], child: QaulApp(themeMode: savedThemeMode)));
-// }
+import 'helpers/user_prefs_helper.dart';
 
 /// file /state/container.dart
 final container = ProviderContainer();
@@ -23,21 +17,23 @@ final container = ProviderContainer();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Init.initialize(container.read);
+  await Hive.initFlutter();
+  await Hive.openBox(UserPrefsHelper.hiveBoxName);
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
-  runApp(MyApp(QaulApp(themeMode: savedThemeMode)));
+  runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
 }
 
-class MyApp extends StatefulWidget {
-  MyApp(this.app);
+class _CustomProviderScope extends StatefulWidget {
+  const _CustomProviderScope(this.app);
 
   final Widget app;
 
   @override
-  _MyApp createState() => _MyApp();
+  _CustomProviderScopeState createState() => _CustomProviderScopeState();
 }
 
-class _MyApp extends State<MyApp> {
+class _CustomProviderScopeState extends State<_CustomProviderScope> {
   @override
   void dispose() {
     super.dispose();
@@ -51,12 +47,12 @@ class _MyApp extends State<MyApp> {
   }
 }
 
-class QaulApp extends StatelessWidget {
+class QaulApp extends ConsumerWidget {
   const QaulApp({Key? key, this.themeMode}) : super(key: key);
   final AdaptiveThemeMode? themeMode;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return AdaptiveTheme(
       light: ThemeData(
         brightness: Brightness.light,
@@ -67,30 +63,42 @@ class QaulApp extends StatelessWidget {
         primarySwatch: Colors.lightBlue,
       ),
       initial: themeMode ?? AdaptiveThemeMode.light,
-      builder: (theme, darkTheme) => MaterialApp(
-        theme: theme,
-        darkTheme: darkTheme,
-        initialRoute: NavigationHelper.initial,
-        onGenerateRoute: NavigationHelper.onGenerateRoute,
-        builder: (context, child) {
-          final mediaQuery = MediaQuery.of(context);
-          return MediaQuery(
-            data: mediaQuery.copyWith(textScaleFactor: 1.0),
-            child: ResponsiveWrapper.builder(
-              child,
-              maxWidth: 828,
-              minWidth: 370,
-              breakpoints: const [
-                ResponsiveBreakpoint.resize(350.0,
-                    name: 'ANDROID', scaleFactor: 0.8),
-                ResponsiveBreakpoint.resize(480, name: MOBILE),
-                ResponsiveBreakpoint.autoScale(800, name: TABLET),
-                ResponsiveBreakpoint.resize(1000, name: DESKTOP),
-              ],
-            ),
-          );
-        },
-      ),
+      builder: (theme, darkTheme) {
+        return ValueListenableBuilder(
+          valueListenable: Hive.box(UserPrefsHelper.hiveBoxName).listenable(),
+          builder: (context, box, _) => MaterialApp(
+            theme: theme,
+            darkTheme: darkTheme,
+            initialRoute: NavigationHelper.initial,
+            onGenerateRoute: NavigationHelper.onGenerateRoute,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localeResolutionCallback: (locale, supportedLocales) {
+              final defaultLocale = UserPrefsHelper().defaultLocale;
+              if (defaultLocale != null) return defaultLocale;
+              return locale;
+            },
+            builder: (context, child) {
+              final mediaQuery = MediaQuery.of(context);
+              return MediaQuery(
+                data: mediaQuery.copyWith(textScaleFactor: 1.0),
+                child: ResponsiveWrapper.builder(
+                  child,
+                  maxWidth: 828,
+                  minWidth: 370,
+                  breakpoints: const [
+                    ResponsiveBreakpoint.resize(350.0,
+                        name: 'ANDROID', scaleFactor: 0.8),
+                    ResponsiveBreakpoint.resize(480, name: MOBILE),
+                    ResponsiveBreakpoint.autoScale(800, name: TABLET),
+                    ResponsiveBreakpoint.resize(1000, name: DESKTOP),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

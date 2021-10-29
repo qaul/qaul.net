@@ -27,6 +27,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # ********
   # UI Dependencies
@@ -43,6 +45,11 @@ dependencies:
   # *******
   # Business Logic Dependencies
   # *******
+  intl: ^0.17.0
+
+  hive: ^2.0.4
+  hive_flutter: ^1.1.0
+
   flutter_hooks: ^0.18.0
   hooks_riverpod: ^1.0.0-dev.11
 
@@ -58,6 +65,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  hive_generator: ^1.1.1
+  build_runner: ^2.1.4
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -70,6 +80,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  generate: true
 
   assets:
     - assets/icons/
