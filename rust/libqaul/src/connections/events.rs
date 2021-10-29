@@ -1,6 +1,7 @@
-/**
- * Event handling for connection modules
- */
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! Event handling for connection modules
 
 use libp2p::{
     ping::{PingEvent, PingSuccess, PingFailure},

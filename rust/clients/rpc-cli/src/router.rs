@@ -113,14 +113,13 @@ impl Router {
                                 let via = bs58::encode(connection.via.clone());
 
                                 // get enum name as string
-                                let m = connection.module;
-                                let module = match m {
-                                    m if m == proto::ConnectionModule::None as i32 => "None",
-                                    m if m == proto::ConnectionModule::Lan as i32 => "Lan",
-                                    m if m == proto::ConnectionModule::Internet as i32 => "Internet",
-                                    m if m == proto::ConnectionModule::Ble as i32 => "Ble",
-                                    m if m == proto::ConnectionModule::Local as i32 => "Local",
-                                    _ => "Unknown",
+                                let module = match proto::ConnectionModule::from_i32(connection.module) {
+                                    Some(proto::ConnectionModule::None) => "None",
+                                    Some(proto::ConnectionModule::Lan) => "Lan",
+                                    Some(proto::ConnectionModule::Internet) => "Internet",
+                                    Some(proto::ConnectionModule::Ble) => "Ble",
+                                    Some(proto::ConnectionModule::Local) => "Local",
+                                    None => "Unknown",
                                 };
 
                                 // print connection entry

@@ -17,6 +17,7 @@ class Modules extends $pb.ProtobufEnum {
   static const Modules USERS = Modules._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USERS');
   static const Modules ROUTER = Modules._(5, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ROUTER');
   static const Modules FEED = Modules._(6, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'FEED');
+  static const Modules CONNECTIONS = Modules._(7, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONNECTIONS');
 
   static const $core.List<Modules> values = <Modules> [
     NONE,
@@ -26,6 +27,7 @@ class Modules extends $pb.ProtobufEnum {
     USERS,
     ROUTER,
     FEED,
+    CONNECTIONS,
   ];
 
   static final $core.Map<$core.int, Modules> _byValue = $pb.ProtobufEnum.initByValue(values);

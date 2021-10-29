@@ -35,4 +35,5 @@ pub enum Modules {
     Users = 4,
     Router = 5,
     Feed = 6,
+    Connections = 7,
 }

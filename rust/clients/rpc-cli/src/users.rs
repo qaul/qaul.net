@@ -90,11 +90,11 @@ impl Users {
     /// Process received RPC message
     /// 
     /// Decodes received protobuf encoded binary RPC message
-    /// of the router module.
+    /// of the users module.
     pub fn rpc(data: Vec<u8>) {
         match proto::Users::decode(&data[..]) {
-            Ok(router) => {
-                match router.message {
+            Ok(users) => {
+                match users.message {
                     Some(proto::users::Message::UserList(proto_userlist)) => {
                         let mut line = 1;
                         println!("");
@@ -118,7 +118,7 @@ impl Users {
                         println!("");
                     }
                     _ => {
-                        log::error!("unprocessable RPC router message");
+                        log::error!("unprocessable RPC users message");
                     },
                 }    
             },

@@ -16,6 +16,7 @@ use crate::connections::{
     lan::Lan,
     internet::Internet,
 };
+use crate::connections::Connections;
 use crate::router::Router;
 use crate::router::users::Users;
 use crate::node::Node;
@@ -155,6 +156,10 @@ impl Rpc {
                     Some(Modules::Feed) => {
                         log::info!("Message Modules::Feed received");
                         Feed::rpc(message.data, message.user_id, lan, internet);
+                    },
+                    Some(Modules::Connections) => {
+                        log::info!("Message Modules::Connections received");
+                        Connections::rpc(message.data, internet);
                     },
                     Some(Modules::None) => {
                         log::error!("Message Modules::None received");

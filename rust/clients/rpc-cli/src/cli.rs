@@ -7,6 +7,7 @@
 
 use super::node::Node;
 use super::user_accounts::UserAccounts;
+use super::connections::Connections;
 use super::users::Users;
 use super::router::Router;
 use super::feed::Feed;
@@ -38,6 +39,10 @@ impl Cli {
             // feed functions
             cmd if cmd.starts_with("feed ") => {
                 Feed::cli(cmd.strip_prefix("feed ").unwrap());
+            },
+            // connections functions
+            cmd if cmd.starts_with("connections ") => {
+                Connections::cli(cmd.strip_prefix("connections ").unwrap());
             },
             // debugging functions
             cmd if cmd.starts_with("debug ") => {

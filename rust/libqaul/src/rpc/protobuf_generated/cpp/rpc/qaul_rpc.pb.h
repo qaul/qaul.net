@@ -75,12 +75,13 @@ enum Modules : int {
   USERS = 4,
   ROUTER = 5,
   FEED = 6,
+  CONNECTIONS = 7,
   Modules_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   Modules_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool Modules_IsValid(int value);
 constexpr Modules Modules_MIN = NONE;
-constexpr Modules Modules_MAX = FEED;
+constexpr Modules Modules_MAX = CONNECTIONS;
 constexpr int Modules_ARRAYSIZE = Modules_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Modules_descriptor();

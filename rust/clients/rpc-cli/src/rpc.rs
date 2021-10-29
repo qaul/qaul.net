@@ -86,6 +86,9 @@ impl Rpc {
                     Some(proto::Modules::Feed) => {
                         super::feed::Feed::rpc(message.data);
                     },
+                    Some(proto::Modules::Connections) => {
+                        super::connections::Connections::rpc(message.data);
+                    }
                     Some(proto::Modules::None) => {},
                     None => {},
                 }

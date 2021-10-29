@@ -32,4 +32,5 @@ enum Modules {
     USERS = 4;
     ROUTER = 5;
     FEED = 6;
+    CONNECTIONS = 7;
 }
