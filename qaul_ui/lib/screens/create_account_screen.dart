@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qaul_ui/helpers/navigation_helper.dart';
 
 class CreateAccountScreen extends StatelessWidget {
   const CreateAccountScreen({Key? key}) : super(key: key);
@@ -6,6 +7,17 @@ class CreateAccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: Update placeholder
-    return const Scaffold(body: Center(child: Text('Create account')));
+    return Scaffold(
+        body: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Center(child: Text('Create account')),
+        ElevatedButton(
+          onPressed: () =>
+              Navigator.pushReplacementNamed(context, NavigationHelper.home),
+          child: const Text('Go to home'),
+        ),
+      ],
+    ));
   }
 }
