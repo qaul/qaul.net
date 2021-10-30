@@ -23,6 +23,11 @@ object ConnectionsKt {
     internal fun _build(): qaul.rpc.connections.ConnectionsOuterClass.Connections = _builder.build()
 
     /**
+     * <pre>
+     * Request a list of all internet nodes.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
      */
     var internetNodesRequest: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest
@@ -33,12 +38,22 @@ object ConnectionsKt {
         _builder.setInternetNodesRequest(value)
       }
     /**
+     * <pre>
+     * Request a list of all internet nodes.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
      */
     fun clearInternetNodesRequest() {
       _builder.clearInternetNodesRequest()
     }
     /**
+     * <pre>
+     * Request a list of all internet nodes.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
      * @return Whether the internetNodesRequest field is set.
      */
@@ -47,6 +62,11 @@ object ConnectionsKt {
     }
 
     /**
+     * <pre>
+     * returns a list of all internet nodes and 
+     * an information about why this message has been sent.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
      */
     var internetNodesList: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList
@@ -57,12 +77,22 @@ object ConnectionsKt {
         _builder.setInternetNodesList(value)
       }
     /**
+     * <pre>
+     * returns a list of all internet nodes and 
+     * an information about why this message has been sent.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
      */
     fun clearInternetNodesList() {
       _builder.clearInternetNodesList()
     }
     /**
+     * <pre>
+     * returns a list of all internet nodes and 
+     * an information about why this message has been sent.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
      * @return Whether the internetNodesList field is set.
      */
@@ -71,6 +101,11 @@ object ConnectionsKt {
     }
 
     /**
+     * <pre>
+     * Add a new internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
      */
     var internetNodesAdd: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry
@@ -81,12 +116,22 @@ object ConnectionsKt {
         _builder.setInternetNodesAdd(value)
       }
     /**
+     * <pre>
+     * Add a new internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
      */
     fun clearInternetNodesAdd() {
       _builder.clearInternetNodesAdd()
     }
     /**
+     * <pre>
+     * Add a new internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
      * @return Whether the internetNodesAdd field is set.
      */
@@ -95,6 +140,11 @@ object ConnectionsKt {
     }
 
     /**
+     * <pre>
+     * Remove an internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
      */
     var internetNodesRemove: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry
@@ -105,12 +155,22 @@ object ConnectionsKt {
         _builder.setInternetNodesRemove(value)
       }
     /**
+     * <pre>
+     * Remove an internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
      */
     fun clearInternetNodesRemove() {
       _builder.clearInternetNodesRemove()
     }
     /**
+     * <pre>
+     * Remove an internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
      * @return Whether the internetNodesRemove field is set.
      */

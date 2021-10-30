@@ -20,6 +20,74 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
+/// Information about the system actions that led to 
+/// the creation of this message.
+enum Qaul_Rpc_Connections_Info: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+
+  /// Internet Nodes Request
+  /// By default, this message is sent due to an
+  /// internet nodes request message.
+  case request // = 0
+
+  /// Add Internet Node 
+  /// Successfully added an address
+  case addSuccess // = 1
+
+  /// Error: not a valid multiaddress
+  case addErrorInvalid // = 2
+
+  /// Remove Internet Node
+  /// Successfully removed the address
+  case removeSuccess // = 5
+
+  /// Error: Address not found
+  case removeErrorNotFound // = 6
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .request
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .request
+    case 1: self = .addSuccess
+    case 2: self = .addErrorInvalid
+    case 5: self = .removeSuccess
+    case 6: self = .removeErrorNotFound
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .request: return 0
+    case .addSuccess: return 1
+    case .addErrorInvalid: return 2
+    case .removeSuccess: return 5
+    case .removeErrorNotFound: return 6
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Qaul_Rpc_Connections_Info: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Qaul_Rpc_Connections_Info] = [
+    .request,
+    .addSuccess,
+    .addErrorInvalid,
+    .removeSuccess,
+    .removeErrorNotFound,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
 /// Connections rpc message container
 struct Qaul_Rpc_Connections_Connections {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -28,6 +96,8 @@ struct Qaul_Rpc_Connections_Connections {
 
   var message: Qaul_Rpc_Connections_Connections.OneOf_Message? = nil
 
+  /// Request a list of all internet nodes.
+  /// libqaul returns an internet_nodes_list message.
   var internetNodesRequest: Qaul_Rpc_Connections_InternetNodesRequest {
     get {
       if case .internetNodesRequest(let v)? = message {return v}
@@ -36,6 +106,8 @@ struct Qaul_Rpc_Connections_Connections {
     set {message = .internetNodesRequest(newValue)}
   }
 
+  /// returns a list of all internet nodes and 
+  /// an information about why this message has been sent.
   var internetNodesList: Qaul_Rpc_Connections_InternetNodesList {
     get {
       if case .internetNodesList(let v)? = message {return v}
@@ -44,6 +116,8 @@ struct Qaul_Rpc_Connections_Connections {
     set {message = .internetNodesList(newValue)}
   }
 
+  /// Add a new internet node address.
+  /// libqaul returns an internet_nodes_list message.
   var internetNodesAdd: Qaul_Rpc_Connections_InternetNodesEntry {
     get {
       if case .internetNodesAdd(let v)? = message {return v}
@@ -52,6 +126,8 @@ struct Qaul_Rpc_Connections_Connections {
     set {message = .internetNodesAdd(newValue)}
   }
 
+  /// Remove an internet node address.
+  /// libqaul returns an internet_nodes_list message.
   var internetNodesRemove: Qaul_Rpc_Connections_InternetNodesEntry {
     get {
       if case .internetNodesRemove(let v)? = message {return v}
@@ -63,9 +139,17 @@ struct Qaul_Rpc_Connections_Connections {
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Message: Equatable {
+    /// Request a list of all internet nodes.
+    /// libqaul returns an internet_nodes_list message.
     case internetNodesRequest(Qaul_Rpc_Connections_InternetNodesRequest)
+    /// returns a list of all internet nodes and 
+    /// an information about why this message has been sent.
     case internetNodesList(Qaul_Rpc_Connections_InternetNodesList)
+    /// Add a new internet node address.
+    /// libqaul returns an internet_nodes_list message.
     case internetNodesAdd(Qaul_Rpc_Connections_InternetNodesEntry)
+    /// Remove an internet node address.
+    /// libqaul returns an internet_nodes_list message.
     case internetNodesRemove(Qaul_Rpc_Connections_InternetNodesEntry)
 
   #if !swift(>=4.1)
@@ -114,11 +198,21 @@ struct Qaul_Rpc_Connections_InternetNodesRequest {
 ///
 /// This is a list of all peer nodes the internet
 /// connections module tries to connect to.
+///
+/// This message is returned after a request, or when
+/// adding or removing a node address.
 struct Qaul_Rpc_Connections_InternetNodesList {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// Information about why this message is sent
+  /// and the result of the request, adding or removing
+  /// of nodes.
+  var info: Qaul_Rpc_Connections_Info = .request
+
+  /// list of all node multiaddresses that
+  /// the internet module will try to connect to.
   var nodes: [Qaul_Rpc_Connections_InternetNodesEntry] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -145,6 +239,16 @@ struct Qaul_Rpc_Connections_InternetNodesEntry {
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "qaul.rpc.connections"
+
+extension Qaul_Rpc_Connections_Info: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "REQUEST"),
+    1: .same(proto: "ADD_SUCCESS"),
+    2: .same(proto: "ADD_ERROR_INVALID"),
+    5: .same(proto: "REMOVE_SUCCESS"),
+    6: .same(proto: "REMOVE_ERROR_NOT_FOUND"),
+  ]
+}
 
 extension Qaul_Rpc_Connections_Connections: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Connections"
@@ -274,7 +378,8 @@ extension Qaul_Rpc_Connections_InternetNodesRequest: SwiftProtobuf.Message, Swif
 extension Qaul_Rpc_Connections_InternetNodesList: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".InternetNodesList"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "nodes"),
+    1: .same(proto: "info"),
+    2: .same(proto: "nodes"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -283,20 +388,25 @@ extension Qaul_Rpc_Connections_InternetNodesList: SwiftProtobuf.Message, SwiftPr
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.nodes) }()
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.info) }()
+      case 2: try { try decoder.decodeRepeatedMessageField(value: &self.nodes) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.info != .request {
+      try visitor.visitSingularEnumField(value: self.info, fieldNumber: 1)
+    }
     if !self.nodes.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.nodes, fieldNumber: 1)
+      try visitor.visitRepeatedMessageField(value: self.nodes, fieldNumber: 2)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Rpc_Connections_InternetNodesList, rhs: Qaul_Rpc_Connections_InternetNodesList) -> Bool {
+    if lhs.info != rhs.info {return false}
     if lhs.nodes != rhs.nodes {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

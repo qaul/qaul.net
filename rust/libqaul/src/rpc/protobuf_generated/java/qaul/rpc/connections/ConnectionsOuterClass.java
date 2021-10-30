@@ -14,66 +14,314 @@ public final class ConnectionsOuterClass {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
+  /**
+   * <pre>
+   * Information about the system actions that led to 
+   * the creation of this message.
+   * </pre>
+   *
+   * Protobuf enum {@code qaul.rpc.connections.Info}
+   */
+  public enum Info
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <pre>
+     * Internet Nodes Request
+     * By default, this message is sent due to an
+     * internet nodes request message.
+     * </pre>
+     *
+     * <code>REQUEST = 0;</code>
+     */
+    REQUEST(0),
+    /**
+     * <pre>
+     * Add Internet Node 
+     * Successfully added an address
+     * </pre>
+     *
+     * <code>ADD_SUCCESS = 1;</code>
+     */
+    ADD_SUCCESS(1),
+    /**
+     * <pre>
+     * Error: not a valid multiaddress
+     * </pre>
+     *
+     * <code>ADD_ERROR_INVALID = 2;</code>
+     */
+    ADD_ERROR_INVALID(2),
+    /**
+     * <pre>
+     * Remove Internet Node
+     * Successfully removed the address
+     * </pre>
+     *
+     * <code>REMOVE_SUCCESS = 5;</code>
+     */
+    REMOVE_SUCCESS(5),
+    /**
+     * <pre>
+     * Error: Address not found
+     * </pre>
+     *
+     * <code>REMOVE_ERROR_NOT_FOUND = 6;</code>
+     */
+    REMOVE_ERROR_NOT_FOUND(6),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     * Internet Nodes Request
+     * By default, this message is sent due to an
+     * internet nodes request message.
+     * </pre>
+     *
+     * <code>REQUEST = 0;</code>
+     */
+    public static final int REQUEST_VALUE = 0;
+    /**
+     * <pre>
+     * Add Internet Node 
+     * Successfully added an address
+     * </pre>
+     *
+     * <code>ADD_SUCCESS = 1;</code>
+     */
+    public static final int ADD_SUCCESS_VALUE = 1;
+    /**
+     * <pre>
+     * Error: not a valid multiaddress
+     * </pre>
+     *
+     * <code>ADD_ERROR_INVALID = 2;</code>
+     */
+    public static final int ADD_ERROR_INVALID_VALUE = 2;
+    /**
+     * <pre>
+     * Remove Internet Node
+     * Successfully removed the address
+     * </pre>
+     *
+     * <code>REMOVE_SUCCESS = 5;</code>
+     */
+    public static final int REMOVE_SUCCESS_VALUE = 5;
+    /**
+     * <pre>
+     * Error: Address not found
+     * </pre>
+     *
+     * <code>REMOVE_ERROR_NOT_FOUND = 6;</code>
+     */
+    public static final int REMOVE_ERROR_NOT_FOUND_VALUE = 6;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Info valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static Info forNumber(int value) {
+      switch (value) {
+        case 0: return REQUEST;
+        case 1: return ADD_SUCCESS;
+        case 2: return ADD_ERROR_INVALID;
+        case 5: return REMOVE_SUCCESS;
+        case 6: return REMOVE_ERROR_NOT_FOUND;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Info>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Info> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Info>() {
+            public Info findValueByNumber(int number) {
+              return Info.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return qaul.rpc.connections.ConnectionsOuterClass.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final Info[] VALUES = values();
+
+    public static Info valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private Info(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:qaul.rpc.connections.Info)
+  }
+
   public interface ConnectionsOrBuilder extends
       // @@protoc_insertion_point(interface_extends:qaul.rpc.connections.Connections)
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Request a list of all internet nodes.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
      * @return Whether the internetNodesRequest field is set.
      */
     boolean hasInternetNodesRequest();
     /**
+     * <pre>
+     * Request a list of all internet nodes.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
      * @return The internetNodesRequest.
      */
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest getInternetNodesRequest();
     /**
+     * <pre>
+     * Request a list of all internet nodes.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
      */
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequestOrBuilder getInternetNodesRequestOrBuilder();
 
     /**
+     * <pre>
+     * returns a list of all internet nodes and 
+     * an information about why this message has been sent.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
      * @return Whether the internetNodesList field is set.
      */
     boolean hasInternetNodesList();
     /**
+     * <pre>
+     * returns a list of all internet nodes and 
+     * an information about why this message has been sent.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
      * @return The internetNodesList.
      */
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList getInternetNodesList();
     /**
+     * <pre>
+     * returns a list of all internet nodes and 
+     * an information about why this message has been sent.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
      */
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesListOrBuilder getInternetNodesListOrBuilder();
 
     /**
+     * <pre>
+     * Add a new internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
      * @return Whether the internetNodesAdd field is set.
      */
     boolean hasInternetNodesAdd();
     /**
+     * <pre>
+     * Add a new internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
      * @return The internetNodesAdd.
      */
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry getInternetNodesAdd();
     /**
+     * <pre>
+     * Add a new internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
      */
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getInternetNodesAddOrBuilder();
 
     /**
+     * <pre>
+     * Remove an internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
      * @return Whether the internetNodesRemove field is set.
      */
     boolean hasInternetNodesRemove();
     /**
+     * <pre>
+     * Remove an internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
      * @return The internetNodesRemove.
      */
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry getInternetNodesRemove();
     /**
+     * <pre>
+     * Remove an internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
      */
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getInternetNodesRemoveOrBuilder();
@@ -264,6 +512,11 @@ public final class ConnectionsOuterClass {
 
     public static final int INTERNET_NODES_REQUEST_FIELD_NUMBER = 1;
     /**
+     * <pre>
+     * Request a list of all internet nodes.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
      * @return Whether the internetNodesRequest field is set.
      */
@@ -272,6 +525,11 @@ public final class ConnectionsOuterClass {
       return messageCase_ == 1;
     }
     /**
+     * <pre>
+     * Request a list of all internet nodes.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
      * @return The internetNodesRequest.
      */
@@ -283,6 +541,11 @@ public final class ConnectionsOuterClass {
       return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest.getDefaultInstance();
     }
     /**
+     * <pre>
+     * Request a list of all internet nodes.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
      */
     @java.lang.Override
@@ -295,6 +558,11 @@ public final class ConnectionsOuterClass {
 
     public static final int INTERNET_NODES_LIST_FIELD_NUMBER = 2;
     /**
+     * <pre>
+     * returns a list of all internet nodes and 
+     * an information about why this message has been sent.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
      * @return Whether the internetNodesList field is set.
      */
@@ -303,6 +571,11 @@ public final class ConnectionsOuterClass {
       return messageCase_ == 2;
     }
     /**
+     * <pre>
+     * returns a list of all internet nodes and 
+     * an information about why this message has been sent.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
      * @return The internetNodesList.
      */
@@ -314,6 +587,11 @@ public final class ConnectionsOuterClass {
       return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.getDefaultInstance();
     }
     /**
+     * <pre>
+     * returns a list of all internet nodes and 
+     * an information about why this message has been sent.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
      */
     @java.lang.Override
@@ -326,6 +604,11 @@ public final class ConnectionsOuterClass {
 
     public static final int INTERNET_NODES_ADD_FIELD_NUMBER = 3;
     /**
+     * <pre>
+     * Add a new internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
      * @return Whether the internetNodesAdd field is set.
      */
@@ -334,6 +617,11 @@ public final class ConnectionsOuterClass {
       return messageCase_ == 3;
     }
     /**
+     * <pre>
+     * Add a new internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
      * @return The internetNodesAdd.
      */
@@ -345,6 +633,11 @@ public final class ConnectionsOuterClass {
       return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
     }
     /**
+     * <pre>
+     * Add a new internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
      */
     @java.lang.Override
@@ -357,6 +650,11 @@ public final class ConnectionsOuterClass {
 
     public static final int INTERNET_NODES_REMOVE_FIELD_NUMBER = 4;
     /**
+     * <pre>
+     * Remove an internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
      * @return Whether the internetNodesRemove field is set.
      */
@@ -365,6 +663,11 @@ public final class ConnectionsOuterClass {
       return messageCase_ == 4;
     }
     /**
+     * <pre>
+     * Remove an internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
      * @return The internetNodesRemove.
      */
@@ -376,6 +679,11 @@ public final class ConnectionsOuterClass {
       return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
     }
     /**
+     * <pre>
+     * Remove an internet node address.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
      */
     @java.lang.Override
@@ -814,6 +1122,11 @@ public final class ConnectionsOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest.Builder, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequestOrBuilder> internetNodesRequestBuilder_;
       /**
+       * <pre>
+       * Request a list of all internet nodes.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
        * @return Whether the internetNodesRequest field is set.
        */
@@ -822,6 +1135,11 @@ public final class ConnectionsOuterClass {
         return messageCase_ == 1;
       }
       /**
+       * <pre>
+       * Request a list of all internet nodes.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
        * @return The internetNodesRequest.
        */
@@ -840,6 +1158,11 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
+       * <pre>
+       * Request a list of all internet nodes.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
        */
       public Builder setInternetNodesRequest(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest value) {
@@ -856,6 +1179,11 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Request a list of all internet nodes.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
        */
       public Builder setInternetNodesRequest(
@@ -870,6 +1198,11 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Request a list of all internet nodes.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
        */
       public Builder mergeInternetNodesRequest(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest value) {
@@ -892,6 +1225,11 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Request a list of all internet nodes.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
        */
       public Builder clearInternetNodesRequest() {
@@ -911,12 +1249,22 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Request a list of all internet nodes.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
        */
       public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest.Builder getInternetNodesRequestBuilder() {
         return getInternetNodesRequestFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Request a list of all internet nodes.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
        */
       @java.lang.Override
@@ -931,6 +1279,11 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
+       * <pre>
+       * Request a list of all internet nodes.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -955,6 +1308,11 @@ public final class ConnectionsOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.Builder, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesListOrBuilder> internetNodesListBuilder_;
       /**
+       * <pre>
+       * returns a list of all internet nodes and 
+       * an information about why this message has been sent.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
        * @return Whether the internetNodesList field is set.
        */
@@ -963,6 +1321,11 @@ public final class ConnectionsOuterClass {
         return messageCase_ == 2;
       }
       /**
+       * <pre>
+       * returns a list of all internet nodes and 
+       * an information about why this message has been sent.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
        * @return The internetNodesList.
        */
@@ -981,6 +1344,11 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
+       * <pre>
+       * returns a list of all internet nodes and 
+       * an information about why this message has been sent.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
        */
       public Builder setInternetNodesList(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList value) {
@@ -997,6 +1365,11 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * returns a list of all internet nodes and 
+       * an information about why this message has been sent.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
        */
       public Builder setInternetNodesList(
@@ -1011,6 +1384,11 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * returns a list of all internet nodes and 
+       * an information about why this message has been sent.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
        */
       public Builder mergeInternetNodesList(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList value) {
@@ -1033,6 +1411,11 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * returns a list of all internet nodes and 
+       * an information about why this message has been sent.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
        */
       public Builder clearInternetNodesList() {
@@ -1052,12 +1435,22 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * returns a list of all internet nodes and 
+       * an information about why this message has been sent.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
        */
       public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.Builder getInternetNodesListBuilder() {
         return getInternetNodesListFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * returns a list of all internet nodes and 
+       * an information about why this message has been sent.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
        */
       @java.lang.Override
@@ -1072,6 +1465,11 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
+       * <pre>
+       * returns a list of all internet nodes and 
+       * an information about why this message has been sent.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -1096,6 +1494,11 @@ public final class ConnectionsOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder> internetNodesAddBuilder_;
       /**
+       * <pre>
+       * Add a new internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
        * @return Whether the internetNodesAdd field is set.
        */
@@ -1104,6 +1507,11 @@ public final class ConnectionsOuterClass {
         return messageCase_ == 3;
       }
       /**
+       * <pre>
+       * Add a new internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
        * @return The internetNodesAdd.
        */
@@ -1122,6 +1530,11 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
+       * <pre>
+       * Add a new internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
        */
       public Builder setInternetNodesAdd(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry value) {
@@ -1138,6 +1551,11 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Add a new internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
        */
       public Builder setInternetNodesAdd(
@@ -1152,6 +1570,11 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Add a new internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
        */
       public Builder mergeInternetNodesAdd(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry value) {
@@ -1174,6 +1597,11 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Add a new internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
        */
       public Builder clearInternetNodesAdd() {
@@ -1193,12 +1621,22 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Add a new internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
        */
       public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder getInternetNodesAddBuilder() {
         return getInternetNodesAddFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Add a new internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
        */
       @java.lang.Override
@@ -1213,6 +1651,11 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
+       * <pre>
+       * Add a new internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -1237,6 +1680,11 @@ public final class ConnectionsOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder> internetNodesRemoveBuilder_;
       /**
+       * <pre>
+       * Remove an internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
        * @return Whether the internetNodesRemove field is set.
        */
@@ -1245,6 +1693,11 @@ public final class ConnectionsOuterClass {
         return messageCase_ == 4;
       }
       /**
+       * <pre>
+       * Remove an internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
        * @return The internetNodesRemove.
        */
@@ -1263,6 +1716,11 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
+       * <pre>
+       * Remove an internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
        */
       public Builder setInternetNodesRemove(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry value) {
@@ -1279,6 +1737,11 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Remove an internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
        */
       public Builder setInternetNodesRemove(
@@ -1293,6 +1756,11 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Remove an internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
        */
       public Builder mergeInternetNodesRemove(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry value) {
@@ -1315,6 +1783,11 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Remove an internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
        */
       public Builder clearInternetNodesRemove() {
@@ -1334,12 +1807,22 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Remove an internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
        */
       public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder getInternetNodesRemoveBuilder() {
         return getInternetNodesRemoveFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Remove an internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
        */
       @java.lang.Override
@@ -1354,6 +1837,11 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
+       * <pre>
+       * Remove an internet node address.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
        * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -1858,25 +2346,73 @@ public final class ConnectionsOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+     * <pre>
+     * Information about why this message is sent
+     * and the result of the request, adding or removing
+     * of nodes.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.Info info = 1;</code>
+     * @return The enum numeric value on the wire for info.
+     */
+    int getInfoValue();
+    /**
+     * <pre>
+     * Information about why this message is sent
+     * and the result of the request, adding or removing
+     * of nodes.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.Info info = 1;</code>
+     * @return The info.
+     */
+    qaul.rpc.connections.ConnectionsOuterClass.Info getInfo();
+
+    /**
+     * <pre>
+     * list of all node multiaddresses that
+     * the internet module will try to connect to.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
      */
     java.util.List<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry> 
         getNodesList();
     /**
-     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+     * <pre>
+     * list of all node multiaddresses that
+     * the internet module will try to connect to.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
      */
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry getNodes(int index);
     /**
-     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+     * <pre>
+     * list of all node multiaddresses that
+     * the internet module will try to connect to.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
      */
     int getNodesCount();
     /**
-     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+     * <pre>
+     * list of all node multiaddresses that
+     * the internet module will try to connect to.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
      */
     java.util.List<? extends qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder> 
         getNodesOrBuilderList();
     /**
-     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+     * <pre>
+     * list of all node multiaddresses that
+     * the internet module will try to connect to.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
      */
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getNodesOrBuilder(
         int index);
@@ -1886,6 +2422,8 @@ public final class ConnectionsOuterClass {
    * Internet Nodes List
    * This is a list of all peer nodes the internet
    * connections module tries to connect to.
+   * This message is returned after a request, or when
+   * adding or removing a node address.
    * </pre>
    *
    * Protobuf type {@code qaul.rpc.connections.InternetNodesList}
@@ -1900,6 +2438,7 @@ public final class ConnectionsOuterClass {
       super(builder);
     }
     private InternetNodesList() {
+      info_ = 0;
       nodes_ = java.util.Collections.emptyList();
     }
 
@@ -1934,7 +2473,13 @@ public final class ConnectionsOuterClass {
             case 0:
               done = true;
               break;
-            case 10: {
+            case 8: {
+              int rawValue = input.readEnum();
+
+              info_ = rawValue;
+              break;
+            }
+            case 18: {
               if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 nodes_ = new java.util.ArrayList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry>();
                 mutable_bitField0_ |= 0x00000001;
@@ -1978,17 +2523,58 @@ public final class ConnectionsOuterClass {
               qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.class, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.Builder.class);
     }
 
-    public static final int NODES_FIELD_NUMBER = 1;
+    public static final int INFO_FIELD_NUMBER = 1;
+    private int info_;
+    /**
+     * <pre>
+     * Information about why this message is sent
+     * and the result of the request, adding or removing
+     * of nodes.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.Info info = 1;</code>
+     * @return The enum numeric value on the wire for info.
+     */
+    @java.lang.Override public int getInfoValue() {
+      return info_;
+    }
+    /**
+     * <pre>
+     * Information about why this message is sent
+     * and the result of the request, adding or removing
+     * of nodes.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.Info info = 1;</code>
+     * @return The info.
+     */
+    @java.lang.Override public qaul.rpc.connections.ConnectionsOuterClass.Info getInfo() {
+      @SuppressWarnings("deprecation")
+      qaul.rpc.connections.ConnectionsOuterClass.Info result = qaul.rpc.connections.ConnectionsOuterClass.Info.valueOf(info_);
+      return result == null ? qaul.rpc.connections.ConnectionsOuterClass.Info.UNRECOGNIZED : result;
+    }
+
+    public static final int NODES_FIELD_NUMBER = 2;
     private java.util.List<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry> nodes_;
     /**
-     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+     * <pre>
+     * list of all node multiaddresses that
+     * the internet module will try to connect to.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
      */
     @java.lang.Override
     public java.util.List<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry> getNodesList() {
       return nodes_;
     }
     /**
-     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+     * <pre>
+     * list of all node multiaddresses that
+     * the internet module will try to connect to.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
      */
     @java.lang.Override
     public java.util.List<? extends qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder> 
@@ -1996,21 +2582,36 @@ public final class ConnectionsOuterClass {
       return nodes_;
     }
     /**
-     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+     * <pre>
+     * list of all node multiaddresses that
+     * the internet module will try to connect to.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
      */
     @java.lang.Override
     public int getNodesCount() {
       return nodes_.size();
     }
     /**
-     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+     * <pre>
+     * list of all node multiaddresses that
+     * the internet module will try to connect to.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
      */
     @java.lang.Override
     public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry getNodes(int index) {
       return nodes_.get(index);
     }
     /**
-     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+     * <pre>
+     * list of all node multiaddresses that
+     * the internet module will try to connect to.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
      */
     @java.lang.Override
     public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getNodesOrBuilder(
@@ -2032,8 +2633,11 @@ public final class ConnectionsOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (info_ != qaul.rpc.connections.ConnectionsOuterClass.Info.REQUEST.getNumber()) {
+        output.writeEnum(1, info_);
+      }
       for (int i = 0; i < nodes_.size(); i++) {
-        output.writeMessage(1, nodes_.get(i));
+        output.writeMessage(2, nodes_.get(i));
       }
       unknownFields.writeTo(output);
     }
@@ -2044,9 +2648,13 @@ public final class ConnectionsOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (info_ != qaul.rpc.connections.ConnectionsOuterClass.Info.REQUEST.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, info_);
+      }
       for (int i = 0; i < nodes_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, nodes_.get(i));
+          .computeMessageSize(2, nodes_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -2063,6 +2671,7 @@ public final class ConnectionsOuterClass {
       }
       qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList other = (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList) obj;
 
+      if (info_ != other.info_) return false;
       if (!getNodesList()
           .equals(other.getNodesList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -2076,6 +2685,8 @@ public final class ConnectionsOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + INFO_FIELD_NUMBER;
+      hash = (53 * hash) + info_;
       if (getNodesCount() > 0) {
         hash = (37 * hash) + NODES_FIELD_NUMBER;
         hash = (53 * hash) + getNodesList().hashCode();
@@ -2180,6 +2791,8 @@ public final class ConnectionsOuterClass {
      * Internet Nodes List
      * This is a list of all peer nodes the internet
      * connections module tries to connect to.
+     * This message is returned after a request, or when
+     * adding or removing a node address.
      * </pre>
      *
      * Protobuf type {@code qaul.rpc.connections.InternetNodesList}
@@ -2220,6 +2833,8 @@ public final class ConnectionsOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        info_ = 0;
+
         if (nodesBuilder_ == null) {
           nodes_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000001);
@@ -2253,6 +2868,7 @@ public final class ConnectionsOuterClass {
       public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList buildPartial() {
         qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList result = new qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList(this);
         int from_bitField0_ = bitField0_;
+        result.info_ = info_;
         if (nodesBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             nodes_ = java.util.Collections.unmodifiableList(nodes_);
@@ -2310,6 +2926,9 @@ public final class ConnectionsOuterClass {
 
       public Builder mergeFrom(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList other) {
         if (other == qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.getDefaultInstance()) return this;
+        if (other.info_ != 0) {
+          setInfoValue(other.getInfoValue());
+        }
         if (nodesBuilder_ == null) {
           if (!other.nodes_.isEmpty()) {
             if (nodes_.isEmpty()) {
@@ -2366,6 +2985,90 @@ public final class ConnectionsOuterClass {
       }
       private int bitField0_;
 
+      private int info_ = 0;
+      /**
+       * <pre>
+       * Information about why this message is sent
+       * and the result of the request, adding or removing
+       * of nodes.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.Info info = 1;</code>
+       * @return The enum numeric value on the wire for info.
+       */
+      @java.lang.Override public int getInfoValue() {
+        return info_;
+      }
+      /**
+       * <pre>
+       * Information about why this message is sent
+       * and the result of the request, adding or removing
+       * of nodes.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.Info info = 1;</code>
+       * @param value The enum numeric value on the wire for info to set.
+       * @return This builder for chaining.
+       */
+      public Builder setInfoValue(int value) {
+        
+        info_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Information about why this message is sent
+       * and the result of the request, adding or removing
+       * of nodes.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.Info info = 1;</code>
+       * @return The info.
+       */
+      @java.lang.Override
+      public qaul.rpc.connections.ConnectionsOuterClass.Info getInfo() {
+        @SuppressWarnings("deprecation")
+        qaul.rpc.connections.ConnectionsOuterClass.Info result = qaul.rpc.connections.ConnectionsOuterClass.Info.valueOf(info_);
+        return result == null ? qaul.rpc.connections.ConnectionsOuterClass.Info.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Information about why this message is sent
+       * and the result of the request, adding or removing
+       * of nodes.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.Info info = 1;</code>
+       * @param value The info to set.
+       * @return This builder for chaining.
+       */
+      public Builder setInfo(qaul.rpc.connections.ConnectionsOuterClass.Info value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        info_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Information about why this message is sent
+       * and the result of the request, adding or removing
+       * of nodes.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.Info info = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearInfo() {
+        
+        info_ = 0;
+        onChanged();
+        return this;
+      }
+
       private java.util.List<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry> nodes_ =
         java.util.Collections.emptyList();
       private void ensureNodesIsMutable() {
@@ -2379,7 +3082,12 @@ public final class ConnectionsOuterClass {
           qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder> nodesBuilder_;
 
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public java.util.List<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry> getNodesList() {
         if (nodesBuilder_ == null) {
@@ -2389,7 +3097,12 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public int getNodesCount() {
         if (nodesBuilder_ == null) {
@@ -2399,7 +3112,12 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry getNodes(int index) {
         if (nodesBuilder_ == null) {
@@ -2409,7 +3127,12 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public Builder setNodes(
           int index, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry value) {
@@ -2426,7 +3149,12 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public Builder setNodes(
           int index, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder builderForValue) {
@@ -2440,7 +3168,12 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public Builder addNodes(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry value) {
         if (nodesBuilder_ == null) {
@@ -2456,7 +3189,12 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public Builder addNodes(
           int index, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry value) {
@@ -2473,7 +3211,12 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public Builder addNodes(
           qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder builderForValue) {
@@ -2487,7 +3230,12 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public Builder addNodes(
           int index, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder builderForValue) {
@@ -2501,7 +3249,12 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public Builder addAllNodes(
           java.lang.Iterable<? extends qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry> values) {
@@ -2516,7 +3269,12 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public Builder clearNodes() {
         if (nodesBuilder_ == null) {
@@ -2529,7 +3287,12 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public Builder removeNodes(int index) {
         if (nodesBuilder_ == null) {
@@ -2542,14 +3305,24 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder getNodesBuilder(
           int index) {
         return getNodesFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getNodesOrBuilder(
           int index) {
@@ -2559,7 +3332,12 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public java.util.List<? extends qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder> 
            getNodesOrBuilderList() {
@@ -2570,14 +3348,24 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder addNodesBuilder() {
         return getNodesFieldBuilder().addBuilder(
             qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance());
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder addNodesBuilder(
           int index) {
@@ -2585,7 +3373,12 @@ public final class ConnectionsOuterClass {
             index, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance());
       }
       /**
-       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;</code>
+       * <pre>
+       * list of all node multiaddresses that
+       * the internet module will try to connect to.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
        */
       public java.util.List<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder> 
            getNodesBuilderList() {
@@ -3277,10 +4070,13 @@ public final class ConnectionsOuterClass {
       "odesEntryH\000\022I\n\025internet_nodes_remove\030\004 \001" +
       "(\0132(.qaul.rpc.connections.InternetNodesE" +
       "ntryH\000B\t\n\007message\"\026\n\024InternetNodesReques" +
-      "t\"L\n\021InternetNodesList\0227\n\005nodes\030\001 \003(\0132(." +
-      "qaul.rpc.connections.InternetNodesEntry\"" +
-      "%\n\022InternetNodesEntry\022\017\n\007address\030\001 \001(\tb\006" +
-      "proto3"
+      "t\"v\n\021InternetNodesList\022(\n\004info\030\001 \001(\0162\032.q" +
+      "aul.rpc.connections.Info\0227\n\005nodes\030\002 \003(\0132" +
+      "(.qaul.rpc.connections.InternetNodesEntr" +
+      "y\"%\n\022InternetNodesEntry\022\017\n\007address\030\001 \001(\t" +
+      "*k\n\004Info\022\013\n\007REQUEST\020\000\022\017\n\013ADD_SUCCESS\020\001\022\025" +
+      "\n\021ADD_ERROR_INVALID\020\002\022\022\n\016REMOVE_SUCCESS\020" +
+      "\005\022\032\n\026REMOVE_ERROR_NOT_FOUND\020\006b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -3303,7 +4099,7 @@ public final class ConnectionsOuterClass {
     internal_static_qaul_rpc_connections_InternetNodesList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_connections_InternetNodesList_descriptor,
-        new java.lang.String[] { "Nodes", });
+        new java.lang.String[] { "Info", "Nodes", });
     internal_static_qaul_rpc_connections_InternetNodesEntry_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_qaul_rpc_connections_InternetNodesEntry_fieldAccessorTable = new

@@ -44,7 +44,9 @@ struct InternetNodesRequestDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT InternetNodesRequestDefaultTypeInternal _InternetNodesRequest_default_instance_;
 constexpr InternetNodesList::InternetNodesList(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : nodes_(){}
+  : nodes_()
+  , info_(0)
+{}
 struct InternetNodesListDefaultTypeInternal {
   constexpr InternetNodesListDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -70,7 +72,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT InternetNodesEntryDefaultTypeIn
 }  // namespace rpc
 }  // namespace qaul
 static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_connections_2fconnections_2eproto[4];
-static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_connections_2fconnections_2eproto = nullptr;
+static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_connections_2fconnections_2eproto[1];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_connections_2fconnections_2eproto = nullptr;
 
 const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_connections_2fconnections_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
@@ -94,6 +96,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_connections_2fconnections_2epr
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesList, info_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesList, nodes_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesEntry, _internal_metadata_),
@@ -106,7 +109,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 0, -1, sizeof(::qaul::rpc::connections::Connections)},
   { 10, -1, sizeof(::qaul::rpc::connections::InternetNodesRequest)},
   { 15, -1, sizeof(::qaul::rpc::connections::InternetNodesList)},
-  { 21, -1, sizeof(::qaul::rpc::connections::InternetNodesEntry)},
+  { 22, -1, sizeof(::qaul::rpc::connections::InternetNodesEntry)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -127,14 +130,17 @@ const char descriptor_table_protodef_connections_2fconnections_2eproto[] PROTOBU
   "odesEntryH\000\022I\n\025internet_nodes_remove\030\004 \001"
   "(\0132(.qaul.rpc.connections.InternetNodesE"
   "ntryH\000B\t\n\007message\"\026\n\024InternetNodesReques"
-  "t\"L\n\021InternetNodesList\0227\n\005nodes\030\001 \003(\0132(."
-  "qaul.rpc.connections.InternetNodesEntry\""
-  "%\n\022InternetNodesEntry\022\017\n\007address\030\001 \001(\tb\006"
-  "proto3"
+  "t\"v\n\021InternetNodesList\022(\n\004info\030\001 \001(\0162\032.q"
+  "aul.rpc.connections.Info\0227\n\005nodes\030\002 \003(\0132"
+  "(.qaul.rpc.connections.InternetNodesEntr"
+  "y\"%\n\022InternetNodesEntry\022\017\n\007address\030\001 \001(\t"
+  "*k\n\004Info\022\013\n\007REQUEST\020\000\022\017\n\013ADD_SUCCESS\020\001\022\025"
+  "\n\021ADD_ERROR_INVALID\020\002\022\022\n\016REMOVE_SUCCESS\020"
+  "\005\022\032\n\026REMOVE_ERROR_NOT_FOUND\020\006b\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_connections_2fconnections_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_connections_2fconnections_2eproto = {
-  false, false, 526, descriptor_table_protodef_connections_2fconnections_2eproto, "connections/connections.proto", 
+  false, false, 677, descriptor_table_protodef_connections_2fconnections_2eproto, "connections/connections.proto", 
   &descriptor_table_connections_2fconnections_2eproto_once, nullptr, 0, 4,
   schemas, file_default_instances, TableStruct_connections_2fconnections_2eproto::offsets,
   file_level_metadata_connections_2fconnections_2eproto, file_level_enum_descriptors_connections_2fconnections_2eproto, file_level_service_descriptors_connections_2fconnections_2eproto,
@@ -148,6 +154,23 @@ PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDe
 namespace qaul {
 namespace rpc {
 namespace connections {
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Info_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_connections_2fconnections_2eproto);
+  return file_level_enum_descriptors_connections_2fconnections_2eproto[0];
+}
+bool Info_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 1:
+    case 2:
+    case 5:
+    case 6:
+      return true;
+    default:
+      return false;
+  }
+}
+
 
 // ===================================================================
 
@@ -738,10 +761,12 @@ InternetNodesList::InternetNodesList(const InternetNodesList& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       nodes_(from.nodes_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  info_ = from.info_;
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.connections.InternetNodesList)
 }
 
 inline void InternetNodesList::SharedCtor() {
+info_ = 0;
 }
 
 InternetNodesList::~InternetNodesList() {
@@ -772,6 +797,7 @@ void InternetNodesList::Clear() {
   (void) cached_has_bits;
 
   nodes_.Clear();
+  info_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -781,16 +807,24 @@ const char* InternetNodesList::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;
+      // .qaul.rpc.connections.Info info = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          ::PROTOBUF_NAMESPACE_ID::uint64 val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+          _internal_set_info(static_cast<::qaul::rpc::connections::Info>(val));
+        } else goto handle_unusual;
+        continue;
+      // repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           ptr -= 1;
           do {
             ptr += 1;
             ptr = ctx->ParseMessage(_internal_add_nodes(), ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
         } else goto handle_unusual;
         continue;
       default: {
@@ -822,12 +856,19 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;
+  // .qaul.rpc.connections.Info info = 1;
+  if (this->_internal_info() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteEnumToArray(
+      1, this->_internal_info(), target);
+  }
+
+  // repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_nodes_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(1, this->_internal_nodes(i), target, stream);
+      InternalWriteMessage(2, this->_internal_nodes(i), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -846,11 +887,17 @@ size_t InternetNodesList::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;
+  // repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;
   total_size += 1UL * this->_internal_nodes_size();
   for (const auto& msg : this->nodes_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  // .qaul.rpc.connections.Info info = 1;
+  if (this->_internal_info() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::EnumSize(this->_internal_info());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -882,6 +929,9 @@ void InternetNodesList::MergeFrom(const InternetNodesList& from) {
   (void) cached_has_bits;
 
   nodes_.MergeFrom(from.nodes_);
+  if (from._internal_info() != 0) {
+    _internal_set_info(from._internal_info());
+  }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -900,6 +950,7 @@ void InternetNodesList::InternalSwap(InternetNodesList* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   nodes_.InternalSwap(&other->nodes_);
+  swap(info_, other->info_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata InternetNodesList::GetMetadata() const {

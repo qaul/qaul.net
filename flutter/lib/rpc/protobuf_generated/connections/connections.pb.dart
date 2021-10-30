@@ -9,6 +9,10 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'connections.pbenum.dart';
+
+export 'connections.pbenum.dart';
+
 enum Connections_Message {
   internetNodesRequest, 
   internetNodesList, 
@@ -156,15 +160,20 @@ class InternetNodesRequest extends $pb.GeneratedMessage {
 
 class InternetNodesList extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'InternetNodesList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
-    ..pc<InternetNodesEntry>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'nodes', $pb.PbFieldType.PM, subBuilder: InternetNodesEntry.create)
+    ..e<Info>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'info', $pb.PbFieldType.OE, defaultOrMaker: Info.REQUEST, valueOf: Info.valueOf, enumValues: Info.values)
+    ..pc<InternetNodesEntry>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'nodes', $pb.PbFieldType.PM, subBuilder: InternetNodesEntry.create)
     ..hasRequiredFields = false
   ;
 
   InternetNodesList._() : super();
   factory InternetNodesList({
+    Info? info,
     $core.Iterable<InternetNodesEntry>? nodes,
   }) {
     final _result = create();
+    if (info != null) {
+      _result.info = info;
+    }
     if (nodes != null) {
       _result.nodes.addAll(nodes);
     }
@@ -192,7 +201,16 @@ class InternetNodesList extends $pb.GeneratedMessage {
   static InternetNodesList? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<InternetNodesEntry> get nodes => $_getList(0);
+  Info get info => $_getN(0);
+  @$pb.TagNumber(1)
+  set info(Info v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasInfo() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearInfo() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<InternetNodesEntry> get nodes => $_getList(1);
 }
 
 class InternetNodesEntry extends $pb.GeneratedMessage {

@@ -105,33 +105,12 @@ impl Connections {
             Ok(connections) => {
                 match connections.message {
                     Some(proto::connections::Message::InternetNodesRequest(_internet_nodes_request)) => {
-                        let mut nodes: Vec<proto::InternetNodesEntry> = Vec::new();
-
-                        // get list of peer nodes from config
-                        let config = Configuration::get();
-
-                        // fill all the nodes
-                        for addr_str in &config.internet.peers {
-                            nodes.push(proto::InternetNodesEntry {
-                                address: String::from(addr_str),
-                            });
-                        }
-                
-                        // create the protobuf message
-                        let proto_message = proto::Connections {
-                            message: Some(proto::connections::Message::InternetNodesList (
-                                proto::InternetNodesList {
-                                    nodes,
-                                }
-                            )),
-                        };
-
-                        // send the message
-                        Self::rpc_send_message(proto_message);
+                        Self::rpc_send_node_list(proto::Info::Request);
                     },
                     Some(proto::connections::Message::InternetNodesAdd(nodes_entry)) => {
                         // check if we have a valid address
                         let mut valid = false;
+                        let mut info = proto::Info::AddSuccess;
 
                         {
                             // get config
@@ -151,7 +130,10 @@ impl Connections {
                                         Internet::peer_dial(address, &mut internet.swarm);
                                     }
                                 },
-                                Err(e) => {log::error!("Not a valid address: {:?}", e);},
+                                Err(e) => {
+                                    log::error!("Not a valid address: {:?}", e);
+                                    info = proto::Info::AddErrorInvalid;
+                                },
                             }
                         }
 
@@ -159,8 +141,13 @@ impl Connections {
                         if valid {
                             Configuration::save();
                         }
+
+                        // send response message
+                        Self::rpc_send_node_list(info);
                     },
                     Some(proto::connections::Message::InternetNodesRemove(nodes_entry)) => {
+                        let mut info = proto::Info::RemoveErrorNotFound;
+
                         {
                             let mut nodes: Vec<String> = Vec::new();
 
@@ -170,7 +157,13 @@ impl Connections {
                             // loop through addresses and remove the equal
                             for addr_string in &config.internet.peers {
                                 let string = String::from(addr_string);
-                                if string != nodes_entry.address {
+                                if string == nodes_entry.address {
+                                    // address has been found and is
+                                    // therefore removed.
+                                    info = proto::Info::RemoveSuccess;
+                                } else {
+                                    // addresses do not match.
+                                    // add this address to the new vector.
                                     nodes.push(string);
                                 }
                             }
@@ -183,6 +176,9 @@ impl Connections {
                         Configuration::save();
 
                         // TODO: stop connection to removed host
+
+                        // send response
+                        Self::rpc_send_node_list(info);
                     },
                     _ => {},
                 }
@@ -193,7 +189,35 @@ impl Connections {
         }
     }
 
-    /// send RPC message to UI
+    /// create and send a node list message
+    fn rpc_send_node_list(info: proto::Info) {
+        let mut nodes: Vec<proto::InternetNodesEntry> = Vec::new();
+
+        // get list of peer nodes from config
+        let config = Configuration::get();
+
+        // fill all the nodes
+        for addr_str in &config.internet.peers {
+            nodes.push(proto::InternetNodesEntry {
+                address: String::from(addr_str),
+            });
+        }
+
+        // create the protobuf message
+        let proto_message = proto::Connections {
+            message: Some(proto::connections::Message::InternetNodesList (
+                proto::InternetNodesList {
+                    info: info as i32,
+                    nodes,
+                }
+            )),
+        };
+
+        // send the message
+        Self::rpc_send_message(proto_message);
+    }
+
+    /// encode and send connections RPC message to UI
     fn rpc_send_message (message: proto::Connections) {
         // encode message
         let mut buf = Vec::with_capacity(message.encoded_len());

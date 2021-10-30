@@ -109,7 +109,34 @@ impl Connections {
                     Some(proto::connections::Message::InternetNodesList(proto_list)) => {
                         let mut line = 1;
                         println!("");
-                        println!("Internet Peer Nodes");
+
+                        match proto::Info::from_i32(proto_list.info) {
+                            Some(proto::Info::Request) => {
+                                // all fine no further info
+                            },
+                            Some(proto::Info::AddSuccess) => {
+                                println!("Address successfully added to 'Internet Peer Nodes List'");
+                                println!("");
+                            },
+                            Some(proto::Info::AddErrorInvalid) => {
+                                println!("ERROR: Invalid address, couldn't be added to 'Internet Peer Nodes List'");
+                                println!("");
+                            },
+                            Some(proto::Info::RemoveSuccess) => {
+                                println!("Address successfully removed from 'Internet Peer Nodes List'");
+                                println!("");
+                            },
+                            Some(proto::Info::RemoveErrorNotFound) => {
+                                println!("ERROR: Address not found in 'Internet Peer Nodes List'");
+                                println!("");
+                            },
+                            None => {
+                                println!("Unknown Reason for 'Internet Peer Nodes List' response");
+                                println!("");
+                            },
+                        };
+
+                        println!("Internet Peer Nodes List");
                         println!("No. | Address");
 
                         for node in proto_list.nodes {

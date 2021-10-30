@@ -8,6 +8,20 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
+@$core.Deprecated('Use infoDescriptor instead')
+const Info$json = const {
+  '1': 'Info',
+  '2': const [
+    const {'1': 'REQUEST', '2': 0},
+    const {'1': 'ADD_SUCCESS', '2': 1},
+    const {'1': 'ADD_ERROR_INVALID', '2': 2},
+    const {'1': 'REMOVE_SUCCESS', '2': 5},
+    const {'1': 'REMOVE_ERROR_NOT_FOUND', '2': 6},
+  ],
+};
+
+/// Descriptor for `Info`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List infoDescriptor = $convert.base64Decode('CgRJbmZvEgsKB1JFUVVFU1QQABIPCgtBRERfU1VDQ0VTUxABEhUKEUFERF9FUlJPUl9JTlZBTElEEAISEgoOUkVNT1ZFX1NVQ0NFU1MQBRIaChZSRU1PVkVfRVJST1JfTk9UX0ZPVU5EEAY=');
 @$core.Deprecated('Use connectionsDescriptor instead')
 const Connections$json = const {
   '1': 'Connections',
@@ -35,12 +49,13 @@ final $typed_data.Uint8List internetNodesRequestDescriptor = $convert.base64Deco
 const InternetNodesList$json = const {
   '1': 'InternetNodesList',
   '2': const [
-    const {'1': 'nodes', '3': 1, '4': 3, '5': 11, '6': '.qaul.rpc.connections.InternetNodesEntry', '10': 'nodes'},
+    const {'1': 'info', '3': 1, '4': 1, '5': 14, '6': '.qaul.rpc.connections.Info', '10': 'info'},
+    const {'1': 'nodes', '3': 2, '4': 3, '5': 11, '6': '.qaul.rpc.connections.InternetNodesEntry', '10': 'nodes'},
   ],
 };
 
 /// Descriptor for `InternetNodesList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internetNodesListDescriptor = $convert.base64Decode('ChFJbnRlcm5ldE5vZGVzTGlzdBI+CgVub2RlcxgBIAMoCzIoLnFhdWwucnBjLmNvbm5lY3Rpb25zLkludGVybmV0Tm9kZXNFbnRyeVIFbm9kZXM=');
+final $typed_data.Uint8List internetNodesListDescriptor = $convert.base64Decode('ChFJbnRlcm5ldE5vZGVzTGlzdBIuCgRpbmZvGAEgASgOMhoucWF1bC5ycGMuY29ubmVjdGlvbnMuSW5mb1IEaW5mbxI+CgVub2RlcxgCIAMoCzIoLnFhdWwucnBjLmNvbm5lY3Rpb25zLkludGVybmV0Tm9kZXNFbnRyeVIFbm9kZXM=');
 @$core.Deprecated('Use internetNodesEntryDescriptor instead')
 const InternetNodesEntry$json = const {
   '1': 'InternetNodesEntry',

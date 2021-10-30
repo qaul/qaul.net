@@ -30,6 +30,7 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: export
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
+#include <google/protobuf/generated_enum_reflection.h>
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
@@ -81,6 +82,34 @@ namespace qaul {
 namespace rpc {
 namespace connections {
 
+enum Info : int {
+  REQUEST = 0,
+  ADD_SUCCESS = 1,
+  ADD_ERROR_INVALID = 2,
+  REMOVE_SUCCESS = 5,
+  REMOVE_ERROR_NOT_FOUND = 6,
+  Info_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  Info_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+};
+bool Info_IsValid(int value);
+constexpr Info Info_MIN = REQUEST;
+constexpr Info Info_MAX = REMOVE_ERROR_NOT_FOUND;
+constexpr int Info_ARRAYSIZE = Info_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Info_descriptor();
+template<typename T>
+inline const std::string& Info_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, Info>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function Info_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    Info_descriptor(), enum_t_value);
+}
+inline bool Info_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, Info* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<Info>(
+    Info_descriptor(), name, value);
+}
 // ===================================================================
 
 class Connections final :
@@ -555,9 +584,10 @@ class InternetNodesList final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kNodesFieldNumber = 1,
+    kNodesFieldNumber = 2,
+    kInfoFieldNumber = 1,
   };
-  // repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;
+  // repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;
   int nodes_size() const;
   private:
   int _internal_nodes_size() const;
@@ -575,6 +605,15 @@ class InternetNodesList final :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::connections::InternetNodesEntry >&
       nodes() const;
 
+  // .qaul.rpc.connections.Info info = 1;
+  void clear_info();
+  ::qaul::rpc::connections::Info info() const;
+  void set_info(::qaul::rpc::connections::Info value);
+  private:
+  ::qaul::rpc::connections::Info _internal_info() const;
+  void _internal_set_info(::qaul::rpc::connections::Info value);
+  public:
+
   // @@protoc_insertion_point(class_scope:qaul.rpc.connections.InternetNodesList)
  private:
   class _Internal;
@@ -583,6 +622,7 @@ class InternetNodesList final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::connections::InternetNodesEntry > nodes_;
+  int info_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_connections_2fconnections_2eproto;
 };
@@ -1054,7 +1094,27 @@ inline Connections::MessageCase Connections::message_case() const {
 
 // InternetNodesList
 
-// repeated .qaul.rpc.connections.InternetNodesEntry nodes = 1;
+// .qaul.rpc.connections.Info info = 1;
+inline void InternetNodesList::clear_info() {
+  info_ = 0;
+}
+inline ::qaul::rpc::connections::Info InternetNodesList::_internal_info() const {
+  return static_cast< ::qaul::rpc::connections::Info >(info_);
+}
+inline ::qaul::rpc::connections::Info InternetNodesList::info() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.connections.InternetNodesList.info)
+  return _internal_info();
+}
+inline void InternetNodesList::_internal_set_info(::qaul::rpc::connections::Info value) {
+  
+  info_ = value;
+}
+inline void InternetNodesList::set_info(::qaul::rpc::connections::Info value) {
+  _internal_set_info(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.connections.InternetNodesList.info)
+}
+
+// repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;
 inline int InternetNodesList::_internal_nodes_size() const {
   return nodes_.size();
 }
@@ -1159,6 +1219,16 @@ inline void InternetNodesEntry::set_allocated_address(std::string* address) {
 }  // namespace connections
 }  // namespace rpc
 }  // namespace qaul
+
+PROTOBUF_NAMESPACE_OPEN
+
+template <> struct is_proto_enum< ::qaul::rpc::connections::Info> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::qaul::rpc::connections::Info>() {
+  return ::qaul::rpc::connections::Info_descriptor();
+}
+
+PROTOBUF_NAMESPACE_CLOSE
 
 // @@protoc_insertion_point(global_scope)
 
