@@ -27,7 +27,7 @@ class NavigationHelper {
         break;
       case createAccount:
         routeWidget = WillPopScope(
-            onWillPop: () async => false, child: const CreateAccountScreen());
+            onWillPop: () async => false, child: CreateAccountScreen());
         break;
       case home:
         routeWidget = WillPopScope(

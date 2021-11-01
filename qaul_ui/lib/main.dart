@@ -133,25 +133,25 @@ class Init {
     print("libqaul initialization finished");
 
     // request node info
-    final rpcNode = RpcNode(read);
-    await rpcNode.getNodeInfo();
+    // final rpcNode = RpcNode(read);
+    // await rpcNode.getNodeInfo();
 
     // wait a bit
-    await Future.delayed(Duration(seconds: 1));
+    // await Future.delayed(Duration(seconds: 1));
 
     // DEBUG: how many messages have been sent
-    final sent = await libqaul.checkSendCounter();
-    print("libqaul checkSendCounter: $sent");
+    // final sent = await libqaul.checkSendCounter();
+    // print("libqaul checkSendCounter: $sent");
 
     // DEBUG: how many messages are queued by libqaul
-    final queued = await libqaul.checkReceiveQueue();
-    print("libqaul checkReceiveQueue: $queued");
+    // final queued = await libqaul.checkReceiveQueue();
+    // print("libqaul checkReceiveQueue: $queued");
 
     // check for rpc messages
-    if (queued > 0) {
-      print("libqaul receiveRpc");
-      await libqaul.receiveRpc();
-      print("libqaul RPC receveid");
-    }
+    // if (queued > 0) {
+    //   print("libqaul receiveRpc");
+    //   await libqaul.receiveRpc();
+    //   print("libqaul RPC receveid");
+    // }
   }
 }

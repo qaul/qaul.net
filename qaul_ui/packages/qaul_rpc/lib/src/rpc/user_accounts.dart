@@ -30,20 +30,12 @@ class RpcUserAccounts extends RpcModule {
         debugPrint('RpcUserAccounts default acc exists? $exists');
 
         if (exists) {
-          print("************************************************************");
-          print("true");
-          print("************************************************************");
           final user = User(
             name: info.myUserAccount.name,
             idBase58: info.myUserAccount.idBase58,
           );
-
-          print(user);
           reader(defaultUserProvider).state = user;
         } else {
-          print("************************************************************");
-          print("false");
-          print("************************************************************");
           reader(defaultUserProvider).state = null;
         }
         break;
@@ -62,5 +54,10 @@ class RpcUserAccounts extends RpcModule {
 
     // send message
     await encodeAndSendMessage(message);
+  }
+
+  Future<void> createUserAccount(String name) async {
+    final msg = UserAccounts(createUserAccount: CreateUserAccount(name: name));
+    await encodeAndSendMessage(msg);
   }
 }
