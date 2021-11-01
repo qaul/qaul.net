@@ -131,7 +131,7 @@ class QaulNavBarItem extends ConsumerWidget {
     String svgPath;
     switch (tab) {
       case TabType.account:
-        return UserAvatar(controller: controller, tab: tab);
+        return UserAvatar.small();
       case TabType.users:
         return IconButton(
           icon: const Icon(Icons.group),

@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_ui/decorators/qaul_nav_bar_decorator.dart';
 import 'package:qaul_ui/providers/providers.dart';
+import 'package:qaul_ui/widgets/user_avatar.dart';
 
 part 'tabs/chat_tab.dart';
 part 'tabs/feed_tab.dart';
