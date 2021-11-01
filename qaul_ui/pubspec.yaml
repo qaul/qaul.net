@@ -58,8 +58,8 @@ dependencies:
   # *******
   qaul_rpc:
     path: packages/qaul_rpc
-  color_generator:
-    path: packages/color_generator
+  utils:
+    path: packages/utils
 
   cupertino_icons: ^1.0.2
 

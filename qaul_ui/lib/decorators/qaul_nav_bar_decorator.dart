@@ -1,13 +1,11 @@
-import 'dart:math' as math;
-
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_ui/helpers/navigation_helper.dart';
 import 'package:qaul_ui/providers/providers.dart';
+import 'package:qaul_ui/widgets/user_avatar.dart';
 
 class QaulNavBarDecorator extends StatefulWidget {
   const QaulNavBarDecorator({Key? key, required this.child}) : super(key: key);
@@ -133,19 +131,7 @@ class QaulNavBarItem extends ConsumerWidget {
     String svgPath;
     switch (tab) {
       case TabType.account:
-        return GestureDetector(
-          onTap: () => controller.goToTab(tab),
-          child: Badge(
-            position: BadgePosition.bottomEnd(bottom: 0, end: 0),
-            badgeColor: Colors.greenAccent.shade700,
-            child: CircleAvatar(
-              child: const Text('BD'),
-              backgroundColor: Colors
-                  .primaries[math.Random().nextInt(Colors.primaries.length)]
-                  .shade700,
-            ),
-          ),
-        );
+        return UserAvatar(controller: controller, tab: tab);
       case TabType.users:
         return IconButton(
           icon: const Icon(Icons.group),
