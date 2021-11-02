@@ -41,6 +41,8 @@ dependencies:
   flutter_svg: ^0.23.0+1
   # Notification bubbles on icons
   badges: ^2.0.1
+  # Fuzzy timestamps
+  timeago: ^3.1.0
 
   # *******
   # Business Logic Dependencies
