@@ -13,7 +13,7 @@ class SplashScreen extends ConsumerWidget {
     await Future.delayed(const Duration(seconds: 5));
     final user = ref.read(defaultUserProvider).state;
     final route =
-        user == null ? NavigationHelper.createAccount : NavigationHelper.home;
+        user != null ? NavigationHelper.createAccount : NavigationHelper.home;
     return route;
   });
 

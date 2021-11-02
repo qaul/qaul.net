@@ -17,35 +17,32 @@ class _FeedTab extends ConsumerWidget {
           color: Colors.black,
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * .12),
-        child: RefreshIndicator(
-          onRefresh: () async => await RpcFeed(ref.read).requestFeedMessages(),
-          child: ListView.separated(
-            physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: messages.length,
-            separatorBuilder: (_, __) => const Divider(height: 12.0),
-            itemBuilder: (_, i) {
-              final msg = messages[i];
-              var theme = Theme.of(context).textTheme;
-              return ListTile(
-                leading: UserAvatar.small(),
-                title: Text(
-                  msg.content ?? '',
-                  style: theme.bodyText2!.copyWith(fontSize: 16, height: 1.4),
-                  textAlign: TextAlign.justify,
+      body: RefreshIndicator(
+        onRefresh: () async => await RpcFeed(ref.read).requestFeedMessages(),
+        child: ListView.separated(
+          physics: const AlwaysScrollableScrollPhysics(),
+          itemCount: messages.length,
+          separatorBuilder: (_, __) => const Divider(height: 12.0),
+          itemBuilder: (_, i) {
+            final msg = messages[i];
+            var theme = Theme.of(context).textTheme;
+            return ListTile(
+              leading: UserAvatar.small(),
+              title: Text(
+                msg.content ?? '',
+                style: theme.bodyText2!.copyWith(fontSize: 16, height: 1.4),
+                textAlign: TextAlign.justify,
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Text(
+                  // TODO(brenodt): Prone to exceptions if timeSent is not parsable. Update.
+                  timeago.format(DateTime.parse(msg.timeSent ?? '')),
+                  style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
                 ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Text(
-                    // TODO(brenodt): Prone to exceptions if timeSent is not parsable. Update.
-                    timeago.format(DateTime.parse(msg.timeSent ?? '')),
-                    style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
-                  ),
-                ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

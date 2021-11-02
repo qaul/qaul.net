@@ -36,6 +36,7 @@ class HomeScreen extends HookConsumerWidget {
     return Scaffold(
       body: QaulNavBarDecorator(
         child: PageView(
+          physics: const NeverScrollableScrollPhysics(),
           controller: pageCtrl,
           children: const [
             _UserAccountTab(),

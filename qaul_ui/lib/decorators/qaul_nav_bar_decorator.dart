@@ -45,7 +45,9 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
                     ? AlignmentDirectional.topCenter
                     : AlignmentDirectional.topStart,
                 children: [
-                  widget.child,
+                  orientation == Orientation.portrait
+                      ? _buildHorizontalBody()
+                      : _buildVerticalBody(),
                   orientation == Orientation.portrait
                       ? _buildHorizontalBar(context)
                       : _buildVerticalBar(context),
@@ -81,6 +83,14 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
     ];
   }
 
+  Widget _buildHorizontalBody() {
+    final top = MediaQuery.of(context).size.height * .12;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.0, top, 16.0, 0.0),
+      child: widget.child,
+    );
+  }
+
   Widget _buildHorizontalBar(BuildContext context) {
     return FractionallySizedBox(
       heightFactor: 0.12,
@@ -92,6 +102,15 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
         ),
       ),
     );
+  }
+
+  Widget _buildVerticalBody() {
+    final spacing = MediaQuery.of(context).size.width * .12;
+    final pad = Directionality.of(context) == TextDirection.rtl
+        ? EdgeInsets.fromLTRB(8.0, 8.0, spacing, 0.0)
+        : EdgeInsets.fromLTRB(spacing, 8.0, 8.0, 0.0);
+
+    return Padding(padding: pad, child: widget.child);
   }
 
   Widget _buildVerticalBar(BuildContext context) {
