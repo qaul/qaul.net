@@ -66,7 +66,7 @@ class _CreateFeedMessage extends HookConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.check),
+        child: const Icon(Icons.check, size: 32.0),
         onPressed: () async {
           await RpcFeed(ref.read).sendFeedMessage(controller.text);
           Navigator.pop(context);
@@ -80,6 +80,7 @@ class _CreateFeedMessage extends HookConsumerWidget {
           controller: controller,
           keyboardType: TextInputType.multiline,
           style: Theme.of(context).textTheme.subtitle1,
+          decoration: const InputDecoration(border: InputBorder.none),
         ),
       ),
     );
