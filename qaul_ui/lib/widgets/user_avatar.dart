@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -12,6 +14,17 @@ abstract class UserAvatar extends ConsumerWidget {
   factory UserAvatar.small({Key? key}) => _SmallUserAvatar(key: key);
 
   factory UserAvatar.large({Key? key}) => _LargeUserAvatar(key: key);
+
+  @protected
+  String generateRandomInitials() {
+    int charA = "a".codeUnitAt(0);
+    int charZ = "z".codeUnitAt(0);
+    var out = '';
+    for (var i = 0; i < 2; i++) {
+      out += String.fromCharCode(charA + Random().nextInt(charZ - charA));
+    }
+    return out.toUpperCase();
+  }
 }
 
 class _SmallUserAvatar extends UserAvatar {
@@ -27,11 +40,20 @@ class _SmallUserAvatar extends UserAvatar {
       onTap: () => controller.goToTab(TabType.account),
       // TODO(brenodt): Change badge status depending on user connectivity
       child: Badge(
+        elevation: 0.0,
+        padding: const EdgeInsets.all(6),
+        borderSide: const BorderSide(color: Colors.white, width: 1.5),
         position: BadgePosition.bottomEnd(bottom: 0, end: 0),
         badgeColor: Colors.greenAccent.shade700,
         child: CircleAvatar(
-          child: Text(user != null ? initials(user.name) : ''),
-          backgroundColor: color ?? Colors.limeAccent.shade100,
+          child: Text(
+            user != null ? initials(user.name) : generateRandomInitials(),
+            style: Theme.of(context)
+                .textTheme
+                .bodyText2!
+                .copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+          ),
+          backgroundColor: color ?? Colors.red.shade100,
         ),
       ),
     );
@@ -53,10 +75,13 @@ class _LargeUserAvatar extends UserAvatar {
         minRadius: 60.0,
         maxRadius: 80.0,
         child: Text(
-          user != null ? initials(user.name) : '',
-          style: Theme.of(context).textTheme.headline2,
+          user != null ? initials(user.name) : generateRandomInitials(),
+          style: Theme.of(context)
+              .textTheme
+              .headline2!
+              .copyWith(color: Colors.white),
         ),
-        backgroundColor: color ?? Colors.limeAccent.shade100,
+        backgroundColor: color ?? Colors.red.shade100,
       ),
     );
   }
