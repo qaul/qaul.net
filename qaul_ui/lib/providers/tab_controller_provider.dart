@@ -9,6 +9,8 @@ class SelectedTab extends StateNotifier<int> {
 
   int get index => state;
 
+  TabType get currentTab => TabType.values[state];
+
   @protected
   void goToIndex(int index) {
     assert(!index.isNegative && index < TabType.values.length);

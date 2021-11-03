@@ -90,6 +90,8 @@ class QaulApp extends ConsumerWidget {
                     ResponsiveBreakpoint.resize(350.0,
                         name: 'ANDROID', scaleFactor: 0.8),
                     ResponsiveBreakpoint.resize(480, name: MOBILE),
+                    ResponsiveBreakpoint.resize(680,
+                        name: 'MOBILE_LANDSCAPE', scaleFactor: 0.8),
                     ResponsiveBreakpoint.autoScale(800, name: TABLET),
                     ResponsiveBreakpoint.resize(1000, name: DESKTOP),
                   ],
