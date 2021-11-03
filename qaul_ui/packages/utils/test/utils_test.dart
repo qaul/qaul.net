@@ -98,4 +98,28 @@ void main() {
     test('string with less than 2 chars (besides space) throws', () => expect(() => initials('A        '), throwsArgumentError));
     test('string with less than 2 chars (besides space) throws', () => expect(() => initials(' A '), throwsArgumentError));
   });
+
+  group('describeFuzzyTimestamp', () {
+    final origin = DateTime(2000, 06, 15);
+
+    final testcases = <MapEntry<DateTime, String>>[
+      MapEntry(origin.subtract(const Duration(minutes: 5)), '5 min.'),
+      MapEntry(origin.subtract(const Duration(hours: 1)), 'about an hour'),
+      MapEntry(origin.subtract(const Duration(hours: 2)), '2 hours'),
+      MapEntry(origin.subtract(const Duration(hours: 21)), '21 hours'),
+      MapEntry(origin.subtract(const Duration(days: 4)), '4 days'),
+      MapEntry(origin.subtract(const Duration(days: 40)), 'about a month'),
+      MapEntry(origin.subtract(const Duration(days: 45)), 'about a month'),
+      MapEntry(origin.subtract(const Duration(days: 50)), 'about a month'),
+      MapEntry(origin.subtract(const Duration(days: 51)), '25 Apr 2000'),
+      MapEntry(origin.subtract(const Duration(days: 60)), '16 Apr 2000'),
+      MapEntry(origin.subtract(const Duration(days: 365)), '16 Jun 1999'),
+    ];
+
+    for (final t in testcases) {
+      test('${t.key} from ORIGIN: $origin becomes `${t.value}`',
+           () => expect(describeFuzzyTimestamp(t.key, clock: origin), t.value),
+      );
+    }
+  });
 }

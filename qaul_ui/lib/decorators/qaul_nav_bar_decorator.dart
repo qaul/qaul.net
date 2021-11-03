@@ -91,7 +91,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   Widget _buildHorizontalBody() {
     final top = MediaQuery.of(context).size.height * .12;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.0, top, 16.0, 0.0),
+      padding: EdgeInsets.only(top: top),
       child: widget.child,
     );
   }
@@ -112,8 +112,8 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   Widget _buildVerticalBody() {
     final spacing = MediaQuery.of(context).size.width * .12;
     final pad = Directionality.of(context) == TextDirection.rtl
-        ? EdgeInsets.fromLTRB(8.0, 8.0, spacing, 0.0)
-        : EdgeInsets.fromLTRB(spacing, 8.0, 8.0, 0.0);
+        ? EdgeInsets.only(right: spacing)
+        : EdgeInsets.only(left: spacing);
 
     return Padding(padding: pad, child: widget.child);
   }

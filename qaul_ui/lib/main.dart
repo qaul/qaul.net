@@ -57,10 +57,16 @@ class QaulApp extends ConsumerWidget {
       light: ThemeData(
         brightness: Brightness.light,
         primarySwatch: Colors.lightBlue,
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          foregroundColor: Colors.white,
+        ),
       ),
       dark: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.lightBlue,
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          foregroundColor: Colors.black,
+        ),
       ),
       initial: themeMode ?? AdaptiveThemeMode.light,
       builder: (theme, darkTheme) {

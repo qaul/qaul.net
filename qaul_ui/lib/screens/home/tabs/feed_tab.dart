@@ -10,12 +10,7 @@ class _FeedTab extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const _CreateFeedMessage())),
-        child: SvgPicture.asset(
-          'assets/icons/comment.svg',
-          width: 20,
-          height: 20,
-          color: Colors.black,
-        ),
+        child: const Icon(Icons.add, size: 32),
       ),
       body: RefreshIndicator(
         onRefresh: () async => await RpcFeed(ref.read).requestFeedMessages(),
@@ -26,20 +21,25 @@ class _FeedTab extends ConsumerWidget {
           itemBuilder: (_, i) {
             final msg = messages[i];
             var theme = Theme.of(context).textTheme;
+            // TODO(brenodt): Prone to exceptions if timeSent is not parsable. Update.
+            var sentAt = describeFuzzyTimestamp(DateTime.parse(msg.timeSent!));
+
             return ListTile(
               leading: UserAvatar.small(),
-              title: Text(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // TODO(brenodt): Once Users module is connected, this should be fetched from it.
+                  Text('Name Surname', style: theme.headline6),
+                  Text(
+                    sentAt,
+                    style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
+                  ),
+                ],
+              ),
+              subtitle: Text(
                 msg.content ?? '',
                 style: theme.bodyText2!.copyWith(fontSize: 16, height: 1.4),
-                textAlign: TextAlign.justify,
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Text(
-                  // TODO(brenodt): Prone to exceptions if timeSent is not parsable. Update.
-                  timeago.format(DateTime.parse(msg.timeSent ?? '')),
-                  style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
-                ),
               ),
             );
           },
