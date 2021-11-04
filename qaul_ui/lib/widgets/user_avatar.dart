@@ -8,12 +8,22 @@ import 'package:qaul_ui/providers/providers.dart';
 import 'package:qaul_ui/providers/user_color_provider.dart';
 import 'package:utils/utils.dart';
 
+/// If [user] is provided, it's used to populate this icon (Background color, initials, connection status).
+///
+/// Otherwise, the user found in [defaultUserProvider] is used.
 abstract class UserAvatar extends ConsumerWidget {
-  const UserAvatar({Key? key}) : super(key: key);
+  const UserAvatar({Key? key, this.user}) : super(key: key);
+  final User? user;
 
-  factory UserAvatar.small({Key? key}) => _SmallUserAvatar(key: key);
+  factory UserAvatar.small({Key? key, User? user}) =>
+      _SmallUserAvatar(key: key, user: user);
 
-  factory UserAvatar.large({Key? key}) => _LargeUserAvatar(key: key);
+  factory UserAvatar.large({Key? key, User? user}) =>
+      _LargeUserAvatar(key: key, user: user);
+
+  String get userInitials => initials(user!.name);
+
+  Color get userColor => colorGenerationStrategy(user!.idBase58);
 
   @protected
   String generateRandomInitials() {
@@ -28,46 +38,68 @@ abstract class UserAvatar extends ConsumerWidget {
 }
 
 class _SmallUserAvatar extends UserAvatar {
-  const _SmallUserAvatar({Key? key}) : super(key: key);
+  const _SmallUserAvatar({Key? key, User? user}) : super(key: key, user: user);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.watch(selectedTabProvider);
-    final color = ref.watch(userColorProvider);
-    final user = ref.watch(defaultUserProvider).state;
+    final defaultUserColor = ref.watch(userColorProvider);
+    final defaultUser = ref.watch(defaultUserProvider).state;
+
+    final badgeColor = mapConnectionStatus(user != null
+        ? user!.status
+        : (defaultUser?.status ?? ConnectionStatus.offline));
 
     return GestureDetector(
       onTap: () => controller.goToTab(TabType.account),
-      // TODO(brenodt): Change badge status depending on user connectivity
       child: Badge(
         elevation: 0.0,
         padding: const EdgeInsets.all(6),
         borderSide: const BorderSide(color: Colors.white, width: 1.5),
         position: BadgePosition.bottomEnd(bottom: 0, end: 0),
-        badgeColor: Colors.greenAccent.shade700,
+        badgeColor: badgeColor,
         child: CircleAvatar(
           child: Text(
-            user != null ? initials(user.name) : generateRandomInitials(),
+            user != null
+                ? userInitials
+                : defaultUser != null
+                    ? initials(defaultUser.name)
+                    : generateRandomInitials(),
             style: Theme.of(context)
                 .textTheme
                 .bodyText2!
                 .copyWith(color: Colors.white, fontWeight: FontWeight.w600),
           ),
-          backgroundColor: color ?? Colors.red.shade100,
+          backgroundColor: user != null
+              ? userColor
+              : defaultUserColor ?? Colors.red.shade100,
         ),
       ),
     );
   }
+
+  Color mapConnectionStatus(ConnectionStatus s) {
+    switch (s) {
+      case ConnectionStatus.online:
+        return Colors.greenAccent.shade700;
+      case ConnectionStatus.reachable:
+        return Colors.yellow.shade800;
+      case ConnectionStatus.offline:
+        return Colors.grey.shade500;
+      default:
+        throw ArgumentError.value(s, 'ConnectionStatus', 'value not mapped');
+    }
+  }
 }
 
 class _LargeUserAvatar extends UserAvatar {
-  const _LargeUserAvatar({Key? key}) : super(key: key);
+  const _LargeUserAvatar({Key? key, User? user}) : super(key: key, user: user);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.watch(selectedTabProvider);
-    final color = ref.watch(userColorProvider);
-    final user = ref.watch(defaultUserProvider).state;
+    final defaultUserColor = ref.watch(userColorProvider);
+    final defaultUser = ref.watch(defaultUserProvider).state;
 
     return GestureDetector(
       onTap: () => controller.goToTab(TabType.account),
@@ -75,13 +107,18 @@ class _LargeUserAvatar extends UserAvatar {
         minRadius: 60.0,
         maxRadius: 80.0,
         child: Text(
-          user != null ? initials(user.name) : generateRandomInitials(),
+          user != null
+              ? userInitials
+              : defaultUser != null
+                  ? initials(defaultUser.name)
+                  : generateRandomInitials(),
           style: Theme.of(context)
               .textTheme
               .headline2!
               .copyWith(color: Colors.white),
         ),
-        backgroundColor: color ?? Colors.red.shade100,
+        backgroundColor:
+            user != null ? userColor : defaultUserColor ?? Colors.red.shade100,
       ),
     );
   }

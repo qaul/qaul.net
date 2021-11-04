@@ -9,8 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:qaul_rpc/src/generated/node/node.pb.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
 import 'package:qaul_rpc/src/rpc/rpc_module.dart';
-import 'package:riverpod/src/framework.dart';
-import 'protobuf.dart';
+import 'package:riverpod/riverpod.dart';
 
 class RpcNode extends RpcModule {
   RpcNode(Reader read) : super(read);
