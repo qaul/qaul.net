@@ -65,14 +65,29 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
     );
   }
 
-  List<Widget> get _tabBarContent {
+  List<Widget> _tabBarContent({bool vertical = false}) {
     return [
       const QaulNavBarItem(TabType.account),
-      const QaulNavBarItem(TabType.feed),
-      const QaulNavBarItem(TabType.users),
-      const QaulNavBarItem(TabType.chat),
-      const QaulNavBarItem(TabType.network),
-      const SizedBox(width: 40, height: 40),
+      Expanded(
+        child: vertical ? Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: const [
+            QaulNavBarItem(TabType.feed),
+            QaulNavBarItem(TabType.users),
+            QaulNavBarItem(TabType.chat),
+            QaulNavBarItem(TabType.network),
+          ],
+        ) : Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: const [
+            QaulNavBarItem(TabType.feed),
+            QaulNavBarItem(TabType.users),
+            QaulNavBarItem(TabType.chat),
+            QaulNavBarItem(TabType.network),
+          ],
+        ),
+      ),
+      // const SizedBox(width: 40, height: 40),
       PopupMenuButton<String>(
         onSelected: _handleClick,
         iconSize: 30,
@@ -101,9 +116,12 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
       heightFactor: 0.12,
       child: _barBackground(
         context,
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: _tabBarContent,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: _tabBarContent(),
+          ),
         ),
       ),
     );
@@ -127,7 +145,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             SizedBox(height: MediaQuery.of(context).viewPadding.top),
-            ..._tabBarContent,
+            ..._tabBarContent(vertical: true),
           ],
         ),
         vertical: true,
@@ -149,7 +167,6 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
           );
           return Container(
             alignment: Alignment.bottomCenter,
-            // padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
               border: Border(
                 bottom: vertical ? BorderSide.none : side,

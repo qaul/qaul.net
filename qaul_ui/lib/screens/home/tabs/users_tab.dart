@@ -95,7 +95,7 @@ class _UserDetailsScreen extends StatelessWidget {
             data: Theme.of(context).copyWith(
               elevatedButtonTheme: ElevatedButtonThemeData(
                 style: ElevatedButton.styleFrom(
-                  fixedSize: const Size(double.maxFinite, 48),
+                  fixedSize: Size(MediaQuery.of(context).size.width * .8, 48),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24.0),
                   ),
