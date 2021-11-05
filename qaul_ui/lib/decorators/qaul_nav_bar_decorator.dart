@@ -69,23 +69,25 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
     return [
       const QaulNavBarItem(TabType.account),
       Expanded(
-        child: vertical ? Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: const [
-            QaulNavBarItem(TabType.feed),
-            QaulNavBarItem(TabType.users),
-            QaulNavBarItem(TabType.chat),
-            QaulNavBarItem(TabType.network),
-          ],
-        ) : Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: const [
-            QaulNavBarItem(TabType.feed),
-            QaulNavBarItem(TabType.users),
-            QaulNavBarItem(TabType.chat),
-            QaulNavBarItem(TabType.network),
-          ],
-        ),
+        child: vertical
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: const [
+                  QaulNavBarItem(TabType.feed),
+                  QaulNavBarItem(TabType.users),
+                  QaulNavBarItem(TabType.chat),
+                  QaulNavBarItem(TabType.network),
+                ],
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: const [
+                  QaulNavBarItem(TabType.feed),
+                  QaulNavBarItem(TabType.users),
+                  QaulNavBarItem(TabType.chat),
+                  QaulNavBarItem(TabType.network),
+                ],
+              ),
       ),
       // const SizedBox(width: 40, height: 40),
       PopupMenuButton<String>(
@@ -213,7 +215,8 @@ class QaulNavBarItem extends HookConsumerWidget {
       case TabType.account:
         return Padding(
           padding: const EdgeInsets.all(8.0),
-          child: UserAvatar.small(),
+          child: GestureDetector(
+              onTap: () => controller.goToTab(tab), child: UserAvatar.small()),
         );
       case TabType.users:
         return _SelectedIndicatorDecorator(
