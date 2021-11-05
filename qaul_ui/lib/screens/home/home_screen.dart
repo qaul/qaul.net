@@ -1,3 +1,4 @@
+import 'package:chat/chat.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:qaul_ui/providers/providers.dart';
 import 'package:qaul_ui/widgets/user_avatar.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
+import 'package:uuid/uuid.dart';
 
 part 'tabs/chat_tab.dart';
 part 'tabs/feed_tab.dart';

@@ -17,8 +17,8 @@ abstract class UserAvatar extends ConsumerWidget {
   factory UserAvatar.tiny({Key? key, User? user}) =>
       _TinyUserAvatar(key: key, user: user);
 
-  factory UserAvatar.small({Key? key, User? user}) =>
-      _SmallUserAvatar(key: key, user: user);
+  factory UserAvatar.small({Key? key, User? user, bool badgeEnabled = true}) =>
+      _SmallUserAvatar(key: key, user: user, badgeEnabled: badgeEnabled);
 
   factory UserAvatar.large({Key? key, User? user}) =>
       _LargeUserAvatar(key: key, user: user);
@@ -78,7 +78,12 @@ class _TinyUserAvatar extends UserAvatar {
 }
 
 class _SmallUserAvatar extends UserAvatar {
-  const _SmallUserAvatar({Key? key, User? user}) : super(key: key, user: user);
+  const _SmallUserAvatar({
+    Key? key,
+    User? user,
+    this.badgeEnabled = true,
+  }) : super(key: key, user: user);
+  final bool badgeEnabled;
 
   @override
   double get radius => 20.0;
@@ -92,6 +97,8 @@ class _SmallUserAvatar extends UserAvatar {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!badgeEnabled) return super.build(context, ref);
+
     final defaultUser = ref.watch(defaultUserProvider).state;
     final badgeColor = mapConnectionStatus(user != null
         ? user!.status

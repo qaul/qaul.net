@@ -47,6 +47,8 @@ dependencies:
   # *******
   intl: ^0.17.0
 
+  uuid: ^3.0.5
+
   hive: ^2.0.4
   hive_flutter: ^1.1.0
 
@@ -56,6 +58,8 @@ dependencies:
   # *******
   # Local Dependencies
   # *******
+  chat:
+    path: packages/chat
   qaul_rpc:
     path: packages/qaul_rpc
   utils:
