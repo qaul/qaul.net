@@ -50,6 +50,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
+  bubble:
+    dependency: "direct main"
+    description:
+      name: bubble
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.1"
   build:
     dependency: transitive
     description:
@@ -120,13 +127,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.1"
-  chat:
-    dependency: "direct main"
-    description:
-      path: "packages/chat"
-      relative: true
-    source: path
-    version: "0.0.1"
   checked_yaml:
     dependency: transitive
     description:
@@ -252,7 +252,7 @@ packages:
     source: hosted
     version: "3.2.0"
   flutter_chat_ui:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_chat_ui
       url: "https://pub.dartlang.org"

@@ -8,7 +8,7 @@ class _ChatTab extends ConsumerWidget {
     final users = ref.watch(usersProvider);
 
     final defaultUser = ref.watch(defaultUserProvider).state ??
-        User(
+        const User(
           name: 'Breno',
           idBase58: '12D3KooWEbzJbVGua4EQNKQVUYoA46vcXnfePfi3ZL7C8pGGqddd',
         );
@@ -48,32 +48,38 @@ class _ChatTab extends ConsumerWidget {
             ),
             onTap: defaultUser == null
                 ? null
-                : () => showChat(
-                      context: context,
-                      messages: [
-                        TextMessage(
-                          idBase58: const Uuid().v4(),
-                          text: 'this is a message by another user',
-                          user: users[i],
-                        ),
-                      ],
-                      user: defaultUser,
-                      otherUserAvatarColor: colorGenerationStrategy(users[i].idBase58),
-                      userAppBarAvatar: Row(
+                : () =>
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return ChatScreen(
+                        initialMessages: [
+                          TextMessage(
+                            idBase58: const Uuid().v4(),
+                            text: 'this is a message by another user',
+                            user: users[i],
+                          ),
+                        ],
+                        user: defaultUser,
+                        otherUserAvatarColor: colorGenerationStrategy(users[i].idBase58),
+                        onSendPressed: (String rawText) {
+                          return TextMessage(
+                            idBase58: const Uuid().v4(),
+                            text: rawText,
+                            user: defaultUser,
+                          );
+                        }, userAppBar: Row(
                         children: [
                           UserAvatar.small(badgeEnabled: false),
                           const SizedBox(width: 12),
                           Text(defaultUser.name),
                         ],
                       ),
-                      onSendPressed: (String rawText) {
-                        return TextMessage(
-                          idBase58: const Uuid().v4(),
-                          text: rawText,
-                          user: defaultUser,
-                        );
-                      },
-                    ),
+                      );
+                    },
+                  ),
+                ),
           );
         },
       ),

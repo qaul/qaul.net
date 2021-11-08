@@ -1,4 +1,3 @@
-import 'package:chat/chat.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +6,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_ui/decorators/qaul_nav_bar_decorator.dart';
 import 'package:qaul_ui/providers/providers.dart';
+import 'package:qaul_ui/screens/chat/chat.dart';
+import 'package:qaul_ui/screens/chat/models/text_message.dart';
 import 'package:qaul_ui/widgets/user_avatar.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';

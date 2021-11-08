@@ -42,6 +42,9 @@ dependencies:
   # Notification bubbles on icons
   badges: ^2.0.1
 
+  bubble: ^1.2.1
+  flutter_chat_ui: ^1.5.1
+
   # *******
   # Business Logic Dependencies
   # *******
@@ -58,8 +61,6 @@ dependencies:
   # *******
   # Local Dependencies
   # *******
-  chat:
-    path: packages/chat
   qaul_rpc:
     path: packages/qaul_rpc
   utils:
