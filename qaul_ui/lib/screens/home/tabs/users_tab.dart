@@ -83,7 +83,8 @@ class _UserDetailsScreen extends StatelessWidget {
               'assets/icons/comment.svg',
               width: 24,
               height: 24,
-              color: Theme.of(context).iconTheme.color,
+              color: Theme.of(context).appBarTheme.iconTheme?.color ??
+                  Theme.of(context).iconTheme.color,
             ),
           ],
         ),

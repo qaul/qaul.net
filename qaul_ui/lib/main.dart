@@ -60,6 +60,17 @@ class QaulApp extends ConsumerWidget {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
         ),
+        appBarTheme: AppBarTheme(
+            color: Colors.transparent,
+            elevation: 0.0,
+            titleTextStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.lightBlue),
+            iconTheme: const IconThemeData(color: Colors.lightBlue),
+            actionsIconTheme: const IconThemeData(color: Colors.lightBlue),
+            shape: BorderDirectional(
+                bottom: BorderSide(color: Colors.grey.shade300))),
       ),
       dark: ThemeData(
         brightness: Brightness.dark,
@@ -67,6 +78,8 @@ class QaulApp extends ConsumerWidget {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.black,
         ),
+        appBarTheme:
+            const AppBarTheme(elevation: 0.0, color: Color(0xff212121)),
       ),
       initial: themeMode ?? AdaptiveThemeMode.light,
       builder: (theme, darkTheme) {
