@@ -60,6 +60,7 @@ class QaulApp extends ConsumerWidget {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
         ),
+        iconTheme: IconThemeData(color: Colors.grey.shade600),
         appBarTheme: AppBarTheme(
             color: Colors.transparent,
             elevation: 0.0,
@@ -75,6 +76,7 @@ class QaulApp extends ConsumerWidget {
       dark: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.lightBlue,
+        iconTheme: IconThemeData(color: Colors.white),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.black,
         ),

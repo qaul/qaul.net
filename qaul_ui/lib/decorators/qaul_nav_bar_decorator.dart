@@ -32,34 +32,20 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<AdaptiveThemeMode>(
-      valueListenable: AdaptiveTheme.of(context).modeChangeNotifier,
-      builder: (_, mode, child) {
-        var isDark = mode == AdaptiveThemeMode.dark;
-
-        return Theme(
-          data: Theme.of(context).copyWith(
-            iconTheme: IconThemeData(
-              color: isDark ? Colors.white : Colors.grey.shade500,
-            ),
-          ),
-          child: OrientationBuilder(
-            builder: (context, orientation) {
-              return Stack(
-                alignment: orientation == Orientation.portrait
-                    ? AlignmentDirectional.topCenter
-                    : AlignmentDirectional.topStart,
-                children: [
-                  orientation == Orientation.portrait
-                      ? _buildHorizontalBody()
-                      : _buildVerticalBody(),
-                  orientation == Orientation.portrait
-                      ? _buildHorizontalBar(context)
-                      : _buildVerticalBar(context),
-                ],
-              );
-            },
-          ),
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        return Stack(
+          alignment: orientation == Orientation.portrait
+              ? AlignmentDirectional.topCenter
+              : AlignmentDirectional.topStart,
+          children: [
+            orientation == Orientation.portrait
+                ? _buildHorizontalBody()
+                : _buildVerticalBody(),
+            orientation == Orientation.portrait
+                ? _buildHorizontalBar(context)
+                : _buildVerticalBar(context),
+          ],
         );
       },
     );
@@ -89,10 +75,9 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
                 ],
               ),
       ),
-      // const SizedBox(width: 40, height: 40),
       PopupMenuButton<String>(
         onSelected: _handleClick,
-        iconSize: 30,
+        iconSize: 36,
         itemBuilder: (BuildContext context) {
           return _overflowMenuOptions.map((String choice) {
             return PopupMenuItem<String>(
@@ -196,7 +181,7 @@ class QaulNavBarItem extends HookConsumerWidget {
   const QaulNavBarItem(this.tab, {Key? key}) : super(key: key);
   final TabType tab;
 
-  final double _iconSize = 24.0;
+  final double _iconSize = 32.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -222,15 +207,18 @@ class QaulNavBarItem extends HookConsumerWidget {
         return _SelectedIndicatorDecorator(
           selected: selected,
           selectedColor: theme.colorScheme.primary,
-          child: IconButton(
-            padding: const EdgeInsets.all(16.0),
-            splashRadius: 0.01,
-            icon: Icon(Icons.group,
-                size: _iconSize,
-                color: selected.value
-                    ? theme.colorScheme.primary
-                    : theme.iconTheme.color),
-            onPressed: () => controller.goToTab(tab),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+              padding: const EdgeInsets.all(0.0),
+              splashRadius: 0.01,
+              icon: Icon(Icons.group,
+                  size: _iconSize,
+                  color: selected.value
+                      ? theme.colorScheme.primary
+                      : theme.iconTheme.color),
+              onPressed: () => controller.goToTab(tab),
+            ),
           ),
         );
       case TabType.feed:
@@ -247,18 +235,21 @@ class QaulNavBarItem extends HookConsumerWidget {
     return _SelectedIndicatorDecorator(
       selected: selected,
       selectedColor: theme.colorScheme.primary,
-      child: IconButton(
-        padding: const EdgeInsets.all(16.0),
-        splashRadius: 0.01,
-        icon: SvgPicture.asset(
-          svgPath,
-          width: _iconSize,
-          height: _iconSize,
-          color: selected.value
-              ? theme.colorScheme.primary
-              : theme.iconTheme.color,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: IconButton(
+          padding: const EdgeInsets.all(8.0),
+          splashRadius: 0.01,
+          icon: SvgPicture.asset(
+            svgPath,
+            width: _iconSize,
+            height: _iconSize,
+            color: selected.value
+                ? theme.colorScheme.primary
+                : theme.iconTheme.color,
+          ),
+          onPressed: () => controller.goToTab(tab),
         ),
-        onPressed: () => controller.goToTab(tab),
       ),
     );
   }
