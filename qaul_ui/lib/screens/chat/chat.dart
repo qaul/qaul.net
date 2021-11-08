@@ -62,7 +62,7 @@ class _ChatScreenState extends State<ChatScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: widget.userAppBar,
-        leadingWidth: 20,
+        titleSpacing: 0,
         actions: [
           IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
         ],
