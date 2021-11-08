@@ -201,7 +201,9 @@ class QaulNavBarItem extends HookConsumerWidget {
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: GestureDetector(
-              onTap: () => controller.goToTab(tab), child: UserAvatar.small()),
+            onTap: () => controller.goToTab(tab),
+            child: UserAvatar.small(badgeEnabled: false),
+          ),
         );
       case TabType.users:
         return _SelectedIndicatorDecorator(

@@ -43,7 +43,7 @@ abstract class UserAvatar extends ConsumerWidget {
             ? userInitials
             : defaultUser != null
                 ? initials(defaultUser.name)
-                : generateRandomInitials(),
+                : 'WW',
         style: initialsStyle,
       ),
       backgroundColor:
@@ -71,9 +71,9 @@ class _TinyUserAvatar extends UserAvatar {
 
   @override
   TextStyle get initialsStyle => const TextStyle(
-        fontSize: 10,
+        fontSize: 12,
         color: Colors.white,
-        fontWeight: FontWeight.w300,
+        fontWeight: FontWeight.w500,
       );
 }
 
@@ -90,16 +90,16 @@ class _SmallUserAvatar extends UserAvatar {
 
   @override
   TextStyle get initialsStyle => const TextStyle(
-        fontSize: 14,
+        fontSize: 16,
         color: Colors.white,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w700,
       );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!badgeEnabled) return super.build(context, ref);
-
     final defaultUser = ref.watch(defaultUserProvider).state;
+    if (!badgeEnabled || userIsOffline(defaultUser)) return super.build(context, ref);
+
     final badgeColor = mapConnectionStatus(user != null
         ? user!.status
         : (defaultUser?.status ?? ConnectionStatus.offline));
@@ -115,14 +115,19 @@ class _SmallUserAvatar extends UserAvatar {
     );
   }
 
+  bool userIsOffline(User? defaultUser) {
+    if (defaultUser == null) {
+      return user == null || user!.status == ConnectionStatus.offline;
+    }
+    return defaultUser.status == ConnectionStatus.offline;
+  }
+
   Color mapConnectionStatus(ConnectionStatus s) {
     switch (s) {
       case ConnectionStatus.online:
         return Colors.greenAccent.shade700;
       case ConnectionStatus.reachable:
-        return Colors.yellow.shade800;
-      case ConnectionStatus.offline:
-        return Colors.grey.shade500;
+        return Colors.yellow.shade600;
       default:
         throw ArgumentError.value(s, 'ConnectionStatus', 'value not mapped');
     }
@@ -137,8 +142,8 @@ class _LargeUserAvatar extends UserAvatar {
 
   @override
   TextStyle get initialsStyle => const TextStyle(
-        fontSize: 48,
+        fontSize: 68,
         color: Colors.white,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w700,
       );
 }
