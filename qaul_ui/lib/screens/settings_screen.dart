@@ -25,16 +25,15 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding:
+              MediaQuery.of(context).viewPadding.copyWith(left: 20, right: 20),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(height: MediaQuery.of(context).size.height * .2),
-              const LanguageSelectDropDown(),
-              const SizedBox(height: 20),
-              const _ThemeSelectDropDown(),
-              const SizedBox(height: 120),
-              const _InternetNodesTable(),
+            children: const [
+              LanguageSelectDropDown(),
+              SizedBox(height: 20),
+              _ThemeSelectDropDown(),
+              SizedBox(height: 80),
+              _InternetNodesTable(),
             ],
           ),
         ),

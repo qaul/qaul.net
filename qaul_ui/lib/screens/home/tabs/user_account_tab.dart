@@ -7,9 +7,10 @@ class _UserAccountTab extends StatelessWidget {
   Widget build(BuildContext context) {
     var theme = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: MediaQuery.of(context)
+          .viewPadding
+          .add(const EdgeInsets.fromLTRB(16, 8, 16, 8)),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(

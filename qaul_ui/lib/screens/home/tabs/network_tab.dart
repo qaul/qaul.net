@@ -10,10 +10,7 @@ class _NetworkTab extends StatelessWidget {
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 16.0,
-            vertical: MediaQuery.of(context).size.height * .12,
-          ),
+          padding: MediaQuery.of(context).viewPadding,
           child: Column(
             children: const [
               _AvailableConnectionsTable(type: _ConnectionType.bluetooth),
