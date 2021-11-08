@@ -37,58 +37,64 @@ class _AvailableConnectionsTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final icon = _mapIconFromType(type);
 
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 32),
-            const SizedBox(width: 8),
-            Text('${_buildCapitalizedEnumName()} Connections',
-                style: Theme.of(context).textTheme.headline4),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Table(
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          columnWidths: const {
-            0: FlexColumnWidth(.1),
-            1: FlexColumnWidth(.22),
-            2: FlexColumnWidth(.22),
-            3: FlexColumnWidth(.22),
-          },
-          children: [
-            const TableRow(
-              children: [
-                TableCell(child: SizedBox(height: 24)),
-                TableCell(child: Text('Ping')),
-                TableCell(child: Text('Hop Count')),
-                TableCell(child: Text('Via')),
-              ],
-            ),
-            TableRow(children: [
-              TableCell(
-                  child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: UserAvatar.tiny(),
-              )),
-              const TableCell(child: Text('103 ms')),
-              const TableCell(child: Text('3')),
-              const TableCell(child: Text('Node ID')),
-            ]),
-            TableRow(children: [
-              TableCell(
-                  child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: UserAvatar.tiny(),
-              )),
-              const TableCell(child: Text('512 ms')),
-              const TableCell(child: Text('2')),
-              const TableCell(child: Text('Node ID')),
-            ]),
-          ],
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 32),
+              const SizedBox(width: 8),
+              Text('${_buildCapitalizedEnumName()} Connections',
+                  style: Theme.of(context).textTheme.headline5),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            columnWidths: const {
+              0: FlexColumnWidth(.1),
+              1: FlexColumnWidth(.22),
+              2: FlexColumnWidth(.22),
+              3: FlexColumnWidth(.22),
+            },
+            children: [
+              const TableRow(
+                children: [
+                  TableCell(child: SizedBox(height: 24)),
+                  TableCell(child: Text('Ping')),
+                  TableCell(child: Text('Hop Count')),
+                  TableCell(child: Text('Via')),
+                ],
+              ),
+              TableRow(children: [
+                TableCell(
+                  child: Container(
+                    alignment: AlignmentDirectional.centerStart,
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: UserAvatar.tiny(),
+                  ),
+                ),
+                const TableCell(child: Text('103 ms')),
+                const TableCell(child: Text('3')),
+                const TableCell(child: Text('Node ID')),
+              ]),
+              TableRow(children: [
+                TableCell(
+                  child: Container(
+                    alignment: AlignmentDirectional.centerStart,
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: UserAvatar.tiny(),
+                  ),
+                ),
+                const TableCell(child: Text('512 ms')),
+                const TableCell(child: Text('2')),
+                const TableCell(child: Text('Node ID')),
+              ]),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
