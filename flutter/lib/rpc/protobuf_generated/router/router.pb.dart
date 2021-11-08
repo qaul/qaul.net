@@ -14,35 +14,63 @@ import 'router.pbenum.dart';
 export 'router.pbenum.dart';
 
 enum Router_Message {
-  userRequest, 
-  userList, 
+  routingTableRequest, 
+  routingTable, 
+  connectionsRequest, 
+  connectionsList, 
+  neighboursRequest, 
+  neighboursList, 
   notSet
 }
 
 class Router extends $pb.GeneratedMessage {
   static const $core.Map<$core.int, Router_Message> _Router_MessageByTag = {
-    1 : Router_Message.userRequest,
-    2 : Router_Message.userList,
+    1 : Router_Message.routingTableRequest,
+    2 : Router_Message.routingTable,
+    3 : Router_Message.connectionsRequest,
+    4 : Router_Message.connectionsList,
+    5 : Router_Message.neighboursRequest,
+    6 : Router_Message.neighboursList,
     0 : Router_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Router', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
-    ..oo(0, [1, 2])
-    ..aOM<UserRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userRequest', subBuilder: UserRequest.create)
-    ..aOM<UserList>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userList', subBuilder: UserList.create)
+    ..oo(0, [1, 2, 3, 4, 5, 6])
+    ..aOM<RoutingTableRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'routingTableRequest', subBuilder: RoutingTableRequest.create)
+    ..aOM<RoutingTableList>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'routingTable', subBuilder: RoutingTableList.create)
+    ..aOM<ConnectionsRequest>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionsRequest', subBuilder: ConnectionsRequest.create)
+    ..aOM<ConnectionsList>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionsList', subBuilder: ConnectionsList.create)
+    ..aOM<NeighboursRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'neighboursRequest', subBuilder: NeighboursRequest.create)
+    ..aOM<NeighboursList>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'neighboursList', subBuilder: NeighboursList.create)
     ..hasRequiredFields = false
   ;
 
   Router._() : super();
   factory Router({
-    UserRequest? userRequest,
-    UserList? userList,
+    RoutingTableRequest? routingTableRequest,
+    RoutingTableList? routingTable,
+    ConnectionsRequest? connectionsRequest,
+    ConnectionsList? connectionsList,
+    NeighboursRequest? neighboursRequest,
+    NeighboursList? neighboursList,
   }) {
     final _result = create();
-    if (userRequest != null) {
-      _result.userRequest = userRequest;
+    if (routingTableRequest != null) {
+      _result.routingTableRequest = routingTableRequest;
     }
-    if (userList != null) {
-      _result.userList = userList;
+    if (routingTable != null) {
+      _result.routingTable = routingTable;
+    }
+    if (connectionsRequest != null) {
+      _result.connectionsRequest = connectionsRequest;
+    }
+    if (connectionsList != null) {
+      _result.connectionsList = connectionsList;
+    }
+    if (neighboursRequest != null) {
+      _result.neighboursRequest = neighboursRequest;
+    }
+    if (neighboursList != null) {
+      _result.neighboursList = neighboursList;
     }
     return _result;
   }
@@ -71,226 +99,632 @@ class Router extends $pb.GeneratedMessage {
   void clearMessage() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
-  UserRequest get userRequest => $_getN(0);
+  RoutingTableRequest get routingTableRequest => $_getN(0);
   @$pb.TagNumber(1)
-  set userRequest(UserRequest v) { setField(1, v); }
+  set routingTableRequest(RoutingTableRequest v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasUserRequest() => $_has(0);
+  $core.bool hasRoutingTableRequest() => $_has(0);
   @$pb.TagNumber(1)
-  void clearUserRequest() => clearField(1);
+  void clearRoutingTableRequest() => clearField(1);
   @$pb.TagNumber(1)
-  UserRequest ensureUserRequest() => $_ensure(0);
+  RoutingTableRequest ensureRoutingTableRequest() => $_ensure(0);
 
   @$pb.TagNumber(2)
-  UserList get userList => $_getN(1);
+  RoutingTableList get routingTable => $_getN(1);
   @$pb.TagNumber(2)
-  set userList(UserList v) { setField(2, v); }
+  set routingTable(RoutingTableList v) { setField(2, v); }
   @$pb.TagNumber(2)
-  $core.bool hasUserList() => $_has(1);
+  $core.bool hasRoutingTable() => $_has(1);
   @$pb.TagNumber(2)
-  void clearUserList() => clearField(2);
+  void clearRoutingTable() => clearField(2);
   @$pb.TagNumber(2)
-  UserList ensureUserList() => $_ensure(1);
+  RoutingTableList ensureRoutingTable() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  ConnectionsRequest get connectionsRequest => $_getN(2);
+  @$pb.TagNumber(3)
+  set connectionsRequest(ConnectionsRequest v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasConnectionsRequest() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearConnectionsRequest() => clearField(3);
+  @$pb.TagNumber(3)
+  ConnectionsRequest ensureConnectionsRequest() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  ConnectionsList get connectionsList => $_getN(3);
+  @$pb.TagNumber(4)
+  set connectionsList(ConnectionsList v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasConnectionsList() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearConnectionsList() => clearField(4);
+  @$pb.TagNumber(4)
+  ConnectionsList ensureConnectionsList() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  NeighboursRequest get neighboursRequest => $_getN(4);
+  @$pb.TagNumber(5)
+  set neighboursRequest(NeighboursRequest v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasNeighboursRequest() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearNeighboursRequest() => clearField(5);
+  @$pb.TagNumber(5)
+  NeighboursRequest ensureNeighboursRequest() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  NeighboursList get neighboursList => $_getN(5);
+  @$pb.TagNumber(6)
+  set neighboursList(NeighboursList v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasNeighboursList() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearNeighboursList() => clearField(6);
+  @$pb.TagNumber(6)
+  NeighboursList ensureNeighboursList() => $_ensure(5);
 }
 
-class UserRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+class RoutingTableRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RoutingTableRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  UserRequest._() : super();
-  factory UserRequest() => create();
-  factory UserRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory UserRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  RoutingTableRequest._() : super();
+  factory RoutingTableRequest() => create();
+  factory RoutingTableRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RoutingTableRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  UserRequest clone() => UserRequest()..mergeFromMessage(this);
+  RoutingTableRequest clone() => RoutingTableRequest()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  UserRequest copyWith(void Function(UserRequest) updates) => super.copyWith((message) => updates(message as UserRequest)) as UserRequest; // ignore: deprecated_member_use
+  RoutingTableRequest copyWith(void Function(RoutingTableRequest) updates) => super.copyWith((message) => updates(message as RoutingTableRequest)) as RoutingTableRequest; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static UserRequest create() => UserRequest._();
-  UserRequest createEmptyInstance() => create();
-  static $pb.PbList<UserRequest> createRepeated() => $pb.PbList<UserRequest>();
+  static RoutingTableRequest create() => RoutingTableRequest._();
+  RoutingTableRequest createEmptyInstance() => create();
+  static $pb.PbList<RoutingTableRequest> createRepeated() => $pb.PbList<RoutingTableRequest>();
   @$core.pragma('dart2js:noInline')
-  static UserRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UserRequest>(create);
-  static UserRequest? _defaultInstance;
+  static RoutingTableRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RoutingTableRequest>(create);
+  static RoutingTableRequest? _defaultInstance;
 }
 
-class UserList extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
-    ..pc<UserEntry>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'user', $pb.PbFieldType.PM, subBuilder: UserEntry.create)
+class RoutingTableList extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RoutingTableList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..pc<RoutingTableEntry>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'routingTable', $pb.PbFieldType.PM, subBuilder: RoutingTableEntry.create)
     ..hasRequiredFields = false
   ;
 
-  UserList._() : super();
-  factory UserList({
-    $core.Iterable<UserEntry>? user,
+  RoutingTableList._() : super();
+  factory RoutingTableList({
+    $core.Iterable<RoutingTableEntry>? routingTable,
   }) {
     final _result = create();
-    if (user != null) {
-      _result.user.addAll(user);
+    if (routingTable != null) {
+      _result.routingTable.addAll(routingTable);
     }
     return _result;
   }
-  factory UserList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory UserList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory RoutingTableList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RoutingTableList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  UserList clone() => UserList()..mergeFromMessage(this);
+  RoutingTableList clone() => RoutingTableList()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  UserList copyWith(void Function(UserList) updates) => super.copyWith((message) => updates(message as UserList)) as UserList; // ignore: deprecated_member_use
+  RoutingTableList copyWith(void Function(RoutingTableList) updates) => super.copyWith((message) => updates(message as RoutingTableList)) as RoutingTableList; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static UserList create() => UserList._();
-  UserList createEmptyInstance() => create();
-  static $pb.PbList<UserList> createRepeated() => $pb.PbList<UserList>();
+  static RoutingTableList create() => RoutingTableList._();
+  RoutingTableList createEmptyInstance() => create();
+  static $pb.PbList<RoutingTableList> createRepeated() => $pb.PbList<RoutingTableList>();
   @$core.pragma('dart2js:noInline')
-  static UserList getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UserList>(create);
-  static UserList? _defaultInstance;
+  static RoutingTableList getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RoutingTableList>(create);
+  static RoutingTableList? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<UserEntry> get user => $_getList(0);
+  $core.List<RoutingTableEntry> get routingTable => $_getList(0);
 }
 
-class UserEntry extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OY)
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'idBase58')
-    ..a<$core.List<$core.int>>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'key', $pb.PbFieldType.OY)
-    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'keyType')
-    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'keyBase58')
-    ..e<Connectivity>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectivity', $pb.PbFieldType.OE, defaultOrMaker: Connectivity.Online, valueOf: Connectivity.valueOf, enumValues: Connectivity.values)
+class RoutingTableEntry extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RoutingTableEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId', $pb.PbFieldType.OY)
+    ..pc<RoutingTableConnection>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connections', $pb.PbFieldType.PM, subBuilder: RoutingTableConnection.create)
     ..hasRequiredFields = false
   ;
 
-  UserEntry._() : super();
-  factory UserEntry({
-    $core.String? name,
-    $core.List<$core.int>? id,
-    $core.String? idBase58,
-    $core.List<$core.int>? key,
-    $core.String? keyType,
-    $core.String? keyBase58,
-    Connectivity? connectivity,
+  RoutingTableEntry._() : super();
+  factory RoutingTableEntry({
+    $core.List<$core.int>? userId,
+    $core.Iterable<RoutingTableConnection>? connections,
   }) {
     final _result = create();
-    if (name != null) {
-      _result.name = name;
+    if (userId != null) {
+      _result.userId = userId;
     }
-    if (id != null) {
-      _result.id = id;
-    }
-    if (idBase58 != null) {
-      _result.idBase58 = idBase58;
-    }
-    if (key != null) {
-      _result.key = key;
-    }
-    if (keyType != null) {
-      _result.keyType = keyType;
-    }
-    if (keyBase58 != null) {
-      _result.keyBase58 = keyBase58;
-    }
-    if (connectivity != null) {
-      _result.connectivity = connectivity;
+    if (connections != null) {
+      _result.connections.addAll(connections);
     }
     return _result;
   }
-  factory UserEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory UserEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory RoutingTableEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RoutingTableEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  UserEntry clone() => UserEntry()..mergeFromMessage(this);
+  RoutingTableEntry clone() => RoutingTableEntry()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  UserEntry copyWith(void Function(UserEntry) updates) => super.copyWith((message) => updates(message as UserEntry)) as UserEntry; // ignore: deprecated_member_use
+  RoutingTableEntry copyWith(void Function(RoutingTableEntry) updates) => super.copyWith((message) => updates(message as RoutingTableEntry)) as RoutingTableEntry; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static UserEntry create() => UserEntry._();
-  UserEntry createEmptyInstance() => create();
-  static $pb.PbList<UserEntry> createRepeated() => $pb.PbList<UserEntry>();
+  static RoutingTableEntry create() => RoutingTableEntry._();
+  RoutingTableEntry createEmptyInstance() => create();
+  static $pb.PbList<RoutingTableEntry> createRepeated() => $pb.PbList<RoutingTableEntry>();
   @$core.pragma('dart2js:noInline')
-  static UserEntry getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UserEntry>(create);
-  static UserEntry? _defaultInstance;
+  static RoutingTableEntry getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RoutingTableEntry>(create);
+  static RoutingTableEntry? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get name => $_getSZ(0);
+  $core.List<$core.int> get userId => $_getN(0);
   @$pb.TagNumber(1)
-  set name($core.String v) { $_setString(0, v); }
+  set userId($core.List<$core.int> v) { $_setBytes(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasName() => $_has(0);
+  $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearName() => clearField(1);
+  void clearUserId() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.List<$core.int> get id => $_getN(1);
+  $core.List<RoutingTableConnection> get connections => $_getList(1);
+}
+
+class RoutingTableConnection extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RoutingTableConnection', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..e<ConnectionModule>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'module', $pb.PbFieldType.OE, defaultOrMaker: ConnectionModule.NONE, valueOf: ConnectionModule.valueOf, enumValues: ConnectionModule.values)
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtt', $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'via', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
+  RoutingTableConnection._() : super();
+  factory RoutingTableConnection({
+    ConnectionModule? module,
+    $core.int? rtt,
+    $core.List<$core.int>? via,
+  }) {
+    final _result = create();
+    if (module != null) {
+      _result.module = module;
+    }
+    if (rtt != null) {
+      _result.rtt = rtt;
+    }
+    if (via != null) {
+      _result.via = via;
+    }
+    return _result;
+  }
+  factory RoutingTableConnection.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RoutingTableConnection.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RoutingTableConnection clone() => RoutingTableConnection()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RoutingTableConnection copyWith(void Function(RoutingTableConnection) updates) => super.copyWith((message) => updates(message as RoutingTableConnection)) as RoutingTableConnection; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RoutingTableConnection create() => RoutingTableConnection._();
+  RoutingTableConnection createEmptyInstance() => create();
+  static $pb.PbList<RoutingTableConnection> createRepeated() => $pb.PbList<RoutingTableConnection>();
+  @$core.pragma('dart2js:noInline')
+  static RoutingTableConnection getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RoutingTableConnection>(create);
+  static RoutingTableConnection? _defaultInstance;
+
   @$pb.TagNumber(2)
-  set id($core.List<$core.int> v) { $_setBytes(1, v); }
+  ConnectionModule get module => $_getN(0);
   @$pb.TagNumber(2)
-  $core.bool hasId() => $_has(1);
+  set module(ConnectionModule v) { setField(2, v); }
   @$pb.TagNumber(2)
-  void clearId() => clearField(2);
+  $core.bool hasModule() => $_has(0);
+  @$pb.TagNumber(2)
+  void clearModule() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get rtt => $_getIZ(1);
+  @$pb.TagNumber(3)
+  set rtt($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRtt() => $_has(1);
+  @$pb.TagNumber(3)
+  void clearRtt() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.String get idBase58 => $_getSZ(2);
+  $core.List<$core.int> get via => $_getN(2);
   @$pb.TagNumber(4)
-  set idBase58($core.String v) { $_setString(2, v); }
+  set via($core.List<$core.int> v) { $_setBytes(2, v); }
   @$pb.TagNumber(4)
-  $core.bool hasIdBase58() => $_has(2);
+  $core.bool hasVia() => $_has(2);
   @$pb.TagNumber(4)
-  void clearIdBase58() => clearField(4);
+  void clearVia() => clearField(4);
+}
 
-  @$pb.TagNumber(5)
-  $core.List<$core.int> get key => $_getN(3);
-  @$pb.TagNumber(5)
-  set key($core.List<$core.int> v) { $_setBytes(3, v); }
-  @$pb.TagNumber(5)
-  $core.bool hasKey() => $_has(3);
-  @$pb.TagNumber(5)
-  void clearKey() => clearField(5);
+class ConnectionsRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectionsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
 
-  @$pb.TagNumber(6)
-  $core.String get keyType => $_getSZ(4);
-  @$pb.TagNumber(6)
-  set keyType($core.String v) { $_setString(4, v); }
-  @$pb.TagNumber(6)
-  $core.bool hasKeyType() => $_has(4);
-  @$pb.TagNumber(6)
-  void clearKeyType() => clearField(6);
+  ConnectionsRequest._() : super();
+  factory ConnectionsRequest() => create();
+  factory ConnectionsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ConnectionsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ConnectionsRequest clone() => ConnectionsRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ConnectionsRequest copyWith(void Function(ConnectionsRequest) updates) => super.copyWith((message) => updates(message as ConnectionsRequest)) as ConnectionsRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ConnectionsRequest create() => ConnectionsRequest._();
+  ConnectionsRequest createEmptyInstance() => create();
+  static $pb.PbList<ConnectionsRequest> createRepeated() => $pb.PbList<ConnectionsRequest>();
+  @$core.pragma('dart2js:noInline')
+  static ConnectionsRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConnectionsRequest>(create);
+  static ConnectionsRequest? _defaultInstance;
+}
 
-  @$pb.TagNumber(7)
-  $core.String get keyBase58 => $_getSZ(5);
-  @$pb.TagNumber(7)
-  set keyBase58($core.String v) { $_setString(5, v); }
-  @$pb.TagNumber(7)
-  $core.bool hasKeyBase58() => $_has(5);
-  @$pb.TagNumber(7)
-  void clearKeyBase58() => clearField(7);
+class ConnectionsList extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectionsList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..pc<ConnectionsUserEntry>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lan', $pb.PbFieldType.PM, subBuilder: ConnectionsUserEntry.create)
+    ..pc<ConnectionsUserEntry>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internet', $pb.PbFieldType.PM, subBuilder: ConnectionsUserEntry.create)
+    ..pc<ConnectionsUserEntry>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ble', $pb.PbFieldType.PM, subBuilder: ConnectionsUserEntry.create)
+    ..pc<ConnectionsUserEntry>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'local', $pb.PbFieldType.PM, subBuilder: ConnectionsUserEntry.create)
+    ..hasRequiredFields = false
+  ;
 
-  @$pb.TagNumber(8)
-  Connectivity get connectivity => $_getN(6);
-  @$pb.TagNumber(8)
-  set connectivity(Connectivity v) { setField(8, v); }
-  @$pb.TagNumber(8)
-  $core.bool hasConnectivity() => $_has(6);
-  @$pb.TagNumber(8)
-  void clearConnectivity() => clearField(8);
+  ConnectionsList._() : super();
+  factory ConnectionsList({
+    $core.Iterable<ConnectionsUserEntry>? lan,
+    $core.Iterable<ConnectionsUserEntry>? internet,
+    $core.Iterable<ConnectionsUserEntry>? ble,
+    $core.Iterable<ConnectionsUserEntry>? local,
+  }) {
+    final _result = create();
+    if (lan != null) {
+      _result.lan.addAll(lan);
+    }
+    if (internet != null) {
+      _result.internet.addAll(internet);
+    }
+    if (ble != null) {
+      _result.ble.addAll(ble);
+    }
+    if (local != null) {
+      _result.local.addAll(local);
+    }
+    return _result;
+  }
+  factory ConnectionsList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ConnectionsList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ConnectionsList clone() => ConnectionsList()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ConnectionsList copyWith(void Function(ConnectionsList) updates) => super.copyWith((message) => updates(message as ConnectionsList)) as ConnectionsList; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ConnectionsList create() => ConnectionsList._();
+  ConnectionsList createEmptyInstance() => create();
+  static $pb.PbList<ConnectionsList> createRepeated() => $pb.PbList<ConnectionsList>();
+  @$core.pragma('dart2js:noInline')
+  static ConnectionsList getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConnectionsList>(create);
+  static ConnectionsList? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<ConnectionsUserEntry> get lan => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.List<ConnectionsUserEntry> get internet => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $core.List<ConnectionsUserEntry> get ble => $_getList(2);
+
+  @$pb.TagNumber(4)
+  $core.List<ConnectionsUserEntry> get local => $_getList(3);
+}
+
+class ConnectionsUserEntry extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectionsUserEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId', $pb.PbFieldType.OY)
+    ..pc<ConnectionEntry>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connections', $pb.PbFieldType.PM, subBuilder: ConnectionEntry.create)
+    ..hasRequiredFields = false
+  ;
+
+  ConnectionsUserEntry._() : super();
+  factory ConnectionsUserEntry({
+    $core.List<$core.int>? userId,
+    $core.Iterable<ConnectionEntry>? connections,
+  }) {
+    final _result = create();
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    if (connections != null) {
+      _result.connections.addAll(connections);
+    }
+    return _result;
+  }
+  factory ConnectionsUserEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ConnectionsUserEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ConnectionsUserEntry clone() => ConnectionsUserEntry()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ConnectionsUserEntry copyWith(void Function(ConnectionsUserEntry) updates) => super.copyWith((message) => updates(message as ConnectionsUserEntry)) as ConnectionsUserEntry; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ConnectionsUserEntry create() => ConnectionsUserEntry._();
+  ConnectionsUserEntry createEmptyInstance() => create();
+  static $pb.PbList<ConnectionsUserEntry> createRepeated() => $pb.PbList<ConnectionsUserEntry>();
+  @$core.pragma('dart2js:noInline')
+  static ConnectionsUserEntry getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConnectionsUserEntry>(create);
+  static ConnectionsUserEntry? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get userId => $_getN(0);
+  @$pb.TagNumber(1)
+  set userId($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUserId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUserId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<ConnectionEntry> get connections => $_getList(1);
+}
+
+class ConnectionEntry extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectionEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtt', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hopCount', $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'via', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
+  ConnectionEntry._() : super();
+  factory ConnectionEntry({
+    $core.int? rtt,
+    $core.int? hopCount,
+    $core.List<$core.int>? via,
+  }) {
+    final _result = create();
+    if (rtt != null) {
+      _result.rtt = rtt;
+    }
+    if (hopCount != null) {
+      _result.hopCount = hopCount;
+    }
+    if (via != null) {
+      _result.via = via;
+    }
+    return _result;
+  }
+  factory ConnectionEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ConnectionEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ConnectionEntry clone() => ConnectionEntry()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ConnectionEntry copyWith(void Function(ConnectionEntry) updates) => super.copyWith((message) => updates(message as ConnectionEntry)) as ConnectionEntry; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ConnectionEntry create() => ConnectionEntry._();
+  ConnectionEntry createEmptyInstance() => create();
+  static $pb.PbList<ConnectionEntry> createRepeated() => $pb.PbList<ConnectionEntry>();
+  @$core.pragma('dart2js:noInline')
+  static ConnectionEntry getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConnectionEntry>(create);
+  static ConnectionEntry? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get rtt => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set rtt($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasRtt() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearRtt() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get hopCount => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set hopCount($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasHopCount() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearHopCount() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.List<$core.int> get via => $_getN(2);
+  @$pb.TagNumber(3)
+  set via($core.List<$core.int> v) { $_setBytes(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasVia() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearVia() => clearField(3);
+}
+
+class NeighboursRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'NeighboursRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  NeighboursRequest._() : super();
+  factory NeighboursRequest() => create();
+  factory NeighboursRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory NeighboursRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  NeighboursRequest clone() => NeighboursRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  NeighboursRequest copyWith(void Function(NeighboursRequest) updates) => super.copyWith((message) => updates(message as NeighboursRequest)) as NeighboursRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static NeighboursRequest create() => NeighboursRequest._();
+  NeighboursRequest createEmptyInstance() => create();
+  static $pb.PbList<NeighboursRequest> createRepeated() => $pb.PbList<NeighboursRequest>();
+  @$core.pragma('dart2js:noInline')
+  static NeighboursRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<NeighboursRequest>(create);
+  static NeighboursRequest? _defaultInstance;
+}
+
+class NeighboursList extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'NeighboursList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..pc<NeighboursEntry>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lan', $pb.PbFieldType.PM, subBuilder: NeighboursEntry.create)
+    ..pc<NeighboursEntry>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internet', $pb.PbFieldType.PM, subBuilder: NeighboursEntry.create)
+    ..hasRequiredFields = false
+  ;
+
+  NeighboursList._() : super();
+  factory NeighboursList({
+    $core.Iterable<NeighboursEntry>? lan,
+    $core.Iterable<NeighboursEntry>? internet,
+  }) {
+    final _result = create();
+    if (lan != null) {
+      _result.lan.addAll(lan);
+    }
+    if (internet != null) {
+      _result.internet.addAll(internet);
+    }
+    return _result;
+  }
+  factory NeighboursList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory NeighboursList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  NeighboursList clone() => NeighboursList()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  NeighboursList copyWith(void Function(NeighboursList) updates) => super.copyWith((message) => updates(message as NeighboursList)) as NeighboursList; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static NeighboursList create() => NeighboursList._();
+  NeighboursList createEmptyInstance() => create();
+  static $pb.PbList<NeighboursList> createRepeated() => $pb.PbList<NeighboursList>();
+  @$core.pragma('dart2js:noInline')
+  static NeighboursList getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<NeighboursList>(create);
+  static NeighboursList? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<NeighboursEntry> get lan => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.List<NeighboursEntry> get internet => $_getList(1);
+}
+
+class NeighboursEntry extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'NeighboursEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'nodeId', $pb.PbFieldType.OY)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtt', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
+
+  NeighboursEntry._() : super();
+  factory NeighboursEntry({
+    $core.List<$core.int>? nodeId,
+    $core.int? rtt,
+  }) {
+    final _result = create();
+    if (nodeId != null) {
+      _result.nodeId = nodeId;
+    }
+    if (rtt != null) {
+      _result.rtt = rtt;
+    }
+    return _result;
+  }
+  factory NeighboursEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory NeighboursEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  NeighboursEntry clone() => NeighboursEntry()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  NeighboursEntry copyWith(void Function(NeighboursEntry) updates) => super.copyWith((message) => updates(message as NeighboursEntry)) as NeighboursEntry; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static NeighboursEntry create() => NeighboursEntry._();
+  NeighboursEntry createEmptyInstance() => create();
+  static $pb.PbList<NeighboursEntry> createRepeated() => $pb.PbList<NeighboursEntry>();
+  @$core.pragma('dart2js:noInline')
+  static NeighboursEntry getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<NeighboursEntry>(create);
+  static NeighboursEntry? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get nodeId => $_getN(0);
+  @$pb.TagNumber(1)
+  set nodeId($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasNodeId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearNodeId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get rtt => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set rtt($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRtt() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRtt() => clearField(2);
 }
 

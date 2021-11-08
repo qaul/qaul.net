@@ -1,9 +1,13 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! Table of all direct neighbour nodes
 //! 
 //! There is a table per connection module.
 
 use libp2p::PeerId;
 use state::Storage;
+use prost::Message;
 use std::{
     collections::HashMap,
     sync::RwLock,
@@ -12,6 +16,8 @@ use std::{
 
 use crate::connections::ConnectionModule;
 use super::info::RouterInfo;
+use super::proto;
+use crate::rpc::Rpc;
 
 /// mutable state of Neighbours table per ConnectionModule
 static INTERNET: Storage<RwLock<Neighbours>> = Storage::new();
@@ -49,6 +55,7 @@ impl Neighbours {
         match module {
             ConnectionModule::Lan => neighbours = LAN.get().write().unwrap(),
             ConnectionModule::Internet => neighbours = INTERNET.get().write().unwrap(),
+            ConnectionModule::Ble => return,
             ConnectionModule::Local => return,
             ConnectionModule::None => return,
         }
@@ -75,6 +82,7 @@ impl Neighbours {
         match module {
             ConnectionModule::Lan => neighbours = LAN.get().write().unwrap(),
             ConnectionModule::Internet => neighbours = INTERNET.get().write().unwrap(),
+            ConnectionModule::Ble => return,
             ConnectionModule::Local => return,
             ConnectionModule::None => return,
         }
@@ -98,6 +106,7 @@ impl Neighbours {
         match module {
             ConnectionModule::Lan => neighbours = LAN.get().read().unwrap(),
             ConnectionModule::Internet => neighbours = INTERNET.get().read().unwrap(),
+            ConnectionModule::Ble => return None,
             ConnectionModule::Local => return Some(0),
             ConnectionModule::None => return None,
         }
@@ -129,6 +138,56 @@ impl Neighbours {
         }
 
         ConnectionModule::None
+    }
+
+    /// send protobuf RPC neighbours list
+    pub fn rpc_send_neighbours_list() {
+        // create lists per module
+        let mut lan_neighbours: Vec<proto::NeighboursEntry> = Vec::new();
+        let mut internet_neighbours: Vec<proto::NeighboursEntry> = Vec::new();
+
+        // fill lan connection module neighbours
+        {
+            println!("LAN neighbours:");
+            let lan = LAN.get().read().unwrap();
+
+            for (id, value) in &lan.nodes {
+                lan_neighbours.push(proto::NeighboursEntry {
+                    node_id: id.to_bytes(),
+                    rtt: value.rtt,
+                });
+            }
+        }
+        
+        // fill internet connection module neighbours
+        {
+            println!("Internet neighbours:");
+            let internet = INTERNET.get().write().unwrap();
+
+            for (id, value) in &internet.nodes {
+                internet_neighbours.push(proto::NeighboursEntry {
+                    node_id: id.to_bytes(),
+                    rtt: value.rtt,
+                });
+            }
+        }
+
+        // create neighbours list message
+        let proto_message = proto::Router {
+            message: Some(proto::router::Message::NeighboursList(
+                proto::NeighboursList {
+                    lan: lan_neighbours,
+                    internet: internet_neighbours,
+                }
+            )),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(buf, crate::rpc::proto::Modules::Router.into(), "".to_string(), Vec::new() );
     }
 
     /// neighbours CLI commands

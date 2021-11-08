@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! # Global Routing Table
 //! 
 //! This file contains the global routing table
@@ -9,11 +12,14 @@
 
 use libp2p::PeerId;
 use state::Storage;
+use prost::Message;
 use std::sync::RwLock;
 use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
 
 use crate::connections::ConnectionModule;
+use super::proto;
+use crate::rpc::Rpc;
 
 /// mutable state of table
 static ROUTINGTABLE: Storage<RwLock<RoutingTable>> = Storage::new();
@@ -106,6 +112,64 @@ impl RoutingTable {
         RoutingInfoTable(table)
     }
 
+    /// send protobuf RPC neighbours list
+    pub fn rpc_send_routing_table() {
+        // create list
+        let mut table_list: Vec<proto::RoutingTableEntry> = Vec::new();
+
+        // get routing table state
+        let routing_table = ROUTINGTABLE.get().read().unwrap();
+
+        // loop through all user table entries
+        for (id, entry) in &routing_table.table {
+            let mut table_entry = proto::RoutingTableEntry {
+                user_id: id.to_bytes(),
+                connections: Vec::new(),
+            };
+
+            // loop through all connection entries in a user entry
+            for connection in &entry.connections {
+                // check module
+                let module: i32;
+                match connection.module {
+                    ConnectionModule::Lan => module = proto::ConnectionModule::Lan as i32,
+                    ConnectionModule::Internet => module = proto::ConnectionModule::Internet as i32,
+                    ConnectionModule::Ble => module = proto::ConnectionModule::Ble as i32,
+                    ConnectionModule::Local => module = proto::ConnectionModule::Local as i32,
+                    _ => module = proto::ConnectionModule::None as i32,
+                }
+
+                // create entry
+                table_entry.connections.push(
+                    proto::RoutingTableConnection {
+                        module,
+                        rtt: connection.rtt,
+                        via: connection.node.to_bytes(),
+                    }
+                );
+            }
+
+            // add user entry to table list
+            table_list.push(table_entry);
+        }
+
+        // create table list message
+        let proto_message = proto::Router {
+            message: Some(proto::router::Message::RoutingTable(
+                proto::RoutingTableList {
+                    routing_table: table_list,
+                }
+            )),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(buf, crate::rpc::proto::Modules::Router.into(), "".to_string(), Vec::new());
+    }
+    
     /// Routing table's CLI commands
     /// 
     /// you get here with the commands:
@@ -138,9 +202,7 @@ impl RoutingTable {
 }
 
 
-/**
- * Serializable routing structures to send over the network
- */
+/// Serializable routing structures to send over the network
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct RoutingInfoEntry {
     /// user id

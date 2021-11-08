@@ -27,11 +27,20 @@ pub extern "C" fn hello() -> *mut c_char {
 /// of this API.
 #[no_mangle]
 pub extern "C" fn start() {
-    #[cfg(target_os = "android")]
-    super::start_android();
-
-    #[cfg(not(target_os = "android"))]
     super::start("".to_string());
+}
+
+/// start libqaul on desktop operating systems 
+/// 
+/// This function supports the following systems: 
+/// linux, macOS, windows
+/// 
+/// libqaul will create and find the common paths 
+/// to the data storage location. Therefore no path has 
+/// to be provided.
+#[no_mangle]
+pub extern "C" fn start_desktop() {
+    super::start_desktop();
 }
 
 /// check if libqaul finished initializing

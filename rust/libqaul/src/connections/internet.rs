@@ -25,6 +25,7 @@ use libp2p::{
     ping::{Ping, PingConfig, PingEvent},
     tcp::TcpConfig,
     mplex, yamux,
+    Multiaddr,
     identify::{Identify, IdentifyConfig, IdentifyEvent},
     Transport,
     floodsub::{Floodsub, FloodsubEvent},
@@ -171,26 +172,26 @@ impl Internet {
         internet
     }
 
-    /**
-     * connect to remote peers that are specified in 
-     * the configuration config.internet.peers
-     */
+    /// connect to remote peers that are specified in 
+    /// the configuration config.internet.peers
     pub fn peer_connect( config: &Configuration, swarm: &mut Swarm<QaulInternetBehaviour> ) {
-        for addr in &config.internet.peers {
-            let tried = addr.clone();
-            match addr.parse() {
-                Ok(addr) => match swarm.dial_addr(addr) {
-                    Ok(_) => info!("peer {:?} dialed", tried),
-                    Err(error) => info!("peer {} swarm dial error: {:?}", tried, error),
-                },
-                Err(error) => info!("peer address {} parse error: {:?}", tried, error),
+        for addr_str in &config.internet.peers {
+            match addr_str.clone().parse() {
+                Ok(addresse) => Self::peer_dial(addresse, swarm),
+                Err(error) => info!("peer address {} parse error: {:?}", addr_str, error),
             }
         }
     }
 
-    /**
-     * Print information about this connection
-     */
+    /// dial a remote peer
+    pub fn peer_dial( addresse: Multiaddr, swarm: &mut Swarm<QaulInternetBehaviour> ) {
+        match swarm.dial_addr(addresse.clone()) {
+            Ok(_) => info!("peer {:?} dialed", addresse),
+            Err(error) => info!("peer {} swarm dial error: {:?}", addresse, error),
+        }
+    }
+
+    /// Print information about this connection
     pub fn info(&self) {
         println!("# Internet Connection Module");
         // number of peers connected

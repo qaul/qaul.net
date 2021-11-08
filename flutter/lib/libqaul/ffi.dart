@@ -22,6 +22,12 @@ import '/rpc/protobuf.dart';
 typedef StartFunctionRust = Void Function();
 typedef StartFunctionDart = void Function();
 
+// start libqaul function on a desktop OS
+// C function definition:
+//   void start_desktop();
+typedef StartDesktopFunctionRust = Void Function();
+typedef StartDesktopFunctionDart = void Function();
+
 // Check if libqaul finished initializing
 // C function definition:
 //   i32 initialization_finished();
@@ -88,9 +94,9 @@ class LibqaulFfi {
       // find the library in the rust target build folder
       // TODO: target Raspberry
       _lib = DynamicLibrary.open('../rust/target/$mode/liblibqaul.so');
-    }  else if (Platform.isMacOS) {
+    } else if (Platform.isMacOS) {
       // find the library in the rust target build folder
-      _lib = DynamicLibrary.open('../rust/target/$mode/liblibqaul.dylib');
+      _lib = DynamicLibrary.open('liblibqaul.dylib');
     } else if (Platform.isWindows) {
       // find the library in the rust target build folder
       _lib = DynamicLibrary.open('libqaul.dll');
@@ -114,7 +120,17 @@ class LibqaulFfi {
 
   /// start and initialize libqaul
   start() {
-    final _start = _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
+    var _start;
+    // check what system we are initializing
+    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+      print("flutter start_desktop libqaul");
+      // start libqaul with finding paths to save the configuration files
+      _start = _lib!.lookupFunction<StartDesktopFunctionRust, StartDesktopFunctionDart>('start_desktop');
+    } else {
+      print("flutter start libqaul");
+      // start libqaul without path to storage location
+      _start = _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
+    }
     _start();
   }
 

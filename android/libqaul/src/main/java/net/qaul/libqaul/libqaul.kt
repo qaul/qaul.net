@@ -6,7 +6,7 @@ external fun hello(): String
 
 /// start libqaul
 /// this also intializes the logging
-external fun start()
+external fun start(path: String)
 
 /// check if libqaul has finished initializing
 external fun initialized(): Boolean

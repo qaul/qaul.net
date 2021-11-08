@@ -8,13 +8,14 @@
 //! 
 //! This setup is to decouple the GUI thread from 
 //! libqaul. 
-//! The communication will happen via protbuf rpc messages.
+//! The communication will happen via protobuf rpc messages.
 
 use crossbeam_channel::TryRecvError;
 use futures::executor::block_on;
 use std::{
     thread,
 };
+use directories::ProjectDirs;
 
 use crate::rpc::Rpc;
 
@@ -39,14 +40,54 @@ pub fn start(storage_path: String) {
     ));    
 }
 
+/// start libqaul on a desktop platform (Linux, Mac, Windows)
+/// 
+/// It will automatically define the path to the common OS specific
+/// configuration and data location.
+/// 
+/// The locations are:
+/// 
+/// * Linux: /home/USERNAME/.config/qaul
+/// * MacOS: /Users/USERNAME/Library/Application Support/net.qaul.qaul
+///   * in flutter app: /Users/USERNAME/Library/Containers/net.qaul.qaulApp/Application Support/net.qaul.qaul
+/// * Windows: C:\Users\USERNAME\AppData\Roaming\qaul\qaul\config
+pub fn start_desktop() {
+    log::info!("start_desktop");
+    // create path
+    if let Some(proj_dirs) = ProjectDirs::from("net", "qaul", "qaul") {
+        // get path
+        let path = proj_dirs.config_dir();
+
+        log::info!("configuration path: {:?}", path);
+
+        // check if path already exists
+        if !path.exists() {
+            log::info!("create path");
+
+            // create path if it does not exist
+            std::fs::create_dir_all(path).unwrap();
+        }
+
+        log::info!("start libqaul");
+
+        // start the library with the path
+        start(path.to_str().unwrap().to_string());
+    } else {
+        log::error!("Configuration path couldn't be created.");
+    }
+}
+
 /// start libqaul for android
 /// here for debugging and testing
-pub fn start_android() {
+/// 
+/// Hand over the path on the file system
+/// where the app is allowed to store data.
+pub fn start_android(storage_path: String) {
     // Spawn new thread
     thread::spawn(move|| block_on(
         async move {
             // start libqaul
-            crate::start_android().await;
+            crate::start_android(storage_path).await;
         }
     ));
 }
@@ -63,7 +104,6 @@ pub fn initialization_finished() -> bool {
     
     false
 }
-
 
 /// send an RPC message to libqaul
 pub fn send_rpc(binary_message: Vec<u8>) {

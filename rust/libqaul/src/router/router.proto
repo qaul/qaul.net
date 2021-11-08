@@ -5,41 +5,111 @@ package qaul.rpc.router;
 // router rpc message container
 message Router {
     oneof message {
-        UserRequest user_request = 1;
-        UserList user_list = 2;
+        RoutingTableRequest routing_table_request = 1;
+        RoutingTableList routing_table = 2;
+        ConnectionsRequest connections_request = 3;
+        ConnectionsList connections_list = 4;
+        NeighboursRequest neighbours_request = 5;
+        NeighboursList neighbours_list = 6;
     }
 }
 
-// UI request for some users
-message UserRequest {
+// Connection modules
+enum ConnectionModule {
+    NONE = 0;
+    LAN = 1;
+    INTERNET = 2;
+    BLE = 3;
+    LOCAL = 4;
+}
+
+
+// UI request for routing table list
+message RoutingTableRequest {
 
 }
 
-// user list
-message UserList {
-    repeated UserEntry user = 1;
+// Routing table list
+// This table presents the best view for each user.
+// It represents the decision the router takes
+// when sending and routing packages
+message RoutingTableList {
+    repeated RoutingTableEntry routing_table = 1;
 }
 
-// user entry
-message UserEntry {
-    string name = 1;
-    bytes id = 2;
-    string id_base58 = 4;
-    bytes key = 5; // protobuf encoded public key
-    string key_type = 6;
-    string key_base58 = 7;
-    Connectivity connectivity = 8;
+// Routing table user entry
+// This message contains the best connection to this
+// user per module
+message RoutingTableEntry {
+    bytes user_id = 1;
+    repeated RoutingTableConnection connections = 2;
 }
 
-// how is the user connected
-enum Connectivity {
-    // The user is actively connected to the node
-    // and reachable for synchronous communication.
-    Online = 0;
-    // The node which hosts the user account is online 
-    // but the user is not actively connected to it.
-    // Messages can sent and will reach the node.
-    Reachable = 1;
-    // The user is currently not reachable.
-    Offline = 2;
+// Routing table connection entry.
+// This message contains a connection to a specific user.
+message RoutingTableConnection {
+    // the connection module (LAN, Internet, BLE, etc.)
+    ConnectionModule module = 2;
+    // the round trip time for this connection
+    uint32 rtt = 3;
+    // node id via which this connection is routed
+    bytes via = 4;
+}
+
+
+// UI request for connections list
+message ConnectionsRequest {
+
+}
+
+// Connections list per module.
+// All connections per user per module.
+message ConnectionsList {
+    // users connected via the LAN module
+    repeated ConnectionsUserEntry lan = 1;
+    // users connected via the Internet module
+    repeated ConnectionsUserEntry internet = 2;
+    // users connected via the BLE module
+    repeated ConnectionsUserEntry ble = 3;
+    // users connected locally (on the same node)
+    repeated ConnectionsUserEntry local = 4;
+}
+
+// connections entry for a user
+message ConnectionsUserEntry {
+    // the id of the user
+    bytes user_id = 1;
+    // all connections to this user via this module
+    repeated ConnectionEntry connections = 2;
+}
+
+// all connections of this user
+message ConnectionEntry {
+    // round trip time in milli seconds
+    uint32 rtt = 1;
+    // hop count to the user.
+    // This represents the number of nodes between this node and the user.
+    uint32 hop_count = 2;
+    // connection can be established via the node with the following id
+    bytes via = 3;
+}
+
+
+// UI request for neighbours list
+message NeighboursRequest {
+
+}
+
+// neighbours list per module
+message NeighboursList {
+    repeated NeighboursEntry lan = 1;
+    repeated NeighboursEntry internet = 2;
+}
+
+// neighbours entry
+message NeighboursEntry {
+    // the ID of the neighbour node
+    bytes node_id = 1;
+    // rtt to this neighbour
+    uint32 rtt = 2;
 }

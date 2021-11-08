@@ -29,7 +29,7 @@ tracing = "0.1.26"
 void = "1.0"
 wasm-timer = "0.2"
 rand = "0.8"
-prost = "0.8"
+prost = "0.9"
 libc = "0.2"
 crossbeam-channel = "0.5"
 bs58 = "0.4"
@@ -37,11 +37,14 @@ futures-ticker = "0.0.1"
 jni = "0.19"
 serde_yaml = "0.8"
 
+# only for desktop platforms: Linux, Mac, Windows
+directories = "4.0"
+
 # internal references
-qaul_info = { path = "src/libp2p_modules/qaul_info" }
+qaul_info = { path = "../libp2p_modules/qaul_info" }
 
 [build-dependencies]
-prost-build = "0.8"
+prost-build = "0.9"
 
 
 # special setting for android

@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! # Process RPC Messages
 //! 
 //! The RPC messages are defined in the protobuf format.
@@ -13,7 +16,9 @@ use crate::connections::{
     lan::Lan,
     internet::Internet,
 };
+use crate::connections::Connections;
 use crate::router::Router;
+use crate::router::users::Users;
 use crate::node::Node;
 use crate::node::user_accounts::UserAccounts;
 use crate::feed::Feed;
@@ -140,6 +145,10 @@ impl Rpc {
                         log::info!("Message Modules::Useraccounts received");
                         UserAccounts::rpc(message.data);
                     },
+                    Some(Modules::Users) => {
+                        log::info!("Message Modules::Users received");
+                        Users::rpc(message.data);
+                    },
                     Some(Modules::Router) => {
                         log::info!("Message Modules::Router received");
                         Router::rpc(message.data);
@@ -147,6 +156,10 @@ impl Rpc {
                     Some(Modules::Feed) => {
                         log::info!("Message Modules::Feed received");
                         Feed::rpc(message.data, message.user_id, lan, internet);
+                    },
+                    Some(Modules::Connections) => {
+                        log::info!("Message Modules::Connections received");
+                        Connections::rpc(message.data, internet);
                     },
                     Some(Modules::None) => {
                         log::error!("Message Modules::None received");

@@ -1,0 +1,70 @@
+syntax = "proto3";
+package qaul.rpc.connections;
+
+
+// Connections rpc message container
+message Connections {
+    oneof message {
+        // Request a list of all internet nodes.
+        // libqaul returns an internet_nodes_list message.
+        InternetNodesRequest internet_nodes_request = 1;
+        // returns a list of all internet nodes and 
+        // an information about why this message has been sent.
+        InternetNodesList internet_nodes_list = 2;
+        // Add a new internet node address.
+        // libqaul returns an internet_nodes_list message.
+        InternetNodesEntry internet_nodes_add = 3;
+        // Remove an internet node address.
+        // libqaul returns an internet_nodes_list message.
+        InternetNodesEntry internet_nodes_remove = 4;
+    }
+}
+
+// UI request for Internet nodes list
+message InternetNodesRequest {
+
+}
+
+// Internet Nodes List
+//
+// This is a list of all peer nodes the internet
+// connections module tries to connect to.
+//
+// This message is returned after a request, or when
+// adding or removing a node address.
+message InternetNodesList {
+    // Information about why this message is sent
+    // and the result of the request, adding or removing
+    // of nodes.
+    Info info = 1;
+    // list of all node multiaddresses that
+    // the internet module will try to connect to.
+    repeated InternetNodesEntry nodes = 2;
+}
+
+// Information about the system actions that led to 
+// the creation of this message.
+enum Info {
+    // Internet Nodes Request
+    // By default, this message is sent due to an
+    // internet nodes request message.
+    REQUEST = 0;
+    // Add Internet Node 
+    // Successfully added an address
+    ADD_SUCCESS = 1;
+    // Error: not a valid multiaddress
+    ADD_ERROR_INVALID = 2;
+    // Remove Internet Node
+    // Successfully removed the address
+    REMOVE_SUCCESS = 5;
+    // Error: Address not found
+    REMOVE_ERROR_NOT_FOUND = 6;
+}
+
+// Internet Nodes Entry
+//
+// Contains a node address as a libp2p multiaddress.
+// e.g. "/ip4/144.91.74.192/tcp/9229"
+message InternetNodesEntry {
+    string address = 1;
+}

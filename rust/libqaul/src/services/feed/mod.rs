@@ -1,3 +1,12 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! # Qaul Feed Service
+//! 
+//! The feed service sends and receives feed messages into the network.
+//! Feed messages are not encrypted and for everybody to read.
+//! They should reach everyone in the network.
+
 use libp2p::{
     identity::{Keypair, PublicKey},
     PeerId,
@@ -17,7 +26,6 @@ use crate::node::{
     user_accounts::{UserAccount, UserAccounts},
 }; 
 use crate::connections::{
-    Connections, 
     ConnectionModule,
     lan::Lan,
     internet::Internet,
@@ -114,7 +122,7 @@ impl Feed {
         let container = FeedMessageSendContainer { id: signature , message: msg_send };
 
         // create message json
-        // TODO: couldn't it be sent directly as bytes?
+        // TODO: create protobuf package
         let json = serde_json::to_string(&container).expect("can jsonify request");
         
         // save message in feed store

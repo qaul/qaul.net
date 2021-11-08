@@ -148,6 +148,40 @@ object UserEntryKt {
     fun clearConnectivity() {
       _builder.clearConnectivity()
     }
+
+    /**
+     * <code>bool verified = 9;</code>
+     */
+    var verified: kotlin.Boolean
+      @JvmName("getVerified")
+      get() = _builder.getVerified()
+      @JvmName("setVerified")
+      set(value) {
+        _builder.setVerified(value)
+      }
+    /**
+     * <code>bool verified = 9;</code>
+     */
+    fun clearVerified() {
+      _builder.clearVerified()
+    }
+
+    /**
+     * <code>bool blocked = 10;</code>
+     */
+    var blocked: kotlin.Boolean
+      @JvmName("getBlocked")
+      get() = _builder.getBlocked()
+      @JvmName("setBlocked")
+      set(value) {
+        _builder.setBlocked(value)
+      }
+    /**
+     * <code>bool blocked = 10;</code>
+     */
+    fun clearBlocked() {
+      _builder.clearBlocked()
+    }
   }
 }
 @kotlin.jvm.JvmSynthetic

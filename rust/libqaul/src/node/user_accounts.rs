@@ -165,6 +165,8 @@ impl UserAccounts {
                 id: user.id,
                 key: user.keys.public(),
                 name: user.name.clone(),
+                verified: false,
+                blocked: false,
             });
         }
 

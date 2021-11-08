@@ -27,12 +27,7 @@ impl Storage {
         // put path to state
         STORAGE_PATH.set(path);
 
-        // initialize configuration for Android
-        #[cfg(target_os = "android")]
-        Configuration::init_android();
-    
-        // initialize configuration for all other systems
-        #[cfg(not(target_os = "android"))]
+        // initialize configuration
         Configuration::init();
     } 
 
