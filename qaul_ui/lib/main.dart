@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -93,6 +95,7 @@ class QaulApp extends ConsumerWidget {
             darkTheme: darkTheme,
             initialRoute: NavigationHelper.initial,
             onGenerateRoute: NavigationHelper.onGenerateRoute,
+            scrollBehavior: TouchAndMouseScrollBehavior(),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             localeResolutionCallback: (locale, supportedLocales) {
@@ -125,6 +128,16 @@ class QaulApp extends ConsumerWidget {
       },
     );
   }
+}
+
+class TouchAndMouseScrollBehavior extends MaterialScrollBehavior {
+  // Override behavior methods and getters like dragDevices
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    // etc.
+  };
 }
 
 class Init {
