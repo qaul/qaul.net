@@ -30,14 +30,14 @@ class RpcUserAccounts extends RpcModule {
         debugPrint('RpcUserAccounts default acc exists? $exists');
 
         if (exists) {
-          final user = User(
-            name: info.myUserAccount.name,
-            idBase58: info.myUserAccount.idBase58,
-          );
-          reader(defaultUserProvider).state = user;
+          _updateUserWithMyUserAccount(info.myUserAccount);
         } else {
           reader(defaultUserProvider).state = null;
         }
+        break;
+      case UserAccounts_Message.myUserAccount:
+        final acc = message.ensureMyUserAccount();
+        _updateUserWithMyUserAccount(acc);
         break;
       default:
         throw UnhandledRpcMessageException.value(
@@ -47,12 +47,20 @@ class RpcUserAccounts extends RpcModule {
     }
   }
 
-  Future<void> getDefaultUserAccount() async {
-    // create message
-    UserAccounts message = UserAccounts();
-    message.getDefaultUserAccount = true;
+  void _updateUserWithMyUserAccount(MyUserAccount account) {
+    final user = User(
+      name: account.name,
+      idBase58: account.idBase58,
+      id: account.id,
+      key: account.key,
+      keyType: account.keyType,
+      keyBase58: account.keyBase58,
+    );
+    reader(defaultUserProvider).state = user;
+  }
 
-    // send message
+  Future<void> getDefaultUserAccount() async {
+    UserAccounts message = UserAccounts(getDefaultUserAccount: true);
     await encodeAndSendMessage(message);
   }
 

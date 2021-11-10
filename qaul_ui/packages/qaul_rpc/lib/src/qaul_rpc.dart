@@ -23,7 +23,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'libqaul/channel.dart';
 import 'libqaul/ffi.dart';
 
-
 /// libqaul dart class,
 /// loading dynamic libqaul library
 /// and accessing libqaul's C API ffi through dart

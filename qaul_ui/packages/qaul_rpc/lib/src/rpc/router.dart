@@ -1,3 +1,4 @@
+import 'package:fast_base58/fast_base58.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/router/router.pb.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
@@ -18,18 +19,18 @@ class RpcRouter extends RpcModule {
 
     // send message to the appropriate module
     switch (message.whichMessage()) {
-      case Router_Message.userList:
-        final users = message.ensureUserList().user;
+      case Router_Message.connectionsList:
+        final users = <ConnectionsUserEntry>[];
+        users.addAll(message.ensureConnectionsList().ble);
+        users.addAll(message.ensureConnectionsList().internet);
+        users.addAll(message.ensureConnectionsList().local);
+        users.addAll(message.ensureConnectionsList().lan);
         for (final u in users) {
           read(usersProvider).add(
             User(
-              name: u.name,
-              idBase58: u.idBase58,
-              id: u.id,
-              key: u.key,
-              keyBase58: u.keyBase58,
-              keyType: u.keyType,
-              status: _mapConnectionStatusFrom(u.connectivity),
+              name: 'Name Undefined',
+              idBase58: Base58Encode(u.userId),
+              id: u.userId,
             ),
           );
         }
@@ -44,15 +45,8 @@ class RpcRouter extends RpcModule {
   }
 
   Future<void> requestUsers() async {
-    final msg = Router(userRequest: UserRequest());
+    final msg = Router(connectionsRequest: ConnectionsRequest());
     await encodeAndSendMessage(msg);
-  }
-
-  ConnectionStatus _mapConnectionStatusFrom(Connectivity c) {
-    if (c == Connectivity.Online) return ConnectionStatus.online;
-    if (c == Connectivity.Offline) return ConnectionStatus.offline;
-    if (c == Connectivity.Reachable) return ConnectionStatus.reachable;
-    throw 'Unhandled value of Connectivity: $c';
   }
 }
 

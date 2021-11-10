@@ -28,23 +28,22 @@ class Rpc {
     switch (message.module) {
       case Modules.NODE:
         debugPrint('NODE message received');
-        RpcNode rpcNode = RpcNode(reader);
-        rpcNode.decodeReceivedMessage(message.data);
+        RpcNode(reader).decodeReceivedMessage(message.data);
         break;
       case Modules.USERACCOUNTS:
         debugPrint('USERACCOUNTS message received');
-        RpcUserAccounts rpcNode = RpcUserAccounts(reader);
-        rpcNode.decodeReceivedMessage(message.data);
+        RpcUserAccounts(reader).decodeReceivedMessage(message.data);
         break;
       case Modules.FEED:
         debugPrint('FEED message received');
+        RpcFeed(reader).decodeReceivedMessage(message.data);
         break;
       case Modules.ROUTER:
         debugPrint('ROUTER message received');
+        RpcRouter(reader).decodeReceivedMessage(message.data);
         break;
       default:
-        debugPrint('UNHANDLED protobuf message received');
-        break;
+        throw('UNHANDLED protobuf message received: $message from MODULE: ${message.module}');
     }
   }
 

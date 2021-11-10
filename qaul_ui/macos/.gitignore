@@ -1,3 +1,6 @@
+# dylib built by rust
+liblibqaul.dylib
+
 # Flutter-related
 **/Flutter/ephemeral/
 **/Pods/

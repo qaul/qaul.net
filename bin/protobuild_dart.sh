@@ -7,4 +7,4 @@ protoc --dart_out=../qaul_ui/packages/qaul_rpc/lib/src/generated \
     node/node.proto \
     node/user_accounts.proto \
     router/router.proto \
-    services/feed/feed.proto \
+    services/feed/feed.proto
