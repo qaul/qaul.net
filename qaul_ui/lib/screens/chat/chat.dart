@@ -1,12 +1,16 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart'
-    show Chat, DefaultChatTheme, SendButtonVisibilityMode;
+    show AttachmentButton, Chat, DefaultChatTheme, SendButtonVisibilityMode;
 import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'models/text_message.dart';
+
+part 'custom_input.dart';
 
 typedef OnSendPressed = TextMessage Function(String rawText);
 
@@ -57,7 +61,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          tooltip: 'Back',
+          tooltip: AppLocalizations.of(context)!.backButtonTooltip,
           icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => Navigator.pop(context),
         ),
@@ -69,38 +73,22 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: SafeArea(
         bottom: false,
-        child: ValueListenableBuilder<AdaptiveThemeMode>(
-          valueListenable: AdaptiveTheme.of(context).modeChangeNotifier,
-          builder: (_, mode, child) {
-            var isDark = mode == AdaptiveThemeMode.dark;
-
-            return Chat(
-              showUserNames: true,
-              showUserAvatars: true,
-              user: widget.user.toInternalUser(),
-              messages: _messages,
-              onSendPressed: _handleSendPressed,
-              sendButtonVisibilityMode: SendButtonVisibilityMode.always,
-              bubbleBuilder: _bubbleBuilder,
-              theme: DefaultChatTheme(
-                sendButtonIcon: const Icon(Icons.send, size: 28),
-                userAvatarNameColors: [widget.otherUserAvatarColor],
-                inputBackgroundColor:
-                    isDark ? Colors.white24 : const Color(0xfffafafa),
-                inputTextColor: Colors.black,
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                inputTextStyle:
-                    TextStyle(color: isDark ? Colors.white : Colors.black),
-                inputTextDecoration: InputDecoration(
-                  labelText: 'Your message...',
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-            );
-          },
+        child: Chat(
+          showUserNames: true,
+          showUserAvatars: true,
+          user: widget.user.toInternalUser(),
+          messages: _messages,
+          onSendPressed: _handleSendPressed,
+          sendButtonVisibilityMode: SendButtonVisibilityMode.always,
+          bubbleBuilder: _bubbleBuilder,
+          customBottomWidget: _CustomInput(
+            sendButtonVisibilityMode: SendButtonVisibilityMode.always,
+            onSendPressed: _handleSendPressed,
+          ),
+          theme: DefaultChatTheme(
+            userAvatarNameColors: [widget.otherUserAvatarColor],
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          ),
         ),
       ),
     );

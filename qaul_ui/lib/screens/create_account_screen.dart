@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/helpers/navigation_helper.dart';
 import 'package:qaul_ui/widgets/language_select_dropdown.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CreateAccountScreen extends HookConsumerWidget {
   CreateAccountScreen({Key? key}) : super(key: key);
@@ -55,12 +56,14 @@ class CreateAccountScreen extends HookConsumerWidget {
               context: context,
               builder: (c) {
                 return AlertDialog(
-                  title: const Text('Timeout'),
-                  content: const Text('An error occurred'),
+                  title:
+                      Text(AppLocalizations.of(context)!.timeoutErrorMessage),
+                  content:
+                      Text(AppLocalizations.of(context)!.genericErrorMessage),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('OK'),
+                      child: Text(AppLocalizations.of(context)!.okDialogButton),
                     ),
                   ],
                 );
@@ -86,7 +89,7 @@ class CreateAccountScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 24.0),
                   Text(
-                    'Choose a\nuser name',
+                    AppLocalizations.of(context)!.createAccountHeading,
                     style: Theme.of(context).textTheme.headline4,
                     textAlign: TextAlign.center,
                   ),
@@ -94,7 +97,7 @@ class CreateAccountScreen extends HookConsumerWidget {
                   TextFormField(
                     key: _fieldKey,
                     controller: nameCtrl,
-                    validator: _validateUserName,
+                    validator: (s) => _validateUserName(context, s),
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                     ),
@@ -140,8 +143,10 @@ class CreateAccountScreen extends HookConsumerWidget {
         ));
   }
 
-  String? _validateUserName(String? value) {
-    if (value == null || value.isEmpty) return 'Field required.';
+  String? _validateUserName(BuildContext context, String? value) {
+    if (value == null || value.isEmpty) {
+      return AppLocalizations.of(context)!.fieldRequiredErrorMessage;
+    }
     return null;
   }
 }

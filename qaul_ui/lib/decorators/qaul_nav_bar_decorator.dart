@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_ui/helpers/navigation_helper.dart';
 import 'package:qaul_ui/providers/providers.dart';
 import 'package:qaul_ui/widgets/user_avatar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class QaulNavBarDecorator extends StatefulWidget {
   const QaulNavBarDecorator({Key? key, required this.child}) : super(key: key);
@@ -17,14 +18,17 @@ class QaulNavBarDecorator extends StatefulWidget {
 }
 
 class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
-  static final _overflowMenuOptions = {'Settings', 'About'};
+  Map<String, String> get _overflowMenuOptions => {
+        'settings': AppLocalizations.of(context)!.settings,
+        'about': AppLocalizations.of(context)!.about,
+      };
 
   void _handleClick(String value) {
     switch (value) {
-      case 'Settings':
+      case 'settings':
         Navigator.pushNamed(context, NavigationHelper.settings);
         break;
-      case 'About':
+      case 'about':
         Navigator.pushNamed(context, NavigationHelper.about);
         break;
     }
@@ -79,10 +83,10 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
         onSelected: _handleClick,
         iconSize: 36,
         itemBuilder: (BuildContext context) {
-          return _overflowMenuOptions.map((String choice) {
+          return _overflowMenuOptions.keys.map((String key) {
             return PopupMenuItem<String>(
-              value: choice,
-              child: Text(choice),
+              value: key,
+              child: Text(_overflowMenuOptions[key]!),
             );
           }).toList();
         },
@@ -194,15 +198,20 @@ class QaulNavBarItem extends HookConsumerWidget {
     });
 
     var theme = Theme.of(context);
+    final l18ns = AppLocalizations.of(context);
 
     String svgPath;
+    String tooltip;
     switch (tab) {
       case TabType.account:
         return Padding(
           padding: const EdgeInsets.all(8.0),
-          child: GestureDetector(
-            onTap: () => controller.goToTab(tab),
-            child: UserAvatar.small(badgeEnabled: false),
+          child: Tooltip(
+            message: l18ns!.userAccountNavButtonTooltip,
+            child: InkWell(
+              onTap: () => controller.goToTab(tab),
+              child: UserAvatar.small(badgeEnabled: false),
+            ),
           ),
         );
       case TabType.users:
@@ -214,6 +223,7 @@ class QaulNavBarItem extends HookConsumerWidget {
             child: IconButton(
               padding: const EdgeInsets.all(0.0),
               splashRadius: 0.01,
+              tooltip: l18ns!.usersNavButtonTooltip,
               icon: Icon(Icons.group,
                   size: _iconSize,
                   color: selected.value
@@ -225,12 +235,15 @@ class QaulNavBarItem extends HookConsumerWidget {
         );
       case TabType.feed:
         svgPath = 'assets/icons/hashtag.svg';
+        tooltip = l18ns!.feedNavButtonTooltip;
         break;
       case TabType.chat:
         svgPath = 'assets/icons/comments.svg';
+        tooltip = l18ns!.chatNavButtonTooltip;
         break;
       case TabType.network:
         svgPath = 'assets/icons/network.svg';
+        tooltip = l18ns!.netNavButtonTooltip;
         break;
     }
 
@@ -240,8 +253,9 @@ class QaulNavBarItem extends HookConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: IconButton(
-          padding: const EdgeInsets.all(8.0),
+          tooltip: tooltip,
           splashRadius: 0.01,
+          padding: const EdgeInsets.all(8.0),
           icon: SvgPicture.asset(
             svgPath,
             width: _iconSize,

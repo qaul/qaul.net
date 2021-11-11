@@ -8,8 +8,10 @@ class _FeedTab extends HookConsumerWidget {
     final messages = ref.watch(feedMessagesProvider);
     useMemoized(() => refreshFeed(ref));
 
+    final l18ns = AppLocalizations.of(context);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        tooltip: l18ns!.createFeedPostTooltip,
         onPressed: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const _CreateFeedMessage())),
         child: const Icon(Icons.add, size: 32),
@@ -84,7 +86,7 @@ class _EmptyFeed extends StatelessWidget {
         final isDark = value == AdaptiveThemeMode.dark;
         return IgnorePointer(
           child: Text(
-            'No feed messages yet',
+            AppLocalizations.of(context)!.emptyFeedList,
             style: theme.bodyText1!
                 .copyWith(color: isDark ? Colors.white30 : Colors.black38),
           ),
@@ -101,6 +103,7 @@ class _CreateFeedMessage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useTextEditingController();
 
+    final l18ns = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
@@ -111,6 +114,7 @@ class _CreateFeedMessage extends HookConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: l18ns!.submitPostTooltip,
         child: const Icon(Icons.check, size: 32.0),
         onPressed: () async {
           await RpcFeed(ref.read).sendFeedMessage(controller.text);

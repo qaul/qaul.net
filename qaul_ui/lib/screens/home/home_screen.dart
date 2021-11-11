@@ -13,6 +13,7 @@ import 'package:qaul_ui/widgets/user_avatar.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 part 'tabs/chat_tab.dart';
 part 'tabs/feed_tab.dart';

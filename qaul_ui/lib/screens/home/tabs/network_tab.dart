@@ -37,6 +37,7 @@ class _AvailableConnectionsTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final icon = _mapIconFromType(type);
 
+    final l18ns = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -45,7 +46,7 @@ class _AvailableConnectionsTable extends StatelessWidget {
             children: [
               Icon(icon, size: 32),
               const SizedBox(width: 8),
-              Text('${_buildCapitalizedEnumName()} Connections',
+              Text('${_buildCapitalizedEnumName()} ${l18ns!.connections}',
                   style: Theme.of(context).textTheme.headline5),
             ],
           ),
@@ -59,12 +60,12 @@ class _AvailableConnectionsTable extends StatelessWidget {
               3: FlexColumnWidth(.22),
             },
             children: [
-              const TableRow(
+              TableRow(
                 children: [
-                  TableCell(child: SizedBox(height: 24)),
-                  TableCell(child: Text('Ping')),
-                  TableCell(child: Text('Hop Count')),
-                  TableCell(child: Text('Via')),
+                  const TableCell(child: SizedBox(height: 24)),
+                  TableCell(child: Text(l18ns.ping)),
+                  TableCell(child: Text(l18ns.hopCount)),
+                  TableCell(child: Text(l18ns.via)),
                 ],
               ),
               TableRow(children: [

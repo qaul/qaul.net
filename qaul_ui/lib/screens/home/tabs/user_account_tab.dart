@@ -7,7 +7,8 @@ class _UserAccountTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(defaultUserProvider).state;
 
-    var theme = Theme.of(context).textTheme;
+    final theme = Theme.of(context).textTheme;
+    final l18ns = AppLocalizations.of(context);
     return Padding(
       padding: MediaQuery.of(context)
           .viewPadding
@@ -25,12 +26,16 @@ class _UserAccountTab extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user != null ? user.name : _notFound('Username'),
+                        user != null
+                            ? user.name
+                            : _notFound(l18ns!, l18ns.username),
                         style: theme.headline6,
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        user != null ? user.idBase58 : _notFound('User ID'),
+                        user != null
+                            ? user.idBase58
+                            : _notFound(l18ns!, l18ns.userID),
                         style: theme.subtitle2,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
@@ -42,17 +47,18 @@ class _UserAccountTab extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 60),
-          Text('Qaul Public Key', style: theme.headline5),
+          Text('Qaul ${l18ns!.publicKey}', style: theme.headline5),
           const SizedBox(height: 20),
           Text(
             user != null && user.keyBase58 != null
                 ? user.keyBase58!
-                : _notFound('Public Key'),
+                : _notFound(l18ns, l18ns.publicKey),
           ),
         ],
       ),
     );
   }
 
-  String _notFound(String field) => '$field not found';
+  String _notFound(AppLocalizations localizations, String field) =>
+      '$field ${localizations.notFoundErrorMessage}';
 }

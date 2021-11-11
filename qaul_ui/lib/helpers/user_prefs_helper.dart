@@ -13,6 +13,7 @@ class UserPrefsHelper {
   List<Locale?> get supportedLocales => [
         null,
         const Locale.fromSubtags(languageCode: 'en'),
+        const Locale.fromSubtags(languageCode: 'ar'),
       ];
 
   Locale? get defaultLocale {

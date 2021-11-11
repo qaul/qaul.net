@@ -13,8 +13,10 @@ class _ChatTab extends ConsumerWidget {
           idBase58: '12D3KooWEbzJbVGua4EQNKQVUYoA46vcXnfePfi3ZL7C8pGGqddd',
         );
 
+    final l18ns = AppLocalizations.of(context);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        tooltip: l18ns!.newChatTooltip,
         onPressed: () {},
         child: SvgPicture.asset(
           'assets/icons/comment.svg',
@@ -25,7 +27,7 @@ class _ChatTab extends ConsumerWidget {
       ),
       body: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: 4,
+        itemCount: users.length,
         separatorBuilder: (_, __) => const Divider(height: 12.0),
         itemBuilder: (_, i) {
           var theme = Theme.of(context).textTheme;

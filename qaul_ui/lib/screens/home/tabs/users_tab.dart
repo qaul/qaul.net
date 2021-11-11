@@ -106,22 +106,26 @@ class _UserDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context).textTheme;
+    final l18ns = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          tooltip: 'Back',
+          tooltip: l18ns!.backButtonTooltip,
           icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            SvgPicture.asset(
-              'assets/icons/comment.svg',
-              width: 24,
-              height: 24,
-              color: Theme.of(context).appBarTheme.iconTheme?.color ??
-                  Theme.of(context).iconTheme.color,
+            Tooltip(
+              message: l18ns.newChatTooltip,
+              child: SvgPicture.asset(
+                'assets/icons/comment.svg',
+                width: 24,
+                height: 24,
+                color: Theme.of(context).appBarTheme.iconTheme?.color ??
+                    Theme.of(context).iconTheme.color,
+              ),
             ),
           ],
         ),
@@ -149,12 +153,14 @@ class _UserDetailsScreen extends StatelessWidget {
                   const SizedBox(height: 28.0),
                   Text(user.name, style: theme.headline3),
                   const SizedBox(height: 8.0),
-                  Text('User ID: ${user.id?.join() ?? 'Unkown'}',
+                  Text('${l18ns.userID}: ${user.id?.join() ?? l18ns.unknown}',
                       style: theme.headline5),
                   const SizedBox(height: 40.0),
                   RichText(
                     text: TextSpan(children: [
-                      TextSpan(text: 'Public Key:\n', style: theme.headline5),
+                      TextSpan(
+                          text: '${l18ns.publicKey}:\n',
+                          style: theme.headline5),
                       TextSpan(text: '-' * 500, style: theme.bodyText2),
                     ]),
                   ),
@@ -164,10 +170,10 @@ class _UserDetailsScreen extends StatelessWidget {
                     onPressed: () => _verifyUser(context),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.check, size: 32),
-                        SizedBox(width: 4),
-                        Text('Verify'),
+                      children: [
+                        const Icon(Icons.check, size: 32),
+                        const SizedBox(width: 4),
+                        Text(l18ns.verify),
                       ],
                     ),
                   ),
@@ -175,7 +181,7 @@ class _UserDetailsScreen extends StatelessWidget {
                   _RoundedRectButton(
                     color: Colors.red.shade400,
                     onPressed: () {},
-                    child: const Text('Block User'),
+                    child: Text(l18ns.blockUser),
                   ),
                 ],
               );
@@ -193,51 +199,54 @@ class _UserDetailsScreen extends StatelessWidget {
 
     final res = await showDialog(
       context: context,
-      builder: (c) => Scaffold(
-        backgroundColor: Colors.black38,
-        body: Container(
-          padding: const EdgeInsets.all(8.0),
-          margin: EdgeInsets.symmetric(
-            horizontal: size.width * .17,
-            vertical: size.height * .33,
-          ),
-          decoration: BoxDecoration(
-            color: Theme.of(context).dialogBackgroundColor,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(icon: const Icon(Icons.close), onPressed: pop),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
+      builder: (c) {
+        final l18ns = AppLocalizations.of(context);
+        return Scaffold(
+          backgroundColor: Colors.black38,
+          body: Container(
+            padding: const EdgeInsets.all(8.0),
+            margin: EdgeInsets.symmetric(
+              horizontal: size.width * .17,
+              vertical: size.height * .33,
+            ),
+            decoration: BoxDecoration(
+              color: Theme.of(context).dialogBackgroundColor,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text(
-                      'Do you want to verify this user?',
-                      style: Theme.of(context).textTheme.subtitle1,
-                    ),
-                    const SizedBox(height: 24),
-                    _RoundedRectButton(
-                        color: Colors.lightBlue,
-                        onPressed: () => pop(res: true),
-                        child: const Text('OK')),
-                    const SizedBox(height: 12),
-                    _RoundedRectButton(
-                        color: Colors.lightBlue,
-                        onPressed: pop,
-                        child: const Text('Cancel')),
+                    IconButton(icon: const Icon(Icons.close), onPressed: pop),
                   ],
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        l18ns!.verifyUserConfirmationMessage,
+                        style: Theme.of(context).textTheme.subtitle1,
+                      ),
+                      const SizedBox(height: 24),
+                      _RoundedRectButton(
+                          color: Colors.lightBlue,
+                          onPressed: () => pop(res: true),
+                          child: Text(l18ns.okDialogButton)),
+                      const SizedBox(height: 12),
+                      _RoundedRectButton(
+                          color: Colors.lightBlue,
+                          onPressed: pop,
+                          child: Text(l18ns.cancelDialogButton)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
 
     if (res is! bool || !res) return;

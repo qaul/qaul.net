@@ -2,24 +2,26 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qaul_ui/widgets/language_select_dropdown.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final l18ns = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          tooltip: 'Back',
+          tooltip: l18ns!.backButtonTooltip,
           icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
-          children: const [
-            Icon(Icons.settings),
-            SizedBox(width: 8),
-            Text('Settings'),
+          children: [
+            const Icon(Icons.settings),
+            const SizedBox(width: 8),
+            Text(l18ns.settings),
           ],
         ),
       ),
@@ -49,11 +51,12 @@ class _ThemeSelectDropDown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l18ns = AppLocalizations.of(context);
     return Row(
       children: [
         const Icon(Icons.palette_outlined),
         const SizedBox(width: 8.0),
-        const Text('Theme'),
+        Text(l18ns!.theme),
         const SizedBox(width: 32.0),
         Expanded(
           child: ValueListenableBuilder<AdaptiveThemeMode>(
@@ -63,14 +66,14 @@ class _ThemeSelectDropDown extends StatelessWidget {
               return DropdownButton<bool>(
                 isExpanded: true,
                 value: !isDark,
-                items: const [
+                items: [
                   DropdownMenuItem<bool>(
                     value: true,
-                    child: Text('Light theme'),
+                    child: Text(l18ns.lightTheme),
                   ),
                   DropdownMenuItem<bool>(
                     value: false,
-                    child: Text('Dark theme'),
+                    child: Text(l18ns.darkTheme),
                   ),
                 ],
                 onChanged: (choseLightTheme) {
@@ -93,13 +96,14 @@ class _InternetNodesTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l18ns = AppLocalizations.of(context);
     return Column(
       children: [
         Row(
-          children: const [
-            Icon(CupertinoIcons.globe),
-            SizedBox(width: 8.0),
-            Text('Internet Nodes'),
+          children: [
+            const Icon(CupertinoIcons.globe),
+            const SizedBox(width: 8.0),
+            Text(l18ns!.internetNodes),
           ],
         ),
         const SizedBox(height: 8.0),
@@ -112,12 +116,12 @@ class _InternetNodesTable extends StatelessWidget {
                 Container(
                   height: 32,
                   alignment: Alignment.center,
-                  child: const Text('Address'),
+                  child: Text(l18ns.address),
                 ),
                 Container(
                   height: 32,
                   alignment: Alignment.center,
-                  child: const Text('Name'),
+                  child: Text(l18ns.name),
                 ),
               ],
             ),
@@ -145,7 +149,7 @@ class _InternetNodesTable extends StatelessWidget {
                 )),
             ),
             const SizedBox(width: 12.0),
-            const Text('Add internet node'),
+            Text(l18ns.addNodeCTA),
           ],
         ),
       ],

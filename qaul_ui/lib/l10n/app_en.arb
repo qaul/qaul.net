@@ -1,6 +1,48 @@
 {
-    "helloWorld": "Hello World!",
-    "@helloWorld": {
-      "description": "The conventional newborn programmer greeting"
-    }
+  "createAccountHeading": "Choose a\nuser name",
+  "@createAccountHeading": {
+    "description": "CTA rendered on top of text field"
+  },
+  "okDialogButton": "OK",
+  "cancelDialogButton": "Cancel",
+  "backButtonTooltip": "Back",
+  "sendTooltip": "Send",
+
+  "userAccountNavButtonTooltip": "Your account",
+  "feedNavButtonTooltip": "Feed",
+  "usersNavButtonTooltip": "Users",
+  "chatNavButtonTooltip": "Chat",
+  "netNavButtonTooltip": "Network",
+  "createFeedPostTooltip": "Create post",
+  "submitPostTooltip": "Submit",
+  "newChatTooltip": "New chat",
+
+  "settings": "Settings",
+  "about": "About",
+  "theme": "Theme",
+  "lightTheme": "Light Theme",
+  "darkTheme": "Dark Theme",
+  "internetNodes": "Internet Nodes",
+  "address": "Address",
+  "name": "Name",
+  "connections": "Connections",
+  "ping": "Ping",
+  "hopCount": "Hop Count",
+  "via": "Via",
+  "language": "Language",
+  "username": "Username",
+  "userID": "User ID",
+  "publicKey": "Public Key",
+  "unknown": "Unknown",
+  "verify": "Verify",
+  "blockUser": "Block User",
+  "addNodeCTA": "Add internet node",
+  "chatEmptyMessageHint": "Your message...",
+  "emptyFeedList": "No feed messages yet",
+  "verifyUserConfirmationMessage": "Do you want to verify this user?",
+  "useSystemDefaultMessage": "User system default",
+  "genericErrorMessage": "An error occurred",
+  "fieldRequiredErrorMessage": "Field required.",
+  "timeoutErrorMessage": "Timeout",
+  "notFoundErrorMessage": "not found"
 }

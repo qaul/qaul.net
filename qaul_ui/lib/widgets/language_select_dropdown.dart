@@ -1,9 +1,9 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_ui/helpers/user_prefs_helper.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LanguageSelectDropDown extends ConsumerWidget {
   const LanguageSelectDropDown({
@@ -21,7 +21,7 @@ class LanguageSelectDropDown extends ConsumerWidget {
           color: Theme.of(context).iconTheme.color,
         ),
         const SizedBox(width: 8.0),
-        const Text('Language'),
+        Text(AppLocalizations.of(context)!.language),
         const SizedBox(width: 12.0),
         Expanded(
           child: ValueListenableBuilder(
@@ -34,7 +34,7 @@ class LanguageSelectDropDown extends ConsumerWidget {
                   value: value,
                   child: Text(
                     value == null
-                        ? 'Use system default'
+                        ? AppLocalizations.of(context)!.useSystemDefaultMessage
                         : value.toLanguageTag(),
                   ),
                 );

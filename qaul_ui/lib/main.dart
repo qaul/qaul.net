@@ -62,6 +62,8 @@ class QaulApp extends ConsumerWidget {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
         ),
+        tooltipTheme:
+            const TooltipThemeData(waitDuration: Duration(seconds: 1)),
         iconTheme: IconThemeData(color: Colors.grey.shade600),
         appBarTheme: AppBarTheme(
             color: Colors.transparent,
@@ -83,6 +85,8 @@ class QaulApp extends ConsumerWidget {
           backgroundColor: Colors.lightBlue,
           foregroundColor: Colors.black,
         ),
+        tooltipTheme:
+            const TooltipThemeData(waitDuration: Duration(seconds: 1)),
         appBarTheme:
             const AppBarTheme(elevation: 0.0, color: Color(0xff212121)),
       ),
@@ -90,40 +94,43 @@ class QaulApp extends ConsumerWidget {
       builder: (theme, darkTheme) {
         return ValueListenableBuilder(
           valueListenable: Hive.box(UserPrefsHelper.hiveBoxName).listenable(),
-          builder: (context, box, _) => MaterialApp(
-            theme: theme,
-            darkTheme: darkTheme,
-            initialRoute: NavigationHelper.initial,
-            onGenerateRoute: NavigationHelper.onGenerateRoute,
-            scrollBehavior: TouchAndMouseScrollBehavior(),
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            localeResolutionCallback: (locale, supportedLocales) {
-              final defaultLocale = UserPrefsHelper().defaultLocale;
-              if (defaultLocale != null) return defaultLocale;
-              return locale;
-            },
-            builder: (context, child) {
-              final mediaQuery = MediaQuery.of(context);
-              return MediaQuery(
-                data: mediaQuery.copyWith(textScaleFactor: 1.0),
-                child: ResponsiveWrapper.builder(
-                  child,
-                  maxWidth: 828,
-                  minWidth: 370,
-                  breakpoints: const [
-                    ResponsiveBreakpoint.resize(350.0,
-                        name: 'ANDROID', scaleFactor: 0.8),
-                    ResponsiveBreakpoint.resize(480, name: MOBILE),
-                    ResponsiveBreakpoint.resize(680,
-                        name: 'MOBILE_LANDSCAPE', scaleFactor: 0.8),
-                    ResponsiveBreakpoint.autoScale(800, name: TABLET),
-                    ResponsiveBreakpoint.resize(1000, name: DESKTOP),
-                  ],
-                ),
-              );
-            },
-          ),
+          builder: (context, box, _) {
+            return MaterialApp(
+              theme: theme,
+              darkTheme: darkTheme,
+              initialRoute: NavigationHelper.initial,
+              onGenerateRoute: NavigationHelper.onGenerateRoute,
+              scrollBehavior: TouchAndMouseScrollBehavior(),
+              locale: UserPrefsHelper().defaultLocale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localeResolutionCallback: (locale, supportedLocales) {
+                final defaultLocale = UserPrefsHelper().defaultLocale;
+                if (defaultLocale != null) return defaultLocale;
+                return locale;
+              },
+              builder: (context, child) {
+                final mediaQuery = MediaQuery.of(context);
+                return MediaQuery(
+                  data: mediaQuery.copyWith(textScaleFactor: 1.0),
+                  child: ResponsiveWrapper.builder(
+                    child,
+                    maxWidth: 828,
+                    minWidth: 370,
+                    breakpoints: const [
+                      ResponsiveBreakpoint.resize(350.0,
+                          name: 'ANDROID', scaleFactor: 0.8),
+                      ResponsiveBreakpoint.resize(480, name: MOBILE),
+                      ResponsiveBreakpoint.resize(680,
+                          name: 'MOBILE_LANDSCAPE', scaleFactor: 0.8),
+                      ResponsiveBreakpoint.autoScale(800, name: TABLET),
+                      ResponsiveBreakpoint.resize(1000, name: DESKTOP),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
         );
       },
     );
@@ -134,10 +141,10 @@ class TouchAndMouseScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
   @override
   Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-    // etc.
-  };
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        // etc.
+      };
 }
 
 class Init {
