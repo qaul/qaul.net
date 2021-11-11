@@ -22,12 +22,12 @@ class RpcFeed extends RpcModule {
     switch (message.whichMessage()) {
       case pb.Feed_Message.received:
         final newMessages = message.ensureReceived().feedMessage;
-        debugPrint('Feed Messages:' + newMessages.toString());
+        debugPrint('Feed Messages: ' + newMessages.toString());
 
-        final messagesProvider = read(feedMessagesProvider);
+        final messagesProvider = read(feedMessagesProvider.notifier);
 
         for (final m in newMessages) {
-          if (_contains(messagesProvider, m)) continue;
+          if (messagesProvider.contains(m)) continue;
           messagesProvider.add(m.toModelMessage);
         }
         break;
@@ -49,16 +49,6 @@ class RpcFeed extends RpcModule {
         pb.Feed(request: pb.FeedMessageRequest(lastReceived: lastReceived));
     await encodeAndSendMessage(msg);
   }
-
-  bool _contains(List<models.FeedMessage> messages, pb.FeedMessage message) {
-    return !messages
-        .indexWhere(
-          (m) =>
-              m.senderIdBase58 == message.senderIdBase58 &&
-              m.messageIdBase58 == message.messageIdBase58,
-        )
-        .isNegative;
-  }
 }
 
 // Maybe using a Stream would be simpler. Just creating this class to facilitate manipulating StateNotifierProvider
@@ -67,6 +57,16 @@ class FeedMessages extends StateNotifier<List<models.FeedMessage>> {
 
   void add(models.FeedMessage message) {
     state = [...state, message];
+  }
+
+  bool contains(pb.FeedMessage message) {
+    return !state
+        .indexWhere(
+          (m) =>
+      m.senderIdBase58 == message.senderIdBase58 &&
+          m.messageIdBase58 == message.messageIdBase58,
+    )
+        .isNegative;
   }
 }
 

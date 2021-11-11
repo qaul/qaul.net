@@ -1,6 +1,6 @@
 part of '../home_screen.dart';
 
-class _UsersTab extends ConsumerWidget {
+class _UsersTab extends HookConsumerWidget {
   const _UsersTab({Key? key}) : super(key: key);
 
   @override
@@ -8,7 +8,19 @@ class _UsersTab extends ConsumerWidget {
     final users = ref.watch(usersProvider);
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () async => await RpcRouter(ref.read).requestUsers(),
+        onRefresh: () async {
+          await RpcRouter(ref.read).requestUsers();
+
+          await Future.delayed(const Duration(seconds: 2));
+
+          // TODO check isMounted & trigger on 1st build like FeedTab
+          final libqaul = ref.read(libqaulProvider);
+
+          // DEBUG: how many messages are queued by libqaul
+          final queued = await libqaul.checkReceiveQueue();
+          // check for rpc messages
+          if (queued > 0) await libqaul.receiveRpc();
+        },
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: users.length,
@@ -36,22 +48,13 @@ class _UsersTab extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'ID: ${user.id?.join() ?? 'Unknown'}',
-                    style: theme.caption,
+                    'ID: ${user.idBase58}',
+                    style: theme.caption!.copyWith(fontSize: 10),
                   ),
                   const SizedBox(height: 4),
-                  IconTheme(
-                    data: Theme.of(context).iconTheme.copyWith(size: 18.0),
-                    child: Row(
-                      children: const [
-                        Icon(CupertinoIcons.globe),
-                        SizedBox(width: 4),
-                        Icon(Icons.wifi),
-                        SizedBox(width: 4),
-                        Icon(Icons.bluetooth),
-                      ],
-                    ),
-                  ),
+                  if (user.availableTypes != null &&
+                      user.availableTypes!.isNotEmpty)
+                    _AvailableConnections(user: user),
                 ],
               ),
             );
@@ -60,6 +63,40 @@ class _UsersTab extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _AvailableConnections extends StatelessWidget {
+  const _AvailableConnections({
+    Key? key,
+    required this.user,
+  }) : super(key: key);
+
+  final User user;
+
+  @override
+  Widget build(BuildContext context) {
+    const space = SizedBox(width: 4);
+    return IconTheme(
+      data: Theme.of(context).iconTheme.copyWith(size: 18.0),
+      child: Row(
+        children: [
+          if (_hasInternet) ...[const Icon(CupertinoIcons.globe), space],
+          if (_hasLan) ...[const Icon(Icons.wifi), space],
+          if (_hasLocal) ...[const Icon(Icons.cable), space],
+          if (_hasBluetooth) const Icon(Icons.bluetooth),
+        ],
+      ),
+    );
+  }
+
+  bool get _hasBluetooth => user.availableTypes!.contains(ConnectionType.ble);
+
+  bool get _hasLan => user.availableTypes!.contains(ConnectionType.lan);
+
+  bool get _hasLocal => user.availableTypes!.contains(ConnectionType.local);
+
+  bool get _hasInternet =>
+      user.availableTypes!.contains(ConnectionType.internet);
 }
 
 class _UserDetailsScreen extends StatelessWidget {
