@@ -4,10 +4,10 @@
 
 ```sh
 # clone repository
-git clone https://git.open-communication.net/qaul/experiments/qaul-libp2p.git
+git clone https://github.com/qaul/qaul.net.git
 
 # move into project folder
-cd qaul-libp2p
+cd qaul.net
 ```
 
 ## Build qaul.net
