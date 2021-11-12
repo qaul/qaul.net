@@ -56,7 +56,7 @@ class FeedMessages extends StateNotifier<List<models.FeedMessage>> {
   FeedMessages({List<models.FeedMessage>? messages}) : super(messages ?? []);
 
   void add(models.FeedMessage message) {
-    state = [...state, message];
+    state = [message, ...state];
   }
 
   bool contains(pb.FeedMessage message) {

@@ -6,21 +6,12 @@ class _UsersTab extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final users = ref.watch(usersProvider);
+
+    useMemoized(() => refreshUsers(ref));
+
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () async {
-          await RpcRouter(ref.read).requestUsers();
-
-          await Future.delayed(const Duration(seconds: 2));
-
-          // TODO check isMounted & trigger on 1st build like FeedTab
-          final libqaul = ref.read(libqaulProvider);
-
-          // DEBUG: how many messages are queued by libqaul
-          final queued = await libqaul.checkReceiveQueue();
-          // check for rpc messages
-          if (queued > 0) await libqaul.receiveRpc();
-        },
+        onRefresh: () async => await refreshUsers(ref),
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: users.length,
@@ -62,6 +53,17 @@ class _UsersTab extends HookConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> refreshUsers(WidgetRef ref) async {
+    await RpcRouter(ref.read).requestUsers();
+    await Future.delayed(const Duration(seconds: 2));
+
+    // TODO check isMounted
+    final libqaul = ref.read(libqaulProvider);
+
+    final queued = await libqaul.checkReceiveQueue();
+    if (queued > 0) await libqaul.receiveRpc();
   }
 }
 

@@ -57,6 +57,9 @@ class Rpc {
     message.module = module;
     message.data = data;
 
+    final user = reader(defaultUserProvider).state;
+    if (user != null && user.id != null) message.userId = user.id!;
+
     // encode it
     Uint8List messageEncoded = message.writeToBuffer();
     debugPrint("encodeAndSendMessage final length: ${messageEncoded.length}");

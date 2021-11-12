@@ -107,7 +107,8 @@ class QaulApp extends ConsumerWidget {
               localeResolutionCallback: (locale, supportedLocales) {
                 final defaultLocale = UserPrefsHelper().defaultLocale;
                 if (defaultLocale != null) return defaultLocale;
-                return locale;
+                if (supportedLocales.contains(locale)) return locale;
+                return const Locale.fromSubtags(languageCode: 'en');
               },
               builder: (context, child) {
                 final mediaQuery = MediaQuery.of(context);

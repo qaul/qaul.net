@@ -4,7 +4,6 @@ import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:qaul_ui/providers/user_color_provider.dart';
 import 'package:utils/utils.dart';
 
 /// If [user] is provided, it's used to populate this icon (Background color, initials, connection status).
@@ -33,8 +32,10 @@ abstract class UserAvatar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final defaultUserColor = ref.watch(userColorProvider);
     final defaultUser = ref.watch(defaultUserProvider).state;
+    final defaultUserColor = defaultUser == null
+        ? null
+        : colorGenerationStrategy(defaultUser.idBase58);
 
     return CircleAvatar(
       radius: radius,
@@ -98,7 +99,9 @@ class _SmallUserAvatar extends UserAvatar {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final defaultUser = ref.watch(defaultUserProvider).state;
-    if (!badgeEnabled || userIsOffline(defaultUser)) return super.build(context, ref);
+    if (!badgeEnabled || userIsOffline(defaultUser)) {
+      return super.build(context, ref);
+    }
 
     final badgeColor = mapConnectionStatus(user != null
         ? user!.status

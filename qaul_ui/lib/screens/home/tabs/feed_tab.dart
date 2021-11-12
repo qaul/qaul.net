@@ -6,14 +6,20 @@ class _FeedTab extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final messages = ref.watch(feedMessagesProvider);
+    final users = ref.watch(usersProvider);
+
     useMemoized(() => refreshFeed(ref));
 
     final l18ns = AppLocalizations.of(context);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         tooltip: l18ns!.createFeedPostTooltip,
-        onPressed: () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const _CreateFeedMessage())),
+        onPressed: () async {
+          await Navigator.push(context,
+            MaterialPageRoute(builder: (_) => _CreateFeedMessage()));
+          await Future.delayed(const Duration(milliseconds: 2000));
+          await refreshFeed(ref);
+        },
         child: const Icon(Icons.add, size: 32),
       ),
       body: RefreshIndicator(
@@ -21,39 +27,41 @@ class _FeedTab extends HookConsumerWidget {
         child: Stack(
           children: [
             ListView.separated(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: messages.length,
-                    separatorBuilder: (_, __) => const Divider(height: 12.0),
-                    itemBuilder: (_, i) {
-                      final msg = messages[i];
-                      var theme = Theme.of(context).textTheme;
-                      // TODO(brenodt): Prone to exceptions if timeSent is not parsable. Update.
-                      var sentAt =
-                          describeFuzzyTimestamp(DateTime.parse(msg.timeSent!));
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: messages.length,
+              separatorBuilder: (_, __) => const Divider(height: 12.0),
+              itemBuilder: (_, i) {
+                final msg = messages[i];
+                var theme = Theme.of(context).textTheme;
+                // TODO(brenodt): Prone to exceptions if timeSent is not parsable. Update.
+                var sentAt =
+                    describeFuzzyTimestamp(DateTime.parse(msg.timeSent!));
 
-                      return ListTile(
-                        leading: UserAvatar.small(),
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // TODO(brenodt): Once Users module is connected, this should be fetched from it.
-                            Text('Name Surname', style: theme.headline6),
-                            Text(
-                              sentAt,
-                              style: theme.caption!
-                                  .copyWith(fontStyle: FontStyle.italic),
-                            ),
-                          ],
-                        ),
-                        subtitle: Text(
-                          msg.content ?? '',
-                          style:
-                              theme.bodyText2!.copyWith(fontSize: 16, height: 1.4),
-                        ),
-                      );
-                    },
+                final authorIdx = users.indexWhere(
+                  (u) => u.idBase58 == (msg.senderIdBase58 ?? ''),
+                );
+                final author = authorIdx.isNegative ? null : users[authorIdx];
+
+                return ListTile(
+                  leading: UserAvatar.small(user: author),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(author?.name ?? l18ns.unknown, style: theme.headline6),
+                      Text(
+                        sentAt,
+                        style: theme.caption!
+                            .copyWith(fontStyle: FontStyle.italic),
+                      ),
+                    ],
                   ),
-
+                  subtitle: Text(
+                    msg.content ?? '',
+                    style: theme.bodyText2!.copyWith(fontSize: 16, height: 1.4),
+                  ),
+                );
+              },
+            ),
             if (messages.isEmpty) const Center(child: _EmptyFeed()),
           ],
         ),
@@ -65,11 +73,10 @@ class _FeedTab extends HookConsumerWidget {
     await RpcFeed(ref.read).requestFeedMessages();
     await Future.delayed(const Duration(seconds: 2));
 
+    // TODO check isMounted
     final libqaul = ref.read(libqaulProvider);
 
-    // DEBUG: how many messages are queued by libqaul
     final queued = await libqaul.checkReceiveQueue();
-    // check for rpc messages
     if (queued > 0) await libqaul.receiveRpc();
   }
 }
@@ -97,7 +104,9 @@ class _EmptyFeed extends StatelessWidget {
 }
 
 class _CreateFeedMessage extends HookConsumerWidget {
-  const _CreateFeedMessage({Key? key}) : super(key: key);
+  _CreateFeedMessage({Key? key}) : super(key: key);
+
+  final _formKey = GlobalKey<FormFieldState>();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -116,7 +125,10 @@ class _CreateFeedMessage extends HookConsumerWidget {
       floatingActionButton: FloatingActionButton(
         tooltip: l18ns!.submitPostTooltip,
         child: const Icon(Icons.check, size: 32.0),
+        // TODO show CircularProgressIndicator & prevent more taps
         onPressed: () async {
+          if (!(_formKey.currentState?.validate() ?? false)) return;
+
           await RpcFeed(ref.read).sendFeedMessage(controller.text);
           await Future.delayed(const Duration(seconds: 2));
 
@@ -133,13 +145,18 @@ class _CreateFeedMessage extends HookConsumerWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(40),
-        child: TextField(
+        child: TextFormField(
+          key: _formKey,
           maxLines: 15,
           autofocus: true,
           controller: controller,
           keyboardType: TextInputType.multiline,
           style: Theme.of(context).textTheme.subtitle1,
           decoration: const InputDecoration(border: InputBorder.none),
+          validator: (s) {
+            if (s == null || s.isEmpty) return l18ns.fieldRequiredErrorMessage;
+            return null;
+          },
         ),
       ),
     );
