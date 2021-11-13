@@ -11,3 +11,4 @@ export 'src/rpc/feed.dart';
 export 'src/rpc/node.dart';
 export 'src/rpc/router.dart';
 export 'src/rpc/user_accounts.dart';
+export 'src/rpc/users.dart';

@@ -5,7 +5,8 @@ class _UsersTab extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final users = ref.watch(usersProvider);
+    final users =
+        ref.watch(usersProvider).where((u) => !(u.isBlocked ?? false)).toList();
 
     useMemoized(() => refreshUsers(ref));
 
@@ -21,15 +22,18 @@ class _UsersTab extends HookConsumerWidget {
             var theme = Theme.of(context).textTheme;
 
             return ListTile(
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                await Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (_) => _UserDetailsScreen(user: user)),
                 );
+                refreshUsers(ref);
               },
               leading: UserAvatar.small(user: user),
-              trailing: const Icon(Icons.verified_user),
+              trailing: (user.isVerified ?? false)
+                  ? const Icon(Icons.verified_user)
+                  : const SizedBox(),
               visualDensity: VisualDensity.adaptivePlatformDensity,
               title: Padding(
                 padding: const EdgeInsets.only(bottom: 4.0),
@@ -62,7 +66,13 @@ class _UsersTab extends HookConsumerWidget {
     // TODO check isMounted
     final libqaul = ref.read(libqaulProvider);
 
-    final queued = await libqaul.checkReceiveQueue();
+    var queued = await libqaul.checkReceiveQueue();
+    if (queued > 0) await libqaul.receiveRpc();
+
+    await RpcUsers(ref.read).requestUsers();
+    await Future.delayed(const Duration(seconds: 2));
+
+    queued = await libqaul.checkReceiveQueue();
     if (queued > 0) await libqaul.receiveRpc();
   }
 }
@@ -101,12 +111,12 @@ class _AvailableConnections extends StatelessWidget {
       user.availableTypes!.contains(ConnectionType.internet);
 }
 
-class _UserDetailsScreen extends StatelessWidget {
+class _UserDetailsScreen extends ConsumerWidget {
   const _UserDetailsScreen({Key? key, required this.user}) : super(key: key);
   final User user;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     var theme = Theme.of(context).textTheme;
     final l18ns = AppLocalizations.of(context);
     return Scaffold(
@@ -158,33 +168,45 @@ class _UserDetailsScreen extends StatelessWidget {
                   Text('${l18ns.userID}: ${user.id?.join() ?? l18ns.unknown}',
                       style: theme.headline5),
                   const SizedBox(height: 40.0),
-                  RichText(
-                    text: TextSpan(children: [
-                      TextSpan(
-                          text: '${l18ns.publicKey}:\n',
-                          style: theme.headline5),
-                      TextSpan(text: '-' * 500, style: theme.bodyText2),
-                    ]),
-                  ),
+                  Text('${l18ns.publicKey}:\n${user.keyBase58}',
+                      style: theme.headline5),
                   const SizedBox(height: 40.0),
-                  _RoundedRectButton(
-                    color: Colors.green,
-                    onPressed: () => _verifyUser(context),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.check, size: 32),
-                        const SizedBox(width: 4),
-                        Text(l18ns.verify),
-                      ],
+                  if (!(user.isVerified ?? false)) ...[
+                    _RoundedRectButton(
+                      color: Colors.green,
+                      onPressed: () async {
+                        final res = await _confirmAction(context);
+
+                        if (res is! bool || !res) return;
+
+                        final libqaul = ref.read(libqaulProvider);
+
+                        // TODO verify isMounted, block interaction while updating
+                        await RpcUsers(ref.read).verifyUser(user);
+                        await Future.delayed(const Duration(seconds: 2));
+
+                        final queued = await libqaul.checkReceiveQueue();
+                        if (queued > 0) await libqaul.receiveRpc();
+
+                        Navigator.pop(context);
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.check, size: 32),
+                          const SizedBox(width: 4),
+                          Text(l18ns.verify),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 28.0),
-                  _RoundedRectButton(
-                    color: Colors.red.shade400,
-                    onPressed: () {},
-                    child: Text(l18ns.blockUser),
-                  ),
+                    const SizedBox(height: 28.0),
+                  ],
+                  if (!(user.isBlocked ?? false))
+                    _RoundedRectButton(
+                      color: Colors.red.shade400,
+                      onPressed: () {},
+                      child: Text(l18ns.blockUser),
+                    ),
                 ],
               );
             }),
@@ -194,65 +216,65 @@ class _UserDetailsScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _verifyUser(BuildContext context) async {
+  Future<bool?> _confirmAction(BuildContext context) async {
     void pop({bool res = false}) => Navigator.pop(context, res);
 
     final size = MediaQuery.of(context).size;
 
-    final res = await showDialog(
+    return await showDialog(
       context: context,
       builder: (c) {
         final l18ns = AppLocalizations.of(context);
         return Scaffold(
           backgroundColor: Colors.black38,
-          body: Container(
-            padding: const EdgeInsets.all(8.0),
-            margin: EdgeInsets.symmetric(
-              horizontal: size.width * .17,
-              vertical: size.height * .33,
-            ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).dialogBackgroundColor,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(icon: const Icon(Icons.close), onPressed: pop),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
+          body: OrientationBuilder(builder: (context, orientation) {
+            final isPortrait = orientation == Orientation.portrait;
+            return Container(
+              padding: const EdgeInsets.all(8.0),
+              margin: EdgeInsets.symmetric(
+                horizontal: size.width * (isPortrait ? .17 : .33),
+                vertical: size.height * (isPortrait ? .33 : .17),
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(context).dialogBackgroundColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text(
-                        l18ns!.verifyUserConfirmationMessage,
-                        style: Theme.of(context).textTheme.subtitle1,
-                      ),
-                      const SizedBox(height: 24),
-                      _RoundedRectButton(
-                          color: Colors.lightBlue,
-                          onPressed: () => pop(res: true),
-                          child: Text(l18ns.okDialogButton)),
-                      const SizedBox(height: 12),
-                      _RoundedRectButton(
-                          color: Colors.lightBlue,
-                          onPressed: pop,
-                          child: Text(l18ns.cancelDialogButton)),
+                      IconButton(icon: const Icon(Icons.close), onPressed: pop),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          l18ns!.verifyUserConfirmationMessage,
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                        const SizedBox(height: 24),
+                        _RoundedRectButton(
+                            color: Colors.lightBlue,
+                            onPressed: () => pop(res: true),
+                            child: Text(l18ns.okDialogButton)),
+                        const SizedBox(height: 12),
+                        _RoundedRectButton(
+                            color: Colors.lightBlue,
+                            onPressed: pop,
+                            child: Text(l18ns.cancelDialogButton)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
         );
       },
     );
-
-    if (res is! bool || !res) return;
-    // TODO(brenodt): Add logic to verify user.
   }
 }
 

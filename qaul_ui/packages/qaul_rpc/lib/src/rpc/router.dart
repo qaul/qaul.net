@@ -27,15 +27,18 @@ class RpcRouter extends RpcModule {
         final provider = read(usersProvider.notifier);
 
         for (final u in users) {
-          if (provider.contains(Base58Encode(u.userId))) continue;
-          provider.add(
-            User(
-              name: 'Name Undefined',
-              idBase58: Base58Encode(u.userId),
-              id: u.userId,
-              availableTypes: _mapFromRoutingTableConnections(u.connections),
-            ),
+          final domainUser = User(
+            name: 'Name Undefined',
+            idBase58: Base58Encode(u.userId),
+            id: u.userId,
+            availableTypes: _mapFromRoutingTableConnections(u.connections),
           );
+
+          if (provider.contains(domainUser.idBase58)) {
+            provider.update(domainUser);
+            continue;
+          }
+          provider.add(domainUser);
         }
 
         break;
@@ -82,6 +85,25 @@ class UserListNotifier extends StateNotifier<List<User>> {
 
   void add(User u) {
     state = [...state, u];
+  }
+
+  void update(User u) {
+    assert(u.id != null);
+    final i = state.indexWhere((e) => u.idBase58 == e.idBase58 || e.id == u.id);
+    if (i.isNegative) throw ArgumentError.value(u, 'User', 'user not in state');
+    final beforeUpdate = state[i];
+    state[i] = User(
+      name: beforeUpdate.name == 'Name Undefined' ? u.name : beforeUpdate.name,
+      idBase58: u.idBase58,
+      id: u.id,
+      status: u.status,
+      key: u.key ?? beforeUpdate.key,
+      keyType: u.keyType ?? beforeUpdate.keyType,
+      keyBase58: u.keyBase58 ?? beforeUpdate.keyBase58,
+      isBlocked: u.isBlocked ?? beforeUpdate.isBlocked,
+      isVerified: u.isVerified ?? beforeUpdate.isVerified,
+      availableTypes: u.availableTypes ?? beforeUpdate.availableTypes,
+    );
   }
 
   bool contains(String idBase58) =>

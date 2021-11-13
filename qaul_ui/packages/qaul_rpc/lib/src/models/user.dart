@@ -13,6 +13,8 @@ class User extends Equatable {
     this.keyType,
     this.keyBase58,
     this.availableTypes,
+    this.isBlocked,
+    this.isVerified,
     this.status = ConnectionStatus.offline,
   });
 
@@ -23,6 +25,8 @@ class User extends Equatable {
   final String? keyType;
   final String? keyBase58;
   final List<ConnectionType>? availableTypes;
+  final bool? isBlocked;
+  final bool? isVerified;
   final ConnectionStatus status;
 
   @override

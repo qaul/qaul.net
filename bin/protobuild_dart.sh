@@ -4,7 +4,9 @@ protoc --dart_out=../qaul_ui/packages/qaul_rpc/lib/src/generated \
     --proto_path=../rust/libqaul/src \
     \
     rpc/qaul_rpc.proto \
+    connections/connections.proto \
     node/node.proto \
     node/user_accounts.proto \
     router/router.proto \
-    services/feed/feed.proto
+    router/users.proto \
+    services/feed/feed.proto \
