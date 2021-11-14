@@ -74,16 +74,16 @@ class _UsersState extends _BaseTabState<_Users> {
   }
 
   Future<void> refreshUsers(WidgetRef ref) async {
-    await RpcRouter(ref.read).requestUsers();
+    await RpcUsers(ref.read).requestUsers();
     await Future.delayed(const Duration(seconds: 2));
 
-    // TODO check isMounted
+    if (!mounted) return;
     final libqaul = ref.read(libqaulProvider);
 
     var queued = await libqaul.checkReceiveQueue();
     if (queued > 0) await libqaul.receiveRpc();
 
-    await RpcUsers(ref.read).requestUsers();
+    await RpcRouter(ref.read).requestUsers();
     await Future.delayed(const Duration(seconds: 2));
 
     queued = await libqaul.checkReceiveQueue();
@@ -201,7 +201,6 @@ class _UserDetailsScreen extends HookConsumerWidget {
 
                           final libqaul = ref.read(libqaulProvider);
 
-                          // TODO verify isMounted, block interaction while updating
                           await RpcUsers(ref.read).verifyUser(user);
                           await Future.delayed(const Duration(seconds: 2));
 
@@ -234,7 +233,6 @@ class _UserDetailsScreen extends HookConsumerWidget {
 
                           final libqaul = ref.read(libqaulProvider);
 
-                          // TODO verify isMounted, block interaction while updating
                           await RpcUsers(ref.read).blockUser(user);
                           await Future.delayed(const Duration(seconds: 2));
 

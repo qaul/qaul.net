@@ -146,7 +146,6 @@ class _CreateFeedMessage extends HookConsumerWidget {
         floatingActionButton: FloatingActionButton(
           tooltip: l18ns!.submitPostTooltip,
           child: const Icon(Icons.check, size: 32.0),
-          // TODO show CircularProgressIndicator & prevent more taps
           onPressed: () async {
             if (!(_formKey.currentState?.validate() ?? false)) return;
             loading.value = true;
@@ -154,7 +153,6 @@ class _CreateFeedMessage extends HookConsumerWidget {
             await RpcFeed(ref.read).sendFeedMessage(controller.text);
             await Future.delayed(const Duration(seconds: 2));
 
-            // TODO: check isMounted
             final libqaul = ref.read(libqaulProvider);
 
             // DEBUG: how many messages are queued by libqaul
@@ -177,8 +175,9 @@ class _CreateFeedMessage extends HookConsumerWidget {
             style: Theme.of(context).textTheme.subtitle1,
             decoration: const InputDecoration(border: InputBorder.none),
             validator: (s) {
-              if (s == null || s.isEmpty)
+              if (s == null || s.isEmpty) {
                 return l18ns.fieldRequiredErrorMessage;
+              }
               return null;
             },
           ),
