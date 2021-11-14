@@ -32,11 +32,12 @@ class _ChatTab extends ConsumerWidget {
         itemBuilder: (_, i) {
           var theme = Theme.of(context).textTheme;
 
+          final user = users[i];
           return ListTile(
-            leading: UserAvatar.small(user: users[i]),
+            leading: UserAvatar.small(user: user),
             title: Row(
               children: [
-                Text(users[i].name, style: theme.headline6),
+                Text(user.name, style: theme.headline6),
                 const Expanded(child: SizedBox()),
                 Text('12:00', style: theme.caption),
                 const Icon(Icons.chevron_right),
@@ -60,11 +61,11 @@ class _ChatTab extends ConsumerWidget {
                           TextMessage(
                             idBase58: const Uuid().v4(),
                             text: 'this is a message by another user',
-                            user: users[i],
+                            user: user,
                           ),
                         ],
                         user: defaultUser,
-                        otherUserAvatarColor: colorGenerationStrategy(users[i].idBase58),
+                        otherUserAvatarColor: colorGenerationStrategy(user.idBase58),
                         onSendPressed: (String rawText) {
                           return TextMessage(
                             idBase58: const Uuid().v4(),
@@ -73,9 +74,9 @@ class _ChatTab extends ConsumerWidget {
                           );
                         }, userAppBar: Row(
                         children: [
-                          UserAvatar.small(badgeEnabled: false),
+                          UserAvatar.small(badgeEnabled: false, user: user),
                           const SizedBox(width: 12),
-                          Text(defaultUser.name),
+                          Text(user.name),
                         ],
                       ),
                       );

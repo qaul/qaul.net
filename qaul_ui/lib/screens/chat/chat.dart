@@ -74,7 +74,6 @@ class _ChatScreenState extends State<ChatScreen> {
       body: SafeArea(
         bottom: false,
         child: Chat(
-          showUserNames: true,
           showUserAvatars: true,
           user: widget.user.toInternalUser(),
           messages: _messages,
@@ -104,7 +103,7 @@ class _ChatScreenState extends State<ChatScreen> {
       color: widget.user.toInternalUser().id != message.author.id ||
               message.type == types.MessageType.image
           ? const Color(0xfff5f5f7)
-          : Theme.of(context).colorScheme.primary,
+          : Colors.grey,
       margin: nextMessageInGroup
           ? const BubbleEdges.symmetric(horizontal: 6)
           : null,
