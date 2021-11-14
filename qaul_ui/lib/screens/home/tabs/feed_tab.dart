@@ -25,18 +25,25 @@ class _FeedState extends _BaseTabState<_Feed> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-      final messages = ref.watch(feedMessagesProvider);
-      final users = ref.watch(usersProvider);
+    final messages = ref.watch(feedMessagesProvider);
+    final users = ref.watch(usersProvider);
 
-      useMemoized(() => refreshFeed(ref));
+    final firstLoad = useState(true);
+    useMemoized(() async {
+      await refreshFeed(ref);
+      firstLoad.value = false;
+    });
 
-      final l18ns = AppLocalizations.of(context);
-      return Scaffold(
+    final l18ns = AppLocalizations.of(context);
+    return LoadingDecorator(
+      isLoading: firstLoad.value,
+      backgroundColor: Colors.transparent,
+      child: Scaffold(
         floatingActionButton: FloatingActionButton(
           tooltip: l18ns!.createFeedPostTooltip,
           onPressed: () async {
-            await Navigator.push(context,
-                MaterialPageRoute(builder: (_) => _CreateFeedMessage()));
+            await Navigator.push(
+                context, MaterialPageRoute(builder: (_) => _CreateFeedMessage()));
             await Future.delayed(const Duration(milliseconds: 2000));
             await refreshFeed(ref);
           },
@@ -55,10 +62,10 @@ class _FeedState extends _BaseTabState<_Feed> {
                   var theme = Theme.of(context).textTheme;
                   // TODO(brenodt): Prone to exceptions if timeSent is not parsable. Update.
                   var sentAt =
-                  describeFuzzyTimestamp(DateTime.parse(msg.timeSent!));
+                      describeFuzzyTimestamp(DateTime.parse(msg.timeSent!));
 
                   final authorIdx = users.indexWhere(
-                        (u) => u.idBase58 == (msg.senderIdBase58 ?? ''),
+                    (u) => u.idBase58 == (msg.senderIdBase58 ?? ''),
                   );
                   final author = authorIdx.isNegative ? null : users[authorIdx];
 
@@ -67,7 +74,8 @@ class _FeedState extends _BaseTabState<_Feed> {
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(author?.name ?? l18ns.unknown, style: theme.headline6),
+                        Text(author?.name ?? l18ns.unknown,
+                            style: theme.headline6),
                         Text(
                           sentAt,
                           style: theme.caption!
@@ -86,7 +94,8 @@ class _FeedState extends _BaseTabState<_Feed> {
             ],
           ),
         ),
-      );
+      ),
+    );
   }
 }
 
@@ -168,7 +177,8 @@ class _CreateFeedMessage extends HookConsumerWidget {
             style: Theme.of(context).textTheme.subtitle1,
             decoration: const InputDecoration(border: InputBorder.none),
             validator: (s) {
-              if (s == null || s.isEmpty) return l18ns.fieldRequiredErrorMessage;
+              if (s == null || s.isEmpty)
+                return l18ns.fieldRequiredErrorMessage;
               return null;
             },
           ),

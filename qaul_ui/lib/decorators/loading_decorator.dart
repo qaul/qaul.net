@@ -5,8 +5,10 @@ class LoadingDecorator extends StatelessWidget {
     Key? key,
     required this.child,
     this.isLoading = false,
+    this.backgroundColor = Colors.black26,
   }) : super(key: key);
   final bool isLoading;
+  final Color backgroundColor;
   final Widget child;
 
   @override
@@ -17,7 +19,7 @@ class LoadingDecorator extends StatelessWidget {
         if (isLoading)
           Positioned.fill(
             child: Container(
-              color: Colors.black26,
+              color: backgroundColor,
               child: const Center(child: CircularProgressIndicator()),
             ),
           ),

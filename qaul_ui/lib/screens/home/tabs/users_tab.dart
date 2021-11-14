@@ -14,52 +14,60 @@ class _UsersState extends _BaseTabState<_Users> {
     final users =
     ref.watch(usersProvider).where((u) => !(u.isBlocked ?? false)).toList();
 
-    useMemoized(() => refreshUsers(ref));
+    final firstLoad = useState(true);
+    useMemoized(() async {
+      await refreshUsers(ref);
+      firstLoad.value = false;
+    });
 
-    return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: () async => await refreshUsers(ref),
-        child: ListView.separated(
-          physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: users.length,
-          separatorBuilder: (_, __) => const Divider(height: 12.0),
-          itemBuilder: (_, i) {
-            final user = users[i];
-            var theme = Theme.of(context).textTheme;
+    return LoadingDecorator(
+      isLoading: firstLoad.value,
+      backgroundColor: Colors.transparent,
+      child: Scaffold(
+        body: RefreshIndicator(
+          onRefresh: () async => await refreshUsers(ref),
+          child: ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: users.length,
+            separatorBuilder: (_, __) => const Divider(height: 12.0),
+            itemBuilder: (_, i) {
+              final user = users[i];
+              var theme = Theme.of(context).textTheme;
 
-            return ListTile(
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => _UserDetailsScreen(user: user)),
-                );
-                refreshUsers(ref);
-              },
-              leading: UserAvatar.small(user: user),
-              trailing: (user.isVerified ?? false)
-                  ? const Icon(Icons.verified_user)
-                  : const SizedBox(),
-              visualDensity: VisualDensity.adaptivePlatformDensity,
-              title: Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: Text(user.name, style: theme.headline6),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ID: ${user.idBase58}',
-                    style: theme.caption!.copyWith(fontSize: 10),
-                  ),
-                  const SizedBox(height: 4),
-                  if (user.availableTypes != null &&
-                      user.availableTypes!.isNotEmpty)
-                    _AvailableConnections(user: user),
-                ],
-              ),
-            );
-          },
+              return ListTile(
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => _UserDetailsScreen(user: user)),
+                  );
+                  refreshUsers(ref);
+                },
+                leading: UserAvatar.small(user: user),
+                trailing: (user.isVerified ?? false)
+                    ? const Icon(Icons.verified_user)
+                    : const SizedBox(),
+                visualDensity: VisualDensity.adaptivePlatformDensity,
+                title: Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Text(user.name, style: theme.headline6),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ID: ${user.idBase58}',
+                      style: theme.caption!.copyWith(fontSize: 10),
+                    ),
+                    const SizedBox(height: 4),
+                    if (user.availableTypes != null &&
+                        user.availableTypes!.isNotEmpty)
+                      _AvailableConnections(user: user),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

@@ -211,6 +211,10 @@ class QaulNavBarItem extends HookConsumerWidget {
             message: l18ns!.userAccountNavButtonTooltip,
             child: InkWell(
               onTap: () => controller.goToTab(tab),
+              splashColor: Colors.transparent,
+              hoverColor: Colors.transparent,
+              focusColor: Colors.transparent,
+              highlightColor: Colors.transparent,
               child: UserAvatar.small(badgeEnabled: false),
             ),
           ),
