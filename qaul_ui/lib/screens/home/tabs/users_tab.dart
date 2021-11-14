@@ -175,7 +175,8 @@ class _UserDetailsScreen extends ConsumerWidget {
                     _RoundedRectButton(
                       color: Colors.green,
                       onPressed: () async {
-                        final res = await _confirmAction(context);
+                        final res = await _confirmAction(context,
+                            description: l18ns.verifyUserConfirmationMessage);
 
                         if (res is! bool || !res) return;
 
@@ -204,7 +205,23 @@ class _UserDetailsScreen extends ConsumerWidget {
                   if (!(user.isBlocked ?? false))
                     _RoundedRectButton(
                       color: Colors.red.shade400,
-                      onPressed: () {},
+                      onPressed: () async {
+                        final res = await _confirmAction(context,
+                            description: l18ns.blockUserConfirmationMessage);
+
+                        if (res is! bool || !res) return;
+
+                        final libqaul = ref.read(libqaulProvider);
+
+                        // TODO verify isMounted, block interaction while updating
+                        await RpcUsers(ref.read).blockUser(user);
+                        await Future.delayed(const Duration(seconds: 2));
+
+                        final queued = await libqaul.checkReceiveQueue();
+                        if (queued > 0) await libqaul.receiveRpc();
+
+                        Navigator.pop(context);
+                      },
                       child: Text(l18ns.blockUser),
                     ),
                 ],
@@ -216,62 +233,50 @@ class _UserDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Future<bool?> _confirmAction(BuildContext context) async {
+  Future<bool?> _confirmAction(
+    BuildContext context, {
+    required String description,
+  }) async {
     void pop({bool res = false}) => Navigator.pop(context, res);
-
-    final size = MediaQuery.of(context).size;
 
     return await showDialog(
       context: context,
       builder: (c) {
         final l18ns = AppLocalizations.of(context);
-        return Scaffold(
-          backgroundColor: Colors.black38,
-          body: OrientationBuilder(builder: (context, orientation) {
-            final isPortrait = orientation == Orientation.portrait;
-            return Container(
-              padding: const EdgeInsets.all(8.0),
-              margin: EdgeInsets.symmetric(
-                horizontal: size.width * (isPortrait ? .17 : .33),
-                vertical: size.height * (isPortrait ? .33 : .17),
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(icon: const Icon(Icons.close), onPressed: pop),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                description,
+                style: Theme.of(context).textTheme.subtitle1,
+                textAlign: TextAlign.center,
               ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).dialogBackgroundColor,
-                borderRadius: BorderRadius.circular(20),
+              const SizedBox(height: 24),
+              _RoundedRectButton(
+                color: Colors.lightBlue,
+                size: const Size(280, 80),
+                onPressed: () => pop(res: true),
+                child: Text(l18ns!.okDialogButton),
               ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(icon: const Icon(Icons.close), onPressed: pop),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          l18ns!.verifyUserConfirmationMessage,
-                          style: Theme.of(context).textTheme.subtitle1,
-                        ),
-                        const SizedBox(height: 24),
-                        _RoundedRectButton(
-                            color: Colors.lightBlue,
-                            onPressed: () => pop(res: true),
-                            child: Text(l18ns.okDialogButton)),
-                        const SizedBox(height: 12),
-                        _RoundedRectButton(
-                            color: Colors.lightBlue,
-                            onPressed: pop,
-                            child: Text(l18ns.cancelDialogButton)),
-                      ],
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 12),
+              _RoundedRectButton(
+                color: Colors.lightBlue,
+                size: const Size(280, 80),
+                onPressed: pop,
+                child: Text(l18ns.cancelDialogButton),
               ),
-            );
-          }),
+            ],
+          ),
         );
       },
     );
@@ -284,18 +289,22 @@ class _RoundedRectButton extends StatelessWidget {
     required this.color,
     required this.onPressed,
     required this.child,
+    this.size,
   }) : super(key: key);
   final Color color;
   final VoidCallback onPressed;
   final Widget child;
+  final Size? size;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: onPressed,
       style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
-          foregroundColor: MaterialStateProperty.all(Colors.white),
-          backgroundColor: MaterialStateProperty.all(color)),
+            foregroundColor: MaterialStateProperty.all(Colors.white),
+            backgroundColor: MaterialStateProperty.all(color),
+            maximumSize: MaterialStateProperty.all(size),
+          ),
       child: child,
     );
   }

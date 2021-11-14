@@ -40,6 +40,7 @@
   "chatEmptyMessageHint": "Your message...",
   "emptyFeedList": "No feed messages yet",
   "verifyUserConfirmationMessage": "Do you want to verify this user?",
+  "blockUserConfirmationMessage": "Do you want to block this user?",
   "useSystemDefaultMessage": "User system default",
   "genericErrorMessage": "An error occurred",
   "fieldRequiredErrorMessage": "Field required.",

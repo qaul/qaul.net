@@ -60,10 +60,23 @@ class RpcUsers extends RpcModule {
       name: u.name,
       idBase58: u.idBase58,
       id: u.id,
-      verified: true,
       key: u.key,
       keyType: u.keyType,
       keyBase58: u.keyBase58,
+      verified: true,
+    ));
+    await encodeAndSendMessage(msg);
+  }
+
+  Future<void> blockUser(User u) async {
+    final msg = Users(userUpdate: UserEntry(
+      name: u.name,
+      idBase58: u.idBase58,
+      id: u.id,
+      key: u.key,
+      keyType: u.keyType,
+      keyBase58: u.keyBase58,
+      blocked: true,
     ));
     await encodeAndSendMessage(msg);
   }

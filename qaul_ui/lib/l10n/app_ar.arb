@@ -38,6 +38,7 @@
   "chatEmptyMessageHint": "نص بسيط",
   "emptyFeedList": "نص بسيط",
   "verifyUserConfirmationMessage": "نص بسيط",
+  "blockUserConfirmationMessage": "نص بسيط",
   "useSystemDefaultMessage": "نص بسيط",
   "genericErrorMessage": "نص بسيط",
   "fieldRequiredErrorMessage": "نص بسيط",
