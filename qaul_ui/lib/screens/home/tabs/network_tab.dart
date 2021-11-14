@@ -1,12 +1,17 @@
-part of '../home_screen.dart';
+part of 'tab.dart';
 
-enum _ConnectionType { bluetooth, lan, internet }
-
-class _NetworkTab extends StatelessWidget {
-  const _NetworkTab({Key? key}) : super(key: key);
+class _Network extends BaseTab {
+  const _Network({Key? key}) : super(key: key);
 
   @override
+  _NetworkState createState() => _NetworkState();
+}
+
+class _NetworkState extends _BaseTabState<_Network> {
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
+    
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -25,6 +30,8 @@ class _NetworkTab extends StatelessWidget {
     );
   }
 }
+
+enum _ConnectionType { bluetooth, lan, internet }
 
 class _AvailableConnectionsTable extends StatelessWidget {
   const _AvailableConnectionsTable({

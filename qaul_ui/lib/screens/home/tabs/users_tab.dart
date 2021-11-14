@@ -1,12 +1,18 @@
-part of '../home_screen.dart';
+part of 'tab.dart';
 
-class _UsersTab extends HookConsumerWidget {
-  const _UsersTab({Key? key}) : super(key: key);
+class _Users extends BaseTab {
+  const _Users({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _UsersState createState() => _UsersState();
+}
+
+class _UsersState extends _BaseTabState<_Users> {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
     final users =
-        ref.watch(usersProvider).where((u) => !(u.isBlocked ?? false)).toList();
+    ref.watch(usersProvider).where((u) => !(u.isBlocked ?? false)).toList();
 
     useMemoized(() => refreshUsers(ref));
 
@@ -111,122 +117,131 @@ class _AvailableConnections extends StatelessWidget {
       user.availableTypes!.contains(ConnectionType.internet);
 }
 
-class _UserDetailsScreen extends ConsumerWidget {
+class _UserDetailsScreen extends HookConsumerWidget {
   const _UserDetailsScreen({Key? key, required this.user}) : super(key: key);
   final User user;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loading = useState(false);
+
     var theme = Theme.of(context).textTheme;
     final l18ns = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          tooltip: l18ns!.backButtonTooltip,
-          icon: const Icon(Icons.arrow_back_ios_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Tooltip(
-              message: l18ns.newChatTooltip,
-              child: SvgPicture.asset(
-                'assets/icons/comment.svg',
-                width: 24,
-                height: 24,
-                color: Theme.of(context).appBarTheme.iconTheme?.color ??
-                    Theme.of(context).iconTheme.color,
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              elevatedButtonTheme: ElevatedButtonThemeData(
-                style: ElevatedButton.styleFrom(
-                  fixedSize: Size(MediaQuery.of(context).size.width * .8, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24.0),
-                  ),
-                  textStyle: theme.headline6,
-                  onSurface: Colors.white,
+    return LoadingDecorator(
+      isLoading: loading.value,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            tooltip: l18ns!.backButtonTooltip,
+            icon: const Icon(Icons.arrow_back_ios_rounded),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Tooltip(
+                message: l18ns.newChatTooltip,
+                child: SvgPicture.asset(
+                  'assets/icons/comment.svg',
+                  width: 24,
+                  height: 24,
+                  color: Theme.of(context).appBarTheme.iconTheme?.color ??
+                      Theme.of(context).iconTheme.color,
                 ),
               ),
-            ),
-            child: Builder(builder: (context) {
-              return Column(
-                children: [
-                  UserAvatar.large(user: user),
-                  const SizedBox(height: 28.0),
-                  Text(user.name, style: theme.headline3),
-                  const SizedBox(height: 8.0),
-                  Text('${l18ns.userID}: ${user.id?.join() ?? l18ns.unknown}',
-                      style: theme.headline5),
-                  const SizedBox(height: 40.0),
-                  Text('${l18ns.publicKey}:\n${user.keyBase58}',
-                      style: theme.headline5),
-                  const SizedBox(height: 40.0),
-                  if (!(user.isVerified ?? false)) ...[
-                    _RoundedRectButton(
-                      color: Colors.green,
-                      onPressed: () async {
-                        final res = await _confirmAction(context,
-                            description: l18ns.verifyUserConfirmationMessage);
-
-                        if (res is! bool || !res) return;
-
-                        final libqaul = ref.read(libqaulProvider);
-
-                        // TODO verify isMounted, block interaction while updating
-                        await RpcUsers(ref.read).verifyUser(user);
-                        await Future.delayed(const Duration(seconds: 2));
-
-                        final queued = await libqaul.checkReceiveQueue();
-                        if (queued > 0) await libqaul.receiveRpc();
-
-                        Navigator.pop(context);
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.check, size: 32),
-                          const SizedBox(width: 4),
-                          Text(l18ns.verify),
-                        ],
-                      ),
+            ],
+          ),
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: Size(MediaQuery.of(context).size.width * .8, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24.0),
                     ),
+                    textStyle: theme.headline6,
+                    onSurface: Colors.white,
+                  ),
+                ),
+              ),
+              child: Builder(builder: (context) {
+                return Column(
+                  children: [
+                    UserAvatar.large(user: user),
                     const SizedBox(height: 28.0),
+                    Text(user.name, style: theme.headline3),
+                    const SizedBox(height: 8.0),
+                    Text('${l18ns.userID}: ${user.id?.join() ?? l18ns.unknown}',
+                        style: theme.headline5),
+                    const SizedBox(height: 40.0),
+                    Text('${l18ns.publicKey}:\n${user.keyBase58}',
+                        style: theme.headline5),
+                    const SizedBox(height: 40.0),
+                    if (!(user.isVerified ?? false)) ...[
+                      _RoundedRectButton(
+                        color: Colors.green,
+                        onPressed: () async {
+                          final res = await _confirmAction(context,
+                              description: l18ns.verifyUserConfirmationMessage);
+
+                          if (res is! bool || !res) return;
+                          loading.value = true;
+
+                          final libqaul = ref.read(libqaulProvider);
+
+                          // TODO verify isMounted, block interaction while updating
+                          await RpcUsers(ref.read).verifyUser(user);
+                          await Future.delayed(const Duration(seconds: 2));
+
+                          final queued = await libqaul.checkReceiveQueue();
+                          if (queued > 0) await libqaul.receiveRpc();
+
+                          loading.value = false;
+                          Navigator.pop(context);
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.check, size: 32),
+                            const SizedBox(width: 4),
+                            Text(l18ns.verify),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 28.0),
+                    ],
+                    if (!(user.isBlocked ?? false))
+                      _RoundedRectButton(
+                        color: Colors.red.shade400,
+                        onPressed: () async {
+                          final res = await _confirmAction(context,
+                              description: l18ns.blockUserConfirmationMessage);
+
+                          if (res is! bool || !res) return;
+                          loading.value = true;
+
+                          final libqaul = ref.read(libqaulProvider);
+
+                          // TODO verify isMounted, block interaction while updating
+                          await RpcUsers(ref.read).blockUser(user);
+                          await Future.delayed(const Duration(seconds: 2));
+
+                          final queued = await libqaul.checkReceiveQueue();
+                          if (queued > 0) await libqaul.receiveRpc();
+
+                          loading.value = false;
+                          Navigator.pop(context);
+                        },
+                        child: Text(l18ns.blockUser),
+                      ),
                   ],
-                  if (!(user.isBlocked ?? false))
-                    _RoundedRectButton(
-                      color: Colors.red.shade400,
-                      onPressed: () async {
-                        final res = await _confirmAction(context,
-                            description: l18ns.blockUserConfirmationMessage);
-
-                        if (res is! bool || !res) return;
-
-                        final libqaul = ref.read(libqaulProvider);
-
-                        // TODO verify isMounted, block interaction while updating
-                        await RpcUsers(ref.read).blockUser(user);
-                        await Future.delayed(const Duration(seconds: 2));
-
-                        final queued = await libqaul.checkReceiveQueue();
-                        if (queued > 0) await libqaul.receiveRpc();
-
-                        Navigator.pop(context);
-                      },
-                      child: Text(l18ns.blockUser),
-                    ),
-                ],
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ),
       ),

@@ -1,7 +1,11 @@
-part of '../home_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:qaul_ui/widgets/user_avatar.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class _UserAccountTab extends ConsumerWidget {
-  const _UserAccountTab({Key? key}) : super(key: key);
+class UserAccountScreen extends ConsumerWidget {
+  const UserAccountScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

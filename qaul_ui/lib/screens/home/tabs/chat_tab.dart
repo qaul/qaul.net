@@ -1,10 +1,16 @@
-part of '../home_screen.dart';
+part of 'tab.dart';
 
-class _ChatTab extends ConsumerWidget {
-  const _ChatTab({Key? key}) : super(key: key);
+class _Chat extends BaseTab {
+  const _Chat({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _ChatState createState() => _ChatState();
+}
+
+class _ChatState extends _BaseTabState<_Chat> {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
     final users = ref.watch(usersProvider);
 
     final defaultUser = ref.watch(defaultUserProvider).state ??
