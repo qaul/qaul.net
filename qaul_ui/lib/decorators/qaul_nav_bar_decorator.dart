@@ -220,24 +220,9 @@ class QaulNavBarItem extends HookConsumerWidget {
           ),
         );
       case TabType.users:
-        return _SelectedIndicatorDecorator(
-          selected: selected,
-          selectedColor: theme.colorScheme.primary,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(
-              padding: const EdgeInsets.all(0.0),
-              splashRadius: 0.01,
-              tooltip: l18ns!.usersNavButtonTooltip,
-              icon: Icon(Icons.group,
-                  size: _iconSize,
-                  color: selected.value
-                      ? theme.colorScheme.primary
-                      : theme.iconTheme.color),
-              onPressed: () => controller.goToTab(tab),
-            ),
-          ),
-        );
+        svgPath = 'assets/icons/people.svg';
+        tooltip = l18ns!.feedNavButtonTooltip;
+        break;
       case TabType.feed:
         svgPath = 'assets/icons/hashtag.svg';
         tooltip = l18ns!.feedNavButtonTooltip;
