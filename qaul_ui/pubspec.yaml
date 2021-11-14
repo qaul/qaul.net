@@ -42,6 +42,8 @@ dependencies:
   # Notification bubbles on icons
   badges: ^2.0.1
 
+  window_manager: ^0.0.5
+
   bubble: ^1.2.1
   flutter_chat_ui: ^1.5.1
 

@@ -1,13 +1,16 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'helpers/navigation_helper.dart';
 import 'helpers/user_prefs_helper.dart';
@@ -150,6 +153,12 @@ class TouchAndMouseScrollBehavior extends MaterialScrollBehavior {
 
 class Init {
   static Future<void> initialize(Reader read) async {
+    if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
+      await SystemChrome.setPreferredOrientations(
+          [DeviceOrientation.landscapeLeft]);
+      await initializeWindowManager();
+    }
+
     print("initialize libqaul");
     // load libqaul
     // get it from provider
@@ -198,5 +207,18 @@ class Init {
     //   await libqaul.receiveRpc();
     //   print("libqaul RPC receveid");
     // }
+  }
+
+  static Future<void> initializeWindowManager() async {
+    await windowManager.ensureInitialized();
+
+    // Use it only after calling `hiddenWindowAtLaunch`
+    windowManager.waitUntilReadyToShow().then((_) async {
+      await windowManager.setSize(Size(600, 600));
+      await windowManager.setMinimumSize(const Size(512, 400));
+      await windowManager.setMaximumSize(const Size(828, 760));
+      await windowManager.setFullScreen(false);
+      await windowManager.show();
+    });
   }
 }
