@@ -26,7 +26,12 @@ class _FeedState extends _BaseTabState<_Feed> {
   Widget build(BuildContext context) {
     super.build(context);
     final messages = ref.watch(feedMessagesProvider);
-    final users = ref.watch(usersProvider);
+    final defaultUser = ref.watch(defaultUserProvider).state;
+    final users = ref
+        .watch(usersProvider)
+        .where((u) => !(u.isBlocked ?? false))
+        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
+        .toList();
 
     final firstLoad = useState(true);
     useMemoized(() async {
@@ -40,10 +45,11 @@ class _FeedState extends _BaseTabState<_Feed> {
       backgroundColor: Colors.transparent,
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
+          heroTag: 'feedTabFAB',
           tooltip: l18ns!.createFeedPostTooltip,
           onPressed: () async {
-            await Navigator.push(
-                context, MaterialPageRoute(builder: (_) => _CreateFeedMessage()));
+            await Navigator.push(context,
+                MaterialPageRoute(builder: (_) => _CreateFeedMessage()));
             await Future.delayed(const Duration(milliseconds: 2000));
             await refreshFeed(ref);
           },
@@ -85,7 +91,8 @@ class _FeedState extends _BaseTabState<_Feed> {
                     ),
                     subtitle: Text(
                       msg.content ?? '',
-                      style: theme.bodyText2!.copyWith(fontSize: 16, height: 1.4),
+                      style:
+                          theme.bodyText2!.copyWith(fontSize: 16, height: 1.4),
                     ),
                   );
                 },
@@ -144,6 +151,7 @@ class _CreateFeedMessage extends HookConsumerWidget {
           ),
         ),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'createFeedMessageSubscreenFAB',
           tooltip: l18ns!.submitPostTooltip,
           child: const Icon(Icons.check, size: 32.0),
           onPressed: () async {

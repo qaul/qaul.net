@@ -11,17 +11,17 @@ class _ChatState extends _BaseTabState<_Chat> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final users = ref.watch(usersProvider);
-
-    final defaultUser = ref.watch(defaultUserProvider).state ??
-        const User(
-          name: 'Breno',
-          idBase58: '12D3KooWEbzJbVGua4EQNKQVUYoA46vcXnfePfi3ZL7C8pGGqddd',
-        );
+    final defaultUser = ref.watch(defaultUserProvider).state;
+    final users = ref
+        .watch(usersProvider)
+        .where((u) => !(u.isBlocked ?? false))
+        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
+        .toList();
 
     final l18ns = AppLocalizations.of(context);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        heroTag: 'chatTabFAB',
         tooltip: l18ns!.newChatTooltip,
         onPressed: () {},
         child: SvgPicture.asset(

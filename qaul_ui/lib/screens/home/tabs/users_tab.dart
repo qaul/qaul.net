@@ -11,8 +11,12 @@ class _UsersState extends _BaseTabState<_Users> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final users =
-    ref.watch(usersProvider).where((u) => !(u.isBlocked ?? false)).toList();
+    final defaultUser = ref.watch(defaultUserProvider).state;
+    final users = ref
+        .watch(usersProvider)
+        .where((u) => !(u.isBlocked ?? false))
+        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
+        .toList();
 
     final firstLoad = useState(true);
     useMemoized(() async {
@@ -160,24 +164,26 @@ class _UserDetailsScreen extends HookConsumerWidget {
             ],
           ),
         ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                elevatedButtonTheme: ElevatedButtonThemeData(
-                  style: ElevatedButton.styleFrom(
-                    fixedSize: Size(MediaQuery.of(context).size.width * .8, 48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24.0),
-                    ),
-                    textStyle: theme.headline6,
-                    onSurface: Colors.white,
-                  ),
+        body: Theme(
+          data: Theme.of(context).copyWith(
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                fixedSize: Size(MediaQuery.of(context).size.width * .8, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24.0),
                 ),
+                textStyle: theme.headline6,
+                onSurface: Colors.white,
               ),
-              child: Builder(builder: (context) {
-                return Column(
+            ),
+          ),
+          child: Builder(builder: (context) {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     UserAvatar.large(user: user),
                     const SizedBox(height: 28.0),
@@ -245,10 +251,10 @@ class _UserDetailsScreen extends HookConsumerWidget {
                         child: Text(l18ns.blockUser),
                       ),
                   ],
-                );
-              }),
-            ),
-          ),
+                ),
+              ),
+            );
+          }),
         ),
       ),
     );

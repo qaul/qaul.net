@@ -11,6 +11,12 @@ class _NetworkState extends _BaseTabState<_Network> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final defaultUser = ref.watch(defaultUserProvider).state;
+    final users = ref
+        .watch(usersProvider)
+        .where((u) => !(u.isBlocked ?? false))
+        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
+        .toList();
     
     return Scaffold(
       body: SingleChildScrollView(
