@@ -8,105 +8,130 @@ class _Network extends BaseTab {
 }
 
 class _NetworkState extends _BaseTabState<_Network> {
+  Future<void> refreshNetwork(WidgetRef ref) async {
+    if (loading.value) return;
+    loading.value = true;
+    await RpcRouter(ref.read).requestUsers();
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+    final libqaul = ref.read(libqaulProvider);
+
+    final queued = await libqaul.checkReceiveQueue();
+    if (queued > 0) await libqaul.receiveRpc();
+    loading.value = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final defaultUser = ref.watch(defaultUserProvider).state;
-    final users = ref
-        .watch(usersProvider)
-        .where((u) => !(u.isBlocked ?? false))
-        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
-        .toList();
-    
+
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: MediaQuery.of(context).viewPadding,
-          child: Column(
-            children: const [
-              _AvailableConnectionsTable(type: _ConnectionType.bluetooth),
-              SizedBox(height: 32.0),
-              _AvailableConnectionsTable(type: _ConnectionType.lan),
-              SizedBox(height: 32.0),
-              _AvailableConnectionsTable(type: _ConnectionType.internet),
-            ],
-          ),
+      body: RefreshIndicator(
+        onRefresh: () async => await refreshNetwork(ref),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          controller: ScrollController(),
+          padding: MediaQuery.of(context)
+              .viewPadding
+              .add(const EdgeInsets.symmetric(vertical: 12)),
+          children: const [
+            _AvailableConnectionsTable(type: ConnectionType.ble),
+            SizedBox(height: 32.0),
+            _AvailableConnectionsTable(type: ConnectionType.lan),
+            SizedBox(height: 32.0),
+            _AvailableConnectionsTable(type: ConnectionType.internet),
+          ],
         ),
       ),
     );
   }
 }
 
-enum _ConnectionType { bluetooth, lan, internet }
-
-class _AvailableConnectionsTable extends StatelessWidget {
-  const _AvailableConnectionsTable({
-    Key? key,
-    required this.type,
-  }) : super(key: key);
-  final _ConnectionType type;
+class _AvailableConnectionsTable extends ConsumerWidget {
+  const _AvailableConnectionsTable({Key? key, required this.type})
+      : super(key: key);
+  final ConnectionType type;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final icon = _mapIconFromType(type);
 
     final l18ns = AppLocalizations.of(context);
+    final theme = Theme.of(context).textTheme;
+
+    final defaultUser = ref.watch(defaultUserProvider).state;
+    final users = ref
+        .watch(usersProvider)
+        .where((u) => !(u.isBlocked ?? false))
+        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
+        .where((u) => u.availableTypes?.keys.contains(type) ?? false)
+        .toList();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Icon(icon, size: 32),
               const SizedBox(width: 8),
               Text('${_buildCapitalizedEnumName()} ${l18ns!.connections}',
-                  style: Theme.of(context).textTheme.headline5),
+                  style: theme.headline5),
             ],
           ),
           const SizedBox(height: 12),
-          Table(
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            columnWidths: const {
-              0: FlexColumnWidth(.1),
-              1: FlexColumnWidth(.22),
-              2: FlexColumnWidth(.22),
-              3: FlexColumnWidth(.22),
-            },
-            children: [
-              TableRow(
-                children: [
-                  const TableCell(child: SizedBox(height: 24)),
-                  TableCell(child: Text(l18ns.ping)),
-                  TableCell(child: Text(l18ns.hopCount)),
-                  TableCell(child: Text(l18ns.via)),
-                ],
-              ),
-              TableRow(children: [
-                TableCell(
-                  child: Container(
-                    alignment: AlignmentDirectional.centerStart,
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: UserAvatar.tiny(),
-                  ),
+          users.isEmpty
+              ? Text(l18ns.noneAvailableMessage,
+                  style: theme.subtitle1!.copyWith(fontStyle: FontStyle.italic))
+              : Table(
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  columnWidths: const {
+                    0: FlexColumnWidth(.1),
+                    1: FlexColumnWidth(.22),
+                    2: FlexColumnWidth(.22),
+                    3: FlexColumnWidth(.22),
+                  },
+                  children: [
+                    TableRow(
+                      children: [
+                        const TableCell(child: SizedBox(height: 24)),
+                        TableCell(child: Text(l18ns.ping)),
+                        TableCell(child: Text(l18ns.hopCount)),
+                        TableCell(child: Text(l18ns.via)),
+                      ],
+                    ),
+                    ...List.generate(users.length, (index) {
+                      final usr = users[index];
+                      final data = usr.availableTypes![type];
+
+                      return TableRow(children: [
+                        TableCell(
+                          child: Container(
+                            alignment: AlignmentDirectional.centerStart,
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: UserAvatar.tiny(user: usr),
+                          ),
+                        ),
+                        TableCell(
+                            child: Text(data!.ping == null
+                                ? l18ns.unknown
+                                : '${data.ping} ms')),
+                        TableCell(
+                            child: Text(data.hopCount == null
+                                ? l18ns.unknown
+                                : data.hopCount.toString())),
+                        TableCell(
+                            child: Text(
+                                data.nodeID == null
+                                    ? l18ns.unknown
+                                    : data.nodeID.toString(),
+                                style: theme.caption)),
+                      ]);
+                    }),
+                  ],
                 ),
-                const TableCell(child: Text('103 ms')),
-                const TableCell(child: Text('3')),
-                const TableCell(child: Text('Node ID')),
-              ]),
-              TableRow(children: [
-                TableCell(
-                  child: Container(
-                    alignment: AlignmentDirectional.centerStart,
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: UserAvatar.tiny(),
-                  ),
-                ),
-                const TableCell(child: Text('512 ms')),
-                const TableCell(child: Text('2')),
-                const TableCell(child: Text('Node ID')),
-              ]),
-            ],
-          ),
         ],
       ),
     );
@@ -116,13 +141,13 @@ class _AvailableConnectionsTable extends StatelessWidget {
       describeEnum(type).splitMapJoin(RegExp(r'^.{1}'),
           onMatch: (m) => m[0]!.toUpperCase(), onNonMatch: (n) => n);
 
-  IconData _mapIconFromType(_ConnectionType type) {
+  IconData _mapIconFromType(ConnectionType type) {
     switch (type) {
-      case _ConnectionType.bluetooth:
+      case ConnectionType.ble:
         return Icons.bluetooth;
-      case _ConnectionType.lan:
+      case ConnectionType.lan:
         return Icons.wifi;
-      case _ConnectionType.internet:
+      case ConnectionType.internet:
         return CupertinoIcons.globe;
       default:
         throw ArgumentError.value(type, 'ConnectionType', 'value not mapped');

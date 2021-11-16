@@ -31,6 +31,7 @@ class _UsersState extends _BaseTabState<_Users> {
         body: RefreshIndicator(
           onRefresh: () async => await refreshUsers(ref),
           child: ListView.separated(
+            controller: ScrollController(),
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: users.length,
             separatorBuilder: (_, __) => const Divider(height: 12.0),
@@ -119,14 +120,14 @@ class _AvailableConnections extends StatelessWidget {
     );
   }
 
-  bool get _hasBluetooth => user.availableTypes!.contains(ConnectionType.ble);
+  bool get _hasBluetooth => user.availableTypes!.keys.contains(ConnectionType.ble);
 
-  bool get _hasLan => user.availableTypes!.contains(ConnectionType.lan);
+  bool get _hasLan => user.availableTypes!.keys.contains(ConnectionType.lan);
 
-  bool get _hasLocal => user.availableTypes!.contains(ConnectionType.local);
+  bool get _hasLocal => user.availableTypes!.keys.contains(ConnectionType.local);
 
   bool get _hasInternet =>
-      user.availableTypes!.contains(ConnectionType.internet);
+      user.availableTypes!.keys.contains(ConnectionType.internet);
 }
 
 class _UserDetailsScreen extends HookConsumerWidget {
@@ -189,7 +190,7 @@ class _UserDetailsScreen extends HookConsumerWidget {
                     const SizedBox(height: 28.0),
                     Text(user.name, style: theme.headline3),
                     const SizedBox(height: 8.0),
-                    Text('${l18ns.userID}: ${user.id?.join() ?? l18ns.unknown}',
+                    Text('${l18ns.userID}: ${user.id.join()}',
                         style: theme.headline5),
                     const SizedBox(height: 40.0),
                     Text('${l18ns.publicKey}:\n${user.keyBase58}',

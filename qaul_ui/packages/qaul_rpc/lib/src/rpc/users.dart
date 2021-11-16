@@ -36,7 +36,7 @@ class RpcUsers extends RpcModule {
             isVerified: u.verified,
           );
 
-          if (provider.contains(u.idBase58)) {
+          if (provider.contains(domainUser)) {
             provider.update(domainUser);
             continue;
           }

@@ -1,5 +1,4 @@
 import 'package:fast_base58/fast_base58.dart';
-import 'package:flutter/foundation.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/router/router.pb.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
@@ -22,19 +21,22 @@ class RpcRouter extends RpcModule {
     switch (message.whichMessage()) {
       case Router_Message.routingTable:
         final users = message.ensureRoutingTable().routingTable;
-        debugPrint('Router received Users: $users');
-
         final provider = read(usersProvider.notifier);
 
         for (final u in users) {
+          var map = _mapFromRoutingTableConnections(u.connections);
+
           final domainUser = User(
             name: 'Name Undefined',
             idBase58: Base58Encode(u.userId),
             id: u.userId,
-            availableTypes: _mapFromRoutingTableConnections(u.connections),
+            availableTypes: map,
           );
 
-          if (provider.contains(domainUser.idBase58)) {
+          // map.forEach((key, value) => debugPrint(
+          //     'USER: ${domainUser.idBase58}\nKEY: $key, VALUE: $value'));
+
+          if (provider.contains(domainUser)) {
             provider.update(domainUser);
             continue;
           }
@@ -50,14 +52,12 @@ class RpcRouter extends RpcModule {
     }
   }
 
-  Future<void> requestUsers() async {
-    final msg = Router(routingTableRequest: RoutingTableRequest());
-    await encodeAndSendMessage(msg);
-  }
+  Future<void> requestUsers() async => await encodeAndSendMessage(
+      Router(routingTableRequest: RoutingTableRequest()));
 
-  List<ConnectionType> _mapFromRoutingTableConnections(
+  Map<ConnectionType, ConnectionInfo> _mapFromRoutingTableConnections(
       List<RoutingTableConnection> connections) {
-    ConnectionType _toType(RoutingTableConnection c) {
+    ConnectionType toType(RoutingTableConnection c) {
       if (c.module == ConnectionModule.LOCAL) {
         return ConnectionType.local;
       }
@@ -73,10 +73,12 @@ class RpcRouter extends RpcModule {
       throw ArgumentError.value(c, 'ConnectionModule', 'value not mapped');
     }
 
-    return connections
+    ConnectionInfo toConnectionInfo(RoutingTableConnection c) =>
+        ConnectionInfo(ping: c.rtt, nodeID: c.via);
+
+    return Map.fromEntries(connections
         .where((c) => c.module != ConnectionModule.NONE)
-        .map(_toType)
-        .toList();
+        .map((e) => MapEntry(toType(e), toConnectionInfo(e))));
   }
 }
 
@@ -88,24 +90,28 @@ class UserListNotifier extends StateNotifier<List<User>> {
   }
 
   void update(User u) {
-    assert(u.id != null);
-    final i = state.indexWhere((e) => u.idBase58 == e.idBase58 || e.id == u.id);
-    if (i.isNegative) throw ArgumentError.value(u, 'User', 'user not in state');
-    final beforeUpdate = state[i];
-    state[i] = User(
-      name: beforeUpdate.name == 'Name Undefined' ? u.name : beforeUpdate.name,
-      idBase58: u.idBase58,
-      id: u.id,
-      status: u.status,
-      key: u.key ?? beforeUpdate.key,
-      keyType: u.keyType ?? beforeUpdate.keyType,
-      keyBase58: u.keyBase58 ?? beforeUpdate.keyBase58,
-      isBlocked: u.isBlocked ?? beforeUpdate.isBlocked,
-      isVerified: u.isVerified ?? beforeUpdate.isVerified,
-      availableTypes: u.availableTypes ?? beforeUpdate.availableTypes,
-    );
+    state = [
+      for (final usr in state)
+        if (usr.id == u.id || usr.idBase58 == u.idBase58)
+          User(
+            name: usr.name == 'Name Undefined' ? u.name : usr.name,
+            idBase58: u.idBase58,
+            id: u.id,
+            status:
+                u.status == ConnectionStatus.offline ? usr.status : u.status,
+            key: u.key ?? usr.key,
+            keyType: u.keyType ?? usr.keyType,
+            keyBase58: u.keyBase58 ?? usr.keyBase58,
+            isBlocked: u.isBlocked ?? usr.isBlocked,
+            isVerified: u.isVerified ?? usr.isVerified,
+            availableTypes: u.availableTypes ?? usr.availableTypes,
+          )
+        else
+          usr,
+    ];
   }
 
-  bool contains(String idBase58) =>
-      !state.indexWhere((u) => u.idBase58 == idBase58).isNegative;
+  bool contains(User usr) => !state
+      .indexWhere((u) => u.id == usr.id || u.idBase58 == usr.idBase58)
+      .isNegative;
 }

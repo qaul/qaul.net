@@ -7,8 +7,8 @@ enum ConnectionType { lan, internet, ble, local }
 class User extends Equatable {
   const User({
     required this.name,
+    required this.id,
     required this.idBase58,
-    this.id,
     this.key,
     this.keyType,
     this.keyBase58,
@@ -20,15 +20,26 @@ class User extends Equatable {
 
   final String name;
   final String idBase58;
-  final List<int>? id;
+  final List<int> id;
   final List<int>? key;
   final String? keyType;
   final String? keyBase58;
-  final List<ConnectionType>? availableTypes;
+  final Map<ConnectionType, ConnectionInfo>? availableTypes;
   final bool? isBlocked;
   final bool? isVerified;
   final ConnectionStatus status;
 
   @override
   List<Object?> get props => [name, idBase58];
+}
+
+class ConnectionInfo extends Equatable {
+  const ConnectionInfo({this.ping, this.hopCount, this.nodeID});
+
+  final int? ping;
+  final int? hopCount;
+  final List<int>? nodeID;
+
+  @override
+  List<Object?> get props => [ping, hopCount, nodeID];
 }

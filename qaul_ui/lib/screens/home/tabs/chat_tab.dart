@@ -32,6 +32,7 @@ class _ChatState extends _BaseTabState<_Chat> {
         ),
       ),
       body: ListView.separated(
+        controller: ScrollController(),
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: users.length,
         separatorBuilder: (_, __) => const Divider(height: 12.0),

@@ -62,7 +62,7 @@ class Rpc {
     message.data = data;
 
     final user = reader(defaultUserProvider).state;
-    if (user != null && user.id != null) message.userId = user.id!;
+    if (user != null) message.userId = user.id;
 
     // encode it
     Uint8List messageEncoded = message.writeToBuffer();

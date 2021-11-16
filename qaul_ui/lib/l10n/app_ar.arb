@@ -43,5 +43,6 @@
   "genericErrorMessage": "نص بسيط",
   "fieldRequiredErrorMessage": "نص بسيط",
   "timeoutErrorMessage": "نص بسيط",
-  "notFoundErrorMessage": "نص بسيط"
+  "notFoundErrorMessage": "نص بسيط",
+  "noneAvailableMessage": "نص بسيط"
 }

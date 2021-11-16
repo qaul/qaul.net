@@ -45,5 +45,6 @@
   "genericErrorMessage": "An error occurred",
   "fieldRequiredErrorMessage": "Field required.",
   "timeoutErrorMessage": "Timeout",
-  "notFoundErrorMessage": "not found"
+  "notFoundErrorMessage": "not found",
+  "noneAvailableMessage": "None available"
 }

@@ -60,6 +60,7 @@ class _FeedState extends _BaseTabState<_Feed> {
           child: Stack(
             children: [
               ListView.separated(
+                controller: ScrollController(),
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: messages.length,
                 separatorBuilder: (_, __) => const Divider(height: 12.0),
