@@ -46,6 +46,10 @@ class Rpc {
         debugPrint('USERS message received');
         RpcUsers(reader).decodeReceivedMessage(message.data);
         break;
+      case Modules.CONNECTIONS:
+        debugPrint('CONNECTIONS message received');
+        RpcConnections(reader).decodeReceivedMessage(message.data);
+        break;
       default:
         throw('UNHANDLED protobuf message received: $message from MODULE: ${message.module}');
     }

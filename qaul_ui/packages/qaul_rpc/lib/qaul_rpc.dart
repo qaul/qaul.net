@@ -7,6 +7,7 @@ export 'src/providers.dart';
 export 'src/models/feed_message.dart';
 export 'src/models/user.dart';
 
+export 'src/rpc/connections.dart';
 export 'src/rpc/feed.dart';
 export 'src/rpc/node.dart';
 export 'src/rpc/router.dart';

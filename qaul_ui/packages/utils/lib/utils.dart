@@ -1,9 +1,11 @@
 /// Added as a separate package as running tests on root project instantiates a libqaul shell for some reason, which in return fails the tests.
 library color_generator;
 
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -57,4 +59,52 @@ String describeLocale(Locale l) {
   if (l.languageCode == 'en') return 'English';
   if (l.languageCode == 'ar') return 'Arabic';
   return l.toLanguageTag();
+}
+
+bool isValidIPv4(String? s) {
+  if (s == null || s.isEmpty) return false;
+  return RegExp(r'^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)(\.(?!$)|$)){4}$')
+      .hasMatch(s);
+}
+
+bool isValidPort(String? s) {
+  if (s == null || int.tryParse(s) == null) return false;
+  return int.parse(s) >=0 && int.parse(s) < pow(2, 16);
+}
+
+class IPTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) return newValue;
+    if (oldValue.text.length > newValue.text.length) return newValue;
+
+    var output = newValue.text;
+
+    if (output.contains(',')) output = output.replaceAll(',', '.');
+
+    if (output.endsWith('..')) {
+      return TextEditingValue(
+        text: output.substring(0, output.length - 1),
+        selection: TextSelection.collapsed(offset: output.length - 1),
+      );
+    }
+
+    output = _numberFilter
+        .formatEditUpdate(oldValue,
+            TextEditingValue(text: output, selection: newValue.selection))
+        .text;
+
+    if (output.split('.').last.length == 3) output += '.';
+
+    if (output.length > 15) output = output.substring(0, 15);
+
+    return TextEditingValue(
+      text: output,
+      selection: TextSelection.collapsed(offset: output.length),
+    );
+  }
+
+  FilteringTextInputFormatter get _numberFilter =>
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9\.]'));
 }

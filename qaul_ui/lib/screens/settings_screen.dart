@@ -1,8 +1,13 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:qaul_ui/decorators/loading_decorator.dart';
 import 'package:qaul_ui/widgets/language_select_dropdown.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:utils/utils.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -35,7 +40,7 @@ class SettingsScreen extends StatelessWidget {
               SizedBox(height: 20),
               _ThemeSelectDropDown(),
               SizedBox(height: 80),
-              _InternetNodesTable(),
+              _InternetNodesList(),
             ],
           ),
         ),
@@ -91,11 +96,30 @@ class _ThemeSelectDropDown extends StatelessWidget {
   }
 }
 
-class _InternetNodesTable extends StatelessWidget {
-  const _InternetNodesTable();
+class _InternetNodesList extends HookConsumerWidget {
+  const _InternetNodesList();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final nodes = ref.watch(connectedNodesProvider).state;
+
+    final loading = useState(true);
+    final isMounted = useIsMounted();
+    useMemoized(() async {
+      await RpcConnections(ref.read).requestNodes();
+
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (!isMounted()) return;
+
+      final libqaul = ref.read(libqaulProvider);
+
+      final queued = await libqaul.checkReceiveQueue();
+      if (queued > 0) await libqaul.receiveRpc();
+
+      loading.value = false;
+    });
+
     final l18ns = AppLocalizations.of(context);
     return Column(
       children: [
@@ -107,34 +131,52 @@ class _InternetNodesTable extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8.0),
-        Table(
-          border: TableBorder.all(),
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: <TableRow>[
-            TableRow(
-              children: <Widget>[
-                Container(
-                  height: 32,
-                  alignment: Alignment.center,
-                  child: Text(l18ns.address),
-                ),
-                Container(
-                  height: 32,
-                  alignment: Alignment.center,
-                  child: Text(l18ns.name),
-                ),
-              ],
+        LoadingDecorator(
+          isLoading: loading.value,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.symmetric(
+                  horizontal: loading.value
+                      ? BorderSide.none
+                      : BorderSide(color: Theme.of(context).dividerColor)),
             ),
-            TableRow(
-              decoration: const BoxDecoration(
-                color: Colors.grey,
-              ),
-              children: <Widget>[
-                Container(height: 64),
-                Container(height: 64),
-              ],
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: nodes.length,
+              separatorBuilder: (_, __) => const Divider(height: 12.0),
+              itemBuilder: (context, i) {
+                var nodeAddr = nodes[i].address;
+                return ListTile(
+                  contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
+                  title: Text(
+                    nodeAddr,
+                    style: Theme.of(context).textTheme.subtitle2,
+                  ),
+                  leading: IconButton(
+                    splashRadius: 24,
+                    iconSize: 20,
+                    icon: const Icon(CupertinoIcons.delete),
+                    onPressed: () async {
+                      loading.value = true;
+                      await RpcConnections(ref.read).removeNode(nodeAddr);
+
+                      await Future.delayed(const Duration(seconds: 2));
+
+                      if (!isMounted()) return;
+
+                      final libqaul = ref.read(libqaulProvider);
+
+                      var queued = await libqaul.checkReceiveQueue();
+                      if (queued > 0) await libqaul.receiveRpc();
+                      loading.value = false;
+                    },
+                  ),
+                );
+              },
             ),
-          ],
+          ),
         ),
         const SizedBox(height: 12.0),
         Row(
@@ -142,11 +184,26 @@ class _InternetNodesTable extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.add),
               splashRadius: 24,
-              onPressed: () => ScaffoldMessenger.of(context)
-                ..clearSnackBars()
-                ..showSnackBar(const SnackBar(
-                  content: Text('This will add a node'),
-                )),
+              onPressed: () async {
+                final res = await showDialog(
+                    context: context, builder: (_) => _AddNodeDialog());
+
+                if (res is! String) return;
+                loading.value = true;
+
+                await RpcConnections(ref.read).addNode(res);
+
+                await Future.delayed(const Duration(seconds: 2));
+
+                if (!isMounted()) return;
+
+                final libqaul = ref.read(libqaulProvider);
+
+                var queued = await libqaul.checkReceiveQueue();
+                if (queued > 0) await libqaul.receiveRpc();
+
+                loading.value = false;
+              },
             ),
             const SizedBox(width: 12.0),
             Text(l18ns.addNodeCTA),
@@ -155,4 +212,104 @@ class _InternetNodesTable extends StatelessWidget {
       ],
     );
   }
+}
+
+class _AddNodeDialog extends HookWidget {
+  _AddNodeDialog({
+    Key? key,
+  }) : super(key: key);
+
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    final ipCtrl = useTextEditingController();
+    final portCtrl = useTextEditingController();
+
+    final l18ns = AppLocalizations.of(context)!;
+    var orientation = MediaQuery.of(context).orientation;
+    final tcpField = [
+      _spacer,
+      Text('/tcp/', style: _fixedTextStyle),
+      _spacer,
+      Expanded(
+        child: TextFormField(
+          controller: portCtrl,
+          decoration: _decoration('port', hint: '00000'),
+          keyboardType: TextInputType.number,
+          validator: (val) {
+            if (isValidPort(val)) return null;
+            return l18ns.invalidPortMessage;
+          },
+        ),
+      ),
+    ];
+
+    return AlertDialog(
+      title: orientation == Orientation.landscape
+          ? null
+          : Text(l18ns.addNodeCTA),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('/ip4/', style: _fixedTextStyle),
+                _spacer,
+                Expanded(
+                  child: TextFormField(
+                    autofocus: true,
+                    controller: ipCtrl,
+                    inputFormatters: [IPTextInputFormatter()],
+                    decoration: _decoration('ip', hint: '000.000.000.000'),
+                    validator: (val) {
+                      if (isValidIPv4(val)) return null;
+                      return l18ns.invalidIPMessage;
+                    },
+                    keyboardType: TextInputType.number,
+                    enableInteractiveSelection: false,
+                  ),
+                ),
+                if (orientation == Orientation.landscape) ...tcpField,
+              ],
+            ),
+            if (orientation == Orientation.portrait) ...[
+              const SizedBox(height: 20),
+              Row(children: tcpField),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          child: Text(l18ns.okDialogButton),
+          onPressed: () {
+            if (!(_formKey.currentState?.validate() ?? false)) return;
+            Navigator.pop(context, '/ip4/${ipCtrl.text}/tcp/${portCtrl.text}');
+          },
+        ),
+        TextButton(
+          child: Text(l18ns.cancelDialogButton),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+  }
+
+  SizedBox get _spacer => const SizedBox(width: 4, height: 4);
+
+  TextStyle get _fixedTextStyle => TextStyle(
+      fontSize: 26, fontWeight: FontWeight.w500, color: Colors.grey.shade500);
+
+  InputDecoration _decoration(String label, {String? hint}) => InputDecoration(
+        isDense: true,
+        hintText: hint,
+        labelText: label,
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.all(12),
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+      );
 }

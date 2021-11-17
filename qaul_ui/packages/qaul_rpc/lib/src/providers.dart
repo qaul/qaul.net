@@ -4,6 +4,7 @@ import 'package:qaul_rpc/src/models/user.dart';
 import 'package:qaul_rpc/src/rpc/router.dart';
 
 import '../qaul_rpc.dart';
+import 'models/internet_node.dart';
 
 // TODO(brenodt): Hide from outside of package. No need to expose this low-level class.
 final libqaulProvider = Provider<Libqaul>((ref) => Libqaul(ref.read));
@@ -34,3 +35,5 @@ final usersProvider = StateNotifierProvider<UserListNotifier, List<User>>(
       ],
     ),
 );
+
+final connectedNodesProvider = StateProvider<List<InternetNode>>((ref) => []);

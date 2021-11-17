@@ -44,5 +44,7 @@
   "fieldRequiredErrorMessage": "نص بسيط",
   "timeoutErrorMessage": "نص بسيط",
   "notFoundErrorMessage": "نص بسيط",
-  "noneAvailableMessage": "نص بسيط"
+  "noneAvailableMessage": "نص بسيط",
+  "invalidIPMessage": "نص بسيط",
+  "invalidPortMessage": "نص بسيط"
 }

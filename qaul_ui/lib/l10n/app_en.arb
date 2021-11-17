@@ -4,7 +4,7 @@
     "description": "CTA rendered on top of text field"
   },
   "okDialogButton": "OK",
-  "cancelDialogButton": "Cancel",
+  "cancelDialogButton": "CANCEL",
   "backButtonTooltip": "Back",
   "sendTooltip": "Send",
 
@@ -46,5 +46,7 @@
   "fieldRequiredErrorMessage": "Field required.",
   "timeoutErrorMessage": "Timeout",
   "notFoundErrorMessage": "not found",
-  "noneAvailableMessage": "None available"
+  "noneAvailableMessage": "None available",
+  "invalidIPMessage": "Invalid IP",
+  "invalidPortMessage": "Invalid Port"
 }
