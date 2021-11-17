@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_ui/helpers/user_prefs_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:utils/utils.dart';
 
 class LanguageSelectDropDown extends ConsumerWidget {
   const LanguageSelectDropDown({
@@ -35,7 +36,7 @@ class LanguageSelectDropDown extends ConsumerWidget {
                   child: Text(
                     value == null
                         ? AppLocalizations.of(context)!.useSystemDefaultMessage
-                        : value.toLanguageTag(),
+                        : describeLocale(value),
                   ),
                 );
               }).toList(),

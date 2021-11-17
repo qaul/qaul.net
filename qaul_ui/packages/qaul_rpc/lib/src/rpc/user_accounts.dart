@@ -61,7 +61,7 @@ class RpcUserAccounts extends RpcModule {
 
     debugPrint('*' * 180);
     debugPrint('USER IDBASE58: ${user.idBase58}');
-    debugPrint('USER ID ENCODED: ${Base58Encode(user.id)}');
+    debugPrint('ID ENCODED   : ${Base58Encode(user.id)}');
     debugPrint('*' * 180);
     reader(defaultUserProvider).state = user;
   }

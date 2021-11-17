@@ -49,3 +49,12 @@ String describeFuzzyTimestamp(DateTime date, {DateTime? clock}) {
 
   return timeSent;
 }
+
+/// Returns a long, descriptive name for the locale (always in english).
+///
+/// If [this] is not mapped, then it will return [this.toLanguageTag()]
+String describeLocale(Locale l) {
+  if (l.languageCode == 'en') return 'English';
+  if (l.languageCode == 'ar') return 'Arabic';
+  return l.toLanguageTag();
+}
