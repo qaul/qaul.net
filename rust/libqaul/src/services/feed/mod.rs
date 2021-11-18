@@ -231,12 +231,14 @@ impl Feed {
         }
     }
 
-    /// Process incoming RPC request messages for node module
+    /// Process incoming RPC request messages for feed module
     pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, lan: Option<&mut Lan>, internet: Option<&mut Internet> ) {
         match proto::Feed::decode(&data[..]) {
             Ok(feed) => {
                 match feed.message {
                     Some(proto::feed::Message::Request(_)) => {
+                        log::info!("proto::feed::Message::Request received");
+
                         // get feed message store
                         let feed = FEED.get().read().unwrap();
                         
@@ -272,22 +274,34 @@ impl Feed {
                         Rpc::send_message(buf, crate::rpc::proto::Modules::Feed.into(), "".to_string(), Vec::new() );
                     },
                     Some(proto::feed::Message::Send(send_feed)) => {
+                        log::info!("proto::feed::Message::Send(send_feed) received");
+                        // print message
+                        log::info!("message is: {}", send_feed.content.clone());
+
                         // get user account from user_id
                         let user_account;
-                        if let Ok(user_id_decoded) = PeerId::from_bytes(&user_id){
-                            match UserAccounts::get_by_id(user_id_decoded) {
-                                Some(account) => {
-                                    user_account = account;
-                                    // send the message
-                                    Self::send( &user_account, send_feed.content, lan, internet );
-                                },
-                                None => {
-                                    return
-                                },
-                            }
+                        match PeerId::from_bytes(&user_id){
+                            Ok(user_id_decoded) => {
+                                match UserAccounts::get_by_id(user_id_decoded) {
+                                    Some(account) => {
+                                        user_account = account;
+                                        // send the message
+                                        Self::send( &user_account, send_feed.content, lan, internet );
+                                    },
+                                    None => {
+                                        log::error!("user account id not found: {:?}", user_id_decoded.to_base58());
+                                        return
+                                    },
+                                }    
+                            },
+                            Err(e) => {
+                                log::error!("user account id could'nt be encoded: {:?}", e);
+                            },
                         }
                     },
-                    _ => {},
+                    _ => {
+                        log::error!("Unhandled Protobuf Feed Message");
+                    },
                 }    
             },
             Err(error) => {
