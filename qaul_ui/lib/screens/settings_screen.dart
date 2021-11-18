@@ -135,6 +135,7 @@ class _InternetNodesList extends HookConsumerWidget {
           isLoading: loading.value,
           backgroundColor: Colors.transparent,
           child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 4),
             decoration: BoxDecoration(
               border: Border.symmetric(
                   horizontal: loading.value
@@ -173,6 +174,42 @@ class _InternetNodesList extends HookConsumerWidget {
                       loading.value = false;
                     },
                   ),
+                  onTap: () async {
+                    final ip =
+                        nodeAddr.replaceAll('/ip4/', '').split('/').first;
+                    final port = nodeAddr.split('/').last;
+                    final res = await showDialog(
+                      context: context,
+                      builder: (_) => _AddNodeDialog(ip: ip, port: port),
+                    );
+
+                    if (res is! String) return;
+                    loading.value = true;
+
+                    // remove
+                    await RpcConnections(ref.read).removeNode(nodeAddr);
+
+                    await Future.delayed(const Duration(seconds: 2));
+
+                    if (!isMounted()) return;
+
+                    final libqaul = ref.read(libqaulProvider);
+
+                    var queued = await libqaul.checkReceiveQueue();
+                    if (queued > 0) await libqaul.receiveRpc();
+
+                    // add updated
+                    await RpcConnections(ref.read).addNode(res);
+
+                    await Future.delayed(const Duration(seconds: 2));
+
+                    if (!isMounted()) return;
+
+                    queued = await libqaul.checkReceiveQueue();
+                    if (queued > 0) await libqaul.receiveRpc();
+
+                    loading.value = false;
+                  },
                 );
               },
             ),
@@ -217,14 +254,19 @@ class _InternetNodesList extends HookConsumerWidget {
 class _AddNodeDialog extends HookWidget {
   _AddNodeDialog({
     Key? key,
+    this.ip,
+    this.port,
   }) : super(key: key);
+
+  final String? ip;
+  final String? port;
 
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    final ipCtrl = useTextEditingController();
-    final portCtrl = useTextEditingController();
+    final ipCtrl = useTextEditingController(text: ip);
+    final portCtrl = useTextEditingController(text: port);
 
     final l18ns = AppLocalizations.of(context)!;
     var orientation = MediaQuery.of(context).orientation;
@@ -246,9 +288,8 @@ class _AddNodeDialog extends HookWidget {
     ];
 
     return AlertDialog(
-      title: orientation == Orientation.landscape
-          ? null
-          : Text(l18ns.addNodeCTA),
+      title:
+          orientation == Orientation.landscape ? null : Text(l18ns.addNodeCTA),
       content: Form(
         key: _formKey,
         child: Column(
