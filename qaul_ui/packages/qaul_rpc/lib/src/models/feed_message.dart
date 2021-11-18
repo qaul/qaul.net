@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
 
 class FeedMessage extends Equatable {
@@ -11,9 +13,9 @@ class FeedMessage extends Equatable {
     this.content,
   });
 
-  final List<int>? senderId;
+  final Uint8List? senderId;
   final String? senderIdBase58;
-  final List<int>? messageId;
+  final Uint8List? messageId;
   final String? messageIdBase58;
   final String? timeSent;
   final String? timeReceived;

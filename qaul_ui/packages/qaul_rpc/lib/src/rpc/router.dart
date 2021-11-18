@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fast_base58/fast_base58.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/router/router.pb.dart';
@@ -29,7 +31,7 @@ class RpcRouter extends RpcModule {
           final domainUser = User(
             name: 'Name Undefined',
             idBase58: Base58Encode(u.userId),
-            id: u.userId,
+            id: Uint8List.fromList(u.userId),
             availableTypes: map,
           );
 
@@ -74,7 +76,7 @@ class RpcRouter extends RpcModule {
     }
 
     ConnectionInfo toConnectionInfo(RoutingTableConnection c) =>
-        ConnectionInfo(ping: c.rtt, nodeID: c.via);
+        ConnectionInfo(ping: c.rtt, nodeID: Uint8List.fromList(c.via));
 
     return Map.fromEntries(connections
         .where((c) => c.module != ConnectionModule.NONE)

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
 
 enum ConnectionStatus { online, reachable, offline }
@@ -20,8 +22,8 @@ class User extends Equatable {
 
   final String name;
   final String idBase58;
-  final List<int> id;
-  final List<int>? key;
+  final Uint8List id;
+  final Uint8List? key;
   final String? keyType;
   final String? keyBase58;
   final Map<ConnectionType, ConnectionInfo>? availableTypes;
@@ -38,7 +40,7 @@ class ConnectionInfo extends Equatable {
 
   final int? ping;
   final int? hopCount;
-  final List<int>? nodeID;
+  final Uint8List? nodeID;
 
   @override
   List<Object?> get props => [ping, hopCount, nodeID];

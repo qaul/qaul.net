@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
-import '../providers.dart';
 import 'node.dart';
 
 class Rpc {

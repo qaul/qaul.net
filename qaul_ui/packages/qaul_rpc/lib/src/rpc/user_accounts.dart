@@ -1,4 +1,5 @@
-import 'package:fast_base58/fast_base58.dart';
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/src/generated/node/user_accounts.pb.dart';
@@ -52,17 +53,12 @@ class RpcUserAccounts extends RpcModule {
     final user = User(
       name: account.name,
       idBase58: account.idBase58,
-      id: account.id,
-      key: account.key,
+      id: Uint8List.fromList(account.id),
+      key: Uint8List.fromList(account.key),
       keyType: account.keyType,
       keyBase58: account.keyBase58,
     );
 
-
-    debugPrint('*' * 180);
-    debugPrint('USER IDBASE58: ${user.idBase58}');
-    debugPrint('ID ENCODED   : ${Base58Encode(user.id)}');
-    debugPrint('*' * 180);
     reader(defaultUserProvider).state = user;
   }
 

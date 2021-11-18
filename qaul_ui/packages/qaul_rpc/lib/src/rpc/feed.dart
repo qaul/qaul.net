@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pbenum.dart';
@@ -72,9 +74,9 @@ class FeedMessages extends StateNotifier<List<models.FeedMessage>> {
 
 extension _FMExtension on pb.FeedMessage {
   models.FeedMessage get toModelMessage => models.FeedMessage(
-        senderId: senderId,
+        senderId: Uint8List.fromList(senderId),
         senderIdBase58: senderIdBase58,
-        messageId: messageId,
+        messageId: Uint8List.fromList(messageId),
         messageIdBase58: messageIdBase58,
         timeSent: timeSent,
         timeReceived: timeReceived,

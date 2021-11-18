@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pbenum.dart';
 import 'package:qaul_rpc/src/generated/router/users.pb.dart';
@@ -27,9 +29,9 @@ class RpcUsers extends RpcModule {
           final domainUser = User(
             name: u.name,
             idBase58: u.idBase58,
-            id: u.id,
+            id: Uint8List.fromList(u.id),
             status: _mapStatusFrom(u.connectivity),
-            key: u.key,
+            key: Uint8List.fromList(u.key),
             keyType: u.keyType,
             keyBase58: u.keyBase58,
             isBlocked: u.blocked,
