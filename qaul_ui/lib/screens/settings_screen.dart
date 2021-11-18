@@ -149,12 +149,12 @@ class _InternetNodesList extends HookConsumerWidget {
               itemBuilder: (context, i) {
                 var nodeAddr = nodes[i].address;
                 return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
+                  contentPadding: const EdgeInsets.all(4.0),
                   title: Text(
                     nodeAddr,
                     style: Theme.of(context).textTheme.subtitle2,
                   ),
-                  leading: IconButton(
+                  trailing: IconButton(
                     splashRadius: 24,
                     iconSize: 20,
                     icon: const Icon(CupertinoIcons.delete),
@@ -235,7 +235,7 @@ class _AddNodeDialog extends HookWidget {
       Expanded(
         child: TextFormField(
           controller: portCtrl,
-          decoration: _decoration('port', hint: '00000'),
+          decoration: _decoration('port', hint: '9229'),
           keyboardType: TextInputType.number,
           validator: (val) {
             if (isValidPort(val)) return null;
