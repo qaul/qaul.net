@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:qaul_ui/widgets/default_back_button.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final l18ns = AppLocalizations.of(context);
+    final l18ns = AppLocalizations.of(context)!;
     var bundle = DefaultAssetBundle.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          tooltip: l18ns!.backButtonTooltip,
-          icon: const Icon(Icons.arrow_back_ios_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: const DefaultBackButton(),
         title: Row(
           children: [
             const Icon(Icons.info_outline_rounded),

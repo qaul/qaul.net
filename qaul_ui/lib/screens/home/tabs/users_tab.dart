@@ -139,16 +139,12 @@ class _UserDetailsScreen extends HookConsumerWidget {
     final loading = useState(false);
 
     var theme = Theme.of(context).textTheme;
-    final l18ns = AppLocalizations.of(context);
+    final l18ns = AppLocalizations.of(context)!;
     return LoadingDecorator(
       isLoading: loading.value,
       child: Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            tooltip: l18ns!.backButtonTooltip,
-            icon: const Icon(Icons.arrow_back_ios_rounded),
-            onPressed: () => Navigator.pop(context),
-          ),
+          leading: DefaultBackButton(),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

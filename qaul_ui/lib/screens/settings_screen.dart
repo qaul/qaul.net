@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/decorators/loading_decorator.dart';
+import 'package:qaul_ui/widgets/default_back_button.dart';
 import 'package:qaul_ui/widgets/language_select_dropdown.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:utils/utils.dart';
@@ -14,14 +15,10 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l18ns = AppLocalizations.of(context);
+    final l18ns = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          tooltip: l18ns!.backButtonTooltip,
-          icon: const Icon(Icons.arrow_back_ios_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: const DefaultBackButton(),
         title: Row(
           children: [
             const Icon(Icons.settings),

@@ -7,6 +7,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
     show AttachmentButton, Chat, DefaultChatTheme, SendButtonVisibilityMode;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:qaul_ui/widgets/default_back_button.dart';
 
 import 'models/text_message.dart';
 
@@ -60,11 +61,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          tooltip: AppLocalizations.of(context)!.backButtonTooltip,
-          icon: const Icon(Icons.arrow_back_ios_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: const DefaultBackButton(),
         title: widget.userAppBar,
         titleSpacing: 0,
         actions: [
