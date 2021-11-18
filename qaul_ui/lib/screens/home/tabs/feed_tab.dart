@@ -25,13 +25,12 @@ class _FeedState extends _BaseTabState<_Feed> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final users = ref.watch(usersProvider);
     final messages = ref.watch(feedMessagesProvider);
-    final defaultUser = ref.watch(defaultUserProvider).state;
-    final users = ref
-        .watch(usersProvider)
-        .where((u) => !(u.isBlocked ?? false))
-        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
-        .toList();
+
+    final blockedIds =
+        users.where((u) => u.isBlocked ?? false).map((u) => u.idBase58);
+    messages.removeWhere((m) => blockedIds.contains(m.senderIdBase58 ?? ''));
 
     final firstLoad = useState(true);
     useMemoized(() async {
