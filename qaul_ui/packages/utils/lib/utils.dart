@@ -22,9 +22,10 @@ Color colorGenerationStrategy(String first) {
 ///
 /// If the provided string has no spaces, returns its first two letters - also uppercase.
 String initials(String name) {
-  if (name.replaceAll(' ', '').length < 2)
+  if (name.replaceAll(' ', '').length < 2) {
     throw ArgumentError.value(
         name, 'Name', 'not enough charactes to form initials string');
+  }
   if (name.contains(' ')) {
     final ws = name.split(' ').where((e) => e.isNotEmpty).toList();
     if (ws.length > 1) return '${ws.first[0]}${ws.last[0]}'.toUpperCase();
@@ -69,20 +70,22 @@ bool isValidIPv4(String? s) {
 
 bool isValidPort(String? s) {
   if (s == null || int.tryParse(s) == null) return false;
-  return int.parse(s) >=0 && int.parse(s) < pow(2, 16);
+  return int.parse(s) >= 0 && int.parse(s) < pow(2, 16);
 }
 
-class IPTextInputFormatter extends TextInputFormatter {
+class IPv4TextInputFormatter extends TextInputFormatter {
+  FilteringTextInputFormatter get _numberFilter =>
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9\.]'));
+
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
     if (newValue.text.isEmpty) return newValue;
-    if (oldValue.text.length > newValue.text.length) return newValue;
+    if (_userIsErasing(oldValue, newValue)) return newValue;
 
     var output = newValue.text;
 
     if (output.contains(',')) output = output.replaceAll(',', '.');
-
     if (output.endsWith('..')) {
       return TextEditingValue(
         text: output.substring(0, output.length - 1),
@@ -90,13 +93,13 @@ class IPTextInputFormatter extends TextInputFormatter {
       );
     }
 
-    output = _numberFilter
-        .formatEditUpdate(oldValue,
-            TextEditingValue(text: output, selection: newValue.selection))
-        .text;
+    output = _filterInvalidCharacters(oldValue, newValue, output);
 
-    if (output.split('.').last.length == 3) output += '.';
+    var sections = output.split('.');
+    if (sections.length > 4) sections = sections.getRange(0, 4).toList();
+    sections.last = _validateLastSection(sections);
 
+    output = sections.join('.');
     if (output.length > 15) output = output.substring(0, 15);
 
     return TextEditingValue(
@@ -105,6 +108,21 @@ class IPTextInputFormatter extends TextInputFormatter {
     );
   }
 
-  FilteringTextInputFormatter get _numberFilter =>
-      FilteringTextInputFormatter.allow(RegExp(r'[0-9\.]'));
+  bool _userIsErasing(TextEditingValue oldValue, TextEditingValue newValue) =>
+      oldValue.text.length > newValue.text.length;
+
+  String _filterInvalidCharacters(
+      TextEditingValue oldValue, TextEditingValue newValue, String output) {
+    var value = TextEditingValue(text: output, selection: newValue.selection);
+    return _numberFilter.formatEditUpdate(oldValue, value).text;
+  }
+
+  String _validateLastSection(List<String> sections) {
+    var lastSection = sections.last;
+    if (lastSection.length > 3) {
+      lastSection = lastSection.substring(0, lastSection.length - 1);
+    }
+    if (lastSection.length == 3 && sections.length < 4) lastSection += '.';
+    return lastSection;
+  }
 }

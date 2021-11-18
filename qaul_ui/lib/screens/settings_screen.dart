@@ -263,7 +263,7 @@ class _AddNodeDialog extends HookWidget {
                   child: TextFormField(
                     autofocus: true,
                     controller: ipCtrl,
-                    inputFormatters: [IPTextInputFormatter()],
+                    inputFormatters: [IPv4TextInputFormatter()],
                     decoration: _decoration('ip', hint: '000.000.000.000'),
                     validator: (val) {
                       if (isValidIPv4(val)) return null;
