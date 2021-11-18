@@ -190,7 +190,7 @@ class _UserDetailsScreen extends HookConsumerWidget {
                     const SizedBox(height: 28.0),
                     Text(user.name, style: theme.headline3),
                     const SizedBox(height: 8.0),
-                    Text('${l18ns.userID}: ${user.id.join()}',
+                    Text('${l18ns.userID}: ${user.idBase58}',
                         style: theme.headline5),
                     const SizedBox(height: 40.0),
                     Text('${l18ns.publicKey}:\n${user.keyBase58}',

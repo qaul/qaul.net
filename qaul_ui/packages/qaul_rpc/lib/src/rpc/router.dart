@@ -75,8 +75,11 @@ class RpcRouter extends RpcModule {
       throw ArgumentError.value(c, 'ConnectionModule', 'value not mapped');
     }
 
-    ConnectionInfo toConnectionInfo(RoutingTableConnection c) =>
-        ConnectionInfo(ping: c.rtt, nodeID: Uint8List.fromList(c.via));
+    ConnectionInfo toConnectionInfo(RoutingTableConnection c) => ConnectionInfo(
+          ping: c.rtt,
+          nodeID: Uint8List.fromList(c.via),
+          nodeIDBase58: Base58Encode(c.via),
+        );
 
     return Map.fromEntries(connections
         .where((c) => c.module != ConnectionModule.NONE)

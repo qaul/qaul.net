@@ -36,12 +36,14 @@ class User extends Equatable {
 }
 
 class ConnectionInfo extends Equatable {
-  const ConnectionInfo({this.ping, this.hopCount, this.nodeID});
+  const ConnectionInfo(
+      {this.ping, this.hopCount, this.nodeID, this.nodeIDBase58});
 
   final int? ping;
   final int? hopCount;
   final Uint8List? nodeID;
+  final String? nodeIDBase58;
 
   @override
-  List<Object?> get props => [ping, hopCount, nodeID];
+  List<Object?> get props => [ping, hopCount, nodeID, nodeIDBase58];
 }

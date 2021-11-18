@@ -124,9 +124,9 @@ class _AvailableConnectionsTable extends ConsumerWidget {
                                 : data.hopCount.toString())),
                         TableCell(
                             child: Text(
-                                data.nodeID == null
+                                data.nodeIDBase58 == null
                                     ? l18ns.unknown
-                                    : data.nodeID.toString(),
+                                    : data.nodeIDBase58!,
                                 style: theme.caption)),
                       ]);
                     }),
