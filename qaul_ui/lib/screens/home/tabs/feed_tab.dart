@@ -128,6 +128,14 @@ class _EmptyFeed extends StatelessWidget {
   }
 }
 
+class SendMessageIntent extends Intent {
+  const SendMessageIntent();
+}
+
+class ExitScreenIntent extends Intent {
+  const ExitScreenIntent();
+}
+
 class _CreateFeedMessage extends HookConsumerWidget {
   _CreateFeedMessage({Key? key}) : super(key: key);
 
@@ -137,8 +145,25 @@ class _CreateFeedMessage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useTextEditingController();
     final loading = useState(false);
+    final sendMessage = useCallback(() async {
+      if (!(_formKey.currentState?.validate() ?? false)) return;
+      loading.value = true;
 
-    final l18ns = AppLocalizations.of(context);
+      await RpcFeed(ref.read).sendFeedMessage(controller.text.trim());
+      await Future.delayed(const Duration(seconds: 2));
+
+      final libqaul = ref.read(libqaulProvider);
+
+      // DEBUG: how many messages are queued by libqaul
+      final queued = await libqaul.checkReceiveQueue();
+      // check for rpc messages
+      if (queued > 0) await libqaul.receiveRpc();
+
+      loading.value = false;
+      Navigator.pop(context);
+    }, [UniqueKey()]);
+
+    final l18ns = AppLocalizations.of(context)!;
     return LoadingDecorator(
       isLoading: loading.value,
       child: Scaffold(
@@ -146,48 +171,51 @@ class _CreateFeedMessage extends HookConsumerWidget {
           elevation: 0.0,
           backgroundColor: Colors.transparent,
           leading: IconButton(
+            splashRadius: 24,
             icon: const Icon(Icons.close),
+            tooltip: l18ns.backButtonTooltip,
             onPressed: () => Navigator.pop(context),
           ),
         ),
         floatingActionButton: FloatingActionButton(
           heroTag: 'createFeedMessageSubscreenFAB',
-          tooltip: l18ns!.submitPostTooltip,
+          tooltip: l18ns.submitPostTooltip,
           child: const Icon(Icons.check, size: 32.0),
-          onPressed: () async {
-            if (!(_formKey.currentState?.validate() ?? false)) return;
-            loading.value = true;
-
-            await RpcFeed(ref.read).sendFeedMessage(controller.text);
-            await Future.delayed(const Duration(seconds: 2));
-
-            final libqaul = ref.read(libqaulProvider);
-
-            // DEBUG: how many messages are queued by libqaul
-            final queued = await libqaul.checkReceiveQueue();
-            // check for rpc messages
-            if (queued > 0) await libqaul.receiveRpc();
-
-            loading.value = false;
-            Navigator.pop(context);
-          },
+          onPressed: sendMessage,
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(40),
-          child: TextFormField(
-            key: _formKey,
-            maxLines: 15,
-            autofocus: true,
-            controller: controller,
-            keyboardType: TextInputType.multiline,
-            style: Theme.of(context).textTheme.subtitle1,
-            decoration: const InputDecoration(border: InputBorder.none),
-            validator: (s) {
-              if (s == null || s.isEmpty) {
-                return l18ns.fieldRequiredErrorMessage;
-              }
-              return null;
+        body: Shortcuts(
+          shortcuts: {
+            LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.control):
+                const SendMessageIntent(),
+            LogicalKeySet(LogicalKeyboardKey.escape): const ExitScreenIntent(),
+          },
+          child: Actions(
+            actions: {
+              SendMessageIntent: CallbackAction<SendMessageIntent>(
+                onInvoke: (SendMessageIntent intent) => sendMessage(),
+              ),
+              ExitScreenIntent: CallbackAction<ExitScreenIntent>(
+                onInvoke: (ExitScreenIntent intent) => Navigator.pop(context),
+              ),
             },
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: TextFormField(
+                key: _formKey,
+                maxLines: 15,
+                autofocus: true,
+                controller: controller,
+                keyboardType: TextInputType.multiline,
+                style: Theme.of(context).textTheme.subtitle1,
+                decoration: const InputDecoration(border: InputBorder.none),
+                validator: (s) {
+                  if (s == null || s.isEmpty) {
+                    return l18ns.fieldRequiredErrorMessage;
+                  }
+                  return null;
+                },
+              ),
+            ),
           ),
         ),
       ),
