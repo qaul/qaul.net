@@ -30,7 +30,9 @@ class _FeedState extends _BaseTabState<_Feed> {
 
     final blockedIds =
         users.where((u) => u.isBlocked ?? false).map((u) => u.idBase58);
-    messages.removeWhere((m) => blockedIds.contains(m.senderIdBase58 ?? ''));
+    final filteredMessages = messages
+        .where((m) => !blockedIds.contains(m.senderIdBase58 ?? ''))
+        .toList();
 
     final firstLoad = useState(true);
     useMemoized(() async {
@@ -61,10 +63,10 @@ class _FeedState extends _BaseTabState<_Feed> {
               ListView.separated(
                 controller: ScrollController(),
                 physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: messages.length,
+                itemCount: filteredMessages.length,
                 separatorBuilder: (_, __) => const Divider(height: 12.0),
                 itemBuilder: (_, i) {
-                  final msg = messages[i];
+                  final msg = filteredMessages[i];
                   var theme = Theme.of(context).textTheme;
                   // TODO(brenodt): Prone to exceptions if timeSent is not parsable. Update.
                   var sentAt =
@@ -91,13 +93,12 @@ class _FeedState extends _BaseTabState<_Feed> {
                     ),
                     subtitle: Text(
                       msg.content ?? '',
-                      style:
-                          theme.bodyText2!.copyWith(fontSize: 16, height: 1.4),
+                      style: theme.caption,
                     ),
                   );
                 },
               ),
-              if (messages.isEmpty) const Center(child: _EmptyFeed()),
+              if (filteredMessages.isEmpty) const Center(child: _EmptyFeed()),
             ],
           ),
         ),

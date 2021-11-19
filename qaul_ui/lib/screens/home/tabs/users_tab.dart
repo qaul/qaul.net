@@ -144,7 +144,7 @@ class _UserDetailsScreen extends HookConsumerWidget {
       isLoading: loading.value,
       child: Scaffold(
         appBar: AppBar(
-          leading: DefaultBackButton(),
+          leading: const DefaultBackButton(),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
