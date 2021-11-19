@@ -135,81 +135,83 @@ class _InternetNodesList extends HookConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: 4),
             decoration: BoxDecoration(
               border: Border.symmetric(
-                  horizontal: loading.value
+                  horizontal: loading.value || nodes.isEmpty
                       ? BorderSide.none
                       : BorderSide(color: Theme.of(context).dividerColor)),
             ),
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: nodes.length,
-              separatorBuilder: (_, __) => const Divider(height: 12.0),
-              itemBuilder: (context, i) {
-                var nodeAddr = nodes[i].address;
-                return ListTile(
-                  contentPadding: const EdgeInsets.all(4.0),
-                  title: Text(
-                    nodeAddr,
-                    style: Theme.of(context).textTheme.subtitle2,
-                  ),
-                  trailing: IconButton(
-                    splashRadius: 24,
-                    iconSize: 20,
-                    icon: const Icon(CupertinoIcons.delete),
-                    onPressed: () async {
-                      loading.value = true;
-                      await RpcConnections(ref.read).removeNode(nodeAddr);
+            child: nodes.isEmpty
+                ? const SizedBox(width: 28, height: 20)
+                : ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: nodes.length,
+                    separatorBuilder: (_, __) => const Divider(height: 12.0),
+                    itemBuilder: (context, i) {
+                      var nodeAddr = nodes[i].address;
+                      return ListTile(
+                        contentPadding: const EdgeInsets.all(4.0),
+                        title: Text(
+                          nodeAddr,
+                          style: Theme.of(context).textTheme.subtitle2,
+                        ),
+                        trailing: IconButton(
+                          splashRadius: 24,
+                          iconSize: 20,
+                          icon: const Icon(CupertinoIcons.delete),
+                          onPressed: () async {
+                            loading.value = true;
+                            await RpcConnections(ref.read).removeNode(nodeAddr);
 
-                      await Future.delayed(const Duration(seconds: 2));
+                            await Future.delayed(const Duration(seconds: 2));
 
-                      if (!isMounted()) return;
+                            if (!isMounted()) return;
 
-                      final libqaul = ref.read(libqaulProvider);
+                            final libqaul = ref.read(libqaulProvider);
 
-                      var queued = await libqaul.checkReceiveQueue();
-                      if (queued > 0) await libqaul.receiveRpc();
-                      loading.value = false;
+                            var queued = await libqaul.checkReceiveQueue();
+                            if (queued > 0) await libqaul.receiveRpc();
+                            loading.value = false;
+                          },
+                        ),
+                        onTap: () async {
+                          final ip =
+                              nodeAddr.replaceAll('/ip4/', '').split('/').first;
+                          final port = nodeAddr.split('/').last;
+                          final res = await showDialog(
+                            context: context,
+                            builder: (_) => _AddNodeDialog(ip: ip, port: port),
+                          );
+
+                          if (res is! String) return;
+                          loading.value = true;
+
+                          // remove
+                          await RpcConnections(ref.read).removeNode(nodeAddr);
+
+                          await Future.delayed(const Duration(seconds: 2));
+
+                          if (!isMounted()) return;
+
+                          final libqaul = ref.read(libqaulProvider);
+
+                          var queued = await libqaul.checkReceiveQueue();
+                          if (queued > 0) await libqaul.receiveRpc();
+
+                          // add updated
+                          await RpcConnections(ref.read).addNode(res);
+
+                          await Future.delayed(const Duration(seconds: 2));
+
+                          if (!isMounted()) return;
+
+                          queued = await libqaul.checkReceiveQueue();
+                          if (queued > 0) await libqaul.receiveRpc();
+
+                          loading.value = false;
+                        },
+                      );
                     },
                   ),
-                  onTap: () async {
-                    final ip =
-                        nodeAddr.replaceAll('/ip4/', '').split('/').first;
-                    final port = nodeAddr.split('/').last;
-                    final res = await showDialog(
-                      context: context,
-                      builder: (_) => _AddNodeDialog(ip: ip, port: port),
-                    );
-
-                    if (res is! String) return;
-                    loading.value = true;
-
-                    // remove
-                    await RpcConnections(ref.read).removeNode(nodeAddr);
-
-                    await Future.delayed(const Duration(seconds: 2));
-
-                    if (!isMounted()) return;
-
-                    final libqaul = ref.read(libqaulProvider);
-
-                    var queued = await libqaul.checkReceiveQueue();
-                    if (queued > 0) await libqaul.receiveRpc();
-
-                    // add updated
-                    await RpcConnections(ref.read).addNode(res);
-
-                    await Future.delayed(const Duration(seconds: 2));
-
-                    if (!isMounted()) return;
-
-                    queued = await libqaul.checkReceiveQueue();
-                    if (queued > 0) await libqaul.receiveRpc();
-
-                    loading.value = false;
-                  },
-                );
-              },
-            ),
           ),
         ),
         const SizedBox(height: 12.0),
