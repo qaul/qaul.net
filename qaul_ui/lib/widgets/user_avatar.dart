@@ -98,14 +98,9 @@ class _SmallUserAvatar extends UserAvatar {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final defaultUser = ref.watch(defaultUserProvider).state;
-    if (!badgeEnabled || userIsOffline(defaultUser)) {
+    if (!badgeEnabled || userIsOffline(user)) {
       return super.build(context, ref);
     }
-
-    final badgeColor = mapConnectionStatus(user != null
-        ? user!.status
-        : (defaultUser?.status ?? ConnectionStatus.offline));
 
     return Badge(
       elevation: 0.0,
@@ -113,28 +108,18 @@ class _SmallUserAvatar extends UserAvatar {
       padding: const EdgeInsets.all(6),
       borderSide: const BorderSide(color: Colors.white, width: 1.5),
       position: BadgePosition.bottomEnd(bottom: 0, end: 0),
-      badgeColor: badgeColor,
+      badgeColor: Colors.greenAccent.shade700,
       child: super.build(context, ref),
     );
   }
 
-  bool userIsOffline(User? defaultUser) {
-    if (defaultUser == null) {
-      return user == null || user!.status == ConnectionStatus.offline;
-    }
-    return defaultUser.status == ConnectionStatus.offline;
+  bool userIsOffline(User? u) {
+    return u == null || statusIsOffline(u) || connectionsAreEmpty(u);
   }
 
-  Color mapConnectionStatus(ConnectionStatus s) {
-    switch (s) {
-      case ConnectionStatus.online:
-        return Colors.greenAccent.shade700;
-      case ConnectionStatus.reachable:
-        return Colors.yellow.shade600;
-      default:
-        throw ArgumentError.value(s, 'ConnectionStatus', 'value not mapped');
-    }
-  }
+  bool statusIsOffline(User u) => u.status == ConnectionStatus.offline;
+
+  bool connectionsAreEmpty(User u) => (u.availableTypes?.isEmpty ?? true);
 }
 
 class _LargeUserAvatar extends UserAvatar {
