@@ -33,6 +33,12 @@ class User extends Equatable {
 
   @override
   List<Object?> get props => [name, idBase58];
+
+  bool get isConnected => _statusIsNotOffline && _typesAreNotEmpty;
+
+  bool get _statusIsNotOffline => status != ConnectionStatus.offline;
+
+  bool get _typesAreNotEmpty => (availableTypes?.isNotEmpty ?? false);
 }
 
 class ConnectionInfo extends Equatable {

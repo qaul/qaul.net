@@ -14,9 +14,11 @@ class _UsersState extends _BaseTabState<_Users> {
     final defaultUser = ref.watch(defaultUserProvider).state;
     final users = ref
         .watch(usersProvider)
-        .where((u) => !(u.isBlocked ?? false))
         .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
         .toList();
+
+    users.sort((u1, u2) => u2.isConnected ? 1 : 0);
+    users.sort((u1, u2) => (u1.isBlocked ?? false) ? 1 : 0);
 
     final firstLoad = useState(true);
     useMemoized(() async {
@@ -39,36 +41,42 @@ class _UsersState extends _BaseTabState<_Users> {
               final user = users[i];
               var theme = Theme.of(context).textTheme;
 
-              return ListTile(
-                onTap: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => _UserDetailsScreen(user: user)),
-                  );
-                  refreshUsers(ref);
-                },
-                leading: UserAvatar.small(user: user),
-                trailing: (user.isVerified ?? false)
-                    ? const Icon(Icons.verified_user)
-                    : const SizedBox(),
-                visualDensity: VisualDensity.adaptivePlatformDensity,
-                title: Padding(
-                  padding: const EdgeInsets.only(bottom: 4.0),
-                  child: Text(user.name, style: theme.headline6),
+              return ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  (user.isBlocked ?? false) ? Colors.grey : Colors.white,
+                  BlendMode.modulate,
                 ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'ID: ${user.idBase58}',
-                      style: theme.caption!.copyWith(fontSize: 10),
-                    ),
-                    const SizedBox(height: 4),
-                    if (user.availableTypes != null &&
-                        user.availableTypes!.isNotEmpty)
-                      _AvailableConnections(user: user),
-                  ],
+                child: ListTile(
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => _UserDetailsScreen(user: user)),
+                    );
+                    refreshUsers(ref);
+                  },
+                  leading: UserAvatar.small(user: user),
+                  trailing: (user.isVerified ?? false)
+                      ? const Icon(Icons.verified_user)
+                      : const SizedBox(),
+                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                  title: Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: Text(user.name, style: theme.headline6),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'ID: ${user.idBase58}',
+                        style: theme.caption!.copyWith(fontSize: 10),
+                      ),
+                      const SizedBox(height: 4),
+                      if (user.availableTypes != null &&
+                          user.availableTypes!.isNotEmpty)
+                        _AvailableConnections(user: user),
+                    ],
+                  ),
                 ),
               );
             },
@@ -120,11 +128,13 @@ class _AvailableConnections extends StatelessWidget {
     );
   }
 
-  bool get _hasBluetooth => user.availableTypes!.keys.contains(ConnectionType.ble);
+  bool get _hasBluetooth =>
+      user.availableTypes!.keys.contains(ConnectionType.ble);
 
   bool get _hasLan => user.availableTypes!.keys.contains(ConnectionType.lan);
 
-  bool get _hasLocal => user.availableTypes!.keys.contains(ConnectionType.local);
+  bool get _hasLocal =>
+      user.availableTypes!.keys.contains(ConnectionType.local);
 
   bool get _hasInternet =>
       user.availableTypes!.keys.contains(ConnectionType.internet);

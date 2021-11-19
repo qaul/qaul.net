@@ -113,13 +113,7 @@ class _SmallUserAvatar extends UserAvatar {
     );
   }
 
-  bool userIsOffline(User? u) {
-    return u == null || statusIsOffline(u) || connectionsAreEmpty(u);
-  }
-
-  bool statusIsOffline(User u) => u.status == ConnectionStatus.offline;
-
-  bool connectionsAreEmpty(User u) => (u.availableTypes?.isEmpty ?? true);
+  bool userIsOffline(User? u) => u == null || !u.isConnected;
 }
 
 class _LargeUserAvatar extends UserAvatar {
