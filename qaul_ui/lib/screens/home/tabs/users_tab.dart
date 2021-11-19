@@ -202,61 +202,76 @@ class _UserDetailsScreen extends HookConsumerWidget {
                     Text('${l18ns.publicKey}:\n${user.keyBase58}',
                         style: theme.headline5),
                     const SizedBox(height: 40.0),
-                    if (!(user.isVerified ?? false)) ...[
-                      _RoundedRectButton(
-                        color: Colors.green,
-                        onPressed: () async {
-                          final res = await _confirmAction(context,
-                              description: l18ns.verifyUserConfirmationMessage);
+                    _RoundedRectButton(
+                      color: isVerified ? Colors.green.shade300 : Colors.green,
+                      onPressed: () async {
+                        final res = await _confirmAction(
+                          context,
+                          description: isVerified
+                              ? l18ns.unverifyUserConfirmationMessage
+                              : l18ns.verifyUserConfirmationMessage,
+                        );
 
-                          if (res is! bool || !res) return;
-                          loading.value = true;
+                        if (res is! bool || !res) return;
+                        loading.value = true;
 
-                          final libqaul = ref.read(libqaulProvider);
+                        final libqaul = ref.read(libqaulProvider);
 
-                          await RpcUsers(ref.read).verifyUser(user);
-                          await Future.delayed(const Duration(seconds: 2));
+                        final rpc = RpcUsers(ref.read);
+                        isVerified
+                            ? await rpc.unverifyUser(user)
+                            : await rpc.verifyUser(user);
+                        await Future.delayed(const Duration(seconds: 2));
 
-                          final queued = await libqaul.checkReceiveQueue();
-                          if (queued > 0) await libqaul.receiveRpc();
+                        final queued = await libqaul.checkReceiveQueue();
+                        if (queued > 0) await libqaul.receiveRpc();
 
-                          loading.value = false;
-                          Navigator.pop(context);
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
+                        loading.value = false;
+                        Navigator.pop(context);
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (!isVerified) ...[
                             const Icon(Icons.check, size: 32),
                             const SizedBox(width: 4),
-                            Text(l18ns.verify),
                           ],
-                        ),
+                          Text(isVerified ? l18ns.unverify : l18ns.verify),
+                        ],
                       ),
-                      const SizedBox(height: 28.0),
-                    ],
-                    if (!(user.isBlocked ?? false))
-                      _RoundedRectButton(
-                        color: Colors.red.shade400,
-                        onPressed: () async {
-                          final res = await _confirmAction(context,
-                              description: l18ns.blockUserConfirmationMessage);
+                    ),
+                    const SizedBox(height: 28.0),
+                    _RoundedRectButton(
+                      color:
+                          isBlocked ? Colors.red.shade300 : Colors.red.shade400,
+                      onPressed: () async {
+                        final res = await _confirmAction(
+                          context,
+                          description: isBlocked
+                              ? l18ns.unblockUserConfirmationMessage
+                              : l18ns.blockUserConfirmationMessage,
+                        );
 
-                          if (res is! bool || !res) return;
-                          loading.value = true;
+                        if (res is! bool || !res) return;
+                        loading.value = true;
 
-                          final libqaul = ref.read(libqaulProvider);
+                        final libqaul = ref.read(libqaulProvider);
 
-                          await RpcUsers(ref.read).blockUser(user);
-                          await Future.delayed(const Duration(seconds: 2));
+                        final rpc = RpcUsers(ref.read);
+                        isBlocked
+                            ? await rpc.unblockUser(user)
+                            : await rpc.blockUser(user);
+                        await Future.delayed(const Duration(seconds: 2));
 
-                          final queued = await libqaul.checkReceiveQueue();
-                          if (queued > 0) await libqaul.receiveRpc();
+                        final queued = await libqaul.checkReceiveQueue();
+                        if (queued > 0) await libqaul.receiveRpc();
 
-                          loading.value = false;
-                          Navigator.pop(context);
-                        },
-                        child: Text(l18ns.blockUser),
-                      ),
+                        loading.value = false;
+                        Navigator.pop(context);
+                      },
+                      child:
+                          Text(isBlocked ? l18ns.unblockUser : l18ns.blockUser),
+                    ),
                   ],
                 ),
               ),
@@ -266,6 +281,10 @@ class _UserDetailsScreen extends HookConsumerWidget {
       ),
     );
   }
+
+  bool get isVerified => (user.isVerified ?? false);
+
+  bool get isBlocked => (user.isBlocked ?? false);
 
   Future<bool?> _confirmAction(
     BuildContext context, {

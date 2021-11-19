@@ -58,30 +58,37 @@ class RpcUsers extends RpcModule {
       await encodeAndSendMessage(Users(userRequest: UserRequest()));
 
   Future<void> verifyUser(User u) async {
-    final msg = Users(userUpdate: UserEntry(
-      name: u.name,
-      idBase58: u.idBase58,
-      id: u.id,
-      key: u.key,
-      keyType: u.keyType,
-      keyBase58: u.keyBase58,
-      verified: true,
-    ));
-    await encodeAndSendMessage(msg);
+    var entry = _baseUserEntryFrom(u);
+    entry.verified = true;
+    await encodeAndSendMessage(Users(userUpdate: entry));
+  }
+
+  Future<void> unverifyUser(User u) async {
+    var entry = _baseUserEntryFrom(u);
+    entry.verified = false;
+    await encodeAndSendMessage(Users(userUpdate: entry));
   }
 
   Future<void> blockUser(User u) async {
-    final msg = Users(userUpdate: UserEntry(
-      name: u.name,
-      idBase58: u.idBase58,
-      id: u.id,
-      key: u.key,
-      keyType: u.keyType,
-      keyBase58: u.keyBase58,
-      blocked: true,
-    ));
-    await encodeAndSendMessage(msg);
+    final entry = _baseUserEntryFrom(u);
+    entry.blocked = true;
+    await encodeAndSendMessage(Users(userUpdate: entry));
   }
+
+  Future<void> unblockUser(User u) async {
+    final entry = _baseUserEntryFrom(u);
+    entry.blocked = false;
+    await encodeAndSendMessage(Users(userUpdate: entry));
+  }
+
+  UserEntry _baseUserEntryFrom(User u) => UserEntry(
+        name: u.name,
+        idBase58: u.idBase58,
+        id: u.id,
+        key: u.key,
+        keyType: u.keyType,
+        keyBase58: u.keyBase58,
+      );
 
   ConnectionStatus _mapStatusFrom(Connectivity c) {
     if (c == Connectivity.Online) return ConnectionStatus.online;
