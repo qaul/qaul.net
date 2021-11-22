@@ -39,6 +39,8 @@
   "addNodeCTA": "نص بسيط",
   "chatEmptyMessageHint": "نص بسيط",
   "emptyFeedList": "نص بسيط",
+  "emptyUsersList": "نص بسيط",
+  "emptyChatsList": "نص بسيط",
   "verifyUserConfirmationMessage": "نص بسيط",
   "unverifyUserConfirmationMessage": "نص بسيط",
   "blockUserConfirmationMessage": "نص بسيط",

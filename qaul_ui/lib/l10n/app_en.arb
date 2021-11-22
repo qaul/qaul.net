@@ -41,6 +41,8 @@
   "addNodeCTA": "Add internet node",
   "chatEmptyMessageHint": "Your message...",
   "emptyFeedList": "No feed messages yet",
+  "emptyUsersList": "No users added yet",
+  "emptyChatsList": "No chat rooms yet",
   "verifyUserConfirmationMessage": "Do you want to verify this user?",
   "unverifyUserConfirmationMessage": "Do you want to remove the verified status from this user?",
   "blockUserConfirmationMessage": "Do you want to block this user?",

@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -11,6 +10,7 @@ import 'package:qaul_ui/decorators/loading_decorator.dart';
 import 'package:qaul_ui/screens/chat/chat.dart';
 import 'package:qaul_ui/screens/chat/models/text_message.dart';
 import 'package:qaul_ui/widgets/default_back_button.dart';
+import 'package:qaul_ui/decorators/empty_state_text_decorator.dart';
 import 'package:qaul_ui/widgets/user_avatar.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';

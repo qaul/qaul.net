@@ -58,73 +58,50 @@ class _FeedState extends _BaseTabState<_Feed> {
         ),
         body: RefreshIndicator(
           onRefresh: () async => await refreshFeed(ref),
-          child: Stack(
-            children: [
-              ListView.separated(
-                controller: ScrollController(),
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: filteredMessages.length,
-                separatorBuilder: (_, __) => const Divider(height: 12.0),
-                itemBuilder: (_, i) {
-                  final msg = filteredMessages[i];
-                  var theme = Theme.of(context).textTheme;
-                  // TODO(brenodt): Prone to exceptions if timeSent is not parsable. Update.
-                  var sentAt =
-                      describeFuzzyTimestamp(DateTime.parse(msg.timeSent!));
+          child: EmptyStateTextDecorator(
+            l18ns.emptyFeedList,
+            isEmpty: filteredMessages.isEmpty,
+            child: ListView.separated(
+              controller: ScrollController(),
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: filteredMessages.length,
+              separatorBuilder: (_, __) => const Divider(height: 12.0),
+              itemBuilder: (_, i) {
+                final msg = filteredMessages[i];
+                var theme = Theme.of(context).textTheme;
+                // TODO(brenodt): Prone to exceptions if timeSent is not parsable. Update.
+                var sentAt =
+                    describeFuzzyTimestamp(DateTime.parse(msg.timeSent!));
 
-                  final authorIdx = users.indexWhere(
-                    (u) => u.idBase58 == (msg.senderIdBase58 ?? ''),
-                  );
-                  final author = authorIdx.isNegative ? null : users[authorIdx];
+                final authorIdx = users.indexWhere(
+                  (u) => u.idBase58 == (msg.senderIdBase58 ?? ''),
+                );
+                final author = authorIdx.isNegative ? null : users[authorIdx];
 
-                  return ListTile(
-                    leading: UserAvatar.small(user: author),
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(author?.name ?? l18ns.unknown,
-                            style: theme.headline6),
-                        Text(
-                          sentAt,
-                          style: theme.caption!
-                              .copyWith(fontStyle: FontStyle.italic),
-                        ),
-                      ],
-                    ),
-                    subtitle: Text(
-                      msg.content ?? '',
-                      style: theme.caption,
-                    ),
-                  );
-                },
-              ),
-              if (filteredMessages.isEmpty) const Center(child: _EmptyFeed()),
-            ],
+                return ListTile(
+                  leading: UserAvatar.small(user: author),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(author?.name ?? l18ns.unknown,
+                          style: theme.headline6),
+                      Text(
+                        sentAt,
+                        style: theme.caption!
+                            .copyWith(fontStyle: FontStyle.italic),
+                      ),
+                    ],
+                  ),
+                  subtitle: Text(
+                    msg.content ?? '',
+                    style: theme.caption,
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class _EmptyFeed extends StatelessWidget {
-  const _EmptyFeed({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    var theme = Theme.of(context).textTheme;
-    return ValueListenableBuilder<AdaptiveThemeMode>(
-      valueListenable: AdaptiveTheme.of(context).modeChangeNotifier,
-      builder: (context, value, _) {
-        final isDark = value == AdaptiveThemeMode.dark;
-        return IgnorePointer(
-          child: Text(
-            AppLocalizations.of(context)!.emptyFeedList,
-            style: theme.bodyText1!
-                .copyWith(color: isDark ? Colors.white30 : Colors.black38),
-          ),
-        );
-      },
     );
   }
 }
