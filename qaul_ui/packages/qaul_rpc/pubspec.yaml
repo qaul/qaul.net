@@ -16,6 +16,8 @@ dependencies:
 
   fast_base58: ^0.2.1
 
+  path: ^1.8.0
+
   ffi: ^1.1.2
   convert: ^3.0.1
   protobuf: ^2.0.0

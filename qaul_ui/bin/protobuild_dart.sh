@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-protoc --dart_out=../qaul_ui/packages/qaul_rpc/lib/src/generated \
-    --proto_path=../rust/libqaul/src \
+protoc --dart_out=../packages/qaul_rpc/lib/src/generated \
+    --proto_path=../../rust/libqaul/src \
     \
     rpc/qaul_rpc.proto \
     connections/connections.proto \

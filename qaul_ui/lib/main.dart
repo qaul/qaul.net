@@ -153,7 +153,8 @@ class TouchAndMouseScrollBehavior extends MaterialScrollBehavior {
 
 class Init {
   static Future<void> initialize(Reader read) async {
-    if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
+    // TODO(brenodt): This package was making the application not display on Windows. Removing for now
+    if (Platform.isMacOS || Platform.isLinux) {
       await SystemChrome.setPreferredOrientations(
           [DeviceOrientation.landscapeLeft]);
       await initializeWindowManager();
@@ -210,6 +211,7 @@ class Init {
   }
 
   static Future<void> initializeWindowManager() async {
+    assert(!Platform.isWindows);
     await windowManager.ensureInitialized();
 
     // Use it only after calling `hiddenWindowAtLaunch`
