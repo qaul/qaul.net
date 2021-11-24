@@ -10,7 +10,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:window_manager/window_manager.dart';
+// import 'package:window_manager/window_manager.dart';
 
 import 'helpers/navigation_helper.dart';
 import 'helpers/user_prefs_helper.dart';
@@ -154,11 +154,11 @@ class TouchAndMouseScrollBehavior extends MaterialScrollBehavior {
 class Init {
   static Future<void> initialize(Reader read) async {
     // TODO(brenodt): This package was making the application not display on Windows. Removing for now
-    if (Platform.isMacOS || Platform.isLinux) {
-      await SystemChrome.setPreferredOrientations(
-          [DeviceOrientation.landscapeLeft]);
-      await initializeWindowManager();
-    }
+    // if (Platform.isMacOS || Platform.isLinux) {
+    //   await SystemChrome.setPreferredOrientations(
+    //       [DeviceOrientation.landscapeLeft]);
+    //   await initializeWindowManager();
+    // }
 
     print("initialize libqaul");
     // load libqaul
@@ -210,17 +210,17 @@ class Init {
     // }
   }
 
-  static Future<void> initializeWindowManager() async {
-    assert(!Platform.isWindows);
-    await windowManager.ensureInitialized();
-
-    // Use it only after calling `hiddenWindowAtLaunch`
-    windowManager.waitUntilReadyToShow().then((_) async {
-      await windowManager.setSize(Size(600, 600));
-      await windowManager.setMinimumSize(const Size(512, 400));
-      await windowManager.setMaximumSize(const Size(828, 760));
-      await windowManager.setFullScreen(false);
-      await windowManager.show();
-    });
-  }
+  // static Future<void> initializeWindowManager() async {
+  //   assert(!Platform.isWindows);
+  //   await windowManager.ensureInitialized();
+  //
+  //   // Use it only after calling `hiddenWindowAtLaunch`
+  //   windowManager.waitUntilReadyToShow().then((_) async {
+  //     await windowManager.setSize(Size(600, 600));
+  //     await windowManager.setMinimumSize(const Size(512, 400));
+  //     await windowManager.setMaximumSize(const Size(828, 760));
+  //     await windowManager.setFullScreen(false);
+  //     await windowManager.show();
+  //   });
+  // }
 }
