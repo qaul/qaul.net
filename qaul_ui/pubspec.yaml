@@ -79,12 +79,22 @@ dev_dependencies:
   hive_generator: ^1.1.1
   build_runner: ^2.1.4
 
+  flutter_launcher_icons: "^0.9.2"
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^1.0.0
+
+flutter_icons:
+  ios: true
+  remove_alpha_ios: true
+  image_path_ios: "assets/logo/icon_ios.png"
+
+  android: true
+  image_path_android: "assets/logo/icon_android.png"
 
 flutter:
   # The following line ensures that the Material Icons font is
