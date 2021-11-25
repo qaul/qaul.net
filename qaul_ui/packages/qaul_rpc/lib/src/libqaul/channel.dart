@@ -133,7 +133,7 @@ class LibqaulChannel {
 
   /// receive binary protobuf RPC message from libqaul
   /// and pass it to RPC module
-  Future<void> receiveRpc() async {
+  Future<Uint8List?> receiveRpc() async {
     try {
       final Uint8List? result = await libqaulChannel.invokeMethod('receiveRpcMessage');
 
@@ -144,7 +144,7 @@ class LibqaulChannel {
 
         if(result.isEmpty) {
           debugPrint("channel receiveRpcMessage: result is empty");
-          return;
+          return null;
         }
 
         // check result size
@@ -153,7 +153,7 @@ class LibqaulChannel {
 
         if(size == 0) {
           debugPrint("channel receiveRpcMessage: size == 0");
-          return;
+          return null;
         }
 
         // convert the buffer to a list
@@ -163,8 +163,7 @@ class LibqaulChannel {
         // decode protobuf message
         final rpc = Rpc(read);
         rpc.decodeReceivedMessage(list);
-        debugPrint("channel receiveRpcMessage processed");
-
+        return result;
         // TODO: Free message buffer?
       }
     } on PlatformException catch (e) {

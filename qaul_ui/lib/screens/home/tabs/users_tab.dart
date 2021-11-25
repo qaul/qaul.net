@@ -20,92 +20,73 @@ class _UsersState extends _BaseTabState<_Users> {
     users.sort((u1, u2) => u2.isConnected ? 1 : 0);
     users.sort((u1, u2) => (u1.isBlocked ?? false) ? 1 : 0);
 
-    final firstLoad = useState(true);
-    useMemoized(() async {
-      await refreshUsers(ref);
-      firstLoad.value = false;
-    });
+    final refreshUsers = useCallback(() async {
+      final worker = ref.read(qaulWorkerProvider);
+      await worker.initialized;
+      await worker.getUsers();
+    }, [UniqueKey()]);
+
+    useMemoized(() async => await refreshUsers());
 
     final l18ns = AppLocalizations.of(context)!;
-    return LoadingDecorator(
-      isLoading: firstLoad.value,
-      backgroundColor: Colors.transparent,
-      child: Scaffold(
-        body: RefreshIndicator(
-          onRefresh: () async => await refreshUsers(ref),
-          child: EmptyStateTextDecorator(
-            l18ns.emptyUsersList,
-            isEmpty: users.isEmpty,
-            child: ListView.separated(
-              controller: ScrollController(),
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: users.length,
-              separatorBuilder: (_, __) => const Divider(height: 12.0),
-              itemBuilder: (_, i) {
-                final user = users[i];
-                var theme = Theme.of(context).textTheme;
+    return Scaffold(
+      body: RefreshIndicator(
+        onRefresh: () async => await refreshUsers(),
+        child: EmptyStateTextDecorator(
+          l18ns.emptyUsersList,
+          isEmpty: users.isEmpty,
+          child: ListView.separated(
+            controller: ScrollController(),
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: users.length,
+            separatorBuilder: (_, __) => const Divider(height: 12.0),
+            itemBuilder: (_, i) {
+              final user = users[i];
+              var theme = Theme.of(context).textTheme;
 
-                return ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    (user.isBlocked ?? false) ? Colors.grey : Colors.white,
-                    BlendMode.modulate,
+              return ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  (user.isBlocked ?? false) ? Colors.grey : Colors.white,
+                  BlendMode.modulate,
+                ),
+                child: ListTile(
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => _UserDetailsScreen(user: user)),
+                    );
+                    refreshUsers();
+                  },
+                  leading: UserAvatar.small(user: user),
+                  trailing: (user.isVerified ?? false)
+                      ? const Icon(Icons.verified_user)
+                      : const SizedBox(),
+                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                  title: Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: Text(user.name, style: theme.headline6),
                   ),
-                  child: ListTile(
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => _UserDetailsScreen(user: user)),
-                      );
-                      refreshUsers(ref);
-                    },
-                    leading: UserAvatar.small(user: user),
-                    trailing: (user.isVerified ?? false)
-                        ? const Icon(Icons.verified_user)
-                        : const SizedBox(),
-                    visualDensity: VisualDensity.adaptivePlatformDensity,
-                    title: Padding(
-                      padding: const EdgeInsets.only(bottom: 4.0),
-                      child: Text(user.name, style: theme.headline6),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'ID: ${user.idBase58}',
-                          style: theme.caption!.copyWith(fontSize: 10),
-                        ),
-                        const SizedBox(height: 4),
-                        if (user.availableTypes != null &&
-                            user.availableTypes!.isNotEmpty)
-                          _AvailableConnections(user: user),
-                      ],
-                    ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'ID: ${user.idBase58}',
+                        style: theme.caption!.copyWith(fontSize: 10),
+                      ),
+                      const SizedBox(height: 4),
+                      if (user.availableTypes != null &&
+                          user.availableTypes!.isNotEmpty)
+                        _AvailableConnections(user: user),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),
     );
-  }
-
-  Future<void> refreshUsers(WidgetRef ref) async {
-    await RpcUsers(ref.read).requestUsers();
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (!mounted) return;
-    final libqaul = ref.read(libqaulProvider);
-
-    var queued = await libqaul.checkReceiveQueue();
-    if (queued > 0) await libqaul.receiveRpc();
-
-    await RpcRouter(ref.read).requestUsers();
-    await Future.delayed(const Duration(seconds: 2));
-
-    queued = await libqaul.checkReceiveQueue();
-    if (queued > 0) await libqaul.receiveRpc();
   }
 }
 
@@ -222,10 +203,11 @@ class _UserDetailsScreen extends HookConsumerWidget {
 
                         final libqaul = ref.read(libqaulProvider);
 
-                        final rpc = RpcUsers(ref.read);
+                        final worker = ref.read(qaulWorkerProvider);
+                        await worker.initialized;
                         isVerified
-                            ? await rpc.unverifyUser(user)
-                            : await rpc.verifyUser(user);
+                            ? await worker.unverifyUser(user)
+                            : await worker.verifyUser(user);
                         await Future.delayed(const Duration(seconds: 2));
 
                         final queued = await libqaul.checkReceiveQueue();
@@ -262,10 +244,11 @@ class _UserDetailsScreen extends HookConsumerWidget {
 
                         final libqaul = ref.read(libqaulProvider);
 
-                        final rpc = RpcUsers(ref.read);
+                        final worker = ref.read(qaulWorkerProvider);
+                        await worker.initialized;
                         isBlocked
-                            ? await rpc.unblockUser(user)
-                            : await rpc.blockUser(user);
+                            ? await worker.unblockUser(user)
+                            : await worker.blockUser(user);
                         await Future.delayed(const Duration(seconds: 2));
 
                         final queued = await libqaul.checkReceiveQueue();

@@ -128,11 +128,11 @@ class Libqaul {
   }
 
   /// receive binary protobuf RPC message from libqaul
-  Future<void> receiveRpc() async {
+  Future<Uint8List?> receiveRpc() async {
     if (Platform.isAndroid) {
-      await _libqaulChannel!.receiveRpc();
+      return _libqaulChannel!.receiveRpc();
     } else {
-      _libqaulFfi!.receiveRpc();
+      return _libqaulFfi!.receiveRpc();
     }
   }
 }

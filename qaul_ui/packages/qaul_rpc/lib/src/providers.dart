@@ -9,6 +9,8 @@ import 'models/internet_node.dart';
 // TODO(brenodt): Hide from outside of package. No need to expose this low-level class.
 final libqaulProvider = Provider<Libqaul>((ref) => Libqaul(ref.read));
 
+final qaulWorkerProvider = Provider<LibqaulWorker>((ref) => LibqaulWorker(ref.read));
+
 final defaultUserProvider = StateProvider<User?>((ref) => null);
 
 final feedMessagesProvider =

@@ -165,7 +165,7 @@ class LibqaulFfi {
   int checkReceiveQueue() {
     final _checkQueue = _lib!.lookupFunction<ReceiveRpcQueuedRust, ReceiveRpcQueuedDart>('receive_rpc_from_libqaul_queued_length');
     final result = _checkQueue();
-    debugPrint("$result messages queued by libqaul RPC");
+    if (result > 0) debugPrint("$result messages queued by libqaul RPC");
     return result;
   }
 
@@ -208,7 +208,7 @@ class LibqaulFfi {
   }
 
   /// receive binary protobuf RPC message from libqaul
-  receiveRpc() {
+  Uint8List? receiveRpc() {
     final _receiveRpcFromLibqaul = _lib!.lookupFunction<ReceiveRpcFromLibqaulFunctionRust, ReceiveRpcFromLibqaulFunctionDart>('receive_rpc_from_libqaul');
 
     // create a buffer
@@ -231,6 +231,7 @@ class LibqaulFfi {
       // process message
       final rpc = Rpc(read);
       rpc.decodeReceivedMessage(message);
+      return message;
     } else {
       switch(result) {
         case -1:

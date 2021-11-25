@@ -160,12 +160,12 @@ class Init {
     //   await initializeWindowManager();
     // }
 
-    print("initialize libqaul");
+    debugPrint("initialize libqaul");
     // load libqaul
     // get it from provider
     final libqaul = read(libqaulProvider);
 
-    print("libqaul loaded");
+    debugPrint("libqaul loaded");
 
     // test platform function
     // final platform = await libqaul.getPlatformVersion();
@@ -173,19 +173,19 @@ class Init {
 
     // call hello function
     final hello = await libqaul.hello();
-    print(hello);
+    debugPrint(hello);
 
     // start libqaul
     await libqaul.start();
-    print("libqaul started");
+    debugPrint("libqaul started");
 
     // check if libqaul finished initializing
     //await Future.delayed(Duration(seconds: 3));
-    while (libqaul.initialized() == 0) {
-      await Future.delayed(Duration(milliseconds: 10));
+    while (await libqaul.initialized() == 0) {
+      await Future.delayed(const Duration(milliseconds: 10));
     }
 
-    print("libqaul initialization finished");
+    debugPrint("libqaul initialization finished");
 
     // request node info
     // final rpcNode = RpcNode(read);
