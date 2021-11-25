@@ -82,7 +82,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
       PopupMenuButton<String>(
         onSelected: _handleClick,
         iconSize: 36,
-        icon: const Icon(Icons.more_vert),
+        icon: Icon(vertical ? Icons.more_horiz : Icons.more_vert),
         itemBuilder: (BuildContext context) {
           return _overflowMenuOptions.keys.map((String key) {
             return PopupMenuItem<String>(
