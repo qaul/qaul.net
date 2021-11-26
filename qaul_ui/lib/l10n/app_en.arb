@@ -47,7 +47,7 @@
   "unverifyUserConfirmationMessage": "Do you want to remove the verified status from this user?",
   "blockUserConfirmationMessage": "Do you want to block this user?",
   "unblockUserConfirmationMessage": "Do you want to unblock this user?",
-  "useSystemDefaultMessage": "User system default",
+  "useSystemDefaultMessage": "Use system's default",
   "genericErrorMessage": "An error occurred",
   "fieldRequiredErrorMessage": "Field required.",
   "timeoutErrorMessage": "Timeout",

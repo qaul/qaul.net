@@ -64,25 +64,36 @@ class _ThemeSelectDropDown extends StatelessWidget {
           child: ValueListenableBuilder<AdaptiveThemeMode>(
             valueListenable: AdaptiveTheme.of(context).modeChangeNotifier,
             builder: (_, mode, child) {
-              var isDark = mode == AdaptiveThemeMode.dark;
-              return DropdownButton<bool>(
+              return DropdownButton<AdaptiveThemeMode>(
                 isExpanded: true,
-                value: !isDark,
+                value: mode,
                 items: [
-                  DropdownMenuItem<bool>(
-                    value: true,
+                  DropdownMenuItem<AdaptiveThemeMode>(
+                    value: AdaptiveThemeMode.system,
+                    child: Text(l18ns.useSystemDefaultMessage),
+                  ),
+                  DropdownMenuItem<AdaptiveThemeMode>(
+                    value: AdaptiveThemeMode.light,
                     child: Text(l18ns.lightTheme),
                   ),
-                  DropdownMenuItem<bool>(
-                    value: false,
+                  DropdownMenuItem<AdaptiveThemeMode>(
+                    value: AdaptiveThemeMode.dark,
                     child: Text(l18ns.darkTheme),
                   ),
                 ],
-                onChanged: (choseLightTheme) {
-                  if (choseLightTheme == null) return;
-                  choseLightTheme
-                      ? AdaptiveTheme.of(context).setLight()
-                      : AdaptiveTheme.of(context).setDark();
+                onChanged: (chosenMode) {
+                  switch (chosenMode) {
+                    case AdaptiveThemeMode.light:
+                      AdaptiveTheme.of(context).setLight();
+                      break;
+                    case AdaptiveThemeMode.dark:
+                      AdaptiveTheme.of(context).setDark();
+                      break;
+                    case AdaptiveThemeMode.system:
+                    default:
+                      AdaptiveTheme.of(context).setSystem();
+                      break;
+                  }
                 },
               );
             },

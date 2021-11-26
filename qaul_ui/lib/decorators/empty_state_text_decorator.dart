@@ -1,4 +1,3 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 
 class EmptyStateTextDecorator extends StatelessWidget {
@@ -20,18 +19,12 @@ class EmptyStateTextDecorator extends StatelessWidget {
         child,
         if (isEmpty)
           Center(
-            child: ValueListenableBuilder<AdaptiveThemeMode>(
-              valueListenable: AdaptiveTheme.of(context).modeChangeNotifier,
-              builder: (context, value, _) {
-                final isDark = value == AdaptiveThemeMode.dark;
-                return IgnorePointer(
-                  child: Text(
-                    text,
-                    style: theme.bodyText1!.copyWith(
-                        color: isDark ? Colors.white30 : Colors.black38),
-                  ),
-                );
-              },
+            child: IgnorePointer(
+              child: Text(
+                text,
+                style: theme.bodyText1!
+                    .copyWith(color: Theme.of(context).disabledColor),
+              ),
             ),
           ),
       ],

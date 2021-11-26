@@ -62,6 +62,7 @@ class QaulApp extends ConsumerWidget {
       light: ThemeData(
         brightness: Brightness.light,
         primarySwatch: Colors.lightBlue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
         ),
@@ -69,20 +70,24 @@ class QaulApp extends ConsumerWidget {
             const TooltipThemeData(waitDuration: Duration(seconds: 1)),
         iconTheme: IconThemeData(color: Colors.grey.shade600),
         appBarTheme: AppBarTheme(
-            color: Colors.transparent,
-            elevation: 0.0,
-            titleTextStyle: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.lightBlue),
-            iconTheme: const IconThemeData(color: Colors.lightBlue),
-            actionsIconTheme: const IconThemeData(color: Colors.lightBlue),
-            shape: BorderDirectional(
-                bottom: BorderSide(color: Colors.grey.shade300))),
+          color: Colors.transparent,
+          elevation: 0.0,
+          // Shadow not used as elevation is 0.0 - using this to inject color of decorators/qaul_nav_bar_decorator.dart:157
+          shadowColor: Colors.grey.shade300,
+          titleTextStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.lightBlue),
+          iconTheme: const IconThemeData(color: Colors.lightBlue),
+          actionsIconTheme: const IconThemeData(color: Colors.lightBlue),
+          shape: BorderDirectional(
+              bottom: BorderSide(color: Colors.grey.shade300)),
+        ),
       ),
       dark: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.lightBlue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
         iconTheme: const IconThemeData(color: Colors.white),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: Colors.lightBlue,
@@ -90,10 +95,13 @@ class QaulApp extends ConsumerWidget {
         ),
         tooltipTheme:
             const TooltipThemeData(waitDuration: Duration(seconds: 1)),
-        appBarTheme:
-            const AppBarTheme(elevation: 0.0, color: Color(0xff212121)),
+        appBarTheme: const AppBarTheme(
+          elevation: 0.0,
+          color: Color(0xff212121),
+          shadowColor: Color(0xff212121),
+        ),
       ),
-      initial: themeMode ?? AdaptiveThemeMode.light,
+      initial: themeMode ?? AdaptiveThemeMode.system,
       builder: (theme, darkTheme) {
         return ValueListenableBuilder(
           valueListenable: Hive.box(UserPrefsHelper.hiveBoxName).listenable(),
@@ -210,17 +218,17 @@ class Init {
     // }
   }
 
-  // static Future<void> initializeWindowManager() async {
-  //   assert(!Platform.isWindows);
-  //   await windowManager.ensureInitialized();
-  //
-  //   // Use it only after calling `hiddenWindowAtLaunch`
-  //   windowManager.waitUntilReadyToShow().then((_) async {
-  //     await windowManager.setSize(Size(600, 600));
-  //     await windowManager.setMinimumSize(const Size(512, 400));
-  //     await windowManager.setMaximumSize(const Size(828, 760));
-  //     await windowManager.setFullScreen(false);
-  //     await windowManager.show();
-  //   });
-  // }
+// static Future<void> initializeWindowManager() async {
+//   assert(!Platform.isWindows);
+//   await windowManager.ensureInitialized();
+//
+//   // Use it only after calling `hiddenWindowAtLaunch`
+//   windowManager.waitUntilReadyToShow().then((_) async {
+//     await windowManager.setSize(Size(600, 600));
+//     await windowManager.setMinimumSize(const Size(512, 400));
+//     await windowManager.setMaximumSize(const Size(828, 760));
+//     await windowManager.setFullScreen(false);
+//     await windowManager.show();
+//   });
+// }
 }

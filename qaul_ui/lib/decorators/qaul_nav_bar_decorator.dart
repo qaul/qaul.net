@@ -1,4 +1,3 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -147,38 +146,30 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
 
   Widget _barBackground(BuildContext context, Widget child,
       {bool vertical = false}) {
-    return ValueListenableBuilder<AdaptiveThemeMode>(
-        valueListenable: AdaptiveTheme.of(context).modeChangeNotifier,
-        builder: (_, mode, __) {
-          var isDark = mode == AdaptiveThemeMode.dark;
+    final ltr = Directionality.of(context) == TextDirection.ltr;
 
-          final ltr = Directionality.of(context) == TextDirection.ltr;
-          var side = BorderSide(
-            color:
-                isDark ? Theme.of(context).primaryColor : Colors.grey.shade300,
-          );
-          return Container(
-            alignment: Alignment.bottomCenter,
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: vertical ? BorderSide.none : side,
-                left: !vertical
-                    ? BorderSide.none
-                    : !ltr
-                        ? side
-                        : BorderSide.none,
-                right: !vertical
-                    ? BorderSide.none
-                    : ltr
-                        ? side
-                        : BorderSide.none,
-              ),
-              color:
-                  !isDark ? Colors.transparent : Theme.of(context).primaryColor,
-            ),
-            child: child,
-          );
-        });
+    final barTheme = Theme.of(context).appBarTheme;
+    final side = BorderSide(color: barTheme.shadowColor ?? Colors.transparent);
+    return Container(
+      alignment: Alignment.bottomCenter,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: vertical ? BorderSide.none : side,
+          left: !vertical
+              ? BorderSide.none
+              : !ltr
+                  ? side
+                  : BorderSide.none,
+          right: !vertical
+              ? BorderSide.none
+              : ltr
+                  ? side
+                  : BorderSide.none,
+        ),
+        color: barTheme.backgroundColor,
+      ),
+      child: child,
+    );
   }
 }
 
