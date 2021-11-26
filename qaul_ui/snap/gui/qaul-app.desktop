@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=Qaul App
+Name=qaul.net – قول
 Comment=Internet Independent Wireless Mesh Communication
 Exec=qaul-app
 Icon=${SNAP}/meta/gui/qaul-app.png # replace name to your app name

@@ -29,7 +29,7 @@
 
 
     <application
-            android:label="qaul_app"
+            android:label="qaul.net – قول"
             android:icon="@mipmap/ic_launcher">
         <activity
                 android:name=".MainActivity"
