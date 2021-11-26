@@ -17,7 +17,6 @@ class UsersTranslator extends RpcModuleTranslator {
           name: u.name,
           idBase58: u.idBase58,
           id: Uint8List.fromList(u.id),
-          status: ConnectionStatus.offline,
           key: Uint8List.fromList(u.key),
           keyType: u.keyType,
           keyBase58: u.keyBase58,

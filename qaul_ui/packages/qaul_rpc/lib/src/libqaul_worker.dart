@@ -25,7 +25,8 @@ class LibqaulWorker {
 
   void _init() async {
     if (_initialized.isCompleted) return;
-    await _lib.load();
+    // Throws when called for some reason
+    // await _lib.load();
     await _lib.start();
     while (await _lib.initialized() != 1) {
       await Future.delayed(const Duration(milliseconds: 10));

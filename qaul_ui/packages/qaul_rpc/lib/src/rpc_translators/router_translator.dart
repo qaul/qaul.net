@@ -14,12 +14,15 @@ class RouterTranslator extends RpcModuleTranslator {
             .routingTable
             .map(
               (e) => User(
-            name: 'Name Undefined',
-            idBase58: Base58Encode(e.userId),
-            id: Uint8List.fromList(e.userId),
-            availableTypes: _mapFromRoutingTableConnections(e.connections),
-          ),
-        )
+                name: 'Name Undefined',
+                idBase58: Base58Encode(e.userId),
+                id: Uint8List.fromList(e.userId),
+                availableTypes: _mapFromRoutingTableConnections(e.connections),
+                status: _isConnected(e)
+                    ? ConnectionStatus.online
+                    : ConnectionStatus.offline,
+              ),
+            )
             .toList();
 
         return RpcTranslatorResponse(type, data);
@@ -27,6 +30,8 @@ class RouterTranslator extends RpcModuleTranslator {
         return super.decodeMessageBytes(data);
     }
   }
+
+  bool _isConnected(RoutingTableEntry e) => e.connections.isNotEmpty;
 
   Map<ConnectionType, ConnectionInfo> _mapFromRoutingTableConnections(
       List<RoutingTableConnection> connections) {
@@ -47,10 +52,10 @@ class RouterTranslator extends RpcModuleTranslator {
     }
 
     ConnectionInfo toConnectionInfo(RoutingTableConnection c) => ConnectionInfo(
-      ping: c.rtt,
-      nodeID: Uint8List.fromList(c.via),
-      nodeIDBase58: Base58Encode(c.via),
-    );
+          ping: c.rtt,
+          nodeID: Uint8List.fromList(c.via),
+          nodeIDBase58: Base58Encode(c.via),
+        );
 
     return Map.fromEntries(connections
         .where((c) => c.module != ConnectionModule.NONE)
