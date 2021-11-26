@@ -1,8 +1,6 @@
 package net.qaul.qaul
 
 import android.os.Bundle
-import android.content.Context
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -10,26 +8,28 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
-import kotlinx.coroutines.delay
-import net.qaul.ble.core.ServiceManager
+import net.qaul.ble.Sample
+import net.qaul.ble.core.BleWrapperClass
 import net.qaul.qaul.databinding.ActivityMainBinding
-
-import net.qaul.libqaul.*
+import qaul.sys.ble.BleOuterClass
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-
+    private lateinit var bleWrapperClass: BleWrapperClass
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setSupportActionBar(binding.toolbar)
         binding.btnStart.setOnClickListener {
-            ServiceManager.startService(this)
+            bleWrapperClass = BleWrapperClass()
+//            BleWrapperClass.startService(this)
+            val bleReq : BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
+            bleReq.infoRequest = BleOuterClass.BleInfoRequest.getDefaultInstance()
+            bleWrapperClass.getRequest(bleReq = bleReq.build())
         }
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)

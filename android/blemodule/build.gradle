@@ -1,7 +1,29 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
+    id 'kotlin-android-extensions'
     id 'com.google.protobuf'
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.6.1'
+    }
+    plugins {
+        javalite {
+            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                remove java
+            }
+            task.plugins {
+                javalite {}
+            }
+        }
+    }
 }
 
 android {
@@ -30,33 +52,20 @@ android {
         jvmTarget = '1.8'
     }
 
-    protobuf {
-        protoc {
-            // You still need protoc like in the non-Android case
-            artifact = 'com.google.protobuf:protoc:3.0.0'
-        }
-        plugins {
-            javalite {
-                // The codegen for lite comes as a separate artifact
-                artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
-            }
-        }
-        generateProtoTasks {
-            all().each { task ->
-                task.builtins {
-                    // In most cases you don't need the full Java output
-                    // if you use the lite output.
-                    remove java
-                }
-                task.plugins {
-                    javalite { }
-                }
-            }
+}
+
+sourceSets {
+    main.java.srcDirs += "${protobuf.generatedFilesBaseDir}/main/javalite"
+    main.java.srcDirs += "$projectDir/src/main/proto"
+    main {
+        java {
+            srcDirs += file("${protobuf.generatedFilesBaseDir}/main/javalite")
         }
     }
 }
-sourceSets {
-    main.java.srcDirs += "${protobuf.generatedFilesBaseDir}/main/javalite"
+
+processResources {
+    exclude('**/*.proto')
 }
 
 
@@ -65,7 +74,7 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.4.0'
-    implementation 'com.google.protobuf:protobuf-lite:3.0.0'
+    api 'com.google.protobuf:protobuf-lite:3.0.0'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
