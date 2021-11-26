@@ -11,6 +11,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.coroutines.delay
+import net.qaul.ble.core.ServiceManager
 import net.qaul.qaul.databinding.ActivityMainBinding
 
 import net.qaul.libqaul.*
@@ -27,14 +28,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
-
+        binding.btnStart.setOnClickListener {
+            ServiceManager.startService(this)
+        }
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         // load libqaul
         println("load libqaul")
-        loadLibqaul()
+//        loadLibqaul()
         println("libqaul loaded")
 
         // get app storage path
@@ -44,37 +47,37 @@ class MainActivity : AppCompatActivity() {
         println("start libqaul")
         println("libqaul storage path: $storagePath")
         println("from now on, the logging should work")
-        start(storagePath)
+//        start(storagePath)
         println("libqaul started 6")
 
         // print log "Hello qaul!"
         println("before calling hello")
-        println(hello())
+//        println(hello())
         println("after calling hello")
 
         // wait until library finished starting up
-        while (initialized() == false) {
-            Thread.sleep(1)
-        }
+//        while (initialized() == false) {
+//            Thread.sleep(1)
+//        }
         println("libqaul finished initializing")
 
         // TODO: create and send rpc message
 
         // get messages received
-        var counter = sendcounter()
-        println("libqaul RPC messages sent = $counter")
+//        var counter = sendcounter()
+//        println("libqaul RPC messages sent = $counter")
 
         // get messages queued
-        var queued = receivequeue()
-        println("libqaul RPC messages queued = $queued")
+//        var queued = receivequeue()
+//        println("libqaul RPC messages queued = $queued")
 
         // set text from libqaul to click on bottom icon
         // it prints the message "Hello qaul!"
-        var hellotxt = hello()
+//        var hellotxt = hello()
 
         binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, hellotxt, Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+//            Snackbar.make(view, hellotxt, Snackbar.LENGTH_LONG)
+//                .setAction("Action", null).show()
         }
     }
 

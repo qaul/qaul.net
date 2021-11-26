@@ -9,3 +9,4 @@ dependencyResolutionManagement {
 rootProject.name = "qaul.net – قول"
 include ':app'
 include ':libqaul'
+include ':blemodule'
