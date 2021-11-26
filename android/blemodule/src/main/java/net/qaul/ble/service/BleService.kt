@@ -8,14 +8,16 @@ import net.qaul.ble.AppLog
 class BleService(): LifecycleService() {
     private val TAG: String = BleService::class.java.getSimpleName()
     var bleService: BleService? = null
+
     override fun onCreate() {
         super.onCreate()
-        bleService = this
         AppLog.e(TAG, "$TAG created")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        bleService = this
         return super.onStartCommand(intent, flags, startId)
+
     }
 
     override fun onDestroy() {
