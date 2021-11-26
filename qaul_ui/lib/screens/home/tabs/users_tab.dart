@@ -26,8 +26,6 @@ class _UsersState extends _BaseTabState<_Users> {
       await worker.getUsers();
     }, [UniqueKey()]);
 
-    useMemoized(() async => await refreshUsers());
-
     final l18ns = AppLocalizations.of(context)!;
     return Scaffold(
       body: RefreshIndicator(

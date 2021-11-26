@@ -168,6 +168,9 @@ class Init {
     //   await initializeWindowManager();
     // }
 
+    debugPrint("initialize libqaul worker");
+    await read(qaulWorkerProvider).initialized;
+
     debugPrint("initialize libqaul");
     // load libqaul
     // get it from provider
