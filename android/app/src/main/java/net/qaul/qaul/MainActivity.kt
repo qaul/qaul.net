@@ -25,7 +25,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         binding.btnStart.setOnClickListener {
-            bleWrapperClass = BleWrapperClass()
+            bleWrapperClass = BleWrapperClass(context = this)
+            bleWrapperClass.isBleScanConditionSatisfy()
 //            BleWrapperClass.startService(this)
             val bleReq : BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
             bleReq.infoRequest = BleOuterClass.BleInfoRequest.getDefaultInstance()
