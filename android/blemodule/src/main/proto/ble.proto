@@ -64,12 +64,19 @@ message BleDeviceInfo {
     // Bluetooth device address
     // 48 bit unique Bluetooth device addr
     // e.g. 80:86:F2:08:C7:98
-    string id = 1;
+    //REMOVED: We can not find this
+//    string id = 1;
+    //NEWLY ADDED: device location permission
+    bool location_permission = 1;
+    //NEWLY ADDED:  device location is on
+    bool location_on = 2;
+    //NEWLY ADDED:  device adv permission
+    bool adv_permission = 3;
+    //NEWLY ADDED:  device powered on
+    bool powered = 4;
     // vendor name, device name, etc
     // this is field is purely informative
-    string name = 2;
-    // device powered on
-    bool powered = 3;
+    string name = 5;
     // BLE advertising features supported
     // This field informs us if the basic necessities for
     // qaul BLE requirements are supportorted by
@@ -77,7 +84,8 @@ message BleDeviceInfo {
     // These requirements are:
     // * BLE device roles: central & peripheral
     // * Send & receive BLE advertisements
-    bool ble_support = 4;
+    bool ble_support = 6;
+
     // does it support the 251 byte advertisement messages?
     bool adv_251 = 7;
     // is extended advertising supported
