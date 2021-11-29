@@ -35,10 +35,6 @@ class LibqaulWorker {
       final n = await _lib.checkReceiveQueue();
       if (n > 0) _receiveResponse();
     });
-    Timer.periodic(const Duration(milliseconds: 1500), (_) async {
-      await _initialized.future;
-      await getUsers();
-    });
 
     _initialized.complete(true);
   }

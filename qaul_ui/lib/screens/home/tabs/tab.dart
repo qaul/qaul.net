@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:qaul_ui/decorators/cron_task_decorator.dart';
 import 'package:qaul_ui/decorators/loading_decorator.dart';
 import 'package:qaul_ui/screens/chat/chat.dart';
 import 'package:qaul_ui/screens/chat/models/text_message.dart';
