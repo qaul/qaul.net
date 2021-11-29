@@ -70,26 +70,28 @@ message BleDeviceInfo {
     bool location_permission = 1;
     //NEWLY ADDED:  device location is on
     bool location_on = 2;
-    //NEWLY ADDED:  device adv permission
-    bool adv_permission = 3;
-    //NEWLY ADDED:  device powered on
-    bool powered = 4;
+    //NEWLY ADDED:  device ble permission for Android 12 & above
+    bool ble_permission = 3;
+    //device powered on
+    bool bluetooth_on = 4;
+    //NEWLY ADDED:  device android version
+    int32 android_version = 5;
     // vendor name, device name, etc
     // this is field is purely informative
-    string name = 5;
+    string name = 6;
     // BLE advertising features supported
     // This field informs us if the basic necessities for
-    // qaul BLE requirements are supportorted by
+    // qaul BLE requirements are supported by
     // this device.
     // These requirements are:
     // * BLE device roles: central & peripheral
     // * Send & receive BLE advertisements
-    bool ble_support = 6;
+    bool ble_support = 7;
 
     // does it support the 251 byte advertisement messages?
-    bool adv_251 = 7;
-    // is extended advertising supported
-    bool adv_extended = 8;
+    bool adv_251 = 8;
+    //REMOVED:  is extended advertising supported same as adv_1m
+//    bool adv_extended = 9;
     // what is the maximal amount of bytes sendable via advertising
     uint32 adv_extended_bytes = 9;
     // the following checks for BLE 5 features
@@ -108,6 +110,14 @@ message BleDeviceInfo {
     // macos ?
     // windows ?
     bool le_audio = 13;
+    //NEWLY ADDED:  isLePeriodicAdvertisingSupported
+    bool le_periodic_adv_support  = 14;
+    //NEWLY ADDED:  isMultipleAdvertisementSupported
+    bool le_multiple_adv_support  = 15;
+    //NEWLY ADDED:  isOffloadedFilteringSupported
+    bool offload_filter_support  = 16;
+    //NEWLY ADDED:  isOffloadedScanBatchingSupported
+    bool offload_scan_batching_support  = 17;
 }
 
 // start device request message
