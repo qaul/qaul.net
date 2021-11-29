@@ -38,8 +38,7 @@ class Rpc {
         RpcFeed(reader).decodeReceivedMessage(message.data);
         break;
       case Modules.ROUTER:
-        debugPrint('ROUTER message received');
-        RpcRouter(reader).decodeReceivedMessage(message.data);
+        debugPrint('ROUTER message received: IGNORED -> LibqaulWorker resp.');
         break;
       case Modules.USERS:
         debugPrint('USERS message received: IGNORED -> LibqaulWorker resp.');

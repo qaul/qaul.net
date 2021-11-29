@@ -11,14 +11,9 @@ class _NetworkState extends _BaseTabState<_Network> {
   Future<void> refreshNetwork(WidgetRef ref) async {
     if (loading.value) return;
     loading.value = true;
-    await RpcRouter(ref.read).requestUsers();
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (!mounted) return;
-    final libqaul = ref.read(libqaulProvider);
-
-    final queued = await libqaul.checkReceiveQueue();
-    if (queued > 0) await libqaul.receiveRpc();
+    final worker = ref.read(qaulWorkerProvider);
+    await worker.initialized;
+    await worker.getUsers();
     loading.value = false;
   }
 

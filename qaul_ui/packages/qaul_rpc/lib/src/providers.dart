@@ -1,10 +1,10 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/src/models/feed_message.dart';
 import 'package:qaul_rpc/src/models/user.dart';
-import 'package:qaul_rpc/src/rpc/router.dart';
 
 import '../qaul_rpc.dart';
 import 'models/internet_node.dart';
+import 'models/models.dart';
 
 // TODO(brenodt): Hide from outside of package. No need to expose this low-level class.
 final libqaulProvider = Provider<Libqaul>((ref) => Libqaul(ref.read));
