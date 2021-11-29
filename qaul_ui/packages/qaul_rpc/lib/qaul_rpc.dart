@@ -7,5 +7,3 @@ export 'src/providers.dart';
 export 'src/libqaul_worker.dart';
 
 export 'src/models/models.dart';
-
-export 'src/rpc/user_accounts.dart';

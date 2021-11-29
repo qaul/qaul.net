@@ -17,22 +17,17 @@ class CreateAccountScreen extends HookConsumerWidget {
     final name = ref.watch(_usernameProvider).state;
     if (name == null) return null;
 
-    final rpcUserAccounts = RpcUserAccounts(ref.read);
-    await rpcUserAccounts.createUserAccount(name);
+    final worker = ref.read(qaulWorkerProvider);
+    await worker.initialized;
+    await worker.createUserAccount(name);
 
-    await Future.delayed(const Duration(seconds: 3));
-    await rpcUserAccounts.getDefaultUserAccount();
-    await Future.delayed(const Duration(seconds: 3));
-
-    final libqaul = ref.read(libqaulProvider);
-    // DEBUG: how many messages are queued by libqaul
-    final queued = await libqaul.checkReceiveQueue();
-    // check for rpc messages
-    if (queued > 0) await libqaul.receiveRpc();
-
-    await Future.delayed(const Duration(seconds: 3));
-    final user = ref.read(defaultUserProvider).state;
-    return user != null;
+    for (var i = 0; i < 5; i++) {
+      await worker.getDefaultUserAccount();
+      await Future.delayed(Duration(milliseconds: 100 * (1 + i)));
+      final user = ref.read(defaultUserProvider).state;
+      return user != null;
+    }
+    return false;
   });
 
   @override

@@ -2,11 +2,10 @@ import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
 
-import '../generated/services/feed/feed.pb.dart' as pb;
-import '../models/feed_message.dart' as models;
+import '../generated/services/feed/feed.pb.dart';
 
-class FeedMessage extends Equatable {
-  const FeedMessage({
+class FeedPost extends Equatable {
+  const FeedPost({
     this.senderId,
     this.senderIdBase58,
     this.messageId,
@@ -28,8 +27,8 @@ class FeedMessage extends Equatable {
   List<Object?> get props => [senderIdBase58, messageIdBase58, timeSent];
 }
 
-extension FMExtension on pb.FeedMessage {
-  models.FeedMessage get toModelMessage => models.FeedMessage(
+extension FMExtension on FeedMessage {
+  FeedPost get toModelMessage => FeedPost(
     senderId: Uint8List.fromList(senderId),
     senderIdBase58: senderIdBase58,
     messageId: Uint8List.fromList(messageId),

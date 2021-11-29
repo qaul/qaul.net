@@ -11,7 +11,6 @@ import 'package:ffi/ffi.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:qaul_rpc/src/rpc/protobuf.dart';
 
 // referencing C API type definitions
 // the type definitions to use
@@ -229,8 +228,6 @@ class LibqaulFfi {
       final message = buffer.asTypedList(result);
 
       // process message
-      final rpc = Rpc(read);
-      rpc.decodeReceivedMessage(message);
       return message;
     } else {
       switch(result) {

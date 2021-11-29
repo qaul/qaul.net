@@ -4,13 +4,13 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:qaul_rpc/src/rpc/rpc_module.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
 import 'package:qaul_rpc/src/generated/connections/connections.pb.dart';
 import 'package:qaul_rpc/src/generated/node/node.pb.dart';
+import 'package:qaul_rpc/src/generated/node/user_accounts.pb.dart';
 import 'package:qaul_rpc/src/generated/router/users.pb.dart';
 import 'package:qaul_rpc/src/generated/router/router.pb.dart';
-import 'package:qaul_rpc/src/generated/services/feed/feed.pb.dart' as pb_feed;
+import 'package:qaul_rpc/src/generated/services/feed/feed.pb.dart';
 import 'package:qaul_rpc/src/rpc_translators/abstract_rpc_module_translator.dart';
 import 'package:uuid/uuid.dart';
 
@@ -46,13 +46,13 @@ class LibqaulWorker {
   // Public rpc requests
   // *******************************
   Future<void> sendFeedMessage(String content) async {
-    final msg = pb_feed.Feed(send: pb_feed.SendMessage(content: content));
+    final msg = Feed(send: SendMessage(content: content));
     await _encodeAndSendMessage(Modules.FEED, msg.writeToBuffer());
   }
 
   Future<void> requestFeedMessages({List<int>? lastReceived}) async {
-    final msg = pb_feed.Feed(
-      request: pb_feed.FeedMessageRequest(lastReceived: lastReceived),
+    final msg = Feed(
+      request: FeedMessageRequest(lastReceived: lastReceived),
     );
     _encodeAndSendMessage(Modules.FEED, msg.writeToBuffer());
   }
@@ -115,6 +115,16 @@ class LibqaulWorker {
       Connections(internetNodesRemove: InternetNodesEntry(address: address))
           .writeToBuffer());
 
+  Future<void> getDefaultUserAccount() async {
+    final message = UserAccounts(getDefaultUserAccount: true);
+    await _encodeAndSendMessage(Modules.USERACCOUNTS, message.writeToBuffer());
+  }
+
+  Future<void> createUserAccount(String name) async {
+    final msg = UserAccounts(createUserAccount: CreateUserAccount(name: name));
+    await _encodeAndSendMessage(Modules.USERACCOUNTS, msg.writeToBuffer());
+  }
+
   // *******************************
   // Private (helper) methods
   // *******************************
@@ -156,33 +166,35 @@ class LibqaulWorker {
     final response = await _lib.receiveRpc();
 
     if (response != null) {
-      final message = QaulRpc.fromBuffer(response);
+      final m = QaulRpc.fromBuffer(response);
 
-      if (message.module == Modules.CONNECTIONS) {
+      if (m.module == Modules.CONNECTIONS) {
         final resp =
-            await ConnectionTranslator().decodeMessageBytes(message.data);
+            await ConnectionTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
-      } else if (message.module == Modules.FEED) {
-        final resp = await FeedTranslator().decodeMessageBytes(message.data);
+      } else if (m.module == Modules.FEED) {
+        final resp = await FeedTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
-      } else if (message.module == Modules.NODE) {
-        final resp = await NodeTranslator().decodeMessageBytes(message.data);
+      } else if (m.module == Modules.NODE) {
+        final resp = await NodeTranslator().decodeMessageBytes(m.data);
         debugPrint('RpcNode node id: ${resp?.data}');
-      } else if (message.module == Modules.USERS) {
-        final resp = await UsersTranslator().decodeMessageBytes(message.data);
+      } else if (m.module == Modules.USERACCOUNTS) {
+        final resp = await UserAccountsTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
-      } else if (message.module == Modules.ROUTER) {
-        final resp = await RouterTranslator().decodeMessageBytes(message.data);
+      } else if (m.module == Modules.USERS) {
+        final resp = await UsersTranslator().decodeMessageBytes(m.data);
+        if (resp != null) _processResponse(resp);
+      } else if (m.module == Modules.ROUTER) {
+        final resp = await RouterTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
       } else {
         throw UnhandledRpcMessageException.value(
-            message.toString(), 'LibqaulWorker.receiveResponse');
+            m.toString(), 'LibqaulWorker.receiveResponse');
       }
     }
   }
 
   void _processResponse(RpcTranslatorResponse resp) {
-    // TODO: feed streams through here
     if (resp.data is List<User>) {
       final provider = _reader(usersProvider.notifier);
 
@@ -192,7 +204,7 @@ class LibqaulWorker {
       return;
     }
     if (resp.module == Modules.FEED) {
-      if (resp.data != null && resp.data is List<FeedMessage>) {
+      if (resp.data != null && resp.data is List<FeedPost>) {
         final provider = _reader(feedMessagesProvider.notifier);
 
         for (final msg in resp.data) {
@@ -204,6 +216,12 @@ class LibqaulWorker {
     if (resp.module == Modules.CONNECTIONS) {
       if (resp.data != null && resp.data is List<InternetNode>) {
         _reader(connectedNodesProvider.notifier).state = resp.data;
+      }
+      return;
+    }
+    if (resp.module == Modules.USERACCOUNTS) {
+      if (resp.data != null && resp.data is User) {
+        _reader(defaultUserProvider).state = resp.data;
       }
       return;
     }

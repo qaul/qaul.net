@@ -7,23 +7,16 @@ class SplashScreen extends ConsumerWidget {
   SplashScreen({Key? key}) : super(key: key);
 
   final _sendRequestProvider = FutureProvider<String>((ref) async {
-    final rpcUserAccounts = RpcUserAccounts(ref.read);
+    final worker = ref.read(qaulWorkerProvider);
+    await worker.initialized;
 
-    await rpcUserAccounts.getDefaultUserAccount();
-    await Future.delayed(const Duration(seconds: 7));
-
-    final libqaul = ref.read(libqaulProvider);
-
-    // DEBUG: how many messages are queued by libqaul
-    final queued = await libqaul.checkReceiveQueue();
-    // check for rpc messages
-    if (queued > 0) await libqaul.receiveRpc();
-
-
-    final user = ref.read(defaultUserProvider).state;
-    final route =
-        user == null ? NavigationHelper.createAccount : NavigationHelper.home;
-    return route;
+    for (var i = 0; i < 5; i++) {
+      await worker.getDefaultUserAccount();
+      await Future.delayed(Duration(milliseconds: (i + 1) * 100));
+      final user = ref.read(defaultUserProvider).state;
+      if (user != null) return NavigationHelper.home;
+    }
+    return NavigationHelper.createAccount;
   });
 
   @override

@@ -15,7 +15,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:qaul_rpc/src/rpc/protobuf.dart';
 
 class LibqaulChannel {
   final Reader read;
@@ -156,13 +155,7 @@ class LibqaulChannel {
           return null;
         }
 
-        // convert the buffer to a list
-        final list = result.toList(growable: false);
-        debugPrint("channel receiveRpcMessage before processing");
-
         // decode protobuf message
-        final rpc = Rpc(read);
-        rpc.decodeReceivedMessage(list);
         return result;
         // TODO: Free message buffer?
       }

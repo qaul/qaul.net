@@ -1,18 +1,16 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../generated/services/feed/feed.pb.dart' as pb;
-import '../models/feed_message.dart' as models;
+import '../models/feed_post.dart';
 
 // Maybe using a Stream would be simpler. Just creating this class to facilitate manipulating StateNotifierProvider
-class FeedMessageListNotifier extends StateNotifier<List<models.FeedMessage>> {
-  FeedMessageListNotifier({List<models.FeedMessage>? messages})
-      : super(messages ?? []);
+class FeedPostListNotifier extends StateNotifier<List<FeedPost>> {
+  FeedPostListNotifier({List<FeedPost>? messages}) : super(messages ?? []);
 
-  void add(models.FeedMessage message) {
+  void add(FeedPost message) {
     state = [message, ...state];
   }
 
-  bool contains(pb.FeedMessage message) {
+  bool contains(FeedPost message) {
     return !state
         .indexWhere(
           (m) =>
