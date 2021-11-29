@@ -8,20 +8,6 @@ class _Feed extends BaseTab {
 }
 
 class _FeedState extends _BaseTabState<_Feed> {
-  Future<void> refreshFeed(WidgetRef ref) async {
-    if (loading.value) return;
-    loading.value = true;
-    await RpcFeed(ref.read).requestFeedMessages();
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (!mounted) return;
-    final libqaul = ref.read(libqaulProvider);
-
-    final queued = await libqaul.checkReceiveQueue();
-    if (queued > 0) await libqaul.receiveRpc();
-    loading.value = false;
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -34,30 +20,30 @@ class _FeedState extends _BaseTabState<_Feed> {
         .where((m) => !blockedIds.contains(m.senderIdBase58 ?? ''))
         .toList();
 
-    final firstLoad = useState(true);
-    useMemoized(() async {
-      await refreshFeed(ref);
-      firstLoad.value = false;
-    });
+    final refreshFeed = useCallback(() async {
+      final worker = ref.read(qaulWorkerProvider);
+      await worker.initialized;
+      await worker.requestFeedMessages();
+    }, [UniqueKey()]);
 
     final l18ns = AppLocalizations.of(context);
-    return LoadingDecorator(
-      isLoading: firstLoad.value,
-      backgroundColor: Colors.transparent,
-      child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          heroTag: 'feedTabFAB',
-          tooltip: l18ns!.createFeedPostTooltip,
-          onPressed: () async {
-            await Navigator.push(context,
-                MaterialPageRoute(builder: (_) => _CreateFeedMessage()));
-            await Future.delayed(const Duration(milliseconds: 2000));
-            await refreshFeed(ref);
-          },
-          child: const Icon(Icons.add, size: 32),
-        ),
-        body: RefreshIndicator(
-          onRefresh: () async => await refreshFeed(ref),
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'feedTabFAB',
+        tooltip: l18ns!.createFeedPostTooltip,
+        onPressed: () async {
+          await Navigator.push(context,
+              MaterialPageRoute(builder: (_) => _CreateFeedMessage()));
+          await Future.delayed(const Duration(milliseconds: 2000));
+          await refreshFeed();
+        },
+        child: const Icon(Icons.add, size: 32),
+      ),
+      body: CronTaskDecorator(
+        schedule: const Duration(milliseconds: 2500),
+        callback: () async => await refreshFeed(),
+        child: RefreshIndicator(
+          onRefresh: () async => await refreshFeed(),
           child: EmptyStateTextDecorator(
             l18ns.emptyFeedList,
             isEmpty: filteredMessages.isEmpty,
@@ -123,20 +109,13 @@ class _CreateFeedMessage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useTextEditingController();
     final loading = useState(false);
+
     final sendMessage = useCallback(() async {
       if (!(_formKey.currentState?.validate() ?? false)) return;
       loading.value = true;
-
-      await RpcFeed(ref.read).sendFeedMessage(controller.text.trim());
-      await Future.delayed(const Duration(seconds: 2));
-
-      final libqaul = ref.read(libqaulProvider);
-
-      // DEBUG: how many messages are queued by libqaul
-      final queued = await libqaul.checkReceiveQueue();
-      // check for rpc messages
-      if (queued > 0) await libqaul.receiveRpc();
-
+      final worker = ref.read(qaulWorkerProvider);
+      await worker.initialized;
+      await worker.sendFeedMessage(controller.text.trim());
       loading.value = false;
       Navigator.pop(context);
     }, [UniqueKey()]);

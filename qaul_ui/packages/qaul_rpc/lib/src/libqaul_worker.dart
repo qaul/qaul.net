@@ -8,6 +8,7 @@ import 'package:qaul_rpc/src/rpc/rpc_module.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
 import 'package:qaul_rpc/src/generated/router/users.pb.dart';
 import 'package:qaul_rpc/src/generated/router/router.pb.dart';
+import 'package:qaul_rpc/src/generated/services/feed/feed.pb.dart' as pb_feed;
 import 'package:qaul_rpc/src/rpc_translators/abstract_rpc_module_translator.dart';
 import 'package:uuid/uuid.dart';
 
@@ -42,6 +43,18 @@ class LibqaulWorker {
   // *******************************
   // Public rpc requests
   // *******************************
+  Future<void> sendFeedMessage(String content) async {
+    final msg = pb_feed.Feed(send: pb_feed.SendMessage(content: content));
+    await _encodeAndSendMessage(Modules.FEED, msg.writeToBuffer());
+  }
+
+  Future<void> requestFeedMessages({List<int>? lastReceived}) async {
+    final msg = pb_feed.Feed(
+      request: pb_feed.FeedMessageRequest(lastReceived: lastReceived),
+    );
+    _encodeAndSendMessage(Modules.FEED, msg.writeToBuffer());
+  }
+
   Future<void> getUsers() async {
     final id = await _encodeAndSendMessage(
         Modules.USERS, Users(userRequest: UserRequest()).writeToBuffer());
@@ -125,7 +138,10 @@ class LibqaulWorker {
     if (response != null) {
       final message = QaulRpc.fromBuffer(response);
 
-      if (message.module == Modules.USERS) {
+      if (message.module == Modules.FEED) {
+        final resp = await FeedTranslator().decodeMessageBytes(message.data);
+        if (resp != null) _processResponse(resp);
+      } else if (message.module == Modules.USERS) {
         final resp = await UsersTranslator().decodeMessageBytes(message.data);
         if (resp != null) _processResponse(resp);
       } else if (message.module == Modules.ROUTER) {
@@ -147,6 +163,16 @@ class LibqaulWorker {
         provider.contains(user) ? provider.update(user) : provider.add(user);
       }
       return;
+    }
+    if (resp.module == Modules.FEED) {
+      if (resp.data != null && resp.data is List<FeedMessage>) {
+        final provider = _reader(feedMessagesProvider.notifier);
+
+        for (final msg in resp.data) {
+          if (!provider.contains(msg)) provider.add(msg);
+        }
+        return;
+      }
     }
 
     throw UnhandledRpcMessageException.value(
