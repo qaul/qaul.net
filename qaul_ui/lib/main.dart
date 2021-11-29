@@ -111,7 +111,6 @@ class QaulApp extends ConsumerWidget {
               darkTheme: darkTheme,
               initialRoute: NavigationHelper.initial,
               onGenerateRoute: NavigationHelper.onGenerateRoute,
-              scrollBehavior: TouchAndMouseScrollBehavior(),
               locale: UserPrefsHelper().defaultLocale,
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
@@ -143,16 +142,6 @@ class QaulApp extends ConsumerWidget {
       },
     );
   }
-}
-
-class TouchAndMouseScrollBehavior extends MaterialScrollBehavior {
-  // Override behavior methods and getters like dragDevices
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-        // etc.
-      };
 }
 
 class Init {
