@@ -8,7 +8,9 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
-import net.qaul.ble.Sample
+import com.google.gson.Gson
+import net.qaul.ble.AppLog
+import net.qaul.ble.callback.BleRequestCallback
 import net.qaul.ble.core.BleWrapperClass
 import net.qaul.qaul.databinding.ActivityMainBinding
 import qaul.sys.ble.BleOuterClass
@@ -26,11 +28,20 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         binding.btnStart.setOnClickListener {
             bleWrapperClass = BleWrapperClass(context = this)
-            bleWrapperClass.isBleScanConditionSatisfy()
+//            bleWrapperClass.isBleScanConditionSatisfy()
 //            BleWrapperClass.startService(this)
             val bleReq : BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
             bleReq.infoRequest = BleOuterClass.BleInfoRequest.getDefaultInstance()
-            bleWrapperClass.getRequest(bleReq = bleReq.build())
+            bleWrapperClass.getRequest(bleReq = bleReq.build(), object : BleRequestCallback {
+                override fun bleResponse(ble: BleOuterClass.Ble) {
+                    if (ble.isInitialized) {
+                        if (ble.messageCase == BleOuterClass.Ble.MessageCase.INFO_RESPONSE) {
+                            val deviceInfo: BleOuterClass.BleDeviceInfo = ble.infoResponse.device
+                            AppLog.e("bleResponse: ", Gson().toJson(deviceInfo))
+                        }
+                    }
+                }
+            })
         }
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)

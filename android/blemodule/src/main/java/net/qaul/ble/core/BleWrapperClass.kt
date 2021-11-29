@@ -22,15 +22,18 @@ import net.qaul.ble.RemoteLog
 import net.qaul.ble.service.BleService
 import qaul.sys.ble.BleOuterClass
 import java.lang.Exception
+import android.R.attr.capitalize
+import android.bluetooth.le.BluetoothLeAdvertiser
+import net.qaul.ble.callback.BleRequestCallback
+
 
 class BleWrapperClass(context: AppCompatActivity) {
     private val TAG: String = BleWrapperClass.javaClass.simpleName
     private val context = context
-    private var isBleSupported: Boolean = false
-    private var isLocationPermission: Boolean = false
-    private var isLocationOn: Boolean = false
-    private var isAdvertPermission : Boolean = false
-    private var isBluetoothOn : Boolean = false
+    private var bleCallback: BleRequestCallback? = null
+    /**
+     * Static Member Declaration
+     */
     companion object {
         lateinit var bleService: BleService
         fun startService(context: Context) {
@@ -44,31 +47,92 @@ class BleWrapperClass(context: AppCompatActivity) {
         private const val REQUEST_ENABLE_BT = 113
         private const val BLE_PERMISSION_REQ_CODE_12 = 114
     }
-
-    fun getRequest(bleReq: BleOuterClass.Ble) {
+    /**
+     * This Method get BLERequest from UI & Return BLEResponse by Callback Interface Method
+     */
+    fun getRequest(bleReq: BleOuterClass.Ble, param: BleRequestCallback) {
         if (bleReq.isInitialized) {
+            bleCallback = param
             if (bleReq.messageCase == BleOuterClass.Ble.MessageCase.INFO_REQUEST) {
                 Log.e(TAG, bleReq.messageCase.toString())
                 getDeviceInfo()
             }
+
         }
     }
 
+    /**
+     * This Method Return Device Information Regarding BLE Functionality & Permissions
+     */
     private fun getDeviceInfo() {
-        isBleScanConditionSatisfy()
+        val adapter = BluetoothAdapter.getDefaultAdapter()
         val bleRes: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
-        bleRes.infoResponse = BleOuterClass.BleInfoResponse.getDefaultInstance()
-        if (bleRes.infoResponse.isInitialized) {
-//            bleRes.infoResponse.
-        } else {
+        val bleResInfoResponse = BleOuterClass.BleInfoResponse.newBuilder()
+        if (bleRes.isInitialized) {
+            if (bleResInfoResponse.isInitialized) {
+                val deviceInfoBuilder: BleOuterClass.BleDeviceInfo.Builder =
+                    BleOuterClass.BleDeviceInfo.newBuilder()
+                deviceInfoBuilder.locationPermission = isLocationPermissionAllowed()
+                deviceInfoBuilder.locationOn = isLocationEnable()
+                deviceInfoBuilder.blePermission = isBluetoothPermissionAllowed()
+                deviceInfoBuilder.bluetoothOn = isBluetoothEnable()
+                deviceInfoBuilder.androidVersion = getOsVersion()
+                deviceInfoBuilder.name = getDeviceName()
+                deviceInfoBuilder.bleSupport = isBLeSupported()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    deviceInfoBuilder.adv251 = adapter.leMaximumAdvertisingDataLength > 250
+                    deviceInfoBuilder.adv1M = adapter.isLeExtendedAdvertisingSupported
+                    deviceInfoBuilder.adv2M = adapter.isLe2MPhySupported
+                    deviceInfoBuilder.advCoded = adapter.isLeCodedPhySupported
+                    deviceInfoBuilder.advExtendedBytes = adapter.leMaximumAdvertisingDataLength
+                    deviceInfoBuilder.lePeriodicAdvSupport =
+                        adapter.isLePeriodicAdvertisingSupported
+                    deviceInfoBuilder.leMultipleAdvSupport =
+                        adapter.isMultipleAdvertisementSupported
+                    deviceInfoBuilder.offloadFilterSupport = adapter.isOffloadedFilteringSupported
+                    deviceInfoBuilder.offloadScanBatchingSupport =
+                        adapter.isOffloadedScanBatchingSupported
+                } else {
+                    deviceInfoBuilder.adv251 = false
+                    deviceInfoBuilder.adv1M = false
+                    deviceInfoBuilder.adv2M = false
+                    deviceInfoBuilder.advCoded = false
+                    deviceInfoBuilder.advExtendedBytes = 20
+                    deviceInfoBuilder.leAudio = false
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    deviceInfoBuilder.leAudio = isClass("android.bluetooth.BluetoothLeAudio")
+                }
+                bleResInfoResponse.device = deviceInfoBuilder.build()
+            }
+            bleRes.infoResponse = bleResInfoResponse.build()
+            bleCallback?.bleResponse(ble = bleRes.build())
+        }
+    }
+
+    /**
+     * This Method Checks if inputted Class Exist or Not
+     */
+    private fun isClass(className: String): Boolean {
+        return try {
+            Class.forName(className)
+            true
+        } catch (e: ClassNotFoundException) {
+            e.printStackTrace()
             false
         }
     }
 
+    /**
+     * Checks if BLE Feature is Supported or Not
+     */
     private fun isBLeSupported(): Boolean {
         return context.packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
     }
 
+    /**
+     * Checks if Bluetooth is Enabled or Not
+     */
     private fun isBluetoothEnable(): Boolean {
         val bluetoothManager =
             context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -82,6 +146,9 @@ class BleWrapperClass(context: AppCompatActivity) {
         }
     }
 
+    /**
+     * Checks if Location is Enabled or Not
+     */
     private fun isLocationEnable(): Boolean {
         val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return try {
@@ -93,10 +160,47 @@ class BleWrapperClass(context: AppCompatActivity) {
         }
     }
 
+    /**
+     * Return the Current OS SDK Version
+     */
+    private fun getOsVersion(): Int {
+        return Build.VERSION.SDK_INT
+    }
+
+    /**
+     * Returns Device Manufacturer & Model Name/Number
+     */
+    fun getDeviceName(): String? {
+        val manufacturer = Build.MANUFACTURER
+        val model = Build.MODEL
+        return if (model.toLowerCase().startsWith(manufacturer.toLowerCase())) {
+            capitalize(model)
+        } else {
+            capitalize(manufacturer).toString() + " " + model
+        }
+    }
+
+    /**
+     * Capitalize 1st Letter of String
+     */
+    private fun capitalize(s: String?): String? {
+        if (s == null || s.isEmpty()) {
+            return ""
+        }
+        val first = s[0]
+        return if (Character.isUpperCase(first)) {
+            s
+        } else {
+            Character.toUpperCase(first).toString() + s.substring(1)
+        }
+    }
+
 //    private fun isScanRunning(): Boolean {
 //        return mScanning
 //    }
-
+    /**
+     * Request User to Enable Bluetooth
+     */
     private fun enableBluetooth(context: Activity, requestCode: Int): Boolean {
         val bluetoothManager =
             context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -115,6 +219,9 @@ class BleWrapperClass(context: AppCompatActivity) {
         }
     }
 
+    /**
+     * Disable Bluetooth
+     */
     private fun disableBluetooth(): Boolean {
         val bluetoothManager =
             context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -123,6 +230,9 @@ class BleWrapperClass(context: AppCompatActivity) {
         return false
     }
 
+    /**
+     * Checks if Bluetooth Permission is Allowed or Not for Android 12 & Above
+     */
     private fun isBluetoothPermissionAllowed(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             return hasPermission(
@@ -133,11 +243,12 @@ class BleWrapperClass(context: AppCompatActivity) {
                 )
             )
         }
-        return hasPermission(
-            arrayOf()
-        )
+        return false
     }
 
+    /**
+     * Checks if Location Permission is Allowed or Not
+     */
     private fun isLocationPermissionAllowed(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             return hasPermission(
@@ -151,6 +262,9 @@ class BleWrapperClass(context: AppCompatActivity) {
         )
     }
 
+    /**
+     * Checks if Given Permissions (input as array) are Allowed or Not
+     */
     private fun hasPermission(permissions: Array<String>?): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && permissions != null) {
             for (permission in permissions) {
@@ -164,6 +278,9 @@ class BleWrapperClass(context: AppCompatActivity) {
         return true
     }
 
+    /**
+     * Request User to Allow Location Permission
+     */
     private fun enableLocationPermission(
         activity: Activity?,
         requestCode: Int
@@ -175,6 +292,9 @@ class BleWrapperClass(context: AppCompatActivity) {
         )
     }
 
+    /**
+     * Request User to Allow Bluetooth Permissions for Android 12 & Above
+     */
     private fun enableBlePermission(
         activity: Activity?,
         requestCode: Int
@@ -192,6 +312,9 @@ class BleWrapperClass(context: AppCompatActivity) {
         }
     }
 
+    /**
+     * Request User to Turn On Location
+     */
     private fun enableLocation(context: Activity, locationReqCode: Int) {
         val googleApiClient: GoogleApiClient = GoogleApiClient.Builder(context)
             .addApi(LocationServices.API).build()
@@ -239,6 +362,9 @@ class BleWrapperClass(context: AppCompatActivity) {
         }
     }
 
+    /**
+     * Checks if BLE Regarding All the Requirements Are Satisfies or Not
+     */
     fun isBleScanConditionSatisfy(): Boolean {
         var isBleScanConditionSatisfy = true
         if (!isBLeSupported()) {
@@ -287,4 +413,5 @@ class BleWrapperClass(context: AppCompatActivity) {
 
         return isBleScanConditionSatisfy
     }
+
 }
