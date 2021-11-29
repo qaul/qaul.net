@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/rpc/rpc_module.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
+import 'package:qaul_rpc/src/generated/connections/connections.pb.dart';
 import 'package:qaul_rpc/src/generated/node/node.pb.dart';
 import 'package:qaul_rpc/src/generated/router/users.pb.dart';
 import 'package:qaul_rpc/src/generated/router/router.pb.dart';
@@ -99,6 +100,21 @@ class LibqaulWorker {
   Future<void> getNodeInfo() async => await _encodeAndSendMessage(
       Modules.NODE, Node(getNodeInfo: true).writeToBuffer());
 
+  Future<void> requestNodes() async => await _encodeAndSendMessage(
+      Modules.CONNECTIONS,
+      Connections(internetNodesRequest: InternetNodesRequest())
+          .writeToBuffer());
+
+  Future<void> addNode(String address) async => await _encodeAndSendMessage(
+      Modules.CONNECTIONS,
+      Connections(internetNodesAdd: InternetNodesEntry(address: address))
+          .writeToBuffer());
+
+  Future<void> removeNode(String address) async => await _encodeAndSendMessage(
+      Modules.CONNECTIONS,
+      Connections(internetNodesRemove: InternetNodesEntry(address: address))
+          .writeToBuffer());
+
   // *******************************
   // Private (helper) methods
   // *******************************
@@ -142,7 +158,11 @@ class LibqaulWorker {
     if (response != null) {
       final message = QaulRpc.fromBuffer(response);
 
-      if (message.module == Modules.FEED) {
+      if (message.module == Modules.CONNECTIONS) {
+        final resp =
+            await ConnectionTranslator().decodeMessageBytes(message.data);
+        if (resp != null) _processResponse(resp);
+      } else if (message.module == Modules.FEED) {
         final resp = await FeedTranslator().decodeMessageBytes(message.data);
         if (resp != null) _processResponse(resp);
       } else if (message.module == Modules.NODE) {
@@ -180,6 +200,12 @@ class LibqaulWorker {
         }
         return;
       }
+    }
+    if (resp.module == Modules.CONNECTIONS) {
+      if (resp.data != null && resp.data is List<InternetNode>) {
+        _reader(connectedNodesProvider.notifier).state = resp.data;
+      }
+      return;
     }
 
     throw UnhandledRpcMessageException.value(

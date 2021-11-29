@@ -4,14 +4,15 @@ import 'package:fast_base58/fast_base58.dart';
 import 'package:meta/meta.dart';
 
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
+import 'package:qaul_rpc/src/generated/connections/connections.pb.dart';
 import 'package:qaul_rpc/src/generated/node/node.pb.dart';
 import 'package:qaul_rpc/src/generated/router/users.pb.dart';
 import 'package:qaul_rpc/src/generated/router/router.pb.dart';
 import 'package:qaul_rpc/src/generated/services/feed/feed.pb.dart';
-import 'package:qaul_rpc/src/models/feed_message.dart';
-import 'package:qaul_rpc/src/models/user.dart';
+import 'package:qaul_rpc/src/models/models.dart';
 import 'package:qaul_rpc/src/rpc/rpc_module.dart';
 
+part 'connection_translator.dart';
 part 'feed_translator.dart';
 part 'node_translator.dart';
 part 'users_translator.dart';

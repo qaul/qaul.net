@@ -110,21 +110,31 @@ class _InternetNodesList extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final nodes = ref.watch(connectedNodesProvider).state;
-
     final loading = useState(true);
     final isMounted = useIsMounted();
-    useMemoized(() async {
-      await RpcConnections(ref.read).requestNodes();
 
-      await Future.delayed(const Duration(seconds: 2));
-
+    final removeNode = useCallback((String nodeAddress) async {
+      loading.value = true;
+      final worker = ref.read(qaulWorkerProvider);
+      await worker.initialized;
+      await worker.removeNode(nodeAddress);
       if (!isMounted()) return;
+      loading.value = false;
+    }, [UniqueKey()]);
 
-      final libqaul = ref.read(libqaulProvider);
+    final addNode = useCallback((String nodeAddress) async {
+      loading.value = true;
+      final worker = ref.read(qaulWorkerProvider);
+      await worker.initialized;
+      await worker.addNode(nodeAddress);
+      if (!isMounted()) return;
+      loading.value = false;
+    }, [UniqueKey()]);
 
-      final queued = await libqaul.checkReceiveQueue();
-      if (queued > 0) await libqaul.receiveRpc();
-
+    useMemoized(() async {
+      final worker = ref.read(qaulWorkerProvider);
+      await worker.initialized;
+      await worker.requestNodes();
       loading.value = false;
     });
 
@@ -169,20 +179,7 @@ class _InternetNodesList extends HookConsumerWidget {
                           splashRadius: 24,
                           iconSize: 20,
                           icon: const Icon(CupertinoIcons.delete),
-                          onPressed: () async {
-                            loading.value = true;
-                            await RpcConnections(ref.read).removeNode(nodeAddr);
-
-                            await Future.delayed(const Duration(seconds: 2));
-
-                            if (!isMounted()) return;
-
-                            final libqaul = ref.read(libqaulProvider);
-
-                            var queued = await libqaul.checkReceiveQueue();
-                            if (queued > 0) await libqaul.receiveRpc();
-                            loading.value = false;
-                          },
+                          onPressed: () async => removeNode(nodeAddr),
                         ),
                         onTap: () async {
                           final ip =
@@ -194,31 +191,8 @@ class _InternetNodesList extends HookConsumerWidget {
                           );
 
                           if (res is! String) return;
-                          loading.value = true;
-
-                          // remove
-                          await RpcConnections(ref.read).removeNode(nodeAddr);
-
-                          await Future.delayed(const Duration(seconds: 2));
-
-                          if (!isMounted()) return;
-
-                          final libqaul = ref.read(libqaulProvider);
-
-                          var queued = await libqaul.checkReceiveQueue();
-                          if (queued > 0) await libqaul.receiveRpc();
-
-                          // add updated
-                          await RpcConnections(ref.read).addNode(res);
-
-                          await Future.delayed(const Duration(seconds: 2));
-
-                          if (!isMounted()) return;
-
-                          queued = await libqaul.checkReceiveQueue();
-                          if (queued > 0) await libqaul.receiveRpc();
-
-                          loading.value = false;
+                          removeNode(nodeAddr);
+                          addNode(res);
                         },
                       );
                     },
@@ -236,20 +210,8 @@ class _InternetNodesList extends HookConsumerWidget {
                     context: context, builder: (_) => _AddNodeDialog());
 
                 if (res is! String) return;
-                loading.value = true;
 
-                await RpcConnections(ref.read).addNode(res);
-
-                await Future.delayed(const Duration(seconds: 2));
-
-                if (!isMounted()) return;
-
-                final libqaul = ref.read(libqaulProvider);
-
-                var queued = await libqaul.checkReceiveQueue();
-                if (queued > 0) await libqaul.receiveRpc();
-
-                loading.value = false;
+                addNode(res);
               },
             ),
             const SizedBox(width: 12.0),
