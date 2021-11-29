@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/rpc/rpc_module.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
+import 'package:qaul_rpc/src/generated/node/node.pb.dart';
 import 'package:qaul_rpc/src/generated/router/users.pb.dart';
 import 'package:qaul_rpc/src/generated/router/router.pb.dart';
 import 'package:qaul_rpc/src/generated/services/feed/feed.pb.dart' as pb_feed;
@@ -95,6 +96,9 @@ class LibqaulWorker {
         Modules.USERS, Users(userUpdate: entry).writeToBuffer());
   }
 
+  Future<void> getNodeInfo() async => await _encodeAndSendMessage(
+      Modules.NODE, Node(getNodeInfo: true).writeToBuffer());
+
   // *******************************
   // Private (helper) methods
   // *******************************
@@ -141,6 +145,9 @@ class LibqaulWorker {
       if (message.module == Modules.FEED) {
         final resp = await FeedTranslator().decodeMessageBytes(message.data);
         if (resp != null) _processResponse(resp);
+      } else if (message.module == Modules.NODE) {
+        final resp = await NodeTranslator().decodeMessageBytes(message.data);
+        debugPrint('RpcNode node id: ${resp?.data}');
       } else if (message.module == Modules.USERS) {
         final resp = await UsersTranslator().decodeMessageBytes(message.data);
         if (resp != null) _processResponse(resp);

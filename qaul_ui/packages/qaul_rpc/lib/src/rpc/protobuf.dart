@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
-import 'node.dart';
 
 class Rpc {
   Rpc(this.reader);
@@ -26,8 +25,7 @@ class Rpc {
     // send message to the appropriate module
     switch (message.module) {
       case Modules.NODE:
-        debugPrint('NODE message received');
-        RpcNode(reader).decodeReceivedMessage(message.data);
+        debugPrint('NODE message received: IGNORED -> LibqaulWorker resp.');
         break;
       case Modules.USERACCOUNTS:
         debugPrint('USERACCOUNTS message received');
