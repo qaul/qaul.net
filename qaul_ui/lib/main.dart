@@ -7,7 +7,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/qaul_app.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 // import 'package:window_manager/window_manager.dart';
 
 import 'helpers/user_prefs_helper.dart';
