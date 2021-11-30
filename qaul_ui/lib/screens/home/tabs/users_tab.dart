@@ -44,11 +44,8 @@ class _UsersState extends _BaseTabState<_Users> {
                 final user = users[i];
                 var theme = Theme.of(context).textTheme;
 
-                return ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    (user.isBlocked ?? false) ? Colors.grey : Colors.white,
-                    BlendMode.modulate,
-                  ),
+                return DisabledStateDecorator(
+                  isDisabled: user.isBlocked ?? false,
                   child: ListTile(
                     onTap: () async {
                       await Navigator.push(
@@ -189,46 +186,51 @@ class _UserDetailsScreen extends HookConsumerWidget {
                     Text('${l18ns.publicKey}:\n${user.keyBase58}',
                         style: theme.headline5),
                     const SizedBox(height: 40.0),
-                    _RoundedRectButton(
-                      color: isVerified ? Colors.green.shade300 : Colors.green,
-                      onPressed: () async {
-                        final res = await _confirmAction(
-                          context,
-                          description: isVerified
-                              ? l18ns.unverifyUserConfirmationMessage
-                              : l18ns.verifyUserConfirmationMessage,
-                        );
+                    DisabledStateDecorator(
+                      isDisabled: blocked,
+                      child: _RoundedRectButton(
+                        color: verified ? Colors.green.shade300 : Colors.green,
+                        onPressed: blocked
+                            ? null
+                            : () async {
+                                final res = await _confirmAction(
+                                  context,
+                                  description: verified
+                                      ? l18ns.unverifyUserConfirmationMessage
+                                      : l18ns.verifyUserConfirmationMessage,
+                                );
 
-                        if (res is! bool || !res) return;
-                        loading.value = true;
+                                if (res is! bool || !res) return;
+                                loading.value = true;
 
-                        final worker = ref.read(qaulWorkerProvider);
-                        isVerified
-                            ? await worker.unverifyUser(user)
-                            : await worker.verifyUser(user);
+                                final worker = ref.read(qaulWorkerProvider);
+                                verified
+                                    ? await worker.unverifyUser(user)
+                                    : await worker.verifyUser(user);
 
-                        loading.value = false;
-                        Navigator.pop(context);
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (!isVerified) ...[
-                            const Icon(Icons.check, size: 32),
-                            const SizedBox(width: 4),
+                                loading.value = false;
+                                Navigator.pop(context);
+                              },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (!verified) ...[
+                              const Icon(Icons.check, size: 32),
+                              const SizedBox(width: 4),
+                            ],
+                            Text(verified ? l18ns.unverify : l18ns.verify),
                           ],
-                          Text(isVerified ? l18ns.unverify : l18ns.verify),
-                        ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 28.0),
                     _RoundedRectButton(
                       color:
-                          isBlocked ? Colors.red.shade300 : Colors.red.shade400,
+                          blocked ? Colors.red.shade300 : Colors.red.shade400,
                       onPressed: () async {
                         final res = await _confirmAction(
                           context,
-                          description: isBlocked
+                          description: blocked
                               ? l18ns.unblockUserConfirmationMessage
                               : l18ns.blockUserConfirmationMessage,
                         );
@@ -237,7 +239,7 @@ class _UserDetailsScreen extends HookConsumerWidget {
                         loading.value = true;
 
                         final worker = ref.read(qaulWorkerProvider);
-                        isBlocked
+                        blocked
                             ? await worker.unblockUser(user)
                             : await worker.blockUser(user);
 
@@ -245,7 +247,7 @@ class _UserDetailsScreen extends HookConsumerWidget {
                         Navigator.pop(context);
                       },
                       child:
-                          Text(isBlocked ? l18ns.unblockUser : l18ns.blockUser),
+                          Text(blocked ? l18ns.unblockUser : l18ns.blockUser),
                     ),
                   ],
                 ),
@@ -257,9 +259,9 @@ class _UserDetailsScreen extends HookConsumerWidget {
     );
   }
 
-  bool get isVerified => (user.isVerified ?? false);
+  bool get verified => (user.isVerified ?? false);
 
-  bool get isBlocked => (user.isBlocked ?? false);
+  bool get blocked => (user.isBlocked ?? false);
 
   Future<bool?> _confirmAction(
     BuildContext context, {
@@ -320,7 +322,7 @@ class _RoundedRectButton extends StatelessWidget {
     this.size,
   }) : super(key: key);
   final Color color;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Widget child;
   final Size? size;
 
