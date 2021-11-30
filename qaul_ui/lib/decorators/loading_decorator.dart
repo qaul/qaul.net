@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qaul_ui/widgets/loading_indicator.dart';
 
 class LoadingDecorator extends StatelessWidget {
   const LoadingDecorator({
@@ -20,7 +21,7 @@ class LoadingDecorator extends StatelessWidget {
           Positioned.fill(
             child: Container(
               color: backgroundColor,
-              child: const Center(child: CircularProgressIndicator()),
+              child: const LoadingIndicator(),
             ),
           ),
       ],

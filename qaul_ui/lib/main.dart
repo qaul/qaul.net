@@ -1,18 +1,15 @@
 // import 'dart:io';
-import 'dart:ui';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:qaul_ui/qaul_app.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 // import 'package:window_manager/window_manager.dart';
 
-import 'helpers/navigation_helper.dart';
 import 'helpers/user_prefs_helper.dart';
 
 /// file /state/container.dart
@@ -49,98 +46,6 @@ class _CustomProviderScopeState extends State<_CustomProviderScope> {
   @override
   Widget build(BuildContext context) {
     return UncontrolledProviderScope(container: container, child: widget.app);
-  }
-}
-
-class QaulApp extends ConsumerWidget {
-  const QaulApp({Key? key, this.themeMode}) : super(key: key);
-  final AdaptiveThemeMode? themeMode;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return AdaptiveTheme(
-      light: ThemeData(
-        brightness: Brightness.light,
-        primarySwatch: Colors.lightBlue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          foregroundColor: Colors.white,
-        ),
-        tooltipTheme:
-            const TooltipThemeData(waitDuration: Duration(seconds: 1)),
-        iconTheme: IconThemeData(color: Colors.grey.shade600),
-        appBarTheme: AppBarTheme(
-          color: Colors.transparent,
-          elevation: 0.0,
-          // Shadow not used as elevation is 0.0 - using this to inject color of decorators/qaul_nav_bar_decorator.dart:157
-          shadowColor: Colors.grey.shade300,
-          titleTextStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.lightBlue),
-          iconTheme: const IconThemeData(color: Colors.lightBlue),
-          actionsIconTheme: const IconThemeData(color: Colors.lightBlue),
-          shape: BorderDirectional(
-              bottom: BorderSide(color: Colors.grey.shade300)),
-        ),
-      ),
-      dark: ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.lightBlue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        iconTheme: const IconThemeData(color: Colors.white),
-        floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: Colors.lightBlue,
-          foregroundColor: Colors.black,
-        ),
-        tooltipTheme:
-            const TooltipThemeData(waitDuration: Duration(seconds: 1)),
-        appBarTheme: const AppBarTheme(
-          elevation: 0.0,
-          color: Color(0xff212121),
-          shadowColor: Color(0xff212121),
-        ),
-      ),
-      initial: themeMode ?? AdaptiveThemeMode.system,
-      builder: (theme, darkTheme) {
-        return ValueListenableBuilder(
-          valueListenable: Hive.box(UserPrefsHelper.hiveBoxName).listenable(),
-          builder: (context, box, _) {
-            return MaterialApp(
-              theme: theme,
-              darkTheme: darkTheme,
-              initialRoute: NavigationHelper.initial,
-              onGenerateRoute: NavigationHelper.onGenerateRoute,
-              locale: UserPrefsHelper().defaultLocale,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localeResolutionCallback: (locale, supportedLocales) {
-                final defaultLocale = UserPrefsHelper().defaultLocale;
-                if (defaultLocale != null) return defaultLocale;
-                if (supportedLocales.contains(locale)) return locale;
-                return const Locale.fromSubtags(languageCode: 'en');
-              },
-              builder: (context, child) {
-                return ResponsiveWrapper.builder(
-                  child,
-                  maxWidth: 828,
-                  minWidth: 370,
-                  breakpoints: const [
-                    ResponsiveBreakpoint.resize(350.0,
-                        name: 'ANDROID', scaleFactor: 0.8),
-                    ResponsiveBreakpoint.resize(480, name: MOBILE),
-                    ResponsiveBreakpoint.resize(680,
-                        name: 'MOBILE_LANDSCAPE', scaleFactor: 0.8),
-                    ResponsiveBreakpoint.autoScale(800, name: TABLET),
-                    ResponsiveBreakpoint.resize(1000, name: DESKTOP),
-                  ],
-                );
-              },
-            );
-          },
-        );
-      },
-    );
   }
 }
 

@@ -1,4 +1,3 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -8,6 +7,7 @@ import 'package:qaul_ui/decorators/loading_decorator.dart';
 import 'package:qaul_ui/widgets/default_back_button.dart';
 import 'package:qaul_ui/widgets/language_select_dropdown.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:qaul_ui/widgets/theme_select_dropdown.dart';
 import 'package:utils/utils.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -35,71 +35,13 @@ class SettingsScreen extends StatelessWidget {
             children: const [
               LanguageSelectDropDown(),
               SizedBox(height: 20),
-              _ThemeSelectDropDown(),
+              ThemeSelectDropdown(),
               SizedBox(height: 80),
               _InternetNodesList(),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-class _ThemeSelectDropDown extends StatelessWidget {
-  const _ThemeSelectDropDown({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final l18ns = AppLocalizations.of(context);
-    return Row(
-      children: [
-        const Icon(Icons.palette_outlined),
-        const SizedBox(width: 8.0),
-        Text(l18ns!.theme),
-        const SizedBox(width: 32.0),
-        Expanded(
-          child: ValueListenableBuilder<AdaptiveThemeMode>(
-            valueListenable: AdaptiveTheme.of(context).modeChangeNotifier,
-            builder: (_, mode, child) {
-              return DropdownButton<AdaptiveThemeMode>(
-                isExpanded: true,
-                value: mode,
-                items: [
-                  DropdownMenuItem<AdaptiveThemeMode>(
-                    value: AdaptiveThemeMode.system,
-                    child: Text(l18ns.useSystemDefaultMessage),
-                  ),
-                  DropdownMenuItem<AdaptiveThemeMode>(
-                    value: AdaptiveThemeMode.light,
-                    child: Text(l18ns.lightTheme),
-                  ),
-                  DropdownMenuItem<AdaptiveThemeMode>(
-                    value: AdaptiveThemeMode.dark,
-                    child: Text(l18ns.darkTheme),
-                  ),
-                ],
-                onChanged: (chosenMode) {
-                  switch (chosenMode) {
-                    case AdaptiveThemeMode.light:
-                      AdaptiveTheme.of(context).setLight();
-                      break;
-                    case AdaptiveThemeMode.dark:
-                      AdaptiveTheme.of(context).setDark();
-                      break;
-                    case AdaptiveThemeMode.system:
-                    default:
-                      AdaptiveTheme.of(context).setSystem();
-                      break;
-                  }
-                },
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
 }

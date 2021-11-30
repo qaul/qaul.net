@@ -5,6 +5,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/helpers/navigation_helper.dart';
 import 'package:qaul_ui/widgets/language_select_dropdown.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:qaul_ui/widgets/loading_indicator.dart';
 
 class CreateAccountScreen extends HookConsumerWidget {
   CreateAccountScreen({Key? key}) : super(key: key);
@@ -128,7 +129,7 @@ class CreateAccountScreen extends HookConsumerWidget {
                   ignoring: true,
                   child: Container(
                     color: Colors.black54,
-                    child: const Center(child: CircularProgressIndicator()),
+                    child: const LoadingIndicator(),
                   ),
                 ),
               )

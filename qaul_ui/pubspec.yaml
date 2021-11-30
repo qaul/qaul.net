@@ -49,6 +49,11 @@ dependencies:
   bubble: ^1.2.1
   flutter_chat_ui: ^1.5.1
 
+  # Windows-native Widgets
+  fluent_ui: ^3.4.1
+  # MacOS-native Widgets
+  macos_ui: ^0.10.0+1
+
   # *******
   # Business Logic Dependencies
   # *******

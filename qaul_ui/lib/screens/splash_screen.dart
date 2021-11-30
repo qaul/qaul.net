@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/helpers/navigation_helper.dart';
+import 'package:qaul_ui/widgets/loading_indicator.dart';
 
 class SplashScreen extends ConsumerWidget {
   SplashScreen({Key? key}) : super(key: key);
@@ -25,6 +26,6 @@ class SplashScreen extends ConsumerWidget {
       if (value is String) Navigator.pushReplacementNamed(context, value);
     });
 
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return const Scaffold(body: LoadingIndicator());
   }
 }
