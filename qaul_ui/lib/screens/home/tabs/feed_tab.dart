@@ -22,7 +22,6 @@ class _FeedState extends _BaseTabState<_Feed> {
 
     final refreshFeed = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
-      await worker.initialized;
       await worker.requestFeedMessages();
     }, [UniqueKey()]);
 
@@ -114,7 +113,6 @@ class _CreateFeedMessage extends HookConsumerWidget {
       if (!(_formKey.currentState?.validate() ?? false)) return;
       loading.value = true;
       final worker = ref.read(qaulWorkerProvider);
-      await worker.initialized;
       await worker.sendFeedMessage(controller.text.trim());
       loading.value = false;
       Navigator.pop(context);

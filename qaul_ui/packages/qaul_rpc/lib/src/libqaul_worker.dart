@@ -14,6 +14,8 @@ import 'package:qaul_rpc/src/generated/services/feed/feed.pb.dart';
 import 'package:qaul_rpc/src/rpc_translators/abstract_rpc_module_translator.dart';
 import 'package:uuid/uuid.dart';
 
+import 'libqaul/libqaul.dart';
+
 class LibqaulWorker {
   LibqaulWorker(Reader reader) : _reader = reader {
     _init();

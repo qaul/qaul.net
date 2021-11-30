@@ -12,7 +12,6 @@ class _NetworkState extends _BaseTabState<_Network> {
     if (loading.value) return;
     loading.value = true;
     final worker = ref.read(qaulWorkerProvider);
-    await worker.initialized;
     await worker.getUsers();
     loading.value = false;
   }

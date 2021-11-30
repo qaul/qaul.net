@@ -116,7 +116,6 @@ class _InternetNodesList extends HookConsumerWidget {
     final removeNode = useCallback((String nodeAddress) async {
       loading.value = true;
       final worker = ref.read(qaulWorkerProvider);
-      await worker.initialized;
       await worker.removeNode(nodeAddress);
       if (!isMounted()) return;
       loading.value = false;
@@ -125,7 +124,6 @@ class _InternetNodesList extends HookConsumerWidget {
     final addNode = useCallback((String nodeAddress) async {
       loading.value = true;
       final worker = ref.read(qaulWorkerProvider);
-      await worker.initialized;
       await worker.addNode(nodeAddress);
       if (!isMounted()) return;
       loading.value = false;
@@ -133,7 +131,6 @@ class _InternetNodesList extends HookConsumerWidget {
 
     useMemoized(() async {
       final worker = ref.read(qaulWorkerProvider);
-      await worker.initialized;
       await worker.requestNodes();
       loading.value = false;
     });

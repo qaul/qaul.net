@@ -22,7 +22,6 @@ class _UsersState extends _BaseTabState<_Users> {
 
     final refreshUsers = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
-      await worker.initialized;
       await worker.getUsers();
     }, [UniqueKey()]);
 
@@ -203,17 +202,10 @@ class _UserDetailsScreen extends HookConsumerWidget {
                         if (res is! bool || !res) return;
                         loading.value = true;
 
-                        final libqaul = ref.read(libqaulProvider);
-
                         final worker = ref.read(qaulWorkerProvider);
-                        await worker.initialized;
                         isVerified
                             ? await worker.unverifyUser(user)
                             : await worker.verifyUser(user);
-                        await Future.delayed(const Duration(seconds: 2));
-
-                        final queued = await libqaul.checkReceiveQueue();
-                        if (queued > 0) await libqaul.receiveRpc();
 
                         loading.value = false;
                         Navigator.pop(context);
@@ -244,17 +236,10 @@ class _UserDetailsScreen extends HookConsumerWidget {
                         if (res is! bool || !res) return;
                         loading.value = true;
 
-                        final libqaul = ref.read(libqaulProvider);
-
                         final worker = ref.read(qaulWorkerProvider);
-                        await worker.initialized;
                         isBlocked
                             ? await worker.unblockUser(user)
                             : await worker.blockUser(user);
-                        await Future.delayed(const Duration(seconds: 2));
-
-                        final queued = await libqaul.checkReceiveQueue();
-                        if (queued > 0) await libqaul.receiveRpc();
 
                         loading.value = false;
                         Navigator.pop(context);

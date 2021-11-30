@@ -8,7 +8,6 @@ class SplashScreen extends ConsumerWidget {
 
   final _sendRequestProvider = FutureProvider<String>((ref) async {
     final worker = ref.read(qaulWorkerProvider);
-    await worker.initialized;
 
     for (var i = 0; i < 5; i++) {
       await worker.getDefaultUserAccount();

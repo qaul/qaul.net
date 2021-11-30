@@ -15,13 +15,23 @@
 /// 2) Channel: let the platform code load the library and
 ///             communicate with the platform via platform channels.
 
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'libqaul/channel.dart';
-import 'libqaul/ffi.dart';
+part 'channel.dart';
+
+part 'ffi.dart';
+
+part 'fii_function_types.dart';
+
+/// Libqaul facade provider state.
+final libqaulProvider = Provider<Libqaul>((ref) => Libqaul(ref.read));
 
 /// libqaul dart class,
 /// loading dynamic libqaul library
