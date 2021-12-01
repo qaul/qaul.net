@@ -17,6 +17,7 @@ class UserPrefsHelper {
         null,
         const Locale.fromSubtags(languageCode: 'en'),
         const Locale.fromSubtags(languageCode: 'ar'),
+        const Locale.fromSubtags(languageCode: 'pt'),
       ];
 
   Locale? get defaultLocale {

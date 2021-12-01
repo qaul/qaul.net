@@ -59,6 +59,7 @@ String describeFuzzyTimestamp(DateTime date, {DateTime? clock}) {
 String describeLocale(Locale l) {
   if (l.languageCode == 'en') return 'English';
   if (l.languageCode == 'ar') return 'اللغة العربية';
+  if (l.languageCode == 'pt') return 'Português';
   return l.toLanguageTag();
 }
 
