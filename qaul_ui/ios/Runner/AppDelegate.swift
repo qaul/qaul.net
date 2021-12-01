@@ -10,4 +10,14 @@ import Flutter
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
+
+  public func dummyMethodToEnforceBundling() {
+      // ...
+      // This code will force the bundler to use these functions, but will never be called
+      hello();
+      start();
+      initialized();
+      send_rpc_to_libqaul(UnsafeMutablePointer<UInt8>.allocate(capacity: 0), 0);
+      receive_rpc_from_libqaul(UnsafeMutablePointer<UInt8>.allocate(capacity: 0), 0);
+    }
 }
