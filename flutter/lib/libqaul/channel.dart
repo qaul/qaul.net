@@ -19,7 +19,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/rpc/protobuf.dart';
 
 /// define libqaul channel global state
-final libqaulChannelProvider = Provider<LibqaulChannel>((ref) => LibqaulChannel(ref.read));
+final libqaulChannelProvider =
+    Provider<LibqaulChannel>((ref) => LibqaulChannel(ref.read));
 
 class LibqaulChannel {
   final Reader read;
@@ -44,8 +45,6 @@ class LibqaulChannel {
   /// Test Platform Version dummy method
   Future<String> platformVersion() async {
     debugPrint("platformVersion()");
-
-    //const MethodChannel local_channel = MethodChannel('libqaul');
 
     debugPrint("platformVersion() channel instantiated");
 
@@ -78,7 +77,7 @@ class LibqaulChannel {
   Future<int> initialized() async {
     int result;
     try {
-      if(await libqaul_channel.invokeMethod('initialized')) {
+      if (await libqaul_channel.invokeMethod('initialized')) {
         return 1;
       } else {
         return 0;
@@ -129,7 +128,8 @@ class LibqaulChannel {
   /// send binary protobuf RPC message to libqaul
   Future<void> sendRpc(Uint8List message) async {
     try {
-      await libqaul_channel.invokeMethod( 'sendRpcMessage', { 'message': message } );
+      await libqaul_channel
+          .invokeMethod('sendRpcMessage', {'message': message});
     } on PlatformException catch (e) {
       debugPrint("ERROR: libqaul channel sendRpcMessage: '${e.message}'");
     }
@@ -139,14 +139,15 @@ class LibqaulChannel {
   /// and pass it to RPC module
   Future<void> receiveRpc() async {
     try {
-      final Uint8List? result = await libqaul_channel.invokeMethod('receiveRpcMessage');
+      final Uint8List? result =
+          await libqaul_channel.invokeMethod('receiveRpcMessage');
 
-      if(result == null) {
+      if (result == null) {
         print("channel receiveRpcMessage: null received");
       } else {
         print("channel receiveRpcMessage: received");
 
-        if(result.isEmpty) {
+        if (result.isEmpty) {
           print("channel receiveRpcMessage: result is empty");
           return;
         }
@@ -155,7 +156,7 @@ class LibqaulChannel {
         final size = result.lengthInBytes;
         print("channel receiveRpcMessage: $size bytes received");
 
-        if(size == 0) {
+        if (size == 0) {
           print("channel receiveRpcMessage: size == 0");
           return;
         }

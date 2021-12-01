@@ -18,7 +18,7 @@ XCode Developer Tools
 * After installing XCode, run the following command in a terminal to install the XCode Developer Tools
 
 ```sh
-
+sudo xcode-select --install
 ```
 
 CocoaPods XCode Extension
@@ -37,16 +37,19 @@ libqaul is written in the programming language Rust
 
 [Install Rust](rust-install.md)
 
-### Android Studio
+### Android Studio (Optional)
 
-If you want to develop for Android on your device, download and install Android Studio.
+There are two reasons you might want to install Android Studio:
+
+1) If you want to develop for Android
+2) There is a nice GUI button to run and test the flutter app within Android Studio
 
 [Install Android Studio](android.md)
 
 After installation open it and install the following things:
 
-* Android SDK & NDK
-* Android Studio Flutter plugin
+* Android SDK & NDK (if you want to develop for android)
+* Android studio flutter plugin
 
 ### Flutter
 
@@ -57,7 +60,7 @@ After installation open it and install the following things:
 To build and run the qaul.net desktop app you have to perform the following steps:
 
 1) Build libqaul shared library
-2) Build & Run the 
+2) Build & Run the flutter MacOS desktop app
 
 ### Build libqaul shared Library and CLI binaries
 
@@ -79,7 +82,7 @@ You can build and run the qaul flutter desktop app from the terminal:
 # move into the flutter directory
 cd flutter
 
-# build and run the MacOS desktop app
+# build and run the MacOS desktop app in debug mode
 flutter run -d macos
 ```
 
