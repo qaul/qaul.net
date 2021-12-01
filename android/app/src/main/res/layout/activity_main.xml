@@ -20,14 +20,49 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnStart"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start Service"
-        android:background="@color/teal_200"
-        android:layout_gravity="center"/>
-    <include layout="@layout/content_main" />
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/ll1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:orientation="vertical">
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnInfoRequest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:background="@color/teal_700"
+            android:textColor="@color/white"
+            android:padding="10dp"
+            android:text="Send Info Request"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnStartRequest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:background="@color/teal_200"
+            android:textColor="@color/white"
+            android:padding="10dp"
+            android:text="Send Start Request"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnStartService"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:background="@color/purple_700"
+            android:textColor="@color/white"
+            android:padding="10dp"
+            android:text="Send Start Service"/>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <include
+        layout="@layout/content_main"
+        android:visibility="gone" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
@@ -36,6 +71,7 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="16dp"
+        android:visibility="gone"
         app:srcCompat="@android:drawable/ic_dialog_email" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

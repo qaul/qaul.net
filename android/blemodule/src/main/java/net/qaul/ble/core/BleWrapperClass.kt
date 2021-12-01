@@ -24,42 +24,59 @@ import qaul.sys.ble.BleOuterClass
 import java.lang.Exception
 import android.R.attr.capitalize
 import android.bluetooth.le.BluetoothLeAdvertiser
+import android.os.Handler
 import net.qaul.ble.callback.BleRequestCallback
 
 
 class BleWrapperClass(context: AppCompatActivity) {
     private val TAG: String = BleWrapperClass.javaClass.simpleName
     private val context = context
+    private var errorText = ""
+    private var noRights = false
     private var bleCallback: BleRequestCallback? = null
+    private var qaulId = "qaul_id"
+
     /**
      * Static Member Declaration
      */
     companion object {
-        lateinit var bleService: BleService
-        fun startService(context: Context) {
-            BleService().start(context)
-        }
-
         val serviceManager = this
 
-        private const val BLE_PERMISSION_REQ_CODE = 111
-        private const val LOCATION_ENABLE_REQ_CODE = 112
-        private const val REQUEST_ENABLE_BT = 113
-        private const val BLE_PERMISSION_REQ_CODE_12 = 114
+        const val LOCATION_PERMISSION_REQ_CODE = 111
+        const val LOCATION_ENABLE_REQ_CODE = 112
+        const val REQUEST_ENABLE_BT = 113
+        const val BLE_PERMISSION_REQ_CODE_12 = 114
     }
+
     /**
      * This Method get BLERequest from UI & Return BLEResponse by Callback Interface Method
      */
-    fun getRequest(bleReq: BleOuterClass.Ble, param: BleRequestCallback) {
+    fun receiveRequest(bleReq: BleOuterClass.Ble, param: BleRequestCallback) {
         if (bleReq.isInitialized) {
             bleCallback = param
             if (bleReq.messageCase == BleOuterClass.Ble.MessageCase.INFO_REQUEST) {
                 Log.e(TAG, bleReq.messageCase.toString())
                 getDeviceInfo()
+            } else if (bleReq.messageCase == BleOuterClass.Ble.MessageCase.START_REQUEST) {
+                qaulId = bleReq.startRequest.qaulId
+                startService(context = context)
             }
 
         }
     }
+
+    private fun startService(context: Context) {
+        if (isBleScanConditionSatisfy()) {
+            if (!BleService().isRunning()) {
+                BleService().start(context)
+                Handler().postDelayed(Runnable {
+                    BleService().setData(qaulId, bleCallback) }, 500)
+            } else {
+                BleService().setupAdvertiser()
+            }
+        }
+    }
+
 
     /**
      * This Method Return Device Information Regarding BLE Functionality & Permissions
@@ -85,11 +102,19 @@ class BleWrapperClass(context: AppCompatActivity) {
                     deviceInfoBuilder.adv2M = adapter.isLe2MPhySupported
                     deviceInfoBuilder.advCoded = adapter.isLeCodedPhySupported
                     deviceInfoBuilder.advExtendedBytes = adapter.leMaximumAdvertisingDataLength
+
+                    //Return true if LE Periodic Advertising feature is supported.
                     deviceInfoBuilder.lePeriodicAdvSupport =
                         adapter.isLePeriodicAdvertisingSupported
+
+                    //Return true if the multi advertisement is supported by the chipset
                     deviceInfoBuilder.leMultipleAdvSupport =
                         adapter.isMultipleAdvertisementSupported
+
+                    //Return true if offloaded filters are supported true if chipset supports on-chip filtering
                     deviceInfoBuilder.offloadFilterSupport = adapter.isOffloadedFilteringSupported
+
+                    //Return true if offloaded scan batching is supported true if chipset supports on-chip scan batching
                     deviceInfoBuilder.offloadScanBatchingSupport =
                         adapter.isOffloadedScanBatchingSupported
                 } else {
@@ -170,7 +195,7 @@ class BleWrapperClass(context: AppCompatActivity) {
     /**
      * Returns Device Manufacturer & Model Name/Number
      */
-    fun getDeviceName(): String? {
+    private fun getDeviceName(): String? {
         val manufacturer = Build.MANUFACTURER
         val model = Build.MODEL
         return if (model.toLowerCase().startsWith(manufacturer.toLowerCase())) {
@@ -195,9 +220,6 @@ class BleWrapperClass(context: AppCompatActivity) {
         }
     }
 
-//    private fun isScanRunning(): Boolean {
-//        return mScanning
-//    }
     /**
      * Request User to Enable Bluetooth
      */
@@ -365,31 +387,13 @@ class BleWrapperClass(context: AppCompatActivity) {
     /**
      * Checks if BLE Regarding All the Requirements Are Satisfies or Not
      */
-    fun isBleScanConditionSatisfy(): Boolean {
+    private fun isBleScanConditionSatisfy(): Boolean {
         var isBleScanConditionSatisfy = true
         if (!isBLeSupported()) {
             AppLog.e(TAG, "isBLeSupport : false")
             RemoteLog[context]!!.addDebugLog("$TAG:isBLeSupport : false")
 //            onScanfailed(BLEErrorType.BLE_NO_SUPPORTED)
             isBleScanConditionSatisfy = false
-            return false
-        }
-        if (!isBluetoothEnable()) {
-            AppLog.e(TAG, "isBluetoothEnable : false")
-            RemoteLog[context]!!.addDebugLog("$TAG:isBluetoothEnable : false")
-            isBleScanConditionSatisfy = false
-            enableBluetooth(context, REQUEST_ENABLE_BT)
-            return false
-        }
-        if (!isLocationPermissionAllowed()) {
-            AppLog.e(
-                TAG,
-                "isLocationPermissionGranted() : false"
-            )
-            RemoteLog[context]!!.addDebugLog("$TAG:isLocationPermissionGranted() : false")
-            isBleScanConditionSatisfy = false
-            enableLocationPermission(context, BLE_PERMISSION_REQ_CODE)
-            return false
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!isBluetoothPermissionAllowed()) {
@@ -402,6 +406,17 @@ class BleWrapperClass(context: AppCompatActivity) {
                 enableBlePermission(context, BLE_PERMISSION_REQ_CODE_12)
                 return false
             }
+        } else {
+            if (!isLocationPermissionAllowed()) {
+                AppLog.e(
+                    TAG,
+                    "isLocationPermissionGranted() : false"
+                )
+                RemoteLog[context]!!.addDebugLog("$TAG:isLocationPermissionGranted() : false")
+                isBleScanConditionSatisfy = false
+                enableLocationPermission(context, LOCATION_PERMISSION_REQ_CODE)
+                return false
+            }
         }
         if (!isLocationEnable()) {
             AppLog.e(TAG, "isLocationEnable : false")
@@ -410,8 +425,50 @@ class BleWrapperClass(context: AppCompatActivity) {
             enableLocation(context, LOCATION_ENABLE_REQ_CODE)
             return false
         }
-
+        if (!isBluetoothEnable()) {
+            AppLog.e(TAG, "isBluetoothEnable : false")
+            RemoteLog[context]!!.addDebugLog("$TAG:isBluetoothEnable : false")
+            isBleScanConditionSatisfy = false
+            enableBluetooth(context, REQUEST_ENABLE_BT)
+            return false
+        }
         return isBleScanConditionSatisfy
+    }
+
+    fun onResult(requestCode: Int, status: Boolean) {
+        when {
+            !status -> {
+                when (requestCode) {
+                    LOCATION_PERMISSION_REQ_CODE -> {
+                        errorText = "Location permission is not granted"
+                        noRights = true
+                    }
+                    BLE_PERMISSION_REQ_CODE_12 -> {
+                        errorText = "BLE permissions are not granted"
+                        noRights = true
+                    }
+                    LOCATION_ENABLE_REQ_CODE -> {
+                        errorText = "Location is not enabled"
+                        noRights = false
+                    }
+                    REQUEST_ENABLE_BT -> {
+                        errorText = "Bluetooth is not enabled"
+                        noRights = false
+                    }
+                }
+                val bleRes = BleOuterClass.Ble.newBuilder()
+                val startResult = BleOuterClass.BleStartResult.newBuilder()
+                startResult.success = false
+                startResult.noRights = noRights
+                startResult.errorMessage = errorText
+                startResult.unknonwError = false
+                bleRes.startResult = startResult.build()
+                bleCallback?.bleResponse(ble = bleRes.build())
+            }
+            else -> {
+                startService(context = context)
+            }
+        }
     }
 
 }

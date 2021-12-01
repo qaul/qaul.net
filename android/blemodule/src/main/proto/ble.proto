@@ -126,6 +126,8 @@ message BleDeviceInfo {
 // send & receive advertising messages
 message BleStartRequest {
 
+    string qaul_id = 1;
+
 }
 
 // start device result message
