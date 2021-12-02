@@ -31,16 +31,22 @@ message Ble {
 
 // enum to describe how to send a message
 enum BleMode {
-    // use legacy advertising mode (only 31 Byte payload)
-    legacy = 0;
-    // 1m phy
-    le_1m = 1;
-    // 2m phy
-    le_2m = 2;
-    // LE coded, which only half the speed
-    coded_2 = 3;
-    // LE coded, which is 8 times slower
-    coded_8 = 4;
+    //REMOVED old modes
+//    // use legacy advertising mode (only 31 Byte payload)
+//    legacy = 0;
+//    // 1m phy
+//    le_1m = 1;
+//    // 2m phy
+//    le_2m = 2;
+//    // LE coded, which only half the speed
+//    coded_2 = 3;
+//    // LE coded, which is 8 times slower
+//    coded_8 = 4;
+
+    //NEW ADDED
+    low_power = 0;
+    balanced = 1;
+    low_latency = 2;
 }
 
 // device information request message
@@ -126,7 +132,8 @@ message BleDeviceInfo {
 // send & receive advertising messages
 message BleStartRequest {
 
-    string qaul_id = 1;
+    bytes qaul_id = 1;
+    BleMode mode = 2;
 
 }
 

@@ -25,8 +25,11 @@ import java.lang.Exception
 import android.R.attr.capitalize
 import android.bluetooth.le.BluetoothLeAdvertiser
 import android.os.Handler
+import android.os.Parcelable
+import com.bluetoothplx.BLEUtils
+import com.google.protobuf.ByteString
+import kotlinx.android.parcel.Parcelize
 import net.qaul.ble.callback.BleRequestCallback
-
 
 class BleWrapperClass(context: AppCompatActivity) {
     private val TAG: String = BleWrapperClass.javaClass.simpleName
@@ -35,6 +38,7 @@ class BleWrapperClass(context: AppCompatActivity) {
     private var noRights = false
     private var bleCallback: BleRequestCallback? = null
     private var qaulId = "qaul_id"
+    private var advertMode = "low_latency"
 
     /**
      * Static Member Declaration
@@ -58,23 +62,25 @@ class BleWrapperClass(context: AppCompatActivity) {
                 Log.e(TAG, bleReq.messageCase.toString())
                 getDeviceInfo()
             } else if (bleReq.messageCase == BleOuterClass.Ble.MessageCase.START_REQUEST) {
-                qaulId = bleReq.startRequest.qaulId
+                qaulId = BLEUtils.byteToHex(bleReq.startRequest.toByteArray())
+                advertMode = bleReq.startRequest.mode.toString()
                 startService(context = context)
             }
-
         }
     }
 
     private fun startService(context: Context) {
         if (isBleScanConditionSatisfy()) {
             if (!BleService().isRunning()) {
-                BleService().start(context)
-                Handler().postDelayed(Runnable {
-                    BleService().setData(qaulId, bleCallback) }, 500)
+                BleService().start(context, this, qaulId, advertMode)
             } else {
                 BleService().setupAdvertiser()
             }
         }
+    }
+
+    fun setCallback() {
+        BleService().setData(bleCallback)
     }
 
 

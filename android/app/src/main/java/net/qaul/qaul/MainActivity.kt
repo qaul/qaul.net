@@ -11,7 +11,10 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
+import com.bluetoothplx.BLEUtils
+import com.google.common.primitives.Bytes
 import com.google.gson.Gson
+import com.google.protobuf.ByteString
 import net.qaul.ble.AppLog
 import net.qaul.ble.callback.BleRequestCallback
 import net.qaul.ble.core.BleWrapperClass
@@ -43,7 +46,9 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
         binding.btnStartRequest.setOnClickListener {
             val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
             val startRequest = BleOuterClass.BleStartRequest.newBuilder()
-            startRequest.qaulId = "123abc456ABC"
+            val qaulid = "12D3KooWPLakkJF9dzctAkUR2ZWaifjnRvDSy6CU8zTb4KUzzMuY"
+            startRequest.qaulId = ByteString.copyFrom(qaulid.toByteArray())
+            startRequest.mode = BleOuterClass.BleMode.low_latency
             bleReq.startRequest = startRequest.build()
             bleWrapperClass.receiveRequest(bleReq = bleReq.build(), this)
         }
