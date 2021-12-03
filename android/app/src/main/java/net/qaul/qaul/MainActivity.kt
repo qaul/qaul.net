@@ -3,7 +3,6 @@ package net.qaul.qaul
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -11,8 +10,6 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
-import com.bluetoothplx.BLEUtils
-import com.google.common.primitives.Bytes
 import com.google.gson.Gson
 import com.google.protobuf.ByteString
 import net.qaul.ble.AppLog
@@ -39,23 +36,152 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
         setSupportActionBar(binding.toolbar)
         bleWrapperClass = BleWrapperClass(context = this)
         binding.btnInfoRequest.setOnClickListener {
-            val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
-            bleReq.infoRequest = BleOuterClass.BleInfoRequest.getDefaultInstance()
-            bleWrapperClass.receiveRequest(bleReq = bleReq.build(), this)
+            sendInfoRequest()
         }
         binding.btnStartRequest.setOnClickListener {
-            val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
-            val startRequest = BleOuterClass.BleStartRequest.newBuilder()
-            val qaulid = "12D3KooWPLakkJF9dzctAkUR2ZWaifjnRvDSy6CU8zTb4KUzzMuY"
-            startRequest.qaulId = ByteString.copyFrom(qaulid.toByteArray())
-            startRequest.mode = BleOuterClass.BleMode.low_latency
-            bleReq.startRequest = startRequest.build()
-            bleWrapperClass.receiveRequest(bleReq = bleReq.build(), this)
+            sendStartRequest()
         }
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
+        oldCode()
+    }
+
+    /**
+     * For Sending BleInfoRequest to BLEModule
+     */
+    private fun sendInfoRequest() {
+        val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
+        bleReq.infoRequest = BleOuterClass.BleInfoRequest.getDefaultInstance()
+        bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
+    }
+
+    /**
+     * For Sending BleStartRequest to BLEModule
+     * Have to pass qaul_id and advertise_mode as parameter
+     */
+    private fun sendStartRequest() {
+        val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
+        val startRequest = BleOuterClass.BleStartRequest.newBuilder()
+        val qaulid = "12D3KooWPLakkJF9dzctAkUR2ZWaifjnRvDSy6CU8zTb4KUzzMuY"
+        startRequest.qaulId = ByteString.copyFrom(qaulid.toByteArray())
+        startRequest.mode = BleOuterClass.BleMode.low_latency
+        bleReq.startRequest = startRequest.build()
+        bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
+    }
+
+    /**
+     * This Method Will Be Called When User Accept/Decline Asked Permission From BLEModule
+     * After Response It Will Send User's Response to BLEModule
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LOCATION_PERMISSION_REQ_CODE) {
+            AppLog.e(
+                "MainActivity",
+                "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
+            )
+            if (grantResults.isNotEmpty()) {
+                for (grantResult in grantResults) {
+                    if (grantResult == PackageManager.PERMISSION_DENIED) {
+                        AppLog.e("MainActivity", "grantResults- IF $grantResult")
+                        bleWrapperClass.onResult(requestCode = requestCode, status = false)
+                        break
+                    }
+                }
+                bleWrapperClass.onResult(requestCode = requestCode, status = true)
+            }
+        } else if (requestCode == BLE_PERMISSION_REQ_CODE_12) {
+            AppLog.e(
+                "MainActivity",
+                "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
+            )
+            if (grantResults.isNotEmpty()) {
+                for (grantResult in grantResults) {
+                    if (grantResult == PackageManager.PERMISSION_DENIED) {
+                        AppLog.e("MainActivity", "grantResults- IF $grantResult")
+                        bleWrapperClass.onResult(requestCode = requestCode, status = false)
+                        break
+                    }
+                }
+                bleWrapperClass.onResult(requestCode = requestCode, status = true)
+            }
+        }
+    }
+
+    /**
+     * This Method Will Be Called When User Accept/Decline Asked to Turn On
+     * Bluetooth and/or Location(GPS) From BLEModule
+     * After Response It Will Send User's Response to BLEModule
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        AppLog.e(
+            "MainActivity",
+            "onActivityResult requestCode=$requestCode | resultCode=$resultCode"
+        )
+        if (requestCode == LOCATION_ENABLE_REQ_CODE) {
+            if (resultCode == RESULT_OK) {
+                AppLog.e("MainActivity", "Location Yes")
+                bleWrapperClass.onResult(requestCode = requestCode, status = true)
+            } else {
+                AppLog.e("MainActivity", "Location No")
+                bleWrapperClass.onResult(requestCode = requestCode, status = false)
+            }
+        } else if (requestCode == REQUEST_ENABLE_BT) {
+            if (resultCode == RESULT_OK) {
+                AppLog.e("MainActivity", "BT Yes")
+                bleWrapperClass.onResult(requestCode = requestCode, status = true)
+            } else {
+                AppLog.e("MainActivity", "BT No")
+                bleWrapperClass.onResult(requestCode = requestCode, status = false)
+            }
+        }
+    }
+
+    /**
+     * This Method Will Be Called When BLEModule Send Response To BLERequests Sent
+     */
+    override fun bleResponse(ble: BleOuterClass.Ble) {
+        if (ble.isInitialized) {
+            if (ble.messageCase == BleOuterClass.Ble.MessageCase.INFO_RESPONSE) {
+                val deviceInfo: BleOuterClass.BleDeviceInfo = ble.infoResponse.device
+                AppLog.e("bleResponse: ", Gson().toJson(deviceInfo))
+            } else if (ble.messageCase == BleOuterClass.Ble.MessageCase.START_RESULT) {
+                val startResult: BleOuterClass.BleStartResult = ble.startResult
+                AppLog.e("startResult: ", Gson().toJson(startResult))
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.action_settings -> true
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        return navController.navigateUp(appBarConfiguration)
+                || super.onSupportNavigateUp()
+    }
+
+    private fun oldCode() {
         // load libqaul
         println("load libqaul")
 //        loadLibqaul()
@@ -99,104 +225,6 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
         binding.fab.setOnClickListener { view ->
 //            Snackbar.make(view, hellotxt, Snackbar.LENGTH_LONG)
 //                .setAction("Action", null).show()
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String?>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQ_CODE) {
-            AppLog.e(
-                "MainActivity",
-                "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
-            )
-            if (grantResults.isNotEmpty()) {
-                for (grantResult in grantResults) {
-                    if (grantResult == PackageManager.PERMISSION_DENIED) {
-                        AppLog.e("MainActivity", "grantResults- IF $grantResult")
-                        bleWrapperClass.onResult(requestCode = requestCode, status = false)
-                        break
-                    }
-                }
-                bleWrapperClass.onResult(requestCode = requestCode, status = true)
-            }
-        } else if (requestCode == BLE_PERMISSION_REQ_CODE_12) {
-            AppLog.e(
-                "MainActivity",
-                "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
-            )
-            if (grantResults.isNotEmpty()) {
-                for (grantResult in grantResults) {
-                    if (grantResult == PackageManager.PERMISSION_DENIED) {
-                        AppLog.e("MainActivity", "grantResults- IF $grantResult")
-                        bleWrapperClass.onResult(requestCode = requestCode, status = false)
-                        break
-                    }
-                }
-                bleWrapperClass.onResult(requestCode = requestCode, status = true)
-            }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        AppLog.e(
-            "MainActivity",
-            "onActivityResult requestCode=$requestCode | resultCode=$resultCode"
-        )
-        if (requestCode == LOCATION_ENABLE_REQ_CODE) {
-            if (resultCode == RESULT_OK) {
-                AppLog.e("MainActivity", "Location Yes")
-                bleWrapperClass.onResult(requestCode = requestCode, status = true)
-            } else {
-                AppLog.e("MainActivity", "Location No")
-                bleWrapperClass.onResult(requestCode = requestCode, status = false)
-            }
-        } else if (requestCode == REQUEST_ENABLE_BT) {
-            if (resultCode == RESULT_OK) {
-                AppLog.e("MainActivity", "BT Yes")
-                bleWrapperClass.onResult(requestCode = requestCode, status = true)
-            } else {
-                AppLog.e("MainActivity", "BT No")
-                bleWrapperClass.onResult(requestCode = requestCode, status = false)
-            }
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
-    }
-
-    override fun bleResponse(ble: BleOuterClass.Ble) {
-        if (ble.isInitialized) {
-            if (ble.messageCase == BleOuterClass.Ble.MessageCase.INFO_RESPONSE) {
-                val deviceInfo: BleOuterClass.BleDeviceInfo = ble.infoResponse.device
-                AppLog.e("bleResponse: ", Gson().toJson(deviceInfo))
-            } else if (ble.messageCase == BleOuterClass.Ble.MessageCase.START_RESULT) {
-                val startResult: BleOuterClass.BleStartResult = ble.startResult
-                AppLog.e("startResult: ", Gson().toJson(startResult))
-            }
         }
     }
 }

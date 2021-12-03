@@ -1,4 +1,4 @@
-package com.bluetoothplx
+package net.qaul.ble
 
 import android.text.TextUtils
 import android.util.Log
@@ -8,7 +8,7 @@ import java.util.*
 
 class DateTimeHelper {
     companion object {
-        val TAG = DateTimeHelper::class.java.simpleName
+        private val TAG = DateTimeHelper::class.java.simpleName!!
         const val DATE_FORMAT = "yyyy-MM-dd"
         const val DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss"
         const val DISPLAY_TIME_DATE = "hh:mm a, dd MMM yyyy"

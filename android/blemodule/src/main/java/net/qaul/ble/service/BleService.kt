@@ -8,72 +8,54 @@ import android.bluetooth.le.BluetoothLeAdvertiser
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.os.Handler
 import android.os.ParcelUuid
-import android.util.Log
 import androidx.lifecycle.LifecycleService
-import com.google.gson.Gson
 import net.qaul.ble.AppLog
-import net.qaul.ble.callback.BleRequestCallback
-import net.qaul.ble.core.BleWrapperClass
-import qaul.sys.ble.BleOuterClass
 import java.util.*
-import kotlin.jvm.javaClass
 
-class BleService() : LifecycleService() {
+class BleService : LifecycleService() {
     private val TAG: String = BleService::class.java.simpleName
-    private var bleService: BleService? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
-    private val SERVICE_UUID = "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"
-    private val READ_CHAR = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
+    private var bleResponseCallback: BleResponseCallback? = null
+    private val SERVICE_UUID = "99E91399-80ED-4943-9BCB-39C532A76023"
+    private val READ_CHAR = "99E91401-80ED-4943-9BCB-39C532A76023"
     private var qaulId = ""
     private var advertMode = ""
-    private var bleWrapperClass: BleWrapperClass? = null
     private var bluetoothLeAdvertiser: BluetoothLeAdvertiser? = null
     private var gattServer: BluetoothGattServer? = null
     private var bluetoothManager: BluetoothManager? = null
-    private var bleCallback: BleRequestCallback? = null
 
+    companion object {
+        var bleService: BleService? = null
+    }
 
     override fun onCreate() {
         super.onCreate()
         bleService = this
-
         AppLog.e(TAG, "$TAG created")
     }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        qaulId = intent?.getStringExtra("qaulId").toString()
-        advertMode = intent?.getStringExtra("advertMode").toString()
-        setupAdvertiser()
-        return super.onStartCommand(intent, flags, startId)
-    }
-
 
     override fun onStart(intent: Intent?, startId: Int) {
         super.onStart(intent, startId)
         AppLog.e(TAG, "$TAG started")
     }
 
-    fun setData(bleRequestCallback: BleRequestCallback?) {
-        bleCallback = bleRequestCallback
+    fun setData(
+        qaul_id: String,
+        mode: String, bleCallback: BleResponseCallback
+    ) {
+        bleService?.qaulId = qaul_id
+        bleService?.advertMode = mode
+        bleService?.bleResponseCallback = bleCallback
         setupAdvertiser()
     }
 
     fun start(
-        context: Context,
-        bleClass: BleWrapperClass,
-        qaul_id: String,
-        mode: String
+        context: Context
     ) {
         if (bleService == null) {
-            qaulId = qaul_id
-            advertMode = mode
             val intent = Intent(context, BleService::class.java)
-            intent.putExtra("qaulId", qaulId)
-            intent.putExtra("advertMode", advertMode)
             context.startService(intent)
-            bleWrapperClass = bleClass
         } else {
             AppLog.e(TAG, "$TAG already started")
         }
@@ -92,49 +74,46 @@ class BleService() : LifecycleService() {
     }
 
     fun setupAdvertiser() {
-        if (isRunning()) {
-            val t = Thread {
-                bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-                bluetoothAdapter!!.name = "NewH"
-                bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
-                bluetoothLeAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
-                if (Build.VERSION.SDK_INT > 21) {
-                    if (bluetoothAdapter != null) {
-                        AppLog.e(
-                            TAG,
-                            "Peripheral supported"
-                        )
-                        val firstService = BluetoothGattService(
-                            UUID.fromString(SERVICE_UUID),
-                            BluetoothGattService.SERVICE_TYPE_PRIMARY
-                        )
-                        val firstServiceChar = BluetoothGattCharacteristic(
-                            UUID.fromString(READ_CHAR),
-                            BluetoothGattCharacteristic.PROPERTY_READ,
-                            BluetoothGattCharacteristic.PERMISSION_READ
-                        )
+        val t = Thread {
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+            bluetoothAdapter!!.name = "NewH"
+            bluetoothManager = bleService!!.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
+            bluetoothLeAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
+            if (Build.VERSION.SDK_INT > 21) {
+                if (bluetoothAdapter != null) {
+                    AppLog.e(
+                        TAG,
+                        "Peripheral supported"
+                    )
+                    val firstService = BluetoothGattService(
+                        UUID.fromString(SERVICE_UUID),
+                        BluetoothGattService.SERVICE_TYPE_PRIMARY
+                    )
+                    val firstServiceChar = BluetoothGattCharacteristic(
+                        UUID.fromString(READ_CHAR),
+                        BluetoothGattCharacteristic.PROPERTY_READ,
+                        BluetoothGattCharacteristic.PERMISSION_READ
+                    )
 
-                        firstServiceChar.setValue(qaulId)
-                        firstService.addCharacteristic(firstServiceChar)
-                        startAdvertisement(service = firstService)
-                    } else {
-                        AppLog.e(
-                            TAG,
-                            "Peripheral not supported"
-                        )
-                    }
+                    firstServiceChar.setValue(qaulId)
+                    firstService.addCharacteristic(firstServiceChar)
+                    startAdvertisement(service = firstService)
                 } else {
                     AppLog.e(
                         TAG,
                         "Peripheral not supported"
                     )
                 }
+            } else {
+                AppLog.e(
+                    TAG,
+                    "Peripheral not supported"
+                )
             }
-            t.start()
-        } else {
-            setupAdvertiser()
         }
+        t.start()
     }
+
 
     private fun startAdvertisement(service: BluetoothGattService) {
         startGattServer(service = service)
@@ -145,8 +124,24 @@ class BleService() : LifecycleService() {
 
         val uuid = ParcelUuid(UUID.fromString(SERVICE_UUID))
         dataBuilder.addServiceUuid(uuid)
-        settingsBuilder
-            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+        when (advertMode) {
+            "low_power" -> {
+                settingsBuilder
+                    .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER)
+            }
+            "balanced" -> {
+                settingsBuilder
+                    .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+            }
+            "low_latency" -> {
+                settingsBuilder
+                    .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
+            }
+            "UNRECOGNIZED" -> {
+                settingsBuilder
+                    .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
+            }
+        }
         settingsBuilder
             .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
         settingsBuilder.setConnectable(true)
@@ -254,14 +249,11 @@ class BleService() : LifecycleService() {
         override fun onStartSuccess(advertiseSettings: AdvertiseSettings) {
             val successMsg = "Advertisement successful"
             AppLog.e(TAG, successMsg)
-            val bleRes = BleOuterClass.Ble.newBuilder()
-            val startResult = BleOuterClass.BleStartResult.newBuilder()
-            startResult.success = true
-            startResult.noRights = false
-            startResult.errorMessage = ""
-            startResult.unknonwError = false
-            bleRes.startResult = startResult.build()
-            bleCallback?.bleResponse(ble = bleRes.build())
+            bleService?.bleResponseCallback?.bleAdvertResponse(
+                status = true,
+                errorText = successMsg,
+                unknownError = false
+            )
         }
 
         override fun onStartFailure(i: Int) {
@@ -290,14 +282,15 @@ class BleService() : LifecycleService() {
 
             val failMsg = "Advertisement failed: $errorText"
             AppLog.e(TAG, failMsg)
-            val bleRes = BleOuterClass.Ble.newBuilder()
-            val startResult = BleOuterClass.BleStartResult.newBuilder()
-            startResult.success = false
-            startResult.noRights = false
-            startResult.errorMessage = failMsg
-            startResult.unknonwError = unknownError
-            bleRes.startResult = startResult.build()
-            bleCallback?.bleResponse(ble = bleRes.build())
+            bleService?.bleResponseCallback?.bleAdvertResponse(
+                status = false,
+                errorText = failMsg,
+                unknownError = unknownError
+            )
         }
+    }
+
+    interface BleResponseCallback {
+        fun bleAdvertResponse(status: Boolean, errorText: String, unknownError: Boolean)
     }
 }

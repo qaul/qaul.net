@@ -17,8 +17,8 @@ class RemoteLog(private val context: Context) {
     private var fw: FileWriter? = null
     private val TAG = javaClass.simpleName
     private var logDir: File? = null
-    private val DIR_NAME: String
-    private val FILE_NAME: String
+    private val DIR_NAME: String = "LogFile"
+    private val FILE_NAME: String = "log.txt"
     private var logFile: File? = null
     private fun createDirAndFile() {
         try {
@@ -87,8 +87,6 @@ class RemoteLog(private val context: Context) {
     }
 
     init {
-        DIR_NAME = "LogFile"
-        FILE_NAME = "log.txt"
         createDirAndFile()
     }
 }
