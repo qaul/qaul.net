@@ -4,9 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.content.Context
-import android.content.Intent
-import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
@@ -21,15 +18,12 @@ import net.qaul.ble.AppLog
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.service.BleService
 import qaul.sys.ble.BleOuterClass
-import java.lang.Exception
-import android.R.attr.capitalize
-import android.bluetooth.le.BluetoothLeAdvertiser
+import android.content.*
 import android.os.Handler
-import android.os.Parcelable
-import com.bluetoothplx.BLEUtils
-import com.google.protobuf.ByteString
-import kotlinx.android.parcel.Parcelize
+import android.os.Looper
+import net.qaul.ble.BLEUtils
 import net.qaul.ble.callback.BleRequestCallback
+import java.lang.Exception
 
 class BleWrapperClass(context: AppCompatActivity) {
     private val TAG: String = BleWrapperClass.javaClass.simpleName
@@ -37,7 +31,7 @@ class BleWrapperClass(context: AppCompatActivity) {
     private var errorText = ""
     private var noRights = false
     private var bleCallback: BleRequestCallback? = null
-    private var qaulId = "qaul_id"
+    private var qaulId = ""
     private var advertMode = "low_latency"
 
     /**
@@ -55,9 +49,9 @@ class BleWrapperClass(context: AppCompatActivity) {
     /**
      * This Method get BLERequest from UI & Return BLEResponse by Callback Interface Method
      */
-    fun receiveRequest(bleReq: BleOuterClass.Ble, param: BleRequestCallback) {
+    fun receiveRequest(bleReq: BleOuterClass.Ble, callback: BleRequestCallback) {
         if (bleReq.isInitialized) {
-            bleCallback = param
+            bleCallback = callback
             if (bleReq.messageCase == BleOuterClass.Ble.MessageCase.INFO_REQUEST) {
                 Log.e(TAG, bleReq.messageCase.toString())
                 getDeviceInfo()
@@ -69,20 +63,46 @@ class BleWrapperClass(context: AppCompatActivity) {
         }
     }
 
+    /**
+     * This Method Will Start BLEService
+     */
     private fun startService(context: Context) {
         if (isBleScanConditionSatisfy()) {
             if (!BleService().isRunning()) {
-                BleService().start(context, this, qaulId, advertMode)
+                BleService().start(context = context)
+                Handler(Looper.myLooper()!!).postDelayed({
+                    setCallback()
+                },  500)
             } else {
                 BleService().setupAdvertiser()
             }
         }
     }
 
-    fun setCallback() {
-        BleService().setData(bleCallback)
-    }
 
+    /**
+     * This Method Will Assign Callback & Data to Start Advertiser
+     */
+    private fun setCallback() {
+        BleService.bleService?.setData(qaul_id = qaulId, mode = advertMode,
+            object: BleService.BleResponseCallback {
+            override fun bleAdvertResponse(
+                status: Boolean,
+                errorText: String,
+                unknownError: Boolean
+            ) {
+                val bleRes = BleOuterClass.Ble.newBuilder()
+                val startResult = BleOuterClass.BleStartResult.newBuilder()
+                startResult.success = status
+                startResult.noRights = false
+                startResult.errorMessage = errorText
+                startResult.unknonwError = unknownError
+                bleRes.startResult = startResult.build()
+                bleCallback?.bleResponse(ble = bleRes.build())
+            }
+
+        })
+    }
 
     /**
      * This Method Return Device Information Regarding BLE Functionality & Permissions
@@ -184,7 +204,7 @@ class BleWrapperClass(context: AppCompatActivity) {
         val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return try {
             lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        } catch (ex: java.lang.Exception) {
+        } catch (ex: Exception) {
             AppLog.e(TAG, "isLocationEnable() Exception :$ex")
             RemoteLog[context]!!.addDebugLog("$TAG:isLocationEnable() Exception :$ex")
             false
@@ -204,7 +224,7 @@ class BleWrapperClass(context: AppCompatActivity) {
     private fun getDeviceName(): String? {
         val manufacturer = Build.MANUFACTURER
         val model = Build.MODEL
-        return if (model.toLowerCase().startsWith(manufacturer.toLowerCase())) {
+        return if (model.lowercase().startsWith(manufacturer.lowercase())) {
             capitalize(model)
         } else {
             capitalize(manufacturer).toString() + " " + model
@@ -214,7 +234,7 @@ class BleWrapperClass(context: AppCompatActivity) {
     /**
      * Capitalize 1st Letter of String
      */
-    private fun capitalize(s: String?): String? {
+    private fun capitalize(s: String?): String {
         if (s == null || s.isEmpty()) {
             return ""
         }
@@ -349,9 +369,9 @@ class BleWrapperClass(context: AppCompatActivity) {
         googleApiClient.connect()
 
         val locationRequest: LocationRequest = LocationRequest.create()
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-        locationRequest.setInterval(10000)
-        locationRequest.setFastestInterval((10000 / 2).toLong())
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest.interval = 10000
+        locationRequest.fastestInterval = (10000 / 2).toLong()
 
         val builder: LocationSettingsRequest.Builder =
             LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
