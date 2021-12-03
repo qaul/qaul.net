@@ -24,7 +24,7 @@ mod c;
 
 /// android module
 /// The module only compiled, when the compile target is android.
-#[cfg(target_os = "android")]
+#[cfg(any(target_os = "android", target_os = "ios"))]
 mod android;
 
 /// start libqaul in an own thread

@@ -88,14 +88,14 @@ impl Internet {
 
         // TCP transport for android without DNS resolution
         // as the DNS module crashes on android due to a file system access
-        #[cfg(target_os = "android")]
+        #[cfg(any(target_os = "android", target_os = "ios"))]
         let transport = {
             let tcp = TcpConfig::new().nodelay(true);
             let ws_tcp = WsConfig::new(tcp.clone());
             tcp.or_transport(ws_tcp)
         };
         // create tcp transport with DNS for all other devices
-        #[cfg(not(target_os = "android"))]
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
         let transport = {
             let tcp = TcpConfig::new().nodelay(true);
             let dns_tcp = DnsConfig::system(tcp).await.unwrap();

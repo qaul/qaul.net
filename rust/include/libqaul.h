@@ -15,7 +15,19 @@ char *hello(void);
  * It needs to be called before any other function
  * of this API.
  */
-void start(void);
+void start(const char *s);
+
+/**
+ * start libqaul on desktop operating systems
+ *
+ * This function supports the following systems:
+ * linux, macOS, windows
+ *
+ * libqaul will create and find the common paths
+ * to the data storage location. Therefore no path has
+ * to be provided.
+ */
+void start_desktop(void);
 
 /**
  * check if libqaul finished initializing
@@ -28,6 +40,11 @@ void start(void);
  * Don't send any messages to libqaul before it finished initializing.
  */
 int32_t initialized(void);
+
+/**
+ * Yields the total number of messages queued to be received.
+ */
+int32_t receivequeue(void);
 
 /**
  * send RPC messages to libqaul
