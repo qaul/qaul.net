@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 package net.qaul.ble.core
 
 import android.Manifest
@@ -21,6 +24,7 @@ import qaul.sys.ble.BleOuterClass
 import android.content.*
 import android.os.Handler
 import android.os.Looper
+import androidx.lifecycle.LifecycleService
 import net.qaul.ble.BLEUtils
 import net.qaul.ble.callback.BleRequestCallback
 import java.lang.Exception
@@ -74,14 +78,15 @@ class BleWrapperClass(context: AppCompatActivity) {
                     setCallback()
                 },  500)
             } else {
-                BleService().setupAdvertiser()
+                //TODO please block multiple adding multiple advertiser if advertiser is already running
+                setCallback()
             }
         }
     }
 
 
     /**
-     * This Method Will Assign Callback & Data to Start Advertiser
+     * This Method Will Assign Callback & Data to Start Advertiser and Receive Callback
      */
     private fun setCallback() {
         BleService.bleService?.setData(qaul_id = qaulId, mode = advertMode,
@@ -108,7 +113,8 @@ class BleWrapperClass(context: AppCompatActivity) {
      * This Method Return Device Information Regarding BLE Functionality & Permissions
      */
     private fun getDeviceInfo() {
-        val adapter = BluetoothAdapter.getDefaultAdapter()
+        val bluetoothManager = context.getSystemService(LifecycleService.BLUETOOTH_SERVICE) as BluetoothManager
+        val adapter = bluetoothManager.adapter
         val bleRes: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
         val bleResInfoResponse = BleOuterClass.BleInfoResponse.newBuilder()
         if (bleRes.isInitialized) {

@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 package net.qaul.ble.service
 
 import android.bluetooth.*
@@ -40,6 +43,9 @@ class BleService : LifecycleService() {
         AppLog.e(TAG, "$TAG started")
     }
 
+    /**
+     * This Method Will Set Necessary Data for Staring Advertisement
+     */
     fun setData(
         qaul_id: String,
         mode: String, bleCallback: BleResponseCallback
@@ -50,6 +56,9 @@ class BleService : LifecycleService() {
         setupAdvertiser()
     }
 
+    /**
+     * This Method Will Start the Service
+     */
     fun start(
         context: Context
     ) {
@@ -61,10 +70,16 @@ class BleService : LifecycleService() {
         }
     }
 
+    /**
+     * This Method Will Return True if Service is Running
+     */
     fun isRunning(): Boolean {
         return bleService != null
     }
 
+    /**
+     * This Method Will Stop the Service if It Is Running
+     */
     fun stop() {
         if (bleService != null) {
             bleService?.stopSelf()
@@ -73,11 +88,14 @@ class BleService : LifecycleService() {
         }
     }
 
-    fun setupAdvertiser() {
+    /**
+     * This Method Will Set Service, Characteristic & Other Data to Run Advertiser
+     */
+    private fun setupAdvertiser() {
         val t = Thread {
-            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-            bluetoothAdapter!!.name = "NewH"
             bluetoothManager = bleService!!.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
+            bluetoothAdapter = bluetoothManager!!.adapter
+            bluetoothAdapter!!.name = "Qaul"
             bluetoothLeAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
             if (Build.VERSION.SDK_INT > 21) {
                 if (bluetoothAdapter != null) {
@@ -114,16 +132,17 @@ class BleService : LifecycleService() {
         t.start()
     }
 
-
+    /**
+     * This Method Will Start Advertisement According to Configuration
+     */
     private fun startAdvertisement(service: BluetoothGattService) {
         startGattServer(service = service)
         val dataBuilder = AdvertiseData.Builder()
         val settingsBuilder = AdvertiseSettings.Builder()
-
         dataBuilder.setIncludeTxPowerLevel(true)
-
         val uuid = ParcelUuid(UUID.fromString(SERVICE_UUID))
         dataBuilder.addServiceUuid(uuid)
+        dataBuilder.setIncludeDeviceName(true)
         when (advertMode) {
             "low_power" -> {
                 settingsBuilder
@@ -173,6 +192,10 @@ class BleService : LifecycleService() {
                 super.onServiceAdded(status, service)
             }
 
+            var counter = 20;
+            var remaincounter = 0;
+            var qaulId = "rakesh Jiyani welcome to india okay"
+            var sendSubstring = "";
             override fun onCharacteristicReadRequest(
                 device: BluetoothDevice,
                 requestId: Int, offset: Int,
@@ -182,7 +205,23 @@ class BleService : LifecycleService() {
                     device, requestId, offset,
                     characteristic
                 )
+                //TODO multiple request received
                 AppLog.e(TAG, "Request Received")
+                if (remaincounter > 0) {
+                    return
+                }
+                sendSubstring = sendSubstring.substring(0, counter);
+                remaincounter = sendSubstring.length;
+                gattServer?.sendResponse(
+                    device,
+                    requestId,
+                    0,
+                    remaincounter,
+                    sendSubstring.toByteArray(Charsets.UTF_8)
+                );
+                counter += 15;
+
+
             }
 
             private fun getStoredValue(characteristic: BluetoothGattCharacteristic): ByteArray {
