@@ -221,7 +221,9 @@ class _AddNodeDialog extends HookWidget {
                       if (isValidIPv4(val)) return null;
                       return l18ns.invalidIPMessage;
                     },
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     enableInteractiveSelection: false,
                   ),
                 ),

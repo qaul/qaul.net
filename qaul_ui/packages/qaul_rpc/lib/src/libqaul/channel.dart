@@ -67,7 +67,8 @@ class LibqaulChannel {
   Future<int> initialized() async {
     int result;
     try {
-      if(await libqaulChannel.invokeMethod('initialized')) {
+      var init = await libqaulChannel.invokeMethod('initialized');
+      if ((init is int && init == 1) || (init is bool && init)) {
         return 1;
       } else {
         return 0;
@@ -118,7 +119,7 @@ class LibqaulChannel {
   /// send binary protobuf RPC message to libqaul
   Future<void> sendRpc(Uint8List message) async {
     try {
-      await libqaulChannel.invokeMethod( 'sendRpcMessage', { 'message': message } );
+      await libqaulChannel.invokeMethod('sendRpcMessage', {'message': message});
     } on PlatformException catch (e) {
       debugPrint("ERROR: libqaul channel sendRpcMessage: '${e.message}'");
     }
@@ -128,14 +129,15 @@ class LibqaulChannel {
   /// and pass it to RPC module
   Future<Uint8List?> receiveRpc() async {
     try {
-      final Uint8List? result = await libqaulChannel.invokeMethod('receiveRpcMessage');
+      final Uint8List? result =
+          await libqaulChannel.invokeMethod('receiveRpcMessage');
 
-      if(result == null) {
+      if (result == null) {
         debugPrint("channel receiveRpcMessage: null received");
       } else {
         debugPrint("channel receiveRpcMessage: received");
 
-        if(result.isEmpty) {
+        if (result.isEmpty) {
           debugPrint("channel receiveRpcMessage: result is empty");
           return null;
         }
@@ -144,7 +146,7 @@ class LibqaulChannel {
         final size = result.lengthInBytes;
         debugPrint("channel receiveRpcMessage: $size bytes received");
 
-        if(size == 0) {
+        if (size == 0) {
           debugPrint("channel receiveRpcMessage: size == 0");
           return null;
         }

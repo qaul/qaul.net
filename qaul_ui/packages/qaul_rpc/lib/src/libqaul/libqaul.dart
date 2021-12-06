@@ -49,7 +49,7 @@ class Libqaul {
     if (_initialized != null) return;
 
     // initialize Library
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       // load platform plugin
       _libqaulChannel = LibqaulChannel(read);
     } else {
@@ -72,7 +72,7 @@ class Libqaul {
 
   /// start and initialize libqaul
   Future start() async {
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       await _libqaulChannel!.start();
     } else {
       _libqaulFfi!.start();
@@ -84,7 +84,7 @@ class Libqaul {
   /// returns 1, when qaul finished initializing
   /// otherwise it returns 0
   Future<int> initialized() async {
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       return await _libqaulChannel!.initialized();
     } else {
       return _libqaulFfi!.initialized();
@@ -94,7 +94,7 @@ class Libqaul {
   /// Debug function: get Android Version
   /// returns a string of the android version from AAR library
   Future<String> getPlatformVersion() async {
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       return await _libqaulChannel!.platformVersion();
     } else {
       return "getPlatformVersion() NOT IMPLEMENTED FOR THIS PLATFORM";
@@ -103,7 +103,7 @@ class Libqaul {
 
   /// Debug function: hello function
   Future<String> hello() async {
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       return await _libqaulChannel!.hello();
     } else {
       return _libqaulFfi!.hello();
@@ -112,7 +112,7 @@ class Libqaul {
 
   /// Debug function: how many rpc messages have been sent to libqaul
   Future<int> checkSendCounter() async {
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       return await _libqaulChannel!.checkSendCounter();
     } else {
       return _libqaulFfi!.checkSendCounter();
@@ -121,7 +121,7 @@ class Libqaul {
 
   /// Debug function: How many rpc messages are queued by libqaul
   Future<int> checkReceiveQueue() async {
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       return await _libqaulChannel!.checkReceiveQueue();
     } else {
       return _libqaulFfi!.checkReceiveQueue();
@@ -130,7 +130,7 @@ class Libqaul {
 
   /// send binary protobuf RPC message to libqaul
   Future<void> sendRpc(Uint8List message) async {
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       await _libqaulChannel!.sendRpc(message);
     } else {
       _libqaulFfi!.sendRpc(message);
@@ -139,7 +139,7 @@ class Libqaul {
 
   /// receive binary protobuf RPC message from libqaul
   Future<Uint8List?> receiveRpc() async {
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       return _libqaulChannel!.receiveRpc();
     } else {
       return _libqaulFfi!.receiveRpc();
