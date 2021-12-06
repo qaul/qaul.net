@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 package net.qaul.ble
 
 import android.text.TextUtils
@@ -8,7 +11,7 @@ import java.util.*
 
 class DateTimeHelper {
     companion object {
-        private val TAG = DateTimeHelper::class.java.simpleName!!
+        private val TAG = DateTimeHelper::class.java.simpleName
         const val DATE_FORMAT = "yyyy-MM-dd"
         const val DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss"
         const val DISPLAY_TIME_DATE = "hh:mm a, dd MMM yyyy"

@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 package net.qaul.qaul
 
 import android.content.Intent
