@@ -27,6 +27,7 @@ import qaul.sys.ble.BleOuterClass
 
 class MainActivity : AppCompatActivity(), BleRequestCallback {
 
+    private val TAG: String = "MainActivity"
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var bleWrapperClass: BleWrapperClass
@@ -67,8 +68,10 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
     private fun sendStartRequest() {
         val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
         val startRequest = BleOuterClass.BleStartRequest.newBuilder()
-        val qaulid = "12D3KooWPLakkJF9dzctAkUR2ZWaifjnRvDSy6CU8zTb4KUzzMuY"
-        startRequest.qaulId = ByteString.copyFrom(qaulid.toByteArray())
+//        val qaulid = "12D3KooWPLakkJF9dzctAkUR2ZWaifjnRvDSy6CU8zTb4KUzzMuY"
+        val qaulid = byteArrayOf(0x48,0x65,0x6c,0x6c,0x6f,0x41,0x6a,0x61,0x79,0x48,0x6f,0x77,0x41,0x72,0x65,0x59,0x6f,0x75,0x48,0x65)
+        AppLog.e(TAG,"qaulid : "+qaulid.size)
+        startRequest.qaulId = ByteString.copyFrom(qaulid)
         startRequest.mode = BleOuterClass.BleMode.low_latency
         bleReq.startRequest = startRequest.build()
         bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
