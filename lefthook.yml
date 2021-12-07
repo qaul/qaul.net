@@ -1,9 +1,6 @@
 pre-push:
   parallel: true
   commands:
-    flutter_tests:
-      root: "qaul_ui/"
-      run: flutter test
     flutter_static_code_analysis:
       root: "qaul_ui/"
       run: flutter analyze

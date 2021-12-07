@@ -37,7 +37,6 @@ workflows:
   flutter-ci-cd-workflow:
     jobs:
       - flutter-analyze
-      - flutter-test
 
 commands:
   checkout-flutter-project:
