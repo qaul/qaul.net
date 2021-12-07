@@ -1,0 +1,20 @@
+pre-push:
+  parallel: true
+  commands:
+    flutter_tests:
+      root: "qaul_ui/"
+      run: flutter test
+    flutter_static_code_analysis:
+      root: "qaul_ui/"
+      run: flutter analyze
+
+pre-commit:
+  commands:
+    flutter_lint_code:
+      root: "qaul_ui/"
+      glob: '*.dart'
+      run: dart fix --apply lib && git add .
+    flutter_format_code:
+      root: "qaul_ui/"
+      glob: '*.dart'
+      run: flutter format --line-length=100 {staged_files} && git add .
