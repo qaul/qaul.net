@@ -35,7 +35,7 @@ class BleWrapperClass(context: AppCompatActivity) {
     private var errorText = ""
     private var noRights = false
     private var bleCallback: BleRequestCallback? = null
-    private var qaulId = ""
+    private var qaulId : ByteArray? = null
     private var advertMode = "low_latency"
 
     /**
@@ -60,9 +60,21 @@ class BleWrapperClass(context: AppCompatActivity) {
                 Log.e(TAG, bleReq.messageCase.toString())
                 getDeviceInfo()
             } else if (bleReq.messageCase == BleOuterClass.Ble.MessageCase.START_REQUEST) {
-                qaulId = BLEUtils.byteToHex(bleReq.startRequest.toByteArray())
+                qaulId = bleReq.startRequest.qaulId.toByteArray()
+                AppLog.e(TAG,"qaulid : "+qaulId?.size)
                 advertMode = bleReq.startRequest.mode.toString()
-                startService(context = context)
+                if(qaulId!=null){
+                    startService(context = context)
+                }else{
+                    val bleRes = BleOuterClass.Ble.newBuilder()
+                    val startResult = BleOuterClass.BleStartResult.newBuilder()
+                    startResult.success = false
+                    startResult.noRights = false
+                    startResult.errorMessage = "qaul id required"
+                    startResult.unknonwError = false
+                    bleRes.startResult = startResult.build()
+                    bleCallback?.bleResponse(ble = bleRes.build())
+                }
             }
         }
     }
@@ -76,10 +88,17 @@ class BleWrapperClass(context: AppCompatActivity) {
                 BleService().start(context = context)
                 Handler(Looper.myLooper()!!).postDelayed({
                     setCallback()
-                },  500)
+                }, 500)
             } else {
-                //TODO please block multiple adding multiple advertiser if advertiser is already running
-                setCallback()
+                AppLog.e(TAG, "Already Started")
+                val bleRes = BleOuterClass.Ble.newBuilder()
+                val startResult = BleOuterClass.BleStartResult.newBuilder()
+                startResult.success = true
+                startResult.noRights = false
+                startResult.errorMessage = ""
+                startResult.unknonwError = false
+                bleRes.startResult = startResult.build()
+                bleCallback?.bleResponse(ble = bleRes.build())
             }
         }
     }
@@ -89,31 +108,34 @@ class BleWrapperClass(context: AppCompatActivity) {
      * This Method Will Assign Callback & Data to Start Advertiser and Receive Callback
      */
     private fun setCallback() {
-        BleService.bleService?.setData(qaul_id = qaulId, mode = advertMode,
-            object: BleService.BleResponseCallback {
-            override fun bleAdvertResponse(
-                status: Boolean,
-                errorText: String,
-                unknownError: Boolean
-            ) {
-                val bleRes = BleOuterClass.Ble.newBuilder()
-                val startResult = BleOuterClass.BleStartResult.newBuilder()
-                startResult.success = status
-                startResult.noRights = false
-                startResult.errorMessage = errorText
-                startResult.unknonwError = unknownError
-                bleRes.startResult = startResult.build()
-                bleCallback?.bleResponse(ble = bleRes.build())
-            }
+        if(qaulId!=null) {
+            BleService.bleService?.setData(qaul_id = qaulId!!, mode = advertMode,
+                object : BleService.BleResponseCallback {
+                    override fun bleAdvertResponse(
+                        status: Boolean,
+                        errorText: String,
+                        unknownError: Boolean
+                    ) {
+                        val bleRes = BleOuterClass.Ble.newBuilder()
+                        val startResult = BleOuterClass.BleStartResult.newBuilder()
+                        startResult.success = status
+                        startResult.noRights = false
+                        startResult.errorMessage = errorText
+                        startResult.unknonwError = unknownError
+                        bleRes.startResult = startResult.build()
+                        bleCallback?.bleResponse(ble = bleRes.build())
+                    }
 
-        })
+                })
+        }
     }
 
     /**
      * This Method Return Device Information Regarding BLE Functionality & Permissions
      */
     private fun getDeviceInfo() {
-        val bluetoothManager = context.getSystemService(LifecycleService.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothManager =
+            context.getSystemService(LifecycleService.BLUETOOTH_SERVICE) as BluetoothManager
         val adapter = bluetoothManager.adapter
         val bleRes: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
         val bleResInfoResponse = BleOuterClass.BleInfoResponse.newBuilder()

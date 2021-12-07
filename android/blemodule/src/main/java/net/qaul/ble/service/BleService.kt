@@ -22,7 +22,7 @@ class BleService : LifecycleService() {
     private var bleResponseCallback: BleResponseCallback? = null
     private val SERVICE_UUID = "99E91399-80ED-4943-9BCB-39C532A76023"
     private val READ_CHAR = "99E91401-80ED-4943-9BCB-39C532A76023"
-    private var qaulId = ""
+    private var qaulId : ByteArray? = null
     private var advertMode = ""
     private var bluetoothLeAdvertiser: BluetoothLeAdvertiser? = null
     private var gattServer: BluetoothGattServer? = null
@@ -47,7 +47,7 @@ class BleService : LifecycleService() {
      * This Method Will Set Necessary Data for Staring Advertisement
      */
     fun setData(
-        qaul_id: String,
+        qaul_id: ByteArray,
         mode: String, bleCallback: BleResponseCallback
     ) {
         bleService?.qaulId = qaul_id
@@ -178,7 +178,6 @@ class BleService : LifecycleService() {
         )
         gattServer?.addService(service)
     }
-
     private var gattServerCallback: BluetoothGattServerCallback =
         object : BluetoothGattServerCallback() {
             override fun onConnectionStateChange(
@@ -191,11 +190,6 @@ class BleService : LifecycleService() {
             override fun onServiceAdded(status: Int, service: BluetoothGattService) {
                 super.onServiceAdded(status, service)
             }
-
-            var counter = 20;
-            var remaincounter = 0;
-            var qaulId = "rakesh Jiyani welcome to india okay"
-            var sendSubstring = "";
             override fun onCharacteristicReadRequest(
                 device: BluetoothDevice,
                 requestId: Int, offset: Int,
@@ -205,23 +199,14 @@ class BleService : LifecycleService() {
                     device, requestId, offset,
                     characteristic
                 )
-                //TODO multiple request received
-                AppLog.e(TAG, "Request Received")
-                if (remaincounter > 0) {
-                    return
-                }
-                sendSubstring = sendSubstring.substring(0, counter);
-                remaincounter = sendSubstring.length;
+                AppLog.e(TAG, "Request Received : "+qaulId?.size)
                 gattServer?.sendResponse(
                     device,
                     requestId,
                     0,
-                    remaincounter,
-                    sendSubstring.toByteArray(Charsets.UTF_8)
+                    0,
+                    qaulId
                 );
-                counter += 15;
-
-
             }
 
             private fun getStoredValue(characteristic: BluetoothGattCharacteristic): ByteArray {
@@ -327,6 +312,11 @@ class BleService : LifecycleService() {
                 unknownError = unknownError
             )
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        bleService = null;
     }
 
     interface BleResponseCallback {
