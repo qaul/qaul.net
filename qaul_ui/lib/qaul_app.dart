@@ -101,5 +101,83 @@ class QaulApp extends PlatformAwareBuilder {
       },
     );
   }
-}
 
+  @override
+  Widget linuxBuilder(BuildContext context, WidgetRef ref) {
+    return AdaptiveTheme(
+      light: ThemeData(
+        brightness: Brightness.light,
+        primarySwatch: Colors.lightBlue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          foregroundColor: Colors.white,
+        ),
+        tooltipTheme:
+            const TooltipThemeData(waitDuration: Duration(seconds: 1)),
+        iconTheme: IconThemeData(color: Colors.grey.shade600),
+        appBarTheme: AppBarTheme(
+          color: Colors.transparent,
+          elevation: 0.0,
+          // Shadow not used as elevation is 0.0 - using this to inject color of decorators/qaul_nav_bar_decorator.dart:157
+          shadowColor: Colors.grey.shade300,
+          titleTextStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.lightBlue),
+          iconTheme: const IconThemeData(color: Colors.lightBlue),
+          actionsIconTheme: const IconThemeData(color: Colors.lightBlue),
+          shape: BorderDirectional(
+              bottom: BorderSide(color: Colors.grey.shade300)),
+        ),
+      ),
+      dark: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.lightBlue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        iconTheme: const IconThemeData(color: Colors.white),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Colors.lightBlue,
+          foregroundColor: Colors.black,
+        ),
+        tooltipTheme:
+            const TooltipThemeData(waitDuration: Duration(seconds: 1)),
+        appBarTheme: const AppBarTheme(
+          elevation: 0.0,
+          color: Color(0xff212121),
+          shadowColor: Color(0xff212121),
+        ),
+      ),
+      initial: themeMode ?? AdaptiveThemeMode.system,
+      builder: (theme, darkTheme) {
+        return ValueListenableBuilder(
+          valueListenable: Hive.box(UserPrefsHelper.hiveBoxName).listenable(),
+          builder: (context, box, _) {
+            return MaterialApp(
+              theme: theme,
+              darkTheme: darkTheme,
+              initialRoute: NavigationHelper.initial,
+              onGenerateRoute: NavigationHelper.onGenerateRoute,
+              locale: UserPrefsHelper().defaultLocale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localeResolutionCallback: (locale, supportedLocales) {
+                final defaultLocale = UserPrefsHelper().defaultLocale;
+                if (defaultLocale != null) return defaultLocale;
+                if (supportedLocales.contains(locale)) return locale;
+                return const Locale.fromSubtags(languageCode: 'en');
+              },
+              // builder: (context, child) {
+              //   return Center(
+              //     child: AspectRatio(
+              //       aspectRatio: 16 / 9,
+              //       child: child,
+              //     ),
+              //   );
+              // },
+            );
+          },
+        );
+      },
+    );
+  }
+}

@@ -155,105 +155,109 @@ class _UserDetailsScreen extends HookConsumerWidget {
             ],
           ),
         ),
-        body: Theme(
-          data: Theme.of(context).copyWith(
-            elevatedButtonTheme: ElevatedButtonThemeData(
-              style: ElevatedButton.styleFrom(
-                fixedSize: Size(MediaQuery.of(context).size.width * .8, 48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24.0),
+        body: SizedBox.expand(
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  fixedSize: Size(MediaQuery.of(context).size.width * .8, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24.0),
+                  ),
+                  textStyle: theme.headline6,
+                  onSurface: Colors.white,
                 ),
-                textStyle: theme.headline6,
-                onSurface: Colors.white,
               ),
             ),
-          ),
-          child: Builder(builder: (context) {
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 32.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    UserAvatar.large(user: user),
-                    const SizedBox(height: 28.0),
-                    Text(user.name, style: theme.headline3),
-                    const SizedBox(height: 8.0),
-                    Text('${l18ns.userID}: ${user.idBase58}',
-                        style: theme.headline5),
-                    const SizedBox(height: 40.0),
-                    Text('${l18ns.publicKey}:\n${user.keyBase58}',
-                        style: theme.headline5),
-                    const SizedBox(height: 40.0),
-                    DisabledStateDecorator(
-                      isDisabled: blocked,
-                      child: _RoundedRectButton(
-                        color: verified ? Colors.green.shade300 : Colors.green,
-                        onPressed: blocked
-                            ? null
-                            : () async {
-                                final res = await _confirmAction(
-                                  context,
-                                  description: verified
-                                      ? l18ns.unverifyUserConfirmationMessage
-                                      : l18ns.verifyUserConfirmationMessage,
-                                );
+            child: Builder(builder: (context) {
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 32.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      UserAvatar.large(user: user),
+                      const SizedBox(height: 28.0),
+                      Text(user.name, style: theme.headline3),
+                      const SizedBox(height: 8.0),
+                      Text('${l18ns.userID}: ${user.idBase58}',
+                          style: theme.headline5),
+                      const SizedBox(height: 40.0),
+                      Text('${l18ns.publicKey}:\n${user.keyBase58}',
+                          style: theme.headline5),
+                      const SizedBox(height: 40.0),
+                      DisabledStateDecorator(
+                        isDisabled: blocked,
+                        child: _RoundedRectButton(
+                          color:
+                              verified ? Colors.green.shade300 : Colors.green,
+                          onPressed: blocked
+                              ? null
+                              : () async {
+                                  final res = await _confirmAction(
+                                    context,
+                                    description: verified
+                                        ? l18ns.unverifyUserConfirmationMessage
+                                        : l18ns.verifyUserConfirmationMessage,
+                                  );
 
-                                if (res is! bool || !res) return;
-                                loading.value = true;
+                                  if (res is! bool || !res) return;
+                                  loading.value = true;
 
-                                final worker = ref.read(qaulWorkerProvider);
-                                verified
-                                    ? await worker.unverifyUser(user)
-                                    : await worker.verifyUser(user);
+                                  final worker = ref.read(qaulWorkerProvider);
+                                  verified
+                                      ? await worker.unverifyUser(user)
+                                      : await worker.verifyUser(user);
 
-                                loading.value = false;
-                                Navigator.pop(context);
-                              },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (!verified) ...[
-                              const Icon(Icons.check, size: 32),
-                              const SizedBox(width: 4),
+                                  loading.value = false;
+                                  Navigator.pop(context);
+                                },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (!verified) ...[
+                                const Icon(Icons.check, size: 32),
+                                const SizedBox(width: 4),
+                              ],
+                              Text(verified ? l18ns.unverify : l18ns.verify),
                             ],
-                            Text(verified ? l18ns.unverify : l18ns.verify),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 28.0),
-                    _RoundedRectButton(
-                      color:
-                          blocked ? Colors.red.shade300 : Colors.red.shade400,
-                      onPressed: () async {
-                        final res = await _confirmAction(
-                          context,
-                          description: blocked
-                              ? l18ns.unblockUserConfirmationMessage
-                              : l18ns.blockUserConfirmationMessage,
-                        );
+                      const SizedBox(height: 28.0),
+                      _RoundedRectButton(
+                        color:
+                            blocked ? Colors.red.shade300 : Colors.red.shade400,
+                        onPressed: () async {
+                          final res = await _confirmAction(
+                            context,
+                            description: blocked
+                                ? l18ns.unblockUserConfirmationMessage
+                                : l18ns.blockUserConfirmationMessage,
+                          );
 
-                        if (res is! bool || !res) return;
-                        loading.value = true;
+                          if (res is! bool || !res) return;
+                          loading.value = true;
 
-                        final worker = ref.read(qaulWorkerProvider);
-                        blocked
-                            ? await worker.unblockUser(user)
-                            : await worker.blockUser(user);
+                          final worker = ref.read(qaulWorkerProvider);
+                          blocked
+                              ? await worker.unblockUser(user)
+                              : await worker.blockUser(user);
 
-                        loading.value = false;
-                        Navigator.pop(context);
-                      },
-                      child:
-                          Text(blocked ? l18ns.unblockUser : l18ns.blockUser),
-                    ),
-                  ],
+                          loading.value = false;
+                          Navigator.pop(context);
+                        },
+                        child:
+                            Text(blocked ? l18ns.unblockUser : l18ns.blockUser),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         ),
       ),
     );
@@ -328,14 +332,17 @@ class _RoundedRectButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
-            foregroundColor: MaterialStateProperty.all(Colors.white),
-            backgroundColor: MaterialStateProperty.all(color),
-            maximumSize: MaterialStateProperty.all(size),
-          ),
-      child: child,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 500),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
+              foregroundColor: MaterialStateProperty.all(Colors.white),
+              backgroundColor: MaterialStateProperty.all(color),
+              maximumSize: MaterialStateProperty.all(size),
+            ),
+        child: child,
+      ),
     );
   }
 }
