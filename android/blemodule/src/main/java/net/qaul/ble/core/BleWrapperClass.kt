@@ -7,27 +7,27 @@ import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.content.Context
+import android.content.Intent
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.LifecycleService
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.PendingResult
 import com.google.android.gms.location.*
 import net.qaul.ble.AppLog
 import net.qaul.ble.RemoteLog
+import net.qaul.ble.callback.BleRequestCallback
 import net.qaul.ble.service.BleService
 import qaul.sys.ble.BleOuterClass
-import android.content.*
-import android.os.Handler
-import android.os.Looper
-import androidx.lifecycle.LifecycleService
-import net.qaul.ble.BLEUtils
-import net.qaul.ble.callback.BleRequestCallback
-import java.lang.Exception
 
 class BleWrapperClass(context: AppCompatActivity) {
     private val TAG: String = BleWrapperClass.javaClass.simpleName
@@ -35,7 +35,8 @@ class BleWrapperClass(context: AppCompatActivity) {
     private var errorText = ""
     private var noRights = false
     private var bleCallback: BleRequestCallback? = null
-    private var qaulId : ByteArray? = null
+    private var bleResponseCallback: BleService.BleResponseCallback? = null
+    private var qaulId: ByteArray? = null
     private var advertMode = "low_latency"
 
     /**
@@ -56,26 +57,48 @@ class BleWrapperClass(context: AppCompatActivity) {
     fun receiveRequest(bleReq: BleOuterClass.Ble, callback: BleRequestCallback) {
         if (bleReq.isInitialized) {
             bleCallback = callback
-            if (bleReq.messageCase == BleOuterClass.Ble.MessageCase.INFO_REQUEST) {
-                Log.e(TAG, bleReq.messageCase.toString())
-                getDeviceInfo()
-            } else if (bleReq.messageCase == BleOuterClass.Ble.MessageCase.START_REQUEST) {
-                qaulId = bleReq.startRequest.qaulId.toByteArray()
-                AppLog.e(TAG,"qaulid : "+qaulId?.size)
-                advertMode = bleReq.startRequest.mode.toString()
-                if(qaulId!=null){
-                    startService(context = context)
-                }else{
-                    val bleRes = BleOuterClass.Ble.newBuilder()
-                    val startResult = BleOuterClass.BleStartResult.newBuilder()
-                    startResult.success = false
-                    startResult.noRights = false
-                    startResult.errorMessage = "qaul id required"
-                    startResult.unknonwError = false
-                    bleRes.startResult = startResult.build()
-                    bleCallback?.bleResponse(ble = bleRes.build())
+            Log.e(TAG, bleReq.messageCase.toString())
+            when (bleReq.messageCase) {
+                BleOuterClass.Ble.MessageCase.INFO_REQUEST -> {
+                    getDeviceInfo()
+                }
+                BleOuterClass.Ble.MessageCase.START_REQUEST -> {
+                    qaulId = bleReq.startRequest.qaulId.toByteArray()
+                    AppLog.e(TAG, "qaulid : " + qaulId?.size)
+                    advertMode = bleReq.startRequest.mode.toString()
+                    if (qaulId != null) {
+                        startService(context = context)
+                    } else {
+                        val bleRes = BleOuterClass.Ble.newBuilder()
+                        val startResult = BleOuterClass.BleStartResult.newBuilder()
+                        startResult.success = false
+                        startResult.noRights = false
+                        startResult.errorMessage = "qaul id required"
+                        startResult.unknonwError = false
+                        bleRes.startResult = startResult.build()
+                        bleCallback?.bleResponse(ble = bleRes.build())
+                    }
+                }
+                BleOuterClass.Ble.MessageCase.STOP_REQUEST -> {
+                    stopService()
                 }
             }
+        }
+    }
+
+    /**
+     * This Method Will Stop the Service & Advertisement.
+     */
+    private fun stopService() {
+        if (BleService().isRunning()) {
+            BleService.bleService?.stop()
+        } else {
+            val bleRes = BleOuterClass.Ble.newBuilder()
+            val stopResult = BleOuterClass.BleStopResult.newBuilder()
+            stopResult.success = false
+            stopResult.errorMessage = "Advertisement is not Running"
+            bleRes.stopResult = stopResult.build()
+            bleCallback?.bleResponse(ble = bleRes.build())
         }
     }
 
@@ -90,15 +113,19 @@ class BleWrapperClass(context: AppCompatActivity) {
                     setCallback()
                 }, 500)
             } else {
-                AppLog.e(TAG, "Already Started")
-                val bleRes = BleOuterClass.Ble.newBuilder()
-                val startResult = BleOuterClass.BleStartResult.newBuilder()
-                startResult.success = true
-                startResult.noRights = false
-                startResult.errorMessage = ""
-                startResult.unknonwError = false
-                bleRes.startResult = startResult.build()
-                bleCallback?.bleResponse(ble = bleRes.build())
+                if (BleService.bleService!!.isAdvertiserRunning()) {
+                    AppLog.e(TAG, "Already Started")
+                    val bleRes = BleOuterClass.Ble.newBuilder()
+                    val startResult = BleOuterClass.BleStartResult.newBuilder()
+                    startResult.success = true
+                    startResult.noRights = false
+                    startResult.errorMessage = "Advertisement already Started"
+                    startResult.unknonwError = false
+                    bleRes.startResult = startResult.build()
+                    bleCallback?.bleResponse(ble = bleRes.build())
+                } else {
+                    setCallback()
+                }
             }
         }
     }
@@ -108,25 +135,37 @@ class BleWrapperClass(context: AppCompatActivity) {
      * This Method Will Assign Callback & Data to Start Advertiser and Receive Callback
      */
     private fun setCallback() {
-        if(qaulId!=null) {
-            BleService.bleService?.setData(qaul_id = qaulId!!, mode = advertMode,
-                object : BleService.BleResponseCallback {
-                    override fun bleAdvertResponse(
-                        status: Boolean,
-                        errorText: String,
-                        unknownError: Boolean
-                    ) {
-                        val bleRes = BleOuterClass.Ble.newBuilder()
-                        val startResult = BleOuterClass.BleStartResult.newBuilder()
-                        startResult.success = status
-                        startResult.noRights = false
-                        startResult.errorMessage = errorText
-                        startResult.unknonwError = unknownError
-                        bleRes.startResult = startResult.build()
-                        bleCallback?.bleResponse(ble = bleRes.build())
-                    }
+        bleResponseCallback = object : BleService.BleResponseCallback {
+            override fun bleAdvertStartRes(
+                status: Boolean,
+                errorText: String,
+                unknownError: Boolean
+            ) {
+                val bleRes = BleOuterClass.Ble.newBuilder()
+                val startResult = BleOuterClass.BleStartResult.newBuilder()
+                startResult.success = status
+                startResult.noRights = false
+                startResult.errorMessage = errorText
+                startResult.unknonwError = unknownError
+                bleRes.startResult = startResult.build()
+                bleCallback?.bleResponse(ble = bleRes.build())
+            }
 
-                })
+            override fun bleAdvertStopRes(status: Boolean, errorText: String) {
+                val bleRes = BleOuterClass.Ble.newBuilder()
+                val stopResult = BleOuterClass.BleStopResult.newBuilder()
+                stopResult.success = status
+                stopResult.errorMessage = errorText
+                bleRes.stopResult = stopResult.build()
+                bleCallback?.bleResponse(ble = bleRes.build())
+            }
+
+        }
+        if (qaulId != null) {
+            BleService.bleService?.setData(
+                qaul_id = qaulId!!, mode = advertMode,
+                bleResponseCallback!!
+            )
         }
     }
 

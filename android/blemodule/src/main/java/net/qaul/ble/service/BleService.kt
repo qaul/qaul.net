@@ -22,7 +22,7 @@ class BleService : LifecycleService() {
     private var bleResponseCallback: BleResponseCallback? = null
     private val SERVICE_UUID = "99E91399-80ED-4943-9BCB-39C532A76023"
     private val READ_CHAR = "99E91401-80ED-4943-9BCB-39C532A76023"
-    private var qaulId : ByteArray? = null
+    private var qaulId: ByteArray? = null
     private var advertMode = ""
     private var bluetoothLeAdvertiser: BluetoothLeAdvertiser? = null
     private var gattServer: BluetoothGattServer? = null
@@ -30,6 +30,8 @@ class BleService : LifecycleService() {
 
     companion object {
         var bleService: BleService? = null
+        var isAdvertisementRunning = false
+        var offset = 0
     }
 
     override fun onCreate() {
@@ -78,12 +80,34 @@ class BleService : LifecycleService() {
     }
 
     /**
+     * This Method Will Return True if Advertisement is ON
+     */
+    fun isAdvertiserRunning(): Boolean {
+        return isAdvertisementRunning
+    }
+
+    /**
      * This Method Will Stop the Service if It Is Running
      */
     fun stop() {
         if (bleService != null) {
+            var str = "$TAG stopped"
+            if (bleService!!.isAdvertiserRunning()) {
+                bluetoothLeAdvertiser?.stopAdvertising(advertiseCallback)
+                gattServer?.clearServices()
+                gattServer?.close()
+                str = str.plus(" advertisement stopped")
+            }
             bleService?.stopSelf()
+            bleService?.bleResponseCallback?.bleAdvertStopRes(
+                status = true,
+                errorText = str
+            )
         } else {
+            bleService?.bleResponseCallback?.bleAdvertStopRes(
+                status = false,
+                errorText = "$TAG not started"
+            )
             AppLog.e(TAG, "$TAG not started")
         }
     }
@@ -171,6 +195,9 @@ class BleService : LifecycleService() {
         )
     }
 
+    /**
+     * This Method Will Start the GattServer.
+     */
     private fun startGattServer(service: BluetoothGattService) {
         gattServer = bluetoothManager!!.openGattServer(
             this,
@@ -178,6 +205,10 @@ class BleService : LifecycleService() {
         )
         gattServer?.addService(service)
     }
+
+    /**
+     * This is a Object of a BluetoothGattServer with it's Callback.
+     */
     private var gattServerCallback: BluetoothGattServerCallback =
         object : BluetoothGattServerCallback() {
             override fun onConnectionStateChange(
@@ -190,6 +221,7 @@ class BleService : LifecycleService() {
             override fun onServiceAdded(status: Int, service: BluetoothGattService) {
                 super.onServiceAdded(status, service)
             }
+
             override fun onCharacteristicReadRequest(
                 device: BluetoothDevice,
                 requestId: Int, offset: Int,
@@ -199,14 +231,14 @@ class BleService : LifecycleService() {
                     device, requestId, offset,
                     characteristic
                 )
-                AppLog.e(TAG, "Request Received : "+qaulId?.size)
+                AppLog.e(TAG, "Request Received : " + qaulId?.size)
                 gattServer?.sendResponse(
                     device,
                     requestId,
                     0,
                     0,
                     qaulId
-                );
+                )
             }
 
             private fun getStoredValue(characteristic: BluetoothGattCharacteristic): ByteArray {
@@ -269,11 +301,15 @@ class BleService : LifecycleService() {
             }
         }
 
+    /**
+     * This is a Object of a AdvertiseCallback.
+     */
     private val advertiseCallback: AdvertiseCallback = object : AdvertiseCallback() {
         override fun onStartSuccess(advertiseSettings: AdvertiseSettings) {
             val successMsg = "Advertisement successful"
+            isAdvertisementRunning = true
             AppLog.e(TAG, successMsg)
-            bleService?.bleResponseCallback?.bleAdvertResponse(
+            bleService?.bleResponseCallback?.bleAdvertStartRes(
                 status = true,
                 errorText = successMsg,
                 unknownError = false
@@ -282,6 +318,7 @@ class BleService : LifecycleService() {
 
         override fun onStartFailure(i: Int) {
             var unknownError = false
+            isAdvertisementRunning = false
             var errorText = ""
             if (i < 1 || i > 5) {
                 unknownError = true
@@ -306,7 +343,7 @@ class BleService : LifecycleService() {
 
             val failMsg = "Advertisement failed: $errorText"
             AppLog.e(TAG, failMsg)
-            bleService?.bleResponseCallback?.bleAdvertResponse(
+            bleService?.bleResponseCallback?.bleAdvertStartRes(
                 status = false,
                 errorText = failMsg,
                 unknownError = unknownError
@@ -314,12 +351,27 @@ class BleService : LifecycleService() {
         }
     }
 
+    /**
+     * This method Will be Called When Service Will Stopped/Destroyed
+     */
     override fun onDestroy() {
+        if (bleService != null) {
+            if (bleService!!.isAdvertiserRunning()) {
+                bluetoothLeAdvertiser?.stopAdvertising(advertiseCallback)
+                gattServer?.clearServices()
+                gattServer?.close()
+            }
+            bleService?.stopSelf()
+        }
+        bleService = null
         super.onDestroy()
-        bleService = null;
     }
 
+    /**
+     * This is a Interface for Sending Advertisement Start & Stop Response to BLEWrapperClass.
+     */
     interface BleResponseCallback {
-        fun bleAdvertResponse(status: Boolean, errorText: String, unknownError: Boolean)
+        fun bleAdvertStartRes(status: Boolean, errorText: String, unknownError: Boolean)
+        fun bleAdvertStopRes(status: Boolean, errorText: String)
     }
 }

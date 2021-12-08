@@ -57,7 +57,6 @@
             android:background="@color/purple_700"
             android:textColor="@color/white"
             android:padding="10dp"
-            android:visibility="gone"
             android:text="Send Stop Request"/>
     </androidx.appcompat.widget.LinearLayoutCompat>
 

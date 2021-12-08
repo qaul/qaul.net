@@ -26,6 +26,12 @@ message Ble {
         BleDirectSend direct_send = 8;
         // direct message received
         BleDirectReceived direct_received = 9;
+
+
+        // stop service request
+        BleStopRequest stop_request = 10;
+        // stop service result
+        BleStopResult stop_result = 11;
     }
 }
 
@@ -137,6 +143,20 @@ message BleStartRequest {
 
 }
 
+//To stop service, advertisement & scanning.
+message BleStopRequest {
+
+}
+
+// stop service feedback
+// this is the feedback
+message BleStopResult {
+    // whether the stop of the device was a success or not
+    bool success = 1;
+    // error message
+    string error_message = 2;
+}
+
 // start device result message
 // this is the feedback
 message BleStartResult {
@@ -149,6 +169,7 @@ message BleStartResult {
     // rights not provided
     bool no_rights = 4;
 }
+
 
 // advertising set message content
 message BleAdvertisingSet {
