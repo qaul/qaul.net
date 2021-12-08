@@ -22,7 +22,7 @@ void main() async {
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
 
-  if (Platform.isLinux) {
+  if (Platform.isLinux || Platform.isMacOS) {
     doWhenWindowReady(() {
       const initialSize = Size(1920, 1080);
       appWindow.minSize = const Size(800, 600);

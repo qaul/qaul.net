@@ -44,12 +44,14 @@ dependencies:
 
   flutter_markdown: ^0.6.8
 
-#  window_manager: ^0.0.5
-  bitsdojo_window: ^0.1.1+1
 
   bubble: ^1.2.1
   flutter_chat_ui: ^1.5.1
 
+  ## *******
+  ## Desktop dependencies
+  ## *******
+  bitsdojo_window: ^0.1.1+1
   # Windows-native Widgets
   fluent_ui: ^3.4.1
   # MacOS-native Widgets
