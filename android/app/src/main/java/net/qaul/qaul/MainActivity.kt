@@ -6,13 +6,14 @@ package net.qaul.qaul
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
 import com.google.gson.Gson
 import com.google.protobuf.ByteString
 import net.qaul.ble.AppLog
@@ -24,6 +25,7 @@ import net.qaul.ble.core.BleWrapperClass.Companion.LOCATION_PERMISSION_REQ_CODE
 import net.qaul.ble.core.BleWrapperClass.Companion.REQUEST_ENABLE_BT
 import net.qaul.qaul.databinding.ActivityMainBinding
 import qaul.sys.ble.BleOuterClass
+import java.nio.charset.Charset
 
 class MainActivity : AppCompatActivity(), BleRequestCallback {
 
@@ -45,10 +47,12 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
         binding.btnStartRequest.setOnClickListener {
             sendStartRequest()
         }
+        binding.btnStopRequest.setOnClickListener {
+            sendStopRequest()
+        }
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
-
         oldCode()
     }
 
@@ -68,12 +72,23 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
     private fun sendStartRequest() {
         val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
         val startRequest = BleOuterClass.BleStartRequest.newBuilder()
-//        val qaulid = "12D3KooWPLakkJF9dzctAkUR2ZWaifjnRvDSy6CU8zTb4KUzzMuY"
-        val qaulid = byteArrayOf(0x48,0x65,0x6c,0x6c,0x6f,0x41,0x6a,0x61,0x79,0x48,0x6f,0x77,0x41,0x72,0x65,0x59,0x6f,0x75,0x48,0x65)
-        AppLog.e(TAG,"qaulid : "+qaulid.size)
+        val qaulid = "HelloThisIsAQaulId".toByteArray(Charset.defaultCharset())
+//        val qaulid = byteArrayOf(
+//            0x48,0x65,0x6c,0x6c,0x6f,0x41,0x6a,0x61,0x79,0x48,0x6f,0x77,0x41,0x72,0x65,0x59,0x6f,0x75,0x48,0x65
+//        )
+        AppLog.e(TAG, "qaulid : " + qaulid.size)
         startRequest.qaulId = ByteString.copyFrom(qaulid)
         startRequest.mode = BleOuterClass.BleMode.low_latency
         bleReq.startRequest = startRequest.build()
+        bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
+    }
+
+    /**
+     * For Sending BleStopRequest to BLEModule. It Is Used To Stop Service.
+     */
+    private fun sendStopRequest() {
+        val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
+        bleReq.stopRequest = BleOuterClass.BleStopRequest.getDefaultInstance()
         bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
     }
 
@@ -155,12 +170,34 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
      */
     override fun bleResponse(ble: BleOuterClass.Ble) {
         if (ble.isInitialized) {
-            if (ble.messageCase == BleOuterClass.Ble.MessageCase.INFO_RESPONSE) {
-                val deviceInfo: BleOuterClass.BleDeviceInfo = ble.infoResponse.device
-                AppLog.e("bleResponse: ", Gson().toJson(deviceInfo))
-            } else if (ble.messageCase == BleOuterClass.Ble.MessageCase.START_RESULT) {
-                val startResult: BleOuterClass.BleStartResult = ble.startResult
-                AppLog.e("startResult: ", Gson().toJson(startResult))
+            when (ble.messageCase) {
+                BleOuterClass.Ble.MessageCase.INFO_RESPONSE -> {
+                    val deviceInfo: BleOuterClass.BleDeviceInfo = ble.infoResponse.device
+                    AppLog.e("bleResponse: ", Gson().toJson(deviceInfo))
+                    Toast.makeText(
+                        this,
+                        "Device info received from : ${deviceInfo.name}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                BleOuterClass.Ble.MessageCase.START_RESULT -> {
+                    val startResult: BleOuterClass.BleStartResult = ble.startResult
+                    AppLog.e("startResult: ", Gson().toJson(startResult))
+                    Toast.makeText(
+                        this,
+                        startResult.errorMessage,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                BleOuterClass.Ble.MessageCase.STOP_RESULT -> {
+                    val stopResult: BleOuterClass.BleStopResult = ble.stopResult
+                    AppLog.e("stopResult: ", Gson().toJson(stopResult))
+                    Toast.makeText(
+                        this,
+                        stopResult.errorMessage,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
