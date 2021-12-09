@@ -26,7 +26,6 @@ import com.google.android.gms.location.*
 import net.qaul.ble.AppLog
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.callback.BleRequestCallback
-import net.qaul.ble.model.BLEScanDevice
 import net.qaul.ble.service.BleService
 import qaul.sys.ble.BleOuterClass
 
@@ -36,7 +35,6 @@ class BleWrapperClass(context: AppCompatActivity) {
     private var errorText = ""
     private var noRights = false
     private var bleCallback: BleRequestCallback? = null
-    private var bleResponseCallback: BleService.BleResponseCallback? = null
     private var qaulId: ByteArray? = null
     private var advertMode = "low_latency"
 
@@ -111,7 +109,8 @@ class BleWrapperClass(context: AppCompatActivity) {
             if (!BleService().isRunning()) {
                 BleService().start(context = context)
                 Handler(Looper.myLooper()!!).postDelayed({
-                    setCallback()
+                    startAdvertiseAndCallback()
+                    startScanAndCallback()
                 }, 500)
             } else {
                 if (BleService.bleService!!.isAdvertiserRunning()) {
@@ -125,7 +124,13 @@ class BleWrapperClass(context: AppCompatActivity) {
                     bleRes.startResult = startResult.build()
                     bleCallback?.bleResponse(ble = bleRes.build())
                 } else {
-                    setCallback()
+                    startAdvertiseAndCallback()
+                }
+
+                if (BleService.bleService!!.isScanRunning()) {
+                    // TODO : Send Response Already Started
+                } else {
+                    startScanAndCallback()
                 }
             }
         }
@@ -135,48 +140,60 @@ class BleWrapperClass(context: AppCompatActivity) {
     /**
      * This Method Will Assign Callback & Data to Start Advertiser and Receive Callback
      */
-    private fun setCallback() {
-        bleResponseCallback = object : BleService.BleResponseCallback {
-            override fun bleAdvertStartRes(
-                status: Boolean,
-                errorText: String,
-                unknownError: Boolean
-            ) {
-                val bleRes = BleOuterClass.Ble.newBuilder()
-                val startResult = BleOuterClass.BleStartResult.newBuilder()
-                startResult.success = status
-                startResult.noRights = false
-                startResult.errorMessage = errorText
-                startResult.unknownError = unknownError
-                bleRes.startResult = startResult.build()
-                bleCallback?.bleResponse(ble = bleRes.build())
-            }
-
-            override fun bleAdvertStopRes(status: Boolean, errorText: String) {
-                val bleRes = BleOuterClass.Ble.newBuilder()
-                val stopResult = BleOuterClass.BleStopResult.newBuilder()
-                stopResult.success = status
-                stopResult.errorMessage = errorText
-                bleRes.stopResult = stopResult.build()
-                bleCallback?.bleResponse(ble = bleRes.build())
-            }
-
-            override fun bleDeviceFound(bleDevice: BLEScanDevice) {
-//                val bleRes = BleOuterClass.Ble.newBuilder()
-//                val advertisingReceived = BleOuterClass.BleAdvertisingReceived.newBuilder()
-//                advertisingReceived.success = status
-//                advertisingReceived.errorMessage = errorText
-//                bleRes.stopResult = stopResult.build()
-//                bleCallback?.bleResponse(ble = bleRes.build())
-            }
-
-        }
+    private fun startAdvertiseAndCallback() {
         if (qaulId != null) {
-            BleService.bleService?.setData(
+            BleService.bleService?.startAdvertise(
                 qaul_id = qaulId!!, mode = advertMode,
-                bleResponseCallback!!
+                object : BleService.BleAdvertiseCallback {
+                    override fun startAdvertiseRes(
+                        status: Boolean,
+                        errorText: String,
+                        unknownError: Boolean
+                    ) {
+                        val bleRes = BleOuterClass.Ble.newBuilder()
+                        val startResult = BleOuterClass.BleStartResult.newBuilder()
+                        startResult.success = status
+                        startResult.noRights = false
+                        startResult.errorMessage = errorText
+                        startResult.unknownError = unknownError
+                        bleRes.startResult = startResult.build()
+                        bleCallback?.bleResponse(ble = bleRes.build())
+                    }
+
+                    override fun stopAdvertiseRes(status: Boolean, errorText: String) {
+                        val bleRes = BleOuterClass.Ble.newBuilder()
+                        val stopResult = BleOuterClass.BleStopResult.newBuilder()
+                        stopResult.success = status
+                        stopResult.errorMessage = errorText
+                        bleRes.stopResult = stopResult.build()
+                        bleCallback?.bleResponse(ble = bleRes.build())
+                    }
+
+                }
             )
         }
+    }
+
+    /**
+     * This Method Will Assign Callback & Data to Start Advertiser and Receive Callback
+     */
+    private fun startScanAndCallback() {
+        BleService.bleService?.startScan(
+            object : BleService.BleScanCallBack {
+                override fun startScanRes(
+                    status: Boolean,
+                    errorText: String,
+                    unknownError: Boolean
+                ) {
+                    // TODO : // Send Response To Qual Module
+                }
+
+                override fun stopScanRes(status: Boolean, errorText: String) {
+                    // TODO : // Send Response To Qual Module
+                }
+
+            }
+        )
     }
 
     /**
