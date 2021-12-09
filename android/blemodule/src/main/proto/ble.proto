@@ -1,4 +1,5 @@
 syntax = "proto3";
+
 package qaul.sys.ble;
 
 // BLE system communication message
@@ -123,13 +124,13 @@ message BleDeviceInfo {
     // windows ?
     bool le_audio = 13;
     //NEWLY ADDED:  isLePeriodicAdvertisingSupported
-    bool le_periodic_adv_support  = 14;
+    bool le_periodic_adv_support = 14;
     //NEWLY ADDED:  isMultipleAdvertisementSupported
-    bool le_multiple_adv_support  = 15;
+    bool le_multiple_adv_support = 15;
     //NEWLY ADDED:  isOffloadedFilteringSupported
-    bool offload_filter_support  = 16;
+    bool offload_filter_support = 16;
     //NEWLY ADDED:  isOffloadedScanBatchingSupported
-    bool offload_scan_batching_support  = 17;
+    bool offload_scan_batching_support = 17;
 }
 
 // start device request message
@@ -165,7 +166,7 @@ message BleStartResult {
     // error message
     string error_message = 2;
     // error reasons
-    bool unknonw_error = 3;
+    bool unknown_error = 3;
     // rights not provided
     bool no_rights = 4;
 }

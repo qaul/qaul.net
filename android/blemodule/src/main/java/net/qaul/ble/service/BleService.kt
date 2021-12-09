@@ -4,16 +4,17 @@
 package net.qaul.ble.service
 
 import android.bluetooth.*
-import android.bluetooth.le.AdvertiseCallback
-import android.bluetooth.le.AdvertiseData
-import android.bluetooth.le.AdvertiseSettings
-import android.bluetooth.le.BluetoothLeAdvertiser
+import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.ParcelUuid
 import androidx.lifecycle.LifecycleService
 import net.qaul.ble.AppLog
+import net.qaul.ble.RemoteLog
+import net.qaul.ble.model.BLEScanDevice
 import java.util.*
 
 class BleService : LifecycleService() {
@@ -28,9 +29,26 @@ class BleService : LifecycleService() {
     private var gattServer: BluetoothGattServer? = null
     private var bluetoothManager: BluetoothManager? = null
 
+    private lateinit var scanCallback: ScanCallback
+    private lateinit var timeOutRunnable: Runnable
+    private lateinit var bleScanner: BluetoothLeScanner
+    private val handler = Handler(Looper.getMainLooper())
+    private val devicesList = arrayListOf<BLEScanDevice>()
+    private val uuidList = arrayListOf<ParcelUuid>()
+    private var filters: ArrayList<ScanFilter> = arrayListOf()
+    private var scanSettings: ScanSettings? = null
+    private var mBluetoothGatt: BluetoothGatt? = null
+    private val descriptorWriteQueue: Queue<BluetoothGattDescriptor> = LinkedList()
+    private var failTimer: Timer? = null
+    var disconnectedFromDevice = false
+    var device: BluetoothDevice? = null
+
     companion object {
+        const val SCAN_TIME_OUT: Long = 300000 // millisecond
+        const val RESCAN_DEVICE: Long = 5000
         var bleService: BleService? = null
         var isAdvertisementRunning = false
+        var isScanningRunning = false
         var offset = 0
     }
 
@@ -57,6 +75,7 @@ class BleService : LifecycleService() {
         bleService?.bleResponseCallback = bleCallback
         setupAdvertiser()
     }
+
 
     /**
      * This Method Will Start the Service
@@ -196,6 +215,97 @@ class BleService : LifecycleService() {
     }
 
     /**
+     * This Method Will Set Filter, ScanMode & Other Data to Start Scanning
+     */
+    private fun setupScanning() {
+        bleScanner = BluetoothAdapter.getDefaultAdapter().bluetoothLeScanner
+        timeOutRunnable = Runnable {
+//                onScanfailed(BLEErrorType.TIME_OUT)
+        }
+        val uuid = ParcelUuid.fromString(SERVICE_UUID)
+        uuidList.add(uuid)
+        setFilter(uuidList)
+        scanCallback = object : ScanCallback() {
+            override fun onScanResult(callbackType: Int, result: ScanResult?) {
+                super.onScanResult(callbackType, result)
+                AppLog.d(TAG, "device : " + result!!.device.address)
+                RemoteLog[this@BleService]!!.addDebugLog("$TAG:device : " + result.device.address)
+                parseBLEFrame(result.device, result.rssi, result)
+            }
+
+            override fun onScanFailed(errorCode: Int) {
+                super.onScanFailed(errorCode)
+                onScanfailed()
+                stopScan()
+            }
+        }
+
+
+        scanSettings =
+            ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
+
+
+        bleScanner.startScan(filters, scanSettings, scanCallback)
+        handler.postDelayed(timeOutRunnable, SCAN_TIME_OUT)
+    }
+
+    private fun onScanfailed() {
+        //Todo Send Response to UI of Scan Failure
+    }
+
+    private fun setFilter(uuidList: ArrayList<ParcelUuid>) {
+
+        for (uuid in uuidList) {
+            filters.add(
+                ScanFilter.Builder().setServiceUuid(uuid).build()
+            )
+        }
+    }
+
+    private fun parseBLEFrame(device: BluetoothDevice, rssi: Int, result: ScanResult) {
+        handler.removeCallbacks(timeOutRunnable)
+        AppLog.d(TAG, "device : " + device.address)
+        val selectItem = devicesList.find { it.macAddress == device.address }
+        if (selectItem == null) {
+            AppLog.e(TAG, "device : " + device.address)
+            AppLog.e(TAG, "UUID : " + result.scanRecord!!.serviceUuids)
+            RemoteLog[this]!!.addDebugLog("$TAG:device : " + device.address + " " + result.scanRecord!!.serviceUuids)
+            val bleDevice: BLEScanDevice = BLEScanDevice.getDevice()
+            bleDevice.bluetoothDevice = device
+            bleDevice.scanResult = result
+            bleDevice.name = device.name
+            bleDevice.deviceRSSI.set(rssi)
+            bleDevice.macAddress = device.address
+            deviceFound(bleDevice)
+        } else {
+            selectItem.deviceRSSI.set(rssi)
+            selectItem.scanResult = result
+            selectItem.name = device.name
+//            deviceFound(selectItem)
+        }
+    }
+
+    private fun deviceFound(bleDevice: BLEScanDevice) {
+        //Todo Send response to UI
+    }
+
+    fun stopScan() {
+        AppLog.e(TAG, "stopScan()")
+        isScanningRunning = false
+        bleScanner.stopScan(scanCallback)
+        RemoteLog[this]!!.addDebugLog("$TAG:Scanning Stopped")
+    }
+
+
+    private fun refreshDeviceCache(gatt: BluetoothGatt?) {
+        try {
+            val localMethod = gatt?.javaClass?.getMethod("refresh", *arrayOfNulls(0))
+            localMethod?.invoke(gatt, *arrayOfNulls(0))
+        } catch (localException: Exception) {
+        }
+    }
+
+    /**
      * This Method Will Start the GattServer.
      */
     private fun startGattServer(service: BluetoothGattService) {
@@ -247,6 +357,7 @@ class BleService : LifecycleService() {
                     characteristic.value, 0, `val`, 0,
                     characteristic.value.size
                 )
+
                 return `val`
             }
 
@@ -373,5 +484,8 @@ class BleService : LifecycleService() {
     interface BleResponseCallback {
         fun bleAdvertStartRes(status: Boolean, errorText: String, unknownError: Boolean)
         fun bleAdvertStopRes(status: Boolean, errorText: String)
+        fun bleDeviceFound(bleDevice: BLEScanDevice)
+//        fun bleDeviceOutRange(bleDevice: BLEScanDevice)
+//        fun bleScanFailed(error: String)
     }
 }
