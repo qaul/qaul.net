@@ -26,6 +26,7 @@ import com.google.android.gms.location.*
 import net.qaul.ble.AppLog
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.callback.BleRequestCallback
+import net.qaul.ble.model.BLEScanDevice
 import net.qaul.ble.service.BleService
 import qaul.sys.ble.BleOuterClass
 
@@ -74,7 +75,7 @@ class BleWrapperClass(context: AppCompatActivity) {
                         startResult.success = false
                         startResult.noRights = false
                         startResult.errorMessage = "qaul id required"
-                        startResult.unknonwError = false
+                        startResult.unknownError = false
                         bleRes.startResult = startResult.build()
                         bleCallback?.bleResponse(ble = bleRes.build())
                     }
@@ -120,7 +121,7 @@ class BleWrapperClass(context: AppCompatActivity) {
                     startResult.success = true
                     startResult.noRights = false
                     startResult.errorMessage = "Advertisement already Started"
-                    startResult.unknonwError = false
+                    startResult.unknownError = false
                     bleRes.startResult = startResult.build()
                     bleCallback?.bleResponse(ble = bleRes.build())
                 } else {
@@ -146,7 +147,7 @@ class BleWrapperClass(context: AppCompatActivity) {
                 startResult.success = status
                 startResult.noRights = false
                 startResult.errorMessage = errorText
-                startResult.unknonwError = unknownError
+                startResult.unknownError = unknownError
                 bleRes.startResult = startResult.build()
                 bleCallback?.bleResponse(ble = bleRes.build())
             }
@@ -158,6 +159,15 @@ class BleWrapperClass(context: AppCompatActivity) {
                 stopResult.errorMessage = errorText
                 bleRes.stopResult = stopResult.build()
                 bleCallback?.bleResponse(ble = bleRes.build())
+            }
+
+            override fun bleDeviceFound(bleDevice: BLEScanDevice) {
+//                val bleRes = BleOuterClass.Ble.newBuilder()
+//                val advertisingReceived = BleOuterClass.BleAdvertisingReceived.newBuilder()
+//                advertisingReceived.success = status
+//                advertisingReceived.errorMessage = errorText
+//                bleRes.stopResult = stopResult.build()
+//                bleCallback?.bleResponse(ble = bleRes.build())
             }
 
         }
@@ -554,7 +564,7 @@ class BleWrapperClass(context: AppCompatActivity) {
                 startResult.success = false
                 startResult.noRights = noRights
                 startResult.errorMessage = errorText
-                startResult.unknonwError = false
+                startResult.unknownError = false
                 bleRes.startResult = startResult.build()
                 bleCallback?.bleResponse(ble = bleRes.build())
             }
