@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(qaul_ui LANGUAGES CXX)
 
-set(BINARY_NAME "qaul_ui")
+set(BINARY_NAME "qaul")
 
 cmake_policy(SET CMP0063 NEW)
 
