@@ -140,31 +140,24 @@ class BleService : LifecycleService() {
             bluetoothAdapter = bluetoothManager!!.adapter
             bluetoothAdapter!!.name = "Qaul"
             bluetoothLeAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
-            if (Build.VERSION.SDK_INT > 21) {
-                if (bluetoothAdapter != null) {
-                    AppLog.e(
-                        TAG,
-                        "Peripheral supported"
-                    )
-                    val firstService = BluetoothGattService(
-                        UUID.fromString(SERVICE_UUID),
-                        BluetoothGattService.SERVICE_TYPE_PRIMARY
-                    )
-                    val firstServiceChar = BluetoothGattCharacteristic(
-                        UUID.fromString(READ_CHAR),
-                        BluetoothGattCharacteristic.PROPERTY_READ,
-                        BluetoothGattCharacteristic.PERMISSION_READ
-                    )
+            if (bluetoothAdapter != null) {
+                AppLog.e(
+                    TAG,
+                    "Peripheral supported"
+                )
+                val firstService = BluetoothGattService(
+                    UUID.fromString(SERVICE_UUID),
+                    BluetoothGattService.SERVICE_TYPE_PRIMARY
+                )
+                val firstServiceChar = BluetoothGattCharacteristic(
+                    UUID.fromString(READ_CHAR),
+                    BluetoothGattCharacteristic.PROPERTY_READ,
+                    BluetoothGattCharacteristic.PERMISSION_READ
+                )
 
-                    firstServiceChar.setValue(qaulId)
-                    firstService.addCharacteristic(firstServiceChar)
-                    startAdvertisement(service = firstService)
-                } else {
-                    AppLog.e(
-                        TAG,
-                        "Peripheral not supported"
-                    )
-                }
+                firstServiceChar.value = qaulId
+                firstService.addCharacteristic(firstServiceChar)
+                startAdvertisement(service = firstService)
             } else {
                 AppLog.e(
                     TAG,
@@ -249,6 +242,9 @@ class BleService : LifecycleService() {
         handler.postDelayed(timeOutRunnable, SCAN_TIME_OUT)
     }
 
+    /**
+     * This Method Will Be Called When Scanning Is Failed
+     */
     private fun onScanfailed() {
         //Todo Send Response to UI of Scan Failure
     }
@@ -289,6 +285,9 @@ class BleService : LifecycleService() {
         //Todo Send response to UI
     }
 
+    /**
+     * This Method Will Set Necessary Data for Staring Advertisement
+     */
     fun stopScan() {
         AppLog.e(TAG, "stopScan()")
         isScanningRunning = false
