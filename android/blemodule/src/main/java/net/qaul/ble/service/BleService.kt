@@ -13,6 +13,7 @@ import android.os.ParcelUuid
 import androidx.lifecycle.LifecycleService
 import net.qaul.ble.AppLog
 import net.qaul.ble.RemoteLog
+import net.qaul.ble.model.BLEDevice
 import net.qaul.ble.model.BLEScanDevice
 import java.util.*
 
@@ -177,24 +178,24 @@ class BleService : LifecycleService() {
                 bluetoothLeAdvertiser?.stopAdvertising(advertiseCallback)
                 gattServer?.clearServices()
                 gattServer?.close()
-                str = str.plus("advertisement stopped")
+                str = str.plus(" Advertisement Stopped")
             }
-
-            stopScan()
-
             bleAdvertiseCallback?.stopAdvertiseRes(
                 status = true,
                 errorText = str
             )
 
-            bleCallback?.stopScanRes(status = true, errorText = "")
-
+            if (bleService!!.isScanRunning()) {
+                stopScan()
+            }
+            bleCallback?.stopScanRes(status = true, errorText = "Scanning Stopped")
             bleService?.stopSelf()
         } else {
             bleAdvertiseCallback?.stopAdvertiseRes(
                 status = false,
                 errorText = "$TAG not started"
             )
+            bleCallback?.stopScanRes(status = false, errorText = "")
             AppLog.e(TAG, "$TAG not started")
         }
     }
@@ -202,8 +203,34 @@ class BleService : LifecycleService() {
     /**
      * This Method Will Be Called When Scanning Is Failed
      */
-    private fun onScanfailed() {
-        //Todo : Send Response to Qaul Module
+    private fun onScanfailed(errorCode: Int) {
+        var unknownError = false
+        isScanningRunning = false
+        var errorText = ""
+        if (errorCode < 1 || errorCode > 4) {
+            unknownError = true
+        }
+        when (errorCode) {
+            1 -> {
+                errorText = "SCAN_FAILED_ALREADY_STARTED"
+            }
+            2 -> {
+                errorText = "SCAN_FAILED_APPLICATION_REGISTRATION_FAILED"
+            }
+            3 -> {
+                errorText = "SCAN_FAILED_INTERNAL_ERROR"
+            }
+            4 -> {
+                errorText = "SCAN_FAILED_FEATURE_UNSUPPORTED"
+            }
+        }
+        val failMsg = "Scanning failed: $errorText"
+        AppLog.e(TAG, failMsg)
+        bleService?.bleCallback?.startScanRes(
+            status = false,
+            errorText = failMsg,
+            unknownError = unknownError
+        )
     }
 
     private fun setFilter(uuidList: ArrayList<ParcelUuid>) {
@@ -302,7 +329,7 @@ class BleService : LifecycleService() {
                     requestId,
                     0,
                     0,
-                    qaulId
+                    getStoredValue(characteristic)
                 )
             }
 
@@ -442,8 +469,23 @@ class BleService : LifecycleService() {
      * This Method Will Set Filter, ScanMode, and Start Scanning
      */
     fun startScan(bleCallback: BleScanCallBack) {
-        this.bleCallback = bleCallback;
-        bleScanner = BluetoothAdapter.getDefaultAdapter().bluetoothLeScanner
+        this.bleCallback = bleCallback
+        if (bluetoothManager != null) {
+            if (bluetoothAdapter != null) {
+                bleScanner = bluetoothManager!!.adapter!!.bluetoothLeScanner
+            } else {
+                bluetoothAdapter = bluetoothManager!!.adapter
+                bluetoothAdapter!!.name = "Qaul"
+                bleScanner = bluetoothAdapter!!.bluetoothLeScanner
+            }
+        } else {
+            bluetoothManager = bleService!!.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
+            bluetoothAdapter = bluetoothManager!!.adapter
+            bluetoothAdapter!!.name = "Qaul"
+            bleScanner = bluetoothAdapter!!.bluetoothLeScanner
+        }
+        uuidList.clear()
+        uuidList.add(ParcelUuid.fromString(SERVICE_UUID))
         setFilter(uuidList)
         scanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult?) {
@@ -455,7 +497,7 @@ class BleService : LifecycleService() {
 
             override fun onScanFailed(errorCode: Int) {
                 super.onScanFailed(errorCode)
-                onScanfailed()
+                onScanfailed(errorCode)
                 stopScan()
             }
         }
@@ -464,7 +506,14 @@ class BleService : LifecycleService() {
             ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
 
         bleScanner.startScan(filters, scanSettings, scanCallback)
-
+        if (!isScanRunning()) {
+            bleService?.bleCallback?.startScanRes(
+                status = true,
+                errorText = "Scanning Started",
+                unknownError = false
+            )
+            isScanningRunning = true
+        }
     }
 
     /**
@@ -481,6 +530,8 @@ class BleService : LifecycleService() {
     interface BleScanCallBack {
         fun startScanRes(status: Boolean, errorText: String, unknownError: Boolean)
         fun stopScanRes(status: Boolean, errorText: String)
+        fun deviceFound(bleDevice: BLEScanDevice)
+        fun deviceOutOfRange(bleDevice: BLEScanDevice)
     }
 
 }
