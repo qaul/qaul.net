@@ -26,6 +26,7 @@ import com.google.android.gms.location.*
 import net.qaul.ble.AppLog
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.callback.BleRequestCallback
+import net.qaul.ble.model.BLEScanDevice
 import net.qaul.ble.service.BleService
 import qaul.sys.ble.BleOuterClass
 
@@ -95,7 +96,7 @@ class BleWrapperClass(context: AppCompatActivity) {
             val bleRes = BleOuterClass.Ble.newBuilder()
             val stopResult = BleOuterClass.BleStopResult.newBuilder()
             stopResult.success = false
-            stopResult.errorMessage = "Advertisement is not Running"
+            stopResult.errorMessage = "Advertisement & Scanning is not Running"
             bleRes.stopResult = stopResult.build()
             bleCallback?.bleResponse(ble = bleRes.build())
         }
@@ -128,7 +129,15 @@ class BleWrapperClass(context: AppCompatActivity) {
                 }
 
                 if (BleService.bleService!!.isScanRunning()) {
-                    // TODO : Send Response Already Started
+                    AppLog.e(TAG, "Scan Already Started")
+                    val bleRes = BleOuterClass.Ble.newBuilder()
+                    val startResult = BleOuterClass.BleStartResult.newBuilder()
+                    startResult.success = true
+                    startResult.noRights = false
+                    startResult.errorMessage = "Scanning already Started"
+                    startResult.unknownError = false
+                    bleRes.startResult = startResult.build()
+                    bleCallback?.bleResponse(ble = bleRes.build())
                 } else {
                     startScanAndCallback()
                 }
@@ -175,7 +184,7 @@ class BleWrapperClass(context: AppCompatActivity) {
     }
 
     /**
-     * This Method Will Assign Callback & Data to Start Advertiser and Receive Callback
+     * This Method Will Assign Callback & Data to Start Scan and Receive Callback
      */
     private fun startScanAndCallback() {
         BleService.bleService?.startScan(
@@ -185,11 +194,31 @@ class BleWrapperClass(context: AppCompatActivity) {
                     errorText: String,
                     unknownError: Boolean
                 ) {
-                    // TODO : // Send Response To Qual Module
+                    val bleRes = BleOuterClass.Ble.newBuilder()
+                    val startResult = BleOuterClass.BleStartResult.newBuilder()
+                    startResult.success = status
+                    startResult.noRights = false
+                    startResult.errorMessage = errorText
+                    startResult.unknownError = unknownError
+                    bleRes.startResult = startResult.build()
+                    bleCallback?.bleResponse(ble = bleRes.build())
                 }
 
                 override fun stopScanRes(status: Boolean, errorText: String) {
-                    // TODO : // Send Response To Qual Module
+                    val bleRes = BleOuterClass.Ble.newBuilder()
+                    val stopResult = BleOuterClass.BleStopResult.newBuilder()
+                    stopResult.success = status
+                    stopResult.errorMessage = errorText
+                    bleRes.stopResult = stopResult.build()
+                    bleCallback?.bleResponse(ble = bleRes.build())
+                }
+
+                override fun deviceFound(bleDevice: BLEScanDevice) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun deviceOutOfRange(bleDevice: BLEScanDevice) {
+                    TODO("Not yet implemented")
                 }
 
             }
@@ -216,35 +245,26 @@ class BleWrapperClass(context: AppCompatActivity) {
                 deviceInfoBuilder.androidVersion = getOsVersion()
                 deviceInfoBuilder.name = getDeviceName()
                 deviceInfoBuilder.bleSupport = isBLeSupported()
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    deviceInfoBuilder.adv251 = adapter.leMaximumAdvertisingDataLength > 250
-                    deviceInfoBuilder.adv1M = adapter.isLeExtendedAdvertisingSupported
-                    deviceInfoBuilder.adv2M = adapter.isLe2MPhySupported
-                    deviceInfoBuilder.advCoded = adapter.isLeCodedPhySupported
-                    deviceInfoBuilder.advExtendedBytes = adapter.leMaximumAdvertisingDataLength
+                deviceInfoBuilder.adv251 = adapter.leMaximumAdvertisingDataLength > 250
+                deviceInfoBuilder.adv1M = adapter.isLeExtendedAdvertisingSupported
+                deviceInfoBuilder.adv2M = adapter.isLe2MPhySupported
+                deviceInfoBuilder.advCoded = adapter.isLeCodedPhySupported
+                deviceInfoBuilder.advExtendedBytes = adapter.leMaximumAdvertisingDataLength
 
-                    //Return true if LE Periodic Advertising feature is supported.
-                    deviceInfoBuilder.lePeriodicAdvSupport =
-                        adapter.isLePeriodicAdvertisingSupported
+                //Return true if LE Periodic Advertising feature is supported.
+                deviceInfoBuilder.lePeriodicAdvSupport =
+                    adapter.isLePeriodicAdvertisingSupported
 
-                    //Return true if the multi advertisement is supported by the chipset
-                    deviceInfoBuilder.leMultipleAdvSupport =
-                        adapter.isMultipleAdvertisementSupported
+                //Return true if the multi advertisement is supported by the chipset
+                deviceInfoBuilder.leMultipleAdvSupport =
+                    adapter.isMultipleAdvertisementSupported
 
-                    //Return true if offloaded filters are supported true if chipset supports on-chip filtering
-                    deviceInfoBuilder.offloadFilterSupport = adapter.isOffloadedFilteringSupported
+                //Return true if offloaded filters are supported true if chipset supports on-chip filtering
+                deviceInfoBuilder.offloadFilterSupport = adapter.isOffloadedFilteringSupported
 
-                    //Return true if offloaded scan batching is supported true if chipset supports on-chip scan batching
-                    deviceInfoBuilder.offloadScanBatchingSupport =
-                        adapter.isOffloadedScanBatchingSupported
-                } else {
-                    deviceInfoBuilder.adv251 = false
-                    deviceInfoBuilder.adv1M = false
-                    deviceInfoBuilder.adv2M = false
-                    deviceInfoBuilder.advCoded = false
-                    deviceInfoBuilder.advExtendedBytes = 20
-                    deviceInfoBuilder.leAudio = false
-                }
+                //Return true if offloaded scan batching is supported true if chipset supports on-chip scan batching
+                deviceInfoBuilder.offloadScanBatchingSupport =
+                    adapter.isOffloadedScanBatchingSupported
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     deviceInfoBuilder.leAudio = isClass("android.bluetooth.BluetoothLeAudio")
                 }
@@ -408,7 +428,7 @@ class BleWrapperClass(context: AppCompatActivity) {
      * Checks if Given Permissions (input as array) are Allowed or Not
      */
     private fun hasPermission(permissions: Array<String>?): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && permissions != null) {
+        if (permissions != null) {
             for (permission in permissions) {
                 if (ActivityCompat.checkSelfPermission(
                         context,
