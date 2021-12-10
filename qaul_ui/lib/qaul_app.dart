@@ -1,10 +1,8 @@
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_ui/widgets/platform_aware_builder.dart';

@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:qaul_ui/screens/about_screen.dart';
 import 'package:qaul_ui/screens/create_account_screen.dart';
 import 'package:qaul_ui/screens/home/home_screen.dart';
