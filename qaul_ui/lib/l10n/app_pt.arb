@@ -27,7 +27,7 @@
   "name": "Nome",
   "connections": "Conexões",
   "ping": "Ping",
-  "hopCount": "Conta de Pulos",
+  "hopCount": "Número de Saltos",
   "via": "Via",
   "language": "Linguagem",
   "username": "Nome de Usuário",

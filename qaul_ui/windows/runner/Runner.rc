@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "net.qaul.qaulapp" "\0"
-            VALUE "FileDescription", "A new Flutter project." "\0"
+            VALUE "FileDescription", "Internet Independent Wireless Mesh Communication App" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "qaul_ui" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2021 net.qaul.qaulapp. All rights reserved." "\0"
-            VALUE "OriginalFilename", "qaul_ui.exe" "\0"
-            VALUE "ProductName", "qaul_ui" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2021 Open Community Project Association https://ocpa.ch" "\0"
+            VALUE "OriginalFilename", "qaul.exe" "\0"
+            VALUE "ProductName", "qaul.net" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

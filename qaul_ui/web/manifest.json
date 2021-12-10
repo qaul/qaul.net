@@ -1,11 +1,11 @@
 {
-    "name": "qaul_ui",
-    "short_name": "qaul_ui",
+    "name": "qaul.net – قول",
+    "short_name": "qaul.net",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Internet Independent Wireless Mesh Communication App",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

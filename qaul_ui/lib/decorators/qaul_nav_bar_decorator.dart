@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -103,15 +102,18 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   }
 
   Widget _buildHorizontalBar(BuildContext context) {
-    return FractionallySizedBox(
-      heightFactor: 0.12,
-      child: _barBackground(
-        context,
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: _tabBarContent(),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 600),
+      child: FractionallySizedBox(
+        heightFactor: 0.12,
+        child: _barBackground(
+          context,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: _tabBarContent(),
+            ),
           ),
         ),
       ),
@@ -128,18 +130,21 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   }
 
   Widget _buildVerticalBar(BuildContext context) {
-    return FractionallySizedBox(
-      widthFactor: 0.1,
-      child: _barBackground(
-        context,
-        Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            SizedBox(height: MediaQuery.of(context).viewPadding.top),
-            ..._tabBarContent(vertical: true),
-          ],
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 1000),
+      child: FractionallySizedBox(
+        widthFactor: 0.1,
+        child: _barBackground(
+          context,
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              SizedBox(height: MediaQuery.of(context).viewPadding.top),
+              ..._tabBarContent(vertical: true),
+            ],
+          ),
+          vertical: true,
         ),
-        vertical: true,
       ),
     );
   }

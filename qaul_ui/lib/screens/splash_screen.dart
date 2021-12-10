@@ -23,7 +23,7 @@ class SplashScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(_sendRequestProvider, (AsyncValue<String> snapshot) {
       final value = snapshot.value;
-      if (value is String) Navigator.pushReplacementNamed(context, value);
+      Navigator.pushReplacementNamed(context, value);
     });
 
     return const Scaffold(body: LoadingIndicator());
