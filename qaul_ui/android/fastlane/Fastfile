@@ -3,15 +3,16 @@ update_fastlane
 default_platform(:android)
 
 platform :android do
-  desc "Submit a new Beta Build to Crashlytics Beta"
-  lane :beta do
-    gradle(task: "clean assembleRelease")
-    crashlytics
+  before_all do
+    setup_circle_ci
   end
 
-  desc "Deploy a new version to the Google Play"
-  lane :deploy do
-    gradle(task: "clean assembleRelease")
-    upload_to_play_store
+  desc "Deploy a new beta build to Google Play"
+  lane :upload_beta_playstore do
+    build_number = number_of_commits()
+    Dir.chdir "../.." do
+      sh("flutter", "build", "appbundle", "--build-number=#{build_number}")
+    end
+    upload_to_play_store(track: 'beta', aab: '../build/app/outputs/bundle/release/app.aab')
   end
 end
