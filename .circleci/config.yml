@@ -1,0 +1,67 @@
+version: 2.1
+
+# ------------------------------------------------
+# Configuration anchors
+# ------------------------------------------------
+default_flutter_wdir: &default_flutter_wdir
+  working_directory: ~/qaul-libp2p/qaul_ui
+checkout_to_flutter_root: &checkout_to_flutter_root
+  steps:
+    - checkout:
+        path: ~/qaul-libp2p/qaul_ui
+
+executors:
+  flutter:
+    docker:
+      - image: cirrusci/flutter:stable
+    <<: *default_flutter_wdir
+
+jobs:
+  # ------------------------------------------------
+  # Integration Jobs
+  # ------------------------------------------------
+  flutter-analyze:
+    executor: flutter
+    steps:
+      - checkout-flutter-project
+      - install-flutter-deps
+      - run: flutter analyze
+  flutter-test:
+    executor: flutter
+    steps:
+      - checkout-flutter-project
+      - install-flutter-deps
+      - run: flutter test
+
+workflows:
+  flutter-ci-cd-workflow:
+    jobs:
+      - flutter-analyze
+
+commands:
+  checkout-flutter-project:
+    description: "Invokes the checkout CircleCI step, declaring `path` as the root of the project (defined by `checkout_to_project_root` anchor)"
+    <<: *checkout_to_flutter_root
+
+  install-flutter-deps:
+    description: "Install Flutter dependencies"
+    parameters:
+      pub-cache:
+        type: string
+        default: "~/.pub-cache"
+    steps:
+      - run: flutter doctor --verbose
+      - restore_cache:
+          name: Restore Flutter pub cache
+          keys:
+            - pub-cache-v1-{{ arch }}-{{ checksum "pubspec.lock" }}
+            - pub-cache-v1-{{ arch }}-
+      - run:
+          name: Install Flutter Dependencies
+          command: flutter pub get
+      - save_cache:
+          name: Save Flutter pub cache
+          key: pub-cache-v1-{{ arch }}-{{ checksum "pubspec.lock" }}
+          paths:
+            - .dart_tool
+            - << parameters.pub-cache >>

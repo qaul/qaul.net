@@ -2,7 +2,6 @@
 library color_generator;
 
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,8 +22,7 @@ Color colorGenerationStrategy(String first) {
 /// If the provided string has no spaces, returns its first two letters - also uppercase.
 String initials(String name) {
   if (name.replaceAll(' ', '').length < 2) {
-    throw ArgumentError.value(
-        name, 'Name', 'not enough charactes to form initials string');
+    throw ArgumentError.value(name, 'Name', 'not enough charactes to form initials string');
   }
   if (name.contains(' ')) {
     final ws = name.split(' ').where((e) => e.isNotEmpty).toList();
@@ -38,9 +36,7 @@ String initials(String name) {
 /// Will throw if [date] is in the future (When [clock] is provided, *future* represents time after it).
 String describeFuzzyTimestamp(DateTime date, {DateTime? clock}) {
   if (date.isAfter(clock ?? DateTime.now())) throw ArgumentError.value(date);
-  if ((clock ?? DateTime.now())
-      .subtract(const Duration(days: 50))
-      .isAfter(date)) {
+  if ((clock ?? DateTime.now()).subtract(const Duration(days: 50)).isAfter(date)) {
     return DateFormat('d MMM y').format(date);
   }
 
@@ -65,8 +61,7 @@ String describeLocale(Locale l) {
 
 bool isValidIPv4(String? s) {
   if (s == null || s.isEmpty) return false;
-  return RegExp(r'^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)(\.(?!$)|$)){4}$')
-      .hasMatch(s);
+  return RegExp(r'^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)(\.(?!$)|$)){4}$').hasMatch(s);
 }
 
 bool isValidPort(String? s) {
@@ -79,8 +74,7 @@ class IPv4TextInputFormatter extends TextInputFormatter {
       FilteringTextInputFormatter.allow(RegExp(r'[0-9\.]'));
 
   @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     if (newValue.text.isEmpty) return newValue;
     if (_userIsErasing(oldValue, newValue)) return newValue;
 

@@ -16,3 +16,5 @@ This folder contains the Flutter UI of the qaul.net app.
     > An example would be `const Locale.fromSubtags(languageCode: 'pt')`
 1. The language support is already complete. You can test changing the current lang in the app's settings.
 1. To update the text displayed in the language dropdown, add an `if` clause with your language code to `describeLocale` (found at `qaul_ui/packages/utils/lib/utils.dart:59`).
+
+## Local configuration steps
