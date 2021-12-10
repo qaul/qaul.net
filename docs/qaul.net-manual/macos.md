@@ -72,6 +72,9 @@ cd rust
 
 # build libqaul and the CLI binaries
 cargo build
+
+# copy dynamic library to flutter
+cp target/debug/liblibqaul.dylib ../qaul_ui/macos/
 ```
 
 ### Build & Run qaul flutter Desktop App
@@ -80,7 +83,7 @@ You can build and run the qaul flutter desktop app from the terminal:
 
 ```sh
 # move into the flutter directory
-cd flutter
+cd qaul_ui
 
 # build and run the MacOS desktop app in debug mode
 flutter run -d macos
@@ -92,7 +95,7 @@ You can build the qaul flutter desktop app from the terminal:
 
 ```sh
 # move into the flutter directory
-cd flutter
+cd qaul_ui
 
 # build and run the MacOS desktop app
 flutter build macos

@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 
-protoc --dart_out=../../../../../flutter/lib/rpc/protobuf_generated \
-    --proto_path=../.. \
-    \
-    rpc/qaul_rpc.proto \
-    connections/connections.proto \
-    node/node.proto \
-    node/user_accounts.proto \
-    router/users.proto \
-    router/router.proto \
-    services/feed/feed.proto \
+# Dart/Flutter code of protobuf messages
+
+# the proto files
+PROTO_FILES=$(tr '\n' ' ' < files.txt)
+
+# create in protobuf collection folder
+PROTO_OUT=../protobuf_generated/dart
+protoc --dart_out=$PROTO_OUT --proto_path=../.. $PROTO_FILES
+
+
+# create in flutter UI directory
+PROTO_OUT=../../../../../qaul_ui/packages/qaul_rpc/lib/src/generated
+protoc --dart_out=$PROTO_OUT --proto_path=../.. $PROTO_FILES

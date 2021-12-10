@@ -44,7 +44,7 @@ You can find them in the folder `rust/libqaul/src/rpc/protobuf_generated`.
 * kotlin
 * rust
 * swift
-* dart (is already copied into the flutter folder `flutter/lib/rpc/protobuf_generated`)
+* dart (is already copied into the flutter folder `qaul_ui/lib/rpc/protobuf_generated`)
 
 ## Build the Files
 
