@@ -1,13 +1,12 @@
-import 'dart:io';
+// import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/qaul_app.dart';
-import 'package:bitsdojo_window/bitsdojo_window.dart';
+// import 'package:bitsdojo_window/bitsdojo_window.dart';
 
 import 'helpers/user_prefs_helper.dart';
 
@@ -22,15 +21,15 @@ void main() async {
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
 
-  if (Platform.isLinux || Platform.isMacOS) {
-    doWhenWindowReady(() {
-      const initialSize = Size(1920, 1080);
-      appWindow.minSize = const Size(800, 600);
-      appWindow.size = initialSize;
-      appWindow.alignment = Alignment.center;
-      appWindow.show();
-    });
-  }
+  // if (Platform.isLinux || Platform.isMacOS) {
+  //   doWhenWindowReady(() {
+  //     const initialSize = Size(1920, 1080);
+  //     appWindow.minSize = const Size(800, 600);
+  //     appWindow.size = initialSize;
+  //     appWindow.alignment = Alignment.center;
+  //     appWindow.show();
+  //   });
+  // }
 }
 
 class _CustomProviderScope extends StatefulWidget {

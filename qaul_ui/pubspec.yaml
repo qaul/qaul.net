@@ -51,9 +51,10 @@ dependencies:
   ## *******
   ## Desktop dependencies
   ## *******
-  bitsdojo_window: ^0.1.1+1
+# TODO: Reinstate once package is fixed. Plugin broke against new Flutter version 2.8
+#  bitsdojo_window: ^0.1.1+1
   # Windows-native Widgets
-  fluent_ui: ^3.4.1
+  fluent_ui: ^3.5.0
   # MacOS-native Widgets
   macos_ui: ^0.10.0+1
 
