@@ -15,22 +15,14 @@ class BLEDevice : BLEScanDevice() {
         private set
     override var bluetoothDevice: BluetoothDevice? = null
     override var isConnectable = true
+    override var lastFoundTime: Long? = null
 
-    override fun toString(): String {
-        return "BlueDevice{" +
-                "scanResult=" + scanResult +
-                ", intervalNanos=" + intervalNanos +
-                '}'
-    }
-
-
-
-    /**
-     * get advertise interval of device in millisecond
-     * @return
-     */
 
     companion object {
-        private const val TAG = "BlueDevice"
+        private const val TAG = "BLEScanDevice"
+    }
+
+    override fun toString(): String {
+        return "BLEDevice(deviceRSSI=$deviceRSSI, scanResult=$scanResult, name=$name, macAddress=$macAddress, intervalNanos=$intervalNanos, bluetoothDevice=$bluetoothDevice, isConnectable=$isConnectable, lastFoundTime=$lastFoundTime)"
     }
 }

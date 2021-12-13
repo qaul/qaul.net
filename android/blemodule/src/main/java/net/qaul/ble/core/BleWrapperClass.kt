@@ -214,11 +214,20 @@ class BleWrapperClass(context: AppCompatActivity) {
                 }
 
                 override fun deviceFound(bleDevice: BLEScanDevice) {
-                    TODO("Not yet implemented")
+                    val bleRes = BleOuterClass.Ble.newBuilder()
+                    val scanResult = BleOuterClass.BleScanResult.newBuilder()
+                    scanResult.mac = bleDevice.macAddress
+                    scanResult.name = bleDevice.name
+                    scanResult.timestamp = bleDevice.lastFoundTime.toString()
+                    scanResult.rssi = bleDevice.deviceRSSI
+                    scanResult.isConnectable = bleDevice.isConnectable
+                    scanResult.isInTheRange = true
+                    bleRes.scanResult = scanResult.build()
+                    bleCallback?.bleResponse(ble = bleRes.build())
                 }
 
                 override fun deviceOutOfRange(bleDevice: BLEScanDevice) {
-                    TODO("Not yet implemented")
+                    AppLog.e(TAG, "${bleDevice.macAddress} out of range")
                 }
 
             }

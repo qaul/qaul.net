@@ -21,7 +21,7 @@ message Ble {
         // send advertsing message
         BleAdvertisingSend advertising_send = 6;
         // advertising message received
-        BleAdvertisingReceived advertising_received = 7;
+        BleScanResult scan_result = 7;
 
         // send a direct message
         BleDirectSend direct_send = 8;
@@ -186,16 +186,20 @@ message BleAdvertisingSend {
     bytes data = 2;
 }
 
-// advertising message received
-message BleAdvertisingReceived {
+// Scan device received
+message BleScanResult {
     // the Bluetooth address of the device sending the advertisement
-    bytes id = 1;
+    string mac = 1;
     // the received signal strength of this device
     int32 rssi = 2;
-    // the mode it was sent in
-    BleMode mode = 3;
+    // time when device found/out of range
+    string timestamp = 3;
     // the data part of the advertising message
-    bytes data = 4;
+    bool is_connectable = 4;
+    // name of the device
+    string name = 5;
+    // is device in the range
+    bool is_in_the_range = 6;
 }
 
 // send a direct message

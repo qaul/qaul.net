@@ -15,4 +15,5 @@ abstract class BLEScanDevice  {
     abstract var name: String?
     abstract var macAddress: String?
     abstract var isConnectable: Boolean
+    abstract var lastFoundTime: Long?
 }
