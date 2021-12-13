@@ -7,13 +7,14 @@ import android.bluetooth.*
 import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.ParcelUuid
 import androidx.lifecycle.LifecycleService
 import net.qaul.ble.AppLog
+import net.qaul.ble.BLEUtils
 import net.qaul.ble.RemoteLog
-import net.qaul.ble.model.BLEDevice
 import net.qaul.ble.model.BLEScanDevice
 import java.util.*
 
@@ -32,14 +33,17 @@ class BleService : LifecycleService() {
 
     private lateinit var scanCallback: ScanCallback
     private lateinit var bleScanner: BluetoothLeScanner
-    private val handler = Handler(Looper.getMainLooper())
+    private val outOfRangeChecker = Handler(Looper.getMainLooper())
     private val devicesList = arrayListOf<BLEScanDevice>()
     private val uuidList = arrayListOf<ParcelUuid>()
     private var filters: ArrayList<ScanFilter> = arrayListOf()
     private var scanSettings: ScanSettings? = null
+
+
     private var mBluetoothGatt: BluetoothGatt? = null
     private val descriptorWriteQueue: Queue<BluetoothGattDescriptor> = LinkedList()
     private var failTimer: Timer? = null
+    private var failedTask: ConnectionFailedTask? = null
     var disconnectedFromDevice = false
     var device: BluetoothDevice? = null
 
@@ -138,7 +142,6 @@ class BleService : LifecycleService() {
         t.start()
 
     }
-
 
     /**
      * This Method Will Start the Service
@@ -259,13 +262,22 @@ class BleService : LifecycleService() {
                 bleDevice.name = device.name
                 bleDevice.deviceRSSI = rssi
                 bleDevice.macAddress = device.address
+                bleDevice.isConnectable = result.isConnectable
+                bleDevice.lastFoundTime = System.currentTimeMillis()
                 devicesList.add(bleDevice)
+                deviceFound(bleDevice)
             } else {
                 selectItem.deviceRSSI = rssi
                 selectItem.scanResult = result
                 selectItem.name = device.name
+                selectItem.isConnectable = result.isConnectable
+                selectItem.lastFoundTime = System.currentTimeMillis()
             }
         }
+    }
+
+    private fun deviceFound(bleDevice: BLEScanDevice) {
+        bleCallback?.deviceFound(bleDevice = bleDevice)
     }
 
     /**
@@ -513,7 +525,269 @@ class BleService : LifecycleService() {
                 unknownError = false
             )
             isScanningRunning = true
+            startOutRangeChecker()
         }
+    }
+
+    private fun startOutRangeChecker() {
+        outOfRangeChecker.postDelayed(outRangeRunnable, 2000)
+    }
+
+
+    private var outRangeRunnable: Runnable = Runnable {
+        if (devicesList.size > 0) {
+            for (bLEDevice in devicesList) {
+                if (bLEDevice.lastFoundTime!! < System.currentTimeMillis() - 5000) {
+                    bleCallback?.deviceOutOfRange(bleDevice = bLEDevice)
+                    devicesList.remove(bLEDevice)
+                } else {
+                    AppLog.e(TAG, "Still in range")
+                }
+            }
+        }
+        startOutRangeChecker()
+    }
+
+    private fun connectDevice(device: BluetoothDevice?) {
+        this.device = device
+        AppLog.e(TAG, "connectDevice : $device")
+        if (device == null) {
+            onConnectionFailed(this.device!!)
+        } else {
+            failTimer = Timer()
+            failedTask = ConnectionFailedTask()
+            failTimer?.schedule(failedTask, 20000)
+            try {
+//            if (device!!.bondState == BluetoothDevice.BOND_BONDED) {
+//                listener!!.pairedDevice(device!!.address)
+//            } else {
+//                pairedDevice(device)
+//            }
+//                mBluetoothGatt =
+//                    device!!.connectGatt(this, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    open fun onConnectionFailed(device: BluetoothDevice) {
+
+    }
+
+    inner class ConnectionFailedTask : TimerTask() {
+        override fun run() {
+            failTimer?.cancel()
+            failedTask?.cancel()
+            onConnectionFailed(device!!)
+        }
+    }
+
+    val mGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
+        override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
+            super.onConnectionStateChange(gatt, status, newState)
+            if (newState == BluetoothProfile.STATE_CONNECTING) {
+            }
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                AppLog.e(TAG, "onConnectionStateChange: STATE_CONNECTED")
+
+                try {
+                    if (failedTask != null && failTimer != null) {
+                        failTimer!!.cancel()
+                        failedTask!!.cancel()
+                    }
+                    if (mBluetoothGatt != null) {
+//                        handler.postDelayed(Runnable {
+//                            if (mBluetoothGatt != null) {
+//                                mBluetoothGatt!!.discoverServices()
+//                            }
+//                        }, 1000)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                AppLog.e(TAG, "onConnectionStateChange: STATE_DISCONNECTED")
+//                connectionState = ConnectionStatus.DEVICE_DISCONNECTED
+                if (mBluetoothGatt != null) {
+                    refreshDeviceCache(mBluetoothGatt!!)
+                    mBluetoothGatt?.close()
+                    mBluetoothGatt = null
+                }
+                if (failedTask != null && failTimer != null) {
+                    failTimer!!.cancel()
+                    failedTask!!.cancel()
+                }
+                if (descriptorWriteQueue != null && descriptorWriteQueue.size > 0) descriptorWriteQueue.clear()
+                if (!disconnectedFromDevice) onDisconnected(device!!) else disconnectedFromDevice =
+                    false
+            }
+        }
+
+        override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+            super.onServicesDiscovered(gatt, status)
+            discoverServices(gatt.services)
+//            onServiceDiscovered(this, device!!.address)
+        }
+
+        override fun onCharacteristicRead(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            status: Int
+        ) {
+            super.onCharacteristicRead(gatt, characteristic, status)
+            AppLog.d(
+                TAG,
+                "onCharacteristicRead : " + characteristic.uuid.toString() + " , data : " + BLEUtils.byteToHex(
+                    characteristic.value
+                )
+            )
+            onCharRead(gatt, characteristic)
+        }
+
+        override fun onCharacteristicWrite(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            status: Int
+        ) {
+            super.onCharacteristicWrite(gatt, characteristic, status)
+            AppLog.d(
+                TAG,
+                "onCharacteristicWrite : " + characteristic.uuid.toString() + " , data : " + BLEUtils.byteToHex(
+                    characteristic.value
+                )
+            )
+        }
+
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic
+        ) {
+            super.onCharacteristicChanged(gatt, characteristic)
+            onNotify(gatt, characteristic)
+        }
+
+
+        override fun onDescriptorRead(
+            gatt: BluetoothGatt,
+            descriptor: BluetoothGattDescriptor,
+            status: Int
+        ) {
+            super.onDescriptorRead(gatt, descriptor, status)
+        }
+
+        override fun onDescriptorWrite(
+            gatt: BluetoothGatt,
+            descriptor: BluetoothGattDescriptor,
+            status: Int
+        ) {
+            super.onDescriptorWrite(gatt, descriptor, status)
+            AppLog.e(TAG, "onDescriptorWrite")
+            RemoteLog[this@BleService]!!.addDebugLog("$TAG:onDescriptorWrite")
+            if (descriptorWriteQueue != null && descriptorWriteQueue.size > 0) {
+                descriptorWriteQueue.remove()
+                if (descriptorWriteQueue.size > 0) {
+                    AppLog.e(TAG, "onDescriptorWrite true")
+                    writeGattDescriptor(descriptorWriteQueue.element())
+                } else {
+                    AppLog.e(TAG, "onDescriptorWrite else")
+                    onDescriptorWrite(device!!)
+                }
+            }
+        }
+    }
+
+
+    open fun onCharRead(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
+
+        RemoteLog[this@BleService]!!.addDebugLog("$TAG: onCharRead" + characteristic.uuid)
+        RemoteLog[this@BleService]!!.addDebugLog("$TAG: onCharRead" + characteristic.value)
+    }
+
+
+    open fun onNotify(gatt: BluetoothGatt,
+                      characteristic: BluetoothGattCharacteristic) {
+
+        RemoteLog[this@BleService]!!.addDebugLog("$TAG: onNotify" + characteristic.uuid)
+        RemoteLog[this@BleService]!!.addDebugLog("$TAG: onNotify" + characteristic.value)
+    }
+
+    open fun onDisconnected(device: BluetoothDevice) {
+
+    }
+
+    open fun onConnected(device: BluetoothDevice) {
+
+    }
+
+    // Discover the services of Connected BLE device.
+    private fun discoverServices(services: List<BluetoothGattService>?) {
+        val serviceList = services as ArrayList<BluetoothGattService>?
+        if (services != null && serviceList!!.size > 0) {
+            for (gattService in serviceList) {
+                AppLog.d(TAG, "service : " + gattService.uuid.toString())
+                val characteristics =
+                    gattService.characteristics as ArrayList<BluetoothGattCharacteristic>
+                if (characteristics != null && characteristics.size > 0) {
+                    for (i in characteristics.indices) {
+                        val characteristic = characteristics[i]
+                        if (characteristic != null && (isCharacteristicNotifiable(characteristic) || isCharacteristicIndicate(
+                                characteristic
+                            ))
+                        ) {
+                            AppLog.d(
+                                TAG,
+                                "characteristic : " + characteristic.uuid.toString()
+                            )
+                            mBluetoothGatt!!.setCharacteristicNotification(characteristic, true)
+                            val gattDescriptor =
+                                characteristic.descriptors as ArrayList<BluetoothGattDescriptor>
+                            descriptorWriteQueue.addAll(gattDescriptor)
+                        }
+                    }
+                }
+            }
+        }
+        AppLog.e(
+            TAG,
+            "discoverServices descriptorWriteQueue size = " + descriptorWriteQueue.size
+        )
+        if (descriptorWriteQueue.size > 0) {
+            Handler(Looper.myLooper()!!).postDelayed(
+                Runnable { writeGattDescriptor(descriptorWriteQueue.element()) },
+                1000
+            )
+        } else {
+            onDescriptorWrite(device)
+        }
+    }
+
+    fun onDescriptorWrite(device: BluetoothDevice?) {
+        onConnected(device!!)
+    }
+
+    private fun writeGattDescriptor(d: BluetoothGattDescriptor) {
+        AppLog.e(TAG, "writeGattDescriptor : " + d.characteristic.uuid.toString())
+        if (isCharacteristicNotifiable(d.characteristic)) {
+            AppLog.e(TAG, "writeGattDescriptor : ENABLE_NOTIFICATION_VALUE")
+            d.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+        } else {
+            AppLog.e(TAG, "writeGattDescriptor : ENABLE_INDICATION_VALUE")
+            d.value = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
+        }
+        AppLog.e(
+            TAG,
+            "mBluetoothGatt.writeDescriptor : " + mBluetoothGatt!!.writeDescriptor(d)
+        )
+    }
+
+    // Check characteristic notifiable or not
+    private fun isCharacteristicNotifiable(pChar: BluetoothGattCharacteristic): Boolean {
+        return pChar.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0
+    }
+
+    private fun isCharacteristicIndicate(pChar: BluetoothGattCharacteristic): Boolean {
+        return pChar.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0
     }
 
     /**

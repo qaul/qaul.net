@@ -198,6 +198,18 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+                BleOuterClass.Ble.MessageCase.SCAN_RESULT -> {
+                    val scanResult: BleOuterClass.BleScanResult = ble.scanResult
+                    AppLog.e("scanResult: ", Gson().toJson(scanResult))
+                    Toast.makeText(
+                        this,
+                        "Device found: ${scanResult.name} : ${scanResult.mac}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                else -> {
+
+                }
             }
         }
     }
