@@ -23,6 +23,7 @@ import androidx.lifecycle.LifecycleService
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.PendingResult
 import com.google.android.gms.location.*
+import com.google.protobuf.ByteString
 import net.qaul.ble.AppLog
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.callback.BleRequestCallback
@@ -222,6 +223,7 @@ class BleWrapperClass(context: AppCompatActivity) {
                     scanResult.rssi = bleDevice.deviceRSSI
                     scanResult.isConnectable = bleDevice.isConnectable
                     scanResult.isInTheRange = true
+                    scanResult.qaulId = ByteString.copyFrom(bleDevice.qaulId)
                     bleRes.scanResult = scanResult.build()
                     bleCallback?.bleResponse(ble = bleRes.build())
                 }

@@ -200,6 +200,8 @@ message BleScanResult {
     string name = 5;
     // is device in the range
     bool is_in_the_range = 6;
+    // qaul_id
+    bytes qaul_id = 7;
 }
 
 // send a direct message

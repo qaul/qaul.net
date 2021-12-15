@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 package net.qaul.ble.model
 
 import android.bluetooth.BluetoothDevice
@@ -16,4 +19,5 @@ abstract class BLEScanDevice  {
     abstract var macAddress: String?
     abstract var isConnectable: Boolean
     abstract var lastFoundTime: Long?
+    abstract var qaulId: ByteArray?
 }
