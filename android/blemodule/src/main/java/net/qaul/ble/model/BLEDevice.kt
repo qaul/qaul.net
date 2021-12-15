@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 package net.qaul.ble.model
 
 import android.bluetooth.BluetoothDevice
@@ -16,13 +19,14 @@ class BLEDevice : BLEScanDevice() {
     override var bluetoothDevice: BluetoothDevice? = null
     override var isConnectable = true
     override var lastFoundTime: Long? = null
-
+    override var qaulId: ByteArray? = null
 
     companion object {
         private const val TAG = "BLEScanDevice"
     }
 
     override fun toString(): String {
-        return "BLEDevice(deviceRSSI=$deviceRSSI, scanResult=$scanResult, name=$name, macAddress=$macAddress, intervalNanos=$intervalNanos, bluetoothDevice=$bluetoothDevice, isConnectable=$isConnectable, lastFoundTime=$lastFoundTime)"
+        return "BLEScanDevice(deviceRSSI=$deviceRSSI, scanResult=$scanResult, name=$name, macAddress=$macAddress, intervalNanos=$intervalNanos, bluetoothDevice=$bluetoothDevice, isConnectable=$isConnectable, lastFoundTime=$lastFoundTime, qaulId=${qaulId?.contentToString()})"
     }
+
 }

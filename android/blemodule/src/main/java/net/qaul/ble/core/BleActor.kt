@@ -1,14 +1,11 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 package net.qaul.ble.core
 
 import android.bluetooth.*
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
-import net.qaul.ble.core.BaseBleActor.BleConnectionListener
-import net.qaul.ble.core.BaseBleActor
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import net.qaul.ble.AppLog
 import net.qaul.ble.BLEUtils
 import net.qaul.ble.model.BLEScanDevice
@@ -16,15 +13,15 @@ import net.qaul.ble.service.BleService
 import java.lang.Exception
 import java.util.*
 
-class BaseBleActor(private val mContext: Context, var listener: BleConnectionListener?) {
+class BleActor(private val mContext: Context, var listener: BleConnectionListener?) {
     private var mBluetoothGatt: BluetoothGatt? = null
-    private val descriptorWriteQueue: Queue<BluetoothGattDescriptor>? = LinkedList()
+    private val descriptorWriteQueue: Queue<BluetoothGattDescriptor> = LinkedList()
     private var failTimer: Timer? = null
     private var failedTask: ConnectionFailedTask? = null
     var disconnectedFromDevice = false
     var bluetoothDevice: BluetoothDevice? = null
     var bleDevice: BLEScanDevice? = null
-    fun disConnectedDevice() {
+    private fun disConnectedDevice() {
         if (mBluetoothGatt != null) {
 //            disconnectedFromDevice = true;
             refreshDeviceCache(mBluetoothGatt!!)
@@ -40,14 +37,14 @@ class BaseBleActor(private val mContext: Context, var listener: BleConnectionLis
         connectDevice()
     }
 
-    fun connectDevice(): Boolean {
+    private fun connectDevice(): Boolean {
         AppLog.e(TAG, "connectDevice : $bluetoothDevice")
         if (bluetoothDevice == null) {
-            listener!!.onConnectionFailed("")
+            listener!!.onConnectionFailed(bleScanDevice = bleDevice!!)
         }
         failTimer = Timer()
         failedTask = ConnectionFailedTask()
-        failTimer!!.schedule(failedTask, 10000)
+        failTimer!!.schedule(failedTask, 20000)
         try {
             mBluetoothGatt =
                 bluetoothDevice!!.connectGatt(
@@ -63,7 +60,7 @@ class BaseBleActor(private val mContext: Context, var listener: BleConnectionLis
     }
 
 
-    val mGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
+    private val mGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
             if (newState == BluetoothProfile.STATE_CONNECTED) {
@@ -102,9 +99,6 @@ class BaseBleActor(private val mContext: Context, var listener: BleConnectionLis
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             super.onServicesDiscovered(gatt, status)
             discoverServices(gatt.services)
-            if (listener != null) {
-                listener!!.onServiceDiscovered(bluetoothDevice!!.address)
-            }
         }
 
         override fun onCharacteristicRead(
@@ -120,7 +114,7 @@ class BaseBleActor(private val mContext: Context, var listener: BleConnectionLis
                 )
             )
             if (listener != null) {
-                listener!!.onCharacteristicRead(bluetoothDevice!!.address, gatt, characteristic)
+                listener!!.onCharacteristicRead(bleDevice!!, gatt, characteristic)
             }
         }
 
@@ -175,7 +169,7 @@ class BaseBleActor(private val mContext: Context, var listener: BleConnectionLis
                 descriptorWriteQueue.remove()
                 if (descriptorWriteQueue.size > 0) writeGattDescriptor(descriptorWriteQueue.element()) else {
                     if (listener != null) {
-                        listener!!.onDescriptorWrite(bleDevice!!)
+                        listener!!.onDescriptorWrite(bleDevice!!, this@BleActor)
                     }
                 }
             }
@@ -189,10 +183,10 @@ class BaseBleActor(private val mContext: Context, var listener: BleConnectionLis
             var isQaulDevice = false
             for (gattService in serviceList) {
                 AppLog.e("SERVICE_UUID", gattService.uuid.toString())
-                if (gattService.uuid.toString().lowercase() == BleService.SERVICE_UUID.lowercase()) {
+                if (gattService.uuid.toString().lowercase().trim() == BleService.SERVICE_UUID.lowercase().trim()) {
+                    AppLog.e(TAG, "service : " + gattService.uuid.toString() + " " + bleDevice?.macAddress)
                     isQaulDevice = true
                     listener?.addToIgnoreList(this.bleDevice!!)
-                    AppLog.d(TAG, "service : " + gattService.uuid.toString())
                     val characteristics =
                         gattService.characteristics as ArrayList<BluetoothGattCharacteristic>
                     if (characteristics != null && characteristics.size > 0) {
@@ -217,12 +211,15 @@ class BaseBleActor(private val mContext: Context, var listener: BleConnectionLis
                 disConnectedDevice()
                 return
             }
+            if (listener != null) {
+                listener!!.onServiceDiscovered(bluetoothDevice!!.address)
+            }
         }
         if (descriptorWriteQueue!!.size > 0) {
             writeGattDescriptor(descriptorWriteQueue.element())
         } else {
             if (listener != null) {
-                listener!!.onDescriptorWrite(this.bleDevice!!)
+                listener!!.onDescriptorWrite(this.bleDevice!!, this)
             }
         }
     }
@@ -245,25 +242,13 @@ class BaseBleActor(private val mContext: Context, var listener: BleConnectionLis
         return pChar.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0
     }
 
-    private fun broadcastUpdate(intentAction: String) {
-        val i = Intent()
-        i.action = intentAction
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(i)
-    }
-
-    private fun broadcastUpdate(intentAction: String, key: String, data: String) {
-        val i = Intent()
-        i.action = intentAction
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(i)
-    }
-
     //Device connection timeout call back
     internal inner class ConnectionFailedTask : TimerTask() {
         override fun run() {
             failTimer!!.cancel()
             failedTask!!.cancel()
             if (listener != null) {
-                listener!!.onConnectionFailed(bluetoothDevice!!.address)
+                listener!!.onConnectionFailed(bleDevice!!)
             }
         }
     }
@@ -335,10 +320,10 @@ class BaseBleActor(private val mContext: Context, var listener: BleConnectionLis
         fun onConnected(macAddress: String?)
         fun onDisconnected(macAddress: String?)
         fun onServiceDiscovered(macAddress: String?)
-        fun onDescriptorWrite(bleScanDevice: BLEScanDevice)
-        fun onConnectionFailed(macAddress: String?)
+        fun onDescriptorWrite(bleScanDevice: BLEScanDevice, bleActor: BleActor)
+        fun onConnectionFailed(bleScanDevice: BLEScanDevice)
         fun onCharacteristicRead(
-            macAddress: String?,
+            bleScanDevice: BLEScanDevice,
             gatt: BluetoothGatt?,
             characteristic: BluetoothGattCharacteristic?
         )
@@ -356,6 +341,6 @@ class BaseBleActor(private val mContext: Context, var listener: BleConnectionLis
     }
 
     companion object {
-        private val TAG = BaseBleActor::class.java.simpleName
+        private val TAG = BleActor::class.java.simpleName
     }
 }

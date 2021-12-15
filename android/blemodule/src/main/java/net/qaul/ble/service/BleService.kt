@@ -13,7 +13,7 @@ import android.os.ParcelUuid
 import androidx.lifecycle.LifecycleService
 import net.qaul.ble.AppLog
 import net.qaul.ble.RemoteLog
-import net.qaul.ble.core.BaseBleActor
+import net.qaul.ble.core.BleActor
 import net.qaul.ble.model.BLEScanDevice
 import java.util.*
 
@@ -31,9 +31,9 @@ class BleService : LifecycleService() {
     private lateinit var scanCallback: ScanCallback
     private lateinit var bleScanner: BluetoothLeScanner
     private val outOfRangeChecker = Handler(Looper.getMainLooper())
-    private val devicesList = arrayListOf<BLEScanDevice>()
-    private val ignoreList = arrayListOf<BLEScanDevice>()
-    private val blackList = arrayListOf<BLEScanDevice>()
+    private val devicesList = Collections.synchronizedCollection(arrayListOf<BLEScanDevice>())
+    private val ignoreList = Collections.synchronizedCollection(arrayListOf<BLEScanDevice>())
+    private val blackList = Collections.synchronizedCollection(arrayListOf<BLEScanDevice>())
     private val uuidList = arrayListOf<ParcelUuid>()
     private var filters: ArrayList<ScanFilter> = arrayListOf()
     private var scanSettings: ScanSettings? = null
@@ -242,11 +242,7 @@ class BleService : LifecycleService() {
 
     private fun parseBLEFrame(device: BluetoothDevice, rssi: Int, result: ScanResult) {
         AppLog.d(TAG, "device : " + device.address)
-
-        if (result.scanRecord?.serviceUuids != null && result.scanRecord?.serviceUuids!!.contains(
-                ParcelUuid.fromString(SERVICE_UUID)
-            )
-        ) {
+        if (blackList.find { it.macAddress == device.address } == null) {
             val selectItem = devicesList.find { it.macAddress == device.address }
             if (selectItem == null) {
                 AppLog.d(TAG, "device : " + device.address)
@@ -261,18 +257,24 @@ class BleService : LifecycleService() {
                 bleDevice.isConnectable = result.isConnectable
                 bleDevice.lastFoundTime = System.currentTimeMillis()
                 devicesList.add(bleDevice)
-                connectDevice(bleDevice)
+                if (result.isConnectable) {
+                    connectDevice(bleDevice)
+                }
             } else {
-                selectItem.deviceRSSI = rssi
-                selectItem.scanResult = result
-                selectItem.name = device.name
-                selectItem.isConnectable = result.isConnectable
-                selectItem.lastFoundTime = System.currentTimeMillis()
+                val selectItemIgnore = ignoreList.find { it.macAddress == device.address }
+                if (selectItemIgnore != null) {
+                    selectItemIgnore.deviceRSSI = rssi
+                    selectItemIgnore.scanResult = result
+                    selectItemIgnore.name = device.name
+                    selectItemIgnore.isConnectable = result.isConnectable
+                    selectItemIgnore.lastFoundTime = System.currentTimeMillis()
+                }
             }
         }
     }
 
-    private fun deviceFound(bleDevice: BLEScanDevice) {
+    private fun deviceFound(bleDevice: BLEScanDevice, byteArray: ByteArray) {
+        bleDevice.qaulId = byteArray
         bleCallback?.deviceFound(bleDevice = bleDevice)
     }
 
@@ -282,7 +284,11 @@ class BleService : LifecycleService() {
     fun stopScan() {
         AppLog.e(TAG, "stopScan()")
         isScanningRunning = false
-        bleScanner.stopScan(scanCallback)
+        try {
+            bleScanner.stopScan(scanCallback)
+        } catch (ex: UninitializedPropertyAccessException) {
+            ex.printStackTrace()
+        }
         RemoteLog[this]!!.addDebugLog("$TAG:Scanning Stopped")
     }
 
@@ -532,14 +538,14 @@ class BleService : LifecycleService() {
 
 
     private var outRangeRunnable: Runnable = Runnable {
-        if (ignoreList.size > 0) {
+        if (ignoreList.isNotEmpty()) {
             for (bLEDevice in ignoreList) {
                 if (bLEDevice.lastFoundTime!! < System.currentTimeMillis() - 5000) {
                     bleCallback?.deviceOutOfRange(bleDevice = bLEDevice)
                     devicesList.remove(bLEDevice)
                     ignoreList.remove(bLEDevice)
                 } else {
-                    AppLog.e(TAG, "Still in range")
+                    AppLog.e(TAG, "${bLEDevice.macAddress} Still in range")
                 }
             }
         }
@@ -547,7 +553,7 @@ class BleService : LifecycleService() {
     }
 
     private fun connectDevice(device: BLEScanDevice) {
-        val baseBleActor = BaseBleActor(this, object : BaseBleActor.BleConnectionListener {
+        val baseBleActor = BleActor(this, object : BleActor.BleConnectionListener {
             override fun onConnected(macAddress: String?) {
                 AppLog.e(TAG, " onConnected : $macAddress")
             }
@@ -560,21 +566,24 @@ class BleService : LifecycleService() {
                 AppLog.e(TAG, " onServiceDiscovered : $macAddress")
             }
 
-            override fun onDescriptorWrite(bleScanDevice: BLEScanDevice) {
+            override fun onDescriptorWrite(bleScanDevice: BLEScanDevice, bleActor: BleActor) {
                 AppLog.e(TAG, " onDescriptorWrite : ${bleScanDevice.macAddress}")
-                deviceFound(bleScanDevice)
+                bleActor.readServiceData(SERVICE_UUID, READ_CHAR)
             }
 
-            override fun onConnectionFailed(macAddress: String?) {
-                AppLog.e(TAG, " onConnectionFailed : $macAddress")
+            override fun onConnectionFailed(bleScanDevice: BLEScanDevice) {
+                AppLog.e(TAG, " onConnectionFailed : ${bleScanDevice.macAddress}")
+                devicesList.remove(bleScanDevice)
             }
 
             override fun onCharacteristicRead(
-                macAddress: String?,
+                bleScanDevice: BLEScanDevice,
                 gatt: BluetoothGatt?,
                 characteristic: BluetoothGattCharacteristic?
             ) {
-
+                if (characteristic!!.uuid.toString().lowercase() == READ_CHAR.lowercase()) {
+                    deviceFound(bleScanDevice, characteristic.value)
+                }
             }
 
             override fun onCharacteristicWrite(
