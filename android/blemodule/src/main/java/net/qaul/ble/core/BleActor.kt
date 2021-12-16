@@ -21,6 +21,10 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     var disconnectedFromDevice = false
     var bluetoothDevice: BluetoothDevice? = null
     var bleDevice: BLEScanDevice? = null
+
+    /**
+     * Disconnect current device.
+     */
     private fun disConnectedDevice() {
         if (mBluetoothGatt != null) {
 //            disconnectedFromDevice = true;
@@ -29,14 +33,18 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         }
     }
 
-
-    // Use to make connection to device
+    /**
+     * Set device in Actor
+     */
     fun setDevice(device: BLEScanDevice?) {
         bleDevice = device
         bluetoothDevice = device!!.bluetoothDevice
         connectDevice()
     }
 
+    /**
+     * Use to make connection to device
+     */
     private fun connectDevice(): Boolean {
         AppLog.e(TAG, "connectDevice : $bluetoothDevice")
         if (bluetoothDevice == null) {
@@ -59,11 +67,13 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         return true
     }
 
-
+    /**
+     * Object of a bluetoothGattCallback
+     */
     private val mGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
+            if (newState == BluetoothProfile.STATE_CONNECTING) {
             }
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 AppLog.e(TAG, "onConnectionStateChange: STATE_CONNECTED")
@@ -176,7 +186,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         }
     }
 
-    // Discover the services of Connected BLE device.
+    /**
+     * Discover the services of Connected BLE device.
+     */
     private fun discoverServices(services: List<BluetoothGattService>?) {
         val serviceList = services as ArrayList<BluetoothGattService>?
         if (services != null && serviceList!!.size > 0) {
@@ -200,7 +212,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                                 mBluetoothGatt!!.setCharacteristicNotification(characteristic, true)
                                 val gattDescriptor =
                                     characteristic.descriptors as ArrayList<BluetoothGattDescriptor>
-                                descriptorWriteQueue!!.addAll(gattDescriptor)
+                                descriptorWriteQueue.addAll(gattDescriptor)
                             }
                         }
                     }
@@ -215,7 +227,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 listener!!.onServiceDiscovered(bluetoothDevice!!.address)
             }
         }
-        if (descriptorWriteQueue!!.size > 0) {
+        if (descriptorWriteQueue.size > 0) {
             writeGattDescriptor(descriptorWriteQueue.element())
         } else {
             if (listener != null) {
@@ -224,6 +236,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         }
     }
 
+    /**
+     * This method is used to write descriptor of gatt
+     */
     private fun writeGattDescriptor(d: BluetoothGattDescriptor) {
         if (isCharacteristicNotifiable(d.characteristic)) {
             d.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
@@ -233,16 +248,24 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         mBluetoothGatt!!.writeDescriptor(d)
     }
 
-    // Check characteristic notifiable or not
+    /**
+     * Check characteristic notifiable or not
+     */
     private fun isCharacteristicNotifiable(pChar: BluetoothGattCharacteristic): Boolean {
         return pChar.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0
     }
 
+    /**
+     * Check characteristic can indicate or not
+     */
     private fun isCharacteristicIndicate(pChar: BluetoothGattCharacteristic): Boolean {
         return pChar.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0
     }
 
-    //Device connection timeout call back
+
+    /**
+     * Device connection timeout call back
+     */
     internal inner class ConnectionFailedTask : TimerTask() {
         override fun run() {
             failTimer!!.cancel()
@@ -253,7 +276,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         }
     }
 
-    //Refresh device bluetooth gatt cache
+    /**
+     * Refresh device bluetooth gatt cache
+     */
     private fun refreshDeviceCache(gatt: BluetoothGatt) {
         try {
             val localMethod =
@@ -263,7 +288,10 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         }
     }
 
-    // User read data from sensor
+
+    /**
+     * User read data from device
+     */
     fun readServiceData(serUUID: String, charUUID: String) {
         AppLog.d(TAG, "readServiceData : serUUID : $serUUID, charUUID:$charUUID")
         if (mBluetoothGatt != null) {
@@ -277,7 +305,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         }
     }
 
-    // User read data from sensor
+    /**
+     * User write data to device
+     */
     fun writeServiceData(serUUID: String, charUUID: String, data: ByteArray?): Boolean {
         if (data != null) {
             AppLog.d(
