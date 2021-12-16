@@ -32,7 +32,7 @@ import net.qaul.ble.service.BleService
 import qaul.sys.ble.BleOuterClass
 
 class BleWrapperClass(context: AppCompatActivity) {
-    private val TAG: String = BleWrapperClass.javaClass.simpleName
+    private val TAG: String = BleWrapperClass::class.java.simpleName
     private val context = context
     private var errorText = ""
     private var noRights = false
@@ -230,6 +230,17 @@ class BleWrapperClass(context: AppCompatActivity) {
 
                 override fun deviceOutOfRange(bleDevice: BLEScanDevice) {
                     AppLog.e(TAG, "${bleDevice.macAddress} out of range")
+                    val bleRes = BleOuterClass.Ble.newBuilder()
+                    val scanResult = BleOuterClass.BleScanResult.newBuilder()
+                    scanResult.mac = bleDevice.macAddress
+                    scanResult.name = bleDevice.name
+                    scanResult.timestamp = bleDevice.lastFoundTime.toString()
+                    scanResult.rssi = bleDevice.deviceRSSI
+                    scanResult.isConnectable = bleDevice.isConnectable
+                    scanResult.isInTheRange = false
+                    scanResult.qaulId = ByteString.copyFrom(bleDevice.qaulId)
+                    bleRes.scanResult = scanResult.build()
+                    bleCallback?.bleResponse(ble = bleRes.build())
                 }
 
             }

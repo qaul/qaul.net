@@ -31,9 +31,9 @@ class BleService : LifecycleService() {
     private lateinit var scanCallback: ScanCallback
     private lateinit var bleScanner: BluetoothLeScanner
     private val outOfRangeChecker = Handler(Looper.getMainLooper())
-    private val devicesList = Collections.synchronizedCollection(arrayListOf<BLEScanDevice>())
-    private val ignoreList = Collections.synchronizedCollection(arrayListOf<BLEScanDevice>())
-    private val blackList = Collections.synchronizedCollection(arrayListOf<BLEScanDevice>())
+    private val devicesList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
+    private val ignoreList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
+    private val blackList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
     private val uuidList = arrayListOf<ParcelUuid>()
     private var filters: ArrayList<ScanFilter> = arrayListOf()
     private var scanSettings: ScanSettings? = null
@@ -582,6 +582,11 @@ class BleService : LifecycleService() {
                 characteristic: BluetoothGattCharacteristic?
             ) {
                 if (characteristic!!.uuid.toString().lowercase() == READ_CHAR.lowercase()) {
+                    val existingDevice = ignoreList.find { it.qaulId.contentEquals(characteristic.value) }
+                    if (existingDevice != null) {
+                        existingDevice.macAddress = bleScanDevice.macAddress
+                        existingDevice.lastFoundTime = System.currentTimeMillis()
+                    }
                     deviceFound(bleScanDevice, characteristic.value)
                 }
             }
