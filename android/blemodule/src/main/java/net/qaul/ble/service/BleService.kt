@@ -177,17 +177,11 @@ class BleService : LifecycleService() {
                 bluetoothLeAdvertiser?.stopAdvertising(advertiseCallback)
                 gattServer?.clearServices()
                 gattServer?.close()
-                str = str.plus(" Advertisement Stopped")
             }
-            bleAdvertiseCallback?.stopAdvertiseRes(
-                status = true,
-                errorText = str
-            )
-
             if (bleService!!.isScanRunning()) {
                 stopScan()
             }
-            bleCallback?.stopScanRes(status = true, errorText = "Scanning Stopped")
+
             bleService?.stopSelf()
         } else {
             bleAdvertiseCallback?.stopAdvertiseRes(
@@ -232,6 +226,9 @@ class BleService : LifecycleService() {
         )
     }
 
+    /**
+     * This Method Will Set Filter of UUID for Scanning
+     */
     private fun setFilter(uuidList: ArrayList<ParcelUuid>) {
         for (uuid in uuidList) {
             filters.add(
@@ -240,6 +237,9 @@ class BleService : LifecycleService() {
         }
     }
 
+    /**
+     * This Method Will Parse Result of ScanResult according to Device
+     */
     private fun parseBLEFrame(device: BluetoothDevice, rssi: Int, result: ScanResult) {
         AppLog.d(TAG, "device : " + device.address)
         if (blackList.find { it.macAddress == device.address } == null) {
@@ -273,6 +273,9 @@ class BleService : LifecycleService() {
         }
     }
 
+    /**
+     * This Method Will Be called When any new Device will found
+     */
     private fun deviceFound(bleDevice: BLEScanDevice, byteArray: ByteArray) {
         bleDevice.qaulId = byteArray
         bleCallback?.deviceFound(bleDevice = bleDevice)
@@ -292,14 +295,6 @@ class BleService : LifecycleService() {
         RemoteLog[this]!!.addDebugLog("$TAG:Scanning Stopped")
     }
 
-
-    private fun refreshDeviceCache(gatt: BluetoothGatt?) {
-        try {
-            val localMethod = gatt?.javaClass?.getMethod("refresh", *arrayOfNulls(0))
-            localMethod?.invoke(gatt, *arrayOfNulls(0))
-        } catch (localException: Exception) {
-        }
-    }
 
     /**
      * This Method Will Start the GattServer.
@@ -470,12 +465,20 @@ class BleService : LifecycleService() {
             }
             bleService?.outOfRangeChecker?.removeCallbacks(outRangeRunnable)
             stopScan()
+            bleAdvertiseCallback?.stopAdvertiseRes(
+                status = true,
+                errorText = "Advertisement Stopped"
+            )
+            bleCallback?.stopScanRes(status = true, errorText = "Scanning Stopped")
             bleService?.stopSelf()
         }
         bleService = null
         super.onDestroy()
     }
 
+    /**
+     * This Method Will Return True if Scan is Running
+     */
     fun isScanRunning(): Boolean {
         return isScanningRunning
     }
@@ -532,11 +535,16 @@ class BleService : LifecycleService() {
         }
     }
 
+    /**
+     * This Method Will Start Handler for Checking Device Out Of Range
+     */
     private fun startOutRangeChecker() {
         outOfRangeChecker.postDelayed(outRangeRunnable, 2000)
     }
 
-
+    /**
+     * Object for Out range Checker
+     */
     private var outRangeRunnable: Runnable = Runnable {
         if (ignoreList.isNotEmpty()) {
             for (bLEDevice in ignoreList) {
@@ -552,6 +560,9 @@ class BleService : LifecycleService() {
         startOutRangeChecker()
     }
 
+    /**
+     * This Method Will be Used to set Callback for Device Connection and Connect to Device
+     */
     private fun connectDevice(device: BLEScanDevice) {
         val baseBleActor = BleActor(this, object : BleActor.BleConnectionListener {
             override fun onConnected(macAddress: String?) {
