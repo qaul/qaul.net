@@ -346,6 +346,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         return false
     }
 
+    /**
+     * Interface To Send Callback of Connection Status & Read Data Result to service
+     */
     interface BleConnectionListener {
         fun onConnected(macAddress: String?)
         fun onDisconnected(macAddress: String?)
