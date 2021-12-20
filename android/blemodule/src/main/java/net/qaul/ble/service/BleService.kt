@@ -44,8 +44,11 @@ class BleService : LifecycleService() {
         var bleService: BleService? = null
         var isAdvertisementRunning = false
         var isScanningRunning = false
-        public val SERVICE_UUID = "99E91399-80ED-4943-9BCB-39C532A76023"
-        public val READ_CHAR = "99E91401-80ED-4943-9BCB-39C532A76023"
+        val SERVICE_UUID = "99E91399-80ED-4943-9BCB-39C532A76023"
+        val MSG_SERVICE_UUID = "99E91400-80ED-4943-9BCB-39C532A76023"
+        val READ_CHAR = "99E91401-80ED-4943-9BCB-39C532A76023"
+        val MSG_CHAR = "99E91402-80ED-4943-9BCB-39C532A76023"
+        val GD_CHAR = "99E91403-80ED-4943-9BCB-39C532A76023"
     }
 
     override fun onCreate() {
@@ -80,24 +83,42 @@ class BleService : LifecycleService() {
                     TAG,
                     "Peripheral supported"
                 )
-                val firstService = BluetoothGattService(
+                val mainService = BluetoothGattService(
                     UUID.fromString(SERVICE_UUID),
                     BluetoothGattService.SERVICE_TYPE_PRIMARY
                 )
-                val firstServiceChar = BluetoothGattCharacteristic(
+                val mainChar = BluetoothGattCharacteristic(
                     UUID.fromString(READ_CHAR),
                     BluetoothGattCharacteristic.PROPERTY_READ,
                     BluetoothGattCharacteristic.PERMISSION_READ
                 )
 
-                firstServiceChar.value = qaulId
-                firstService.addCharacteristic(firstServiceChar)
+                mainChar.value = qaulId
+                mainService.addCharacteristic(mainChar)
 
-                startGattServer(service = firstService)
+                val msgService = BluetoothGattService(
+                    UUID.fromString(MSG_SERVICE_UUID),
+                    BluetoothGattService.SERVICE_TYPE_PRIMARY
+                )
+
+                val msgChar = BluetoothGattCharacteristic(
+                    UUID.fromString(MSG_CHAR),
+                    BluetoothGattCharacteristic.PROPERTY_WRITE,
+                    BluetoothGattCharacteristic.PERMISSION_WRITE
+                )
+//                msgChar.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+
+                msgService.addCharacteristic(msgChar)
+                mainService.addCharacteristic(msgChar)
+                val serviceList = arrayListOf<BluetoothGattService>()
+                serviceList.add(mainService)
+                serviceList.add(msgService)
+                startGattServer(services = serviceList)
 
                 val dataBuilder = AdvertiseData.Builder()
                 val settingsBuilder = AdvertiseSettings.Builder()
                 dataBuilder.setIncludeTxPowerLevel(true)
+
                 val uuid = ParcelUuid(UUID.fromString(SERVICE_UUID))
                 dataBuilder.addServiceUuid(uuid)
                 dataBuilder.setIncludeDeviceName(true)
@@ -299,12 +320,12 @@ class BleService : LifecycleService() {
     /**
      * This Method Will Start the GattServer.
      */
-    private fun startGattServer(service: BluetoothGattService) {
+    private fun startGattServer(services: ArrayList<BluetoothGattService>) {
         gattServer = bluetoothManager!!.openGattServer(
             this,
             gattServerCallback
         )
-        gattServer?.addService(service)
+        gattServer?.addService(services[0])
     }
 
     /**
@@ -363,6 +384,8 @@ class BleService : LifecycleService() {
                     characteristic, preparedWrite, responseNeeded, offset,
                     value
                 )
+                AppLog.e(TAG, "Write Request Received: " + String(value))
+                gattServer!!.sendResponse(device, requestId, 0, offset, value);
             }
 
             override fun onDescriptorReadRequest(
@@ -372,6 +395,7 @@ class BleService : LifecycleService() {
                 descriptor: BluetoothGattDescriptor
             ) {
                 super.onDescriptorReadRequest(device, requestId, offset, descriptor)
+                AppLog.e(TAG, "onDescriptorReadRequest()")
             }
 
             override fun onDescriptorWriteRequest(
@@ -391,6 +415,11 @@ class BleService : LifecycleService() {
                     responseNeeded,
                     offset,
                     value
+                )
+                AppLog.e(TAG, "onDescriptorWriteRequest()")
+                gattServer?.sendResponse(
+                    device, requestId,
+                    BluetoothGatt.GATT_SUCCESS, offset, value
                 )
             }
 
@@ -593,7 +622,8 @@ class BleService : LifecycleService() {
                 characteristic: BluetoothGattCharacteristic?
             ) {
                 if (characteristic!!.uuid.toString().lowercase() == READ_CHAR.lowercase()) {
-                    val existingDevice = ignoreList.find { it.qaulId.contentEquals(characteristic.value) }
+                    val existingDevice =
+                        ignoreList.find { it.qaulId.contentEquals(characteristic.value) }
                     if (existingDevice != null) {
                         existingDevice.macAddress = bleScanDevice.macAddress
                         existingDevice.lastFoundTime = System.currentTimeMillis()

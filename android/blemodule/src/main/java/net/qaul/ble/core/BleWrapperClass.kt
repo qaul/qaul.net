@@ -112,7 +112,7 @@ class BleWrapperClass(context: AppCompatActivity) {
                 BleService().start(context = context)
                 Handler(Looper.myLooper()!!).postDelayed({
                     startAdvertiseAndCallback()
-                    startScanAndCallback()
+//                    startScanAndCallback()
                 }, 500)
             } else {
                 if (BleService.bleService!!.isAdvertiserRunning()) {
