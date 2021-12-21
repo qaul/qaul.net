@@ -3,18 +3,23 @@
 
 package net.qaul.ble.service
 
+import android.app.Application
 import android.bluetooth.*
 import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
+import android.net.nsd.NsdManager
 import android.os.Handler
 import android.os.Looper
+import android.os.Message
 import android.os.ParcelUuid
 import androidx.lifecycle.LifecycleService
 import net.qaul.ble.AppLog
+import net.qaul.ble.BLEUtils
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.core.BleActor
 import net.qaul.ble.model.BLEScanDevice
+import qaul.sys.ble.BleOuterClass
 import java.util.*
 
 class BleService : LifecycleService() {
@@ -37,7 +42,7 @@ class BleService : LifecycleService() {
     private val uuidList = arrayListOf<ParcelUuid>()
     private var filters: ArrayList<ScanFilter> = arrayListOf()
     private var scanSettings: ScanSettings? = null
-
+    private val msgMap = Collections.synchronizedMap(hashMapOf<String, String>())
     private val handler = Handler(Looper.getMainLooper())
 
     companion object {
@@ -384,8 +389,30 @@ class BleService : LifecycleService() {
                     characteristic, preparedWrite, responseNeeded, offset,
                     value
                 )
-                AppLog.e(TAG, "Write Request Received: " + String(value))
-                gattServer!!.sendResponse(device, requestId, 0, offset, value);
+                val emptyArray = ByteArray(0)
+                AppLog.e(TAG, "Write Request Received: " + String(value) + " :: " + requestId)
+                val s = BLEUtils.byteToHex(value)
+                AppLog.e(TAG, "Data in hex:: $s")
+                gattServer!!.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value)
+                if (msgMap.containsKey(device.address)) {
+                    var oldValue = msgMap[device.address]
+                    oldValue += s
+                    if (s.endsWith("2424")) {
+                        //SendResponse of oldValue
+//                        bleAdvertiseCallback!!.onMessageReceived(device.address, BLEUtils.hexToByteArray(oldValue)!!)
+                        msgMap.remove(device.address)
+                    }
+                } else {
+                    if (s.startsWith("2424") && s.endsWith("2424")) {
+                        //Send Response of s
+//                        bleAdvertiseCallback!!.onMessageReceived(device.address, BLEUtils.hexToByteArray(s)!!)
+                    } else if (s.startsWith("2424")) {
+                        msgMap[device.address] = s
+                    } else {
+                        AppLog.e("onCharacteristicWriteRequest()", "Invalid data received.")
+                    }
+                }
+
             }
 
             override fun onDescriptorReadRequest(
@@ -667,6 +694,7 @@ class BleService : LifecycleService() {
     interface BleAdvertiseCallback {
         fun startAdvertiseRes(status: Boolean, errorText: String, unknownError: Boolean)
         fun stopAdvertiseRes(status: Boolean, errorText: String)
+        fun onMessageReceived(macAddress: String, message: ByteArray)
     }
 
     /**
