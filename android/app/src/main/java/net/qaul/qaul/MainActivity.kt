@@ -5,7 +5,9 @@ package net.qaul.qaul
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.os.Message
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -50,6 +52,9 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
         binding.btnStopRequest.setOnClickListener {
             sendStopRequest()
         }
+        binding.btnSendMessage.setOnClickListener {
+            validateData()
+        }
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -72,7 +77,11 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
     private fun sendStartRequest() {
         val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
         val startRequest = BleOuterClass.BleStartRequest.newBuilder()
-        val qaulid = "HelloThisIsAQaulId".toByteArray(Charset.defaultCharset())
+        var qaulId = getDeviceName()
+        if (qaulId!!.length > 18) {
+            qaulId = "HelloThisIsAQaulId"
+        }
+        val qaulid = qaulId.toByteArray(Charset.defaultCharset())
 //        val qaulid = byteArrayOf(
 //            0x48,0x65,0x6c,0x6c,0x6f,0x41,0x6a,0x61,0x79,0x48,0x6f,0x77,0x41,0x72,0x65,0x59,0x6f,0x75,0x48,0x65
 //        )
@@ -91,6 +100,44 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
         bleReq.stopRequest = BleOuterClass.BleStopRequest.getDefaultInstance()
         bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
     }
+
+    private fun validateData() {
+        val qaulId = binding.etQaulId.text.toString()
+        val message = binding.etMessage.text.toString()
+        when {
+            qaulId.length < 10 -> {
+                Toast.makeText(
+                    this,
+                    "Please enter correct qaul_id of receiver",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+            message.isEmpty() -> {
+                Toast.makeText(
+                    this,
+                    "Please enter at least 1 character of message",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+            else -> {
+                sendData(qaulId = qaulId, message = message)
+            }
+        }
+    }
+
+
+    private fun sendData(qaulId: String, message: String) {
+        val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
+        val directSend = BleOuterClass.BleDirectSend.newBuilder()
+        directSend.data = ByteString.copyFrom(message.toByteArray(Charset.defaultCharset()))
+        directSend.to = ByteString.copyFrom(qaulId.toByteArray(Charset.defaultCharset()))
+        directSend.id = System.currentTimeMillis().toString()
+        bleReq.directSend = directSend.build()
+        bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
+    }
+
 
     /**
      * This Method Will Be Called When User Accept/Decline Asked Permission From BLEModule
@@ -201,16 +248,66 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
                 BleOuterClass.Ble.MessageCase.SCAN_RESULT -> {
                     val scanResult: BleOuterClass.BleScanResult = ble.scanResult
                     AppLog.e("scanResult: ", Gson().toJson(scanResult))
-                    Toast.makeText(
-                        this,
-                        "Device found: ${scanResult.name} : ${scanResult.mac}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    if (scanResult.isInTheRange) {
+                        Toast.makeText(
+                            this,
+                            "Device found: ${scanResult.name} : ${scanResult.mac}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        if (!scanResult.qaulId.isEmpty) {
+                            binding.etQaulId.setText(String(scanResult.qaulId.toByteArray()))
+                        }
+                    } else {
+                        Toast.makeText(
+                            this,
+                            "Device is out of range: ${scanResult.name} : ${scanResult.mac}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+                BleOuterClass.Ble.MessageCase.DIRECT_RECEIVED -> {
+                    val directReceived: BleOuterClass.BleDirectReceived = ble.directReceived
+                    AppLog.e("directReceived: ", Gson().toJson(directReceived))
+                    val message: String =
+                        String(directReceived.data!!.toByteArray()).removeSuffix("$$")
+                            .removePrefix("$$")
+                    runOnUiThread {
+                        binding.tvMessage.text = message
+                        binding.etQaulId.setText(String(directReceived.qaulId.toByteArray()))
+                    }
                 }
                 else -> {
 
                 }
             }
+        }
+    }
+
+    /**
+     * Returns Device Manufacturer & Model Name/Number
+     */
+    private fun getDeviceName(): String? {
+        val manufacturer = Build.MANUFACTURER
+        val model = Build.MODEL
+        return if (model.lowercase().startsWith(manufacturer.lowercase())) {
+            capitalize(model)
+        } else {
+            capitalize(manufacturer).toString() + " " + model
+        }
+    }
+
+    /**
+     * Capitalize 1st Letter of String
+     */
+    private fun capitalize(s: String?): String {
+        if (s == null || s.isEmpty()) {
+            return ""
+        }
+        val first = s[0]
+        return if (Character.isUpperCase(first)) {
+            s
+        } else {
+            Character.toUpperCase(first).toString() + s.substring(1)
         }
     }
 

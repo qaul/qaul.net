@@ -83,6 +83,12 @@ class BleWrapperClass(context: AppCompatActivity) {
                 BleOuterClass.Ble.MessageCase.STOP_REQUEST -> {
                     stopService()
                 }
+                BleOuterClass.Ble.MessageCase.DIRECT_SEND -> {
+                    val bleDirectSend = bleReq.directSend
+                    if (BleService().isRunning()) {
+                        BleService.bleService?.sendMessage(id = bleDirectSend.id, qaulId = bleDirectSend.to.toByteArray(), message = bleDirectSend.data.toByteArray())
+                    }
+                }
             }
         }
     }
@@ -112,7 +118,7 @@ class BleWrapperClass(context: AppCompatActivity) {
                 BleService().start(context = context)
                 Handler(Looper.myLooper()!!).postDelayed({
                     startAdvertiseAndCallback()
-//                    startScanAndCallback()
+                    startScanAndCallback()
                 }, 500)
             } else {
                 if (BleService.bleService!!.isAdvertiserRunning()) {
@@ -179,6 +185,17 @@ class BleWrapperClass(context: AppCompatActivity) {
                         bleCallback?.bleResponse(ble = bleRes.build())
                     }
 
+                    override fun onMessageReceived(bleDevice: BLEScanDevice, message: ByteArray) {
+                        val bleRes = BleOuterClass.Ble.newBuilder()
+                        val directReceived = BleOuterClass.BleDirectReceived.newBuilder()
+                        directReceived.from = bleDevice.macAddress
+                        directReceived.mode = BleOuterClass.BleMode.low_latency
+                        directReceived.qaulId = ByteString.copyFrom(bleDevice.qaulId)
+                        directReceived.data = ByteString.copyFrom(message)
+                        bleRes.directReceived = directReceived.build()
+                        bleCallback?.bleResponse(ble = bleRes.build())
+                    }
+
                 }
             )
         }
@@ -241,6 +258,10 @@ class BleWrapperClass(context: AppCompatActivity) {
                     scanResult.qaulId = ByteString.copyFrom(bleDevice.qaulId)
                     bleRes.scanResult = scanResult.build()
                     bleCallback?.bleResponse(ble = bleRes.build())
+                }
+
+                override fun onMessageSent(id: String, success: Boolean, data: ByteArray) {
+                    TODO("Not yet implemented")
                 }
 
             }

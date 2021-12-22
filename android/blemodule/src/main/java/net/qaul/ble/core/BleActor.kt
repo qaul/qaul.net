@@ -21,6 +21,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     var disconnectedFromDevice = false
     var bluetoothDevice: BluetoothDevice? = null
     var bleDevice: BLEScanDevice? = null
+    var messageId: String = ""
 
     /**
      * Disconnect current device.
@@ -126,6 +127,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             if (listener != null) {
                 listener!!.onCharacteristicRead(bleDevice!!, gatt, characteristic)
             }
+            if (characteristic.uuid.toString().lowercase() == BleService.READ_CHAR.lowercase()) {
+                disConnectedDevice()
+            }
         }
 
         override fun onCharacteristicWrite(
@@ -135,7 +139,11 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         ) {
             super.onCharacteristicWrite(gatt, characteristic, status)
             if (listener != null) {
-                listener!!.onCharacteristicWrite(gatt, characteristic)
+                if (messageId.isEmpty() || messageId.isBlank()) {
+                    listener!!.onCharacteristicWrite(gatt = gatt, characteristic = characteristic)
+                } else {
+                    listener!!.onMessageSent(gatt = gatt, characteristic = characteristic, id = messageId)
+                }
             }
             AppLog.d(
                 TAG,
@@ -363,6 +371,10 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         fun onCharacteristicWrite(
             gatt: BluetoothGatt?,
             characteristic: BluetoothGattCharacteristic?
+        )
+        fun onMessageSent(
+            gatt: BluetoothGatt?,
+            characteristic: BluetoothGattCharacteristic?, id: String
         )
         fun onCharacteristicChanged(
             macAddress: String?,

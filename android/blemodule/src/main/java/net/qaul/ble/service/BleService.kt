@@ -20,6 +20,7 @@ import net.qaul.ble.RemoteLog
 import net.qaul.ble.core.BleActor
 import net.qaul.ble.model.BLEScanDevice
 import qaul.sys.ble.BleOuterClass
+import java.nio.charset.Charset
 import java.util.*
 
 class BleService : LifecycleService() {
@@ -389,23 +390,31 @@ class BleService : LifecycleService() {
                     characteristic, preparedWrite, responseNeeded, offset,
                     value
                 )
-                val emptyArray = ByteArray(0)
                 AppLog.e(TAG, "Write Request Received: " + String(value) + " :: " + requestId)
                 val s = BLEUtils.byteToHex(value)
                 AppLog.e(TAG, "Data in hex:: $s")
+                var bleDevice = ignoreList.find { it.macAddress == device.address }
+                if (bleDevice == null) {
+                    bleDevice = BLEScanDevice.getDevice()
+                    bleDevice.macAddress = device.address
+                    bleDevice.qaulId = "HelloThisIsAQaulId".toByteArray(Charset.defaultCharset())
+                }
                 gattServer!!.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value)
                 if (msgMap.containsKey(device.address)) {
                     var oldValue = msgMap[device.address]
-                    oldValue += s
-                    if (s.endsWith("2424")) {
+                    if (s.endsWith("2424") || (oldValue!!.endsWith("24") && s.startsWith("24"))) {
                         //SendResponse of oldValue
-//                        bleAdvertiseCallback!!.onMessageReceived(device.address, BLEUtils.hexToByteArray(oldValue)!!)
+                        oldValue += s
+                        bleAdvertiseCallback!!.onMessageReceived(bleDevice = bleDevice, BLEUtils.hexToByteArray(oldValue)!!)
                         msgMap.remove(device.address)
+                    } else {
+                        oldValue += s
+                        msgMap[device.address] = oldValue
                     }
                 } else {
                     if (s.startsWith("2424") && s.endsWith("2424")) {
                         //Send Response of s
-//                        bleAdvertiseCallback!!.onMessageReceived(device.address, BLEUtils.hexToByteArray(s)!!)
+                        bleAdvertiseCallback!!.onMessageReceived(bleDevice = bleDevice, BLEUtils.hexToByteArray(s)!!)
                     } else if (s.startsWith("2424")) {
                         msgMap[device.address] = s
                     } else {
@@ -508,6 +517,8 @@ class BleService : LifecycleService() {
             )
         }
     }
+
+
 
     /**
      * This method Will be Called When Service Will Stopped/Destroyed
@@ -619,7 +630,7 @@ class BleService : LifecycleService() {
     /**
      * This Method Will be Used to set Callback for Device Connection and Connect to Device
      */
-    private fun connectDevice(device: BLEScanDevice) {
+    private fun connectDevice(device: BLEScanDevice): BleActor{
         val baseBleActor = BleActor(this, object : BleActor.BleConnectionListener {
             override fun onConnected(macAddress: String?) {
                 AppLog.e(TAG, " onConnected : $macAddress")
@@ -666,6 +677,14 @@ class BleService : LifecycleService() {
 
             }
 
+            override fun onMessageSent(
+                gatt: BluetoothGatt?,
+                characteristic: BluetoothGattCharacteristic?,
+                id: String
+            ) {
+                bleCallback?.onMessageSent(id = id, success = true, data = characteristic!!.value)
+            }
+
             override fun onCharacteristicChanged(
                 macAddress: String?,
                 gatt: BluetoothGatt?,
@@ -686,6 +705,18 @@ class BleService : LifecycleService() {
 
         })
         baseBleActor.setDevice(device)
+        return baseBleActor
+    }
+
+    fun sendMessage(id: String, qaulId: ByteArray, message: ByteArray) {
+        val bleDevice = ignoreList.find { it.qaulId.contentEquals(qaulId) }
+        if (bleDevice != null) {
+            val bleActor = connectDevice(bleDevice)
+            bleActor.messageId = id
+            bleActor.writeServiceData(SERVICE_UUID, MSG_CHAR, message)
+        } else {
+            TODO("Fail response for Device Not Found")
+        }
     }
 
     /**
@@ -694,7 +725,7 @@ class BleService : LifecycleService() {
     interface BleAdvertiseCallback {
         fun startAdvertiseRes(status: Boolean, errorText: String, unknownError: Boolean)
         fun stopAdvertiseRes(status: Boolean, errorText: String)
-        fun onMessageReceived(macAddress: String, message: ByteArray)
+        fun onMessageReceived(bleDevice: BLEScanDevice, message: ByteArray)
     }
 
     /**
@@ -705,6 +736,7 @@ class BleService : LifecycleService() {
         fun stopScanRes(status: Boolean, errorText: String)
         fun deviceFound(bleDevice: BLEScanDevice)
         fun deviceOutOfRange(bleDevice: BLEScanDevice)
+        fun onMessageSent(id: String, success: Boolean, data: ByteArray)
     }
 
 }

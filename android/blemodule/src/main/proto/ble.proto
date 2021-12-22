@@ -207,13 +207,11 @@ message BleScanResult {
 // send a direct message
 message BleDirectSend {
     // message id (as a reference for the result message)
-    bytes id = 1;
-    // bluetooth address of the device to send it to
+    string id = 1;
+    // qaul_id of the device to send it to
     bytes to = 2;
-    // sending mode
-    BleMode mode = 3;
     // data to be sent
-    bytes data = 4;
+    bytes data = 3;
 }
 
 // result after sending the direct message
@@ -229,9 +227,9 @@ message BleDirectSendResult {
 // direct message received message
 message BleDirectReceived {
     // bluetooth address of the sending device
-    bytes from = 1;
-    // received signal strength of the sending device
-    int32 rssi = 2;
+    string from = 1;
+    // qaul_id of the sending device
+    bytes qaul_id = 2;
     // the mode this message was sent in
     BleMode mode = 3;
     // the data received
