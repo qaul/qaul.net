@@ -20,45 +20,109 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:id="@+id/ll1"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:orientation="vertical">
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnInfoRequest"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:background="@color/teal_700"
-            android:textColor="@color/white"
-            android:padding="10dp"
-            android:text="Send Info Request"/>
+        android:layout_marginTop="?attr/actionBarSize">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnStartRequest"
-            android:layout_width="wrap_content"
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:background="@color/teal_200"
-            android:textColor="@color/white"
-            android:padding="10dp"
-            android:text="Send Start Request"/>
+            android:orientation="vertical">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnStopRequest"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:background="@color/purple_700"
-            android:textColor="@color/white"
-            android:padding="10dp"
-            android:text="Send Stop Request"/>
-    </androidx.appcompat.widget.LinearLayoutCompat>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnInfoRequest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:background="@color/teal_700"
+                android:textColor="@color/white"
+                android:padding="10dp"
+                android:text="Send Info Request" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnStartRequest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:background="@color/teal_200"
+                android:textColor="@color/white"
+                android:padding="10dp"
+                android:text="Send Start Request" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnStopRequest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:background="@color/purple_700"
+                android:textColor="@color/white"
+                android:padding="10dp"
+                android:text="Send Stop Request" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/etQaulId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:minLines="1"
+                android:hint="qaul_id of Receiver"
+                android:layout_gravity="center"
+                android:gravity="top|start"
+                android:inputType="text" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/etMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:minLines="3"
+                android:hint="Message"
+                android:layout_gravity="center"
+                android:gravity="top|start"
+                android:inputType="textMultiLine" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSendMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:background="@color/purple_700"
+                android:textColor="@color/white"
+                android:padding="10dp"
+                android:text="Send Message" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="15dp"
+                android:gravity="center"
+                android:text="Message Received: "
+                android:textStyle="bold"
+                android:textColor="@color/purple_200"
+                android:textSize="16sp" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_gravity="center"
+                android:minLines="5"
+                android:hint="Received Message Will Be Displayed Here"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:gravity="top|center" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </ScrollView>
 
     <include
         layout="@layout/content_main"
