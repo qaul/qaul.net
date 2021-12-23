@@ -20,7 +20,7 @@ import java.nio.charset.Charset
 import java.util.*
 
 class BleService : LifecycleService() {
-    private var bleCallback: BleScanCallBack? = null
+    var bleCallback: BleScanCallBack? = null
     private val TAG: String = BleService::class.java.simpleName
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var bleAdvertiseCallback: BleAdvertiseCallback? = null
@@ -723,12 +723,7 @@ class BleService : LifecycleService() {
         if (bleDevice != null) {
             val bleActor = connectDevice(device = bleDevice, isFromMessage = true)
             bleActor.messageId = id
-            Handler(Looper.myLooper()!!).postDelayed( {
-                val x = bleActor.writeServiceData(SERVICE_UUID, MSG_CHAR, message, 0)
-                if (!x) {
-                    bleCallback?.onMessageSent(id = id, success = false, data = ByteArray(0))
-                }
-            }, 2000)
+            bleActor.tempData = message
         } else {
             bleCallback?.onMessageSent(id = id, success = false, data = ByteArray(0))
         }
