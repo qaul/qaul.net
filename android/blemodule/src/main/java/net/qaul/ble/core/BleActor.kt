@@ -196,11 +196,14 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                     }
                 }
             }
-            if (isReconnect) {
+            if (isReconnect && isFromMessage) {
                 writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tempData, attempt)
                 attempt = 0
                 tempData = ByteArray(0)
                 isReconnect = false
+            } else if (isFromMessage) {
+                writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tempData, 0)
+                tempData = ByteArray(0)
             }
         }
     }
@@ -250,7 +253,8 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             writeGattDescriptor(descriptorWriteQueue.element())
         } else {
             if (listener != null) {
-                listener!!.onDescriptorWrite(this.bleDevice!!, this)
+//                listener!!.onDescriptorWrite(this.bleDevice!!, this)
+
             }
         }
     }
@@ -374,6 +378,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 }
             }
         }
+        BleService.bleService!!.bleCallback?.onMessageSent(id = messageId, success = false, data = data!!)
         return false
     }
 
