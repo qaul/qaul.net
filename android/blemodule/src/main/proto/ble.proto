@@ -25,14 +25,16 @@ message Ble {
 
         // send a direct message
         BleDirectSend direct_send = 8;
+        // send a direct message result
+        BleDirectSendResult direct_send_result = 9;
         // direct message received
-        BleDirectReceived direct_received = 9;
+        BleDirectReceived direct_received = 10;
 
 
         // stop service request
-        BleStopRequest stop_request = 10;
+        BleStopRequest stop_request = 11;
         // stop service result
-        BleStopResult stop_result = 11;
+        BleStopResult stop_result = 12;
     }
 }
 
@@ -217,7 +219,7 @@ message BleDirectSend {
 // result after sending the direct message
 message BleDirectSendResult {
     // message id
-    bytes id = 1;
+    string id = 1;
     // result after sending the message
     bool success = 2;
     // error messages

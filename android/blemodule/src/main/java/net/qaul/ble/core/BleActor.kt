@@ -22,6 +22,10 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     var bluetoothDevice: BluetoothDevice? = null
     var bleDevice: BLEScanDevice? = null
     var messageId: String = ""
+    var isFromMessage = false
+    var isReconnect = false
+    var tempData = ByteArray(0)
+    var attempt = 0
 
     /**
      * Disconnect current device.
@@ -37,9 +41,10 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     /**
      * Set device in Actor
      */
-    fun setDevice(device: BLEScanDevice?) {
+    fun setDevice(device: BLEScanDevice?, isFromMessage: Boolean) {
         bleDevice = device
         bluetoothDevice = device!!.bluetoothDevice
+        this.isFromMessage = isFromMessage
         connectDevice()
     }
 
@@ -102,7 +107,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                     failedTask!!.cancel()
                 }
                 if (descriptorWriteQueue != null && descriptorWriteQueue.size > 0) descriptorWriteQueue.clear()
-                if (!disconnectedFromDevice) listener!!.onDisconnected(bluetoothDevice!!.address) else disconnectedFromDevice =
+                if (!disconnectedFromDevice) listener!!.onDisconnected(bleDevice!!) else disconnectedFromDevice =
                     false
             }
         }
@@ -127,7 +132,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             if (listener != null) {
                 listener!!.onCharacteristicRead(bleDevice!!, gatt, characteristic)
             }
-            if (characteristic.uuid.toString().lowercase() == BleService.READ_CHAR.lowercase()) {
+            if (characteristic.uuid.toString().lowercase() == BleService.READ_CHAR.lowercase() && !isFromMessage) {
                 disConnectedDevice()
             }
         }
@@ -190,6 +195,12 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                         listener!!.onDescriptorWrite(bleDevice!!, this@BleActor)
                     }
                 }
+            }
+            if (isReconnect) {
+                writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tempData, attempt)
+                attempt = 0
+                tempData = ByteArray(0)
+                isReconnect = false
             }
         }
     }
@@ -316,38 +327,50 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     /**
      * User write data to device
      */
-    fun writeServiceData(serUUID: String, charUUID: String, data: ByteArray?): Boolean {
-        if (data != null) {
-            AppLog.d(
-                TAG,
-                "writeServiceData : serUUID : $serUUID, charUUID:$charUUID, data :" + BLEUtils.byteToHex(
-                    data
+    fun writeServiceData(serUUID: String, charUUID: String, data: ByteArray?, attempt: Int): Boolean {
+        if (attempt < 3) {
+            if (data != null) {
+                AppLog.d(
+                    TAG,
+                    "writeServiceData : serUUID : $serUUID, charUUID:$charUUID, data :" + BLEUtils.byteToHex(
+                        data
+                    )
                 )
-            )
-            if (mBluetoothGatt != null) {
-                val service = mBluetoothGatt!!.getService(UUID.fromString(serUUID))
-                if (service != null) {
-                    val characteristic = service.getCharacteristic(UUID.fromString(charUUID))
-                    if (characteristic != null) {
-                        characteristic.value = data
-                        return mBluetoothGatt!!.writeCharacteristic(characteristic)
-                    }
-                }
-            } else {
-                try {
-                    mBluetoothGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        bluetoothDevice!!.connectGatt(
-                            mContext,
-                            false,
-                            mGattCallback,
-                            BluetoothDevice.TRANSPORT_LE
-                        )
+                if (mBluetoothGatt != null) {
+                    val service = mBluetoothGatt!!.getService(UUID.fromString(serUUID))
+                    if (service != null) {
+                        val characteristic = service.getCharacteristic(UUID.fromString(charUUID))
+                        if (characteristic != null) {
+                            characteristic.value = data
+                            return mBluetoothGatt!!.writeCharacteristic(characteristic)
+                        }
                     } else {
                         bluetoothDevice!!.connectGatt(mContext, false, mGattCallback)
+                        this.attempt = attempt + 1
+                        tempData = data
+                        isReconnect = true
                     }
-                    writeServiceData(serUUID, charUUID, data)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                    return true
+                } else {
+                    try {
+                        mBluetoothGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            bluetoothDevice!!.connectGatt(
+                                mContext,
+                                false,
+                                mGattCallback,
+                                BluetoothDevice.TRANSPORT_LE
+                            )
+                        } else {
+                            bluetoothDevice!!.connectGatt(mContext, false, mGattCallback)
+
+                        }
+                        this.attempt = attempt + 1
+                        tempData = data
+                        isReconnect = true
+                        return true
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
         }
@@ -359,7 +382,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
      */
     interface BleConnectionListener {
         fun onConnected(macAddress: String?)
-        fun onDisconnected(macAddress: String?)
+        fun onDisconnected(bleScanDevice: BLEScanDevice)
         fun onServiceDiscovered(macAddress: String?)
         fun onDescriptorWrite(bleScanDevice: BLEScanDevice, bleActor: BleActor)
         fun onConnectionFailed(bleScanDevice: BLEScanDevice)

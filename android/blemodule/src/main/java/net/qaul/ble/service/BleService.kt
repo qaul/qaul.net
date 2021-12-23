@@ -3,15 +3,12 @@
 
 package net.qaul.ble.service
 
-import android.app.Application
 import android.bluetooth.*
 import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
-import android.net.nsd.NsdManager
 import android.os.Handler
 import android.os.Looper
-import android.os.Message
 import android.os.ParcelUuid
 import androidx.lifecycle.LifecycleService
 import net.qaul.ble.AppLog
@@ -19,7 +16,6 @@ import net.qaul.ble.BLEUtils
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.core.BleActor
 import net.qaul.ble.model.BLEScanDevice
-import qaul.sys.ble.BleOuterClass
 import java.nio.charset.Charset
 import java.util.*
 
@@ -285,7 +281,7 @@ class BleService : LifecycleService() {
                 bleDevice.lastFoundTime = System.currentTimeMillis()
                 devicesList.add(bleDevice)
                 if (result.isConnectable) {
-                    connectDevice(bleDevice)
+                    connectDevice(bleDevice, isFromMessage = false)
                 }
             } else {
                 val selectItemIgnore = ignoreList.find { it.macAddress == device.address }
@@ -399,13 +395,22 @@ class BleService : LifecycleService() {
                     bleDevice.macAddress = device.address
                     bleDevice.qaulId = "HelloThisIsAQaulId".toByteArray(Charset.defaultCharset())
                 }
-                gattServer!!.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value)
+                gattServer!!.sendResponse(
+                    device,
+                    requestId,
+                    BluetoothGatt.GATT_SUCCESS,
+                    offset,
+                    value
+                )
                 if (msgMap.containsKey(device.address)) {
                     var oldValue = msgMap[device.address]
                     if (s.endsWith("2424") || (oldValue!!.endsWith("24") && s.startsWith("24"))) {
                         //SendResponse of oldValue
                         oldValue += s
-                        bleAdvertiseCallback!!.onMessageReceived(bleDevice = bleDevice, BLEUtils.hexToByteArray(oldValue)!!)
+                        bleAdvertiseCallback!!.onMessageReceived(
+                            bleDevice = bleDevice,
+                            BLEUtils.hexToByteArray(oldValue)!!
+                        )
                         msgMap.remove(device.address)
                     } else {
                         oldValue += s
@@ -414,7 +419,10 @@ class BleService : LifecycleService() {
                 } else {
                     if (s.startsWith("2424") && s.endsWith("2424")) {
                         //Send Response of s
-                        bleAdvertiseCallback!!.onMessageReceived(bleDevice = bleDevice, BLEUtils.hexToByteArray(s)!!)
+                        bleAdvertiseCallback!!.onMessageReceived(
+                            bleDevice = bleDevice,
+                            BLEUtils.hexToByteArray(s)!!
+                        )
                     } else if (s.startsWith("2424")) {
                         msgMap[device.address] = s
                     } else {
@@ -519,7 +527,6 @@ class BleService : LifecycleService() {
     }
 
 
-
     /**
      * This method Will be Called When Service Will Stopped/Destroyed
      */
@@ -618,7 +625,7 @@ class BleService : LifecycleService() {
                 if (bLEDevice.lastFoundTime!! < System.currentTimeMillis() - 5000) {
                     bleCallback?.deviceOutOfRange(bleDevice = bLEDevice)
                     devicesList.remove(bLEDevice)
-                    ignoreList.remove(bLEDevice)
+//                    ignoreList.remove(bLEDevice)
                 } else {
                     AppLog.e(TAG, "${bLEDevice.macAddress} Still in range")
                 }
@@ -630,14 +637,17 @@ class BleService : LifecycleService() {
     /**
      * This Method Will be Used to set Callback for Device Connection and Connect to Device
      */
-    private fun connectDevice(device: BLEScanDevice): BleActor{
+    private fun connectDevice(device: BLEScanDevice, isFromMessage: Boolean): BleActor {
         val baseBleActor = BleActor(this, object : BleActor.BleConnectionListener {
             override fun onConnected(macAddress: String?) {
                 AppLog.e(TAG, " onConnected : $macAddress")
             }
 
-            override fun onDisconnected(macAddress: String?) {
-                AppLog.e(TAG, " onDisconnected : $macAddress")
+            override fun onDisconnected(bleScanDevice: BLEScanDevice) {
+                AppLog.e(TAG, " onDisconnected : ${bleScanDevice.macAddress}")
+                if (!blackList.contains(bleScanDevice) && !ignoreList.contains(bleScanDevice)) {
+                    devicesList.remove(bleScanDevice)
+                }
             }
 
             override fun onServiceDiscovered(macAddress: String?) {
@@ -704,18 +714,23 @@ class BleService : LifecycleService() {
             }
 
         })
-        baseBleActor.setDevice(device)
+        baseBleActor.setDevice(device = device, isFromMessage = isFromMessage)
         return baseBleActor
     }
 
     fun sendMessage(id: String, qaulId: ByteArray, message: ByteArray) {
         val bleDevice = ignoreList.find { it.qaulId.contentEquals(qaulId) }
         if (bleDevice != null) {
-            val bleActor = connectDevice(bleDevice)
+            val bleActor = connectDevice(device = bleDevice, isFromMessage = true)
             bleActor.messageId = id
-            bleActor.writeServiceData(SERVICE_UUID, MSG_CHAR, message)
+            Handler(Looper.myLooper()!!).postDelayed( {
+                val x = bleActor.writeServiceData(SERVICE_UUID, MSG_CHAR, message, 0)
+                if (!x) {
+                    bleCallback?.onMessageSent(id = id, success = false, data = ByteArray(0))
+                }
+            }, 2000)
         } else {
-            TODO("Fail response for Device Not Found")
+            bleCallback?.onMessageSent(id = id, success = false, data = ByteArray(0))
         }
     }
 

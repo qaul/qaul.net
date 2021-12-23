@@ -39,6 +39,7 @@ class BleWrapperClass(context: AppCompatActivity) {
     private var bleCallback: BleRequestCallback? = null
     private var qaulId: ByteArray? = null
     private var advertMode = "low_latency"
+    private var isFromMessage = false
 
     /**
      * Static Member Declaration
@@ -86,9 +87,14 @@ class BleWrapperClass(context: AppCompatActivity) {
                 BleOuterClass.Ble.MessageCase.DIRECT_SEND -> {
                     val bleDirectSend = bleReq.directSend
                     if (BleService().isRunning()) {
-                        BleService.bleService?.sendMessage(id = bleDirectSend.id, qaulId = bleDirectSend.to.toByteArray(), message = bleDirectSend.data.toByteArray())
+                        BleService.bleService?.sendMessage(
+                            id = bleDirectSend.id,
+                            qaulId = bleDirectSend.to.toByteArray(),
+                            message = bleDirectSend.data.toByteArray()
+                        )
                     }
                 }
+                else -> {}
             }
         }
     }
@@ -249,19 +255,33 @@ class BleWrapperClass(context: AppCompatActivity) {
                     AppLog.e(TAG, "${bleDevice.macAddress} out of range")
                     val bleRes = BleOuterClass.Ble.newBuilder()
                     val scanResult = BleOuterClass.BleScanResult.newBuilder()
-                    scanResult.mac = bleDevice.macAddress
-                    scanResult.name = bleDevice.name
-                    scanResult.timestamp = bleDevice.lastFoundTime.toString()
-                    scanResult.rssi = bleDevice.deviceRSSI
-                    scanResult.isConnectable = bleDevice.isConnectable
-                    scanResult.isInTheRange = false
-                    scanResult.qaulId = ByteString.copyFrom(bleDevice.qaulId)
-                    bleRes.scanResult = scanResult.build()
-                    bleCallback?.bleResponse(ble = bleRes.build())
+                    try {
+                        scanResult.mac = bleDevice.macAddress
+                        scanResult.name = bleDevice.name!!
+                        scanResult.timestamp = bleDevice.lastFoundTime.toString()
+                        scanResult.rssi = bleDevice.deviceRSSI
+                        scanResult.isConnectable = bleDevice.isConnectable
+                        scanResult.isInTheRange = false
+                        scanResult.qaulId = ByteString.copyFrom(bleDevice.qaulId)
+                        bleRes.scanResult = scanResult.build()
+                        bleCallback?.bleResponse(ble = bleRes.build())
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
 
                 override fun onMessageSent(id: String, success: Boolean, data: ByteArray) {
-                    TODO("Not yet implemented")
+                    val bleRes = BleOuterClass.Ble.newBuilder()
+                    val directSendResult = BleOuterClass.BleDirectSendResult.newBuilder()
+                    if (success) {
+                        directSendResult.errorMessage = "Successfully sent"
+                    } else {
+                        directSendResult.errorMessage = "Connection not established. Please try again."
+                    }
+                    directSendResult.success = success
+                    directSendResult.id = id
+                    bleRes.directSendResult = directSendResult.build()
+                    bleCallback?.bleResponse(ble = bleRes.build())
                 }
 
             }
