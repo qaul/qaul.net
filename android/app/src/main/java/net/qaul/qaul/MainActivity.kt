@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
                 return
             }
             else -> {
-                sendData(qaulId = qaulId, message = message)
+                sendData(qaulId = qaulId, message = "$$$message$$")
             }
         }
     }
@@ -247,22 +247,26 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
                 }
                 BleOuterClass.Ble.MessageCase.SCAN_RESULT -> {
                     val scanResult: BleOuterClass.BleScanResult = ble.scanResult
-                    AppLog.e("scanResult: ", Gson().toJson(scanResult))
+                    AppLog.e("scanResult: ", Gson().toJson(scanResult) + " " + String(scanResult.qaulId.toByteArray()))
                     if (scanResult.isInTheRange) {
-                        Toast.makeText(
-                            this,
-                            "Device found: ${scanResult.name} : ${scanResult.mac}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        if (!scanResult.qaulId.isEmpty) {
-                            binding.etQaulId.setText(String(scanResult.qaulId.toByteArray()))
+                        runOnUiThread {
+//                            Toast.makeText(
+//                                this,
+//                                "Device found: ${scanResult.name} : ${scanResult.mac}",
+//                                Toast.LENGTH_SHORT
+//                            ).show()
+                            if (!scanResult.qaulId.isEmpty) {
+                                binding.etQaulId.setText(String(scanResult.qaulId.toByteArray()))
+                            }
                         }
                     } else {
-                        Toast.makeText(
-                            this,
-                            "Device is out of range: ${scanResult.name} : ${scanResult.mac}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        runOnUiThread {
+//                            Toast.makeText(
+//                                this,
+//                                "Device is out of range: ${scanResult.name} : ${scanResult.mac}",
+//                                Toast.LENGTH_SHORT
+//                            ).show()
+                        }
                     }
                 }
                 BleOuterClass.Ble.MessageCase.DIRECT_RECEIVED -> {
