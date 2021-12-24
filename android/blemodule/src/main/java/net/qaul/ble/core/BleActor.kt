@@ -132,6 +132,11 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             if (listener != null) {
                 listener!!.onCharacteristicRead(bleDevice!!, gatt, characteristic)
             }
+            if (isFromMessage) {
+                writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tempData, 0)
+                tempData = ByteArray(0)
+                return
+            }
             if (characteristic.uuid.toString().lowercase() == BleService.READ_CHAR.lowercase() && !isFromMessage) {
                 disConnectedDevice()
             }
@@ -148,6 +153,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                     listener!!.onCharacteristicWrite(gatt = gatt, characteristic = characteristic)
                 } else {
                     listener!!.onMessageSent(gatt = gatt, characteristic = characteristic, id = messageId)
+                    disConnectedDevice()
                 }
             }
             AppLog.d(
@@ -253,8 +259,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             writeGattDescriptor(descriptorWriteQueue.element())
         } else {
             if (listener != null) {
-//                listener!!.onDescriptorWrite(this.bleDevice!!, this)
-
+                listener!!.onDescriptorWrite(this.bleDevice!!, this)
             }
         }
     }
