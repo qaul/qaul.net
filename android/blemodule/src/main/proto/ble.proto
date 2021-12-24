@@ -214,6 +214,8 @@ message BleDirectSend {
     bytes to = 2;
     // data to be sent
     bytes data = 3;
+    // qaul_id_sender
+    bytes qaul_id = 4;
 }
 
 // result after sending the direct message
