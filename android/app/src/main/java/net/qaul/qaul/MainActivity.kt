@@ -35,12 +35,17 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var bleWrapperClass: BleWrapperClass
+    private lateinit var qaulId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        qaulId = getDeviceName()
+        if (qaulId.length > 18) {
+            qaulId = "HelloThisIsAQaulId"
+        }
         setSupportActionBar(binding.toolbar)
         bleWrapperClass = BleWrapperClass(context = this)
         binding.btnInfoRequest.setOnClickListener {
@@ -77,10 +82,6 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
     private fun sendStartRequest() {
         val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
         val startRequest = BleOuterClass.BleStartRequest.newBuilder()
-        var qaulId = getDeviceName()
-        if (qaulId!!.length > 18) {
-            qaulId = "HelloThisIsAQaulId"
-        }
         val qaulid = qaulId.toByteArray(Charset.defaultCharset())
 //        val qaulid = byteArrayOf(
 //            0x48,0x65,0x6c,0x6c,0x6f,0x41,0x6a,0x61,0x79,0x48,0x6f,0x77,0x41,0x72,0x65,0x59,0x6f,0x75,0x48,0x65
@@ -122,7 +123,7 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
                 return
             }
             else -> {
-                sendData(qaulId = qaulId, message = "$$$message$$")
+                sendData(qaulId = qaulId, message = "$message")
             }
         }
     }
@@ -133,6 +134,7 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
         val directSend = BleOuterClass.BleDirectSend.newBuilder()
         directSend.data = ByteString.copyFrom(message.toByteArray(Charset.defaultCharset()))
         directSend.to = ByteString.copyFrom(qaulId.toByteArray(Charset.defaultCharset()))
+        directSend.qaulId = ByteString.copyFrom(this.qaulId, Charset.defaultCharset())
         directSend.id = System.currentTimeMillis().toString()
         bleReq.directSend = directSend.build()
         bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
@@ -275,9 +277,10 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
                     val message: String =
                         String(directReceived.data!!.toByteArray()).removeSuffix("$$")
                             .removePrefix("$$")
+                    val msgObject = Gson().fromJson(message, net.qaul.ble.model.Message::class.java)
                     runOnUiThread {
-                        binding.tvMessage.text = message
-                        binding.etQaulId.setText(String(directReceived.qaulId.toByteArray()))
+                        binding.tvMessage.text = msgObject.message
+                        binding.etQaulId.setText(msgObject.qaulId)
                     }
                 }
                 else -> {
@@ -290,7 +293,7 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
     /**
      * Returns Device Manufacturer & Model Name/Number
      */
-    private fun getDeviceName(): String? {
+    private fun getDeviceName(): String {
         val manufacturer = Build.MANUFACTURER
         val model = Build.MODEL
         return if (model.lowercase().startsWith(manufacturer.lowercase())) {

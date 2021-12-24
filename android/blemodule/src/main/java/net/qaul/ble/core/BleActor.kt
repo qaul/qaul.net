@@ -6,6 +6,8 @@ package net.qaul.ble.core
 import android.bluetooth.*
 import android.content.Context
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import net.qaul.ble.AppLog
 import net.qaul.ble.BLEUtils
 import net.qaul.ble.model.BLEScanDevice
@@ -32,9 +34,12 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
      */
     private fun disConnectedDevice() {
         if (mBluetoothGatt != null) {
-//            disconnectedFromDevice = true;
+            disconnectedFromDevice = true;
             refreshDeviceCache(mBluetoothGatt!!)
             mBluetoothGatt!!.disconnect()
+            Handler(Looper.myLooper()!!).postDelayed({
+                mBluetoothGatt!!.close()
+            },200)
         }
     }
 
@@ -133,7 +138,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 listener!!.onCharacteristicRead(bleDevice!!, gatt, characteristic)
             }
             if (isFromMessage) {
-                writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tempData, 0)
+                writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tempData, attempt)
                 tempData = ByteArray(0)
                 return
             }
@@ -202,15 +207,15 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                     }
                 }
             }
-            if (isReconnect && isFromMessage) {
-                writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tempData, attempt)
-                attempt = 0
-                tempData = ByteArray(0)
-                isReconnect = false
-            } else if (isFromMessage) {
-                writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tempData, 0)
-                tempData = ByteArray(0)
-            }
+//            if (isReconnect && isFromMessage) {
+//                writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tempData, attempt)
+//                attempt = 0
+//                tempData = ByteArray(0)
+//                isReconnect = false
+//            } else if (isFromMessage) {
+//                writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tempData, 0)
+//                tempData = ByteArray(0)
+//            }
         }
     }
 

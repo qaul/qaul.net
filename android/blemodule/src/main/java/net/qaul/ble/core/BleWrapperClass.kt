@@ -89,8 +89,9 @@ class BleWrapperClass(context: AppCompatActivity) {
                     if (BleService().isRunning()) {
                         BleService.bleService?.sendMessage(
                             id = bleDirectSend.id,
-                            qaulId = bleDirectSend.to.toByteArray(),
-                            message = bleDirectSend.data.toByteArray()
+                            to = bleDirectSend.to.toByteArray(),
+                            message = bleDirectSend.data.toByteArray(),
+                            from = bleDirectSend.qaulId.toByteArray()
                         )
                     }
                 }

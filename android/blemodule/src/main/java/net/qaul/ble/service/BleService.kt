@@ -11,11 +11,13 @@ import android.os.Handler
 import android.os.Looper
 import android.os.ParcelUuid
 import androidx.lifecycle.LifecycleService
+import com.google.gson.Gson
 import net.qaul.ble.AppLog
 import net.qaul.ble.BLEUtils
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.core.BleActor
 import net.qaul.ble.model.BLEScanDevice
+import net.qaul.ble.model.Message
 import java.nio.charset.Charset
 import java.util.*
 
@@ -390,11 +392,6 @@ class BleService : LifecycleService() {
                 val s = BLEUtils.byteToHex(value)
                 AppLog.e(TAG, "Data in hex:: $s")
                 var bleDevice = ignoreList.find { it.macAddress == device.address }
-                if (bleDevice == null) {
-                    bleDevice = BLEScanDevice.getDevice()
-                    bleDevice.macAddress = device.address
-                    bleDevice.qaulId = "HelloThisIsAQaulId".toByteArray(Charset.defaultCharset())
-                }
                 gattServer!!.sendResponse(
                     device,
                     requestId,
@@ -404,9 +401,17 @@ class BleService : LifecycleService() {
                 )
                 if (msgMap.containsKey(device.address)) {
                     var oldValue = msgMap[device.address]
-                    if (s.endsWith("2424") || (oldValue!!.endsWith("24") && s.startsWith("24"))) {
+                    if (s.endsWith("2424") || (oldValue!!.endsWith("24") && s == "24")) {
                         //SendResponse of oldValue
                         oldValue += s
+                        val msgData = String(BLEUtils.hexToByteArray(oldValue)!!).removeSuffix("$$")
+                            .removePrefix("$$")
+                        val msgObject = Gson().fromJson(msgData, Message::class.java)
+                        if (bleDevice == null) {
+                            bleDevice = BLEScanDevice.getDevice()
+                            bleDevice.macAddress = device.address
+                            bleDevice.qaulId = msgObject.qaulId!!.toByteArray(Charset.defaultCharset())
+                        }
                         bleAdvertiseCallback!!.onMessageReceived(
                             bleDevice = bleDevice,
                             BLEUtils.hexToByteArray(oldValue)!!
@@ -419,6 +424,14 @@ class BleService : LifecycleService() {
                 } else {
                     if (s.startsWith("2424") && s.endsWith("2424")) {
                         //Send Response of s
+                        val msgData = String(BLEUtils.hexToByteArray(s)!!).removeSuffix("$$")
+                            .removePrefix("$$")
+                        val msgObject = Gson().fromJson(msgData, Message::class.java)
+                        if (bleDevice == null) {
+                            bleDevice = BLEScanDevice.getDevice()
+                            bleDevice.macAddress = device.address
+                            bleDevice.qaulId = msgObject.qaulId!!.toByteArray(Charset.defaultCharset())
+                        }
                         bleAdvertiseCallback!!.onMessageReceived(
                             bleDevice = bleDevice,
                             BLEUtils.hexToByteArray(s)!!
@@ -718,12 +731,19 @@ class BleService : LifecycleService() {
         return baseBleActor
     }
 
-    fun sendMessage(id: String, qaulId: ByteArray, message: ByteArray) {
-        val bleDevice = ignoreList.find { it.qaulId.contentEquals(qaulId) }
+    fun sendMessage(id: String, to: ByteArray, message: ByteArray, from: ByteArray) {
+        val bleDevice = ignoreList.find { it.qaulId.contentEquals(to) }
+        val msg = Message()
+        msg.message = String(message)
+        msg.qaulId = String(from)
         if (bleDevice != null) {
             val bleActor = connectDevice(device = bleDevice, isFromMessage = true)
             bleActor.messageId = id
-            bleActor.tempData = message
+            val btArray =  Gson().toJson(msg).toByteArray(Charset.defaultCharset())
+            val delimiter = ByteArray(2)
+            delimiter[0] = 36
+            delimiter[1] = 36
+            bleActor.tempData = delimiter + btArray + delimiter
         } else {
             bleCallback?.onMessageSent(id = id, success = false, data = ByteArray(0))
         }
