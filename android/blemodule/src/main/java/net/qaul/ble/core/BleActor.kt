@@ -8,11 +8,11 @@ import android.content.Context
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.widget.Toast
 import net.qaul.ble.AppLog
 import net.qaul.ble.BLEUtils
 import net.qaul.ble.model.BLEScanDevice
 import net.qaul.ble.service.BleService
-import java.lang.Exception
 import java.util.*
 
 class BleActor(private val mContext: Context, var listener: BleConnectionListener?) {
@@ -39,7 +39,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             mBluetoothGatt!!.disconnect()
             Handler(Looper.myLooper()!!).postDelayed({
                 mBluetoothGatt!!.close()
-            },200)
+            }, 200)
         }
     }
 
@@ -114,6 +114,15 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 if (descriptorWriteQueue != null && descriptorWriteQueue.size > 0) descriptorWriteQueue.clear()
                 if (!disconnectedFromDevice) listener!!.onDisconnected(bleDevice!!) else disconnectedFromDevice =
                     false
+                if (isFromMessage) {
+                    if (mBluetoothGatt != null) {
+                        BleService.bleService!!.bleCallback?.onMessageSent(
+                            id = messageId,
+                            success = false,
+                            data = tempData
+                        )
+                    }
+                }
             }
         }
 
@@ -142,7 +151,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 tempData = ByteArray(0)
                 return
             }
-            if (characteristic.uuid.toString().lowercase() == BleService.READ_CHAR.lowercase() && !isFromMessage) {
+            if (characteristic.uuid.toString()
+                    .lowercase() == BleService.READ_CHAR.lowercase() && !isFromMessage
+            ) {
                 disConnectedDevice()
             }
         }
@@ -157,7 +168,11 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 if (messageId.isEmpty() || messageId.isBlank()) {
                     listener!!.onCharacteristicWrite(gatt = gatt, characteristic = characteristic)
                 } else {
-                    listener!!.onMessageSent(gatt = gatt, characteristic = characteristic, id = messageId)
+                    listener!!.onMessageSent(
+                        gatt = gatt,
+                        characteristic = characteristic,
+                        id = messageId
+                    )
                     disConnectedDevice()
                 }
             }
@@ -228,8 +243,13 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             var isQaulDevice = false
             for (gattService in serviceList) {
                 AppLog.e("SERVICE_UUID", gattService.uuid.toString())
-                if (gattService.uuid.toString().lowercase().trim() == BleService.SERVICE_UUID.lowercase().trim()) {
-                    AppLog.e(TAG, "service : " + gattService.uuid.toString() + " " + bleDevice?.macAddress)
+                if (gattService.uuid.toString().lowercase()
+                        .trim() == BleService.SERVICE_UUID.lowercase().trim()
+                ) {
+                    AppLog.e(
+                        TAG,
+                        "service : " + gattService.uuid.toString() + " " + bleDevice?.macAddress
+                    )
                     isQaulDevice = true
                     listener?.addToIgnoreList(this.bleDevice!!)
                     val characteristics =
@@ -305,6 +325,15 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             failedTask!!.cancel()
             if (listener != null) {
                 listener!!.onConnectionFailed(bleDevice!!)
+                if (isFromMessage) {
+                    if (mBluetoothGatt != null) {
+                        BleService.bleService!!.bleCallback?.onMessageSent(
+                            id = messageId,
+                            success = false,
+                            data = tempData
+                        )
+                    }
+                }
             }
         }
     }
@@ -341,7 +370,12 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     /**
      * User write data to device
      */
-    fun writeServiceData(serUUID: String, charUUID: String, data: ByteArray?, attempt: Int): Boolean {
+    fun writeServiceData(
+        serUUID: String,
+        charUUID: String,
+        data: ByteArray?,
+        attempt: Int
+    ): Boolean {
         if (attempt < 3) {
             if (data != null) {
                 AppLog.d(
@@ -388,7 +422,11 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 }
             }
         }
-        BleService.bleService!!.bleCallback?.onMessageSent(id = messageId, success = false, data = data!!)
+        BleService.bleService!!.bleCallback?.onMessageSent(
+            id = messageId,
+            success = false,
+            data = data!!
+        )
         return false
     }
 
@@ -406,19 +444,23 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             gatt: BluetoothGatt?,
             characteristic: BluetoothGattCharacteristic?
         )
+
         fun onCharacteristicWrite(
             gatt: BluetoothGatt?,
             characteristic: BluetoothGattCharacteristic?
         )
+
         fun onMessageSent(
             gatt: BluetoothGatt?,
             characteristic: BluetoothGattCharacteristic?, id: String
         )
+
         fun onCharacteristicChanged(
             macAddress: String?,
             gatt: BluetoothGatt?,
             characteristic: BluetoothGattCharacteristic?
         )
+
         fun addToBlackList(bleScanDevice: BLEScanDevice)
         fun addToIgnoreList(bleScanDevice: BLEScanDevice)
     }
