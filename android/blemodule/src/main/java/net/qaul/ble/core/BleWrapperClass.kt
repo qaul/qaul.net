@@ -23,13 +23,17 @@ import androidx.lifecycle.LifecycleService
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.PendingResult
 import com.google.android.gms.location.*
+import com.google.gson.Gson
 import com.google.protobuf.ByteString
 import net.qaul.ble.AppLog
+import net.qaul.ble.BLEUtils
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.callback.BleRequestCallback
 import net.qaul.ble.model.BLEScanDevice
+import net.qaul.ble.model.Message
 import net.qaul.ble.service.BleService
 import qaul.sys.ble.BleOuterClass
+import java.nio.charset.Charset
 
 class BleWrapperClass(context: AppCompatActivity) {
     private val TAG: String = BleWrapperClass::class.java.simpleName
@@ -195,10 +199,13 @@ class BleWrapperClass(context: AppCompatActivity) {
                     override fun onMessageReceived(bleDevice: BLEScanDevice, message: ByteArray) {
                         val bleRes = BleOuterClass.Ble.newBuilder()
                         val directReceived = BleOuterClass.BleDirectReceived.newBuilder()
+                        val msgData = String(message).removeSuffix("$$")
+                            .removePrefix("$$")
+                        val msgObject = Gson().fromJson(msgData, Message::class.java)
                         directReceived.from = bleDevice.macAddress
                         directReceived.mode = BleOuterClass.BleMode.low_latency
                         directReceived.qaulId = ByteString.copyFrom(bleDevice.qaulId)
-                        directReceived.data = ByteString.copyFrom(message)
+                        directReceived.data = ByteString.copyFrom(msgObject.message, Charset.defaultCharset())
                         bleRes.directReceived = directReceived.build()
                         bleCallback?.bleResponse(ble = bleRes.build())
                     }

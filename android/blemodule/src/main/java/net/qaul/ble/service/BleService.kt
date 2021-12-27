@@ -37,6 +37,7 @@ class BleService : LifecycleService() {
     private val outOfRangeChecker = Handler(Looper.getMainLooper())
     private val devicesList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
     private val ignoreList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
+    private val receiveList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
     private val blackList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
     private val uuidList = arrayListOf<ParcelUuid>()
     private var filters: ArrayList<ScanFilter> = arrayListOf()
@@ -392,6 +393,9 @@ class BleService : LifecycleService() {
                 val s = BLEUtils.byteToHex(value)
                 AppLog.e(TAG, "Data in hex:: $s")
                 var bleDevice = ignoreList.find { it.macAddress == device.address }
+                if (bleDevice == null) {
+                    bleDevice = receiveList.find { it.macAddress == device.address }
+                }
                 gattServer!!.sendResponse(
                     device,
                     requestId,
@@ -411,6 +415,8 @@ class BleService : LifecycleService() {
                             bleDevice = BLEScanDevice.getDevice()
                             bleDevice.macAddress = device.address
                             bleDevice.qaulId = msgObject.qaulId!!.toByteArray(Charset.defaultCharset())
+                            bleDevice.bluetoothDevice = device
+                            receiveList.add(bleDevice)
                         }
                         bleAdvertiseCallback!!.onMessageReceived(
                             bleDevice = bleDevice,
@@ -431,6 +437,8 @@ class BleService : LifecycleService() {
                             bleDevice = BLEScanDevice.getDevice()
                             bleDevice.macAddress = device.address
                             bleDevice.qaulId = msgObject.qaulId!!.toByteArray(Charset.defaultCharset())
+                            bleDevice.bluetoothDevice = device
+                            receiveList.add(bleDevice)
                         }
                         bleAdvertiseCallback!!.onMessageReceived(
                             bleDevice = bleDevice,
@@ -731,8 +739,14 @@ class BleService : LifecycleService() {
         return baseBleActor
     }
 
+    /**
+     * This Method Will Be Used to Send Data to Other Qaul-Device
+     */
     fun sendMessage(id: String, to: ByteArray, message: ByteArray, from: ByteArray) {
-        val bleDevice = ignoreList.find { it.qaulId.contentEquals(to) }
+        var bleDevice = ignoreList.find { it.qaulId.contentEquals(to) }
+        if (bleDevice == null) {
+            bleDevice = receiveList.find { it.qaulId.contentEquals(to) }
+        }
         val msg = Message()
         msg.message = String(message)
         msg.qaulId = String(from)

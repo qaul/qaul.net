@@ -138,6 +138,9 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
         directSend.id = System.currentTimeMillis().toString()
         bleReq.directSend = directSend.build()
         bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
+        runOnUiThread {
+            Toast.makeText(this, "Connecting...", Toast.LENGTH_SHORT).show()
+        }
     }
 
 
@@ -274,13 +277,18 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
                 BleOuterClass.Ble.MessageCase.DIRECT_RECEIVED -> {
                     val directReceived: BleOuterClass.BleDirectReceived = ble.directReceived
                     AppLog.e("directReceived: ", Gson().toJson(directReceived))
-                    val message: String =
-                        String(directReceived.data!!.toByteArray()).removeSuffix("$$")
-                            .removePrefix("$$")
-                    val msgObject = Gson().fromJson(message, net.qaul.ble.model.Message::class.java)
+                    val message: String = directReceived.data.toString(Charset.defaultCharset())
+                    val qaulId: String = directReceived.qaulId.toString(Charset.defaultCharset())
                     runOnUiThread {
-                        binding.tvMessage.text = msgObject.message
-                        binding.etQaulId.setText(msgObject.qaulId)
+                        binding.tvMessage.text = message
+                        binding.etQaulId.setText(qaulId)
+                    }
+                }
+                BleOuterClass.Ble.MessageCase.DIRECT_SEND_RESULT -> {
+                    val directSendResult: BleOuterClass.BleDirectSendResult = ble.directSendResult
+                    AppLog.e("directSendResult: ", Gson().toJson(directSendResult))
+                    runOnUiThread {
+                        Toast.makeText(this, directSendResult.errorMessage, Toast.LENGTH_SHORT).show()
                     }
                 }
                 else -> {
