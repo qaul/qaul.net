@@ -112,31 +112,6 @@ impl Users {
         }
     }
 
-    /// users CLI commands
-    /// 
-    /// you invoke this with the commands:
-    /// ```
-    /// router users list
-    /// ```
-    pub fn cli(cmd: &str) {        
-        match cmd {
-            // list all users
-            cmd if cmd.starts_with("list") => {
-                let mut line = 1;
-                println!("All known Users");
-                println!("No. | User Name | User Id | Public Key");
-
-                let users = USERS.get().read().unwrap();
-
-                for (id, user) in &users.users {
-                    println!("{} | {} | {:?} | {:?}", line, user.name, id, user.key);
-                    line += 1;
-                }
-            },
-            _ => log::error!("unknown router users command"),
-        }
-    }
-
     /// Process incoming RPC request messages
     pub fn rpc(data: Vec<u8>) {
         match proto::Users::decode(&data[..]) {

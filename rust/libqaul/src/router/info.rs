@@ -245,39 +245,4 @@ impl RouterInfo {
             },
         }
     }
-
-    /// RouterInfo table's CLI commands
-    /// 
-    /// you get here with the commands:
-    /// ```
-    /// router info list
-    /// ```
-    pub fn cli(cmd: &str) {        
-        match cmd {
-            // display routing table
-            cmd if cmd.starts_with("list") => {
-                println!("Routing Info Scheduler List");
-
-                let mut line = 1;
-                let scheduler = SCHEDULER.get().read().unwrap();
-
-                println!("Scheduled interval is {} seconds", scheduler.interval.as_secs());
-                println!("No. | invoked in ms  | Neighbour Node Id");
-
-                // loop through all neighbour entries
-                for (id, entry) in &scheduler.neighbours {
-                    let now = SystemTime::now();
-                    let duration_result = now.duration_since(entry.timestamp);
-                    if let Ok(duration) = duration_result {
-                        let scheduled_in = scheduler.interval - duration;
-                        println!("{} | {} | {:?}", line, scheduled_in.as_millis() , id);
-                    } else {
-                        log::error!("entry.timestamp.duration_since() produced the following error: {:?}", duration_result);
-                    }
-                    line += 1; 
-                }
-            },
-            _ => log::error!("unknown router info command"),
-        }
-    }
 }

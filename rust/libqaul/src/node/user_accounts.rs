@@ -173,26 +173,6 @@ impl UserAccounts {
         user_info
     }
 
-    /// Process command line instructions for the 
-    /// user accounts
-    pub fn cli(cmd: &str) {        
-        match cmd {
-            // list all user accounts
-            "list" => {
-                println!("User Accounts:");
-                let users = USERACCOUNTS.get().read().unwrap();
-                for user in &users.users {
-                    println!("'{}' {:?}", user.name, user.id);
-                }
-            },
-            // create a new user account
-            cmd if cmd.starts_with("create ") => {
-                Self::create( String::from(cmd.strip_prefix("create ").unwrap()) );
-            },
-            _ => error!("unknown user command"),
-        }
-    }
-
     /// Process incoming RPC request messages for user accounts
     pub fn rpc(data: Vec<u8>) {
         match proto::UserAccounts::decode(&data[..]) {

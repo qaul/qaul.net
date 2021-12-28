@@ -57,35 +57,6 @@ impl Router {
         RouterInfo::init(10);
     }
 
-    /// Process commandline instructions for the router 
-    /// module and forward them to the submodules
-    pub fn cli(cmd: &str) {
-        match cmd {
-            // connections
-            cmd if cmd.starts_with("connections ") => {
-                ConnectionTable::cli(cmd.strip_prefix("connections ").unwrap());
-            },
-            // info
-            cmd if cmd.starts_with("info ") => {
-                RouterInfo::cli(cmd.strip_prefix("info ").unwrap());
-            },
-            // neighbours
-            cmd if cmd.starts_with("neighbours ") => {
-                Neighbours::cli(cmd.strip_prefix("neighbours ").unwrap());
-            },
-            // table
-            cmd if cmd.starts_with("table ") => {
-                RoutingTable::cli(cmd.strip_prefix("table ").unwrap());
-            },
-            // users
-            cmd if cmd.starts_with("users ") => {
-                Users::cli(cmd.strip_prefix("users ").unwrap());
-            },
-            // unhandled command
-            _ => log::error!("unknown router command"),
-        }
-    }
-
     /// Process incoming RPC request messages and send them to
     /// the submodules
     pub fn rpc(data: Vec<u8>) {

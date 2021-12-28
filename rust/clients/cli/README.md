@@ -1,14 +1,8 @@
 # qaul-cli
 
-**qaul CLI client**
+**qaul RPC CLI client**
 
-This client can:
-
-* discover other nodes in the same network via mdns
-* connect to remote nodes via the internet overlay network.
-* list the network structure & display router state
-* create user accounts
-* publish, distribute and display feed-messages via floodsub protocol to all other nodes in the network.
+This CLI client starts libqaul in an own thread, and uses the protobuf RPC interface to communicate with libqaul.
 
 
 ## Run qaul-cli
@@ -22,7 +16,7 @@ You can run as many instances on as many machines as you like. the machines just
 
 ```sh
 # start the program
-RUST_LOG=info cargo run --bin=qaul-cli
+cargo run --bin=qaul-cli
 ```
 
 Once the program is running, one can enter the commands documented in the CLI Manual below.
@@ -32,41 +26,31 @@ Once the program is running, one can enter the commands documented in the CLI Ma
 
 The following commands are available:
 
+* node
+  * `node info` - prints the local node id
 * user accounts
-  * `user list` - list all local user accounts
-  * `user create {User Name}` - create a new user account with the name {User Name}
-* feed service
-  * `feed send {FeedMessage}` - sends the {FeedMessage} to the network and distributes it to all connected nodes.
-    * the message is signed and can be validated.
-    * at least one user needs to be created.
-* router info
-  * `router table list` - display routing table for all currently reachable users
-  * `router users list` - display all users known to this router
-  * `router neighbours list` - display all neighbour nodes per interface
-  * `router connections list` - display connection discovery table
-    * out of this information the routing table is generated
-  * `router info list` - display scheduler info
-    * Each neighbour receives routing info updates.
-      This list displays the scheduler information.
-* connection modules info
-  * `modules info` - display information of the connections modules
-    * list all neighbour nodes a module has a running tcp connection.
-
-
-## Further Configuration
-
-On the first startup of the program, a configuration file `config.toml` 
-is generated in the local folder. 
-You can configure your node by editing it.
-
-
-### Connect to Nodes in the Internet
-
-You can run nodes online, to interconnect local networks and create an internet overlay network.
-
-To connect to one, you need to add it's address to the peers list of the `[internet]`  module in the configuration file `config.toml`. For example, for the IP address `144.91.74.192` on port `9229` it looks like this:
-
-```toml
-[internet]
-peers = ["/ip4/144.91.74.192/tcp/9229"]
-```
+  * `account default` - get's and displays the default user account
+  * `account create {User Name}` - create a new user account with the name {User Name}
+* users - Functions for all users known by your node
+  * `users list` - display all users known to this router
+  * `users verify {User ID}` - verify user with {User ID}
+  * `users block {User ID}` - block user with {User ID}
+* router
+  * `router table list` - request and display routing table with per module connectivity per user.
+  * `router neighbours list` - request and display neighbours list of all neighbouring nodes.
+  * `router connections list` - request and display connections table, with all known connections per connection module.
+* connections
+  * `connections nodes list` - request a list of all statically configured peering nodes via the internet.
+  * `connections nodes add {Multiaddress}` - add a new internet peering node, via it's multiaddress, e.g. `/ip4/144.91.74.192/tcp/9229`
+  * `connections nodes remove {Multiaddress}` - remove an internet peering node.
+* feed
+  * `feed send {FeedMessage}` - sends the {FeedMessage} to the network and distributes it to all connected nodes
+    * the message is signed and can be validated
+    * at least one user needs to be created
+  * `feed list` - displays all feed messages
+    * `feed list {Feed Message ID}` - displays only feed messages newer than {Feed Message ID}
+* debug
+  * all these commands are for debugging purposes only
+  * `debug rpc sent` - displays the number of RPC messages sent to libqaul
+  * `debug rpc queued` - displays the number of messages in the RPC queue to be processed.
+    * This command will probably always return '0', as the messages are checked many times per second by this client.

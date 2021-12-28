@@ -169,36 +169,6 @@ impl RoutingTable {
         // send message
         Rpc::send_message(buf, crate::rpc::proto::Modules::Router.into(), "".to_string(), Vec::new());
     }
-    
-    /// Routing table's CLI commands
-    /// 
-    /// you get here with the commands:
-    /// ```
-    /// router table list
-    /// ```
-    pub fn cli(cmd: &str) {        
-        match cmd {
-            // display routing table
-            cmd if cmd.starts_with("list") => {
-                println!("Routing Table");
-                println!("No. | User ID  | Connection Module | RTT in ms | Via Neighbour Node Id");
-
-                let mut line = 1;
-                let routing_table = ROUTINGTABLE.get().read().unwrap();
-
-                // loop through all user table entries
-                for (id, entry) in &routing_table.table {
-                    // loop through all connection entries in a user entry
-                    for connection in &entry.connections {
-                        println!("{} | {:?} | {:?} | {} | {:?}", line, id, connection.module, connection.rtt, connection.node);
-                        line += 1;    
-                    }
-                }
-            },
-            _ => log::error!("unknown router table command"),
-        }
-    }
-
 }
 
 
