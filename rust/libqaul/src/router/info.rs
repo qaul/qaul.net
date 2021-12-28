@@ -85,9 +85,9 @@ pub struct RouterInfoMessage {
 /// Signed message container
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct RouterInfoContainer {
-    /// data contains the binary encoded RouterInfoContainer
+    /// data contains the binary encoded RouterInfoMessage
     pub data: Vec<u8>,
-    /// signature of RouterInfoContainer
+    /// signature of RouterInfoMessage
     pub signature: Vec<u8>,
 }
 
@@ -125,7 +125,6 @@ impl RouterInfo {
             for (id, time) in scheduler.neighbours.iter() {
                 if time.timestamp + scheduler.interval < SystemTime::now() {
                     found_neighbour = Some(id.clone());
-                    log::info!("found timout {:?}", id);
                     break
                 }
             }

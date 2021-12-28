@@ -36,6 +36,8 @@ bs58 = "0.4"
 futures-ticker = "0.0.1"
 jni = "0.19"
 serde_yaml = "0.8"
+sled = "0.34.7"
+sled-extensions = { version = "0.2", features = ["bincode"] }
 
 # only for desktop platforms: Linux, Mac, Windows
 directories = "4.0"

@@ -28,11 +28,12 @@ const FeedMessageRequest$json = const {
   '1': 'FeedMessageRequest',
   '2': const [
     const {'1': 'last_received', '3': 1, '4': 1, '5': 12, '10': 'lastReceived'},
+    const {'1': 'last_index', '3': 2, '4': 1, '5': 4, '10': 'lastIndex'},
   ],
 };
 
 /// Descriptor for `FeedMessageRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List feedMessageRequestDescriptor = $convert.base64Decode('ChJGZWVkTWVzc2FnZVJlcXVlc3QSIwoNbGFzdF9yZWNlaXZlZBgBIAEoDFIMbGFzdFJlY2VpdmVk');
+final $typed_data.Uint8List feedMessageRequestDescriptor = $convert.base64Decode('ChJGZWVkTWVzc2FnZVJlcXVlc3QSIwoNbGFzdF9yZWNlaXZlZBgBIAEoDFIMbGFzdFJlY2VpdmVkEh0KCmxhc3RfaW5kZXgYAiABKARSCWxhc3RJbmRleA==');
 @$core.Deprecated('Use feedMessageListDescriptor instead')
 const FeedMessageList$json = const {
   '1': 'FeedMessageList',
@@ -54,11 +55,12 @@ const FeedMessage$json = const {
     const {'1': 'time_sent', '3': 5, '4': 1, '5': 9, '10': 'timeSent'},
     const {'1': 'time_received', '3': 6, '4': 1, '5': 9, '10': 'timeReceived'},
     const {'1': 'content', '3': 7, '4': 1, '5': 9, '10': 'content'},
+    const {'1': 'index', '3': 8, '4': 1, '5': 4, '10': 'index'},
   ],
 };
 
 /// Descriptor for `FeedMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List feedMessageDescriptor = $convert.base64Decode('CgtGZWVkTWVzc2FnZRIbCglzZW5kZXJfaWQYASABKAxSCHNlbmRlcklkEigKEHNlbmRlcl9pZF9iYXNlNTgYAiABKAlSDnNlbmRlcklkQmFzZTU4Eh0KCm1lc3NhZ2VfaWQYAyABKAxSCW1lc3NhZ2VJZBIqChFtZXNzYWdlX2lkX2Jhc2U1OBgEIAEoCVIPbWVzc2FnZUlkQmFzZTU4EhsKCXRpbWVfc2VudBgFIAEoCVIIdGltZVNlbnQSIwoNdGltZV9yZWNlaXZlZBgGIAEoCVIMdGltZVJlY2VpdmVkEhgKB2NvbnRlbnQYByABKAlSB2NvbnRlbnQ=');
+final $typed_data.Uint8List feedMessageDescriptor = $convert.base64Decode('CgtGZWVkTWVzc2FnZRIbCglzZW5kZXJfaWQYASABKAxSCHNlbmRlcklkEigKEHNlbmRlcl9pZF9iYXNlNTgYAiABKAlSDnNlbmRlcklkQmFzZTU4Eh0KCm1lc3NhZ2VfaWQYAyABKAxSCW1lc3NhZ2VJZBIqChFtZXNzYWdlX2lkX2Jhc2U1OBgEIAEoCVIPbWVzc2FnZUlkQmFzZTU4EhsKCXRpbWVfc2VudBgFIAEoCVIIdGltZVNlbnQSIwoNdGltZV9yZWNlaXZlZBgGIAEoCVIMdGltZVJlY2VpdmVkEhgKB2NvbnRlbnQYByABKAlSB2NvbnRlbnQSFAoFaW5kZXgYCCABKARSBWluZGV4');
 @$core.Deprecated('Use sendMessageDescriptor instead')
 const SendMessage$json = const {
   '1': 'SendMessage',
