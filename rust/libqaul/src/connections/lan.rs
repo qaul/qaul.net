@@ -36,7 +36,6 @@ use libp2p::{
 };
 use futures::channel::mpsc;
 use prost::Message;
-use std::collections::HashSet;
 use log::info;
 use async_std::task;
 use mpsc::UnboundedReceiver;
@@ -46,7 +45,7 @@ use crate::node::Node;
 use crate::services::{
     page,
     page::{PageMode, PageRequest, PageResponse},
-    feed::{Feed, FeedMessageSendContainer},
+    feed::{Feed},
 };
 use crate::storage::configuration::Configuration;
 use crate::connections::{
@@ -91,8 +90,7 @@ impl Lan {
         #[cfg(any(target_os = "android", target_os = "ios"))]
         let transport = {
             let tcp = TcpConfig::new().nodelay(true);
-            let ws_tcp = WsConfig::new(tcp.clone());
-            tcp.or_transport(ws_tcp)
+            tcp
         };
         // create tcp transport with DNS for all other devices
         #[cfg(not(any(target_os = "android", target_os = "ios")))]
