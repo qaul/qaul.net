@@ -102,6 +102,16 @@ impl Users {
         }
     }
 
+    /// get the name of a known user
+    pub fn get_name( user_id: &PeerId ) -> Option<String> {
+        let store = USERS.get().read().unwrap();
+        let result = store.users.get(user_id);
+        match result {
+            Some(user) => Some(user.name.clone()),
+            None => None
+        }
+    }
+
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
     pub fn get_user_info_table() -> UserInfoTable {

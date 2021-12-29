@@ -22,12 +22,10 @@ message Chat {
 }
 
 // request for overview list of all conversations
-// this request shall be sent continously when the view is open
+// this request shall be sent continuously when the view is open
+// 
+// at the moment always the entire list is sent
 message ChatOverviewRequest {
-    // send all messages
-    bool all = 1;
-    // send only changes that are newer than the last received
-    bytes last_received = 2;
 }
 
 // overview list of conversations
@@ -40,12 +38,12 @@ message ChatOverviewList {
 message ChatConversation {
     // id of the user
     bytes conversation_id = 1;
-    // name of the user
-    string name = 2;
+    // last message index
+    uint32 last_message_index = 2;
+    // name of the conversation
+    string name = 3;
     // time when last message was sent or received
-    string last_message_at = 3;
-    // when has the user last time invoked the conversation
-    string invoked_at = 4;
+    uint64 last_message_at = 4;
     // unread messages
     int32 unread = 5;
     // preview text of the last message
@@ -67,21 +65,23 @@ message ChatConversationList {
 
 // a single chat message
 message ChatMessage {
+    // message index
+    uint32 index = 1;
     // id of the sending user
-    bytes sender_id = 1;
+    bytes sender_id = 2;
     // message id
-    bytes message_id = 2;
+    bytes message_id = 3;
     // message status
     // 0 = nothing
     // 1 = sent
     // 2 = received
-    int32 status = 3;
+    int32 status = 4;
     // time when the message was sent
-    string sent_at = 4;
+    uint64 sent_at = 5;
     // time when the message was received
-    string received_at = 5;
+    uint64 received_at = 6;
     // content of the message
-    string content = 6;
+    string content = 7;
 }
 
 // send chat message

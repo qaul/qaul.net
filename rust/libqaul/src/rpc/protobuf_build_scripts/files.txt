@@ -6,4 +6,6 @@ router/users.proto
 router/router.proto
 services/feed/feed.proto
 services/feed/feed_net.proto
+services/chat/chat.proto
+services/messaging/messaging.proto
 connections/ble/manager/ble.proto

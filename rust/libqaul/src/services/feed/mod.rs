@@ -111,7 +111,7 @@ impl Feed {
     /// initialize feed module
     pub fn init() {
         // get database and initialize tree
-        let db = DataBase::get_db();
+        let db = DataBase::get_node_db();
         let tree: Tree<FeedMessageData> = db.open_bincode_tree("feed").unwrap();
 
         // get last key

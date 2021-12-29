@@ -1,0 +1,48 @@
+syntax = "proto3";
+package qaul.net.messaging;
+
+// qaul network messaging service
+//
+// is responsible to distribute messages to users
+// the container contains the entire message with signature
+message Container {
+    // signed by sending user
+    bytes signature = 1;
+    // Message envelope
+    Envelope envelope = 2;
+}
+
+// message envelop with sender and receiver
+message Envelope {
+    // the qaul ID of the sender
+    bytes sender_id = 1;
+    // the qaul ID of the receiver
+    bytes receiver_id = 2;
+    // the encrypted message data
+    bytes data = 3;
+}
+
+// message received confirmation
+// 
+// every message that was received by a user
+// sends an acknowledgment package, to the sender
+// to confirm the receive.
+message Confirmation {
+    // message ID
+    bytes message_id = 1;
+    // receveived at timestamp
+    uint64 received_at = 2;
+}
+
+// chat message
+message ChatMessage {
+    // group chat
+    bool group = 1;
+    // conversation id 
+    // (only for group chat messages)
+    bytes conversation_id = 2;
+    // sent timestamp
+    uint64 sent_at = 3;
+    // message
+    string content = 4;
+}

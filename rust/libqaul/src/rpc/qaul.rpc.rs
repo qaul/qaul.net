@@ -37,4 +37,5 @@ pub enum Modules {
     Feed = 6,
     Connections = 7,
     Debug = 8,
+    Chat = 9,
 }

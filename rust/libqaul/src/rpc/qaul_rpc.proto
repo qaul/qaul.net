@@ -34,4 +34,5 @@ enum Modules {
     FEED = 6;
     CONNECTIONS = 7;
     DEBUG = 8;
+    CHAT = 9;
 }
