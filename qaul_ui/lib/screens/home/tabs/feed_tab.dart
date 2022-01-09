@@ -69,7 +69,8 @@ class _FeedState extends _BaseTabState<_Feed> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(author?.name ?? l18ns.unknown,
-                          style: theme.headline6),
+                          style: theme.bodyText1!
+                              .copyWith(fontWeight: FontWeight.bold)),
                       Text(
                         sentAt,
                         style: theme.caption!
@@ -79,7 +80,7 @@ class _FeedState extends _BaseTabState<_Feed> {
                   ),
                   subtitle: Text(
                     msg.content ?? '',
-                    style: theme.caption,
+                    style: theme.bodyText1,
                   ),
                 );
               },

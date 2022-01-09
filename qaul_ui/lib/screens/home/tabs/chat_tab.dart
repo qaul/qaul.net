@@ -48,15 +48,17 @@ class _ChatState extends _BaseTabState<_Chat> {
               leading: UserAvatar.small(user: user),
               title: Row(
                 children: [
-                  Text(user.name, style: theme.headline6),
+                  Text(user.name, style: theme.bodyText1!
+                      .copyWith(fontWeight: FontWeight.bold)),
                   const Expanded(child: SizedBox()),
-                  Text('12:00', style: theme.caption),
+                  Text('12:00', style: theme.caption!
+                      .copyWith(fontStyle: FontStyle.italic)),
                   const Icon(Icons.chevron_right),
                 ],
               ),
               subtitle: Text(
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-                style: theme.caption,
+                style: theme.bodyText1,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
