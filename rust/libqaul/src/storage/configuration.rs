@@ -74,7 +74,8 @@ impl Default for Internet {
             #[cfg(any(target_os = "android", target_os = "ios"))]
             peers: vec![String::from("/ip4/144.91.74.192/tcp/9229"); 1],
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
-            peers: Vec::new(),
+            peers: vec![String::from("/ip4/144.91.74.192/tcp/9229"); 1],
+            //peers: Vec::new(),
             do_listen: false,
             listen: String::from("/ip4/0.0.0.0/tcp/0"),
         }
