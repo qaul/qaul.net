@@ -189,39 +189,5 @@ impl Neighbours {
         // send message
         Rpc::send_message(buf, crate::rpc::proto::Modules::Router.into(), "".to_string(), Vec::new() );
     }
-
-    /// neighbours CLI commands
-    /// 
-    /// you get here with the commands:
-    /// ```
-    /// router neighbours list
-    /// ```
-    pub fn cli(cmd: &str) {        
-        match cmd {
-            // list neighbours
-            cmd if cmd.starts_with("list") => {
-                // display lan connection module neighbours
-                {
-                    println!("LAN neighbours:");
-                    let lan = LAN.get().read().unwrap();
-
-                    for (id, value) in &lan.nodes {
-                        println!("{:?}, {} rtt", id, value.rtt);
-                    }
-                }
-                
-                // display internet connection module neighbours
-                {
-                    println!("Internet neighbours:");
-                    let internet = INTERNET.get().write().unwrap();
-
-                    for (id, value) in &internet.nodes {
-                        println!("{:?}, {} rtt", id, value.rtt);
-                    }
-                }
-            },
-            _ => log::error!("unknown router neighbours command"),
-        }
-    }
 }
 

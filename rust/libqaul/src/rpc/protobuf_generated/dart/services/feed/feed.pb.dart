@@ -7,6 +7,7 @@
 
 import 'dart:core' as $core;
 
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 enum Feed_Message {
@@ -110,16 +111,21 @@ class Feed extends $pb.GeneratedMessage {
 class FeedMessageRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedMessageRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.feed'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastReceived', $pb.PbFieldType.OY)
+    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastIndex', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
   FeedMessageRequest._() : super();
   factory FeedMessageRequest({
     $core.List<$core.int>? lastReceived,
+    $fixnum.Int64? lastIndex,
   }) {
     final _result = create();
     if (lastReceived != null) {
       _result.lastReceived = lastReceived;
+    }
+    if (lastIndex != null) {
+      _result.lastIndex = lastIndex;
     }
     return _result;
   }
@@ -152,6 +158,15 @@ class FeedMessageRequest extends $pb.GeneratedMessage {
   $core.bool hasLastReceived() => $_has(0);
   @$pb.TagNumber(1)
   void clearLastReceived() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get lastIndex => $_getI64(1);
+  @$pb.TagNumber(2)
+  set lastIndex($fixnum.Int64 v) { $_setInt64(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasLastIndex() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLastIndex() => clearField(2);
 }
 
 class FeedMessageList extends $pb.GeneratedMessage {
@@ -204,6 +219,7 @@ class FeedMessage extends $pb.GeneratedMessage {
     ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timeSent')
     ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timeReceived')
     ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
+    ..a<$fixnum.Int64>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'index', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
@@ -216,6 +232,7 @@ class FeedMessage extends $pb.GeneratedMessage {
     $core.String? timeSent,
     $core.String? timeReceived,
     $core.String? content,
+    $fixnum.Int64? index,
   }) {
     final _result = create();
     if (senderId != null) {
@@ -238,6 +255,9 @@ class FeedMessage extends $pb.GeneratedMessage {
     }
     if (content != null) {
       _result.content = content;
+    }
+    if (index != null) {
+      _result.index = index;
     }
     return _result;
   }
@@ -324,6 +344,15 @@ class FeedMessage extends $pb.GeneratedMessage {
   $core.bool hasContent() => $_has(6);
   @$pb.TagNumber(7)
   void clearContent() => clearField(7);
+
+  @$pb.TagNumber(8)
+  $fixnum.Int64 get index => $_getI64(7);
+  @$pb.TagNumber(8)
+  set index($fixnum.Int64 v) { $_setInt64(7, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasIndex() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearIndex() => clearField(8);
 }
 
 class SendMessage extends $pb.GeneratedMessage {

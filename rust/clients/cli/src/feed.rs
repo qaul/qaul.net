@@ -24,7 +24,21 @@ impl Feed {
             },
             // request feed list
             cmd if cmd.starts_with("list") => {
-                Self::request_feed_list();
+                match cmd.strip_prefix("list ") {
+                    Some(index_str) => {
+                        if let Ok(index) = index_str.parse::<u64>() {
+                            // request messages
+                            Self::request_feed_list(index);
+                        }
+                        else {
+                            log::error!("feed list index is not a valid number");
+                        }
+                    },
+                    None => {
+                        // request all messages
+                        Self::request_feed_list(0);
+                    }
+                }
             },
             // unknown command
             _ => log::error!("unknown feed command"),
@@ -51,12 +65,13 @@ impl Feed {
     }
 
     /// request feed list via rpc
-    fn request_feed_list() {
+    fn request_feed_list(last_index: u64) {
         // create feed list request message
         let proto_message = proto::Feed {
             message: Some(proto::feed::Message::Request(
                 proto::FeedMessageRequest{
                     last_received: Vec::new(),
+                    last_index,
                 }
             )),
         };
@@ -85,6 +100,7 @@ impl Feed {
 
                         // print all messages in the feed list
                         for message in proto_feedlist.feed_message {
+                            print!{"[{}] ", message.index};
                             println!("{}", message.time_sent);
                             println!("Message ID {}", message.message_id_base58);
                             println!("From {}", message.sender_id_base58);

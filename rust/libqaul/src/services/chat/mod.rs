@@ -197,39 +197,6 @@ impl Feed {
         key.verify(&buf, &msg.id)
     }
 
-    /// Process command line instructions for the feed module
-    pub fn cli(cmd: &str, lan: Option<&mut Lan>, internet: Option<&mut Internet> ) {        
-        match cmd {
-            // list all messages
-            "list" => {
-                println!("feed messages:");
-                let feed = FEED.get().read().unwrap();
-                for (id,message) in &feed.messages {
-                    // print meta data
-                    println!("{}, {:?}", humantime::format_rfc3339(message.time), id);
-                    // print message
-                    println!("  '{}'", message.content);
-                }
-            },
-            // send a new feed message
-            cmd if cmd.starts_with("send ") => {
-                // get default user account
-                match UserAccounts::get_default_user() {
-                    None => {
-                        // please register a user account first
-                        println!("Please create a user account first:");
-                        println!("  user create USERNAME");
-                    },
-                    Some(user_account) => {
-                        // send the message
-                        Self::send( &user_account, cmd.strip_prefix("send ").unwrap().to_string(), lan, internet );
-                    },
-                }
-            },
-            _ => error!("unknown user command"),
-        }
-    }
-
     /// Process incoming RPC request messages for node module
     pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, lan: Option<&mut Lan>, internet: Option<&mut Internet> ) {
         match proto::Feed::decode(&data[..]) {

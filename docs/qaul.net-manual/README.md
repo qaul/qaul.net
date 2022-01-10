@@ -19,6 +19,7 @@ and how you can build it for the supported operating systems.
 
 * [Glossary](glossary.md)
 * [RPC communication between libqaul and UI](rpc.md)
+* [Security Overview](security.md)
 
 ## Using qaul.net
 

@@ -40,6 +40,10 @@ object FeedMessageKt {
     }
 
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string sender_id_base58 = 2;</code>
      */
     var senderIdBase58: kotlin.String
@@ -50,6 +54,10 @@ object FeedMessageKt {
         _builder.setSenderIdBase58(value)
       }
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string sender_id_base58 = 2;</code>
      */
     fun clearSenderIdBase58() {
@@ -74,6 +82,10 @@ object FeedMessageKt {
     }
 
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string message_id_base58 = 4;</code>
      */
     var messageIdBase58: kotlin.String
@@ -84,6 +96,10 @@ object FeedMessageKt {
         _builder.setMessageIdBase58(value)
       }
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string message_id_base58 = 4;</code>
      */
     fun clearMessageIdBase58() {
@@ -139,6 +155,23 @@ object FeedMessageKt {
      */
     fun clearContent() {
       _builder.clearContent()
+    }
+
+    /**
+     * <code>uint64 index = 8;</code>
+     */
+    var index: kotlin.Long
+      @JvmName("getIndex")
+      get() = _builder.getIndex()
+      @JvmName("setIndex")
+      set(value) {
+        _builder.setIndex(value)
+      }
+    /**
+     * <code>uint64 index = 8;</code>
+     */
+    fun clearIndex() {
+      _builder.clearIndex()
     }
   }
 }

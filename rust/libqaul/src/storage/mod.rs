@@ -6,10 +6,13 @@
 //! contains:
 //! 
 //! * configuration management
+//! * database handling
 
 pub mod configuration;
+pub mod database;
 
 use configuration::Configuration;
+use database::DataBase;
 use state;
 
 /// make storage path accessible
@@ -29,6 +32,9 @@ impl Storage {
 
         // initialize configuration
         Configuration::init();
+
+        // initialize data base
+        DataBase::init();
     } 
 
     /// get data storage path
