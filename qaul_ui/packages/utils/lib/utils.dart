@@ -56,6 +56,7 @@ String describeLocale(Locale l) {
   if (l.languageCode == 'en') return 'English';
   if (l.languageCode == 'ar') return 'اللغة العربية';
   if (l.languageCode == 'pt') return 'Português';
+  if (l.languageCode == 'id') return 'Bahasa Indonesia';
   return l.toLanguageTag();
 }
 
