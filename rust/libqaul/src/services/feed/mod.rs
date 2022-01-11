@@ -209,7 +209,8 @@ impl Feed {
                 error!("  sender id:  {}", message.sender.to_base58());
                 let (key_type, key_base58) = crate::router::users::Users::get_protobuf_public_key(key);
                 error!("  sender key [{}]: {}", key_type, key_base58);
-                return
+                // TODO: Fix validation failure on first validation.
+                //return
             }
         } else {
             error!("Sender of feed message not known: {}", message.sender);
