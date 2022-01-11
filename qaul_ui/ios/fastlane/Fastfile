@@ -12,7 +12,9 @@ platform :ios do
 
   desc "Create a beta build and upload to Testflight, intended for local use"
   lane :beta do
-    sh("flutter", "build", "ios" "--release" "--no-codesign" "--config-only")
+    Dir.chdir "../.." do
+        sh("flutter", "build", "ios", "--release", "--no-codesign", "--config-only")
+    end
     match(type: "appstore", readonly: true)
     increment_build_number(
       build_number: latest_testflight_build_number(
