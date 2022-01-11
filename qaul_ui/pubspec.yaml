@@ -1,5 +1,5 @@
 name: qaul_ui
-description: qaul.net Internet Independent Wireless Mesh Communication App GUI.
+description: qaul.net Internet Independent Wireless Mesh Communication App
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
