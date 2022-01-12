@@ -9,10 +9,10 @@ default_flutter_wdir: &default_flutter_wdir
   working_directory: ~/qaul-libp2p/qaul_ui
 flutter_ios_dir: &flutter_ios_dir
   working_directory: ~/qaul-libp2p/qaul_ui/ios
-checkout_to_flutter_root: &checkout_to_flutter_root
+checkout_to_root: &checkout_to_root
   steps:
     - checkout:
-        path: ~/qaul-libp2p/qaul_ui
+        path: ~/qaul-libp2p
 
 aliases:
   - &restore_git_cache
@@ -45,15 +45,15 @@ jobs:
   flutter-analyze:
     executor: flutter
     steps:
-      - checkout-flutter-project
+      - checkout-project
       - run: pwd
-      - run: ls -lt 
+      - run: ls -lt
       # - install-flutter-deps
-      - run: flutter analyze
+      # - run: flutter analyze
   flutter-test:
     executor: flutter
     steps:
-      - checkout-flutter-project
+      - checkout-project
       - install-flutter-deps
       - run: flutter test
   # ------------------------------------------------
@@ -74,7 +74,7 @@ jobs:
     shell: /bin/bash --login -o pipefail
     steps:
       - restore_cache: *restore_git_cache
-      - checkout-flutter-project
+      - checkout-project
       - save_cache: *save_git_cache
       - install-flutter-linux:
           version: "$FLUTTER_VERSION"
@@ -105,7 +105,7 @@ jobs:
     shell: /bin/bash --login -o pipefail
     steps:
       - restore_cache: *restore_git_cache
-      - checkout-flutter-project
+      - checkout-project
       - save_cache: *save_git_cache
       - install-flutter-macos:
           version: "$FLUTTER_VERSION"
@@ -128,9 +128,9 @@ workflows:
       - flutter-analyze
 
 commands:
-  checkout-flutter-project:
+  checkout-project:
     description: "Invokes the checkout CircleCI step, declaring `path` as the root of the project (defined by `checkout_to_project_root` anchor)"
-    <<: *checkout_to_flutter_root
+    <<: *checkout_to_root
 
   install-flutter-linux:
     description: "Installs the Linux flutter binary"
