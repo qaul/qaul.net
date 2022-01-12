@@ -278,6 +278,11 @@ impl Feed {
         if let Err(e) = feed.tree.insert(&last_message.to_be_bytes(), message_data) {
             log::error!("Error saving feed message to data base: {}", e);
         }
+        else {
+            if let Err(e) = feed.tree.flush() {
+                log::error!("Error when flushing data base to disk: {}", e);
+            }
+        }
 
         // update key
         feed.last_message = last_message;

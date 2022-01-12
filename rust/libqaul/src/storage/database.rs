@@ -70,6 +70,11 @@ impl DbUsers {
         // save user
         if let Err(e) = tree.insert(key.as_slice(), user) {
             log::error!("Error saving user to data base: {}", e);
+        } 
+        else {
+            if let Err(e) = tree.flush() {
+                log::error!("Error when flushing data base to disk: {}", e);
+            }
         }
     }
 
