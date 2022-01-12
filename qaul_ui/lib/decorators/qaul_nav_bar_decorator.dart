@@ -41,9 +41,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
               ? AlignmentDirectional.topCenter
               : AlignmentDirectional.topStart,
           children: [
-            orientation == Orientation.portrait
-                ? _buildHorizontalBody()
-                : _buildVerticalBody(),
+            orientation == Orientation.portrait ? _buildHorizontalBody() : _buildVerticalBody(),
             orientation == Orientation.portrait
                 ? _buildHorizontalBar(context)
                 : _buildVerticalBar(context),
@@ -102,14 +100,17 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   }
 
   Widget _buildHorizontalBar(BuildContext context) {
+    final safePadding = MediaQuery.of(context).padding.top;
+    final safeFraction = safePadding / MediaQuery.of(context).size.height;
+
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 600),
+      constraints: BoxConstraints(maxHeight: 600 + safePadding),
       child: FractionallySizedBox(
-        heightFactor: 0.12,
+        heightFactor: 0.12 + safeFraction,
         child: _barBackground(
           context,
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.only(left: 8, right: 8, top: safePadding),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: _tabBarContent(),
@@ -149,8 +150,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
     );
   }
 
-  Widget _barBackground(BuildContext context, Widget child,
-      {bool vertical = false}) {
+  Widget _barBackground(BuildContext context, Widget child, {bool vertical = false}) {
     final ltr = Directionality.of(context) == TextDirection.ltr;
 
     final barTheme = Theme.of(context).appBarTheme;
@@ -246,9 +246,7 @@ class QaulNavBarItem extends HookConsumerWidget {
             svgPath,
             width: _iconSize,
             height: _iconSize,
-            color: selected.value
-                ? theme.colorScheme.primary
-                : theme.iconTheme.color,
+            color: selected.value ? theme.colorScheme.primary : theme.iconTheme.color,
           ),
           onPressed: () => controller.goToTab(tab),
         ),
