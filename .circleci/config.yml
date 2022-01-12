@@ -202,14 +202,14 @@ commands:
       - restore_cache:
           name: Restore Flutter pub cache
           keys:
-            - pub-cache-v1-{{ arch }}-{{ checksum "pubspec.rev" }}
-            - pub-cache-v1-{{ arch }}-
+            - pub-cache-v2-{{ arch }}-{{ checksum "pubspec.rev" }}
+            - pub-cache-v2-{{ arch }}-
       - run:
           name: Install Flutter Dependencies
           command: flutter pub get
       - save_cache:
           name: Save Flutter pub cache
-          key: pub-cache-v1-{{ arch }}-{{ checksum "pubspec.rev" }}
+          key: pub-cache-v2-{{ arch }}-{{ checksum "pubspec.rev" }}
           paths:
             - .dart_tool
             - << parameters.pub-cache >>
