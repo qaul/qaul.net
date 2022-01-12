@@ -9,6 +9,11 @@ platform :ios do
         xcversion(version: "13.0")
     end
   end
+  desc "Syncs with the stored keys, certificates & provisioning profiles"
+  lane :certificates do
+    match(type: "appstore", readonly: true)
+    match(type: "development", readonly: true)
+  end
 
   desc "Create a beta build and upload to Testflight, intended for local use"
   lane :beta do

@@ -18,3 +18,32 @@ This folder contains the Flutter UI of the qaul.net app.
 1. To update the text displayed in the language dropdown, add an `if` clause with your language code to `describeLocale` (found at `qaul_ui/packages/utils/lib/utils.dart:59`).
 
 ## Local configuration steps
+
+### Fastlane
+
+[Fastlane](https://docs.fastlane.tools) is a set of tools that help streamline the most tedious tasks relating to code signing, version releasing & so on.
+
+To have it installed, you need to have *Bundler* on your machine. It can be installed with:
+`gem install bundler`
+
+Then, `cd` into the `ios` & `android` folders and run:
+`bundle install`
+
+We do them separately due to them being considered standalone projects from Fastlane's perspective.
+You should be in the respective folder when running fastlane related tasks.
+To test if it's properly installed run:
+`bundle exec fastlane --version`
+> Every command you run using `fastlane` can be run without `bundle exec` at the beginning, but using
+> bundler explicitly speeds up the execution time, so it's advised.
+ 
+### (iOS-only) Managing XCode certificates & profiles
+
+We use [Match](https://docs.fastlane.tools/actions/match/) to simplify managing all profiles & certificates for iOS.
+On a fresh machine, follow these steps to configure your XCode environment:
+
+* Make sure you already have xcode installed by running: `xcode-select --install`
+* Request access to the certificates & profiles git repo.
+> *Note*: Match expects you to have SSH configured to be used with github.
+* Ask for the decryption passphrase
+* Make sure you've installed Fastlane for iOS, then run:
+  * `fastlane certificates`
