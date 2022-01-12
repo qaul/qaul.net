@@ -197,8 +197,8 @@ commands:
       - run: flutter doctor --verbose
       - run:
           name: "Prepare For Cache Key"
-         command: |
-           cat "$(find .. -iname "pubspec.lock" | head -n 1)" > pubspec.rev
+          command: |
+            cat "$(find .. -iname "pubspec.lock" | head -n 1)" > pubspec.rev
       - restore_cache:
           name: Restore Flutter pub cache
           keys:
