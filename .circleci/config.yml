@@ -45,13 +45,17 @@ jobs:
   flutter-analyze:
     executor: flutter
     steps:
+      - restore_cache: *restore_git_cache
       - checkout-project
+      - save_cache: *save_git_cache
       - install-flutter-deps
       - run: flutter analyze
   flutter-test:
     executor: flutter
     steps:
+      - restore_cache: *restore_git_cache
       - checkout-project
+      - save_cache: *save_git_cache
       - install-flutter-deps
       - run: flutter test
   # ------------------------------------------------
@@ -124,6 +128,7 @@ workflows:
   flutter-ci-cd-workflow:
     jobs:
       - flutter-analyze
+      - flutter-test
 
 commands:
   checkout-project:
