@@ -46,10 +46,8 @@ jobs:
     executor: flutter
     steps:
       - checkout-project
-      - run: pwd
-      - run: ls -lt
-      # - install-flutter-deps
-      # - run: flutter analyze
+      - install-flutter-deps
+      - run: flutter analyze
   flutter-test:
     executor: flutter
     steps:
