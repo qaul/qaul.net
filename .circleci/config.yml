@@ -129,6 +129,26 @@ workflows:
     jobs:
       - flutter-analyze
       - flutter-test
+      - hold:
+          type: approval
+          requires:
+            - flutter-test
+            - flutter-analyze
+          filters:
+            branches:
+              only: beta
+      - android-beta-deploy:
+          requires:
+            - hold
+          filters:
+            branches:
+              only: beta
+      - ios-beta-deploy:
+          requires:
+            - hold
+          filters:
+            branches:
+              only: beta
 
 commands:
   checkout-project:
