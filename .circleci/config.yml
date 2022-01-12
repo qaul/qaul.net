@@ -195,17 +195,21 @@ commands:
         default: "~/.pub-cache"
     steps:
       - run: flutter doctor --verbose
+      - run:
+          name: "Prepare For Cache Key"
+         command: |
+           cat "$(find .. -iname "pubspec.lock" | head -n 1)" > pubspec.rev
       - restore_cache:
           name: Restore Flutter pub cache
           keys:
-            - pub-cache-v1-{{ arch }}-{{ checksum "$(find .. -iname "pubspec.lock" | head -n 1)" }}
+            - pub-cache-v1-{{ arch }}-{{ checksum "pubspec.rev" }}
             - pub-cache-v1-{{ arch }}-
       - run:
           name: Install Flutter Dependencies
           command: flutter pub get
       - save_cache:
           name: Save Flutter pub cache
-          key: pub-cache-v1-{{ arch }}-{{ checksum "$(find .. -iname "pubspec.lock" | head -n 1)" }}
+          key: pub-cache-v1-{{ arch }}-{{ checksum "pubspec.rev" }}
           paths:
             - .dart_tool
             - << parameters.pub-cache >>
