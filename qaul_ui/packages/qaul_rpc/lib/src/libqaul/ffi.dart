@@ -35,7 +35,7 @@ class LibqaulFfi {
       _lib = DynamicLibrary.open('liblibqaul.dylib');
     } else if (Platform.isWindows) {
       // find the library in the rust target build folder
-      _lib = DynamicLibrary.open(Platform.script.resolve('build/windows/runner/Debug/libqaul.dll').toFilePath());
+      _lib = DynamicLibrary.open(Platform.script.resolve('libqaul.dll').toFilePath());
     } else if (Platform.isAndroid) {
       // version 1: load liblibqaul.so directly, we use version 2 now
       //   problems:
