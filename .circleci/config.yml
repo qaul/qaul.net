@@ -4,7 +4,7 @@ version: 2.1
 # Configuration anchors
 # ------------------------------------------------
 flutter_version: &flutter_version
-  FLUTTER_VERSION: "2.5.3"
+  FLUTTER_VERSION: "2.8.0"
 default_flutter_wdir: &default_flutter_wdir
   working_directory: ~/qaul-libp2p/qaul_ui
 flutter_ios_dir: &flutter_ios_dir
@@ -72,6 +72,7 @@ jobs:
       FASTLANE_LANE: upload_beta_playstore
       LANG: en_US.UTF-8
       LC_ALL: en_US.UTF-8
+      SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/google-credentials.json
       <<: *flutter_version
     shell: /bin/bash --login -o pipefail
     steps:
@@ -87,6 +88,7 @@ jobs:
       - install-bundler-deps
       - run: echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > app/upload-keystore.jks
       - run: echo "$PLAY_STORE_UPLOAD_KEY_INFO" | base64 --decode > key.properties
+      - run: echo "$PLAY_STORE_JSON_KEY" | base64 --decode > google-credentials.json
       - run:
           name: fastlane
           command: bundle exec fastlane $FASTLANE_LANE
@@ -193,6 +195,9 @@ commands:
       pub-cache:
         type: string
         default: "~/.pub-cache"
+      dart-tool-cache:
+        type: string
+        default: ".dart_tool"
     steps:
       - run: flutter doctor --verbose
       - run:
@@ -201,17 +206,15 @@ commands:
             cat "$(find .. -iname "pubspec.lock" | head -n 1)" > pubspec.rev
       - restore_cache:
           name: Restore Flutter pub cache
-          keys:
-            - pub-cache-v2-{{ arch }}-{{ checksum "pubspec.rev" }}
-            - pub-cache-v2-{{ arch }}-
+          key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
       - run:
           name: Install Flutter Dependencies
           command: flutter pub get
       - save_cache:
           name: Save Flutter pub cache
-          key: pub-cache-v2-{{ arch }}-{{ checksum "pubspec.rev" }}
+          key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
           paths:
-            - .dart_tool
+            - << parameters.dart-tool-cache >>
             - << parameters.pub-cache >>
 
   install-bundler-deps:
