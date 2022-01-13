@@ -61,7 +61,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
                 children: const [
                   QaulNavBarItem(TabType.feed),
                   QaulNavBarItem(TabType.users),
-                  QaulNavBarItem(TabType.chat),
+                  //QaulNavBarItem(TabType.chat),
                   QaulNavBarItem(TabType.network),
                 ],
               )
@@ -70,7 +70,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
                 children: const [
                   QaulNavBarItem(TabType.feed),
                   QaulNavBarItem(TabType.users),
-                  QaulNavBarItem(TabType.chat),
+                  //QaulNavBarItem(TabType.chat),
                   QaulNavBarItem(TabType.network),
                 ],
               ),
