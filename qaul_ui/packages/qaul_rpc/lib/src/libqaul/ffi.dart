@@ -148,7 +148,7 @@ class LibqaulFfi {
     final _receiveRpcFromLibqaul = _lib!.lookupFunction<ReceiveRpcFromLibqaulFunctionRust, ReceiveRpcFromLibqaulFunctionDart>('receive_rpc_from_libqaul');
 
     // create a buffer
-    const bufferSize = 4048;
+    const bufferSize = 259072;
     final buffer = malloc<Uint8>(bufferSize);
     final bufferPointer = buffer.cast<Uint8>();
 
