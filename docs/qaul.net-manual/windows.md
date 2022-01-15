@@ -73,7 +73,7 @@ You can now build and run the flutter desktop app from the terminal:
 
 ```sh
 # move into the flutter directory
-cd flutter
+cd qaul_ui
 
 # build and run the Windows desktop app
 flutter run -d windows

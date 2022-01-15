@@ -66,14 +66,14 @@ After installation open it and install the following things:
 
 [Install Flutter](flutter-install.md)
 
-## Build & Run qaul.net MacOS Desktop App
+## Build & Run qaul.net iOS App
 
 To build and run the qaul.net desktop app you have to perform the following steps:
 
 1) Build libqaul shared library
 2) Build & run the flutter iOS app
 
-### Build libqaul shared Library and CLI binaries
+### Build libqaul shared Library
 
 Open a terminal and run the following commands
 
@@ -87,26 +87,15 @@ cd rust/libqaul
 cargo lipo
 ```
 
-### Build & Run qaul flutter Desktop App
+### Build & Run qaul app on iOS Simulator or on your iOS Device
 
 You can build and run the qaul flutter desktop app from the terminal:
 
 ```sh
 # move into the flutter directory
-cd flutter
+cd qaul_ui
 
 # build and run the MacOS desktop app
-flutter run -d macos
+flutter 
 ```
 
-### Build Distributable MacOS Application
-
-You can build the qaul flutter desktop app from the terminal:
-
-```sh
-# move into the flutter directory
-cd flutter
-
-# build and run the MacOS desktop app
-flutter build macos
-```
