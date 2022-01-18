@@ -1,0 +1,29 @@
+name: logger
+description: Logging Package
+version: 0.0.1
+
+publish_to: 'none'
+
+environment:
+  sdk: ">=2.15.0 <3.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  equatable: ^2.0.3
+
+  # Email-based Logger
+  mailer: ^5.0.2
+  # Firebase-based Logger
+  firebase_core: ^1.11.0
+  firebase_analytics: ^9.0.5
+  firebase_crashlytics: ^2.4.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^1.0.0
+
+flutter:
