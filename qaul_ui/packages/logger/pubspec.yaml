@@ -14,12 +14,10 @@ dependencies:
 
   equatable: ^2.0.3
 
-  # Email-based Logger
-  mailer: ^5.0.2
-  # Firebase-based Logger
-  firebase_core: ^1.11.0
-  firebase_analytics: ^9.0.5
-  firebase_crashlytics: ^2.4.5
+  archive: ^3.1.8
+  path_provider: ^2.0.8
+
+  flutter_email_sender: ^5.0.2
 
 dev_dependencies:
   flutter_test:
