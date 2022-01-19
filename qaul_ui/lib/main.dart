@@ -23,7 +23,8 @@ void main() async {
     await Hive.openBox(UserPrefsHelper.hiveBoxName);
 
     await Logger.instance.initialize();
-    await Logger.instance.logAppOpen();
+
+    throw FlutterError('a custom error');
 
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
     runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
