@@ -13,5 +13,9 @@ abstract class Logger {
 
   Future<void> logError(Object error, StackTrace stack, {String? message});
 
+  Future<bool> get hasLogsStored;
+
   Future<void> sendLogs();
+
+  Future<void> deleteLogs();
 }

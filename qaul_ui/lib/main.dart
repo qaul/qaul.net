@@ -24,8 +24,6 @@ void main() async {
 
     await Logger.instance.initialize();
 
-    throw FlutterError('a custom error');
-
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
     runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
 
