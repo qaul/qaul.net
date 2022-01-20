@@ -6,13 +6,15 @@ import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:logger/src/info_provider.dart';
+import 'package:mailto/mailto.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'logger.dart';
 
 class EmailLogger implements Logger {
   @override
-  bool loggingEnabled = Platform.isIOS || Platform.isAndroid;
+  bool loggingEnabled = true;
 
   @override
   Future<void> initialize() async {
@@ -96,7 +98,11 @@ $stack
   @override
   Future<void> sendLogs() async {
     if (!loggingEnabled) return;
+    if (Platform.isAndroid || Platform.isIOS) await _sendMobileLogs();
+    await _sendDesktopLogs();
+  }
 
+  Future<void> _sendMobileLogs() async {
     final email = Email(
       body: 'Customer Feedback - Error/Exception Logs',
       subject: 'Customer Feedback - Error/Exception Logs',
@@ -105,8 +111,25 @@ $stack
       attachmentPaths: (await _logs).map((e) => e.path).toList(),
       isHTML: false,
     );
-
     await FlutterEmailSender.send(email);
+  }
+
+  Future<void> _sendDesktopLogs() async {
+    final mailtoLink = Mailto(
+      to: ['qaul.service@gmail.com'],
+      body: await _buildDesktopEmail(),
+      subject: 'Customer Feedback - Error/Exception Logs',
+    );
+    await launch('$mailtoLink');
+  }
+
+  Future<String> _buildDesktopEmail() async {
+    var body = 'Customer Feedback - Error/Exception Logs\n\n\n${'#' * 100}\n\n';
+    for (final log in (await _logs).map((e) => e.path)) {
+      var logContent = GZipDecoder().decodeBytes(File(log).readAsBytesSync());
+      body += utf8.decode(logContent) + '\n${'#' * 100}\n\n';
+    }
+    return body;
   }
 
   @override
