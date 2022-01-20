@@ -1,10 +1,11 @@
 import 'dart:convert';
-import 'dart:io' show Directory, File, FileSystemEntity, Platform;
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:logger/src/info_provider.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'logger.dart';
@@ -24,10 +25,17 @@ class EmailLogger implements Logger {
 
   DateTime get now => DateTime.now();
 
-  Future<String> get _storeDirectory async => (await getApplicationDocumentsDirectory()).path;
+  Future<String> get _storeDirectory async {
+    final dir = (Platform.isAndroid)
+        ? (await getExternalStorageDirectory())!.path
+        : (await getApplicationDocumentsDirectory()).path;
+    return '$dir/Logs';
+  }
 
-  Future<List<FileSystemEntity>> get _logs async =>
-      Directory('${await _storeDirectory}/Logs').listSync();
+  Future<List<FileSystemEntity>> get _logs async {
+    var path = Directory(await _storeDirectory);
+    return path.listSync().where((element) => element.path.contains(_titlePrefix)).toList();
+  }
 
   @override
   Future<bool> get hasLogsStored async => (await _logs).map((e) => e.path).isNotEmpty;
@@ -35,7 +43,7 @@ class EmailLogger implements Logger {
   @override
   Future<void> logError(Object e, StackTrace s, {String? message}) async {
     if (!loggingEnabled) return;
-    final log = _buildLogContent(e, s, 'ERROR', message ?? '-');
+    final log = await _buildLogContent(e, s, 'ERROR', message ?? '-');
     final bytes = _createCompressedLog(log);
     if (bytes != null) _storeCompressedLog(bytes, _buildTitle(e));
   }
@@ -43,7 +51,7 @@ class EmailLogger implements Logger {
   @override
   Future<void> logException(Exception e, StackTrace s, {String? message}) async {
     if (!loggingEnabled) return;
-    final log = _buildLogContent(e, s, 'EXCEPTION', message ?? '-');
+    final log = await _buildLogContent(e, s, 'EXCEPTION', message ?? '-');
     final bytes = _createCompressedLog(log);
     if (bytes != null) _storeCompressedLog(bytes, _buildTitle(e));
   }
@@ -51,15 +59,21 @@ class EmailLogger implements Logger {
   String get _titlePrefix => 'qaul_log';
 
   String _buildTitle(Object e) =>
-      '$_titlePrefix-${e.toString().trim().replaceAll(' ', '_')}-${now.millisecondsSinceEpoch}';
+      '$_titlePrefix-${e.runtimeType.toString().trim().replaceAll(' ', '_')}-${now.millisecondsSinceEpoch}';
 
-  String _buildLogContent(Object e, StackTrace stack, String type, String msg) {
+  Future<String> _buildLogContent(Object e, StackTrace stack, String type, String msg) async {
     return '''
 Log Type: $type
 
 Error/Exception: $e
 
 Message: $msg
+
+App Details:
+${await InfoProvider.getPackageInfo()}
+
+Device Details:
+${await InfoProvider.getDeviceInfo()}
 
 Stack Trace:
 $stack
@@ -74,7 +88,7 @@ $stack
   Future _storeCompressedLog(List<int> logBytes, String logTitle) async {
     final directory = await _storeDirectory;
     debugPrint('storing log in directory: $directory');
-    final file = File('$directory/Logs/$logTitle.gzip');
+    final file = File('$directory/$logTitle.gzip');
     file.createSync(recursive: true);
     file.writeAsBytesSync(logBytes);
   }
@@ -87,6 +101,7 @@ $stack
       body: 'Customer Feedback - Error/Exception Logs',
       subject: 'Customer Feedback - Error/Exception Logs',
       recipients: ['qaul.service@gmail.com'],
+      // recipients: ['debug@qaul.net'],
       attachmentPaths: (await _logs).map((e) => e.path).toList(),
       isHTML: false,
     );

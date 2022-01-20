@@ -7,8 +7,6 @@ class SupportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final l18ns = AppLocalizations.of(context)!;
-
     return Scaffold(
       appBar: AppBar(
         leading: const DefaultBackButton(),
@@ -16,7 +14,6 @@ class SupportScreen extends StatelessWidget {
           children: const [
             Icon(Icons.contact_support_outlined),
             SizedBox(width: 8),
-            // Text(l18ns.support),
             Text('Support'),
           ],
         ),
