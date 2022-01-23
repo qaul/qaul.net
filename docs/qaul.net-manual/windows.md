@@ -1,18 +1,27 @@
 # Build qaul.net on Windows
 
 ## Prerequisits
-
-### Install Rust
-
-[Install Rust](rust-install.md)
-
 ### Install Visual Studio
 
-In order to develop for the windows desktop platform you need to have 'Microsoft Visual Studio 2019' installed.
+In order to develop for the windows desktop platform you need to have 'Microsoft Visual Studio 2019' or 'Microsoft Visual Studio 2022' installed.
 
 <https://visualstudio.microsoft.com/downloads/>
 
-In Visual Studio 2019, you need to have 'Desktop development with C++' workload installed.
+In Microsoft Visual Studio 2019/2022, you need to have 'Desktop development with C++' workload installed.
+
+### Install Git for Windows
+
+Git is a free version control system and needed for source code management.
+Please download and install the git from the following page:
+
+<https://git-scm.com/download/win>
+
+### Install Rust
+
+libqaul is written in the programming language rust.
+In order to install rust, open the page [rustup.rs](https://rustup.rs) and follow the installation instructions.
+
+<https://rustup.rs>
 
 ### Install Android Studio
 
