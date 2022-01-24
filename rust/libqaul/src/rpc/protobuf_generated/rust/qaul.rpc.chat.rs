@@ -70,8 +70,8 @@ pub struct ChatConversationRequest {
     #[prost(bytes="vec", tag="1")]
     pub conversation_id: ::prost::alloc::vec::Vec<u8>,
     /// send only changes that are newer than the last received
-    #[prost(string, tag="2")]
-    pub last_received: ::prost::alloc::string::String,
+    #[prost(uint64, tag="2")]
+    pub last_index: u64,
 }
 /// list of chat messages of a specific conversation
 #[derive(Clone, PartialEq, ::prost::Message)]

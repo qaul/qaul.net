@@ -11,6 +11,7 @@ use super::connections::Connections;
 use super::users::Users;
 use super::router::Router;
 use super::feed::Feed;
+use super::chat::Chat;
 use super::debug::Debug;
 
 /// CLI command analizer and processing
@@ -39,6 +40,10 @@ impl Cli {
             // feed functions
             cmd if cmd.starts_with("feed ") => {
                 Feed::cli(cmd.strip_prefix("feed ").unwrap());
+            },
+            // chat functions
+            cmd if cmd.starts_with("chat ") => {
+                Chat::cli(cmd.strip_prefix("chat ").unwrap());
             },
             // connections functions
             cmd if cmd.starts_with("connections ") => {

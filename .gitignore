@@ -3,6 +3,7 @@ config.toml
 default.json
 config.yaml
 node.db/
+12D3KooW*/
 
 # android artifacts
 android/app/debug

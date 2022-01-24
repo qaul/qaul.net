@@ -54,7 +54,7 @@ message ChatConversation {
 message ChatConversationRequest {
     bytes conversation_id = 1;
     // send only changes that are newer than the last received
-    string last_received = 2;
+    uint64 last_index = 2;
 }
 
 // list of chat messages of a specific conversation

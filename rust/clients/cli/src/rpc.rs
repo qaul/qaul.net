@@ -87,8 +87,7 @@ impl Rpc {
                         super::feed::Feed::rpc(message.data);
                     },
                     Some(proto::Modules::Chat) => {
-                        // TODO
-                        //super::chat::Chat::rpc(message.data);
+                        super::chat::Chat::rpc(message.data);
                     },
                     Some(proto::Modules::Connections) => {
                         super::connections::Connections::rpc(message.data);

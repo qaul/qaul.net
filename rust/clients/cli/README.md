@@ -49,6 +49,10 @@ The following commands are available:
     * at least one user needs to be created
   * `feed list` - displays all feed messages
     * `feed list {Feed Message ID}` - displays only feed messages newer than {Feed Message ID}
+* chat
+  * `chat send {Conversation ID} {Chat Message}` - sends the {Chat Message} to the user with the ID {Conversation ID}
+  * `chat overview` - displays an overview of all conversations and the last messages within them
+  * `chat conversation {Conversation ID}` - displays all messages of the conversation with the ID {Conversation ID}
 * debug
   * all these commands are for debugging purposes only
   * `debug rpc sent` - displays the number of RPC messages sent to libqaul

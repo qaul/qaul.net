@@ -23,6 +23,7 @@ mod connections;
 mod users;
 mod router;
 mod feed;
+mod chat;
 mod debug;
 
 use cli::Cli;
