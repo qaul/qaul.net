@@ -16,22 +16,29 @@ class LogEntry {
 
 class StorageManager {
   StorageManager() {
-    // Create a periodic task that prints 'Hello World' every 30s
-    _deleteSchedule = NeatPeriodicTaskScheduler(
-      interval: const Duration(minutes: 10),
+    _deleteObsoleteSchedule = NeatPeriodicTaskScheduler(
+      interval: const Duration(minutes: 5),
       name: 'delete-obsolete-logs',
       task: _deleteObsoleteLogs,
-      timeout: const Duration(minutes: 5),
+      timeout: const Duration(minutes: 2),
+      minCycle: const Duration(minutes: 2),
+    );
+    _deleteSurpassingSizeSchedule = NeatPeriodicTaskScheduler(
+      interval: const Duration(minutes: 5),
+      name: 'delete-surpassing-size-logs',
+      task: _deleteSurpassingSizeLogs,
+      timeout: const Duration(minutes: 2),
+      minCycle: const Duration(minutes: 2),
     );
 
-    _deleteSchedule.start();
+    _deleteObsoleteSchedule.start();
+    _deleteSurpassingSizeSchedule.start();
   }
 
-  void dispose() async => await _deleteSchedule.stop();
-
-  late NeatPeriodicTaskScheduler _deleteSchedule;
-
-  final _staleLogPeriod = const Duration(days: 14);
+  void dispose() async {
+    await _deleteObsoleteSchedule.stop();
+    await _deleteSurpassingSizeSchedule.stop();
+  }
 
   /// String identifier used to later find the application's logs.
   String get titlePrefix => 'qaul_log';
@@ -53,6 +60,12 @@ class StorageManager {
     return (await path.stat()).size;
   }
 
+  // ***************************************************************************
+  //
+  // ***************************************************************************
+  late NeatPeriodicTaskScheduler _deleteObsoleteSchedule;
+  static const _staleLogPeriod = Duration(days: 14);
+
   Future<void> _deleteObsoleteLogs() async {
     final today = DateTime.now();
     final obsoleteLogs = (await logs).where((log) {
@@ -63,6 +76,29 @@ class StorageManager {
     await deleteLogs(obsoleteLogs);
   }
 
+  // ***************************************************************************
+  //
+  // ***************************************************************************
+  late NeatPeriodicTaskScheduler _deleteSurpassingSizeSchedule;
+  static const _maxSizeInBytes = 200 * 1000; // 200 KB
+  static const _maxNumberOfFiles = 2;
+
+  Future<void> _deleteSurpassingSizeLogs() async {
+    final sortedLogs = (await logs)
+      ..sort((a, b) => _lastInteraction(a.statSync()).compareTo(_lastInteraction(b.statSync())));
+    while (sortedLogs.length > _maxNumberOfFiles) {
+      final oldest = sortedLogs.removeAt(0);
+      await oldest.delete();
+    }
+    while ((await logFolderSize) > _maxSizeInBytes) {
+      final oldest = sortedLogs.removeAt(0);
+      await oldest.delete();
+    }
+  }
+
+  // ***************************************************************************
+  //
+  // ***************************************************************************
   Future<void> deleteLogs(Iterable<FileSystemEntity> logs) async {
     for (final log in logs) {
       await log.delete();
