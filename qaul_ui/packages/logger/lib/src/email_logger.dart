@@ -1,20 +1,33 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:logger/src/info_provider.dart';
+import 'package:logger/src/storage_manager.dart';
 import 'package:mailto/mailto.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'logger.dart';
 
 class EmailLogger implements Logger {
+  @override
+  Future<void> initialize() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(_loggingEnabledKey)) {
+      _enabled = prefs.getBool(_loggingEnabledKey) ?? true;
+    }
+
+    FlutterError.onError = (details) => logError(details.exception, details.stack!);
+    Isolate.current.addErrorListener(RawReceivePort((pair) async {
+      final List<dynamic> errorAndStacktrace = pair;
+      await logError(errorAndStacktrace.first, errorAndStacktrace.last);
+    }).sendPort);
+  }
+
   static const _loggingEnabledKey = 'loggingEnabledKey';
+
   @override
   bool get loggingEnabled => _enabled;
   bool _enabled = true;
@@ -30,57 +43,28 @@ class EmailLogger implements Logger {
     prefs.setBool(_loggingEnabledKey, _enabled);
   }
 
-  @override
-  Future<void> initialize() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (prefs.containsKey(_loggingEnabledKey)) {
-      _enabled = prefs.getBool(_loggingEnabledKey) ?? true;
-    }
-
-    FlutterError.onError = (details) => logError(details.exception, details.stack!);
-    Isolate.current.addErrorListener(RawReceivePort((pair) async {
-      final List<dynamic> errorAndStacktrace = pair;
-      await logError(errorAndStacktrace.first, errorAndStacktrace.last);
-    }).sendPort);
-  }
-
-  DateTime get now => DateTime.now();
-
-  Future<String> get _storeDirectory async {
-    final dir = (Platform.isAndroid)
-        ? (await getExternalStorageDirectory())!.path
-        : (await getApplicationDocumentsDirectory()).path;
-    return '$dir/Logs';
-  }
-
-  Future<List<FileSystemEntity>> get _logs async {
-    var path = Directory(await _storeDirectory);
-    return path.listSync().where((element) => element.path.contains(_titlePrefix)).toList();
-  }
+  final _storageManager = StorageManager();
 
   @override
-  Future<bool> get hasLogsStored async => (await _logs).map((e) => e.path).isNotEmpty;
+  Future<bool> get hasLogsStored async =>
+      (await _storageManager.logs).map((e) => e.path).isNotEmpty;
 
   @override
   Future<void> logError(Object e, StackTrace s, {String? message}) async {
     if (!loggingEnabled) return;
     final log = await _buildLogContent(e, s, 'ERROR', message ?? '-');
-    final bytes = _createCompressedLog(log);
-    if (bytes != null) _storeCompressedLog(bytes, _buildTitle(e));
+    _storageManager.storeLog(LogEntry(_buildTitle(e), log));
   }
 
   @override
   Future<void> logException(Exception e, StackTrace s, {String? message}) async {
     if (!loggingEnabled) return;
     final log = await _buildLogContent(e, s, 'EXCEPTION', message ?? '-');
-    final bytes = _createCompressedLog(log);
-    if (bytes != null) _storeCompressedLog(bytes, _buildTitle(e));
+    _storageManager.storeLog(LogEntry(_buildTitle(e), log));
   }
 
-  String get _titlePrefix => 'qaul_log';
-
   String _buildTitle(Object e) =>
-      '$_titlePrefix-${e.runtimeType.toString().trim().replaceAll(' ', '_')}-${now.millisecondsSinceEpoch}';
+      '${_storageManager.titlePrefix}-${e.runtimeType.toString().trim().replaceAll(' ', '_')}-${DateTime.now()}';
 
   Future<String> _buildLogContent(Object e, StackTrace stack, String type, String msg) async {
     return '''
@@ -101,19 +85,6 @@ $stack
 ''';
   }
 
-  List<int>? _createCompressedLog(String logContent) {
-    var stringBytes = utf8.encode(logContent);
-    return GZipEncoder().encode(stringBytes);
-  }
-
-  Future _storeCompressedLog(List<int> logBytes, String logTitle) async {
-    final directory = await _storeDirectory;
-    debugPrint('storing log in directory: $directory');
-    final file = File('$directory/$logTitle.gzip');
-    file.createSync(recursive: true);
-    file.writeAsBytesSync(logBytes);
-  }
-
   @override
   Future<void> sendLogs() async {
     if (!loggingEnabled) return;
@@ -127,7 +98,7 @@ $stack
       subject: 'Customer Feedback - Error/Exception Logs',
       recipients: ['qaul.service@gmail.com'],
       // recipients: ['debug@qaul.net'],
-      attachmentPaths: (await _logs).map((e) => e.path).toList(),
+      attachmentPaths: (await _storageManager.logs).map((e) => e.path).toList(),
       isHTML: false,
     );
     await FlutterEmailSender.send(email);
@@ -144,17 +115,12 @@ $stack
 
   Future<String> _buildDesktopEmail() async {
     var body = 'Customer Feedback - Error/Exception Logs\n\n\n${'#' * 100}\n\n';
-    for (final log in (await _logs).map((e) => e.path)) {
-      var logContent = GZipDecoder().decodeBytes(File(log).readAsBytesSync());
-      body += utf8.decode(logContent) + '\n${'#' * 100}\n\n';
+    for (final log in (await _storageManager.logs)) {
+      body += _storageManager.logContents(log) + '\n${'#' * 100}\n\n';
     }
     return body;
   }
 
   @override
-  Future<void> deleteLogs() async {
-    for (var log in (await _logs)) {
-      log.deleteSync();
-    }
-  }
+  Future<void> deleteLogs() async => _storageManager.deleteLogs(await _storageManager.logs);
 }
