@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:qaul_ui/decorators/disabled_state_decorator.dart';
 import 'package:qaul_ui/widgets/default_back_button.dart';
+import 'package:qaul_ui/widgets/platform_aware_switch.dart';
 
-class SupportScreen extends StatelessWidget {
+class SupportScreen extends StatefulWidget {
   const SupportScreen({Key? key}) : super(key: key);
 
+  @override
+  State<SupportScreen> createState() => _SupportScreenState();
+}
+
+class _SupportScreenState extends State<SupportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,40 +30,72 @@ class SupportScreen extends StatelessWidget {
           builder: (context, snapshot) {
             final hasLogs = (snapshot.hasData && snapshot.data == true);
             return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text('Whenever an error occurs, a log is created.'),
-                const SizedBox(height: 8, width: double.maxFinite),
-                const Text('You can choose to report them or delete them.'),
-                const SizedBox(height: 20, width: double.maxFinite),
-                TextButton(
-                  child: Text(hasLogs ? 'Send Logs' : 'No Logs Available'),
-                  onPressed: hasLogs
-                      ? () async {
-                          await Logger.instance.sendLogs();
-                          await Logger.instance.deleteLogs();
-                          Navigator.pop(context);
-                        }
-                      : null,
-                ),
-                const SizedBox(height: 20, width: double.maxFinite),
-                if (hasLogs)
-                  TextButton(
-                    child: const Text('Delete Logs'),
-                    onPressed: () async {
-                      await Logger.instance.deleteLogs();
-                      Navigator.pop(context);
-                    },
+                Expanded(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Enable Logging:'),
+                            PlatformAwareSwitch(
+                              value: Logger.instance.loggingEnabled,
+                              onChanged: (val) {
+                                Logger.instance.loggingEnabled = val;
+                                setState(() {});
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (hasLogs)
+                        TextButton(
+                          child: const Text('Delete Logs'),
+                          onPressed: () async {
+                            await Logger.instance.deleteLogs();
+                            Navigator.pop(context);
+                          },
+                        ),
+                    ],
                   ),
-                const SizedBox(height: 20, width: double.maxFinite),
-                const Divider(),
-                const Text("<Testing Only>"),
-                TextButton(
-                  child:
-                      const Text('Throw Error (Generate Log - to see it close and reopen screen).'),
-                  onPressed: () => throw FlutterError('Test error'),
                 ),
+                Expanded(
+                  child: DisabledStateDecorator(
+                    isDisabled: !Logger.instance.loggingEnabled,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text('Whenever an error occurs, a log is created.'),
+                        const SizedBox(height: 8, width: double.maxFinite),
+                        const Text('You can choose to report them or delete them.'),
+                        const SizedBox(height: 20, width: double.maxFinite),
+                        TextButton(
+                          child: Text(hasLogs ? 'Send Logs' : 'No Logs Available'),
+                          onPressed: hasLogs
+                              ? () async {
+                                  await Logger.instance.sendLogs();
+                                  await Logger.instance.deleteLogs();
+                                  Navigator.pop(context);
+                                }
+                              : null,
+                        ),
+                        const SizedBox(height: 20, width: double.maxFinite),
+                        const Divider(),
+                        const Text("<Testing Only>"),
+                        TextButton(
+                          child: const Text(
+                              'Throw Error (Generate Log - to see it close and reopen screen).'),
+                          onPressed: () => throw FlutterError('Test error'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const Expanded(child: SizedBox()),
               ],
             );
           }),
