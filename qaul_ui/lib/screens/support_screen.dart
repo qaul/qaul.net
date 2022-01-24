@@ -32,12 +32,13 @@ class _SupportScreenState extends State<SupportScreen> {
             return Column(
               children: [
                 Expanded(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text('Enable Logging:'),
@@ -50,24 +51,30 @@ class _SupportScreenState extends State<SupportScreen> {
                             ),
                           ],
                         ),
-                      ),
-                      if (hasLogs) ...[
-                        FutureBuilder(
-                          future: Logger.instance.logStorageSize,
-                          builder: (context, snapshot) {
-                            final size = snapshot.data ?? '0.0 KB';
-                            return Text('Total logs size: $size');
-                          },
-                        ),
-                        TextButton(
-                          child: const Text('Delete Logs'),
-                          onPressed: () async {
-                            await Logger.instance.deleteLogs();
-                            Navigator.pop(context);
-                          },
-                        ),
+                        const Divider(),
+                        if (hasLogs) ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              FutureBuilder(
+                                future: Logger.instance.logStorageSize,
+                                builder: (context, snapshot) {
+                                  final size = snapshot.data ?? '0.0 KB';
+                                  return Text('Total logs size: $size');
+                                },
+                              ),
+                              TextButton(
+                                child: const Text('Delete Logs'),
+                                onPressed: () async {
+                                  await Logger.instance.deleteLogs();
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
                 Expanded(
@@ -92,13 +99,6 @@ class _SupportScreenState extends State<SupportScreen> {
                               : null,
                         ),
                         const SizedBox(height: 20, width: double.maxFinite),
-                        const Divider(),
-                        const Text("<Testing Only>"),
-                        TextButton(
-                          child: const Text(
-                              'Throw Error (Generate Log - to see it close and reopen screen).'),
-                          onPressed: () => throw FlutterError('Test error'),
-                        ),
                       ],
                     ),
                   ),

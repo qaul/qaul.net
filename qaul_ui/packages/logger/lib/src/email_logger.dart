@@ -71,7 +71,7 @@ class EmailLogger implements Logger {
   }
 
   String _buildTitle(Object e) =>
-      '${_storageManager.titlePrefix}-${e.runtimeType.toString().trim().replaceAll(' ', '_')}-${DateTime.now()}';
+      '${_storageManager.titlePrefix}-${e.runtimeType.toString().trim().replaceAll(' ', '_')}-${DateTime.now().millisecondsSinceEpoch}';
 
   Future<String> _buildLogContent(Object e, StackTrace stack, String type, String msg) async {
     return '''
