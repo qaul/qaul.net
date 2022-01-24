@@ -8,16 +8,35 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:logger/src/info_provider.dart';
 import 'package:mailto/mailto.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'logger.dart';
 
 class EmailLogger implements Logger {
+  static const _loggingEnabledKey = 'loggingEnabledKey';
   @override
-  bool loggingEnabled = true;
+  bool get loggingEnabled => _enabled;
+  bool _enabled = true;
+
+  @override
+  set loggingEnabled(bool enabled) {
+    _enabled = enabled;
+    _storeLoggingOption();
+  }
+
+  void _storeLoggingOption() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool(_loggingEnabledKey, _enabled);
+  }
 
   @override
   Future<void> initialize() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(_loggingEnabledKey)) {
+      _enabled = prefs.getBool(_loggingEnabledKey) ?? true;
+    }
+
     FlutterError.onError = (details) => logError(details.exception, details.stack!);
     Isolate.current.addErrorListener(RawReceivePort((pair) async {
       final List<dynamic> errorAndStacktrace = pair;
