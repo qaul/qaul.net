@@ -51,7 +51,14 @@ class _SupportScreenState extends State<SupportScreen> {
                           ],
                         ),
                       ),
-                      if (hasLogs)
+                      if (hasLogs) ...[
+                        FutureBuilder(
+                          future: Logger.instance.logStorageSize,
+                          builder: (context, snapshot) {
+                            final size = snapshot.data ?? '0.0 KB';
+                            return Text('Total logs size: $size');
+                          },
+                        ),
                         TextButton(
                           child: const Text('Delete Logs'),
                           onPressed: () async {
@@ -59,6 +66,7 @@ class _SupportScreenState extends State<SupportScreen> {
                             Navigator.pop(context);
                           },
                         ),
+                      ],
                     ],
                   ),
                 ),

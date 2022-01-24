@@ -48,6 +48,11 @@ class StorageManager {
     return path.listSync().where((file) => file.path.contains(titlePrefix)).toList();
   }
 
+  Future<int> get logFolderSize async {
+    var path = Directory(await _storeDirectory);
+    return (await path.stat()).size;
+  }
+
   Future<void> _deleteObsoleteLogs() async {
     final today = DateTime.now();
     final obsoleteLogs = (await logs).where((log) {
