@@ -15,6 +15,8 @@ abstract class Logger {
 
   Future<bool> get hasLogsStored;
 
+  Future<String> get logStorageSize;
+
   Future<void> sendLogs();
 
   Future<void> deleteLogs();

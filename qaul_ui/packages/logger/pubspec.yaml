@@ -15,6 +15,7 @@ dependencies:
   equatable: ^2.0.3
 
   archive: ^3.1.8
+  filesize: ^2.0.1
   path_provider: ^2.0.8
   neat_periodic_task: ^2.0.0
   shared_preferences: ^2.0.12

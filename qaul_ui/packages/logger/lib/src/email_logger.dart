@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:filesize/filesize.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:logger/src/info_provider.dart';
@@ -48,6 +49,12 @@ class EmailLogger implements Logger {
   @override
   Future<bool> get hasLogsStored async =>
       (await _storageManager.logs).map((e) => e.path).isNotEmpty;
+
+  @override
+  Future<String> get logStorageSize async {
+    final size = await _storageManager.logFolderSize;
+    return filesize(size);
+  }
 
   @override
   Future<void> logError(Object e, StackTrace s, {String? message}) async {
