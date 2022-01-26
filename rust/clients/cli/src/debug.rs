@@ -4,6 +4,7 @@
 //! # Node module functions
 
 use libqaul;
+use super::rpc::Rpc;
 
 /// node module function handling
 pub struct Debug {}
@@ -22,6 +23,10 @@ impl Debug {
             cmd if cmd.starts_with("rpc queued") => {
                 Self::rpc_queued();
             },
+            // let libqaul panic
+            cmd if cmd.starts_with("panic") => {
+                Self::panic();
+            },
             // unknown command
             _ => log::error!("unknown debug command"),
         }
@@ -39,5 +44,12 @@ impl Debug {
     fn rpc_queued() {
         let count = libqaul::api::receive_rpc_queued();
         println!("{} RPC messages in libqaul's queue", count);
+    }
+
+    /// send a debugging message to libqaul that
+    /// let's it panic.
+    fn panic() {
+        // send empty debug message
+        Rpc::send_message(Vec::new(), super::rpc::proto::Modules::Debug.into(), "".to_string());
     }
 }

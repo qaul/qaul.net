@@ -88,7 +88,10 @@ impl Rpc {
                     },
                     Some(proto::Modules::Connections) => {
                         super::connections::Connections::rpc(message.data);
-                    }
+                    },
+                    Some(proto::Modules::Debug) => {
+                        // these messages are used for debugging
+                    },
                     Some(proto::Modules::None) => {},
                     None => {},
                 }

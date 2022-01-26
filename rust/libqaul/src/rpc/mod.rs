@@ -161,6 +161,11 @@ impl Rpc {
                         log::info!("Message Modules::Connections received");
                         Connections::rpc(message.data, internet);
                     },
+                    Some(Modules::Debug) => {
+                        log::info!("Message Modules::Debug received");
+                        log::error!("Libqaul will panic");
+                        panic!("Libqaul panics for debugging reasons");
+                    },
                     Some(Modules::None) => {
                         log::error!("Message Modules::None received");
                     },

@@ -33,4 +33,5 @@ enum Modules {
     ROUTER = 5;
     FEED = 6;
     CONNECTIONS = 7;
+    DEBUG = 8;
 }

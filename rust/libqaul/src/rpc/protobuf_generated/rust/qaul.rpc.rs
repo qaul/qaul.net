@@ -36,4 +36,5 @@ pub enum Modules {
     Router = 5,
     Feed = 6,
     Connections = 7,
+    Debug = 8,
 }
