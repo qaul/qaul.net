@@ -1,4 +1,6 @@
 {
+  "languageName": "English",
+
   "createAccountHeading": "Choose a\nuser name",
   "@createAccountHeading": {
     "description": "CTA rendered on top of text field"

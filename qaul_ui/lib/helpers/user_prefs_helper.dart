@@ -12,14 +12,6 @@ class UserPrefsHelper {
 
   String get _defaultThemeKey => 'cached_default_theme';
 
-  List<Locale?> get supportedLocales => [
-        null,
-        const Locale.fromSubtags(languageCode: 'en'),
-        const Locale.fromSubtags(languageCode: 'ar'),
-        const Locale.fromSubtags(languageCode: 'pt'),
-        const Locale.fromSubtags(languageCode: 'id'),
-      ];
-
   Locale? get defaultLocale {
     String? completeCode = _prefsBox?.get(_defaultLocaleKey);
     if (completeCode == null) return null;

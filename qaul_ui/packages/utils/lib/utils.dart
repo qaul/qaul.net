@@ -49,17 +49,6 @@ String describeFuzzyTimestamp(DateTime date, {DateTime? clock}) {
   return timeSent;
 }
 
-/// Returns a long, descriptive name for the locale (always in that language).
-///
-/// If [this] is not mapped, then it will return [this.toLanguageTag()]
-String describeLocale(Locale l) {
-  if (l.languageCode == 'en') return 'English';
-  if (l.languageCode == 'ar') return 'اللغة العربية';
-  if (l.languageCode == 'pt') return 'Português';
-  if (l.languageCode == 'id') return 'Bahasa Indonesia';
-  return l.toLanguageTag();
-}
-
 bool isValidIPv4(String? s) {
   if (s == null || s.isEmpty) return false;
   return RegExp(r'^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)(\.(?!$)|$)){4}$').hasMatch(s);

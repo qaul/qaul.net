@@ -1,4 +1,6 @@
 {
+  "languageName": "Português",
+
   "createAccountHeading": "Escolha um\nnome de usuário",
   "@createAccountHeading": {
     "description": "CTA rendered on top of text field"

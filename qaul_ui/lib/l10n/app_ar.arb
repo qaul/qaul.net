@@ -1,4 +1,6 @@
 {
+  "languageName": "اللغة العربية",
+
   "createAccountHeading": "نص بسيط",
   "@createAccountHeading": {
     "description": "CTA rendered on top of text field"

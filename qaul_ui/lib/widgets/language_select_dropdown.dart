@@ -4,7 +4,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_ui/helpers/user_prefs_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:utils/utils.dart';
 
 class LanguageSelectDropDown extends ConsumerWidget {
   const LanguageSelectDropDown({
@@ -30,13 +29,13 @@ class LanguageSelectDropDown extends ConsumerWidget {
             builder: (context, box, _) => DropdownButton<Locale?>(
               isExpanded: true,
               value: UserPrefsHelper().defaultLocale,
-              items: UserPrefsHelper().supportedLocales.map((value) {
+              items: <Locale?>[null, ...AppLocalizations.supportedLocales].map((value) {
                 return DropdownMenuItem<Locale?>(
                   value: value,
                   child: Text(
                     value == null
                         ? AppLocalizations.of(context)!.useSystemDefaultMessage
-                        : describeLocale(value),
+                        : _languageName(value),
                   ),
                 );
               }).toList(),
@@ -47,4 +46,6 @@ class LanguageSelectDropDown extends ConsumerWidget {
       ],
     );
   }
+
+  String _languageName(Locale l) => lookupAppLocalizations(l).languageName;
 }
