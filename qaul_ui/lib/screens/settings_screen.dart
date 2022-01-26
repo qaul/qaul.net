@@ -10,11 +10,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:qaul_ui/widgets/theme_select_dropdown.dart';
 import 'package:utils/utils.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends HookConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l18ns = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
@@ -31,12 +31,21 @@ class SettingsScreen extends StatelessWidget {
         child: Padding(
           padding: MediaQuery.of(context).viewPadding.copyWith(left: 20, right: 20),
           child: Column(
-            children: const [
-              LanguageSelectDropDown(),
-              SizedBox(height: 20),
-              ThemeSelectDropdown(),
-              SizedBox(height: 80),
-              _InternetNodesList(),
+            children: [
+              const LanguageSelectDropDown(),
+              const SizedBox(height: 20),
+              const ThemeSelectDropdown(),
+              //
+              const Divider(),
+              TextButton(
+                child: const Text('Throw libqaul Panic'),
+                onPressed: () {
+                  ref.read(qaulWorkerProvider).sendDebugPanicMessage();
+                },
+              ),
+
+              const SizedBox(height: 80),
+              const _InternetNodesList(),
             ],
           ),
         ),

@@ -14,6 +14,8 @@ import 'package:qaul_rpc/src/models/models.dart';
 
 part 'connection_translator.dart';
 
+part 'debug_translator.dart';
+
 part 'feed_translator.dart';
 
 part 'node_translator.dart';
