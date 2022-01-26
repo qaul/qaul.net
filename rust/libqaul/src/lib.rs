@@ -66,7 +66,6 @@ pub fn initialize_android_logging() {
 
 /// Events of the async loop
 enum EventType {
-    Cli(String),
     Rpc(bool),
     Flooding(bool),
     RoutingInfo(bool),
@@ -164,7 +163,6 @@ pub async fn start(storage_path: String) -> () {
 
         if let Some(event) = evt {
             match event {
-                EventType::Cli(_line) => {}
                 EventType::Rpc(_) => {
                     if let Ok(rpc_message) = libqaul_receive.try_recv() {
                         // we received a message, send it to RPC crate
@@ -270,7 +268,7 @@ pub async fn start_android(storage_path: String) -> () {
     // initialize Connection Modules
     let conn = Connections::init_android().await;
     let mut internet = conn.internet.unwrap();
-    //let mut lan = conn.lan.unwrap();
+    let mut lan = conn.lan.unwrap();
 
     log::info!("start_android Connections::init().await");
 
@@ -309,7 +307,7 @@ pub async fn start_android(storage_path: String) -> () {
 
     loop {
         let evt = {
-            //let lan_fut = conn.lan.unwrap().swarm.next().fuse();
+            let lan_fut = lan.swarm.next().fuse();
             let internet_fut = internet.swarm.next().fuse();
             let rpc_fut = rpc_ticker.next().fuse();
             let flooding_fut = flooding_ticker.next().fuse();
@@ -319,7 +317,7 @@ pub async fn start_android(storage_path: String) -> () {
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
             // You need to downgrade to version 0.2.400 if this happens to you
             pin_mut!(
-                //lan_fut,
+                lan_fut,
                 internet_fut,
                 rpc_fut,
                 flooding_fut,
@@ -328,10 +326,10 @@ pub async fn start_android(storage_path: String) -> () {
             );
 
             select! {
-                //lan_event = lan_fut => {
-                //    log::info!("Unhandled lan connection module event: {:?}", lan_event);
-                //    None
-                //},
+                lan_event = lan_fut => {
+                    log::info!("Unhandled lan connection module event: {:?}", lan_event);
+                    None
+                },
                 internet_event = internet_fut => {
                     log::info!("Unhandled internet connection module event: {:?}", internet_event);
                     None
@@ -345,7 +343,6 @@ pub async fn start_android(storage_path: String) -> () {
 
         if let Some(event) = evt {
             match event {
-                EventType::Cli(_line) => {}
                 EventType::Rpc(_) => {
                     if let Ok(rpc_message) = libqaul_receive.try_recv() {
                         // we received a message, send it to RPC crate
@@ -385,7 +382,11 @@ pub async fn start_android(storage_path: String) -> () {
                         );
                         // send routing information
                         match connection_module {
-                            ConnectionModule::Lan => {} //conn.lan.unwrap().swarm.behaviour_mut().qaul_info.send_qaul_info_message(neighbour_id, data),
+                            ConnectionModule::Lan => lan
+                                .swarm
+                                .behaviour_mut()
+                                .qaul_info
+                                .send_qaul_info_message(neighbour_id, data),
                             ConnectionModule::Internet => internet
                                 .swarm
                                 .behaviour_mut()

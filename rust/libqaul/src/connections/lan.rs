@@ -121,18 +121,18 @@ impl Lan {
         let mut ping_config = PingConfig::new();
         ping_config = ping_config.with_keep_alive(true);
 
-        log::info!("Internet.init() ping_config");
+        log::info!("Lan::init() ping_config");
 
         let mut swarm = {
-            log::info!("Internet.init() swarm creation started");
+            log::info!("Lan::init() swarm creation started");
 
             // create MDNS behaviour
             // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
             let mdns = task::block_on(Mdns::new(MdnsConfig::default())).unwrap();
 
-            log::info!("Internet.init() swarm mdns module created");
+            log::info!("Lan::init() swarm mdns module created");
 
-            // TODO: set shorter readvertisment time
+            // TODO: set shorter re-advertisement time
             //       see here: libp2p-mdns/src/behaviour.rs
             let mut behaviour = QaulLanBehaviour {
                 floodsub: Floodsub::new(Node::get_id()),
@@ -142,11 +142,11 @@ impl Lan {
                 response_sender,
             };
 
-            log::info!("Internet.init() swarm behaviour defined");
+            log::info!("Lan::init() swarm behaviour defined");
 
             behaviour.floodsub.subscribe(Node::get_topic());
 
-            log::info!("Internet.init() swarm behaviour floodsub subscribed");
+            log::info!("Lan::init() swarm behaviour floodsub subscribed");
 
             Swarm::new(transport_upgraded, behaviour, Node::get_id())
         };
@@ -169,24 +169,6 @@ impl Lan {
         let lan = Lan { swarm: swarm, receiver: response_rcv };
 
         lan
-    }
-
-    /**
-     * Print information about this connection
-     */
-    pub fn info(&self) {
-        println!("# Lan Connection Module");
-        // number of peers connected
-        println!("{} peer(s) connected", self.swarm.network_info().num_peers());
-
-        // List mdns peers
-        println!("Discovered mdns peers:");
-        let nodes = self.swarm.behaviour().mdns.discovered_nodes();
-        let mut unique_peers = HashSet::new();
-        for peer in nodes {
-            unique_peers.insert(peer);
-        }
-        unique_peers.iter().for_each(|p| println!("  {}", p));
     }
 }
 

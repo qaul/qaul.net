@@ -383,34 +383,5 @@ impl ConnectionTable {
         // return list
         connections_list
     }
-
-    /// print list of connection module on terminal 
-    fn cli_display_list( conn: ConnectionModule ) {
-        println!("{:?}", conn);
-        println!("No. | User ID");
-        println!("      * RTT in ms | hop count | Via Neighbour Node Id");
-
-        let mut line = 1;
-        let connection_table;
-        
-        match conn {
-            ConnectionModule::Lan => connection_table = LAN.get().read().unwrap(),
-            ConnectionModule::Internet => connection_table = INTERNET.get().read().unwrap(),
-            ConnectionModule::Ble => return,
-            ConnectionModule::Local => return,
-            ConnectionModule::None => return,
-        }
-
-        // loop through all table entries per user
-        for (id, entry) in &connection_table.table {
-            println!("{} | {:?}", line, id);
-            // loop through all neighbour entries of a user entry
-            for (id, neighbour) in &entry.connections {
-                println!("      * {} | {} | {:?}", neighbour.rtt, neighbour.hc, id);
-            }
-            line += 1;
-        }
-    }
-
 }
 

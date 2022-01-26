@@ -84,7 +84,7 @@ impl Connections {
 
 
         // initialize Lan module
-        let _lan = Lan::init(auth_keys.clone()).await;
+        let lan = Lan::init(auth_keys.clone()).await;
 
         log::info!("init_android() lan initialized");
 
@@ -94,7 +94,7 @@ impl Connections {
         log::info!("init_android() internet initialized");
 
         //let conn = Connections{ lan: None, internet: Some(internet) };
-        let conn = Connections{ lan: None, internet: Some(internet) };
+        let conn = Connections{ lan: Some(lan), internet: Some(internet) };
 
         conn
     }

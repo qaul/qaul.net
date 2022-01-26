@@ -193,13 +193,6 @@ impl Internet {
             Err(error) => info!("peer {} swarm dial error: {:?}", addresse, error),
         }
     }
-
-    /// Print information about this connection
-    pub fn info(&self) {
-        println!("# Internet Connection Module");
-        // number of peers connected
-        println!("{} peer(s) connected", self.swarm.network_info().num_peers());
-    }
 }
 
 impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
