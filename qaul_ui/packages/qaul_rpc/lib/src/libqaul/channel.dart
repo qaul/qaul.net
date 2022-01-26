@@ -27,6 +27,7 @@ class LibqaulChannel {
       debugPrint("libqaulload called");
     } on PlatformException catch (e) {
       debugPrint("ERROR: Failed to load libqaul: '${e.message}'");
+      rethrow;
     }
   }
 
@@ -47,6 +48,7 @@ class LibqaulChannel {
     } on PlatformException catch (e) {
       version = "ERROR: libqaul getPlatformVersion: '${e.message}'";
       debugPrint(version);
+      rethrow;
     }
     return version;
   }
@@ -57,6 +59,7 @@ class LibqaulChannel {
       await libqaulChannel.invokeMethod('start');
     } on PlatformException catch (e) {
       debugPrint("ERROR: Failed to start libqaul: '${e.message}'");
+      rethrow;
     }
   }
 
@@ -65,7 +68,6 @@ class LibqaulChannel {
   /// returns 1, when qaul finished initializing
   /// otherwise it returns 0
   Future<int> initialized() async {
-    int result;
     try {
       var init = await libqaulChannel.invokeMethod('initialized');
       if ((init is int && init == 1) || (init is bool && init)) {
@@ -74,10 +76,9 @@ class LibqaulChannel {
         return 0;
       }
     } on PlatformException catch (e) {
-      result = -1;
       debugPrint("ERROR: libqaul initialized: '${e.message}'");
+      rethrow;
     }
-    return result;
   }
 
   /// hello function
@@ -86,8 +87,8 @@ class LibqaulChannel {
     try {
       result = await libqaulChannel.invokeMethod('hello');
     } on PlatformException catch (e) {
-      result = "hello ERROR";
       debugPrint("ERROR: libqaul hello: '${e.message}'");
+      rethrow;
     }
     return result;
   }
@@ -98,8 +99,8 @@ class LibqaulChannel {
     try {
       result = await libqaulChannel.invokeMethod('sendcounter');
     } on PlatformException catch (e) {
-      result = -1;
       debugPrint("ERROR: libqaul sendcounter: '${e.message}'");
+      rethrow;
     }
     return result;
   }
@@ -110,8 +111,8 @@ class LibqaulChannel {
     try {
       result = await libqaulChannel.invokeMethod('receivequeue');
     } on PlatformException catch (e) {
-      result = -1;
       debugPrint("ERROR: libqaul channel receivequeue: '${e.message}'");
+      rethrow;
     }
     return result;
   }
@@ -122,6 +123,7 @@ class LibqaulChannel {
       await libqaulChannel.invokeMethod('sendRpcMessage', {'message': message});
     } on PlatformException catch (e) {
       debugPrint("ERROR: libqaul channel sendRpcMessage: '${e.message}'");
+      rethrow;
     }
   }
 
@@ -156,6 +158,7 @@ class LibqaulChannel {
       }
     } on PlatformException catch (e) {
       debugPrint("ERROR: libqaul receiveRpcMessage: '${e.message}'");
+      rethrow;
     }
     return null;
   }
