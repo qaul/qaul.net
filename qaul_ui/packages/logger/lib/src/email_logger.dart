@@ -102,8 +102,7 @@ $stack
     final email = Email(
       body: 'Customer Feedback - Error/Exception Logs',
       subject: 'Customer Feedback - Error/Exception Logs',
-      recipients: ['qaul.service@gmail.com'],
-      // recipients: ['debug@qaul.net'],
+      recipients: ['debug@qaul.net'],
       attachmentPaths: (await _storageManager.logs).map((e) => e.path).toList(),
       isHTML: false,
     );
@@ -112,7 +111,7 @@ $stack
 
   Future<void> _sendDesktopLogs() async {
     final mailtoLink = Mailto(
-      to: ['qaul.service@gmail.com'],
+      to: ['debug@qaul.net'],
       body: await _buildDesktopEmail(),
       subject: 'Customer Feedback - Error/Exception Logs',
     );
