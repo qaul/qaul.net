@@ -95,8 +95,7 @@ $stack
   @override
   Future<void> sendLogs() async {
     if (!loggingEnabled) return;
-    if (Platform.isAndroid || Platform.isIOS) await _sendMobileLogs();
-    await _sendDesktopLogs();
+    (Platform.isAndroid || Platform.isIOS) ? await _sendMobileLogs() : await _sendDesktopLogs();
   }
 
   Future<void> _sendMobileLogs() async {
