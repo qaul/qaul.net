@@ -27,11 +27,14 @@ mod types;
 
 use connections::{ConnectionModule, Connections};
 use node::Node;
-use router::flooder;
-use router::{info::RouterInfo, Router};
+use router::{
+    flooder,
+    info::RouterInfo, 
+    Router,
+};
 use rpc::Rpc;
-use services::feed;
 use services::Services;
+use services::messaging::Messaging;
 use utilities::Utilities;
 
 /// check this when the library finished initializing
@@ -70,6 +73,7 @@ enum EventType {
     Flooding(bool),
     RoutingInfo(bool),
     RoutingTable(bool),
+    Messaging(bool),
 }
 
 /// initialize and start libqaul
@@ -122,6 +126,9 @@ pub async fn start(storage_path: String) -> () {
     // re-create routing table periodically
     let mut routing_table_ticker = Ticker::new(Duration::from_millis(1000));
 
+    // manage the message sending
+    let mut messaging_ticker = Ticker::new(Duration::from_millis(10));
+
     // set initialized flag
     INITIALIZED.set(true);
 
@@ -133,6 +140,7 @@ pub async fn start(storage_path: String) -> () {
             let flooding_fut = flooding_ticker.next().fuse();
             let routing_info_fut = routing_info_ticker.next().fuse();
             let routing_table_fut = routing_table_ticker.next().fuse();
+            let messaging_fut = messaging_ticker.next().fuse();
 
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
             // You need to downgrade to version 0.2.400 if this happens to you
@@ -142,7 +150,8 @@ pub async fn start(storage_path: String) -> () {
                 rpc_fut,
                 flooding_fut,
                 routing_info_fut,
-                routing_table_fut
+                routing_table_fut,
+                messaging_fut,
             );
 
             select! {
@@ -158,6 +167,7 @@ pub async fn start(storage_path: String) -> () {
                 _flooding_event = flooding_fut => Some(EventType::Flooding(true)),
                 _routing_info_event = routing_info_fut => Some(EventType::RoutingInfo(true)),
                 _routing_table_event = routing_table_fut => Some(EventType::RoutingTable(true)),
+                _messaging_event = messaging_fut => Some(EventType::Messaging(true)),
             }
         };
 
@@ -228,6 +238,38 @@ pub async fn start(storage_path: String) -> () {
                 EventType::RoutingTable(_) => {
                     // create new routing table
                     router::connections::ConnectionTable::create_routing_table();
+                }
+                EventType::Messaging(_) => {
+                    // send scheduled messages
+                    if let Some((neighbour_id, connection_module, data)) =
+                        Messaging::check_scheduler()
+                    {
+                        log::info!(
+                            "sending routing information via {:?} to {:?}",
+                            connection_module,
+                            neighbour_id
+                        );
+                        // send routing information
+                        match connection_module {
+                            ConnectionModule::Lan => {
+                                // lan
+                                // .swarm
+                                // .behaviour_mut()
+                                // .qaul_info
+                                // .send_qaul_info_message(neighbour_id, data);
+                            },
+                            ConnectionModule::Internet => {
+                                // internet
+                                //     .swarm
+                                //     .behaviour_mut()
+                                //     .qaul_info
+                                //     .send_qaul_info_message(neighbour_id, data);
+                            },
+                            ConnectionModule::Ble => {},
+                            ConnectionModule::Local => {},
+                            ConnectionModule::None => {},
+                        }
+                    }
                 }
             }
         }
@@ -300,6 +342,9 @@ pub async fn start_android(storage_path: String) -> () {
 
     log::info!("start_android routing_table_ticker");
 
+    // manage the message sending
+    let mut messaging_ticker = Ticker::new(Duration::from_millis(10));
+
     // set initialized flag
     INITIALIZED.set(true);
 
@@ -313,6 +358,7 @@ pub async fn start_android(storage_path: String) -> () {
             let flooding_fut = flooding_ticker.next().fuse();
             let routing_info_fut = routing_info_ticker.next().fuse();
             let routing_table_fut = routing_table_ticker.next().fuse();
+            let messaging_fut = messaging_ticker.next().fuse();
 
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
             // You need to downgrade to version 0.2.400 if this happens to you
@@ -322,7 +368,8 @@ pub async fn start_android(storage_path: String) -> () {
                 rpc_fut,
                 flooding_fut,
                 routing_info_fut,
-                routing_table_fut
+                routing_table_fut,
+                messaging_fut,
             );
 
             select! {
@@ -338,6 +385,7 @@ pub async fn start_android(storage_path: String) -> () {
                 _flooding_event = flooding_fut => Some(EventType::Flooding(true)),
                 _routing_info_event = routing_info_fut => Some(EventType::RoutingInfo(true)),
                 _routing_table_event = routing_table_fut => Some(EventType::RoutingTable(true)),
+                _messaging_event = messaging_fut => Some(EventType::Messaging(true)),
             }
         };
 
@@ -401,6 +449,38 @@ pub async fn start_android(storage_path: String) -> () {
                 EventType::RoutingTable(_) => {
                     // create new routing table
                     router::connections::ConnectionTable::create_routing_table();
+                }
+                EventType::Messaging(_) => {
+                    // send scheduled messages
+                    if let Some((neighbour_id, connection_module, data)) =
+                        Messaging::check_scheduler()
+                    {
+                        log::info!(
+                            "sending routing information via {:?} to {:?}",
+                            connection_module,
+                            neighbour_id
+                        );
+                        // send routing information
+                        match connection_module {
+                            ConnectionModule::Lan => {
+                                // lan
+                                // .swarm
+                                // .behaviour_mut()
+                                // .qaul_info
+                                // .send_qaul_info_message(neighbour_id, data);
+                            },
+                            ConnectionModule::Internet => {
+                                // internet
+                                //     .swarm
+                                //     .behaviour_mut()
+                                //     .qaul_info
+                                //     .send_qaul_info_message(neighbour_id, data);
+                            },
+                            ConnectionModule::Ble => {},
+                            ConnectionModule::Local => {},
+                            ConnectionModule::None => {},
+                        }
+                    }
                 }
             }
         }

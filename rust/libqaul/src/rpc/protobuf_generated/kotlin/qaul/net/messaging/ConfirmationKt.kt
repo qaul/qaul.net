@@ -4,23 +4,23 @@
 package qaul.net.messaging;
 
 @kotlin.jvm.JvmSynthetic
-public inline fun confirmation(block: qaul.net.messaging.ConfirmationKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.Messaging.Confirmation =
-  qaul.net.messaging.ConfirmationKt.Dsl._create(qaul.net.messaging.Messaging.Confirmation.newBuilder()).apply { block() }._build()
+public inline fun confirmation(block: qaul.net.messaging.ConfirmationKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Confirmation =
+  qaul.net.messaging.ConfirmationKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.Confirmation.newBuilder()).apply { block() }._build()
 public object ConfirmationKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
   public class Dsl private constructor(
-    private val _builder: qaul.net.messaging.Messaging.Confirmation.Builder
+    private val _builder: qaul.net.messaging.MessagingOuterClass.Confirmation.Builder
   ) {
     public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
-      internal fun _create(builder: qaul.net.messaging.Messaging.Confirmation.Builder): Dsl = Dsl(builder)
+      internal fun _create(builder: qaul.net.messaging.MessagingOuterClass.Confirmation.Builder): Dsl = Dsl(builder)
     }
 
     @kotlin.jvm.JvmSynthetic
     @kotlin.PublishedApi
-    internal fun _build(): qaul.net.messaging.Messaging.Confirmation = _builder.build()
+    internal fun _build(): qaul.net.messaging.MessagingOuterClass.Confirmation = _builder.build()
 
     /**
      * <pre>
@@ -74,5 +74,5 @@ public object ConfirmationKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.messaging.Messaging.Confirmation.copy(block: qaul.net.messaging.ConfirmationKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.Messaging.Confirmation =
+public inline fun qaul.net.messaging.MessagingOuterClass.Confirmation.copy(block: qaul.net.messaging.ConfirmationKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Confirmation =
   qaul.net.messaging.ConfirmationKt.Dsl._create(this.toBuilder()).apply { block() }._build()

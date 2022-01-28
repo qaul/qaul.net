@@ -972,7 +972,7 @@ class ChatConversationRequest final :
 
   enum : int {
     kConversationIdFieldNumber = 1,
-    kLastReceivedFieldNumber = 2,
+    kLastIndexFieldNumber = 2,
   };
   // bytes conversation_id = 1;
   void clear_conversation_id();
@@ -988,18 +988,13 @@ class ChatConversationRequest final :
   std::string* _internal_mutable_conversation_id();
   public:
 
-  // string last_received = 2;
-  void clear_last_received();
-  const std::string& last_received() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_last_received(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_last_received();
-  PROTOBUF_NODISCARD std::string* release_last_received();
-  void set_allocated_last_received(std::string* last_received);
+  // uint64 last_index = 2;
+  void clear_last_index();
+  uint64_t last_index() const;
+  void set_last_index(uint64_t value);
   private:
-  const std::string& _internal_last_received() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_last_received(const std::string& value);
-  std::string* _internal_mutable_last_received();
+  uint64_t _internal_last_index() const;
+  void _internal_set_last_index(uint64_t value);
   public:
 
   // @@protoc_insertion_point(class_scope:qaul.rpc.chat.ChatConversationRequest)
@@ -1010,7 +1005,7 @@ class ChatConversationRequest final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr conversation_id_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr last_received_;
+  uint64_t last_index_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_services_2fchat_2fchat_2eproto;
 };
@@ -2289,55 +2284,24 @@ inline void ChatConversationRequest::set_allocated_conversation_id(std::string* 
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatConversationRequest.conversation_id)
 }
 
-// string last_received = 2;
-inline void ChatConversationRequest::clear_last_received() {
-  last_received_.ClearToEmpty();
+// uint64 last_index = 2;
+inline void ChatConversationRequest::clear_last_index() {
+  last_index_ = uint64_t{0u};
 }
-inline const std::string& ChatConversationRequest::last_received() const {
-  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatConversationRequest.last_received)
-  return _internal_last_received();
+inline uint64_t ChatConversationRequest::_internal_last_index() const {
+  return last_index_;
 }
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void ChatConversationRequest::set_last_received(ArgT0&& arg0, ArgT... args) {
- 
- last_received_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatConversationRequest.last_received)
+inline uint64_t ChatConversationRequest::last_index() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatConversationRequest.last_index)
+  return _internal_last_index();
 }
-inline std::string* ChatConversationRequest::mutable_last_received() {
-  std::string* _s = _internal_mutable_last_received();
-  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.ChatConversationRequest.last_received)
-  return _s;
-}
-inline const std::string& ChatConversationRequest::_internal_last_received() const {
-  return last_received_.Get();
-}
-inline void ChatConversationRequest::_internal_set_last_received(const std::string& value) {
+inline void ChatConversationRequest::_internal_set_last_index(uint64_t value) {
   
-  last_received_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+  last_index_ = value;
 }
-inline std::string* ChatConversationRequest::_internal_mutable_last_received() {
-  
-  return last_received_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
-}
-inline std::string* ChatConversationRequest::release_last_received() {
-  // @@protoc_insertion_point(field_release:qaul.rpc.chat.ChatConversationRequest.last_received)
-  return last_received_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
-}
-inline void ChatConversationRequest::set_allocated_last_received(std::string* last_received) {
-  if (last_received != nullptr) {
-    
-  } else {
-    
-  }
-  last_received_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), last_received,
-      GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (last_received_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
-    last_received_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatConversationRequest.last_received)
+inline void ChatConversationRequest::set_last_index(uint64_t value) {
+  _internal_set_last_index(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatConversationRequest.last_index)
 }
 
 // -------------------------------------------------------------------

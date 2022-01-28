@@ -74,7 +74,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ChatConversationDefaultTypeInte
 constexpr ChatConversationRequest::ChatConversationRequest(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : conversation_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , last_received_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+  , last_index_(uint64_t{0u}){}
 struct ChatConversationRequestDefaultTypeInternal {
   constexpr ChatConversationRequestDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -180,7 +180,7 @@ const uint32_t TableStruct_services_2fchat_2fchat_2eproto::offsets[] PROTOBUF_SE
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::ChatConversationRequest, conversation_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::ChatConversationRequest, last_received_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::ChatConversationRequest, last_index_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::ChatConversationList, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -249,21 +249,20 @@ const char descriptor_table_protodef_services_2fchat_2fchat_2eproto[] PROTOBUF_S
   "tConversation\022\027\n\017conversation_id\030\001 \001(\014\022\032"
   "\n\022last_message_index\030\002 \001(\r\022\014\n\004name\030\003 \001(\t"
   "\022\027\n\017last_message_at\030\004 \001(\004\022\016\n\006unread\030\005 \001("
-  "\005\022\017\n\007content\030\006 \001(\t\"I\n\027ChatConversationRe"
-  "quest\022\027\n\017conversation_id\030\001 \001(\014\022\025\n\rlast_r"
-  "eceived\030\002 \001(\t\"a\n\024ChatConversationList\022\027\n"
-  "\017conversation_id\030\001 \001(\014\0220\n\014message_list\030\002"
-  " \003(\0132\032.qaul.rpc.chat.ChatMessage\"\212\001\n\013Cha"
-  "tMessage\022\r\n\005index\030\001 \001(\r\022\021\n\tsender_id\030\002 \001"
-  "(\014\022\022\n\nmessage_id\030\003 \001(\014\022\016\n\006status\030\004 \001(\005\022\017"
-  "\n\007sent_at\030\005 \001(\004\022\023\n\013received_at\030\006 \001(\004\022\017\n\007"
-  "content\030\007 \001(\t\";\n\017ChatMessageSend\022\027\n\017conv"
-  "ersation_id\030\001 \001(\014\022\017\n\007content\030\002 \001(\tb\006prot"
-  "o3"
+  "\005\022\017\n\007content\030\006 \001(\t\"F\n\027ChatConversationRe"
+  "quest\022\027\n\017conversation_id\030\001 \001(\014\022\022\n\nlast_i"
+  "ndex\030\002 \001(\004\"a\n\024ChatConversationList\022\027\n\017co"
+  "nversation_id\030\001 \001(\014\0220\n\014message_list\030\002 \003("
+  "\0132\032.qaul.rpc.chat.ChatMessage\"\212\001\n\013ChatMe"
+  "ssage\022\r\n\005index\030\001 \001(\r\022\021\n\tsender_id\030\002 \001(\014\022"
+  "\022\n\nmessage_id\030\003 \001(\014\022\016\n\006status\030\004 \001(\005\022\017\n\007s"
+  "ent_at\030\005 \001(\004\022\023\n\013received_at\030\006 \001(\004\022\017\n\007con"
+  "tent\030\007 \001(\t\";\n\017ChatMessageSend\022\027\n\017convers"
+  "ation_id\030\001 \001(\014\022\017\n\007content\030\002 \001(\tb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_services_2fchat_2fchat_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_services_2fchat_2fchat_2eproto = {
-  false, false, 1002, descriptor_table_protodef_services_2fchat_2fchat_2eproto, "services/chat/chat.proto", 
+  false, false, 999, descriptor_table_protodef_services_2fchat_2fchat_2eproto, "services/chat/chat.proto", 
   &descriptor_table_services_2fchat_2fchat_2eproto_once, nullptr, 0, 8,
   schemas, file_default_instances, TableStruct_services_2fchat_2fchat_2eproto::offsets,
   file_level_metadata_services_2fchat_2fchat_2eproto, file_level_enum_descriptors_services_2fchat_2fchat_2eproto, file_level_service_descriptors_services_2fchat_2fchat_2eproto,
@@ -1377,14 +1376,7 @@ ChatConversationRequest::ChatConversationRequest(const ChatConversationRequest& 
     conversation_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_conversation_id(), 
       GetArenaForAllocation());
   }
-  last_received_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    last_received_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_last_received().empty()) {
-    last_received_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_last_received(), 
-      GetArenaForAllocation());
-  }
+  last_index_ = from.last_index_;
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.chat.ChatConversationRequest)
 }
 
@@ -1393,10 +1385,7 @@ conversation_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptySt
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   conversation_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-last_received_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  last_received_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+last_index_ = uint64_t{0u};
 }
 
 ChatConversationRequest::~ChatConversationRequest() {
@@ -1409,7 +1398,6 @@ ChatConversationRequest::~ChatConversationRequest() {
 inline void ChatConversationRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   conversation_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  last_received_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void ChatConversationRequest::ArenaDtor(void* object) {
@@ -1429,7 +1417,7 @@ void ChatConversationRequest::Clear() {
   (void) cached_has_bits;
 
   conversation_id_.ClearToEmpty();
-  last_received_.ClearToEmpty();
+  last_index_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1448,12 +1436,10 @@ const char* ChatConversationRequest::_InternalParse(const char* ptr, ::PROTOBUF_
         } else
           goto handle_unusual;
         continue;
-      // string last_received = 2;
+      // uint64 last_index = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
-          auto str = _internal_mutable_last_received();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.chat.ChatConversationRequest.last_received"));
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          last_index_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1493,14 +1479,10 @@ uint8_t* ChatConversationRequest::_InternalSerialize(
         1, this->_internal_conversation_id(), target);
   }
 
-  // string last_received = 2;
-  if (!this->_internal_last_received().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_last_received().data(), static_cast<int>(this->_internal_last_received().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.rpc.chat.ChatConversationRequest.last_received");
-    target = stream->WriteStringMaybeAliased(
-        2, this->_internal_last_received(), target);
+  // uint64 last_index = 2;
+  if (this->_internal_last_index() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_last_index(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1526,11 +1508,9 @@ size_t ChatConversationRequest::ByteSizeLong() const {
         this->_internal_conversation_id());
   }
 
-  // string last_received = 2;
-  if (!this->_internal_last_received().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_last_received());
+  // uint64 last_index = 2;
+  if (this->_internal_last_index() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_last_index());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -1558,8 +1538,8 @@ void ChatConversationRequest::MergeFrom(const ChatConversationRequest& from) {
   if (!from._internal_conversation_id().empty()) {
     _internal_set_conversation_id(from._internal_conversation_id());
   }
-  if (!from._internal_last_received().empty()) {
-    _internal_set_last_received(from._internal_last_received());
+  if (from._internal_last_index() != 0) {
+    _internal_set_last_index(from._internal_last_index());
   }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -1585,11 +1565,7 @@ void ChatConversationRequest::InternalSwap(ChatConversationRequest* other) {
       &conversation_id_, lhs_arena,
       &other->conversation_id_, rhs_arena
   );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      &last_received_, lhs_arena,
-      &other->last_received_, rhs_arena
-  );
+  swap(last_index_, other->last_index_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ChatConversationRequest::GetMetadata() const {

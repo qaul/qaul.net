@@ -169,8 +169,83 @@ impl RoutingTable {
         // send message
         Rpc::send_message(buf, crate::rpc::proto::Modules::Router.into(), "".to_string(), Vec::new());
     }
-}
 
+    /// Get the routing connection entry for a specific user
+    /// 
+    /// The connection entry for the provided user_id contains
+    /// the neighbour id as well as the connection module via
+    /// which to send the packages.
+    /// 
+    /// It selects the best route according to the rank_routing_connection function.
+    /// 
+    pub fn get_route_to_user(user_id: PeerId) -> Option<RoutingConnectionEntry> {
+        // get routing table state
+        let routing_table = ROUTINGTABLE.get().read().unwrap();
+
+        // find user
+        if let Some(user_entry) = routing_table.table.get(&user_id) {
+            let mut compare: Option<&RoutingConnectionEntry> = None;
+
+            // find best route
+            for connection in &user_entry.connections {
+                match compare {
+                    Some(current) => {
+                        if Self::compare_connections(current, connection) {
+                            compare = Some(connection);
+                        }
+                    },
+                    None => compare = Some(connection),
+                }
+            }
+
+            // return route
+            match compare {
+                None => return None,
+                Some(connection) => return Some(connection.to_owned()),
+            }
+        }
+
+        None
+    }
+
+    /// Compare two routing connections and decides which one is better
+    /// 
+    /// This function decides which connection to favour based on the 
+    /// rank_routing_connection function
+    /// 
+    /// Return values:
+    /// 
+    /// * returns true, when the new connection is better
+    /// * returns false, when the current connection is better
+    /// 
+    fn compare_connections(current: &RoutingConnectionEntry, new: &RoutingConnectionEntry) -> bool {
+        let current_value = Self::rank_routing_connection(current);
+        let new_value = Self::rank_routing_connection(new);
+
+        if current_value < new_value {
+            return true;
+        }
+        
+        false
+    }
+
+    /// give a ranking to the routing connection
+    /// 
+    /// This function decides which connection to favour based on the following qualities:
+    /// 
+    /// * Hierarchy of connection modules in the following order: 
+    ///   Local, LAN, Internet, BLE, None
+    /// 
+    fn rank_routing_connection(connection: &RoutingConnectionEntry) -> u8 {
+        match connection.module {
+            ConnectionModule::None => return 0,
+            ConnectionModule::Ble => return 1,
+            ConnectionModule::Internet => return 2,
+            ConnectionModule::Lan => return 3,
+            ConnectionModule::Local => return 4,
+        }
+    }
+}
 
 /// Serializable routing structures to send over the network
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]

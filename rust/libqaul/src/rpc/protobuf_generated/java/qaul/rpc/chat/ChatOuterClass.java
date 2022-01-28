@@ -4369,20 +4369,10 @@ public final class ChatOuterClass {
      * send only changes that are newer than the last received
      * </pre>
      *
-     * <code>string last_received = 2;</code>
-     * @return The lastReceived.
+     * <code>uint64 last_index = 2;</code>
+     * @return The lastIndex.
      */
-    java.lang.String getLastReceived();
-    /**
-     * <pre>
-     * send only changes that are newer than the last received
-     * </pre>
-     *
-     * <code>string last_received = 2;</code>
-     * @return The bytes for lastReceived.
-     */
-    com.google.protobuf.ByteString
-        getLastReceivedBytes();
+    long getLastIndex();
   }
   /**
    * <pre>
@@ -4402,7 +4392,6 @@ public final class ChatOuterClass {
     }
     private ChatConversationRequest() {
       conversationId_ = com.google.protobuf.ByteString.EMPTY;
-      lastReceived_ = "";
     }
 
     @java.lang.Override
@@ -4440,10 +4429,9 @@ public final class ChatOuterClass {
               conversationId_ = input.readBytes();
               break;
             }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 16: {
 
-              lastReceived_ = s;
+              lastIndex_ = input.readUInt64();
               break;
             }
             default: {
@@ -4489,50 +4477,19 @@ public final class ChatOuterClass {
       return conversationId_;
     }
 
-    public static final int LAST_RECEIVED_FIELD_NUMBER = 2;
-    private volatile java.lang.Object lastReceived_;
+    public static final int LAST_INDEX_FIELD_NUMBER = 2;
+    private long lastIndex_;
     /**
      * <pre>
      * send only changes that are newer than the last received
      * </pre>
      *
-     * <code>string last_received = 2;</code>
-     * @return The lastReceived.
+     * <code>uint64 last_index = 2;</code>
+     * @return The lastIndex.
      */
     @java.lang.Override
-    public java.lang.String getLastReceived() {
-      java.lang.Object ref = lastReceived_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        lastReceived_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * send only changes that are newer than the last received
-     * </pre>
-     *
-     * <code>string last_received = 2;</code>
-     * @return The bytes for lastReceived.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getLastReceivedBytes() {
-      java.lang.Object ref = lastReceived_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        lastReceived_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getLastIndex() {
+      return lastIndex_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -4552,8 +4509,8 @@ public final class ChatOuterClass {
       if (!conversationId_.isEmpty()) {
         output.writeBytes(1, conversationId_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(lastReceived_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, lastReceived_);
+      if (lastIndex_ != 0L) {
+        output.writeUInt64(2, lastIndex_);
       }
       unknownFields.writeTo(output);
     }
@@ -4568,8 +4525,9 @@ public final class ChatOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, conversationId_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(lastReceived_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, lastReceived_);
+      if (lastIndex_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(2, lastIndex_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4588,8 +4546,8 @@ public final class ChatOuterClass {
 
       if (!getConversationId()
           .equals(other.getConversationId())) return false;
-      if (!getLastReceived()
-          .equals(other.getLastReceived())) return false;
+      if (getLastIndex()
+          != other.getLastIndex()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -4603,8 +4561,9 @@ public final class ChatOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + CONVERSATION_ID_FIELD_NUMBER;
       hash = (53 * hash) + getConversationId().hashCode();
-      hash = (37 * hash) + LAST_RECEIVED_FIELD_NUMBER;
-      hash = (53 * hash) + getLastReceived().hashCode();
+      hash = (37 * hash) + LAST_INDEX_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getLastIndex());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4744,7 +4703,7 @@ public final class ChatOuterClass {
         super.clear();
         conversationId_ = com.google.protobuf.ByteString.EMPTY;
 
-        lastReceived_ = "";
+        lastIndex_ = 0L;
 
         return this;
       }
@@ -4773,7 +4732,7 @@ public final class ChatOuterClass {
       public qaul.rpc.chat.ChatOuterClass.ChatConversationRequest buildPartial() {
         qaul.rpc.chat.ChatOuterClass.ChatConversationRequest result = new qaul.rpc.chat.ChatOuterClass.ChatConversationRequest(this);
         result.conversationId_ = conversationId_;
-        result.lastReceived_ = lastReceived_;
+        result.lastIndex_ = lastIndex_;
         onBuilt();
         return result;
       }
@@ -4825,9 +4784,8 @@ public final class ChatOuterClass {
         if (other.getConversationId() != com.google.protobuf.ByteString.EMPTY) {
           setConversationId(other.getConversationId());
         }
-        if (!other.getLastReceived().isEmpty()) {
-          lastReceived_ = other.lastReceived_;
-          onChanged();
+        if (other.getLastIndex() != 0L) {
+          setLastIndex(other.getLastIndex());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -4892,64 +4850,31 @@ public final class ChatOuterClass {
         return this;
       }
 
-      private java.lang.Object lastReceived_ = "";
+      private long lastIndex_ ;
       /**
        * <pre>
        * send only changes that are newer than the last received
        * </pre>
        *
-       * <code>string last_received = 2;</code>
-       * @return The lastReceived.
+       * <code>uint64 last_index = 2;</code>
+       * @return The lastIndex.
        */
-      public java.lang.String getLastReceived() {
-        java.lang.Object ref = lastReceived_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          lastReceived_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getLastIndex() {
+        return lastIndex_;
       }
       /**
        * <pre>
        * send only changes that are newer than the last received
        * </pre>
        *
-       * <code>string last_received = 2;</code>
-       * @return The bytes for lastReceived.
-       */
-      public com.google.protobuf.ByteString
-          getLastReceivedBytes() {
-        java.lang.Object ref = lastReceived_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          lastReceived_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * send only changes that are newer than the last received
-       * </pre>
-       *
-       * <code>string last_received = 2;</code>
-       * @param value The lastReceived to set.
+       * <code>uint64 last_index = 2;</code>
+       * @param value The lastIndex to set.
        * @return This builder for chaining.
        */
-      public Builder setLastReceived(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        lastReceived_ = value;
+      public Builder setLastIndex(long value) {
+        
+        lastIndex_ = value;
         onChanged();
         return this;
       }
@@ -4958,32 +4883,12 @@ public final class ChatOuterClass {
        * send only changes that are newer than the last received
        * </pre>
        *
-       * <code>string last_received = 2;</code>
+       * <code>uint64 last_index = 2;</code>
        * @return This builder for chaining.
        */
-      public Builder clearLastReceived() {
+      public Builder clearLastIndex() {
         
-        lastReceived_ = getDefaultInstance().getLastReceived();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * send only changes that are newer than the last received
-       * </pre>
-       *
-       * <code>string last_received = 2;</code>
-       * @param value The bytes for lastReceived to set.
-       * @return This builder for chaining.
-       */
-      public Builder setLastReceivedBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        lastReceived_ = value;
+        lastIndex_ = 0L;
         onChanged();
         return this;
       }
@@ -7862,17 +7767,16 @@ public final class ChatOuterClass {
       "tConversation\022\027\n\017conversation_id\030\001 \001(\014\022\032" +
       "\n\022last_message_index\030\002 \001(\r\022\014\n\004name\030\003 \001(\t" +
       "\022\027\n\017last_message_at\030\004 \001(\004\022\016\n\006unread\030\005 \001(" +
-      "\005\022\017\n\007content\030\006 \001(\t\"I\n\027ChatConversationRe" +
-      "quest\022\027\n\017conversation_id\030\001 \001(\014\022\025\n\rlast_r" +
-      "eceived\030\002 \001(\t\"a\n\024ChatConversationList\022\027\n" +
-      "\017conversation_id\030\001 \001(\014\0220\n\014message_list\030\002" +
-      " \003(\0132\032.qaul.rpc.chat.ChatMessage\"\212\001\n\013Cha" +
-      "tMessage\022\r\n\005index\030\001 \001(\r\022\021\n\tsender_id\030\002 \001" +
-      "(\014\022\022\n\nmessage_id\030\003 \001(\014\022\016\n\006status\030\004 \001(\005\022\017" +
-      "\n\007sent_at\030\005 \001(\004\022\023\n\013received_at\030\006 \001(\004\022\017\n\007" +
-      "content\030\007 \001(\t\";\n\017ChatMessageSend\022\027\n\017conv" +
-      "ersation_id\030\001 \001(\014\022\017\n\007content\030\002 \001(\tb\006prot" +
-      "o3"
+      "\005\022\017\n\007content\030\006 \001(\t\"F\n\027ChatConversationRe" +
+      "quest\022\027\n\017conversation_id\030\001 \001(\014\022\022\n\nlast_i" +
+      "ndex\030\002 \001(\004\"a\n\024ChatConversationList\022\027\n\017co" +
+      "nversation_id\030\001 \001(\014\0220\n\014message_list\030\002 \003(" +
+      "\0132\032.qaul.rpc.chat.ChatMessage\"\212\001\n\013ChatMe" +
+      "ssage\022\r\n\005index\030\001 \001(\r\022\021\n\tsender_id\030\002 \001(\014\022" +
+      "\022\n\nmessage_id\030\003 \001(\014\022\016\n\006status\030\004 \001(\005\022\017\n\007s" +
+      "ent_at\030\005 \001(\004\022\023\n\013received_at\030\006 \001(\004\022\017\n\007con" +
+      "tent\030\007 \001(\t\";\n\017ChatMessageSend\022\027\n\017convers" +
+      "ation_id\030\001 \001(\014\022\017\n\007content\030\002 \001(\tb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -7907,7 +7811,7 @@ public final class ChatOuterClass {
     internal_static_qaul_rpc_chat_ChatConversationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_chat_ChatConversationRequest_descriptor,
-        new java.lang.String[] { "ConversationId", "LastReceived", });
+        new java.lang.String[] { "ConversationId", "LastIndex", });
     internal_static_qaul_rpc_chat_ChatConversationList_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_qaul_rpc_chat_ChatConversationList_fieldAccessorTable = new

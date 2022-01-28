@@ -4,23 +4,23 @@
 package qaul.net.messaging;
 
 @kotlin.jvm.JvmSynthetic
-public inline fun envelope(block: qaul.net.messaging.EnvelopeKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.Messaging.Envelope =
-  qaul.net.messaging.EnvelopeKt.Dsl._create(qaul.net.messaging.Messaging.Envelope.newBuilder()).apply { block() }._build()
+public inline fun envelope(block: qaul.net.messaging.EnvelopeKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Envelope =
+  qaul.net.messaging.EnvelopeKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.Envelope.newBuilder()).apply { block() }._build()
 public object EnvelopeKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
   public class Dsl private constructor(
-    private val _builder: qaul.net.messaging.Messaging.Envelope.Builder
+    private val _builder: qaul.net.messaging.MessagingOuterClass.Envelope.Builder
   ) {
     public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
-      internal fun _create(builder: qaul.net.messaging.Messaging.Envelope.Builder): Dsl = Dsl(builder)
+      internal fun _create(builder: qaul.net.messaging.MessagingOuterClass.Envelope.Builder): Dsl = Dsl(builder)
     }
 
     @kotlin.jvm.JvmSynthetic
     @kotlin.PublishedApi
-    internal fun _build(): qaul.net.messaging.Messaging.Envelope = _builder.build()
+    internal fun _build(): qaul.net.messaging.MessagingOuterClass.Envelope = _builder.build()
 
     /**
      * <pre>
@@ -99,5 +99,5 @@ public object EnvelopeKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.messaging.Messaging.Envelope.copy(block: qaul.net.messaging.EnvelopeKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.Messaging.Envelope =
+public inline fun qaul.net.messaging.MessagingOuterClass.Envelope.copy(block: qaul.net.messaging.EnvelopeKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Envelope =
   qaul.net.messaging.EnvelopeKt.Dsl._create(this.toBuilder()).apply { block() }._build()

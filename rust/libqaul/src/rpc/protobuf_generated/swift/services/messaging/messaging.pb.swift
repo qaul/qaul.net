@@ -69,6 +69,59 @@ struct Qaul_Net_Messaging_Envelope {
   init() {}
 }
 
+/// messaging unified message
+struct Qaul_Net_Messaging_Messaging {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var message: Qaul_Net_Messaging_Messaging.OneOf_Message? = nil
+
+  var confirmationMessage: Qaul_Net_Messaging_Confirmation {
+    get {
+      if case .confirmationMessage(let v)? = message {return v}
+      return Qaul_Net_Messaging_Confirmation()
+    }
+    set {message = .confirmationMessage(newValue)}
+  }
+
+  var chatMessage: Qaul_Net_Messaging_ChatMessage {
+    get {
+      if case .chatMessage(let v)? = message {return v}
+      return Qaul_Net_Messaging_ChatMessage()
+    }
+    set {message = .chatMessage(newValue)}
+  }
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  enum OneOf_Message: Equatable {
+    case confirmationMessage(Qaul_Net_Messaging_Confirmation)
+    case chatMessage(Qaul_Net_Messaging_ChatMessage)
+
+  #if !swift(>=4.1)
+    static func ==(lhs: Qaul_Net_Messaging_Messaging.OneOf_Message, rhs: Qaul_Net_Messaging_Messaging.OneOf_Message) -> Bool {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch (lhs, rhs) {
+      case (.confirmationMessage, .confirmationMessage): return {
+        guard case .confirmationMessage(let l) = lhs, case .confirmationMessage(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.chatMessage, .chatMessage): return {
+        guard case .chatMessage(let l) = lhs, case .chatMessage(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      default: return false
+      }
+    }
+  #endif
+  }
+
+  init() {}
+}
+
 /// message received confirmation
 /// 
 /// every message that was received by a user
@@ -199,6 +252,76 @@ extension Qaul_Net_Messaging_Envelope: SwiftProtobuf.Message, SwiftProtobuf._Mes
     if lhs.senderID != rhs.senderID {return false}
     if lhs.receiverID != rhs.receiverID {return false}
     if lhs.data != rhs.data {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Messaging"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "confirmation_message"),
+    2: .standard(proto: "chat_message"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try {
+        var v: Qaul_Net_Messaging_Confirmation?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .confirmationMessage(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .confirmationMessage(v)
+        }
+      }()
+      case 2: try {
+        var v: Qaul_Net_Messaging_ChatMessage?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .chatMessage(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .chatMessage(v)
+        }
+      }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    switch self.message {
+    case .confirmationMessage?: try {
+      guard case .confirmationMessage(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    }()
+    case .chatMessage?: try {
+      guard case .chatMessage(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
+    case nil: break
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Net_Messaging_Messaging, rhs: Qaul_Net_Messaging_Messaging) -> Bool {
+    if lhs.message != rhs.message {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

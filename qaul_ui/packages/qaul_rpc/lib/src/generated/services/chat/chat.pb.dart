@@ -334,21 +334,21 @@ class ChatConversation extends $pb.GeneratedMessage {
 class ChatConversationRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatConversationRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationId', $pb.PbFieldType.OY)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastReceived')
+    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastIndex', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
   ChatConversationRequest._() : super();
   factory ChatConversationRequest({
     $core.List<$core.int>? conversationId,
-    $core.String? lastReceived,
+    $fixnum.Int64? lastIndex,
   }) {
     final _result = create();
     if (conversationId != null) {
       _result.conversationId = conversationId;
     }
-    if (lastReceived != null) {
-      _result.lastReceived = lastReceived;
+    if (lastIndex != null) {
+      _result.lastIndex = lastIndex;
     }
     return _result;
   }
@@ -383,13 +383,13 @@ class ChatConversationRequest extends $pb.GeneratedMessage {
   void clearConversationId() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get lastReceived => $_getSZ(1);
+  $fixnum.Int64 get lastIndex => $_getI64(1);
   @$pb.TagNumber(2)
-  set lastReceived($core.String v) { $_setString(1, v); }
+  set lastIndex($fixnum.Int64 v) { $_setInt64(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasLastReceived() => $_has(1);
+  $core.bool hasLastIndex() => $_has(1);
   @$pb.TagNumber(2)
-  void clearLastReceived() => clearField(2);
+  void clearLastIndex() => clearField(2);
 }
 
 class ChatConversationList extends $pb.GeneratedMessage {

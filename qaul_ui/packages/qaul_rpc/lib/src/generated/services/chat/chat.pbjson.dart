@@ -62,12 +62,12 @@ const ChatConversationRequest$json = const {
   '1': 'ChatConversationRequest',
   '2': const [
     const {'1': 'conversation_id', '3': 1, '4': 1, '5': 12, '10': 'conversationId'},
-    const {'1': 'last_received', '3': 2, '4': 1, '5': 9, '10': 'lastReceived'},
+    const {'1': 'last_index', '3': 2, '4': 1, '5': 4, '10': 'lastIndex'},
   ],
 };
 
 /// Descriptor for `ChatConversationRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List chatConversationRequestDescriptor = $convert.base64Decode('ChdDaGF0Q29udmVyc2F0aW9uUmVxdWVzdBInCg9jb252ZXJzYXRpb25faWQYASABKAxSDmNvbnZlcnNhdGlvbklkEiMKDWxhc3RfcmVjZWl2ZWQYAiABKAlSDGxhc3RSZWNlaXZlZA==');
+final $typed_data.Uint8List chatConversationRequestDescriptor = $convert.base64Decode('ChdDaGF0Q29udmVyc2F0aW9uUmVxdWVzdBInCg9jb252ZXJzYXRpb25faWQYASABKAxSDmNvbnZlcnNhdGlvbklkEh0KCmxhc3RfaW5kZXgYAiABKARSCWxhc3RJbmRleA==');
 @$core.Deprecated('Use chatConversationListDescriptor instead')
 const ChatConversationList$json = const {
   '1': 'ChatConversationList',

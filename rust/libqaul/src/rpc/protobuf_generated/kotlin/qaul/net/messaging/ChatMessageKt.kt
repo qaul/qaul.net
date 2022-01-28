@@ -4,23 +4,23 @@
 package qaul.net.messaging;
 
 @kotlin.jvm.JvmSynthetic
-public inline fun chatMessage(block: qaul.net.messaging.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.Messaging.ChatMessage =
-  qaul.net.messaging.ChatMessageKt.Dsl._create(qaul.net.messaging.Messaging.ChatMessage.newBuilder()).apply { block() }._build()
+public inline fun chatMessage(block: qaul.net.messaging.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.ChatMessage =
+  qaul.net.messaging.ChatMessageKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.ChatMessage.newBuilder()).apply { block() }._build()
 public object ChatMessageKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
   public class Dsl private constructor(
-    private val _builder: qaul.net.messaging.Messaging.ChatMessage.Builder
+    private val _builder: qaul.net.messaging.MessagingOuterClass.ChatMessage.Builder
   ) {
     public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
-      internal fun _create(builder: qaul.net.messaging.Messaging.ChatMessage.Builder): Dsl = Dsl(builder)
+      internal fun _create(builder: qaul.net.messaging.MessagingOuterClass.ChatMessage.Builder): Dsl = Dsl(builder)
     }
 
     @kotlin.jvm.JvmSynthetic
     @kotlin.PublishedApi
-    internal fun _build(): qaul.net.messaging.Messaging.ChatMessage = _builder.build()
+    internal fun _build(): qaul.net.messaging.MessagingOuterClass.ChatMessage = _builder.build()
 
     /**
      * <pre>
@@ -126,5 +126,5 @@ public object ChatMessageKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.messaging.Messaging.ChatMessage.copy(block: qaul.net.messaging.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.Messaging.ChatMessage =
+public inline fun qaul.net.messaging.MessagingOuterClass.ChatMessage.copy(block: qaul.net.messaging.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.ChatMessage =
   qaul.net.messaging.ChatMessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()

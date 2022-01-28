@@ -26,6 +26,22 @@ pub struct Envelope {
     #[prost(bytes="vec", tag="3")]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
+/// messaging unified message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Messaging {
+    #[prost(oneof="messaging::Message", tags="1, 2")]
+    pub message: ::core::option::Option<messaging::Message>,
+}
+/// Nested message and enum types in `Messaging`.
+pub mod messaging {
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Message {
+        #[prost(message, tag="1")]
+        ConfirmationMessage(super::Confirmation),
+        #[prost(message, tag="2")]
+        ChatMessage(super::ChatMessage),
+    }
+}
 /// message received confirmation
 /// 
 /// every message that was received by a user

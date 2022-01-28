@@ -22,6 +22,14 @@ message Envelope {
     bytes data = 3;
 }
 
+// messaging unified message
+message Messaging {
+    oneof message {
+        Confirmation confirmation_message = 1;
+        ChatMessage chat_message = 2;
+    }
+}
+
 // message received confirmation
 // 
 // every message that was received by a user

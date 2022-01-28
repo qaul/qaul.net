@@ -44,24 +44,24 @@ public object ChatConversationRequestKt {
      * send only changes that are newer than the last received
      * </pre>
      *
-     * <code>string last_received = 2;</code>
+     * <code>uint64 last_index = 2;</code>
      */
-    public var lastReceived: kotlin.String
-      @JvmName("getLastReceived")
-      get() = _builder.getLastReceived()
-      @JvmName("setLastReceived")
+    public var lastIndex: kotlin.Long
+      @JvmName("getLastIndex")
+      get() = _builder.getLastIndex()
+      @JvmName("setLastIndex")
       set(value) {
-        _builder.setLastReceived(value)
+        _builder.setLastIndex(value)
       }
     /**
      * <pre>
      * send only changes that are newer than the last received
      * </pre>
      *
-     * <code>string last_received = 2;</code>
+     * <code>uint64 last_index = 2;</code>
      */
-    public fun clearLastReceived() {
-      _builder.clearLastReceived()
+    public fun clearLastIndex() {
+      _builder.clearLastIndex()
     }
   }
 }

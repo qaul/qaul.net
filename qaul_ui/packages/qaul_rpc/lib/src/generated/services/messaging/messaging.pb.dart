@@ -148,6 +148,86 @@ class Envelope extends $pb.GeneratedMessage {
   void clearData() => clearField(3);
 }
 
+enum Messaging_Message {
+  confirmationMessage, 
+  chatMessage, 
+  notSet
+}
+
+class Messaging extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, Messaging_Message> _Messaging_MessageByTag = {
+    1 : Messaging_Message.confirmationMessage,
+    2 : Messaging_Message.chatMessage,
+    0 : Messaging_Message.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Messaging', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
+    ..oo(0, [1, 2])
+    ..aOM<Confirmation>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'confirmationMessage', subBuilder: Confirmation.create)
+    ..aOM<ChatMessage>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatMessage', subBuilder: ChatMessage.create)
+    ..hasRequiredFields = false
+  ;
+
+  Messaging._() : super();
+  factory Messaging({
+    Confirmation? confirmationMessage,
+    ChatMessage? chatMessage,
+  }) {
+    final _result = create();
+    if (confirmationMessage != null) {
+      _result.confirmationMessage = confirmationMessage;
+    }
+    if (chatMessage != null) {
+      _result.chatMessage = chatMessage;
+    }
+    return _result;
+  }
+  factory Messaging.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Messaging.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Messaging clone() => Messaging()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Messaging copyWith(void Function(Messaging) updates) => super.copyWith((message) => updates(message as Messaging)) as Messaging; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Messaging create() => Messaging._();
+  Messaging createEmptyInstance() => create();
+  static $pb.PbList<Messaging> createRepeated() => $pb.PbList<Messaging>();
+  @$core.pragma('dart2js:noInline')
+  static Messaging getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Messaging>(create);
+  static Messaging? _defaultInstance;
+
+  Messaging_Message whichMessage() => _Messaging_MessageByTag[$_whichOneof(0)]!;
+  void clearMessage() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  Confirmation get confirmationMessage => $_getN(0);
+  @$pb.TagNumber(1)
+  set confirmationMessage(Confirmation v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasConfirmationMessage() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearConfirmationMessage() => clearField(1);
+  @$pb.TagNumber(1)
+  Confirmation ensureConfirmationMessage() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  ChatMessage get chatMessage => $_getN(1);
+  @$pb.TagNumber(2)
+  set chatMessage(ChatMessage v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasChatMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearChatMessage() => clearField(2);
+  @$pb.TagNumber(2)
+  ChatMessage ensureChatMessage() => $_ensure(1);
+}
+
 class Confirmation extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Confirmation', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageId', $pb.PbFieldType.OY)

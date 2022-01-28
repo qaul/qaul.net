@@ -46,7 +46,7 @@ struct TableStruct_services_2fmessaging_2fmessaging_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[4]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[5]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -68,6 +68,9 @@ extern ContainerDefaultTypeInternal _Container_default_instance_;
 class Envelope;
 struct EnvelopeDefaultTypeInternal;
 extern EnvelopeDefaultTypeInternal _Envelope_default_instance_;
+class Messaging;
+struct MessagingDefaultTypeInternal;
+extern MessagingDefaultTypeInternal _Messaging_default_instance_;
 }  // namespace messaging
 }  // namespace net
 }  // namespace qaul
@@ -76,6 +79,7 @@ template<> ::qaul::net::messaging::ChatMessage* Arena::CreateMaybeMessage<::qaul
 template<> ::qaul::net::messaging::Confirmation* Arena::CreateMaybeMessage<::qaul::net::messaging::Confirmation>(Arena*);
 template<> ::qaul::net::messaging::Container* Arena::CreateMaybeMessage<::qaul::net::messaging::Container>(Arena*);
 template<> ::qaul::net::messaging::Envelope* Arena::CreateMaybeMessage<::qaul::net::messaging::Envelope>(Arena*);
+template<> ::qaul::net::messaging::Messaging* Arena::CreateMaybeMessage<::qaul::net::messaging::Messaging>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace qaul {
 namespace net {
@@ -437,6 +441,200 @@ class Envelope final :
 };
 // -------------------------------------------------------------------
 
+class Messaging final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.messaging.Messaging) */ {
+ public:
+  inline Messaging() : Messaging(nullptr) {}
+  ~Messaging() override;
+  explicit constexpr Messaging(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  Messaging(const Messaging& from);
+  Messaging(Messaging&& from) noexcept
+    : Messaging() {
+    *this = ::std::move(from);
+  }
+
+  inline Messaging& operator=(const Messaging& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Messaging& operator=(Messaging&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const Messaging& default_instance() {
+    return *internal_default_instance();
+  }
+  enum MessageCase {
+    kConfirmationMessage = 1,
+    kChatMessage = 2,
+    MESSAGE_NOT_SET = 0,
+  };
+
+  static inline const Messaging* internal_default_instance() {
+    return reinterpret_cast<const Messaging*>(
+               &_Messaging_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    2;
+
+  friend void swap(Messaging& a, Messaging& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Messaging* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Messaging* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  Messaging* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<Messaging>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const Messaging& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const Messaging& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Messaging* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.net.messaging.Messaging";
+  }
+  protected:
+  explicit Messaging(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kConfirmationMessageFieldNumber = 1,
+    kChatMessageFieldNumber = 2,
+  };
+  // .qaul.net.messaging.Confirmation confirmation_message = 1;
+  bool has_confirmation_message() const;
+  private:
+  bool _internal_has_confirmation_message() const;
+  public:
+  void clear_confirmation_message();
+  const ::qaul::net::messaging::Confirmation& confirmation_message() const;
+  PROTOBUF_NODISCARD ::qaul::net::messaging::Confirmation* release_confirmation_message();
+  ::qaul::net::messaging::Confirmation* mutable_confirmation_message();
+  void set_allocated_confirmation_message(::qaul::net::messaging::Confirmation* confirmation_message);
+  private:
+  const ::qaul::net::messaging::Confirmation& _internal_confirmation_message() const;
+  ::qaul::net::messaging::Confirmation* _internal_mutable_confirmation_message();
+  public:
+  void unsafe_arena_set_allocated_confirmation_message(
+      ::qaul::net::messaging::Confirmation* confirmation_message);
+  ::qaul::net::messaging::Confirmation* unsafe_arena_release_confirmation_message();
+
+  // .qaul.net.messaging.ChatMessage chat_message = 2;
+  bool has_chat_message() const;
+  private:
+  bool _internal_has_chat_message() const;
+  public:
+  void clear_chat_message();
+  const ::qaul::net::messaging::ChatMessage& chat_message() const;
+  PROTOBUF_NODISCARD ::qaul::net::messaging::ChatMessage* release_chat_message();
+  ::qaul::net::messaging::ChatMessage* mutable_chat_message();
+  void set_allocated_chat_message(::qaul::net::messaging::ChatMessage* chat_message);
+  private:
+  const ::qaul::net::messaging::ChatMessage& _internal_chat_message() const;
+  ::qaul::net::messaging::ChatMessage* _internal_mutable_chat_message();
+  public:
+  void unsafe_arena_set_allocated_chat_message(
+      ::qaul::net::messaging::ChatMessage* chat_message);
+  ::qaul::net::messaging::ChatMessage* unsafe_arena_release_chat_message();
+
+  void clear_message();
+  MessageCase message_case() const;
+  // @@protoc_insertion_point(class_scope:qaul.net.messaging.Messaging)
+ private:
+  class _Internal;
+  void set_has_confirmation_message();
+  void set_has_chat_message();
+
+  inline bool has_message() const;
+  inline void clear_has_message();
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  union MessageUnion {
+    constexpr MessageUnion() : _constinit_{} {}
+      ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
+    ::qaul::net::messaging::Confirmation* confirmation_message_;
+    ::qaul::net::messaging::ChatMessage* chat_message_;
+  } message_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  uint32_t _oneof_case_[1];
+
+  friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
+};
+// -------------------------------------------------------------------
+
 class Confirmation final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.messaging.Confirmation) */ {
  public:
@@ -485,7 +683,7 @@ class Confirmation final :
                &_Confirmation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    3;
 
   friend void swap(Confirmation& a, Confirmation& b) {
     a.Swap(&b);
@@ -647,7 +845,7 @@ class ChatMessage final :
                &_ChatMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    4;
 
   friend void swap(ChatMessage& a, ChatMessage& b) {
     a.Swap(&b);
@@ -1097,6 +1295,167 @@ inline void Envelope::set_allocated_data(std::string* data) {
 
 // -------------------------------------------------------------------
 
+// Messaging
+
+// .qaul.net.messaging.Confirmation confirmation_message = 1;
+inline bool Messaging::_internal_has_confirmation_message() const {
+  return message_case() == kConfirmationMessage;
+}
+inline bool Messaging::has_confirmation_message() const {
+  return _internal_has_confirmation_message();
+}
+inline void Messaging::set_has_confirmation_message() {
+  _oneof_case_[0] = kConfirmationMessage;
+}
+inline void Messaging::clear_confirmation_message() {
+  if (_internal_has_confirmation_message()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete message_.confirmation_message_;
+    }
+    clear_has_message();
+  }
+}
+inline ::qaul::net::messaging::Confirmation* Messaging::release_confirmation_message() {
+  // @@protoc_insertion_point(field_release:qaul.net.messaging.Messaging.confirmation_message)
+  if (_internal_has_confirmation_message()) {
+    clear_has_message();
+      ::qaul::net::messaging::Confirmation* temp = message_.confirmation_message_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    message_.confirmation_message_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::qaul::net::messaging::Confirmation& Messaging::_internal_confirmation_message() const {
+  return _internal_has_confirmation_message()
+      ? *message_.confirmation_message_
+      : reinterpret_cast< ::qaul::net::messaging::Confirmation&>(::qaul::net::messaging::_Confirmation_default_instance_);
+}
+inline const ::qaul::net::messaging::Confirmation& Messaging::confirmation_message() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.Messaging.confirmation_message)
+  return _internal_confirmation_message();
+}
+inline ::qaul::net::messaging::Confirmation* Messaging::unsafe_arena_release_confirmation_message() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:qaul.net.messaging.Messaging.confirmation_message)
+  if (_internal_has_confirmation_message()) {
+    clear_has_message();
+    ::qaul::net::messaging::Confirmation* temp = message_.confirmation_message_;
+    message_.confirmation_message_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Messaging::unsafe_arena_set_allocated_confirmation_message(::qaul::net::messaging::Confirmation* confirmation_message) {
+  clear_message();
+  if (confirmation_message) {
+    set_has_confirmation_message();
+    message_.confirmation_message_ = confirmation_message;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:qaul.net.messaging.Messaging.confirmation_message)
+}
+inline ::qaul::net::messaging::Confirmation* Messaging::_internal_mutable_confirmation_message() {
+  if (!_internal_has_confirmation_message()) {
+    clear_message();
+    set_has_confirmation_message();
+    message_.confirmation_message_ = CreateMaybeMessage< ::qaul::net::messaging::Confirmation >(GetArenaForAllocation());
+  }
+  return message_.confirmation_message_;
+}
+inline ::qaul::net::messaging::Confirmation* Messaging::mutable_confirmation_message() {
+  ::qaul::net::messaging::Confirmation* _msg = _internal_mutable_confirmation_message();
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.Messaging.confirmation_message)
+  return _msg;
+}
+
+// .qaul.net.messaging.ChatMessage chat_message = 2;
+inline bool Messaging::_internal_has_chat_message() const {
+  return message_case() == kChatMessage;
+}
+inline bool Messaging::has_chat_message() const {
+  return _internal_has_chat_message();
+}
+inline void Messaging::set_has_chat_message() {
+  _oneof_case_[0] = kChatMessage;
+}
+inline void Messaging::clear_chat_message() {
+  if (_internal_has_chat_message()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete message_.chat_message_;
+    }
+    clear_has_message();
+  }
+}
+inline ::qaul::net::messaging::ChatMessage* Messaging::release_chat_message() {
+  // @@protoc_insertion_point(field_release:qaul.net.messaging.Messaging.chat_message)
+  if (_internal_has_chat_message()) {
+    clear_has_message();
+      ::qaul::net::messaging::ChatMessage* temp = message_.chat_message_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    message_.chat_message_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::qaul::net::messaging::ChatMessage& Messaging::_internal_chat_message() const {
+  return _internal_has_chat_message()
+      ? *message_.chat_message_
+      : reinterpret_cast< ::qaul::net::messaging::ChatMessage&>(::qaul::net::messaging::_ChatMessage_default_instance_);
+}
+inline const ::qaul::net::messaging::ChatMessage& Messaging::chat_message() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.Messaging.chat_message)
+  return _internal_chat_message();
+}
+inline ::qaul::net::messaging::ChatMessage* Messaging::unsafe_arena_release_chat_message() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:qaul.net.messaging.Messaging.chat_message)
+  if (_internal_has_chat_message()) {
+    clear_has_message();
+    ::qaul::net::messaging::ChatMessage* temp = message_.chat_message_;
+    message_.chat_message_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Messaging::unsafe_arena_set_allocated_chat_message(::qaul::net::messaging::ChatMessage* chat_message) {
+  clear_message();
+  if (chat_message) {
+    set_has_chat_message();
+    message_.chat_message_ = chat_message;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:qaul.net.messaging.Messaging.chat_message)
+}
+inline ::qaul::net::messaging::ChatMessage* Messaging::_internal_mutable_chat_message() {
+  if (!_internal_has_chat_message()) {
+    clear_message();
+    set_has_chat_message();
+    message_.chat_message_ = CreateMaybeMessage< ::qaul::net::messaging::ChatMessage >(GetArenaForAllocation());
+  }
+  return message_.chat_message_;
+}
+inline ::qaul::net::messaging::ChatMessage* Messaging::mutable_chat_message() {
+  ::qaul::net::messaging::ChatMessage* _msg = _internal_mutable_chat_message();
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.Messaging.chat_message)
+  return _msg;
+}
+
+inline bool Messaging::has_message() const {
+  return message_case() != MESSAGE_NOT_SET;
+}
+inline void Messaging::clear_has_message() {
+  _oneof_case_[0] = MESSAGE_NOT_SET;
+}
+inline Messaging::MessageCase Messaging::message_case() const {
+  return Messaging::MessageCase(_oneof_case_[0]);
+}
+// -------------------------------------------------------------------
+
 // Confirmation
 
 // bytes message_id = 1;
@@ -1319,6 +1678,8 @@ inline void ChatMessage::set_allocated_content(std::string* content) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

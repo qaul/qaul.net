@@ -4,23 +4,23 @@
 package qaul.net.messaging;
 
 @kotlin.jvm.JvmSynthetic
-public inline fun container(block: qaul.net.messaging.ContainerKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.Messaging.Container =
-  qaul.net.messaging.ContainerKt.Dsl._create(qaul.net.messaging.Messaging.Container.newBuilder()).apply { block() }._build()
+public inline fun container(block: qaul.net.messaging.ContainerKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Container =
+  qaul.net.messaging.ContainerKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.Container.newBuilder()).apply { block() }._build()
 public object ContainerKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
   public class Dsl private constructor(
-    private val _builder: qaul.net.messaging.Messaging.Container.Builder
+    private val _builder: qaul.net.messaging.MessagingOuterClass.Container.Builder
   ) {
     public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
-      internal fun _create(builder: qaul.net.messaging.Messaging.Container.Builder): Dsl = Dsl(builder)
+      internal fun _create(builder: qaul.net.messaging.MessagingOuterClass.Container.Builder): Dsl = Dsl(builder)
     }
 
     @kotlin.jvm.JvmSynthetic
     @kotlin.PublishedApi
-    internal fun _build(): qaul.net.messaging.Messaging.Container = _builder.build()
+    internal fun _build(): qaul.net.messaging.MessagingOuterClass.Container = _builder.build()
 
     /**
      * <pre>
@@ -54,7 +54,7 @@ public object ContainerKt {
      *
      * <code>.qaul.net.messaging.Envelope envelope = 2;</code>
      */
-    public var envelope: qaul.net.messaging.Messaging.Envelope
+    public var envelope: qaul.net.messaging.MessagingOuterClass.Envelope
       @JvmName("getEnvelope")
       get() = _builder.getEnvelope()
       @JvmName("setEnvelope")
@@ -85,5 +85,5 @@ public object ContainerKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.messaging.Messaging.Container.copy(block: qaul.net.messaging.ContainerKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.Messaging.Container =
+public inline fun qaul.net.messaging.MessagingOuterClass.Container.copy(block: qaul.net.messaging.ContainerKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Container =
   qaul.net.messaging.ContainerKt.Dsl._create(this.toBuilder()).apply { block() }._build()

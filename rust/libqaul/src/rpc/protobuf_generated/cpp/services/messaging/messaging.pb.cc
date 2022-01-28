@@ -46,6 +46,18 @@ struct EnvelopeDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT EnvelopeDefaultTypeInternal _Envelope_default_instance_;
+constexpr Messaging::Messaging(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : _oneof_case_{}{}
+struct MessagingDefaultTypeInternal {
+  constexpr MessagingDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~MessagingDefaultTypeInternal() {}
+  union {
+    Messaging _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT MessagingDefaultTypeInternal _Messaging_default_instance_;
 constexpr Confirmation::Confirmation(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : message_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -77,7 +89,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ChatMessageDefaultTypeInternal 
 }  // namespace messaging
 }  // namespace net
 }  // namespace qaul
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_services_2fmessaging_2fmessaging_2eproto[4];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_services_2fmessaging_2fmessaging_2eproto[5];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_services_2fmessaging_2fmessaging_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_services_2fmessaging_2fmessaging_2eproto = nullptr;
 
@@ -100,6 +112,15 @@ const uint32_t TableStruct_services_2fmessaging_2fmessaging_2eproto::offsets[] P
   PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::Envelope, receiver_id_),
   PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::Envelope, data_),
   ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::Messaging, _internal_metadata_),
+  ~0u,  // no _extensions_
+  PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::Messaging, _oneof_case_[0]),
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::Messaging, message_),
+  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::Confirmation, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -121,13 +142,15 @@ const uint32_t TableStruct_services_2fmessaging_2fmessaging_2eproto::offsets[] P
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::net::messaging::Container)},
   { 8, -1, -1, sizeof(::qaul::net::messaging::Envelope)},
-  { 17, -1, -1, sizeof(::qaul::net::messaging::Confirmation)},
-  { 25, -1, -1, sizeof(::qaul::net::messaging::ChatMessage)},
+  { 17, -1, -1, sizeof(::qaul::net::messaging::Messaging)},
+  { 26, -1, -1, sizeof(::qaul::net::messaging::Confirmation)},
+  { 34, -1, -1, sizeof(::qaul::net::messaging::ChatMessage)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::net::messaging::_Container_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::net::messaging::_Envelope_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::net::messaging::_Messaging_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::net::messaging::_Confirmation_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::net::messaging::_ChatMessage_default_instance_),
 };
@@ -138,15 +161,19 @@ const char descriptor_table_protodef_services_2fmessaging_2fmessaging_2eproto[] 
   "re\030\001 \001(\014\022.\n\010envelope\030\002 \001(\0132\034.qaul.net.me"
   "ssaging.Envelope\"@\n\010Envelope\022\021\n\tsender_i"
   "d\030\001 \001(\014\022\023\n\013receiver_id\030\002 \001(\014\022\014\n\004data\030\003 \001"
-  "(\014\"7\n\014Confirmation\022\022\n\nmessage_id\030\001 \001(\014\022\023"
-  "\n\013received_at\030\002 \001(\004\"W\n\013ChatMessage\022\r\n\005gr"
-  "oup\030\001 \001(\010\022\027\n\017conversation_id\030\002 \001(\014\022\017\n\007se"
-  "nt_at\030\003 \001(\004\022\017\n\007content\030\004 \001(\tb\006proto3"
+  "(\014\"\221\001\n\tMessaging\022@\n\024confirmation_message"
+  "\030\001 \001(\0132 .qaul.net.messaging.Confirmation"
+  "H\000\0227\n\014chat_message\030\002 \001(\0132\037.qaul.net.mess"
+  "aging.ChatMessageH\000B\t\n\007message\"7\n\014Confir"
+  "mation\022\022\n\nmessage_id\030\001 \001(\014\022\023\n\013received_a"
+  "t\030\002 \001(\004\"W\n\013ChatMessage\022\r\n\005group\030\001 \001(\010\022\027\n"
+  "\017conversation_id\030\002 \001(\014\022\017\n\007sent_at\030\003 \001(\004\022"
+  "\017\n\007content\030\004 \001(\tb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_services_2fmessaging_2fmessaging_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_services_2fmessaging_2fmessaging_2eproto = {
-  false, false, 356, descriptor_table_protodef_services_2fmessaging_2fmessaging_2eproto, "services/messaging/messaging.proto", 
-  &descriptor_table_services_2fmessaging_2fmessaging_2eproto_once, nullptr, 0, 4,
+  false, false, 504, descriptor_table_protodef_services_2fmessaging_2fmessaging_2eproto, "services/messaging/messaging.proto", 
+  &descriptor_table_services_2fmessaging_2fmessaging_2eproto_once, nullptr, 0, 5,
   schemas, file_default_instances, TableStruct_services_2fmessaging_2fmessaging_2eproto::offsets,
   file_level_metadata_services_2fmessaging_2fmessaging_2eproto, file_level_enum_descriptors_services_2fmessaging_2fmessaging_2eproto, file_level_service_descriptors_services_2fmessaging_2fmessaging_2eproto,
 };
@@ -689,6 +716,306 @@ void Envelope::InternalSwap(Envelope* other) {
 
 // ===================================================================
 
+class Messaging::_Internal {
+ public:
+  static const ::qaul::net::messaging::Confirmation& confirmation_message(const Messaging* msg);
+  static const ::qaul::net::messaging::ChatMessage& chat_message(const Messaging* msg);
+};
+
+const ::qaul::net::messaging::Confirmation&
+Messaging::_Internal::confirmation_message(const Messaging* msg) {
+  return *msg->message_.confirmation_message_;
+}
+const ::qaul::net::messaging::ChatMessage&
+Messaging::_Internal::chat_message(const Messaging* msg) {
+  return *msg->message_.chat_message_;
+}
+void Messaging::set_allocated_confirmation_message(::qaul::net::messaging::Confirmation* confirmation_message) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (confirmation_message) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::net::messaging::Confirmation>::GetOwningArena(confirmation_message);
+    if (message_arena != submessage_arena) {
+      confirmation_message = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, confirmation_message, submessage_arena);
+    }
+    set_has_confirmation_message();
+    message_.confirmation_message_ = confirmation_message;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.Messaging.confirmation_message)
+}
+void Messaging::set_allocated_chat_message(::qaul::net::messaging::ChatMessage* chat_message) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (chat_message) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::net::messaging::ChatMessage>::GetOwningArena(chat_message);
+    if (message_arena != submessage_arena) {
+      chat_message = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, chat_message, submessage_arena);
+    }
+    set_has_chat_message();
+    message_.chat_message_ = chat_message;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.Messaging.chat_message)
+}
+Messaging::Messaging(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor();
+  if (!is_message_owned) {
+    RegisterArenaDtor(arena);
+  }
+  // @@protoc_insertion_point(arena_constructor:qaul.net.messaging.Messaging)
+}
+Messaging::Messaging(const Messaging& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  clear_has_message();
+  switch (from.message_case()) {
+    case kConfirmationMessage: {
+      _internal_mutable_confirmation_message()->::qaul::net::messaging::Confirmation::MergeFrom(from._internal_confirmation_message());
+      break;
+    }
+    case kChatMessage: {
+      _internal_mutable_chat_message()->::qaul::net::messaging::ChatMessage::MergeFrom(from._internal_chat_message());
+      break;
+    }
+    case MESSAGE_NOT_SET: {
+      break;
+    }
+  }
+  // @@protoc_insertion_point(copy_constructor:qaul.net.messaging.Messaging)
+}
+
+inline void Messaging::SharedCtor() {
+clear_has_message();
+}
+
+Messaging::~Messaging() {
+  // @@protoc_insertion_point(destructor:qaul.net.messaging.Messaging)
+  if (GetArenaForAllocation() != nullptr) return;
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+inline void Messaging::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (has_message()) {
+    clear_message();
+  }
+}
+
+void Messaging::ArenaDtor(void* object) {
+  Messaging* _this = reinterpret_cast< Messaging* >(object);
+  (void)_this;
+}
+void Messaging::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void Messaging::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void Messaging::clear_message() {
+// @@protoc_insertion_point(one_of_clear_start:qaul.net.messaging.Messaging)
+  switch (message_case()) {
+    case kConfirmationMessage: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete message_.confirmation_message_;
+      }
+      break;
+    }
+    case kChatMessage: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete message_.chat_message_;
+      }
+      break;
+    }
+    case MESSAGE_NOT_SET: {
+      break;
+    }
+  }
+  _oneof_case_[0] = MESSAGE_NOT_SET;
+}
+
+
+void Messaging::Clear() {
+// @@protoc_insertion_point(message_clear_start:qaul.net.messaging.Messaging)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  clear_message();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* Messaging::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .qaul.net.messaging.Confirmation confirmation_message = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_confirmation_message(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .qaul.net.messaging.ChatMessage chat_message = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_chat_message(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* Messaging::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:qaul.net.messaging.Messaging)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .qaul.net.messaging.Confirmation confirmation_message = 1;
+  if (_internal_has_confirmation_message()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::confirmation_message(this), target, stream);
+  }
+
+  // .qaul.net.messaging.ChatMessage chat_message = 2;
+  if (_internal_has_chat_message()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        2, _Internal::chat_message(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:qaul.net.messaging.Messaging)
+  return target;
+}
+
+size_t Messaging::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:qaul.net.messaging.Messaging)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  switch (message_case()) {
+    // .qaul.net.messaging.Confirmation confirmation_message = 1;
+    case kConfirmationMessage: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *message_.confirmation_message_);
+      break;
+    }
+    // .qaul.net.messaging.ChatMessage chat_message = 2;
+    case kChatMessage: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *message_.chat_message_);
+      break;
+    }
+    case MESSAGE_NOT_SET: {
+      break;
+    }
+  }
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Messaging::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    Messaging::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Messaging::GetClassData() const { return &_class_data_; }
+
+void Messaging::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<Messaging *>(to)->MergeFrom(
+      static_cast<const Messaging &>(from));
+}
+
+
+void Messaging::MergeFrom(const Messaging& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.messaging.Messaging)
+  GOOGLE_DCHECK_NE(&from, this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  switch (from.message_case()) {
+    case kConfirmationMessage: {
+      _internal_mutable_confirmation_message()->::qaul::net::messaging::Confirmation::MergeFrom(from._internal_confirmation_message());
+      break;
+    }
+    case kChatMessage: {
+      _internal_mutable_chat_message()->::qaul::net::messaging::ChatMessage::MergeFrom(from._internal_chat_message());
+      break;
+    }
+    case MESSAGE_NOT_SET: {
+      break;
+    }
+  }
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void Messaging::CopyFrom(const Messaging& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:qaul.net.messaging.Messaging)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool Messaging::IsInitialized() const {
+  return true;
+}
+
+void Messaging::InternalSwap(Messaging* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(message_, other->message_);
+  swap(_oneof_case_[0], other->_oneof_case_[0]);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata Messaging::GetMetadata() const {
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_services_2fmessaging_2fmessaging_2eproto_getter, &descriptor_table_services_2fmessaging_2fmessaging_2eproto_once,
+      file_level_metadata_services_2fmessaging_2fmessaging_2eproto[2]);
+}
+
+// ===================================================================
+
 class Confirmation::_Internal {
  public:
 };
@@ -908,7 +1235,7 @@ void Confirmation::InternalSwap(Confirmation* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Confirmation::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_services_2fmessaging_2fmessaging_2eproto_getter, &descriptor_table_services_2fmessaging_2fmessaging_2eproto_once,
-      file_level_metadata_services_2fmessaging_2fmessaging_2eproto[2]);
+      file_level_metadata_services_2fmessaging_2fmessaging_2eproto[3]);
 }
 
 // ===================================================================
@@ -1215,7 +1542,7 @@ void ChatMessage::InternalSwap(ChatMessage* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ChatMessage::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_services_2fmessaging_2fmessaging_2eproto_getter, &descriptor_table_services_2fmessaging_2fmessaging_2eproto_once,
-      file_level_metadata_services_2fmessaging_2fmessaging_2eproto[3]);
+      file_level_metadata_services_2fmessaging_2fmessaging_2eproto[4]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -1228,6 +1555,9 @@ template<> PROTOBUF_NOINLINE ::qaul::net::messaging::Container* Arena::CreateMay
 }
 template<> PROTOBUF_NOINLINE ::qaul::net::messaging::Envelope* Arena::CreateMaybeMessage< ::qaul::net::messaging::Envelope >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::net::messaging::Envelope >(arena);
+}
+template<> PROTOBUF_NOINLINE ::qaul::net::messaging::Messaging* Arena::CreateMaybeMessage< ::qaul::net::messaging::Messaging >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::net::messaging::Messaging >(arena);
 }
 template<> PROTOBUF_NOINLINE ::qaul::net::messaging::Confirmation* Arena::CreateMaybeMessage< ::qaul::net::messaging::Confirmation >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::net::messaging::Confirmation >(arena);
