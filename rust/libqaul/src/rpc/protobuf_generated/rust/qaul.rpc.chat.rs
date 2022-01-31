@@ -39,12 +39,12 @@ pub struct ChatOverviewRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ChatOverviewList {
     #[prost(message, repeated, tag="1")]
-    pub conversation_list: ::prost::alloc::vec::Vec<ChatConversation>,
+    pub overview_list: ::prost::alloc::vec::Vec<ChatOverview>,
 }
-/// a chat conversation item
+/// a chat conversation overview item
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct ChatConversation {
+pub struct ChatOverview {
     /// id of the user
     #[prost(bytes="vec", tag="1")]
     pub conversation_id: ::prost::alloc::vec::Vec<u8>,

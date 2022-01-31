@@ -27,65 +27,65 @@ public object ChatOverviewListKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    public class ConversationListProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    public class OverviewListProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
-     * <code>repeated .qaul.rpc.chat.ChatConversation conversation_list = 1;</code>
+     * <code>repeated .qaul.rpc.chat.ChatOverview overview_list = 1;</code>
      */
-     public val conversationList: com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatConversation, ConversationListProxy>
+     public val overviewList: com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
-        _builder.getConversationListList()
+        _builder.getOverviewListList()
       )
     /**
-     * <code>repeated .qaul.rpc.chat.ChatConversation conversation_list = 1;</code>
-     * @param value The conversationList to add.
+     * <code>repeated .qaul.rpc.chat.ChatOverview overview_list = 1;</code>
+     * @param value The overviewList to add.
      */
     @kotlin.jvm.JvmSynthetic
-    @kotlin.jvm.JvmName("addConversationList")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatConversation, ConversationListProxy>.add(value: qaul.rpc.chat.ChatOuterClass.ChatConversation) {
-      _builder.addConversationList(value)
+    @kotlin.jvm.JvmName("addOverviewList")
+    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.add(value: qaul.rpc.chat.ChatOuterClass.ChatOverview) {
+      _builder.addOverviewList(value)
     }/**
-     * <code>repeated .qaul.rpc.chat.ChatConversation conversation_list = 1;</code>
-     * @param value The conversationList to add.
+     * <code>repeated .qaul.rpc.chat.ChatOverview overview_list = 1;</code>
+     * @param value The overviewList to add.
      */
     @kotlin.jvm.JvmSynthetic
-    @kotlin.jvm.JvmName("plusAssignConversationList")
+    @kotlin.jvm.JvmName("plusAssignOverviewList")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatConversation, ConversationListProxy>.plusAssign(value: qaul.rpc.chat.ChatOuterClass.ChatConversation) {
+    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.plusAssign(value: qaul.rpc.chat.ChatOuterClass.ChatOverview) {
       add(value)
     }/**
-     * <code>repeated .qaul.rpc.chat.ChatConversation conversation_list = 1;</code>
-     * @param values The conversationList to add.
+     * <code>repeated .qaul.rpc.chat.ChatOverview overview_list = 1;</code>
+     * @param values The overviewList to add.
      */
     @kotlin.jvm.JvmSynthetic
-    @kotlin.jvm.JvmName("addAllConversationList")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatConversation, ConversationListProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatConversation>) {
-      _builder.addAllConversationList(values)
+    @kotlin.jvm.JvmName("addAllOverviewList")
+    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatOverview>) {
+      _builder.addAllOverviewList(values)
     }/**
-     * <code>repeated .qaul.rpc.chat.ChatConversation conversation_list = 1;</code>
-     * @param values The conversationList to add.
+     * <code>repeated .qaul.rpc.chat.ChatOverview overview_list = 1;</code>
+     * @param values The overviewList to add.
      */
     @kotlin.jvm.JvmSynthetic
-    @kotlin.jvm.JvmName("plusAssignAllConversationList")
+    @kotlin.jvm.JvmName("plusAssignAllOverviewList")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatConversation, ConversationListProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatConversation>) {
+    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatOverview>) {
       addAll(values)
     }/**
-     * <code>repeated .qaul.rpc.chat.ChatConversation conversation_list = 1;</code>
+     * <code>repeated .qaul.rpc.chat.ChatOverview overview_list = 1;</code>
      * @param index The index to set the value at.
-     * @param value The conversationList to set.
+     * @param value The overviewList to set.
      */
     @kotlin.jvm.JvmSynthetic
-    @kotlin.jvm.JvmName("setConversationList")
-    public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatConversation, ConversationListProxy>.set(index: kotlin.Int, value: qaul.rpc.chat.ChatOuterClass.ChatConversation) {
-      _builder.setConversationList(index, value)
+    @kotlin.jvm.JvmName("setOverviewList")
+    public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.set(index: kotlin.Int, value: qaul.rpc.chat.ChatOuterClass.ChatOverview) {
+      _builder.setOverviewList(index, value)
     }/**
-     * <code>repeated .qaul.rpc.chat.ChatConversation conversation_list = 1;</code>
+     * <code>repeated .qaul.rpc.chat.ChatOverview overview_list = 1;</code>
      */
     @kotlin.jvm.JvmSynthetic
-    @kotlin.jvm.JvmName("clearConversationList")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatConversation, ConversationListProxy>.clear() {
-      _builder.clearConversationList()
+    @kotlin.jvm.JvmName("clearOverviewList")
+    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.clear() {
+      _builder.clearOverviewList()
     }}
 }
 @kotlin.jvm.JvmSynthetic

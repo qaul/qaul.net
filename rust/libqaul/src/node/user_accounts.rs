@@ -176,6 +176,23 @@ impl UserAccounts {
         user_info
     }
 
+    /// checks if user account exists
+    /// 
+    /// returns true if a user account with the given ID exists
+    pub fn is_account(user_id: PeerId) -> bool {
+        // get user accounts state
+        let users = USERACCOUNTS.get().read().unwrap();
+
+        // loop through user accounts and compare
+        for user in &users.users {
+            if user.id == user_id {
+                return true;
+            }
+        }
+
+        false
+    }
+
     /// Process incoming RPC request messages for user accounts
     pub fn rpc(data: Vec<u8>) {
         match proto::UserAccounts::decode(&data[..]) {

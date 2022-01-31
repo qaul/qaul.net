@@ -44,6 +44,7 @@ directories = "4.0"
 
 # internal references
 qaul_info = { path = "../libp2p_modules/qaul_info" }
+qaul_messaging = { path = "../libp2p_modules/qaul_messaging" }
 
 [build-dependencies]
 prost-build = "0.9"

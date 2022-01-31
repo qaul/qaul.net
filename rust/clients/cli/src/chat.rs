@@ -218,7 +218,7 @@ impl Chat {
                         println!("");
 
                         // print all messages in the feed list
-                        for message in proto_overview.conversation_list {
+                        for message in proto_overview.overview_list {
                             println!{"[ {} ] {}", bs58::encode(message.conversation_id).into_string(), message.name};
                             print!("  {} | ", message.unread);
                             print!("{} | ", message.last_message_index);
@@ -242,10 +242,10 @@ impl Chat {
                             print!{"{} | ", message.index};
 
                             match message.status {
-                                0 => print!(" .. | "),
-                                1 => print!(" ✓. | "),
-                                2 => print!(" ✓✓ | "),
-                                _ => print!("    | "),
+                                0 => print!(".. | "),
+                                1 => print!("✓. | "),
+                                2 => print!("✓✓ | "),
+                                _ => print!("   | "),
                             }
 
                             print!("{} | ", message.sent_at);

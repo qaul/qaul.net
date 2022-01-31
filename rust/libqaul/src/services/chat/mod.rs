@@ -19,7 +19,7 @@ use sled_extensions::{
     bincode::Tree,
 };
 
-use super::messaging::proto::ChatMessage;
+use super::messaging::proto;
 use super::messaging::Messaging;
 use crate::node::user_accounts::{UserAccount, UserAccounts}; 
 use crate::connections::{
@@ -42,7 +42,7 @@ static CHAT: Storage<RwLock<Chat>> = Storage::new();
 #[derive(Clone)]
 pub struct ChatUser {
     // chat conversations sled data base tree
-    pub conversations: Tree<rpc_proto::ChatConversation>,
+    pub overview: Tree<rpc_proto::ChatOverview>,
     // messages sled data base tree
     pub messages: Tree<rpc_proto::ChatMessage>,
 }
@@ -67,7 +67,7 @@ impl Chat {
     /// Save a new incoming Message
     /// 
     /// This function saves an incoming chat message in the data base
-    pub fn save_incoming_message (user_id: PeerId, sender_id: PeerId, message: ChatMessage, signature: Vec<u8>) {        
+    pub fn save_incoming_message (user_id: PeerId, sender_id: PeerId, message: proto::ChatMessage, signature: Vec<u8>) {        
         // create timestamp
         let time = SystemTime::now();
         let duration = time.duration_since(UNIX_EPOCH).expect("Time went backwards");
@@ -77,9 +77,9 @@ impl Chat {
         let db_ref = Self::get_user_db_ref(user_id);
 
         // get conversation
-        let conversation;
-        match Self::get_updated_conversation(&db_ref, sender_id.to_bytes(), timestamp, message.content.clone()) {
-            Ok(chat_conversation) => conversation = chat_conversation,
+        let overview;
+        match Self::update_overview(&db_ref, sender_id.to_bytes(), timestamp, message.content.clone()) {
+            Ok(chat_overview) => overview = chat_overview,
             Err(e) => {
                 log::error!("{}", e);
                 return;
@@ -87,13 +87,11 @@ impl Chat {
         }
 
         // create data base key
-        let mut db_index = sender_id.to_bytes();
-        let mut index_vec = conversation.last_message_index.to_be_bytes().to_vec();
-        db_index.append(&mut index_vec);
+        let key = Self::get_db_key(sender_id, overview.last_message_index);
 
         // create chat message
         let chat_message = rpc_proto::ChatMessage {
-            index: conversation.last_message_index,
+            index: overview.last_message_index,
             sender_id: sender_id.to_bytes(),
             message_id: signature,
             status: 0,
@@ -103,18 +101,18 @@ impl Chat {
         };
 
         // save message in data base
-        if let Err(e) = db_ref.messages.insert(index_vec, chat_message) {
+        if let Err(e) = db_ref.messages.insert(key, chat_message) {
             log::error!("Error saving chat message to data base: {}", e);
         }
 
         // flush trees to disk
         if let Err(e) = db_ref.messages.flush() {
-            log::error!("Error messages flush: {}", e);
+            log::error!("Error chat messages flush: {}", e);
         }
     }
 
     // send the message
-    pub fn send(user_account: &UserAccount, chat_message: rpc_proto::ChatMessageSend,  lan: Option<&mut Lan>, internet: Option<&mut Internet> ) -> Result<Vec<u8>, String> {
+    pub fn send(user_account: &UserAccount, chat_message: rpc_proto::ChatMessageSend) -> Result<Vec<u8>, String> {
         // create timestamp
         let time = SystemTime::now();
         let duration = time.duration_since(UNIX_EPOCH).expect("Time went backwards");
@@ -128,16 +126,21 @@ impl Chat {
         }
 
         // pack message
-        let send_message = ChatMessage {
-            group: false,
-            conversation_id: Vec::new(),
-            sent_at: timestamp,
-            content: chat_message.content,
+        let send_message = proto::Messaging{
+            message: Some(proto::messaging::Message::ChatMessage(
+                proto::ChatMessage {
+                    group: false,
+                    conversation_id: Vec::new(),
+                    sent_at: timestamp,
+                    content: chat_message.content,
+                }
+            )),
         };
 
         // encode chat message
         let mut message_buf = Vec::with_capacity(send_message.encoded_len());
         send_message.encode(&mut message_buf).expect("Vec<u8> provides capacity as needed");
+        log::info!("message_buf len {}", message_buf.len());
 
         // send message via messaging
         Messaging::pack_and_send_message(user_account, receiver, message_buf)
@@ -155,7 +158,7 @@ impl Chat {
 
         // get conversation
         let conversation;
-        match Self::get_updated_conversation(&db_ref, conversation_id.clone(), timestamp, content.clone()) {
+        match Self::update_overview(&db_ref, conversation_id.clone(), timestamp, content.clone()) {
             Ok(chat_conversation) => conversation = chat_conversation,
             Err(e) => {
                 log::error!("{}", e);
@@ -164,9 +167,7 @@ impl Chat {
         }
 
         // create data base key
-        let mut db_index = conversation_id.clone();
-        let mut index_vec = conversation.last_message_index.to_be_bytes().to_vec();
-        db_index.append(&mut index_vec);
+        let key = Self::get_db_key_from_vec(conversation_id, conversation.last_message_index);
 
         // create chat message
         let message = rpc_proto::ChatMessage {
@@ -180,36 +181,33 @@ impl Chat {
         };
 
         // save message in data base
-        if let Err(e) = db_ref.messages.insert(index_vec, message) {
+        if let Err(e) = db_ref.messages.insert(key, message) {
             log::error!("Error saving chat message to data base: {}", e);
         }
 
         // flush trees to disk
         if let Err(e) = db_ref.messages.flush() {
-            log::error!("Error messages flush: {}", e);
+            log::error!("Error chat messages flush: {}", e);
         }
     }
     
-    /// Get Updated Conversation Index
-    fn get_updated_conversation (db_ref: &ChatUser, conversation_id: Vec<u8>, timestamp: u64, content: String) -> Result<rpc_proto::ChatConversation, String> {
-        // get data base of user account
-        //let db_ref = Self::get_user_db_ref(user_id);
-
+    /// Update the last Message and the Conversation Index of an Overview entry
+    fn update_overview (db_ref: &ChatUser, conversation_id: Vec<u8>, timestamp: u64, content: String) -> Result<rpc_proto::ChatOverview, String> {
         // check if there is an conversation
-        let mut conversation: rpc_proto::ChatConversation;
+        let mut overview: rpc_proto::ChatOverview;
         let index;
 
-        match db_ref.conversations.get(conversation_id.clone()) {
+        match db_ref.overview.get(conversation_id.clone()) {
             // conversation exists
             Ok(Some(my_conversation)) => {
-                conversation = my_conversation;
+                overview = my_conversation;
 
                 // update conversation
-                conversation.last_message_at = timestamp;
-                index = conversation.last_message_index +1;
-                conversation.last_message_index = index;
-                conversation.unread = conversation.unread +1;
-                conversation.content = content;
+                overview.last_message_at = timestamp;
+                index = overview.last_message_index +1;
+                overview.last_message_index = index;
+                overview.unread = overview.unread +1;
+                overview.content = content;
             },
             // conversation does not exist yet
             Ok(None) => {
@@ -230,7 +228,7 @@ impl Chat {
                 }
                 
                 // create a new conversation
-                conversation = rpc_proto::ChatConversation {
+                overview = rpc_proto::ChatOverview {
                     conversation_id: conversation_id.clone(),
                     last_message_index: index,
                     name,
@@ -246,60 +244,97 @@ impl Chat {
             },
         }
 
-        // save conversation in data base
-        if let Err(e) = db_ref.conversations.insert(conversation_id, conversation.clone()) {
+        // save conversation overview in data base
+        if let Err(e) = db_ref.overview.insert(conversation_id, overview.clone()) {
             log::error!("{}", e);
-            return Err("Error saving conversation to data base".to_string());
+            return Err("Error saving chat overview to data base".to_string());
         }
 
         // flush tree to disk
-        if let Err(e) = db_ref.conversations.flush() {
-            log::error!("Error conversations flush: {}", e);
+        if let Err(e) = db_ref.overview.flush() {
+            log::error!("Error chat overview flush: {}", e);
         }
 
-        Ok(conversation)
+        Ok(overview)
     }
     
 
     /// Get conversation overview list from data base
     fn get_overview(user_id: PeerId) -> rpc_proto::ChatOverviewList {
         // create empty conversation list
-        let mut conversation_list: Vec<rpc_proto::ChatConversation> = Vec::new();
+        let mut overview_list: Vec<rpc_proto::ChatOverview> = Vec::new();
 
         // get chat conversations overview tree for user
         let db_ref = Self::get_user_db_ref(user_id);
 
         // iterate over all values in db
-        for res in db_ref.conversations.iter() {
+        for res in db_ref.overview.iter() {
             if let Ok((_vec, conversation)) = res {
-                conversation_list.push(conversation);
+                overview_list.push(conversation);
             }
         }
 
         rpc_proto::ChatOverviewList {
-            conversation_list,
+            overview_list,
         }
     }
 
-    /// Get messages of a specific conversation from data base
+    /// Get chat messages of a specific conversation from data base
     fn get_messages(user_id: PeerId, conversation_id: Vec<u8>) -> rpc_proto::ChatConversationList {
         // create empty messages list
         let mut message_list: Vec<rpc_proto::ChatMessage> = Vec::new();
 
-        // get chat conversations overview tree for user
+        // get database references for this user account
         let db_ref = Self::get_user_db_ref(user_id);
 
-        // iterate over all values in db
-        for res in db_ref.messages.iter() {
-            if let Ok((_vec, message)) = res {
-                message_list.push(message);
+        // create message keys
+        let (first_key, last_key) = Self::get_db_key_range(conversation_id.clone());
+
+        // iterate over all values in chat_messages db
+        for res in db_ref.messages.range(first_key.as_slice()..last_key.as_slice()) {
+            match res {
+                Ok((_id, message)) => {
+                    message_list.push(message);
+                },
+                Err(e) => {
+                    log::error!("get_messages error: {}", e);
+                }
             }
         }
-
+        
         rpc_proto::ChatConversationList {
             conversation_id,
             message_list,
         }
+    }
+
+    /// get DB key range for a conversation ID
+    ///
+    /// returns a key tuple, which can be used to
+    /// retrieve all messages for a user ID from the DB: 
+    /// 
+    /// (first_key, last_key)
+    fn get_db_key_range(conversation_id: Vec<u8>) -> (Vec<u8>, Vec<u8>) {
+        let first_key = Self::get_db_key_from_vec(conversation_id.clone(), 0);
+        let last_key = Self::get_db_key_from_vec(conversation_id, 4294967295);
+
+        (first_key, last_key)
+    }
+
+    // create DB key from user ID and Index
+    fn get_db_key(user_id: PeerId, index: u32) -> Vec<u8> {
+        let conversation_id = user_id.to_bytes();
+
+        Self::get_db_key_from_vec(conversation_id, index)
+    }
+
+    // create DB key from conversation ID
+    fn get_db_key_from_vec(conversation_id: Vec<u8>, index: u32) -> Vec<u8> {
+        let mut index_bytes = index.to_be_bytes().to_vec();
+        let mut key_bytes = conversation_id;
+
+        key_bytes.append(&mut index_bytes);
+        key_bytes
     }
     
     // get user data base tree references
@@ -312,7 +347,7 @@ impl Chat {
             // check if user ID is in map
             if let Some(chat_user) = chat.db_ref.get(&user_id.to_bytes()) {
                 return ChatUser {
-                    conversations: chat_user.conversations.clone(),
+                    overview: chat_user.overview.clone(),
                     messages: chat_user.messages.clone(),
                 };
             }
@@ -323,7 +358,7 @@ impl Chat {
 
         // return chat_user structure
         ChatUser {
-            conversations: chat_user.conversations.clone(),
+            overview: chat_user.overview.clone(),
             messages: chat_user.messages.clone(),
         }
     }
@@ -334,10 +369,10 @@ impl Chat {
         let db = DataBase::get_user_db(user_id);
 
         // open trees
-        let conversations: Tree<rpc_proto::ChatConversation> = db.open_bincode_tree("chat_conversations").unwrap();
+        let overview: Tree<rpc_proto::ChatOverview> = db.open_bincode_tree("chat_overview").unwrap();
         let messages: Tree<rpc_proto::ChatMessage> = db.open_bincode_tree("chat_messages").unwrap();
         let chat_user = ChatUser {
-            conversations,
+            overview,
             messages,
         };
 
@@ -352,7 +387,7 @@ impl Chat {
     }
 
     /// Process incoming RPC request messages for chat module
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, lan: Option<&mut Lan>, internet: Option<&mut Internet> ) {
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, _lan: Option<&mut Lan>, _internet: Option<&mut Internet> ) {
         let my_user_id = PeerId::from_bytes(&user_id).unwrap();
 
         match rpc_proto::Chat::decode(&data[..]) {
@@ -419,13 +454,13 @@ impl Chat {
                         }
 
                         // send the message
-                        match Self::send( &user_account, message.clone(), lan, internet ) {
+                        match Self::send( &user_account, message.clone() ) {
                             Ok(signature) => {
                                 // save the message to data base
                                 Self::save_outgoing_message(user_account.id, message.conversation_id, message.content, signature);
                             },
                             Err(e) => {
-                                log::error!("{}", e)
+                                log::error!("Outgoing chat message error: {}", e)
                             }
                         }
                     },

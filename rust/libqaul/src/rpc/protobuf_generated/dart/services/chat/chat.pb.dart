@@ -175,17 +175,17 @@ class ChatOverviewRequest extends $pb.GeneratedMessage {
 
 class ChatOverviewList extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatOverviewList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
-    ..pc<ChatConversation>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationList', $pb.PbFieldType.PM, subBuilder: ChatConversation.create)
+    ..pc<ChatOverview>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'overviewList', $pb.PbFieldType.PM, subBuilder: ChatOverview.create)
     ..hasRequiredFields = false
   ;
 
   ChatOverviewList._() : super();
   factory ChatOverviewList({
-    $core.Iterable<ChatConversation>? conversationList,
+    $core.Iterable<ChatOverview>? overviewList,
   }) {
     final _result = create();
-    if (conversationList != null) {
-      _result.conversationList.addAll(conversationList);
+    if (overviewList != null) {
+      _result.overviewList.addAll(overviewList);
     }
     return _result;
   }
@@ -211,11 +211,11 @@ class ChatOverviewList extends $pb.GeneratedMessage {
   static ChatOverviewList? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<ChatConversation> get conversationList => $_getList(0);
+  $core.List<ChatOverview> get overviewList => $_getList(0);
 }
 
-class ChatConversation extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatConversation', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
+class ChatOverview extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatOverview', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationId', $pb.PbFieldType.OY)
     ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastMessageIndex', $pb.PbFieldType.OU3)
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
@@ -225,8 +225,8 @@ class ChatConversation extends $pb.GeneratedMessage {
     ..hasRequiredFields = false
   ;
 
-  ChatConversation._() : super();
-  factory ChatConversation({
+  ChatOverview._() : super();
+  factory ChatOverview({
     $core.List<$core.int>? conversationId,
     $core.int? lastMessageIndex,
     $core.String? name,
@@ -255,26 +255,26 @@ class ChatConversation extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory ChatConversation.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ChatConversation.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ChatOverview.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ChatOverview.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  ChatConversation clone() => ChatConversation()..mergeFromMessage(this);
+  ChatOverview clone() => ChatOverview()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ChatConversation copyWith(void Function(ChatConversation) updates) => super.copyWith((message) => updates(message as ChatConversation)) as ChatConversation; // ignore: deprecated_member_use
+  ChatOverview copyWith(void Function(ChatOverview) updates) => super.copyWith((message) => updates(message as ChatOverview)) as ChatOverview; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static ChatConversation create() => ChatConversation._();
-  ChatConversation createEmptyInstance() => create();
-  static $pb.PbList<ChatConversation> createRepeated() => $pb.PbList<ChatConversation>();
+  static ChatOverview create() => ChatOverview._();
+  ChatOverview createEmptyInstance() => create();
+  static $pb.PbList<ChatOverview> createRepeated() => $pb.PbList<ChatOverview>();
   @$core.pragma('dart2js:noInline')
-  static ChatConversation getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ChatConversation>(create);
-  static ChatConversation? _defaultInstance;
+  static ChatOverview getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ChatOverview>(create);
+  static ChatOverview? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.List<$core.int> get conversationId => $_getN(0);

@@ -245,29 +245,35 @@ pub async fn start(storage_path: String) -> () {
                         Messaging::check_scheduler()
                     {
                         log::info!(
-                            "sending routing information via {:?} to {:?}",
+                            "sending messaging message via {:?} to {:?}",
                             connection_module,
                             neighbour_id
                         );
-                        // send routing information
+                        // send messaging message via the best module
                         match connection_module {
                             ConnectionModule::Lan => {
-                                // lan
-                                // .swarm
-                                // .behaviour_mut()
-                                // .qaul_info
-                                // .send_qaul_info_message(neighbour_id, data);
+                                lan
+                                    .swarm
+                                    .behaviour_mut()
+                                    .qaul_messaging
+                                    .send_qaul_messaging_message(neighbour_id, data);
                             },
                             ConnectionModule::Internet => {
-                                // internet
-                                //     .swarm
-                                //     .behaviour_mut()
-                                //     .qaul_info
-                                //     .send_qaul_info_message(neighbour_id, data);
+                                internet
+                                    .swarm
+                                    .behaviour_mut()
+                                    .qaul_messaging
+                                    .send_qaul_messaging_message(neighbour_id, data);
                             },
                             ConnectionModule::Ble => {},
-                            ConnectionModule::Local => {},
-                            ConnectionModule::None => {},
+                            ConnectionModule::Local => {
+                                // TODO: deliver it locally
+                            },
+                            ConnectionModule::None => {
+                                // TODO: DNT behaviour
+                                // reschedule it for the moment
+
+                            },
                         }
                     }
                 }
@@ -406,7 +412,10 @@ pub async fn start_android(storage_path: String) -> () {
                     while let Some(msg) = flooder.to_send.pop_front() {
                         // check which swarm to send to
                         if !matches!(msg.incoming_via, ConnectionModule::Lan) {
-                            //lan.swarm.behaviour_mut().floodsub.publish( msg.topic.clone(), msg.message.clone());
+                            lan.swarm
+                                .behaviour_mut()
+                                .floodsub
+                                .publish(msg.topic.clone(), msg.message.clone());
                         }
                         if !matches!(msg.incoming_via, ConnectionModule::Internet) {
                             internet
@@ -463,18 +472,18 @@ pub async fn start_android(storage_path: String) -> () {
                         // send routing information
                         match connection_module {
                             ConnectionModule::Lan => {
-                                // lan
-                                // .swarm
-                                // .behaviour_mut()
-                                // .qaul_info
-                                // .send_qaul_info_message(neighbour_id, data);
+                                lan
+                                    .swarm
+                                    .behaviour_mut()
+                                    .qaul_messaging
+                                    .send_qaul_messaging_message(neighbour_id, data);
                             },
                             ConnectionModule::Internet => {
-                                // internet
-                                //     .swarm
-                                //     .behaviour_mut()
-                                //     .qaul_info
-                                //     .send_qaul_info_message(neighbour_id, data);
+                                internet
+                                    .swarm
+                                    .behaviour_mut()
+                                    .qaul_messaging
+                                    .send_qaul_messaging_message(neighbour_id, data);
                             },
                             ConnectionModule::Ble => {},
                             ConnectionModule::Local => {},

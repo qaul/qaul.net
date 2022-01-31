@@ -36,15 +36,15 @@ final $typed_data.Uint8List chatOverviewRequestDescriptor = $convert.base64Decod
 const ChatOverviewList$json = const {
   '1': 'ChatOverviewList',
   '2': const [
-    const {'1': 'conversation_list', '3': 1, '4': 3, '5': 11, '6': '.qaul.rpc.chat.ChatConversation', '10': 'conversationList'},
+    const {'1': 'overview_list', '3': 1, '4': 3, '5': 11, '6': '.qaul.rpc.chat.ChatOverview', '10': 'overviewList'},
   ],
 };
 
 /// Descriptor for `ChatOverviewList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List chatOverviewListDescriptor = $convert.base64Decode('ChBDaGF0T3ZlcnZpZXdMaXN0EkwKEWNvbnZlcnNhdGlvbl9saXN0GAEgAygLMh8ucWF1bC5ycGMuY2hhdC5DaGF0Q29udmVyc2F0aW9uUhBjb252ZXJzYXRpb25MaXN0');
-@$core.Deprecated('Use chatConversationDescriptor instead')
-const ChatConversation$json = const {
-  '1': 'ChatConversation',
+final $typed_data.Uint8List chatOverviewListDescriptor = $convert.base64Decode('ChBDaGF0T3ZlcnZpZXdMaXN0EkAKDW92ZXJ2aWV3X2xpc3QYASADKAsyGy5xYXVsLnJwYy5jaGF0LkNoYXRPdmVydmlld1IMb3ZlcnZpZXdMaXN0');
+@$core.Deprecated('Use chatOverviewDescriptor instead')
+const ChatOverview$json = const {
+  '1': 'ChatOverview',
   '2': const [
     const {'1': 'conversation_id', '3': 1, '4': 1, '5': 12, '10': 'conversationId'},
     const {'1': 'last_message_index', '3': 2, '4': 1, '5': 13, '10': 'lastMessageIndex'},
@@ -55,8 +55,8 @@ const ChatConversation$json = const {
   ],
 };
 
-/// Descriptor for `ChatConversation`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List chatConversationDescriptor = $convert.base64Decode('ChBDaGF0Q29udmVyc2F0aW9uEicKD2NvbnZlcnNhdGlvbl9pZBgBIAEoDFIOY29udmVyc2F0aW9uSWQSLAoSbGFzdF9tZXNzYWdlX2luZGV4GAIgASgNUhBsYXN0TWVzc2FnZUluZGV4EhIKBG5hbWUYAyABKAlSBG5hbWUSJgoPbGFzdF9tZXNzYWdlX2F0GAQgASgEUg1sYXN0TWVzc2FnZUF0EhYKBnVucmVhZBgFIAEoBVIGdW5yZWFkEhgKB2NvbnRlbnQYBiABKAlSB2NvbnRlbnQ=');
+/// Descriptor for `ChatOverview`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List chatOverviewDescriptor = $convert.base64Decode('CgxDaGF0T3ZlcnZpZXcSJwoPY29udmVyc2F0aW9uX2lkGAEgASgMUg5jb252ZXJzYXRpb25JZBIsChJsYXN0X21lc3NhZ2VfaW5kZXgYAiABKA1SEGxhc3RNZXNzYWdlSW5kZXgSEgoEbmFtZRgDIAEoCVIEbmFtZRImCg9sYXN0X21lc3NhZ2VfYXQYBCABKARSDWxhc3RNZXNzYWdlQXQSFgoGdW5yZWFkGAUgASgFUgZ1bnJlYWQSGAoHY29udGVudBgGIAEoCVIHY29udGVudA==');
 @$core.Deprecated('Use chatConversationRequestDescriptor instead')
 const ChatConversationRequest$json = const {
   '1': 'ChatConversationRequest',

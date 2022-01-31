@@ -58,6 +58,10 @@ use qaul_info::{
     QaulInfo,
     QaulInfoEvent,
 };
+use qaul_messaging::{
+    QaulMessaging,
+    QaulMessagingEvent,
+};
 
 use crate::services::feed::proto_net;
 
@@ -67,6 +71,7 @@ pub struct QaulInternetBehaviour {
     pub identify: Identify,
     pub ping: Ping,
     pub qaul_info: QaulInfo,
+    pub qaul_messaging: QaulMessaging,
     #[behaviour(ignore)]
     pub response_sender: UnboundedSender<QaulMessage>,
 }
@@ -141,6 +146,7 @@ impl Internet {
                 ),
                 ping: Ping::new(ping_config),
                 qaul_info: QaulInfo::new(Node::get_id()),
+                qaul_messaging: QaulMessaging::new(Node::get_id()),
                 response_sender,
             };
             behaviour.floodsub.subscribe(Node::get_topic());
@@ -227,6 +233,12 @@ impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
 impl NetworkBehaviourEventProcess<QaulInfoEvent> for QaulInternetBehaviour {
     fn inject_event(&mut self, event: QaulInfoEvent) {
         events::qaul_info_event( event, ConnectionModule::Internet );
+    }
+}
+
+impl NetworkBehaviourEventProcess<QaulMessagingEvent> for QaulInternetBehaviour {
+    fn inject_event(&mut self, event: QaulMessagingEvent) {
+        events::qaul_messaging_event( event, ConnectionModule::Internet );
     }
 }
 

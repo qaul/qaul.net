@@ -145,15 +145,15 @@ struct Qaul_Rpc_Chat_ChatOverviewList {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var conversationList: [Qaul_Rpc_Chat_ChatConversation] = []
+  var overviewList: [Qaul_Rpc_Chat_ChatOverview] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 }
 
-/// a chat conversation item
-struct Qaul_Rpc_Chat_ChatConversation {
+/// a chat conversation overview item
+struct Qaul_Rpc_Chat_ChatOverview {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -414,7 +414,7 @@ extension Qaul_Rpc_Chat_ChatOverviewRequest: SwiftProtobuf.Message, SwiftProtobu
 extension Qaul_Rpc_Chat_ChatOverviewList: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ChatOverviewList"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "conversation_list"),
+    1: .standard(proto: "overview_list"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -423,28 +423,28 @@ extension Qaul_Rpc_Chat_ChatOverviewList: SwiftProtobuf.Message, SwiftProtobuf._
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.conversationList) }()
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.overviewList) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.conversationList.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.conversationList, fieldNumber: 1)
+    if !self.overviewList.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.overviewList, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Rpc_Chat_ChatOverviewList, rhs: Qaul_Rpc_Chat_ChatOverviewList) -> Bool {
-    if lhs.conversationList != rhs.conversationList {return false}
+    if lhs.overviewList != rhs.overviewList {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Qaul_Rpc_Chat_ChatConversation: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ChatConversation"
+extension Qaul_Rpc_Chat_ChatOverview: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".ChatOverview"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "conversation_id"),
     2: .standard(proto: "last_message_index"),
@@ -493,7 +493,7 @@ extension Qaul_Rpc_Chat_ChatConversation: SwiftProtobuf.Message, SwiftProtobuf._
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Qaul_Rpc_Chat_ChatConversation, rhs: Qaul_Rpc_Chat_ChatConversation) -> Bool {
+  static func ==(lhs: Qaul_Rpc_Chat_ChatOverview, rhs: Qaul_Rpc_Chat_ChatOverview) -> Bool {
     if lhs.conversationID != rhs.conversationID {return false}
     if lhs.lastMessageIndex != rhs.lastMessageIndex {return false}
     if lhs.name != rhs.name {return false}

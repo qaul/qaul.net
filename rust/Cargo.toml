@@ -8,5 +8,6 @@ members = [
     "clients/qauld",
 
     # libp2p modules
-    "libp2p_modules/qaul_info"
+    "libp2p_modules/qaul_info",
+    "libp2p_modules/qaul_messaging"
 ]

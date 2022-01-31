@@ -31,11 +31,11 @@ message ChatOverviewRequest {
 // overview list of conversations
 // this can eighter be the entire list or the last updates
 message ChatOverviewList {
-    repeated ChatConversation conversation_list = 1;
+    repeated ChatOverview overview_list = 1;
 }
 
-// a chat conversation item
-message ChatConversation {
+// a chat conversation overview item
+message ChatOverview {
     // id of the user
     bytes conversation_id = 1;
     // last message index
