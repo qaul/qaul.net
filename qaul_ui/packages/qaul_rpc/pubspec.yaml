@@ -22,7 +22,7 @@ dependencies:
   rxdart: ^0.27.3
   equatable: ^2.0.3
   fast_base58: ^0.2.1
-  hooks_riverpod: ^1.0.0-dev.11
+  hooks_riverpod: ^1.0.3
 
 dev_dependencies:
   flutter_test:

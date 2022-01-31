@@ -9,14 +9,12 @@ class UserAccountScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(defaultUserProvider).state;
+    final user = ref.watch(defaultUserProvider);
 
     final theme = Theme.of(context).textTheme;
     final l18ns = AppLocalizations.of(context);
     return Padding(
-      padding: MediaQuery.of(context)
-          .viewPadding
-          .add(const EdgeInsets.fromLTRB(16, 8, 16, 8)),
+      padding: MediaQuery.of(context).viewPadding.add(const EdgeInsets.fromLTRB(16, 8, 16, 8)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -30,16 +28,12 @@ class UserAccountScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user != null
-                            ? user.name
-                            : _notFound(l18ns!, l18ns.username),
+                        user != null ? user.name : _notFound(l18ns!, l18ns.username),
                         style: theme.headline6,
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        user != null
-                            ? user.idBase58
-                            : _notFound(l18ns!, l18ns.userID),
+                        user != null ? user.idBase58 : _notFound(l18ns!, l18ns.userID),
                         style: theme.subtitle2,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,

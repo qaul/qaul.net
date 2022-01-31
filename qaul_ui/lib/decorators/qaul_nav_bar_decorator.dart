@@ -190,7 +190,7 @@ class QaulNavBarItem extends HookConsumerWidget {
     var selected = useState(false);
 
     useEffect(() {
-      void updateSelected(int i) => selected.value = TabType.values[i] == tab;
+      void updateSelected(SelectedTabStatus s) => selected.value = TabType.values[s.tab] == tab;
       return controller.addListener(updateSelected);
     });
 
@@ -223,10 +223,10 @@ class QaulNavBarItem extends HookConsumerWidget {
         svgPath = 'assets/icons/hashtag.svg';
         tooltip = l18ns!.feedNavButtonTooltip;
         break;
-      case TabType.chat:
-        svgPath = 'assets/icons/comments.svg';
-        tooltip = l18ns!.chatNavButtonTooltip;
-        break;
+      // case TabType.chat:
+      //   svgPath = 'assets/icons/comments.svg';
+      //   tooltip = l18ns!.chatNavButtonTooltip;
+      //   break;
       case TabType.network:
         svgPath = 'assets/icons/network.svg';
         tooltip = l18ns!.netNavButtonTooltip;

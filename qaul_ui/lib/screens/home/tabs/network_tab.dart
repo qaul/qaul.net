@@ -26,9 +26,7 @@ class _NetworkState extends _BaseTabState<_Network> {
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           controller: ScrollController(),
-          padding: MediaQuery.of(context)
-              .viewPadding
-              .add(const EdgeInsets.symmetric(vertical: 12)),
+          padding: MediaQuery.of(context).viewPadding.add(const EdgeInsets.symmetric(vertical: 12)),
           children: const [
             _AvailableConnectionsTable(type: ConnectionType.ble),
             SizedBox(height: 32.0),
@@ -43,8 +41,7 @@ class _NetworkState extends _BaseTabState<_Network> {
 }
 
 class _AvailableConnectionsTable extends ConsumerWidget {
-  const _AvailableConnectionsTable({Key? key, required this.type})
-      : super(key: key);
+  const _AvailableConnectionsTable({Key? key, required this.type}) : super(key: key);
   final ConnectionType type;
 
   @override
@@ -54,7 +51,7 @@ class _AvailableConnectionsTable extends ConsumerWidget {
     final l18ns = AppLocalizations.of(context);
     final theme = Theme.of(context).textTheme;
 
-    final defaultUser = ref.watch(defaultUserProvider).state;
+    final defaultUser = ref.watch(defaultUserProvider);
     final users = ref
         .watch(usersProvider)
         .where((u) => !(u.isBlocked ?? false))
@@ -71,8 +68,7 @@ class _AvailableConnectionsTable extends ConsumerWidget {
             children: [
               Icon(icon, size: 32),
               const SizedBox(width: 8),
-              Text('${_buildCapitalizedEnumName()} ${l18ns!.connections}',
-                  style: theme.headline5),
+              Text('${_buildCapitalizedEnumName()} ${l18ns!.connections}', style: theme.headline5),
             ],
           ),
           const SizedBox(height: 12),
@@ -109,18 +105,13 @@ class _AvailableConnectionsTable extends ConsumerWidget {
                           ),
                         ),
                         TableCell(
-                            child: Text(data!.ping == null
-                                ? l18ns.unknown
-                                : '${data.ping} ms')),
-                        TableCell(
-                            child: Text(data.hopCount == null
-                                ? l18ns.unknown
-                                : data.hopCount.toString())),
+                            child: Text(data!.ping == null ? l18ns.unknown : '${data.ping} ms')),
                         TableCell(
                             child: Text(
-                                data.nodeIDBase58 == null
-                                    ? l18ns.unknown
-                                    : data.nodeIDBase58!,
+                                data.hopCount == null ? l18ns.unknown : data.hopCount.toString())),
+                        TableCell(
+                            child: Text(
+                                data.nodeIDBase58 == null ? l18ns.unknown : data.nodeIDBase58!,
                                 style: theme.caption)),
                       ]);
                     }),
@@ -131,9 +122,8 @@ class _AvailableConnectionsTable extends ConsumerWidget {
     );
   }
 
-  String _buildCapitalizedEnumName() =>
-      describeEnum(type).splitMapJoin(RegExp(r'^.{1}'),
-          onMatch: (m) => m[0]!.toUpperCase(), onNonMatch: (n) => n);
+  String _buildCapitalizedEnumName() => describeEnum(type)
+      .splitMapJoin(RegExp(r'^.{1}'), onMatch: (m) => m[0]!.toUpperCase(), onNonMatch: (n) => n);
 
   IconData _mapIconFromType(ConnectionType type) {
     switch (type) {

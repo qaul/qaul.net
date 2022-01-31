@@ -63,8 +63,8 @@ class LibqaulWorker {
     final id = await _encodeAndSendMessage(
         Modules.USERS, Users(userRequest: UserRequest()).writeToBuffer());
 
-    _encodeAndSendMessage(Modules.ROUTER,
-        Router(routingTableRequest: RoutingTableRequest()).writeToBuffer());
+    _encodeAndSendMessage(
+        Modules.ROUTER, Router(routingTableRequest: RoutingTableRequest()).writeToBuffer());
 
     debugPrint('*' * 80);
     debugPrint('ID: $id');
@@ -74,48 +74,38 @@ class LibqaulWorker {
   Future<void> verifyUser(User u) async {
     var entry = _baseUserEntryFrom(u);
     entry.verified = true;
-    await _encodeAndSendMessage(
-        Modules.USERS, Users(userUpdate: entry).writeToBuffer());
+    await _encodeAndSendMessage(Modules.USERS, Users(userUpdate: entry).writeToBuffer());
   }
 
   Future<void> unverifyUser(User u) async {
     var entry = _baseUserEntryFrom(u);
     entry.verified = false;
-    await _encodeAndSendMessage(
-        Modules.USERS, Users(userUpdate: entry).writeToBuffer());
+    await _encodeAndSendMessage(Modules.USERS, Users(userUpdate: entry).writeToBuffer());
   }
 
   Future<void> blockUser(User u) async {
     final entry = _baseUserEntryFrom(u);
     entry.blocked = true;
-    await _encodeAndSendMessage(
-        Modules.USERS, Users(userUpdate: entry).writeToBuffer());
+    await _encodeAndSendMessage(Modules.USERS, Users(userUpdate: entry).writeToBuffer());
   }
 
   Future<void> unblockUser(User u) async {
     final entry = _baseUserEntryFrom(u);
     entry.blocked = false;
-    await _encodeAndSendMessage(
-        Modules.USERS, Users(userUpdate: entry).writeToBuffer());
+    await _encodeAndSendMessage(Modules.USERS, Users(userUpdate: entry).writeToBuffer());
   }
 
-  Future<void> getNodeInfo() async => await _encodeAndSendMessage(
-      Modules.NODE, Node(getNodeInfo: true).writeToBuffer());
+  Future<void> getNodeInfo() async =>
+      await _encodeAndSendMessage(Modules.NODE, Node(getNodeInfo: true).writeToBuffer());
 
-  Future<void> requestNodes() async => await _encodeAndSendMessage(
-      Modules.CONNECTIONS,
-      Connections(internetNodesRequest: InternetNodesRequest())
-          .writeToBuffer());
+  Future<void> requestNodes() async => await _encodeAndSendMessage(Modules.CONNECTIONS,
+      Connections(internetNodesRequest: InternetNodesRequest()).writeToBuffer());
 
-  Future<void> addNode(String address) async => await _encodeAndSendMessage(
-      Modules.CONNECTIONS,
-      Connections(internetNodesAdd: InternetNodesEntry(address: address))
-          .writeToBuffer());
+  Future<void> addNode(String address) async => await _encodeAndSendMessage(Modules.CONNECTIONS,
+      Connections(internetNodesAdd: InternetNodesEntry(address: address)).writeToBuffer());
 
-  Future<void> removeNode(String address) async => await _encodeAndSendMessage(
-      Modules.CONNECTIONS,
-      Connections(internetNodesRemove: InternetNodesEntry(address: address))
-          .writeToBuffer());
+  Future<void> removeNode(String address) async => await _encodeAndSendMessage(Modules.CONNECTIONS,
+      Connections(internetNodesRemove: InternetNodesEntry(address: address)).writeToBuffer());
 
   Future<void> getDefaultUserAccount() async {
     final message = UserAccounts(getDefaultUserAccount: true);
@@ -148,7 +138,7 @@ class LibqaulWorker {
     message.module = module;
     message.data = data;
 
-    final user = _reader(defaultUserProvider).state;
+    final user = _reader(defaultUserProvider);
     if (user != null) message.userId = user.id;
 
     final id = const Uuid().v4();
@@ -171,8 +161,7 @@ class LibqaulWorker {
       final m = QaulRpc.fromBuffer(response);
 
       if (m.module == Modules.CONNECTIONS) {
-        final resp =
-            await ConnectionTranslator().decodeMessageBytes(m.data);
+        final resp = await ConnectionTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
       } else if (m.module == Modules.FEED) {
         final resp = await FeedTranslator().decodeMessageBytes(m.data);
@@ -190,8 +179,7 @@ class LibqaulWorker {
         final resp = await RouterTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
       } else {
-        throw UnhandledRpcMessageException.value(
-            m.toString(), 'LibqaulWorker.receiveResponse');
+        throw UnhandledRpcMessageException.value(m.toString(), 'LibqaulWorker.receiveResponse');
       }
     }
   }
@@ -223,12 +211,11 @@ class LibqaulWorker {
     }
     if (resp.module == Modules.USERACCOUNTS) {
       if (resp.data != null && resp.data is User) {
-        _reader(defaultUserProvider).state = resp.data;
+        _reader(defaultUserProvider.state).state = resp.data;
       }
       return;
     }
 
-    throw UnhandledRpcMessageException.value(
-        resp.toString(), '_processResponse');
+    throw UnhandledRpcMessageException.value(resp.toString(), '_processResponse');
   }
 }

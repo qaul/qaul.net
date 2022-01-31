@@ -29,8 +29,7 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding:
-              MediaQuery.of(context).viewPadding.copyWith(left: 20, right: 20),
+          padding: MediaQuery.of(context).viewPadding.copyWith(left: 20, right: 20),
           child: Column(
             children: const [
               LanguageSelectDropDown(),
@@ -51,7 +50,7 @@ class _InternetNodesList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final nodes = ref.watch(connectedNodesProvider).state;
+    final nodes = ref.watch(connectedNodesProvider);
     final loading = useState(true);
     final isMounted = useIsMounted();
 
@@ -121,8 +120,7 @@ class _InternetNodesList extends HookConsumerWidget {
                           onPressed: () async => removeNode(nodeAddr),
                         ),
                         onTap: () async {
-                          final ip =
-                              nodeAddr.replaceAll('/ip4/', '').split('/').first;
+                          final ip = nodeAddr.replaceAll('/ip4/', '').split('/').first;
                           final port = nodeAddr.split('/').last;
                           final res = await showDialog(
                             context: context,
@@ -145,8 +143,7 @@ class _InternetNodesList extends HookConsumerWidget {
               icon: const Icon(Icons.add),
               splashRadius: 24,
               onPressed: () async {
-                final res = await showDialog(
-                    context: context, builder: (_) => _AddNodeDialog());
+                final res = await showDialog(context: context, builder: (_) => _AddNodeDialog());
 
                 if (res is! String) return;
 
@@ -199,8 +196,7 @@ class _AddNodeDialog extends HookWidget {
     ];
 
     return AlertDialog(
-      title:
-          orientation == Orientation.landscape ? null : Text(l18ns.addNodeCTA),
+      title: orientation == Orientation.landscape ? null : Text(l18ns.addNodeCTA),
       content: Form(
         key: _formKey,
         child: Column(
@@ -255,8 +251,8 @@ class _AddNodeDialog extends HookWidget {
 
   SizedBox get _spacer => const SizedBox(width: 4, height: 4);
 
-  TextStyle get _fixedTextStyle => TextStyle(
-      fontSize: 26, fontWeight: FontWeight.w500, color: Colors.grey.shade500);
+  TextStyle get _fixedTextStyle =>
+      TextStyle(fontSize: 26, fontWeight: FontWeight.w500, color: Colors.grey.shade500);
 
   InputDecoration _decoration(String label, {String? hint}) => InputDecoration(
         isDense: true,

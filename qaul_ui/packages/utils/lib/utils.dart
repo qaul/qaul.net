@@ -1,6 +1,7 @@
 /// Added as a separate package as running tests on root project instantiates a libqaul shell for some reason, which in return fails the tests.
 library color_generator;
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -109,5 +110,100 @@ class IPv4TextInputFormatter extends TextInputFormatter {
     }
     if (lastSection.length == 3 && sections.length < 4) lastSection += '.';
     return lastSection;
+  }
+}
+
+/// A substitute to [Timer] that allows cancelling & restarting with no need to
+/// re-instantiate the timer. Ticks occur every 10ms.
+///
+/// Example:
+/// ```dart
+/// final timer = LoopTimer(const Duration(milliseconds: 500));
+/// timer.onTick = () => print('tick');
+/// timer.onTimeout = () {
+///   print('timeout');
+///   timer.cancel();
+/// };
+/// timer.start();
+/// ```
+class LoopTimer {
+  LoopTimer(Duration duration)
+      : _stopwatch = Stopwatch(),
+        _loopDuration = duration,
+        _zone = Zone.current;
+
+  final Stopwatch _stopwatch;
+
+  final Zone _zone;
+  Timer? _zoneTick;
+  Timer? _zoneTimeout;
+
+  Duration get tenMs => const Duration(milliseconds: 10);
+
+  Duration get target => _loopDuration;
+  final Duration _loopDuration;
+
+  Duration get elapsed => (_loopDuration - _stopwatch.elapsed);
+
+  bool get isRunning => _stopwatch.isRunning;
+
+  void start() {
+    _stopwatch.start();
+    if (_onTick != null) _scheduleTickCallback();
+    if (_onTimeout != null) _scheduleTimeoutCallback();
+  }
+
+  void pause() {
+    _stopwatch.stop();
+    _cancelZoneTimers();
+  }
+
+  void cancel() {
+    _stopwatch
+      ..stop()
+      ..reset();
+    _cancelZoneTimers();
+    _deleteAssignedCallbacks();
+  }
+
+  void _cancelZoneTimers() {
+    _zoneTick?.cancel();
+    _zoneTimeout?.cancel();
+  }
+
+  void _deleteAssignedCallbacks() {
+    _onTick = null;
+    _onTimeout = null;
+  }
+
+  void _invoke(VoidCallback? callback) {
+    if (callback != null) _zone.run(callback);
+  }
+
+  void Function()? _onTimeout;
+
+  set onTimeout(void Function()? callback) {
+    _onTimeout = callback == null ? null : _zone.bindCallback(callback);
+    if (isRunning) _scheduleTimeoutCallback();
+  }
+
+  void _scheduleTimeoutCallback() {
+    _zoneTimeout = _zone.createTimer(elapsed, () => _invoke(_onTimeout));
+  }
+
+  void Function()? _onTick;
+
+  set onTick(void Function()? callback) {
+    _onTick = callback == null ? null : _zone.bindCallback(callback);
+    if (isRunning) _scheduleTickCallback();
+  }
+
+  void cancelOnTickCallback() {
+    _zoneTick?.cancel();
+    _onTick = null;
+  }
+
+  void _scheduleTickCallback() {
+    _zoneTick = _zone.createPeriodicTimer(tenMs, (_) => _invoke(_onTick));
   }
 }

@@ -13,24 +13,20 @@ class NavigationHelper {
   static const settings = '/settings';
   static const about = '/about';
 
-  static Route<T> _buildRoute<T>(
-          final RouteSettings settings, final WidgetBuilder page) =>
+  static Route<T> _buildRoute<T>(final RouteSettings settings, final WidgetBuilder page) =>
       CupertinoPageRoute(builder: page, settings: settings);
 
   static Route<dynamic> onGenerateRoute(final RouteSettings _settings) {
     Widget routeWidget = const SizedBox.shrink();
     switch (_settings.name) {
       case initial:
-        routeWidget = WillPopScope(
-            onWillPop: () async => false, child: SplashScreen());
+        routeWidget = WillPopScope(onWillPop: () async => false, child: SplashScreen());
         break;
       case createAccount:
-        routeWidget = WillPopScope(
-            onWillPop: () async => false, child: CreateAccountScreen());
+        routeWidget = WillPopScope(onWillPop: () async => false, child: CreateAccountScreen());
         break;
       case home:
-        routeWidget = WillPopScope(
-            onWillPop: () async => false, child: const HomeScreen());
+        routeWidget = WillPopScope(onWillPop: () async => false, child: HomeScreen());
         break;
       case settings:
         routeWidget = const SettingsScreen();
@@ -39,8 +35,8 @@ class NavigationHelper {
         routeWidget = const AboutScreen();
         break;
       default:
-        throw ArgumentError.value(_settings.name, 'Route name',
-            'Handle this route in NavigationHelper.');
+        throw ArgumentError.value(
+            _settings.name, 'Route name', 'Handle this route in NavigationHelper.');
     }
 
     return _buildRoute(_settings, (context) => routeWidget);

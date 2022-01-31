@@ -11,7 +11,7 @@ class _ChatState extends _BaseTabState<_Chat> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final defaultUser = ref.watch(defaultUserProvider).state;
+    final defaultUser = ref.watch(defaultUserProvider);
     final users = ref
         .watch(usersProvider)
         .where((u) => !(u.isBlocked ?? false))
@@ -48,11 +48,9 @@ class _ChatState extends _BaseTabState<_Chat> {
               leading: UserAvatar.small(user: user),
               title: Row(
                 children: [
-                  Text(user.name, style: theme.bodyText1!
-                      .copyWith(fontWeight: FontWeight.bold)),
+                  Text(user.name, style: theme.bodyText1!.copyWith(fontWeight: FontWeight.bold)),
                   const Expanded(child: SizedBox()),
-                  Text('12:00', style: theme.caption!
-                      .copyWith(fontStyle: FontStyle.italic)),
+                  Text('12:00', style: theme.caption!.copyWith(fontStyle: FontStyle.italic)),
                   const Icon(Icons.chevron_right),
                 ],
               ),
@@ -64,38 +62,38 @@ class _ChatState extends _BaseTabState<_Chat> {
               ),
               onTap: defaultUser == null
                   ? null
-                  : () =>
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return ChatScreen(
-                          initialMessages: [
-                            TextMessage(
-                              idBase58: const Uuid().v4(),
-                              text: 'this is a message by another user',
-                              user: user,
-                            ),
-                          ],
-                          user: defaultUser,
-                          otherUserAvatarColor: colorGenerationStrategy(user.idBase58),
-                          onSendPressed: (String rawText) {
-                            return TextMessage(
-                              idBase58: const Uuid().v4(),
-                              text: rawText,
+                  : () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return ChatScreen(
+                              initialMessages: [
+                                TextMessage(
+                                  idBase58: const Uuid().v4(),
+                                  text: 'this is a message by another user',
+                                  user: user,
+                                ),
+                              ],
                               user: defaultUser,
+                              otherUserAvatarColor: colorGenerationStrategy(user.idBase58),
+                              onSendPressed: (String rawText) {
+                                return TextMessage(
+                                  idBase58: const Uuid().v4(),
+                                  text: rawText,
+                                  user: defaultUser,
+                                );
+                              },
+                              userAppBar: Row(
+                                children: [
+                                  UserAvatar.small(badgeEnabled: false, user: user),
+                                  const SizedBox(width: 12),
+                                  Text(user.name),
+                                ],
+                              ),
                             );
-                          }, userAppBar: Row(
-                          children: [
-                            UserAvatar.small(badgeEnabled: false, user: user),
-                            const SizedBox(width: 12),
-                            Text(user.name),
-                          ],
+                          },
                         ),
-                        );
-                      },
-                    ),
-                  ),
+                      ),
             );
           },
         ),

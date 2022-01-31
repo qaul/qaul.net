@@ -11,11 +11,9 @@ class _UsersState extends _BaseTabState<_Users> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final defaultUser = ref.watch(defaultUserProvider).state;
-    final users = ref
-        .watch(usersProvider)
-        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
-        .toList();
+    final defaultUser = ref.watch(defaultUserProvider);
+    final users =
+        ref.watch(usersProvider).where((u) => u.idBase58 != (defaultUser?.idBase58 ?? '')).toList();
 
     users.sort((u1, u2) => u2.isConnected ? 1 : 0);
     users.sort((u1, u2) => (u1.isBlocked ?? false) ? 1 : 0);
@@ -50,8 +48,7 @@ class _UsersState extends _BaseTabState<_Users> {
                     onTap: () async {
                       await Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (_) => _UserDetailsScreen(user: user)),
+                        MaterialPageRoute(builder: (_) => _UserDetailsScreen(user: user)),
                       );
                       refreshUsers();
                     },
@@ -72,8 +69,7 @@ class _UsersState extends _BaseTabState<_Users> {
                           style: theme.caption!.copyWith(fontSize: 10),
                         ),
                         const SizedBox(height: 4),
-                        if (user.availableTypes != null &&
-                            user.availableTypes!.isNotEmpty)
+                        if (user.availableTypes != null && user.availableTypes!.isNotEmpty)
                           _AvailableConnections(user: user),
                       ],
                     ),
@@ -112,16 +108,13 @@ class _AvailableConnections extends StatelessWidget {
     );
   }
 
-  bool get _hasBluetooth =>
-      user.availableTypes!.keys.contains(ConnectionType.ble);
+  bool get _hasBluetooth => user.availableTypes!.keys.contains(ConnectionType.ble);
 
   bool get _hasLan => user.availableTypes!.keys.contains(ConnectionType.lan);
 
-  bool get _hasLocal =>
-      user.availableTypes!.keys.contains(ConnectionType.local);
+  bool get _hasLocal => user.availableTypes!.keys.contains(ConnectionType.local);
 
-  bool get _hasInternet =>
-      user.availableTypes!.keys.contains(ConnectionType.internet);
+  bool get _hasInternet => user.availableTypes!.keys.contains(ConnectionType.internet);
 }
 
 class _UserDetailsScreen extends HookConsumerWidget {
@@ -172,8 +165,7 @@ class _UserDetailsScreen extends HookConsumerWidget {
             child: Builder(builder: (context) {
               return SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 32.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -182,17 +174,14 @@ class _UserDetailsScreen extends HookConsumerWidget {
                       const SizedBox(height: 28.0),
                       Text(user.name, style: theme.headline3),
                       const SizedBox(height: 8.0),
-                      Text('${l18ns.userID}: ${user.idBase58}',
-                          style: theme.headline5),
+                      Text('${l18ns.userID}: ${user.idBase58}', style: theme.headline5),
                       const SizedBox(height: 40.0),
-                      Text('${l18ns.publicKey}:\n${user.keyBase58}',
-                          style: theme.headline5),
+                      Text('${l18ns.publicKey}:\n${user.keyBase58}', style: theme.headline5),
                       const SizedBox(height: 40.0),
                       DisabledStateDecorator(
                         isDisabled: blocked,
                         child: _RoundedRectButton(
-                          color:
-                              verified ? Colors.green.shade300 : Colors.green,
+                          color: verified ? Colors.green.shade300 : Colors.green,
                           onPressed: blocked
                               ? null
                               : () async {
@@ -228,8 +217,7 @@ class _UserDetailsScreen extends HookConsumerWidget {
                       ),
                       const SizedBox(height: 28.0),
                       _RoundedRectButton(
-                        color:
-                            blocked ? Colors.red.shade300 : Colors.red.shade400,
+                        color: blocked ? Colors.red.shade300 : Colors.red.shade400,
                         onPressed: () async {
                           final res = await _confirmAction(
                             context,
@@ -242,15 +230,12 @@ class _UserDetailsScreen extends HookConsumerWidget {
                           loading.value = true;
 
                           final worker = ref.read(qaulWorkerProvider);
-                          blocked
-                              ? await worker.unblockUser(user)
-                              : await worker.blockUser(user);
+                          blocked ? await worker.unblockUser(user) : await worker.blockUser(user);
 
                           loading.value = false;
                           Navigator.pop(context);
                         },
-                        child:
-                            Text(blocked ? l18ns.unblockUser : l18ns.blockUser),
+                        child: Text(blocked ? l18ns.unblockUser : l18ns.blockUser),
                       ),
                     ],
                   ),

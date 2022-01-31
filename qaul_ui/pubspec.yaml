@@ -69,7 +69,7 @@ dependencies:
   hive_flutter: ^1.1.0
 
   flutter_hooks: ^0.18.0
-  hooks_riverpod: ^1.0.0-dev.11
+  riverpod: ^1.0.3
 
   # *******
   # Local Dependencies

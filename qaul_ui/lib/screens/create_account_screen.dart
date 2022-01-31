@@ -15,7 +15,7 @@ class CreateAccountScreen extends HookConsumerWidget {
   static final _usernameProvider = StateProvider<String?>((ref) => null);
 
   final _sendRequestProvider = FutureProvider<bool?>((ref) async {
-    final name = ref.watch(_usernameProvider).state;
+    final name = ref.watch(_usernameProvider);
     if (name == null) return null;
 
     final worker = ref.read(qaulWorkerProvider);
@@ -24,7 +24,7 @@ class CreateAccountScreen extends HookConsumerWidget {
     for (var i = 0; i < 5; i++) {
       await worker.getDefaultUserAccount();
       await Future.delayed(Duration(milliseconds: 100 * (1 + i)));
-      final user = ref.read(defaultUserProvider).state;
+      final user = ref.read(defaultUserProvider);
       return user != null;
     }
     return false;
@@ -38,7 +38,7 @@ class CreateAccountScreen extends HookConsumerWidget {
 
     ref.listen(
       _sendRequestProvider,
-      (AsyncValue<bool?> data) {
+      (AsyncValue<bool?>? previous, AsyncValue<bool?> data) {
         data.whenData(
           (created) {
             if (created == null) return;
@@ -51,10 +51,8 @@ class CreateAccountScreen extends HookConsumerWidget {
               context: context,
               builder: (c) {
                 return AlertDialog(
-                  title:
-                      Text(AppLocalizations.of(context)!.timeoutErrorMessage),
-                  content:
-                      Text(AppLocalizations.of(context)!.genericErrorMessage),
+                  title: Text(AppLocalizations.of(context)!.timeoutErrorMessage),
+                  content: Text(AppLocalizations.of(context)!.genericErrorMessage),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -112,7 +110,7 @@ class CreateAccountScreen extends HookConsumerWidget {
                             if (!(valid ?? false)) return;
 
                             loading.value = true;
-                            ref.read(_usernameProvider).state = nameCtrl.text;
+                            ref.read(_usernameProvider.state).state = nameCtrl.text;
                           },
                           child: const Padding(
                             padding: EdgeInsets.all(20.0),

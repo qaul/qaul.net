@@ -2,24 +2,39 @@ part of 'providers.dart';
 
 final selectedTabProvider = Provider((ref) => SelectedTab(initialTab: 1));
 
-enum TabType { account, feed, users, chat, network }
+enum TabType { account, feed, users, network } //chat, network }
 
-class SelectedTab extends StateNotifier<int> {
+@immutable
+class SelectedTabStatus {
+  const SelectedTabStatus({required this.tab, this.shouldScroll = true});
+
+  final int tab;
+  final bool shouldScroll;
+
+  SelectedTabStatus copyWith({int? tab, bool? shouldScroll}) {
+    return SelectedTabStatus(
+      tab: tab ?? this.tab,
+      shouldScroll: shouldScroll ?? this.shouldScroll,
+    );
+  }
+}
+
+class SelectedTab extends StateNotifier<SelectedTabStatus> {
   SelectedTab({int? initialTab})
       : _initialTab = initialTab ?? 0,
-        super(initialTab ?? 0);
+        super(SelectedTabStatus(tab: initialTab ?? 0));
 
-  int get index => state;
+  int get index => state.tab;
 
-  TabType get currentTab => TabType.values[state];
+  TabType get currentTab => TabType.values[state.tab];
 
   get initialTab => _initialTab;
   final int _initialTab;
 
   @protected
-  void goToIndex(int index) {
+  void goToIndex(int index, {bool scroll = true}) {
     assert(!index.isNegative && index < TabType.values.length);
-    state = index;
+    state = state.copyWith(tab: index, shouldScroll: scroll);
   }
 
   void goToTab(TabType tab) => goToIndex(TabType.values.indexOf(tab));
@@ -31,4 +46,6 @@ class SelectedTab extends StateNotifier<int> {
   void goToPrevious() {
     index == 0 ? goToIndex(TabType.values.length - 1) : goToIndex(index - 1);
   }
+
+  void updateCurrentIndexWithoutScrolling(int i) => goToIndex(i, scroll: false);
 }

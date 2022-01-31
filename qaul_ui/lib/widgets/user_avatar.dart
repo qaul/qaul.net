@@ -13,14 +13,12 @@ abstract class UserAvatar extends ConsumerWidget {
   const UserAvatar({Key? key, this.user}) : super(key: key);
   final User? user;
 
-  factory UserAvatar.tiny({Key? key, User? user}) =>
-      _TinyUserAvatar(key: key, user: user);
+  factory UserAvatar.tiny({Key? key, User? user}) => _TinyUserAvatar(key: key, user: user);
 
   factory UserAvatar.small({Key? key, User? user, bool badgeEnabled = true}) =>
       _SmallUserAvatar(key: key, user: user, badgeEnabled: badgeEnabled);
 
-  factory UserAvatar.large({Key? key, User? user}) =>
-      _LargeUserAvatar(key: key, user: user);
+  factory UserAvatar.large({Key? key, User? user}) => _LargeUserAvatar(key: key, user: user);
 
   double get radius;
 
@@ -32,10 +30,9 @@ abstract class UserAvatar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final defaultUser = ref.watch(defaultUserProvider).state;
-    final defaultUserColor = defaultUser == null
-        ? null
-        : colorGenerationStrategy(defaultUser.idBase58);
+    final defaultUser = ref.watch(defaultUserProvider);
+    final defaultUserColor =
+        defaultUser == null ? null : colorGenerationStrategy(defaultUser.idBase58);
 
     return CircleAvatar(
       radius: radius,
@@ -47,8 +44,7 @@ abstract class UserAvatar extends ConsumerWidget {
                 : 'WW',
         style: initialsStyle,
       ),
-      backgroundColor:
-          user != null ? userColor : defaultUserColor ?? Colors.red.shade700,
+      backgroundColor: user != null ? userColor : defaultUserColor ?? Colors.red.shade700,
     );
   }
 

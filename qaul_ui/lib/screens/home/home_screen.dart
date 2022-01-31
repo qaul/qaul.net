@@ -6,6 +6,7 @@ import 'package:qaul_ui/decorators/qaul_nav_bar_decorator.dart';
 import 'package:qaul_ui/providers/providers.dart';
 import 'package:qaul_ui/screens/home/tabs/tab.dart';
 import 'package:qaul_ui/screens/home/user_account_screen.dart';
+import 'package:utils/utils.dart';
 
 class SwitchTabIntent extends Intent {
   const SwitchTabIntent._(this.switchForward);
@@ -18,18 +19,40 @@ class SwitchTabIntent extends Intent {
 }
 
 class HomeScreen extends HookConsumerWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  HomeScreen({Key? key}) : super(key: key);
+
+  final _animatingTimer = LoopTimer(_transitionDuration);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabCtrl = ref.watch(selectedTabProvider);
     final pageCtrl = usePageController(initialPage: tabCtrl.initialTab);
 
+    final updateCurrentlyVisibleTab = useCallback(() {
+      if (pageCtrl.page == null) return;
+      tabCtrl.updateCurrentIndexWithoutScrolling(pageCtrl.page!.round());
+      _animatingTimer.cancel();
+    }, [const Key('updateCurrentlyVisibleTab')]);
+
+    final onUserSwipeAnimation = useCallback(() {
+      if (_animatingTimer.isRunning) return;
+      _animatingTimer.onTimeout = updateCurrentlyVisibleTab;
+      _animatingTimer.start();
+    }, [const Key('onUserSwipeAnimation')]);
+
+    useEffect(() {
+      pageCtrl.addListener(onUserSwipeAnimation);
+      return () => pageCtrl.removeListener(onUserSwipeAnimation);
+    }, [const Key('subscribeToPageCtrl')]);
+
     useEffect(
       () {
         final subscription = tabCtrl.stream.listen(
-          (i) => pageCtrl.animateToPage(i,
-              duration: _pageTransitionDuration, curve: Curves.decelerate),
+          (s) {
+            if (!s.shouldScroll) return;
+            _animatingTimer.cancel();
+            pageCtrl.animateToPage(s.tab, duration: _transitionDuration, curve: Curves.decelerate);
+          },
         );
         return subscription.cancel;
       },
@@ -49,20 +72,18 @@ class HomeScreen extends HookConsumerWidget {
         child: Actions(
           actions: {
             SwitchTabIntent: CallbackAction<SwitchTabIntent>(
-              onInvoke: (intent) =>
-                  intent.switchForward ? switchForward() : switchBack(),
+              onInvoke: (intent) => intent.switchForward ? switchForward() : switchBack(),
             ),
           },
           child: QaulNavBarDecorator(
             child: PageView(
               controller: pageCtrl,
               allowImplicitScrolling: true,
-              physics: const NeverScrollableScrollPhysics(),
               children: [
                 const UserAccountScreen(),
                 BaseTab.feed(),
                 BaseTab.users(),
-                BaseTab.chat(),
+                // BaseTab.chat(),
                 BaseTab.network(),
               ],
             ),
@@ -72,5 +93,5 @@ class HomeScreen extends HookConsumerWidget {
     );
   }
 
-  Duration get _pageTransitionDuration => const Duration(milliseconds: 230);
+  static Duration get _transitionDuration => const Duration(milliseconds: 230);
 }
