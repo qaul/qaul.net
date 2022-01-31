@@ -1,0 +1,557 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3486EA6A278E975A00775997 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3486EA68278E975A00775997 /* Main.storyboard */; };
+		3486EA6C278E975C00775997 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3486EA6B278E975C00775997 /* Assets.xcassets */; };
+		3486EA6F278E975C00775997 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3486EA6D278E975C00775997 /* LaunchScreen.storyboard */; };
+		3486EA9E278EB63500775997 /* ble.proto in Sources */ = {isa = PBXBuildFile; fileRef = 3486EA9D278EB63500775997 /* ble.proto */; };
+		3486EAA0278EB99500775997 /* ble.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3486EA9F278EB99500775997 /* ble.pb.swift */; };
+		34FFC30D27A26F31001D745E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FFC30927A26F31001D745E /* SceneDelegate.swift */; };
+		34FFC30E27A26F31001D745E /* BleWrapperClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FFC30A27A26F31001D745E /* BleWrapperClass.swift */; };
+		34FFC30F27A26F31001D745E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FFC30B27A26F31001D745E /* ViewController.swift */; };
+		34FFC31027A26F31001D745E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FFC30C27A26F31001D745E /* AppDelegate.swift */; };
+		34FFC31B27A3E990001D745E /* BleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FFC31827A3E990001D745E /* BleService.swift */; };
+		34FFC31C27A3E990001D745E /* BLEPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FFC31A27A3E990001D745E /* BLEPeripheral.swift */; };
+		34FFC32027A3F1A6001D745E /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FFC31F27A3F1A6001D745E /* Toast.swift */; };
+		34FFC32827A41F04001D745E /* BLEManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FFC32227A41F03001D745E /* BLEManager.swift */; };
+		34FFC32927A41F04001D745E /* BleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FFC32327A41F03001D745E /* BleExtensions.swift */; };
+		34FFC32A27A41F04001D745E /* GlobalKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FFC32427A41F03001D745E /* GlobalKeys.swift */; };
+		34FFC32B27A41F04001D745E /* BLEDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FFC32527A41F03001D745E /* BLEDevice.swift */; };
+		34FFC32C27A41F04001D745E /* CommandConstVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FFC32727A41F03001D745E /* CommandConstVC.swift */; };
+		B7A64E8F7A28F2B4CE42658C /* Pods_QaulBLE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB901DEE77356878E980108D /* Pods_QaulBLE.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0EAC413318F267C693788F19 /* Pods-QaulBLE.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QaulBLE.debug.xcconfig"; path = "Target Support Files/Pods-QaulBLE/Pods-QaulBLE.debug.xcconfig"; sourceTree = "<group>"; };
+		3486EA5F278E975A00775997 /* QaulBLE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QaulBLE.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3486EA69278E975A00775997 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		3486EA6B278E975C00775997 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3486EA6E278E975C00775997 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		3486EA70278E975C00775997 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3486EA9D278EB63500775997 /* ble.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = ble.proto; sourceTree = "<group>"; };
+		3486EA9F278EB99500775997 /* ble.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ble.pb.swift; sourceTree = "<group>"; };
+		34FFC30927A26F31001D745E /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		34FFC30A27A26F31001D745E /* BleWrapperClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BleWrapperClass.swift; sourceTree = "<group>"; };
+		34FFC30B27A26F31001D745E /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		34FFC30C27A26F31001D745E /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		34FFC31827A3E990001D745E /* BleService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BleService.swift; sourceTree = "<group>"; };
+		34FFC31A27A3E990001D745E /* BLEPeripheral.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLEPeripheral.swift; sourceTree = "<group>"; };
+		34FFC31F27A3F1A6001D745E /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
+		34FFC32227A41F03001D745E /* BLEManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLEManager.swift; sourceTree = "<group>"; };
+		34FFC32327A41F03001D745E /* BleExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BleExtensions.swift; sourceTree = "<group>"; };
+		34FFC32427A41F03001D745E /* GlobalKeys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalKeys.swift; sourceTree = "<group>"; };
+		34FFC32527A41F03001D745E /* BLEDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLEDevice.swift; sourceTree = "<group>"; };
+		34FFC32727A41F03001D745E /* CommandConstVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandConstVC.swift; sourceTree = "<group>"; };
+		9A10E585C3D31D00B1B588F0 /* Pods-QaulBLE.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QaulBLE.release.xcconfig"; path = "Target Support Files/Pods-QaulBLE/Pods-QaulBLE.release.xcconfig"; sourceTree = "<group>"; };
+		AB901DEE77356878E980108D /* Pods_QaulBLE.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_QaulBLE.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3486EA5C278E975A00775997 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B7A64E8F7A28F2B4CE42658C /* Pods_QaulBLE.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3486EA56278E975A00775997 = {
+			isa = PBXGroup;
+			children = (
+				3486EA61278E975A00775997 /* QaulBLE */,
+				3486EA60278E975A00775997 /* Products */,
+				51CE9990AB27E8A5A86336A5 /* Pods */,
+				66FB429D91C426E245783D08 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		3486EA60278E975A00775997 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3486EA5F278E975A00775997 /* QaulBLE.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3486EA61278E975A00775997 /* QaulBLE */ = {
+			isa = PBXGroup;
+			children = (
+				34FFC30827A26EEC001D745E /* iOS App */,
+				3486EA9B278EB63500775997 /* Source */,
+				3486EA68278E975A00775997 /* Main.storyboard */,
+				3486EA6B278E975C00775997 /* Assets.xcassets */,
+				3486EA6D278E975C00775997 /* LaunchScreen.storyboard */,
+				3486EA70278E975C00775997 /* Info.plist */,
+			);
+			path = QaulBLE;
+			sourceTree = "<group>";
+		};
+		3486EA9B278EB63500775997 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				3486EA9C278EB63500775997 /* proto */,
+			);
+			path = Source;
+			sourceTree = "<group>";
+		};
+		3486EA9C278EB63500775997 /* proto */ = {
+			isa = PBXGroup;
+			children = (
+				3486EA9F278EB99500775997 /* ble.pb.swift */,
+				3486EA9D278EB63500775997 /* ble.proto */,
+			);
+			path = proto;
+			sourceTree = "<group>";
+		};
+		34FFC30827A26EEC001D745E /* iOS App */ = {
+			isa = PBXGroup;
+			children = (
+				34FFC30C27A26F31001D745E /* AppDelegate.swift */,
+				34FFC31D27A3F1A6001D745E /* Library */,
+				34FFC32127A41F03001D745E /* BLEManager */,
+				34FFC31927A3E990001D745E /* BLEAdvertise */,
+				34FFC31727A3E990001D745E /* BleService */,
+				34FFC30A27A26F31001D745E /* BleWrapperClass.swift */,
+				34FFC30927A26F31001D745E /* SceneDelegate.swift */,
+				34FFC30B27A26F31001D745E /* ViewController.swift */,
+			);
+			path = "iOS App";
+			sourceTree = "<group>";
+		};
+		34FFC31727A3E990001D745E /* BleService */ = {
+			isa = PBXGroup;
+			children = (
+				34FFC31827A3E990001D745E /* BleService.swift */,
+			);
+			path = BleService;
+			sourceTree = "<group>";
+		};
+		34FFC31927A3E990001D745E /* BLEAdvertise */ = {
+			isa = PBXGroup;
+			children = (
+				34FFC31A27A3E990001D745E /* BLEPeripheral.swift */,
+			);
+			path = BLEAdvertise;
+			sourceTree = "<group>";
+		};
+		34FFC31D27A3F1A6001D745E /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				34FFC31E27A3F1A6001D745E /* Toast */,
+			);
+			path = Library;
+			sourceTree = "<group>";
+		};
+		34FFC31E27A3F1A6001D745E /* Toast */ = {
+			isa = PBXGroup;
+			children = (
+				34FFC31F27A3F1A6001D745E /* Toast.swift */,
+			);
+			path = Toast;
+			sourceTree = "<group>";
+		};
+		34FFC32127A41F03001D745E /* BLEManager */ = {
+			isa = PBXGroup;
+			children = (
+				34FFC32227A41F03001D745E /* BLEManager.swift */,
+				34FFC32327A41F03001D745E /* BleExtensions.swift */,
+				34FFC32427A41F03001D745E /* GlobalKeys.swift */,
+				34FFC32527A41F03001D745E /* BLEDevice.swift */,
+				34FFC32627A41F03001D745E /* CommandConst */,
+			);
+			path = BLEManager;
+			sourceTree = "<group>";
+		};
+		34FFC32627A41F03001D745E /* CommandConst */ = {
+			isa = PBXGroup;
+			children = (
+				34FFC32727A41F03001D745E /* CommandConstVC.swift */,
+			);
+			path = CommandConst;
+			sourceTree = "<group>";
+		};
+		51CE9990AB27E8A5A86336A5 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				0EAC413318F267C693788F19 /* Pods-QaulBLE.debug.xcconfig */,
+				9A10E585C3D31D00B1B588F0 /* Pods-QaulBLE.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		66FB429D91C426E245783D08 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AB901DEE77356878E980108D /* Pods_QaulBLE.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3486EA5E278E975A00775997 /* QaulBLE */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3486EA73278E975C00775997 /* Build configuration list for PBXNativeTarget "QaulBLE" */;
+			buildPhases = (
+				AEC7C5FFE78E0F166933E0F9 /* [CP] Check Pods Manifest.lock */,
+				3486EA5B278E975A00775997 /* Sources */,
+				3486EA5C278E975A00775997 /* Frameworks */,
+				3486EA5D278E975A00775997 /* Resources */,
+				99D4DC6B997EB5F645509709 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = QaulBLE;
+			productName = QaulBLE;
+			productReference = 3486EA5F278E975A00775997 /* QaulBLE.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3486EA57278E975A00775997 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1300;
+				LastUpgradeCheck = 1300;
+				TargetAttributes = {
+					3486EA5E278E975A00775997 = {
+						CreatedOnToolsVersion = 13.0;
+					};
+				};
+			};
+			buildConfigurationList = 3486EA5A278E975A00775997 /* Build configuration list for PBXProject "QaulBLE" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 3486EA56278E975A00775997;
+			productRefGroup = 3486EA60278E975A00775997 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3486EA5E278E975A00775997 /* QaulBLE */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3486EA5D278E975A00775997 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3486EA6F278E975C00775997 /* LaunchScreen.storyboard in Resources */,
+				3486EA6C278E975C00775997 /* Assets.xcassets in Resources */,
+				3486EA6A278E975A00775997 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		99D4DC6B997EB5F645509709 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-QaulBLE/Pods-QaulBLE-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-QaulBLE/Pods-QaulBLE-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-QaulBLE/Pods-QaulBLE-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		AEC7C5FFE78E0F166933E0F9 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-QaulBLE-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3486EA5B278E975A00775997 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				34FFC32C27A41F04001D745E /* CommandConstVC.swift in Sources */,
+				34FFC30D27A26F31001D745E /* SceneDelegate.swift in Sources */,
+				34FFC31B27A3E990001D745E /* BleService.swift in Sources */,
+				34FFC30E27A26F31001D745E /* BleWrapperClass.swift in Sources */,
+				34FFC30F27A26F31001D745E /* ViewController.swift in Sources */,
+				34FFC32927A41F04001D745E /* BleExtensions.swift in Sources */,
+				3486EA9E278EB63500775997 /* ble.proto in Sources */,
+				34FFC31C27A3E990001D745E /* BLEPeripheral.swift in Sources */,
+				34FFC31027A26F31001D745E /* AppDelegate.swift in Sources */,
+				34FFC32A27A41F04001D745E /* GlobalKeys.swift in Sources */,
+				34FFC32827A41F04001D745E /* BLEManager.swift in Sources */,
+				34FFC32027A3F1A6001D745E /* Toast.swift in Sources */,
+				3486EAA0278EB99500775997 /* ble.pb.swift in Sources */,
+				34FFC32B27A41F04001D745E /* BLEDevice.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		3486EA68278E975A00775997 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3486EA69278E975A00775997 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		3486EA6D278E975C00775997 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3486EA6E278E975C00775997 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		3486EA71278E975C00775997 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3486EA72278E975C00775997 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3486EA74278E975C00775997 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0EAC413318F267C693788F19 /* Pods-QaulBLE.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = W7J8FUEGEL;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = QaulBLE/Info.plist;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Allow to access for nearby user to communicate";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Allow to access for nearby user to communicate";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bluepixeltech.QaulBLE;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3486EA75278E975C00775997 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9A10E585C3D31D00B1B588F0 /* Pods-QaulBLE.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = W7J8FUEGEL;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = QaulBLE/Info.plist;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Allow to access for nearby user to communicate";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Allow to access for nearby user to communicate";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bluepixeltech.QaulBLE;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3486EA5A278E975A00775997 /* Build configuration list for PBXProject "QaulBLE" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3486EA71278E975C00775997 /* Debug */,
+				3486EA72278E975C00775997 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3486EA73278E975C00775997 /* Build configuration list for PBXNativeTarget "QaulBLE" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3486EA74278E975C00775997 /* Debug */,
+				3486EA75278E975C00775997 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3486EA57278E975A00775997 /* Project object */;
+}

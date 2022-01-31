@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="epZ-Xv-G7d">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="8cm-aO-7ZL">
+            <objects>
+                <navigationController navigationBarHidden="YES" id="epZ-Xv-G7d" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="I0z-wt-eiC">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="cd0-fE-I3q"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="vRG-xy-h3Q" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-926" y="50"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="QaulBLE" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TWH-kr-9WJ" userLabel="TopView">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="104"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="First Screen" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zE4-YM-88Y">
+                                        <rect key="frame" x="10" y="52" width="394" height="44"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="W8L-Tq-r6O"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="25"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" red="0.58188301320000002" green="0.21569153669999999" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="zE4-YM-88Y" firstAttribute="leading" secondItem="TWH-kr-9WJ" secondAttribute="leading" constant="10" id="Dq8-jU-5Pz"/>
+                                    <constraint firstAttribute="trailing" secondItem="zE4-YM-88Y" secondAttribute="trailing" constant="10" id="bXk-eG-fvO"/>
+                                    <constraint firstAttribute="bottom" secondItem="zE4-YM-88Y" secondAttribute="bottom" constant="8" id="czu-yE-294"/>
+                                </constraints>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QDw-Kr-cWn">
+                                <rect key="frame" x="0.0" y="104" width="414" height="708"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="center" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="9Es-Bs-UWn">
+                                        <rect key="frame" x="0.0" y="20" width="414" height="190"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="i0D-tk-WKj">
+                                                <rect key="frame" x="107" y="0.0" width="200" height="50"/>
+                                                <color key="backgroundColor" red="0.0" green="0.56904578210000001" blue="0.57461684940000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="width" constant="200" id="WON-5u-pl5"/>
+                                                    <constraint firstAttribute="height" constant="50" id="c0n-Hx-tgB"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" title="SEND INFO REQUEST">
+                                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </state>
+                                                <connections>
+                                                    <action selector="btnInfoRequestWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="JvJ-b2-uKw"/>
+                                                </connections>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hcS-w5-UHd">
+                                                <rect key="frame" x="107" y="70" width="200" height="50"/>
+                                                <color key="backgroundColor" red="0.0" green="0.32852089410000002" blue="0.57488495110000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="width" constant="200" id="alX-wO-KXX"/>
+                                                    <constraint firstAttribute="height" constant="50" id="oF4-Ec-z0V"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" title="SEND START REQUEST">
+                                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </state>
+                                                <connections>
+                                                    <action selector="btnAdvertizingWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="2oW-kd-ZcM"/>
+                                                </connections>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ukX-mv-RdP">
+                                                <rect key="frame" x="107" y="140" width="200" height="50"/>
+                                                <color key="backgroundColor" red="0.0048598507420000003" green="0.096086271109999996" blue="0.57499289509999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="width" constant="200" id="ihf-eT-ZHJ"/>
+                                                    <constraint firstAttribute="height" constant="50" id="j7J-1X-0Bq"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" title="SEND STOP REQUEST">
+                                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </state>
+                                                <connections>
+                                                    <action selector="btnStopAdvertizingWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Nd7-RV-fIC"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="9Es-Bs-UWn" secondAttribute="trailing" id="6TH-Ds-hiU"/>
+                                    <constraint firstItem="9Es-Bs-UWn" firstAttribute="top" secondItem="QDw-Kr-cWn" secondAttribute="top" constant="20" id="E6X-3T-JkE"/>
+                                    <constraint firstItem="9Es-Bs-UWn" firstAttribute="leading" secondItem="QDw-Kr-cWn" secondAttribute="leading" id="hTa-kz-sp1"/>
+                                </constraints>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uOr-oc-WWE">
+                                <rect key="frame" x="0.0" y="812" width="414" height="50"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="9YO-fE-GfK"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="QDw-Kr-cWn" secondAttribute="trailing" id="1w9-Ei-qRy"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="TWH-kr-9WJ" secondAttribute="trailing" id="284-7y-YHe"/>
+                            <constraint firstItem="QDw-Kr-cWn" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="4KY-js-GAA"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="uOr-oc-WWE" secondAttribute="bottom" id="AT3-Uf-JRx"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="uOr-oc-WWE" secondAttribute="trailing" id="DSu-OF-fWD"/>
+                            <constraint firstItem="QDw-Kr-cWn" firstAttribute="top" secondItem="TWH-kr-9WJ" secondAttribute="bottom" id="Ld3-nd-0zV"/>
+                            <constraint firstItem="uOr-oc-WWE" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="SOF-gu-7d8"/>
+                            <constraint firstItem="zE4-YM-88Y" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="8" id="bhw-bY-nvz"/>
+                            <constraint firstItem="TWH-kr-9WJ" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="cLU-jD-EcL"/>
+                            <constraint firstItem="TWH-kr-9WJ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="dm2-Vj-bqT"/>
+                            <constraint firstItem="uOr-oc-WWE" firstAttribute="top" secondItem="QDw-Kr-cWn" secondAttribute="bottom" id="w83-bG-heV"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="7fk-0n-MeD"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="13" y="50"/>
+        </scene>
+    </scenes>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

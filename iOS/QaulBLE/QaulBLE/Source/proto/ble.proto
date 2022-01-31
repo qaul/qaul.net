@@ -1,0 +1,246 @@
+syntax = "proto3";
+
+package qaul.sys.ble;
+
+// BLE system communication message
+message Ble {
+    // message type
+    oneof message {
+        // device information request
+        BleInfoRequest info_request = 1;
+        // device information response
+        BleInfoResponse info_response = 2;
+
+        // start device request
+        BleStartRequest start_request = 3;
+        // start device result
+        BleStartResult start_result = 4;
+
+        // advertising set message content
+        BleAdvertisingSet advertising_set = 5;
+        // send advertsing message
+        BleAdvertisingSend advertising_send = 6;
+        // advertising message received
+        BleScanResult scan_result = 7;
+
+        // send a direct message
+        BleDirectSend direct_send = 8;
+        // send a direct message result
+        BleDirectSendResult direct_send_result = 9;
+        // direct message received
+        BleDirectReceived direct_received = 10;
+
+
+        // stop service request
+        BleStopRequest stop_request = 11;
+        // stop service result
+        BleStopResult stop_result = 12;
+    }
+}
+
+// enum to describe how to send a message
+enum BleMode {
+    //REMOVED old modes
+//    // use legacy advertising mode (only 31 Byte payload)
+//    legacy = 0;
+//    // 1m phy
+//    le_1m = 1;
+//    // 2m phy
+//    le_2m = 2;
+//    // LE coded, which only half the speed
+//    coded_2 = 3;
+//    // LE coded, which is 8 times slower
+//    coded_8 = 4;
+
+    //NEW ADDED
+    low_power = 0;
+    balanced = 1;
+    low_latency = 2;
+}
+
+// device information request message
+message BleInfoRequest {
+
+}
+
+// device information response message
+message BleInfoResponse {
+    // fill in a device information for each device on the system
+
+    /**
+     *  Edited by Vishal 26-11-2021:
+     *  Removed repeated keyword because Android will only one Device
+     */
+    BleDeviceInfo device = 1;
+}
+
+// BLE device information
+message BleDeviceInfo {
+    // Bluetooth device address
+    // 48 bit unique Bluetooth device addr
+    // e.g. 80:86:F2:08:C7:98
+    //REMOVED: We can not find this
+//    string id = 1;
+    //NEWLY ADDED: device location permission
+    bool location_permission = 1;
+    //NEWLY ADDED:  device location is on
+    bool location_on = 2;
+    //NEWLY ADDED:  device ble permission for Android 12 & above
+    bool ble_permission = 3;
+    //device powered on
+    bool bluetooth_on = 4;
+    //NEWLY ADDED:  device android version
+    int32 android_version = 5;
+    // vendor name, device name, etc
+    // this is field is purely informative
+    string name = 6;
+    // BLE advertising features supported
+    // This field informs us if the basic necessities for
+    // qaul BLE requirements are supported by
+    // this device.
+    // These requirements are:
+    // * BLE device roles: central & peripheral
+    // * Send & receive BLE advertisements
+    bool ble_support = 7;
+
+    // does it support the 251 byte advertisement messages?
+    bool adv_251 = 8;
+    //REMOVED:  is extended advertising supported same as adv_1m
+//    bool adv_extended = 9;
+    // what is the maximal amount of bytes sendable via advertising
+    uint32 adv_extended_bytes = 9;
+    // the following checks for BLE 5 features
+    // is extended advertising supported?
+    bool adv_1m = 10;
+    // is extended advertising supported with 2M phy?
+    bool adv_2m = 11;
+    // is extended advertising supported in coded
+    // mode? (For long distance connections)
+    bool adv_coded = 12;
+    // is LE audio supported?
+    // this is the most recent feature, supported by
+    // android 12 and above
+    // linux ?
+    // ios ?
+    // macos ?
+    // windows ?
+    bool le_audio = 13;
+    //NEWLY ADDED:  isLePeriodicAdvertisingSupported
+    bool le_periodic_adv_support = 14;
+    //NEWLY ADDED:  isMultipleAdvertisementSupported
+    bool le_multiple_adv_support = 15;
+    //NEWLY ADDED:  isOffloadedFilteringSupported
+    bool offload_filter_support = 16;
+    //NEWLY ADDED:  isOffloadedScanBatchingSupported
+    bool offload_scan_batching_support = 17;
+    
+    //NEWLY ADDED:  device iOS version
+    string iOS_version = 18;
+   
+    
+}
+
+// start device request message
+// the module will try to start the device, power it up,
+// get all rights, configure it for qaul, and
+// send & receive advertising messages
+message BleStartRequest {
+
+    bytes qaul_id = 1;
+    BleMode mode = 2;
+
+}
+
+//To stop service, advertisement & scanning.
+message BleStopRequest {
+
+}
+
+// stop service feedback
+// this is the feedback
+message BleStopResult {
+    // whether the stop of the device was a success or not
+    bool success = 1;
+    // error message
+    string error_message = 2;
+}
+
+// start device result message
+// this is the feedback
+message BleStartResult {
+    // whether the start of the device was a success or not
+    bool success = 1;
+    // error message
+    string error_message = 2;
+    // error reasons
+    bool unknown_error = 3;
+    // rights not provided
+    bool no_rights = 4;
+}
+
+
+// advertising set message content
+message BleAdvertisingSet {
+    // set data which can be used for interval data advertisement
+    bytes data = 1;
+}
+
+// send advertsing message
+message BleAdvertisingSend {
+    // advertising mode
+    BleMode mode = 1;
+    // the data to be sent in the data field
+    bytes data = 2;
+}
+
+// Scan device received
+message BleScanResult {
+    // the Bluetooth address of the device sending the advertisement
+    string mac = 1;
+    // the received signal strength of this device
+    int32 rssi = 2;
+    // time when device found/out of range
+    string timestamp = 3;
+    // the data part of the advertising message
+    bool is_connectable = 4;
+    // name of the device
+    string name = 5;
+    // is device in the range
+    bool is_in_the_range = 6;
+    // qaul_id
+    bytes qaul_id = 7;
+}
+
+// send a direct message
+message BleDirectSend {
+    // message id (as a reference for the result message)
+    string id = 1;
+    // qaul_id of the device to send it to
+    bytes to = 2;
+    // data to be sent
+    bytes data = 3;
+    // qaul_id_sender
+    bytes qaul_id = 4;
+}
+
+// result after sending the direct message
+message BleDirectSendResult {
+    // message id
+    string id = 1;
+    // result after sending the message
+    bool success = 2;
+    // error messages
+    string error_message = 3;
+}
+
+// direct message received message
+message BleDirectReceived {
+    // bluetooth address of the sending device
+    string from = 1;
+    // qaul_id of the sending device
+    bytes qaul_id = 2;
+    // the mode this message was sent in
+    BleMode mode = 3;
+    // the data received
+    bytes data = 4;
+}
