@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:fixnum/fixnum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
@@ -52,9 +53,9 @@ class LibqaulWorker {
     await _encodeAndSendMessage(Modules.FEED, msg.writeToBuffer());
   }
 
-  Future<void> requestFeedMessages({List<int>? lastReceived}) async {
+  Future<void> requestFeedMessages({int? lastIndex}) async {
     final msg = Feed(
-      request: FeedMessageRequest(lastReceived: lastReceived),
+      request: FeedMessageRequest(lastIndex: Int64(lastIndex ?? 0)),
     );
     _encodeAndSendMessage(Modules.FEED, msg.writeToBuffer());
   }
@@ -65,10 +66,6 @@ class LibqaulWorker {
 
     _encodeAndSendMessage(
         Modules.ROUTER, Router(routingTableRequest: RoutingTableRequest()).writeToBuffer());
-
-    debugPrint('*' * 80);
-    debugPrint('ID: $id');
-    debugPrint('*' * 80);
   }
 
   Future<void> verifyUser(User u) async {
