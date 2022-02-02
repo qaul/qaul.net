@@ -61,8 +61,7 @@ class LibqaulWorker {
   }
 
   Future<void> getUsers() async {
-    final id = await _encodeAndSendMessage(
-        Modules.USERS, Users(userRequest: UserRequest()).writeToBuffer());
+    await _encodeAndSendMessage(Modules.USERS, Users(userRequest: UserRequest()).writeToBuffer());
 
     _encodeAndSendMessage(
         Modules.ROUTER, Router(routingTableRequest: RoutingTableRequest()).writeToBuffer());
