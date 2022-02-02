@@ -22,7 +22,9 @@ class _FeedState extends _BaseTabState<_Feed> {
 
     final refreshFeed = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
-      await worker.requestFeedMessages();
+      final indexes = messages.map((e) => e.index ?? 1);
+      await worker.requestFeedMessages(
+          lastIndex: indexes.isEmpty ? null : indexes.reduce(math.max));
     }, [UniqueKey()]);
 
     final l18ns = AppLocalizations.of(context);

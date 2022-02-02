@@ -28,23 +28,29 @@ import Flutter
               result(FlutterError.init(code: "errorSetMessage", message: "data or format error", details: nil))
           }
       } else if ("receiveRpcMessage" == call.method) {
-          let bufferSize = 4048;
+          let bufferSize = 8096;
           let pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
           defer {
               pointer.deinitialize(count: bufferSize)
               pointer.deallocate()
           }
           
-          // TODO: Error handling? Use return value from receive_rpc_from_libqaul
           let message_length = receive_rpc_from_libqaul(pointer, UInt32(bufferSize))
           
-          let buffer = UnsafeMutableBufferPointer<UInt8>(start: pointer, count: Int(message_length))
-          
-          result(FlutterStandardTypedData(bytes: Data(buffer)))
+          if (message_length == -2) {
+              result(FlutterError.init(code: "errorReceiveRpc", message: "an unknown error occurred when receiving a message from libqaul", details: nil))
+          } else if (message_length == -3) {
+              result(FlutterError.init(code: "errorReceiveRpc", message: "buffer sent to libqaul is too small", details: nil))
+          } else if (message_length < 0) {
+                  result(FlutterError.init(code: "errorReceiveRpc", message: "buffer sent to libqaul is nil", details: nil))
+          } else {
+              let buffer = UnsafeMutableBufferPointer<UInt8>(start: pointer, count: Int(message_length))
+              result(FlutterStandardTypedData(bytes: Data(buffer)))
+          }
       } else if ("receivequeue" == call.method) {
           result(receivequeue())
       } else {
-        result(FlutterMethodNotImplemented);
+          result(FlutterMethodNotImplemented);
       }
     })
 
