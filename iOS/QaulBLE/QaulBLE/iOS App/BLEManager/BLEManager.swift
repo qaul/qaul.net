@@ -278,10 +278,12 @@ extension BLEManager: CBCentralManagerDelegate {
        // logfile.appendNewText(text: "Peri:->>>>>> \(peripheral), \(advertisementData)")
        // print("Peri:->>>>>> \(peripheral), \(advertisementData)")
         let localName = advertisementData.peripheralname() ?? ""
-        //print("Peri:->>>>>> \(peripheralName)")
-        //if peripheralName.uppercased().contains("VSNEW") || localName.uppercased().contains("VSNEW"){
-            if peripheralName.uppercased().contains("UART") || localName.uppercased().contains("UART") || peripheralName.uppercased().contains("VSNEW") || localName.uppercased().contains("VSNEW"){
-            
+        print("Peri:->>>>>> \(peripheralName)")
+        
+        let localUUID = advertisementData.standardServiceid() ?? ""
+        print("localUUID:->>>>>> \(localUUID)")
+      
+        if localUUID == SERVICES.SERVICE_UUID {
             if let existingBLE = self.arrOfBLEDevices[peripheral.identifier.uuidString] {
                 
                 //logfile.appendNewText(text: "Existing Device Found : \(existingBLE.peripheral)")

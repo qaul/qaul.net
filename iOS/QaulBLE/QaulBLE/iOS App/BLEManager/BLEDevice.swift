@@ -55,11 +55,17 @@ public class BLEDevice: NSObject {
     public typealias updateRSSI = (Int) -> Void
     var getUpdateRSSI:updateRSSI!
     
-    public typealias ReadDeviceValue = (Bool, String) -> Void
-    var readDeviceValue:ReadDeviceValue!
-    
+
     typealias GetAnyUpdateComplitionBlock = (String) -> Void
     private var getAnyUpdateComplition: GetAnyUpdateComplitionBlock!
+    
+    //isDeviceConencted, isCharFound, qaulId , qaulIdbyte
+    public typealias GetQaulIDComplition = ((Bool, Bool, String , Data) -> Void)
+    private var getQaulIDComplition: GetQaulIDComplition!
+    
+    //isDeviceConencted, isCharFound, qaulId , qaulIdbyte
+    public typealias GetSendMessageComplition = ((Bool, Bool, String , Data) -> Void)
+    private var getSendMessageComplition: GetQaulIDComplition!
     
     private var connectionTime  = Timer()
     private var readLogTime     = Timer()
@@ -188,19 +194,32 @@ public class BLEDevice: NSObject {
         self.getAnyUpdateComplition = myComplition
     }
     
-//    public func writeVIN(stValue: String, tolValue: String) {
-//
-//        let parameter = self.getOBDJSON(ID: RequestTypeIndex.VIN.rawValue, keyName: APIParamKey.kVin, stValue: stValue, tolValue: tolValue)
-//        logfile.appendNewText(text: "writeVIN ::: \(parameter)")
-//
-//        let command = Data(parameter.bytes)
-//        logfile.appendNewText(text: "command ::: \(command)")
-//        logfile.appendNewText(text: "command Hexa::: \(Data(parameter.bytes).hexString())")
-//        self.writeDataWithResponse(writeData: Data(command), characteristic: self.getCharsticFrom(UUID: CHAR.VANEW_WRITE_WRITE)!)
-//    }
-   
-   
+    func readQaulID(myComplition: @escaping GetQaulIDComplition) {
+       
+        self.getQaulIDComplition = myComplition
+        if let char = self.getCharsticFrom(UUID: CHAR.READ_CHAR) {
+            
+            self.readDataWithCharacteristic(characteristic: char)
+        } else {
+            //Char is not found in this conected device
+            //Disconnect Device here
+            self.getQaulIDComplition(true, false, "Char is not found" , Data())
+        }
+    }
     
+    func writeQaulID(message : Data ,myComplition: @escaping GetSendMessageComplition) {
+       
+        self.getSendMessageComplition = myComplition
+        
+        if let char = self.getCharsticFrom(UUID: CHAR.MSG_CHAR) {
+            self.getSendMessageComplition(true, true, "" , Data())
+            self.writeDataWithResponse(writeData: message, characteristic: char)
+        } else {
+            //Char is not found in this conected device
+            //Disconnect Device here
+            self.getSendMessageComplition(true, false, "Char is not found" , Data())
+        }
+    }
     
 }
 
@@ -231,6 +250,8 @@ extension BLEDevice: CBPeripheralDelegate {
             peripheral.discoverCharacteristics(nil, for: oneService)
         }
     }
+    
+   
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         
         let ser = self.serivces.filter({$0.uuid == service.uuid.uuidString})
@@ -240,6 +261,14 @@ extension BLEDevice: CBPeripheralDelegate {
         for chr in service.characteristics ?? [CBCharacteristic]() {
             
             if chr.properties.contains(.notify) {
+                
+                peripheral.setNotifyValue(true, for: chr)
+            }
+            if chr.properties.contains(.indicate) {
+                
+                peripheral.setNotifyValue(true, for: chr)
+            }
+            if chr.properties.contains(.broadcast) {
                 
                 peripheral.setNotifyValue(true, for: chr)
             }
@@ -268,6 +297,7 @@ extension BLEDevice: CBPeripheralDelegate {
             peripheral.readValue(for: des)
         }
     }
+    
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor descriptor: CBDescriptor, error: Error?) {
         
         if error == nil {
@@ -276,17 +306,38 @@ extension BLEDevice: CBPeripheralDelegate {
     }
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         
-        let updatedCharacterstic = Characterstic(characterstic: characteristic)
+        print("characteristic.uuid.uuidString:- \(characteristic.uuid.uuidString)")
+        if characteristic.uuid.uuidString == CHAR.READ_CHAR {
+            let updatedCharacterstic = Characterstic(characterstic: characteristic)
+            if let resultDate = updatedCharacterstic.dataValue {
+                
+                if let str = String(bytes: resultDate.bytes, encoding: .utf8) {
+                    self.getQaulIDComplition(true, true, str , resultDate)
+                } else {
+                    print("not a valid UTF-8 sequence")
+                }
+            } else {
         
-        if let resultDate = updatedCharacterstic.dataValue {
-            
-        } else {
-            
-          
+            }
+        } else if characteristic.uuid.uuidString == CHAR.MSG_CHAR {
+            let updatedCharacterstic = Characterstic(characterstic: characteristic)
+            if let resultDate = updatedCharacterstic.dataValue {
+                
+                if let str = String(bytes: resultDate.bytes, encoding: .utf8) {
+                    self.getSendMessageComplition(true, false, str ,resultDate)
+                } else {
+                    print("not a valid UTF-8 sequence")
+                }
+            } else {
+        
+            }
         }
     }
+    
+    
     public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
         
+        print("characteristic.uuid.uuidString:- \(characteristic.uuid.uuidString)")
         if error == nil {
             
             if ((charComplition != nil) && operationalCharacteristic.uuid == characteristic.uuid) {
@@ -296,6 +347,24 @@ extension BLEDevice: CBPeripheralDelegate {
                 charComplition = nil
             }
         }
+        
+        if characteristic.uuid.uuidString == CHAR.MSG_CHAR {
+            let updatedCharacterstic = Characterstic(characterstic: characteristic)
+            if let resultDate = updatedCharacterstic.dataValue {
+                
+                if let str = String(bytes: resultDate.bytes, encoding: .utf8) {
+                    self.getSendMessageComplition(true, false, str ,resultDate)
+                } else {
+                    print("not a valid UTF-8 sequence")
+                }
+            } else {
+        
+            }
+        }
+    }
+    
+    public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor descriptor: CBDescriptor, error: Error?) {
+        
     }
     
     func updateCharactersticInBLEDevice(charstic: CBCharacteristic) {
@@ -512,5 +581,14 @@ public class Descriptor: NSObject {
             self.type  = .None
             break
         }
+    }
+}
+
+extension Collection where Element == UInt8 {
+    var data: Data {
+        return Data(self)
+    }
+    var hexa: String {
+        return map{ String(format: "%02X", $0) }.joined()
     }
 }

@@ -9,8 +9,8 @@
 import Foundation
 import CoreBluetooth
 
-public let kTRANSFER_SERVICE_UUID        = "33c0ac57-d316-43ec-a883-691fc200e37b".uppercased()
-public let kTRANSFER_CHARACTERISTIC_UUID = "aec5e807-83e9-4fce-a5a9-3790cd63a977".uppercased()
+//public let kTRANSFER_SERVICE_UUID        = "33c0ac57-d316-43ec-a883-691fc200e37b".uppercased()
+//public let kTRANSFER_CHARACTERISTIC_UUID = "aec5e807-83e9-4fce-a5a9-3790cd63a977".uppercased()
 
 let bLEPeripheral = BLEPeripheral()
 
@@ -47,21 +47,25 @@ public class BLEPeripheral: NSObject, CBPeripheralManagerDelegate, CBPeripheralD
         
         StartbleAdvertiseCallback = bleCallback
         
-        let valueData = name.data(using: .utf8)
+        let valueData = bleService.qaulId //.data(using: .utf8)
         
         self.peripheralName = name
         
         servicesIDs = CBUUID(string: serviceID)
         
-        let CustomChar = CBMutableCharacteristic(type: CBUUID(string: kTRANSFER_CHARACTERISTIC_UUID), properties: [.read], value: valueData, permissions: [.readable])
+        let CustomChar = CBMutableCharacteristic(type: CBUUID(string: CHAR.READ_CHAR), properties: [.read], value: valueData, permissions: [.readable])
+        let CustomChar2 = CBMutableCharacteristic(type: CBUUID(string: CHAR.MSG_CHAR), properties: [ .write], value: nil, permissions: [.writeable])
+//        let CustomChar2 = CBMutableCharacteristic(type:  CBUUID(string: CHAR.MSG_CHAR), properties: [CBCharacteristicProperties.read,CBCharacteristicProperties.writeWithoutResponse,CBCharacteristicProperties.notify], value: nil, permissions: [CBAttributePermissions.readable, CBAttributePermissions.writeable])
+        
+//        CBMutableCharacteristic(type: CBUUID(string: CHAR.MSG_CHAR), properties: [.notify, .write, .read], value: nil, permissions: [.readable, .writeable])
         
         let myService = CBMutableService(type: servicesIDs, primary: true)
-        myService.characteristics = [CustomChar]
+        myService.characteristics = [CustomChar , CustomChar2]
         
         peripheralManager.removeAllServices()
         peripheralManager.add(myService)
-        self.perform(#selector(self.startAdvertise), with: nil, afterDelay: 1.0)
-        
+//        self.perform(#selector(self.startAdvertise), with: nil, afterDelay: 1.0)
+        startAdvertise()
     }
     @objc fileprivate func startAdvertise() {
         peripheralManager.startAdvertising([
@@ -103,5 +107,14 @@ public class BLEPeripheral: NSObject, CBPeripheralManagerDelegate, CBPeripheralD
         }
         
         //locManager.appendNewText(text: "Start Advertising.....")
+    }
+    
+    public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
+        print("data message \(requests)")
+        print("data message \(String(bytes: requests[0].value!, encoding: .utf8))")
+    }
+    
+    public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
+        print(request)
     }
 }

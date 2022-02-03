@@ -52,6 +52,18 @@ public extension Dictionary where Key == String, Value == Any {
         }
         return nil
     }
+    
+    func standardServiceid() -> String? {
+        
+        if let serviceIDS = self[CBAdvertisementDataServiceUUIDsKey] as? NSArray {
+            for seviceid in serviceIDS {
+                
+                return "\(seviceid)"
+            }
+        }
+        return nil
+    }
+    
     func getManufacturerData() -> String? {
         
         if let manufacturerData = self[CBAdvertisementDataManufacturerDataKey] as? Data {
