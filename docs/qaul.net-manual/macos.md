@@ -28,7 +28,7 @@ CocoaPods is needed by flutter to retrieve the iOS and macOS platform plugin cod
 After installing XCode run the following code in your Terminal to install the CocoaPods:
 
 ```sh
-sudo gem install cocoapod
+sudo gem install cocoapods
 ```
 
 ### Rust
