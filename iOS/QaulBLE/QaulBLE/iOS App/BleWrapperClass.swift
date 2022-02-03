@@ -36,12 +36,14 @@ class BleWrapperClass: UIViewController {
     /**
      * This Method get BLERequest from UI & Return BLEResponse by Callback Interface Method
      */
-    func receiveRequest(bleReq: Qaul_Sys_Ble_Ble, callback: @escaping BleRequestCallback) {
+    func receiveRequest(bleReq: Qaul_Sys_Ble_Ble, SetdataforbleReq : Qaul_Sys_Ble_Ble ,callback: @escaping BleRequestCallback) {
         if (bleReq.isInitialized) {
+        
             bleCallback = callback
             print("bleReq.message:- \(bleReq.message)")
+            print("SetdataforbleReq.message:- \(SetdataforbleReq.message)")
 //            Log.e(TAG, bleReq.messageCase.toString())
-            switch bleReq.message! {
+            switch SetdataforbleReq.message! {
             case .infoRequest(Qaul_Sys_Ble_BleInfoRequest()):
                 getDeviceInfo()
                 break
@@ -73,15 +75,6 @@ class BleWrapperClass: UIViewController {
                 break
 
             case .directSend(Qaul_Sys_Ble_BleDirectSend())://is Qaul_Sys_Ble_BleDirectSend:
-                var bleDirectSend = bleReq.directSend
-//                if (BleService().isRunning()) {
-//                    BleService.bleService?.sendMessage(
-//                        id = bleDirectSend.id,
-//                        to = bleDirectSend.to.toByteArray(),
-//                        message = bleDirectSend.data.toByteArray(),
-//                        from = bleDirectSend.qaulId.toByteArray()
-//                    )
-//                }
                 break
             default:
                 print("Default")
@@ -170,7 +163,7 @@ class BleWrapperClass: UIViewController {
      */
     private func getDeviceName() -> String {
        //return UIDevice.current.localizedModel
-        return UIDevice.modelName
+        return appendtextiOSdevice + UIDevice.modelName
     }
     
     /**
@@ -362,7 +355,7 @@ class BleWrapperClass: UIViewController {
      * This Method Will Assign Callback & Data to Start Advertiser and Receive Callback
      */
     private func startAdvertiseAndCallback() {
-       
+        bleService.qaulId = self.qaulId
             bleService.startAdvertise { status, errorText, unknownError in
                 var bleRes: Qaul_Sys_Ble_Ble = Qaul_Sys_Ble_Ble()
                 var startResult = Qaul_Sys_Ble_BleStartResult()

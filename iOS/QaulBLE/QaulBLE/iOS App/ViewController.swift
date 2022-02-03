@@ -15,11 +15,17 @@ class ViewController: UIViewController {
     //                        MARK: - Outlet -
     //-----------------------------------------------------------------
     
+    @IBOutlet weak var txtQaulBLE: UITextField!
+    @IBOutlet weak var txtMessage: UITextView!
+    @IBOutlet weak var lblMessagePlaceholader: UILabel!
+    @IBOutlet weak var heightOfTxtMessage: NSLayoutConstraint!
+
     // -----------------------------------------------------------------
     //                        MARK: - Property -
     // -----------------------------------------------------------------
     private var value = "iOSQaulBLE"
     private var qaulId: String = ""
+    private let maxHeightOfTxtMessage: CGFloat = 1000
 
     //-----------------------------------------------------------------
     //                       MARK: - View Life Cycle -
@@ -30,6 +36,9 @@ class ViewController: UIViewController {
         
         navigationcontroller = self.navigationController ?? UINavigationController()
         // Do any additional setup after loading the view.
+        
+        NotificationCenter.default.removeObserver(self, name: .GetscanDevice, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(SetScanDevice(_:)), name: .GetscanDevice, object: nil)
         
     }
     
@@ -45,7 +54,10 @@ class ViewController: UIViewController {
         initobj.message = .infoRequest(info)
         print(initobj.message)
 
-        bleWrapperClass.receiveRequest(bleReq: initobj) { qaul_Sys_Ble_Ble in
+        var setbleReq = Qaul_Sys_Ble_Ble.init()
+        setbleReq.message = .infoRequest(Qaul_Sys_Ble_BleInfoRequest.init())
+        
+        bleWrapperClass.receiveRequest(bleReq: initobj, SetdataforbleReq: setbleReq) { qaul_Sys_Ble_Ble in
             print("qaul_Sys_Ble_Ble:- \(qaul_Sys_Ble_Ble)")
             if qaul_Sys_Ble_Ble.infoResponse != nil {
                 let strmessage = "Device info recived from : \(qaul_Sys_Ble_Ble.infoResponse.device.name)"
@@ -68,9 +80,22 @@ class ViewController: UIViewController {
         sendStopRequest()
     }
     
+    @IBAction func btnSendMessage(sender: UIButton) {
+        
+       
+    }
+    
     //-----------------------------------------------------------------
     //                    MARK: - Functions -
     //-----------------------------------------------------------------
+    
+    @objc func SetScanDevice(_ notification: NSNotification) {
+        guard let strQaulID = notification.object as? BLEScanDevice else { return }
+       
+        self.txtQaulBLE.text = strQaulID.strqaulId
+        
+    }
+    
     /**
      * For Sending BleStartRequest to BLEModule
      * Have to pass qaul_id and advertise_mode as parameter
@@ -79,14 +104,17 @@ class ViewController: UIViewController {
     
         var startRequest = Qaul_Sys_Ble_BleStartRequest.init()
     
-        startRequest.qaulID = UIDevice.modelName.data(using: .utf8)!
+        startRequest.qaulID = (appendtextiOSdevice + UIDevice.modelName).data(using: .utf8)!
         startRequest.mode = Qaul_Sys_Ble_BleMode.lowLatency //BleOuterClass.BleMode.low_latency
     
         var bleReq = Qaul_Sys_Ble_Ble.init()
         bleReq.startRequest = startRequest
-        bleReq.message = .startRequest(Qaul_Sys_Ble_BleStartRequest.init())
+//        bleReq.message = .startRequest(Qaul_Sys_Ble_BleStartRequest.init())
     
-        bleWrapperClass.receiveRequest(bleReq: bleReq) { qaul_Sys_Ble_Ble in
+        var setbleReq = Qaul_Sys_Ble_Ble.init()
+        setbleReq.message = .startRequest(Qaul_Sys_Ble_BleStartRequest.init())
+        
+        bleWrapperClass.receiveRequest(bleReq: bleReq, SetdataforbleReq: setbleReq) { qaul_Sys_Ble_Ble in
             print("qaul_Sys_Ble_Ble:- \(qaul_Sys_Ble_Ble)")
             if qaul_Sys_Ble_Ble.startResult != nil {
                 let strmessage = qaul_Sys_Ble_Ble.startResult.errorMessage
@@ -105,10 +133,13 @@ class ViewController: UIViewController {
         var stopRequest = Qaul_Sys_Ble_BleStopRequest.init()
      
         var bleReq = Qaul_Sys_Ble_Ble.init()
-        bleReq.stopRequest = stopRequest
         bleReq.message = .stopRequest(Qaul_Sys_Ble_BleStopRequest.init())
+        bleReq.stopRequest = stopRequest
         
-        bleWrapperClass.receiveRequest(bleReq: bleReq) { qaul_Sys_Ble_Ble in
+        var setbleReq = Qaul_Sys_Ble_Ble.init()
+        setbleReq.message = .stopRequest( Qaul_Sys_Ble_BleStopRequest.init())
+        
+        bleWrapperClass.receiveRequest(bleReq: bleReq, SetdataforbleReq: setbleReq) { qaul_Sys_Ble_Ble in
             print("qaul_Sys_Ble_Ble:- \(qaul_Sys_Ble_Ble)")
             if qaul_Sys_Ble_Ble.stopResult != nil {
                 let strmessage = qaul_Sys_Ble_Ble.stopResult.errorMessage
@@ -118,6 +149,7 @@ class ViewController: UIViewController {
             }
         }
     }
+    
 }
 
 
@@ -129,3 +161,38 @@ class ViewController: UIViewController {
 //    }
 //    
 //}
+// ---------------------------------------------------------------------------
+//                          MARK: - UITextViewDelegate -
+// ---------------------------------------------------------------------------
+extension ViewController: UITextViewDelegate {
+
+func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+    
+    let updatedText = (textView.text ?? "").count + text.count - range.length
+    
+    switch textView {
+        case self.txtMessage:
+            
+            if updatedText > 0 {
+                self.lblMessagePlaceholader.isHidden = true
+                
+            } else {
+                self.lblMessagePlaceholader.isHidden = false
+            }
+            
+            if self.txtMessage.contentSize.height >= self.maxHeightOfTxtMessage {
+                self.txtMessage.isScrollEnabled = true
+                    //                    self.heightOfTxtMessage.constant = 37
+
+            } else {
+                self.txtMessage.isScrollEnabled = false
+                self.heightOfTxtMessage.constant = self.maxHeightOfTxtMessage
+            }
+            return updatedText <= 1500
+            
+        default:
+            break
+    }
+    return true
+}
+}

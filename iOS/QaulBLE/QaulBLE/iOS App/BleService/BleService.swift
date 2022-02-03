@@ -7,10 +7,18 @@
 
 import Foundation
 
-let deviceName = "qaul"
+let deviceName = "qauliOS"
+let appendtextiOSdevice = "Apple"
 var bleService = BleService()
 
 public class BleService {
+    
+    private var devicesList = [String: BLEScanDevice]() // All devices in list
+    private var ignoreList = [String: BLEScanDevice]() // Qualid match
+    private var receiveList = [String:BLEScanDevice]() // if not in ignorelist and message get then its in ignorlist
+    
+    
+//    private var blackList = [BLEScanDevice]() not need in iOS
     
 //    public typealias BleRequestCallback = ((Qaul_Sys_Ble_Ble) -> Void)
 //    public var bleCallback: BleRequestCallback!
@@ -35,17 +43,15 @@ public class BleService {
     public typealias stopScanRes = ((Bool, String) -> Void)
     private var StopbleScanCallback: stopAdvertiseRes!
     
-    private var qaulId: Data? = nil
+    //onMessageSent(id: String, success: Boolean, data: ByteArray)
+    public typealias onMessageSent = ((String, Bool, Date) -> Void)
+    private var onMessageSentCallback: onMessageSent!
+    
+    var qaulId: Data? = nil
     private var advertMode = ""
     
     var isAdvertisementRunning = false
     var isScanningRunning = false
-    
-    let SERVICE_UUID = "99E91399-80ED-4943-9BCB-39C532A76023"
-    let MSG_SERVICE_UUID = "99E91400-80ED-4943-9BCB-39C532A76023"
-    let READ_CHAR = "99E91401-80ED-4943-9BCB-39C532A76023"
-    let MSG_CHAR = "99E91402-80ED-4943-9BCB-39C532A76023"
-    let GD_CHAR = "99E91403-80ED-4943-9BCB-39C532A76023"
     
     /**
      * This Method Will Set the necessary data and start the advertisement
@@ -54,7 +60,7 @@ public class BleService {
 //        bleService.qaulId = qaul_id
 //        bleService.advertMode = mode
         bleService.StartbleAdvertiseCallback = bleCallback
-        bLEPeripheral.startAdvertising(serviceID: kTRANSFER_SERVICE_UUID, name: deviceName){ (status, errorText, unknownError) in
+        bLEPeripheral.startAdvertising(serviceID: SERVICES.SERVICE_UUID, name: deviceName){ (status, errorText, unknownError) in
             
             self.isAdvertisementRunning = status
             self.StartbleAdvertiseCallback(status, errorText , unknownError)
@@ -116,13 +122,35 @@ public class BleService {
      */
     func startScan(bleCallback: @escaping startScanRes) {
         startbleScanCallback = bleCallback
+        self.isScanningRunning = true//bleManager.isScanningStart
+        self.startbleScanCallback(true, "" , false)
+//        self.startbleScanCallback(bleManager.isScanningStart, "" , false)
+
+        bleManager.StartScanning(WithServices: [SERVICES.SERVICE_UUID]) { bLEDevice in
         
-        bleManager.StartScanning(WithServices: [SERVICE_UUID]) { BLEDevice in
+            if self.ignoreList[bLEDevice.uuid] == nil {
+                
+                if self.devicesList[bLEDevice.uuid] == nil {
+                    
+                    var scanDeviceObj             = BLEScanDevice()
+                    scanDeviceObj.macAddress      = bLEDevice.uuid
+                    scanDeviceObj.bluetoothDevice = bLEDevice
+                    self.devicesList[bLEDevice.uuid] = scanDeviceObj
+                    
+//                    self.devicesList[bLEDevice.uuid]?.bluetoothDevice = bLEDevice
+                    
+                }
+            } else {
+                // Just ingore device here anyhow
+            }
         }
-        
-        self.isScanningRunning = bleManager.isScanningStart
-        self.startbleScanCallback(bleManager.isScanningStart, "" , false)
+       
     }
+    
+    /**
+     * This Method Will Be Used to Send Data to Other Qaul-Device
+     */
+    
     /**
      * This Method Will Return True if Service is Running
      */
@@ -178,3 +206,8 @@ public class BleService {
 
 
 
+extension Notification.Name {
+    
+    static let GetscanDevice = Notification.Name(rawValue: "GetscanDevice")
+   
+}

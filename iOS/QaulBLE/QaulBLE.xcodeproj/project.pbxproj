@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		341862CF27A7ED1800E36DA3 /* BLEScanDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341862CE27A7ED1800E36DA3 /* BLEScanDevice.swift */; };
+		341862D127A7F1F200E36DA3 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341862D027A7F1F200E36DA3 /* Message.swift */; };
 		3486EA6A278E975A00775997 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3486EA68278E975A00775997 /* Main.storyboard */; };
 		3486EA6C278E975C00775997 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3486EA6B278E975C00775997 /* Assets.xcassets */; };
 		3486EA6F278E975C00775997 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3486EA6D278E975C00775997 /* LaunchScreen.storyboard */; };
@@ -29,6 +31,8 @@
 
 /* Begin PBXFileReference section */
 		0EAC413318F267C693788F19 /* Pods-QaulBLE.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QaulBLE.debug.xcconfig"; path = "Target Support Files/Pods-QaulBLE/Pods-QaulBLE.debug.xcconfig"; sourceTree = "<group>"; };
+		341862CE27A7ED1800E36DA3 /* BLEScanDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLEScanDevice.swift; sourceTree = "<group>"; };
+		341862D027A7F1F200E36DA3 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		3486EA5F278E975A00775997 /* QaulBLE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QaulBLE.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3486EA69278E975A00775997 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		3486EA6B278E975C00775997 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -64,6 +68,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		341862CD27A7ED1800E36DA3 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				341862D027A7F1F200E36DA3 /* Message.swift */,
+				341862CE27A7ED1800E36DA3 /* BLEScanDevice.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		3486EA56278E975A00775997 = {
 			isa = PBXGroup;
 			children = (
@@ -116,6 +129,7 @@
 			isa = PBXGroup;
 			children = (
 				34FFC30C27A26F31001D745E /* AppDelegate.swift */,
+				341862CD27A7ED1800E36DA3 /* Model */,
 				34FFC31D27A3F1A6001D745E /* Library */,
 				34FFC32127A41F03001D745E /* BLEManager */,
 				34FFC31927A3E990001D745E /* BLEAdvertise */,
@@ -317,6 +331,7 @@
 				34FFC30E27A26F31001D745E /* BleWrapperClass.swift in Sources */,
 				34FFC30F27A26F31001D745E /* ViewController.swift in Sources */,
 				34FFC32927A41F04001D745E /* BleExtensions.swift in Sources */,
+				341862D127A7F1F200E36DA3 /* Message.swift in Sources */,
 				3486EA9E278EB63500775997 /* ble.proto in Sources */,
 				34FFC31C27A3E990001D745E /* BLEPeripheral.swift in Sources */,
 				34FFC31027A26F31001D745E /* AppDelegate.swift in Sources */,
@@ -325,6 +340,7 @@
 				34FFC32027A3F1A6001D745E /* Toast.swift in Sources */,
 				3486EAA0278EB99500775997 /* ble.pb.swift in Sources */,
 				34FFC32B27A41F04001D745E /* BLEDevice.swift in Sources */,
+				341862CF27A7ED1800E36DA3 /* BLEScanDevice.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
