@@ -13,12 +13,11 @@ class _FeedState extends _BaseTabState<_Feed> {
     super.build(context);
     final users = ref.watch(usersProvider);
     final messages = ref.watch(feedMessagesProvider);
+    final defaultUser = ref.watch(defaultUserProvider);
 
-    final blockedIds =
-        users.where((u) => u.isBlocked ?? false).map((u) => u.idBase58);
-    final filteredMessages = messages
-        .where((m) => !blockedIds.contains(m.senderIdBase58 ?? ''))
-        .toList();
+    final blockedIds = users.where((u) => u.isBlocked ?? false).map((u) => u.idBase58);
+    final filteredMessages =
+        messages.where((m) => !blockedIds.contains(m.senderIdBase58 ?? '')).toList();
 
     final refreshFeed = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
@@ -33,8 +32,7 @@ class _FeedState extends _BaseTabState<_Feed> {
         heroTag: 'feedTabFAB',
         tooltip: l18ns!.createFeedPostTooltip,
         onPressed: () async {
-          await Navigator.push(context,
-              MaterialPageRoute(builder: (_) => _CreateFeedMessage()));
+          await Navigator.push(context, MaterialPageRoute(builder: (_) => _CreateFeedMessage()));
           await Future.delayed(const Duration(milliseconds: 2000));
           await refreshFeed();
         },
@@ -57,8 +55,7 @@ class _FeedState extends _BaseTabState<_Feed> {
                 final msg = filteredMessages[i];
                 var theme = Theme.of(context).textTheme;
                 // TODO(brenodt): Prone to exceptions if timeSent is not parsable. Update.
-                var sentAt =
-                    describeFuzzyTimestamp(DateTime.parse(msg.timeSent!));
+                var sentAt = describeFuzzyTimestamp(DateTime.parse(msg.timeSent!));
 
                 final authorIdx = users.indexWhere(
                   (u) => u.idBase58 == (msg.senderIdBase58 ?? ''),
@@ -66,17 +63,26 @@ class _FeedState extends _BaseTabState<_Feed> {
                 final author = authorIdx.isNegative ? null : users[authorIdx];
 
                 return ListTile(
+                  onTap: (author == null || author.idBase58 == defaultUser?.idBase58)
+                      ? null
+                      : () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => UserDetailsScreen(user: author),
+                            ),
+                          );
+                          refreshFeed();
+                        },
                   leading: UserAvatar.small(user: author),
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(author?.name ?? l18ns.unknown,
-                          style: theme.bodyText1!
-                              .copyWith(fontWeight: FontWeight.bold)),
+                          style: theme.bodyText1!.copyWith(fontWeight: FontWeight.bold)),
                       Text(
                         sentAt,
-                        style: theme.caption!
-                            .copyWith(fontStyle: FontStyle.italic),
+                        style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
                       ),
                     ],
                   ),
