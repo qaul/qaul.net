@@ -139,6 +139,34 @@ public class BleService {
                     
 //                    self.devicesList[bLEDevice.uuid]?.bluetoothDevice = bLEDevice
                     
+                    self.devicesList[bLEDevice.uuid]!.bluetoothDevice!.connectedDevice { (isServiceFound) in
+                        
+                        if isServiceFound { } else { }
+                        
+                    } complition: { (isConnected, ConnectionDevice, error) in
+                        
+                        if isConnected {
+                            print(isConnected)
+                            self.devicesList[bLEDevice.uuid]?.bluetoothDevice?.readQaulID(myComplition: { isDeviceConencted, isCharFound, qaulId , qaulIdbyte in
+                                
+                                var ignoreDeviceObj             = BLEScanDevice()
+                                ignoreDeviceObj.macAddress      = bLEDevice.uuid
+                                ignoreDeviceObj.bluetoothDevice = bLEDevice
+                                ignoreDeviceObj.strqaulId       = qaulId
+                                ignoreDeviceObj.qaulId          = qaulIdbyte
+                                
+                                self.ignoreList[bLEDevice.uuid] = ignoreDeviceObj
+                                
+                                NotificationCenter.default.post(name: .GetscanDevice, object: ignoreDeviceObj, userInfo: nil)
+                                
+                                self.devicesList[bLEDevice.uuid]!.bluetoothDevice?.disConnect(myComplition: { isDisconnected in
+                                    
+                                })
+                                
+                                print("QAUL ID Found From connected Device:->\(qaulId)")
+                            })
+                        }
+                    }
                 }
             } else {
                 // Just ingore device here anyhow
@@ -150,6 +178,73 @@ public class BleService {
     /**
      * This Method Will Be Used to Send Data to Other Qaul-Device
      */
+    func sendMessage(id: String , to: Data, message: Data, from: Data , bleCallback: @escaping onMessageSent) {
+        
+        self.onMessageSentCallback = bleCallback
+        
+        let strto = String(bytes: to.bytes, encoding: .utf8) ?? ""
+
+        var bleDevice = ignoreList.first { (key: String, value: BLEScanDevice) in
+            value.strqaulId == strto && value.qaulId == to
+        }
+        
+        var msg = Message()
+        msg.message = String(bytes: message.bytes, encoding: .utf8)
+        msg.qaulId = String(bytes: from.bytes, encoding: .utf8)
+        
+//        msg.toJSONString()?.bytes
+        
+        if (bleDevice != nil) {
+            
+            bleDevice?.value.bluetoothDevice?.connectedDevice { (isServiceFound) in
+                
+                if isServiceFound { } else { }
+                
+            } complition: { (isConnected, ConnectionDevice, error) in
+                
+                if isConnected {
+                    print(isConnected)
+                    
+                    ConnectionDevice.writeQaulID(message: Data(("$$" + msg.toJSONString()! + "$$").utf8)) {isDeviceConencted, isCharFound, qaulId , qaulIdbyte in
+                        self.onMessageSentCallback(isDeviceConencted && isCharFound ? "Successfully sent " : "", isDeviceConencted && isCharFound , Date())
+                    }
+//                    self.devicesList[ConnectionDevice.uuid]?.bluetoothDevice?.readQaulID(myComplition: { isDeviceConencted, isCharFound, qaulId , qaulIdbyte in
+                        
+//                        var ignoreDeviceObj             = BLEScanDevice()
+//                        ignoreDeviceObj.macAddress      = ConnectionDevice.uuid
+//                        ignoreDeviceObj.bluetoothDevice = ConnectionDevice
+//                        ignoreDeviceObj.strqaulId       = qaulId
+//                        ignoreDeviceObj.qaulId          = qaulIdbyte
+//
+//                        self.ignoreList[ConnectionDevice.uuid] = scanDeviceObj
+//
+//                        NotificationCenter.default.post(name: .GetscanDevice, object: ignoreDeviceObj, userInfo: nil)
+//
+//                        self.devicesList[ConnectionDevice.uuid]!.bluetoothDevice?.disConnect(myComplition: { isDisconnected in
+//
+//                        })
+                        
+//                        print("QAUL ID Found From connected Device:->\(qaulId)")
+//                    })
+                } else{
+                    self.onMessageSentCallback( "", false, Date())
+                }
+            }
+        } else {
+            self.onMessageSentCallback( "", false, Date())
+        }
+//        if (bleDevice != null) {
+//            val bleActor = connectDevice(device = bleDevice, isFromMessage = true)
+//            bleActor.messageId = id
+//            val btArray =  Gson().toJson(msg).toByteArray(Charset.defaultCharset())
+//            val delimiter = ByteArray(2)
+//            delimiter[0] = 36
+//            delimiter[1] = 36
+//            bleActor.tempData = delimiter + btArray + delimiter
+//        } else {
+//            bleCallback?.onMessageSent(id = id, success = false, data = ByteArray(0))
+//        }
+    }
     
     /**
      * This Method Will Return True if Service is Running
