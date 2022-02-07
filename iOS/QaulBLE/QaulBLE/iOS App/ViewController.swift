@@ -82,7 +82,16 @@ class ViewController: UIViewController {
     
     @IBAction func btnSendMessage(sender: UIButton) {
         
+        if (txtQaulBLE.text?.count ?? 0) < 10  {
+            self.view.makeToast("Please enter correct qaul_id of receiver")
+        }
+        if txtMessage.text.count <= 0 {
+            self.view.makeToast("Please enter at least 1 character of message")
+            return
+        }
        
+//        blePeripheral.startAdvertising(serviceID: kTRANSFER_SERVICE_UUID, name: self.value)
+//        sendStopRequest()
     }
     
     //-----------------------------------------------------------------

@@ -75,6 +75,23 @@ class BleWrapperClass: UIViewController {
                 break
 
             case .directSend(Qaul_Sys_Ble_BleDirectSend())://is Qaul_Sys_Ble_BleDirectSend:
+                let bleDirectSend = bleReq.directSend
+                if bleService.isRunning() {
+                    bleService.sendMessage(id: bleDirectSend.id, to: bleDirectSend.to, message: bleDirectSend.data, from: bleDirectSend.qaulID) { id, success, data in
+                        
+                        var bleRes = Qaul_Sys_Ble_Ble.init()
+                        
+                        var directSendResult = Qaul_Sys_Ble_BleDirectSendResult.init()
+                        directSendResult.success = false
+                        directSendResult.id = id
+                        directSendResult.errorMessage = success ? "Successfully sent" : "Connection not established. Please try again."
+                        
+                        bleRes.directSendResult = directSendResult
+                        self.bleCallback(bleRes)
+                        
+                       
+                    }
+                }
                 break
             default:
                 print("Default")
