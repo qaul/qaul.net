@@ -28,7 +28,7 @@ import Flutter
               result(FlutterError.init(code: "errorSetMessage", message: "data or format error", details: nil))
           }
       } else if ("receiveRpcMessage" == call.method) {
-          let bufferSize = 8096;
+          let bufferSize = 259072;
           let pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
           defer {
               pointer.deinitialize(count: bufferSize)

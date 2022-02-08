@@ -19,6 +19,7 @@ class UserAccountsTranslator extends RpcModuleTranslator {
       default:
         return super.decodeMessageBytes(data);
     }
+    return null;
   }
 
   RpcTranslatorResponse _buildResponseWithUser(MyUserAccount account) {
