@@ -5,4 +5,5 @@ node/user_accounts.proto
 router/users.proto
 router/router.proto
 services/feed/feed.proto
+services/feed/feed_net.proto
 connections/ble/manager/ble.proto
