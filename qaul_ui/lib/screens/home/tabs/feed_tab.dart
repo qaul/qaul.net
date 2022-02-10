@@ -63,7 +63,7 @@ class _FeedState extends _BaseTabState<_Feed> {
                 final author = authorIdx.isNegative ? null : users[authorIdx];
 
                 return ListTile(
-                  onTap: (author == null || author.idBase58 == defaultUser?.idBase58)
+                  onTap: (author == null || author.idBase58 == defaultUser.idBase58)
                       ? null
                       : () async {
                           await Navigator.push(

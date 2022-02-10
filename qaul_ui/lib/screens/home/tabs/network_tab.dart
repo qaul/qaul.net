@@ -55,7 +55,7 @@ class _AvailableConnectionsTable extends ConsumerWidget {
     final users = ref
         .watch(usersProvider)
         .where((u) => !(u.isBlocked ?? false))
-        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
+        .where((u) => u.idBase58 != (defaultUser.idBase58 ?? ''))
         .where((u) => u.availableTypes?.keys.contains(type) ?? false)
         .toList();
 

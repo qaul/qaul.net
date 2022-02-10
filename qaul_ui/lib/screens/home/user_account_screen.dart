@@ -48,7 +48,7 @@ class UserAccountScreen extends ConsumerWidget {
           Text('Qaul ${l18ns!.publicKey}', style: theme.headline5),
           const SizedBox(height: 20),
           Text(
-            user != null && user.keyBase58 != null
+            user.keyBase58 != null
                 ? user.keyBase58!
                 : _notFound(l18ns, l18ns.publicKey),
           ),
