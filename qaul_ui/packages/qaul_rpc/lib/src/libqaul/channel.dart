@@ -129,8 +129,7 @@ class LibqaulChannel {
   /// and pass it to RPC module
   Future<Uint8List?> receiveRpc() async {
     try {
-      final Uint8List? result =
-          await libqaulChannel.invokeMethod('receiveRpcMessage');
+      final Uint8List? result = await libqaulChannel.invokeMethod('receiveRpcMessage');
 
       if (result == null) {
         debugPrint("channel receiveRpcMessage: null received");
@@ -158,5 +157,6 @@ class LibqaulChannel {
     } on PlatformException catch (e) {
       debugPrint("ERROR: libqaul receiveRpcMessage: '${e.message}'");
     }
+    return null;
   }
 }

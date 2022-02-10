@@ -137,6 +137,7 @@ class _CustomInputState extends State<_CustomInput> {
                     TextPosition(offset: _newValue.length),
                   ),
                 );
+                return null;
               },
             ),
           },

@@ -19,7 +19,7 @@ class LibqaulFfi {
 
     // check build mode (release or debug target)
     String mode;
-    if(kReleaseMode) {
+    if (kReleaseMode) {
       mode = 'release';
     } else {
       mode = 'debug';
@@ -50,7 +50,7 @@ class LibqaulFfi {
       _lib = DynamicLibrary.process();
     } else {
       // the platform is not known
-      throw('Platform ${Platform.operatingSystem} not implemented yet.');
+      throw ('Platform ${Platform.operatingSystem} not implemented yet.');
     }
   }
 
@@ -61,7 +61,8 @@ class LibqaulFfi {
     if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
       debugPrint("flutter start_desktop libqaul");
       // start libqaul with finding paths to save the configuration files
-      _start = _lib!.lookupFunction<StartDesktopFunctionRust, StartDesktopFunctionDart>('start_desktop');
+      _start =
+          _lib!.lookupFunction<StartDesktopFunctionRust, StartDesktopFunctionDart>('start_desktop');
     } else {
       debugPrint("flutter start libqaul");
       // start libqaul without path to storage location
@@ -75,7 +76,8 @@ class LibqaulFfi {
   /// returns 1, when qaul finished initializing
   /// otherwise it returns 0
   int initialized() {
-    final _initialized = _lib!.lookupFunction<InitializationFinishedRust, InitializationFinishedDart>('initialized');
+    final _initialized =
+        _lib!.lookupFunction<InitializationFinishedRust, InitializationFinishedDart>('initialized');
     final result = _initialized();
     return result;
   }
@@ -91,7 +93,8 @@ class LibqaulFfi {
 
   /// Debug function: how many rpc messages have been sent to libqaul
   int checkSendCounter() {
-    final _checkCounter = _lib!.lookupFunction<SendRpcCounterRust, SendRpcCounterDart>('send_rpc_to_libqaul_count');
+    final _checkCounter =
+        _lib!.lookupFunction<SendRpcCounterRust, SendRpcCounterDart>('send_rpc_to_libqaul_count');
     final result = _checkCounter();
     debugPrint("$result RPC messages sent to libqaul");
     return result;
@@ -99,7 +102,8 @@ class LibqaulFfi {
 
   /// Debug function: How many rpc messages are queued by libqaul
   int checkReceiveQueue() {
-    final _checkQueue = _lib!.lookupFunction<ReceiveRpcQueuedRust, ReceiveRpcQueuedDart>('receive_rpc_from_libqaul_queued_length');
+    final _checkQueue = _lib!.lookupFunction<ReceiveRpcQueuedRust, ReceiveRpcQueuedDart>(
+        'receive_rpc_from_libqaul_queued_length');
     final result = _checkQueue();
     if (result > 0) debugPrint("$result messages queued by libqaul RPC");
     return result;
@@ -107,7 +111,9 @@ class LibqaulFfi {
 
   /// send binary protobuf RPC message to libqaul
   sendRpc(Uint8List message) {
-    final _sendRpcToLibqaul = _lib!.lookupFunction<SendRpcToLibqaulFunctionRust, SendRpcToLibqaulFunctionDart>('send_rpc_to_libqaul');
+    final _sendRpcToLibqaul = _lib!
+        .lookupFunction<SendRpcToLibqaulFunctionRust, SendRpcToLibqaulFunctionDart>(
+            'send_rpc_to_libqaul');
 
     // create message buffer
     final buffer = malloc<Uint8>(message.length);
@@ -127,7 +133,7 @@ class LibqaulFfi {
     malloc.free(bufferPointer);
 
     // analyze result
-    switch(result) {
+    switch (result) {
       case 0:
         debugPrint("sendRpc success");
         break;
@@ -145,7 +151,9 @@ class LibqaulFfi {
 
   /// receive binary protobuf RPC message from libqaul
   Uint8List? receiveRpc() {
-    final _receiveRpcFromLibqaul = _lib!.lookupFunction<ReceiveRpcFromLibqaulFunctionRust, ReceiveRpcFromLibqaulFunctionDart>('receive_rpc_from_libqaul');
+    final _receiveRpcFromLibqaul = _lib!
+        .lookupFunction<ReceiveRpcFromLibqaulFunctionRust, ReceiveRpcFromLibqaulFunctionDart>(
+            'receive_rpc_from_libqaul');
 
     // create a buffer
     const bufferSize = 259072;
@@ -156,9 +164,9 @@ class LibqaulFfi {
     final result = _receiveRpcFromLibqaul(bufferPointer, bufferSize);
 
     // check if a message was received
-    if(result == 0) {
+    if (result == 0) {
       debugPrint("receiveRpc: nothing received");
-    } else if(result > 0) {
+    } else if (result > 0) {
       debugPrint("receiveRpc: $result bytes received");
 
       // copy buffer
@@ -167,7 +175,7 @@ class LibqaulFfi {
       // process message
       return message;
     } else {
-      switch(result) {
+      switch (result) {
         case -1:
           debugPrint("receiveRpc ERROR -1: an error occurred");
           break;
@@ -185,6 +193,6 @@ class LibqaulFfi {
 
     // free buffer
     malloc.free(bufferPointer);
+    return null;
   }
 }
-

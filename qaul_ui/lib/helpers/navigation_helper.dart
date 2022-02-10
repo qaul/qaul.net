@@ -26,7 +26,8 @@ class NavigationHelper {
         routeWidget = WillPopScope(onWillPop: () async => false, child: CreateAccountScreen());
         break;
       case home:
-        routeWidget = WillPopScope(onWillPop: () async => false, child: HomeScreen());
+        // WillPopScope handled in build method of HomeScreen -> Custom behavior
+        routeWidget = HomeScreen();
         break;
       case settings:
         routeWidget = const SettingsScreen();

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -59,33 +61,40 @@ class HomeScreen extends HookConsumerWidget {
       [tabCtrl.index],
     );
 
+    final switchToFeed = useCallback(() => tabCtrl.goToTab(TabType.feed), []);
     final switchForward = useCallback(() => tabCtrl.goToNext(), [UniqueKey()]);
     final switchBack = useCallback(() => tabCtrl.goToPrevious(), [UniqueKey()]);
 
-    return Scaffold(
-      body: Shortcuts(
-        shortcuts: {
-          LogicalKeySet(LogicalKeyboardKey.tab): SwitchTabIntent.forward(),
-          LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab):
-              SwitchTabIntent.backward(),
-        },
-        child: Actions(
-          actions: {
-            SwitchTabIntent: CallbackAction<SwitchTabIntent>(
-              onInvoke: (intent) => intent.switchForward ? switchForward() : switchBack(),
-            ),
+    return WillPopScope(
+      onWillPop: () async {
+        if (Platform.isAndroid) switchToFeed();
+        return false;
+      },
+      child: Scaffold(
+        body: Shortcuts(
+          shortcuts: {
+            LogicalKeySet(LogicalKeyboardKey.tab): SwitchTabIntent.forward(),
+            LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab):
+                SwitchTabIntent.backward(),
           },
-          child: QaulNavBarDecorator(
-            child: PageView(
-              controller: pageCtrl,
-              allowImplicitScrolling: true,
-              children: [
-                const UserAccountScreen(),
-                BaseTab.feed(),
-                BaseTab.users(),
-                // BaseTab.chat(),
-                BaseTab.network(),
-              ],
+          child: Actions(
+            actions: {
+              SwitchTabIntent: CallbackAction<SwitchTabIntent>(
+                onInvoke: (intent) => intent.switchForward ? switchForward() : switchBack(),
+              ),
+            },
+            child: QaulNavBarDecorator(
+              child: PageView(
+                controller: pageCtrl,
+                allowImplicitScrolling: true,
+                children: [
+                  const UserAccountScreen(),
+                  BaseTab.feed(),
+                  BaseTab.users(),
+                  // BaseTab.chat(),
+                  BaseTab.network(),
+                ],
+              ),
             ),
           ),
         ),
