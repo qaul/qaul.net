@@ -31,21 +31,15 @@ class SettingsScreen extends HookConsumerWidget {
         child: Padding(
           padding: MediaQuery.of(context).viewPadding.copyWith(left: 20, right: 20),
           child: Column(
-            children: [
-              const LanguageSelectDropDown(),
-              const SizedBox(height: 20),
-              const ThemeSelectDropdown(),
+            children: const [
+              LanguageSelectDropDown(),
+              SizedBox(height: 20),
+              ThemeSelectDropdown(),
               //
-              const Divider(),
-              TextButton(
-                child: const Text('Throw libqaul Panic'),
-                onPressed: () {
-                  ref.read(qaulWorkerProvider).sendDebugPanicMessage();
-                },
-              ),
+              Divider(),
 
-              const SizedBox(height: 80),
-              const _InternetNodesList(),
+              SizedBox(height: 80),
+              _InternetNodesList(),
             ],
           ),
         ),

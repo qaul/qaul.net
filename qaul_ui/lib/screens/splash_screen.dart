@@ -13,8 +13,8 @@ class SplashScreen extends ConsumerWidget {
     for (var i = 0; i < 5; i++) {
       await worker.getDefaultUserAccount();
       await Future.delayed(Duration(milliseconds: (i + 1) * 100));
-      final user = ref.read(defaultUserProvider);
- return NavigationHelper.home;
+      // final user = ref.read(defaultUserProvider);
+      return NavigationHelper.home;
     }
     return NavigationHelper.createAccount;
   });
@@ -23,7 +23,7 @@ class SplashScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(_sendRequestProvider, (AsyncValue<String>? old, AsyncValue<String> snapshot) {
       final value = snapshot.value;
- Navigator.pushReplacementNamed(context, value);
+      if (value != null) Navigator.pushReplacementNamed(context, value);
     });
 
     return const Scaffold(body: LoadingIndicator());

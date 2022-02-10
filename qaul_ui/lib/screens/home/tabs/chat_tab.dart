@@ -15,7 +15,7 @@ class _ChatState extends _BaseTabState<_Chat> {
     final users = ref
         .watch(usersProvider)
         .where((u) => !(u.isBlocked ?? false))
-        .where((u) => u.idBase58 != (defaultUser.idBase58 ?? ''))
+        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
         .toList();
 
     final l18ns = AppLocalizations.of(context);

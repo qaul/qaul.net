@@ -13,7 +13,7 @@ class _UsersState extends _BaseTabState<_Users> {
     super.build(context);
     final defaultUser = ref.watch(defaultUserProvider);
     final users =
-        ref.watch(usersProvider).where((u) => u.idBase58 != (defaultUser.idBase58 ?? '')).toList();
+        ref.watch(usersProvider).where((u) => u.idBase58 != (defaultUser?.idBase58 ?? '')).toList();
 
     users.sort((u1, u2) => u2.isConnected ? 1 : 0);
     users.sort((u1, u2) => (u1.isBlocked ?? false) ? 1 : 0);
