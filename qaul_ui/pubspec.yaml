@@ -74,6 +74,8 @@ dependencies:
   # *******
   # Local Dependencies
   # *******
+  logger:
+    path: packages/logger
   qaul_rpc:
     path: packages/qaul_rpc
   utils:

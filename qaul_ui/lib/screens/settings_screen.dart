@@ -10,11 +10,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:qaul_ui/widgets/theme_select_dropdown.dart';
 import 'package:utils/utils.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends HookConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l18ns = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
@@ -35,6 +35,9 @@ class SettingsScreen extends StatelessWidget {
               LanguageSelectDropDown(),
               SizedBox(height: 20),
               ThemeSelectDropdown(),
+              //
+              Divider(),
+
               SizedBox(height: 80),
               _InternetNodesList(),
             ],

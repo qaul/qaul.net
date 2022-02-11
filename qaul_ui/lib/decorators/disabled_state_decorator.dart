@@ -16,7 +16,10 @@ class DisabledStateDecorator extends StatelessWidget {
         isDisabled ? Colors.grey : Colors.white,
         BlendMode.modulate,
       ),
-      child: child,
+      child: DefaultTextStyle.merge(
+        style: !isDisabled ? null : DefaultTextStyle.of(context).style.copyWith(color: Colors.grey),
+        child: IgnorePointer(ignoring: isDisabled, child: child),
+      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:qaul_ui/screens/about_screen.dart';
 import 'package:qaul_ui/screens/create_account_screen.dart';
 import 'package:qaul_ui/screens/home/home_screen.dart';
 import 'package:qaul_ui/screens/settings_screen.dart';
+import 'package:qaul_ui/screens/support_screen.dart';
 
 import '../screens/splash_screen.dart';
 
@@ -12,6 +13,7 @@ class NavigationHelper {
   static const home = '/home';
   static const settings = '/settings';
   static const about = '/about';
+  static const support = '/support';
 
   static Route<T> _buildRoute<T>(final RouteSettings settings, final WidgetBuilder page) =>
       CupertinoPageRoute(builder: page, settings: settings);
@@ -34,6 +36,9 @@ class NavigationHelper {
         break;
       case about:
         routeWidget = const AboutScreen();
+        break;
+      case support:
+        routeWidget = const SupportScreen();
         break;
       default:
         throw ArgumentError.value(

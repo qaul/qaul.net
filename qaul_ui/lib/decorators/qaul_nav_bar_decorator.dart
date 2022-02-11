@@ -19,6 +19,8 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   Map<String, String> get _overflowMenuOptions => {
         'settings': AppLocalizations.of(context)!.settings,
         'about': AppLocalizations.of(context)!.about,
+        // 'support': AppLocalizations.of(context)!.support,
+        'support': 'Support',
       };
 
   void _handleClick(String value) {
@@ -28,6 +30,9 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
         break;
       case 'about':
         Navigator.pushNamed(context, NavigationHelper.about);
+        break;
+      case 'support':
+        Navigator.pushNamed(context, NavigationHelper.support);
         break;
     }
   }

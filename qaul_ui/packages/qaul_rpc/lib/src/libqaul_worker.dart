@@ -113,6 +113,10 @@ class LibqaulWorker {
     await _encodeAndSendMessage(Modules.USERACCOUNTS, msg.writeToBuffer());
   }
 
+  void sendDebugPanicMessage() async {
+    await _encodeAndSendMessage(Modules.DEBUG, Uint8List(0));
+  }
+
   // *******************************
   // Private (helper) methods
   // *******************************
