@@ -13,15 +13,12 @@ use libp2p::{
     PeerId,
 };
 use prost::Message;
-//use bincode;
-use humantime;
 use log::{info, error};
 use serde::{Serialize, Deserialize};
 use state::Storage;
 use std::{sync::RwLock, convert::TryInto};
 use std::collections::BTreeMap;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-//use std::convert::TryFrom;
+use std::time::{SystemTime};
 use sled_extensions::{
     DbExt,
     bincode::Tree,
@@ -30,7 +27,8 @@ use sled_extensions::{
 use crate::node::{
     Node,
     user_accounts::{UserAccount, UserAccounts},
-}; 
+};
+
 use crate::connections::{
     ConnectionModule,
     lan::Lan,
@@ -61,9 +59,9 @@ pub struct FeedMessageData {
     // user ID of the sender
     pub sender_id: Vec<u8>,
     // time sent in milli seconds
-    pub time_sent: u64,
+    pub timestamp_sent: u64,
     // time received in milli seconds
-    pub time_received: u64,
+    pub timestamp_received: u64,
     // the message content
     pub content: String,
 }
@@ -154,9 +152,8 @@ impl Feed {
     pub fn send(user_account: &UserAccount, content: String,  lan: Option<&mut Lan>, internet: Option<&mut Internet> )
     {
         // create timestamp
-        let time = SystemTime::now();
-        let timestamp = timestamp::Timestamp::convert_to_u64(time);
-        
+        let timestamp = timestamp::Timestamp::convert_to_u64();
+
         // create feed message
         let msg = proto_net::FeedMessageContent {
             sender: user_account.id.to_bytes(),
@@ -210,7 +207,6 @@ impl Feed {
                                 error!("  sender id:  {}", user_id_decoded);
                                 let (key_type, key_base58) = crate::router::users::Users::get_protobuf_public_key(key);
                                 error!("  sender key [{}]: {}", key_type, key_base58);
-                                // TODO: Fix validation failure on first validation.
                                 return
                             }
                             
@@ -232,8 +228,8 @@ impl Feed {
 
                                 // display message
                                 info!("message received:");
-                               // info!("{}, {:?}", humantime::format_rfc3339(feed_content.time), feed_container.signature);
-                                info!("  '{:?}'", message.content);
+                                info!("Timestamp - {}, Signature- {:?}", message.time, feed_container.signature);
+                                info!(" Message Content {}", message.content);
                                 
                                 // encode container
                                 let mut buf = Vec::with_capacity(feed_container.encoded_len());
@@ -249,16 +245,10 @@ impl Feed {
                             error!("Sender of feed message not known: {}", user_id_decoded);
                             return
                             }
-
                         }
-
-                        
-                        
-
                     }
                     Err(_) => todo!("False to decode Feed Message Content"),
-                }
-       
+                }  
     }
 
     /// Save a Message
@@ -275,16 +265,15 @@ impl Feed {
         let last_message = feed.last_message +1;
 
         // create timestamp
-        let time = SystemTime::now();
-        let time_received = timestamp::Timestamp::convert_to_u64(time);
-
+        let timestamp_received = timestamp::Timestamp::convert_to_u64();
+         
         //create feed struct for database store
         let message_data = FeedMessageData {
             index: last_message,
             message_id: signature.clone(),
             sender_id: message.sender,
-            time_sent: message.time,
-            time_received,
+            timestamp_sent: message.time,
+            timestamp_received,
             content: message.content.clone(),
         };    
 
@@ -326,16 +315,6 @@ impl Feed {
                     Ok((_id, message)) => {
                         let sender_id_base58 = bs58::encode(message.sender_id.clone()).into_string();
 
-                        // create system time from timestamps
-                        let time = SystemTime::now();
-                        let time_now_duration = time.duration_since(UNIX_EPOCH).expect("Time went backwards");
-
-                        let time_sent_duration = Duration::from_millis(message.time_sent);
-                        let time_sent = time.checked_sub(time_now_duration - time_sent_duration).unwrap();
-
-                        let time_received_duration = Duration::from_millis(message.time_received);
-                        let time_received = time.checked_sub(time_now_duration - time_received_duration).unwrap();
-
                         // create message
                         let feed_message = proto::FeedMessage {
                             sender_id: message.sender_id.clone(),
@@ -344,8 +323,12 @@ impl Feed {
                             message_id: message.message_id.clone(),
                             // DEPRECATED
                             message_id_base58: bs58::encode(message.message_id).into_string(),
-                            time_sent: humantime::format_rfc3339(time_sent).to_string(),
-                            time_received: humantime::format_rfc3339(time_received).to_string(),
+                            // DEPRECATED
+                            time_sent: String::from("DEPRECATED"),
+                            timestamp_sent: message.timestamp_sent,
+                            // DEPRECATED
+                            time_received: String::from("DEPRECATED"),
+                            timestamp_received: message.timestamp_received,
                             content: message.content.clone(),
                             // data base index
                             index: message.index,
@@ -372,7 +355,6 @@ impl Feed {
 
     /// validate a message via the public key of the sender
     pub fn validate_message( msg: &proto_net::FeedContainer, key: PublicKey ) -> bool {
-        //let buf = &msg.message;
         key.verify(&msg.message, &msg.signature)
     }
 
