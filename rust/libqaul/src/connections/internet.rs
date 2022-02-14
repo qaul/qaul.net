@@ -29,9 +29,7 @@ use libp2p::{
     Transport,
     floodsub::{Floodsub, FloodsubEvent},
     swarm::{
-        Swarm, NetworkBehaviourEventProcess, ExpandedSwarm,
-        protocols_handler::ProtocolsHandler,
-        IntoProtocolsHandler, NetworkBehaviour,
+        Swarm, NetworkBehaviourEventProcess,
     },
     NetworkBehaviour,
 };
@@ -82,6 +80,7 @@ use std::time::Duration;
 
 
 #[derive(NetworkBehaviour)]
+#[behaviour(out_event = "QaulInternetEvent")]
 pub struct QaulInternetBehaviour {
     pub floodsub: Floodsub,
     pub identify: Identify,
@@ -102,12 +101,42 @@ pub struct InternetReConnections {
 }
 static INTERNETRECONNECTIONS: Storage<RwLock<InternetReConnections>> = Storage::new();
 
+pub enum QaulInternetEvent {
+    Floodsub(FloodsubEvent),
+    Identify(IdentifyEvent),
+    Ping(PingEvent),
+    QaulInfo(QaulInfoEvent),
+}
+  
+impl From<FloodsubEvent> for QaulInternetEvent {
+    fn from(event: FloodsubEvent) -> Self {
+        Self::Floodsub(event)
+    }
+}
+
+impl From<IdentifyEvent> for QaulInternetEvent {
+    fn from(event: IdentifyEvent) -> Self {
+      Self::Identify(event)
+    }
+}
+
+impl From<PingEvent> for QaulInternetEvent {
+    fn from(event: PingEvent) -> Self {
+      Self::Ping(event)
+    }
+}
+
+impl From<QaulInfoEvent> for QaulInternetEvent {
+    fn from(event: QaulInfoEvent) -> Self {
+      Self::QaulInfo(event)
+    }
+}
 
 /// Internet Connection Module of libqaul
 /// 
 /// it creates a libp2p swarm
 pub struct Internet {
-    pub swarm: ExpandedSwarm<QaulInternetBehaviour, <<<QaulInternetBehaviour as NetworkBehaviour>::ProtocolsHandler as IntoProtocolsHandler>::Handler as ProtocolsHandler>::InEvent, <<<QaulInternetBehaviour as NetworkBehaviour>::ProtocolsHandler as IntoProtocolsHandler>::Handler as ProtocolsHandler>::OutEvent, <QaulInternetBehaviour as NetworkBehaviour>::ProtocolsHandler>, 
+    pub swarm: Swarm<QaulInternetBehaviour>, 
     pub receiver: UnboundedReceiver<QaulMessage>,
 }
 
@@ -225,7 +254,7 @@ impl Internet {
    
     /// dial a remote peer
     pub fn peer_dial( addresse: Multiaddr, swarm: &mut Swarm<QaulInternetBehaviour> ) {
-        match swarm.dial_addr(addresse.clone()) {
+        match swarm.dial(addresse.clone()) {
             Ok(_) => info!("peer {:?} dialed", addresse),
             Err(error) => info!("peer {} swarm dial error: {:?}", addresse, error),
         }

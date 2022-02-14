@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! # Qaul Routing Info Behaviour
 //! 
 //! This module is a libp2p swarm-behaviour module.
@@ -15,8 +18,8 @@ use libp2p::{
     swarm::{
         NetworkBehaviour,
         NetworkBehaviourAction,
+        IntoProtocolsHandler,
         PollParameters,
-        ProtocolsHandler,
         OneShotHandler,
         NotifyHandler,
     }
@@ -36,7 +39,13 @@ pub use crate::types::{
 /// Network behaviour that handles the qaul_info protocol.
 pub struct QaulInfo {
     /// Events that need to be handed to the outside when polling.
-    events: VecDeque<NetworkBehaviourAction<QaulInfoData, QaulInfoEvent>>,
+    events: VecDeque<
+        NetworkBehaviourAction<
+            QaulInfoEvent, 
+            //QaulInfoData
+            OneShotHandler<QaulInfoProtocol, QaulInfoData, InnerMessage>,
+        >
+    >,
 
     #[allow(dead_code)]
     config: QaulInfoConfig,
@@ -124,8 +133,8 @@ impl NetworkBehaviour for QaulInfo {
         _: &mut impl PollParameters,
     ) -> Poll<
         NetworkBehaviourAction<
-            <Self::ProtocolsHandler as ProtocolsHandler>::InEvent,
             Self::OutEvent,
+            Self::ProtocolsHandler,
         >,
     > {
         if let Some(event) = self.events.pop_front() {
@@ -134,10 +143,69 @@ impl NetworkBehaviour for QaulInfo {
 
         Poll::Pending
     }
+
+    fn inject_connection_established(
+        &mut self,
+        _peer_id: &PeerId,
+        _connection_id: &ConnectionId,
+        _endpoint: &libp2p::core::ConnectedPoint,
+        _failed_addresses: Option<&Vec<Multiaddr>>,
+    ) {
+    }
+
+    fn inject_connection_closed(
+        &mut self,
+        _: &PeerId,
+        _: &ConnectionId,
+        _: &libp2p::core::ConnectedPoint,
+        _: <Self::ProtocolsHandler as IntoProtocolsHandler>::Handler,
+    ) {
+    }
+
+    fn inject_address_change(
+        &mut self,
+        _: &PeerId,
+        _: &ConnectionId,
+        _old: &libp2p::core::ConnectedPoint,
+        _new: &libp2p::core::ConnectedPoint,
+    ) {
+    }
+
+    fn inject_dial_failure(
+        &mut self,
+        _peer_id: Option<PeerId>,
+        _handler: Self::ProtocolsHandler,
+        _error: &libp2p::swarm::DialError,
+    ) {
+    }
+
+    fn inject_listen_failure(
+        &mut self,
+        _local_addr: &Multiaddr,
+        _send_back_addr: &Multiaddr,
+        _handler: Self::ProtocolsHandler,
+    ) {
+    }
+
+    fn inject_new_listener(&mut self, _id: libp2p::core::connection::ListenerId) {}
+
+    fn inject_new_listen_addr(&mut self, _id: libp2p::core::connection::ListenerId, _addr: &Multiaddr) {}
+
+    fn inject_expired_listen_addr(&mut self, _id: libp2p::core::connection::ListenerId, _addr: &Multiaddr) {}
+
+    fn inject_listener_error(&mut self, _id: libp2p::core::connection::ListenerId, _err: &(dyn std::error::Error + 'static)) {
+    }
+
+    fn inject_listener_closed(&mut self, _id: libp2p::core::connection::ListenerId, _reason: Result<(), &std::io::Error>) {}
+
+    fn inject_new_external_addr(&mut self, _addr: &Multiaddr) {}
+
+    fn inject_expired_external_addr(&mut self, _addr: &Multiaddr) {}
 }
 
 /// Transmission between the `OneShotHandler` of the protocols handler
 /// and the `QaulInfoHandler`.
+#[derive(Debug)]
 pub enum InnerMessage {
     /// We received an QaulRoutingInfoMessage from a remote.
     Received(QaulInfoData),
