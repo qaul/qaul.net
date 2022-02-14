@@ -88,7 +88,7 @@ impl Users {
     /// and save it to the data base
     pub fn add_with_check( id: PeerId, key: PublicKey, name: String ) {
         // check if user is valid
-        if id != key.clone().into_peer_id() {
+        if id != key.clone().to_peer_id() {
             log::error!("user id & key do not match {}", id.to_base58());
             return 
         }
@@ -188,7 +188,7 @@ impl Users {
                                 name: user.name.clone(),
                                 id: id.to_bytes(),
                                 id_base58: id.to_base58(),
-                                key: user.key.clone().into_protobuf_encoding(),
+                                key: user.key.clone().to_protobuf_encoding(),
                                 key_type,
                                 key_base58,
                                 connectivity: 0,

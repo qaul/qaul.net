@@ -1,16 +1,16 @@
 [package]
 name = "qaul_info"
-edition = "2018"
+edition = "2021"
 description = "qaul.net routing-info protocol for libp2p"
 version = "0.1.0"
 authors = ["qaul.net community <contact@qaul.net>"]
 license = "AGPL"
 
 [dependencies]
-libp2p = "0.39"
+libp2p = "0.42.2"
 cuckoofilter = "0.5.0"
 fnv = "1.0"
-futures = "0.3.1"
+futures = "0.3.21"
 log = "0.4"
 rand = "0.8.4"
-smallvec = "1.6.1"
+smallvec = "1.8.0"

@@ -26,9 +26,7 @@ use libp2p::{
     Transport,
     floodsub::{Floodsub, FloodsubEvent},
     swarm::{
-        Swarm, NetworkBehaviourEventProcess, ExpandedSwarm,
-        protocols_handler::ProtocolsHandler,
-        IntoProtocolsHandler, NetworkBehaviour
+        Swarm, NetworkBehaviourEventProcess,
     },
     NetworkBehaviour,
 };
@@ -70,6 +68,7 @@ use qaul_messaging::{
 use crate::services::feed::proto_net;
 
 #[derive(NetworkBehaviour)]
+#[behaviour(out_event = "QaulLanEvent")]
 pub struct QaulLanBehaviour {
     pub floodsub: Floodsub,
     pub mdns: Mdns,
@@ -80,8 +79,39 @@ pub struct QaulLanBehaviour {
     pub response_sender: mpsc::UnboundedSender<QaulMessage>,
 }
 
+pub enum QaulLanEvent {
+    Floodsub(FloodsubEvent),
+    Mdns(MdnsEvent),
+    Ping(PingEvent),
+    QaulInfo(QaulInfoEvent),
+}
+  
+impl From<FloodsubEvent> for QaulLanEvent {
+    fn from(event: FloodsubEvent) -> Self {
+        Self::Floodsub(event)
+    }
+}
+
+impl From<MdnsEvent> for QaulLanEvent {
+    fn from(event: MdnsEvent) -> Self {
+      Self::Mdns(event)
+    }
+}
+
+impl From<PingEvent> for QaulLanEvent {
+    fn from(event: PingEvent) -> Self {
+      Self::Ping(event)
+    }
+}
+
+impl From<QaulInfoEvent> for QaulLanEvent {
+    fn from(event: QaulInfoEvent) -> Self {
+      Self::QaulInfo(event)
+    }
+}
+
 pub struct Lan {
-    pub swarm: ExpandedSwarm<QaulLanBehaviour, <<<QaulLanBehaviour as NetworkBehaviour>::ProtocolsHandler as IntoProtocolsHandler>::Handler as ProtocolsHandler>::InEvent, <<<QaulLanBehaviour as NetworkBehaviour>::ProtocolsHandler as IntoProtocolsHandler>::Handler as ProtocolsHandler>::OutEvent, <QaulLanBehaviour as NetworkBehaviour>::ProtocolsHandler>, 
+    pub swarm: Swarm<QaulLanBehaviour>, 
     pub receiver: UnboundedReceiver<QaulMessage>,
 }
 

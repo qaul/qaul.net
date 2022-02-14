@@ -77,5 +77,11 @@ pub fn ping_event( event: PingEvent, module: ConnectionModule ) {
         } => {
             log::debug!("PingFailure::Other {} error: {}", peer, error);
         }
+        PingEvent {
+            peer,
+            result: Result::Err(PingFailure::Unsupported),
+        } => {
+            log::debug!("PingFailure::Unsupported by peer {}", peer);
+        }
     }
 }

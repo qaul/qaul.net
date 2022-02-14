@@ -220,7 +220,7 @@ impl UserAccounts {
                                                     name: user_account.name,
                                                     id: user_account.id.to_bytes(),
                                                     id_base58: user_account.id.to_base58(),
-                                                    key: user_account.keys.public().into_protobuf_encoding(),
+                                                    key: user_account.keys.public().to_protobuf_encoding(),
                                                     key_type,
                                                     key_base58,
                                                 }),
@@ -266,7 +266,7 @@ impl UserAccounts {
                                         name: user_account.name,
                                         id: user_account.id.to_bytes(),
                                         id_base58: user_account.id.to_base58(),
-                                        key: user_account.keys.public().into_protobuf_encoding(),
+                                        key: user_account.keys.public().to_protobuf_encoding(),
                                         key_type,
                                         key_base58,
                                     }

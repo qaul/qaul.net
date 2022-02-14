@@ -142,7 +142,7 @@ impl Neighbours {
     }
 
     /// Delete Neighbour
-    pub fn delete( module: ConnectionModule, node_id: PeerId ) {
+    pub fn _delete( module: ConnectionModule, node_id: PeerId ) {
         // get table
         let mut neighbours;
         match module {
