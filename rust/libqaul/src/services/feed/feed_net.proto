@@ -3,7 +3,7 @@ package qaul.net.feed;
 
 
 // Qaul Feed Network Message
-message Feed {
+message FeedContainer {
     // signature
     bytes signature = 1;
     // message content
@@ -12,10 +12,10 @@ message Feed {
 
 // Feed Message Content
 message FeedMessageContent {
-    // sender
+    // sender id
     bytes sender = 1;
-    // timestamp in milli seconds
-    uint64 time = 2;
     // message content
-    string message = 3;
+    string content = 2;
+    // timestamp in milli seconds
+    uint64 time = 3;
 }

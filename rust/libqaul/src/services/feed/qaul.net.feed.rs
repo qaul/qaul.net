@@ -1,6 +1,6 @@
 /// Qaul Feed Network Message
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Feed {
+pub struct FeedContainer {
     /// signature
     #[prost(bytes="vec", tag="1")]
     pub signature: ::prost::alloc::vec::Vec<u8>,
@@ -11,13 +11,13 @@ pub struct Feed {
 /// Feed Message Content
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FeedMessageContent {
-    /// sender
+    /// sender id
     #[prost(bytes="vec", tag="1")]
     pub sender: ::prost::alloc::vec::Vec<u8>,
-    /// timestamp in milli seconds
-    #[prost(uint64, tag="2")]
-    pub time: u64,
     /// message content
-    #[prost(string, tag="3")]
-    pub message: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub content: ::prost::alloc::string::String,
+    /// timestamp in milli seconds
+    #[prost(uint64, tag="3")]
+    pub time: u64,
 }

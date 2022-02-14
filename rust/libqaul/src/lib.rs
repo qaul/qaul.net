@@ -17,6 +17,7 @@ use std::time::Duration;
 // crate modules
 pub mod api;
 pub mod storage;
+pub mod utilities;
 mod connections;
 mod node;
 mod router;
@@ -31,6 +32,7 @@ use router::{info::RouterInfo, Router};
 use rpc::Rpc;
 use services::feed;
 use services::Services;
+use utilities::Utilities;
 
 /// check this when the library finished initializing
 static INITIALIZED: Storage<bool> = Storage::new();
@@ -103,6 +105,9 @@ pub async fn start(storage_path: String) -> () {
     // initialize services
     Services::init();
 
+    //initialize utilities
+    Utilities::init();
+    
     // check RPC once every 10 milliseconds
     // TODO: interval is only in unstable. Use it once it is stable.
     //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html

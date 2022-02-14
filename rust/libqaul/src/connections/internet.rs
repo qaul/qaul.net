@@ -40,6 +40,7 @@ use libp2p::{
 use log::info;
 use futures::channel::mpsc;
 use mpsc::{UnboundedReceiver, UnboundedSender};
+use prost::Message;
 
 use crate::types::QaulMessage;
 use crate::node::Node;
@@ -57,6 +58,8 @@ use qaul_info::{
     QaulInfo,
     QaulInfoEvent,
 };
+
+use crate::services::feed::proto_net;
 
 #[derive(NetworkBehaviour)]
 pub struct QaulInternetBehaviour {
@@ -246,7 +249,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulInternetBehaviour {
         match event {
             FloodsubEvent::Message(msg) => {
                 // feed Message
-                if let Ok(resp) = serde_json::from_slice::<FeedMessageSendContainer>(&msg.data) {
+                if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
                     Feed::received( ConnectionModule::Internet, msg.source, resp);
                 }
                 // Pages Messages
