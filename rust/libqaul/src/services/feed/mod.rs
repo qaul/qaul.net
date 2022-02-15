@@ -18,7 +18,6 @@ use serde::{Serialize, Deserialize};
 use state::Storage;
 use std::{sync::RwLock, convert::TryInto};
 use std::collections::BTreeMap;
-use std::time::{SystemTime};
 use sled_extensions::{
     DbExt,
     bincode::Tree,
@@ -73,7 +72,7 @@ pub struct FeedMessage {
     /// the content of the message
     pub content: String,
     /// the time when this message was sent in seconds
-    pub time: SystemTime,
+    pub time: u64,
 }
 
 /// Serializable format of the feed message
@@ -152,7 +151,7 @@ impl Feed {
     pub fn send(user_account: &UserAccount, content: String,  lan: Option<&mut Lan>, internet: Option<&mut Internet> )
     {
         // create timestamp
-        let timestamp = timestamp::Timestamp::convert_to_u64();
+        let timestamp = timestamp::Timestamp::get_timestamp();
 
         // create feed message
         let msg = proto_net::FeedMessageContent {
@@ -242,12 +241,14 @@ impl Feed {
                             }
 
                             } else {
-                            error!("Sender of feed message not known: {}", user_id_decoded);
-                            return
+                                error!("Sender of feed message not known: {}", user_id_decoded);
+                                return
                             }
                         }
                     }
-                    Err(_) => todo!("False to decode Feed Message Content"),
+                    Err(error) => {
+                        log::error!("{:?}", error);
+                    },
                 }  
     }
 
@@ -265,7 +266,7 @@ impl Feed {
         let last_message = feed.last_message +1;
 
         // create timestamp
-        let timestamp_received = timestamp::Timestamp::convert_to_u64();
+        let timestamp_received = timestamp::Timestamp::get_timestamp();
          
         //create feed struct for database store
         let message_data = FeedMessageData {
@@ -315,6 +316,9 @@ impl Feed {
                     Ok((_id, message)) => {
                         let sender_id_base58 = bs58::encode(message.sender_id.clone()).into_string();
 
+                        //create timestamp
+                        let time_sent = timestamp::Timestamp::create_time();
+                        
                         // create message
                         let feed_message = proto::FeedMessage {
                             sender_id: message.sender_id.clone(),
@@ -324,10 +328,10 @@ impl Feed {
                             // DEPRECATED
                             message_id_base58: bs58::encode(message.message_id).into_string(),
                             // DEPRECATED
-                            time_sent: String::from("DEPRECATED"),
+                            time_sent: humantime::format_rfc3339(time_sent.clone()).to_string(),
                             timestamp_sent: message.timestamp_sent,
                             // DEPRECATED
-                            time_received: String::from("DEPRECATED"),
+                            time_received: humantime::format_rfc3339(time_sent).to_string(),
                             timestamp_received: message.timestamp_received,
                             content: message.content.clone(),
                             // data base index

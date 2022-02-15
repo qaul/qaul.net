@@ -18,11 +18,11 @@ impl Timestamp {
         info!("Timestamp Initialized!!!");
     }
 
-    fn create_time() -> SystemTime {
+    pub fn create_time() -> SystemTime {
         SystemTime::now()
     }
 
-    pub fn convert_to_u64() -> u64 {
+    pub fn get_timestamp() -> u64 {
         //create SystemTime
         let time = Timestamp::create_time();
         //create Duration
