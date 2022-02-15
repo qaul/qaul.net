@@ -1,0 +1,219 @@
+version: 2.1
+
+# ------------------------------------------------
+# Configuration anchors
+# ------------------------------------------------
+flutter_version: &flutter_version
+  FLUTTER_VERSION: "2.5.3"
+default_flutter_wdir: &default_flutter_wdir
+  working_directory: ~/qaul-libp2p/qaul_ui
+flutter_ios_dir: &flutter_ios_dir
+  working_directory: ~/qaul-libp2p/qaul_ui/ios
+checkout_to_flutter_root: &checkout_to_flutter_root
+  steps:
+    - checkout:
+        path: ~/qaul-libp2p/qaul_ui
+
+aliases:
+  - &restore_git_cache
+    name: Restore GIT cache
+    keys:
+      - source-v1-{{ .Branch }}-{{ .Revision }}
+      - source-v1-{{ .Branch }}-
+      - source-v1-
+  - &save_git_cache
+    name: Save GIT cache
+    key: source-v1-{{ .Branch }}-{{ .Revision }}
+    paths:
+      - .git
+
+executors:
+  flutter:
+    docker:
+      - image: cirrusci/flutter:stable
+    <<: *default_flutter_wdir
+  android-flutter:
+    docker:
+      - image: cimg/android:2021.10
+    resource_class: large
+    <<: *default_flutter_wdir
+
+jobs:
+  # ------------------------------------------------
+  # Integration Jobs
+  # ------------------------------------------------
+  flutter-analyze:
+    executor: flutter
+    steps:
+      - checkout-flutter-project
+      - install-flutter-deps
+      - run: flutter analyze
+  flutter-test:
+    executor: flutter
+    steps:
+      - checkout-flutter-project
+      - install-flutter-deps
+      - run: flutter test
+  # ------------------------------------------------
+  # Deploy Jobs
+  # ------------------------------------------------
+  # #  ---------------------------------------------
+  # #  Android
+  # #  ---------------------------------------------
+  android-beta-deploy:
+    executor: android-flutter
+    working_directory: ~/qaul-libp2p/qaul_ui/android
+    environment:
+      FL_OUTPUT_DIR: output
+      FASTLANE_LANE: upload_beta_playstore
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      <<: *flutter_version
+    shell: /bin/bash --login -o pipefail
+    steps:
+      - restore_cache: *restore_git_cache
+      - checkout-flutter-project
+      - save_cache: *save_git_cache
+      - install-flutter-linux:
+          version: "$FLUTTER_VERSION"
+      - install-flutter-deps
+      - run:
+          name: Install Bundler
+          command: ruby --version && sudo gem install bundler -N -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
+      - install-bundler-deps
+      - run: echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > app/upload-keystore.jks
+      - run: echo "$PLAY_STORE_UPLOAD_KEY_INFO" | base64 --decode > key.properties
+      - run:
+          name: fastlane
+          command: bundle exec fastlane $FASTLANE_LANE
+      - store_artifacts:
+          path: output
+          destination: output
+  # #  ---------------------------------------------
+  # #  iOS
+  # #  ---------------------------------------------
+  ios-beta-deploy:
+    macos:
+      xcode: 13.0.0
+    <<: *flutter_ios_dir
+    environment:
+      FL_OUTPUT_DIR: output
+      FASTLANE_LANE: upload_testflight
+      <<: *flutter_version
+    shell: /bin/bash --login -o pipefail
+    steps:
+      - restore_cache: *restore_git_cache
+      - checkout-flutter-project
+      - save_cache: *save_git_cache
+      - install-flutter-macos:
+          version: "$FLUTTER_VERSION"
+      - install-flutter-deps
+      - install-bundler-deps
+      - install-cocoapods-deps
+      - run:
+          name: Build Flutter iOS Configuration
+          command: flutter build ios --release --no-codesign --config-only
+      - run:
+          name: fastlane
+          command: bundle exec fastlane $FASTLANE_LANE
+      - store_artifacts:
+          path: output
+          destination: output
+
+workflows:
+  flutter-ci-cd-workflow:
+    jobs:
+      - flutter-analyze
+
+commands:
+  checkout-flutter-project:
+    description: "Invokes the checkout CircleCI step, declaring `path` as the root of the project (defined by `checkout_to_project_root` anchor)"
+    <<: *checkout_to_flutter_root
+
+  install-flutter-linux:
+    description: "Installs the Linux flutter binary"
+    parameters:
+      version:
+        type: string
+    steps:
+      - run:
+          name: Install Flutter
+          command: |
+            cd && mkdir .flutter-sdk
+            cd .flutter-sdk
+            curl --fail --remote-time --silent --location -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_<< parameters.version >>-stable.tar.xz
+            tar xf flutter_linux_<< parameters.version >>-stable.tar.xz --strip-components=1
+            rm flutter_linux_<< parameters.version >>-stable.tar.xz
+            echo "export PATH=$PATH:`pwd`/bin" >> $BASH_ENV
+
+  install-flutter-macos:
+    description: "Installs the MacOS flutter binary"
+    parameters:
+      version:
+        type: string
+    steps:
+      - run:
+          name: Install Flutter
+          command: |
+            cd && mkdir .flutter-sdk
+            cd .flutter-sdk
+            curl --fail --remote-time --silent --location -O https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_<< parameters.version >>-stable.zip
+            unzip flutter_macos_<< parameters.version >>-stable.zip
+            rm flutter_macos_<< parameters.version >>-stable.zip
+            echo "export PATH=$PATH:`pwd`/flutter/bin" >> $BASH_ENV
+
+  install-flutter-deps:
+    description: "Install Flutter dependencies"
+    parameters:
+      pub-cache:
+        type: string
+        default: "~/.pub-cache"
+    steps:
+      - run: flutter doctor --verbose
+      - restore_cache:
+          name: Restore Flutter pub cache
+          keys:
+            - pub-cache-v1-{{ arch }}-{{ checksum "pubspec.lock" }}
+            - pub-cache-v1-{{ arch }}-
+      - run:
+          name: Install Flutter Dependencies
+          command: flutter pub get
+      - save_cache:
+          name: Save Flutter pub cache
+          key: pub-cache-v1-{{ arch }}-{{ checksum "pubspec.lock" }}
+          paths:
+            - .dart_tool
+            - << parameters.pub-cache >>
+
+  install-bundler-deps:
+    description: "Install Bundle dependencies"
+    steps:
+      - restore_cache:
+          name: Restore Bundle cache
+          keys:
+            - gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
+            - gem-cache-v2-{{ arch }}-
+            - gem-cache-v2-
+      - run:
+          name: Install Bundle
+          command: bundle check || sudo bundle install --path vendor/bundle
+      - save_cache:
+          name: Save Bundle cache
+          key: gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+
+  install-cocoapods-deps:
+    description: "Install Pods dependencies"
+    steps:
+      - restore_cache:
+          name: Restore CocoaPods cache
+          key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
+      - run:
+          name: Install CocoaPods
+          command: bundle exec pod install
+      - save_cache:
+          name: Save CocoaPods cache
+          key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
+          paths:
+            - ./Pods

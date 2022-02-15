@@ -64,7 +64,7 @@ cargo build
 # copy libqaul.dll to flutter runner
 ## this step is required in order to run flutter app
 ## create the location folder if it does not yet exist
- cp .\target\debug\libqaul.dll ..\flutter\build\windows\runner\Debug\
+cp .\target\debug\libqaul.dll ..\qaul_ui\build\windows\runner\Debug\
 ```
 
 ### Build and Run Windows Desktop App

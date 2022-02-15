@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
 
+# the proto files
+PROTO_FILES=$(tr '\n' ' ' < files.txt)
+
 protoc \
     --java_out=../protobuf_generated/java \
     --kotlin_out=../protobuf_generated/kotlin \
     \
-    --proto_path=../.. \
-    \
-    rpc/qaul_rpc.proto \
-    connections/connections.proto \
-    node/node.proto \
-    node/user_accounts.proto \
-    router/users.proto \
-    router/router.proto \
-    services/feed/feed.proto \
-    \
-    connections/ble/manager/ble.proto\
+    --proto_path="../../" $PROTO_FILES

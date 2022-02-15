@@ -88,7 +88,7 @@ impl UserAccounts {
         let keys_config = base64::encode(keys_ed25519.encode());
         let keys = Keypair::Ed25519(keys_ed25519);
         let id = PeerId::from(keys.public());
-        let user = UserAccount {id, keys, name: name.clone()};
+        let user = UserAccount {id, keys: keys.clone(), name: name.clone()};
 
         // save it to state
         let mut users = USERACCOUNTS.get().write().unwrap();
@@ -104,6 +104,9 @@ impl UserAccounts {
             });
         }
         Configuration::save();
+
+        // add it to users list
+        crate::router::users::Users::add(id, keys.public(), name.clone(), false, false);
 
         // display id
         info!("created user account '{}' {:?}", name, id);
@@ -171,26 +174,6 @@ impl UserAccounts {
         }
 
         user_info
-    }
-
-    /// Process command line instructions for the 
-    /// user accounts
-    pub fn cli(cmd: &str) {        
-        match cmd {
-            // list all user accounts
-            "list" => {
-                println!("User Accounts:");
-                let users = USERACCOUNTS.get().read().unwrap();
-                for user in &users.users {
-                    println!("'{}' {:?}", user.name, user.id);
-                }
-            },
-            // create a new user account
-            cmd if cmd.starts_with("create ") => {
-                Self::create( String::from(cmd.strip_prefix("create ").unwrap()) );
-            },
-            _ => error!("unknown user command"),
-        }
     }
 
     /// Process incoming RPC request messages for user accounts

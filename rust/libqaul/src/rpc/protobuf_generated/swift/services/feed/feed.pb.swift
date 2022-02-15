@@ -100,10 +100,19 @@ struct Qaul_Rpc_Feed_FeedMessageRequest {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// message id of the last received message
-  /// this can be empty, then all last messages
-  /// are sent.
+  /// DEPRECATED
   var lastReceived: Data = Data()
+
+  /// Index of the last message received
+  ///
+  /// The message index is a continues numbering
+  /// of incoming messages in the database of the node.
+  ///
+  /// When this variable is set, only 
+  /// newer messages will be sent.
+  /// Default value is 0, when the value
+  /// is 0, all feed messages will be sent.
+  var lastIndex: UInt64 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -131,10 +140,12 @@ struct Qaul_Rpc_Feed_FeedMessage {
 
   var senderID: Data = Data()
 
+  /// DEPRECATED
   var senderIDBase58: String = String()
 
   var messageID: Data = Data()
 
+  /// DEPRECATED
   var messageIDBase58: String = String()
 
   var timeSent: String = String()
@@ -142,6 +153,8 @@ struct Qaul_Rpc_Feed_FeedMessage {
   var timeReceived: String = String()
 
   var content: String = String()
+
+  var index: UInt64 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -257,6 +270,7 @@ extension Qaul_Rpc_Feed_FeedMessageRequest: SwiftProtobuf.Message, SwiftProtobuf
   static let protoMessageName: String = _protobuf_package + ".FeedMessageRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "last_received"),
+    2: .standard(proto: "last_index"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -266,6 +280,7 @@ extension Qaul_Rpc_Feed_FeedMessageRequest: SwiftProtobuf.Message, SwiftProtobuf
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularBytesField(value: &self.lastReceived) }()
+      case 2: try { try decoder.decodeSingularUInt64Field(value: &self.lastIndex) }()
       default: break
       }
     }
@@ -275,11 +290,15 @@ extension Qaul_Rpc_Feed_FeedMessageRequest: SwiftProtobuf.Message, SwiftProtobuf
     if !self.lastReceived.isEmpty {
       try visitor.visitSingularBytesField(value: self.lastReceived, fieldNumber: 1)
     }
+    if self.lastIndex != 0 {
+      try visitor.visitSingularUInt64Field(value: self.lastIndex, fieldNumber: 2)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Rpc_Feed_FeedMessageRequest, rhs: Qaul_Rpc_Feed_FeedMessageRequest) -> Bool {
     if lhs.lastReceived != rhs.lastReceived {return false}
+    if lhs.lastIndex != rhs.lastIndex {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -327,6 +346,7 @@ extension Qaul_Rpc_Feed_FeedMessage: SwiftProtobuf.Message, SwiftProtobuf._Messa
     5: .standard(proto: "time_sent"),
     6: .standard(proto: "time_received"),
     7: .same(proto: "content"),
+    8: .same(proto: "index"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -342,6 +362,7 @@ extension Qaul_Rpc_Feed_FeedMessage: SwiftProtobuf.Message, SwiftProtobuf._Messa
       case 5: try { try decoder.decodeSingularStringField(value: &self.timeSent) }()
       case 6: try { try decoder.decodeSingularStringField(value: &self.timeReceived) }()
       case 7: try { try decoder.decodeSingularStringField(value: &self.content) }()
+      case 8: try { try decoder.decodeSingularUInt64Field(value: &self.index) }()
       default: break
       }
     }
@@ -369,6 +390,9 @@ extension Qaul_Rpc_Feed_FeedMessage: SwiftProtobuf.Message, SwiftProtobuf._Messa
     if !self.content.isEmpty {
       try visitor.visitSingularStringField(value: self.content, fieldNumber: 7)
     }
+    if self.index != 0 {
+      try visitor.visitSingularUInt64Field(value: self.index, fieldNumber: 8)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -380,6 +404,7 @@ extension Qaul_Rpc_Feed_FeedMessage: SwiftProtobuf.Message, SwiftProtobuf._Messa
     if lhs.timeSent != rhs.timeSent {return false}
     if lhs.timeReceived != rhs.timeReceived {return false}
     if lhs.content != rhs.content {return false}
+    if lhs.index != rhs.index {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

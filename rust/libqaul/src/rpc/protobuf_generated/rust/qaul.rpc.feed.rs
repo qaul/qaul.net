@@ -24,11 +24,20 @@ pub mod feed {
 /// request feed messages
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FeedMessageRequest {
-    /// message id of the last received message
-    /// this can be empty, then all last messages
-    /// are sent.
+    /// DEPRECATED
     #[prost(bytes="vec", tag="1")]
     pub last_received: ::prost::alloc::vec::Vec<u8>,
+    /// Index of the last message received
+    ///
+    /// The message index is a continues numbering
+    /// of incoming messages in the database of the node.
+    ///
+    /// When this variable is set, only 
+    /// newer messages will be sent.
+    /// Default value is 0, when the value
+    /// is 0, all feed messages will be sent.
+    #[prost(uint64, tag="2")]
+    pub last_index: u64,
 }
 /// List of feed messages
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -41,10 +50,12 @@ pub struct FeedMessageList {
 pub struct FeedMessage {
     #[prost(bytes="vec", tag="1")]
     pub sender_id: ::prost::alloc::vec::Vec<u8>,
+    /// DEPRECATED
     #[prost(string, tag="2")]
     pub sender_id_base58: ::prost::alloc::string::String,
     #[prost(bytes="vec", tag="3")]
     pub message_id: ::prost::alloc::vec::Vec<u8>,
+    /// DEPRECATED
     #[prost(string, tag="4")]
     pub message_id_base58: ::prost::alloc::string::String,
     #[prost(string, tag="5")]
@@ -53,6 +64,8 @@ pub struct FeedMessage {
     pub time_received: ::prost::alloc::string::String,
     #[prost(string, tag="7")]
     pub content: ::prost::alloc::string::String,
+    #[prost(uint64, tag="8")]
+    pub index: u64,
 }
 /// send feed message
 #[derive(Clone, PartialEq, ::prost::Message)]

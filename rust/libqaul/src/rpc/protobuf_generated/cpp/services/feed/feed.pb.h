@@ -412,6 +412,7 @@ class FeedMessageRequest final :
 
   enum : int {
     kLastReceivedFieldNumber = 1,
+    kLastIndexFieldNumber = 2,
   };
   // bytes last_received = 1;
   void clear_last_received();
@@ -427,6 +428,15 @@ class FeedMessageRequest final :
   std::string* _internal_mutable_last_received();
   public:
 
+  // uint64 last_index = 2;
+  void clear_last_index();
+  ::PROTOBUF_NAMESPACE_ID::uint64 last_index() const;
+  void set_last_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_last_index() const;
+  void _internal_set_last_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:qaul.rpc.feed.FeedMessageRequest)
  private:
   class _Internal;
@@ -435,6 +445,7 @@ class FeedMessageRequest final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr last_received_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 last_index_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_services_2ffeed_2ffeed_2eproto;
 };
@@ -710,6 +721,7 @@ class FeedMessage final :
     kTimeSentFieldNumber = 5,
     kTimeReceivedFieldNumber = 6,
     kContentFieldNumber = 7,
+    kIndexFieldNumber = 8,
   };
   // bytes sender_id = 1;
   void clear_sender_id();
@@ -809,6 +821,15 @@ class FeedMessage final :
   std::string* _internal_mutable_content();
   public:
 
+  // uint64 index = 8;
+  void clear_index();
+  ::PROTOBUF_NAMESPACE_ID::uint64 index() const;
+  void set_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_index() const;
+  void _internal_set_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:qaul.rpc.feed.FeedMessage)
  private:
   class _Internal;
@@ -823,6 +844,7 @@ class FeedMessage final :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr time_sent_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr time_received_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr content_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 index_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_services_2ffeed_2ffeed_2eproto;
 };
@@ -1262,6 +1284,26 @@ inline void FeedMessageRequest::set_allocated_last_received(std::string* last_re
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.feed.FeedMessageRequest.last_received)
 }
 
+// uint64 last_index = 2;
+inline void FeedMessageRequest::clear_last_index() {
+  last_index_ = uint64_t{0u};
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 FeedMessageRequest::_internal_last_index() const {
+  return last_index_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 FeedMessageRequest::last_index() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.feed.FeedMessageRequest.last_index)
+  return _internal_last_index();
+}
+inline void FeedMessageRequest::_internal_set_last_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  last_index_ = value;
+}
+inline void FeedMessageRequest::set_last_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_last_index(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.feed.FeedMessageRequest.last_index)
+}
+
 // -------------------------------------------------------------------
 
 // FeedMessageList
@@ -1630,6 +1672,26 @@ inline void FeedMessage::set_allocated_content(std::string* content) {
   content_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), content,
       GetArenaForAllocation());
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.feed.FeedMessage.content)
+}
+
+// uint64 index = 8;
+inline void FeedMessage::clear_index() {
+  index_ = uint64_t{0u};
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 FeedMessage::_internal_index() const {
+  return index_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 FeedMessage::index() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.feed.FeedMessage.index)
+  return _internal_index();
+}
+inline void FeedMessage::_internal_set_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  index_ = value;
+}
+inline void FeedMessage::set_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_index(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.feed.FeedMessage.index)
 }
 
 // -------------------------------------------------------------------

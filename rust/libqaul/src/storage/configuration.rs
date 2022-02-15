@@ -71,10 +71,11 @@ impl Default for Internet {
     fn default() -> Self {
         Internet {
             active: true,
-            #[cfg(target_os = "android")]
-            peers: vec![String::from("/ip4/144.91.74.192/tcp/0"); 1],
-            #[cfg(not(target_os = "android"))]
-            peers: Vec::new(),
+            #[cfg(any(target_os = "android", target_os = "ios"))]
+            peers: vec![String::from("/ip4/144.91.74.192/tcp/9229"); 1],
+            #[cfg(not(any(target_os = "android", target_os = "ios")))]
+            peers: vec![String::from("/ip4/144.91.74.192/tcp/9229"); 1],
+            //peers: Vec::new(),
             do_listen: false,
             listen: String::from("/ip4/0.0.0.0/tcp/0"),
         }
@@ -125,8 +126,6 @@ impl Configuration {
         let mut settings = Config::default();
 
         // create configuration path
-        //let mut path = super::Storage::get_path();
-        //path.push_str("config");
         let path_string = super::Storage::get_path();
         let path = Path::new(path_string.as_str());
         let config_path = path.join("config.yaml");
@@ -195,52 +194,4 @@ impl Configuration {
 
         fs::write(config_path.clone(), yaml).expect(&format!("Could not write config to {:?}.", config_path));
     }
-
-/*
-    /// FOR DEBUGGING ANDROID
-    ///
-    /// Initialize a default configuration for android
-    pub fn init_android() {
-        // create Node configuration
-        let node = Node {
-            initialized: 1,
-            id: String::from("12D3KooWMRmfDGEuKWX6RRPrP2mVc293kfff7XuM1hP91HWr3HsS"),
-            keys: String::from("fBgCB+NsT0jEkOmfXRYyuH5ELCODSCDNbG7I8RdAnrSsgnIXOhLqpReH2hQRgDVcr0IzoTRNVkRXO+iN/m7NLQ=="),
-        };
-
-        // create Lan configuration
-        let lan = Lan {
-            active: true,
-            listen: String::from("/ip4/0.0.0.0/tcp/0"),
-        };
-
-        // create Internet configuration
-        let internet = Internet {
-            active: true,
-            peers: vec![String::from("/ip4/144.91.74.192/tcp/9229"); 1],
-            //peers: Vec::new(),
-            do_listen: false,
-            listen: String::from("/ip4/0.0.0.0/tcp/0"),
-        };
-
-        // create UserAccount configuration
-        let mut user_accounts = Vec::new();
-        user_accounts.push(UserAccount {
-            name: String::from("DEBUG ONLY"),
-            id: String::from("12D3KooWKAGBaQKMcGzpnrAYE8JQq2NmYnSYJMcBj8DdJ9QVDEPf"),
-            keys: String::from("POQCEaXwvi4P7V9VVu84fwhm3tEYzGIPQg4jw8LMuECK0gfQSROZJww/sN9dIqe7m33KcoriZe/ImV6XseQVdg=="),
-        });
-
-        // create Configuration structure
-        let config = Configuration {
-            node,
-            lan,
-            internet,
-            user_accounts,
-        };
-
-        // save to state
-        CONFIG.set(RwLock::new(config));
-    }
-*/
 }

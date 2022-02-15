@@ -5,7 +5,6 @@ members = [
 
     # binaries
     "clients/cli",
-    "clients/rpc-cli",
     "clients/qauld",
 
     # libp2p modules

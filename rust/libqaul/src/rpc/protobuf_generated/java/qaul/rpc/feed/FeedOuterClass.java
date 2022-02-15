@@ -1384,15 +1384,29 @@ public final class FeedOuterClass {
 
     /**
      * <pre>
-     * message id of the last received message
-     * this can be empty, then all last messages
-     * are sent.
+     * DEPRECATED
      * </pre>
      *
      * <code>bytes last_received = 1;</code>
      * @return The lastReceived.
      */
     com.google.protobuf.ByteString getLastReceived();
+
+    /**
+     * <pre>
+     * Index of the last message received
+     * The message index is a continues numbering
+     * of incoming messages in the database of the node.
+     * When this variable is set, only 
+     * newer messages will be sent.
+     * Default value is 0, when the value
+     * is 0, all feed messages will be sent.
+     * </pre>
+     *
+     * <code>uint64 last_index = 2;</code>
+     * @return The lastIndex.
+     */
+    long getLastIndex();
   }
   /**
    * <pre>
@@ -1449,6 +1463,11 @@ public final class FeedOuterClass {
               lastReceived_ = input.readBytes();
               break;
             }
+            case 16: {
+
+              lastIndex_ = input.readUInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -1485,9 +1504,7 @@ public final class FeedOuterClass {
     private com.google.protobuf.ByteString lastReceived_;
     /**
      * <pre>
-     * message id of the last received message
-     * this can be empty, then all last messages
-     * are sent.
+     * DEPRECATED
      * </pre>
      *
      * <code>bytes last_received = 1;</code>
@@ -1496,6 +1513,27 @@ public final class FeedOuterClass {
     @java.lang.Override
     public com.google.protobuf.ByteString getLastReceived() {
       return lastReceived_;
+    }
+
+    public static final int LAST_INDEX_FIELD_NUMBER = 2;
+    private long lastIndex_;
+    /**
+     * <pre>
+     * Index of the last message received
+     * The message index is a continues numbering
+     * of incoming messages in the database of the node.
+     * When this variable is set, only 
+     * newer messages will be sent.
+     * Default value is 0, when the value
+     * is 0, all feed messages will be sent.
+     * </pre>
+     *
+     * <code>uint64 last_index = 2;</code>
+     * @return The lastIndex.
+     */
+    @java.lang.Override
+    public long getLastIndex() {
+      return lastIndex_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1515,6 +1553,9 @@ public final class FeedOuterClass {
       if (!lastReceived_.isEmpty()) {
         output.writeBytes(1, lastReceived_);
       }
+      if (lastIndex_ != 0L) {
+        output.writeUInt64(2, lastIndex_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -1527,6 +1568,10 @@ public final class FeedOuterClass {
       if (!lastReceived_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, lastReceived_);
+      }
+      if (lastIndex_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(2, lastIndex_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1545,6 +1590,8 @@ public final class FeedOuterClass {
 
       if (!getLastReceived()
           .equals(other.getLastReceived())) return false;
+      if (getLastIndex()
+          != other.getLastIndex()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1558,6 +1605,9 @@ public final class FeedOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + LAST_RECEIVED_FIELD_NUMBER;
       hash = (53 * hash) + getLastReceived().hashCode();
+      hash = (37 * hash) + LAST_INDEX_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getLastIndex());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1697,6 +1747,8 @@ public final class FeedOuterClass {
         super.clear();
         lastReceived_ = com.google.protobuf.ByteString.EMPTY;
 
+        lastIndex_ = 0L;
+
         return this;
       }
 
@@ -1724,6 +1776,7 @@ public final class FeedOuterClass {
       public qaul.rpc.feed.FeedOuterClass.FeedMessageRequest buildPartial() {
         qaul.rpc.feed.FeedOuterClass.FeedMessageRequest result = new qaul.rpc.feed.FeedOuterClass.FeedMessageRequest(this);
         result.lastReceived_ = lastReceived_;
+        result.lastIndex_ = lastIndex_;
         onBuilt();
         return result;
       }
@@ -1775,6 +1828,9 @@ public final class FeedOuterClass {
         if (other.getLastReceived() != com.google.protobuf.ByteString.EMPTY) {
           setLastReceived(other.getLastReceived());
         }
+        if (other.getLastIndex() != 0L) {
+          setLastIndex(other.getLastIndex());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -1807,9 +1863,7 @@ public final class FeedOuterClass {
       private com.google.protobuf.ByteString lastReceived_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
-       * message id of the last received message
-       * this can be empty, then all last messages
-       * are sent.
+       * DEPRECATED
        * </pre>
        *
        * <code>bytes last_received = 1;</code>
@@ -1821,9 +1875,7 @@ public final class FeedOuterClass {
       }
       /**
        * <pre>
-       * message id of the last received message
-       * this can be empty, then all last messages
-       * are sent.
+       * DEPRECATED
        * </pre>
        *
        * <code>bytes last_received = 1;</code>
@@ -1841,9 +1893,7 @@ public final class FeedOuterClass {
       }
       /**
        * <pre>
-       * message id of the last received message
-       * this can be empty, then all last messages
-       * are sent.
+       * DEPRECATED
        * </pre>
        *
        * <code>bytes last_received = 1;</code>
@@ -1852,6 +1902,67 @@ public final class FeedOuterClass {
       public Builder clearLastReceived() {
         
         lastReceived_ = getDefaultInstance().getLastReceived();
+        onChanged();
+        return this;
+      }
+
+      private long lastIndex_ ;
+      /**
+       * <pre>
+       * Index of the last message received
+       * The message index is a continues numbering
+       * of incoming messages in the database of the node.
+       * When this variable is set, only 
+       * newer messages will be sent.
+       * Default value is 0, when the value
+       * is 0, all feed messages will be sent.
+       * </pre>
+       *
+       * <code>uint64 last_index = 2;</code>
+       * @return The lastIndex.
+       */
+      @java.lang.Override
+      public long getLastIndex() {
+        return lastIndex_;
+      }
+      /**
+       * <pre>
+       * Index of the last message received
+       * The message index is a continues numbering
+       * of incoming messages in the database of the node.
+       * When this variable is set, only 
+       * newer messages will be sent.
+       * Default value is 0, when the value
+       * is 0, all feed messages will be sent.
+       * </pre>
+       *
+       * <code>uint64 last_index = 2;</code>
+       * @param value The lastIndex to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLastIndex(long value) {
+        
+        lastIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Index of the last message received
+       * The message index is a continues numbering
+       * of incoming messages in the database of the node.
+       * When this variable is set, only 
+       * newer messages will be sent.
+       * Default value is 0, when the value
+       * is 0, all feed messages will be sent.
+       * </pre>
+       *
+       * <code>uint64 last_index = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLastIndex() {
+        
+        lastIndex_ = 0L;
         onChanged();
         return this;
       }
@@ -2720,11 +2831,19 @@ public final class FeedOuterClass {
     com.google.protobuf.ByteString getSenderId();
 
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string sender_id_base58 = 2;</code>
      * @return The senderIdBase58.
      */
     java.lang.String getSenderIdBase58();
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string sender_id_base58 = 2;</code>
      * @return The bytes for senderIdBase58.
      */
@@ -2738,11 +2857,19 @@ public final class FeedOuterClass {
     com.google.protobuf.ByteString getMessageId();
 
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string message_id_base58 = 4;</code>
      * @return The messageIdBase58.
      */
     java.lang.String getMessageIdBase58();
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string message_id_base58 = 4;</code>
      * @return The bytes for messageIdBase58.
      */
@@ -2784,6 +2911,12 @@ public final class FeedOuterClass {
      */
     com.google.protobuf.ByteString
         getContentBytes();
+
+    /**
+     * <code>uint64 index = 8;</code>
+     * @return The index.
+     */
+    long getIndex();
   }
   /**
    * <pre>
@@ -2881,6 +3014,11 @@ public final class FeedOuterClass {
               content_ = s;
               break;
             }
+            case 64: {
+
+              index_ = input.readUInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -2927,6 +3065,10 @@ public final class FeedOuterClass {
     public static final int SENDER_ID_BASE58_FIELD_NUMBER = 2;
     private volatile java.lang.Object senderIdBase58_;
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string sender_id_base58 = 2;</code>
      * @return The senderIdBase58.
      */
@@ -2944,6 +3086,10 @@ public final class FeedOuterClass {
       }
     }
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string sender_id_base58 = 2;</code>
      * @return The bytes for senderIdBase58.
      */
@@ -2976,6 +3122,10 @@ public final class FeedOuterClass {
     public static final int MESSAGE_ID_BASE58_FIELD_NUMBER = 4;
     private volatile java.lang.Object messageIdBase58_;
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string message_id_base58 = 4;</code>
      * @return The messageIdBase58.
      */
@@ -2993,6 +3143,10 @@ public final class FeedOuterClass {
       }
     }
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string message_id_base58 = 4;</code>
      * @return The bytes for messageIdBase58.
      */
@@ -3125,6 +3279,17 @@ public final class FeedOuterClass {
       }
     }
 
+    public static final int INDEX_FIELD_NUMBER = 8;
+    private long index_;
+    /**
+     * <code>uint64 index = 8;</code>
+     * @return The index.
+     */
+    @java.lang.Override
+    public long getIndex() {
+      return index_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -3160,6 +3325,9 @@ public final class FeedOuterClass {
       if (!getContentBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, content_);
       }
+      if (index_ != 0L) {
+        output.writeUInt64(8, index_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -3192,6 +3360,10 @@ public final class FeedOuterClass {
       if (!getContentBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, content_);
       }
+      if (index_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(8, index_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -3221,6 +3393,8 @@ public final class FeedOuterClass {
           .equals(other.getTimeReceived())) return false;
       if (!getContent()
           .equals(other.getContent())) return false;
+      if (getIndex()
+          != other.getIndex()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -3246,6 +3420,9 @@ public final class FeedOuterClass {
       hash = (53 * hash) + getTimeReceived().hashCode();
       hash = (37 * hash) + CONTENT_FIELD_NUMBER;
       hash = (53 * hash) + getContent().hashCode();
+      hash = (37 * hash) + INDEX_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getIndex());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3397,6 +3574,8 @@ public final class FeedOuterClass {
 
         content_ = "";
 
+        index_ = 0L;
+
         return this;
       }
 
@@ -3430,6 +3609,7 @@ public final class FeedOuterClass {
         result.timeSent_ = timeSent_;
         result.timeReceived_ = timeReceived_;
         result.content_ = content_;
+        result.index_ = index_;
         onBuilt();
         return result;
       }
@@ -3504,6 +3684,9 @@ public final class FeedOuterClass {
           content_ = other.content_;
           onChanged();
         }
+        if (other.getIndex() != 0L) {
+          setIndex(other.getIndex());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -3569,6 +3752,10 @@ public final class FeedOuterClass {
 
       private java.lang.Object senderIdBase58_ = "";
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string sender_id_base58 = 2;</code>
        * @return The senderIdBase58.
        */
@@ -3585,6 +3772,10 @@ public final class FeedOuterClass {
         }
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string sender_id_base58 = 2;</code>
        * @return The bytes for senderIdBase58.
        */
@@ -3602,6 +3793,10 @@ public final class FeedOuterClass {
         }
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string sender_id_base58 = 2;</code>
        * @param value The senderIdBase58 to set.
        * @return This builder for chaining.
@@ -3617,6 +3812,10 @@ public final class FeedOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string sender_id_base58 = 2;</code>
        * @return This builder for chaining.
        */
@@ -3627,6 +3826,10 @@ public final class FeedOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string sender_id_base58 = 2;</code>
        * @param value The bytes for senderIdBase58 to set.
        * @return This builder for chaining.
@@ -3679,6 +3882,10 @@ public final class FeedOuterClass {
 
       private java.lang.Object messageIdBase58_ = "";
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string message_id_base58 = 4;</code>
        * @return The messageIdBase58.
        */
@@ -3695,6 +3902,10 @@ public final class FeedOuterClass {
         }
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string message_id_base58 = 4;</code>
        * @return The bytes for messageIdBase58.
        */
@@ -3712,6 +3923,10 @@ public final class FeedOuterClass {
         }
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string message_id_base58 = 4;</code>
        * @param value The messageIdBase58 to set.
        * @return This builder for chaining.
@@ -3727,6 +3942,10 @@ public final class FeedOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string message_id_base58 = 4;</code>
        * @return This builder for chaining.
        */
@@ -3737,6 +3956,10 @@ public final class FeedOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string message_id_base58 = 4;</code>
        * @param value The bytes for messageIdBase58 to set.
        * @return This builder for chaining.
@@ -3977,6 +4200,37 @@ public final class FeedOuterClass {
   checkByteStringIsUtf8(value);
         
         content_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long index_ ;
+      /**
+       * <code>uint64 index = 8;</code>
+       * @return The index.
+       */
+      @java.lang.Override
+      public long getIndex() {
+        return index_;
+      }
+      /**
+       * <code>uint64 index = 8;</code>
+       * @param value The index to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIndex(long value) {
+        
+        index_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint64 index = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIndex() {
+        
+        index_ = 0L;
         onChanged();
         return this;
       }
@@ -4648,15 +4902,16 @@ public final class FeedOuterClass {
       "feed.FeedMessageListH\000\022*\n\004send\030\002 \001(\0132\032.q" +
       "aul.rpc.feed.SendMessageH\000\0224\n\007request\030\003 " +
       "\001(\0132!.qaul.rpc.feed.FeedMessageRequestH\000" +
-      "B\t\n\007message\"+\n\022FeedMessageRequest\022\025\n\rlas" +
-      "t_received\030\001 \001(\014\"C\n\017FeedMessageList\0220\n\014f" +
-      "eed_message\030\001 \003(\0132\032.qaul.rpc.feed.FeedMe" +
-      "ssage\"\244\001\n\013FeedMessage\022\021\n\tsender_id\030\001 \001(\014" +
-      "\022\030\n\020sender_id_base58\030\002 \001(\t\022\022\n\nmessage_id" +
-      "\030\003 \001(\014\022\031\n\021message_id_base58\030\004 \001(\t\022\021\n\ttim" +
-      "e_sent\030\005 \001(\t\022\025\n\rtime_received\030\006 \001(\t\022\017\n\007c" +
-      "ontent\030\007 \001(\t\"\036\n\013SendMessage\022\017\n\007content\030\001" +
-      " \001(\tb\006proto3"
+      "B\t\n\007message\"?\n\022FeedMessageRequest\022\025\n\rlas" +
+      "t_received\030\001 \001(\014\022\022\n\nlast_index\030\002 \001(\004\"C\n\017" +
+      "FeedMessageList\0220\n\014feed_message\030\001 \003(\0132\032." +
+      "qaul.rpc.feed.FeedMessage\"\263\001\n\013FeedMessag" +
+      "e\022\021\n\tsender_id\030\001 \001(\014\022\030\n\020sender_id_base58" +
+      "\030\002 \001(\t\022\022\n\nmessage_id\030\003 \001(\014\022\031\n\021message_id" +
+      "_base58\030\004 \001(\t\022\021\n\ttime_sent\030\005 \001(\t\022\025\n\rtime" +
+      "_received\030\006 \001(\t\022\017\n\007content\030\007 \001(\t\022\r\n\005inde" +
+      "x\030\010 \001(\004\"\036\n\013SendMessage\022\017\n\007content\030\001 \001(\tb" +
+      "\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4673,7 +4928,7 @@ public final class FeedOuterClass {
     internal_static_qaul_rpc_feed_FeedMessageRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_feed_FeedMessageRequest_descriptor,
-        new java.lang.String[] { "LastReceived", });
+        new java.lang.String[] { "LastReceived", "LastIndex", });
     internal_static_qaul_rpc_feed_FeedMessageList_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_qaul_rpc_feed_FeedMessageList_fieldAccessorTable = new
@@ -4685,7 +4940,7 @@ public final class FeedOuterClass {
     internal_static_qaul_rpc_feed_FeedMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_feed_FeedMessage_descriptor,
-        new java.lang.String[] { "SenderId", "SenderIdBase58", "MessageId", "MessageIdBase58", "TimeSent", "TimeReceived", "Content", });
+        new java.lang.String[] { "SenderId", "SenderIdBase58", "MessageId", "MessageIdBase58", "TimeSent", "TimeReceived", "Content", "Index", });
     internal_static_qaul_rpc_feed_SendMessage_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_qaul_rpc_feed_SendMessage_fieldAccessorTable = new

@@ -384,26 +384,6 @@ impl ConnectionTable {
         connections_list
     }
 
-    /// Connections table's CLI commands
-    /// 
-    /// you get here with the commands:
-    /// ```
-    /// router connections list
-    /// ```
-    pub fn cli(cmd: &str) {        
-        match cmd {
-            // display routing table
-            cmd if cmd.starts_with("list") => {
-                // display LAN table
-                Self::cli_display_list(ConnectionModule::Lan);
-
-                // display Internet table
-                Self::cli_display_list(ConnectionModule::Internet);
-            },
-            _ => log::error!("unknown router connections command"),
-        }
-    }
-
     /// print list of connection module on terminal 
     fn cli_display_list( conn: ConnectionModule ) {
         println!("{:?}", conn);

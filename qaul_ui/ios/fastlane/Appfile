@@ -1,0 +1,9 @@
+app_identifier ENV["APP_IDENTIFIER"] || "net.qaul.app"
+
+apple_id ENV["APPLE_ID"]
+
+itc_team_id("123930764") # App Store Connect Team ID
+team_id("VVYZ2Q8TUK") # Developer Portal Team ID
+
+# For more information about the Appfile, see:
+#     https://docs.fastlane.tools/advanced/#appfile

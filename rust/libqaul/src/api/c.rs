@@ -9,7 +9,7 @@
 //! All functions are thread safe and can be
 //! called from any external thread.
 
-use std::ffi::CString;
+use std::ffi::{CString, CStr};
 use std::os::raw::c_char;
 
 /// test function
@@ -26,8 +26,16 @@ pub extern "C" fn hello() -> *mut c_char {
 /// It needs to be called before any other function
 /// of this API.
 #[no_mangle]
-pub extern "C" fn start() {
-    super::start("".to_string());
+pub extern "C" fn start(s: *const c_char) {
+    let c_str = unsafe {
+        assert!(!s.is_null());
+
+        CStr::from_ptr(s)
+    };
+
+    let r_str = c_str.to_str().unwrap();
+    println!("{}", r_str.to_string());
+    super::start(r_str.to_string());
 }
 
 /// start libqaul on desktop operating systems 
@@ -58,6 +66,12 @@ pub extern "C" fn initialized() -> i32 {
     }
 
     0
+}
+
+/// Yields the total number of messages queued to be received.
+#[no_mangle]
+pub extern "C" fn receivequeue() -> i32 {
+    return super::receive_rpc_queued() as i32;
 }
 
 /// send RPC messages to libqaul

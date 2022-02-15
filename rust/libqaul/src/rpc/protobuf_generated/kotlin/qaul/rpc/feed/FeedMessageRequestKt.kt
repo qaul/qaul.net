@@ -24,9 +24,7 @@ object FeedMessageRequestKt {
 
     /**
      * <pre>
-     * message id of the last received message
-     * this can be empty, then all last messages
-     * are sent.
+     * DEPRECATED
      * </pre>
      *
      * <code>bytes last_received = 1;</code>
@@ -40,15 +38,50 @@ object FeedMessageRequestKt {
       }
     /**
      * <pre>
-     * message id of the last received message
-     * this can be empty, then all last messages
-     * are sent.
+     * DEPRECATED
      * </pre>
      *
      * <code>bytes last_received = 1;</code>
      */
     fun clearLastReceived() {
       _builder.clearLastReceived()
+    }
+
+    /**
+     * <pre>
+     * Index of the last message received
+     * The message index is a continues numbering
+     * of incoming messages in the database of the node.
+     * When this variable is set, only 
+     * newer messages will be sent.
+     * Default value is 0, when the value
+     * is 0, all feed messages will be sent.
+     * </pre>
+     *
+     * <code>uint64 last_index = 2;</code>
+     */
+    var lastIndex: kotlin.Long
+      @JvmName("getLastIndex")
+      get() = _builder.getLastIndex()
+      @JvmName("setLastIndex")
+      set(value) {
+        _builder.setLastIndex(value)
+      }
+    /**
+     * <pre>
+     * Index of the last message received
+     * The message index is a continues numbering
+     * of incoming messages in the database of the node.
+     * When this variable is set, only 
+     * newer messages will be sent.
+     * Default value is 0, when the value
+     * is 0, all feed messages will be sent.
+     * </pre>
+     *
+     * <code>uint64 last_index = 2;</code>
+     */
+    fun clearLastIndex() {
+      _builder.clearLastIndex()
     }
   }
 }

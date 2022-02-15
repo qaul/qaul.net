@@ -1,0 +1,28 @@
+name: qaul-app
+version: 0.1.0
+summary: Qaul App
+description: Internet Independent Wireless Mesh Communication
+
+confinement: strict
+base: core18
+grade: stable
+
+slots:
+  dbus-qaul-app: # adjust accordingly to your app name
+    interface: dbus
+    bus: session
+    name: net.qaul.qaulApp # adjust accordingly to your app name and
+
+apps:
+  qaul-app:
+    command: qaul_app
+    extensions: [flutter-master] # Where "master" defines which Flutter channel to use for the build
+    plugs:
+      - network
+    slots:
+      - dbus-qaul-app
+parts:
+  qaul-app:
+    source: .
+    plugin: flutter
+    flutter-target: lib/main.dart # The main entry-point file of the application
