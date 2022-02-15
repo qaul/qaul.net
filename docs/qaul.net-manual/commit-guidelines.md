@@ -31,6 +31,9 @@ git rebase main
 # a pull request.
 ```
 
+You can use rebasing also during development to bring the latest
+changes from main branch to your_branch.
+
 ## Coding Style
 
 The coding style is following each languages linting guide lines.
