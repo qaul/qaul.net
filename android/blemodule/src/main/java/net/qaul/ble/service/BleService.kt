@@ -3,6 +3,7 @@
 
 package net.qaul.ble.service
 
+import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.bluetooth.le.*
 import android.content.Context
@@ -21,6 +22,7 @@ import net.qaul.ble.model.Message
 import java.nio.charset.Charset
 import java.util.*
 
+@SuppressLint("MissingPermission")
 class BleService : LifecycleService() {
     var bleCallback: BleScanCallBack? = null
     private val TAG: String = BleService::class.java.simpleName
@@ -710,10 +712,10 @@ class BleService : LifecycleService() {
 
             override fun onMessageSent(
                 gatt: BluetoothGatt?,
-                characteristic: BluetoothGattCharacteristic?,
+                value: ByteArray,
                 id: String
             ) {
-                bleCallback?.onMessageSent(id = id, success = true, data = characteristic!!.value)
+                bleCallback?.onMessageSent(id = id, success = true, data = value)
             }
 
             override fun onCharacteristicChanged(
