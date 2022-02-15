@@ -209,7 +209,6 @@ class BleWrapperClass(context: AppCompatActivity) {
                         bleRes.directReceived = directReceived.build()
                         bleCallback?.bleResponse(ble = bleRes.build())
                     }
-
                 }
             )
         }
