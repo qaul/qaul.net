@@ -3,11 +3,33 @@
 This is best praxis guide for committing to the qaul project.
 We value every contributions!
 
-## Merge Request & Commit Structure
+## Pull Request & Commit Structure
 
 * Please organize the commits by functionality.
 * Please structure your work in feature branches.
 * Make separate commits for comment typo & coding style fixes, if they are not directly in the functions you're working on.
+
+### Before Pull Request
+
+Please always rebase
+
+#### How to Rebase your Branch against Main Branch
+
+Rebasing puts your commits on top of the main branch.
+
+```sh
+# checkout main branch and pull latests changes to make
+# sure it is up to date.
+checkout main
+git pull
+
+# checkout your_branch and rebase it against main branch
+checkout your_branch
+git rebase main
+
+# now you can push your_branch to github and create
+# a pull request.
+```
 
 ## Coding Style
 
