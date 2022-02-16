@@ -96,8 +96,8 @@ public final class NodeOuterClass {
               done = true;
               break;
             case 8: {
-              messageCase_ = 1;
               message_ = input.readBool();
+              messageCase_ = 1;
               break;
             }
             case 18: {
@@ -1001,7 +1001,7 @@ public final class NodeOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getIdBase58Bytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idBase58_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, idBase58_);
       }
       unknownFields.writeTo(output);
@@ -1013,7 +1013,7 @@ public final class NodeOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!getIdBase58Bytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idBase58_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, idBase58_);
       }
       size += unknownFields.getSerializedSize();

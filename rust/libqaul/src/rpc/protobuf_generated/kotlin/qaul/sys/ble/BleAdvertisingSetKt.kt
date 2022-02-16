@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmSynthetic
-inline fun bleAdvertisingSet(block: qaul.sys.ble.BleAdvertisingSetKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.BleAdvertisingSet =
+public inline fun bleAdvertisingSet(block: qaul.sys.ble.BleAdvertisingSetKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleAdvertisingSet =
   qaul.sys.ble.BleAdvertisingSetKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleAdvertisingSet.newBuilder()).apply { block() }._build()
-object BleAdvertisingSetKt {
+public object BleAdvertisingSetKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.sys.ble.BleOuterClass.BleAdvertisingSet.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.sys.ble.BleOuterClass.BleAdvertisingSet.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleAdvertisingSet.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ object BleAdvertisingSetKt {
      *
      * <code>bytes data = 1;</code>
      */
-    var data: com.google.protobuf.ByteString
+    public var data: com.google.protobuf.ByteString
       @JvmName("getData")
       get() = _builder.getData()
       @JvmName("setData")
@@ -43,11 +43,11 @@ object BleAdvertisingSetKt {
      *
      * <code>bytes data = 1;</code>
      */
-    fun clearData() {
+    public fun clearData() {
       _builder.clearData()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.sys.ble.BleOuterClass.BleAdvertisingSet.copy(block: qaul.sys.ble.BleAdvertisingSetKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.BleAdvertisingSet =
+public inline fun qaul.sys.ble.BleOuterClass.BleAdvertisingSet.copy(block: qaul.sys.ble.BleAdvertisingSetKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleAdvertisingSet =
   qaul.sys.ble.BleAdvertisingSetKt.Dsl._create(this.toBuilder()).apply { block() }._build()

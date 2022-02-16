@@ -4,15 +4,15 @@
 package qaul.rpc.connections;
 
 @kotlin.jvm.JvmSynthetic
-inline fun connections(block: qaul.rpc.connections.ConnectionsKt.Dsl.() -> Unit): qaul.rpc.connections.ConnectionsOuterClass.Connections =
+public inline fun connections(block: qaul.rpc.connections.ConnectionsKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.Connections =
   qaul.rpc.connections.ConnectionsKt.Dsl._create(qaul.rpc.connections.ConnectionsOuterClass.Connections.newBuilder()).apply { block() }._build()
-object ConnectionsKt {
+public object ConnectionsKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.rpc.connections.ConnectionsOuterClass.Connections.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.rpc.connections.ConnectionsOuterClass.Connections.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.connections.ConnectionsOuterClass.Connections.Builder): Dsl = Dsl(builder)
@@ -30,7 +30,7 @@ object ConnectionsKt {
      *
      * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
      */
-    var internetNodesRequest: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest
+    public var internetNodesRequest: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest
       @JvmName("getInternetNodesRequest")
       get() = _builder.getInternetNodesRequest()
       @JvmName("setInternetNodesRequest")
@@ -45,7 +45,7 @@ object ConnectionsKt {
      *
      * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
      */
-    fun clearInternetNodesRequest() {
+    public fun clearInternetNodesRequest() {
       _builder.clearInternetNodesRequest()
     }
     /**
@@ -57,7 +57,7 @@ object ConnectionsKt {
      * <code>.qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;</code>
      * @return Whether the internetNodesRequest field is set.
      */
-    fun hasInternetNodesRequest(): kotlin.Boolean {
+    public fun hasInternetNodesRequest(): kotlin.Boolean {
       return _builder.hasInternetNodesRequest()
     }
 
@@ -69,7 +69,7 @@ object ConnectionsKt {
      *
      * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
      */
-    var internetNodesList: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList
+    public var internetNodesList: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList
       @JvmName("getInternetNodesList")
       get() = _builder.getInternetNodesList()
       @JvmName("setInternetNodesList")
@@ -84,7 +84,7 @@ object ConnectionsKt {
      *
      * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
      */
-    fun clearInternetNodesList() {
+    public fun clearInternetNodesList() {
       _builder.clearInternetNodesList()
     }
     /**
@@ -96,7 +96,7 @@ object ConnectionsKt {
      * <code>.qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;</code>
      * @return Whether the internetNodesList field is set.
      */
-    fun hasInternetNodesList(): kotlin.Boolean {
+    public fun hasInternetNodesList(): kotlin.Boolean {
       return _builder.hasInternetNodesList()
     }
 
@@ -108,7 +108,7 @@ object ConnectionsKt {
      *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
      */
-    var internetNodesAdd: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry
+    public var internetNodesAdd: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry
       @JvmName("getInternetNodesAdd")
       get() = _builder.getInternetNodesAdd()
       @JvmName("setInternetNodesAdd")
@@ -123,7 +123,7 @@ object ConnectionsKt {
      *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
      */
-    fun clearInternetNodesAdd() {
+    public fun clearInternetNodesAdd() {
       _builder.clearInternetNodesAdd()
     }
     /**
@@ -135,7 +135,7 @@ object ConnectionsKt {
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;</code>
      * @return Whether the internetNodesAdd field is set.
      */
-    fun hasInternetNodesAdd(): kotlin.Boolean {
+    public fun hasInternetNodesAdd(): kotlin.Boolean {
       return _builder.hasInternetNodesAdd()
     }
 
@@ -147,7 +147,7 @@ object ConnectionsKt {
      *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
      */
-    var internetNodesRemove: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry
+    public var internetNodesRemove: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry
       @JvmName("getInternetNodesRemove")
       get() = _builder.getInternetNodesRemove()
       @JvmName("setInternetNodesRemove")
@@ -162,7 +162,7 @@ object ConnectionsKt {
      *
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
      */
-    fun clearInternetNodesRemove() {
+    public fun clearInternetNodesRemove() {
       _builder.clearInternetNodesRemove()
     }
     /**
@@ -174,18 +174,18 @@ object ConnectionsKt {
      * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;</code>
      * @return Whether the internetNodesRemove field is set.
      */
-    fun hasInternetNodesRemove(): kotlin.Boolean {
+    public fun hasInternetNodesRemove(): kotlin.Boolean {
       return _builder.hasInternetNodesRemove()
     }
-    val messageCase: qaul.rpc.connections.ConnectionsOuterClass.Connections.MessageCase
+    public val messageCase: qaul.rpc.connections.ConnectionsOuterClass.Connections.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
 
-    fun clearMessage() {
+    public fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.rpc.connections.ConnectionsOuterClass.Connections.copy(block: qaul.rpc.connections.ConnectionsKt.Dsl.() -> Unit): qaul.rpc.connections.ConnectionsOuterClass.Connections =
+public inline fun qaul.rpc.connections.ConnectionsOuterClass.Connections.copy(block: qaul.rpc.connections.ConnectionsKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.Connections =
   qaul.rpc.connections.ConnectionsKt.Dsl._create(this.toBuilder()).apply { block() }._build()

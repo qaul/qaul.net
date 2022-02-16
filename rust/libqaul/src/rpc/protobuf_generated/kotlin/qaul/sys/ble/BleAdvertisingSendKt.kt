@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmSynthetic
-inline fun bleAdvertisingSend(block: qaul.sys.ble.BleAdvertisingSendKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.BleAdvertisingSend =
+public inline fun bleAdvertisingSend(block: qaul.sys.ble.BleAdvertisingSendKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleAdvertisingSend =
   qaul.sys.ble.BleAdvertisingSendKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleAdvertisingSend.newBuilder()).apply { block() }._build()
-object BleAdvertisingSendKt {
+public object BleAdvertisingSendKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.sys.ble.BleOuterClass.BleAdvertisingSend.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.sys.ble.BleOuterClass.BleAdvertisingSend.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleAdvertisingSend.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ object BleAdvertisingSendKt {
      *
      * <code>.qaul.sys.ble.BleMode mode = 1;</code>
      */
-    var mode: qaul.sys.ble.BleOuterClass.BleMode
+    public var mode: qaul.sys.ble.BleOuterClass.BleMode
       @JvmName("getMode")
       get() = _builder.getMode()
       @JvmName("setMode")
@@ -43,7 +43,7 @@ object BleAdvertisingSendKt {
      *
      * <code>.qaul.sys.ble.BleMode mode = 1;</code>
      */
-    fun clearMode() {
+    public fun clearMode() {
       _builder.clearMode()
     }
 
@@ -54,7 +54,7 @@ object BleAdvertisingSendKt {
      *
      * <code>bytes data = 2;</code>
      */
-    var data: com.google.protobuf.ByteString
+    public var data: com.google.protobuf.ByteString
       @JvmName("getData")
       get() = _builder.getData()
       @JvmName("setData")
@@ -68,11 +68,11 @@ object BleAdvertisingSendKt {
      *
      * <code>bytes data = 2;</code>
      */
-    fun clearData() {
+    public fun clearData() {
       _builder.clearData()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.sys.ble.BleOuterClass.BleAdvertisingSend.copy(block: qaul.sys.ble.BleAdvertisingSendKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.BleAdvertisingSend =
+public inline fun qaul.sys.ble.BleOuterClass.BleAdvertisingSend.copy(block: qaul.sys.ble.BleAdvertisingSendKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleAdvertisingSend =
   qaul.sys.ble.BleAdvertisingSendKt.Dsl._create(this.toBuilder()).apply { block() }._build()

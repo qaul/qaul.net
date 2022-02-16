@@ -4,15 +4,15 @@
 package qaul.rpc.router;
 
 @kotlin.jvm.JvmSynthetic
-inline fun connectionsRequest(block: qaul.rpc.router.ConnectionsRequestKt.Dsl.() -> Unit): qaul.rpc.router.RouterOuterClass.ConnectionsRequest =
+public inline fun connectionsRequest(block: qaul.rpc.router.ConnectionsRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.ConnectionsRequest =
   qaul.rpc.router.ConnectionsRequestKt.Dsl._create(qaul.rpc.router.RouterOuterClass.ConnectionsRequest.newBuilder()).apply { block() }._build()
-object ConnectionsRequestKt {
+public object ConnectionsRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.rpc.router.RouterOuterClass.ConnectionsRequest.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.rpc.router.RouterOuterClass.ConnectionsRequest.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.router.RouterOuterClass.ConnectionsRequest.Builder): Dsl = Dsl(builder)
@@ -24,5 +24,5 @@ object ConnectionsRequestKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.rpc.router.RouterOuterClass.ConnectionsRequest.copy(block: qaul.rpc.router.ConnectionsRequestKt.Dsl.() -> Unit): qaul.rpc.router.RouterOuterClass.ConnectionsRequest =
+public inline fun qaul.rpc.router.RouterOuterClass.ConnectionsRequest.copy(block: qaul.rpc.router.ConnectionsRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.ConnectionsRequest =
   qaul.rpc.router.ConnectionsRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()

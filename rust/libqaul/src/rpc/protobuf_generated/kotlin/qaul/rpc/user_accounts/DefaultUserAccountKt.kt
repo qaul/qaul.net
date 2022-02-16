@@ -4,15 +4,15 @@
 package qaul.rpc.user_accounts;
 
 @kotlin.jvm.JvmSynthetic
-inline fun defaultUserAccount(block: qaul.rpc.user_accounts.DefaultUserAccountKt.Dsl.() -> Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount =
+public inline fun defaultUserAccount(block: qaul.rpc.user_accounts.DefaultUserAccountKt.Dsl.() -> kotlin.Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount =
   qaul.rpc.user_accounts.DefaultUserAccountKt.Dsl._create(qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount.newBuilder()).apply { block() }._build()
-object DefaultUserAccountKt {
+public object DefaultUserAccountKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ object DefaultUserAccountKt {
     /**
      * <code>bool user_account_exists = 1;</code>
      */
-    var userAccountExists: kotlin.Boolean
+    public var userAccountExists: kotlin.Boolean
       @JvmName("getUserAccountExists")
       get() = _builder.getUserAccountExists()
       @JvmName("setUserAccountExists")
@@ -35,14 +35,14 @@ object DefaultUserAccountKt {
     /**
      * <code>bool user_account_exists = 1;</code>
      */
-    fun clearUserAccountExists() {
+    public fun clearUserAccountExists() {
       _builder.clearUserAccountExists()
     }
 
     /**
      * <code>.qaul.rpc.user_accounts.MyUserAccount my_user_account = 2;</code>
      */
-    var myUserAccount: qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount
+    public var myUserAccount: qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount
       @JvmName("getMyUserAccount")
       get() = _builder.getMyUserAccount()
       @JvmName("setMyUserAccount")
@@ -52,18 +52,18 @@ object DefaultUserAccountKt {
     /**
      * <code>.qaul.rpc.user_accounts.MyUserAccount my_user_account = 2;</code>
      */
-    fun clearMyUserAccount() {
+    public fun clearMyUserAccount() {
       _builder.clearMyUserAccount()
     }
     /**
      * <code>.qaul.rpc.user_accounts.MyUserAccount my_user_account = 2;</code>
      * @return Whether the myUserAccount field is set.
      */
-    fun hasMyUserAccount(): kotlin.Boolean {
+    public fun hasMyUserAccount(): kotlin.Boolean {
       return _builder.hasMyUserAccount()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount.copy(block: qaul.rpc.user_accounts.DefaultUserAccountKt.Dsl.() -> Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount =
+public inline fun qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount.copy(block: qaul.rpc.user_accounts.DefaultUserAccountKt.Dsl.() -> kotlin.Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount =
   qaul.rpc.user_accounts.DefaultUserAccountKt.Dsl._create(this.toBuilder()).apply { block() }._build()

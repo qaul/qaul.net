@@ -4,15 +4,15 @@
 package qaul.rpc.feed;
 
 @kotlin.jvm.JvmSynthetic
-inline fun feedMessageRequest(block: qaul.rpc.feed.FeedMessageRequestKt.Dsl.() -> Unit): qaul.rpc.feed.FeedOuterClass.FeedMessageRequest =
+public inline fun feedMessageRequest(block: qaul.rpc.feed.FeedMessageRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.FeedMessageRequest =
   qaul.rpc.feed.FeedMessageRequestKt.Dsl._create(qaul.rpc.feed.FeedOuterClass.FeedMessageRequest.newBuilder()).apply { block() }._build()
-object FeedMessageRequestKt {
+public object FeedMessageRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.rpc.feed.FeedOuterClass.FeedMessageRequest.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.rpc.feed.FeedOuterClass.FeedMessageRequest.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.feed.FeedOuterClass.FeedMessageRequest.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ object FeedMessageRequestKt {
      *
      * <code>bytes last_received = 1;</code>
      */
-    var lastReceived: com.google.protobuf.ByteString
+    public var lastReceived: com.google.protobuf.ByteString
       @JvmName("getLastReceived")
       get() = _builder.getLastReceived()
       @JvmName("setLastReceived")
@@ -43,7 +43,7 @@ object FeedMessageRequestKt {
      *
      * <code>bytes last_received = 1;</code>
      */
-    fun clearLastReceived() {
+    public fun clearLastReceived() {
       _builder.clearLastReceived()
     }
 
@@ -60,7 +60,7 @@ object FeedMessageRequestKt {
      *
      * <code>uint64 last_index = 2;</code>
      */
-    var lastIndex: kotlin.Long
+    public var lastIndex: kotlin.Long
       @JvmName("getLastIndex")
       get() = _builder.getLastIndex()
       @JvmName("setLastIndex")
@@ -80,11 +80,11 @@ object FeedMessageRequestKt {
      *
      * <code>uint64 last_index = 2;</code>
      */
-    fun clearLastIndex() {
+    public fun clearLastIndex() {
       _builder.clearLastIndex()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.rpc.feed.FeedOuterClass.FeedMessageRequest.copy(block: qaul.rpc.feed.FeedMessageRequestKt.Dsl.() -> Unit): qaul.rpc.feed.FeedOuterClass.FeedMessageRequest =
+public inline fun qaul.rpc.feed.FeedOuterClass.FeedMessageRequest.copy(block: qaul.rpc.feed.FeedMessageRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.FeedMessageRequest =
   qaul.rpc.feed.FeedMessageRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()

@@ -4,15 +4,15 @@
 package qaul.rpc.node;
 
 @kotlin.jvm.JvmSynthetic
-inline fun nodeInformation(block: qaul.rpc.node.NodeInformationKt.Dsl.() -> Unit): qaul.rpc.node.NodeOuterClass.NodeInformation =
+public inline fun nodeInformation(block: qaul.rpc.node.NodeInformationKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.NodeInformation =
   qaul.rpc.node.NodeInformationKt.Dsl._create(qaul.rpc.node.NodeOuterClass.NodeInformation.newBuilder()).apply { block() }._build()
-object NodeInformationKt {
+public object NodeInformationKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.rpc.node.NodeOuterClass.NodeInformation.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.rpc.node.NodeOuterClass.NodeInformation.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.node.NodeOuterClass.NodeInformation.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ object NodeInformationKt {
     /**
      * <code>string id_base58 = 1;</code>
      */
-    var idBase58: kotlin.String
+    public var idBase58: kotlin.String
       @JvmName("getIdBase58")
       get() = _builder.getIdBase58()
       @JvmName("setIdBase58")
@@ -35,11 +35,11 @@ object NodeInformationKt {
     /**
      * <code>string id_base58 = 1;</code>
      */
-    fun clearIdBase58() {
+    public fun clearIdBase58() {
       _builder.clearIdBase58()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.rpc.node.NodeOuterClass.NodeInformation.copy(block: qaul.rpc.node.NodeInformationKt.Dsl.() -> Unit): qaul.rpc.node.NodeOuterClass.NodeInformation =
+public inline fun qaul.rpc.node.NodeOuterClass.NodeInformation.copy(block: qaul.rpc.node.NodeInformationKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.NodeInformation =
   qaul.rpc.node.NodeInformationKt.Dsl._create(this.toBuilder()).apply { block() }._build()

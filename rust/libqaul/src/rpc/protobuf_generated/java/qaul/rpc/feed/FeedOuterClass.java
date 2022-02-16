@@ -2877,11 +2877,19 @@ public final class FeedOuterClass {
         getMessageIdBase58Bytes();
 
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string time_sent = 5;</code>
      * @return The timeSent.
      */
     java.lang.String getTimeSent();
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string time_sent = 5;</code>
      * @return The bytes for timeSent.
      */
@@ -2889,16 +2897,36 @@ public final class FeedOuterClass {
         getTimeSentBytes();
 
     /**
+     * <code>uint64 timestamp_sent = 9;</code>
+     * @return The timestampSent.
+     */
+    long getTimestampSent();
+
+    /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string time_received = 6;</code>
      * @return The timeReceived.
      */
     java.lang.String getTimeReceived();
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string time_received = 6;</code>
      * @return The bytes for timeReceived.
      */
     com.google.protobuf.ByteString
         getTimeReceivedBytes();
+
+    /**
+     * <code>uint64 timestamp_received = 10;</code>
+     * @return The timestampReceived.
+     */
+    long getTimestampReceived();
 
     /**
      * <code>string content = 7;</code>
@@ -3017,6 +3045,16 @@ public final class FeedOuterClass {
             case 64: {
 
               index_ = input.readUInt64();
+              break;
+            }
+            case 72: {
+
+              timestampSent_ = input.readUInt64();
+              break;
+            }
+            case 80: {
+
+              timestampReceived_ = input.readUInt64();
               break;
             }
             default: {
@@ -3168,6 +3206,10 @@ public final class FeedOuterClass {
     public static final int TIME_SENT_FIELD_NUMBER = 5;
     private volatile java.lang.Object timeSent_;
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string time_sent = 5;</code>
      * @return The timeSent.
      */
@@ -3185,6 +3227,10 @@ public final class FeedOuterClass {
       }
     }
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string time_sent = 5;</code>
      * @return The bytes for timeSent.
      */
@@ -3203,9 +3249,24 @@ public final class FeedOuterClass {
       }
     }
 
+    public static final int TIMESTAMP_SENT_FIELD_NUMBER = 9;
+    private long timestampSent_;
+    /**
+     * <code>uint64 timestamp_sent = 9;</code>
+     * @return The timestampSent.
+     */
+    @java.lang.Override
+    public long getTimestampSent() {
+      return timestampSent_;
+    }
+
     public static final int TIME_RECEIVED_FIELD_NUMBER = 6;
     private volatile java.lang.Object timeReceived_;
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string time_received = 6;</code>
      * @return The timeReceived.
      */
@@ -3223,6 +3284,10 @@ public final class FeedOuterClass {
       }
     }
     /**
+     * <pre>
+     * DEPRECATED
+     * </pre>
+     *
      * <code>string time_received = 6;</code>
      * @return The bytes for timeReceived.
      */
@@ -3239,6 +3304,17 @@ public final class FeedOuterClass {
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
+    }
+
+    public static final int TIMESTAMP_RECEIVED_FIELD_NUMBER = 10;
+    private long timestampReceived_;
+    /**
+     * <code>uint64 timestamp_received = 10;</code>
+     * @return The timestampReceived.
+     */
+    @java.lang.Override
+    public long getTimestampReceived() {
+      return timestampReceived_;
     }
 
     public static final int CONTENT_FIELD_NUMBER = 7;
@@ -3307,26 +3383,32 @@ public final class FeedOuterClass {
       if (!senderId_.isEmpty()) {
         output.writeBytes(1, senderId_);
       }
-      if (!getSenderIdBase58Bytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(senderIdBase58_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, senderIdBase58_);
       }
       if (!messageId_.isEmpty()) {
         output.writeBytes(3, messageId_);
       }
-      if (!getMessageIdBase58Bytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(messageIdBase58_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, messageIdBase58_);
       }
-      if (!getTimeSentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(timeSent_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, timeSent_);
       }
-      if (!getTimeReceivedBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(timeReceived_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, timeReceived_);
       }
-      if (!getContentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, content_);
       }
       if (index_ != 0L) {
         output.writeUInt64(8, index_);
+      }
+      if (timestampSent_ != 0L) {
+        output.writeUInt64(9, timestampSent_);
+      }
+      if (timestampReceived_ != 0L) {
+        output.writeUInt64(10, timestampReceived_);
       }
       unknownFields.writeTo(output);
     }
@@ -3341,28 +3423,36 @@ public final class FeedOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, senderId_);
       }
-      if (!getSenderIdBase58Bytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(senderIdBase58_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, senderIdBase58_);
       }
       if (!messageId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(3, messageId_);
       }
-      if (!getMessageIdBase58Bytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(messageIdBase58_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, messageIdBase58_);
       }
-      if (!getTimeSentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(timeSent_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, timeSent_);
       }
-      if (!getTimeReceivedBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(timeReceived_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, timeReceived_);
       }
-      if (!getContentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, content_);
       }
       if (index_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(8, index_);
+      }
+      if (timestampSent_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(9, timestampSent_);
+      }
+      if (timestampReceived_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(10, timestampReceived_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3389,8 +3479,12 @@ public final class FeedOuterClass {
           .equals(other.getMessageIdBase58())) return false;
       if (!getTimeSent()
           .equals(other.getTimeSent())) return false;
+      if (getTimestampSent()
+          != other.getTimestampSent()) return false;
       if (!getTimeReceived()
           .equals(other.getTimeReceived())) return false;
+      if (getTimestampReceived()
+          != other.getTimestampReceived()) return false;
       if (!getContent()
           .equals(other.getContent())) return false;
       if (getIndex()
@@ -3416,8 +3510,14 @@ public final class FeedOuterClass {
       hash = (53 * hash) + getMessageIdBase58().hashCode();
       hash = (37 * hash) + TIME_SENT_FIELD_NUMBER;
       hash = (53 * hash) + getTimeSent().hashCode();
+      hash = (37 * hash) + TIMESTAMP_SENT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTimestampSent());
       hash = (37 * hash) + TIME_RECEIVED_FIELD_NUMBER;
       hash = (53 * hash) + getTimeReceived().hashCode();
+      hash = (37 * hash) + TIMESTAMP_RECEIVED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTimestampReceived());
       hash = (37 * hash) + CONTENT_FIELD_NUMBER;
       hash = (53 * hash) + getContent().hashCode();
       hash = (37 * hash) + INDEX_FIELD_NUMBER;
@@ -3570,7 +3670,11 @@ public final class FeedOuterClass {
 
         timeSent_ = "";
 
+        timestampSent_ = 0L;
+
         timeReceived_ = "";
+
+        timestampReceived_ = 0L;
 
         content_ = "";
 
@@ -3607,7 +3711,9 @@ public final class FeedOuterClass {
         result.messageId_ = messageId_;
         result.messageIdBase58_ = messageIdBase58_;
         result.timeSent_ = timeSent_;
+        result.timestampSent_ = timestampSent_;
         result.timeReceived_ = timeReceived_;
+        result.timestampReceived_ = timestampReceived_;
         result.content_ = content_;
         result.index_ = index_;
         onBuilt();
@@ -3676,9 +3782,15 @@ public final class FeedOuterClass {
           timeSent_ = other.timeSent_;
           onChanged();
         }
+        if (other.getTimestampSent() != 0L) {
+          setTimestampSent(other.getTimestampSent());
+        }
         if (!other.getTimeReceived().isEmpty()) {
           timeReceived_ = other.timeReceived_;
           onChanged();
+        }
+        if (other.getTimestampReceived() != 0L) {
+          setTimestampReceived(other.getTimestampReceived());
         }
         if (!other.getContent().isEmpty()) {
           content_ = other.content_;
@@ -3978,6 +4090,10 @@ public final class FeedOuterClass {
 
       private java.lang.Object timeSent_ = "";
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string time_sent = 5;</code>
        * @return The timeSent.
        */
@@ -3994,6 +4110,10 @@ public final class FeedOuterClass {
         }
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string time_sent = 5;</code>
        * @return The bytes for timeSent.
        */
@@ -4011,6 +4131,10 @@ public final class FeedOuterClass {
         }
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string time_sent = 5;</code>
        * @param value The timeSent to set.
        * @return This builder for chaining.
@@ -4026,6 +4150,10 @@ public final class FeedOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string time_sent = 5;</code>
        * @return This builder for chaining.
        */
@@ -4036,6 +4164,10 @@ public final class FeedOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string time_sent = 5;</code>
        * @param value The bytes for timeSent to set.
        * @return This builder for chaining.
@@ -4052,8 +4184,43 @@ public final class FeedOuterClass {
         return this;
       }
 
+      private long timestampSent_ ;
+      /**
+       * <code>uint64 timestamp_sent = 9;</code>
+       * @return The timestampSent.
+       */
+      @java.lang.Override
+      public long getTimestampSent() {
+        return timestampSent_;
+      }
+      /**
+       * <code>uint64 timestamp_sent = 9;</code>
+       * @param value The timestampSent to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTimestampSent(long value) {
+        
+        timestampSent_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint64 timestamp_sent = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTimestampSent() {
+        
+        timestampSent_ = 0L;
+        onChanged();
+        return this;
+      }
+
       private java.lang.Object timeReceived_ = "";
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string time_received = 6;</code>
        * @return The timeReceived.
        */
@@ -4070,6 +4237,10 @@ public final class FeedOuterClass {
         }
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string time_received = 6;</code>
        * @return The bytes for timeReceived.
        */
@@ -4087,6 +4258,10 @@ public final class FeedOuterClass {
         }
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string time_received = 6;</code>
        * @param value The timeReceived to set.
        * @return This builder for chaining.
@@ -4102,6 +4277,10 @@ public final class FeedOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string time_received = 6;</code>
        * @return This builder for chaining.
        */
@@ -4112,6 +4291,10 @@ public final class FeedOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * DEPRECATED
+       * </pre>
+       *
        * <code>string time_received = 6;</code>
        * @param value The bytes for timeReceived to set.
        * @return This builder for chaining.
@@ -4124,6 +4307,37 @@ public final class FeedOuterClass {
   checkByteStringIsUtf8(value);
         
         timeReceived_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long timestampReceived_ ;
+      /**
+       * <code>uint64 timestamp_received = 10;</code>
+       * @return The timestampReceived.
+       */
+      @java.lang.Override
+      public long getTimestampReceived() {
+        return timestampReceived_;
+      }
+      /**
+       * <code>uint64 timestamp_received = 10;</code>
+       * @param value The timestampReceived to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTimestampReceived(long value) {
+        
+        timestampReceived_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint64 timestamp_received = 10;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTimestampReceived() {
+        
+        timestampReceived_ = 0L;
         onChanged();
         return this;
       }
@@ -4443,7 +4657,7 @@ public final class FeedOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getContentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, content_);
       }
       unknownFields.writeTo(output);
@@ -4455,7 +4669,7 @@ public final class FeedOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!getContentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, content_);
       }
       size += unknownFields.getSerializedSize();
@@ -4905,13 +5119,14 @@ public final class FeedOuterClass {
       "B\t\n\007message\"?\n\022FeedMessageRequest\022\025\n\rlas" +
       "t_received\030\001 \001(\014\022\022\n\nlast_index\030\002 \001(\004\"C\n\017" +
       "FeedMessageList\0220\n\014feed_message\030\001 \003(\0132\032." +
-      "qaul.rpc.feed.FeedMessage\"\263\001\n\013FeedMessag" +
+      "qaul.rpc.feed.FeedMessage\"\347\001\n\013FeedMessag" +
       "e\022\021\n\tsender_id\030\001 \001(\014\022\030\n\020sender_id_base58" +
       "\030\002 \001(\t\022\022\n\nmessage_id\030\003 \001(\014\022\031\n\021message_id" +
-      "_base58\030\004 \001(\t\022\021\n\ttime_sent\030\005 \001(\t\022\025\n\rtime" +
-      "_received\030\006 \001(\t\022\017\n\007content\030\007 \001(\t\022\r\n\005inde" +
-      "x\030\010 \001(\004\"\036\n\013SendMessage\022\017\n\007content\030\001 \001(\tb" +
-      "\006proto3"
+      "_base58\030\004 \001(\t\022\021\n\ttime_sent\030\005 \001(\t\022\026\n\016time" +
+      "stamp_sent\030\t \001(\004\022\025\n\rtime_received\030\006 \001(\t\022" +
+      "\032\n\022timestamp_received\030\n \001(\004\022\017\n\007content\030\007" +
+      " \001(\t\022\r\n\005index\030\010 \001(\004\"\036\n\013SendMessage\022\017\n\007co" +
+      "ntent\030\001 \001(\tb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4940,7 +5155,7 @@ public final class FeedOuterClass {
     internal_static_qaul_rpc_feed_FeedMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_feed_FeedMessage_descriptor,
-        new java.lang.String[] { "SenderId", "SenderIdBase58", "MessageId", "MessageIdBase58", "TimeSent", "TimeReceived", "Content", "Index", });
+        new java.lang.String[] { "SenderId", "SenderIdBase58", "MessageId", "MessageIdBase58", "TimeSent", "TimestampSent", "TimeReceived", "TimestampReceived", "Content", "Index", });
     internal_static_qaul_rpc_feed_SendMessage_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_qaul_rpc_feed_SendMessage_fieldAccessorTable = new

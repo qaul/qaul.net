@@ -4,15 +4,15 @@
 package qaul.rpc.users;
 
 @kotlin.jvm.JvmSynthetic
-inline fun users(block: qaul.rpc.users.UsersKt.Dsl.() -> Unit): qaul.rpc.users.UsersOuterClass.Users =
+public inline fun users(block: qaul.rpc.users.UsersKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.Users =
   qaul.rpc.users.UsersKt.Dsl._create(qaul.rpc.users.UsersOuterClass.Users.newBuilder()).apply { block() }._build()
-object UsersKt {
+public object UsersKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.rpc.users.UsersOuterClass.Users.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.rpc.users.UsersOuterClass.Users.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.users.UsersOuterClass.Users.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ object UsersKt {
     /**
      * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
      */
-    var userRequest: qaul.rpc.users.UsersOuterClass.UserRequest
+    public var userRequest: qaul.rpc.users.UsersOuterClass.UserRequest
       @JvmName("getUserRequest")
       get() = _builder.getUserRequest()
       @JvmName("setUserRequest")
@@ -35,21 +35,21 @@ object UsersKt {
     /**
      * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
      */
-    fun clearUserRequest() {
+    public fun clearUserRequest() {
       _builder.clearUserRequest()
     }
     /**
      * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
      * @return Whether the userRequest field is set.
      */
-    fun hasUserRequest(): kotlin.Boolean {
+    public fun hasUserRequest(): kotlin.Boolean {
       return _builder.hasUserRequest()
     }
 
     /**
      * <code>.qaul.rpc.users.UserList user_list = 2;</code>
      */
-    var userList: qaul.rpc.users.UsersOuterClass.UserList
+    public var userList: qaul.rpc.users.UsersOuterClass.UserList
       @JvmName("getUserList")
       get() = _builder.getUserList()
       @JvmName("setUserList")
@@ -59,21 +59,21 @@ object UsersKt {
     /**
      * <code>.qaul.rpc.users.UserList user_list = 2;</code>
      */
-    fun clearUserList() {
+    public fun clearUserList() {
       _builder.clearUserList()
     }
     /**
      * <code>.qaul.rpc.users.UserList user_list = 2;</code>
      * @return Whether the userList field is set.
      */
-    fun hasUserList(): kotlin.Boolean {
+    public fun hasUserList(): kotlin.Boolean {
       return _builder.hasUserList()
     }
 
     /**
      * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
      */
-    var userUpdate: qaul.rpc.users.UsersOuterClass.UserEntry
+    public var userUpdate: qaul.rpc.users.UsersOuterClass.UserEntry
       @JvmName("getUserUpdate")
       get() = _builder.getUserUpdate()
       @JvmName("setUserUpdate")
@@ -83,25 +83,25 @@ object UsersKt {
     /**
      * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
      */
-    fun clearUserUpdate() {
+    public fun clearUserUpdate() {
       _builder.clearUserUpdate()
     }
     /**
      * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
      * @return Whether the userUpdate field is set.
      */
-    fun hasUserUpdate(): kotlin.Boolean {
+    public fun hasUserUpdate(): kotlin.Boolean {
       return _builder.hasUserUpdate()
     }
-    val messageCase: qaul.rpc.users.UsersOuterClass.Users.MessageCase
+    public val messageCase: qaul.rpc.users.UsersOuterClass.Users.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
 
-    fun clearMessage() {
+    public fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.rpc.users.UsersOuterClass.Users.copy(block: qaul.rpc.users.UsersKt.Dsl.() -> Unit): qaul.rpc.users.UsersOuterClass.Users =
+public inline fun qaul.rpc.users.UsersOuterClass.Users.copy(block: qaul.rpc.users.UsersKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.Users =
   qaul.rpc.users.UsersKt.Dsl._create(this.toBuilder()).apply { block() }._build()

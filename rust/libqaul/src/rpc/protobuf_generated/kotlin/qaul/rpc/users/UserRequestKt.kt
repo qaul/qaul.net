@@ -4,15 +4,15 @@
 package qaul.rpc.users;
 
 @kotlin.jvm.JvmSynthetic
-inline fun userRequest(block: qaul.rpc.users.UserRequestKt.Dsl.() -> Unit): qaul.rpc.users.UsersOuterClass.UserRequest =
+public inline fun userRequest(block: qaul.rpc.users.UserRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.UserRequest =
   qaul.rpc.users.UserRequestKt.Dsl._create(qaul.rpc.users.UsersOuterClass.UserRequest.newBuilder()).apply { block() }._build()
-object UserRequestKt {
+public object UserRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.rpc.users.UsersOuterClass.UserRequest.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.rpc.users.UsersOuterClass.UserRequest.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.users.UsersOuterClass.UserRequest.Builder): Dsl = Dsl(builder)
@@ -24,5 +24,5 @@ object UserRequestKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.rpc.users.UsersOuterClass.UserRequest.copy(block: qaul.rpc.users.UserRequestKt.Dsl.() -> Unit): qaul.rpc.users.UsersOuterClass.UserRequest =
+public inline fun qaul.rpc.users.UsersOuterClass.UserRequest.copy(block: qaul.rpc.users.UserRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.UserRequest =
   qaul.rpc.users.UserRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()

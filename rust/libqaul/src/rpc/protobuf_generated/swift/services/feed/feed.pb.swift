@@ -148,9 +148,15 @@ struct Qaul_Rpc_Feed_FeedMessage {
   /// DEPRECATED
   var messageIDBase58: String = String()
 
+  /// DEPRECATED
   var timeSent: String = String()
 
+  var timestampSent: UInt64 = 0
+
+  /// DEPRECATED
   var timeReceived: String = String()
+
+  var timestampReceived: UInt64 = 0
 
   var content: String = String()
 
@@ -344,7 +350,9 @@ extension Qaul_Rpc_Feed_FeedMessage: SwiftProtobuf.Message, SwiftProtobuf._Messa
     3: .standard(proto: "message_id"),
     4: .standard(proto: "message_id_base58"),
     5: .standard(proto: "time_sent"),
+    9: .standard(proto: "timestamp_sent"),
     6: .standard(proto: "time_received"),
+    10: .standard(proto: "timestamp_received"),
     7: .same(proto: "content"),
     8: .same(proto: "index"),
   ]
@@ -363,6 +371,8 @@ extension Qaul_Rpc_Feed_FeedMessage: SwiftProtobuf.Message, SwiftProtobuf._Messa
       case 6: try { try decoder.decodeSingularStringField(value: &self.timeReceived) }()
       case 7: try { try decoder.decodeSingularStringField(value: &self.content) }()
       case 8: try { try decoder.decodeSingularUInt64Field(value: &self.index) }()
+      case 9: try { try decoder.decodeSingularUInt64Field(value: &self.timestampSent) }()
+      case 10: try { try decoder.decodeSingularUInt64Field(value: &self.timestampReceived) }()
       default: break
       }
     }
@@ -393,6 +403,12 @@ extension Qaul_Rpc_Feed_FeedMessage: SwiftProtobuf.Message, SwiftProtobuf._Messa
     if self.index != 0 {
       try visitor.visitSingularUInt64Field(value: self.index, fieldNumber: 8)
     }
+    if self.timestampSent != 0 {
+      try visitor.visitSingularUInt64Field(value: self.timestampSent, fieldNumber: 9)
+    }
+    if self.timestampReceived != 0 {
+      try visitor.visitSingularUInt64Field(value: self.timestampReceived, fieldNumber: 10)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -402,7 +418,9 @@ extension Qaul_Rpc_Feed_FeedMessage: SwiftProtobuf.Message, SwiftProtobuf._Messa
     if lhs.messageID != rhs.messageID {return false}
     if lhs.messageIDBase58 != rhs.messageIDBase58 {return false}
     if lhs.timeSent != rhs.timeSent {return false}
+    if lhs.timestampSent != rhs.timestampSent {return false}
     if lhs.timeReceived != rhs.timeReceived {return false}
+    if lhs.timestampReceived != rhs.timestampReceived {return false}
     if lhs.content != rhs.content {return false}
     if lhs.index != rhs.index {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}

@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmSynthetic
-inline fun bleInfoRequest(block: qaul.sys.ble.BleInfoRequestKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.BleInfoRequest =
+public inline fun bleInfoRequest(block: qaul.sys.ble.BleInfoRequestKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleInfoRequest =
   qaul.sys.ble.BleInfoRequestKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleInfoRequest.newBuilder()).apply { block() }._build()
-object BleInfoRequestKt {
+public object BleInfoRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.sys.ble.BleOuterClass.BleInfoRequest.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.sys.ble.BleOuterClass.BleInfoRequest.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleInfoRequest.Builder): Dsl = Dsl(builder)
@@ -24,5 +24,5 @@ object BleInfoRequestKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.sys.ble.BleOuterClass.BleInfoRequest.copy(block: qaul.sys.ble.BleInfoRequestKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.BleInfoRequest =
+public inline fun qaul.sys.ble.BleOuterClass.BleInfoRequest.copy(block: qaul.sys.ble.BleInfoRequestKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleInfoRequest =
   qaul.sys.ble.BleInfoRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()

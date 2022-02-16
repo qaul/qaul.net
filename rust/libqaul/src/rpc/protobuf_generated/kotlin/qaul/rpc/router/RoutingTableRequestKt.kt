@@ -4,15 +4,15 @@
 package qaul.rpc.router;
 
 @kotlin.jvm.JvmSynthetic
-inline fun routingTableRequest(block: qaul.rpc.router.RoutingTableRequestKt.Dsl.() -> Unit): qaul.rpc.router.RouterOuterClass.RoutingTableRequest =
+public inline fun routingTableRequest(block: qaul.rpc.router.RoutingTableRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.RoutingTableRequest =
   qaul.rpc.router.RoutingTableRequestKt.Dsl._create(qaul.rpc.router.RouterOuterClass.RoutingTableRequest.newBuilder()).apply { block() }._build()
-object RoutingTableRequestKt {
+public object RoutingTableRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.rpc.router.RouterOuterClass.RoutingTableRequest.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.rpc.router.RouterOuterClass.RoutingTableRequest.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.router.RouterOuterClass.RoutingTableRequest.Builder): Dsl = Dsl(builder)
@@ -24,5 +24,5 @@ object RoutingTableRequestKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.rpc.router.RouterOuterClass.RoutingTableRequest.copy(block: qaul.rpc.router.RoutingTableRequestKt.Dsl.() -> Unit): qaul.rpc.router.RouterOuterClass.RoutingTableRequest =
+public inline fun qaul.rpc.router.RouterOuterClass.RoutingTableRequest.copy(block: qaul.rpc.router.RoutingTableRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.RoutingTableRequest =
   qaul.rpc.router.RoutingTableRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()

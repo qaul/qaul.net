@@ -3038,22 +3038,22 @@ public final class UsersOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
       }
       if (!id_.isEmpty()) {
         output.writeBytes(2, id_);
       }
-      if (!getIdBase58Bytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idBase58_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, idBase58_);
       }
       if (!key_.isEmpty()) {
         output.writeBytes(5, key_);
       }
-      if (!getKeyTypeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(keyType_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, keyType_);
       }
-      if (!getKeyBase58Bytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(keyBase58_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, keyBase58_);
       }
       if (connectivity_ != qaul.rpc.users.UsersOuterClass.Connectivity.Online.getNumber()) {
@@ -3074,24 +3074,24 @@ public final class UsersOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
       }
       if (!id_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, id_);
       }
-      if (!getIdBase58Bytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idBase58_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, idBase58_);
       }
       if (!key_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(5, key_);
       }
-      if (!getKeyTypeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(keyType_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, keyType_);
       }
-      if (!getKeyBase58Bytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(keyBase58_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, keyBase58_);
       }
       if (connectivity_ != qaul.rpc.users.UsersOuterClass.Connectivity.Online.getNumber()) {

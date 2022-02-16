@@ -4,15 +4,15 @@
 package qaul.rpc.router;
 
 @kotlin.jvm.JvmSynthetic
-inline fun connectionEntry(block: qaul.rpc.router.ConnectionEntryKt.Dsl.() -> Unit): qaul.rpc.router.RouterOuterClass.ConnectionEntry =
+public inline fun connectionEntry(block: qaul.rpc.router.ConnectionEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.ConnectionEntry =
   qaul.rpc.router.ConnectionEntryKt.Dsl._create(qaul.rpc.router.RouterOuterClass.ConnectionEntry.newBuilder()).apply { block() }._build()
-object ConnectionEntryKt {
+public object ConnectionEntryKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ object ConnectionEntryKt {
      *
      * <code>uint32 rtt = 1;</code>
      */
-    var rtt: kotlin.Int
+    public var rtt: kotlin.Int
       @JvmName("getRtt")
       get() = _builder.getRtt()
       @JvmName("setRtt")
@@ -43,7 +43,7 @@ object ConnectionEntryKt {
      *
      * <code>uint32 rtt = 1;</code>
      */
-    fun clearRtt() {
+    public fun clearRtt() {
       _builder.clearRtt()
     }
 
@@ -55,7 +55,7 @@ object ConnectionEntryKt {
      *
      * <code>uint32 hop_count = 2;</code>
      */
-    var hopCount: kotlin.Int
+    public var hopCount: kotlin.Int
       @JvmName("getHopCount")
       get() = _builder.getHopCount()
       @JvmName("setHopCount")
@@ -70,7 +70,7 @@ object ConnectionEntryKt {
      *
      * <code>uint32 hop_count = 2;</code>
      */
-    fun clearHopCount() {
+    public fun clearHopCount() {
       _builder.clearHopCount()
     }
 
@@ -81,7 +81,7 @@ object ConnectionEntryKt {
      *
      * <code>bytes via = 3;</code>
      */
-    var via: com.google.protobuf.ByteString
+    public var via: com.google.protobuf.ByteString
       @JvmName("getVia")
       get() = _builder.getVia()
       @JvmName("setVia")
@@ -95,11 +95,11 @@ object ConnectionEntryKt {
      *
      * <code>bytes via = 3;</code>
      */
-    fun clearVia() {
+    public fun clearVia() {
       _builder.clearVia()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.rpc.router.RouterOuterClass.ConnectionEntry.copy(block: qaul.rpc.router.ConnectionEntryKt.Dsl.() -> Unit): qaul.rpc.router.RouterOuterClass.ConnectionEntry =
+public inline fun qaul.rpc.router.RouterOuterClass.ConnectionEntry.copy(block: qaul.rpc.router.ConnectionEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.ConnectionEntry =
   qaul.rpc.router.ConnectionEntryKt.Dsl._create(this.toBuilder()).apply { block() }._build()
