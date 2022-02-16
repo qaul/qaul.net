@@ -11,9 +11,9 @@ class FeedPost extends Equatable {
     this.senderIdBase58,
     this.messageId,
     this.messageIdBase58,
-    this.timeSent,
-    this.timeReceived,
     this.content,
+    required this.sendTime,
+    required this.receiveTime,
   });
 
   final Uint8List? senderId;
@@ -21,23 +21,23 @@ class FeedPost extends Equatable {
   final String? senderIdBase58;
   final Uint8List? messageId;
   final String? messageIdBase58;
-  final String? timeSent;
-  final String? timeReceived;
   final String? content;
+  final DateTime sendTime;
+  final DateTime receiveTime;
 
   @override
-  List<Object?> get props => [senderIdBase58, messageIdBase58, timeSent, index];
+  List<Object?> get props => [senderIdBase58, messageIdBase58, index];
 }
 
 extension FMExtension on FeedMessage {
   FeedPost get toModelMessage => FeedPost(
-    senderId: Uint8List.fromList(senderId),
-    index: index.toInt(),
-    senderIdBase58: senderIdBase58,
-    messageId: Uint8List.fromList(messageId),
-    messageIdBase58: messageIdBase58,
-    timeSent: timeSent,
-    timeReceived: timeReceived,
-    content: content,
-  );
+        senderId: Uint8List.fromList(senderId),
+        index: index.toInt(),
+        senderIdBase58: senderIdBase58,
+        messageId: Uint8List.fromList(messageId),
+        messageIdBase58: messageIdBase58,
+        content: content,
+        sendTime: DateTime.fromMillisecondsSinceEpoch(timestampSent.toInt()),
+        receiveTime: DateTime.fromMillisecondsSinceEpoch(timestampReceived.toInt()),
+      );
 }
