@@ -13,8 +13,8 @@ class SplashScreen extends ConsumerWidget {
     for (var i = 0; i < 5; i++) {
       await worker.getDefaultUserAccount();
       await Future.delayed(Duration(milliseconds: (i + 1) * 100));
-      // final user = ref.read(defaultUserProvider);
-      return NavigationHelper.home;
+      final user = ref.read(defaultUserProvider);
+      if (user != null) return NavigationHelper.home;
     }
     return NavigationHelper.createAccount;
   });
