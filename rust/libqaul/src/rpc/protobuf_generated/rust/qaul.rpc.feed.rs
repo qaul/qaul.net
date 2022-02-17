@@ -58,10 +58,16 @@ pub struct FeedMessage {
     /// DEPRECATED
     #[prost(string, tag="4")]
     pub message_id_base58: ::prost::alloc::string::String,
+    /// DEPRECATED
     #[prost(string, tag="5")]
     pub time_sent: ::prost::alloc::string::String,
+    #[prost(uint64, tag="9")]
+    pub timestamp_sent: u64,
+    /// DEPRECATED
     #[prost(string, tag="6")]
     pub time_received: ::prost::alloc::string::String,
+    #[prost(uint64, tag="10")]
+    pub timestamp_received: u64,
     #[prost(string, tag="7")]
     pub content: ::prost::alloc::string::String,
     #[prost(uint64, tag="8")]

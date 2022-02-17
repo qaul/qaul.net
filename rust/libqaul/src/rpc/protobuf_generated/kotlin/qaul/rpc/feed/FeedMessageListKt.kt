@@ -4,15 +4,15 @@
 package qaul.rpc.feed;
 
 @kotlin.jvm.JvmSynthetic
-inline fun feedMessageList(block: qaul.rpc.feed.FeedMessageListKt.Dsl.() -> Unit): qaul.rpc.feed.FeedOuterClass.FeedMessageList =
+public inline fun feedMessageList(block: qaul.rpc.feed.FeedMessageListKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.FeedMessageList =
   qaul.rpc.feed.FeedMessageListKt.Dsl._create(qaul.rpc.feed.FeedOuterClass.FeedMessageList.newBuilder()).apply { block() }._build()
-object FeedMessageListKt {
+public object FeedMessageListKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.rpc.feed.FeedOuterClass.FeedMessageList.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.rpc.feed.FeedOuterClass.FeedMessageList.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.feed.FeedOuterClass.FeedMessageList.Builder): Dsl = Dsl(builder)
@@ -27,11 +27,11 @@ object FeedMessageListKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    class FeedMessageProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    public class FeedMessageProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <code>repeated .qaul.rpc.feed.FeedMessage feed_message = 1;</code>
      */
-     val feedMessage: com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>
+     public val feedMessage: com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getFeedMessageList()
@@ -42,7 +42,7 @@ object FeedMessageListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addFeedMessage")
-    fun com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>.add(value: qaul.rpc.feed.FeedOuterClass.FeedMessage) {
+    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>.add(value: qaul.rpc.feed.FeedOuterClass.FeedMessage) {
       _builder.addFeedMessage(value)
     }/**
      * <code>repeated .qaul.rpc.feed.FeedMessage feed_message = 1;</code>
@@ -50,7 +50,8 @@ object FeedMessageListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignFeedMessage")
-    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>.plusAssign(value: qaul.rpc.feed.FeedOuterClass.FeedMessage) {
+    @Suppress("NOTHING_TO_INLINE")
+    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>.plusAssign(value: qaul.rpc.feed.FeedOuterClass.FeedMessage) {
       add(value)
     }/**
      * <code>repeated .qaul.rpc.feed.FeedMessage feed_message = 1;</code>
@@ -58,7 +59,7 @@ object FeedMessageListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllFeedMessage")
-    fun com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.feed.FeedOuterClass.FeedMessage>) {
+    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.feed.FeedOuterClass.FeedMessage>) {
       _builder.addAllFeedMessage(values)
     }/**
      * <code>repeated .qaul.rpc.feed.FeedMessage feed_message = 1;</code>
@@ -66,7 +67,8 @@ object FeedMessageListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllFeedMessage")
-    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.feed.FeedOuterClass.FeedMessage>) {
+    @Suppress("NOTHING_TO_INLINE")
+    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.feed.FeedOuterClass.FeedMessage>) {
       addAll(values)
     }/**
      * <code>repeated .qaul.rpc.feed.FeedMessage feed_message = 1;</code>
@@ -75,17 +77,17 @@ object FeedMessageListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setFeedMessage")
-    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>.set(index: kotlin.Int, value: qaul.rpc.feed.FeedOuterClass.FeedMessage) {
+    public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>.set(index: kotlin.Int, value: qaul.rpc.feed.FeedOuterClass.FeedMessage) {
       _builder.setFeedMessage(index, value)
     }/**
      * <code>repeated .qaul.rpc.feed.FeedMessage feed_message = 1;</code>
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearFeedMessage")
-    fun com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>.clear() {
+    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.feed.FeedOuterClass.FeedMessage, FeedMessageProxy>.clear() {
       _builder.clearFeedMessage()
     }}
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.rpc.feed.FeedOuterClass.FeedMessageList.copy(block: qaul.rpc.feed.FeedMessageListKt.Dsl.() -> Unit): qaul.rpc.feed.FeedOuterClass.FeedMessageList =
+public inline fun qaul.rpc.feed.FeedOuterClass.FeedMessageList.copy(block: qaul.rpc.feed.FeedMessageListKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.FeedMessageList =
   qaul.rpc.feed.FeedMessageListKt.Dsl._create(this.toBuilder()).apply { block() }._build()

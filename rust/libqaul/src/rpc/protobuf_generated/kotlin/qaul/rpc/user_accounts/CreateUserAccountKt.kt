@@ -4,15 +4,15 @@
 package qaul.rpc.user_accounts;
 
 @kotlin.jvm.JvmSynthetic
-inline fun createUserAccount(block: qaul.rpc.user_accounts.CreateUserAccountKt.Dsl.() -> Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount =
+public inline fun createUserAccount(block: qaul.rpc.user_accounts.CreateUserAccountKt.Dsl.() -> kotlin.Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount =
   qaul.rpc.user_accounts.CreateUserAccountKt.Dsl._create(qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount.newBuilder()).apply { block() }._build()
-object CreateUserAccountKt {
+public object CreateUserAccountKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ object CreateUserAccountKt {
     /**
      * <code>string name = 1;</code>
      */
-    var name: kotlin.String
+    public var name: kotlin.String
       @JvmName("getName")
       get() = _builder.getName()
       @JvmName("setName")
@@ -35,11 +35,11 @@ object CreateUserAccountKt {
     /**
      * <code>string name = 1;</code>
      */
-    fun clearName() {
+    public fun clearName() {
       _builder.clearName()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount.copy(block: qaul.rpc.user_accounts.CreateUserAccountKt.Dsl.() -> Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount =
+public inline fun qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount.copy(block: qaul.rpc.user_accounts.CreateUserAccountKt.Dsl.() -> kotlin.Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount =
   qaul.rpc.user_accounts.CreateUserAccountKt.Dsl._create(this.toBuilder()).apply { block() }._build()

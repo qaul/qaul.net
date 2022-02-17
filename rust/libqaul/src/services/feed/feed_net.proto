@@ -1,0 +1,21 @@
+syntax = "proto3";
+package qaul.net.feed;
+
+
+// Qaul Feed Network Message
+message FeedContainer {
+    // signature
+    bytes signature = 1;
+    // message content
+    bytes message = 2;
+}
+
+// Feed Message Content
+message FeedMessageContent {
+    // sender id
+    bytes sender = 1;
+    // message content
+    string content = 2;
+    // timestamp in milli seconds
+    uint64 time = 3;
+}

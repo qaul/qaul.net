@@ -35,6 +35,7 @@ use libp2p::{
     NetworkBehaviour,
 };
 use futures::channel::mpsc;
+use prost::Message;
 use std::collections::HashSet;
 use log::info;
 use async_std::task;
@@ -57,6 +58,8 @@ use qaul_info::{
     QaulInfoEvent,
 };
 
+
+use crate::services::feed::proto_net;
 
 #[derive(NetworkBehaviour)]
 pub struct QaulLanBehaviour {
@@ -225,7 +228,7 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulLanBehaviour {
         match event {
             FloodsubEvent::Message(msg) => {
                 // feed Message
-                if let Ok(resp) = serde_json::from_slice::<FeedMessageSendContainer>(&msg.data) {
+                if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
                     Feed::received( ConnectionModule::Lan, msg.source, resp);
                 }
                 // Pages Messages

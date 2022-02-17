@@ -220,6 +220,8 @@ class FeedMessage extends $pb.GeneratedMessage {
     ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timeReceived')
     ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
     ..a<$fixnum.Int64>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'index', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timestampSent', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timestampReceived', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
@@ -233,6 +235,8 @@ class FeedMessage extends $pb.GeneratedMessage {
     $core.String? timeReceived,
     $core.String? content,
     $fixnum.Int64? index,
+    $fixnum.Int64? timestampSent,
+    $fixnum.Int64? timestampReceived,
   }) {
     final _result = create();
     if (senderId != null) {
@@ -258,6 +262,12 @@ class FeedMessage extends $pb.GeneratedMessage {
     }
     if (index != null) {
       _result.index = index;
+    }
+    if (timestampSent != null) {
+      _result.timestampSent = timestampSent;
+    }
+    if (timestampReceived != null) {
+      _result.timestampReceived = timestampReceived;
     }
     return _result;
   }
@@ -353,6 +363,24 @@ class FeedMessage extends $pb.GeneratedMessage {
   $core.bool hasIndex() => $_has(7);
   @$pb.TagNumber(8)
   void clearIndex() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $fixnum.Int64 get timestampSent => $_getI64(8);
+  @$pb.TagNumber(9)
+  set timestampSent($fixnum.Int64 v) { $_setInt64(8, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasTimestampSent() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearTimestampSent() => clearField(9);
+
+  @$pb.TagNumber(10)
+  $fixnum.Int64 get timestampReceived => $_getI64(9);
+  @$pb.TagNumber(10)
+  set timestampReceived($fixnum.Int64 v) { $_setInt64(9, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasTimestampReceived() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearTimestampReceived() => clearField(10);
 }
 
 class SendMessage extends $pb.GeneratedMessage {

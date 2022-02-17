@@ -4,15 +4,15 @@
 package qaul.rpc.user_accounts;
 
 @kotlin.jvm.JvmSynthetic
-inline fun myUserAccount(block: qaul.rpc.user_accounts.MyUserAccountKt.Dsl.() -> Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount =
+public inline fun myUserAccount(block: qaul.rpc.user_accounts.MyUserAccountKt.Dsl.() -> kotlin.Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount =
   qaul.rpc.user_accounts.MyUserAccountKt.Dsl._create(qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount.newBuilder()).apply { block() }._build()
-object MyUserAccountKt {
+public object MyUserAccountKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ object MyUserAccountKt {
     /**
      * <code>string name = 1;</code>
      */
-    var name: kotlin.String
+    public var name: kotlin.String
       @JvmName("getName")
       get() = _builder.getName()
       @JvmName("setName")
@@ -35,14 +35,14 @@ object MyUserAccountKt {
     /**
      * <code>string name = 1;</code>
      */
-    fun clearName() {
+    public fun clearName() {
       _builder.clearName()
     }
 
     /**
      * <code>bytes id = 2;</code>
      */
-    var id: com.google.protobuf.ByteString
+    public var id: com.google.protobuf.ByteString
       @JvmName("getId")
       get() = _builder.getId()
       @JvmName("setId")
@@ -52,14 +52,14 @@ object MyUserAccountKt {
     /**
      * <code>bytes id = 2;</code>
      */
-    fun clearId() {
+    public fun clearId() {
       _builder.clearId()
     }
 
     /**
      * <code>string id_base58 = 3;</code>
      */
-    var idBase58: kotlin.String
+    public var idBase58: kotlin.String
       @JvmName("getIdBase58")
       get() = _builder.getIdBase58()
       @JvmName("setIdBase58")
@@ -69,14 +69,14 @@ object MyUserAccountKt {
     /**
      * <code>string id_base58 = 3;</code>
      */
-    fun clearIdBase58() {
+    public fun clearIdBase58() {
       _builder.clearIdBase58()
     }
 
     /**
      * <code>bytes key = 4;</code>
      */
-    var key: com.google.protobuf.ByteString
+    public var key: com.google.protobuf.ByteString
       @JvmName("getKey")
       get() = _builder.getKey()
       @JvmName("setKey")
@@ -86,14 +86,14 @@ object MyUserAccountKt {
     /**
      * <code>bytes key = 4;</code>
      */
-    fun clearKey() {
+    public fun clearKey() {
       _builder.clearKey()
     }
 
     /**
      * <code>string key_type = 5;</code>
      */
-    var keyType: kotlin.String
+    public var keyType: kotlin.String
       @JvmName("getKeyType")
       get() = _builder.getKeyType()
       @JvmName("setKeyType")
@@ -103,14 +103,14 @@ object MyUserAccountKt {
     /**
      * <code>string key_type = 5;</code>
      */
-    fun clearKeyType() {
+    public fun clearKeyType() {
       _builder.clearKeyType()
     }
 
     /**
      * <code>string key_base58 = 6;</code>
      */
-    var keyBase58: kotlin.String
+    public var keyBase58: kotlin.String
       @JvmName("getKeyBase58")
       get() = _builder.getKeyBase58()
       @JvmName("setKeyBase58")
@@ -120,11 +120,11 @@ object MyUserAccountKt {
     /**
      * <code>string key_base58 = 6;</code>
      */
-    fun clearKeyBase58() {
+    public fun clearKeyBase58() {
       _builder.clearKeyBase58()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount.copy(block: qaul.rpc.user_accounts.MyUserAccountKt.Dsl.() -> Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount =
+public inline fun qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount.copy(block: qaul.rpc.user_accounts.MyUserAccountKt.Dsl.() -> kotlin.Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount =
   qaul.rpc.user_accounts.MyUserAccountKt.Dsl._create(this.toBuilder()).apply { block() }._build()

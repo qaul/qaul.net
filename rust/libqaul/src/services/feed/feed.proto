@@ -44,8 +44,12 @@ message FeedMessage {
     bytes message_id = 3;
     // DEPRECATED
     string message_id_base58 = 4;
+    // DEPRECATED
     string time_sent = 5;
+    uint64 timestamp_sent = 9;
+    // DEPRECATED
     string time_received = 6;
+    uint64 timestamp_received = 10;
     string content = 7;
     uint64 index = 8;
 }

@@ -54,8 +54,7 @@ class _FeedState extends _BaseTabState<_Feed> {
               itemBuilder: (_, i) {
                 final msg = filteredMessages[i];
                 var theme = Theme.of(context).textTheme;
-                // TODO(brenodt): Prone to exceptions if timeSent is not parsable. Update.
-                var sentAt = describeFuzzyTimestamp(DateTime.parse(msg.timeSent!));
+                var sentAt = describeFuzzyTimestamp(msg.sendTime);
 
                 final authorIdx = users.indexWhere(
                   (u) => u.idBase58 == (msg.senderIdBase58 ?? ''),

@@ -5185,10 +5185,10 @@ public final class BleOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
       }
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
       }
       if (powered_ != false) {
@@ -5227,10 +5227,10 @@ public final class BleOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!getIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
       }
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
       }
       if (powered_ != false) {
@@ -7041,7 +7041,7 @@ public final class BleOuterClass {
       if (success_ != false) {
         output.writeBool(1, success_);
       }
-      if (!getErrorMessageBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(errorMessage_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, errorMessage_);
       }
       if (unknonwError_ != false) {
@@ -7063,7 +7063,7 @@ public final class BleOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, success_);
       }
-      if (!getErrorMessageBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(errorMessage_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, errorMessage_);
       }
       if (unknonwError_ != false) {
@@ -10782,7 +10782,7 @@ public final class BleOuterClass {
       if (success_ != false) {
         output.writeBool(2, success_);
       }
-      if (!getErrorMessageBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(errorMessage_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, errorMessage_);
       }
       unknownFields.writeTo(output);
@@ -10802,7 +10802,7 @@ public final class BleOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, success_);
       }
-      if (!getErrorMessageBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(errorMessage_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, errorMessage_);
       }
       size += unknownFields.getSerializedSize();

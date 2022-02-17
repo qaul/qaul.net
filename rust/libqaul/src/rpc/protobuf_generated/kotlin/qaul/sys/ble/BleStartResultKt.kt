@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmSynthetic
-inline fun bleStartResult(block: qaul.sys.ble.BleStartResultKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.BleStartResult =
+public inline fun bleStartResult(block: qaul.sys.ble.BleStartResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartResult =
   qaul.sys.ble.BleStartResultKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleStartResult.newBuilder()).apply { block() }._build()
-object BleStartResultKt {
+public object BleStartResultKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.sys.ble.BleOuterClass.BleStartResult.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.sys.ble.BleOuterClass.BleStartResult.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleStartResult.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ object BleStartResultKt {
      *
      * <code>bool success = 1;</code>
      */
-    var success: kotlin.Boolean
+    public var success: kotlin.Boolean
       @JvmName("getSuccess")
       get() = _builder.getSuccess()
       @JvmName("setSuccess")
@@ -43,7 +43,7 @@ object BleStartResultKt {
      *
      * <code>bool success = 1;</code>
      */
-    fun clearSuccess() {
+    public fun clearSuccess() {
       _builder.clearSuccess()
     }
 
@@ -54,7 +54,7 @@ object BleStartResultKt {
      *
      * <code>string error_message = 2;</code>
      */
-    var errorMessage: kotlin.String
+    public var errorMessage: kotlin.String
       @JvmName("getErrorMessage")
       get() = _builder.getErrorMessage()
       @JvmName("setErrorMessage")
@@ -68,7 +68,7 @@ object BleStartResultKt {
      *
      * <code>string error_message = 2;</code>
      */
-    fun clearErrorMessage() {
+    public fun clearErrorMessage() {
       _builder.clearErrorMessage()
     }
 
@@ -79,7 +79,7 @@ object BleStartResultKt {
      *
      * <code>bool unknonw_error = 3;</code>
      */
-    var unknonwError: kotlin.Boolean
+    public var unknonwError: kotlin.Boolean
       @JvmName("getUnknonwError")
       get() = _builder.getUnknonwError()
       @JvmName("setUnknonwError")
@@ -93,7 +93,7 @@ object BleStartResultKt {
      *
      * <code>bool unknonw_error = 3;</code>
      */
-    fun clearUnknonwError() {
+    public fun clearUnknonwError() {
       _builder.clearUnknonwError()
     }
 
@@ -104,7 +104,7 @@ object BleStartResultKt {
      *
      * <code>bool no_rights = 4;</code>
      */
-    var noRights: kotlin.Boolean
+    public var noRights: kotlin.Boolean
       @JvmName("getNoRights")
       get() = _builder.getNoRights()
       @JvmName("setNoRights")
@@ -118,11 +118,11 @@ object BleStartResultKt {
      *
      * <code>bool no_rights = 4;</code>
      */
-    fun clearNoRights() {
+    public fun clearNoRights() {
       _builder.clearNoRights()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.sys.ble.BleOuterClass.BleStartResult.copy(block: qaul.sys.ble.BleStartResultKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.BleStartResult =
+public inline fun qaul.sys.ble.BleOuterClass.BleStartResult.copy(block: qaul.sys.ble.BleStartResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartResult =
   qaul.sys.ble.BleStartResultKt.Dsl._create(this.toBuilder()).apply { block() }._build()

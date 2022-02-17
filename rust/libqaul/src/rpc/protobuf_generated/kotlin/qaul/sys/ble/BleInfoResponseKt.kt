@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmSynthetic
-inline fun bleInfoResponse(block: qaul.sys.ble.BleInfoResponseKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.BleInfoResponse =
+public inline fun bleInfoResponse(block: qaul.sys.ble.BleInfoResponseKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleInfoResponse =
   qaul.sys.ble.BleInfoResponseKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleInfoResponse.newBuilder()).apply { block() }._build()
-object BleInfoResponseKt {
+public object BleInfoResponseKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.sys.ble.BleOuterClass.BleInfoResponse.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.sys.ble.BleOuterClass.BleInfoResponse.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleInfoResponse.Builder): Dsl = Dsl(builder)
@@ -27,7 +27,7 @@ object BleInfoResponseKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    class DeviceProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    public class DeviceProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <pre>
      * fill in a device information for each device on the system
@@ -35,7 +35,7 @@ object BleInfoResponseKt {
      *
      * <code>repeated .qaul.sys.ble.BleDeviceInfo device = 1;</code>
      */
-     val device: com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>
+     public val device: com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getDeviceList()
@@ -50,7 +50,7 @@ object BleInfoResponseKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addDevice")
-    fun com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>.add(value: qaul.sys.ble.BleOuterClass.BleDeviceInfo) {
+    public fun com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>.add(value: qaul.sys.ble.BleOuterClass.BleDeviceInfo) {
       _builder.addDevice(value)
     }/**
      * <pre>
@@ -62,7 +62,8 @@ object BleInfoResponseKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignDevice")
-    inline operator fun com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>.plusAssign(value: qaul.sys.ble.BleOuterClass.BleDeviceInfo) {
+    @Suppress("NOTHING_TO_INLINE")
+    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>.plusAssign(value: qaul.sys.ble.BleOuterClass.BleDeviceInfo) {
       add(value)
     }/**
      * <pre>
@@ -74,7 +75,7 @@ object BleInfoResponseKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllDevice")
-    fun com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>.addAll(values: kotlin.collections.Iterable<qaul.sys.ble.BleOuterClass.BleDeviceInfo>) {
+    public fun com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>.addAll(values: kotlin.collections.Iterable<qaul.sys.ble.BleOuterClass.BleDeviceInfo>) {
       _builder.addAllDevice(values)
     }/**
      * <pre>
@@ -86,7 +87,8 @@ object BleInfoResponseKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllDevice")
-    inline operator fun com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.sys.ble.BleOuterClass.BleDeviceInfo>) {
+    @Suppress("NOTHING_TO_INLINE")
+    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.sys.ble.BleOuterClass.BleDeviceInfo>) {
       addAll(values)
     }/**
      * <pre>
@@ -99,7 +101,7 @@ object BleInfoResponseKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setDevice")
-    operator fun com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>.set(index: kotlin.Int, value: qaul.sys.ble.BleOuterClass.BleDeviceInfo) {
+    public operator fun com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>.set(index: kotlin.Int, value: qaul.sys.ble.BleOuterClass.BleDeviceInfo) {
       _builder.setDevice(index, value)
     }/**
      * <pre>
@@ -110,10 +112,10 @@ object BleInfoResponseKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearDevice")
-    fun com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>.clear() {
+    public fun com.google.protobuf.kotlin.DslList<qaul.sys.ble.BleOuterClass.BleDeviceInfo, DeviceProxy>.clear() {
       _builder.clearDevice()
     }}
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.sys.ble.BleOuterClass.BleInfoResponse.copy(block: qaul.sys.ble.BleInfoResponseKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.BleInfoResponse =
+public inline fun qaul.sys.ble.BleOuterClass.BleInfoResponse.copy(block: qaul.sys.ble.BleInfoResponseKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleInfoResponse =
   qaul.sys.ble.BleInfoResponseKt.Dsl._create(this.toBuilder()).apply { block() }._build()

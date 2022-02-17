@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmSynthetic
-inline fun bleDeviceInfo(block: qaul.sys.ble.BleDeviceInfoKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.BleDeviceInfo =
+public inline fun bleDeviceInfo(block: qaul.sys.ble.BleDeviceInfoKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceInfo =
   qaul.sys.ble.BleDeviceInfoKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleDeviceInfo.newBuilder()).apply { block() }._build()
-object BleDeviceInfoKt {
+public object BleDeviceInfoKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.sys.ble.BleOuterClass.BleDeviceInfo.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.sys.ble.BleOuterClass.BleDeviceInfo.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleDeviceInfo.Builder): Dsl = Dsl(builder)
@@ -31,7 +31,7 @@ object BleDeviceInfoKt {
      *
      * <code>string id = 1;</code>
      */
-    var id: kotlin.String
+    public var id: kotlin.String
       @JvmName("getId")
       get() = _builder.getId()
       @JvmName("setId")
@@ -47,7 +47,7 @@ object BleDeviceInfoKt {
      *
      * <code>string id = 1;</code>
      */
-    fun clearId() {
+    public fun clearId() {
       _builder.clearId()
     }
 
@@ -59,7 +59,7 @@ object BleDeviceInfoKt {
      *
      * <code>string name = 2;</code>
      */
-    var name: kotlin.String
+    public var name: kotlin.String
       @JvmName("getName")
       get() = _builder.getName()
       @JvmName("setName")
@@ -74,7 +74,7 @@ object BleDeviceInfoKt {
      *
      * <code>string name = 2;</code>
      */
-    fun clearName() {
+    public fun clearName() {
       _builder.clearName()
     }
 
@@ -85,7 +85,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool powered = 3;</code>
      */
-    var powered: kotlin.Boolean
+    public var powered: kotlin.Boolean
       @JvmName("getPowered")
       get() = _builder.getPowered()
       @JvmName("setPowered")
@@ -99,7 +99,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool powered = 3;</code>
      */
-    fun clearPowered() {
+    public fun clearPowered() {
       _builder.clearPowered()
     }
 
@@ -116,7 +116,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool ble_support = 4;</code>
      */
-    var bleSupport: kotlin.Boolean
+    public var bleSupport: kotlin.Boolean
       @JvmName("getBleSupport")
       get() = _builder.getBleSupport()
       @JvmName("setBleSupport")
@@ -136,7 +136,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool ble_support = 4;</code>
      */
-    fun clearBleSupport() {
+    public fun clearBleSupport() {
       _builder.clearBleSupport()
     }
 
@@ -147,7 +147,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool adv_251 = 7;</code>
      */
-    var adv251: kotlin.Boolean
+    public var adv251: kotlin.Boolean
       @JvmName("getAdv251")
       get() = _builder.getAdv251()
       @JvmName("setAdv251")
@@ -161,7 +161,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool adv_251 = 7;</code>
      */
-    fun clearAdv251() {
+    public fun clearAdv251() {
       _builder.clearAdv251()
     }
 
@@ -172,7 +172,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool adv_extended = 8;</code>
      */
-    var advExtended: kotlin.Boolean
+    public var advExtended: kotlin.Boolean
       @JvmName("getAdvExtended")
       get() = _builder.getAdvExtended()
       @JvmName("setAdvExtended")
@@ -186,7 +186,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool adv_extended = 8;</code>
      */
-    fun clearAdvExtended() {
+    public fun clearAdvExtended() {
       _builder.clearAdvExtended()
     }
 
@@ -197,7 +197,7 @@ object BleDeviceInfoKt {
      *
      * <code>uint32 adv_extended_bytes = 9;</code>
      */
-    var advExtendedBytes: kotlin.Int
+    public var advExtendedBytes: kotlin.Int
       @JvmName("getAdvExtendedBytes")
       get() = _builder.getAdvExtendedBytes()
       @JvmName("setAdvExtendedBytes")
@@ -211,7 +211,7 @@ object BleDeviceInfoKt {
      *
      * <code>uint32 adv_extended_bytes = 9;</code>
      */
-    fun clearAdvExtendedBytes() {
+    public fun clearAdvExtendedBytes() {
       _builder.clearAdvExtendedBytes()
     }
 
@@ -223,7 +223,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool adv_1m = 10;</code>
      */
-    var adv1M: kotlin.Boolean
+    public var adv1M: kotlin.Boolean
       @JvmName("getAdv1M")
       get() = _builder.getAdv1M()
       @JvmName("setAdv1M")
@@ -238,7 +238,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool adv_1m = 10;</code>
      */
-    fun clearAdv1M() {
+    public fun clearAdv1M() {
       _builder.clearAdv1M()
     }
 
@@ -249,7 +249,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool adv_2m = 11;</code>
      */
-    var adv2M: kotlin.Boolean
+    public var adv2M: kotlin.Boolean
       @JvmName("getAdv2M")
       get() = _builder.getAdv2M()
       @JvmName("setAdv2M")
@@ -263,7 +263,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool adv_2m = 11;</code>
      */
-    fun clearAdv2M() {
+    public fun clearAdv2M() {
       _builder.clearAdv2M()
     }
 
@@ -275,7 +275,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool adv_coded = 12;</code>
      */
-    var advCoded: kotlin.Boolean
+    public var advCoded: kotlin.Boolean
       @JvmName("getAdvCoded")
       get() = _builder.getAdvCoded()
       @JvmName("setAdvCoded")
@@ -290,7 +290,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool adv_coded = 12;</code>
      */
-    fun clearAdvCoded() {
+    public fun clearAdvCoded() {
       _builder.clearAdvCoded()
     }
 
@@ -307,7 +307,7 @@ object BleDeviceInfoKt {
      *
      * <code>bool le_audio = 13;</code>
      */
-    var leAudio: kotlin.Boolean
+    public var leAudio: kotlin.Boolean
       @JvmName("getLeAudio")
       get() = _builder.getLeAudio()
       @JvmName("setLeAudio")
@@ -327,11 +327,11 @@ object BleDeviceInfoKt {
      *
      * <code>bool le_audio = 13;</code>
      */
-    fun clearLeAudio() {
+    public fun clearLeAudio() {
       _builder.clearLeAudio()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.sys.ble.BleOuterClass.BleDeviceInfo.copy(block: qaul.sys.ble.BleDeviceInfoKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.BleDeviceInfo =
+public inline fun qaul.sys.ble.BleOuterClass.BleDeviceInfo.copy(block: qaul.sys.ble.BleDeviceInfoKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceInfo =
   qaul.sys.ble.BleDeviceInfoKt.Dsl._create(this.toBuilder()).apply { block() }._build()

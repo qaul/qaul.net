@@ -40,6 +40,7 @@ enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
   case router // = 5
   case feed // = 6
   case connections // = 7
+  case debug // = 8
   case UNRECOGNIZED(Int)
 
   init() {
@@ -56,6 +57,7 @@ enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
     case 5: self = .router
     case 6: self = .feed
     case 7: self = .connections
+    case 8: self = .debug
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -70,6 +72,7 @@ enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
     case .router: return 5
     case .feed: return 6
     case .connections: return 7
+    case .debug: return 8
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -89,6 +92,7 @@ extension Qaul_Rpc_Modules: CaseIterable {
     .router,
     .feed,
     .connections,
+    .debug,
   ]
 }
 
@@ -135,6 +139,7 @@ extension Qaul_Rpc_Modules: SwiftProtobuf._ProtoNameProviding {
     5: .same(proto: "ROUTER"),
     6: .same(proto: "FEED"),
     7: .same(proto: "CONNECTIONS"),
+    8: .same(proto: "DEBUG"),
   ]
 }
 

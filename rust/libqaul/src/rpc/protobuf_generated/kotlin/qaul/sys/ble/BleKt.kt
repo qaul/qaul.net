@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmSynthetic
-inline fun ble(block: qaul.sys.ble.BleKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.Ble =
+public inline fun ble(block: qaul.sys.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.Ble =
   qaul.sys.ble.BleKt.Dsl._create(qaul.sys.ble.BleOuterClass.Ble.newBuilder()).apply { block() }._build()
-object BleKt {
+public object BleKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  class Dsl private constructor(
-    @kotlin.jvm.JvmField private val _builder: qaul.sys.ble.BleOuterClass.Ble.Builder
+  public class Dsl private constructor(
+    private val _builder: qaul.sys.ble.BleOuterClass.Ble.Builder
   ) {
-    companion object {
+    public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.Ble.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleInfoRequest info_request = 1;</code>
      */
-    var infoRequest: qaul.sys.ble.BleOuterClass.BleInfoRequest
+    public var infoRequest: qaul.sys.ble.BleOuterClass.BleInfoRequest
       @JvmName("getInfoRequest")
       get() = _builder.getInfoRequest()
       @JvmName("setInfoRequest")
@@ -43,7 +43,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleInfoRequest info_request = 1;</code>
      */
-    fun clearInfoRequest() {
+    public fun clearInfoRequest() {
       _builder.clearInfoRequest()
     }
     /**
@@ -54,7 +54,7 @@ object BleKt {
      * <code>.qaul.sys.ble.BleInfoRequest info_request = 1;</code>
      * @return Whether the infoRequest field is set.
      */
-    fun hasInfoRequest(): kotlin.Boolean {
+    public fun hasInfoRequest(): kotlin.Boolean {
       return _builder.hasInfoRequest()
     }
 
@@ -65,7 +65,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleInfoResponse info_response = 2;</code>
      */
-    var infoResponse: qaul.sys.ble.BleOuterClass.BleInfoResponse
+    public var infoResponse: qaul.sys.ble.BleOuterClass.BleInfoResponse
       @JvmName("getInfoResponse")
       get() = _builder.getInfoResponse()
       @JvmName("setInfoResponse")
@@ -79,7 +79,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleInfoResponse info_response = 2;</code>
      */
-    fun clearInfoResponse() {
+    public fun clearInfoResponse() {
       _builder.clearInfoResponse()
     }
     /**
@@ -90,7 +90,7 @@ object BleKt {
      * <code>.qaul.sys.ble.BleInfoResponse info_response = 2;</code>
      * @return Whether the infoResponse field is set.
      */
-    fun hasInfoResponse(): kotlin.Boolean {
+    public fun hasInfoResponse(): kotlin.Boolean {
       return _builder.hasInfoResponse()
     }
 
@@ -101,7 +101,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleStartRequest start_request = 3;</code>
      */
-    var startRequest: qaul.sys.ble.BleOuterClass.BleStartRequest
+    public var startRequest: qaul.sys.ble.BleOuterClass.BleStartRequest
       @JvmName("getStartRequest")
       get() = _builder.getStartRequest()
       @JvmName("setStartRequest")
@@ -115,7 +115,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleStartRequest start_request = 3;</code>
      */
-    fun clearStartRequest() {
+    public fun clearStartRequest() {
       _builder.clearStartRequest()
     }
     /**
@@ -126,7 +126,7 @@ object BleKt {
      * <code>.qaul.sys.ble.BleStartRequest start_request = 3;</code>
      * @return Whether the startRequest field is set.
      */
-    fun hasStartRequest(): kotlin.Boolean {
+    public fun hasStartRequest(): kotlin.Boolean {
       return _builder.hasStartRequest()
     }
 
@@ -137,7 +137,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleStartResult start_result = 4;</code>
      */
-    var startResult: qaul.sys.ble.BleOuterClass.BleStartResult
+    public var startResult: qaul.sys.ble.BleOuterClass.BleStartResult
       @JvmName("getStartResult")
       get() = _builder.getStartResult()
       @JvmName("setStartResult")
@@ -151,7 +151,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleStartResult start_result = 4;</code>
      */
-    fun clearStartResult() {
+    public fun clearStartResult() {
       _builder.clearStartResult()
     }
     /**
@@ -162,7 +162,7 @@ object BleKt {
      * <code>.qaul.sys.ble.BleStartResult start_result = 4;</code>
      * @return Whether the startResult field is set.
      */
-    fun hasStartResult(): kotlin.Boolean {
+    public fun hasStartResult(): kotlin.Boolean {
       return _builder.hasStartResult()
     }
 
@@ -173,7 +173,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleAdvertisingSet advertising_set = 5;</code>
      */
-    var advertisingSet: qaul.sys.ble.BleOuterClass.BleAdvertisingSet
+    public var advertisingSet: qaul.sys.ble.BleOuterClass.BleAdvertisingSet
       @JvmName("getAdvertisingSet")
       get() = _builder.getAdvertisingSet()
       @JvmName("setAdvertisingSet")
@@ -187,7 +187,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleAdvertisingSet advertising_set = 5;</code>
      */
-    fun clearAdvertisingSet() {
+    public fun clearAdvertisingSet() {
       _builder.clearAdvertisingSet()
     }
     /**
@@ -198,7 +198,7 @@ object BleKt {
      * <code>.qaul.sys.ble.BleAdvertisingSet advertising_set = 5;</code>
      * @return Whether the advertisingSet field is set.
      */
-    fun hasAdvertisingSet(): kotlin.Boolean {
+    public fun hasAdvertisingSet(): kotlin.Boolean {
       return _builder.hasAdvertisingSet()
     }
 
@@ -209,7 +209,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleAdvertisingSend advertising_send = 6;</code>
      */
-    var advertisingSend: qaul.sys.ble.BleOuterClass.BleAdvertisingSend
+    public var advertisingSend: qaul.sys.ble.BleOuterClass.BleAdvertisingSend
       @JvmName("getAdvertisingSend")
       get() = _builder.getAdvertisingSend()
       @JvmName("setAdvertisingSend")
@@ -223,7 +223,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleAdvertisingSend advertising_send = 6;</code>
      */
-    fun clearAdvertisingSend() {
+    public fun clearAdvertisingSend() {
       _builder.clearAdvertisingSend()
     }
     /**
@@ -234,7 +234,7 @@ object BleKt {
      * <code>.qaul.sys.ble.BleAdvertisingSend advertising_send = 6;</code>
      * @return Whether the advertisingSend field is set.
      */
-    fun hasAdvertisingSend(): kotlin.Boolean {
+    public fun hasAdvertisingSend(): kotlin.Boolean {
       return _builder.hasAdvertisingSend()
     }
 
@@ -245,7 +245,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleAdvertisingReceived advertising_received = 7;</code>
      */
-    var advertisingReceived: qaul.sys.ble.BleOuterClass.BleAdvertisingReceived
+    public var advertisingReceived: qaul.sys.ble.BleOuterClass.BleAdvertisingReceived
       @JvmName("getAdvertisingReceived")
       get() = _builder.getAdvertisingReceived()
       @JvmName("setAdvertisingReceived")
@@ -259,7 +259,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleAdvertisingReceived advertising_received = 7;</code>
      */
-    fun clearAdvertisingReceived() {
+    public fun clearAdvertisingReceived() {
       _builder.clearAdvertisingReceived()
     }
     /**
@@ -270,7 +270,7 @@ object BleKt {
      * <code>.qaul.sys.ble.BleAdvertisingReceived advertising_received = 7;</code>
      * @return Whether the advertisingReceived field is set.
      */
-    fun hasAdvertisingReceived(): kotlin.Boolean {
+    public fun hasAdvertisingReceived(): kotlin.Boolean {
       return _builder.hasAdvertisingReceived()
     }
 
@@ -281,7 +281,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleDirectSend direct_send = 8;</code>
      */
-    var directSend: qaul.sys.ble.BleOuterClass.BleDirectSend
+    public var directSend: qaul.sys.ble.BleOuterClass.BleDirectSend
       @JvmName("getDirectSend")
       get() = _builder.getDirectSend()
       @JvmName("setDirectSend")
@@ -295,7 +295,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleDirectSend direct_send = 8;</code>
      */
-    fun clearDirectSend() {
+    public fun clearDirectSend() {
       _builder.clearDirectSend()
     }
     /**
@@ -306,7 +306,7 @@ object BleKt {
      * <code>.qaul.sys.ble.BleDirectSend direct_send = 8;</code>
      * @return Whether the directSend field is set.
      */
-    fun hasDirectSend(): kotlin.Boolean {
+    public fun hasDirectSend(): kotlin.Boolean {
       return _builder.hasDirectSend()
     }
 
@@ -317,7 +317,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleDirectReceived direct_received = 9;</code>
      */
-    var directReceived: qaul.sys.ble.BleOuterClass.BleDirectReceived
+    public var directReceived: qaul.sys.ble.BleOuterClass.BleDirectReceived
       @JvmName("getDirectReceived")
       get() = _builder.getDirectReceived()
       @JvmName("setDirectReceived")
@@ -331,7 +331,7 @@ object BleKt {
      *
      * <code>.qaul.sys.ble.BleDirectReceived direct_received = 9;</code>
      */
-    fun clearDirectReceived() {
+    public fun clearDirectReceived() {
       _builder.clearDirectReceived()
     }
     /**
@@ -342,18 +342,18 @@ object BleKt {
      * <code>.qaul.sys.ble.BleDirectReceived direct_received = 9;</code>
      * @return Whether the directReceived field is set.
      */
-    fun hasDirectReceived(): kotlin.Boolean {
+    public fun hasDirectReceived(): kotlin.Boolean {
       return _builder.hasDirectReceived()
     }
-    val messageCase: qaul.sys.ble.BleOuterClass.Ble.MessageCase
+    public val messageCase: qaul.sys.ble.BleOuterClass.Ble.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
 
-    fun clearMessage() {
+    public fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-inline fun qaul.sys.ble.BleOuterClass.Ble.copy(block: qaul.sys.ble.BleKt.Dsl.() -> Unit): qaul.sys.ble.BleOuterClass.Ble =
+public inline fun qaul.sys.ble.BleOuterClass.Ble.copy(block: qaul.sys.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.Ble =
   qaul.sys.ble.BleKt.Dsl._create(this.toBuilder()).apply { block() }._build()

@@ -101,7 +101,10 @@ impl Feed {
                         // print all messages in the feed list
                         for message in proto_feedlist.feed_message {
                             print!{"[{}] ", message.index};
-                            println!("{}", message.time_sent);
+                            println!("Time Sent - {}", message.time_sent);
+                            println!("Timestamp Sent - {}", message.timestamp_sent);
+                            println!("Time Received - {}", message.time_received);
+                            println!("Timestamp Received - {}", message.timestamp_received);
                             println!("Message ID {}", message.message_id_base58);
                             println!("From {}", message.sender_id_base58);
                             println!("\t{}", message.content);
