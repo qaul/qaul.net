@@ -278,10 +278,10 @@ extension BLEManager: CBCentralManagerDelegate {
        // logfile.appendNewText(text: "Peri:->>>>>> \(peripheral), \(advertisementData)")
        // print("Peri:->>>>>> \(peripheral), \(advertisementData)")
         let localName = advertisementData.peripheralname() ?? ""
-        print("Peri:->>>>>> \(peripheralName)")
+//        print("Peri:->>>>>> \(peripheralName)")
         
         let localUUID = advertisementData.standardServiceid() ?? ""
-        print("localUUID:->>>>>> \(localUUID)")
+//        print("localUUID:->>>>>> \(localUUID)")
       
         if localUUID == SERVICES.SERVICE_UUID {
             if let existingBLE = self.arrOfBLEDevices[peripheral.identifier.uuidString] {

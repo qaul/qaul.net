@@ -208,12 +208,44 @@ public class BLEDevice: NSObject {
     }
     
     func writeQaulID(message : Data ,myComplition: @escaping GetSendMessageComplition) {
-       
+        print("data send size :- \(message)")
         self.getSendMessageComplition = myComplition
         
         if let char = self.getCharsticFrom(UUID: CHAR.MSG_CHAR) {
-            self.getSendMessageComplition(true, true, "" , Data())
-            self.writeDataWithResponse(writeData: message, characteristic: char)
+            //self.getSendMessageComplition(true, true, "" , Data())
+            
+            let bytes = message.bytes
+            
+            if let convertString = String(bytes: bytes, encoding: .utf8) {
+                print("Original Message:: \(convertString)")
+            }
+            let numberofinteraction = message.bytes.count / 20
+            
+            let remainBytes = numberofinteraction * 20
+            let remainingCount = message.bytes.count - remainBytes
+            
+            var startIndex = 0
+            for index in 1...numberofinteraction{
+                var lastIndex = startIndex + 20
+                if index == numberofinteraction && remainingCount == 0{
+                    lastIndex = lastIndex - 1
+                }
+                let newBytes = Array(bytes[startIndex...lastIndex])
+                let data = Data(newBytes)
+                if let convertString = String(bytes: newBytes, encoding: .utf8) {
+                    print("Index: \(index) :: \(convertString)")
+                }
+                startIndex = lastIndex
+                self.writeDataWithResponse(writeData: data, characteristic: char)
+            }
+            if remainingCount > 0 {
+                let lastIndex = startIndex + remainingCount
+                let data = Data(Array(bytes[(startIndex + 1)...lastIndex - 1]))
+                if let convertString = String(bytes: Array(bytes[(startIndex + 1)...lastIndex - 1]), encoding: .utf8) {
+                    print("\(convertString)")
+                }
+                self.writeDataWithResponse(writeData: data, characteristic: char)
+            }
         } else {
             //Char is not found in this conected device
             //Disconnect Device here
@@ -306,7 +338,13 @@ extension BLEDevice: CBPeripheralDelegate {
     }
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         
-        print("characteristic.uuid.uuidString:- \(characteristic.uuid.uuidString)")
+        let data = peripheral.maximumWriteValueLength(for: .withResponse)
+        //peripheral.maximumWriteValueLength(for: .withResponse)
+        //peripheral.maximumWriteValueLength(for: .withoutResponse)
+//        print("connectTarget : \(peripheral)")
+//        print("data : \(data)")
+        
+        //print("characteristic.uuid.uuidString:- \(characteristic.uuid.uuidString)")
         if characteristic.uuid.uuidString == CHAR.READ_CHAR {
             let updatedCharacterstic = Characterstic(characterstic: characteristic)
             if let resultDate = updatedCharacterstic.dataValue {

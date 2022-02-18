@@ -304,5 +304,6 @@ public class BleService {
 extension Notification.Name {
     
     static let GetscanDevice = Notification.Name(rawValue: "GetscanDevice")
+    static let GetscanMessage = Notification.Name(rawValue: "GetscanMessage")
    
 }

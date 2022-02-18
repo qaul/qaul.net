@@ -19,7 +19,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var txtMessage: UITextView!
     @IBOutlet weak var lblMessagePlaceholader: UILabel!
     @IBOutlet weak var heightOfTxtMessage: NSLayoutConstraint!
-
+    @IBOutlet weak var lblMessage: UILabel!
     // -----------------------------------------------------------------
     //                        MARK: - Property -
     // -----------------------------------------------------------------
@@ -40,6 +40,8 @@ class ViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: .GetscanDevice, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(SetScanDevice(_:)), name: .GetscanDevice, object: nil)
         
+        NotificationCenter.default.removeObserver(self, name: .GetscanMessage, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(SetScanMessage(_:)), name: .GetscanMessage, object: nil)
     }
     
     //-----------------------------------------------------------------
@@ -82,14 +84,14 @@ class ViewController: UIViewController {
     
     @IBAction func btnSendMessage(sender: UIButton) {
         
-        if (txtQaulBLE.text?.count ?? 0) < 10  {
+        if (txtQaulBLE.text?.count ?? 0) < 10 &&  (txtQaulBLE.text?.count ?? 0) > 0 {
             self.view.makeToast("Please enter correct qaul_id of receiver")
         }
         if txtMessage.text.count <= 0 {
             self.view.makeToast("Please enter at least 1 character of message")
             return
         }
-       
+        self.sendData(strqaulId: (txtQaulBLE.text ?? ""), message: (txtMessage.text ?? ""))
 //        blePeripheral.startAdvertising(serviceID: kTRANSFER_SERVICE_UUID, name: self.value)
 //        sendStopRequest()
     }
@@ -103,6 +105,14 @@ class ViewController: UIViewController {
        
         self.txtQaulBLE.text = strQaulID.strqaulId
         
+    }
+    
+    @objc func SetScanMessage(_ notification: NSNotification) {
+        guard let strMessage = notification.object as? Message else { return }
+       
+        DispatchQueue.main.async {
+        self.lblMessage.text = strMessage.message ?? ""
+        }
     }
     
     /**
@@ -159,6 +169,37 @@ class ViewController: UIViewController {
         }
     }
     
+    private func sendData(strqaulId: String, message: String) {
+        var directSend = Qaul_Sys_Ble_BleDirectSend.init()
+       
+        directSend.data = Data(message.utf8)
+        directSend.to = strqaulId.data(using: .utf8)!
+        directSend.qaulID = (appendtextiOSdevice + UIDevice.modelName).data(using: .utf8)!
+        directSend.id = String(Int64(Date().timeIntervalSince1970 * 1000))
+//        directSend.unknownFields = SwiftProtobuf.UnknownStorage()
+        
+        var bleReq = Qaul_Sys_Ble_Ble.init()
+        //bleReq.message = .directSend(Qaul_Sys_Ble_BleDirectSend.init())
+        bleReq.directSend = directSend
+    
+        
+        var setbleReq = Qaul_Sys_Ble_Ble.init()
+        setbleReq.message = .directSend(Qaul_Sys_Ble_BleDirectSend.init())
+//        bleReq.directSend = directSend
+        
+        bleWrapperClass.receiveRequest(bleReq: bleReq, SetdataforbleReq: setbleReq) { qaul_Sys_Ble_Ble in
+            print("qaul_Sys_Ble_Ble:- \(qaul_Sys_Ble_Ble)")
+            if qaul_Sys_Ble_Ble.directSendResult != nil {
+                let strmessage = qaul_Sys_Ble_Ble.directSendResult.errorMessage
+                DispatchQueue.main.async {
+                    self.view.makeToast(strmessage)
+                }
+            }
+        }
+        DispatchQueue.main.async {
+            self.view.makeToast("Connecting...")
+        }
+    }
 }
 
 
