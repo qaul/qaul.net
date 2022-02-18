@@ -13,6 +13,6 @@ platform :android do
     Dir.chdir "../.." do
       sh("flutter", "build", "appbundle", "--build-number=#{build_number}")
     end
-    upload_to_play_store(track: 'beta', aab: '../build/app/outputs/bundle/release/app.aab')
+    upload_to_play_store(track: 'beta', aab: '../build/app/outputs/bundle/release/app-release.aab')
   end
 end
