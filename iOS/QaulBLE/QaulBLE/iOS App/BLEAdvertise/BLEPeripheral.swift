@@ -8,9 +8,12 @@
 
 import Foundation
 import CoreBluetooth
+import ObjectMapper
 
 //public let kTRANSFER_SERVICE_UUID        = "33c0ac57-d316-43ec-a883-691fc200e37b".uppercased()
 //public let kTRANSFER_CHARACTERISTIC_UUID = "aec5e807-83e9-4fce-a5a9-3790cd63a977".uppercased()
+
+var recivemessage = ""
 
 let bLEPeripheral = BLEPeripheral()
 
@@ -99,6 +102,7 @@ public class BLEPeripheral: NSObject, CBPeripheralManagerDelegate, CBPeripheralD
         if error == nil{
             self.isStartAdvertising =  true
             print("Start Advertising.....")
+            
             StartbleAdvertiseCallback(true , "" , false)
         }else{
             self.isStartAdvertising =  false
@@ -110,11 +114,22 @@ public class BLEPeripheral: NSObject, CBPeripheralManagerDelegate, CBPeripheralD
     }
     
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
-        print("data message \(requests)")
+//        print("data message \(requests)")
         print("data message \(String(bytes: requests[0].value!, encoding: .utf8))")
+//        print(request)
+        var str = String(bytes: requests[0].value!, encoding: .utf8)
+        str = str?.replacingOccurrences(of: "$$", with: "")
+        
+        recivemessage = recivemessage + (str ?? "")
+        print("data message recivemessage : \(recivemessage)")
+        let messagerecive = Message(JSONString: recivemessage ?? "", context: .none)
+        if messagerecive != nil {
+            recivemessage = ""
+            NotificationCenter.default.post(name: .GetscanMessage, object: messagerecive, userInfo: nil)
+        }
     }
     
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
-        print(request)
+       
     }
 }
