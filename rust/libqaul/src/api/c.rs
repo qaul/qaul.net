@@ -99,7 +99,7 @@ pub extern "C" fn send_rpc_to_libqaul(message: *const u8, message_length: u32) -
     // copy input buffer to libqaul
     log::info!("copy {} bytes of message buffer", message_length);
     let message_length_usize: usize = message_length as usize;
-    let mut rust_buffer_owned: Vec<u8>;
+    let rust_buffer_owned: Vec<u8>;
     unsafe {
         //std::ptr::copy_nonoverlapping(message, rust_buffer.as_mut_ptr(), message_length_usize);
         let rust_buffer = &std::slice::from_raw_parts(message, message_length_usize).to_vec();

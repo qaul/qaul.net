@@ -76,6 +76,7 @@ impl Neighbours {
     }
 
     /// Delete Neighbour
+    #[allow(dead_code)]
     pub fn delete( module: ConnectionModule, node_id: PeerId ) {
         // get table
         let mut neighbours;

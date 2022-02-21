@@ -38,6 +38,7 @@ pub struct QaulInfo {
     /// Events that need to be handed to the outside when polling.
     events: VecDeque<NetworkBehaviourAction<QaulInfoData, QaulInfoEvent>>,
 
+    #[allow(dead_code)]
     config: QaulInfoConfig,
 }
 

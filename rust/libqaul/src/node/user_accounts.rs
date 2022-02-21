@@ -132,6 +132,7 @@ impl UserAccounts {
     }
 
     /// Return the number of registered user accounts on this node.
+    #[allow(dead_code)]
     pub fn len() -> usize {
         let users = USERACCOUNTS.get().read().unwrap();
         users.users.len()
