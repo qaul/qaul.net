@@ -2,7 +2,7 @@ part of 'providers.dart';
 
 final selectedTabProvider = Provider((ref) => SelectedTab(initialTab: 1));
 
-enum TabType { account, feed, users, network } //chat, network }
+enum TabType { account, feed, users, chat, network }
 
 @immutable
 class SelectedTabStatus {

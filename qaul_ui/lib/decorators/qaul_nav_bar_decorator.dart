@@ -66,7 +66,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
                 children: const [
                   QaulNavBarItem(TabType.feed),
                   QaulNavBarItem(TabType.users),
-                  //QaulNavBarItem(TabType.chat),
+                  QaulNavBarItem(TabType.chat),
                   QaulNavBarItem(TabType.network),
                 ],
               )
@@ -75,7 +75,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
                 children: const [
                   QaulNavBarItem(TabType.feed),
                   QaulNavBarItem(TabType.users),
-                  //QaulNavBarItem(TabType.chat),
+                  QaulNavBarItem(TabType.chat),
                   QaulNavBarItem(TabType.network),
                 ],
               ),
@@ -228,10 +228,10 @@ class QaulNavBarItem extends HookConsumerWidget {
         svgPath = 'assets/icons/hashtag.svg';
         tooltip = l18ns!.feedNavButtonTooltip;
         break;
-      // case TabType.chat:
-      //   svgPath = 'assets/icons/comments.svg';
-      //   tooltip = l18ns!.chatNavButtonTooltip;
-      //   break;
+      case TabType.chat:
+        svgPath = 'assets/icons/comments.svg';
+        tooltip = l18ns!.chatNavButtonTooltip;
+        break;
       case TabType.network:
         svgPath = 'assets/icons/network.svg';
         tooltip = l18ns!.netNavButtonTooltip;

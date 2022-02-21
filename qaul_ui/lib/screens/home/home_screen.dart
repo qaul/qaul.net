@@ -91,7 +91,7 @@ class HomeScreen extends HookConsumerWidget {
                   const UserAccountScreen(),
                   BaseTab.feed(),
                   BaseTab.users(),
-                  // BaseTab.chat(),
+                  BaseTab.chat(),
                   BaseTab.network(),
                 ],
               ),
