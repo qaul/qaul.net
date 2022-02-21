@@ -12,48 +12,30 @@ import 'package:flutter/material.dart';
 import 'package:forge2d/forge2d.dart';
 import 'package:open_simplex_2/open_simplex_2.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../widgets/user_avatar.dart';
 
-class DynamicNetworkView extends StatelessWidget {
-  const DynamicNetworkView({Key? key}) : super(key: key);
+part 'models/network_node.dart';
+part 'widgets/network_type_filter.dart';
+
+class DynamicNetworkScreen extends HookConsumerWidget {
+  const DynamicNetworkScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final nodes = ref.watch(_filteredNodes);
+
     return Scaffold(
       body: Stack(
         alignment: AlignmentDirectional.topEnd,
         children: [
-          GameWidget(
-            game: _DynamicNetworkGameEngine(),
-          ),
-          Container(
-            padding: const EdgeInsets.all(4.0),
-            margin: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.blueGrey.withOpacity(.8),
-              borderRadius: BorderRadius.circular(200.0),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                CircleAvatar(
-                    child: Icon(Icons.bluetooth),
-                    backgroundColor: Colors.lightBlue,
-                    foregroundColor: Colors.white),
-                SizedBox(width: 8),
-                CircleAvatar(
-                    child: Icon(Icons.wifi),
-                    backgroundColor: Colors.lightBlue,
-                    foregroundColor: Colors.white),
-                SizedBox(width: 8),
-                CircleAvatar(
-                    child: Icon(CupertinoIcons.globe),
-                    backgroundColor: Colors.lightBlue,
-                    foregroundColor: Colors.white),
-              ],
+          InteractiveViewer(
+            child: GameWidget(
+              game: _DynamicNetworkGameEngine(root: nodes),
             ),
           ),
+          const _NetworkTypeFilterToolbar(),
         ],
       ),
     );
@@ -61,7 +43,8 @@ class DynamicNetworkView extends StatelessWidget {
 }
 
 class _DynamicNetworkGameEngine extends Forge2DGame with HasTappables {
-  _DynamicNetworkGameEngine() : super(gravity: Vector2(0, 0));
+  _DynamicNetworkGameEngine({required this.root}) : super(gravity: Vector2(0, 0));
+  final NetworkNode root;
 
   @override
   Color backgroundColor() => Colors.transparent;
@@ -453,62 +436,3 @@ class _NetworkNodeInfoBottomSheet extends StatelessWidget {
     );
   }
 }
-
-@immutable
-class NetworkNode {
-  const NetworkNode({
-    required this.name,
-    this.children,
-    this.color = Colors.blueAccent,
-  }) : assert(name.length == 2, 'Name should be user\'s initials');
-
-  final String name;
-  final Color color;
-  final Set<NetworkNode>? children;
-}
-
-const root = NetworkNode(
-  name: 'AA',
-  color: Colors.blue,
-  children: {
-    NetworkNode(
-      name: 'BB',
-      color: Colors.teal,
-      children: {
-        NetworkNode(name: 'CC', color: Colors.deepPurple, children: {
-          NetworkNode(name: 'CC', color: Colors.deepPurple, children: {
-            NetworkNode(name: 'CC', color: Colors.deepPurple, children: {
-              NetworkNode(
-                name: 'CC',
-                color: Colors.deepPurple,
-              ),
-            }),
-          }),
-        }),
-      },
-    ),
-    NetworkNode(name: 'DD', color: Colors.deepOrangeAccent),
-    NetworkNode(
-      name: 'BB',
-      color: Colors.teal,
-      children: {
-        NetworkNode(name: 'CC', color: Colors.deepPurple),
-      },
-    ),
-    NetworkNode(
-      name: 'DD',
-      color: Colors.orange,
-      children: {
-        NetworkNode(name: 'EE', color: Colors.redAccent),
-      },
-    ),
-    NetworkNode(
-      name: 'FF',
-      color: Colors.orange,
-      children: {
-        NetworkNode(name: 'GG', color: Colors.redAccent),
-        NetworkNode(name: 'HH', color: Colors.pinkAccent),
-      },
-    ),
-  },
-);
