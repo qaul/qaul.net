@@ -86,6 +86,7 @@ class QaulApp extends PlatformAwareBuilder {
             return MaterialApp(
               theme: theme,
               darkTheme: darkTheme,
+              debugShowCheckedModeBanner: false,
               initialRoute: NavigationHelper.initial,
               onGenerateRoute: NavigationHelper.onGenerateRoute,
               locale: UserPrefsHelper().defaultLocale,
