@@ -12,11 +12,7 @@ class _ChatState extends _BaseTabState<_Chat> {
   Widget build(BuildContext context) {
     super.build(context);
     final defaultUser = ref.watch(defaultUserProvider);
-    final users = ref
-        .watch(usersProvider)
-        .where((u) => !(u.isBlocked ?? false))
-        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
-        .toList();
+    final chatRooms = ref.watch(chatRoomsProvider);
 
     final l18ns = AppLocalizations.of(context);
     return Scaffold(
@@ -33,67 +29,69 @@ class _ChatState extends _BaseTabState<_Chat> {
       ),
       body: EmptyStateTextDecorator(
         l18ns.emptyChatsList,
-        // TODO: this should be updated when a chat module is integrated
-        isEmpty: users.isEmpty,
+        isEmpty: chatRooms.isEmpty,
         child: ListView.separated(
           controller: ScrollController(),
           physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: users.length,
+          itemCount: chatRooms.length,
           separatorBuilder: (_, __) => const Divider(height: 12.0),
           itemBuilder: (_, i) {
             var theme = Theme.of(context).textTheme;
+            final room = chatRooms[i];
 
-            final user = users[i];
             return ListTile(
-              leading: UserAvatar.small(user: user),
+              // TODO Must match with other user's id
+              // leading: UserAvatar.small(user: user),
+              leading: const CircleAvatar(),
               title: Row(
                 children: [
-                  Text(user.name, style: theme.bodyText1!.copyWith(fontWeight: FontWeight.bold)),
+                  Text(room.name ?? '',
+                      style: theme.bodyText1!.copyWith(fontWeight: FontWeight.bold)),
                   const Expanded(child: SizedBox()),
-                  Text('12:00', style: theme.caption!.copyWith(fontStyle: FontStyle.italic)),
+                  Text(
+                    room.lastMessageTime == null
+                        ? ''
+                        : describeFuzzyTimestamp(room.lastMessageTime!),
+                    style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
+                  ),
                   const Icon(Icons.chevron_right),
                 ],
               ),
               subtitle: Text(
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+                room.lastMessagePreview ?? '',
                 style: theme.bodyText1,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               onTap: defaultUser == null
                   ? null
-                  : () => Navigator.push(
+                  : () {
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) {
+                            // TODO: MUST BE MAPPED
+                            final otherUser = defaultUser;
                             return ChatScreen(
-                              initialMessages: [
-                                TextMessage(
-                                  idBase58: const Uuid().v4(),
-                                  text: 'this is a message by another user',
-                                  user: user,
-                                ),
-                              ],
+                              initialMessages: room.messages!,
                               user: defaultUser,
-                              otherUserAvatarColor: colorGenerationStrategy(user.idBase58),
-                              onSendPressed: (String rawText) {
-                                return TextMessage(
-                                  idBase58: const Uuid().v4(),
-                                  text: rawText,
-                                  user: defaultUser,
-                                );
+                              otherUser: otherUser,
+                              onSendPressed: (msg) {
+                                final worker = ref.read(qaulWorkerProvider);
+                                worker.sendMessage(room.conversationId, msg);
                               },
                               userAppBar: Row(
                                 children: [
-                                  UserAvatar.small(badgeEnabled: false, user: user),
+                                  UserAvatar.small(badgeEnabled: false, user: otherUser),
                                   const SizedBox(width: 12),
-                                  Text(user.name),
+                                  Text(otherUser.name),
                                 ],
                               ),
                             );
                           },
                         ),
-                      ),
+                      );
+                    },
             );
           },
         ),

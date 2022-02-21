@@ -12,7 +12,6 @@ import 'package:qaul_rpc/src/generated/node/user_accounts.pb.dart';
 import 'package:qaul_rpc/src/generated/router/users.pb.dart';
 import 'package:qaul_rpc/src/generated/router/router.pb.dart';
 import 'package:qaul_rpc/src/generated/services/feed/feed.pb.dart';
-import 'package:qaul_rpc/src/models/chat_room.dart';
 import 'package:qaul_rpc/src/rpc_translators/abstract_rpc_module_translator.dart';
 import 'package:uuid/uuid.dart';
 

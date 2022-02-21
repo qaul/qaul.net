@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
+import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/foundation.dart';
 
 import '../generated/services/chat/chat.pb.dart';
@@ -89,6 +90,8 @@ class Message extends Equatable {
   final DateTime sentAt;
   final DateTime receivedAt;
   final String content;
+
+  String get messageIdBase58 => Base58Encode(messageId);
 
   factory Message.fromChatMessage(ChatMessage m) {
     return Message(

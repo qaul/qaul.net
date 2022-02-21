@@ -1,5 +1,4 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qaul_rpc/src/models/chat_room.dart';
 import 'package:qaul_rpc/src/models/feed_post_list_notifier.dart';
 
 import '../qaul_rpc.dart';

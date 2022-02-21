@@ -8,25 +8,28 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:qaul_ui/widgets/default_back_button.dart';
-
-import 'models/text_message.dart';
+import 'package:utils/utils.dart';
 
 part 'custom_input.dart';
 
-typedef OnSendPressed = TextMessage Function(String rawText);
+typedef OnSendPressed = void Function(String rawText);
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({
     Key? key,
     required this.user,
+    required this.otherUser,
     required this.initialMessages,
-    required this.otherUserAvatarColor,
     required this.userAppBar,
     required this.onSendPressed,
   }) : super(key: key);
+
+  /// The default user
   final User user;
-  final List<TextMessage> initialMessages;
-  final Color otherUserAvatarColor;
+
+  /// Someone the default user is having a conversation with
+  final User otherUser;
+  final List<Message> initialMessages;
   final Widget userAppBar;
   final OnSendPressed onSendPressed;
 
@@ -37,24 +40,12 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final List<types.Message> _messages = [];
 
-  void _addMessage(types.Message message) =>
-      setState(() => _messages.insert(0, message));
-
-  void _handleSendPressed(types.PartialText message) {
-    final textMessage = types.TextMessage.fromPartial(
-      author: widget.user.toInternalUser(),
-      id: widget.onSendPressed(message.text).idBase58,
-      partialText: message,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-    );
-
-    _addMessage(textMessage);
-  }
-
   @override
   void initState() {
     super.initState();
-    _messages.addAll(widget.initialMessages.map((e) => e.toInternalMessage()));
+    _messages.addAll(
+      widget.initialMessages.map((e) => e.toInternalMessage(widget.otherUser)),
+    );
   }
 
   @override
@@ -74,15 +65,17 @@ class _ChatScreenState extends State<ChatScreen> {
           showUserAvatars: true,
           user: widget.user.toInternalUser(),
           messages: _messages,
-          onSendPressed: _handleSendPressed,
+          onSendPressed: (message) => widget.onSendPressed(message.text),
           sendButtonVisibilityMode: SendButtonVisibilityMode.always,
           bubbleBuilder: _bubbleBuilder,
           customBottomWidget: _CustomInput(
             sendButtonVisibilityMode: SendButtonVisibilityMode.always,
-            onSendPressed: _handleSendPressed,
+            onSendPressed: (message) => widget.onSendPressed(message.text),
           ),
           theme: DefaultChatTheme(
-            userAvatarNameColors: [widget.otherUserAvatarColor],
+            userAvatarNameColors: [
+              colorGenerationStrategy(widget.otherUser.idBase58),
+            ],
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           ),
         ),
@@ -101,14 +94,28 @@ class _ChatScreenState extends State<ChatScreen> {
               message.type == types.MessageType.image
           ? const Color(0xfff5f5f7)
           : Colors.grey,
-      margin: nextMessageInGroup
-          ? const BubbleEdges.symmetric(horizontal: 6)
-          : null,
+      margin: nextMessageInGroup ? const BubbleEdges.symmetric(horizontal: 6) : null,
       nip: nextMessageInGroup
           ? BubbleNip.no
           : widget.user.toInternalUser().id != message.author.id
               ? BubbleNip.leftBottom
               : BubbleNip.rightBottom,
     );
+  }
+}
+
+extension MessageExtension on Message {
+  types.TextMessage toInternalMessage(User author) {
+    return types.TextMessage(
+      id: messageIdBase58,
+      text: content,
+      author: author.toInternalUser(),
+    );
+  }
+}
+
+extension UserExtension on User {
+  types.User toInternalUser() {
+    return types.User(id: idBase58, firstName: name);
   }
 }
