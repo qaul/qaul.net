@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_ui/decorators/qaul_nav_bar_decorator.dart';
 import 'package:qaul_ui/providers/providers.dart';
+import 'package:qaul_ui/screens/home/dynamic_network/dynamic_network_screen.dart';
 import 'package:qaul_ui/screens/home/tabs/tab.dart';
 import 'package:qaul_ui/screens/home/user_account_screen.dart';
 import 'package:utils/utils.dart';
@@ -92,7 +93,8 @@ class HomeScreen extends HookConsumerWidget {
                   BaseTab.feed(),
                   BaseTab.users(),
                   // BaseTab.chat(),
-                  BaseTab.network(),
+                  const DynamicNetworkView(),
+                  // BaseTab.network(),
                 ],
               ),
             ),
