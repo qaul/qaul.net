@@ -41,6 +41,10 @@ dependencies:
   flutter_svg: ^0.23.0+1
   # Notification bubbles on icons
   badges: ^2.0.1
+  # Dynamic Network View
+  flame: ^1.0.0
+  flame_forge2d: ^0.8.3
+  open_simplex_2: ^0.2.1
 
   flutter_markdown: ^0.6.8
 
