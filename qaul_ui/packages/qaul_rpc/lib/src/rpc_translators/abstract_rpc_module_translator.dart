@@ -10,7 +10,12 @@ import 'package:qaul_rpc/src/generated/node/user_accounts.pb.dart';
 import 'package:qaul_rpc/src/generated/router/users.pb.dart';
 import 'package:qaul_rpc/src/generated/router/router.pb.dart';
 import 'package:qaul_rpc/src/generated/services/feed/feed.pb.dart';
+import 'package:qaul_rpc/src/models/chat_room.dart';
 import 'package:qaul_rpc/src/models/models.dart';
+
+import '../generated/services/chat/chat.pb.dart';
+
+part 'chat_translator.dart';
 
 part 'connection_translator.dart';
 

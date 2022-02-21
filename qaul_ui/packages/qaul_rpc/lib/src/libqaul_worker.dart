@@ -12,9 +12,11 @@ import 'package:qaul_rpc/src/generated/node/user_accounts.pb.dart';
 import 'package:qaul_rpc/src/generated/router/users.pb.dart';
 import 'package:qaul_rpc/src/generated/router/router.pb.dart';
 import 'package:qaul_rpc/src/generated/services/feed/feed.pb.dart';
+import 'package:qaul_rpc/src/models/chat_room.dart';
 import 'package:qaul_rpc/src/rpc_translators/abstract_rpc_module_translator.dart';
 import 'package:uuid/uuid.dart';
 
+import 'generated/services/chat/chat.pb.dart';
 import 'libqaul/libqaul.dart';
 
 class LibqaulWorker {
@@ -117,6 +119,28 @@ class LibqaulWorker {
     await _encodeAndSendMessage(Modules.DEBUG, Uint8List(0));
   }
 
+  void getAllChatRooms() async {
+    final msg = Chat(overviewRequest: ChatOverviewRequest());
+    await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
+  }
+
+  void getChatRoomMessages(Uint8List chatId, {int lastIndex = 0}) async {
+    final msg = Chat(
+      conversationRequest: ChatConversationRequest(
+        conversationId: chatId,
+        lastIndex: Int64(lastIndex),
+      ),
+    );
+    await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
+  }
+
+  void sendMessage(Uint8List chatId, String content) async {
+    final msg = Chat(
+      send: ChatMessageSend(conversationId: chatId, content: content),
+    );
+    await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
+  }
+
   // *******************************
   // Private (helper) methods
   // *******************************
@@ -178,6 +202,9 @@ class LibqaulWorker {
       } else if (m.module == Modules.ROUTER) {
         final resp = await RouterTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
+      } else if (m.module == Modules.CHAT) {
+        final resp = await ChatTranslator().decodeMessageBytes(m.data);
+        if (resp != null) _processResponse(resp);
       } else {
         throw UnhandledRpcMessageException.value(m.toString(), 'LibqaulWorker.receiveResponse');
       }
@@ -214,6 +241,27 @@ class LibqaulWorker {
         _reader(defaultUserProvider.state).state = resp.data;
       }
       return;
+    }
+    if (resp.module == Modules.CHAT) {
+      if (resp.data != null && resp.data is List<ChatRoom>) {
+        final state = _reader(chatRoomsProvider.notifier).state;
+        for (final msg in resp.data) {
+          if (!state.contains(msg)) {
+            state.add(msg);
+          } else {
+            state.remove(msg);
+            state.add(msg.copyWith(
+              lastMessageIndex: msg.lastMessageIndex,
+              name: msg.name,
+              lastMessageTime: msg.lastMessageTime,
+              unreadCount: msg.unreadCount,
+              lastMessagePreview: msg.lastMessagePreview,
+              messages: msg.messages,
+            ));
+          }
+        }
+        return;
+      }
     }
 
     throw UnhandledRpcMessageException.value(resp.toString(), '_processResponse');
