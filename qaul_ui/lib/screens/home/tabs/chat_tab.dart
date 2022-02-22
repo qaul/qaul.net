@@ -16,7 +16,8 @@ class _ChatState extends _BaseTabState<_Chat> {
     final chatRooms = ref.watch(chatRoomsProvider);
 
     final blockedIds = users.where((u) => u.isBlocked ?? false).map((u) => u.id);
-    final filteredRooms = chatRooms.where((m) => !blockedIds.contains(m.conversationId)).toList();
+    final filteredRooms = chatRooms.where((m) => !blockedIds.contains(m.conversationId)).toList()
+      ..sort();
 
     final refreshChats = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
@@ -32,12 +33,10 @@ class _ChatState extends _BaseTabState<_Chat> {
           final availableUsers = users
               .where((u) =>
                   !(u.isBlocked ?? false) &&
-                  chatRooms.indexWhere((c) => c.conversationId == u.id).isNegative)
+                  chatRooms.indexWhere((c) => c.conversationId.equals(u.id)).isNegative)
               .toList();
-          final user = await showDialog(
-            context: context,
-            builder: (_) => _CreateNewRoomDialog(availableUsers),
-          );
+          final user = await Navigator.push(
+              context, MaterialPageRoute(builder: (_) => _CreateNewRoomDialog(availableUsers)));
           if (user is User) {
             final newRoom = ChatRoom.blank(user: defaultUser, otherUser: user);
             _openChat(newRoom, defaultUser, user);
@@ -141,9 +140,15 @@ class _CreateNewRoomDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context).textTheme;
+    final l18ns = AppLocalizations.of(context)!;
+    final theme = Theme.of(context).textTheme;
 
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: false,
+        leading: const DefaultBackButton(),
+        title: Text(l18ns.newChatTooltip),
+      ),
       body: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -155,7 +160,10 @@ class _CreateNewRoomDialog extends StatelessWidget {
             return ListTile(
               onTap: () => Navigator.pop(context, user),
               leading: UserAvatar.small(user: user),
-              title: Text(user.name, style: theme.bodyText1!.copyWith(fontWeight: FontWeight.bold)),
+              title: Text(
+                user.name,
+                style: theme.bodyText1!.copyWith(fontWeight: FontWeight.bold),
+              ),
             );
           },
         ),

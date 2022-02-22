@@ -19,6 +19,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../../widgets/default_back_button.dart';
 import '../user_details_screen.dart';
 
 part 'chat_tab.dart';

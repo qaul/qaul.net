@@ -1,5 +1,6 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:bubble/bubble.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -82,11 +83,10 @@ class ChatScreen extends HookConsumerWidget {
     );
   }
 
+  User _author(Message e) => e.senderId.equals(user.id) ? user : otherUser;
+
   List<types.TextMessage>? messages(ChatRoom room) {
-    return room.messages
-        ?.sorted()
-        .map((e) => e.toInternalMessage(e.senderId == user.id ? user : otherUser))
-        .toList();
+    return room.messages?.sorted().map((e) => e.toInternalMessage(_author(e))).toList();
   }
 
   Widget _bubbleBuilder(
@@ -94,24 +94,24 @@ class ChatScreen extends HookConsumerWidget {
     required message,
     required nextMessageInGroup,
   }) {
-    return Bubble(
-      child: child,
-      color:
-          user.toInternalUser().id != message.author.id || message.type == types.MessageType.image
-              ? const Color(0xfff5f5f7)
-              : Colors.grey,
-      margin: nextMessageInGroup ? const BubbleEdges.symmetric(horizontal: 6) : null,
-      nip: nextMessageInGroup
-          ? BubbleNip.no
-          : user.toInternalUser().id != message.author.id
-              ? BubbleNip.leftBottom
-              : BubbleNip.rightBottom,
-    );
-  }
-}
+    return Builder(builder: (context) {
+      var theme = Theme.of(context);
 
-extension _MessageListExtension on List<Message>? {
-  List<Message> sorted() => [...?(this?..sort())];
+      return Bubble(
+        child: child,
+        color:
+            user.toInternalUser().id != message.author.id || message.type == types.MessageType.image
+                ? const Color(0xfff5f5f7)
+                : theme.primaryColor,
+        margin: nextMessageInGroup ? const BubbleEdges.symmetric(horizontal: 6) : null,
+        nip: nextMessageInGroup
+            ? BubbleNip.no
+            : user.toInternalUser().id != message.author.id
+                ? BubbleNip.leftBottom
+                : BubbleNip.rightBottom,
+      );
+    });
+  }
 }
 
 extension _MessageExtension on Message {

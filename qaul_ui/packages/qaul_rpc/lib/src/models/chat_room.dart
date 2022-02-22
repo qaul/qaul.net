@@ -10,7 +10,7 @@ import 'models.dart';
 enum MessageStatus { nothing, sent, received }
 
 @immutable
-class ChatRoom extends Equatable {
+class ChatRoom with EquatableMixin implements Comparable {
   const ChatRoom._({
     required this.conversationId,
     this.lastMessageIndex,
@@ -52,6 +52,21 @@ class ChatRoom extends Equatable {
       conversationId: Uint8List.fromList(conversationList.conversationId),
       messages: conversationList.messageList.map((e) => Message.fromChatMessage(e)).toList(),
     );
+  }
+
+  @override
+  int compareTo(dynamic other) {
+    assert(
+      runtimeType == other.runtimeType,
+      "The sorting algorithm must not compare incomparable keys, since they don't "
+      'know how to order themselves relative to each other. Comparing $this with $other',
+    );
+    if (other is ChatRoom) {
+      if (other.lastMessageTime == null && lastMessageTime == null) return 0;
+      if (other.lastMessageTime == null) return 1;
+      if (lastMessageTime == null) return -1;
+    }
+    return (other as ChatRoom).lastMessageTime!.compareTo(lastMessageTime!);
   }
 
   @override
