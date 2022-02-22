@@ -106,10 +106,15 @@ impl Messaging {
     /// Check if there is a message scheduled for sending.
     /// 
     pub fn check_scheduler() -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
-        // get scheduled messaging buffer
-        let mut messaging = MESSAGING.get().write().unwrap();
+        let message_item: Option<ScheduledMessage>;
 
-        if let Some(message) = messaging.to_send.pop_front() {
+        // get scheduled messaging buffer
+        {
+            let mut messaging = MESSAGING.get().write().unwrap();
+            message_item = messaging.to_send.pop_front();
+        }
+
+        if let Some(message) = message_item {
             // check for route
             if let Some(route) = RoutingTable::get_route_to_user(message.receiver) {
                 // create binary message
@@ -129,7 +134,7 @@ impl Messaging {
         None
     }
 
-    /// send received confirmation message
+    /// TODO: send received confirmation message
     fn _send_confirmation() {
 
     }
