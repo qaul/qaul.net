@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/src/models/feed_post_list_notifier.dart';
 
 import '../qaul_rpc.dart';
+import 'models/chat_room_list_notifier.dart';
 
 final qaulWorkerProvider = Provider<LibqaulWorker>((ref) => LibqaulWorker(ref.read));
 
@@ -17,4 +18,7 @@ final usersProvider = StateNotifierProvider<UserListNotifier, List<User>>(
 
 final connectedNodesProvider = StateProvider<List<InternetNode>>((ref) => []);
 
-final chatRoomsProvider = StateProvider<List<ChatRoom>>((ref) => []);
+final chatRoomsProvider =
+    StateNotifierProvider<ChatRoomListNotifier, List<ChatRoom>>((ref) => ChatRoomListNotifier());
+
+final currentOpenChatRoom = StateProvider<ChatRoom?>((ref) => null);

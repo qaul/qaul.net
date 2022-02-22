@@ -63,6 +63,8 @@ dependencies:
   # *******
   intl: ^0.17.0
 
+  collection: ^1.15.0
+
   uuid: ^3.0.5
 
   hive: ^2.0.4

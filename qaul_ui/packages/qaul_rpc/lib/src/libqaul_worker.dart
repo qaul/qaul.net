@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -242,24 +243,25 @@ class LibqaulWorker {
       return;
     }
     if (resp.module == Modules.CHAT) {
-      if (resp.data != null && resp.data is List<ChatRoom>) {
-        final state = _reader(chatRoomsProvider.notifier).state;
-        for (final msg in resp.data) {
-          if (!state.contains(msg)) {
-            state.add(msg);
-          } else {
-            state.remove(msg);
-            state.add(msg.copyWith(
-              lastMessageIndex: msg.lastMessageIndex,
-              name: msg.name,
-              lastMessageTime: msg.lastMessageTime,
-              unreadCount: msg.unreadCount,
-              lastMessagePreview: msg.lastMessagePreview,
-              messages: msg.messages,
-            ));
+      if (resp.data != null) {
+        if (resp.data is List<ChatRoom>) {
+          final state = _reader(chatRoomsProvider.notifier);
+          for (final room in resp.data) {
+            if (!state.contains(room)) {
+              state.add(room);
+            } else {
+              state.update(room);
+            }
+          }
+          return;
+        }
+        if (resp.data is ChatRoom) {
+          final currentRoom = _reader(currentOpenChatRoom);
+
+          if (currentRoom != null && currentRoom.conversationId.equals(resp.data.conversationId)) {
+            _reader(currentOpenChatRoom.notifier).state = resp.data;
           }
         }
-        return;
       }
     }
 

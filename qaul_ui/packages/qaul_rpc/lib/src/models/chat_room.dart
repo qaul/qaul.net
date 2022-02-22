@@ -5,6 +5,7 @@ import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/foundation.dart';
 
 import '../generated/services/chat/chat.pb.dart';
+import 'models.dart';
 
 enum MessageStatus { nothing, sent, received }
 
@@ -20,6 +21,7 @@ class ChatRoom extends Equatable {
     this.unreadCount = 0,
   });
 
+  /// The ID of the other user
   final Uint8List conversationId;
   final int? lastMessageIndex;
   final String? name;
@@ -27,6 +29,10 @@ class ChatRoom extends Equatable {
   final int unreadCount;
   final String? lastMessagePreview;
   final List<Message>? messages;
+
+  factory ChatRoom.blank({required User user, required User otherUser}) {
+    return ChatRoom._(conversationId: otherUser.id, name: otherUser.name);
+  }
 
   factory ChatRoom.fromOverview(ChatOverview overview) {
     return ChatRoom._(
@@ -72,7 +78,7 @@ class ChatRoom extends Equatable {
 }
 
 @immutable
-class Message extends Equatable {
+class Message with EquatableMixin implements Comparable<Message> {
   const Message({
     required this.senderId,
     required this.messageId,
@@ -103,6 +109,16 @@ class Message extends Equatable {
       sentAt: DateTime.fromMillisecondsSinceEpoch(m.sentAt.toInt()),
       receivedAt: DateTime.fromMillisecondsSinceEpoch(m.receivedAt.toInt()),
     );
+  }
+
+  @override
+  int compareTo(dynamic other) {
+    assert(
+      runtimeType == other.runtimeType,
+      "The sorting algorithm must not compare incomparable keys, since they don't "
+      'know how to order themselves relative to each other. Comparing $this with $other',
+    );
+    return (other as Message).sentAt.compareTo(sentAt);
   }
 
   @override

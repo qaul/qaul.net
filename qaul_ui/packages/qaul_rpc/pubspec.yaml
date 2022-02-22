@@ -14,6 +14,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  collection: ^1.15.0
+
   ffi: ^1.1.2
   convert: ^3.0.1
   protobuf: ^2.0.0
