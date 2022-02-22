@@ -241,14 +241,16 @@ impl RouterInfo {
         match decoding_result {
             Ok(container) => {
                 // TODO: check signature
+                //let signature = container.signature;
 
-                // unstuff data
+                // decode message
                 let message_result = router_net_proto::RouterInfoContent::decode(&container.message[..]);
 
                 match message_result {
                     Ok(content) => {
                         let message_info = router_net_proto::RouterInfoMessage::decode(&content.content[..]);
                         if let Ok(message) = message_info {
+                            // collect users and routes
                             let messages = message;
                             let users = messages.users;
                             let routes = messages.routes;
@@ -257,21 +259,25 @@ impl RouterInfo {
                                 Some(router_net_proto::UserInfoTable { info }) => {
                                     Users::add_user_info_table(info);
                                 },
-                                None => todo!("None => add_user_info_table"),
+                                _ => {},
                             }
 
                             match routes {
-                                Some(router_net_proto::RoutingInfoTable { entry}) => {
+                                Some(router_net_proto::RoutingInfoTable { entry} ) => {
                                     ConnectionTable::process_received_routing_info(received.received_from, entry);
-                                }
-                                None => todo!("None => process_received_routing_info"),
+                                },
+                                _ => {},
                             }
                         }
                     },
-                    _ => log::error!("RouterInfoContent decoding error")
+                    Err(msg) => {
+                        log::error!("RouterInfoContent decode {:?}", msg);
+                    },
                 }
         },
-        _ => log::error!("info - RouterInfoContainer decode")
+        Err(msg) => {
+            log::error!("RouterInfoContainer decode {:?}", msg);
+        },
     }
 }
 }
