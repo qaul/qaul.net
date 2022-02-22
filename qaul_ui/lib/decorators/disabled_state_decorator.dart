@@ -5,8 +5,10 @@ class DisabledStateDecorator extends StatelessWidget {
     Key? key,
     required this.child,
     this.isDisabled = false,
+    this.ignorePointer = true,
   }) : super(key: key);
   final bool isDisabled;
+  final bool ignorePointer;
   final Widget child;
 
   @override
@@ -18,7 +20,7 @@ class DisabledStateDecorator extends StatelessWidget {
       ),
       child: DefaultTextStyle.merge(
         style: !isDisabled ? null : DefaultTextStyle.of(context).style.copyWith(color: Colors.grey),
-        child: IgnorePointer(ignoring: isDisabled, child: child),
+        child: IgnorePointer(ignoring: ignorePointer && isDisabled, child: child),
       ),
     );
   }

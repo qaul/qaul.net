@@ -44,6 +44,7 @@ class _UsersState extends _BaseTabState<_Users> {
 
                 return DisabledStateDecorator(
                   isDisabled: user.isBlocked ?? false,
+                  ignorePointer: false,
                   child: ListTile(
                     onTap: () async {
                       await Navigator.push(
