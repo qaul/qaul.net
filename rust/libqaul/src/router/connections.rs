@@ -23,10 +23,11 @@ use std::time::{SystemTime, Duration};
 use crate::connections::ConnectionModule;
 use crate::node;
 use crate::router::{
-    table::{RoutingInfoTable, RoutingTable, RoutingUserEntry, RoutingConnectionEntry},
+    table::{RoutingTable, RoutingUserEntry, RoutingConnectionEntry},
     neighbours::Neighbours,
 };
 use super::proto;
+use crate::router::router_net_proto;
 use crate::rpc::Rpc;
 
 
@@ -116,7 +117,7 @@ impl ConnectionTable {
 
     /// process received routing info table
     /// enter it into all modules where we are connected to
-    pub fn process_received_routing_info( neighbour_id: PeerId, info: RoutingInfoTable ) {
+    pub fn process_received_routing_info( neighbour_id: PeerId, info: Vec<router_net_proto::RoutingInfoEntry> ) {
         // try Lan module
         if let Some(rtt) = Neighbours::get_rtt(&neighbour_id , &ConnectionModule::Lan ){
             Self::fill_received_routing_info(ConnectionModule::Lan, neighbour_id, rtt, info.clone());
@@ -129,14 +130,14 @@ impl ConnectionTable {
     }
 
     /// populate connection table with incoming routing information
-    fn fill_received_routing_info( conn: ConnectionModule, neighbour_id: PeerId, rtt: u32, info: RoutingInfoTable ) {
+    fn fill_received_routing_info( conn: ConnectionModule, neighbour_id: PeerId, rtt: u32, info: Vec<router_net_proto::RoutingInfoEntry> ) {
         // loop through results and enter them to the table
-        for entry in info.0 {
+        for entry in info {
             if let Ok(user_id) = PeerId::from_bytes(&entry.user){
                 let neighbour = NeighbourEntry {
                     id: neighbour_id,
                     rtt: entry.rtt +rtt,
-                    hc: entry.hc,
+                    hc: entry.hc[0],
                     pl: entry.pl,
                     last_update: SystemTime::now(),
                 };
@@ -383,5 +384,35 @@ impl ConnectionTable {
         // return list
         connections_list
     }
+
+    /// print list of connection module on terminal 
+    #[allow(dead_code)]
+    fn cli_display_list( conn: ConnectionModule ) {
+        println!("{:?}", conn);
+        println!("No. | User ID");
+        println!("      * RTT in ms | hop count | Via Neighbour Node Id");
+
+        let mut line = 1;
+        let connection_table;
+        
+        match conn {
+            ConnectionModule::Lan => connection_table = LAN.get().read().unwrap(),
+            ConnectionModule::Internet => connection_table = INTERNET.get().read().unwrap(),
+            ConnectionModule::Ble => return,
+            ConnectionModule::Local => return,
+            ConnectionModule::None => return,
+        }
+
+        // loop through all table entries per user
+        for (id, entry) in &connection_table.table {
+            println!("{} | {:?}", line, id);
+            // loop through all neighbour entries of a user entry
+            for (id, neighbour) in &entry.connections {
+                println!("      * {} | {} | {:?}", neighbour.rtt, neighbour.hc, id);
+            }
+            line += 1;
+        }
+    }
+
 }
 

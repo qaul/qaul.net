@@ -37,6 +37,7 @@ fn main() {
 		"node/user_accounts.proto",
 		"router/users.proto",
 		"router/router.proto",
+		"router/router_net_info.proto",
 		"services/feed/feed.proto",
 		"services/feed/feed_net.proto",
 		"services/chat/chat.proto",
@@ -60,6 +61,7 @@ fn main() {
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.user_accounts.rs"), to.join("qaul.rpc.user_accounts.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.users.rs"), to.join("qaul.rpc.users.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.router.rs"), to.join("qaul.rpc.router.rs")).unwrap();
+	fs::copy(Path::new(&out_dir).join("qaul.net.router_net_info.rs"), to.join("qaul.net.router_net_info.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.feed.rs"), to.join("qaul.rpc.feed.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.chat.rs"), to.join("qaul.rpc.chat.rs")).unwrap();
 	// system communication
@@ -76,6 +78,7 @@ fn main() {
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.user_accounts.rs"), Path::new("src/node/qaul.rpc.user_accounts.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.users.rs"), Path::new("src/router/qaul.rpc.users.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.router.rs"), Path::new("src/router/qaul.rpc.router.rs")).unwrap();
+	fs::copy(&Path::new(&out_dir).join("qaul.net.router_net_info.rs"), Path::new("src/router/qaul.net.router_net_info.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.feed.rs"), Path::new("src/services/feed/qaul.rpc.feed.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.chat.rs"), Path::new("src/services/chat/qaul.rpc.chat.rs")).unwrap();
 	// system communication

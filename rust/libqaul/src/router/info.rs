@@ -17,6 +17,7 @@
 //! The timer needs to be polled manually.
 
 use libp2p::PeerId;
+use prost::Message;
 use state::Storage;
 use serde::{Serialize, Deserialize};
 use std::{
@@ -38,10 +39,10 @@ use crate::{
         table::{RoutingTable, RoutingInfoTable},
         users::{Users, UserInfoTable},
         connections::ConnectionTable,
+        router_net_proto,
     },
     utilities::timestamp::Timestamp,
 };
-
 
 /// mutable state of Neighbours table per ConnectionModule
 static SCHEDULER: Storage<RwLock<Scheduler>> = Storage::new();
@@ -192,54 +193,85 @@ impl RouterInfo {
 
         let timestamp = Timestamp::get_timestamp();
 
-        let router_info = RouterInfoMessage {
-            node: node_id.to_bytes(),
-            routes,
-            users,
+        let router_info = router_net_proto::RouterInfoMessage {
+            node: node_id.clone().to_bytes(),
+            routes: Some(routes),
+            users: Some(users),
             timestamp,
         };
 
+        let mut buf = Vec::with_capacity(router_info.encoded_len());
+        router_info.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        let router_info_proto = router_net_proto::RouterInfoContent {
+            id: node_id.to_bytes(),
+            content: buf,
+            time: timestamp,
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(router_info_proto.encoded_len());
+        router_info_proto.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
         // convert to bytes data
-        let data = bincode::serialize(&router_info).unwrap();
+        //let data = bincode::serialize(&router_info).unwrap();
 
         // sign data
         let keys = Node::get_keys();
-        let signature = keys.sign(&data).unwrap();
+        let signature = keys.sign(&buf).unwrap();
 
-        // create signed message
-        let message = RouterInfoContainer {
-            data,
+        // create signed container
+        let router_info_container = router_net_proto::RouterInfoContainer {
             signature,
+            message: buf,
         };
 
-        // return binary data
-        bincode::serialize(&message).unwrap()
+        // encode message
+        let mut buf = Vec::with_capacity(router_info_container.encoded_len());
+        router_info_container.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        buf
     }
 
     /// process received qaul_info message
     pub fn received( received: QaulInfoReceived ) {
         // decode message to structure
-        let decoding_result: Result<RouterInfoContainer, bincode::Error> = bincode::deserialize(&received.data[..]);
-        
+        let decoding_result = router_net_proto::RouterInfoContainer::decode(&received.data[..]);
+
         match decoding_result {
-            Ok(RouterInfoContainer { data, signature: _ }) => {
+            Ok(container) => {
                 // TODO: check signature
 
                 // unstuff data
-                let message_result: Result<RouterInfoMessage, bincode::Error> = bincode::deserialize(&data[..]);
+                let message_result = router_net_proto::RouterInfoContent::decode(&container.message[..]);
 
-                // process received RouterInfoMessage
-                if let Ok(message) = message_result {
-                    // add users to users list
-                    Users::add_user_info_table(message.users);
-                    // fill routes it into the connections tables
-                    ConnectionTable::process_received_routing_info( received.received_from, message.routes );
+                match message_result {
+                    Ok(content) => {
+                        let message_info = router_net_proto::RouterInfoMessage::decode(&content.content[..]);
+                        if let Ok(message) = message_info {
+                            let messages = message;
+                            let users = messages.users;
+                            let routes = messages.routes;
+
+                            match users {
+                                Some(router_net_proto::UserInfoTable { info }) => {
+                                    Users::add_user_info_table(info);
+                                },
+                                None => todo!("None => add_user_info_table"),
+                            }
+
+                            match routes {
+                                Some(router_net_proto::RoutingInfoTable { entry}) => {
+                                    ConnectionTable::process_received_routing_info(received.received_from, entry);
+                                }
+                                None => todo!("None => process_received_routing_info"),
+                            }
+                        }
+                    },
+                    _ => log::error!("RouterInfoContent decoding error")
                 }
-            },
-            _ => {
-                log::error!("bincode RouterInfoContainer decoding error");
-                return
-            },
-        }
+        },
+        _ => log::error!("info - RouterInfoContainer decode")
     }
+}
 }

@@ -20,6 +20,7 @@ use serde::{Serialize, Deserialize};
 use crate::connections::ConnectionModule;
 use super::proto;
 use crate::rpc::Rpc;
+use  crate::router::router_net_proto;
 
 /// mutable state of table
 static ROUTINGTABLE: Storage<RwLock<RoutingTable>> = Storage::new();
@@ -78,8 +79,10 @@ impl RoutingTable {
     }
 
     /// create serializable routing info for a specific neighbour
-    pub fn create_routing_info( neighbour: Option<PeerId> ) -> RoutingInfoTable {
-        let mut table: Vec<RoutingInfoEntry> = Vec::new();
+    pub fn create_routing_info( neighbour: Option<PeerId> ) -> router_net_proto::RoutingInfoTable {
+        let mut table = router_net_proto::RoutingInfoTable {
+            entry: Vec::new()
+        };
 
         // get access to routing table
         let routing_table = ROUTINGTABLE.get().read().unwrap();
@@ -91,25 +94,35 @@ impl RoutingTable {
                 if let Some(neighbour_id) = neighbour {
                     // check if neighbour is best connection to it
                     if neighbour_id != user.connections[0].node {
-                        table.push( RoutingInfoEntry {
+                        let mut hc = Vec::new();
+                        hc.push(user.connections[0].hc);
+
+                        let table_entry = router_net_proto::RoutingInfoEntry {
                             user: user_id.to_bytes(),
                             rtt: user.connections[0].rtt,
-                            hc: user.connections[0].hc,
+                            hc,
                             pl: user.connections[0].pl,
-                        });
+                        };
+
+                        table.entry.push(table_entry);
                     }
                 } else {
-                    table.push( RoutingInfoEntry {
+                    let mut hc = Vec::new();
+                            hc.push(user.connections[0].hc);
+                            
+                    let table_entry = router_net_proto::RoutingInfoEntry {
                         user: user_id.to_bytes(),
                         rtt: user.connections[0].rtt,
-                        hc: user.connections[0].hc,
+                        hc,
                         pl: user.connections[0].pl,
-                    });
+                    };
+
+                    table.entry.push(table_entry);
                 }
             }
         }
 
-        RoutingInfoTable(table)
+        table
     }
 
     /// send protobuf RPC neighbours list
