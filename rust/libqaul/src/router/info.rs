@@ -238,40 +238,36 @@ impl RouterInfo {
         // decode message to structure
         let decoding_result = router_net_proto::RouterInfoContainer::decode(&received.data[..]);
 
-        match decoding_result {
-            Ok(container) => {
-                // TODO: check signature
+        if let Ok(container) = decoding_result {
+            // TODO: check signature
 
-                // unstuff data
-                let message_result = router_net_proto::RouterInfoContent::decode(&container.message[..]);
+            // unstuff data
+            let message_result = router_net_proto::RouterInfoContent::decode(&container.message[..]);
 
-                match message_result {
-                    Ok(content) => {
-                        let message_info = router_net_proto::RouterInfoMessage::decode(&content.content[..]);
-                        if let Ok(message) = message_info {
-                            let messages = message;
-                            let users = messages.users;
-                            let routes = messages.routes;
+            if let Ok(content) = message_result {
+                let message_info = router_net_proto::RouterInfoMessage::decode(&content.content[..]);
+                if let Ok(message) = message_info {
+                    let messages = message;
+                    let users = messages.users;
+                    let routes = messages.routes;
 
-                            match users {
-                                Some(router_net_proto::UserInfoTable { info }) => {
-                                    Users::add_user_info_table(info);
-                                },
-                                None => todo!("None => add_user_info_table"),
-                            }
+                    if let Some(router_net_proto::UserInfoTable { info }) = users {
+                        Users::add_user_info_table(info);
+                    } else {
+                        todo!("None => add_user_info_table")
+                    }
 
-                            match routes {
-                                Some(router_net_proto::RoutingInfoTable { entry}) => {
-                                    ConnectionTable::process_received_routing_info(received.received_from, entry);
-                                }
-                                None => todo!("None => process_received_routing_info"),
-                            }
-                        }
-                    },
-                    _ => log::error!("RouterInfoContent decoding error")
+                    if let Some(router_net_proto::RoutingInfoTable { entry}) = routes {
+                        ConnectionTable::process_received_routing_info(received.received_from, entry);
+                    } else {
+                        todo!("None => process_received_routing_info")
+                    }
                 }
-        },
-        _ => log::error!("info - RouterInfoContainer decode")
-    }
+            } else {
+                log::error!("RouterInfoContent decoding error")
+            }
+                } else {
+            log::error!("info - RouterInfoContainer decode")
+        }
 }
 }
