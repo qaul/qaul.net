@@ -69,36 +69,6 @@ impl Connections {
         conn
     }
 
-    /// Initialize connections for android
-    /// This is here for debugging reasons
-    pub async fn init_android() -> Connections  {
-        log::info!("init_android() start");
-
-
-        // create transport encryption keys for noise protocol
-        let auth_keys = Keypair::<X25519Spec>::new()
-        .into_authentic(Node::get_keys())
-        .expect("can create auth keys");
-
-        log::info!("init_android() auth_keys generated");
-
-
-        // initialize Lan module
-        let lan = Lan::init(auth_keys.clone()).await;
-
-        log::info!("init_android() lan initialized");
-
-        // initialize Internet overlay module
-        let internet = Internet::init(auth_keys).await;
-
-        log::info!("init_android() internet initialized");
-
-        //let conn = Connections{ lan: None, internet: Some(internet) };
-        let conn = Connections{ lan: Some(lan), internet: Some(internet) };
-
-        conn
-    }
-
     /// Process incoming RPC request messages
     pub fn rpc(data: Vec<u8>, internet_opt: Option<&mut Internet>) {
         match proto::Connections::decode(&data[..]) {

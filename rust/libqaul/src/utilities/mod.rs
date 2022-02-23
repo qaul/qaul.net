@@ -9,17 +9,10 @@
    
 pub mod timestamp;
 
-use timestamp::Timestamp;
-
 /// utilities module structure
 pub struct Utilities {
 
 }
 
 impl Utilities {
-    /// initialize utilities module
-    pub fn init() {
-        // initialize timestamp
-        Timestamp::init();
-    } 
 }
