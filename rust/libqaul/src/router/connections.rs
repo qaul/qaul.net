@@ -18,7 +18,6 @@ use prost::Message;
 use std::sync::RwLock;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
-use std::time::{SystemTime, Duration};
 
 use crate::connections::ConnectionModule;
 use crate::node;
@@ -28,7 +27,7 @@ use crate::router::{
 };
 use super::proto;
 use crate::rpc::Rpc;
-
+use crate::utilities::timestamp::Timestamp;
 
 /// Mutable module state
 /// Tables with all stats for each connection module
@@ -47,8 +46,8 @@ struct NeighbourEntry {
     hc: u8,
     /// package loss
     pl: f32,
-    /// time when the node was last updated
-    last_update: SystemTime,
+    /// timestamp when the node was last updated
+    last_update: u64,
 }
 
 /// user entry for ConnectionTable
@@ -138,7 +137,7 @@ impl ConnectionTable {
                     rtt: entry.rtt +rtt,
                     hc: entry.hc,
                     pl: entry.pl,
-                    last_update: SystemTime::now(),
+                    last_update: Timestamp::get_timestamp(),
                 };
 
                 Self::add_connection(user_id, neighbour, conn.clone());
@@ -280,14 +279,13 @@ impl ConnectionTable {
                 let mut expired = true;
 
                 // check if entry is expired
-                if let Ok(duration) = value.last_update.elapsed() {
-                    if duration < Duration::new(20, 0) {
-                        expired = false;
+                // it expires after 20 seconds
+                if value.last_update < Timestamp::get_timestamp() - (20 * 1000) {
+                    expired = false;
 
-                        if value.rtt < rtt {
-                            rtt = value.rtt;
-                            entry_found = Some(value);
-                        }
+                    if value.rtt < rtt {
+                        rtt = value.rtt;
+                        entry_found = Some(value);
                     }
                 }
 

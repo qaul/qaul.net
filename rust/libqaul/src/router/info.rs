@@ -21,9 +21,7 @@ use state::Storage;
 use serde::{Serialize, Deserialize};
 use std::{
     collections::HashMap,
-    convert::TryFrom,
     sync::RwLock,
-    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
 use qaul_info::{
@@ -40,6 +38,7 @@ use crate::{
         users::{Users, UserInfoTable},
         connections::ConnectionTable,
     },
+    utilities::timestamp::Timestamp,
 };
 
 
@@ -56,17 +55,17 @@ pub struct Scheduler {
     /// modules, the table is only sent on one of them.
     neighbours: HashMap<PeerId, SchedulerEntry>,
 
-    /// interval in which updated routing information
-    /// shall be sent to the neighbouring nodes.
-    interval: Duration,
+    /// interval in milliseconds in which updated routing 
+    /// information shall be sent to the neighbouring nodes.
+    interval: u64,
 }
 
 /// An entry for the scheduler neighbour list
 /// that contains the time stamp 
 #[derive(Clone, Debug, Copy)]
 struct SchedulerEntry {
-    /// time of the last send
-    timestamp: SystemTime,
+    /// timestamp of the last send
+    timestamp: u64,
 }
 
 /// Serializable routing information message 
@@ -105,7 +104,7 @@ impl RouterInfo {
         // neighbours list for routing info scheduler
         let scheduler = Scheduler { 
             neighbours: HashMap::new(),
-            interval: Duration::from_secs(interval_seconds),
+            interval: (interval_seconds * 1000),
         };
         SCHEDULER.set(RwLock::new(scheduler));
     }
@@ -123,7 +122,7 @@ impl RouterInfo {
 
             // loop over all neighbours
             for (id, time) in scheduler.neighbours.iter() {
-                if time.timestamp + scheduler.interval < SystemTime::now() {
+                if time.timestamp + scheduler.interval < Timestamp::get_timestamp() {
                     found_neighbour = Some(id.clone());
                     break
                 }
@@ -148,7 +147,7 @@ impl RouterInfo {
             else {
                 // update timer
                 if let Some(entry) = scheduler.neighbours.get_mut(&node_id){
-                    entry.timestamp = SystemTime::now();
+                    entry.timestamp = Timestamp::get_timestamp();
                 }
 
                 // create routing information
@@ -177,7 +176,7 @@ impl RouterInfo {
             let mut scheduler = SCHEDULER.get().write().unwrap();
             let interval = scheduler.interval.clone();
             scheduler.neighbours.insert(node_id, SchedulerEntry {
-                timestamp: SystemTime::now() - interval,
+                timestamp: Timestamp::get_timestamp() - interval,
             });
         }
     }
@@ -190,9 +189,7 @@ impl RouterInfo {
         let routes = RoutingTable::create_routing_info(neighbour);
         let users = Users::get_user_info_table();
 
-        let time = SystemTime::now();
-        let duration = time.duration_since(UNIX_EPOCH).expect("Time went backwards");
-        let timestamp = u64::try_from(duration.as_millis()).unwrap();
+        let timestamp = Timestamp::get_timestamp();
 
         let router_info = RouterInfoMessage {
             node: node_id.to_bytes(),
@@ -224,7 +221,7 @@ impl RouterInfo {
         let decoding_result: Result<RouterInfoContainer, bincode::Error> = bincode::deserialize(&received.data[..]);
         
         match decoding_result {
-            Ok(RouterInfoContainer { data, signature }) => {
+            Ok(RouterInfoContainer { data, signature: _ }) => {
                 // TODO: check signature
 
                 // unstuff data
