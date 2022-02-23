@@ -15,8 +15,11 @@ class _UsersState extends _BaseTabState<_Users> {
     final users =
         ref.watch(usersProvider).where((u) => u.idBase58 != (defaultUser?.idBase58 ?? '')).toList();
 
-    users.sort((u1, u2) => u2.isConnected ? 1 : 0);
-    users.sort((u1, u2) => (u1.isBlocked ?? false) ? 1 : 0);
+    users.sort((u1, u2) => (u1.isBlocked ?? false)
+        ? 1
+        : u2.isConnected
+            ? 1
+            : -1);
 
     final refreshUsers = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
