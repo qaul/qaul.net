@@ -18,9 +18,7 @@ class RouterTranslator extends RpcModuleTranslator {
                 idBase58: Base58Encode(e.userId),
                 id: Uint8List.fromList(e.userId),
                 availableTypes: _mapFromRoutingTableConnections(e.connections),
-                status: _isConnected(e)
-                    ? ConnectionStatus.online
-                    : ConnectionStatus.offline,
+                status: _isConnected(e) ? ConnectionStatus.online : ConnectionStatus.offline,
               ),
             )
             .toList();
@@ -52,7 +50,7 @@ class RouterTranslator extends RpcModuleTranslator {
     }
 
     ConnectionInfo toConnectionInfo(RoutingTableConnection c) => ConnectionInfo(
-          ping: c.rtt,
+          ping: c.rtt ~/ 1000,
           nodeID: Uint8List.fromList(c.via),
           nodeIDBase58: Base58Encode(c.via),
         );
