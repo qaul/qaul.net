@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DefaultBackButton extends StatelessWidget {
-  const DefaultBackButton({Key? key}) : super(key: key);
+  const DefaultBackButton({Key? key, this.onPressed}) : super(key: key);
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +12,7 @@ class DefaultBackButton extends StatelessWidget {
       splashRadius: 24,
       tooltip: l18ns.backButtonTooltip,
       icon: const Icon(Icons.arrow_back_ios_rounded),
-      onPressed: () => Navigator.maybePop(context),
+      onPressed: onPressed != null ? onPressed! : () => Navigator.maybePop(context),
     );
   }
 }

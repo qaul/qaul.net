@@ -39,7 +39,7 @@ class _ChatState extends _BaseTabState<_Chat> {
               context, MaterialPageRoute(builder: (_) => _CreateNewRoomDialog(availableUsers)));
           if (user is User) {
             final newRoom = ChatRoom.blank(user: defaultUser, otherUser: user);
-            _openChat(newRoom, defaultUser, user);
+            openChat(newRoom, context: context, user: defaultUser, otherUser: user);
           }
         },
         child: SvgPicture.asset(
@@ -92,41 +92,14 @@ class _ChatState extends _BaseTabState<_Chat> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  onTap: () => _openChat(room, defaultUser, otherUser),
+                  onTap: () {
+                    openChat(room, context: context, user: defaultUser, otherUser: otherUser);
+                  },
                 );
               },
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  void _openChat(ChatRoom room, User user, User otherUser) {
-    ref.read(currentOpenChatRoom.notifier).state = room;
-    ref.read(qaulWorkerProvider).getChatRoomMessages(room.conversationId);
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) {
-          return ChatScreen(
-            initialMessages: room.messages ?? [],
-            user: user,
-            otherUser: otherUser,
-            onSendPressed: (msg) {
-              final worker = ref.read(qaulWorkerProvider);
-              worker.sendMessage(room.conversationId, msg);
-            },
-            userAppBar: Row(
-              children: [
-                UserAvatar.small(badgeEnabled: false, user: otherUser),
-                const SizedBox(width: 12),
-                Text(otherUser.name),
-              ],
-            ),
-          );
-        },
       ),
     );
   }

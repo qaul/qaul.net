@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qaul_ui/decorators/disabled_state_decorator.dart';
 import 'package:qaul_ui/decorators/loading_decorator.dart';
+import 'package:qaul_ui/screens/chat/chat.dart';
 import 'package:qaul_ui/widgets/default_back_button.dart';
 import 'package:qaul_ui/widgets/user_avatar.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
@@ -29,12 +30,26 @@ class UserDetailsScreen extends HookConsumerWidget {
             children: [
               Tooltip(
                 message: l18ns.newChatTooltip,
-                child: SvgPicture.asset(
-                  'assets/icons/comment.svg',
-                  width: 24,
-                  height: 24,
-                  color: Theme.of(context).appBarTheme.iconTheme?.color ??
-                      Theme.of(context).iconTheme.color,
+                child: IconButton(
+                  splashRadius: 26,
+                  onPressed: () {
+                    final defaultUser = ref.watch(defaultUserProvider)!;
+                    final newRoom = ChatRoom.blank(user: defaultUser, otherUser: user);
+                    Navigator.pop(context);
+                    openChat(
+                      newRoom,
+                      context: context,
+                      user: defaultUser,
+                      otherUser: user,
+                    );
+                  },
+                  icon: SvgPicture.asset(
+                    'assets/icons/comment.svg',
+                    width: 24,
+                    height: 24,
+                    color: Theme.of(context).appBarTheme.iconTheme?.color ??
+                        Theme.of(context).iconTheme.color,
+                  ),
                 ),
               ),
             ],

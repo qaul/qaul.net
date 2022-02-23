@@ -14,42 +14,98 @@ import 'package:qaul_ui/widgets/default_back_button.dart';
 import 'package:utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../widgets/loading_indicator.dart';
+import '../../widgets/user_avatar.dart';
+
 part 'custom_input.dart';
 
 typedef OnSendPressed = void Function(String rawText);
 
-class ChatScreen extends HookConsumerWidget {
-  const ChatScreen({
+Future<void> openChat(
+  ChatRoom room, {
+  required BuildContext context,
+  required User user,
+  required User otherUser,
+}) {
+  return Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => _ChatScreen(room, user, otherUser),
+      ));
+}
+
+class _ChatScreen extends StatefulHookConsumerWidget {
+  const _ChatScreen(
+    this.room,
+    this.user,
+    this.otherUser, {
     Key? key,
-    required this.user,
-    required this.otherUser,
-    required this.initialMessages,
-    required this.userAppBar,
-    required this.onSendPressed,
   }) : super(key: key);
+
+  final ChatRoom room;
 
   /// The default user
   final User user;
 
   /// Someone the default user is having a conversation with
   final User otherUser;
-  final List<Message> initialMessages;
-  final Widget userAppBar;
-  final OnSendPressed onSendPressed;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final room = ref.watch(currentOpenChatRoom)!;
+  _ChatScreenState createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends ConsumerState<_ChatScreen> {
+  ChatRoom get room => widget.room;
+
+  User get user => widget.user;
+
+  User get otherUser => widget.otherUser;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      ref.read(currentOpenChatRoom.notifier).state = room;
+      ref.read(qaulWorkerProvider).getChatRoomMessages(room.conversationId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final room = ref.watch(currentOpenChatRoom);
+
+    if (room == null) {
+      return const Scaffold(body: Center(child: LoadingIndicator()));
+    }
 
     final refreshCurrentRoom = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
-      worker.getChatRoomMessages(room.conversationId, lastIndex: room.lastMessageIndex ?? 1);
+      worker.getChatRoomMessages(
+        room.conversationId,
+        lastIndex: room.lastMessageIndex ?? 1,
+      );
+    }, [UniqueKey()]);
+
+    final closeChat = useCallback(() {
+      ref.read(currentOpenChatRoom.notifier).state = null;
+      Navigator.pop(context);
+    }, []);
+
+    final sendMessage = useCallback((types.PartialText msg) {
+      final worker = ref.read(qaulWorkerProvider);
+      worker.sendMessage(room.conversationId, msg.text);
     }, [UniqueKey()]);
 
     return Scaffold(
       appBar: AppBar(
-        leading: const DefaultBackButton(),
-        title: userAppBar,
+        leading: DefaultBackButton(onPressed: closeChat),
+        title: Row(
+          children: [
+            UserAvatar.small(badgeEnabled: false, user: otherUser),
+            const SizedBox(width: 12),
+            Text(otherUser.name),
+          ],
+        ),
         titleSpacing: 0,
         actions: [
           IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
@@ -64,12 +120,12 @@ class ChatScreen extends HookConsumerWidget {
             showUserAvatars: true,
             user: user.toInternalUser(),
             messages: messages(room) ?? [],
-            onSendPressed: (message) => onSendPressed(message.text),
+            onSendPressed: sendMessage,
             sendButtonVisibilityMode: SendButtonVisibilityMode.always,
             bubbleBuilder: _bubbleBuilder,
             customBottomWidget: _CustomInput(
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
-              onSendPressed: (message) => onSendPressed(message.text),
+              onSendPressed: sendMessage,
             ),
             theme: DefaultChatTheme(
               userAvatarNameColors: [
