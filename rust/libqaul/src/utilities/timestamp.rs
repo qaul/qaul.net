@@ -32,7 +32,7 @@ impl Timestamp {
     /// get a timestamp since UNIX_EPOCH in milliseconds for now
     /// 
     /// The function should never panick.
-    /// If it fails it returns the timestamp 1 year after zero ( == 31'536'000'000 milliseconds ).
+    /// If it fails it returns the timestamp 1 hour after zero ( == 360'000 milliseconds ).
     pub fn get_timestamp() -> u64 {
         //create SystemTime
         let time = Timestamp::create_time();
@@ -49,7 +49,7 @@ impl Timestamp {
             log::error!("Time is before UNIX_EPOCH");
         }
 
-        // one year after zero == 31'536'000'000 milliseconds
-        365 * 24 * 60 * 60 * 1000
+        // one hour after zero == 360'000 milliseconds
+        60 * 60 * 1000
     }
 }

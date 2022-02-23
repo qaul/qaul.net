@@ -22,6 +22,7 @@ use serde::{Serialize, Deserialize};
 use std::{
     collections::HashMap,
     sync::RwLock,
+    time::{Duration, SystemTime},
 };
 
 use qaul_info::{
@@ -55,17 +56,17 @@ pub struct Scheduler {
     /// modules, the table is only sent on one of them.
     neighbours: HashMap<PeerId, SchedulerEntry>,
 
-    /// interval in milliseconds in which updated routing 
-    /// information shall be sent to the neighbouring nodes.
-    interval: u64,
+    /// interval in which updated routing information
+    /// shall be sent to the neighbouring nodes.
+    interval: Duration,
 }
 
 /// An entry for the scheduler neighbour list
 /// that contains the time stamp 
 #[derive(Clone, Debug, Copy)]
 struct SchedulerEntry {
-    /// timestamp of the last send
-    timestamp: u64,
+    /// time of the last send
+    timestamp: SystemTime,
 }
 
 /// Serializable routing information message 
@@ -104,7 +105,7 @@ impl RouterInfo {
         // neighbours list for routing info scheduler
         let scheduler = Scheduler { 
             neighbours: HashMap::new(),
-            interval: (interval_seconds * 1000),
+            interval: Duration::from_secs(interval_seconds),
         };
         SCHEDULER.set(RwLock::new(scheduler));
     }
@@ -122,7 +123,7 @@ impl RouterInfo {
 
             // loop over all neighbours
             for (id, time) in scheduler.neighbours.iter() {
-                if time.timestamp + scheduler.interval < Timestamp::get_timestamp() {
+                if time.timestamp + scheduler.interval < SystemTime::now() {
                     found_neighbour = Some(id.clone());
                     break
                 }
@@ -147,7 +148,7 @@ impl RouterInfo {
             else {
                 // update timer
                 if let Some(entry) = scheduler.neighbours.get_mut(&node_id){
-                    entry.timestamp = Timestamp::get_timestamp();
+                    entry.timestamp = SystemTime::now();
                 }
 
                 // create routing information
@@ -176,7 +177,7 @@ impl RouterInfo {
             let mut scheduler = SCHEDULER.get().write().unwrap();
             let interval = scheduler.interval.clone();
             scheduler.neighbours.insert(node_id, SchedulerEntry {
-                timestamp: Timestamp::get_timestamp() - interval,
+                timestamp: SystemTime::now() - interval,
             });
         }
     }
