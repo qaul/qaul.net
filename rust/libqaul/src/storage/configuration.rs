@@ -72,9 +72,9 @@ impl Default for Internet {
         Internet {
             active: true,
             #[cfg(any(target_os = "android", target_os = "ios"))]
-            peers: vec![String::from("/ip4/144.91.74.192/tcp/9229"); 1],
+            peers: vec![String::from("/ip4/144.91.74.192/tcp/9339"); 1],
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
-            peers: vec![String::from("/ip4/144.91.74.192/tcp/9229"); 1],
+            peers: vec![String::from("/ip4/144.91.74.192/tcp/9339"); 1],
             //peers: Vec::new(),
             do_listen: false,
             #[cfg(any(target_os = "android", target_os = "ios"))]
