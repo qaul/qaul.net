@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:qaul_ui/widgets/platform_aware_builder.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 
@@ -25,22 +26,18 @@ class QaulApp extends PlatformAwareBuilder {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
         ),
-        tooltipTheme:
-            const TooltipThemeData(waitDuration: Duration(seconds: 1)),
+        tooltipTheme: const TooltipThemeData(waitDuration: Duration(seconds: 1)),
         iconTheme: IconThemeData(color: Colors.grey.shade600),
         appBarTheme: AppBarTheme(
           color: Colors.transparent,
           elevation: 0.0,
           // Shadow not used as elevation is 0.0 - using this to inject color of decorators/qaul_nav_bar_decorator.dart:157
           shadowColor: Colors.grey.shade300,
-          titleTextStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.lightBlue),
+          titleTextStyle:
+              const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.lightBlue),
           iconTheme: const IconThemeData(color: Colors.lightBlue),
           actionsIconTheme: const IconThemeData(color: Colors.lightBlue),
-          shape: BorderDirectional(
-              bottom: BorderSide(color: Colors.grey.shade300)),
+          shape: BorderDirectional(bottom: BorderSide(color: Colors.grey.shade300)),
         ),
       ),
       dark: ThemeData(
@@ -52,8 +49,7 @@ class QaulApp extends PlatformAwareBuilder {
           backgroundColor: Colors.lightBlue,
           foregroundColor: Colors.black,
         ),
-        tooltipTheme:
-            const TooltipThemeData(waitDuration: Duration(seconds: 1)),
+        tooltipTheme: const TooltipThemeData(waitDuration: Duration(seconds: 1)),
         appBarTheme: const AppBarTheme(
           elevation: 0.0,
           color: Color(0xff212121),
@@ -75,8 +71,14 @@ class QaulApp extends PlatformAwareBuilder {
               supportedLocales: AppLocalizations.supportedLocales,
               localeResolutionCallback: (locale, supportedLocales) {
                 final defaultLocale = UserPrefsHelper().defaultLocale;
-                if (defaultLocale != null) return defaultLocale;
-                if (supportedLocales.contains(locale)) return locale;
+                if (defaultLocale != null) {
+                  Intl.defaultLocale = defaultLocale.toLanguageTag();
+                  return defaultLocale;
+                }
+                if (locale != null && supportedLocales.contains(locale)) {
+                  Intl.defaultLocale = locale.toLanguageTag();
+                  return locale;
+                }
                 return const Locale.fromSubtags(languageCode: 'en');
               },
               builder: (context, child) {
@@ -89,11 +91,9 @@ class QaulApp extends PlatformAwareBuilder {
                   maxWidth: 828,
                   minWidth: 370,
                   breakpoints: const [
-                    ResponsiveBreakpoint.resize(350.0,
-                        name: 'ANDROID', scaleFactor: 0.8),
+                    ResponsiveBreakpoint.resize(350.0, name: 'ANDROID', scaleFactor: 0.8),
                     ResponsiveBreakpoint.resize(480, name: MOBILE),
-                    ResponsiveBreakpoint.resize(680,
-                        name: 'MOBILE_LANDSCAPE', scaleFactor: 0.8),
+                    ResponsiveBreakpoint.resize(680, name: 'MOBILE_LANDSCAPE', scaleFactor: 0.8),
                     ResponsiveBreakpoint.autoScale(800, name: TABLET),
                     ResponsiveBreakpoint.resize(1000, name: DESKTOP),
                   ],

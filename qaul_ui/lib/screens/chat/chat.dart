@@ -147,18 +147,16 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
 
   Widget _bubbleBuilder(
     Widget child, {
-    required message,
-    required nextMessageInGroup,
+    required types.Message message,
+    required bool nextMessageInGroup,
   }) {
     return Builder(builder: (context) {
-      var theme = Theme.of(context);
-
       return Bubble(
         child: child,
         color:
             user.toInternalUser().id != message.author.id || message.type == types.MessageType.image
                 ? const Color(0xfff5f5f7)
-                : theme.primaryColor,
+                : Colors.lightBlue.shade700,
         margin: nextMessageInGroup ? const BubbleEdges.symmetric(horizontal: 6) : null,
         nip: nextMessageInGroup
             ? BubbleNip.no
@@ -176,6 +174,7 @@ extension _MessageExtension on Message {
       id: messageIdBase58,
       text: content,
       author: author.toInternalUser(),
+      createdAt: receivedAt.millisecondsSinceEpoch,
     );
   }
 }
