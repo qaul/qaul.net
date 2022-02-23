@@ -42,7 +42,6 @@ static INITIALIZED: Storage<bool> = Storage::new();
 
 /// To see logs on android we need the android logger
 #[cfg(target_os = "android")]
-#[macro_use]
 extern crate log;
 #[cfg(target_os = "android")]
 use log::Level;

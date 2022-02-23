@@ -20,7 +20,6 @@
 
 use libp2p::{
     core::upgrade,
-    dns::DnsConfig,
     noise::{NoiseConfig, X25519Spec, AuthenticKeypair},
     ping::{Ping, PingConfig, PingEvent},
     tcp::TcpConfig,
@@ -34,8 +33,13 @@ use libp2p::{
         protocols_handler::ProtocolsHandler,
         IntoProtocolsHandler, NetworkBehaviour,
     },
-    websocket::WsConfig,
     NetworkBehaviour,
+};
+// DNS is excluded on mobile, as it is not working there
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+use libp2p::{
+    dns::DnsConfig,
+    websocket::WsConfig,
 };
 use log::info;
 use futures::channel::mpsc;

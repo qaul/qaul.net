@@ -1,13 +1,19 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! # Android-API for libqaul
+//! 
+//! This is the Android FFI of libqaul.
+//! 
+//! LibqaulKt references the name libqaul.kt, which is the kotlin file exposing the functions.
+
 #![cfg(target_os = "android")]
 #![allow(non_snake_case)]
 
-use crate::api;
-use jni::objects::{JClass, JString, JByteBuffer};
+use jni::objects::{JClass, JString};
 use jni::sys::{jstring, jbyteArray, jint};
 use jni::JNIEnv;
-use std::ffi::CString;
 
-// NOTE: LibqaulKt references the name libqaul.kt, which is the kotlin file exposing the functions.
 
 /// dummy function to test the functionality
 #[no_mangle]
@@ -52,7 +58,7 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_start(
 /// check if libqaul finished initializing
 #[no_mangle]
 pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_initialized(
-  env: JNIEnv,
+  _env: JNIEnv,
   _: JClass,
 ) -> bool {
     super::initialization_finished()
@@ -62,7 +68,7 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_initialized(
 /// this function is only for debugging
 #[no_mangle]
 pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sendcounter(
-    env: JNIEnv,
+    _env: JNIEnv,
     _: JClass,
 ) -> jint {
     // return number of RPC messages sent to libqaul
@@ -73,7 +79,7 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sendcounter(
 /// from libqaul
 #[no_mangle]
 pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receivequeue(
-    env: JNIEnv,
+    _env: JNIEnv,
     _: JClass,
 ) -> jint {
     // start libqaul in an own thread
