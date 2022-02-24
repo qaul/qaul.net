@@ -12,14 +12,11 @@ class _UsersState extends _BaseTabState<_Users> {
   Widget build(BuildContext context) {
     super.build(context);
     final defaultUser = ref.watch(defaultUserProvider);
-    final users =
-        ref.watch(usersProvider).where((u) => u.idBase58 != (defaultUser?.idBase58 ?? '')).toList();
-
-    users.sort((u1, u2) => (u1.isBlocked ?? false)
-        ? 1
-        : u2.isConnected
-            ? 1
-            : -1);
+    final users = ref
+        .watch(usersProvider)
+        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
+        .toList()
+      ..sort();
 
     final refreshUsers = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
