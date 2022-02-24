@@ -59,17 +59,20 @@ class _AvailableConnectionsTable extends ConsumerWidget {
         .where((u) => u.availableTypes?.keys.contains(type) ?? false)
         .toList();
 
+    // TODO(brenodt): Should be solved programmatically, not hard-coded. Maybe make use of Intl.message (https://pub.dev/packages/intl#messages)
+    final header = Text(
+        (Intl.defaultLocale?.startsWith('pt') ?? false)
+            ? '${l18ns!.connections} ${_buildCapitalizedEnumName()}'
+            : '${_buildCapitalizedEnumName()} ${l18ns!.connections}',
+        style: theme.headline5);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: [
-              Icon(icon, size: 32),
-              const SizedBox(width: 8),
-              Text('${_buildCapitalizedEnumName()} ${l18ns!.connections}', style: theme.headline5),
-            ],
+            children: [Icon(icon, size: 32), const SizedBox(width: 8), header],
           ),
           const SizedBox(height: 12),
           users.isEmpty
