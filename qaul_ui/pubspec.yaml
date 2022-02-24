@@ -71,6 +71,7 @@ dependencies:
   logging: ^1.0.2
 
   uuid: ^3.0.5
+  equatable: ^2.0.3
 
   hive: ^2.0.4
   hive_flutter: ^1.1.0
@@ -93,9 +94,10 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   hive_generator: ^1.1.1
   build_runner: ^2.1.4
+
+  fast_base58: ^0.2.1
 
   flutter_launcher_icons: "^0.9.2"
 

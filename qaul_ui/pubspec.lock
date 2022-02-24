@@ -254,7 +254,7 @@ packages:
     source: hosted
     version: "3.0.0"
   equatable:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: equatable
       url: "https://pub.dartlang.org"
@@ -268,7 +268,7 @@ packages:
     source: hosted
     version: "1.2.0"
   fast_base58:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: fast_base58
       url: "https://pub.dartlang.org"
@@ -1117,7 +1117,7 @@ packages:
       name: uuid
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.5"
+    version: "3.0.6"
   vector_math:
     dependency: transitive
     description:
