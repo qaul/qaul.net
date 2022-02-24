@@ -34,7 +34,8 @@ class _ChatState extends _BaseTabState<_Chat> {
               .where((u) =>
                   !(u.isBlocked ?? false) &&
                   chatRooms.indexWhere((c) => c.conversationId.equals(u.id)).isNegative)
-              .toList();
+              .toList()
+            ..sort();
           if (availableUsers.isEmpty) return;
           final user = await Navigator.push(
               context, MaterialPageRoute(builder: (_) => _CreateNewRoomDialog(availableUsers)));
