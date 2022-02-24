@@ -1,8 +1,8 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qaul_rpc/src/models/feed_post_list_notifier.dart';
 
 import '../qaul_rpc.dart';
 import 'models/chat_room_list_notifier.dart';
+import 'models/feed_post_list_notifier.dart';
 
 final qaulWorkerProvider = Provider<LibqaulWorker>((ref) => LibqaulWorker(ref.read));
 

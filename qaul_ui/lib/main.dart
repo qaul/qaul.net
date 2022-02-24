@@ -8,12 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
-import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:qaul_ui/qaul_app.dart';
 import 'package:logging/logging.dart' as logging;
+import 'package:qaul_rpc/qaul_rpc.dart';
+
 // import 'package:bitsdojo_window/bitsdojo_window.dart';
 
 import 'helpers/user_prefs_helper.dart';
+import 'qaul_app.dart';
 
 final container = ProviderContainer();
 

@@ -1,5 +1,5 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qaul_rpc/qaul_rpc.dart';
+import '../../qaul_rpc.dart';
 
 class ChatRoomListNotifier extends StateNotifier<List<ChatRoom>> {
   ChatRoomListNotifier({List<ChatRoom>? rooms}) : super(rooms ?? []);

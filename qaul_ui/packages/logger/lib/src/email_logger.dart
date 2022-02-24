@@ -4,13 +4,13 @@ import 'dart:isolate';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
-import 'package:logger/src/info_provider.dart';
-import 'package:logger/src/storage_manager.dart';
 import 'package:mailto/mailto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'info_provider.dart';
 import 'logger.dart';
+import 'storage_manager.dart';
 
 class EmailLogger implements Logger {
   @override

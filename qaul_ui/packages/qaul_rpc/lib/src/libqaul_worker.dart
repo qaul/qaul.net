@@ -5,19 +5,19 @@ import 'package:collection/collection.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
-import 'package:qaul_rpc/src/generated/connections/connections.pb.dart';
-import 'package:qaul_rpc/src/generated/node/node.pb.dart';
-import 'package:qaul_rpc/src/generated/node/user_accounts.pb.dart';
-import 'package:qaul_rpc/src/generated/router/users.pb.dart';
-import 'package:qaul_rpc/src/generated/router/router.pb.dart';
-import 'package:qaul_rpc/src/generated/services/feed/feed.pb.dart';
-import 'package:qaul_rpc/src/rpc_translators/abstract_rpc_module_translator.dart';
 import 'package:uuid/uuid.dart';
 
+import '../qaul_rpc.dart';
+import 'generated/connections/connections.pb.dart';
+import 'generated/node/node.pb.dart';
+import 'generated/node/user_accounts.pb.dart';
+import 'generated/router/router.pb.dart';
+import 'generated/router/users.pb.dart';
+import 'generated/rpc/qaul_rpc.pb.dart';
 import 'generated/services/chat/chat.pb.dart';
+import 'generated/services/feed/feed.pb.dart';
 import 'libqaul/libqaul.dart';
+import 'rpc_translators/abstract_rpc_module_translator.dart';
 
 class LibqaulWorker {
   LibqaulWorker(Reader reader) : _reader = reader {
