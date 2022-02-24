@@ -1,7 +1,4 @@
-import 'dart:io' show Platform;
-
-import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+part of 'widgets.dart';
 
 /// Overriding [defaultBuilder] is required. It's passed as the base value of all
 /// other builders.
@@ -15,20 +12,15 @@ abstract class PlatformAwareBuilder extends HookConsumerWidget {
 
   Widget defaultBuilder(BuildContext context, WidgetRef ref);
 
-  Widget androidBuilder(BuildContext context, WidgetRef ref) =>
-      defaultBuilder(context, ref);
+  Widget androidBuilder(BuildContext context, WidgetRef ref) => defaultBuilder(context, ref);
 
-  Widget linuxBuilder(BuildContext context, WidgetRef ref) =>
-      defaultBuilder(context, ref);
+  Widget linuxBuilder(BuildContext context, WidgetRef ref) => defaultBuilder(context, ref);
 
-  Widget windowsBuilder(BuildContext context, WidgetRef ref) =>
-      defaultBuilder(context, ref);
+  Widget windowsBuilder(BuildContext context, WidgetRef ref) => defaultBuilder(context, ref);
 
-  Widget iosBuilder(BuildContext context, WidgetRef ref) =>
-      defaultBuilder(context, ref);
+  Widget iosBuilder(BuildContext context, WidgetRef ref) => defaultBuilder(context, ref);
 
-  Widget macosBuilder(BuildContext context, WidgetRef ref) =>
-      defaultBuilder(context, ref);
+  Widget macosBuilder(BuildContext context, WidgetRef ref) => defaultBuilder(context, ref);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

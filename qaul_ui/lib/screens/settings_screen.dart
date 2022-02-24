@@ -4,11 +4,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/decorators/loading_decorator.dart';
-import 'package:qaul_ui/widgets/default_back_button.dart';
-import 'package:qaul_ui/widgets/language_select_dropdown.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:qaul_ui/widgets/theme_select_dropdown.dart';
 import 'package:utils/utils.dart';
+
+import '../widgets/widgets.dart';
 
 class SettingsScreen extends HookConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);

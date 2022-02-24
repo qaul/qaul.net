@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:qaul_ui/decorators/disabled_state_decorator.dart';
-import 'package:qaul_ui/widgets/default_back_button.dart';
-import 'package:qaul_ui/widgets/platform_aware_switch.dart';
+
+import '../decorators/disabled_state_decorator.dart';
+import '../widgets/widgets.dart';
 
 class SupportScreen extends StatefulWidget {
   const SupportScreen({Key? key}) : super(key: key);

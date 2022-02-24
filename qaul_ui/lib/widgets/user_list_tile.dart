@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:qaul_rpc/qaul_rpc.dart';
-
-import 'user_avatar.dart';
+part of 'widgets.dart';
 
 class UserListTile extends StatelessWidget {
   const UserListTile(

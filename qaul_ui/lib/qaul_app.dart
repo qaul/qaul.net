@@ -6,11 +6,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:qaul_ui/widgets/platform_aware_builder.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 
 import 'helpers/navigation_helper.dart';
 import 'helpers/user_prefs_helper.dart';
+import 'widgets/widgets.dart';
 
 class QaulApp extends PlatformAwareBuilder {
   const QaulApp({Key? key, this.themeMode}) : super(key: key);

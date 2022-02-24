@@ -9,12 +9,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:qaul_ui/decorators/cron_task_decorator.dart';
-import 'package:qaul_ui/widgets/default_back_button.dart';
 import 'package:utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../widgets/loading_indicator.dart';
-import '../../widgets/user_avatar.dart';
+import '../../widgets/widgets.dart';
 
 part 'custom_input.dart';
 

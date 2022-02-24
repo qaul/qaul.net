@@ -1,7 +1,4 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qaul_ui/widgets/platform_aware_builder.dart';
+part of 'widgets.dart';
 
 class LoadingIndicator extends PlatformAwareBuilder {
   const LoadingIndicator({Key? key}) : super(key: key);
