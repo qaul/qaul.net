@@ -1,6 +1,9 @@
 import 'dart:async' as async;
 import 'dart:math' as math;
+import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:equatable/equatable.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame_forge2d/body_component.dart';
@@ -13,6 +16,8 @@ import 'package:forge2d/forge2d.dart';
 import 'package:open_simplex_2/open_simplex_2.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:utils/utils.dart';
 
 import '../../../widgets/user_avatar.dart';
 
@@ -262,7 +267,8 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    canvas.drawCircle(Offset.zero, radius, Paint()..color = node.color);
+    var circle = Paint()..color = colorGenerationStrategy(node.user.idBase58);
+    canvas.drawCircle(Offset.zero, radius, circle);
 
     const factor = 10;
     final fontSize = radius * factor;
@@ -284,7 +290,7 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
       height: 0.7 + 0.0625 * proportionalFontSize,
     );
     final tp = TextPainter(
-      text: TextSpan(text: node.name, style: style),
+      text: TextSpan(text: initials(node.user.name), style: style),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     );
