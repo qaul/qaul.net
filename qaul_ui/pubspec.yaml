@@ -64,6 +64,7 @@ dependencies:
   intl: ^0.17.0
 
   collection: ^1.15.0
+  logging: ^1.0.2
 
   uuid: ^3.0.5
 

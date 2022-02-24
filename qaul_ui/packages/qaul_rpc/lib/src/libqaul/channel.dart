@@ -14,40 +14,42 @@ class LibqaulChannel {
   final Reader read;
   static const MethodChannel libqaulChannel = MethodChannel('libqaul');
 
+  final _log = Logger('LibqaulChannel');
+
   /// instantiate libqaul
   LibqaulChannel(this.read) {
-    debugPrint("LibqaulChannel(this.read)");
+    _log.finer("LibqaulChannel(this.read)");
   }
 
   /// load libqaul
   Future<void> load() async {
-    debugPrint("load()");
+    _log.finer("load()");
     try {
       await libqaulChannel.invokeMethod('libqaulload');
-      debugPrint("libqaulload called");
+      _log.finer("libqaulload called");
     } on PlatformException catch (e) {
-      debugPrint("ERROR: Failed to load libqaul: '${e.message}'");
+      _log.warning("ERROR: Failed to load libqaul: '${e.message}'");
       rethrow;
     }
   }
 
   /// Test Platform Version dummy method
   Future<String> platformVersion() async {
-    debugPrint("platformVersion()");
+    _log.finer("platformVersion()");
 
     //const MethodChannel local_channel = MethodChannel('libqaul');
 
-    debugPrint("platformVersion() channel instantiated");
+    _log.finer("platformVersion() channel instantiated");
 
     String version;
     try {
-      debugPrint("platformVersion() try");
+      _log.finer("platformVersion() try");
       final result = await libqaulChannel.invokeMethod('getPlatformVersion');
-      debugPrint("platformVersion() result: $result");
+      _log.finer("platformVersion() result: $result");
       version = 'Android platform version: $result';
     } on PlatformException catch (e) {
       version = "ERROR: libqaul getPlatformVersion: '${e.message}'";
-      debugPrint(version);
+      _log.warning(version);
       rethrow;
     }
     return version;
@@ -58,7 +60,7 @@ class LibqaulChannel {
     try {
       await libqaulChannel.invokeMethod('start');
     } on PlatformException catch (e) {
-      debugPrint("ERROR: Failed to start libqaul: '${e.message}'");
+      _log.warning("ERROR: Failed to start libqaul: '${e.message}'");
       rethrow;
     }
   }
@@ -76,7 +78,7 @@ class LibqaulChannel {
         return 0;
       }
     } on PlatformException catch (e) {
-      debugPrint("ERROR: libqaul initialized: '${e.message}'");
+      _log.warning("ERROR: libqaul initialized: '${e.message}'");
       rethrow;
     }
   }
@@ -87,7 +89,7 @@ class LibqaulChannel {
     try {
       result = await libqaulChannel.invokeMethod('hello');
     } on PlatformException catch (e) {
-      debugPrint("ERROR: libqaul hello: '${e.message}'");
+      _log.warning("ERROR: libqaul hello: '${e.message}'");
       rethrow;
     }
     return result;
@@ -99,7 +101,7 @@ class LibqaulChannel {
     try {
       result = await libqaulChannel.invokeMethod('sendcounter');
     } on PlatformException catch (e) {
-      debugPrint("ERROR: libqaul sendcounter: '${e.message}'");
+      _log.warning("ERROR: libqaul sendcounter: '${e.message}'");
       rethrow;
     }
     return result;
@@ -111,7 +113,7 @@ class LibqaulChannel {
     try {
       result = await libqaulChannel.invokeMethod('receivequeue');
     } on PlatformException catch (e) {
-      debugPrint("ERROR: libqaul channel receivequeue: '${e.message}'");
+      _log.warning("ERROR: libqaul channel receivequeue: '${e.message}'");
       rethrow;
     }
     return result;
@@ -122,7 +124,7 @@ class LibqaulChannel {
     try {
       await libqaulChannel.invokeMethod('sendRpcMessage', {'message': message});
     } on PlatformException catch (e) {
-      debugPrint("ERROR: libqaul channel sendRpcMessage: '${e.message}'");
+      _log.warning("ERROR: libqaul channel sendRpcMessage: '${e.message}'");
       rethrow;
     }
   }
@@ -134,21 +136,21 @@ class LibqaulChannel {
       final Uint8List? result = await libqaulChannel.invokeMethod('receiveRpcMessage');
 
       if (result == null) {
-        debugPrint("channel receiveRpcMessage: null received");
+        _log.finer("channel receiveRpcMessage: null received");
       } else {
-        debugPrint("channel receiveRpcMessage: received");
+        _log.finer("channel receiveRpcMessage: received");
 
         if (result.isEmpty) {
-          debugPrint("channel receiveRpcMessage: result is empty");
+          _log.finer("channel receiveRpcMessage: result is empty");
           return null;
         }
 
         // check result size
         final size = result.lengthInBytes;
-        debugPrint("channel receiveRpcMessage: $size bytes received");
+        _log.finer("channel receiveRpcMessage: $size bytes received");
 
         if (size == 0) {
-          debugPrint("channel receiveRpcMessage: size == 0");
+          _log.finer("channel receiveRpcMessage: size == 0");
           return null;
         }
 
@@ -157,7 +159,7 @@ class LibqaulChannel {
         // TODO: Free message buffer?
       }
     } on PlatformException catch (e) {
-      debugPrint("ERROR: libqaul receiveRpcMessage: '${e.message}'");
+      _log.warning("ERROR: libqaul receiveRpcMessage: '${e.message}'");
       rethrow;
     }
     return null;

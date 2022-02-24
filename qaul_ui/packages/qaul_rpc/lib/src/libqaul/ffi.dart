@@ -11,6 +11,8 @@ class LibqaulFfi {
   final Reader read;
   static DynamicLibrary? _lib;
 
+  final _log = Logger('LibqaulFfi');
+
   /// instantiate libqaul
   /// load dynamic library and initialize it
   LibqaulFfi(this.read) {
@@ -59,12 +61,12 @@ class LibqaulFfi {
     StartDesktopFunctionDart _start;
     // check what system we are initializing
     if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
-      debugPrint("flutter start_desktop libqaul");
+      _log.finer("flutter start_desktop libqaul");
       // start libqaul with finding paths to save the configuration files
       _start =
           _lib!.lookupFunction<StartDesktopFunctionRust, StartDesktopFunctionDart>('start_desktop');
     } else {
-      debugPrint("flutter start libqaul");
+      _log.finer("flutter start libqaul");
       // start libqaul without path to storage location
       _start = _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
     }
@@ -96,7 +98,7 @@ class LibqaulFfi {
     final _checkCounter =
         _lib!.lookupFunction<SendRpcCounterRust, SendRpcCounterDart>('send_rpc_to_libqaul_count');
     final result = _checkCounter();
-    debugPrint("$result RPC messages sent to libqaul");
+    _log.finer("$result RPC messages sent to libqaul");
     return result;
   }
 
@@ -105,7 +107,7 @@ class LibqaulFfi {
     final _checkQueue = _lib!.lookupFunction<ReceiveRpcQueuedRust, ReceiveRpcQueuedDart>(
         'receive_rpc_from_libqaul_queued_length');
     final result = _checkQueue();
-    if (result > 0) debugPrint("$result messages queued by libqaul RPC");
+    if (result > 0) _log.finer("$result messages queued by libqaul RPC");
     return result;
   }
 
@@ -126,7 +128,7 @@ class LibqaulFfi {
 
     // send message
     final messageSize = message.length;
-    debugPrint("sendRpc send $messageSize bytes");
+    _log.finer("sendRpc send $messageSize bytes");
     final result = _sendRpcToLibqaul(bufferPointer, message.length);
 
     // free buffer
@@ -135,16 +137,16 @@ class LibqaulFfi {
     // analyze result
     switch (result) {
       case 0:
-        debugPrint("sendRpc success");
+        _log.finer("sendRpc success");
         break;
       case -1:
-        debugPrint("sendRpc Error: pointer is null");
+        _log.finer("sendRpc Error: pointer is null");
         break;
       case -2:
-        debugPrint("sendRpc Error: message is too big");
+        _log.finer("sendRpc Error: message is too big");
         break;
       default:
-        debugPrint("sendRpc invalid result");
+        _log.finer("sendRpc invalid result");
         break;
     }
   }
@@ -165,9 +167,9 @@ class LibqaulFfi {
 
     // check if a message was received
     if (result == 0) {
-      debugPrint("receiveRpc: nothing received");
+      _log.finer("receiveRpc: nothing received");
     } else if (result > 0) {
-      debugPrint("receiveRpc: $result bytes received");
+      _log.finer("receiveRpc: $result bytes received");
 
       // copy buffer
       final message = buffer.asTypedList(result);
@@ -177,16 +179,16 @@ class LibqaulFfi {
     } else {
       switch (result) {
         case -1:
-          debugPrint("receiveRpc ERROR -1: an error occurred");
+          _log.finer("receiveRpc ERROR -1: an error occurred");
           break;
         case -2:
-          debugPrint("receiveRpc ERROR -2: buffer to small");
+          _log.finer("receiveRpc ERROR -2: buffer to small");
           break;
         case -3:
-          debugPrint("receiveRpc ERROR -3: buffer pointer is null");
+          _log.finer("receiveRpc ERROR -3: buffer pointer is null");
           break;
         default:
-          debugPrint("receivedRpc unknown ERROR $result");
+          _log.finer("receivedRpc unknown ERROR $result");
           break;
       }
     }

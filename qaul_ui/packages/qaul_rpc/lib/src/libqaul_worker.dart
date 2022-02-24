@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:fixnum/fixnum.dart';
-import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/rpc/qaul_rpc.pb.dart';
 import 'package:qaul_rpc/src/generated/connections/connections.pb.dart';
@@ -25,6 +25,7 @@ class LibqaulWorker {
   }
 
   final Reader _reader;
+  final _log = Logger('LibqaulWorker');
 
   Libqaul get _lib => _reader(libqaulProvider);
 
@@ -192,7 +193,7 @@ class LibqaulWorker {
         if (resp != null) _processResponse(resp);
       } else if (m.module == Modules.NODE) {
         final resp = await NodeTranslator().decodeMessageBytes(m.data);
-        debugPrint('RpcNode node id: ${resp?.data}');
+        _log.finer('RpcNode node id: ${resp?.data}');
       } else if (m.module == Modules.USERACCOUNTS) {
         final resp = await UserAccountsTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
