@@ -6,23 +6,32 @@ enum _NetworkType {
   internet,
 }
 
+ConnectionType _mapFilter(_NetworkType t) {
+  switch (t) {
+    case _NetworkType.bluetooth:
+      return ConnectionType.ble;
+    case _NetworkType.lan:
+      return ConnectionType.lan;
+    case _NetworkType.internet:
+      return ConnectionType.internet;
+  }
+}
+
 /// The currently active filter.
 final _networkTypeFilter = StateProvider((_) => _NetworkType.bluetooth);
 
 /// Nodes that fit the current filter criteria
 final _filteredNodes = Provider<NetworkNode>((ref) {
   final filter = ref.watch(_networkTypeFilter);
+  final defaultUser = ref.watch(defaultUserProvider)!;
+  final users = ref
+      .watch(usersProvider)
+      .where((u) => !(u.isBlocked ?? false))
+      .where((u) => u.idBase58 != defaultUser.idBase58)
+      .where((u) => u.availableTypes?.keys.contains(_mapFilter(filter)) ?? false)
+      .toList();
 
-  switch (filter) {
-    case _NetworkType.bluetooth:
-      return root;
-    case _NetworkType.lan:
-      return root1;
-    case _NetworkType.internet:
-      return root2;
-    default:
-      throw FlutterError('Invalid Filter provided; Value not mapped: $filter');
-  }
+  return NetworkNode.fromUserData(defaultUser, users, _mapFilter(filter));
 });
 
 class _NetworkTypeFilterToolbar extends HookConsumerWidget {
