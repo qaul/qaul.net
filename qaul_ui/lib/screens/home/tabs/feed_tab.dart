@@ -54,7 +54,10 @@ class _FeedState extends _BaseTabState<_Feed> {
               itemBuilder: (_, i) {
                 final msg = filteredMessages[i];
                 var theme = Theme.of(context).textTheme;
-                var sentAt = describeFuzzyTimestamp(msg.sendTime);
+                var sentAt = describeFuzzyTimestamp(
+                  msg.sendTime,
+                  locale: Locale.parse(Intl.defaultLocale ?? 'en'),
+                );
 
                 final author = users.firstWhereOrNull(
                   (u) => u.idBase58 == (msg.senderIdBase58 ?? ''),

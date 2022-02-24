@@ -9,6 +9,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/locale.dart';
 import 'package:qaul_ui/decorators/cron_task_decorator.dart';
 import 'package:qaul_ui/decorators/disabled_state_decorator.dart';
 import 'package:qaul_ui/decorators/loading_decorator.dart';

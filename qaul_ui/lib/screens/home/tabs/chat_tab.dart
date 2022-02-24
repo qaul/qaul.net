@@ -85,7 +85,10 @@ class _ChatState extends _BaseTabState<_Chat> {
                       Text(
                         room.lastMessageTime == null
                             ? ''
-                            : describeFuzzyTimestamp(room.lastMessageTime!),
+                            : describeFuzzyTimestamp(
+                                room.lastMessageTime!,
+                                locale: Locale.parse(Intl.defaultLocale ?? 'en'),
+                              ),
                         style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
                       ),
                       const Icon(Icons.chevron_right),
