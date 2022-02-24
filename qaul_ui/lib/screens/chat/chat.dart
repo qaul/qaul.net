@@ -1,4 +1,3 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:bubble/bubble.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';

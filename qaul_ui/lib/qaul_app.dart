@@ -39,6 +39,17 @@ class QaulApp extends PlatformAwareBuilder {
           actionsIconTheme: const IconThemeData(color: Colors.lightBlue),
           shape: BorderDirectional(bottom: BorderSide(color: Colors.grey.shade300)),
         ),
+        inputDecorationTheme: InputDecorationTheme(
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide(color: Colors.grey.shade600),
+          ),
+        ),
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: Colors.grey.shade600,
+        ),
       ),
       dark: ThemeData(
         brightness: Brightness.dark,
@@ -54,6 +65,17 @@ class QaulApp extends PlatformAwareBuilder {
           elevation: 0.0,
           color: Color(0xff212121),
           shadowColor: Color(0xff212121),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: const BorderSide(color: Colors.white),
+          ),
+        ),
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Colors.white,
         ),
       ),
       initial: themeMode ?? AdaptiveThemeMode.system,
