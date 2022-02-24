@@ -56,10 +56,9 @@ class _FeedState extends _BaseTabState<_Feed> {
                 var theme = Theme.of(context).textTheme;
                 var sentAt = describeFuzzyTimestamp(msg.sendTime);
 
-                final authorIdx = users.indexWhere(
+                final author = users.firstWhereOrNull(
                   (u) => u.idBase58 == (msg.senderIdBase58 ?? ''),
                 );
-                final author = authorIdx.isNegative ? null : users[authorIdx];
                 if (author == null) return const SizedBox.shrink();
 
                 return UserListTile(
