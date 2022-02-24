@@ -16,6 +16,7 @@ import 'package:qaul_ui/screens/chat/chat.dart';
 import 'package:qaul_ui/decorators/empty_state_text_decorator.dart';
 import 'package:qaul_ui/widgets/user_avatar.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:qaul_ui/widgets/user_list_tile.dart';
 import 'package:utils/utils.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

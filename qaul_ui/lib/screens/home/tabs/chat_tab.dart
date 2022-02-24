@@ -35,6 +35,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                   !(u.isBlocked ?? false) &&
                   chatRooms.indexWhere((c) => c.conversationId.equals(u.id)).isNegative)
               .toList();
+          if (availableUsers.isEmpty) return;
           final user = await Navigator.push(
               context, MaterialPageRoute(builder: (_) => _CreateNewRoomDialog(availableUsers)));
           if (user is User) {
@@ -70,13 +71,16 @@ class _ChatState extends _BaseTabState<_Chat> {
                 // TODO error handling?
                 if (otherUser == null) return const SizedBox.shrink();
 
-                return ListTile(
-                  leading: UserAvatar.small(user: otherUser),
-                  title: Row(
+                return UserListTile(
+                  otherUser,
+                  content: Text(
+                    room.lastMessagePreview ?? '',
+                    style: theme.bodyText1,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailingMetadata: Row(
                     children: [
-                      Text(room.name ?? '',
-                          style: theme.bodyText1!.copyWith(fontWeight: FontWeight.bold)),
-                      const Expanded(child: SizedBox()),
                       Text(
                         room.lastMessageTime == null
                             ? ''
@@ -86,15 +90,12 @@ class _ChatState extends _BaseTabState<_Chat> {
                       const Icon(Icons.chevron_right),
                     ],
                   ),
-                  subtitle: Text(
-                    room.lastMessagePreview ?? '',
-                    style: theme.bodyText1,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  onTap: () => openChat(
+                    room,
+                    context: context,
+                    user: defaultUser,
+                    otherUser: otherUser,
                   ),
-                  onTap: () {
-                    openChat(room, context: context, user: defaultUser, otherUser: otherUser);
-                  },
                 );
               },
             ),
@@ -113,33 +114,19 @@ class _CreateNewRoomDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l18ns = AppLocalizations.of(context)!;
-    final theme = Theme.of(context).textTheme;
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
         leading: const DefaultBackButton(),
-        title: Text(l18ns.newChatTooltip),
+        title: Text(AppLocalizations.of(context)!.newChatTooltip),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: ListView.builder(
-          itemCount: availableUsers.length,
-          itemBuilder: (context, i) {
-            final user = availableUsers[i];
-            return ListTile(
-              onTap: () => Navigator.pop(context, user),
-              leading: UserAvatar.small(user: user),
-              title: Text(
-                user.name,
-                style: theme.bodyText1!.copyWith(fontWeight: FontWeight.bold),
-              ),
-            );
-          },
-        ),
+      body: ListView.separated(
+        itemCount: availableUsers.length,
+        separatorBuilder: (_, __) => const Divider(height: 12.0),
+        itemBuilder: (context, i) {
+          final usr = availableUsers[i];
+          return UserListTile(usr, onTap: () => Navigator.pop(context, usr));
+        },
       ),
     );
   }

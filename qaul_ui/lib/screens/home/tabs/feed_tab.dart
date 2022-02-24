@@ -60,9 +60,16 @@ class _FeedState extends _BaseTabState<_Feed> {
                   (u) => u.idBase58 == (msg.senderIdBase58 ?? ''),
                 );
                 final author = authorIdx.isNegative ? null : users[authorIdx];
+                if (author == null) return const SizedBox.shrink();
 
-                return ListTile(
-                  onTap: (author == null || author.idBase58 == (defaultUser?.idBase58 ?? ''))
+                return UserListTile(
+                  author,
+                  content: Text(msg.content ?? '', style: theme.bodyText1),
+                  trailingMetadata: Text(
+                    sentAt,
+                    style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
+                  ),
+                  onTap: (author.idBase58 == (defaultUser?.idBase58 ?? ''))
                       ? null
                       : () async {
                           await Navigator.push(
@@ -73,22 +80,6 @@ class _FeedState extends _BaseTabState<_Feed> {
                           );
                           refreshFeed();
                         },
-                  leading: UserAvatar.small(user: author),
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(author?.name ?? l18ns.unknown,
-                          style: theme.bodyText1!.copyWith(fontWeight: FontWeight.bold)),
-                      Text(
-                        sentAt,
-                        style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
-                      ),
-                    ],
-                  ),
-                  subtitle: Text(
-                    msg.content ?? '',
-                    style: theme.bodyText1,
-                  ),
                 );
               },
             ),

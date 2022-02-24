@@ -44,11 +44,35 @@ class _UsersState extends _BaseTabState<_Users> {
               itemBuilder: (_, i) {
                 final user = users[i];
                 var theme = Theme.of(context).textTheme;
+                var hasConnections = user.availableTypes != null && user.availableTypes!.isNotEmpty;
+
+                var userId = Text(
+                  'ID: ${user.idBase58}',
+                  style: theme.caption!.copyWith(fontSize: 10),
+                );
+                var content = !hasConnections
+                    ? userId
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          userId,
+                          if (hasConnections) ...[
+                            const SizedBox(height: 8),
+                            _AvailableConnections(user: user),
+                          ],
+                        ],
+                      );
 
                 return DisabledStateDecorator(
                   isDisabled: user.isBlocked ?? false,
                   ignorePointer: false,
-                  child: ListTile(
+                  child: UserListTile(
+                    user,
+                    content: content,
+                    isThreeLine: hasConnections,
+                    trailingIcon: (user.isVerified ?? false)
+                        ? const Icon(Icons.verified_user)
+                        : const SizedBox(),
                     onTap: () async {
                       await Navigator.push(
                         context,
@@ -56,27 +80,6 @@ class _UsersState extends _BaseTabState<_Users> {
                       );
                       refreshUsers();
                     },
-                    leading: UserAvatar.small(user: user),
-                    trailing: (user.isVerified ?? false)
-                        ? const Icon(Icons.verified_user)
-                        : const SizedBox(),
-                    visualDensity: VisualDensity.adaptivePlatformDensity,
-                    title: Padding(
-                      padding: const EdgeInsets.only(bottom: 4.0),
-                      child: Text(user.name, style: theme.headline6),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'ID: ${user.idBase58}',
-                          style: theme.caption!.copyWith(fontSize: 10),
-                        ),
-                        const SizedBox(height: 4),
-                        if (user.availableTypes != null && user.availableTypes!.isNotEmpty)
-                          _AvailableConnections(user: user),
-                      ],
-                    ),
                   ),
                 );
               },
