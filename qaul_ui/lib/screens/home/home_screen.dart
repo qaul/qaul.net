@@ -5,10 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:utils/utils.dart';
-import 'package:qaul_ui/screens/home/dynamic_network/dynamic_network_screen.dart';
 
 import '../../decorators/qaul_nav_bar_decorator.dart';
 import '../../providers/providers.dart';
+import 'dynamic_network/dynamic_network_screen.dart';
 import 'tabs/tab.dart';
 import 'user_account_screen.dart';
 
