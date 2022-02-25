@@ -19,7 +19,7 @@ import 'package:open_simplex_2/open_simplex_2.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
-import '../../../widgets/widgets.dart';
+import '../../../../widgets/widgets.dart';
 
 part 'models/network_node.dart';
 part 'widgets/network_type_filter.dart';
