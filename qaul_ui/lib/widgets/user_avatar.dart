@@ -1,10 +1,4 @@
-import 'dart:math';
-
-import 'package:badges/badges.dart';
-import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:utils/utils.dart';
+part of 'widgets.dart';
 
 /// If [user] is provided, it's used to populate this icon (Background color, initials, connection status).
 ///

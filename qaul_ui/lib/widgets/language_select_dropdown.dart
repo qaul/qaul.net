@@ -1,9 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qaul_ui/helpers/user_prefs_helper.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+part of 'widgets.dart';
 
 class LanguageSelectDropDown extends ConsumerWidget {
   const LanguageSelectDropDown({

@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+part of 'widgets.dart';
 
 class DefaultBackButton extends StatelessWidget {
   const DefaultBackButton({Key? key, this.onPressed}) : super(key: key);

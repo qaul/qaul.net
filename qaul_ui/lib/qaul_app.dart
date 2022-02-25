@@ -6,11 +6,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:qaul_ui/widgets/platform_aware_builder.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 
 import 'helpers/navigation_helper.dart';
 import 'helpers/user_prefs_helper.dart';
+import 'widgets/widgets.dart';
 
 class QaulApp extends PlatformAwareBuilder {
   const QaulApp({Key? key, this.themeMode}) : super(key: key);
@@ -39,6 +39,17 @@ class QaulApp extends PlatformAwareBuilder {
           actionsIconTheme: const IconThemeData(color: Colors.lightBlue),
           shape: BorderDirectional(bottom: BorderSide(color: Colors.grey.shade300)),
         ),
+        inputDecorationTheme: InputDecorationTheme(
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide(color: Colors.grey.shade600),
+          ),
+        ),
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: Colors.grey.shade600,
+        ),
       ),
       dark: ThemeData(
         brightness: Brightness.dark,
@@ -54,6 +65,17 @@ class QaulApp extends PlatformAwareBuilder {
           elevation: 0.0,
           color: Color(0xff212121),
           shadowColor: Color(0xff212121),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: const BorderSide(color: Colors.white),
+          ),
+        ),
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Colors.white,
         ),
       ),
       initial: themeMode ?? AdaptiveThemeMode.system,

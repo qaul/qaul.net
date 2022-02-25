@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:qaul_ui/widgets/default_back_button.dart';
-import 'package:qaul_ui/widgets/loading_indicator.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+
+import '../widgets/widgets.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({Key? key}) : super(key: key);

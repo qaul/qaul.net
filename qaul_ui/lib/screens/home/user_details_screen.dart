@@ -1,14 +1,14 @@
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:qaul_ui/decorators/disabled_state_decorator.dart';
-import 'package:qaul_ui/decorators/loading_decorator.dart';
-import 'package:qaul_ui/screens/chat/chat.dart';
-import 'package:qaul_ui/widgets/default_back_button.dart';
-import 'package:qaul_ui/widgets/user_avatar.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../decorators/disabled_state_decorator.dart';
+import '../../decorators/loading_decorator.dart';
+import '../../widgets/widgets.dart';
+import '../chat/chat.dart';
 
 class UserDetailsScreen extends HookConsumerWidget {
   const UserDetailsScreen({Key? key, required this.user}) : super(key: key);

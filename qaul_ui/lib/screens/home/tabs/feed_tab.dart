@@ -54,15 +54,24 @@ class _FeedState extends _BaseTabState<_Feed> {
               itemBuilder: (_, i) {
                 final msg = filteredMessages[i];
                 var theme = Theme.of(context).textTheme;
-                var sentAt = describeFuzzyTimestamp(msg.sendTime);
+                var sentAt = describeFuzzyTimestamp(
+                  msg.sendTime,
+                  locale: Locale.parse(Intl.defaultLocale ?? 'en'),
+                );
 
-                final authorIdx = users.indexWhere(
+                final author = users.firstWhereOrNull(
                   (u) => u.idBase58 == (msg.senderIdBase58 ?? ''),
                 );
-                final author = authorIdx.isNegative ? null : users[authorIdx];
+                if (author == null) return const SizedBox.shrink();
 
-                return ListTile(
-                  onTap: (author == null || author.idBase58 == (defaultUser?.idBase58 ?? ''))
+                return UserListTile(
+                  author,
+                  content: Text(msg.content ?? '', style: theme.bodyText1),
+                  trailingMetadata: Text(
+                    sentAt,
+                    style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
+                  ),
+                  onTap: (author.idBase58 == (defaultUser?.idBase58 ?? ''))
                       ? null
                       : () async {
                           await Navigator.push(
@@ -73,22 +82,6 @@ class _FeedState extends _BaseTabState<_Feed> {
                           );
                           refreshFeed();
                         },
-                  leading: UserAvatar.small(user: author),
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(author?.name ?? l18ns.unknown,
-                          style: theme.bodyText1!.copyWith(fontWeight: FontWeight.bold)),
-                      Text(
-                        sentAt,
-                        style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
-                      ),
-                    ],
-                  ),
-                  subtitle: Text(
-                    msg.content ?? '',
-                    style: theme.bodyText1,
-                  ),
                 );
               },
             ),

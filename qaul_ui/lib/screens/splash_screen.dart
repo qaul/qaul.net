@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:qaul_ui/helpers/navigation_helper.dart';
-import 'package:qaul_ui/widgets/loading_indicator.dart';
+
+import '../helpers/navigation_helper.dart';
+import '../widgets/widgets.dart';
 
 class SplashScreen extends ConsumerWidget {
   SplashScreen({Key? key}) : super(key: key);

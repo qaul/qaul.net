@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/locale.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 Color colorGenerationStrategy(String first) {
@@ -35,12 +36,16 @@ String initials(String name) {
 /// If [clock] is provided, timestamp is in relation to [clock] (Should only be useful for testing).
 ///
 /// Will throw if [date] is in the future (When [clock] is provided, *future* represents time after it).
-String describeFuzzyTimestamp(DateTime date, {DateTime? clock}) {
+String describeFuzzyTimestamp(DateTime date, {DateTime? clock, Locale? locale}) {
   if (date.isAfter(clock ?? DateTime.now())) throw ArgumentError.value(date);
   if ((clock ?? DateTime.now()).subtract(const Duration(days: 50)).isAfter(date)) {
     return DateFormat('d MMM y').format(date);
   }
 
+  if (locale != null) {
+    timeago.setLocaleMessages(locale.languageCode, _fromLocale(locale));
+    timeago.setDefaultLocale(locale.languageCode);
+  }
   var timeSent = timeago
       .format(date, clock: clock)
       .replaceFirst(RegExp('minutes'), 'min.')
@@ -48,6 +53,23 @@ String describeFuzzyTimestamp(DateTime date, {DateTime? clock}) {
       .trim();
 
   return timeSent;
+}
+
+/// Helper function to enable dynamic loading of prebuilt lookup messages.
+///
+/// Defaults to English. Add more cases as necessary.
+timeago.LookupMessages _fromLocale(Locale l) {
+  switch (l.languageCode) {
+    case 'ar':
+      return timeago.ArShortMessages();
+    case 'id':
+      return timeago.IdMessages();
+    case 'pt':
+      return timeago.PtBrShortMessages();
+    case 'en':
+    default:
+      return timeago.EnShortMessages();
+  }
 }
 
 bool isValidIPv4(String? s) {

@@ -118,10 +118,8 @@ class _CustomInputState extends State<_CustomInput> {
       child: Shortcuts(
         shortcuts: {
           LogicalKeySet(LogicalKeyboardKey.enter): const SendMessageIntent(),
-          LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.alt):
-              const NewLineIntent(),
-          LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.shift):
-              const NewLineIntent(),
+          LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.alt): const NewLineIntent(),
+          LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.shift): const NewLineIntent(),
         },
         child: Actions(
           actions: {
@@ -157,47 +155,24 @@ class _CustomInputState extends State<_CustomInput> {
                   children: [
                     if (widget.onAttachmentPressed != null) _leftWidget(),
                     Expanded(
-                      child: ValueListenableBuilder<AdaptiveThemeMode>(
-                        valueListenable:
-                            AdaptiveTheme.of(context).modeChangeNotifier,
-                        builder: (context, mode, _) {
-                          var isDark = mode == AdaptiveThemeMode.dark;
-
-                          return TextField(
-                            controller: _textController,
-                            cursorColor: isDark ? Colors.white : Colors.black,
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context)!
-                                  .chatEmptyMessageHint,
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.never,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                borderSide: BorderSide(
-                                  color: isDark ? Colors.white : Colors.black,
-                                ),
-                              ),
-                            ),
-                            focusNode: _inputFocusNode,
-                            keyboardType: TextInputType.multiline,
-                            maxLines: 5,
-                            minLines: 1,
-                            onChanged: widget.onTextChanged,
-                            onTap: widget.onTextFieldTap,
-                            textCapitalization: TextCapitalization.sentences,
-                          );
-                        },
+                      child: TextField(
+                        controller: _textController,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.chatEmptyMessageHint,
+                        ),
+                        focusNode: _inputFocusNode,
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 5,
+                        minLines: 1,
+                        onChanged: widget.onTextChanged,
+                        onTap: widget.onTextFieldTap,
+                        textCapitalization: TextCapitalization.sentences,
                       ),
                     ),
                     const SizedBox(width: 16.0),
                     Visibility(
                       visible: _sendButtonVisible,
-                      child: _CustomSendButton(
-                        onPressed: _handleSendPressed,
-                      ),
+                      child: _CustomSendButton(onPressed: _handleSendPressed),
                     ),
                   ],
                 ),
@@ -211,8 +186,7 @@ class _CustomInputState extends State<_CustomInput> {
 }
 
 class _CustomSendButton extends StatelessWidget {
-  const _CustomSendButton({Key? key, required this.onPressed})
-      : super(key: key);
+  const _CustomSendButton({Key? key, required this.onPressed}) : super(key: key);
 
   final void Function() onPressed;
 

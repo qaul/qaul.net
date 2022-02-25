@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:qaul_ui/widgets/loading_indicator.dart';
+
+import '../widgets/widgets.dart';
 
 class LoadingDecorator extends StatelessWidget {
   const LoadingDecorator({

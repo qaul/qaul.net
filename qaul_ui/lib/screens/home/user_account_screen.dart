@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:qaul_ui/widgets/user_avatar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../widgets/widgets.dart';
 
 class UserAccountScreen extends ConsumerWidget {
   const UserAccountScreen({Key? key}) : super(key: key);

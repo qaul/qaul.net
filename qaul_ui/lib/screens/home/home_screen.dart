@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qaul_ui/decorators/qaul_nav_bar_decorator.dart';
-import 'package:qaul_ui/providers/providers.dart';
-import 'package:qaul_ui/screens/home/tabs/tab.dart';
-import 'package:qaul_ui/screens/home/user_account_screen.dart';
 import 'package:utils/utils.dart';
+
+import '../../decorators/qaul_nav_bar_decorator.dart';
+import '../../providers/providers.dart';
+import 'tabs/tab.dart';
+import 'user_account_screen.dart';
 
 class SwitchTabIntent extends Intent {
   const SwitchTabIntent._(this.switchForward);

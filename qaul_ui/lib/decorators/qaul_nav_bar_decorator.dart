@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qaul_ui/helpers/navigation_helper.dart';
-import 'package:qaul_ui/providers/providers.dart';
-import 'package:qaul_ui/widgets/user_avatar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../helpers/navigation_helper.dart';
+import '../providers/providers.dart';
+import '../widgets/widgets.dart';
 
 class QaulNavBarDecorator extends StatefulWidget {
   const QaulNavBarDecorator({Key? key, required this.child}) : super(key: key);
