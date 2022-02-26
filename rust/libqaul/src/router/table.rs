@@ -157,6 +157,7 @@ impl RoutingTable {
                     proto::RoutingTableConnection {
                         module,
                         rtt: connection.rtt,
+                        hop_count: connection.hc as u32,
                         via: connection.node.to_bytes(),
                     }
                 );

@@ -134,14 +134,26 @@ impl ConnectionTable {
         // loop through results and enter them to the table
         for entry in info {
             if let Ok(user_id) = PeerId::from_bytes(&entry.user){
+                // calculate hop count
+                // if hop count is > 255, return
+                let hc;
+                if entry.hc[0] < 255 {
+                    hc = entry.hc[0] +1;
+                }
+                else {
+                    return;
+                }
+
+                // fill structure
                 let neighbour = NeighbourEntry {
                     id: neighbour_id,
                     rtt: entry.rtt +rtt,
-                    hc: entry.hc[0],
+                    hc,
                     pl: entry.pl,
                     last_update: SystemTime::now(),
                 };
 
+                // add it to state
                 Self::add_connection(user_id, neighbour, conn.clone());
             }
         }
