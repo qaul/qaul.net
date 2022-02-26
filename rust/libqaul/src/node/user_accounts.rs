@@ -108,6 +108,9 @@ impl UserAccounts {
         // add it to users list
         crate::router::users::Users::add(id, keys.public(), name.clone(), false, false);
 
+        // add user to routing table / connections table
+        crate::router::connections::ConnectionTable::add_local_user(id);
+
         // display id
         info!("created user account '{}' {:?}", name, id);
 
