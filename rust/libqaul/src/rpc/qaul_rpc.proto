@@ -35,4 +35,5 @@ enum Modules {
     CONNECTIONS = 7;
     DEBUG = 8;
     CHAT = 9;
+    BLE = 10;
 }

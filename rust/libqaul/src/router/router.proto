@@ -106,6 +106,7 @@ message NeighboursRequest {
 message NeighboursList {
     repeated NeighboursEntry lan = 1;
     repeated NeighboursEntry internet = 2;
+    repeated NeighboursEntry ble = 3;
 }
 
 // neighbours entry

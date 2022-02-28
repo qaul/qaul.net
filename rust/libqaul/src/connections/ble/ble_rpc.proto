@@ -1,0 +1,69 @@
+syntax = "proto3";
+package qaul.rpc.ble;
+
+// BLE RPC Message Container
+//
+// Union of all messages that can be sent or received
+// via RPC between the UI and libqaul
+message Ble {
+    oneof message {
+        InfoRequest info_request = 1;
+        InfoResponse info_response = 2;
+        StartRequest start_request = 3;
+        StopRequest stop_request = 4;
+        DiscoveredRequest discovered_request = 5;
+        DiscoveredResponse discovered_response = 6;
+    }
+}
+
+// UI request for information on devices and module status
+message InfoRequest {
+
+}
+
+// BLE Info Response Message
+//
+// Contains information on the status of the module,
+// as well as all available BLE devices 
+message InfoResponse {
+    // the small 16 byte BLE id
+    bytes small_id = 1;
+    // status of the module
+    string status = 2;
+    // devices
+    bytes device_info = 3;
+}
+
+// Request BLE module to start
+//
+// Start message sent from UI to libqaul.
+//
+// This message only has an effect if the module
+// has not already started.
+message StartRequest {
+}
+
+// Request BLE module to stop
+//
+// Stop message sent from UI to libqaul.
+//
+// This message only has an effect if the module
+// was started earlier and is running.
+message StopRequest {
+}
+
+// Request Discovered Nodes on BLE
+//
+// Message sent from UI to libqaul.
+message DiscoveredRequest {
+}
+
+// All Discovered Nodes
+//
+// Answer from libqaul to UI on DiscoveredRequest
+message DiscoveredResponse {
+    // number of nodes in discovery table
+    uint32 nodes_count = 1;
+    // number of nodes in to_confirm table
+    uint32 to_confirm_count = 2;
+}

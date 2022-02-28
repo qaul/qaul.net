@@ -10,4 +10,6 @@ services/feed/feed.proto
 services/feed/feed_net.proto
 services/chat/chat.proto
 services/messaging/messaging.proto
-connections/ble/manager/ble.proto
+connections/ble/ble.proto
+connections/ble/ble_net.proto
+connections/ble/ble_rpc.proto

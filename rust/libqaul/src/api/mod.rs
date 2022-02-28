@@ -18,6 +18,7 @@ use std::{
 use directories::ProjectDirs;
 
 use crate::rpc::Rpc;
+use crate::rpc::sys::Sys;
 
 /// C API module
 mod c;
@@ -124,3 +125,14 @@ pub fn receive_rpc_queued() -> usize {
 pub fn send_rpc_count() -> i32 {
     Rpc::send_rpc_count()
 }
+
+/// send a SYS message to libqaul
+pub fn send_sys(binary_message: Vec<u8>) {
+    Sys::send_to_libqaul(binary_message);
+}
+
+/// receive a SYS message from libqaul
+pub fn receive_sys() -> Result<Vec<u8>, TryRecvError> {
+    Sys::receive_from_libqaul()
+}
+

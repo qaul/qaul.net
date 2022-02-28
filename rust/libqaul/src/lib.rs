@@ -25,7 +25,10 @@ mod rpc;
 mod services;
 mod types;
 
-use connections::{ConnectionModule, Connections};
+use connections::{
+    ConnectionModule, Connections,
+    ble::Ble,
+};
 use node::Node;
 use router::{
     flooder,
@@ -33,6 +36,7 @@ use router::{
     Router,
 };
 use rpc::Rpc;
+use rpc::sys::Sys;
 use services::Services;
 use services::messaging::Messaging;
 
@@ -68,6 +72,7 @@ pub fn initialize_android_logging() {
 /// Events of the async loop
 enum EventType {
     Rpc(bool),
+    Sys(bool),
     Flooding(bool),
     RoutingInfo(bool),
     RoutingTable(bool),
@@ -82,7 +87,8 @@ pub async fn start(storage_path: String) -> () {
     log::info!("start initializing libqaul");
 
     // initialize rpc system
-    let libqaul_receive = Rpc::init();
+    let libqaul_rpc_receive = Rpc::init();
+    let libqaul_sys_receive = Sys::init();
 
     // only use the pretty logger on desktop systems
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
@@ -112,6 +118,12 @@ pub async fn start(storage_path: String) -> () {
     //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     let mut rpc_ticker = Ticker::new(Duration::from_millis(10));
 
+    // check SYS once every 10 milliseconds
+    // TODO: interval is only in unstable. Use it once it is stable.
+    //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
+    //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
+    let mut sys_ticker = Ticker::new(Duration::from_millis(10));
+
     // check flooding message queue periodically
     let mut flooding_ticker = Ticker::new(Duration::from_millis(100));
 
@@ -134,6 +146,7 @@ pub async fn start(storage_path: String) -> () {
             let lan_fut = lan.swarm.next().fuse();
             let internet_fut = internet.swarm.next().fuse();
             let rpc_fut = rpc_ticker.next().fuse();
+            let sys_fut = sys_ticker.next().fuse();
             let flooding_fut = flooding_ticker.next().fuse();
             let routing_info_fut = routing_info_ticker.next().fuse();
             let routing_table_fut = routing_table_ticker.next().fuse();
@@ -145,6 +158,7 @@ pub async fn start(storage_path: String) -> () {
                 lan_fut,
                 internet_fut,
                 rpc_fut,
+                sys_fut,
                 flooding_fut,
                 routing_info_fut,
                 routing_table_fut,
@@ -161,6 +175,7 @@ pub async fn start(storage_path: String) -> () {
                     None
                 },
                 _rpc_event = rpc_fut => Some(EventType::Rpc(true)),
+                _sys_event = sys_fut => Some(EventType::Sys(true)),
                 _flooding_event = flooding_fut => Some(EventType::Flooding(true)),
                 _routing_info_event = routing_info_fut => Some(EventType::RoutingInfo(true)),
                 _routing_table_event = routing_table_fut => Some(EventType::RoutingTable(true)),
@@ -171,10 +186,20 @@ pub async fn start(storage_path: String) -> () {
         if let Some(event) = evt {
             match event {
                 EventType::Rpc(_) => {
-                    if let Ok(rpc_message) = libqaul_receive.try_recv() {
+                    if let Ok(rpc_message) = libqaul_rpc_receive.try_recv() {
                         // we received a message, send it to RPC crate
                         Rpc::process_received_message(
                             rpc_message,
+                            Some(&mut lan),
+                            Some(&mut internet),
+                        );
+                    }
+                }
+                EventType::Sys(_) => {
+                    if let Ok(sys_message) = libqaul_sys_receive.try_recv() {
+                        // we received a message, send it to RPC crate
+                        Sys::process_received_message(
+                            sys_message,
                             Some(&mut lan),
                             Some(&mut internet),
                         );
@@ -199,7 +224,10 @@ pub async fn start(storage_path: String) -> () {
                                 .swarm
                                 .behaviour_mut()
                                 .floodsub
-                                .publish(msg.topic, msg.message);
+                                .publish(msg.topic.clone(), msg.message.clone());
+                        }
+                        if !matches!(msg.incoming_via, ConnectionModule::Ble) {
+                            Ble::send_feed_message(msg.topic, msg.message);
                         }
                     }
                 }
@@ -226,7 +254,9 @@ pub async fn start(storage_path: String) -> () {
                                 .behaviour_mut()
                                 .qaul_info
                                 .send_qaul_info_message(neighbour_id, data),
-                            ConnectionModule::Ble => {}
+                            ConnectionModule::Ble => {
+                                Ble::send_routing_info(neighbour_id, data);
+                            }
                             ConnectionModule::Local => {}
                             ConnectionModule::None => {}
                         }
@@ -262,12 +292,14 @@ pub async fn start(storage_path: String) -> () {
                                     .qaul_messaging
                                     .send_qaul_messaging_message(neighbour_id, data);
                             },
-                            ConnectionModule::Ble => {},
+                            ConnectionModule::Ble => {
+                                Ble::send_messaging_message(neighbour_id, data);
+                            },
                             ConnectionModule::Local => {
                                 // TODO: deliver it locally
                             },
                             ConnectionModule::None => {
-                                // TODO: DNT behaviour
+                                // TODO: DTN behaviour
                                 // reschedule it for the moment
 
                             },

@@ -92,6 +92,9 @@ impl Rpc {
                     Some(proto::Modules::Connections) => {
                         super::connections::Connections::rpc(message.data);
                     },
+                    Some(proto::Modules::Ble) => {
+                        // TODO: Process BLE messages
+                    },
                     Some(proto::Modules::Debug) => {
                         super::debug::Debug::rpc(message.data);
                     },

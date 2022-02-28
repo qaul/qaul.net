@@ -1,0 +1,30 @@
+// qaul network communication over BLE
+syntax = "proto3";
+package qaul.net.ble;
+
+// BLE network communication message
+message BleMessage {
+    // message type
+    oneof message {
+        // info message
+        bytes info = 1;
+        // feed message
+        bytes feed = 2;
+        // messaging message
+        bytes messaging = 3;
+        // identification request
+        Identification identification = 4;
+    }
+}
+
+// Identfication Request
+message Identification {
+    bool request = 1;
+    NodeIdentification node = 2;
+}
+
+// Identity Information
+message NodeIdentification {
+    // Node ID
+    bytes id = 1;
+}

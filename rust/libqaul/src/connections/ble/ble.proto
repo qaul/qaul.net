@@ -1,0 +1,264 @@
+// qaul system communication with BLE module
+syntax = "proto3";
+package qaul.sys.ble;
+
+// BLE system communication message
+message Ble {
+    // message type
+    oneof message {
+        // device information request
+        BleInfoRequest info_request = 1;
+        // device information response
+        BleInfoResponse info_response = 2;
+
+        // start device request
+        BleStartRequest start_request = 3;
+        // start device result
+        BleStartResult start_result = 4;
+
+        // stop device request
+        BleStopRequest stop_request = 5;
+        // stop device result
+        BleStopResult stop_result = 6;
+
+        // device discovered
+        BleDeviceDiscovered device_discovered = 7;
+        // device became unavailable
+        BleDeviceUnavailable device_unavailable = 8;
+
+        // send a direct message
+        BleDirectSend direct_send = 9;
+        // direct message send result
+        BleDirectSendResult direct_send_result = 10;
+
+        // direct message received
+        BleDirectReceived direct_received = 11;
+    }
+}
+
+// device information request message
+message BleInfoRequest {
+
+}
+
+// device information response message
+message BleInfoResponse {
+    // fill in a device information of the BLE device
+    BleDeviceInfo device = 1;
+}
+
+// BLE device information
+message BleDeviceInfo {
+    // Check if Bluetooth / Bluetooth Low Energy is supported 
+    //
+    // Android: check if a bluetooth adapter is found
+    bool ble_support = 1;
+    // Bluetooth device address
+    // 48 bit unique Bluetooth device addr
+    // e.g. 80:86:F2:08:C7:98
+    // 
+    // Android: BluetoothAdapter getAddress()
+    // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getAddress()
+    string id = 2;
+    // Get Bluetooth Name
+    // this is field is purely informative
+    //
+    // Android: BluetoothAdapter getName()
+    // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
+    string name = 3;
+    // Bluetooth is enable / powered on
+    //
+    // Android: BluetoothAdapter isEnabled()
+    // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isEnabled() 
+    bool bluetooth_on = 4;
+    // Is extended advertisement supported?
+    //
+    // Android: BluetoothAdapter isLeExtendedAdvertisingSupported ()
+    // https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeExtendedAdvertisingSupported()
+    bool adv_extended = 5;
+    // what is the maximal amount of bytes sendable via advertising?
+    //
+    // Android: BluetoothAdapter getLeMaximumAdvertisingDataLength() 
+    // https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#getLeMaximumAdvertisingDataLength()
+    uint32 adv_extended_bytes = 6;
+    // Is 2M phy supported?
+    //
+    // Android: BluetoothAdapter isLe2MPhySupported()
+    // https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLe2MPhySupported()
+    bool le_2m = 7;
+    // is extended advertising supported in coded
+    // mode? (For long distance connections)
+    //
+    // Android: BluetoothAdapter isLeCodedPhySupported()
+    // https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeCodedPhySupported()
+    bool le_coded = 8;
+    // is LE audio supported?
+    //
+    // This is the most recent BLE feature, supported on:
+    //
+    // * android 12 and above
+    // * linux ?
+    // * ios ?
+    // * macos ?
+    // * windows ?
+    //
+    // Android: AndroidAdapter isLeAudioSupported()
+    // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isLeAudioSupported()
+    bool le_audio = 9;
+    // is periodic advertisment supported?
+    //
+    // Android: BluetoothAdapter isLePeriodicAdvertisingSupported()
+    // https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLePeriodicAdvertisingSupported()
+    bool le_periodic_adv_support = 14;
+    // Is multi advertisement supported?
+    //
+    // When multi advertisement is supported one can have different
+    // advertisement types parallely. Each advertisement has a 
+    // different device address.
+    // For scanning devices it looks, as if multiple devices devices
+    // would advertise themselves.
+    // This is helpful to support several incompatible advertisement
+    // modes at the same time.
+    //
+    // Android: BluetoothAdapter isMultipleAdvertisementSupported()
+    // https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isMultipleAdvertisementSupported()
+    bool le_multiple_adv_support = 15;
+    // Android Specific: is Offloaded Filtering Supported?
+    //
+    // Android: BluetoothAdapter isOffloadedFilteringSupported()
+    // 
+    bool offload_filter_support = 16;
+    // Android Specific: is Offloaded Scan Batching Supported?
+    //
+    // Android: BluetoothAdapter isOffloadedScanBatchingSupported()
+    // https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isOffloadedScanBatchingSupported()
+    bool offload_scan_batching_support = 17;
+}
+
+// Start Device
+//
+// the module will try to start the device, power it up,
+// get all rights, configure it for qaul, and
+// send & receive advertising messages
+message BleStartRequest {
+    // qaul ID
+    //
+    // The small 16 byte qaul id
+    // to be used to identify this node
+    bytes qaul_id = 1;
+    // power settings 
+    BlePowerSetting power_setting = 2;
+}
+
+// power settings
+// 
+// These power settings relate to the android
+// power modes.
+enum BlePowerSetting {
+    // use power saving option
+    //
+    // this option will miss a lot of incoming messages,
+    // as the processor is often sleeping
+    low_power = 0;
+    // use a compromise between power
+    // saving and reactivity
+    balanced = 1;
+    // always listen
+    //
+    // this option uses the most battery power
+    low_latency = 2;
+}
+
+// Start device result message
+//
+// Feedback from the 
+message BleStartResult {
+    // whether the device was successfully started
+    bool success = 1;
+    // error reason
+    BleError error_reason = 2;
+    // error message
+    string error_message = 3;
+}
+
+// BLE Error Reasons
+//
+// TODO: this list needs to be completed
+//       if none of the reasons apply, use 
+//       UNKNOWN_ERROR
+enum BleError {
+    // undefined error
+    //
+    // use this when no other reason applies
+    UNKNOWN_ERROR = 0;
+    // the rights to use BLE were
+    // not provided by the user
+    RIGHTS_MISSING = 1;
+    // there was a module timeout
+    TIMEOUT = 2;
+}
+
+// Stop Bluetooth Device
+message BleStopRequest {
+
+}
+
+// Stop Result
+//
+// Feedback of the stop request
+message BleStopResult {
+    // whether the device was successfully stopped
+    bool success = 1;
+    // error reason
+    BleError error_reason = 2;
+    // error message
+    string error_message = 3;
+}
+
+// Device Discovered
+//
+// A new device has been discovered.
+message BleDeviceDiscovered {
+    // qaul id of the device
+    bytes qaul_id = 1;
+    // the received signal strength of this device
+    int32 rssi = 2;
+}
+
+// Device Unavailable
+//
+// A formerly discovered device has become 
+// unavailable. No messages can be sent to it.
+message BleDeviceUnavailable {
+    // qaul id of the device that
+    // became unavailable
+    bytes qaul_id = 1;
+}
+
+// send a direct message
+message BleDirectSend {
+    // message id (as a reference for the result message)
+    bytes id = 1;
+    // qaul id of the device to send it to
+    bytes to = 2;
+    // data to be sent
+    bytes data = 4;
+}
+
+// result after sending the direct message
+message BleDirectSendResult {
+    // message id
+    bytes id = 1;
+    // result after sending the message
+    bool success = 2;
+    // error messages
+    string error_message = 3;
+}
+
+// direct message received message
+message BleDirectReceived {
+    // qaul id of the sending device
+    bytes from = 1;
+    // the data received
+    bytes data = 4;
+}

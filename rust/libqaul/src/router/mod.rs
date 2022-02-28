@@ -52,7 +52,7 @@ impl Router {
         ConnectionTable::init();
 
         // initialize RouterInfo submodule that 
-        // scheduals the sending of the routing information
+        // schedules the sending of the routing information
         // to the neighbouring nodes.
         RouterInfo::init(10);
     }

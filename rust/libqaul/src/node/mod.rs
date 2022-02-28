@@ -23,6 +23,7 @@ use state;
 use crate::storage::configuration::Configuration;
 use user_accounts::UserAccounts;
 use crate::rpc::Rpc;
+use crate::utilities::qaul_id::QaulId;
 
 
 /// central state of this instances Node struct
@@ -113,6 +114,12 @@ impl Node {
         let node = NODE.get();
         node.id.clone()
     }
+    
+    /// get small node ID
+    pub fn get_small_id() -> Vec<u8> {
+        let node = NODE.get();
+        QaulId::to_small(node.id)
+    }    
 
     /// get the string of a PeerId
     pub fn get_id_string() -> String {

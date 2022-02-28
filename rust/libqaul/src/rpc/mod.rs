@@ -7,6 +7,7 @@
 //! The format is then translated to rust program code.
 
 pub mod debug;
+pub mod sys;
 
 use crossbeam_channel::{unbounded, Sender, Receiver, TryRecvError};
 use state::Storage;
@@ -19,6 +20,7 @@ use crate::connections::{
     internet::Internet,
 };
 use crate::connections::Connections;
+use crate::connections::ble::Ble;
 use crate::router::Router;
 use crate::router::users::Users;
 use crate::node::Node;
@@ -168,6 +170,10 @@ impl Rpc {
                     Some(Modules::Connections) => {
                         log::info!("Message Modules::Connections received");
                         Connections::rpc(message.data, internet);
+                    },
+                    Some(Modules::Ble) => {
+                        log::info!("Message Modules::Ble received");
+                        Ble::rpc(message.data);
                     },
                     Some(Modules::Debug) => {
                         log::info!("Message Modules::Debug received");

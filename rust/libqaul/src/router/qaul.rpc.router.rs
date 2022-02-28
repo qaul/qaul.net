@@ -118,6 +118,8 @@ pub struct NeighboursList {
     pub lan: ::prost::alloc::vec::Vec<NeighboursEntry>,
     #[prost(message, repeated, tag="2")]
     pub internet: ::prost::alloc::vec::Vec<NeighboursEntry>,
+    #[prost(message, repeated, tag="3")]
+    pub ble: ::prost::alloc::vec::Vec<NeighboursEntry>,
 }
 /// neighbours entry
 #[derive(Clone, PartialEq, ::prost::Message)]

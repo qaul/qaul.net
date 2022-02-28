@@ -38,4 +38,5 @@ pub enum Modules {
     Connections = 7,
     Debug = 8,
     Chat = 9,
+    Ble = 10,
 }
