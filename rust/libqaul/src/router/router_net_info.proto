@@ -1,0 +1,72 @@
+syntax = "proto3";
+package qaul.net.router_net_info;
+
+// Router information Container
+message RouterInfoContainer {
+    // signature
+    bytes signature = 1;
+    // message content
+    bytes message = 2;
+}
+
+// Router information content
+message RouterInfoContent {
+    // node id
+    bytes id = 1;
+    // message content
+    bytes content = 2;
+    // timestamp in milli seconds
+    uint64 time = 3;
+}
+
+
+// Router information message
+message RouterInfoMessage {
+    // node id
+    bytes node = 1;
+    // Routing information table
+    RoutingInfoTable routes = 2;
+    // Users information table
+    UserInfoTable users = 3;
+    // timestamp
+    uint64 timestamp = 4;
+}
+
+// 
+message Routing {
+    oneof message {
+        UserInfoTable user_info_table = 1;
+        UserInfo user_info = 2;
+        RoutingInfoTable routing_info_table = 3;
+        RoutingInfoEntry routing_info_entry = 4;
+    }
+}
+
+// Routing information to send to neighbours
+message RoutingInfoTable {
+    repeated RoutingInfoEntry entry = 1;
+}
+
+// Routing structures to send over the network
+message RoutingInfoEntry {
+    /// user id
+    bytes user = 1;
+    /// round trip time
+    uint32 rtt = 2;
+    /// hop count
+    bytes hc = 3;
+    /// package loss
+    float pl = 4;
+}
+
+// User information table
+message UserInfoTable {
+    repeated UserInfo info = 1;
+}
+
+// User info structure for sending to the  
+message UserInfo {
+    bytes id = 1;
+    bytes key = 2;
+    string name = 3;
+}

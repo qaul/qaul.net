@@ -52,6 +52,8 @@ message RoutingTableConnection {
     ConnectionModule module = 2;
     // the round trip time for this connection
     uint32 rtt = 3;
+    // hop count
+    uint32 hop_count = 5;
     // node id via which this connection is routed
     bytes via = 4;
 }

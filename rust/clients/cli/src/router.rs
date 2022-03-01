@@ -98,7 +98,7 @@ impl Router {
                         println!("");
                         println!("Routing Table");
                         println!("No. | User ID");
-                        println!("      * Connection Module | RTT in ms | Via Neighbour Node Id");
+                        println!("      * Connection Module | RTT in ms | hop count | Via Neighbour Node Id");
         
                         let mut line = 1;
 
@@ -123,7 +123,7 @@ impl Router {
                                 };
 
                                 // print connection entry
-                                println!("      * {} | {} | {}", module, connection.rtt, via.into_string());
+                                println!("      * {} | {} | {} | {}", module, connection.rtt, connection.hop_count, via.into_string());
                             }
 
                             line += 1;

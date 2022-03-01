@@ -55,6 +55,9 @@ pub struct RoutingTableConnection {
     /// the round trip time for this connection
     #[prost(uint32, tag="3")]
     pub rtt: u32,
+    /// hop count
+    #[prost(uint32, tag="5")]
+    pub hop_count: u32,
     /// node id via which this connection is routed
     #[prost(bytes="vec", tag="4")]
     pub via: ::prost::alloc::vec::Vec<u8>,
