@@ -22,7 +22,9 @@ import 'package:utils/utils.dart';
 import '../../../../widgets/widgets.dart';
 
 part 'models/network_node.dart';
+
 part 'widgets/network_node_info_bottom_sheet.dart';
+
 part 'widgets/network_type_filter.dart';
 
 class DynamicNetworkScreen extends HookConsumerWidget {
@@ -64,7 +66,12 @@ class _DynamicNetworkGameEngine extends Forge2DGame with HasTappables {
     addContactCallback(_NudgeSiblingsAndNephewsCallback());
 
     final worldCenter = screenToWorld(size * camera.zoom / 2);
-    add(_NetworkNodeComponent(root, worldCenter, radius: 8));
+    add(_NetworkNodeComponent(
+      root,
+      worldCenter,
+      radius: 8,
+      openBottomSheetOnTap: false,
+    ));
   }
 }
 
@@ -138,6 +145,7 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
     this.level = 0,
     this.initialDirection,
     this.ballParent,
+    this.openBottomSheetOnTap = true,
   }) {
     // Painted manually on render()
     paint = Paint()..color = Colors.transparent;
@@ -145,6 +153,8 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
 
   final double radius;
   final Vector2 _position;
+
+  final bool openBottomSheetOnTap;
 
   final NetworkNode node;
   final int level;
@@ -219,6 +229,17 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
 
       gameRef.add(component);
     }
+  }
+
+  @override
+  bool onTapDown(_) {
+    if (openBottomSheetOnTap && gameRef.buildContext != null) {
+      Scaffold.of(gameRef.buildContext!).showBottomSheet(
+        (context) => _NetworkNodeInfoBottomSheet(node: node),
+        backgroundColor: Colors.transparent,
+      );
+    }
+    return false;
   }
 
   @override
@@ -298,18 +319,5 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
     );
     tp.layout();
     tp.paint(canvas, Offset.zero - tp.size.center(Offset.zero));
-  }
-
-  @override
-  bool onTapDown(_) {
-    if (gameRef.buildContext != null) {
-      Scaffold.of(gameRef.buildContext!).showBottomSheet(
-        (context) {
-          return const _NetworkNodeInfoBottomSheet();
-        },
-        backgroundColor: Colors.transparent,
-      );
-    }
-    return false;
   }
 }

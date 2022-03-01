@@ -3,7 +3,25 @@ part of '../dynamic_network_screen.dart';
 class _NetworkNodeInfoBottomSheet extends StatelessWidget {
   const _NetworkNodeInfoBottomSheet({
     Key? key,
+    required this.node,
   }) : super(key: key);
+  final NetworkNode node;
+
+  List<ConnectionType> get _supportedTypes =>
+      [ConnectionType.ble, ConnectionType.lan, ConnectionType.internet];
+
+  IconData _toIconData(ConnectionType t) {
+    switch (t) {
+      case ConnectionType.lan:
+        return Icons.wifi;
+      case ConnectionType.internet:
+        return CupertinoIcons.globe;
+      case ConnectionType.ble:
+        return Icons.bluetooth;
+      case ConnectionType.local:
+        return Icons.cable_outlined;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +34,7 @@ class _NetworkNodeInfoBottomSheet extends StatelessWidget {
     return GestureDetector(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20.0),
-        padding: const EdgeInsets.fromLTRB(20.0, 16.0, 10.0, 16.0),
+        padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 16.0),
         decoration: BoxDecoration(
           color: Theme.of(context).appBarTheme.backgroundColor,
           borderRadius: const BorderRadius.vertical(
@@ -35,22 +53,11 @@ class _NetworkNodeInfoBottomSheet extends StatelessWidget {
                 child: const Icon(Icons.close_rounded),
               ),
             ),
-            ListTile(
-              leading: UserAvatar.small(),
-              visualDensity: VisualDensity.adaptivePlatformDensity,
-              contentPadding: EdgeInsets.zero,
-              title: Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: Text('Name name', style: theme.headline6),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ID: --------------------------------------',
-                    style: theme.caption!.copyWith(fontSize: 10),
-                  ),
-                ],
+            UserListTile(
+              node.user,
+              content: Text(
+                'ID: ${node.user.idBase58}',
+                style: theme.caption!.copyWith(fontSize: 10),
               ),
             ),
             const SizedBox(height: 12),
@@ -71,57 +78,34 @@ class _NetworkNodeInfoBottomSheet extends StatelessWidget {
                     TableCell(child: Text(l18ns.via)),
                   ],
                 ),
-                TableRow(children: [
-                  const TableCell(
-                    child: Align(
-                      alignment: start,
-                      child: Icon(Icons.bluetooth),
+                ...List<TableRow>.generate(_supportedTypes.length, (index) {
+                  var type = _supportedTypes[index];
+                  var info = node.user.availableTypes?[type];
+                  var ping = info?.ping == null ? '-' : '${info!.ping!} ms';
+                  return TableRow(children: [
+                    TableCell(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        alignment: start,
+                        child: Icon(_toIconData(type)),
+                      ),
                     ),
-                  ),
-                  TableCell(
-                    child: Container(
-                      alignment: end,
-                      padding: const EdgeInsets.only(right: 12),
-                      child: const Text('200 ms'),
+                    TableCell(
+                      child: Container(
+                        alignment: end,
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Text(ping),
+                      ),
                     ),
-                  ),
-                  const TableCell(child: Text('HC')),
-                  const TableCell(child: Text('Via')),
-                ]),
-                TableRow(children: [
-                  const TableCell(
-                    child: Align(
-                      alignment: start,
-                      child: Icon(Icons.wifi),
+                    TableCell(child: Text(info?.hopCount?.toString() ?? '-')),
+                    TableCell(
+                      child: Text(
+                        info?.nodeIDBase58 ?? '-',
+                        style: theme.caption!.copyWith(fontSize: 10),
+                      ),
                     ),
-                  ),
-                  TableCell(
-                    child: Container(
-                      alignment: end,
-                      padding: const EdgeInsets.only(right: 12),
-                      child: const Text('200 ms'),
-                    ),
-                  ),
-                  const TableCell(child: Text('HC')),
-                  const TableCell(child: Text('Via')),
-                ]),
-                TableRow(children: [
-                  const TableCell(
-                    child: Align(
-                      alignment: start,
-                      child: Icon(CupertinoIcons.globe),
-                    ),
-                  ),
-                  TableCell(
-                    child: Container(
-                      alignment: end,
-                      padding: const EdgeInsets.only(right: 12),
-                      child: const Text('200 ms'),
-                    ),
-                  ),
-                  const TableCell(child: Text('HC')),
-                  const TableCell(child: Text('Via')),
-                ]),
+                  ]);
+                }),
               ],
             ),
           ],
