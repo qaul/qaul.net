@@ -31,7 +31,7 @@ class NetworkNode extends Equatable {
   static List<NetworkNode> _prepareUnstructuredNetworkNodes(
       User defaultUser, List<User> users, ConnectionType filter) {
     final immediateChildren =
-        users.where((element) => element.availableTypes![filter]!.hopCount! == 0);
+        users.where((element) => element.availableTypes![filter]!.hopCount! == 1);
     final out =
         immediateChildren.map((e) => NetworkNode(user: e, parentId: defaultUser.id)).toList();
     if (out.isEmpty) return out;
@@ -42,7 +42,7 @@ class NetworkNode extends Equatable {
     if (hops.isEmpty) return out;
 
     final maxHops = hops.reduce(max);
-    for (var hops = 1; hops <= maxHops; hops++) {
+    for (var hops = 2; hops <= maxHops; hops++) {
       hopCountMatchesHops(e) => e.availableTypes?[filter]?.hopCount == hops;
       final usersWithNHops = remainingUsers.where(hopCountMatchesHops).toList();
       if (usersWithNHops.isEmpty) continue;

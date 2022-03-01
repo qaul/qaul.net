@@ -18,7 +18,7 @@ ConnectionType _mapFilter(_NetworkType t) {
 }
 
 /// The currently active filter.
-final _networkTypeFilter = StateProvider((_) => _NetworkType.bluetooth);
+final _networkTypeFilter = StateProvider((_) => _NetworkType.internet);
 
 /// Nodes that fit the current filter criteria
 final _filteredNodes = Provider<NetworkNode>((ref) {
@@ -34,8 +34,8 @@ final _filteredNodes = Provider<NetworkNode>((ref) {
   return NetworkNode.fromUserData(defaultUser, users, _mapFilter(filter));
 });
 
-class _NetworkTypeFilterToolbar extends HookConsumerWidget {
-  const _NetworkTypeFilterToolbar({Key? key}) : super(key: key);
+class NetworkTypeFilterToolbar extends HookConsumerWidget {
+  const NetworkTypeFilterToolbar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

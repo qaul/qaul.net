@@ -36,7 +36,7 @@ void main() {
     var user = generateUser('user');
     var users = [
       generateUser('',
-          connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 0)})
+          connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)})
     ];
 
     final tree = NetworkNode.fromUserData(user, users, ConnectionType.ble);
@@ -44,11 +44,11 @@ void main() {
     expect(tree, NetworkNode(user: user, children: const {}));
   });
 
-  test('Node with no children if users contains only users with hops > 0', () async {
+  test('Node with no children if users contains only users with hops > 1', () async {
     var user = generateUser('user');
     var users = [
       generateUser('',
-          connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)})
+          connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 2)})
     ];
 
     final tree = NetworkNode.fromUserData(user, users, ConnectionType.internet);
@@ -56,11 +56,11 @@ void main() {
     expect(tree, NetworkNode(user: user, children: const {}));
   });
 
-  test('Node with single child if user matches filter & zero hops', () async {
+  test('Node with single child if user matches filter & one hops', () async {
     var user = generateUser('user');
     final users = [
       generateUser('child1',
-          connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 0)}),
+          connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)}),
     ];
 
     final tree = NetworkNode.fromUserData(user, users, ConnectionType.internet);
@@ -84,11 +84,11 @@ void main() {
     var user = generateUser('user');
     final users = [
       generateUser('child1',
-          connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 0)}),
+          connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)}),
       generateUser('child2',
-          connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 0)}),
+          connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 1)}),
       generateUser('child3', connections: const {
-        ConnectionType.internet: ConnectionInfo(ping: 109324810924, hopCount: 0)
+        ConnectionType.internet: ConnectionInfo(ping: 109324810924, hopCount: 1)
       }),
     ];
 
@@ -109,21 +109,21 @@ void main() {
     );
   });
 
-  test('Node with three children and a node with 2 hops', () async {
+  test('Node with three children and a node with 3 hops', () async {
     var user = generateUser('user');
     final users = [
       generateUser('child1',
-          connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 0)}),
+          connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)}),
       generateUser('child2',
-          connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 0)}),
+          connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 1)}),
       generateUser('child3', connections: const {
-        ConnectionType.internet: ConnectionInfo(ping: 109324810924, hopCount: 0)
+        ConnectionType.internet: ConnectionInfo(ping: 109324810924, hopCount: 1)
       }),
     ];
     final users2 = [
       ...users,
       generateUser('child3', connections: const {
-        ConnectionType.internet: ConnectionInfo(ping: 109324810924, hopCount: 2)
+        ConnectionType.internet: ConnectionInfo(ping: 109324810924, hopCount: 3)
       }),
     ];
 
@@ -148,11 +148,11 @@ void main() {
     var user = generateUser('user');
     final users = [
       generateUser('child1',
-          connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 0)}),
+          connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)}),
       generateUser('child2',
-          connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 0)}),
+          connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 1)}),
       generateUser('child3', connections: const {
-        ConnectionType.internet: ConnectionInfo(ping: 109324810924, hopCount: 0)
+        ConnectionType.internet: ConnectionInfo(ping: 109324810924, hopCount: 1)
       }),
     ];
     final users2 = [
@@ -181,14 +181,14 @@ void main() {
   test('Node with three children and a grand-child', () async {
     var user = generateUser('user');
     var child1 = generateUser('child1',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 0)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)});
     var child2 = generateUser('child2',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 0)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 1)});
     var child3 = generateUser('child3', connections: const {
-      ConnectionType.internet: ConnectionInfo(ping: 109324810924, hopCount: 0)
+      ConnectionType.internet: ConnectionInfo(ping: 109324810924, hopCount: 1)
     });
     var grandchild11 = generateUser('grandchild11',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 111, hopCount: 1)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 111, hopCount: 2)});
     final users = [child1, child2, child3, grandchild11];
 
     final tree = NetworkNode.fromUserData(user, users, ConnectionType.internet);
@@ -211,13 +211,13 @@ void main() {
   test('Node with three children and a grand-child, picks last possible parent', () async {
     var user = generateUser('user');
     var child1 = generateUser('child1',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 0)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)});
     var child2 = generateUser('child2',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 0)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 1)});
     var child3 = generateUser('child3',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 0)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)});
     var grandchild31 = generateUser('grandchild31',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 111, hopCount: 1)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 111, hopCount: 2)});
     final users = [child1, child2, child3, grandchild31];
 
     final tree = NetworkNode.fromUserData(user, users, ConnectionType.internet);
@@ -240,17 +240,17 @@ void main() {
   test('Node with three children and three grand-children', () async {
     var user = generateUser('user');
     var child1 = generateUser('child1',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 0)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)});
     var child2 = generateUser('child2',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 0)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 1)});
     var child3 = generateUser('child3',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 129387013, hopCount: 0)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 129387013, hopCount: 1)});
     var gc11 = generateUser('grandchild11',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 111, hopCount: 1)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 111, hopCount: 2)});
     var gc21 = generateUser('grandchild21',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1010000, hopCount: 1)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1010000, hopCount: 2)});
     var gc31 = generateUser('grandchild31',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 129387413, hopCount: 1)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 129387413, hopCount: 2)});
     final users = [child1, child2, child3, gc11, gc21, gc31];
 
     final tree = NetworkNode.fromUserData(user, users, ConnectionType.internet);
@@ -277,37 +277,37 @@ void main() {
   test('Complex Node Tree', () async {
     var user = generateUser('user');
     var child1 = generateUser('child1',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 0)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)});
     var child2 = generateUser('child2',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 0)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1000000, hopCount: 1)});
     var child3 = generateUser('child3',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 129387013, hopCount: 0)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 129387013, hopCount: 1)});
     var child4 = generateUser('child4', connections: const {
-      ConnectionType.internet: ConnectionInfo(ping: 1279387013, hopCount: 0)
+      ConnectionType.internet: ConnectionInfo(ping: 1279387013, hopCount: 1)
     });
     var gc11 = generateUser('grandchild11',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 111, hopCount: 1)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 111, hopCount: 2)});
     var ggc111 = generateUser('grandgrandchild111',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 129, hopCount: 2)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 129, hopCount: 3)});
     var gggc1111 = generateUser('grandgrandgrandchild1111',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 334, hopCount: 3)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 334, hopCount: 4)});
     var gggc1112 = generateUser('grandgrandgrandchild1112',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 298, hopCount: 3)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 298, hopCount: 4)});
     var gc12 = generateUser('grandchild12',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 157, hopCount: 1)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 157, hopCount: 2)});
     var gc13 = generateUser('grandchild13',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 559, hopCount: 1)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 559, hopCount: 2)});
     var gc21 = generateUser('grandchild21',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1010000, hopCount: 1)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1010000, hopCount: 2)});
     var ggc211 = generateUser('grandgrandchild211',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: null, hopCount: 2)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: null, hopCount: 3)});
     var gggc2111 = generateUser('grandgrandgrandchild2111', connections: const {
       ConnectionType.internet: ConnectionInfo(ping: 1010300, hopCount: null)
     });
     var ggc212 = generateUser('grandgrandchild212',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1010200, hopCount: 2)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 1010200, hopCount: 3)});
     var gc31 = generateUser('grandchild31',
-        connections: const {ConnectionType.internet: ConnectionInfo(ping: 129387413, hopCount: 1)});
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 129387413, hopCount: 2)});
     final users = [
       child1,
       gc11,
