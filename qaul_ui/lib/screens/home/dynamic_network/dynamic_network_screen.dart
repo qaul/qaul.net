@@ -205,11 +205,11 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
 
     var i = 0;
     for (final child in node.children ?? {}) {
-      final angle = i * (2 * math.pi / (node.children!.length));
+      var numberOfChildren = (node.children!.length);
+      final angle = i * (2 * math.pi / numberOfChildren);
       i++;
 
-      // TODO must be a factor of the number of children
-      var newRadius = radius * .45;
+      var newRadius = radius * .65 / numberOfChildren;
 
       var polar = Vector2(math.cos(angle), math.sin(angle));
 
