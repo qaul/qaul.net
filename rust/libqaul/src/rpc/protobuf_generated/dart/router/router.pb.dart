@@ -295,6 +295,7 @@ class RoutingTableConnection extends $pb.GeneratedMessage {
     ..e<ConnectionModule>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'module', $pb.PbFieldType.OE, defaultOrMaker: ConnectionModule.NONE, valueOf: ConnectionModule.valueOf, enumValues: ConnectionModule.values)
     ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtt', $pb.PbFieldType.OU3)
     ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'via', $pb.PbFieldType.OY)
+    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hopCount', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
@@ -303,6 +304,7 @@ class RoutingTableConnection extends $pb.GeneratedMessage {
     ConnectionModule? module,
     $core.int? rtt,
     $core.List<$core.int>? via,
+    $core.int? hopCount,
   }) {
     final _result = create();
     if (module != null) {
@@ -313,6 +315,9 @@ class RoutingTableConnection extends $pb.GeneratedMessage {
     }
     if (via != null) {
       _result.via = via;
+    }
+    if (hopCount != null) {
+      _result.hopCount = hopCount;
     }
     return _result;
   }
@@ -363,6 +368,15 @@ class RoutingTableConnection extends $pb.GeneratedMessage {
   $core.bool hasVia() => $_has(2);
   @$pb.TagNumber(4)
   void clearVia() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.int get hopCount => $_getIZ(3);
+  @$pb.TagNumber(5)
+  set hopCount($core.int v) { $_setUnsignedInt32(3, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasHopCount() => $_has(3);
+  @$pb.TagNumber(5)
+  void clearHopCount() => clearField(5);
 }
 
 class ConnectionsRequest extends $pb.GeneratedMessage {
