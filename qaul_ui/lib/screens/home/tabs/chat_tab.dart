@@ -30,15 +30,10 @@ class _ChatState extends _BaseTabState<_Chat> {
         heroTag: 'chatTabFAB',
         tooltip: l18ns!.newChatTooltip,
         onPressed: () async {
-          final availableUsers = users
-              .where((u) =>
-                  !(u.isBlocked ?? false) &&
-                  chatRooms.indexWhere((c) => c.conversationId.equals(u.id)).isNegative)
-              .toList()
-            ..sort();
-          if (availableUsers.isEmpty) return;
           final user = await Navigator.push(
-              context, MaterialPageRoute(builder: (_) => _CreateNewRoomDialog(availableUsers)));
+            context,
+            MaterialPageRoute(builder: (_) => const _CreateNewRoomDialog()),
+          );
           if (user is User) {
             final newRoom = ChatRoom.blank(user: defaultUser, otherUser: user);
             openChat(newRoom, context: context, user: defaultUser, otherUser: user);
@@ -111,27 +106,23 @@ class _ChatState extends _BaseTabState<_Chat> {
 }
 
 class _CreateNewRoomDialog extends StatelessWidget {
-  const _CreateNewRoomDialog(this.availableUsers, {Key? key})
-      : assert(availableUsers.length > 0),
-        super(key: key);
-  final List<User> availableUsers;
+  const _CreateNewRoomDialog({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        leading: const DefaultBackButton(),
-        title: Text(AppLocalizations.of(context)!.newChatTooltip),
-      ),
-      body: ListView.separated(
-        itemCount: availableUsers.length,
-        separatorBuilder: (_, __) => const Divider(height: 12.0),
-        itemBuilder: (context, i) {
-          final usr = availableUsers[i];
-          return UserListTile(usr, onTap: () => Navigator.pop(context, usr));
-        },
-      ),
+    return SearchUserDecorator(
+      title: AppLocalizations.of(context)!.newChatTooltip,
+      builder: (_, users) {
+        return ListView.separated(
+          padding: const EdgeInsets.all(8),
+          itemCount: users.length,
+          separatorBuilder: (_, __) => const Divider(height: 12.0),
+          itemBuilder: (context, i) {
+            final usr = users[i];
+            return UserListTile(usr, onTap: () => Navigator.pop(context, usr));
+          },
+        );
+      },
     );
   }
 }
