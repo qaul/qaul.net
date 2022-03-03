@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+message Request {
+}
+
+message Reply {
+}
+
+message Panic {
+}
