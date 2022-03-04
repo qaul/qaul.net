@@ -39,6 +39,7 @@ class QaulApp extends PlatformAwareBuilder {
           actionsIconTheme: const IconThemeData(color: Colors.lightBlue),
           shape: BorderDirectional(bottom: BorderSide(color: Colors.grey.shade300)),
         ),
+        buttonTheme: const ButtonThemeData(),
         inputDecorationTheme: InputDecorationTheme(
           floatingLabelBehavior: FloatingLabelBehavior.never,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),

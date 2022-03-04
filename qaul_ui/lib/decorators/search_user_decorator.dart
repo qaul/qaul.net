@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
@@ -7,7 +8,7 @@ import '../widgets/widgets.dart';
 
 typedef SearchUserResultBuilder = Widget Function(BuildContext context, List<User> users);
 
-final searchKeyProvider = StateProvider.autoDispose<String>((ref) {
+final _searchKeyProvider = StateProvider.autoDispose<String>((ref) {
   return '';
 });
 
@@ -23,7 +24,7 @@ final _userSearchProvider = StateProvider.autoDispose<List<User>>((ref) {
       .toList()
     ..sort();
 
-  final key = ref.watch(searchKeyProvider).toLowerCase();
+  final key = ref.watch(_searchKeyProvider).toLowerCase();
   if (key.isEmpty) return users;
 
   return users.where((user) => user.name.toLowerCase().contains(key)).toList();
@@ -40,6 +41,9 @@ class SearchUserDecorator extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final controller = useTextEditingController();
+    final searchKeyNotifier = _searchKeyProvider.notifier;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -49,18 +53,25 @@ class SearchUserDecorator extends HookConsumerWidget {
           preferredSize: const Size(double.maxFinite, 40),
           child: Padding(
             padding: EdgeInsets.zero,
-            child: TextFormField(
-              decoration: const InputDecoration(
+            child: TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
                 hintText: 'Search user...',
-                border: UnderlineInputBorder(),
-                focusedBorder: UnderlineInputBorder(
+                border: const UnderlineInputBorder(),
+                focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.white),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 20),
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    controller.clear();
+                    ref.read(searchKeyNotifier).state = '';
+                  },
+                  splashRadius: 16,
+                  icon: const Icon(Icons.clear_rounded),
+                ),
               ),
-              onChanged: (newValue) {
-                ref.read(searchKeyProvider.notifier).state = newValue;
-              },
+              onChanged: (val) => ref.read(searchKeyNotifier).state = val,
             ),
           ),
         ),
