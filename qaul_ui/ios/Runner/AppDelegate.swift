@@ -9,6 +9,9 @@ import Flutter
   ) -> Bool {
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
     let libqaulChannel = FlutterMethodChannel(name: "libqaul", binaryMessenger: controller.binaryMessenger)
+    if #available(iOS 10.0, *) {
+      UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
+    }
     
     libqaulChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
