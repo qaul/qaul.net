@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:local_notifications/local_notifications.dart';
 import 'package:logger/logger.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:qaul_rpc/qaul_rpc.dart';
@@ -24,6 +25,7 @@ void main() async {
     await Init.initialize(container.read);
     await Hive.initFlutter();
     await Hive.openBox(UserPrefsHelper.hiveBoxName);
+    await LocalNotifications.instance.initialize();
 
     logging.Logger.root.level = kDebugMode ? logging.Level.CONFIG : logging.Level.FINE;
     logging.Logger.root.onRecord.listen((record) {

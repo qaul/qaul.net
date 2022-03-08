@@ -77,6 +77,8 @@ dependencies:
   # *******
   # Local Dependencies
   # *******
+  local_notifications:
+    path: packages/local_notifications
   logger:
     path: packages/logger
   qaul_rpc:

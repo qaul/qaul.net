@@ -44,12 +44,12 @@ class _LocalNotifications implements LocalNotifications {
   @override
   Future<bool> initialize() async {
     final initializationSettings = InitializationSettings(
-      android: const AndroidInitializationSettings('ic_stat_name'),
+      android: const AndroidInitializationSettings('@drawable/ic_notification'),
       iOS: IOSInitializationSettings(
         onDidReceiveLocalNotification: _onDidReceiveLocalNotification,
       ),
       macOS: const MacOSInitializationSettings(),
-      linux: const LinuxInitializationSettings(defaultActionName: 'action-name'),
+      linux: const LinuxInitializationSettings(defaultActionName: 'qaul-app'),
     );
 
     final r = await _localNotificationsPlugin.initialize(
@@ -110,32 +110,32 @@ class _LocalNotifications implements LocalNotifications {
   NotificationDetails _notificationDetails() {
     if (!Platform.isWindows) {
       return NotificationDetails(
-        android: androidNotificationDetails,
-        iOS: iosNotificationDetails,
-        macOS: macosNotificationDetails,
-        linux: linuxNotificationDetails,
+        android: _androidDetails,
+        iOS: _iosDetails,
+        macOS: _macosDetails,
+        linux: _linuxDetails,
       );
     }
     throw UnimplementedError(
         '_notificationDetails() Failed on platform ${Platform.operatingSystem}');
   }
 
-  AndroidNotificationDetails? get androidNotificationDetails => !Platform.isAndroid
+  AndroidNotificationDetails? get _androidDetails => !Platform.isAndroid
       ? null
       : const AndroidNotificationDetails(
-          'your channel id',
-          'your channel name',
-          channelDescription: 'your channel description',
+          'qaulAppChannelNotificationsID',
+          'qaulAppNotifications',
+          channelDescription: 'Used to display new message notifications',
           importance: Importance.max,
           priority: Priority.high,
         );
 
-  IOSNotificationDetails? get iosNotificationDetails =>
+  IOSNotificationDetails? get _iosDetails =>
       !Platform.isIOS ? null : const IOSNotificationDetails();
 
-  MacOSNotificationDetails? get macosNotificationDetails =>
+  MacOSNotificationDetails? get _macosDetails =>
       !Platform.isIOS ? null : const MacOSNotificationDetails();
 
-  LinuxNotificationDetails? get linuxNotificationDetails =>
+  LinuxNotificationDetails? get _linuxDetails =>
       !Platform.isLinux ? null : const LinuxNotificationDetails();
 }
