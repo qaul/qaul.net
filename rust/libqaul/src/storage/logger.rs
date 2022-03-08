@@ -51,7 +51,7 @@ pub fn configure(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let level2 = level.unwrap_or(LevelFilter::Debug);
     let config = if log_into_file {
-        let fixed_window_roller = FixedWindowRoller::builder().build(ROLL_PATTERN, 10)?;
+        let fixed_window_roller = FixedWindowRoller::builder().build(ROLL_PATTERN, 100)?;
         let size_trigger = SizeTrigger::new(LOG_FILE_SIZE_IN_B);
         let compound_policy =
             CompoundPolicy::new(Box::new(size_trigger), Box::new(fixed_window_roller));
