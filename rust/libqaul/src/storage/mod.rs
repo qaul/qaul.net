@@ -10,6 +10,7 @@
 
 pub mod configuration;
 pub mod database;
+pub mod logger;
 
 use configuration::Configuration;
 use database::DataBase;

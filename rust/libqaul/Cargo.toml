@@ -38,6 +38,7 @@ jni = "0.19"
 serde_yaml = "0.8"
 sled = "0.34.7"
 sled-extensions = { version = "0.2", features = ["bincode"] }
+log4rs = { version = "1.0", features = ["rolling_file_appender"] }
 
 # only for desktop platforms: Linux, Mac, Windows
 directories = "4.0"
