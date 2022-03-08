@@ -1,0 +1,56 @@
+# Scan this file for changes every 30 seconds
+refresh_rate: 30 seconds
+
+appenders:
+  # An appender named "stdout" that writes to stdout
+  stdout:
+    kind: console
+    encoder:
+      kind: pattern
+      pattern: "{d} - {m}{n}"
+
+  stderr:
+    kind: console
+    encoder:
+      kind: pattern
+      pattern: "{d} - {m}{n}"
+
+  log_file:
+    kind: rolling_file
+    append: true
+    path: "logs/data.log"
+    encoder:
+      pattern: "{d} - {m}{n}"
+    policy:
+      kind: compound
+      trigger:
+        kind: size
+        limit: 10mb
+      roller:
+        kind: fixed_window
+        base: 1
+        count: 100
+        pattern: "logs/data{}.log"
+
+
+# Set the default logging level to "warn" and attach the "stdout" appender to the root
+root:
+  level: warn
+  appenders:
+    - stdout
+    - stderr
+    - log_file
+
+
+loggers:
+  # Raise the maximum log level for events sent to the "app::backend::db" logger to "info"
+  app::backend::db:
+    level: info
+
+  # Route log events sent to the "app::requests" logger to the "requests" appender,
+  # and *not* the normal appenders installed at the root
+  app::requests:
+    level: info
+    appenders:
+      - requests
+    additive: false
