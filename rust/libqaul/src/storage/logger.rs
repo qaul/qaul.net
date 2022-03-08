@@ -25,6 +25,7 @@ const LOG_FILE_TAG: &str = "log_file";
 const ROLL_PATTERN: &str = "./logs/data.log.{}.gz";
 const LOG_FILE_PATH: &str = "./logs/data.log";
 const LOG_FILE_SIZE_IN_B: u64 = 1024 * 1024 * 1024 * 10; //10Mb
+const FIXED_WINDOW_ROLLER_AMOUNT: u32 = 100;
 
 //TODO
 //
@@ -51,7 +52,7 @@ pub fn configure(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let level2 = level.unwrap_or(LevelFilter::Debug);
     let config = if log_into_file {
-        let fixed_window_roller = FixedWindowRoller::builder().build(ROLL_PATTERN, 100)?;
+        let fixed_window_roller = FixedWindowRoller::builder().build(ROLL_PATTERN, FIXED_WINDOW_ROLLER_AMOUNT)?;
         let size_trigger = SizeTrigger::new(LOG_FILE_SIZE_IN_B);
         let compound_policy =
             CompoundPolicy::new(Box::new(size_trigger), Box::new(fixed_window_roller));
