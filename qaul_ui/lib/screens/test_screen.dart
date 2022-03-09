@@ -10,7 +10,8 @@ class TestScreen extends StatelessWidget {
       body: Center(
         child: TextButton(
           onPressed: () {
-            const message = Message(id: 0, title: 'title', body: 'body', payload: 'payload');
+            const message =
+                LocalNotification(id: 0, title: 'title', body: 'body', payload: 'payload');
             LocalNotifications.instance.displayNotification(message);
           },
           child: const Text('Show Notification'),

@@ -54,6 +54,8 @@ class ChatRoom with EquatableMixin implements Comparable {
     );
   }
 
+  String get idBase58 => Base58Encode(conversationId);
+
   @override
   int compareTo(dynamic other) {
     assert(

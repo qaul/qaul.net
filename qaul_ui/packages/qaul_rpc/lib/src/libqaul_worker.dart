@@ -262,10 +262,12 @@ class LibqaulWorker {
           if (currentRoom != null && currentRoom.conversationId.equals(resp.data.conversationId)) {
             _reader(currentOpenChatRoom.notifier).state = resp.data;
           }
+          return;
         }
       }
     }
 
+    _log.severe('_processResponse: UnhandledRpcMessageException($resp)');
     throw UnhandledRpcMessageException.value(resp.toString(), '_processResponse');
   }
 }

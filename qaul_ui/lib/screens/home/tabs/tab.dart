@@ -20,6 +20,7 @@ import '../../../decorators/disabled_state_decorator.dart';
 import '../../../decorators/empty_state_text_decorator.dart';
 import '../../../decorators/loading_decorator.dart';
 import '../../../decorators/search_user_decorator.dart';
+import '../../../providers/providers.dart';
 import '../../../widgets/widgets.dart';
 import '../../chat/chat.dart';
 import '../user_details_screen.dart';

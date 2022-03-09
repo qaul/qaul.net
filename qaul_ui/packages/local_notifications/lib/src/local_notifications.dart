@@ -9,15 +9,15 @@ abstract class LocalNotifications {
 
   Future<bool> initialize();
 
-  Stream<Message> get onNotificationOpened;
+  Stream<LocalNotification> get onNotificationOpened;
 
   Future<bool> requestPermissions();
 
-  Future<void> displayNotification(Message message);
+  Future<void> displayNotification(LocalNotification message);
 }
 
-class Message extends Equatable {
-  const Message({
+class LocalNotification extends Equatable {
+  const LocalNotification({
     required this.id,
     required this.title,
     required this.body,
@@ -36,10 +36,10 @@ class Message extends Equatable {
 class _LocalNotifications implements LocalNotifications {
   final _localNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  final _messageStreamController = StreamController<Message>.broadcast();
+  final _messageStreamController = StreamController<LocalNotification>.broadcast();
 
   @override
-  Stream<Message> get onNotificationOpened => _messageStreamController.stream;
+  Stream<LocalNotification> get onNotificationOpened => _messageStreamController.stream;
 
   @override
   Future<bool> initialize() async {
@@ -92,7 +92,7 @@ class _LocalNotifications implements LocalNotifications {
   }
 
   @override
-  Future<void> displayNotification(Message message) async {
+  Future<void> displayNotification(LocalNotification message) async {
     await _localNotificationsPlugin.show(
         message.id, message.title, message.body, _notificationDetails(),
         payload: message.payload);
