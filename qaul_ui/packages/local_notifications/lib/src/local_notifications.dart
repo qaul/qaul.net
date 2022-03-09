@@ -36,10 +36,12 @@ class LocalNotification extends Equatable {
 class _LocalNotifications implements LocalNotifications {
   final _localNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  final _messageStreamController = StreamController<LocalNotification>.broadcast();
+  final _messageStreamController =
+      StreamController<LocalNotification>.broadcast();
 
   @override
-  Stream<LocalNotification> get onNotificationOpened => _messageStreamController.stream;
+  Stream<LocalNotification> get onNotificationOpened =>
+      _messageStreamController.stream;
 
   @override
   Future<bool> initialize() async {
@@ -49,7 +51,10 @@ class _LocalNotifications implements LocalNotifications {
         onDidReceiveLocalNotification: _onDidReceiveLocalNotification,
       ),
       macOS: const MacOSInitializationSettings(),
-      linux: const LinuxInitializationSettings(defaultActionName: 'qaul-app'),
+      linux: LinuxInitializationSettings(
+        defaultActionName: 'qaul-app',
+        defaultIcon: AssetsLinuxIcon('assets/logo/icon_android.png'),
+      ),
     );
 
     final r = await _localNotificationsPlugin.initialize(
@@ -71,7 +76,8 @@ class _LocalNotifications implements LocalNotifications {
     bool? result;
     if (Platform.isIOS) {
       result = await _localNotificationsPlugin
-          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions(
             alert: true,
             badge: true,
@@ -79,7 +85,8 @@ class _LocalNotifications implements LocalNotifications {
           );
     } else {
       result = await _localNotificationsPlugin
-          .resolvePlatformSpecificImplementation<MacOSFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+              MacOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions(
             alert: true,
             badge: true,
@@ -99,7 +106,8 @@ class _LocalNotifications implements LocalNotifications {
   }
 
   // ***************************************************************************
-  void _onDidReceiveLocalNotification(int id, String? title, String? body, String? payload) {
+  void _onDidReceiveLocalNotification(
+      int id, String? title, String? body, String? payload) {
     // TODO
   }
 
