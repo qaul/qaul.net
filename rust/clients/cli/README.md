@@ -59,3 +59,4 @@ The following commands are available:
   * `debug rpc queued` - displays the number of messages in the RPC queue to be processed.
     * This command will probably always return '0', as the messages are checked many times per second by this client.
   * `debug panic` - sends a debug message to libqaul that let's libqaul panic. This function is for testing the crash logger on flutter.
+  * `debug heartbeat` - sends a heartbeat request message to libqaul, which is answered with a returning heartbeat message.

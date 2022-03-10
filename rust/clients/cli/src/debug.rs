@@ -1,10 +1,14 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # Node module functions
+//! # Debug module functions
 
+use prost::Message;
 use libqaul;
 use super::rpc::Rpc;
+
+/// include generated protobuf RPC rust definition file
+mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.debug.rs"); }
 
 /// node module function handling
 pub struct Debug {}
@@ -12,16 +16,20 @@ pub struct Debug {}
 impl Debug {
     /// CLI command interpretation
     /// 
-    /// The CLI commands of node module are processed here
+    /// The CLI commands of debug module are processed here
     pub fn cli(command: &str) {
         match command {
-            // node functions
+            // print sent rpc messages
             cmd if cmd.starts_with("rpc sent") => {
                 Self::rpc_sent();
             },
-            // node functions
+            // print queued rpc messages
             cmd if cmd.starts_with("rpc queued") => {
                 Self::rpc_queued();
+            },
+            // send a heartbeat
+            cmd if cmd.starts_with("heartbeat") => {
+                Self::heartbeat_send();
             },
             // let libqaul panic
             cmd if cmd.starts_with("panic") => {
@@ -46,10 +54,62 @@ impl Debug {
         println!("{} RPC messages in libqaul's queue", count);
     }
 
+    /// print rpc message counter of messages sent
+    /// from client to libqaul
+    fn heartbeat_send() {
+        // create heartbeat message
+        let proto_message = proto::Debug {
+            message: Some(proto::debug::Message::HeartbeatRequest(
+                proto::HeartbeatRequest{}
+            )),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(buf, super::rpc::proto::Modules::Debug.into(), "".to_string());
+    }
+
     /// send a debugging message to libqaul that
     /// let's it panic.
     fn panic() {
-        // send empty debug message
-        Rpc::send_message(Vec::new(), super::rpc::proto::Modules::Debug.into(), "".to_string());
+        // create panic message
+        let proto_message = proto::Debug {
+            message: Some(proto::debug::Message::Panic(
+                proto::Panic{}
+            )),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(buf, super::rpc::proto::Modules::Debug.into(), "".to_string());
+    }
+
+    /// Process received RPC message
+    /// 
+    /// Decodes received protobuf encoded binary RPC message
+    /// of the debug module.
+    pub fn rpc(data: Vec<u8>) {
+        match proto::Debug::decode(&data[..]) {
+            Ok(debug) => {
+                match debug.message {
+                    Some(proto::debug::Message::HeartbeatResponse(_heartbeat)) => {
+                        // print confirmation
+                        println!("Heartbeat response received");
+                    }
+                    _ => {
+                        log::error!("unprocessable RPC debug message");
+                    },
+                }    
+            },
+            Err(error) => {
+                log::error!("{:?}", error);
+            },
+        }
     }
 }

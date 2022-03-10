@@ -1,10 +1,40 @@
 syntax = "proto3";
+package qaul.rpc.debug;
 
-message Request {
+
+// Libqaul RPC Debug Messages
+message Debug {
+    // message type
+    oneof message {
+        // request a heartbeat
+        HeartbeatRequest heartbeat_request = 1;
+        // response to the heartbeat request
+        HeartbeatResponse heartbeat_response = 2;
+
+        // libqaul panics immediatly
+        Panic panic = 3;
+    }
 }
 
-message Reply {
+// Request a Heartbeat from Libqaul
+//
+// The UI requests regular heartbeats from libqaul,
+// to check if libqaul is still alive
+message HeartbeatRequest {
 }
 
+// Heartbeat Reply
+//
+// Libqaul answers to the heartbeat request
+// with the heartbeat reply answer
+message HeartbeatResponse {
+}
+
+// Panic
+//
+// If libqaul receives this panic message, it
+// throws an error and panics immediatly.
+//
+// This message is for debugging only.
 message Panic {
 }
