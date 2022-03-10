@@ -34,6 +34,11 @@ class _LogStorageManager {
     await _deleteSurpassingSizeSchedule.stop();
   }
 
+  // ***************************************************************************
+  // Getters
+  // ***************************************************************************
+  final _log = Logger('LogStorageManager');
+
   /// String identifier used to later find the application's logs.
   String get titlePrefix => 'qaul_log';
 
@@ -55,7 +60,7 @@ class _LogStorageManager {
   }
 
   // ***************************************************************************
-  //
+  // Obsolete logs deletion task
   // ***************************************************************************
   late NeatPeriodicTaskScheduler _deleteObsoleteSchedule;
   static const _staleLogPeriod = Duration(days: 14);
@@ -71,7 +76,7 @@ class _LogStorageManager {
   }
 
   // ***************************************************************************
-  //
+  // Surpassing size/maximum number logs deletion task
   // ***************************************************************************
   late NeatPeriodicTaskScheduler _deleteSurpassingSizeSchedule;
   static const _maxSizeInBytes = 200 * 1000; // 200 KB
@@ -91,32 +96,24 @@ class _LogStorageManager {
   }
 
   // ***************************************************************************
-  //
+  // API
   // ***************************************************************************
   Future<void> deleteLogs(Iterable<FileSystemEntity> logs) async {
     for (final log in logs) {
+      _log.info('deleting log ${log.path}');
       await log.delete();
     }
   }
 
-  DateTime _lastInteraction(FileStat stats) {
-    var access = stats.accessed;
-    var change = stats.changed;
-    var modified = stats.modified;
-    if (access.isAfter(change) && access.isAfter(modified)) return access;
-    if (change.isAfter(access) && change.isAfter(modified)) return change;
-    return modified;
+  String logContents(FileSystemEntity log) {
+    var contents = GZipDecoder().decodeBytes(File(log.path).readAsBytesSync());
+    return utf8.decode(contents);
   }
 
   Future<void> storeLog(_LogEntry log) async {
     final logBytes = _createCompressedLog(log.contents);
     if (logBytes == null) return;
     _storeCompressedLog(logBytes, log.title);
-  }
-
-  String logContents(FileSystemEntity log) {
-    var contents = GZipDecoder().decodeBytes(File(log.path).readAsBytesSync());
-    return utf8.decode(contents);
   }
 
   List<int>? _createCompressedLog(String logContent) {
@@ -126,9 +123,18 @@ class _LogStorageManager {
 
   Future _storeCompressedLog(List<int> logBytes, String logTitle) async {
     final directory = await _storeDirectory;
-    debugPrint('storing log in directory: $directory');
+    _log.info('storing log in directory: $directory/$logTitle.gzip');
     final file = File('$directory/$logTitle.gzip');
     file.createSync(recursive: true);
     file.writeAsBytesSync(logBytes);
+  }
+
+  DateTime _lastInteraction(FileStat stats) {
+    var access = stats.accessed;
+    var change = stats.changed;
+    var modified = stats.modified;
+    if (access.isAfter(change) && access.isAfter(modified)) return access;
+    if (change.isAfter(access) && change.isAfter(modified)) return change;
+    return modified;
   }
 }

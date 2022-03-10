@@ -19,7 +19,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 part 'info_provider.dart';
 
-part 'storage_manager.dart';
+part 'log_storage_manager.dart';
 
 class EmailLoggingCoordinator {
   EmailLoggingCoordinator._();
