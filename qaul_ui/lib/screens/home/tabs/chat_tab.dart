@@ -11,6 +11,11 @@ class _ChatState extends _BaseTabState<_Chat> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    useEffect(() {
+      ref.read(chatNotificationControllerProvider).initialize();
+      return () {};
+    }, []);
+
     final defaultUser = ref.watch(defaultUserProvider)!;
     final users = ref.watch(usersProvider);
     final chatRooms = ref.watch(chatRoomsProvider);

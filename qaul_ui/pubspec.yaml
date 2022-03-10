@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 2.0.0+3
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.15.0 <3.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -77,6 +77,8 @@ dependencies:
   # *******
   # Local Dependencies
   # *******
+  local_notifications:
+    path: packages/local_notifications
   logger:
     path: packages/logger
   qaul_rpc:
@@ -121,3 +123,4 @@ flutter:
   assets:
     - assets/icons/
     - assets/license/
+    - assets/logo/
