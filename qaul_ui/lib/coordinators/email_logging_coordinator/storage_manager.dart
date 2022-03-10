@@ -1,21 +1,15 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:archive/archive.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:neat_periodic_task/neat_periodic_task.dart';
-import 'package:path_provider/path_provider.dart';
+part of 'email_logging_coordinator.dart';
 
 @immutable
-class LogEntry {
-  const LogEntry(this.title, this.contents);
+class _LogEntry {
+  const _LogEntry(this.title, this.contents);
 
   final String title;
   final String contents;
 }
 
-class StorageManager {
-  StorageManager() {
+class _LogStorageManager {
+  _LogStorageManager() {
     _deleteObsoleteSchedule = NeatPeriodicTaskScheduler(
       interval: const Duration(minutes: 5),
       name: 'delete-obsolete-logs',
@@ -114,7 +108,7 @@ class StorageManager {
     return modified;
   }
 
-  Future<void> storeLog(LogEntry log) async {
+  Future<void> storeLog(_LogEntry log) async {
     final logBytes = _createCompressedLog(log.contents);
     if (logBytes == null) return;
     _storeCompressedLog(logBytes, log.title);

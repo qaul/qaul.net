@@ -1,39 +1,64 @@
+library email_logging_coordinator;
+
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:archive/archive.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:logging/logging.dart';
 import 'package:mailto/mailto.dart';
+import 'package:neat_periodic_task/neat_periodic_task.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'info_provider.dart';
-import 'logger.dart';
-import 'storage_manager.dart';
+part 'info_provider.dart';
 
-class EmailLogger implements Logger {
-  @override
+part 'storage_manager.dart';
+
+class EmailLoggingCoordinator {
+  EmailLoggingCoordinator._();
+
+  static final instance = EmailLoggingCoordinator._();
+
   Future<void> initialize() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey(_loggingEnabledKey)) {
       _enabled = prefs.getBool(_loggingEnabledKey) ?? true;
     }
 
-    FlutterError.onError = (details) => logError(details.exception, details.stack!);
-    Isolate.current.addErrorListener(RawReceivePort((pair) async {
-      final List<dynamic> errorAndStacktrace = pair;
-      await logError(errorAndStacktrace.first, errorAndStacktrace.last);
+    Logger.root.onRecord.listen((record) {
+      var message =
+          '[${record.level.name}] ${record.loggerName} (${record.time}): ${record.message}';
+      if (kDebugMode) debugPrint(message);
+
+      if (record.level >= Level.WARNING) {
+        _logError(record.object!, stack: record.stackTrace, message: message);
+      }
+    });
+
+    FlutterError.onError = (details) {
+      FlutterError.presentError(details);
+      _logError(details.exception, stack: details.stack);
+    };
+    Isolate.current.addErrorListener(RawReceivePort((err) async {
+      final error = (err as List<String?>).first!;
+      final stack = err.last == null ? null : StackTrace.fromString(err.last!);
+
+      await _logError(error, stack: stack);
     }).sendPort);
   }
 
   static const _loggingEnabledKey = 'loggingEnabledKey';
 
-  @override
   bool get loggingEnabled => _enabled;
   bool _enabled = true;
 
-  @override
   set loggingEnabled(bool enabled) {
     _enabled = enabled;
     _storeLoggingOption();
@@ -44,55 +69,42 @@ class EmailLogger implements Logger {
     prefs.setBool(_loggingEnabledKey, _enabled);
   }
 
-  final _storageManager = StorageManager();
+  final _storageManager = _LogStorageManager();
 
-  @override
   Future<bool> get hasLogsStored async =>
       (await _storageManager.logs).map((e) => e.path).isNotEmpty;
 
-  @override
   Future<String> get logStorageSize async {
     final size = await _storageManager.logFolderSize;
     return filesize(size);
   }
 
-  @override
-  Future<void> logError(Object e, StackTrace s, {String? message}) async {
+  Future<void> _logError(Object e, {StackTrace? stack, String? message}) async {
     if (!loggingEnabled) return;
-    final log = await _buildLogContent(e, s, 'ERROR', message ?? '-');
-    _storageManager.storeLog(LogEntry(_buildTitle(e), log));
-  }
-
-  @override
-  Future<void> logException(Exception e, StackTrace s, {String? message}) async {
-    if (!loggingEnabled) return;
-    final log = await _buildLogContent(e, s, 'EXCEPTION', message ?? '-');
-    _storageManager.storeLog(LogEntry(_buildTitle(e), log));
+    final log = await _buildLogContent(e, stack, message ?? '-');
+    _storageManager.storeLog(_LogEntry(_buildTitle(e), log));
   }
 
   String _buildTitle(Object e) =>
       '${_storageManager.titlePrefix}-${e.runtimeType.toString().trim().replaceAll(' ', '_')}-${DateTime.now().millisecondsSinceEpoch}';
 
-  Future<String> _buildLogContent(Object e, StackTrace stack, String type, String msg) async {
+  Future<String> _buildLogContent(Object e, StackTrace? stack, String msg) async {
     return '''
-Log Type: $type
-
 Error/Exception: $e
 
 Message: $msg
 
 App Details:
-${await InfoProvider.getPackageInfo()}
+${await _InfoProvider.getPackageInfo()}
 
 Device Details:
-${await InfoProvider.getDeviceInfo()}
+${await _InfoProvider.getDeviceInfo()}
 
 Stack Trace:
-$stack
+${stack ?? 'Not available'}
 ''';
   }
 
-  @override
   Future<void> sendLogs() async {
     if (!loggingEnabled) return;
     (Platform.isAndroid || Platform.isIOS) ? await _sendMobileLogs() : await _sendDesktopLogs();
@@ -126,6 +138,5 @@ $stack
     return body;
   }
 
-  @override
   Future<void> deleteLogs() async => _storageManager.deleteLogs(await _storageManager.logs);
 }

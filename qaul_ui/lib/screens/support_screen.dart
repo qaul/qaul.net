@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:logger/logger.dart';
 
+import '../coordinators/email_logging_coordinator/email_logging_coordinator.dart';
 import '../decorators/disabled_state_decorator.dart';
 import '../widgets/widgets.dart';
 
@@ -13,6 +13,8 @@ class SupportScreen extends StatefulWidget {
 }
 
 class _SupportScreenState extends State<SupportScreen> {
+  EmailLoggingCoordinator get emailLogger => EmailLoggingCoordinator.instance;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +29,7 @@ class _SupportScreenState extends State<SupportScreen> {
         ),
       ),
       body: FutureBuilder<bool>(
-          future: Logger.instance.hasLogsStored,
+          future: emailLogger.hasLogsStored,
           builder: (context, snapshot) {
             final hasLogs = (snapshot.hasData && snapshot.data == true);
             return Column(
@@ -44,9 +46,9 @@ class _SupportScreenState extends State<SupportScreen> {
                           children: [
                             const Text('Enable Logging:'),
                             PlatformAwareSwitch(
-                              value: Logger.instance.loggingEnabled,
+                              value: emailLogger.loggingEnabled,
                               onChanged: (val) {
-                                Logger.instance.loggingEnabled = val;
+                                emailLogger.loggingEnabled = val;
                                 setState(() {});
                               },
                             ),
@@ -58,7 +60,7 @@ class _SupportScreenState extends State<SupportScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               FutureBuilder(
-                                future: Logger.instance.logStorageSize,
+                                future: emailLogger.logStorageSize,
                                 builder: (context, snapshot) {
                                   final size = snapshot.data ?? '0.0 KB';
                                   return Text('Total logs size: $size');
@@ -67,7 +69,7 @@ class _SupportScreenState extends State<SupportScreen> {
                               TextButton(
                                 child: const Text('Delete Logs'),
                                 onPressed: () async {
-                                  await Logger.instance.deleteLogs();
+                                  await emailLogger.deleteLogs();
                                   Navigator.pop(context);
                                 },
                               ),
@@ -80,7 +82,7 @@ class _SupportScreenState extends State<SupportScreen> {
                 ),
                 Expanded(
                   child: DisabledStateDecorator(
-                    isDisabled: !Logger.instance.loggingEnabled,
+                    isDisabled: !emailLogger.loggingEnabled,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -93,8 +95,8 @@ class _SupportScreenState extends State<SupportScreen> {
                           child: Text(hasLogs ? 'Send Logs' : 'No Logs Available'),
                           onPressed: hasLogs
                               ? () async {
-                                  await Logger.instance.sendLogs();
-                                  await Logger.instance.deleteLogs();
+                                  await emailLogger.sendLogs();
+                                  await emailLogger.deleteLogs();
                                   Navigator.pop(context);
                                 }
                               : null,
@@ -104,6 +106,7 @@ class _SupportScreenState extends State<SupportScreen> {
                     ),
                   ),
                 ),
+                TextButton(onPressed: () => throw FlutterError('test'), child: const Text('Throw')),
                 const Expanded(child: SizedBox()),
               ],
             );

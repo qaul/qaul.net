@@ -23,7 +23,7 @@ packages:
     source: hosted
     version: "3.2.0"
   archive:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: archive
       url: "https://pub.dartlang.org"
@@ -212,7 +212,7 @@ packages:
     source: hosted
     version: "0.6.8"
   device_info_plus:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: device_info_plus
       url: "https://pub.dartlang.org"
@@ -296,7 +296,7 @@ packages:
     source: hosted
     version: "6.1.2"
   filesize:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: filesize
       url: "https://pub.dartlang.org"
@@ -359,7 +359,7 @@ packages:
     source: hosted
     version: "1.5.5"
   flutter_email_sender:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_email_sender
       url: "https://pub.dartlang.org"
@@ -611,13 +611,6 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
-  logger:
-    dependency: "direct main"
-    description:
-      path: "packages/logger"
-      relative: true
-    source: path
-    version: "0.0.1"
   logging:
     dependency: "direct main"
     description:
@@ -633,7 +626,7 @@ packages:
     source: hosted
     version: "0.10.0+1"
   mailto:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: mailto
       url: "https://pub.dartlang.org"
@@ -682,7 +675,7 @@ packages:
     source: hosted
     version: "0.2.0+3"
   neat_periodic_task:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: neat_periodic_task
       url: "https://pub.dartlang.org"
@@ -710,7 +703,7 @@ packages:
     source: hosted
     version: "2.0.2"
   package_info_plus:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: package_info_plus
       url: "https://pub.dartlang.org"
@@ -773,7 +766,7 @@ packages:
     source: hosted
     version: "0.2.1"
   path_provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path_provider
       url: "https://pub.dartlang.org"
@@ -934,7 +927,7 @@ packages:
     source: hosted
     version: "0.3.0"
   shared_preferences:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: shared_preferences
       url: "https://pub.dartlang.org"
@@ -1135,7 +1128,7 @@ packages:
     source: hosted
     version: "0.1.0"
   url_launcher:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: url_launcher
       url: "https://pub.dartlang.org"
