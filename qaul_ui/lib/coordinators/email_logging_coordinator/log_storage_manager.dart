@@ -49,6 +49,8 @@ class _LogStorageManager {
     return '$dir/Logs';
   }
 
+  Future<bool> get isEmpty async => (await logs).map((e) => e.path).isEmpty;
+
   Future<List<FileSystemEntity>> get logs async {
     var path = Directory(await _storeDirectory);
     return path.listSync().where((file) => file.path.contains(titlePrefix)).toList();
@@ -123,7 +125,7 @@ class _LogStorageManager {
 
   Future _storeCompressedLog(List<int> logBytes, String logTitle) async {
     final directory = await _storeDirectory;
-    _log.info('storing log in directory: $directory/$logTitle.gzip');
+    _log.info('storing log "$logTitle.gzip" in directory:\n\t$directory');
     final file = File('$directory/$logTitle.gzip');
     file.createSync(recursive: true);
     file.writeAsBytesSync(logBytes);

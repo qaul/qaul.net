@@ -26,35 +26,59 @@ class EmailLoggingCoordinator {
 
   static final instance = EmailLoggingCoordinator._();
 
-  Future<void> initialize() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (prefs.containsKey(_loggingEnabledKey)) {
-      _enabled = prefs.getBool(_loggingEnabledKey) ?? true;
-    }
+  final _log = Logger('EmailLoggingCoordinator');
 
+  Future<void> initialize() async {
+    await _initializeEnabledStatus();
+
+    _reportLogMessages();
+    _reportErrorsCaughtByFlutterFramework();
+    await _reportUncaughtErrorsOfTheIsolate();
+  }
+
+  // ***************************************************************************
+  // Log reporting subscriptions/callbacks
+  // ***************************************************************************
+  void _reportLogMessages() {
     Logger.root.onRecord.listen((record) {
       var message =
-          '[${record.level.name}] ${record.loggerName} (${record.time}): ${record.message}';
+          '[${record.level.name}] ${record.loggerName}\t(${record.time}): ${record.message}';
       if (kDebugMode) debugPrint(message);
 
       if (record.level >= Level.WARNING) {
         _logError(record.object!, stack: record.stackTrace, message: message);
       }
     });
+  }
 
+  void _reportErrorsCaughtByFlutterFramework() {
     FlutterError.onError = (details) {
       FlutterError.presentError(details);
       _logError(details.exception, stack: details.stack);
     };
+  }
+
+  Future<void> _reportUncaughtErrorsOfTheIsolate() async {
     Isolate.current.addErrorListener(RawReceivePort((err) async {
       final error = (err as List<String?>).first!;
       final stack = err.last == null ? null : StackTrace.fromString(err.last!);
-
+      _log.warning('error caught outside of isolate', error, stack);
       await _logError(error, stack: stack);
     }).sendPort);
   }
 
+  // ***************************************************************************
+  // Enable/disable logging logic
+  // ***************************************************************************
   static const _loggingEnabledKey = 'loggingEnabledKey';
+
+  Future<void> _initializeEnabledStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(_loggingEnabledKey)) {
+      _enabled = prefs.getBool(_loggingEnabledKey) ?? true;
+    }
+    _log.config('logger initialized with enabled status: $_enabled');
+  }
 
   bool get loggingEnabled => _enabled;
   bool _enabled = true;
@@ -65,14 +89,17 @@ class EmailLoggingCoordinator {
   }
 
   void _storeLoggingOption() async {
+    _log.fine('updating logging enabled status: $_enabled');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool(_loggingEnabledKey, _enabled);
   }
 
+  // ***************************************************************************
+  // Log creation/storage
+  // ***************************************************************************
   final _storageManager = _LogStorageManager();
 
-  Future<bool> get hasLogsStored async =>
-      (await _storageManager.logs).map((e) => e.path).isNotEmpty;
+  Future<bool> get hasLogsStored async => !(await _storageManager.isEmpty);
 
   Future<String> get logStorageSize async {
     final size = await _storageManager.logFolderSize;
@@ -105,12 +132,18 @@ ${stack ?? 'Not available'}
 ''';
   }
 
+  // ***************************************************************************
+  // API
+  // ***************************************************************************
+  Future<void> deleteLogs() async => _storageManager.deleteLogs(await _storageManager.logs);
+
   Future<void> sendLogs() async {
     if (!loggingEnabled) return;
     (Platform.isAndroid || Platform.isIOS) ? await _sendMobileLogs() : await _sendDesktopLogs();
   }
 
   Future<void> _sendMobileLogs() async {
+    _log.fine('(MOBILE) sending logs via deafult mail app');
     final email = Email(
       body: 'Customer Feedback - Error/Exception Logs',
       subject: 'Customer Feedback - Error/Exception Logs',
@@ -122,6 +155,7 @@ ${stack ?? 'Not available'}
   }
 
   Future<void> _sendDesktopLogs() async {
+    _log.fine('(DESKTOP) sending logs via mailto link');
     final mailtoLink = Mailto(
       to: ['debug@qaul.net'],
       body: await _buildDesktopEmail(),
@@ -137,6 +171,4 @@ ${stack ?? 'Not available'}
     }
     return body;
   }
-
-  Future<void> deleteLogs() async => _storageManager.deleteLogs(await _storageManager.logs);
 }
