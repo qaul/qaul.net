@@ -46,6 +46,7 @@ dependencies:
   flame_forge2d: ^0.8.3
   open_simplex_2: ^0.2.1
 
+
   flutter_markdown: ^0.6.8
 
 
@@ -92,6 +93,9 @@ dependencies:
     path: packages/utils
 
   cupertino_icons: ^1.0.2
+
+dependency_overrides:
+  forge2d: ^0.8.2
 
 dev_dependencies:
   flutter_test:
