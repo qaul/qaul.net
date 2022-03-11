@@ -43,9 +43,18 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final filter = ref.watch(_networkTypeFilter);
 
-    Color? bgColorFor(NetworkTypeFilter t) {
+    Color bgColorFor(NetworkTypeFilter t) {
       return filter == t ? Colors.lightBlue : Colors.blueGrey.shade200;
     }
+
+    final buttons = List.generate(NetworkTypeFilter.values.length, (i) {
+      final filter = NetworkTypeFilter.values[i];
+      return filterButton(
+        filter: filter,
+        backgroundColor: bgColorFor(filter),
+        onTap: () => ref.read(_networkTypeFilter.notifier).state = filter,
+      );
+    }).intersperse(const SizedBox(width: 8)).toList();
 
     return Container(
       padding: const EdgeInsets.all(4.0),
@@ -54,46 +63,35 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
         color: Colors.blueGrey.withOpacity(.8),
         borderRadius: BorderRadius.circular(200.0),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          GestureDetector(
-            onTap: () => ref.read(_networkTypeFilter.notifier).state = NetworkTypeFilter.bluetooth,
-            child: CircleAvatar(
-              backgroundColor: bgColorFor(NetworkTypeFilter.bluetooth),
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.bluetooth),
-            ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () => ref.read(_networkTypeFilter.notifier).state = NetworkTypeFilter.lan,
-            child: CircleAvatar(
-              backgroundColor: bgColorFor(NetworkTypeFilter.lan),
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.wifi),
-            ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () => ref.read(_networkTypeFilter.notifier).state = NetworkTypeFilter.internet,
-            child: CircleAvatar(
-              backgroundColor: bgColorFor(NetworkTypeFilter.internet),
-              foregroundColor: Colors.white,
-              child: const Icon(CupertinoIcons.globe),
-            ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () => ref.read(_networkTypeFilter.notifier).state = NetworkTypeFilter.all,
-            child: CircleAvatar(
-              backgroundColor: bgColorFor(NetworkTypeFilter.all),
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.mediation),
-            ),
-          ),
-        ],
+      child: Row(mainAxisSize: MainAxisSize.min, children: buttons),
+    );
+  }
+
+  Widget filterButton({
+    required NetworkTypeFilter filter,
+    required Color backgroundColor,
+    required VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: CircleAvatar(
+        foregroundColor: Colors.white,
+        backgroundColor: backgroundColor,
+        child: iconFor(filter),
       ),
     );
+  }
+
+  Widget iconFor(NetworkTypeFilter filter) {
+    switch (filter) {
+      case NetworkTypeFilter.bluetooth:
+        return const Icon(Icons.bluetooth);
+      case NetworkTypeFilter.lan:
+        return const Icon(Icons.wifi);
+      case NetworkTypeFilter.internet:
+        return const Icon(CupertinoIcons.globe);
+      case NetworkTypeFilter.all:
+        return const Icon(Icons.mediation);
+    }
   }
 }
