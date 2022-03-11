@@ -43,8 +43,7 @@ class DynamicNetworkScreen extends HookConsumerWidget {
               game: _DynamicNetworkGameEngine(root: nodes),
             ),
           ),
-          // TODO(brenodt): Reinstate once ConcurrentModificationError is fixed: https://github.com/flame-engine/forge2d/issues/34
-          // const _NetworkTypeFilterToolbar(),
+          const _NetworkTypeFilterToolbar(),
         ],
       ),
     );

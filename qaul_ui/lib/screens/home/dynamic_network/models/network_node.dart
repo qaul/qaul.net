@@ -14,26 +14,51 @@ class NetworkNode extends Equatable {
 
   Uint8List get id => user.id;
 
-  factory NetworkNode.fromUserData(User defaultUser, List<User> users, ConnectionType filter) {
-    var root = NetworkNode(user: defaultUser, children: const {});
-    if (users.isEmpty) return root;
+  factory NetworkNode.fromUserData(
+    User root,
+    List<User> users,
+    NetworkTypeFilter filter,
+  ) {
+    var rootNode = NetworkNode(user: root, children: const {});
+    if (users.isEmpty) return rootNode;
 
-    bool hasValidConnectionData(User u) =>
-        (u.availableTypes?.containsKey(filter) ?? false) &&
-        u.availableTypes![filter]!.hopCount != null &&
-        u.availableTypes![filter]!.ping != null;
-    final filtered = users.where(hasValidConnectionData).toList();
+    bool typeIsNotAll(NetworkTypeFilter t) => t != NetworkTypeFilter.all;
 
-    final unstructured = _prepareUnstructuredNetworkNodes(defaultUser, filtered, filter);
-    return _buildNetworkNodeListRecursively(root, allNodes: unstructured);
+    final options = filter != NetworkTypeFilter.all
+        ? [filter]
+        : NetworkTypeFilter.values.where(typeIsNotAll).toList();
+
+    final unstructured = _assignParentToChildNodes(root, users, options);
+    return _buildNetworkNodeListRecursively(rootNode, allNodes: unstructured);
+  }
+
+  static List<NetworkNode> _assignParentToChildNodes(
+    User root,
+    List<User> users,
+    List<NetworkTypeFilter> options,
+  ) {
+    bool hasValidConnectionData(User u, ConnectionType type) =>
+        (u.availableTypes?.containsKey(type) ?? false) &&
+        u.availableTypes![type]!.hopCount != null &&
+        u.availableTypes![type]!.ping != null;
+
+    final unstructured = <NetworkNode>[];
+    for (final type in options) {
+      final flt = _mapFilter(type);
+      final fltrd = users.where((u) => hasValidConnectionData(u, flt)).toList();
+      unstructured.addAll(_prepareUnstructuredNetworkNodes(root, fltrd, flt));
+    }
+    return unstructured;
   }
 
   static List<NetworkNode> _prepareUnstructuredNetworkNodes(
-      User defaultUser, List<User> users, ConnectionType filter) {
+    User root,
+    List<User> users,
+    ConnectionType filter,
+  ) {
     final immediateChildren =
         users.where((element) => element.availableTypes![filter]!.hopCount! == 1);
-    final out =
-        immediateChildren.map((e) => NetworkNode(user: e, parentId: defaultUser.id)).toList();
+    final out = immediateChildren.map((e) => NetworkNode(user: e, parentId: root.id)).toList();
     if (out.isEmpty) return out;
 
     final remainingUsers = [...users]
@@ -73,8 +98,10 @@ class NetworkNode extends Equatable {
     return out;
   }
 
-  static NetworkNode _buildNetworkNodeListRecursively(NetworkNode node,
-      {List<NetworkNode>? allNodes}) {
+  static NetworkNode _buildNetworkNodeListRecursively(
+    NetworkNode node, {
+    List<NetworkNode>? allNodes,
+  }) {
     return NetworkNode(
       user: node.user,
       parentId: node.parentId,

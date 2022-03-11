@@ -1,24 +1,27 @@
 part of '../dynamic_network_screen.dart';
 
-enum _NetworkType {
+enum NetworkTypeFilter {
   bluetooth,
   lan,
   internet,
+  all,
 }
 
-ConnectionType _mapFilter(_NetworkType t) {
+ConnectionType _mapFilter(NetworkTypeFilter t) {
   switch (t) {
-    case _NetworkType.bluetooth:
+    case NetworkTypeFilter.bluetooth:
       return ConnectionType.ble;
-    case _NetworkType.lan:
+    case NetworkTypeFilter.lan:
       return ConnectionType.lan;
-    case _NetworkType.internet:
+    case NetworkTypeFilter.internet:
       return ConnectionType.internet;
+    default:
+      throw ArgumentError.value(t, '$t has no ConnectionType counterpart');
   }
 }
 
 /// The currently active filter.
-final _networkTypeFilter = StateProvider((_) => _NetworkType.internet);
+final _networkTypeFilter = StateProvider((_) => NetworkTypeFilter.internet);
 
 /// Nodes that fit the current filter criteria
 final _filteredNodes = Provider<NetworkNode>((ref) {
@@ -28,20 +31,19 @@ final _filteredNodes = Provider<NetworkNode>((ref) {
       .watch(usersProvider)
       .where((u) => !(u.isBlocked ?? false))
       .where((u) => u.idBase58 != defaultUser.idBase58)
-      .where((u) => u.availableTypes?.keys.contains(_mapFilter(filter)) ?? false)
       .toList();
 
-  return NetworkNode.fromUserData(defaultUser, users, _mapFilter(filter));
+  return NetworkNode.fromUserData(defaultUser, users, filter);
 });
 
-class NetworkTypeFilterToolbar extends HookConsumerWidget {
-  const NetworkTypeFilterToolbar({Key? key}) : super(key: key);
+class _NetworkTypeFilterToolbar extends HookConsumerWidget {
+  const _NetworkTypeFilterToolbar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final filter = ref.watch(_networkTypeFilter);
 
-    Color? bgColorFor(_NetworkType t) {
+    Color? bgColorFor(NetworkTypeFilter t) {
       return filter == t ? Colors.lightBlue : Colors.blueGrey.shade200;
     }
 
@@ -56,29 +58,38 @@ class NetworkTypeFilterToolbar extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           GestureDetector(
-            onTap: () => ref.read(_networkTypeFilter.notifier).state = _NetworkType.bluetooth,
+            onTap: () => ref.read(_networkTypeFilter.notifier).state = NetworkTypeFilter.bluetooth,
             child: CircleAvatar(
-              backgroundColor: bgColorFor(_NetworkType.bluetooth),
+              backgroundColor: bgColorFor(NetworkTypeFilter.bluetooth),
               foregroundColor: Colors.white,
               child: const Icon(Icons.bluetooth),
             ),
           ),
           const SizedBox(width: 8),
           GestureDetector(
-            onTap: () => ref.read(_networkTypeFilter.notifier).state = _NetworkType.lan,
+            onTap: () => ref.read(_networkTypeFilter.notifier).state = NetworkTypeFilter.lan,
             child: CircleAvatar(
-              backgroundColor: bgColorFor(_NetworkType.lan),
+              backgroundColor: bgColorFor(NetworkTypeFilter.lan),
               foregroundColor: Colors.white,
               child: const Icon(Icons.wifi),
             ),
           ),
           const SizedBox(width: 8),
           GestureDetector(
-            onTap: () => ref.read(_networkTypeFilter.notifier).state = _NetworkType.internet,
+            onTap: () => ref.read(_networkTypeFilter.notifier).state = NetworkTypeFilter.internet,
             child: CircleAvatar(
-              backgroundColor: bgColorFor(_NetworkType.internet),
+              backgroundColor: bgColorFor(NetworkTypeFilter.internet),
               foregroundColor: Colors.white,
               child: const Icon(CupertinoIcons.globe),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => ref.read(_networkTypeFilter.notifier).state = NetworkTypeFilter.all,
+            child: CircleAvatar(
+              backgroundColor: bgColorFor(NetworkTypeFilter.all),
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.mediation),
             ),
           ),
         ],

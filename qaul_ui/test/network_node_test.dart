@@ -27,7 +27,7 @@ void main() {
   test('Returns node with no children if no users', () async {
     var user = generateUser('user');
 
-    final tree = NetworkNode.fromUserData(user, const [], ConnectionType.ble);
+    final tree = NetworkNode.fromUserData(user, const [], NetworkTypeFilter.bluetooth);
 
     expect(tree, NetworkNode(user: user, children: const {}));
   });
@@ -39,7 +39,7 @@ void main() {
           connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)})
     ];
 
-    final tree = NetworkNode.fromUserData(user, users, ConnectionType.ble);
+    final tree = NetworkNode.fromUserData(user, users, NetworkTypeFilter.bluetooth);
 
     expect(tree, NetworkNode(user: user, children: const {}));
   });
@@ -51,7 +51,7 @@ void main() {
           connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 2)})
     ];
 
-    final tree = NetworkNode.fromUserData(user, users, ConnectionType.internet);
+    final tree = NetworkNode.fromUserData(user, users, NetworkTypeFilter.internet);
 
     expect(tree, NetworkNode(user: user, children: const {}));
   });
@@ -63,7 +63,7 @@ void main() {
           connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)}),
     ];
 
-    final tree = NetworkNode.fromUserData(user, users, ConnectionType.internet);
+    final tree = NetworkNode.fromUserData(user, users, NetworkTypeFilter.internet);
 
     expect(
       tree,
@@ -92,7 +92,7 @@ void main() {
       }),
     ];
 
-    final tree = NetworkNode.fromUserData(user, users, ConnectionType.internet);
+    final tree = NetworkNode.fromUserData(user, users, NetworkTypeFilter.internet);
 
     expect(
       tree,
@@ -127,7 +127,7 @@ void main() {
       }),
     ];
 
-    final tree = NetworkNode.fromUserData(user, users2, ConnectionType.internet);
+    final tree = NetworkNode.fromUserData(user, users2, NetworkTypeFilter.internet);
 
     expect(
       tree,
@@ -161,7 +161,7 @@ void main() {
           connections: const {ConnectionType.internet: ConnectionInfo(ping: null, hopCount: 1)}),
     ];
 
-    final tree = NetworkNode.fromUserData(user, users2, ConnectionType.internet);
+    final tree = NetworkNode.fromUserData(user, users2, NetworkTypeFilter.internet);
 
     expect(
       tree,
@@ -191,7 +191,7 @@ void main() {
         connections: const {ConnectionType.internet: ConnectionInfo(ping: 111, hopCount: 2)});
     final users = [child1, child2, child3, grandchild11];
 
-    final tree = NetworkNode.fromUserData(user, users, ConnectionType.internet);
+    final tree = NetworkNode.fromUserData(user, users, NetworkTypeFilter.internet);
 
     expect(
       tree,
@@ -220,7 +220,7 @@ void main() {
         connections: const {ConnectionType.internet: ConnectionInfo(ping: 111, hopCount: 2)});
     final users = [child1, child2, child3, grandchild31];
 
-    final tree = NetworkNode.fromUserData(user, users, ConnectionType.internet);
+    final tree = NetworkNode.fromUserData(user, users, NetworkTypeFilter.internet);
 
     expect(
       tree,
@@ -253,7 +253,7 @@ void main() {
         connections: const {ConnectionType.internet: ConnectionInfo(ping: 129387413, hopCount: 2)});
     final users = [child1, child2, child3, gc11, gc21, gc31];
 
-    final tree = NetworkNode.fromUserData(user, users, ConnectionType.internet);
+    final tree = NetworkNode.fromUserData(user, users, NetworkTypeFilter.internet);
 
     expect(
       tree,
@@ -326,7 +326,7 @@ void main() {
       child4,
     ];
 
-    final tree = NetworkNode.fromUserData(user, users, ConnectionType.internet);
+    final tree = NetworkNode.fromUserData(user, users, NetworkTypeFilter.internet);
 
     expect(
       tree,
