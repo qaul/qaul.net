@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../helpers/navigation_helper.dart';
 import '../providers/providers.dart';
+import '../screens/home/tabs/tab.dart';
 import '../screens/test_screen.dart';
 import '../widgets/widgets.dart';
 
@@ -23,6 +24,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
         'about': AppLocalizations.of(context)!.about,
         // 'support': AppLocalizations.of(context)!.support,
         'support': 'Support',
+        'old-network': 'Classic Network View',
         'test': "TEST",
       };
 
@@ -36,6 +38,23 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
         break;
       case 'support':
         Navigator.pushNamed(context, NavigationHelper.support);
+        break;
+      case 'old-network':
+        Navigator.push(context, MaterialPageRoute(builder: (_) {
+          return Scaffold(
+            appBar: AppBar(
+              leading: const DefaultBackButton(),
+              title: Row(
+                children: const [
+                  Icon(Icons.language),
+                  SizedBox(width: 8),
+                  Text('Classic Network View'),
+                ],
+              ),
+            ),
+            body: BaseTab.network(),
+          );
+        }));
         break;
       case 'test':
         Navigator.push(context, MaterialPageRoute(builder: (_) => const TestScreen()));
