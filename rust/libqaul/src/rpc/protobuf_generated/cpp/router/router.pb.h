@@ -996,6 +996,7 @@ class RoutingTableConnection final :
     kViaFieldNumber = 4,
     kModuleFieldNumber = 2,
     kRttFieldNumber = 3,
+    kHopCountFieldNumber = 5,
   };
   // bytes via = 4;
   void clear_via();
@@ -1029,6 +1030,15 @@ class RoutingTableConnection final :
   void _internal_set_rtt(uint32_t value);
   public:
 
+  // uint32 hop_count = 5;
+  void clear_hop_count();
+  uint32_t hop_count() const;
+  void set_hop_count(uint32_t value);
+  private:
+  uint32_t _internal_hop_count() const;
+  void _internal_set_hop_count(uint32_t value);
+  public:
+
   // @@protoc_insertion_point(class_scope:qaul.rpc.router.RoutingTableConnection)
  private:
   class _Internal;
@@ -1039,6 +1049,7 @@ class RoutingTableConnection final :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr via_;
   int module_;
   uint32_t rtt_;
+  uint32_t hop_count_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_router_2frouter_2eproto;
 };
@@ -2823,6 +2834,26 @@ inline void RoutingTableConnection::_internal_set_rtt(uint32_t value) {
 inline void RoutingTableConnection::set_rtt(uint32_t value) {
   _internal_set_rtt(value);
   // @@protoc_insertion_point(field_set:qaul.rpc.router.RoutingTableConnection.rtt)
+}
+
+// uint32 hop_count = 5;
+inline void RoutingTableConnection::clear_hop_count() {
+  hop_count_ = 0u;
+}
+inline uint32_t RoutingTableConnection::_internal_hop_count() const {
+  return hop_count_;
+}
+inline uint32_t RoutingTableConnection::hop_count() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.router.RoutingTableConnection.hop_count)
+  return _internal_hop_count();
+}
+inline void RoutingTableConnection::_internal_set_hop_count(uint32_t value) {
+  
+  hop_count_ = value;
+}
+inline void RoutingTableConnection::set_hop_count(uint32_t value) {
+  _internal_set_hop_count(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.router.RoutingTableConnection.hop_count)
 }
 
 // bytes via = 4;

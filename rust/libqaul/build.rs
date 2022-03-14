@@ -32,6 +32,7 @@ fn main() {
 	prost_build.compile_protos(
 		&[
 		"rpc/qaul_rpc.proto",
+		"rpc/debug.proto",
 		"connections/connections.proto",
 		"node/node.proto",
 		"node/user_accounts.proto",
@@ -56,6 +57,7 @@ fn main() {
 	// copy to central rust file folder
 	// UI rpc
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.rs"), to.join("qaul.rpc.rs")).unwrap();
+	fs::copy(Path::new(&out_dir).join("qaul.rpc.debug.rs"), to.join("qaul.rpc.debug.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.connections.rs"), to.join("qaul.rpc.connections.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.node.rs"), to.join("qaul.rpc.node.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.user_accounts.rs"), to.join("qaul.rpc.user_accounts.rs")).unwrap();
@@ -73,6 +75,7 @@ fn main() {
 	// copy to modules
 	// UI rpc
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.rs"), Path::new("src/rpc/qaul.rpc.rs")).unwrap();
+	fs::copy(&Path::new(&out_dir).join("qaul.rpc.debug.rs"), Path::new("src/rpc/qaul.rpc.debug.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.connections.rs"), Path::new("src/connections/qaul.rpc.connections.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.node.rs"), Path::new("src/node/qaul.rpc.node.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.user_accounts.rs"), Path::new("src/node/qaul.rpc.user_accounts.rs")).unwrap();

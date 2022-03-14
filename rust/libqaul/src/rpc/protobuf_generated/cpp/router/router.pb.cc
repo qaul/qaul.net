@@ -72,7 +72,8 @@ constexpr RoutingTableConnection::RoutingTableConnection(
   : via_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , module_(0)
 
-  , rtt_(0u){}
+  , rtt_(0u)
+  , hop_count_(0u){}
 struct RoutingTableConnectionDefaultTypeInternal {
   constexpr RoutingTableConnectionDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -222,6 +223,7 @@ const uint32_t TableStruct_router_2frouter_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, module_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, rtt_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, hop_count_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, via_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsRequest, _internal_metadata_),
@@ -285,13 +287,13 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 19, -1, -1, sizeof(::qaul::rpc::router::RoutingTableList)},
   { 26, -1, -1, sizeof(::qaul::rpc::router::RoutingTableEntry)},
   { 34, -1, -1, sizeof(::qaul::rpc::router::RoutingTableConnection)},
-  { 43, -1, -1, sizeof(::qaul::rpc::router::ConnectionsRequest)},
-  { 49, -1, -1, sizeof(::qaul::rpc::router::ConnectionsList)},
-  { 59, -1, -1, sizeof(::qaul::rpc::router::ConnectionsUserEntry)},
-  { 67, -1, -1, sizeof(::qaul::rpc::router::ConnectionEntry)},
-  { 76, -1, -1, sizeof(::qaul::rpc::router::NeighboursRequest)},
-  { 82, -1, -1, sizeof(::qaul::rpc::router::NeighboursList)},
-  { 90, -1, -1, sizeof(::qaul::rpc::router::NeighboursEntry)},
+  { 44, -1, -1, sizeof(::qaul::rpc::router::ConnectionsRequest)},
+  { 50, -1, -1, sizeof(::qaul::rpc::router::ConnectionsList)},
+  { 60, -1, -1, sizeof(::qaul::rpc::router::ConnectionsUserEntry)},
+  { 68, -1, -1, sizeof(::qaul::rpc::router::ConnectionEntry)},
+  { 77, -1, -1, sizeof(::qaul::rpc::router::NeighboursRequest)},
+  { 83, -1, -1, sizeof(::qaul::rpc::router::NeighboursList)},
+  { 91, -1, -1, sizeof(::qaul::rpc::router::NeighboursEntry)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -326,30 +328,31 @@ const char descriptor_table_protodef_router_2frouter_2eproto[] PROTOBUF_SECTION_
   ".rpc.router.RoutingTableEntry\"b\n\021Routing"
   "TableEntry\022\017\n\007user_id\030\001 \001(\014\022<\n\013connectio"
   "ns\030\002 \003(\0132\'.qaul.rpc.router.RoutingTableC"
-  "onnection\"e\n\026RoutingTableConnection\0221\n\006m"
+  "onnection\"x\n\026RoutingTableConnection\0221\n\006m"
   "odule\030\002 \001(\0162!.qaul.rpc.router.Connection"
-  "Module\022\013\n\003rtt\030\003 \001(\r\022\013\n\003via\030\004 \001(\014\"\024\n\022Conn"
-  "ectionsRequest\"\350\001\n\017ConnectionsList\0222\n\003la"
-  "n\030\001 \003(\0132%.qaul.rpc.router.ConnectionsUse"
-  "rEntry\0227\n\010internet\030\002 \003(\0132%.qaul.rpc.rout"
-  "er.ConnectionsUserEntry\0222\n\003ble\030\003 \003(\0132%.q"
-  "aul.rpc.router.ConnectionsUserEntry\0224\n\005l"
-  "ocal\030\004 \003(\0132%.qaul.rpc.router.Connections"
-  "UserEntry\"^\n\024ConnectionsUserEntry\022\017\n\007use"
-  "r_id\030\001 \001(\014\0225\n\013connections\030\002 \003(\0132 .qaul.r"
-  "pc.router.ConnectionEntry\">\n\017ConnectionE"
-  "ntry\022\013\n\003rtt\030\001 \001(\r\022\021\n\thop_count\030\002 \001(\r\022\013\n\003"
-  "via\030\003 \001(\014\"\023\n\021NeighboursRequest\"s\n\016Neighb"
-  "oursList\022-\n\003lan\030\001 \003(\0132 .qaul.rpc.router."
-  "NeighboursEntry\0222\n\010internet\030\002 \003(\0132 .qaul"
-  ".rpc.router.NeighboursEntry\"/\n\017Neighbour"
-  "sEntry\022\017\n\007node_id\030\001 \001(\014\022\013\n\003rtt\030\002 \001(\r*G\n\020"
-  "ConnectionModule\022\010\n\004NONE\020\000\022\007\n\003LAN\020\001\022\014\n\010I"
-  "NTERNET\020\002\022\007\n\003BLE\020\003\022\t\n\005LOCAL\020\004b\006proto3"
+  "Module\022\013\n\003rtt\030\003 \001(\r\022\021\n\thop_count\030\005 \001(\r\022\013"
+  "\n\003via\030\004 \001(\014\"\024\n\022ConnectionsRequest\"\350\001\n\017Co"
+  "nnectionsList\0222\n\003lan\030\001 \003(\0132%.qaul.rpc.ro"
+  "uter.ConnectionsUserEntry\0227\n\010internet\030\002 "
+  "\003(\0132%.qaul.rpc.router.ConnectionsUserEnt"
+  "ry\0222\n\003ble\030\003 \003(\0132%.qaul.rpc.router.Connec"
+  "tionsUserEntry\0224\n\005local\030\004 \003(\0132%.qaul.rpc"
+  ".router.ConnectionsUserEntry\"^\n\024Connecti"
+  "onsUserEntry\022\017\n\007user_id\030\001 \001(\014\0225\n\013connect"
+  "ions\030\002 \003(\0132 .qaul.rpc.router.ConnectionE"
+  "ntry\">\n\017ConnectionEntry\022\013\n\003rtt\030\001 \001(\r\022\021\n\t"
+  "hop_count\030\002 \001(\r\022\013\n\003via\030\003 \001(\014\"\023\n\021Neighbou"
+  "rsRequest\"s\n\016NeighboursList\022-\n\003lan\030\001 \003(\013"
+  "2 .qaul.rpc.router.NeighboursEntry\0222\n\010in"
+  "ternet\030\002 \003(\0132 .qaul.rpc.router.Neighbour"
+  "sEntry\"/\n\017NeighboursEntry\022\017\n\007node_id\030\001 \001"
+  "(\014\022\013\n\003rtt\030\002 \001(\r*G\n\020ConnectionModule\022\010\n\004N"
+  "ONE\020\000\022\007\n\003LAN\020\001\022\014\n\010INTERNET\020\002\022\007\n\003BLE\020\003\022\t\n"
+  "\005LOCAL\020\004b\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_router_2frouter_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_router_2frouter_2eproto = {
-  false, false, 1437, descriptor_table_protodef_router_2frouter_2eproto, "router/router.proto", 
+  false, false, 1456, descriptor_table_protodef_router_2frouter_2eproto, "router/router.proto", 
   &descriptor_table_router_2frouter_2eproto_once, nullptr, 0, 12,
   schemas, file_default_instances, TableStruct_router_2frouter_2eproto::offsets,
   file_level_metadata_router_2frouter_2eproto, file_level_enum_descriptors_router_2frouter_2eproto, file_level_service_descriptors_router_2frouter_2eproto,
@@ -1391,8 +1394,8 @@ RoutingTableConnection::RoutingTableConnection(const RoutingTableConnection& fro
       GetArenaForAllocation());
   }
   ::memcpy(&module_, &from.module_,
-    static_cast<size_t>(reinterpret_cast<char*>(&rtt_) -
-    reinterpret_cast<char*>(&module_)) + sizeof(rtt_));
+    static_cast<size_t>(reinterpret_cast<char*>(&hop_count_) -
+    reinterpret_cast<char*>(&module_)) + sizeof(hop_count_));
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.RoutingTableConnection)
 }
 
@@ -1403,8 +1406,8 @@ via_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyI
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&module_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&rtt_) -
-    reinterpret_cast<char*>(&module_)) + sizeof(rtt_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&hop_count_) -
+    reinterpret_cast<char*>(&module_)) + sizeof(hop_count_));
 }
 
 RoutingTableConnection::~RoutingTableConnection() {
@@ -1437,8 +1440,8 @@ void RoutingTableConnection::Clear() {
 
   via_.ClearToEmpty();
   ::memset(&module_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&rtt_) -
-      reinterpret_cast<char*>(&module_)) + sizeof(rtt_));
+      reinterpret_cast<char*>(&hop_count_) -
+      reinterpret_cast<char*>(&module_)) + sizeof(hop_count_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1470,6 +1473,14 @@ const char* RoutingTableConnection::_InternalParse(const char* ptr, ::PROTOBUF_N
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
           auto str = _internal_mutable_via();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // uint32 hop_count = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+          hop_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1522,6 +1533,12 @@ uint8_t* RoutingTableConnection::_InternalSerialize(
         4, this->_internal_via(), target);
   }
 
+  // uint32 hop_count = 5;
+  if (this->_internal_hop_count() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(5, this->_internal_hop_count(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -1556,6 +1573,11 @@ size_t RoutingTableConnection::ByteSizeLong() const {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32SizePlusOne(this->_internal_rtt());
   }
 
+  // uint32 hop_count = 5;
+  if (this->_internal_hop_count() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32SizePlusOne(this->_internal_hop_count());
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
 }
 
@@ -1587,6 +1609,9 @@ void RoutingTableConnection::MergeFrom(const RoutingTableConnection& from) {
   if (from._internal_rtt() != 0) {
     _internal_set_rtt(from._internal_rtt());
   }
+  if (from._internal_hop_count() != 0) {
+    _internal_set_hop_count(from._internal_hop_count());
+  }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -1612,8 +1637,8 @@ void RoutingTableConnection::InternalSwap(RoutingTableConnection* other) {
       &other->via_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(RoutingTableConnection, rtt_)
-      + sizeof(RoutingTableConnection::rtt_)
+      PROTOBUF_FIELD_OFFSET(RoutingTableConnection, hop_count_)
+      + sizeof(RoutingTableConnection::hop_count_)
       - PROTOBUF_FIELD_OFFSET(RoutingTableConnection, module_)>(
           reinterpret_cast<char*>(&module_),
           reinterpret_cast<char*>(&other->module_));

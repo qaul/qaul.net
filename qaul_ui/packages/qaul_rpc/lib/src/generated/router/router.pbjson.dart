@@ -74,12 +74,13 @@ const RoutingTableConnection$json = const {
   '2': const [
     const {'1': 'module', '3': 2, '4': 1, '5': 14, '6': '.qaul.rpc.router.ConnectionModule', '10': 'module'},
     const {'1': 'rtt', '3': 3, '4': 1, '5': 13, '10': 'rtt'},
+    const {'1': 'hop_count', '3': 5, '4': 1, '5': 13, '10': 'hopCount'},
     const {'1': 'via', '3': 4, '4': 1, '5': 12, '10': 'via'},
   ],
 };
 
 /// Descriptor for `RoutingTableConnection`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List routingTableConnectionDescriptor = $convert.base64Decode('ChZSb3V0aW5nVGFibGVDb25uZWN0aW9uEjkKBm1vZHVsZRgCIAEoDjIhLnFhdWwucnBjLnJvdXRlci5Db25uZWN0aW9uTW9kdWxlUgZtb2R1bGUSEAoDcnR0GAMgASgNUgNydHQSEAoDdmlhGAQgASgMUgN2aWE=');
+final $typed_data.Uint8List routingTableConnectionDescriptor = $convert.base64Decode('ChZSb3V0aW5nVGFibGVDb25uZWN0aW9uEjkKBm1vZHVsZRgCIAEoDjIhLnFhdWwucnBjLnJvdXRlci5Db25uZWN0aW9uTW9kdWxlUgZtb2R1bGUSEAoDcnR0GAMgASgNUgNydHQSGwoJaG9wX2NvdW50GAUgASgNUghob3BDb3VudBIQCgN2aWEYBCABKAxSA3ZpYQ==');
 @$core.Deprecated('Use connectionsRequestDescriptor instead')
 const ConnectionsRequest$json = const {
   '1': 'ConnectionsRequest',

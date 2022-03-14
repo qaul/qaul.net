@@ -4171,6 +4171,16 @@ public final class RouterOuterClass {
 
     /**
      * <pre>
+     * hop count
+     * </pre>
+     *
+     * <code>uint32 hop_count = 5;</code>
+     * @return The hopCount.
+     */
+    int getHopCount();
+
+    /**
+     * <pre>
      * node id via which this connection is routed
      * </pre>
      *
@@ -4247,6 +4257,11 @@ public final class RouterOuterClass {
               via_ = input.readBytes();
               break;
             }
+            case 40: {
+
+              hopCount_ = input.readUInt32();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -4321,6 +4336,21 @@ public final class RouterOuterClass {
       return rtt_;
     }
 
+    public static final int HOP_COUNT_FIELD_NUMBER = 5;
+    private int hopCount_;
+    /**
+     * <pre>
+     * hop count
+     * </pre>
+     *
+     * <code>uint32 hop_count = 5;</code>
+     * @return The hopCount.
+     */
+    @java.lang.Override
+    public int getHopCount() {
+      return hopCount_;
+    }
+
     public static final int VIA_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString via_;
     /**
@@ -4359,6 +4389,9 @@ public final class RouterOuterClass {
       if (!via_.isEmpty()) {
         output.writeBytes(4, via_);
       }
+      if (hopCount_ != 0) {
+        output.writeUInt32(5, hopCount_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -4380,6 +4413,10 @@ public final class RouterOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, via_);
       }
+      if (hopCount_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(5, hopCount_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -4398,6 +4435,8 @@ public final class RouterOuterClass {
       if (module_ != other.module_) return false;
       if (getRtt()
           != other.getRtt()) return false;
+      if (getHopCount()
+          != other.getHopCount()) return false;
       if (!getVia()
           .equals(other.getVia())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -4415,6 +4454,8 @@ public final class RouterOuterClass {
       hash = (53 * hash) + module_;
       hash = (37 * hash) + RTT_FIELD_NUMBER;
       hash = (53 * hash) + getRtt();
+      hash = (37 * hash) + HOP_COUNT_FIELD_NUMBER;
+      hash = (53 * hash) + getHopCount();
       hash = (37 * hash) + VIA_FIELD_NUMBER;
       hash = (53 * hash) + getVia().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
@@ -4559,6 +4600,8 @@ public final class RouterOuterClass {
 
         rtt_ = 0;
 
+        hopCount_ = 0;
+
         via_ = com.google.protobuf.ByteString.EMPTY;
 
         return this;
@@ -4589,6 +4632,7 @@ public final class RouterOuterClass {
         qaul.rpc.router.RouterOuterClass.RoutingTableConnection result = new qaul.rpc.router.RouterOuterClass.RoutingTableConnection(this);
         result.module_ = module_;
         result.rtt_ = rtt_;
+        result.hopCount_ = hopCount_;
         result.via_ = via_;
         onBuilt();
         return result;
@@ -4643,6 +4687,9 @@ public final class RouterOuterClass {
         }
         if (other.getRtt() != 0) {
           setRtt(other.getRtt());
+        }
+        if (other.getHopCount() != 0) {
+          setHopCount(other.getHopCount());
         }
         if (other.getVia() != com.google.protobuf.ByteString.EMPTY) {
           setVia(other.getVia());
@@ -4789,6 +4836,49 @@ public final class RouterOuterClass {
       public Builder clearRtt() {
         
         rtt_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int hopCount_ ;
+      /**
+       * <pre>
+       * hop count
+       * </pre>
+       *
+       * <code>uint32 hop_count = 5;</code>
+       * @return The hopCount.
+       */
+      @java.lang.Override
+      public int getHopCount() {
+        return hopCount_;
+      }
+      /**
+       * <pre>
+       * hop count
+       * </pre>
+       *
+       * <code>uint32 hop_count = 5;</code>
+       * @param value The hopCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHopCount(int value) {
+        
+        hopCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * hop count
+       * </pre>
+       *
+       * <code>uint32 hop_count = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHopCount() {
+        
+        hopCount_ = 0;
         onChanged();
         return this;
       }
@@ -11690,26 +11780,27 @@ public final class RouterOuterClass {
       ".rpc.router.RoutingTableEntry\"b\n\021Routing" +
       "TableEntry\022\017\n\007user_id\030\001 \001(\014\022<\n\013connectio" +
       "ns\030\002 \003(\0132\'.qaul.rpc.router.RoutingTableC" +
-      "onnection\"e\n\026RoutingTableConnection\0221\n\006m" +
+      "onnection\"x\n\026RoutingTableConnection\0221\n\006m" +
       "odule\030\002 \001(\0162!.qaul.rpc.router.Connection" +
-      "Module\022\013\n\003rtt\030\003 \001(\r\022\013\n\003via\030\004 \001(\014\"\024\n\022Conn" +
-      "ectionsRequest\"\350\001\n\017ConnectionsList\0222\n\003la" +
-      "n\030\001 \003(\0132%.qaul.rpc.router.ConnectionsUse" +
-      "rEntry\0227\n\010internet\030\002 \003(\0132%.qaul.rpc.rout" +
-      "er.ConnectionsUserEntry\0222\n\003ble\030\003 \003(\0132%.q" +
-      "aul.rpc.router.ConnectionsUserEntry\0224\n\005l" +
-      "ocal\030\004 \003(\0132%.qaul.rpc.router.Connections" +
-      "UserEntry\"^\n\024ConnectionsUserEntry\022\017\n\007use" +
-      "r_id\030\001 \001(\014\0225\n\013connections\030\002 \003(\0132 .qaul.r" +
-      "pc.router.ConnectionEntry\">\n\017ConnectionE" +
-      "ntry\022\013\n\003rtt\030\001 \001(\r\022\021\n\thop_count\030\002 \001(\r\022\013\n\003" +
-      "via\030\003 \001(\014\"\023\n\021NeighboursRequest\"s\n\016Neighb" +
-      "oursList\022-\n\003lan\030\001 \003(\0132 .qaul.rpc.router." +
-      "NeighboursEntry\0222\n\010internet\030\002 \003(\0132 .qaul" +
-      ".rpc.router.NeighboursEntry\"/\n\017Neighbour" +
-      "sEntry\022\017\n\007node_id\030\001 \001(\014\022\013\n\003rtt\030\002 \001(\r*G\n\020" +
-      "ConnectionModule\022\010\n\004NONE\020\000\022\007\n\003LAN\020\001\022\014\n\010I" +
-      "NTERNET\020\002\022\007\n\003BLE\020\003\022\t\n\005LOCAL\020\004b\006proto3"
+      "Module\022\013\n\003rtt\030\003 \001(\r\022\021\n\thop_count\030\005 \001(\r\022\013" +
+      "\n\003via\030\004 \001(\014\"\024\n\022ConnectionsRequest\"\350\001\n\017Co" +
+      "nnectionsList\0222\n\003lan\030\001 \003(\0132%.qaul.rpc.ro" +
+      "uter.ConnectionsUserEntry\0227\n\010internet\030\002 " +
+      "\003(\0132%.qaul.rpc.router.ConnectionsUserEnt" +
+      "ry\0222\n\003ble\030\003 \003(\0132%.qaul.rpc.router.Connec" +
+      "tionsUserEntry\0224\n\005local\030\004 \003(\0132%.qaul.rpc" +
+      ".router.ConnectionsUserEntry\"^\n\024Connecti" +
+      "onsUserEntry\022\017\n\007user_id\030\001 \001(\014\0225\n\013connect" +
+      "ions\030\002 \003(\0132 .qaul.rpc.router.ConnectionE" +
+      "ntry\">\n\017ConnectionEntry\022\013\n\003rtt\030\001 \001(\r\022\021\n\t" +
+      "hop_count\030\002 \001(\r\022\013\n\003via\030\003 \001(\014\"\023\n\021Neighbou" +
+      "rsRequest\"s\n\016NeighboursList\022-\n\003lan\030\001 \003(\013" +
+      "2 .qaul.rpc.router.NeighboursEntry\0222\n\010in" +
+      "ternet\030\002 \003(\0132 .qaul.rpc.router.Neighbour" +
+      "sEntry\"/\n\017NeighboursEntry\022\017\n\007node_id\030\001 \001" +
+      "(\014\022\013\n\003rtt\030\002 \001(\r*G\n\020ConnectionModule\022\010\n\004N" +
+      "ONE\020\000\022\007\n\003LAN\020\001\022\014\n\010INTERNET\020\002\022\007\n\003BLE\020\003\022\t\n" +
+      "\005LOCAL\020\004b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -11744,7 +11835,7 @@ public final class RouterOuterClass {
     internal_static_qaul_rpc_router_RoutingTableConnection_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_router_RoutingTableConnection_descriptor,
-        new java.lang.String[] { "Module", "Rtt", "Via", });
+        new java.lang.String[] { "Module", "Rtt", "HopCount", "Via", });
     internal_static_qaul_rpc_router_ConnectionsRequest_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_qaul_rpc_router_ConnectionsRequest_fieldAccessorTable = new

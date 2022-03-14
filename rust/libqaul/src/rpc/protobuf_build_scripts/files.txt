@@ -1,4 +1,5 @@
 rpc/qaul_rpc.proto
+rpc/debug.proto
 connections/connections.proto
 node/node.proto
 node/user_accounts.proto
