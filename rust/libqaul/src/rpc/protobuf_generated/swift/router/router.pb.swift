@@ -235,6 +235,9 @@ struct Qaul_Rpc_Router_RoutingTableConnection {
   /// the round trip time for this connection
   var rtt: UInt32 = 0
 
+  /// hop count
+  var hopCount: UInt32 = 0
+
   /// node id via which this connection is routed
   var via: Data = Data()
 
@@ -609,6 +612,7 @@ extension Qaul_Rpc_Router_RoutingTableConnection: SwiftProtobuf.Message, SwiftPr
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     2: .same(proto: "module"),
     3: .same(proto: "rtt"),
+    5: .standard(proto: "hop_count"),
     4: .same(proto: "via"),
   ]
 
@@ -621,6 +625,7 @@ extension Qaul_Rpc_Router_RoutingTableConnection: SwiftProtobuf.Message, SwiftPr
       case 2: try { try decoder.decodeSingularEnumField(value: &self.module) }()
       case 3: try { try decoder.decodeSingularUInt32Field(value: &self.rtt) }()
       case 4: try { try decoder.decodeSingularBytesField(value: &self.via) }()
+      case 5: try { try decoder.decodeSingularUInt32Field(value: &self.hopCount) }()
       default: break
       }
     }
@@ -636,12 +641,16 @@ extension Qaul_Rpc_Router_RoutingTableConnection: SwiftProtobuf.Message, SwiftPr
     if !self.via.isEmpty {
       try visitor.visitSingularBytesField(value: self.via, fieldNumber: 4)
     }
+    if self.hopCount != 0 {
+      try visitor.visitSingularUInt32Field(value: self.hopCount, fieldNumber: 5)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Rpc_Router_RoutingTableConnection, rhs: Qaul_Rpc_Router_RoutingTableConnection) -> Bool {
     if lhs.module != rhs.module {return false}
     if lhs.rtt != rhs.rtt {return false}
+    if lhs.hopCount != rhs.hopCount {return false}
     if lhs.via != rhs.via {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

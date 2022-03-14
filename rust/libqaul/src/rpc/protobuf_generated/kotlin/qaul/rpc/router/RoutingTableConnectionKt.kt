@@ -74,6 +74,31 @@ public object RoutingTableConnectionKt {
 
     /**
      * <pre>
+     * hop count
+     * </pre>
+     *
+     * <code>uint32 hop_count = 5;</code>
+     */
+    public var hopCount: kotlin.Int
+      @JvmName("getHopCount")
+      get() = _builder.getHopCount()
+      @JvmName("setHopCount")
+      set(value) {
+        _builder.setHopCount(value)
+      }
+    /**
+     * <pre>
+     * hop count
+     * </pre>
+     *
+     * <code>uint32 hop_count = 5;</code>
+     */
+    public fun clearHopCount() {
+      _builder.clearHopCount()
+    }
+
+    /**
+     * <pre>
      * node id via which this connection is routed
      * </pre>
      *
