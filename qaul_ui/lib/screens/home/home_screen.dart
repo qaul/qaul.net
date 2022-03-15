@@ -8,6 +8,7 @@ import 'package:utils/utils.dart';
 
 import '../../decorators/qaul_nav_bar_decorator.dart';
 import '../../providers/providers.dart';
+import 'dynamic_network/dynamic_network_screen.dart';
 import 'tabs/tab.dart';
 import 'user_account_screen.dart';
 
@@ -93,7 +94,8 @@ class HomeScreen extends HookConsumerWidget {
                   BaseTab.feed(),
                   BaseTab.users(),
                   BaseTab.chat(),
-                  BaseTab.network(),
+                  const DynamicNetworkScreen(),
+                  // BaseTab.network(),
                 ],
               ),
             ),

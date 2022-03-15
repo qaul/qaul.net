@@ -261,7 +261,7 @@ packages:
     source: hosted
     version: "3.0.0"
   equatable:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: equatable
       url: "https://pub.dartlang.org"
@@ -275,7 +275,7 @@ packages:
     source: hosted
     version: "1.2.0"
   fast_base58:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: fast_base58
       url: "https://pub.dartlang.org"
@@ -309,6 +309,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  flame:
+    dependency: "direct main"
+    description:
+      name: flame
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
+  flame_forge2d:
+    dependency: "direct main"
+    description:
+      name: flame_forge2d
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.8.3"
   fluent_ui:
     dependency: "direct main"
     description:
@@ -434,6 +448,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  forge2d:
+    dependency: "direct overridden"
+    description:
+      name: forge2d
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.8.2"
   frontend_server_client:
     dependency: transitive
     description:
@@ -518,6 +539,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.1"
+  intersperse:
+    dependency: "direct main"
+    description:
+      name: intersperse
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   intl:
     dependency: "direct main"
     description:
@@ -644,6 +672,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
+  open_simplex_2:
+    dependency: "direct main"
+    description:
+      name: open_simplex_2
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.1"
+  ordered_set:
+    dependency: transitive
+    description:
+      name: ordered_set
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.0.0"
   package_config:
     dependency: transitive
     description:
@@ -1124,7 +1166,7 @@ packages:
       name: uuid
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.5"
+    version: "3.0.6"
   vector_math:
     dependency: transitive
     description:

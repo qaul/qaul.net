@@ -51,6 +51,7 @@ class RouterTranslator extends RpcModuleTranslator {
 
     ConnectionInfo toConnectionInfo(RoutingTableConnection c) => ConnectionInfo(
           ping: c.rtt ~/ 1000,
+          hopCount: c.hopCount == 0 ? 1 : c.hopCount,
           nodeID: Uint8List.fromList(c.via),
           nodeIDBase58: Base58Encode(c.via),
         );
