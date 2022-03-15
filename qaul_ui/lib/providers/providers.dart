@@ -13,4 +13,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'chat_notification_controller_provider.dart';
+
+part 'feed_notification_controller_provider.dart';
+
 part 'tab_controller_provider.dart';

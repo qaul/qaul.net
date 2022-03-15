@@ -18,7 +18,6 @@ class ChatNotificationController {
   Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
     if (_prefs.containsKey(_cacheKey)) {
-      // _prefs.remove(_cacheKey);
       _chats.addAll(_prefs.getStringList(_cacheKey)!.map((e) {
         return _ChatData.fromJson(jsonDecode(e));
       }));
