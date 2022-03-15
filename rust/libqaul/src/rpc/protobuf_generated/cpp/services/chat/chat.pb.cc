@@ -59,6 +59,7 @@ constexpr ChatOverview::ChatOverview(
   : conversation_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , content_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , last_message_sender_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , last_message_index_(0u)
   , unread_(0)
   , last_message_at_(uint64_t{0u}){}
@@ -173,6 +174,7 @@ const uint32_t TableStruct_services_2fchat_2fchat_2eproto::offsets[] PROTOBUF_SE
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::ChatOverview, last_message_at_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::ChatOverview, unread_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::ChatOverview, content_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::ChatOverview, last_message_sender_id_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::ChatConversationRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -216,10 +218,10 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 12, -1, -1, sizeof(::qaul::rpc::chat::ChatOverviewRequest)},
   { 18, -1, -1, sizeof(::qaul::rpc::chat::ChatOverviewList)},
   { 25, -1, -1, sizeof(::qaul::rpc::chat::ChatOverview)},
-  { 37, -1, -1, sizeof(::qaul::rpc::chat::ChatConversationRequest)},
-  { 45, -1, -1, sizeof(::qaul::rpc::chat::ChatConversationList)},
-  { 53, -1, -1, sizeof(::qaul::rpc::chat::ChatMessage)},
-  { 66, -1, -1, sizeof(::qaul::rpc::chat::ChatMessageSend)},
+  { 38, -1, -1, sizeof(::qaul::rpc::chat::ChatConversationRequest)},
+  { 46, -1, -1, sizeof(::qaul::rpc::chat::ChatConversationList)},
+  { 54, -1, -1, sizeof(::qaul::rpc::chat::ChatMessage)},
+  { 67, -1, -1, sizeof(::qaul::rpc::chat::ChatMessageSend)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -245,24 +247,25 @@ const char descriptor_table_protodef_services_2fchat_2fchat_2eproto[] PROTOBUF_S
   " \001(\0132\036.qaul.rpc.chat.ChatMessageSendH\000B\t"
   "\n\007message\"\025\n\023ChatOverviewRequest\"F\n\020Chat"
   "OverviewList\0222\n\roverview_list\030\001 \003(\0132\033.qa"
-  "ul.rpc.chat.ChatOverview\"\213\001\n\014ChatOvervie"
+  "ul.rpc.chat.ChatOverview\"\253\001\n\014ChatOvervie"
   "w\022\027\n\017conversation_id\030\001 \001(\014\022\032\n\022last_messa"
   "ge_index\030\002 \001(\r\022\014\n\004name\030\003 \001(\t\022\027\n\017last_mes"
   "sage_at\030\004 \001(\004\022\016\n\006unread\030\005 \001(\005\022\017\n\007content"
-  "\030\006 \001(\t\"F\n\027ChatConversationRequest\022\027\n\017con"
-  "versation_id\030\001 \001(\014\022\022\n\nlast_index\030\002 \001(\004\"a"
-  "\n\024ChatConversationList\022\027\n\017conversation_i"
-  "d\030\001 \001(\014\0220\n\014message_list\030\002 \003(\0132\032.qaul.rpc"
-  ".chat.ChatMessage\"\212\001\n\013ChatMessage\022\r\n\005ind"
-  "ex\030\001 \001(\r\022\021\n\tsender_id\030\002 \001(\014\022\022\n\nmessage_i"
-  "d\030\003 \001(\014\022\016\n\006status\030\004 \001(\005\022\017\n\007sent_at\030\005 \001(\004"
-  "\022\023\n\013received_at\030\006 \001(\004\022\017\n\007content\030\007 \001(\t\";"
-  "\n\017ChatMessageSend\022\027\n\017conversation_id\030\001 \001"
-  "(\014\022\017\n\007content\030\002 \001(\tb\006proto3"
+  "\030\006 \001(\t\022\036\n\026last_message_sender_id\030\007 \001(\014\"F"
+  "\n\027ChatConversationRequest\022\027\n\017conversatio"
+  "n_id\030\001 \001(\014\022\022\n\nlast_index\030\002 \001(\004\"a\n\024ChatCo"
+  "nversationList\022\027\n\017conversation_id\030\001 \001(\014\022"
+  "0\n\014message_list\030\002 \003(\0132\032.qaul.rpc.chat.Ch"
+  "atMessage\"\212\001\n\013ChatMessage\022\r\n\005index\030\001 \001(\r"
+  "\022\021\n\tsender_id\030\002 \001(\014\022\022\n\nmessage_id\030\003 \001(\014\022"
+  "\016\n\006status\030\004 \001(\005\022\017\n\007sent_at\030\005 \001(\004\022\023\n\013rece"
+  "ived_at\030\006 \001(\004\022\017\n\007content\030\007 \001(\t\";\n\017ChatMe"
+  "ssageSend\022\027\n\017conversation_id\030\001 \001(\014\022\017\n\007co"
+  "ntent\030\002 \001(\tb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_services_2fchat_2fchat_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_services_2fchat_2fchat_2eproto = {
-  false, false, 987, descriptor_table_protodef_services_2fchat_2fchat_2eproto, "services/chat/chat.proto", 
+  false, false, 1019, descriptor_table_protodef_services_2fchat_2fchat_2eproto, "services/chat/chat.proto", 
   &descriptor_table_services_2fchat_2fchat_2eproto_once, nullptr, 0, 8,
   schemas, file_default_instances, TableStruct_services_2fchat_2fchat_2eproto::offsets,
   file_level_metadata_services_2fchat_2fchat_2eproto, file_level_enum_descriptors_services_2fchat_2fchat_2eproto, file_level_service_descriptors_services_2fchat_2fchat_2eproto,
@@ -1014,6 +1017,14 @@ ChatOverview::ChatOverview(const ChatOverview& from)
     content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_content(), 
       GetArenaForAllocation());
   }
+  last_message_sender_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    last_message_sender_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_last_message_sender_id().empty()) {
+    last_message_sender_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_last_message_sender_id(), 
+      GetArenaForAllocation());
+  }
   ::memcpy(&last_message_index_, &from.last_message_index_,
     static_cast<size_t>(reinterpret_cast<char*>(&last_message_at_) -
     reinterpret_cast<char*>(&last_message_index_)) + sizeof(last_message_at_));
@@ -1033,6 +1044,10 @@ content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlre
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   content_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+last_message_sender_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  last_message_sender_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&last_message_index_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&last_message_at_) -
@@ -1051,6 +1066,7 @@ inline void ChatOverview::SharedDtor() {
   conversation_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   content_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  last_message_sender_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void ChatOverview::ArenaDtor(void* object) {
@@ -1072,6 +1088,7 @@ void ChatOverview::Clear() {
   conversation_id_.ClearToEmpty();
   name_.ClearToEmpty();
   content_.ClearToEmpty();
+  last_message_sender_id_.ClearToEmpty();
   ::memset(&last_message_index_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&last_message_at_) -
       reinterpret_cast<char*>(&last_message_index_)) + sizeof(last_message_at_));
@@ -1133,6 +1150,15 @@ const char* ChatOverview::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
           auto str = _internal_mutable_content();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.chat.ChatOverview.content"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bytes last_message_sender_id = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
+          auto str = _internal_mutable_last_message_sender_id();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1210,6 +1236,12 @@ uint8_t* ChatOverview::_InternalSerialize(
         6, this->_internal_content(), target);
   }
 
+  // bytes last_message_sender_id = 7;
+  if (!this->_internal_last_message_sender_id().empty()) {
+    target = stream->WriteBytesMaybeAliased(
+        7, this->_internal_last_message_sender_id(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -1245,6 +1277,13 @@ size_t ChatOverview::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_content());
+  }
+
+  // bytes last_message_sender_id = 7;
+  if (!this->_internal_last_message_sender_id().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+        this->_internal_last_message_sender_id());
   }
 
   // uint32 last_message_index = 2;
@@ -1293,6 +1332,9 @@ void ChatOverview::MergeFrom(const ChatOverview& from) {
   if (!from._internal_content().empty()) {
     _internal_set_content(from._internal_content());
   }
+  if (!from._internal_last_message_sender_id().empty()) {
+    _internal_set_last_message_sender_id(from._internal_last_message_sender_id());
+  }
   if (from._internal_last_message_index() != 0) {
     _internal_set_last_message_index(from._internal_last_message_index());
   }
@@ -1335,6 +1377,11 @@ void ChatOverview::InternalSwap(ChatOverview* other) {
       &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &content_, lhs_arena,
       &other->content_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &last_message_sender_id_, lhs_arena,
+      &other->last_message_sender_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(ChatOverview, last_message_at_)

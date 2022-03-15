@@ -52,11 +52,12 @@ const ChatOverview$json = const {
     const {'1': 'last_message_at', '3': 4, '4': 1, '5': 4, '10': 'lastMessageAt'},
     const {'1': 'unread', '3': 5, '4': 1, '5': 5, '10': 'unread'},
     const {'1': 'content', '3': 6, '4': 1, '5': 9, '10': 'content'},
+    const {'1': 'last_message_sender_id', '3': 7, '4': 1, '5': 12, '10': 'lastMessageSenderId'},
   ],
 };
 
 /// Descriptor for `ChatOverview`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List chatOverviewDescriptor = $convert.base64Decode('CgxDaGF0T3ZlcnZpZXcSJwoPY29udmVyc2F0aW9uX2lkGAEgASgMUg5jb252ZXJzYXRpb25JZBIsChJsYXN0X21lc3NhZ2VfaW5kZXgYAiABKA1SEGxhc3RNZXNzYWdlSW5kZXgSEgoEbmFtZRgDIAEoCVIEbmFtZRImCg9sYXN0X21lc3NhZ2VfYXQYBCABKARSDWxhc3RNZXNzYWdlQXQSFgoGdW5yZWFkGAUgASgFUgZ1bnJlYWQSGAoHY29udGVudBgGIAEoCVIHY29udGVudA==');
+final $typed_data.Uint8List chatOverviewDescriptor = $convert.base64Decode('CgxDaGF0T3ZlcnZpZXcSJwoPY29udmVyc2F0aW9uX2lkGAEgASgMUg5jb252ZXJzYXRpb25JZBIsChJsYXN0X21lc3NhZ2VfaW5kZXgYAiABKA1SEGxhc3RNZXNzYWdlSW5kZXgSEgoEbmFtZRgDIAEoCVIEbmFtZRImCg9sYXN0X21lc3NhZ2VfYXQYBCABKARSDWxhc3RNZXNzYWdlQXQSFgoGdW5yZWFkGAUgASgFUgZ1bnJlYWQSGAoHY29udGVudBgGIAEoCVIHY29udGVudBIzChZsYXN0X21lc3NhZ2Vfc2VuZGVyX2lkGAcgASgMUhNsYXN0TWVzc2FnZVNlbmRlcklk');
 @$core.Deprecated('Use chatConversationRequestDescriptor instead')
 const ChatConversationRequest$json = const {
   '1': 'ChatConversationRequest',

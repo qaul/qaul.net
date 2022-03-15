@@ -3274,6 +3274,16 @@ public final class ChatOuterClass {
      */
     com.google.protobuf.ByteString
         getContentBytes();
+
+    /**
+     * <pre>
+     * sender of the last message
+     * </pre>
+     *
+     * <code>bytes last_message_sender_id = 7;</code>
+     * @return The lastMessageSenderId.
+     */
+    com.google.protobuf.ByteString getLastMessageSenderId();
   }
   /**
    * <pre>
@@ -3295,6 +3305,7 @@ public final class ChatOuterClass {
       conversationId_ = com.google.protobuf.ByteString.EMPTY;
       name_ = "";
       content_ = "";
+      lastMessageSenderId_ = com.google.protobuf.ByteString.EMPTY;
     }
 
     @java.lang.Override
@@ -3357,6 +3368,11 @@ public final class ChatOuterClass {
               java.lang.String s = input.readStringRequireUtf8();
 
               content_ = s;
+              break;
+            }
+            case 58: {
+
+              lastMessageSenderId_ = input.readBytes();
               break;
             }
             default: {
@@ -3543,6 +3559,21 @@ public final class ChatOuterClass {
       }
     }
 
+    public static final int LAST_MESSAGE_SENDER_ID_FIELD_NUMBER = 7;
+    private com.google.protobuf.ByteString lastMessageSenderId_;
+    /**
+     * <pre>
+     * sender of the last message
+     * </pre>
+     *
+     * <code>bytes last_message_sender_id = 7;</code>
+     * @return The lastMessageSenderId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getLastMessageSenderId() {
+      return lastMessageSenderId_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -3575,6 +3606,9 @@ public final class ChatOuterClass {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, content_);
       }
+      if (!lastMessageSenderId_.isEmpty()) {
+        output.writeBytes(7, lastMessageSenderId_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -3606,6 +3640,10 @@ public final class ChatOuterClass {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, content_);
       }
+      if (!lastMessageSenderId_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(7, lastMessageSenderId_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -3633,6 +3671,8 @@ public final class ChatOuterClass {
           != other.getUnread()) return false;
       if (!getContent()
           .equals(other.getContent())) return false;
+      if (!getLastMessageSenderId()
+          .equals(other.getLastMessageSenderId())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -3657,6 +3697,8 @@ public final class ChatOuterClass {
       hash = (53 * hash) + getUnread();
       hash = (37 * hash) + CONTENT_FIELD_NUMBER;
       hash = (53 * hash) + getContent().hashCode();
+      hash = (37 * hash) + LAST_MESSAGE_SENDER_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getLastMessageSenderId().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3806,6 +3848,8 @@ public final class ChatOuterClass {
 
         content_ = "";
 
+        lastMessageSenderId_ = com.google.protobuf.ByteString.EMPTY;
+
         return this;
       }
 
@@ -3838,6 +3882,7 @@ public final class ChatOuterClass {
         result.lastMessageAt_ = lastMessageAt_;
         result.unread_ = unread_;
         result.content_ = content_;
+        result.lastMessageSenderId_ = lastMessageSenderId_;
         onBuilt();
         return result;
       }
@@ -3905,6 +3950,9 @@ public final class ChatOuterClass {
         if (!other.getContent().isEmpty()) {
           content_ = other.content_;
           onChanged();
+        }
+        if (other.getLastMessageSenderId() != com.google.protobuf.ByteString.EMPTY) {
+          setLastMessageSenderId(other.getLastMessageSenderId());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -4298,6 +4346,52 @@ public final class ChatOuterClass {
   checkByteStringIsUtf8(value);
         
         content_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString lastMessageSenderId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * sender of the last message
+       * </pre>
+       *
+       * <code>bytes last_message_sender_id = 7;</code>
+       * @return The lastMessageSenderId.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getLastMessageSenderId() {
+        return lastMessageSenderId_;
+      }
+      /**
+       * <pre>
+       * sender of the last message
+       * </pre>
+       *
+       * <code>bytes last_message_sender_id = 7;</code>
+       * @param value The lastMessageSenderId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLastMessageSenderId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        lastMessageSenderId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * sender of the last message
+       * </pre>
+       *
+       * <code>bytes last_message_sender_id = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLastMessageSenderId() {
+        
+        lastMessageSenderId_ = getDefaultInstance().getLastMessageSenderId();
         onChanged();
         return this;
       }
@@ -7763,20 +7857,21 @@ public final class ChatOuterClass {
       " \001(\0132\036.qaul.rpc.chat.ChatMessageSendH\000B\t" +
       "\n\007message\"\025\n\023ChatOverviewRequest\"F\n\020Chat" +
       "OverviewList\0222\n\roverview_list\030\001 \003(\0132\033.qa" +
-      "ul.rpc.chat.ChatOverview\"\213\001\n\014ChatOvervie" +
+      "ul.rpc.chat.ChatOverview\"\253\001\n\014ChatOvervie" +
       "w\022\027\n\017conversation_id\030\001 \001(\014\022\032\n\022last_messa" +
       "ge_index\030\002 \001(\r\022\014\n\004name\030\003 \001(\t\022\027\n\017last_mes" +
       "sage_at\030\004 \001(\004\022\016\n\006unread\030\005 \001(\005\022\017\n\007content" +
-      "\030\006 \001(\t\"F\n\027ChatConversationRequest\022\027\n\017con" +
-      "versation_id\030\001 \001(\014\022\022\n\nlast_index\030\002 \001(\004\"a" +
-      "\n\024ChatConversationList\022\027\n\017conversation_i" +
-      "d\030\001 \001(\014\0220\n\014message_list\030\002 \003(\0132\032.qaul.rpc" +
-      ".chat.ChatMessage\"\212\001\n\013ChatMessage\022\r\n\005ind" +
-      "ex\030\001 \001(\r\022\021\n\tsender_id\030\002 \001(\014\022\022\n\nmessage_i" +
-      "d\030\003 \001(\014\022\016\n\006status\030\004 \001(\005\022\017\n\007sent_at\030\005 \001(\004" +
-      "\022\023\n\013received_at\030\006 \001(\004\022\017\n\007content\030\007 \001(\t\";" +
-      "\n\017ChatMessageSend\022\027\n\017conversation_id\030\001 \001" +
-      "(\014\022\017\n\007content\030\002 \001(\tb\006proto3"
+      "\030\006 \001(\t\022\036\n\026last_message_sender_id\030\007 \001(\014\"F" +
+      "\n\027ChatConversationRequest\022\027\n\017conversatio" +
+      "n_id\030\001 \001(\014\022\022\n\nlast_index\030\002 \001(\004\"a\n\024ChatCo" +
+      "nversationList\022\027\n\017conversation_id\030\001 \001(\014\022" +
+      "0\n\014message_list\030\002 \003(\0132\032.qaul.rpc.chat.Ch" +
+      "atMessage\"\212\001\n\013ChatMessage\022\r\n\005index\030\001 \001(\r" +
+      "\022\021\n\tsender_id\030\002 \001(\014\022\022\n\nmessage_id\030\003 \001(\014\022" +
+      "\016\n\006status\030\004 \001(\005\022\017\n\007sent_at\030\005 \001(\004\022\023\n\013rece" +
+      "ived_at\030\006 \001(\004\022\017\n\007content\030\007 \001(\t\";\n\017ChatMe" +
+      "ssageSend\022\027\n\017conversation_id\030\001 \001(\014\022\017\n\007co" +
+      "ntent\030\002 \001(\tb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -7805,7 +7900,7 @@ public final class ChatOuterClass {
     internal_static_qaul_rpc_chat_ChatOverview_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_chat_ChatOverview_descriptor,
-        new java.lang.String[] { "ConversationId", "LastMessageIndex", "Name", "LastMessageAt", "Unread", "Content", });
+        new java.lang.String[] { "ConversationId", "LastMessageIndex", "Name", "LastMessageAt", "Unread", "Content", "LastMessageSenderId", });
     internal_static_qaul_rpc_chat_ChatConversationRequest_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_qaul_rpc_chat_ChatConversationRequest_fieldAccessorTable = new

@@ -176,6 +176,9 @@ struct Qaul_Rpc_Chat_ChatOverview {
   /// preview text of the last message
   var content: String = String()
 
+  /// sender of the last message
+  var lastMessageSenderID: Data = Data()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -452,6 +455,7 @@ extension Qaul_Rpc_Chat_ChatOverview: SwiftProtobuf.Message, SwiftProtobuf._Mess
     4: .standard(proto: "last_message_at"),
     5: .same(proto: "unread"),
     6: .same(proto: "content"),
+    7: .standard(proto: "last_message_sender_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -466,6 +470,7 @@ extension Qaul_Rpc_Chat_ChatOverview: SwiftProtobuf.Message, SwiftProtobuf._Mess
       case 4: try { try decoder.decodeSingularUInt64Field(value: &self.lastMessageAt) }()
       case 5: try { try decoder.decodeSingularInt32Field(value: &self.unread) }()
       case 6: try { try decoder.decodeSingularStringField(value: &self.content) }()
+      case 7: try { try decoder.decodeSingularBytesField(value: &self.lastMessageSenderID) }()
       default: break
       }
     }
@@ -490,6 +495,9 @@ extension Qaul_Rpc_Chat_ChatOverview: SwiftProtobuf.Message, SwiftProtobuf._Mess
     if !self.content.isEmpty {
       try visitor.visitSingularStringField(value: self.content, fieldNumber: 6)
     }
+    if !self.lastMessageSenderID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.lastMessageSenderID, fieldNumber: 7)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -500,6 +508,7 @@ extension Qaul_Rpc_Chat_ChatOverview: SwiftProtobuf.Message, SwiftProtobuf._Mess
     if lhs.lastMessageAt != rhs.lastMessageAt {return false}
     if lhs.unread != rhs.unread {return false}
     if lhs.content != rhs.content {return false}
+    if lhs.lastMessageSenderID != rhs.lastMessageSenderID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

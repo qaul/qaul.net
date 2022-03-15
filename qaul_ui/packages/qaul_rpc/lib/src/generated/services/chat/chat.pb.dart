@@ -222,6 +222,7 @@ class ChatOverview extends $pb.GeneratedMessage {
     ..a<$fixnum.Int64>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastMessageAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'unread', $pb.PbFieldType.O3)
     ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
+    ..a<$core.List<$core.int>>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastMessageSenderId', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
@@ -233,6 +234,7 @@ class ChatOverview extends $pb.GeneratedMessage {
     $fixnum.Int64? lastMessageAt,
     $core.int? unread,
     $core.String? content,
+    $core.List<$core.int>? lastMessageSenderId,
   }) {
     final _result = create();
     if (conversationId != null) {
@@ -252,6 +254,9 @@ class ChatOverview extends $pb.GeneratedMessage {
     }
     if (content != null) {
       _result.content = content;
+    }
+    if (lastMessageSenderId != null) {
+      _result.lastMessageSenderId = lastMessageSenderId;
     }
     return _result;
   }
@@ -329,6 +334,15 @@ class ChatOverview extends $pb.GeneratedMessage {
   $core.bool hasContent() => $_has(5);
   @$pb.TagNumber(6)
   void clearContent() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.List<$core.int> get lastMessageSenderId => $_getN(6);
+  @$pb.TagNumber(7)
+  set lastMessageSenderId($core.List<$core.int> v) { $_setBytes(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasLastMessageSenderId() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearLastMessageSenderId() => clearField(7);
 }
 
 class ChatConversationRequest extends $pb.GeneratedMessage {

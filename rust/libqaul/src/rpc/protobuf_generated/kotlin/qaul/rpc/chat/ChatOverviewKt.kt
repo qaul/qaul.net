@@ -171,6 +171,31 @@ public object ChatOverviewKt {
     public fun clearContent() {
       _builder.clearContent()
     }
+
+    /**
+     * <pre>
+     * sender of the last message
+     * </pre>
+     *
+     * <code>bytes last_message_sender_id = 7;</code>
+     */
+    public var lastMessageSenderId: com.google.protobuf.ByteString
+      @JvmName("getLastMessageSenderId")
+      get() = _builder.getLastMessageSenderId()
+      @JvmName("setLastMessageSenderId")
+      set(value) {
+        _builder.setLastMessageSenderId(value)
+      }
+    /**
+     * <pre>
+     * sender of the last message
+     * </pre>
+     *
+     * <code>bytes last_message_sender_id = 7;</code>
+     */
+    public fun clearLastMessageSenderId() {
+      _builder.clearLastMessageSenderId()
+    }
   }
 }
 @kotlin.jvm.JvmSynthetic

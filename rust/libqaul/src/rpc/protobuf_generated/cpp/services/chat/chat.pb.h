@@ -758,6 +758,7 @@ class ChatOverview final :
     kConversationIdFieldNumber = 1,
     kNameFieldNumber = 3,
     kContentFieldNumber = 6,
+    kLastMessageSenderIdFieldNumber = 7,
     kLastMessageIndexFieldNumber = 2,
     kUnreadFieldNumber = 5,
     kLastMessageAtFieldNumber = 4,
@@ -804,6 +805,20 @@ class ChatOverview final :
   std::string* _internal_mutable_content();
   public:
 
+  // bytes last_message_sender_id = 7;
+  void clear_last_message_sender_id();
+  const std::string& last_message_sender_id() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_last_message_sender_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_last_message_sender_id();
+  PROTOBUF_NODISCARD std::string* release_last_message_sender_id();
+  void set_allocated_last_message_sender_id(std::string* last_message_sender_id);
+  private:
+  const std::string& _internal_last_message_sender_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_last_message_sender_id(const std::string& value);
+  std::string* _internal_mutable_last_message_sender_id();
+  public:
+
   // uint32 last_message_index = 2;
   void clear_last_message_index();
   uint32_t last_message_index() const;
@@ -841,6 +856,7 @@ class ChatOverview final :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr conversation_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr content_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr last_message_sender_id_;
   uint32_t last_message_index_;
   int32_t unread_;
   uint64_t last_message_at_;
@@ -2227,6 +2243,57 @@ inline void ChatOverview::set_allocated_content(std::string* content) {
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatOverview.content)
+}
+
+// bytes last_message_sender_id = 7;
+inline void ChatOverview::clear_last_message_sender_id() {
+  last_message_sender_id_.ClearToEmpty();
+}
+inline const std::string& ChatOverview::last_message_sender_id() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatOverview.last_message_sender_id)
+  return _internal_last_message_sender_id();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void ChatOverview::set_last_message_sender_id(ArgT0&& arg0, ArgT... args) {
+ 
+ last_message_sender_id_.SetBytes(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatOverview.last_message_sender_id)
+}
+inline std::string* ChatOverview::mutable_last_message_sender_id() {
+  std::string* _s = _internal_mutable_last_message_sender_id();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.ChatOverview.last_message_sender_id)
+  return _s;
+}
+inline const std::string& ChatOverview::_internal_last_message_sender_id() const {
+  return last_message_sender_id_.Get();
+}
+inline void ChatOverview::_internal_set_last_message_sender_id(const std::string& value) {
+  
+  last_message_sender_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* ChatOverview::_internal_mutable_last_message_sender_id() {
+  
+  return last_message_sender_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* ChatOverview::release_last_message_sender_id() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.chat.ChatOverview.last_message_sender_id)
+  return last_message_sender_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void ChatOverview::set_allocated_last_message_sender_id(std::string* last_message_sender_id) {
+  if (last_message_sender_id != nullptr) {
+    
+  } else {
+    
+  }
+  last_message_sender_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), last_message_sender_id,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (last_message_sender_id_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    last_message_sender_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatOverview.last_message_sender_id)
 }
 
 // -------------------------------------------------------------------

@@ -63,6 +63,9 @@ pub struct ChatOverview {
     /// preview text of the last message
     #[prost(string, tag="6")]
     pub content: ::prost::alloc::string::String,
+    /// sender of the last message
+    #[prost(bytes="vec", tag="7")]
+    pub last_message_sender_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// request messages of a specific chat conversation
 #[derive(Clone, PartialEq, ::prost::Message)]

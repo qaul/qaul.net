@@ -48,6 +48,8 @@ message ChatOverview {
     int32 unread = 5;
     // preview text of the last message
     string content = 6;
+    // sender of the last message
+    bytes last_message_sender_id = 7;
 }
 
 // request messages of a specific chat conversation

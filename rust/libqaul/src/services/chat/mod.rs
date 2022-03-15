@@ -75,7 +75,7 @@ impl Chat {
 
         // get conversation
         let overview;
-        match Self::update_overview(&db_ref, sender_id.to_bytes(), timestamp, message.content.clone()) {
+        match Self::update_overview(&db_ref, sender_id.to_bytes(), timestamp, message.content.clone(), sender_id.to_bytes()) {
             Ok(chat_overview) => overview = chat_overview,
             Err(e) => {
                 log::error!("{}", e);
@@ -151,7 +151,7 @@ impl Chat {
 
         // get conversation
         let conversation;
-        match Self::update_overview(&db_ref, conversation_id.clone(), timestamp, content.clone()) {
+        match Self::update_overview(&db_ref, conversation_id.clone(), timestamp, content.clone(), user_id.to_bytes()) {
             Ok(chat_conversation) => conversation = chat_conversation,
             Err(e) => {
                 log::error!("{}", e);
@@ -185,7 +185,7 @@ impl Chat {
     }
     
     /// Update the last Message and the Conversation Index of an Overview entry
-    fn update_overview (db_ref: &ChatUser, conversation_id: Vec<u8>, timestamp: u64, content: String) -> Result<rpc_proto::ChatOverview, String> {
+    fn update_overview (db_ref: &ChatUser, conversation_id: Vec<u8>, timestamp: u64, content: String, last_message_sender_id: Vec<u8>) -> Result<rpc_proto::ChatOverview, String> {
         // check if there is an conversation
         let mut overview: rpc_proto::ChatOverview;
         let index;
@@ -201,6 +201,7 @@ impl Chat {
                 overview.last_message_index = index;
                 overview.unread = overview.unread +1;
                 overview.content = content;
+                overview.last_message_sender_id = last_message_sender_id;
             },
             // conversation does not exist yet
             Ok(None) => {
@@ -228,6 +229,7 @@ impl Chat {
                     last_message_at: timestamp,
                     unread: 1,
                     content,
+                    last_message_sender_id,
                 };
             },
             // data base error
