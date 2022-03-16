@@ -14,8 +14,9 @@ class FeedNotificationController extends NotificationController<List<FeedPost>>
   String get cacheKey => 'feedNotificationControllerLastPostIndexDataKey';
 
   @override
-  Map<AlwaysAliveProviderListenable<List<FeedPost>>, void Function(List<FeedPost>?, List<FeedPost>)>
-      get strategies => {feedMessagesProvider: execute};
+  MapEntry<AlwaysAliveProviderListenable<List<FeedPost>>,
+          void Function(List<FeedPost>?, List<FeedPost>)>
+      get strategy => MapEntry(feedMessagesProvider, execute);
 
   @override
   Future<void> initialize() async {

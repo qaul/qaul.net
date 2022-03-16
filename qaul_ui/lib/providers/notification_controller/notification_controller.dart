@@ -22,7 +22,7 @@ class NotificationController<T> {
 
   @protected
   @visibleForOverriding
-  Map<AlwaysAliveProviderListenable<T>, void Function(T?, T)> get strategies =>
+  MapEntry<AlwaysAliveProviderListenable<T>, void Function(T?, T)> get strategy =>
       throw UnimplementedError('Must be implemented by child class');
 
   @protected
@@ -33,9 +33,7 @@ class NotificationController<T> {
   Future<void> initialize() async {
     _preferences = await SharedPreferences.getInstance();
     _user = ref.read(defaultUserProvider)!;
-    for (final entry in strategies.entries) {
-      ref.listen(entry.key, entry.value);
-    }
+    ref.listen(strategy.key, strategy.value);
   }
 
   @protected

@@ -15,8 +15,9 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   String get cacheKey => 'chatNotificationControllerChatDataKey';
 
   @override
-  Map<AlwaysAliveProviderListenable<List<ChatRoom>>, void Function(List<ChatRoom>?, List<ChatRoom>)>
-      get strategies => {chatRoomsProvider: execute};
+  MapEntry<AlwaysAliveProviderListenable<List<ChatRoom>>,
+          void Function(List<ChatRoom>?, List<ChatRoom>)>
+      get strategy => MapEntry(chatRoomsProvider, execute);
 
   @override
   Future<void> initialize() async {
