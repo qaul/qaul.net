@@ -71,6 +71,7 @@ dependencies:
   collection: ^1.15.0
   intersperse: ^2.0.0
   logging: ^1.0.2
+  meta: ^1.7.0
 
   uuid: ^3.0.5
   equatable: ^2.0.3
