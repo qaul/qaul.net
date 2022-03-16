@@ -13,6 +13,7 @@ enum MessageStatus { nothing, sent, received }
 class ChatRoom with EquatableMixin implements Comparable {
   const ChatRoom._({
     required this.conversationId,
+    this.lastMessageSenderId,
     this.lastMessageIndex,
     this.name,
     this.lastMessageTime,
@@ -23,6 +24,7 @@ class ChatRoom with EquatableMixin implements Comparable {
 
   /// The ID of the other user
   final Uint8List conversationId;
+  final Uint8List? lastMessageSenderId;
   final int? lastMessageIndex;
   final String? name;
   final DateTime? lastMessageTime;
@@ -38,6 +40,7 @@ class ChatRoom with EquatableMixin implements Comparable {
     return ChatRoom._(
       conversationId: Uint8List.fromList(overview.conversationId),
       name: overview.name,
+      lastMessageSenderId: Uint8List.fromList(overview.lastMessageSenderId),
       lastMessageIndex: overview.lastMessageIndex,
       lastMessageTime: DateTime.fromMillisecondsSinceEpoch(
         overview.lastMessageAt.toInt(),

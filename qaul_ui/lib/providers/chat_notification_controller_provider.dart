@@ -6,7 +6,6 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
     with DataProcessingStrategy<ChatRoom> {
   ChatNotificationController(Ref ref) : super(ref);
 
-  ChatRoom? _currentOpenRoom;
   final _chats = <_ChatData>[];
 
   final _log = Logger('ChatNotificationController');
@@ -28,12 +27,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
       }));
     }
     ref.read(qaulWorkerProvider).getAllChatRooms();
-    ref.listen(currentOpenChatRoom.state, _updateCurrentOpenRoom);
     _log.config('Initialized:\n\t· User: ${localUser.name}\n\t· Cached chats: $_chats');
-  }
-
-  void _updateCurrentOpenRoom(_, StateController<ChatRoom?> notifier) {
-    _currentOpenRoom = notifier.state;
   }
 
   @override
@@ -62,9 +56,10 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
 
   @override
   LocalNotification? process(ChatRoom value) {
-    if (!UserPrefsHelper().chatNotificationsEnabled) return null;
     _updateLocalCachedChatWith(value);
-    if (_lastMessageIsFromLocalUser(value)) return null;
+    if (!UserPrefsHelper().chatNotificationsEnabled || _lastMessageIsFromLocalUser(value)) {
+      return null;
+    }
     return LocalNotification(
       id: value.hashCode,
       title: value.name ?? 'New Message',
@@ -73,18 +68,12 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
     );
   }
 
-  bool _lastMessageIsFromLocalUser(ChatRoom r1) {
-    if (_currentOpenRoom == null || _currentOpenRoom!.messages == null) {
-      return false;
-    }
-    if (!_currentOpenRoom!.conversationId.equals(r1.conversationId)) {
-      return false;
-    }
-    return _currentOpenRoom!.messages!.last.senderId.equals(localUser.id);
-  }
+  bool _lastMessageIsFromLocalUser(ChatRoom r1) =>
+      localUser.id.equals(r1.lastMessageSenderId ?? []);
 
   void _updateLocalCachedChatWith(ChatRoom r) {
     var newChatData = _ChatData(r.idBase58, r.lastMessageIndex ?? 1);
+    _log.fine('updating cached chat (${r.name}) data: $newChatData');
     final res = _chats.indexWhere((r2) => r2.roomIdBase58 == r.idBase58);
     res.isNegative ? _chats.add(newChatData) : _chats[res] = newChatData;
   }
