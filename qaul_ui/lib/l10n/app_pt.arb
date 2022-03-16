@@ -19,6 +19,9 @@
   "submitPostTooltip": "Submeter",
   "newChatTooltip": "Nova conversa",
 
+  "feedNotificationsEnabled": "Ativar/Desativar notificações do feed:",
+  "chatNotificationsEnabled": "Ativar/Desativar notificações do chat:",
+
   "settings": "Configurações",
   "about": "Sobre",
   "theme": "Tema",

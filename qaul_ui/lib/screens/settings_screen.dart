@@ -7,13 +7,19 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
 import '../decorators/loading_decorator.dart';
+import '../helpers/user_prefs_helper.dart';
 import '../widgets/widgets.dart';
 
-class SettingsScreen extends HookConsumerWidget {
+class SettingsScreen extends StatefulHookConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _SettingsScreenState createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  @override
+  Widget build(BuildContext context) {
     final l18ns = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
@@ -30,15 +36,43 @@ class SettingsScreen extends HookConsumerWidget {
         child: Padding(
           padding: MediaQuery.of(context).viewPadding.copyWith(left: 20, right: 20),
           child: Column(
-            children: const [
-              LanguageSelectDropDown(),
-              SizedBox(height: 20),
-              ThemeSelectDropdown(),
-              //
-              Divider(),
-
-              SizedBox(height: 80),
-              _InternetNodesList(),
+            children: [
+              const LanguageSelectDropDown(),
+              const SizedBox(height: 20),
+              const ThemeSelectDropdown(),
+              const SizedBox(height: 20),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(l18ns.feedNotificationsEnabled),
+                  PlatformAwareSwitch(
+                    value: UserPrefsHelper().feedNotificationsEnabled,
+                    onChanged: (val) {
+                      UserPrefsHelper().feedNotificationsEnabled = val;
+                      setState(() {});
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(l18ns.chatNotificationsEnabled),
+                  PlatformAwareSwitch(
+                    value: UserPrefsHelper().chatNotificationsEnabled,
+                    onChanged: (val) {
+                      UserPrefsHelper().chatNotificationsEnabled = val;
+                      setState(() {});
+                    },
+                  ),
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 80),
+              const _InternetNodesList(),
             ],
           ),
         ),

@@ -54,5 +54,8 @@
   "notFoundErrorMessage": "نص بسيط",
   "noneAvailableMessage": "نص بسيط",
   "invalidIPMessage": "نص بسيط",
-  "invalidPortMessage": "نص بسيط"
+  "invalidPortMessage": "نص بسيط",
+
+  "feedNotificationsEnabled": "تمكين / تعطيل إشعارات الخلاصة:",
+  "chatNotificationsEnabled": "تمكين / تعطيل إشعارات الدردشة:"
 }

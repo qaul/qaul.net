@@ -19,6 +19,9 @@
   "submitPostTooltip": "Kirim",
   "newChatTooltip": "Obrolan Baru",
 
+  "feedNotificationsEnabled": "Aktifkan/Nonaktifkan Pemberitahuan Umpan:",
+  "chatNotificationsEnabled": "Aktifkan/Nonaktifkan Notifikasi Obrolan:",
+
   "settings": "Pengaturan",
   "about": "Tentang",
   "theme": "Tema",

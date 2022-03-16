@@ -20,4 +20,9 @@ class PlatformAwareSwitch extends PlatformAwareBuilder {
   Widget iosBuilder(BuildContext context, WidgetRef ref) {
     return CupertinoSwitch(value: value, onChanged: onChanged);
   }
+
+  @override
+  Widget macosBuilder(BuildContext context, WidgetRef ref) {
+    return CupertinoSwitch(value: value, onChanged: onChanged);
+  }
 }

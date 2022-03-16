@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:riverpod/riverpod.dart';
 
+import '../helpers/user_prefs_helper.dart';
 import 'notification_controller/notification_controller.dart';
 
 part 'chat_notification_controller_provider.dart';

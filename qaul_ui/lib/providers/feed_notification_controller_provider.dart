@@ -42,6 +42,7 @@ class FeedNotificationController extends NotificationController<List<FeedPost>>
 
   @override
   LocalNotification? process(FeedPost value) {
+    if (!UserPrefsHelper().feedNotificationsEnabled) return null;
     _lastIndex = value.index ?? 1;
     if (_lastMessageIsFromLocalUser(value)) return null;
     return LocalNotification(
