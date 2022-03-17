@@ -1,4 +1,4 @@
-part of 'providers.dart';
+part of '../providers.dart';
 
 final feedNotificationControllerProvider = Provider((ref) => FeedNotificationController(ref));
 

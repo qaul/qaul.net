@@ -13,8 +13,8 @@ import 'package:riverpod/riverpod.dart';
 import '../helpers/user_prefs_helper.dart';
 import 'notification_controller/notification_controller.dart';
 
-part 'chat_notification_controller_provider.dart';
+part 'notification_controller/chat_notification_controller_provider.dart';
 
-part 'feed_notification_controller_provider.dart';
+part 'notification_controller/feed_notification_controller_provider.dart';
 
 part 'tab_controller_provider.dart';
