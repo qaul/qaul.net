@@ -66,6 +66,8 @@ timeago.LookupMessages _fromLocale(Locale l) {
       return timeago.IdMessages();
     case 'pt':
       return timeago.PtBrShortMessages();
+    case 'uk':
+      return timeago.UkMessages();
     case 'en':
     default:
       return timeago.EnShortMessages();
