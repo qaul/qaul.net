@@ -7,7 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../helpers/navigation_helper.dart';
 import '../providers/providers.dart';
 import '../screens/home/tabs/tab.dart';
-import '../screens/test_screen.dart';
 import '../widgets/widgets.dart';
 
 class QaulNavBarDecorator extends StatefulWidget {
@@ -25,7 +24,6 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
         // 'support': AppLocalizations.of(context)!.support,
         'support': 'Support',
         'old-network': 'Classic Network View',
-        'test': "TEST",
       };
 
   void _handleClick(String value) {
@@ -55,9 +53,6 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
             body: BaseTab.network(),
           );
         }));
-        break;
-      case 'test':
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const TestScreen()));
         break;
     }
   }

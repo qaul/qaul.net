@@ -19,6 +19,9 @@
   "submitPostTooltip": "Submit",
   "newChatTooltip": "New chat",
 
+  "feedNotificationsEnabled": "Enable/Disable Feed Notifications:",
+  "chatNotificationsEnabled": "Enable/Disable Chat Notifications:",
+
   "settings": "Settings",
   "about": "About",
   "theme": "Theme",

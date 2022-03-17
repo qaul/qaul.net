@@ -11,6 +11,11 @@ class _FeedState extends _BaseTabState<_Feed> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    useEffect(() {
+      ref.read(feedNotificationControllerProvider).initialize();
+      return () {};
+    }, []);
+
     final users = ref.watch(usersProvider);
     final messages = ref.watch(feedMessagesProvider);
     final defaultUser = ref.watch(defaultUserProvider);

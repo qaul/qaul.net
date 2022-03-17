@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
+import '../decorators/deeplink_decorator.dart';
 import '../screens/about_screen.dart';
 import '../screens/create_account_screen.dart';
 import '../screens/home/home_screen.dart';
@@ -29,7 +30,7 @@ class NavigationHelper {
         break;
       case home:
         // WillPopScope handled in build method of HomeScreen -> Custom behavior
-        routeWidget = HomeScreen();
+        routeWidget = DeepLinkWrapper(child: HomeScreen());
         break;
       case settings:
         routeWidget = const SettingsScreen();
