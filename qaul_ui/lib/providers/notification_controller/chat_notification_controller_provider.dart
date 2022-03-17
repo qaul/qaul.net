@@ -64,7 +64,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
       id: value.hashCode,
       title: value.name ?? 'New Message',
       body: value.lastMessagePreview!,
-      payload: value.idBase58,
+      payload: 'qaul://chat/${value.idBase58}',
     );
   }
 

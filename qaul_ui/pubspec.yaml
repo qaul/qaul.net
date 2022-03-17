@@ -66,21 +66,18 @@ dependencies:
   # *******
   # Business Logic Dependencies
   # *******
-  intl: ^0.17.0
-
   collection: ^1.15.0
-  intersperse: ^2.0.0
-  logging: ^1.0.2
-  meta: ^1.7.0
-
-  uuid: ^3.0.5
   equatable: ^2.0.3
-
+  flutter_hooks: ^0.18.0
   hive: ^2.0.4
   hive_flutter: ^1.1.0
-
-  flutter_hooks: ^0.18.0
+  intersperse: ^2.0.0
+  intl: ^0.17.0
+  logging: ^1.0.2
+  meta: ^1.7.0
   riverpod: ^1.0.3
+  uni_links: ^0.5.1
+  uuid: ^3.0.5
 
   # *******
   # Local Dependencies
