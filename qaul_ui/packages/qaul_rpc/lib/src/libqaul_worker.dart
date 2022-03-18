@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -13,6 +14,7 @@ import 'generated/node/node.pb.dart';
 import 'generated/node/user_accounts.pb.dart';
 import 'generated/router/router.pb.dart';
 import 'generated/router/users.pb.dart';
+import 'generated/rpc/debug.pb.dart';
 import 'generated/rpc/qaul_rpc.pb.dart';
 import 'generated/services/chat/chat.pb.dart';
 import 'generated/services/feed/feed.pb.dart';
@@ -32,6 +34,11 @@ class LibqaulWorker {
   Future<bool> get initialized => _initialized.future;
   final _initialized = Completer<bool>();
 
+  final _heartbeats = Queue<bool>();
+
+  Stream<bool> get onLibraryCrash => _streamController.stream;
+  final _streamController = StreamController<bool>.broadcast();
+
   void _init() async {
     if (_initialized.isCompleted) return;
     // Throws when called for some reason
@@ -43,6 +50,12 @@ class LibqaulWorker {
     Timer.periodic(const Duration(milliseconds: 100), (_) async {
       final n = await _lib.checkReceiveQueue();
       if (n > 0) _receiveResponse();
+    });
+    Timer.periodic(const Duration(seconds: 2), (_) async {
+      if (_heartbeats.length > 5) _streamController.add(true);
+      _heartbeats.addLast(true);
+      final msg = Debug(heartbeatRequest: HeartbeatRequest());
+      _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
     });
 
     _initialized.complete(true);
@@ -206,6 +219,9 @@ class LibqaulWorker {
       } else if (m.module == Modules.CHAT) {
         final resp = await ChatTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
+      } else if (m.module == Modules.DEBUG) {
+        final resp = await DebugTranslator().decodeMessageBytes(m.data);
+        if (resp?.data is bool) _heartbeats.removeFirst();
       } else {
         throw UnhandledRpcMessageException.value(m.toString(), 'LibqaulWorker.receiveResponse');
       }

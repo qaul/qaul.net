@@ -60,6 +60,22 @@ class _CustomProviderScope extends StatefulWidget {
 
 class _CustomProviderScopeState extends State<_CustomProviderScope> {
   @override
+  void initState() {
+    super.initState();
+    container.read(qaulWorkerProvider).onLibraryCrash.listen((_) {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) {
+            return const AlertDialog(
+              title: Text('An Error occurred'),
+              content: Text('Please restart the application.'),
+            );
+          });
+    });
+  }
+
+  @override
   void dispose() {
     super.dispose();
     // disposing the globally self managed container.
