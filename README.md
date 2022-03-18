@@ -23,5 +23,5 @@ Committing and contributing to this project, you agree to transfer the full copy
 
 [Verein zur Förderung von offenen Community-Projekten]: https://ocpa.ch
 [Open Community Project Association]: https://ocpa.ch
-[AGPLv3]: agpl-3.0.md
-[GNU Affero General Public License version 3 or later]: agpl-3.0.md
+[AGPLv3]: licenses/agpl-3.0.md
+[GNU Affero General Public License version 3 or later]: licenses/agpl-3.0.md
