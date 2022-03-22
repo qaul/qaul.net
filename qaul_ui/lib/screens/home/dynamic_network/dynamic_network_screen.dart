@@ -1,6 +1,5 @@
 import 'dart:async' as async;
 import 'dart:math' as math;
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
@@ -162,7 +161,7 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
 
   final _NetworkNodeComponent? ballParent;
 
-  final _noise = OpenSimplex2S(10);
+  final _noise = OpenSimplex2S(math.Random().nextInt(255));
 
   double get x => body.position.x;
 
@@ -197,12 +196,12 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Add noise callback
-    async.Timer.periodic(
-      const Duration(milliseconds: 100),
-      (t) => addNoise(t.tick),
-    );
-
+    if (ballParent != null) {
+      async.Timer.periodic(
+        const Duration(milliseconds: 100),
+        (t) => addNoise(t.tick),
+      );
+    }
     var i = 0;
     for (final child in node.children ?? {}) {
       var numberOfChildren = (node.children!.length);
