@@ -619,7 +619,7 @@ impl Ble {
                         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
                         // send message
-                        Rpc::send_message(buf, crate::rpc::proto::Modules::Node.into(), "".to_string(), Vec::new());
+                        Rpc::send_message(buf, crate::rpc::proto::Modules::Ble.into(), "".to_string(), Vec::new());
                     },
                     Some(proto_rpc::ble::Message::StartRequest(_)) => {
                         // start BLE module
@@ -651,7 +651,7 @@ impl Ble {
                         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
                         // send message
-                        Rpc::send_message(buf, crate::rpc::proto::Modules::Node.into(), "".to_string(), Vec::new());
+                        Rpc::send_message(buf, crate::rpc::proto::Modules::Ble.into(), "".to_string(), Vec::new());
                     },
                     _ => {
                         log::error!("BLE rpc message undefined");

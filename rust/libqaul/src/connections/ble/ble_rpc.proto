@@ -18,7 +18,6 @@ message Ble {
 
 // UI request for information on devices and module status
 message InfoRequest {
-
 }
 
 // BLE Info Response Message

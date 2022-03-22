@@ -25,6 +25,7 @@ mod router;
 mod feed;
 mod chat;
 mod debug;
+mod ble;
 
 use cli::Cli;
 use rpc::Rpc;

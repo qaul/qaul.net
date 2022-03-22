@@ -13,6 +13,7 @@ use super::router::Router;
 use super::feed::Feed;
 use super::chat::Chat;
 use super::debug::Debug;
+use super::ble::Ble;
 
 /// CLI command analizer and processing
 pub struct Cli {}
@@ -48,6 +49,10 @@ impl Cli {
             // connections functions
             cmd if cmd.starts_with("connections ") => {
                 Connections::cli(cmd.strip_prefix("connections ").unwrap());
+            },
+            // ble functions
+            cmd if cmd.starts_with("ble ") => {
+                Ble::cli(cmd.strip_prefix("ble ").unwrap());
             },
             // debugging functions
             cmd if cmd.starts_with("debug ") => {

@@ -10,7 +10,7 @@ use super::rpc::Rpc;
 /// include generated protobuf RPC rust definition file
 mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.debug.rs"); }
 
-/// node module function handling
+/// debug module function handling
 pub struct Debug {}
 
 impl Debug {
