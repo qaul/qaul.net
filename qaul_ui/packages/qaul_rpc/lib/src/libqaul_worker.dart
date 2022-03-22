@@ -52,8 +52,12 @@ class LibqaulWorker {
       if (n > 0) _receiveResponse();
     });
     Timer.periodic(const Duration(seconds: 2), (_) async {
-      if (_heartbeats.length > 5) _streamController.add(true);
+      if (_heartbeats.length > 5) {
+        _log.warning('${_heartbeats.length} heartbeats unanswered by Libqaul');
+        _streamController.add(true);
+      }
       _heartbeats.addLast(true);
+      _log.fine('requesting heartbeat to libqaul');
       final msg = Debug(heartbeatRequest: HeartbeatRequest());
       _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
     });
@@ -221,7 +225,10 @@ class LibqaulWorker {
         if (resp != null) _processResponse(resp);
       } else if (m.module == Modules.DEBUG) {
         final resp = await DebugTranslator().decodeMessageBytes(m.data);
-        if (resp?.data is bool) _heartbeats.removeFirst();
+        if (resp?.data is bool) {
+          _log.fine('libqaul answered a heartbeat request');
+          _heartbeats.removeFirst();
+        }
       } else {
         throw UnhandledRpcMessageException.value(m.toString(), 'LibqaulWorker.receiveResponse');
       }
