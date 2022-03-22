@@ -14,6 +14,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 
 // import 'package:bitsdojo_window/bitsdojo_window.dart';
 
+import 'helpers/navigation_helper.dart';
 import 'helpers/user_prefs_helper.dart';
 import 'qaul_app.dart';
 
@@ -59,6 +60,28 @@ class _CustomProviderScope extends StatefulWidget {
 }
 
 class _CustomProviderScopeState extends State<_CustomProviderScope> {
+  @override
+  void initState() {
+    super.initState();
+    container.read(qaulWorkerProvider).onLibraryCrash.listen((_) {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) {
+            return AlertDialog(
+              title: const Text('An Error occurred'),
+              content: const Text('Please restart the application.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pushNamed(context, NavigationHelper.support),
+                  child: const Text('Go to support'),
+                ),
+              ],
+            );
+          });
+    });
+  }
+
   @override
   void dispose() {
     super.dispose();

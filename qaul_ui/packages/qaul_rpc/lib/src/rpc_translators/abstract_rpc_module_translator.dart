@@ -8,6 +8,7 @@ import '../generated/node/node.pb.dart';
 import '../generated/node/user_accounts.pb.dart';
 import '../generated/router/router.pb.dart';
 import '../generated/router/users.pb.dart';
+import '../generated/rpc/debug.pb.dart';
 import '../generated/rpc/qaul_rpc.pb.dart';
 import '../generated/services/chat/chat.pb.dart';
 import '../generated/services/feed/feed.pb.dart';
