@@ -86,16 +86,49 @@ targets and copies them to the appropriate location in the android folder
 
 ## Build Android Libqaul AAR Library
 
-1) Open the `android` folder in android studio.
-2) In Android Studio do the following steps
-  * open the gradle tab
-  * in the gradle tab open the following path libqaul > Tasks > build
-  * run the `assemble` script in the build folder
-3) now you can find the library files `libqaul-target.aar` and `libqaul-debug.aar`
-   in the folder `build/libqaul/outputs`.
+Now an Android AAR libqaul library needs to be built with the previously built 
+rust libqaul.so in it.
 
+```sh
+# move to projects toplevel android folder
+cd android
 
-## Build the Flutter Android App
+# Build aar for debug & release
+./gradlew assemble
+```
 
-Open the `flutter` folder in android-studio, build it for Android or run 
-it in the virtual android device.
+## Build the qaul Android App 
+
+### Build and Run a debuggable Android Version for your Phone
+
+To build and run the debug version of the Android app on your phone,
+attach your phone to your computer and make sure it is found by adb.
+
+```sh
+# move to the flutter 
+cd qaul_ui
+
+# build and run the qaul app on your phone
+flutter run
+```
+
+To see the debug messages via logcat, open logcat in a second terminal, 
+while the qaul app is running.
+
+```sh
+# start logcat in a separate terminal and filter for qaul
+# log messages
+adb logcat | grep qaul
+```
+
+### Build Android AAR for Release and for Store
+
+To build an Android app ARR archive for uploading to the play store.
+
+```sh
+# change into the flutter android folder
+cd qaul_ui/android
+
+# start fastline build and upload script
+bundle exec fastlane upload_beta_playstore
+```
