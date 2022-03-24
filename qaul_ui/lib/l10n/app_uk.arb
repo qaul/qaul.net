@@ -31,6 +31,7 @@
   "address": "Доступ",
   "name": "Ім'я",
   "connections": "З'єднання",
+  "allConnectionsFilterLabel": "Показати всю мережу",
   "ping": "Пінг",
   "hopCount": "Стрибків",
   "via": "Через",
