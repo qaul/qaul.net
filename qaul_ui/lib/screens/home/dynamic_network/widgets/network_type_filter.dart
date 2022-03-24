@@ -77,7 +77,7 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
     return GestureDetector(
       onTap: onTap,
       child: Tooltip(
-        message: labelFor(filter),
+        message: labelFor(filter, context: context),
         child: CircleAvatar(
           foregroundColor: Colors.white,
           backgroundColor: backgroundColor,
@@ -103,16 +103,16 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
     }
   }
 
-  String labelFor(NetworkTypeFilter filter) {
+  String labelFor(NetworkTypeFilter filter, {required BuildContext context}) {
     switch (filter) {
       case NetworkTypeFilter.bluetooth:
         return 'Bluetooth';
       case NetworkTypeFilter.lan:
-        return 'Local';
+        return 'LAN';
       case NetworkTypeFilter.internet:
-        return 'Wi-fi';
+        return 'Internet';
       case NetworkTypeFilter.all:
-        return 'All';
+        return AppLocalizations.of(context)!.allConnectionsFilterLabel;
     }
   }
 }

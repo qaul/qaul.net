@@ -26,6 +26,7 @@
   "address": "نص بسيط",
   "name": "نص بسيط",
   "connections": "نص بسيط",
+  "allConnectionsFilterLabel": "عرض الشبكة بالكامل",
   "ping": "نص بسيط",
   "hopCount": "نص بسيط",
   "via": "نص بسيط",

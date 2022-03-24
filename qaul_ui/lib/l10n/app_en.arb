@@ -31,6 +31,7 @@
   "address": "Address",
   "name": "Name",
   "connections": "Connections",
+  "allConnectionsFilterLabel": "Show Entire Network",
   "ping": "Ping",
   "hopCount": "Hop Count",
   "via": "Via",

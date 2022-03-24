@@ -31,6 +31,7 @@
   "address": "Alamat",
   "name": "Nama",
   "connections": "Koneksi",
+  "allConnectionsFilterLabel": "Tampilkan Seluruh Jaringan",
   "ping": "Ping",
   "hopCount": "Jumlah Loncatan",
   "via": "Melalui",
