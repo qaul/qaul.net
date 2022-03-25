@@ -13,6 +13,8 @@ import 'user_account_screen.dart';
 class HomeScreen extends HookConsumerWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
+  bool get _isMobile => Platform.isIOS || Platform.isAndroid;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabCtrl = ref.read(homeScreenControllerProvider.notifier);
@@ -29,6 +31,7 @@ class HomeScreen extends HookConsumerWidget {
           child: PageView(
             controller: tabCtrl.pageController,
             allowImplicitScrolling: true,
+            physics: _isMobile ? const PageScrollPhysics() : const NeverScrollableScrollPhysics(),
             children: [
               const UserAccountScreen(),
               BaseTab.feed(),
