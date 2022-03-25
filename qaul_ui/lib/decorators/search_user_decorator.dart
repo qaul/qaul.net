@@ -31,12 +31,8 @@ final _userSearchProvider = StateProvider.autoDispose<List<User>>((ref) {
 });
 
 class SearchUserDecorator extends HookConsumerWidget {
-  const SearchUserDecorator({
-    Key? key,
-    required this.title,
-    required this.builder,
-  }) : super(key: key);
-  final String title;
+  const SearchUserDecorator({Key? key, required this.builder, this.title}) : super(key: key);
+  final String? title;
   final SearchUserResultBuilder builder;
 
   @override
@@ -44,38 +40,41 @@ class SearchUserDecorator extends HookConsumerWidget {
     final controller = useTextEditingController();
     final searchKeyNotifier = _searchKeyProvider.notifier;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        centerTitle: false,
-        leading: const DefaultBackButton(),
-        bottom: PreferredSize(
-          preferredSize: const Size(double.maxFinite, 40),
-          child: Padding(
-            padding: EdgeInsets.zero,
-            child: TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search),
-                hintText: 'Search user...',
-                border: const UnderlineInputBorder(),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
-                ),
-                suffixIcon: IconButton(
-                  onPressed: () {
-                    controller.clear();
-                    ref.read(searchKeyNotifier).state = '';
-                  },
-                  splashRadius: 16,
-                  icon: const Icon(Icons.clear_rounded),
-                ),
-              ),
-              onChanged: (val) => ref.read(searchKeyNotifier).state = val,
+    final searchBar = PreferredSize(
+      preferredSize: const Size(double.maxFinite, 40),
+      child: Padding(
+        padding: EdgeInsets.zero,
+        child: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            prefixIcon: const Icon(Icons.search),
+            hintText: 'Search user...',
+            border: const UnderlineInputBorder(),
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.white),
+            ),
+            suffixIcon: IconButton(
+              onPressed: () {
+                controller.clear();
+                ref.read(searchKeyNotifier).state = '';
+              },
+              splashRadius: 16,
+              icon: const Icon(Icons.clear_rounded),
             ),
           ),
+          onChanged: (val) => ref.read(searchKeyNotifier).state = val,
         ),
       ),
+    );
+    return Scaffold(
+      appBar: title == null
+          ? searchBar
+          : AppBar(
+              title: Text(title!),
+              centerTitle: false,
+              leading: const DefaultBackButton(),
+              bottom: searchBar,
+            ),
       body: Consumer(
         builder: (context, ref, ___) {
           final users = ref.watch(_userSearchProvider.notifier).state;
