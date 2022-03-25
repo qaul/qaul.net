@@ -21,7 +21,7 @@ ConnectionType _mapFilter(NetworkTypeFilter t) {
 }
 
 /// The currently active filter.
-final _networkTypeFilter = StateProvider((_) => NetworkTypeFilter.internet);
+final _networkTypeFilter = StateProvider((_) => NetworkTypeFilter.all);
 
 /// Nodes that fit the current filter criteria
 final _filteredNodes = Provider<NetworkNode>((ref) {
