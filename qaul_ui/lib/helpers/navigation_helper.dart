@@ -30,7 +30,7 @@ class NavigationHelper {
         break;
       case home:
         // WillPopScope handled in build method of HomeScreen -> Custom behavior
-        routeWidget = DeepLinkWrapper(child: HomeScreen());
+        routeWidget = const DeepLinkWrapper(child: HomeScreen());
         break;
       case settings:
         routeWidget = const SettingsScreen();
