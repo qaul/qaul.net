@@ -11,77 +11,73 @@ class _UsersState extends _BaseTabState<_Users> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final defaultUser = ref.watch(defaultUserProvider);
-    final users = ref
-        .watch(usersProvider)
-        .where((u) => u.idBase58 != (defaultUser?.idBase58 ?? ''))
-        .toList()
-      ..sort();
-
     final refreshUsers = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
       await worker.getUsers();
     }, [UniqueKey()]);
 
-    final l18ns = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: CronTaskDecorator(
         schedule: const Duration(milliseconds: 1000),
         callback: () async => await refreshUsers(),
         child: RefreshIndicator(
           onRefresh: () async => await refreshUsers(),
-          child: EmptyStateTextDecorator(
-            l18ns.emptyUsersList,
-            isEmpty: users.isEmpty,
-            child: ListView.separated(
-              controller: ScrollController(),
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: users.length,
-              separatorBuilder: (_, __) => const Divider(height: 12.0),
-              itemBuilder: (_, i) {
-                final user = users[i];
-                var theme = Theme.of(context).textTheme;
-                var hasConnections = user.availableTypes != null && user.availableTypes!.isNotEmpty;
+          child: SearchUserDecorator(builder: (_, users) {
+            return EmptyStateTextDecorator(
+              l10n.emptyUsersList,
+              isEmpty: users.isEmpty,
+              child: ListView.separated(
+                controller: ScrollController(),
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: users.length,
+                separatorBuilder: (_, __) => const Divider(height: 12.0),
+                itemBuilder: (_, i) {
+                  final user = users[i];
+                  var theme = Theme.of(context).textTheme;
+                  var hasConnections =
+                      user.availableTypes != null && user.availableTypes!.isNotEmpty;
 
-                var userId = Text(
-                  'ID: ${user.idBase58}',
-                  style: theme.caption!.copyWith(fontSize: 10),
-                );
-                var content = !hasConnections
-                    ? userId
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          userId,
-                          if (hasConnections) ...[
-                            const SizedBox(height: 8),
-                            _AvailableConnections(user: user),
+                  var userId = Text(
+                    'ID: ${user.idBase58}',
+                    style: theme.caption!.copyWith(fontSize: 10),
+                  );
+                  var content = !hasConnections
+                      ? userId
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            userId,
+                            if (hasConnections) ...[
+                              const SizedBox(height: 8),
+                              _AvailableConnections(user: user),
+                            ],
                           ],
-                        ],
-                      );
+                        );
 
-                return DisabledStateDecorator(
-                  isDisabled: user.isBlocked ?? false,
-                  ignorePointer: false,
-                  child: UserListTile(
-                    user,
-                    content: content,
-                    isThreeLine: hasConnections,
-                    trailingIcon: (user.isVerified ?? false)
-                        ? const Icon(Icons.verified_user)
-                        : const SizedBox(),
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => UserDetailsScreen(user: user)),
-                      );
-                      refreshUsers();
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
+                  return DisabledStateDecorator(
+                    isDisabled: user.isBlocked ?? false,
+                    ignorePointer: false,
+                    child: UserListTile(
+                      user,
+                      content: content,
+                      isThreeLine: hasConnections,
+                      trailingIcon: (user.isVerified ?? false)
+                          ? const Icon(Icons.verified_user)
+                          : const SizedBox(),
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => UserDetailsScreen(user: user)),
+                        );
+                        refreshUsers();
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          }),
         ),
       ),
     );

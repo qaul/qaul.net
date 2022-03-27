@@ -66,7 +66,7 @@ class NetworkNode extends Equatable {
     var hops = remainingUsers.map((e) => e.availableTypes![filter]!.hopCount!);
     if (hops.isEmpty) return out;
 
-    final maxHops = hops.reduce(max);
+    final maxHops = hops.reduce(math.max);
     for (var hops = 2; hops <= maxHops; hops++) {
       hopCountMatchesHops(e) => e.availableTypes?[filter]?.hopCount == hops;
       final usersWithNHops = remainingUsers.where(hopCountMatchesHops).toList();

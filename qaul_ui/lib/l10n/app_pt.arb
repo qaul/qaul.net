@@ -31,6 +31,7 @@
   "address": "Endereço",
   "name": "Nome",
   "connections": "Conexões",
+  "allConnectionsFilterLabel": "Mostrar toda a rede",
   "ping": "Ping",
   "hopCount": "Número de Saltos",
   "via": "Via",

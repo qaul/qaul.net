@@ -211,11 +211,11 @@ class QaulNavBarItem extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.watch(selectedTabProvider);
+    final controller = ref.read(homeScreenControllerProvider.notifier);
     var selected = useState(false);
 
     useEffect(() {
-      void updateSelected(SelectedTabStatus s) => selected.value = TabType.values[s.tab] == tab;
+      void updateSelected(int i) => selected.value = TabType.values[i] == tab;
       return controller.addListener(updateSelected);
     });
 
@@ -242,7 +242,7 @@ class QaulNavBarItem extends HookConsumerWidget {
         );
       case TabType.users:
         svgPath = 'assets/icons/people.svg';
-        tooltip = l18ns!.feedNavButtonTooltip;
+        tooltip = l18ns!.usersNavButtonTooltip;
         break;
       case TabType.feed:
         svgPath = 'assets/icons/hashtag.svg';

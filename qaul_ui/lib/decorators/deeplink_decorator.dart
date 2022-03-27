@@ -60,7 +60,7 @@ class _DeepLinkWrapperState extends ConsumerState<DeepLinkWrapper> {
       final linkCommand = link.replaceAll("qaul://", "");
       if (linkCommand == 'feed') {
         Navigator.popUntil(context, _reachedHomeScreen);
-        ref.read(selectedTabProvider).goToTab(TabType.feed);
+        ref.read(homeScreenControllerProvider.notifier).goToTab(TabType.feed);
       } else if (linkCommand.startsWith("chat/")) {
         final idBase58 = linkCommand.replaceAll("chat/", "");
         _navigateToChat(idBase58);

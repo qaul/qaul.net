@@ -21,7 +21,7 @@ ConnectionType _mapFilter(NetworkTypeFilter t) {
 }
 
 /// The currently active filter.
-final _networkTypeFilter = StateProvider((_) => NetworkTypeFilter.internet);
+final _networkTypeFilter = StateProvider((_) => NetworkTypeFilter.all);
 
 /// Nodes that fit the current filter criteria
 final _filteredNodes = Provider<NetworkNode>((ref) {
@@ -50,6 +50,7 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
     final buttons = List.generate(NetworkTypeFilter.values.length, (i) {
       final filter = NetworkTypeFilter.values[i];
       return filterButton(
+        context,
         filter: filter,
         backgroundColor: bgColorFor(filter),
         onTap: () => ref.read(_networkTypeFilter.notifier).state = filter,
@@ -67,22 +68,26 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
     );
   }
 
-  Widget filterButton({
+  Widget filterButton(
+    BuildContext context, {
     required NetworkTypeFilter filter,
     required Color backgroundColor,
     required VoidCallback? onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: CircleAvatar(
-        foregroundColor: Colors.white,
-        backgroundColor: backgroundColor,
-        child: iconFor(filter),
+      child: Tooltip(
+        message: labelFor(filter, context: context),
+        child: CircleAvatar(
+          foregroundColor: Colors.white,
+          backgroundColor: backgroundColor,
+          child: iconFor(filter, context: context),
+        ),
       ),
     );
   }
 
-  Widget iconFor(NetworkTypeFilter filter) {
+  Widget iconFor(NetworkTypeFilter filter, {required BuildContext context}) {
     switch (filter) {
       case NetworkTypeFilter.bluetooth:
         return const Icon(Icons.bluetooth);
@@ -91,7 +96,23 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
       case NetworkTypeFilter.internet:
         return const Icon(CupertinoIcons.globe);
       case NetworkTypeFilter.all:
-        return const Icon(Icons.mediation);
+        return SvgPicture.asset(
+          'assets/icons/network.svg',
+          color: Theme.of(context).iconTheme.color,
+        );
+    }
+  }
+
+  String labelFor(NetworkTypeFilter filter, {required BuildContext context}) {
+    switch (filter) {
+      case NetworkTypeFilter.bluetooth:
+        return 'Bluetooth';
+      case NetworkTypeFilter.lan:
+        return 'LAN';
+      case NetworkTypeFilter.internet:
+        return 'Internet';
+      case NetworkTypeFilter.all:
+        return AppLocalizations.of(context)!.allConnectionsFilterLabel;
     }
   }
 }
