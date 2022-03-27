@@ -9,8 +9,8 @@
 // https://runrust.miraheze.org/wiki/Async_crate_comparison
 // MPSC = Multi-Producer, Single-Consumer FiFo
 use futures::prelude::*;
-use futures::{future::FutureExt, pin_mut, select};
-use futures_ticker::Ticker;
+use futures::{future::FutureExt, pin_mut};
+use tokio::select;
 use state::Storage;
 use std::time::Duration;
 
@@ -116,25 +116,31 @@ pub async fn start(storage_path: String) -> () {
     // TODO: interval is only in unstable. Use it once it is stable.
     //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
     //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
-    let mut rpc_ticker = Ticker::new(Duration::from_millis(10));
+    let mut rpc_ticker = tokio::time::interval(Duration::from_millis(10));
+    // let mut rpc_ticker = Ticker::new(Duration::from_millis(10));
 
     // check SYS once every 10 milliseconds
     // TODO: interval is only in unstable. Use it once it is stable.
     //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
     //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
-    let mut sys_ticker = Ticker::new(Duration::from_millis(10));
+    let mut sys_ticker = tokio::time::interval(Duration::from_millis(10));
+    // let mut sys_ticker = Ticker::new(Duration::from_millis(10));
 
     // check flooding message queue periodically
-    let mut flooding_ticker = Ticker::new(Duration::from_millis(100));
+    let mut flooding_ticker = tokio::time::interval(Duration::from_millis(100));
+    // let mut flooding_ticker = Ticker::new(Duration::from_millis(100));
 
     // send routing info periodically to neighbours
-    let mut routing_info_ticker = Ticker::new(Duration::from_millis(100));
+    let mut routing_info_ticker = tokio::time::interval(Duration::from_millis(100));
+    // let mut routing_info_ticker = Ticker::new(Duration::from_millis(100));
 
     // re-create routing table periodically
-    let mut routing_table_ticker = Ticker::new(Duration::from_millis(1000));
+    let mut routing_table_ticker = tokio::time::interval(Duration::from_millis(1000));
+    // let mut routing_table_ticker = Ticker::new(Duration::from_millis(1000));
 
     // manage the message sending
-    let mut messaging_ticker = Ticker::new(Duration::from_millis(10));
+    let mut messaging_ticker = tokio::time::interval(Duration::from_millis(10));
+    // let mut messaging_ticker = Ticker::new(Duration::from_millis(10));
 
     // set initialized flag
     INITIALIZED.set(true);
@@ -145,12 +151,12 @@ pub async fn start(storage_path: String) -> () {
         let evt = {
             let lan_fut = lan.swarm.next().fuse();
             let internet_fut = internet.swarm.next().fuse();
-            let rpc_fut = rpc_ticker.next().fuse();
-            let sys_fut = sys_ticker.next().fuse();
-            let flooding_fut = flooding_ticker.next().fuse();
-            let routing_info_fut = routing_info_ticker.next().fuse();
-            let routing_table_fut = routing_table_ticker.next().fuse();
-            let messaging_fut = messaging_ticker.next().fuse();
+            let rpc_fut = rpc_ticker.tick().fuse();
+            let sys_fut = sys_ticker.tick().fuse();
+            let flooding_fut = flooding_ticker.tick().fuse();
+            let routing_info_fut = routing_info_ticker.tick().fuse();
+            let routing_table_fut = routing_table_ticker.tick().fuse();
+            let messaging_fut = messaging_ticker.tick().fuse();
 
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
             // You need to downgrade to version 0.2.400 if this happens to you

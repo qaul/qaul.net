@@ -10,8 +10,9 @@ name = "libqaul"
 crate-type = ["cdylib", "staticlib", "rlib"]
 
 [dependencies]
-libp2p = { version = "0.39.1" }
+libp2p = { version = "0.39.1", features = [ "tcp-tokio", "mdns", "dns-tokio" ] }
 async-std = { version = "1.9", features = ["attributes"] }
+tokio = { version = "1.0.1", features = ["full"] }
 futures = "0.3.15"
 serde = {version = "=1.0", features = ["derive"] }
 serde_json = "=1.0"

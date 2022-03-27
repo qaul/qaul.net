@@ -6,11 +6,11 @@
 //! This client uses all the functionality of the qaul.net
 //! RPC system and 
 
-use futures_ticker::Ticker;
-use async_std::io;
-//use async_std::stream;
-use futures::prelude::*;
-use futures::{ pin_mut, select, future::FutureExt };
+use tokio::io::{self, AsyncBufReadExt};
+use tokio::select;
+use futures::{ pin_mut };
+use options::Config;
+use structopt::StructOpt;
 use std::time::Duration;
 
 use libqaul;
@@ -26,6 +26,7 @@ mod feed;
 mod chat;
 mod debug;
 mod ble;
+mod options;
 
 use cli::Cli;
 use rpc::Rpc;
@@ -37,10 +38,14 @@ enum EventType {
     Rpc(bool),
 }
 
-#[async_std::main]
+#[tokio::main]
 async fn main() {
+    // Extract the CLI options
+    let Config { options } = options::Config::from_args();
+
     // start libqaul in new thread and save configuration file to current working path
-    libqaul::api::start("".to_string());
+    libqaul::api::start(options.storage_path.unwrap_or("".to_string()));
+
     //#[cfg(target_os = "windows")]
     //libqaul::api::start(".\\".to_string());
     //#[cfg(not(target_os = "windows"))]
@@ -59,17 +64,16 @@ async fn main() {
     let mut stdin = io::BufReader::new(io::stdin()).lines();
     
     // check RPC once every 10 milliseconds
-    // TODO: interval is only in unstable. Use it once it is stable. 
-    //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
-    //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
-    let mut futures_ticker = Ticker::new(Duration::from_millis(10));
+    let mut rpc_interval = tokio::time::interval(Duration::from_millis(10));
+
+    // let mut futures_ticker = Ticker::new(Duration::from_millis(10));
 
 
     // loop and poll CLI and RPC
     loop {
         let evt = {
-            let line_fut = stdin.next().fuse();
-            let rpc_fut = futures_ticker.next().fuse();
+            let line_fut = stdin.next_line();
+            let rpc_fut = rpc_interval.tick();
 
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
             // You need to downgrade to version 0.2.400 if this happens to you
