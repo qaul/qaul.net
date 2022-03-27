@@ -15,6 +15,7 @@ use futures::executor::block_on;
 use std::{
     thread,
 };
+use tokio::task;
 use directories::ProjectDirs;
 
 use crate::rpc::Rpc;
@@ -33,12 +34,10 @@ mod android;
 /// Provide the location for storage, all data of qaul will be saved there.
 pub fn start(storage_path: String) {
     // Spawn new thread
-    thread::spawn(move|| block_on(
-        async move {
-            // start libqaul
-            crate::start(storage_path).await;
-        }
-    ));    
+    task::spawn(async move {
+        // start libqaul
+        crate::start(storage_path).await;
+    });
 }
 
 /// start libqaul on a desktop platform (Linux, Mac, Windows)

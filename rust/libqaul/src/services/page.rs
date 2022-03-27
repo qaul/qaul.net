@@ -6,7 +6,8 @@ use log::{error, info};
 // Async comparison
 // https://runrust.miraheze.org/wiki/Async_crate_comparison
 // MPSC = Multi-Producer, Single-Consumer FiFo
-use async_std::{task, fs};
+use async_std::{fs};
+use tokio::task;
 use futures::channel::mpsc;
 
 use crate::node::Node;
@@ -51,7 +52,7 @@ pub struct PageResponse {
 
 
 pub fn respond_with_public_pages(sender: mpsc::UnboundedSender<QaulMessage>, receiver: String) {
-    task::spawn(async move{
+    task::spawn(async move {
         match read_local_pages().await {
             Ok(pages) => {
                 let page_resp = PageResponse {

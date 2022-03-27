@@ -41,7 +41,8 @@ use libp2p::{
 use futures::channel::mpsc;
 use prost::Message;
 use log::info;
-use async_std::task;
+// use async_std::task;
+// use tokio::task;
 use mpsc::UnboundedReceiver;
 
 use crate::types::QaulMessage;
@@ -134,7 +135,7 @@ impl Lan {
 
             // create MDNS behaviour
             // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
-            let mdns = task::block_on(Mdns::new(MdnsConfig::default())).unwrap();
+            let mdns = Mdns::new(MdnsConfig::default()).await.unwrap();
 
             log::info!("Lan::init() swarm mdns module created");
 
