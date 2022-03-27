@@ -5,12 +5,7 @@
 //! 
 //! qaul Daemon is running headless on servers in the background
 
-//use futures_ticker::Ticker;
-//use async_std::io;
-//use futures::prelude::*;
-//use futures::{ pin_mut, select, future::FutureExt };
 use std::{thread, time::Duration};
-
 use libqaul;
 
 #[async_std::main]
@@ -32,7 +27,6 @@ async fn main() {
     //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
     //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     
-    //let mut futures_ticker = Ticker::new(Duration::from_millis(10));
 
 
     // loop

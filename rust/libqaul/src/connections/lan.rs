@@ -41,8 +41,6 @@ use libp2p::{
 use futures::channel::mpsc;
 use prost::Message;
 use log::info;
-// use async_std::task;
-// use tokio::task;
 use mpsc::UnboundedReceiver;
 
 use crate::types::QaulMessage;

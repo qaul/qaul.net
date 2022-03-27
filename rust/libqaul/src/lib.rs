@@ -113,34 +113,22 @@ pub async fn start(storage_path: String) -> () {
     Services::init();
     
     // check RPC once every 10 milliseconds
-    // TODO: interval is only in unstable. Use it once it is stable.
-    //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
-    //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     let mut rpc_ticker = tokio::time::interval(Duration::from_millis(10));
-    // let mut rpc_ticker = Ticker::new(Duration::from_millis(10));
 
     // check SYS once every 10 milliseconds
-    // TODO: interval is only in unstable. Use it once it is stable.
-    //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
-    //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     let mut sys_ticker = tokio::time::interval(Duration::from_millis(10));
-    // let mut sys_ticker = Ticker::new(Duration::from_millis(10));
 
     // check flooding message queue periodically
     let mut flooding_ticker = tokio::time::interval(Duration::from_millis(100));
-    // let mut flooding_ticker = Ticker::new(Duration::from_millis(100));
 
     // send routing info periodically to neighbours
     let mut routing_info_ticker = tokio::time::interval(Duration::from_millis(100));
-    // let mut routing_info_ticker = Ticker::new(Duration::from_millis(100));
 
     // re-create routing table periodically
     let mut routing_table_ticker = tokio::time::interval(Duration::from_millis(1000));
-    // let mut routing_table_ticker = Ticker::new(Duration::from_millis(1000));
 
     // manage the message sending
     let mut messaging_ticker = tokio::time::interval(Duration::from_millis(10));
-    // let mut messaging_ticker = Ticker::new(Duration::from_millis(10));
 
     // set initialized flag
     INITIALIZED.set(true);

@@ -66,9 +66,6 @@ async fn main() {
     // check RPC once every 10 milliseconds
     let mut rpc_interval = tokio::time::interval(Duration::from_millis(10));
 
-    // let mut futures_ticker = Ticker::new(Duration::from_millis(10));
-
-
     // loop and poll CLI and RPC
     loop {
         let evt = {

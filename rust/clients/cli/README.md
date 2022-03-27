@@ -14,9 +14,17 @@ You can run as many instances on as many machines as you like. the machines just
 
 **Start Program**
 
+If you are want to run multiple instances of the CLI client, you will need to provide path to the database.
+
 ```sh
-# start the program
+# Start the first client
 cargo run --bin=qaul-cli
+
+# In a different terminal window, start the second client
+cargo run --bin=qaul-cli -- --storage-path="./bob.db"
+
+# In another terminal window
+cargo run --bin=qaul-cli -- --storage-path="./charlie.db"
 ```
 
 Once the program is running, one can enter the commands documented in the CLI Manual below.
