@@ -416,7 +416,7 @@ class BleService : LifecycleService() {
                         if (bleDevice == null) {
                             bleDevice = BLEScanDevice.getDevice()
                             bleDevice.macAddress = device.address
-                            bleDevice.qaulId = msgObject.qaulId!!.toByteArray(Charset.defaultCharset())
+                            bleDevice.qaulId = msgObject.qaulId!!.toByteArray(Charset.forName("UTF-8"))
                             bleDevice.bluetoothDevice = device
                             receiveList.add(bleDevice)
                         }
@@ -438,7 +438,7 @@ class BleService : LifecycleService() {
                         if (bleDevice == null) {
                             bleDevice = BLEScanDevice.getDevice()
                             bleDevice.macAddress = device.address
-                            bleDevice.qaulId = msgObject.qaulId!!.toByteArray(Charset.defaultCharset())
+                            bleDevice.qaulId = msgObject.qaulId!!.toByteArray(Charset.forName("UTF-8"))
                             bleDevice.bluetoothDevice = device
                             receiveList.add(bleDevice)
                         }
@@ -755,7 +755,7 @@ class BleService : LifecycleService() {
         if (bleDevice != null) {
             val bleActor = connectDevice(device = bleDevice, isFromMessage = true)
             bleActor.messageId = id
-            val btArray =  Gson().toJson(msg).toByteArray(Charset.defaultCharset())
+            val btArray =  Gson().toJson(msg).toByteArray(Charset.forName("UTF-8"))
             val delimiter = ByteArray(2)
             delimiter[0] = 36
             delimiter[1] = 36

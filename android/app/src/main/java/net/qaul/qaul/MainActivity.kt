@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Message
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -44,7 +43,7 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
         setContentView(binding.root)
         qaulId = getDeviceName()
         if (qaulId.length > 18) {
-            qaulId = "HelloThisIsAQaulId"
+            qaulId = qaulId.substring(0,17)
         }
         setSupportActionBar(binding.toolbar)
         bleWrapperClass = BleWrapperClass(context = this)
@@ -72,7 +71,7 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
     private fun sendInfoRequest() {
         val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
         bleReq.infoRequest = BleOuterClass.BleInfoRequest.getDefaultInstance()
-        bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
+        bleWrapperClass.receiveRequest(data = bleReq.build().toByteString(), callback = this)
     }
 
     /**
@@ -82,15 +81,15 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
     private fun sendStartRequest() {
         val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
         val startRequest = BleOuterClass.BleStartRequest.newBuilder()
-        val qaulid = qaulId.toByteArray(Charset.defaultCharset())
+        val qaulid = qaulId.toByteArray(Charset.forName("UTF-8"))
 //        val qaulid = byteArrayOf(
 //            0x48,0x65,0x6c,0x6c,0x6f,0x41,0x6a,0x61,0x79,0x48,0x6f,0x77,0x41,0x72,0x65,0x59,0x6f,0x75,0x48,0x65
 //        )
         AppLog.e(TAG, "qaulid : " + qaulid.size)
         startRequest.qaulId = ByteString.copyFrom(qaulid)
-        startRequest.mode = BleOuterClass.BleMode.low_latency
+        startRequest.powerSetting = BleOuterClass.BlePowerSetting.low_latency
         bleReq.startRequest = startRequest.build()
-        bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
+        bleWrapperClass.receiveRequest(data = bleReq.build().toByteString(), callback = this)
     }
 
     /**
@@ -99,7 +98,7 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
     private fun sendStopRequest() {
         val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
         bleReq.stopRequest = BleOuterClass.BleStopRequest.getDefaultInstance()
-        bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
+        bleWrapperClass.receiveRequest(data = bleReq.build().toByteString(), callback = this)
     }
 
     private fun validateData() {
@@ -132,12 +131,14 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
     private fun sendData(qaulId: String, message: String) {
         val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
         val directSend = BleOuterClass.BleDirectSend.newBuilder()
-        directSend.data = ByteString.copyFrom(message.toByteArray(Charset.defaultCharset()))
-        directSend.to = ByteString.copyFrom(qaulId.toByteArray(Charset.defaultCharset()))
-        directSend.qaulId = ByteString.copyFrom(this.qaulId, Charset.defaultCharset())
-        directSend.id = System.currentTimeMillis().toString()
+        directSend.data = ByteString.copyFrom(message.toByteArray(Charset.forName("UTF-8")))
+        directSend.receiverId = ByteString.copyFrom(qaulId.toByteArray(Charset.forName("UTF-8")))
+        directSend.senderId = ByteString.copyFrom(this.qaulId, Charset.defaultCharset())
+        directSend.messageId = ByteString.copyFrom(
+            System.currentTimeMillis().toString().toByteArray(Charset.forName("UTF-8"))
+        )
         bleReq.directSend = directSend.build()
-        bleWrapperClass.receiveRequest(bleReq = bleReq.build(), callback = this)
+        bleWrapperClass.receiveRequest(data = bleReq.build().toByteString(), callback = this)
         runOnUiThread {
             Toast.makeText(this, "Connecting...", Toast.LENGTH_SHORT).show()
         }
@@ -220,7 +221,8 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
     /**
      * This Method Will Be Called When BLEModule Send Response To BLERequests Sent
      */
-    override fun bleResponse(ble: BleOuterClass.Ble) {
+    override fun bleResponse(data: ByteString) {
+        val ble: BleOuterClass.Ble = BleOuterClass.Ble.parseFrom(data)
         if (ble.isInitialized) {
             when (ble.messageCase) {
                 BleOuterClass.Ble.MessageCase.INFO_RESPONSE -> {
@@ -250,35 +252,32 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-                BleOuterClass.Ble.MessageCase.SCAN_RESULT -> {
-                    val scanResult: BleOuterClass.BleScanResult = ble.scanResult
-                    AppLog.e("scanResult: ", Gson().toJson(scanResult) + " " + String(scanResult.qaulId.toByteArray()))
-                    if (scanResult.isInTheRange) {
-                        runOnUiThread {
-//                            Toast.makeText(
-//                                this,
-//                                "Device found: ${scanResult.name} : ${scanResult.mac}",
-//                                Toast.LENGTH_SHORT
-//                            ).show()
-                            if (!scanResult.qaulId.isEmpty) {
-                                binding.etQaulId.setText(String(scanResult.qaulId.toByteArray()))
-                            }
-                        }
-                    } else {
-                        runOnUiThread {
-//                            Toast.makeText(
-//                                this,
-//                                "Device is out of range: ${scanResult.name} : ${scanResult.mac}",
-//                                Toast.LENGTH_SHORT
-//                            ).show()
+                BleOuterClass.Ble.MessageCase.DEVICE_DISCOVERED -> {
+                    val scanResult: BleOuterClass.BleDeviceDiscovered = ble.deviceDiscovered
+                    AppLog.e(
+                        "deviceDiscovered: ",
+                        Gson().toJson(scanResult) + " " + String(scanResult.qaulId.toByteArray())
+                    )
+
+                    runOnUiThread {
+                        if (!scanResult.qaulId.isEmpty) {
+                            binding.etQaulId.setText(String(scanResult.qaulId.toByteArray()))
                         }
                     }
+
+                }
+                BleOuterClass.Ble.MessageCase.DEVICE_UNAVAILABLE -> {
+                    val scanResult: BleOuterClass.BleDeviceUnavailable = ble.deviceUnavailable
+                    AppLog.e(
+                        "deviceUnavailable: ",
+                        Gson().toJson(scanResult) + " " + String(scanResult.qaulId.toByteArray())
+                    )
                 }
                 BleOuterClass.Ble.MessageCase.DIRECT_RECEIVED -> {
                     val directReceived: BleOuterClass.BleDirectReceived = ble.directReceived
                     AppLog.e("directReceived: ", Gson().toJson(directReceived))
                     val message: String = directReceived.data.toString(Charset.defaultCharset())
-                    val qaulId: String = directReceived.qaulId.toString(Charset.defaultCharset())
+                    val qaulId: String = directReceived.from.toString(Charset.defaultCharset())
                     runOnUiThread {
                         binding.tvMessage.text = message
                         binding.etQaulId.setText(qaulId)
@@ -288,7 +287,8 @@ class MainActivity : AppCompatActivity(), BleRequestCallback {
                     val directSendResult: BleOuterClass.BleDirectSendResult = ble.directSendResult
                     AppLog.e("directSendResult: ", Gson().toJson(directSendResult))
                     runOnUiThread {
-                        Toast.makeText(this, directSendResult.errorMessage, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, directSendResult.errorMessage, Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
                 else -> {
