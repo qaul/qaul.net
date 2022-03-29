@@ -151,6 +151,71 @@ public object NeighboursListKt {
     @kotlin.jvm.JvmName("clearInternet")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, InternetProxy>.clear() {
       _builder.clearInternet()
+    }
+    /**
+     * An uninstantiable, behaviorless type to represent the field in
+     * generics.
+     */
+    @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
+    public class BleProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     */
+     public val ble: com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>
+      @kotlin.jvm.JvmSynthetic
+      get() = com.google.protobuf.kotlin.DslList(
+        _builder.getBleList()
+      )
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     * @param value The ble to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("addBle")
+    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>.add(value: qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
+      _builder.addBle(value)
+    }/**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     * @param value The ble to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("plusAssignBle")
+    @Suppress("NOTHING_TO_INLINE")
+    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
+      add(value)
+    }/**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     * @param values The ble to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("addAllBle")
+    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.NeighboursEntry>) {
+      _builder.addAllBle(values)
+    }/**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     * @param values The ble to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("plusAssignAllBle")
+    @Suppress("NOTHING_TO_INLINE")
+    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.NeighboursEntry>) {
+      addAll(values)
+    }/**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     * @param index The index to set the value at.
+     * @param value The ble to set.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("setBle")
+    public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
+      _builder.setBle(index, value)
+    }/**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("clearBle")
+    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>.clear() {
+      _builder.clearBle()
     }}
 }
 @kotlin.jvm.JvmSynthetic

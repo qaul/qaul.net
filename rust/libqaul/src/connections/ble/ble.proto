@@ -238,9 +238,11 @@ message BleDeviceUnavailable {
 // send a direct message
 message BleDirectSend {
     // message id (as a reference for the result message)
-    bytes id = 1;
+    bytes message_id = 1;
     // qaul id of the device to send it to
-    bytes to = 2;
+    bytes receiver_id = 2;
+    // qaul id of the sending device
+    bytes sender_id = 3;
     // data to be sent
     bytes data = 4;
 }

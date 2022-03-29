@@ -1974,6 +1974,7 @@ class NeighboursList final :
   enum : int {
     kLanFieldNumber = 1,
     kInternetFieldNumber = 2,
+    kBleFieldNumber = 3,
   };
   // repeated .qaul.rpc.router.NeighboursEntry lan = 1;
   int lan_size() const;
@@ -2011,6 +2012,24 @@ class NeighboursList final :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::router::NeighboursEntry >&
       internet() const;
 
+  // repeated .qaul.rpc.router.NeighboursEntry ble = 3;
+  int ble_size() const;
+  private:
+  int _internal_ble_size() const;
+  public:
+  void clear_ble();
+  ::qaul::rpc::router::NeighboursEntry* mutable_ble(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::router::NeighboursEntry >*
+      mutable_ble();
+  private:
+  const ::qaul::rpc::router::NeighboursEntry& _internal_ble(int index) const;
+  ::qaul::rpc::router::NeighboursEntry* _internal_add_ble();
+  public:
+  const ::qaul::rpc::router::NeighboursEntry& ble(int index) const;
+  ::qaul::rpc::router::NeighboursEntry* add_ble();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::router::NeighboursEntry >&
+      ble() const;
+
   // @@protoc_insertion_point(class_scope:qaul.rpc.router.NeighboursList)
  private:
   class _Internal;
@@ -2020,6 +2039,7 @@ class NeighboursList final :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::router::NeighboursEntry > lan_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::router::NeighboursEntry > internet_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::router::NeighboursEntry > ble_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_router_2frouter_2eproto;
 };
@@ -3351,6 +3371,46 @@ inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::router::Nei
 NeighboursList::internet() const {
   // @@protoc_insertion_point(field_list:qaul.rpc.router.NeighboursList.internet)
   return internet_;
+}
+
+// repeated .qaul.rpc.router.NeighboursEntry ble = 3;
+inline int NeighboursList::_internal_ble_size() const {
+  return ble_.size();
+}
+inline int NeighboursList::ble_size() const {
+  return _internal_ble_size();
+}
+inline void NeighboursList::clear_ble() {
+  ble_.Clear();
+}
+inline ::qaul::rpc::router::NeighboursEntry* NeighboursList::mutable_ble(int index) {
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.router.NeighboursList.ble)
+  return ble_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::router::NeighboursEntry >*
+NeighboursList::mutable_ble() {
+  // @@protoc_insertion_point(field_mutable_list:qaul.rpc.router.NeighboursList.ble)
+  return &ble_;
+}
+inline const ::qaul::rpc::router::NeighboursEntry& NeighboursList::_internal_ble(int index) const {
+  return ble_.Get(index);
+}
+inline const ::qaul::rpc::router::NeighboursEntry& NeighboursList::ble(int index) const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.router.NeighboursList.ble)
+  return _internal_ble(index);
+}
+inline ::qaul::rpc::router::NeighboursEntry* NeighboursList::_internal_add_ble() {
+  return ble_.Add();
+}
+inline ::qaul::rpc::router::NeighboursEntry* NeighboursList::add_ble() {
+  ::qaul::rpc::router::NeighboursEntry* _add = _internal_add_ble();
+  // @@protoc_insertion_point(field_add:qaul.rpc.router.NeighboursList.ble)
+  return _add;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::router::NeighboursEntry >&
+NeighboursList::ble() const {
+  // @@protoc_insertion_point(field_list:qaul.rpc.router.NeighboursList.ble)
+  return ble_;
 }
 
 // -------------------------------------------------------------------

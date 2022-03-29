@@ -150,7 +150,8 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT NeighboursRequestDefaultTypeInt
 constexpr NeighboursList::NeighboursList(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : lan_()
-  , internet_(){}
+  , internet_()
+  , ble_(){}
 struct NeighboursListDefaultTypeInternal {
   constexpr NeighboursListDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -272,6 +273,7 @@ const uint32_t TableStruct_router_2frouter_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, lan_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, internet_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, ble_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursEntry, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -293,7 +295,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 68, -1, -1, sizeof(::qaul::rpc::router::ConnectionEntry)},
   { 77, -1, -1, sizeof(::qaul::rpc::router::NeighboursRequest)},
   { 83, -1, -1, sizeof(::qaul::rpc::router::NeighboursList)},
-  { 91, -1, -1, sizeof(::qaul::rpc::router::NeighboursEntry)},
+  { 92, -1, -1, sizeof(::qaul::rpc::router::NeighboursEntry)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -342,17 +344,18 @@ const char descriptor_table_protodef_router_2frouter_2eproto[] PROTOBUF_SECTION_
   "ions\030\002 \003(\0132 .qaul.rpc.router.ConnectionE"
   "ntry\">\n\017ConnectionEntry\022\013\n\003rtt\030\001 \001(\r\022\021\n\t"
   "hop_count\030\002 \001(\r\022\013\n\003via\030\003 \001(\014\"\023\n\021Neighbou"
-  "rsRequest\"s\n\016NeighboursList\022-\n\003lan\030\001 \003(\013"
-  "2 .qaul.rpc.router.NeighboursEntry\0222\n\010in"
-  "ternet\030\002 \003(\0132 .qaul.rpc.router.Neighbour"
-  "sEntry\"/\n\017NeighboursEntry\022\017\n\007node_id\030\001 \001"
-  "(\014\022\013\n\003rtt\030\002 \001(\r*G\n\020ConnectionModule\022\010\n\004N"
-  "ONE\020\000\022\007\n\003LAN\020\001\022\014\n\010INTERNET\020\002\022\007\n\003BLE\020\003\022\t\n"
-  "\005LOCAL\020\004b\006proto3"
+  "rsRequest\"\242\001\n\016NeighboursList\022-\n\003lan\030\001 \003("
+  "\0132 .qaul.rpc.router.NeighboursEntry\0222\n\010i"
+  "nternet\030\002 \003(\0132 .qaul.rpc.router.Neighbou"
+  "rsEntry\022-\n\003ble\030\003 \003(\0132 .qaul.rpc.router.N"
+  "eighboursEntry\"/\n\017NeighboursEntry\022\017\n\007nod"
+  "e_id\030\001 \001(\014\022\013\n\003rtt\030\002 \001(\r*G\n\020ConnectionMod"
+  "ule\022\010\n\004NONE\020\000\022\007\n\003LAN\020\001\022\014\n\010INTERNET\020\002\022\007\n\003"
+  "BLE\020\003\022\t\n\005LOCAL\020\004b\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_router_2frouter_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_router_2frouter_2eproto = {
-  false, false, 1456, descriptor_table_protodef_router_2frouter_2eproto, "router/router.proto", 
+  false, false, 1504, descriptor_table_protodef_router_2frouter_2eproto, "router/router.proto", 
   &descriptor_table_router_2frouter_2eproto_once, nullptr, 0, 12,
   schemas, file_default_instances, TableStruct_router_2frouter_2eproto::offsets,
   file_level_metadata_router_2frouter_2eproto, file_level_enum_descriptors_router_2frouter_2eproto, file_level_service_descriptors_router_2frouter_2eproto,
@@ -2511,7 +2514,8 @@ NeighboursList::NeighboursList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
   lan_(arena),
-  internet_(arena) {
+  internet_(arena),
+  ble_(arena) {
   SharedCtor();
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
@@ -2521,7 +2525,8 @@ NeighboursList::NeighboursList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
 NeighboursList::NeighboursList(const NeighboursList& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       lan_(from.lan_),
-      internet_(from.internet_) {
+      internet_(from.internet_),
+      ble_(from.ble_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.NeighboursList)
 }
@@ -2558,6 +2563,7 @@ void NeighboursList::Clear() {
 
   lan_.Clear();
   internet_.Clear();
+  ble_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2590,6 +2596,19 @@ const char* NeighboursList::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
+        } else
+          goto handle_unusual;
+        continue;
+      // repeated .qaul.rpc.router.NeighboursEntry ble = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_ble(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<26>(ptr));
         } else
           goto handle_unusual;
         continue;
@@ -2638,6 +2657,14 @@ uint8_t* NeighboursList::_InternalSerialize(
       InternalWriteMessage(2, this->_internal_internet(i), target, stream);
   }
 
+  // repeated .qaul.rpc.router.NeighboursEntry ble = 3;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_ble_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(3, this->_internal_ble(i), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -2668,6 +2695,13 @@ size_t NeighboursList::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
+  // repeated .qaul.rpc.router.NeighboursEntry ble = 3;
+  total_size += 1UL * this->_internal_ble_size();
+  for (const auto& msg : this->ble_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
 }
 
@@ -2692,6 +2726,7 @@ void NeighboursList::MergeFrom(const NeighboursList& from) {
 
   lan_.MergeFrom(from.lan_);
   internet_.MergeFrom(from.internet_);
+  ble_.MergeFrom(from.ble_);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -2711,6 +2746,7 @@ void NeighboursList::InternalSwap(NeighboursList* other) {
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   lan_.InternalSwap(&other->lan_);
   internet_.InternalSwap(&other->internet_);
+  ble_.InternalSwap(&other->ble_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata NeighboursList::GetMetadata() const {

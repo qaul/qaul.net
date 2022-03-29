@@ -636,6 +636,7 @@ class NeighboursList extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'NeighboursList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
     ..pc<NeighboursEntry>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lan', $pb.PbFieldType.PM, subBuilder: NeighboursEntry.create)
     ..pc<NeighboursEntry>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internet', $pb.PbFieldType.PM, subBuilder: NeighboursEntry.create)
+    ..pc<NeighboursEntry>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ble', $pb.PbFieldType.PM, subBuilder: NeighboursEntry.create)
     ..hasRequiredFields = false
   ;
 
@@ -643,6 +644,7 @@ class NeighboursList extends $pb.GeneratedMessage {
   factory NeighboursList({
     $core.Iterable<NeighboursEntry>? lan,
     $core.Iterable<NeighboursEntry>? internet,
+    $core.Iterable<NeighboursEntry>? ble,
   }) {
     final _result = create();
     if (lan != null) {
@@ -650,6 +652,9 @@ class NeighboursList extends $pb.GeneratedMessage {
     }
     if (internet != null) {
       _result.internet.addAll(internet);
+    }
+    if (ble != null) {
+      _result.ble.addAll(ble);
     }
     return _result;
   }
@@ -679,6 +684,9 @@ class NeighboursList extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(2)
   $core.List<NeighboursEntry> get internet => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $core.List<NeighboursEntry> get ble => $_getList(2);
 }
 
 class NeighboursEntry extends $pb.GeneratedMessage {

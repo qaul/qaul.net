@@ -137,11 +137,12 @@ const NeighboursList$json = const {
   '2': const [
     const {'1': 'lan', '3': 1, '4': 3, '5': 11, '6': '.qaul.rpc.router.NeighboursEntry', '10': 'lan'},
     const {'1': 'internet', '3': 2, '4': 3, '5': 11, '6': '.qaul.rpc.router.NeighboursEntry', '10': 'internet'},
+    const {'1': 'ble', '3': 3, '4': 3, '5': 11, '6': '.qaul.rpc.router.NeighboursEntry', '10': 'ble'},
   ],
 };
 
 /// Descriptor for `NeighboursList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List neighboursListDescriptor = $convert.base64Decode('Cg5OZWlnaGJvdXJzTGlzdBIyCgNsYW4YASADKAsyIC5xYXVsLnJwYy5yb3V0ZXIuTmVpZ2hib3Vyc0VudHJ5UgNsYW4SPAoIaW50ZXJuZXQYAiADKAsyIC5xYXVsLnJwYy5yb3V0ZXIuTmVpZ2hib3Vyc0VudHJ5UghpbnRlcm5ldA==');
+final $typed_data.Uint8List neighboursListDescriptor = $convert.base64Decode('Cg5OZWlnaGJvdXJzTGlzdBIyCgNsYW4YASADKAsyIC5xYXVsLnJwYy5yb3V0ZXIuTmVpZ2hib3Vyc0VudHJ5UgNsYW4SPAoIaW50ZXJuZXQYAiADKAsyIC5xYXVsLnJwYy5yb3V0ZXIuTmVpZ2hib3Vyc0VudHJ5UghpbnRlcm5ldBIyCgNibGUYAyADKAsyIC5xYXVsLnJwYy5yb3V0ZXIuTmVpZ2hib3Vyc0VudHJ5UgNibGU=');
 @$core.Deprecated('Use neighboursEntryDescriptor instead')
 const NeighboursEntry$json = const {
   '1': 'NeighboursEntry',

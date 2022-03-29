@@ -340,6 +340,8 @@ struct Qaul_Rpc_Router_NeighboursList {
 
   var internet: [Qaul_Rpc_Router_NeighboursEntry] = []
 
+  var ble: [Qaul_Rpc_Router_NeighboursEntry] = []
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -832,6 +834,7 @@ extension Qaul_Rpc_Router_NeighboursList: SwiftProtobuf.Message, SwiftProtobuf._
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "lan"),
     2: .same(proto: "internet"),
+    3: .same(proto: "ble"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -842,6 +845,7 @@ extension Qaul_Rpc_Router_NeighboursList: SwiftProtobuf.Message, SwiftProtobuf._
       switch fieldNumber {
       case 1: try { try decoder.decodeRepeatedMessageField(value: &self.lan) }()
       case 2: try { try decoder.decodeRepeatedMessageField(value: &self.internet) }()
+      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.ble) }()
       default: break
       }
     }
@@ -854,12 +858,16 @@ extension Qaul_Rpc_Router_NeighboursList: SwiftProtobuf.Message, SwiftProtobuf._
     if !self.internet.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.internet, fieldNumber: 2)
     }
+    if !self.ble.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.ble, fieldNumber: 3)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Rpc_Router_NeighboursList, rhs: Qaul_Rpc_Router_NeighboursList) -> Bool {
     if lhs.lan != rhs.lan {return false}
     if lhs.internet != rhs.internet {return false}
+    if lhs.ble != rhs.ble {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

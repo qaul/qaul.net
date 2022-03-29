@@ -236,10 +236,13 @@ pub struct BleDeviceUnavailable {
 pub struct BleDirectSend {
     /// message id (as a reference for the result message)
     #[prost(bytes="vec", tag="1")]
-    pub id: ::prost::alloc::vec::Vec<u8>,
+    pub message_id: ::prost::alloc::vec::Vec<u8>,
     /// qaul id of the device to send it to
     #[prost(bytes="vec", tag="2")]
-    pub to: ::prost::alloc::vec::Vec<u8>,
+    pub receiver_id: ::prost::alloc::vec::Vec<u8>,
+    /// qaul id of the sending device
+    #[prost(bytes="vec", tag="3")]
+    pub sender_id: ::prost::alloc::vec::Vec<u8>,
     /// data to be sent
     #[prost(bytes="vec", tag="4")]
     pub data: ::prost::alloc::vec::Vec<u8>,

@@ -9963,6 +9963,30 @@ public final class RouterOuterClass {
      */
     qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder getInternetOrBuilder(
         int index);
+
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     */
+    java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> 
+        getBleList();
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.NeighboursEntry getBle(int index);
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     */
+    int getBleCount();
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     */
+    java.util.List<? extends qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> 
+        getBleOrBuilderList();
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     */
+    qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder getBleOrBuilder(
+        int index);
   }
   /**
    * <pre>
@@ -9983,6 +10007,7 @@ public final class RouterOuterClass {
     private NeighboursList() {
       lan_ = java.util.Collections.emptyList();
       internet_ = java.util.Collections.emptyList();
+      ble_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
@@ -10034,6 +10059,15 @@ public final class RouterOuterClass {
                   input.readMessage(qaul.rpc.router.RouterOuterClass.NeighboursEntry.parser(), extensionRegistry));
               break;
             }
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
+                ble_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.NeighboursEntry>();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              ble_.add(
+                  input.readMessage(qaul.rpc.router.RouterOuterClass.NeighboursEntry.parser(), extensionRegistry));
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -10054,6 +10088,9 @@ public final class RouterOuterClass {
         }
         if (((mutable_bitField0_ & 0x00000002) != 0)) {
           internet_ = java.util.Collections.unmodifiableList(internet_);
+        }
+        if (((mutable_bitField0_ & 0x00000004) != 0)) {
+          ble_ = java.util.Collections.unmodifiableList(ble_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -10152,6 +10189,46 @@ public final class RouterOuterClass {
       return internet_.get(index);
     }
 
+    public static final int BLE_FIELD_NUMBER = 3;
+    private java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> ble_;
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> getBleList() {
+      return ble_;
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> 
+        getBleOrBuilderList() {
+      return ble_;
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     */
+    @java.lang.Override
+    public int getBleCount() {
+      return ble_.size();
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursEntry getBle(int index) {
+      return ble_.get(index);
+    }
+    /**
+     * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder getBleOrBuilder(
+        int index) {
+      return ble_.get(index);
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -10172,6 +10249,9 @@ public final class RouterOuterClass {
       for (int i = 0; i < internet_.size(); i++) {
         output.writeMessage(2, internet_.get(i));
       }
+      for (int i = 0; i < ble_.size(); i++) {
+        output.writeMessage(3, ble_.get(i));
+      }
       unknownFields.writeTo(output);
     }
 
@@ -10188,6 +10268,10 @@ public final class RouterOuterClass {
       for (int i = 0; i < internet_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, internet_.get(i));
+      }
+      for (int i = 0; i < ble_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, ble_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -10208,6 +10292,8 @@ public final class RouterOuterClass {
           .equals(other.getLanList())) return false;
       if (!getInternetList()
           .equals(other.getInternetList())) return false;
+      if (!getBleList()
+          .equals(other.getBleList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -10226,6 +10312,10 @@ public final class RouterOuterClass {
       if (getInternetCount() > 0) {
         hash = (37 * hash) + INTERNET_FIELD_NUMBER;
         hash = (53 * hash) + getInternetList().hashCode();
+      }
+      if (getBleCount() > 0) {
+        hash = (37 * hash) + BLE_FIELD_NUMBER;
+        hash = (53 * hash) + getBleList().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -10361,6 +10451,7 @@ public final class RouterOuterClass {
                 .alwaysUseFieldBuilders) {
           getLanFieldBuilder();
           getInternetFieldBuilder();
+          getBleFieldBuilder();
         }
       }
       @java.lang.Override
@@ -10377,6 +10468,12 @@ public final class RouterOuterClass {
           bitField0_ = (bitField0_ & ~0x00000002);
         } else {
           internetBuilder_.clear();
+        }
+        if (bleBuilder_ == null) {
+          ble_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        } else {
+          bleBuilder_.clear();
         }
         return this;
       }
@@ -10422,6 +10519,15 @@ public final class RouterOuterClass {
           result.internet_ = internet_;
         } else {
           result.internet_ = internetBuilder_.build();
+        }
+        if (bleBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) != 0)) {
+            ble_ = java.util.Collections.unmodifiableList(ble_);
+            bitField0_ = (bitField0_ & ~0x00000004);
+          }
+          result.ble_ = ble_;
+        } else {
+          result.ble_ = bleBuilder_.build();
         }
         onBuilt();
         return result;
@@ -10520,6 +10626,32 @@ public final class RouterOuterClass {
                    getInternetFieldBuilder() : null;
             } else {
               internetBuilder_.addAllMessages(other.internet_);
+            }
+          }
+        }
+        if (bleBuilder_ == null) {
+          if (!other.ble_.isEmpty()) {
+            if (ble_.isEmpty()) {
+              ble_ = other.ble_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+            } else {
+              ensureBleIsMutable();
+              ble_.addAll(other.ble_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.ble_.isEmpty()) {
+            if (bleBuilder_.isEmpty()) {
+              bleBuilder_.dispose();
+              bleBuilder_ = null;
+              ble_ = other.ble_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+              bleBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getBleFieldBuilder() : null;
+            } else {
+              bleBuilder_.addAllMessages(other.ble_);
             }
           }
         }
@@ -11031,6 +11163,246 @@ public final class RouterOuterClass {
           internet_ = null;
         }
         return internetBuilder_;
+      }
+
+      private java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> ble_ =
+        java.util.Collections.emptyList();
+      private void ensureBleIsMutable() {
+        if (!((bitField0_ & 0x00000004) != 0)) {
+          ble_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.NeighboursEntry>(ble_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.NeighboursEntry, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder, qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> bleBuilder_;
+
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> getBleList() {
+        if (bleBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(ble_);
+        } else {
+          return bleBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public int getBleCount() {
+        if (bleBuilder_ == null) {
+          return ble_.size();
+        } else {
+          return bleBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry getBle(int index) {
+        if (bleBuilder_ == null) {
+          return ble_.get(index);
+        } else {
+          return bleBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public Builder setBle(
+          int index, qaul.rpc.router.RouterOuterClass.NeighboursEntry value) {
+        if (bleBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBleIsMutable();
+          ble_.set(index, value);
+          onChanged();
+        } else {
+          bleBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public Builder setBle(
+          int index, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder builderForValue) {
+        if (bleBuilder_ == null) {
+          ensureBleIsMutable();
+          ble_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          bleBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public Builder addBle(qaul.rpc.router.RouterOuterClass.NeighboursEntry value) {
+        if (bleBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBleIsMutable();
+          ble_.add(value);
+          onChanged();
+        } else {
+          bleBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public Builder addBle(
+          int index, qaul.rpc.router.RouterOuterClass.NeighboursEntry value) {
+        if (bleBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBleIsMutable();
+          ble_.add(index, value);
+          onChanged();
+        } else {
+          bleBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public Builder addBle(
+          qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder builderForValue) {
+        if (bleBuilder_ == null) {
+          ensureBleIsMutable();
+          ble_.add(builderForValue.build());
+          onChanged();
+        } else {
+          bleBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public Builder addBle(
+          int index, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder builderForValue) {
+        if (bleBuilder_ == null) {
+          ensureBleIsMutable();
+          ble_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          bleBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public Builder addAllBle(
+          java.lang.Iterable<? extends qaul.rpc.router.RouterOuterClass.NeighboursEntry> values) {
+        if (bleBuilder_ == null) {
+          ensureBleIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, ble_);
+          onChanged();
+        } else {
+          bleBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public Builder clearBle() {
+        if (bleBuilder_ == null) {
+          ble_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+          onChanged();
+        } else {
+          bleBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public Builder removeBle(int index) {
+        if (bleBuilder_ == null) {
+          ensureBleIsMutable();
+          ble_.remove(index);
+          onChanged();
+        } else {
+          bleBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder getBleBuilder(
+          int index) {
+        return getBleFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder getBleOrBuilder(
+          int index) {
+        if (bleBuilder_ == null) {
+          return ble_.get(index);  } else {
+          return bleBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public java.util.List<? extends qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> 
+           getBleOrBuilderList() {
+        if (bleBuilder_ != null) {
+          return bleBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(ble_);
+        }
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder addBleBuilder() {
+        return getBleFieldBuilder().addBuilder(
+            qaul.rpc.router.RouterOuterClass.NeighboursEntry.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder addBleBuilder(
+          int index) {
+        return getBleFieldBuilder().addBuilder(
+            index, qaul.rpc.router.RouterOuterClass.NeighboursEntry.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
+       */
+      public java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder> 
+           getBleBuilderList() {
+        return getBleFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.router.RouterOuterClass.NeighboursEntry, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder, qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder> 
+          getBleFieldBuilder() {
+        if (bleBuilder_ == null) {
+          bleBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              qaul.rpc.router.RouterOuterClass.NeighboursEntry, qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder, qaul.rpc.router.RouterOuterClass.NeighboursEntryOrBuilder>(
+                  ble_,
+                  ((bitField0_ & 0x00000004) != 0),
+                  getParentForChildren(),
+                  isClean());
+          ble_ = null;
+        }
+        return bleBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -11794,13 +12166,14 @@ public final class RouterOuterClass {
       "ions\030\002 \003(\0132 .qaul.rpc.router.ConnectionE" +
       "ntry\">\n\017ConnectionEntry\022\013\n\003rtt\030\001 \001(\r\022\021\n\t" +
       "hop_count\030\002 \001(\r\022\013\n\003via\030\003 \001(\014\"\023\n\021Neighbou" +
-      "rsRequest\"s\n\016NeighboursList\022-\n\003lan\030\001 \003(\013" +
-      "2 .qaul.rpc.router.NeighboursEntry\0222\n\010in" +
-      "ternet\030\002 \003(\0132 .qaul.rpc.router.Neighbour" +
-      "sEntry\"/\n\017NeighboursEntry\022\017\n\007node_id\030\001 \001" +
-      "(\014\022\013\n\003rtt\030\002 \001(\r*G\n\020ConnectionModule\022\010\n\004N" +
-      "ONE\020\000\022\007\n\003LAN\020\001\022\014\n\010INTERNET\020\002\022\007\n\003BLE\020\003\022\t\n" +
-      "\005LOCAL\020\004b\006proto3"
+      "rsRequest\"\242\001\n\016NeighboursList\022-\n\003lan\030\001 \003(" +
+      "\0132 .qaul.rpc.router.NeighboursEntry\0222\n\010i" +
+      "nternet\030\002 \003(\0132 .qaul.rpc.router.Neighbou" +
+      "rsEntry\022-\n\003ble\030\003 \003(\0132 .qaul.rpc.router.N" +
+      "eighboursEntry\"/\n\017NeighboursEntry\022\017\n\007nod" +
+      "e_id\030\001 \001(\014\022\013\n\003rtt\030\002 \001(\r*G\n\020ConnectionMod" +
+      "ule\022\010\n\004NONE\020\000\022\007\n\003LAN\020\001\022\014\n\010INTERNET\020\002\022\007\n\003" +
+      "BLE\020\003\022\t\n\005LOCAL\020\004b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -11871,7 +12244,7 @@ public final class RouterOuterClass {
     internal_static_qaul_rpc_router_NeighboursList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_router_NeighboursList_descriptor,
-        new java.lang.String[] { "Lan", "Internet", });
+        new java.lang.String[] { "Lan", "Internet", "Ble", });
     internal_static_qaul_rpc_router_NeighboursEntry_descriptor =
       getDescriptor().getMessageTypes().get(11);
     internal_static_qaul_rpc_router_NeighboursEntry_fieldAccessorTable = new

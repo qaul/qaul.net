@@ -417,11 +417,12 @@ impl Ble {
     }
 
     /// send messages
-    pub fn message_send(small_id: Vec<u8>, data: Vec<u8>) {
+    pub fn message_send(receiver_id: Vec<u8>, data: Vec<u8>) {
         // create direct message
         let direct_message = proto::BleDirectSend {
-            id: vec![0],
-            to: small_id,
+            message_id: vec![0],
+            receiver_id,
+            sender_id: vec![0],
             data,
         };
 
