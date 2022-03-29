@@ -3,8 +3,8 @@
 
 package net.qaul.ble.callback
 
-import qaul.sys.ble.BleOuterClass
+import com.google.protobuf.ByteString
 
 interface BleRequestCallback {
-    fun bleResponse(ble: BleOuterClass.Ble)
+    fun bleResponse(data: ByteString)
 }

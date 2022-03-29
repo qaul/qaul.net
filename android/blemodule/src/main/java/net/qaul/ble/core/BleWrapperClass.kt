@@ -4,6 +4,7 @@
 package net.qaul.ble.core
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -26,7 +27,6 @@ import com.google.android.gms.location.*
 import com.google.gson.Gson
 import com.google.protobuf.ByteString
 import net.qaul.ble.AppLog
-import net.qaul.ble.BLEUtils
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.callback.BleRequestCallback
 import net.qaul.ble.model.BLEScanDevice
@@ -35,7 +35,8 @@ import net.qaul.ble.service.BleService
 import qaul.sys.ble.BleOuterClass
 import java.nio.charset.Charset
 
-class BleWrapperClass(context: AppCompatActivity) {
+@SuppressLint("MissingPermission")
+open class BleWrapperClass(context: AppCompatActivity) {
     private val TAG: String = BleWrapperClass::class.java.simpleName
     private val context = context
     private var errorText = ""
@@ -60,7 +61,8 @@ class BleWrapperClass(context: AppCompatActivity) {
     /**
      * This Method get BLERequest from UI & Return BLEResponse by Callback Interface Method
      */
-    fun receiveRequest(bleReq: BleOuterClass.Ble, callback: BleRequestCallback) {
+    open fun receiveRequest(data: ByteString, callback: BleRequestCallback) {
+        val bleReq: BleOuterClass.Ble = BleOuterClass.Ble.parseFrom(data)
         if (bleReq.isInitialized) {
             bleCallback = callback
             Log.e(TAG, bleReq.messageCase.toString())
@@ -71,18 +73,17 @@ class BleWrapperClass(context: AppCompatActivity) {
                 BleOuterClass.Ble.MessageCase.START_REQUEST -> {
                     qaulId = bleReq.startRequest.qaulId.toByteArray()
                     AppLog.e(TAG, "qaulid : " + qaulId?.size)
-                    advertMode = bleReq.startRequest.mode.toString()
+                    advertMode = bleReq.startRequest.powerSetting.toString()
                     if (qaulId != null) {
                         startService(context = context)
                     } else {
                         val bleRes = BleOuterClass.Ble.newBuilder()
                         val startResult = BleOuterClass.BleStartResult.newBuilder()
                         startResult.success = false
-                        startResult.noRights = false
-                        startResult.errorMessage = "qaul id required"
-                        startResult.unknownError = false
+                        startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
+                        startResult.errorMessage = "qaul id is required"
                         bleRes.startResult = startResult.build()
-                        bleCallback?.bleResponse(ble = bleRes.build())
+                        bleCallback?.bleResponse(data = bleRes.build().toByteString())
                     }
                 }
                 BleOuterClass.Ble.MessageCase.STOP_REQUEST -> {
@@ -92,10 +93,10 @@ class BleWrapperClass(context: AppCompatActivity) {
                     val bleDirectSend = bleReq.directSend
                     if (BleService().isRunning()) {
                         BleService.bleService?.sendMessage(
-                            id = bleDirectSend.id,
-                            to = bleDirectSend.to.toByteArray(),
+                            id = bleDirectSend.messageId.toString(Charset.defaultCharset()),
+                            to = bleDirectSend.receiverId.toByteArray(),
                             message = bleDirectSend.data.toByteArray(),
-                            from = bleDirectSend.qaulId.toByteArray()
+                            from = bleDirectSend.senderId.toByteArray()
                         )
                     }
                 }
@@ -116,7 +117,7 @@ class BleWrapperClass(context: AppCompatActivity) {
             stopResult.success = false
             stopResult.errorMessage = "Advertisement & Scanning is not Running"
             bleRes.stopResult = stopResult.build()
-            bleCallback?.bleResponse(ble = bleRes.build())
+            bleCallback?.bleResponse(data = bleRes.build().toByteString())
         }
     }
 
@@ -137,11 +138,10 @@ class BleWrapperClass(context: AppCompatActivity) {
                     val bleRes = BleOuterClass.Ble.newBuilder()
                     val startResult = BleOuterClass.BleStartResult.newBuilder()
                     startResult.success = true
-                    startResult.noRights = false
+                    startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
                     startResult.errorMessage = "Advertisement already Started"
-                    startResult.unknownError = false
                     bleRes.startResult = startResult.build()
-                    bleCallback?.bleResponse(ble = bleRes.build())
+                    bleCallback?.bleResponse(data = bleRes.build().toByteString())
                 } else {
                     startAdvertiseAndCallback()
                 }
@@ -151,11 +151,10 @@ class BleWrapperClass(context: AppCompatActivity) {
                     val bleRes = BleOuterClass.Ble.newBuilder()
                     val startResult = BleOuterClass.BleStartResult.newBuilder()
                     startResult.success = true
-                    startResult.noRights = false
+                    startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
                     startResult.errorMessage = "Scanning already Started"
-                    startResult.unknownError = false
                     bleRes.startResult = startResult.build()
-                    bleCallback?.bleResponse(ble = bleRes.build())
+                    bleCallback?.bleResponse(data = bleRes.build().toByteString())
                 } else {
                     startScanAndCallback()
                 }
@@ -180,11 +179,14 @@ class BleWrapperClass(context: AppCompatActivity) {
                         val bleRes = BleOuterClass.Ble.newBuilder()
                         val startResult = BleOuterClass.BleStartResult.newBuilder()
                         startResult.success = status
-                        startResult.noRights = false
+                        if (unknownError) {
+                            startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
+                        } else {
+                            startResult.errorReason = BleOuterClass.BleError.UNRECOGNIZED
+                        }
                         startResult.errorMessage = errorText
-                        startResult.unknownError = unknownError
                         bleRes.startResult = startResult.build()
-                        bleCallback?.bleResponse(ble = bleRes.build())
+                        bleCallback?.bleResponse(data = bleRes.build().toByteString())
                     }
 
                     override fun stopAdvertiseRes(status: Boolean, errorText: String) {
@@ -193,7 +195,7 @@ class BleWrapperClass(context: AppCompatActivity) {
                         stopResult.success = status
                         stopResult.errorMessage = errorText
                         bleRes.stopResult = stopResult.build()
-                        bleCallback?.bleResponse(ble = bleRes.build())
+                        bleCallback?.bleResponse(data = bleRes.build().toByteString())
                     }
 
                     override fun onMessageReceived(bleDevice: BLEScanDevice, message: ByteArray) {
@@ -202,12 +204,11 @@ class BleWrapperClass(context: AppCompatActivity) {
                         val msgData = String(message).removeSuffix("$$")
                             .removePrefix("$$")
                         val msgObject = Gson().fromJson(msgData, Message::class.java)
-                        directReceived.from = bleDevice.macAddress
-                        directReceived.mode = BleOuterClass.BleMode.low_latency
-                        directReceived.qaulId = ByteString.copyFrom(bleDevice.qaulId)
-                        directReceived.data = ByteString.copyFrom(msgObject.message, Charset.defaultCharset())
+                        directReceived.from = ByteString.copyFrom(bleDevice.qaulId)
+                        directReceived.data =
+                            ByteString.copyFrom(msgObject.message, Charset.defaultCharset())
                         bleRes.directReceived = directReceived.build()
-                        bleCallback?.bleResponse(ble = bleRes.build())
+                        bleCallback?.bleResponse(data = bleRes.build().toByteString())
                     }
                 }
             )
@@ -228,11 +229,14 @@ class BleWrapperClass(context: AppCompatActivity) {
                     val bleRes = BleOuterClass.Ble.newBuilder()
                     val startResult = BleOuterClass.BleStartResult.newBuilder()
                     startResult.success = status
-                    startResult.noRights = false
+                    if (unknownError) {
+                        startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
+                    } else {
+                        startResult.errorReason = BleOuterClass.BleError.UNRECOGNIZED
+                    }
                     startResult.errorMessage = errorText
-                    startResult.unknownError = unknownError
                     bleRes.startResult = startResult.build()
-                    bleCallback?.bleResponse(ble = bleRes.build())
+                    bleCallback?.bleResponse(data = bleRes.build().toByteString())
                 }
 
                 override fun stopScanRes(status: Boolean, errorText: String) {
@@ -241,37 +245,26 @@ class BleWrapperClass(context: AppCompatActivity) {
                     stopResult.success = status
                     stopResult.errorMessage = errorText
                     bleRes.stopResult = stopResult.build()
-                    bleCallback?.bleResponse(ble = bleRes.build())
+                    bleCallback?.bleResponse(data = bleRes.build().toByteString())
                 }
 
                 override fun deviceFound(bleDevice: BLEScanDevice) {
                     val bleRes = BleOuterClass.Ble.newBuilder()
-                    val scanResult = BleOuterClass.BleScanResult.newBuilder()
-                    scanResult.mac = bleDevice.macAddress
-                    scanResult.name = bleDevice.name
-                    scanResult.timestamp = bleDevice.lastFoundTime.toString()
-                    scanResult.rssi = bleDevice.deviceRSSI
-                    scanResult.isConnectable = bleDevice.isConnectable
-                    scanResult.isInTheRange = true
-                    scanResult.qaulId = ByteString.copyFrom(bleDevice.qaulId)
-                    bleRes.scanResult = scanResult.build()
-                    bleCallback?.bleResponse(ble = bleRes.build())
+                    val deviceDiscovered = BleOuterClass.BleDeviceDiscovered.newBuilder()
+                    deviceDiscovered.rssi = bleDevice.deviceRSSI
+                    deviceDiscovered.qaulId = ByteString.copyFrom(bleDevice.qaulId)
+                    bleRes.deviceDiscovered = deviceDiscovered.build()
+                    bleCallback?.bleResponse(data = bleRes.build().toByteString())
                 }
 
                 override fun deviceOutOfRange(bleDevice: BLEScanDevice) {
                     AppLog.e(TAG, "${bleDevice.macAddress} out of range")
                     val bleRes = BleOuterClass.Ble.newBuilder()
-                    val scanResult = BleOuterClass.BleScanResult.newBuilder()
+                    val deviceUnavailable = BleOuterClass.BleDeviceUnavailable.newBuilder()
                     try {
-                        scanResult.mac = bleDevice.macAddress
-                        scanResult.name = bleDevice.name!!
-                        scanResult.timestamp = bleDevice.lastFoundTime.toString()
-                        scanResult.rssi = bleDevice.deviceRSSI
-                        scanResult.isConnectable = bleDevice.isConnectable
-                        scanResult.isInTheRange = false
-                        scanResult.qaulId = ByteString.copyFrom(bleDevice.qaulId)
-                        bleRes.scanResult = scanResult.build()
-                        bleCallback?.bleResponse(ble = bleRes.build())
+                        deviceUnavailable.qaulId = ByteString.copyFrom(bleDevice.qaulId)
+                        bleRes.deviceUnavailable = deviceUnavailable.build()
+                        bleCallback?.bleResponse(data = bleRes.build().toByteString())
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -283,12 +276,13 @@ class BleWrapperClass(context: AppCompatActivity) {
                     if (success) {
                         directSendResult.errorMessage = "Successfully sent"
                     } else {
-                        directSendResult.errorMessage = "Connection not established. Please try again."
+                        directSendResult.errorMessage =
+                            "Connection not established. Please try again."
                     }
                     directSendResult.success = success
-                    directSendResult.id = id
+                    directSendResult.id = ByteString.copyFrom(id.toByteArray(Charset.forName("UTF-8")))
                     bleRes.directSendResult = directSendResult.build()
-                    bleCallback?.bleResponse(ble = bleRes.build())
+                    bleCallback?.bleResponse(data = bleRes.build().toByteString())
                 }
 
             }
@@ -308,17 +302,25 @@ class BleWrapperClass(context: AppCompatActivity) {
             if (bleResInfoResponse.isInitialized) {
                 val deviceInfoBuilder: BleOuterClass.BleDeviceInfo.Builder =
                     BleOuterClass.BleDeviceInfo.newBuilder()
-                deviceInfoBuilder.locationPermission = isLocationPermissionAllowed()
-                deviceInfoBuilder.locationOn = isLocationEnable()
-                deviceInfoBuilder.blePermission = isBluetoothPermissionAllowed()
                 deviceInfoBuilder.bluetoothOn = isBluetoothEnable()
-                deviceInfoBuilder.androidVersion = getOsVersion()
-                deviceInfoBuilder.name = getDeviceName()
+                deviceInfoBuilder.id = ""
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (ActivityCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        deviceInfoBuilder.name = adapter.name
+                    } else {
+                        deviceInfoBuilder.name = getDeviceName()
+                    }
+                } else {
+                    deviceInfoBuilder.name = adapter.name
+                }
                 deviceInfoBuilder.bleSupport = isBLeSupported()
-                deviceInfoBuilder.adv251 = adapter.leMaximumAdvertisingDataLength > 250
-                deviceInfoBuilder.adv1M = adapter.isLeExtendedAdvertisingSupported
-                deviceInfoBuilder.adv2M = adapter.isLe2MPhySupported
-                deviceInfoBuilder.advCoded = adapter.isLeCodedPhySupported
+                deviceInfoBuilder.advExtended = adapter.isLeExtendedAdvertisingSupported
+                deviceInfoBuilder.le2M = adapter.isLe2MPhySupported
+                deviceInfoBuilder.leCoded = adapter.isLeCodedPhySupported
                 deviceInfoBuilder.advExtendedBytes = adapter.leMaximumAdvertisingDataLength
 
                 //Return true if LE Periodic Advertising feature is supported.
@@ -341,7 +343,7 @@ class BleWrapperClass(context: AppCompatActivity) {
                 bleResInfoResponse.device = deviceInfoBuilder.build()
             }
             bleRes.infoResponse = bleResInfoResponse.build()
-            bleCallback?.bleResponse(ble = bleRes.build())
+            bleCallback?.bleResponse(data = bleRes.build().toByteString())
         }
     }
 
@@ -659,26 +661,28 @@ class BleWrapperClass(context: AppCompatActivity) {
                     }
                     LOCATION_ENABLE_REQ_CODE -> {
                         errorText = "Location is not enabled"
-                        noRights = false
+                        noRights = true
                     }
                     REQUEST_ENABLE_BT -> {
                         errorText = "Bluetooth is not enabled"
-                        noRights = false
+                        noRights = true
                     }
                 }
                 val bleRes = BleOuterClass.Ble.newBuilder()
                 val startResult = BleOuterClass.BleStartResult.newBuilder()
                 startResult.success = false
-                startResult.noRights = noRights
+                if (noRights) {
+                    startResult.errorReason = BleOuterClass.BleError.RIGHTS_MISSING
+                } else {
+                    startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
+                }
                 startResult.errorMessage = errorText
-                startResult.unknownError = false
                 bleRes.startResult = startResult.build()
-                bleCallback?.bleResponse(ble = bleRes.build())
+                bleCallback?.bleResponse(data = bleRes.build().toByteString())
             }
             else -> {
                 startService(context = context)
             }
         }
     }
-
 }
