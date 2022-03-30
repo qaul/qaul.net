@@ -21,6 +21,7 @@ use std::{
     sync::RwLock,
 };
 use prost::Message;
+use uuid::Uuid;
 
 use crate::connections::ConnectionModule;
 use crate::node::Node;
@@ -416,13 +417,20 @@ impl Ble {
         Self::create_send_message(QaulId::to_small(node_id), message);
     }
 
-    /// send messages
-    pub fn message_send(receiver_id: Vec<u8>, data: Vec<u8>) {
+    /// send message
+    /// 
+    /// * receiver_id: the small qaul id of the receiving node
+    /// * sender_id: the small qaul id of the sending node (this node)
+    /// * data: the binary data of the message to send
+    pub fn message_send(receiver_id: Vec<u8>, sender_id: Vec<u8>, data: Vec<u8>) {
+        // create a random UUID as message id
+        let message_id = Uuid::new_v4().as_bytes().to_vec();
+
         // create direct message
         let direct_message = proto::BleDirectSend {
-            message_id: vec![0],
+            message_id,
             receiver_id,
-            sender_id: vec![0],
+            sender_id,
             data,
         };
 
@@ -479,6 +487,10 @@ impl Ble {
 
     /// create the message
     fn create_send_message(small_id: Vec<u8>, message: proto_net::ble_message::Message) {
+        // get small qaul id of this node
+        let sender_id = Node::get_small_id();
+
+        // create message
         let proto_message = proto_net::BleMessage {
             message: Some(message),
         };
@@ -488,7 +500,7 @@ impl Ble {
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
         // send the message
-        Self::message_send (small_id, buf);
+        Self::message_send (small_id, sender_id, buf);
     }
 
     /// BLE message received
