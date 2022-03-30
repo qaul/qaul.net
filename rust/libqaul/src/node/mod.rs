@@ -24,7 +24,10 @@ use crate::storage::configuration::Configuration;
 use user_accounts::UserAccounts;
 use crate::rpc::Rpc;
 use crate::utilities::qaul_id::QaulId;
-
+use crate::connections::{
+    internet::Internet,
+    lan::Lan,
+};
 
 /// central state of this instances Node struct
 static NODE: state::Storage<Node> = state::Storage::new();
@@ -140,18 +143,43 @@ impl Node {
     }
 
     /// Process incoming RPC request messages for node module
-    pub fn rpc(data: Vec<u8>) {
-        log::info!("Node rpc message received");
-
+    pub fn rpc(data: Vec<u8>, lan: Option<&mut Lan>, internet: Option<&mut Internet> ) {
         match proto::Node::decode(&data[..]) {
             Ok(node) => {
                 match node.message {
                     Some(proto::node::Message::GetNodeInfo(_)) => {
                         Rpc::increase_message_counter();
 
+                        // create address list
+                        let mut addresses: Vec<String> = Vec::new();
+                        if let Some(internet_connection) = internet  {
+                            // listener addresses
+                            for address in internet_connection.swarm.listeners() {
+                                addresses.push(address.to_string());
+                            }
+                            // external addresses
+                            for address in internet_connection.swarm.external_addresses() {
+                                addresses.push(address.addr.to_string());
+                            }
+                        }
+                        else if let Some(lan_connection) = lan {
+                            // listener addresses
+                            for address in lan_connection.swarm.listeners() {
+                                addresses.push(address.to_string());
+                            }
+                            // external addresses
+                            for address in lan_connection.swarm.external_addresses() {
+                                addresses.push(address.addr.to_string());
+                            }
+                        }
+                        else {
+                            log::error!("lan & internet swarms missing");
+                        }
+
                         // create response message
                         let proto_nodeinformation = proto::NodeInformation {
                             id_base58: Self::get_id_string(),
+                            addresses,
                         };
 
                         let proto_message = proto::Node {

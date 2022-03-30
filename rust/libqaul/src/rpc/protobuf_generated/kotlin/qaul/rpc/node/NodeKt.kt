@@ -23,6 +23,10 @@ public object NodeKt {
     internal fun _build(): qaul.rpc.node.NodeOuterClass.Node = _builder.build()
 
     /**
+     * <pre>
+     * request node info message from libqaul
+     * </pre>
+     *
      * <code>bool get_node_info = 1;</code>
      */
     public var getNodeInfo: kotlin.Boolean
@@ -33,12 +37,20 @@ public object NodeKt {
         _builder.setGetNodeInfo(value)
       }
     /**
+     * <pre>
+     * request node info message from libqaul
+     * </pre>
+     *
      * <code>bool get_node_info = 1;</code>
      */
     public fun clearGetNodeInfo() {
       _builder.clearGetNodeInfo()
     }
     /**
+     * <pre>
+     * request node info message from libqaul
+     * </pre>
+     *
      * <code>bool get_node_info = 1;</code>
      * @return Whether the getNodeInfo field is set.
      */
@@ -47,6 +59,10 @@ public object NodeKt {
     }
 
     /**
+     * <pre>
+     * libqaul sends node info
+     * </pre>
+     *
      * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
      */
     public var info: qaul.rpc.node.NodeOuterClass.NodeInformation
@@ -57,12 +73,20 @@ public object NodeKt {
         _builder.setInfo(value)
       }
     /**
+     * <pre>
+     * libqaul sends node info
+     * </pre>
+     *
      * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
      */
     public fun clearInfo() {
       _builder.clearInfo()
     }
     /**
+     * <pre>
+     * libqaul sends node info
+     * </pre>
+     *
      * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
      * @return Whether the info field is set.
      */

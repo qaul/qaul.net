@@ -26,8 +26,10 @@ struct Qaul_Rpc_Node_Node {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// message contains all node message types
   var message: Qaul_Rpc_Node_Node.OneOf_Message? = nil
 
+  /// request node info message from libqaul
   var getNodeInfo: Bool {
     get {
       if case .getNodeInfo(let v)? = message {return v}
@@ -36,6 +38,7 @@ struct Qaul_Rpc_Node_Node {
     set {message = .getNodeInfo(newValue)}
   }
 
+  /// libqaul sends node info
   var info: Qaul_Rpc_Node_NodeInformation {
     get {
       if case .info(let v)? = message {return v}
@@ -46,8 +49,11 @@ struct Qaul_Rpc_Node_Node {
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
+  /// message contains all node message types
   enum OneOf_Message: Equatable {
+    /// request node info message from libqaul
     case getNodeInfo(Bool)
+    /// libqaul sends node info
     case info(Qaul_Rpc_Node_NodeInformation)
 
   #if !swift(>=4.1)
@@ -79,7 +85,12 @@ struct Qaul_Rpc_Node_NodeInformation {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// the node ID in base 58 encoding
   var idBase58: String = String()
+
+  /// all known multi addresses under which 
+  /// this node can be connected.
+  var addresses: [String] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -159,6 +170,7 @@ extension Qaul_Rpc_Node_NodeInformation: SwiftProtobuf.Message, SwiftProtobuf._M
   static let protoMessageName: String = _protobuf_package + ".NodeInformation"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "id_base58"),
+    2: .same(proto: "addresses"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -168,6 +180,7 @@ extension Qaul_Rpc_Node_NodeInformation: SwiftProtobuf.Message, SwiftProtobuf._M
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.idBase58) }()
+      case 2: try { try decoder.decodeRepeatedStringField(value: &self.addresses) }()
       default: break
       }
     }
@@ -177,11 +190,15 @@ extension Qaul_Rpc_Node_NodeInformation: SwiftProtobuf.Message, SwiftProtobuf._M
     if !self.idBase58.isEmpty {
       try visitor.visitSingularStringField(value: self.idBase58, fieldNumber: 1)
     }
+    if !self.addresses.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.addresses, fieldNumber: 2)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Rpc_Node_NodeInformation, rhs: Qaul_Rpc_Node_NodeInformation) -> Bool {
     if lhs.idBase58 != rhs.idBase58 {return false}
+    if lhs.addresses != rhs.addresses {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

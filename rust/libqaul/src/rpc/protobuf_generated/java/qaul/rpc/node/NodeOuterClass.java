@@ -19,27 +19,47 @@ public final class NodeOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * request node info message from libqaul
+     * </pre>
+     *
      * <code>bool get_node_info = 1;</code>
      * @return Whether the getNodeInfo field is set.
      */
     boolean hasGetNodeInfo();
     /**
+     * <pre>
+     * request node info message from libqaul
+     * </pre>
+     *
      * <code>bool get_node_info = 1;</code>
      * @return The getNodeInfo.
      */
     boolean getGetNodeInfo();
 
     /**
+     * <pre>
+     * libqaul sends node info
+     * </pre>
+     *
      * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
      * @return Whether the info field is set.
      */
     boolean hasInfo();
     /**
+     * <pre>
+     * libqaul sends node info
+     * </pre>
+     *
      * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
      * @return The info.
      */
     qaul.rpc.node.NodeOuterClass.NodeInformation getInfo();
     /**
+     * <pre>
+     * libqaul sends node info
+     * </pre>
+     *
      * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
      */
     qaul.rpc.node.NodeOuterClass.NodeInformationOrBuilder getInfoOrBuilder();
@@ -191,6 +211,10 @@ public final class NodeOuterClass {
 
     public static final int GET_NODE_INFO_FIELD_NUMBER = 1;
     /**
+     * <pre>
+     * request node info message from libqaul
+     * </pre>
+     *
      * <code>bool get_node_info = 1;</code>
      * @return Whether the getNodeInfo field is set.
      */
@@ -199,6 +223,10 @@ public final class NodeOuterClass {
       return messageCase_ == 1;
     }
     /**
+     * <pre>
+     * request node info message from libqaul
+     * </pre>
+     *
      * <code>bool get_node_info = 1;</code>
      * @return The getNodeInfo.
      */
@@ -212,6 +240,10 @@ public final class NodeOuterClass {
 
     public static final int INFO_FIELD_NUMBER = 2;
     /**
+     * <pre>
+     * libqaul sends node info
+     * </pre>
+     *
      * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
      * @return Whether the info field is set.
      */
@@ -220,6 +252,10 @@ public final class NodeOuterClass {
       return messageCase_ == 2;
     }
     /**
+     * <pre>
+     * libqaul sends node info
+     * </pre>
+     *
      * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
      * @return The info.
      */
@@ -231,6 +267,10 @@ public final class NodeOuterClass {
       return qaul.rpc.node.NodeOuterClass.NodeInformation.getDefaultInstance();
     }
     /**
+     * <pre>
+     * libqaul sends node info
+     * </pre>
+     *
      * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
      */
     @java.lang.Override
@@ -614,6 +654,10 @@ public final class NodeOuterClass {
 
 
       /**
+       * <pre>
+       * request node info message from libqaul
+       * </pre>
+       *
        * <code>bool get_node_info = 1;</code>
        * @return Whether the getNodeInfo field is set.
        */
@@ -621,6 +665,10 @@ public final class NodeOuterClass {
         return messageCase_ == 1;
       }
       /**
+       * <pre>
+       * request node info message from libqaul
+       * </pre>
+       *
        * <code>bool get_node_info = 1;</code>
        * @return The getNodeInfo.
        */
@@ -631,6 +679,10 @@ public final class NodeOuterClass {
         return false;
       }
       /**
+       * <pre>
+       * request node info message from libqaul
+       * </pre>
+       *
        * <code>bool get_node_info = 1;</code>
        * @param value The getNodeInfo to set.
        * @return This builder for chaining.
@@ -642,6 +694,10 @@ public final class NodeOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * request node info message from libqaul
+       * </pre>
+       *
        * <code>bool get_node_info = 1;</code>
        * @return This builder for chaining.
        */
@@ -657,6 +713,10 @@ public final class NodeOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.node.NodeOuterClass.NodeInformation, qaul.rpc.node.NodeOuterClass.NodeInformation.Builder, qaul.rpc.node.NodeOuterClass.NodeInformationOrBuilder> infoBuilder_;
       /**
+       * <pre>
+       * libqaul sends node info
+       * </pre>
+       *
        * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
        * @return Whether the info field is set.
        */
@@ -665,6 +725,10 @@ public final class NodeOuterClass {
         return messageCase_ == 2;
       }
       /**
+       * <pre>
+       * libqaul sends node info
+       * </pre>
+       *
        * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
        * @return The info.
        */
@@ -683,6 +747,10 @@ public final class NodeOuterClass {
         }
       }
       /**
+       * <pre>
+       * libqaul sends node info
+       * </pre>
+       *
        * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
        */
       public Builder setInfo(qaul.rpc.node.NodeOuterClass.NodeInformation value) {
@@ -699,6 +767,10 @@ public final class NodeOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * libqaul sends node info
+       * </pre>
+       *
        * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
        */
       public Builder setInfo(
@@ -713,6 +785,10 @@ public final class NodeOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * libqaul sends node info
+       * </pre>
+       *
        * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
        */
       public Builder mergeInfo(qaul.rpc.node.NodeOuterClass.NodeInformation value) {
@@ -736,6 +812,10 @@ public final class NodeOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * libqaul sends node info
+       * </pre>
+       *
        * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
        */
       public Builder clearInfo() {
@@ -755,12 +835,20 @@ public final class NodeOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * libqaul sends node info
+       * </pre>
+       *
        * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
        */
       public qaul.rpc.node.NodeOuterClass.NodeInformation.Builder getInfoBuilder() {
         return getInfoFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * libqaul sends node info
+       * </pre>
+       *
        * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
        */
       @java.lang.Override
@@ -775,6 +863,10 @@ public final class NodeOuterClass {
         }
       }
       /**
+       * <pre>
+       * libqaul sends node info
+       * </pre>
+       *
        * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -853,16 +945,69 @@ public final class NodeOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * the node ID in base 58 encoding
+     * </pre>
+     *
      * <code>string id_base58 = 1;</code>
      * @return The idBase58.
      */
     java.lang.String getIdBase58();
     /**
+     * <pre>
+     * the node ID in base 58 encoding
+     * </pre>
+     *
      * <code>string id_base58 = 1;</code>
      * @return The bytes for idBase58.
      */
     com.google.protobuf.ByteString
         getIdBase58Bytes();
+
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @return A list containing the addresses.
+     */
+    java.util.List<java.lang.String>
+        getAddressesList();
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @return The count of addresses.
+     */
+    int getAddressesCount();
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @param index The index of the element to return.
+     * @return The addresses at the given index.
+     */
+    java.lang.String getAddresses(int index);
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the addresses at the given index.
+     */
+    com.google.protobuf.ByteString
+        getAddressesBytes(int index);
   }
   /**
    * <pre>
@@ -882,6 +1027,7 @@ public final class NodeOuterClass {
     }
     private NodeInformation() {
       idBase58_ = "";
+      addresses_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     }
 
     @java.lang.Override
@@ -904,6 +1050,7 @@ public final class NodeOuterClass {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -918,6 +1065,15 @@ public final class NodeOuterClass {
               java.lang.String s = input.readStringRequireUtf8();
 
               idBase58_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                addresses_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              addresses_.add(s);
               break;
             }
             default: {
@@ -937,6 +1093,9 @@ public final class NodeOuterClass {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          addresses_ = addresses_.getUnmodifiableView();
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -957,6 +1116,10 @@ public final class NodeOuterClass {
     public static final int ID_BASE58_FIELD_NUMBER = 1;
     private volatile java.lang.Object idBase58_;
     /**
+     * <pre>
+     * the node ID in base 58 encoding
+     * </pre>
+     *
      * <code>string id_base58 = 1;</code>
      * @return The idBase58.
      */
@@ -974,6 +1137,10 @@ public final class NodeOuterClass {
       }
     }
     /**
+     * <pre>
+     * the node ID in base 58 encoding
+     * </pre>
+     *
      * <code>string id_base58 = 1;</code>
      * @return The bytes for idBase58.
      */
@@ -990,6 +1157,61 @@ public final class NodeOuterClass {
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
+    }
+
+    public static final int ADDRESSES_FIELD_NUMBER = 2;
+    private com.google.protobuf.LazyStringList addresses_;
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @return A list containing the addresses.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getAddressesList() {
+      return addresses_;
+    }
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @return The count of addresses.
+     */
+    public int getAddressesCount() {
+      return addresses_.size();
+    }
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @param index The index of the element to return.
+     * @return The addresses at the given index.
+     */
+    public java.lang.String getAddresses(int index) {
+      return addresses_.get(index);
+    }
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the addresses at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getAddressesBytes(int index) {
+      return addresses_.getByteString(index);
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1009,6 +1231,9 @@ public final class NodeOuterClass {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idBase58_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, idBase58_);
       }
+      for (int i = 0; i < addresses_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, addresses_.getRaw(i));
+      }
       unknownFields.writeTo(output);
     }
 
@@ -1020,6 +1245,14 @@ public final class NodeOuterClass {
       size = 0;
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idBase58_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, idBase58_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < addresses_.size(); i++) {
+          dataSize += computeStringSizeNoTag(addresses_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getAddressesList().size();
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1038,6 +1271,8 @@ public final class NodeOuterClass {
 
       if (!getIdBase58()
           .equals(other.getIdBase58())) return false;
+      if (!getAddressesList()
+          .equals(other.getAddressesList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1051,6 +1286,10 @@ public final class NodeOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + ID_BASE58_FIELD_NUMBER;
       hash = (53 * hash) + getIdBase58().hashCode();
+      if (getAddressesCount() > 0) {
+        hash = (37 * hash) + ADDRESSES_FIELD_NUMBER;
+        hash = (53 * hash) + getAddressesList().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1190,6 +1429,8 @@ public final class NodeOuterClass {
         super.clear();
         idBase58_ = "";
 
+        addresses_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -1216,7 +1457,13 @@ public final class NodeOuterClass {
       @java.lang.Override
       public qaul.rpc.node.NodeOuterClass.NodeInformation buildPartial() {
         qaul.rpc.node.NodeOuterClass.NodeInformation result = new qaul.rpc.node.NodeOuterClass.NodeInformation(this);
+        int from_bitField0_ = bitField0_;
         result.idBase58_ = idBase58_;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          addresses_ = addresses_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.addresses_ = addresses_;
         onBuilt();
         return result;
       }
@@ -1269,6 +1516,16 @@ public final class NodeOuterClass {
           idBase58_ = other.idBase58_;
           onChanged();
         }
+        if (!other.addresses_.isEmpty()) {
+          if (addresses_.isEmpty()) {
+            addresses_ = other.addresses_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureAddressesIsMutable();
+            addresses_.addAll(other.addresses_);
+          }
+          onChanged();
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -1297,9 +1554,14 @@ public final class NodeOuterClass {
         }
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object idBase58_ = "";
       /**
+       * <pre>
+       * the node ID in base 58 encoding
+       * </pre>
+       *
        * <code>string id_base58 = 1;</code>
        * @return The idBase58.
        */
@@ -1316,6 +1578,10 @@ public final class NodeOuterClass {
         }
       }
       /**
+       * <pre>
+       * the node ID in base 58 encoding
+       * </pre>
+       *
        * <code>string id_base58 = 1;</code>
        * @return The bytes for idBase58.
        */
@@ -1333,6 +1599,10 @@ public final class NodeOuterClass {
         }
       }
       /**
+       * <pre>
+       * the node ID in base 58 encoding
+       * </pre>
+       *
        * <code>string id_base58 = 1;</code>
        * @param value The idBase58 to set.
        * @return This builder for chaining.
@@ -1348,6 +1618,10 @@ public final class NodeOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * the node ID in base 58 encoding
+       * </pre>
+       *
        * <code>string id_base58 = 1;</code>
        * @return This builder for chaining.
        */
@@ -1358,6 +1632,10 @@ public final class NodeOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * the node ID in base 58 encoding
+       * </pre>
+       *
        * <code>string id_base58 = 1;</code>
        * @param value The bytes for idBase58 to set.
        * @return This builder for chaining.
@@ -1370,6 +1648,161 @@ public final class NodeOuterClass {
   checkByteStringIsUtf8(value);
         
         idBase58_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.LazyStringList addresses_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureAddressesIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          addresses_ = new com.google.protobuf.LazyStringArrayList(addresses_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <pre>
+       * all known multi addresses under which 
+       * this node can be connected.
+       * </pre>
+       *
+       * <code>repeated string addresses = 2;</code>
+       * @return A list containing the addresses.
+       */
+      public com.google.protobuf.ProtocolStringList
+          getAddressesList() {
+        return addresses_.getUnmodifiableView();
+      }
+      /**
+       * <pre>
+       * all known multi addresses under which 
+       * this node can be connected.
+       * </pre>
+       *
+       * <code>repeated string addresses = 2;</code>
+       * @return The count of addresses.
+       */
+      public int getAddressesCount() {
+        return addresses_.size();
+      }
+      /**
+       * <pre>
+       * all known multi addresses under which 
+       * this node can be connected.
+       * </pre>
+       *
+       * <code>repeated string addresses = 2;</code>
+       * @param index The index of the element to return.
+       * @return The addresses at the given index.
+       */
+      public java.lang.String getAddresses(int index) {
+        return addresses_.get(index);
+      }
+      /**
+       * <pre>
+       * all known multi addresses under which 
+       * this node can be connected.
+       * </pre>
+       *
+       * <code>repeated string addresses = 2;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the addresses at the given index.
+       */
+      public com.google.protobuf.ByteString
+          getAddressesBytes(int index) {
+        return addresses_.getByteString(index);
+      }
+      /**
+       * <pre>
+       * all known multi addresses under which 
+       * this node can be connected.
+       * </pre>
+       *
+       * <code>repeated string addresses = 2;</code>
+       * @param index The index to set the value at.
+       * @param value The addresses to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAddresses(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureAddressesIsMutable();
+        addresses_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * all known multi addresses under which 
+       * this node can be connected.
+       * </pre>
+       *
+       * <code>repeated string addresses = 2;</code>
+       * @param value The addresses to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAddresses(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureAddressesIsMutable();
+        addresses_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * all known multi addresses under which 
+       * this node can be connected.
+       * </pre>
+       *
+       * <code>repeated string addresses = 2;</code>
+       * @param values The addresses to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllAddresses(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureAddressesIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, addresses_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * all known multi addresses under which 
+       * this node can be connected.
+       * </pre>
+       *
+       * <code>repeated string addresses = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAddresses() {
+        addresses_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * all known multi addresses under which 
+       * this node can be connected.
+       * </pre>
+       *
+       * <code>repeated string addresses = 2;</code>
+       * @param value The bytes of the addresses to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAddressesBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        ensureAddressesIsMutable();
+        addresses_.add(value);
         onChanged();
         return this;
       }
@@ -1448,8 +1881,8 @@ public final class NodeOuterClass {
       "\n\017node/node.proto\022\rqaul.rpc.node\"Z\n\004Node" +
       "\022\027\n\rget_node_info\030\001 \001(\010H\000\022.\n\004info\030\002 \001(\0132" +
       "\036.qaul.rpc.node.NodeInformationH\000B\t\n\007mes" +
-      "sage\"$\n\017NodeInformation\022\021\n\tid_base58\030\001 \001" +
-      "(\tb\006proto3"
+      "sage\"7\n\017NodeInformation\022\021\n\tid_base58\030\001 \001" +
+      "(\t\022\021\n\taddresses\030\002 \003(\tb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1466,7 +1899,7 @@ public final class NodeOuterClass {
     internal_static_qaul_rpc_node_NodeInformation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_node_NodeInformation_descriptor,
-        new java.lang.String[] { "IdBase58", });
+        new java.lang.String[] { "IdBase58", "Addresses", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

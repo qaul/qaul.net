@@ -135,48 +135,37 @@ impl Rpc {
 
         match QaulRpc::decode(&data[..]) {
             Ok(message) => {
-                log::info!("qaul rpc message received, with message module {}", message.module);
-
                 match Modules::from_i32(message.module) {
                     Some(Modules::Node) => {
                         Self::increase_message_counter();
-                        log::info!("Message Modules::Node received");
-                        Node::rpc(message.data);
+                        Node::rpc(message.data, lan, internet);
                     },
                     Some(Modules::Rpc) => {
                         log::info!("Message Modules::Rpc received");
                         // TODO: authorisation
                     },
                     Some(Modules::Useraccounts) => {
-                        log::info!("Message Modules::Useraccounts received");
                         UserAccounts::rpc(message.data);
                     },
                     Some(Modules::Users) => {
-                        log::info!("Message Modules::Users received");
                         Users::rpc(message.data);
                     },
                     Some(Modules::Router) => {
-                        log::info!("Message Modules::Router received");
                         Router::rpc(message.data);
                     },
                     Some(Modules::Feed) => {
-                        log::info!("Message Modules::Feed received");
                         Feed::rpc(message.data, message.user_id, lan, internet);
                     },
                     Some(Modules::Chat) => {
-                        log::info!("Message Modules::Chat received");
                         Chat::rpc(message.data, message.user_id, lan, internet);
                     },
                     Some(Modules::Connections) => {
-                        log::info!("Message Modules::Connections received");
                         Connections::rpc(message.data, internet);
                     },
                     Some(Modules::Ble) => {
-                        log::info!("Message Modules::Ble received");
                         Ble::rpc(message.data);
                     },
                     Some(Modules::Debug) => {
-                        log::info!("Message Modules::Debug received");
                         Debug::rpc(message.data, message.user_id);
                     },
                     Some(Modules::None) => {

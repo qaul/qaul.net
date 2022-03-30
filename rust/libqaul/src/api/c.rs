@@ -97,7 +97,6 @@ pub extern "C" fn send_rpc_to_libqaul(message: *const u8, message_length: u32) -
     }
 
     // copy input buffer to libqaul
-    log::info!("copy {} bytes of message buffer", message_length);
     let message_length_usize: usize = message_length as usize;
     let rust_buffer_owned: Vec<u8>;
     unsafe {
@@ -105,7 +104,6 @@ pub extern "C" fn send_rpc_to_libqaul(message: *const u8, message_length: u32) -
         let rust_buffer = &std::slice::from_raw_parts(message, message_length_usize).to_vec();
         rust_buffer_owned = rust_buffer.iter().cloned().collect();
     }
-    log::info!("received message: {:02x?}", rust_buffer_owned);
 
     // send it further to libqaul
     crate::rpc::Rpc::send_to_libqaul(rust_buffer_owned);
@@ -224,7 +222,6 @@ pub extern "C" fn send_sys_to_libqaul(message: *const u8, message_length: u32) -
     }
 
     // copy input buffer to libqaul
-    log::info!("copy {} bytes of message buffer", message_length);
     let message_length_usize: usize = message_length as usize;
     let rust_buffer_owned: Vec<u8>;
     unsafe {
@@ -232,7 +229,6 @@ pub extern "C" fn send_sys_to_libqaul(message: *const u8, message_length: u32) -
         let rust_buffer = &std::slice::from_raw_parts(message, message_length_usize).to_vec();
         rust_buffer_owned = rust_buffer.iter().cloned().collect();
     }
-    log::info!("received message: {:02x?}", rust_buffer_owned);
 
     // send it further to libqaul
     crate::rpc::sys::Sys::send_to_libqaul(rust_buffer_owned);

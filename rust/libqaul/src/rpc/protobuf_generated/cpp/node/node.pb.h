@@ -371,8 +371,33 @@ class NodeInformation final :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kAddressesFieldNumber = 2,
     kIdBase58FieldNumber = 1,
   };
+  // repeated string addresses = 2;
+  int addresses_size() const;
+  private:
+  int _internal_addresses_size() const;
+  public:
+  void clear_addresses();
+  const std::string& addresses(int index) const;
+  std::string* mutable_addresses(int index);
+  void set_addresses(int index, const std::string& value);
+  void set_addresses(int index, std::string&& value);
+  void set_addresses(int index, const char* value);
+  void set_addresses(int index, const char* value, size_t size);
+  std::string* add_addresses();
+  void add_addresses(const std::string& value);
+  void add_addresses(std::string&& value);
+  void add_addresses(const char* value);
+  void add_addresses(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& addresses() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_addresses();
+  private:
+  const std::string& _internal_addresses(int index) const;
+  std::string* _internal_add_addresses();
+  public:
+
   // string id_base58 = 1;
   void clear_id_base58();
   const std::string& id_base58() const;
@@ -394,6 +419,7 @@ class NodeInformation final :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> addresses_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_base58_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_node_2fnode_2eproto;
@@ -582,6 +608,81 @@ inline void NodeInformation::set_allocated_id_base58(std::string* id_base58) {
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.node.NodeInformation.id_base58)
+}
+
+// repeated string addresses = 2;
+inline int NodeInformation::_internal_addresses_size() const {
+  return addresses_.size();
+}
+inline int NodeInformation::addresses_size() const {
+  return _internal_addresses_size();
+}
+inline void NodeInformation::clear_addresses() {
+  addresses_.Clear();
+}
+inline std::string* NodeInformation::add_addresses() {
+  std::string* _s = _internal_add_addresses();
+  // @@protoc_insertion_point(field_add_mutable:qaul.rpc.node.NodeInformation.addresses)
+  return _s;
+}
+inline const std::string& NodeInformation::_internal_addresses(int index) const {
+  return addresses_.Get(index);
+}
+inline const std::string& NodeInformation::addresses(int index) const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.node.NodeInformation.addresses)
+  return _internal_addresses(index);
+}
+inline std::string* NodeInformation::mutable_addresses(int index) {
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.node.NodeInformation.addresses)
+  return addresses_.Mutable(index);
+}
+inline void NodeInformation::set_addresses(int index, const std::string& value) {
+  addresses_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.node.NodeInformation.addresses)
+}
+inline void NodeInformation::set_addresses(int index, std::string&& value) {
+  addresses_.Mutable(index)->assign(std::move(value));
+  // @@protoc_insertion_point(field_set:qaul.rpc.node.NodeInformation.addresses)
+}
+inline void NodeInformation::set_addresses(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  addresses_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:qaul.rpc.node.NodeInformation.addresses)
+}
+inline void NodeInformation::set_addresses(int index, const char* value, size_t size) {
+  addresses_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:qaul.rpc.node.NodeInformation.addresses)
+}
+inline std::string* NodeInformation::_internal_add_addresses() {
+  return addresses_.Add();
+}
+inline void NodeInformation::add_addresses(const std::string& value) {
+  addresses_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:qaul.rpc.node.NodeInformation.addresses)
+}
+inline void NodeInformation::add_addresses(std::string&& value) {
+  addresses_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:qaul.rpc.node.NodeInformation.addresses)
+}
+inline void NodeInformation::add_addresses(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  addresses_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:qaul.rpc.node.NodeInformation.addresses)
+}
+inline void NodeInformation::add_addresses(const char* value, size_t size) {
+  addresses_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:qaul.rpc.node.NodeInformation.addresses)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+NodeInformation::addresses() const {
+  // @@protoc_insertion_point(field_list:qaul.rpc.node.NodeInformation.addresses)
+  return addresses_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+NodeInformation::mutable_addresses() {
+  // @@protoc_insertion_point(field_mutable_list:qaul.rpc.node.NodeInformation.addresses)
+  return &addresses_;
 }
 
 #ifdef __GNUC__

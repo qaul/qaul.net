@@ -27,8 +27,9 @@ const NodeInformation$json = const {
   '1': 'NodeInformation',
   '2': const [
     const {'1': 'id_base58', '3': 1, '4': 1, '5': 9, '10': 'idBase58'},
+    const {'1': 'addresses', '3': 2, '4': 3, '5': 9, '10': 'addresses'},
   ],
 };
 
 /// Descriptor for `NodeInformation`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List nodeInformationDescriptor = $convert.base64Decode('Cg9Ob2RlSW5mb3JtYXRpb24SGwoJaWRfYmFzZTU4GAEgASgJUghpZEJhc2U1OA==');
+final $typed_data.Uint8List nodeInformationDescriptor = $convert.base64Decode('Cg9Ob2RlSW5mb3JtYXRpb24SGwoJaWRfYmFzZTU4GAEgASgJUghpZEJhc2U1OBIcCglhZGRyZXNzZXMYAiADKAlSCWFkZHJlc3Nlcw==');

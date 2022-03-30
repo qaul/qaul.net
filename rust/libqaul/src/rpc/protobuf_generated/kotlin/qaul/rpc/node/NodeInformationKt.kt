@@ -23,6 +23,10 @@ public object NodeInformationKt {
     internal fun _build(): qaul.rpc.node.NodeOuterClass.NodeInformation = _builder.build()
 
     /**
+     * <pre>
+     * the node ID in base 58 encoding
+     * </pre>
+     *
      * <code>string id_base58 = 1;</code>
      */
     public var idBase58: kotlin.String
@@ -33,12 +37,121 @@ public object NodeInformationKt {
         _builder.setIdBase58(value)
       }
     /**
+     * <pre>
+     * the node ID in base 58 encoding
+     * </pre>
+     *
      * <code>string id_base58 = 1;</code>
      */
     public fun clearIdBase58() {
       _builder.clearIdBase58()
     }
-  }
+
+    /**
+     * An uninstantiable, behaviorless type to represent the field in
+     * generics.
+     */
+    @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
+    public class AddressesProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @return A list containing the addresses.
+     */
+    public val addresses: com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>
+      @kotlin.jvm.JvmSynthetic
+      get() = com.google.protobuf.kotlin.DslList(
+        _builder.getAddressesList()
+      )
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @param value The addresses to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("addAddresses")
+    public fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.add(value: kotlin.String) {
+      _builder.addAddresses(value)
+    }
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @param value The addresses to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("plusAssignAddresses")
+    @Suppress("NOTHING_TO_INLINE")
+    public inline operator fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.plusAssign(value: kotlin.String) {
+      add(value)
+    }
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @param values The addresses to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("addAllAddresses")
+    public fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.addAll(values: kotlin.collections.Iterable<kotlin.String>) {
+      _builder.addAllAddresses(values)
+    }
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @param values The addresses to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("plusAssignAllAddresses")
+    @Suppress("NOTHING_TO_INLINE")
+    public inline operator fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.plusAssign(values: kotlin.collections.Iterable<kotlin.String>) {
+      addAll(values)
+    }
+    /**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     * @param index The index to set the value at.
+     * @param value The addresses to set.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("setAddresses")
+    public operator fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.set(index: kotlin.Int, value: kotlin.String) {
+      _builder.setAddresses(index, value)
+    }/**
+     * <pre>
+     * all known multi addresses under which 
+     * this node can be connected.
+     * </pre>
+     *
+     * <code>repeated string addresses = 2;</code>
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("clearAddresses")
+    public fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.clear() {
+      _builder.clearAddresses()
+    }}
 }
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.node.NodeOuterClass.NodeInformation.copy(block: qaul.rpc.node.NodeInformationKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.NodeInformation =

@@ -37,7 +37,8 @@ struct NodeDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeDefaultTypeInternal _Node_default_instance_;
 PROTOBUF_CONSTEXPR NodeInformation::NodeInformation(
     ::_pbi::ConstantInitialized)
-  : id_base58_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
+  : addresses_()
+  , id_base58_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
 struct NodeInformationDefaultTypeInternal {
   PROTOBUF_CONSTEXPR NodeInformationDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -71,6 +72,7 @@ const uint32_t TableStruct_node_2fnode_2eproto::offsets[] PROTOBUF_SECTION_VARIA
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, id_base58_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, addresses_),
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::node::Node)},
@@ -86,12 +88,12 @@ const char descriptor_table_protodef_node_2fnode_2eproto[] PROTOBUF_SECTION_VARI
   "\n\017node/node.proto\022\rqaul.rpc.node\"Z\n\004Node"
   "\022\027\n\rget_node_info\030\001 \001(\010H\000\022.\n\004info\030\002 \001(\0132"
   "\036.qaul.rpc.node.NodeInformationH\000B\t\n\007mes"
-  "sage\"$\n\017NodeInformation\022\021\n\tid_base58\030\001 \001"
-  "(\tb\006proto3"
+  "sage\"7\n\017NodeInformation\022\021\n\tid_base58\030\001 \001"
+  "(\t\022\021\n\taddresses\030\002 \003(\tb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_node_2fnode_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_node_2fnode_2eproto = {
-    false, false, 170, descriptor_table_protodef_node_2fnode_2eproto,
+    false, false, 189, descriptor_table_protodef_node_2fnode_2eproto,
     "node/node.proto",
     &descriptor_table_node_2fnode_2eproto_once, nullptr, 0, 2,
     schemas, file_default_instances, TableStruct_node_2fnode_2eproto::offsets,
@@ -382,12 +384,14 @@ class NodeInformation::_Internal {
 
 NodeInformation::NodeInformation(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
+  addresses_(arena) {
   SharedCtor();
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.node.NodeInformation)
 }
 NodeInformation::NodeInformation(const NodeInformation& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      addresses_(from.addresses_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   id_base58_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -431,6 +435,7 @@ void NodeInformation::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  addresses_.Clear();
   id_base58_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -448,6 +453,21 @@ const char* NodeInformation::_InternalParse(const char* ptr, ::_pbi::ParseContex
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
           CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.node.NodeInformation.id_base58"));
+        } else
+          goto handle_unusual;
+        continue;
+      // repeated string addresses = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            auto str = _internal_add_addresses();
+            ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+            CHK_(ptr);
+            CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.node.NodeInformation.addresses"));
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
         } else
           goto handle_unusual;
         continue;
@@ -490,6 +510,16 @@ uint8_t* NodeInformation::_InternalSerialize(
         1, this->_internal_id_base58(), target);
   }
 
+  // repeated string addresses = 2;
+  for (int i = 0, n = this->_internal_addresses_size(); i < n; i++) {
+    const auto& s = this->_internal_addresses(i);
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      s.data(), static_cast<int>(s.length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "qaul.rpc.node.NodeInformation.addresses");
+    target = stream->WriteString(2, s, target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -505,6 +535,14 @@ size_t NodeInformation::ByteSizeLong() const {
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
+
+  // repeated string addresses = 2;
+  total_size += 1 *
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(addresses_.size());
+  for (int i = 0, n = addresses_.size(); i < n; i++) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+      addresses_.Get(i));
+  }
 
   // string id_base58 = 1;
   if (!this->_internal_id_base58().empty()) {
@@ -535,6 +573,7 @@ void NodeInformation::MergeFrom(const NodeInformation& from) {
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  addresses_.MergeFrom(from.addresses_);
   if (!from._internal_id_base58().empty()) {
     _internal_set_id_base58(from._internal_id_base58());
   }
@@ -557,6 +596,7 @@ void NodeInformation::InternalSwap(NodeInformation* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  addresses_.InternalSwap(&other->addresses_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &id_base58_, lhs_arena,
       &other->id_base58_, rhs_arena

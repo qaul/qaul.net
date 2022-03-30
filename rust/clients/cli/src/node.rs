@@ -53,6 +53,10 @@ impl Node {
                     Some(proto::node::Message::Info(proto_nodeinformation)) => {
                         // print information
                         println!("Node ID is: {}", proto_nodeinformation.id_base58 );
+                        println!("Node Addresses are:");
+                        for address in proto_nodeinformation.addresses {
+                            println!("    {}", address);
+                        }
                     }
                     _ => {},
                 }    

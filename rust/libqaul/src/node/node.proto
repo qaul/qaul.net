@@ -4,13 +4,20 @@ package qaul.rpc.node;
 
 // node rpc message container
 message Node {
+    // message contains all node message types
     oneof message {
+        // request node info message from libqaul
         bool get_node_info = 1;
+        // libqaul sends node info
         NodeInformation info = 2;
     }
 }
 
 // node information
 message NodeInformation {
+    // the node ID in base 58 encoding
     string id_base58 = 1;
+    // all known multi addresses under which 
+    // this node can be connected.
+    repeated string addresses = 2;
 }

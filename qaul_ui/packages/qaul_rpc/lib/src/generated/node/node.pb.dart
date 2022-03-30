@@ -90,16 +90,21 @@ class Node extends $pb.GeneratedMessage {
 class NodeInformation extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'NodeInformation', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.node'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'idBase58')
+    ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'addresses')
     ..hasRequiredFields = false
   ;
 
   NodeInformation._() : super();
   factory NodeInformation({
     $core.String? idBase58,
+    $core.Iterable<$core.String>? addresses,
   }) {
     final _result = create();
     if (idBase58 != null) {
       _result.idBase58 = idBase58;
+    }
+    if (addresses != null) {
+      _result.addresses.addAll(addresses);
     }
     return _result;
   }
@@ -132,5 +137,8 @@ class NodeInformation extends $pb.GeneratedMessage {
   $core.bool hasIdBase58() => $_has(0);
   @$pb.TagNumber(1)
   void clearIdBase58() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<$core.String> get addresses => $_getList(1);
 }
 
