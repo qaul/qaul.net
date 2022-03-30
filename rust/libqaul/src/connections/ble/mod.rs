@@ -222,7 +222,42 @@ impl Ble {
         }
         else {
             // TODO: manage rights, etc.
-            log::error!("BLE start error");
+            log::error!("BLE start error: {}", message.error_message);
+
+            match message.error_reason {
+                // proto::BleError::UnknownError
+                0 => {
+                    log::error!("BLE unknown error");
+                },
+                // proto::BleError::RightsMissing
+                1 => {
+                    log::error!("BLE rights missing");
+
+                    // request rights from GUI
+                    // create rights request message
+                    let rights_request = proto_rpc::RightsRequest{};
+
+                    // create BLE RPC message
+                    let proto_message = proto_rpc::Ble {
+                        message: Some(proto_rpc::ble::Message::RightsRequest(rights_request)),
+                    };
+
+                    // encode message
+                    let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                    proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+                    // send message
+                    Rpc::send_message(buf, crate::rpc::proto::Modules::Ble.into(), "".to_string(), Vec::new());
+
+                },
+                // proto::BleError::Timeout
+                2 => {
+                    log::error!("BLE timeout error");
+                },
+                _ => {
+                    log::error!("BLE undefined error");
+                }
+            }
         }
     }
 
@@ -666,7 +701,15 @@ impl Ble {
                         // send message
                         Rpc::send_message(buf, crate::rpc::proto::Modules::Ble.into(), "".to_string(), Vec::new());
                     },
-                    _ => {
+                    Some(proto_rpc::ble::Message::RightsResult(rights_result)) => {
+                        if rights_result.rights_granted {
+                            Self::module_start();
+                        }
+                        else {
+                            log::error!("BLE rights not granted");
+                        }
+                    },
+                     _ => {
                         log::error!("BLE rpc message undefined");
                     },
                 }    

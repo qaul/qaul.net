@@ -134,6 +134,9 @@ impl Ble {
                     Some(proto::ble::Message::DiscoveredResponse(discovered)) => {
                         Self::print_discovered(discovered);
                     }
+                    Some(proto::ble::Message::RightsRequest(_)) => {
+                        log::error!("BLE rights requested");
+                    }
                     _ => {
                         log::error!("unprocessable RPC debug message");
                     },

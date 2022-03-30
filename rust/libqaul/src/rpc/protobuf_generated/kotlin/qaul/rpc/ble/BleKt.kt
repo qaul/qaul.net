@@ -165,6 +165,54 @@ public object BleKt {
     public fun hasDiscoveredResponse(): kotlin.Boolean {
       return _builder.hasDiscoveredResponse()
     }
+
+    /**
+     * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+     */
+    public var rightsRequest: qaul.rpc.ble.BleRpc.RightsRequest
+      @JvmName("getRightsRequest")
+      get() = _builder.getRightsRequest()
+      @JvmName("setRightsRequest")
+      set(value) {
+        _builder.setRightsRequest(value)
+      }
+    /**
+     * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+     */
+    public fun clearRightsRequest() {
+      _builder.clearRightsRequest()
+    }
+    /**
+     * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+     * @return Whether the rightsRequest field is set.
+     */
+    public fun hasRightsRequest(): kotlin.Boolean {
+      return _builder.hasRightsRequest()
+    }
+
+    /**
+     * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+     */
+    public var rightsResult: qaul.rpc.ble.BleRpc.RightsResult
+      @JvmName("getRightsResult")
+      get() = _builder.getRightsResult()
+      @JvmName("setRightsResult")
+      set(value) {
+        _builder.setRightsResult(value)
+      }
+    /**
+     * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+     */
+    public fun clearRightsResult() {
+      _builder.clearRightsResult()
+    }
+    /**
+     * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+     * @return Whether the rightsResult field is set.
+     */
+    public fun hasRightsResult(): kotlin.Boolean {
+      return _builder.hasRightsResult()
+    }
     public val messageCase: qaul.rpc.ble.BleRpc.Ble.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()

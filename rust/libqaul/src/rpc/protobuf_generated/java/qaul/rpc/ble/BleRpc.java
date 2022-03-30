@@ -108,6 +108,36 @@ public final class BleRpc {
      */
     qaul.rpc.ble.BleRpc.DiscoveredResponseOrBuilder getDiscoveredResponseOrBuilder();
 
+    /**
+     * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+     * @return Whether the rightsRequest field is set.
+     */
+    boolean hasRightsRequest();
+    /**
+     * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+     * @return The rightsRequest.
+     */
+    qaul.rpc.ble.BleRpc.RightsRequest getRightsRequest();
+    /**
+     * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+     */
+    qaul.rpc.ble.BleRpc.RightsRequestOrBuilder getRightsRequestOrBuilder();
+
+    /**
+     * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+     * @return Whether the rightsResult field is set.
+     */
+    boolean hasRightsResult();
+    /**
+     * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+     * @return The rightsResult.
+     */
+    qaul.rpc.ble.BleRpc.RightsResult getRightsResult();
+    /**
+     * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+     */
+    qaul.rpc.ble.BleRpc.RightsResultOrBuilder getRightsResultOrBuilder();
+
     public qaul.rpc.ble.BleRpc.Ble.MessageCase getMessageCase();
   }
   /**
@@ -245,6 +275,34 @@ public final class BleRpc {
               messageCase_ = 6;
               break;
             }
+            case 58: {
+              qaul.rpc.ble.BleRpc.RightsRequest.Builder subBuilder = null;
+              if (messageCase_ == 7) {
+                subBuilder = ((qaul.rpc.ble.BleRpc.RightsRequest) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.ble.BleRpc.RightsRequest.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.ble.BleRpc.RightsRequest) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 7;
+              break;
+            }
+            case 66: {
+              qaul.rpc.ble.BleRpc.RightsResult.Builder subBuilder = null;
+              if (messageCase_ == 8) {
+                subBuilder = ((qaul.rpc.ble.BleRpc.RightsResult) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.ble.BleRpc.RightsResult.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.ble.BleRpc.RightsResult) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 8;
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -288,6 +346,8 @@ public final class BleRpc {
       STOP_REQUEST(4),
       DISCOVERED_REQUEST(5),
       DISCOVERED_RESPONSE(6),
+      RIGHTS_REQUEST(7),
+      RIGHTS_RESULT(8),
       MESSAGE_NOT_SET(0);
       private final int value;
       private MessageCase(int value) {
@@ -311,6 +371,8 @@ public final class BleRpc {
           case 4: return STOP_REQUEST;
           case 5: return DISCOVERED_REQUEST;
           case 6: return DISCOVERED_RESPONSE;
+          case 7: return RIGHTS_REQUEST;
+          case 8: return RIGHTS_RESULT;
           case 0: return MESSAGE_NOT_SET;
           default: return null;
         }
@@ -512,6 +574,68 @@ public final class BleRpc {
       return qaul.rpc.ble.BleRpc.DiscoveredResponse.getDefaultInstance();
     }
 
+    public static final int RIGHTS_REQUEST_FIELD_NUMBER = 7;
+    /**
+     * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+     * @return Whether the rightsRequest field is set.
+     */
+    @java.lang.Override
+    public boolean hasRightsRequest() {
+      return messageCase_ == 7;
+    }
+    /**
+     * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+     * @return The rightsRequest.
+     */
+    @java.lang.Override
+    public qaul.rpc.ble.BleRpc.RightsRequest getRightsRequest() {
+      if (messageCase_ == 7) {
+         return (qaul.rpc.ble.BleRpc.RightsRequest) message_;
+      }
+      return qaul.rpc.ble.BleRpc.RightsRequest.getDefaultInstance();
+    }
+    /**
+     * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.ble.BleRpc.RightsRequestOrBuilder getRightsRequestOrBuilder() {
+      if (messageCase_ == 7) {
+         return (qaul.rpc.ble.BleRpc.RightsRequest) message_;
+      }
+      return qaul.rpc.ble.BleRpc.RightsRequest.getDefaultInstance();
+    }
+
+    public static final int RIGHTS_RESULT_FIELD_NUMBER = 8;
+    /**
+     * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+     * @return Whether the rightsResult field is set.
+     */
+    @java.lang.Override
+    public boolean hasRightsResult() {
+      return messageCase_ == 8;
+    }
+    /**
+     * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+     * @return The rightsResult.
+     */
+    @java.lang.Override
+    public qaul.rpc.ble.BleRpc.RightsResult getRightsResult() {
+      if (messageCase_ == 8) {
+         return (qaul.rpc.ble.BleRpc.RightsResult) message_;
+      }
+      return qaul.rpc.ble.BleRpc.RightsResult.getDefaultInstance();
+    }
+    /**
+     * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.ble.BleRpc.RightsResultOrBuilder getRightsResultOrBuilder() {
+      if (messageCase_ == 8) {
+         return (qaul.rpc.ble.BleRpc.RightsResult) message_;
+      }
+      return qaul.rpc.ble.BleRpc.RightsResult.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -543,6 +667,12 @@ public final class BleRpc {
       }
       if (messageCase_ == 6) {
         output.writeMessage(6, (qaul.rpc.ble.BleRpc.DiscoveredResponse) message_);
+      }
+      if (messageCase_ == 7) {
+        output.writeMessage(7, (qaul.rpc.ble.BleRpc.RightsRequest) message_);
+      }
+      if (messageCase_ == 8) {
+        output.writeMessage(8, (qaul.rpc.ble.BleRpc.RightsResult) message_);
       }
       unknownFields.writeTo(output);
     }
@@ -576,6 +706,14 @@ public final class BleRpc {
       if (messageCase_ == 6) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, (qaul.rpc.ble.BleRpc.DiscoveredResponse) message_);
+      }
+      if (messageCase_ == 7) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(7, (qaul.rpc.ble.BleRpc.RightsRequest) message_);
+      }
+      if (messageCase_ == 8) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(8, (qaul.rpc.ble.BleRpc.RightsResult) message_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -618,6 +756,14 @@ public final class BleRpc {
           if (!getDiscoveredResponse()
               .equals(other.getDiscoveredResponse())) return false;
           break;
+        case 7:
+          if (!getRightsRequest()
+              .equals(other.getRightsRequest())) return false;
+          break;
+        case 8:
+          if (!getRightsResult()
+              .equals(other.getRightsResult())) return false;
+          break;
         case 0:
         default:
       }
@@ -656,6 +802,14 @@ public final class BleRpc {
         case 6:
           hash = (37 * hash) + DISCOVERED_RESPONSE_FIELD_NUMBER;
           hash = (53 * hash) + getDiscoveredResponse().hashCode();
+          break;
+        case 7:
+          hash = (37 * hash) + RIGHTS_REQUEST_FIELD_NUMBER;
+          hash = (53 * hash) + getRightsRequest().hashCode();
+          break;
+        case 8:
+          hash = (37 * hash) + RIGHTS_RESULT_FIELD_NUMBER;
+          hash = (53 * hash) + getRightsResult().hashCode();
           break;
         case 0:
         default:
@@ -869,6 +1023,20 @@ public final class BleRpc {
             result.message_ = discoveredResponseBuilder_.build();
           }
         }
+        if (messageCase_ == 7) {
+          if (rightsRequestBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = rightsRequestBuilder_.build();
+          }
+        }
+        if (messageCase_ == 8) {
+          if (rightsResultBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = rightsResultBuilder_.build();
+          }
+        }
         result.messageCase_ = messageCase_;
         onBuilt();
         return result;
@@ -941,6 +1109,14 @@ public final class BleRpc {
           }
           case DISCOVERED_RESPONSE: {
             mergeDiscoveredResponse(other.getDiscoveredResponse());
+            break;
+          }
+          case RIGHTS_REQUEST: {
+            mergeRightsRequest(other.getRightsRequest());
+            break;
+          }
+          case RIGHTS_RESULT: {
+            mergeRightsResult(other.getRightsResult());
             break;
           }
           case MESSAGE_NOT_SET: {
@@ -1835,6 +2011,288 @@ public final class BleRpc {
         messageCase_ = 6;
         onChanged();;
         return discoveredResponseBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.ble.BleRpc.RightsRequest, qaul.rpc.ble.BleRpc.RightsRequest.Builder, qaul.rpc.ble.BleRpc.RightsRequestOrBuilder> rightsRequestBuilder_;
+      /**
+       * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+       * @return Whether the rightsRequest field is set.
+       */
+      @java.lang.Override
+      public boolean hasRightsRequest() {
+        return messageCase_ == 7;
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+       * @return The rightsRequest.
+       */
+      @java.lang.Override
+      public qaul.rpc.ble.BleRpc.RightsRequest getRightsRequest() {
+        if (rightsRequestBuilder_ == null) {
+          if (messageCase_ == 7) {
+            return (qaul.rpc.ble.BleRpc.RightsRequest) message_;
+          }
+          return qaul.rpc.ble.BleRpc.RightsRequest.getDefaultInstance();
+        } else {
+          if (messageCase_ == 7) {
+            return rightsRequestBuilder_.getMessage();
+          }
+          return qaul.rpc.ble.BleRpc.RightsRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+       */
+      public Builder setRightsRequest(qaul.rpc.ble.BleRpc.RightsRequest value) {
+        if (rightsRequestBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          rightsRequestBuilder_.setMessage(value);
+        }
+        messageCase_ = 7;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+       */
+      public Builder setRightsRequest(
+          qaul.rpc.ble.BleRpc.RightsRequest.Builder builderForValue) {
+        if (rightsRequestBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          rightsRequestBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 7;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+       */
+      public Builder mergeRightsRequest(qaul.rpc.ble.BleRpc.RightsRequest value) {
+        if (rightsRequestBuilder_ == null) {
+          if (messageCase_ == 7 &&
+              message_ != qaul.rpc.ble.BleRpc.RightsRequest.getDefaultInstance()) {
+            message_ = qaul.rpc.ble.BleRpc.RightsRequest.newBuilder((qaul.rpc.ble.BleRpc.RightsRequest) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 7) {
+            rightsRequestBuilder_.mergeFrom(value);
+          }
+          rightsRequestBuilder_.setMessage(value);
+        }
+        messageCase_ = 7;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+       */
+      public Builder clearRightsRequest() {
+        if (rightsRequestBuilder_ == null) {
+          if (messageCase_ == 7) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 7) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          rightsRequestBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+       */
+      public qaul.rpc.ble.BleRpc.RightsRequest.Builder getRightsRequestBuilder() {
+        return getRightsRequestFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.ble.BleRpc.RightsRequestOrBuilder getRightsRequestOrBuilder() {
+        if ((messageCase_ == 7) && (rightsRequestBuilder_ != null)) {
+          return rightsRequestBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 7) {
+            return (qaul.rpc.ble.BleRpc.RightsRequest) message_;
+          }
+          return qaul.rpc.ble.BleRpc.RightsRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.ble.BleRpc.RightsRequest, qaul.rpc.ble.BleRpc.RightsRequest.Builder, qaul.rpc.ble.BleRpc.RightsRequestOrBuilder> 
+          getRightsRequestFieldBuilder() {
+        if (rightsRequestBuilder_ == null) {
+          if (!(messageCase_ == 7)) {
+            message_ = qaul.rpc.ble.BleRpc.RightsRequest.getDefaultInstance();
+          }
+          rightsRequestBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.ble.BleRpc.RightsRequest, qaul.rpc.ble.BleRpc.RightsRequest.Builder, qaul.rpc.ble.BleRpc.RightsRequestOrBuilder>(
+                  (qaul.rpc.ble.BleRpc.RightsRequest) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 7;
+        onChanged();;
+        return rightsRequestBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.ble.BleRpc.RightsResult, qaul.rpc.ble.BleRpc.RightsResult.Builder, qaul.rpc.ble.BleRpc.RightsResultOrBuilder> rightsResultBuilder_;
+      /**
+       * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+       * @return Whether the rightsResult field is set.
+       */
+      @java.lang.Override
+      public boolean hasRightsResult() {
+        return messageCase_ == 8;
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+       * @return The rightsResult.
+       */
+      @java.lang.Override
+      public qaul.rpc.ble.BleRpc.RightsResult getRightsResult() {
+        if (rightsResultBuilder_ == null) {
+          if (messageCase_ == 8) {
+            return (qaul.rpc.ble.BleRpc.RightsResult) message_;
+          }
+          return qaul.rpc.ble.BleRpc.RightsResult.getDefaultInstance();
+        } else {
+          if (messageCase_ == 8) {
+            return rightsResultBuilder_.getMessage();
+          }
+          return qaul.rpc.ble.BleRpc.RightsResult.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+       */
+      public Builder setRightsResult(qaul.rpc.ble.BleRpc.RightsResult value) {
+        if (rightsResultBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          rightsResultBuilder_.setMessage(value);
+        }
+        messageCase_ = 8;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+       */
+      public Builder setRightsResult(
+          qaul.rpc.ble.BleRpc.RightsResult.Builder builderForValue) {
+        if (rightsResultBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          rightsResultBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 8;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+       */
+      public Builder mergeRightsResult(qaul.rpc.ble.BleRpc.RightsResult value) {
+        if (rightsResultBuilder_ == null) {
+          if (messageCase_ == 8 &&
+              message_ != qaul.rpc.ble.BleRpc.RightsResult.getDefaultInstance()) {
+            message_ = qaul.rpc.ble.BleRpc.RightsResult.newBuilder((qaul.rpc.ble.BleRpc.RightsResult) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 8) {
+            rightsResultBuilder_.mergeFrom(value);
+          }
+          rightsResultBuilder_.setMessage(value);
+        }
+        messageCase_ = 8;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+       */
+      public Builder clearRightsResult() {
+        if (rightsResultBuilder_ == null) {
+          if (messageCase_ == 8) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 8) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          rightsResultBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+       */
+      public qaul.rpc.ble.BleRpc.RightsResult.Builder getRightsResultBuilder() {
+        return getRightsResultFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.ble.BleRpc.RightsResultOrBuilder getRightsResultOrBuilder() {
+        if ((messageCase_ == 8) && (rightsResultBuilder_ != null)) {
+          return rightsResultBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 8) {
+            return (qaul.rpc.ble.BleRpc.RightsResult) message_;
+          }
+          return qaul.rpc.ble.BleRpc.RightsResult.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.ble.BleRpc.RightsResult, qaul.rpc.ble.BleRpc.RightsResult.Builder, qaul.rpc.ble.BleRpc.RightsResultOrBuilder> 
+          getRightsResultFieldBuilder() {
+        if (rightsResultBuilder_ == null) {
+          if (!(messageCase_ == 8)) {
+            message_ = qaul.rpc.ble.BleRpc.RightsResult.getDefaultInstance();
+          }
+          rightsResultBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.ble.BleRpc.RightsResult, qaul.rpc.ble.BleRpc.RightsResult.Builder, qaul.rpc.ble.BleRpc.RightsResultOrBuilder>(
+                  (qaul.rpc.ble.BleRpc.RightsResult) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 8;
+        onChanged();;
+        return rightsResultBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -5019,6 +5477,929 @@ public final class BleRpc {
 
   }
 
+  public interface RightsRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.ble.RightsRequest)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Request Rights
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.ble.RightsRequest}
+   */
+  public static final class RightsRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.ble.RightsRequest)
+      RightsRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RightsRequest.newBuilder() to construct.
+    private RightsRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RightsRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RightsRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RightsRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_RightsRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_RightsRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.ble.BleRpc.RightsRequest.class, qaul.rpc.ble.BleRpc.RightsRequest.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.ble.BleRpc.RightsRequest)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.ble.BleRpc.RightsRequest other = (qaul.rpc.ble.BleRpc.RightsRequest) obj;
+
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.ble.BleRpc.RightsRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.ble.BleRpc.RightsRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request Rights
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.ble.RightsRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.ble.RightsRequest)
+        qaul.rpc.ble.BleRpc.RightsRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_RightsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_RightsRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.ble.BleRpc.RightsRequest.class, qaul.rpc.ble.BleRpc.RightsRequest.Builder.class);
+      }
+
+      // Construct using qaul.rpc.ble.BleRpc.RightsRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_RightsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.ble.BleRpc.RightsRequest getDefaultInstanceForType() {
+        return qaul.rpc.ble.BleRpc.RightsRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.ble.BleRpc.RightsRequest build() {
+        qaul.rpc.ble.BleRpc.RightsRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.ble.BleRpc.RightsRequest buildPartial() {
+        qaul.rpc.ble.BleRpc.RightsRequest result = new qaul.rpc.ble.BleRpc.RightsRequest(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.ble.BleRpc.RightsRequest) {
+          return mergeFrom((qaul.rpc.ble.BleRpc.RightsRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.ble.BleRpc.RightsRequest other) {
+        if (other == qaul.rpc.ble.BleRpc.RightsRequest.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.ble.BleRpc.RightsRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.ble.BleRpc.RightsRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.ble.RightsRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.ble.RightsRequest)
+    private static final qaul.rpc.ble.BleRpc.RightsRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.ble.BleRpc.RightsRequest();
+    }
+
+    public static qaul.rpc.ble.BleRpc.RightsRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RightsRequest>
+        PARSER = new com.google.protobuf.AbstractParser<RightsRequest>() {
+      @java.lang.Override
+      public RightsRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RightsRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RightsRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RightsRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.ble.BleRpc.RightsRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RightsResultOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.ble.RightsResult)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>bool rights_granted = 1;</code>
+     * @return The rightsGranted.
+     */
+    boolean getRightsGranted();
+  }
+  /**
+   * <pre>
+   * Rights Request Results
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.ble.RightsResult}
+   */
+  public static final class RightsResult extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.ble.RightsResult)
+      RightsResultOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RightsResult.newBuilder() to construct.
+    private RightsResult(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RightsResult() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RightsResult();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RightsResult(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+
+              rightsGranted_ = input.readBool();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_RightsResult_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_RightsResult_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.ble.BleRpc.RightsResult.class, qaul.rpc.ble.BleRpc.RightsResult.Builder.class);
+    }
+
+    public static final int RIGHTS_GRANTED_FIELD_NUMBER = 1;
+    private boolean rightsGranted_;
+    /**
+     * <code>bool rights_granted = 1;</code>
+     * @return The rightsGranted.
+     */
+    @java.lang.Override
+    public boolean getRightsGranted() {
+      return rightsGranted_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (rightsGranted_ != false) {
+        output.writeBool(1, rightsGranted_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (rightsGranted_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(1, rightsGranted_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.ble.BleRpc.RightsResult)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.ble.BleRpc.RightsResult other = (qaul.rpc.ble.BleRpc.RightsResult) obj;
+
+      if (getRightsGranted()
+          != other.getRightsGranted()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + RIGHTS_GRANTED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getRightsGranted());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.ble.BleRpc.RightsResult parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsResult parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsResult parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsResult parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsResult parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsResult parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsResult parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsResult parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsResult parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsResult parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsResult parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.ble.BleRpc.RightsResult parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.ble.BleRpc.RightsResult prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Rights Request Results
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.ble.RightsResult}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.ble.RightsResult)
+        qaul.rpc.ble.BleRpc.RightsResultOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_RightsResult_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_RightsResult_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.ble.BleRpc.RightsResult.class, qaul.rpc.ble.BleRpc.RightsResult.Builder.class);
+      }
+
+      // Construct using qaul.rpc.ble.BleRpc.RightsResult.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        rightsGranted_ = false;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_RightsResult_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.ble.BleRpc.RightsResult getDefaultInstanceForType() {
+        return qaul.rpc.ble.BleRpc.RightsResult.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.ble.BleRpc.RightsResult build() {
+        qaul.rpc.ble.BleRpc.RightsResult result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.ble.BleRpc.RightsResult buildPartial() {
+        qaul.rpc.ble.BleRpc.RightsResult result = new qaul.rpc.ble.BleRpc.RightsResult(this);
+        result.rightsGranted_ = rightsGranted_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.ble.BleRpc.RightsResult) {
+          return mergeFrom((qaul.rpc.ble.BleRpc.RightsResult)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.ble.BleRpc.RightsResult other) {
+        if (other == qaul.rpc.ble.BleRpc.RightsResult.getDefaultInstance()) return this;
+        if (other.getRightsGranted() != false) {
+          setRightsGranted(other.getRightsGranted());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.ble.BleRpc.RightsResult parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.ble.BleRpc.RightsResult) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private boolean rightsGranted_ ;
+      /**
+       * <code>bool rights_granted = 1;</code>
+       * @return The rightsGranted.
+       */
+      @java.lang.Override
+      public boolean getRightsGranted() {
+        return rightsGranted_;
+      }
+      /**
+       * <code>bool rights_granted = 1;</code>
+       * @param value The rightsGranted to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRightsGranted(boolean value) {
+        
+        rightsGranted_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool rights_granted = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRightsGranted() {
+        
+        rightsGranted_ = false;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.ble.RightsResult)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.ble.RightsResult)
+    private static final qaul.rpc.ble.BleRpc.RightsResult DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.ble.BleRpc.RightsResult();
+    }
+
+    public static qaul.rpc.ble.BleRpc.RightsResult getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RightsResult>
+        PARSER = new com.google.protobuf.AbstractParser<RightsResult>() {
+      @java.lang.Override
+      public RightsResult parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RightsResult(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RightsResult> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RightsResult> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.ble.BleRpc.RightsResult getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_rpc_ble_Ble_descriptor;
   private static final 
@@ -5054,6 +6435,16 @@ public final class BleRpc {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_rpc_ble_DiscoveredResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_ble_RightsRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_ble_RightsRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_ble_RightsResult_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_ble_RightsResult_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -5064,7 +6455,7 @@ public final class BleRpc {
   static {
     java.lang.String[] descriptorData = {
       "\n\035connections/ble/ble_rpc.proto\022\014qaul.rp" +
-      "c.ble\"\340\002\n\003Ble\0221\n\014info_request\030\001 \001(\0132\031.qa" +
+      "c.ble\"\314\003\n\003Ble\0221\n\014info_request\030\001 \001(\0132\031.qa" +
       "ul.rpc.ble.InfoRequestH\000\0223\n\rinfo_respons" +
       "e\030\002 \001(\0132\032.qaul.rpc.ble.InfoResponseH\000\0223\n" +
       "\rstart_request\030\003 \001(\0132\032.qaul.rpc.ble.Star" +
@@ -5072,13 +6463,17 @@ public final class BleRpc {
       "rpc.ble.StopRequestH\000\022=\n\022discovered_requ" +
       "est\030\005 \001(\0132\037.qaul.rpc.ble.DiscoveredReque" +
       "stH\000\022?\n\023discovered_response\030\006 \001(\0132 .qaul" +
-      ".rpc.ble.DiscoveredResponseH\000B\t\n\007message" +
-      "\"\r\n\013InfoRequest\"E\n\014InfoResponse\022\020\n\010small" +
-      "_id\030\001 \001(\014\022\016\n\006status\030\002 \001(\t\022\023\n\013device_info" +
-      "\030\003 \001(\014\"\016\n\014StartRequest\"\r\n\013StopRequest\"\023\n" +
-      "\021DiscoveredRequest\"C\n\022DiscoveredResponse" +
-      "\022\023\n\013nodes_count\030\001 \001(\r\022\030\n\020to_confirm_coun" +
-      "t\030\002 \001(\rb\006proto3"
+      ".rpc.ble.DiscoveredResponseH\000\0225\n\016rights_" +
+      "request\030\007 \001(\0132\033.qaul.rpc.ble.RightsReque" +
+      "stH\000\0223\n\rrights_result\030\010 \001(\0132\032.qaul.rpc.b" +
+      "le.RightsResultH\000B\t\n\007message\"\r\n\013InfoRequ" +
+      "est\"E\n\014InfoResponse\022\020\n\010small_id\030\001 \001(\014\022\016\n" +
+      "\006status\030\002 \001(\t\022\023\n\013device_info\030\003 \001(\014\"\016\n\014St" +
+      "artRequest\"\r\n\013StopRequest\"\023\n\021DiscoveredR" +
+      "equest\"C\n\022DiscoveredResponse\022\023\n\013nodes_co" +
+      "unt\030\001 \001(\r\022\030\n\020to_confirm_count\030\002 \001(\r\"\017\n\rR" +
+      "ightsRequest\"&\n\014RightsResult\022\026\n\016rights_g" +
+      "ranted\030\001 \001(\010b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -5089,7 +6484,7 @@ public final class BleRpc {
     internal_static_qaul_rpc_ble_Ble_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_ble_Ble_descriptor,
-        new java.lang.String[] { "InfoRequest", "InfoResponse", "StartRequest", "StopRequest", "DiscoveredRequest", "DiscoveredResponse", "Message", });
+        new java.lang.String[] { "InfoRequest", "InfoResponse", "StartRequest", "StopRequest", "DiscoveredRequest", "DiscoveredResponse", "RightsRequest", "RightsResult", "Message", });
     internal_static_qaul_rpc_ble_InfoRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_qaul_rpc_ble_InfoRequest_fieldAccessorTable = new
@@ -5126,6 +6521,18 @@ public final class BleRpc {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_ble_DiscoveredResponse_descriptor,
         new java.lang.String[] { "NodesCount", "ToConfirmCount", });
+    internal_static_qaul_rpc_ble_RightsRequest_descriptor =
+      getDescriptor().getMessageTypes().get(7);
+    internal_static_qaul_rpc_ble_RightsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_ble_RightsRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_qaul_rpc_ble_RightsResult_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_qaul_rpc_ble_RightsResult_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_ble_RightsResult_descriptor,
+        new java.lang.String[] { "RightsGranted", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

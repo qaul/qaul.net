@@ -79,6 +79,22 @@ struct Qaul_Rpc_Ble_Ble {
     set {message = .discoveredResponse(newValue)}
   }
 
+  var rightsRequest: Qaul_Rpc_Ble_RightsRequest {
+    get {
+      if case .rightsRequest(let v)? = message {return v}
+      return Qaul_Rpc_Ble_RightsRequest()
+    }
+    set {message = .rightsRequest(newValue)}
+  }
+
+  var rightsResult: Qaul_Rpc_Ble_RightsResult {
+    get {
+      if case .rightsResult(let v)? = message {return v}
+      return Qaul_Rpc_Ble_RightsResult()
+    }
+    set {message = .rightsResult(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Message: Equatable {
@@ -88,6 +104,8 @@ struct Qaul_Rpc_Ble_Ble {
     case stopRequest(Qaul_Rpc_Ble_StopRequest)
     case discoveredRequest(Qaul_Rpc_Ble_DiscoveredRequest)
     case discoveredResponse(Qaul_Rpc_Ble_DiscoveredResponse)
+    case rightsRequest(Qaul_Rpc_Ble_RightsRequest)
+    case rightsResult(Qaul_Rpc_Ble_RightsResult)
 
   #if !swift(>=4.1)
     static func ==(lhs: Qaul_Rpc_Ble_Ble.OneOf_Message, rhs: Qaul_Rpc_Ble_Ble.OneOf_Message) -> Bool {
@@ -117,6 +135,14 @@ struct Qaul_Rpc_Ble_Ble {
       }()
       case (.discoveredResponse, .discoveredResponse): return {
         guard case .discoveredResponse(let l) = lhs, case .discoveredResponse(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.rightsRequest, .rightsRequest): return {
+        guard case .rightsRequest(let l) = lhs, case .rightsRequest(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.rightsResult, .rightsResult): return {
+        guard case .rightsResult(let l) = lhs, case .rightsResult(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -226,6 +252,30 @@ struct Qaul_Rpc_Ble_DiscoveredResponse {
   init() {}
 }
 
+/// Request Rights
+struct Qaul_Rpc_Ble_RightsRequest {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// Rights Request Results
+struct Qaul_Rpc_Ble_RightsResult {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var rightsGranted: Bool = false
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "qaul.rpc.ble"
@@ -239,6 +289,8 @@ extension Qaul_Rpc_Ble_Ble: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     4: .standard(proto: "stop_request"),
     5: .standard(proto: "discovered_request"),
     6: .standard(proto: "discovered_response"),
+    7: .standard(proto: "rights_request"),
+    8: .standard(proto: "rights_result"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -325,6 +377,32 @@ extension Qaul_Rpc_Ble_Ble: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
           self.message = .discoveredResponse(v)
         }
       }()
+      case 7: try {
+        var v: Qaul_Rpc_Ble_RightsRequest?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .rightsRequest(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .rightsRequest(v)
+        }
+      }()
+      case 8: try {
+        var v: Qaul_Rpc_Ble_RightsResult?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .rightsResult(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .rightsResult(v)
+        }
+      }()
       default: break
       }
     }
@@ -359,6 +437,14 @@ extension Qaul_Rpc_Ble_Ble: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     case .discoveredResponse?: try {
       guard case .discoveredResponse(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
+    }()
+    case .rightsRequest?: try {
+      guard case .rightsRequest(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+    }()
+    case .rightsResult?: try {
+      guard case .rightsResult(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
     }()
     case nil: break
     }
@@ -525,6 +611,57 @@ extension Qaul_Rpc_Ble_DiscoveredResponse: SwiftProtobuf.Message, SwiftProtobuf.
   static func ==(lhs: Qaul_Rpc_Ble_DiscoveredResponse, rhs: Qaul_Rpc_Ble_DiscoveredResponse) -> Bool {
     if lhs.nodesCount != rhs.nodesCount {return false}
     if lhs.toConfirmCount != rhs.toConfirmCount {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Rpc_Ble_RightsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".RightsRequest"
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let _ = try decoder.nextFieldNumber() {
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Rpc_Ble_RightsRequest, rhs: Qaul_Rpc_Ble_RightsRequest) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Rpc_Ble_RightsResult: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".RightsResult"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "rights_granted"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.rightsGranted) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.rightsGranted != false {
+      try visitor.visitSingularBoolField(value: self.rightsGranted, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Rpc_Ble_RightsResult, rhs: Qaul_Rpc_Ble_RightsResult) -> Bool {
+    if lhs.rightsGranted != rhs.rightsGranted {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

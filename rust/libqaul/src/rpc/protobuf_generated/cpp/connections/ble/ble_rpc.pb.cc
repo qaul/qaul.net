@@ -102,10 +102,33 @@ struct DiscoveredResponseDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DiscoveredResponseDefaultTypeInternal _DiscoveredResponse_default_instance_;
+constexpr RightsRequest::RightsRequest(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+struct RightsRequestDefaultTypeInternal {
+  constexpr RightsRequestDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~RightsRequestDefaultTypeInternal() {}
+  union {
+    RightsRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT RightsRequestDefaultTypeInternal _RightsRequest_default_instance_;
+constexpr RightsResult::RightsResult(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : rights_granted_(false){}
+struct RightsResultDefaultTypeInternal {
+  constexpr RightsResultDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~RightsResultDefaultTypeInternal() {}
+  union {
+    RightsResult _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT RightsResultDefaultTypeInternal _RightsResult_default_instance_;
 }  // namespace ble
 }  // namespace rpc
 }  // namespace qaul
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_connections_2fble_2fble_5frpc_2eproto[7];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_connections_2fble_2fble_5frpc_2eproto[9];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_connections_2fble_2fble_5frpc_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_connections_2fble_2fble_5frpc_2eproto = nullptr;
 
@@ -116,6 +139,8 @@ const uint32_t TableStruct_connections_2fble_2fble_5frpc_2eproto::offsets[] PROT
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::ble::Ble, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
@@ -164,15 +189,30 @@ const uint32_t TableStruct_connections_2fble_2fble_5frpc_2eproto::offsets[] PROT
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::ble::DiscoveredResponse, nodes_count_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::ble::DiscoveredResponse, to_confirm_count_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::ble::RightsRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::ble::RightsResult, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::ble::RightsResult, rights_granted_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::ble::Ble)},
-  { 13, -1, -1, sizeof(::qaul::rpc::ble::InfoRequest)},
-  { 19, -1, -1, sizeof(::qaul::rpc::ble::InfoResponse)},
-  { 28, -1, -1, sizeof(::qaul::rpc::ble::StartRequest)},
-  { 34, -1, -1, sizeof(::qaul::rpc::ble::StopRequest)},
-  { 40, -1, -1, sizeof(::qaul::rpc::ble::DiscoveredRequest)},
-  { 46, -1, -1, sizeof(::qaul::rpc::ble::DiscoveredResponse)},
+  { 15, -1, -1, sizeof(::qaul::rpc::ble::InfoRequest)},
+  { 21, -1, -1, sizeof(::qaul::rpc::ble::InfoResponse)},
+  { 30, -1, -1, sizeof(::qaul::rpc::ble::StartRequest)},
+  { 36, -1, -1, sizeof(::qaul::rpc::ble::StopRequest)},
+  { 42, -1, -1, sizeof(::qaul::rpc::ble::DiscoveredRequest)},
+  { 48, -1, -1, sizeof(::qaul::rpc::ble::DiscoveredResponse)},
+  { 56, -1, -1, sizeof(::qaul::rpc::ble::RightsRequest)},
+  { 62, -1, -1, sizeof(::qaul::rpc::ble::RightsResult)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -183,11 +223,13 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::ble::_StopRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::ble::_DiscoveredRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::ble::_DiscoveredResponse_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::ble::_RightsRequest_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::ble::_RightsResult_default_instance_),
 };
 
 const char descriptor_table_protodef_connections_2fble_2fble_5frpc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\035connections/ble/ble_rpc.proto\022\014qaul.rp"
-  "c.ble\"\340\002\n\003Ble\0221\n\014info_request\030\001 \001(\0132\031.qa"
+  "c.ble\"\314\003\n\003Ble\0221\n\014info_request\030\001 \001(\0132\031.qa"
   "ul.rpc.ble.InfoRequestH\000\0223\n\rinfo_respons"
   "e\030\002 \001(\0132\032.qaul.rpc.ble.InfoResponseH\000\0223\n"
   "\rstart_request\030\003 \001(\0132\032.qaul.rpc.ble.Star"
@@ -195,18 +237,22 @@ const char descriptor_table_protodef_connections_2fble_2fble_5frpc_2eproto[] PRO
   "rpc.ble.StopRequestH\000\022=\n\022discovered_requ"
   "est\030\005 \001(\0132\037.qaul.rpc.ble.DiscoveredReque"
   "stH\000\022\?\n\023discovered_response\030\006 \001(\0132 .qaul"
-  ".rpc.ble.DiscoveredResponseH\000B\t\n\007message"
-  "\"\r\n\013InfoRequest\"E\n\014InfoResponse\022\020\n\010small"
-  "_id\030\001 \001(\014\022\016\n\006status\030\002 \001(\t\022\023\n\013device_info"
-  "\030\003 \001(\014\"\016\n\014StartRequest\"\r\n\013StopRequest\"\023\n"
-  "\021DiscoveredRequest\"C\n\022DiscoveredResponse"
-  "\022\023\n\013nodes_count\030\001 \001(\r\022\030\n\020to_confirm_coun"
-  "t\030\002 \001(\rb\006proto3"
+  ".rpc.ble.DiscoveredResponseH\000\0225\n\016rights_"
+  "request\030\007 \001(\0132\033.qaul.rpc.ble.RightsReque"
+  "stH\000\0223\n\rrights_result\030\010 \001(\0132\032.qaul.rpc.b"
+  "le.RightsResultH\000B\t\n\007message\"\r\n\013InfoRequ"
+  "est\"E\n\014InfoResponse\022\020\n\010small_id\030\001 \001(\014\022\016\n"
+  "\006status\030\002 \001(\t\022\023\n\013device_info\030\003 \001(\014\"\016\n\014St"
+  "artRequest\"\r\n\013StopRequest\"\023\n\021DiscoveredR"
+  "equest\"C\n\022DiscoveredResponse\022\023\n\013nodes_co"
+  "unt\030\001 \001(\r\022\030\n\020to_confirm_count\030\002 \001(\r\"\017\n\rR"
+  "ightsRequest\"&\n\014RightsResult\022\026\n\016rights_g"
+  "ranted\030\001 \001(\010b\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_connections_2fble_2fble_5frpc_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_connections_2fble_2fble_5frpc_2eproto = {
-  false, false, 615, descriptor_table_protodef_connections_2fble_2fble_5frpc_2eproto, "connections/ble/ble_rpc.proto", 
-  &descriptor_table_connections_2fble_2fble_5frpc_2eproto_once, nullptr, 0, 7,
+  false, false, 780, descriptor_table_protodef_connections_2fble_2fble_5frpc_2eproto, "connections/ble/ble_rpc.proto", 
+  &descriptor_table_connections_2fble_2fble_5frpc_2eproto_once, nullptr, 0, 9,
   schemas, file_default_instances, TableStruct_connections_2fble_2fble_5frpc_2eproto::offsets,
   file_level_metadata_connections_2fble_2fble_5frpc_2eproto, file_level_enum_descriptors_connections_2fble_2fble_5frpc_2eproto, file_level_service_descriptors_connections_2fble_2fble_5frpc_2eproto,
 };
@@ -230,6 +276,8 @@ class Ble::_Internal {
   static const ::qaul::rpc::ble::StopRequest& stop_request(const Ble* msg);
   static const ::qaul::rpc::ble::DiscoveredRequest& discovered_request(const Ble* msg);
   static const ::qaul::rpc::ble::DiscoveredResponse& discovered_response(const Ble* msg);
+  static const ::qaul::rpc::ble::RightsRequest& rights_request(const Ble* msg);
+  static const ::qaul::rpc::ble::RightsResult& rights_result(const Ble* msg);
 };
 
 const ::qaul::rpc::ble::InfoRequest&
@@ -255,6 +303,14 @@ Ble::_Internal::discovered_request(const Ble* msg) {
 const ::qaul::rpc::ble::DiscoveredResponse&
 Ble::_Internal::discovered_response(const Ble* msg) {
   return *msg->message_.discovered_response_;
+}
+const ::qaul::rpc::ble::RightsRequest&
+Ble::_Internal::rights_request(const Ble* msg) {
+  return *msg->message_.rights_request_;
+}
+const ::qaul::rpc::ble::RightsResult&
+Ble::_Internal::rights_result(const Ble* msg) {
+  return *msg->message_.rights_result_;
 }
 void Ble::set_allocated_info_request(::qaul::rpc::ble::InfoRequest* info_request) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -346,6 +402,36 @@ void Ble::set_allocated_discovered_response(::qaul::rpc::ble::DiscoveredResponse
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.ble.Ble.discovered_response)
 }
+void Ble::set_allocated_rights_request(::qaul::rpc::ble::RightsRequest* rights_request) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (rights_request) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::ble::RightsRequest>::GetOwningArena(rights_request);
+    if (message_arena != submessage_arena) {
+      rights_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, rights_request, submessage_arena);
+    }
+    set_has_rights_request();
+    message_.rights_request_ = rights_request;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.ble.Ble.rights_request)
+}
+void Ble::set_allocated_rights_result(::qaul::rpc::ble::RightsResult* rights_result) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (rights_result) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::ble::RightsResult>::GetOwningArena(rights_result);
+    if (message_arena != submessage_arena) {
+      rights_result = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, rights_result, submessage_arena);
+    }
+    set_has_rights_result();
+    message_.rights_result_ = rights_result;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.ble.Ble.rights_result)
+}
 Ble::Ble(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
@@ -382,6 +468,14 @@ Ble::Ble(const Ble& from)
     }
     case kDiscoveredResponse: {
       _internal_mutable_discovered_response()->::qaul::rpc::ble::DiscoveredResponse::MergeFrom(from._internal_discovered_response());
+      break;
+    }
+    case kRightsRequest: {
+      _internal_mutable_rights_request()->::qaul::rpc::ble::RightsRequest::MergeFrom(from._internal_rights_request());
+      break;
+    }
+    case kRightsResult: {
+      _internal_mutable_rights_result()->::qaul::rpc::ble::RightsResult::MergeFrom(from._internal_rights_result());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -458,6 +552,18 @@ void Ble::clear_message() {
       }
       break;
     }
+    case kRightsRequest: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete message_.rights_request_;
+      }
+      break;
+    }
+    case kRightsResult: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete message_.rights_result_;
+      }
+      break;
+    }
     case MESSAGE_NOT_SET: {
       break;
     }
@@ -526,6 +632,22 @@ const char* Ble::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::intern
       case 6:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
           ptr = ctx->ParseMessage(_internal_mutable_discovered_response(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .qaul.rpc.ble.RightsRequest rights_request = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
+          ptr = ctx->ParseMessage(_internal_mutable_rights_request(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .qaul.rpc.ble.RightsResult rights_result = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 66)) {
+          ptr = ctx->ParseMessage(_internal_mutable_rights_result(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -607,6 +729,22 @@ uint8_t* Ble::_InternalSerialize(
         6, _Internal::discovered_response(this), target, stream);
   }
 
+  // .qaul.rpc.ble.RightsRequest rights_request = 7;
+  if (_internal_has_rights_request()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        7, _Internal::rights_request(this), target, stream);
+  }
+
+  // .qaul.rpc.ble.RightsResult rights_result = 8;
+  if (_internal_has_rights_result()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        8, _Internal::rights_result(this), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -666,6 +804,20 @@ size_t Ble::ByteSizeLong() const {
           *message_.discovered_response_);
       break;
     }
+    // .qaul.rpc.ble.RightsRequest rights_request = 7;
+    case kRightsRequest: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *message_.rights_request_);
+      break;
+    }
+    // .qaul.rpc.ble.RightsResult rights_result = 8;
+    case kRightsResult: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *message_.rights_result_);
+      break;
+    }
     case MESSAGE_NOT_SET: {
       break;
     }
@@ -715,6 +867,14 @@ void Ble::MergeFrom(const Ble& from) {
     }
     case kDiscoveredResponse: {
       _internal_mutable_discovered_response()->::qaul::rpc::ble::DiscoveredResponse::MergeFrom(from._internal_discovered_response());
+      break;
+    }
+    case kRightsRequest: {
+      _internal_mutable_rights_request()->::qaul::rpc::ble::RightsRequest::MergeFrom(from._internal_rights_request());
+      break;
+    }
+    case kRightsResult: {
+      _internal_mutable_rights_result()->::qaul::rpc::ble::RightsResult::MergeFrom(from._internal_rights_result());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -1407,6 +1567,223 @@ void DiscoveredResponse::InternalSwap(DiscoveredResponse* other) {
       file_level_metadata_connections_2fble_2fble_5frpc_2eproto[6]);
 }
 
+// ===================================================================
+
+class RightsRequest::_Internal {
+ public:
+};
+
+RightsRequest::RightsRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+  // @@protoc_insertion_point(arena_constructor:qaul.rpc.ble.RightsRequest)
+}
+RightsRequest::RightsRequest(const RightsRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:qaul.rpc.ble.RightsRequest)
+}
+
+
+
+
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RightsRequest::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl,
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl,
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RightsRequest::GetClassData() const { return &_class_data_; }
+
+
+
+
+
+
+
+::PROTOBUF_NAMESPACE_ID::Metadata RightsRequest::GetMetadata() const {
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_connections_2fble_2fble_5frpc_2eproto_getter, &descriptor_table_connections_2fble_2fble_5frpc_2eproto_once,
+      file_level_metadata_connections_2fble_2fble_5frpc_2eproto[7]);
+}
+
+// ===================================================================
+
+class RightsResult::_Internal {
+ public:
+};
+
+RightsResult::RightsResult(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor();
+  if (!is_message_owned) {
+    RegisterArenaDtor(arena);
+  }
+  // @@protoc_insertion_point(arena_constructor:qaul.rpc.ble.RightsResult)
+}
+RightsResult::RightsResult(const RightsResult& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  rights_granted_ = from.rights_granted_;
+  // @@protoc_insertion_point(copy_constructor:qaul.rpc.ble.RightsResult)
+}
+
+inline void RightsResult::SharedCtor() {
+rights_granted_ = false;
+}
+
+RightsResult::~RightsResult() {
+  // @@protoc_insertion_point(destructor:qaul.rpc.ble.RightsResult)
+  if (GetArenaForAllocation() != nullptr) return;
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+inline void RightsResult::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+}
+
+void RightsResult::ArenaDtor(void* object) {
+  RightsResult* _this = reinterpret_cast< RightsResult* >(object);
+  (void)_this;
+}
+void RightsResult::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void RightsResult::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void RightsResult::Clear() {
+// @@protoc_insertion_point(message_clear_start:qaul.rpc.ble.RightsResult)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  rights_granted_ = false;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* RightsResult::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // bool rights_granted = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          rights_granted_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* RightsResult::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.ble.RightsResult)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // bool rights_granted = 1;
+  if (this->_internal_rights_granted() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(1, this->_internal_rights_granted(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.ble.RightsResult)
+  return target;
+}
+
+size_t RightsResult::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:qaul.rpc.ble.RightsResult)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // bool rights_granted = 1;
+  if (this->_internal_rights_granted() != 0) {
+    total_size += 1 + 1;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RightsResult::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    RightsResult::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RightsResult::GetClassData() const { return &_class_data_; }
+
+void RightsResult::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<RightsResult *>(to)->MergeFrom(
+      static_cast<const RightsResult &>(from));
+}
+
+
+void RightsResult::MergeFrom(const RightsResult& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.ble.RightsResult)
+  GOOGLE_DCHECK_NE(&from, this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_rights_granted() != 0) {
+    _internal_set_rights_granted(from._internal_rights_granted());
+  }
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void RightsResult::CopyFrom(const RightsResult& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:qaul.rpc.ble.RightsResult)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool RightsResult::IsInitialized() const {
+  return true;
+}
+
+void RightsResult::InternalSwap(RightsResult* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(rights_granted_, other->rights_granted_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata RightsResult::GetMetadata() const {
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_connections_2fble_2fble_5frpc_2eproto_getter, &descriptor_table_connections_2fble_2fble_5frpc_2eproto_once,
+      file_level_metadata_connections_2fble_2fble_5frpc_2eproto[8]);
+}
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace ble
 }  // namespace rpc
@@ -1432,6 +1809,12 @@ template<> PROTOBUF_NOINLINE ::qaul::rpc::ble::DiscoveredRequest* Arena::CreateM
 }
 template<> PROTOBUF_NOINLINE ::qaul::rpc::ble::DiscoveredResponse* Arena::CreateMaybeMessage< ::qaul::rpc::ble::DiscoveredResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::ble::DiscoveredResponse >(arena);
+}
+template<> PROTOBUF_NOINLINE ::qaul::rpc::ble::RightsRequest* Arena::CreateMaybeMessage< ::qaul::rpc::ble::RightsRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::rpc::ble::RightsRequest >(arena);
+}
+template<> PROTOBUF_NOINLINE ::qaul::rpc::ble::RightsResult* Arena::CreateMaybeMessage< ::qaul::rpc::ble::RightsResult >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::rpc::ble::RightsResult >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

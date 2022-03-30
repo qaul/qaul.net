@@ -4,7 +4,7 @@
 /// via RPC between the UI and libqaul
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Ble {
-    #[prost(oneof="ble::Message", tags="1, 2, 3, 4, 5, 6")]
+    #[prost(oneof="ble::Message", tags="1, 2, 3, 4, 5, 6, 7, 8")]
     pub message: ::core::option::Option<ble::Message>,
 }
 /// Nested message and enum types in `Ble`.
@@ -23,6 +23,10 @@ pub mod ble {
         DiscoveredRequest(super::DiscoveredRequest),
         #[prost(message, tag="6")]
         DiscoveredResponse(super::DiscoveredResponse),
+        #[prost(message, tag="7")]
+        RightsRequest(super::RightsRequest),
+        #[prost(message, tag="8")]
+        RightsResult(super::RightsResult),
     }
 }
 /// UI request for information on devices and module status
@@ -80,4 +84,14 @@ pub struct DiscoveredResponse {
     /// number of nodes in to_confirm table
     #[prost(uint32, tag="2")]
     pub to_confirm_count: u32,
+}
+/// Request Rights
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RightsRequest {
+}
+/// Rights Request Results
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RightsResult {
+    #[prost(bool, tag="1")]
+    pub rights_granted: bool,
 }

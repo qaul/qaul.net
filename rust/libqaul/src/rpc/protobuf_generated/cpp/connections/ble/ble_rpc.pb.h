@@ -47,7 +47,7 @@ struct TableStruct_connections_2fble_2fble_5frpc_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[7]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[9]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -72,6 +72,12 @@ extern InfoRequestDefaultTypeInternal _InfoRequest_default_instance_;
 class InfoResponse;
 struct InfoResponseDefaultTypeInternal;
 extern InfoResponseDefaultTypeInternal _InfoResponse_default_instance_;
+class RightsRequest;
+struct RightsRequestDefaultTypeInternal;
+extern RightsRequestDefaultTypeInternal _RightsRequest_default_instance_;
+class RightsResult;
+struct RightsResultDefaultTypeInternal;
+extern RightsResultDefaultTypeInternal _RightsResult_default_instance_;
 class StartRequest;
 struct StartRequestDefaultTypeInternal;
 extern StartRequestDefaultTypeInternal _StartRequest_default_instance_;
@@ -87,6 +93,8 @@ template<> ::qaul::rpc::ble::DiscoveredRequest* Arena::CreateMaybeMessage<::qaul
 template<> ::qaul::rpc::ble::DiscoveredResponse* Arena::CreateMaybeMessage<::qaul::rpc::ble::DiscoveredResponse>(Arena*);
 template<> ::qaul::rpc::ble::InfoRequest* Arena::CreateMaybeMessage<::qaul::rpc::ble::InfoRequest>(Arena*);
 template<> ::qaul::rpc::ble::InfoResponse* Arena::CreateMaybeMessage<::qaul::rpc::ble::InfoResponse>(Arena*);
+template<> ::qaul::rpc::ble::RightsRequest* Arena::CreateMaybeMessage<::qaul::rpc::ble::RightsRequest>(Arena*);
+template<> ::qaul::rpc::ble::RightsResult* Arena::CreateMaybeMessage<::qaul::rpc::ble::RightsResult>(Arena*);
 template<> ::qaul::rpc::ble::StartRequest* Arena::CreateMaybeMessage<::qaul::rpc::ble::StartRequest>(Arena*);
 template<> ::qaul::rpc::ble::StopRequest* Arena::CreateMaybeMessage<::qaul::rpc::ble::StopRequest>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
@@ -146,6 +154,8 @@ class Ble final :
     kStopRequest = 4,
     kDiscoveredRequest = 5,
     kDiscoveredResponse = 6,
+    kRightsRequest = 7,
+    kRightsResult = 8,
     MESSAGE_NOT_SET = 0,
   };
 
@@ -234,6 +244,8 @@ class Ble final :
     kStopRequestFieldNumber = 4,
     kDiscoveredRequestFieldNumber = 5,
     kDiscoveredResponseFieldNumber = 6,
+    kRightsRequestFieldNumber = 7,
+    kRightsResultFieldNumber = 8,
   };
   // .qaul.rpc.ble.InfoRequest info_request = 1;
   bool has_info_request() const;
@@ -343,6 +355,42 @@ class Ble final :
       ::qaul::rpc::ble::DiscoveredResponse* discovered_response);
   ::qaul::rpc::ble::DiscoveredResponse* unsafe_arena_release_discovered_response();
 
+  // .qaul.rpc.ble.RightsRequest rights_request = 7;
+  bool has_rights_request() const;
+  private:
+  bool _internal_has_rights_request() const;
+  public:
+  void clear_rights_request();
+  const ::qaul::rpc::ble::RightsRequest& rights_request() const;
+  PROTOBUF_NODISCARD ::qaul::rpc::ble::RightsRequest* release_rights_request();
+  ::qaul::rpc::ble::RightsRequest* mutable_rights_request();
+  void set_allocated_rights_request(::qaul::rpc::ble::RightsRequest* rights_request);
+  private:
+  const ::qaul::rpc::ble::RightsRequest& _internal_rights_request() const;
+  ::qaul::rpc::ble::RightsRequest* _internal_mutable_rights_request();
+  public:
+  void unsafe_arena_set_allocated_rights_request(
+      ::qaul::rpc::ble::RightsRequest* rights_request);
+  ::qaul::rpc::ble::RightsRequest* unsafe_arena_release_rights_request();
+
+  // .qaul.rpc.ble.RightsResult rights_result = 8;
+  bool has_rights_result() const;
+  private:
+  bool _internal_has_rights_result() const;
+  public:
+  void clear_rights_result();
+  const ::qaul::rpc::ble::RightsResult& rights_result() const;
+  PROTOBUF_NODISCARD ::qaul::rpc::ble::RightsResult* release_rights_result();
+  ::qaul::rpc::ble::RightsResult* mutable_rights_result();
+  void set_allocated_rights_result(::qaul::rpc::ble::RightsResult* rights_result);
+  private:
+  const ::qaul::rpc::ble::RightsResult& _internal_rights_result() const;
+  ::qaul::rpc::ble::RightsResult* _internal_mutable_rights_result();
+  public:
+  void unsafe_arena_set_allocated_rights_result(
+      ::qaul::rpc::ble::RightsResult* rights_result);
+  ::qaul::rpc::ble::RightsResult* unsafe_arena_release_rights_result();
+
   void clear_message();
   MessageCase message_case() const;
   // @@protoc_insertion_point(class_scope:qaul.rpc.ble.Ble)
@@ -354,6 +402,8 @@ class Ble final :
   void set_has_stop_request();
   void set_has_discovered_request();
   void set_has_discovered_response();
+  void set_has_rights_request();
+  void set_has_rights_result();
 
   inline bool has_message() const;
   inline void clear_has_message();
@@ -370,6 +420,8 @@ class Ble final :
     ::qaul::rpc::ble::StopRequest* stop_request_;
     ::qaul::rpc::ble::DiscoveredRequest* discovered_request_;
     ::qaul::rpc::ble::DiscoveredResponse* discovered_response_;
+    ::qaul::rpc::ble::RightsRequest* rights_request_;
+    ::qaul::rpc::ble::RightsResult* rights_result_;
   } message_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   uint32_t _oneof_case_[1];
@@ -1188,6 +1240,270 @@ class DiscoveredResponse final :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_connections_2fble_2fble_5frpc_2eproto;
 };
+// -------------------------------------------------------------------
+
+class RightsRequest final :
+    public ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase /* @@protoc_insertion_point(class_definition:qaul.rpc.ble.RightsRequest) */ {
+ public:
+  inline RightsRequest() : RightsRequest(nullptr) {}
+  explicit constexpr RightsRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RightsRequest(const RightsRequest& from);
+  RightsRequest(RightsRequest&& from) noexcept
+    : RightsRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline RightsRequest& operator=(const RightsRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RightsRequest& operator=(RightsRequest&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RightsRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RightsRequest* internal_default_instance() {
+    return reinterpret_cast<const RightsRequest*>(
+               &_RightsRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    7;
+
+  friend void swap(RightsRequest& a, RightsRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RightsRequest* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RightsRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RightsRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<RightsRequest>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyFrom;
+  inline void CopyFrom(const RightsRequest& from) {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl(this, from);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeFrom;
+  void MergeFrom(const RightsRequest& from) {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl(this, from);
+  }
+  public:
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.rpc.ble.RightsRequest";
+  }
+  protected:
+  explicit RightsRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:qaul.rpc.ble.RightsRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_connections_2fble_2fble_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RightsResult final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.rpc.ble.RightsResult) */ {
+ public:
+  inline RightsResult() : RightsResult(nullptr) {}
+  ~RightsResult() override;
+  explicit constexpr RightsResult(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RightsResult(const RightsResult& from);
+  RightsResult(RightsResult&& from) noexcept
+    : RightsResult() {
+    *this = ::std::move(from);
+  }
+
+  inline RightsResult& operator=(const RightsResult& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RightsResult& operator=(RightsResult&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RightsResult& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RightsResult* internal_default_instance() {
+    return reinterpret_cast<const RightsResult*>(
+               &_RightsResult_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    8;
+
+  friend void swap(RightsResult& a, RightsResult& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RightsResult* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RightsResult* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RightsResult* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<RightsResult>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const RightsResult& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const RightsResult& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RightsResult* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.rpc.ble.RightsResult";
+  }
+  protected:
+  explicit RightsResult(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kRightsGrantedFieldNumber = 1,
+  };
+  // bool rights_granted = 1;
+  void clear_rights_granted();
+  bool rights_granted() const;
+  void set_rights_granted(bool value);
+  private:
+  bool _internal_rights_granted() const;
+  void _internal_set_rights_granted(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:qaul.rpc.ble.RightsResult)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  bool rights_granted_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_connections_2fble_2fble_5frpc_2eproto;
+};
 // ===================================================================
 
 
@@ -1643,6 +1959,154 @@ inline ::qaul::rpc::ble::DiscoveredResponse* Ble::mutable_discovered_response() 
   return _msg;
 }
 
+// .qaul.rpc.ble.RightsRequest rights_request = 7;
+inline bool Ble::_internal_has_rights_request() const {
+  return message_case() == kRightsRequest;
+}
+inline bool Ble::has_rights_request() const {
+  return _internal_has_rights_request();
+}
+inline void Ble::set_has_rights_request() {
+  _oneof_case_[0] = kRightsRequest;
+}
+inline void Ble::clear_rights_request() {
+  if (_internal_has_rights_request()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete message_.rights_request_;
+    }
+    clear_has_message();
+  }
+}
+inline ::qaul::rpc::ble::RightsRequest* Ble::release_rights_request() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.ble.Ble.rights_request)
+  if (_internal_has_rights_request()) {
+    clear_has_message();
+      ::qaul::rpc::ble::RightsRequest* temp = message_.rights_request_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    message_.rights_request_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::qaul::rpc::ble::RightsRequest& Ble::_internal_rights_request() const {
+  return _internal_has_rights_request()
+      ? *message_.rights_request_
+      : reinterpret_cast< ::qaul::rpc::ble::RightsRequest&>(::qaul::rpc::ble::_RightsRequest_default_instance_);
+}
+inline const ::qaul::rpc::ble::RightsRequest& Ble::rights_request() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.ble.Ble.rights_request)
+  return _internal_rights_request();
+}
+inline ::qaul::rpc::ble::RightsRequest* Ble::unsafe_arena_release_rights_request() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:qaul.rpc.ble.Ble.rights_request)
+  if (_internal_has_rights_request()) {
+    clear_has_message();
+    ::qaul::rpc::ble::RightsRequest* temp = message_.rights_request_;
+    message_.rights_request_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Ble::unsafe_arena_set_allocated_rights_request(::qaul::rpc::ble::RightsRequest* rights_request) {
+  clear_message();
+  if (rights_request) {
+    set_has_rights_request();
+    message_.rights_request_ = rights_request;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:qaul.rpc.ble.Ble.rights_request)
+}
+inline ::qaul::rpc::ble::RightsRequest* Ble::_internal_mutable_rights_request() {
+  if (!_internal_has_rights_request()) {
+    clear_message();
+    set_has_rights_request();
+    message_.rights_request_ = CreateMaybeMessage< ::qaul::rpc::ble::RightsRequest >(GetArenaForAllocation());
+  }
+  return message_.rights_request_;
+}
+inline ::qaul::rpc::ble::RightsRequest* Ble::mutable_rights_request() {
+  ::qaul::rpc::ble::RightsRequest* _msg = _internal_mutable_rights_request();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.ble.Ble.rights_request)
+  return _msg;
+}
+
+// .qaul.rpc.ble.RightsResult rights_result = 8;
+inline bool Ble::_internal_has_rights_result() const {
+  return message_case() == kRightsResult;
+}
+inline bool Ble::has_rights_result() const {
+  return _internal_has_rights_result();
+}
+inline void Ble::set_has_rights_result() {
+  _oneof_case_[0] = kRightsResult;
+}
+inline void Ble::clear_rights_result() {
+  if (_internal_has_rights_result()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete message_.rights_result_;
+    }
+    clear_has_message();
+  }
+}
+inline ::qaul::rpc::ble::RightsResult* Ble::release_rights_result() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.ble.Ble.rights_result)
+  if (_internal_has_rights_result()) {
+    clear_has_message();
+      ::qaul::rpc::ble::RightsResult* temp = message_.rights_result_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    message_.rights_result_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::qaul::rpc::ble::RightsResult& Ble::_internal_rights_result() const {
+  return _internal_has_rights_result()
+      ? *message_.rights_result_
+      : reinterpret_cast< ::qaul::rpc::ble::RightsResult&>(::qaul::rpc::ble::_RightsResult_default_instance_);
+}
+inline const ::qaul::rpc::ble::RightsResult& Ble::rights_result() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.ble.Ble.rights_result)
+  return _internal_rights_result();
+}
+inline ::qaul::rpc::ble::RightsResult* Ble::unsafe_arena_release_rights_result() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:qaul.rpc.ble.Ble.rights_result)
+  if (_internal_has_rights_result()) {
+    clear_has_message();
+    ::qaul::rpc::ble::RightsResult* temp = message_.rights_result_;
+    message_.rights_result_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Ble::unsafe_arena_set_allocated_rights_result(::qaul::rpc::ble::RightsResult* rights_result) {
+  clear_message();
+  if (rights_result) {
+    set_has_rights_result();
+    message_.rights_result_ = rights_result;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:qaul.rpc.ble.Ble.rights_result)
+}
+inline ::qaul::rpc::ble::RightsResult* Ble::_internal_mutable_rights_result() {
+  if (!_internal_has_rights_result()) {
+    clear_message();
+    set_has_rights_result();
+    message_.rights_result_ = CreateMaybeMessage< ::qaul::rpc::ble::RightsResult >(GetArenaForAllocation());
+  }
+  return message_.rights_result_;
+}
+inline ::qaul::rpc::ble::RightsResult* Ble::mutable_rights_result() {
+  ::qaul::rpc::ble::RightsResult* _msg = _internal_mutable_rights_result();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.ble.Ble.rights_result)
+  return _msg;
+}
+
 inline bool Ble::has_message() const {
   return message_case() != MESSAGE_NOT_SET;
 }
@@ -1869,9 +2333,41 @@ inline void DiscoveredResponse::set_to_confirm_count(uint32_t value) {
   // @@protoc_insertion_point(field_set:qaul.rpc.ble.DiscoveredResponse.to_confirm_count)
 }
 
+// -------------------------------------------------------------------
+
+// RightsRequest
+
+// -------------------------------------------------------------------
+
+// RightsResult
+
+// bool rights_granted = 1;
+inline void RightsResult::clear_rights_granted() {
+  rights_granted_ = false;
+}
+inline bool RightsResult::_internal_rights_granted() const {
+  return rights_granted_;
+}
+inline bool RightsResult::rights_granted() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.ble.RightsResult.rights_granted)
+  return _internal_rights_granted();
+}
+inline void RightsResult::_internal_set_rights_granted(bool value) {
+  
+  rights_granted_ = value;
+}
+inline void RightsResult::set_rights_granted(bool value) {
+  _internal_set_rights_granted(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.ble.RightsResult.rights_granted)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

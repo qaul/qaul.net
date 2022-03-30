@@ -16,6 +16,8 @@ enum Ble_Message {
   stopRequest, 
   discoveredRequest, 
   discoveredResponse, 
+  rightsRequest, 
+  rightsResult, 
   notSet
 }
 
@@ -27,16 +29,20 @@ class Ble extends $pb.GeneratedMessage {
     4 : Ble_Message.stopRequest,
     5 : Ble_Message.discoveredRequest,
     6 : Ble_Message.discoveredResponse,
+    7 : Ble_Message.rightsRequest,
+    8 : Ble_Message.rightsResult,
     0 : Ble_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Ble', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8])
     ..aOM<InfoRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'infoRequest', subBuilder: InfoRequest.create)
     ..aOM<InfoResponse>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'infoResponse', subBuilder: InfoResponse.create)
     ..aOM<StartRequest>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startRequest', subBuilder: StartRequest.create)
     ..aOM<StopRequest>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stopRequest', subBuilder: StopRequest.create)
     ..aOM<DiscoveredRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discoveredRequest', subBuilder: DiscoveredRequest.create)
     ..aOM<DiscoveredResponse>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discoveredResponse', subBuilder: DiscoveredResponse.create)
+    ..aOM<RightsRequest>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rightsRequest', subBuilder: RightsRequest.create)
+    ..aOM<RightsResult>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rightsResult', subBuilder: RightsResult.create)
     ..hasRequiredFields = false
   ;
 
@@ -48,6 +54,8 @@ class Ble extends $pb.GeneratedMessage {
     StopRequest? stopRequest,
     DiscoveredRequest? discoveredRequest,
     DiscoveredResponse? discoveredResponse,
+    RightsRequest? rightsRequest,
+    RightsResult? rightsResult,
   }) {
     final _result = create();
     if (infoRequest != null) {
@@ -67,6 +75,12 @@ class Ble extends $pb.GeneratedMessage {
     }
     if (discoveredResponse != null) {
       _result.discoveredResponse = discoveredResponse;
+    }
+    if (rightsRequest != null) {
+      _result.rightsRequest = rightsRequest;
+    }
+    if (rightsResult != null) {
+      _result.rightsResult = rightsResult;
     }
     return _result;
   }
@@ -159,6 +173,28 @@ class Ble extends $pb.GeneratedMessage {
   void clearDiscoveredResponse() => clearField(6);
   @$pb.TagNumber(6)
   DiscoveredResponse ensureDiscoveredResponse() => $_ensure(5);
+
+  @$pb.TagNumber(7)
+  RightsRequest get rightsRequest => $_getN(6);
+  @$pb.TagNumber(7)
+  set rightsRequest(RightsRequest v) { setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasRightsRequest() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearRightsRequest() => clearField(7);
+  @$pb.TagNumber(7)
+  RightsRequest ensureRightsRequest() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  RightsResult get rightsResult => $_getN(7);
+  @$pb.TagNumber(8)
+  set rightsResult(RightsResult v) { setField(8, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasRightsResult() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearRightsResult() => clearField(8);
+  @$pb.TagNumber(8)
+  RightsResult ensureRightsResult() => $_ensure(7);
 }
 
 class InfoRequest extends $pb.GeneratedMessage {
@@ -411,5 +447,81 @@ class DiscoveredResponse extends $pb.GeneratedMessage {
   $core.bool hasToConfirmCount() => $_has(1);
   @$pb.TagNumber(2)
   void clearToConfirmCount() => clearField(2);
+}
+
+class RightsRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RightsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  RightsRequest._() : super();
+  factory RightsRequest() => create();
+  factory RightsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RightsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RightsRequest clone() => RightsRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RightsRequest copyWith(void Function(RightsRequest) updates) => super.copyWith((message) => updates(message as RightsRequest)) as RightsRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RightsRequest create() => RightsRequest._();
+  RightsRequest createEmptyInstance() => create();
+  static $pb.PbList<RightsRequest> createRepeated() => $pb.PbList<RightsRequest>();
+  @$core.pragma('dart2js:noInline')
+  static RightsRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RightsRequest>(create);
+  static RightsRequest? _defaultInstance;
+}
+
+class RightsResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RightsResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
+    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rightsGranted')
+    ..hasRequiredFields = false
+  ;
+
+  RightsResult._() : super();
+  factory RightsResult({
+    $core.bool? rightsGranted,
+  }) {
+    final _result = create();
+    if (rightsGranted != null) {
+      _result.rightsGranted = rightsGranted;
+    }
+    return _result;
+  }
+  factory RightsResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RightsResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RightsResult clone() => RightsResult()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RightsResult copyWith(void Function(RightsResult) updates) => super.copyWith((message) => updates(message as RightsResult)) as RightsResult; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RightsResult create() => RightsResult._();
+  RightsResult createEmptyInstance() => create();
+  static $pb.PbList<RightsResult> createRepeated() => $pb.PbList<RightsResult>();
+  @$core.pragma('dart2js:noInline')
+  static RightsResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RightsResult>(create);
+  static RightsResult? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get rightsGranted => $_getBF(0);
+  @$pb.TagNumber(1)
+  set rightsGranted($core.bool v) { $_setBool(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasRightsGranted() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearRightsGranted() => clearField(1);
 }
 

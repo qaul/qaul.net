@@ -18,6 +18,8 @@ const Ble$json = const {
     const {'1': 'stop_request', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.ble.StopRequest', '9': 0, '10': 'stopRequest'},
     const {'1': 'discovered_request', '3': 5, '4': 1, '5': 11, '6': '.qaul.rpc.ble.DiscoveredRequest', '9': 0, '10': 'discoveredRequest'},
     const {'1': 'discovered_response', '3': 6, '4': 1, '5': 11, '6': '.qaul.rpc.ble.DiscoveredResponse', '9': 0, '10': 'discoveredResponse'},
+    const {'1': 'rights_request', '3': 7, '4': 1, '5': 11, '6': '.qaul.rpc.ble.RightsRequest', '9': 0, '10': 'rightsRequest'},
+    const {'1': 'rights_result', '3': 8, '4': 1, '5': 11, '6': '.qaul.rpc.ble.RightsResult', '9': 0, '10': 'rightsResult'},
   ],
   '8': const [
     const {'1': 'message'},
@@ -25,7 +27,7 @@ const Ble$json = const {
 };
 
 /// Descriptor for `Ble`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List bleDescriptor = $convert.base64Decode('CgNCbGUSPgoMaW5mb19yZXF1ZXN0GAEgASgLMhkucWF1bC5ycGMuYmxlLkluZm9SZXF1ZXN0SABSC2luZm9SZXF1ZXN0EkEKDWluZm9fcmVzcG9uc2UYAiABKAsyGi5xYXVsLnJwYy5ibGUuSW5mb1Jlc3BvbnNlSABSDGluZm9SZXNwb25zZRJBCg1zdGFydF9yZXF1ZXN0GAMgASgLMhoucWF1bC5ycGMuYmxlLlN0YXJ0UmVxdWVzdEgAUgxzdGFydFJlcXVlc3QSPgoMc3RvcF9yZXF1ZXN0GAQgASgLMhkucWF1bC5ycGMuYmxlLlN0b3BSZXF1ZXN0SABSC3N0b3BSZXF1ZXN0ElAKEmRpc2NvdmVyZWRfcmVxdWVzdBgFIAEoCzIfLnFhdWwucnBjLmJsZS5EaXNjb3ZlcmVkUmVxdWVzdEgAUhFkaXNjb3ZlcmVkUmVxdWVzdBJTChNkaXNjb3ZlcmVkX3Jlc3BvbnNlGAYgASgLMiAucWF1bC5ycGMuYmxlLkRpc2NvdmVyZWRSZXNwb25zZUgAUhJkaXNjb3ZlcmVkUmVzcG9uc2VCCQoHbWVzc2FnZQ==');
+final $typed_data.Uint8List bleDescriptor = $convert.base64Decode('CgNCbGUSPgoMaW5mb19yZXF1ZXN0GAEgASgLMhkucWF1bC5ycGMuYmxlLkluZm9SZXF1ZXN0SABSC2luZm9SZXF1ZXN0EkEKDWluZm9fcmVzcG9uc2UYAiABKAsyGi5xYXVsLnJwYy5ibGUuSW5mb1Jlc3BvbnNlSABSDGluZm9SZXNwb25zZRJBCg1zdGFydF9yZXF1ZXN0GAMgASgLMhoucWF1bC5ycGMuYmxlLlN0YXJ0UmVxdWVzdEgAUgxzdGFydFJlcXVlc3QSPgoMc3RvcF9yZXF1ZXN0GAQgASgLMhkucWF1bC5ycGMuYmxlLlN0b3BSZXF1ZXN0SABSC3N0b3BSZXF1ZXN0ElAKEmRpc2NvdmVyZWRfcmVxdWVzdBgFIAEoCzIfLnFhdWwucnBjLmJsZS5EaXNjb3ZlcmVkUmVxdWVzdEgAUhFkaXNjb3ZlcmVkUmVxdWVzdBJTChNkaXNjb3ZlcmVkX3Jlc3BvbnNlGAYgASgLMiAucWF1bC5ycGMuYmxlLkRpc2NvdmVyZWRSZXNwb25zZUgAUhJkaXNjb3ZlcmVkUmVzcG9uc2USRAoOcmlnaHRzX3JlcXVlc3QYByABKAsyGy5xYXVsLnJwYy5ibGUuUmlnaHRzUmVxdWVzdEgAUg1yaWdodHNSZXF1ZXN0EkEKDXJpZ2h0c19yZXN1bHQYCCABKAsyGi5xYXVsLnJwYy5ibGUuUmlnaHRzUmVzdWx0SABSDHJpZ2h0c1Jlc3VsdEIJCgdtZXNzYWdl');
 @$core.Deprecated('Use infoRequestDescriptor instead')
 const InfoRequest$json = const {
   '1': 'InfoRequest',
@@ -77,3 +79,20 @@ const DiscoveredResponse$json = const {
 
 /// Descriptor for `DiscoveredResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List discoveredResponseDescriptor = $convert.base64Decode('ChJEaXNjb3ZlcmVkUmVzcG9uc2USHwoLbm9kZXNfY291bnQYASABKA1SCm5vZGVzQ291bnQSKAoQdG9fY29uZmlybV9jb3VudBgCIAEoDVIOdG9Db25maXJtQ291bnQ=');
+@$core.Deprecated('Use rightsRequestDescriptor instead')
+const RightsRequest$json = const {
+  '1': 'RightsRequest',
+};
+
+/// Descriptor for `RightsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rightsRequestDescriptor = $convert.base64Decode('Cg1SaWdodHNSZXF1ZXN0');
+@$core.Deprecated('Use rightsResultDescriptor instead')
+const RightsResult$json = const {
+  '1': 'RightsResult',
+  '2': const [
+    const {'1': 'rights_granted', '3': 1, '4': 1, '5': 8, '10': 'rightsGranted'},
+  ],
+};
+
+/// Descriptor for `RightsResult`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rightsResultDescriptor = $convert.base64Decode('CgxSaWdodHNSZXN1bHQSJQoOcmlnaHRzX2dyYW50ZWQYASABKAhSDXJpZ2h0c0dyYW50ZWQ=');
