@@ -126,17 +126,6 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receive(
 /// Set's up the system protobuf communication pipelines
 /// between libqaul and the BLE module library.
 
-/// get number of messages queued to be received by the BLE module
-/// from libqaul
-#[no_mangle]
-pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sysreceivequeue(
-    _env: JNIEnv,
-    _: JClass,
-) -> jint {
-    // start libqaul in an own thread
-    super::receive_rpc_queued() as jint
-}
-
 /// send a sys protobuf message from BLE module to libqaul
 #[no_mangle]
 pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_syssend(
