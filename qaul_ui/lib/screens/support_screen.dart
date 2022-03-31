@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:logger/logger.dart';
 
 import '../decorators/disabled_state_decorator.dart';
@@ -19,7 +20,7 @@ class _SupportScreenState extends State<SupportScreen> {
         leading: const DefaultBackButton(),
         title: Row(
           children: const [
-            Icon(Icons.contact_support_outlined),
+            FaIcon(FontAwesomeIcons.headset),
             SizedBox(width: 8),
             Text('Support'),
           ],

@@ -33,6 +33,7 @@ dependencies:
   # ********
   # UI Dependencies
   # ********
+  font_awesome_flutter: ^10.1.0
   # Responsive UI Support => App Wrapper
   responsive_framework: ^0.1.4
   # Dynamic Theme Control => dark, light mode & so on
