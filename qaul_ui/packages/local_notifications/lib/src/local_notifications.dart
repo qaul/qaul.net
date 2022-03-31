@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 abstract class LocalNotifications {
@@ -14,6 +15,8 @@ abstract class LocalNotifications {
   Future<bool> requestPermissions();
 
   Future<void> displayNotification(LocalNotification message);
+
+  Future<void> removeNotifications();
 }
 
 class LocalNotification extends Equatable {
@@ -36,12 +39,10 @@ class LocalNotification extends Equatable {
 class _LocalNotifications implements LocalNotifications {
   final _localNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  final _messageStreamController =
-      StreamController<LocalNotification>.broadcast();
+  final _messageStreamController = StreamController<LocalNotification>.broadcast();
 
   @override
-  Stream<LocalNotification> get onNotificationOpened =>
-      _messageStreamController.stream;
+  Stream<LocalNotification> get onNotificationOpened => _messageStreamController.stream;
 
   @override
   Future<bool> initialize() async {
@@ -76,8 +77,7 @@ class _LocalNotifications implements LocalNotifications {
     bool? result;
     if (Platform.isIOS) {
       result = await _localNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions(
             alert: true,
             badge: true,
@@ -85,8 +85,7 @@ class _LocalNotifications implements LocalNotifications {
           );
     } else {
       result = await _localNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              MacOSFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<MacOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions(
             alert: true,
             badge: true,
@@ -100,19 +99,28 @@ class _LocalNotifications implements LocalNotifications {
 
   @override
   Future<void> displayNotification(LocalNotification message) async {
+    if (await FlutterAppBadger.isAppBadgeSupported()) {
+      FlutterAppBadger.updateBadgeCount(1);
+    }
     await _localNotificationsPlugin.show(
         message.id, message.title, message.body, _notificationDetails(),
         payload: message.payload);
   }
 
+  @override
+  Future<void> removeNotifications() async => _localNotificationsPlugin.cancelAll();
+
   // ***************************************************************************
-  void _onDidReceiveLocalNotification(
-      int id, String? title, String? body, String? payload) {
-    // TODO
+  void _onDidReceiveLocalNotification(int id, String? title, String? body, String? payload) async {
+    if (await FlutterAppBadger.isAppBadgeSupported()) {
+      FlutterAppBadger.removeBadge();
+    }
   }
 
   Future<void> _handleNewLocalNotificationOpened(String payload) async {
-    // TODO
+    if (await FlutterAppBadger.isAppBadgeSupported()) {
+      FlutterAppBadger.removeBadge();
+    }
   }
 
   NotificationDetails _notificationDetails() {

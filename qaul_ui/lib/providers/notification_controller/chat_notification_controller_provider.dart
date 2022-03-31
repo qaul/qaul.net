@@ -57,6 +57,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   @override
   LocalNotification? process(ChatRoom value) {
     _updateLocalCachedChatWith(value);
+    if (currentVisibleHomeTab == TabType.feed) return null;
     if (!UserPrefsHelper().chatNotificationsEnabled || _lastMessageIsFromLocalUser(value)) {
       return null;
     }

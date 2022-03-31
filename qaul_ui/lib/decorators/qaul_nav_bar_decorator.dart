@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -258,7 +259,7 @@ class QaulNavBarItem extends HookConsumerWidget {
         break;
     }
 
-    return _SelectedIndicatorDecorator(
+    final button = _SelectedIndicatorDecorator(
       selected: selected,
       selectedColor: theme.colorScheme.primary,
       child: Padding(
@@ -277,6 +278,27 @@ class QaulNavBarItem extends HookConsumerWidget {
         ),
       ),
     );
+
+    if (tab == TabType.feed) {
+      return _TabNotificationBadge(
+        notificationCount: ref.read(feedNotificationControllerProvider).newNotificationCount,
+        onPressed: () {
+          controller.goToTab(tab);
+          ref.read(feedNotificationControllerProvider).removeNotifications();
+        },
+        child: button,
+      );
+    } else if (tab == TabType.chat) {
+      return _TabNotificationBadge(
+        notificationCount: ref.read(chatNotificationControllerProvider).newNotificationCount,
+        onPressed: () {
+          controller.goToTab(tab);
+          ref.read(feedNotificationControllerProvider).removeNotifications();
+        },
+        child: button,
+      );
+    }
+    return button;
   }
 }
 
@@ -317,5 +339,55 @@ class _SelectedIndicatorDecorator extends StatelessWidget {
         ],
       );
     });
+  }
+}
+
+class _TabNotificationBadge extends StatelessWidget {
+  const _TabNotificationBadge({
+    Key? key,
+    required this.notificationCount,
+    required this.onPressed,
+    required this.child,
+  }) : super(key: key);
+  final ValueNotifier<int?> notificationCount;
+  final VoidCallback onPressed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<int?>(
+      valueListenable: notificationCount,
+      builder: (context, count, _) {
+        return Stack(
+          children: [
+            Badge(
+              showBadge: count != null,
+              badgeColor: Theme.of(context).primaryColor,
+              badgeContent: Text(
+                '${count ?? ''}',
+                style: _textStyle(context),
+              ),
+              position: BadgePosition.bottomEnd(bottom: 8, end: 8),
+              child: child,
+            ),
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () {
+                  notificationCount.value = null;
+                  onPressed();
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  TextStyle _textStyle(BuildContext context) {
+    final brightness = ThemeData.estimateBrightnessForColor(Theme.of(context).primaryColor);
+    return TextStyle(
+      color: brightness == Brightness.light ? Colors.black : Colors.white,
+    );
   }
 }
