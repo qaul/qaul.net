@@ -70,6 +70,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ],
               ),
+              if (_notificationsAreEnabled) ...[
+                const SizedBox(height: 20),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(l18ns.notifyOnlyForVerifiedUsers),
+                    PlatformAwareSwitch(
+                      value: UserPrefsHelper().notifyOnlyForVerifiedUsers,
+                      onChanged: (val) {
+                        UserPrefsHelper().notifyOnlyForVerifiedUsers = val;
+                        setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+              ],
               const Divider(),
               const SizedBox(height: 80),
               const _InternetNodesList(),
@@ -79,6 +96,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
   }
+
+  bool get _notificationsAreEnabled =>
+      UserPrefsHelper().chatNotificationsEnabled || UserPrefsHelper().feedNotificationsEnabled;
 }
 
 class _InternetNodesList extends HookConsumerWidget {

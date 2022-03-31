@@ -21,6 +21,7 @@
 
   "feedNotificationsEnabled": "Увімкнути сповіщення стрічки:",
   "chatNotificationsEnabled": "Увімкнути сповіщення чату:",
+  "notifyOnlyForVerifiedUsers": "Показувати лише підтверджені сповіщення:",
 
   "settings": "Параметри",
   "about": "Про застосунок",

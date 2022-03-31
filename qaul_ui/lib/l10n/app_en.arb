@@ -21,6 +21,7 @@
 
   "feedNotificationsEnabled": "Enable/Disable Feed Notifications:",
   "chatNotificationsEnabled": "Enable/Disable Chat Notifications:",
+  "notifyOnlyForVerifiedUsers": "Only Show Verified Notifications:",
 
   "settings": "Settings",
   "about": "About",

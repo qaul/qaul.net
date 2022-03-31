@@ -21,6 +21,7 @@
 
   "feedNotificationsEnabled": "Aktifkan/Nonaktifkan Pemberitahuan Umpan:",
   "chatNotificationsEnabled": "Aktifkan/Nonaktifkan Notifikasi Obrolan:",
+  "notifyOnlyForVerifiedUsers": "Hanya Tampilkan Notifikasi Terverifikasi:",
 
   "settings": "Pengaturan",
   "about": "Tentang",

@@ -36,7 +36,13 @@ class FeedNotificationController extends NotificationController<List<FeedPost>>
   // ***************************************************************************
   @override
   Iterable<FeedPost> entriesToBeProcessed(List<FeedPost> values) {
-    final newPosts = values.where((f) => (f.index ?? 1) > _lastIndex);
+    var newPosts = values.where((f) => (f.index ?? 1) > _lastIndex);
+    if (UserPrefsHelper().notifyOnlyForVerifiedUsers) {
+      final verifiedIds =
+          ref.read(usersProvider).where((u) => u.isVerified ?? false).map((e) => e.id);
+      newPosts = newPosts.where((post) =>
+          post.senderId != null && verifiedIds.where((id) => id.equals(post.senderId!)).isNotEmpty);
+    }
     _log.fine('Feed posts updated. New ones are: $newPosts');
     return newPosts;
   }

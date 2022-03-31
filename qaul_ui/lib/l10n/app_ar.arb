@@ -58,5 +58,6 @@
   "invalidPortMessage": "نص بسيط",
 
   "feedNotificationsEnabled": "تمكين / تعطيل إشعارات الخلاصة:",
-  "chatNotificationsEnabled": "تمكين / تعطيل إشعارات الدردشة:"
+  "chatNotificationsEnabled": "تمكين / تعطيل إشعارات الدردشة:",
+  "notifyOnlyForVerifiedUsers": "إظهار الإخطارات التي تم التحقق منها فقط:"
 }
