@@ -39,8 +39,15 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   // ***************************************************************************
   @override
   Iterable<ChatRoom> entriesToBeProcessed(List<ChatRoom> values) {
-    final newMessages = List<ChatRoom>.from(values.where((room) => !_localCacheContains(room)))
+    var newMessages = List<ChatRoom>.from(values.where((room) => !_localCacheContains(room)))
       ..addAll(values.where(_localCacheContains).where(_hasNewMessage));
+    if (UserPrefsHelper().notifyOnlyForVerifiedUsers) {
+      final verifiedIds =
+          ref.read(usersProvider).where((u) => u.isVerified ?? false).map((e) => e.id);
+      newMessages = newMessages
+          .where((room) => verifiedIds.where((id) => id.equals(room.conversationId)).isNotEmpty)
+          .toList();
+    }
     _log.fine('Chat Rooms updated. New ones are: $newMessages');
     return newMessages;
   }

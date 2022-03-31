@@ -16,6 +16,8 @@ class UserPrefsHelper {
 
   String get _chatNTFYKey => 'cached_chat_notification_enabled';
 
+  String get _verifyNTFKey => 'cached_verified_users_only';
+
   Locale? get defaultLocale {
     String? completeCode = _prefsBox?.get(_defaultLocaleKey);
     if (completeCode == null) return null;
@@ -49,4 +51,8 @@ class UserPrefsHelper {
   bool get chatNotificationsEnabled => _prefsBox?.get(_chatNTFYKey) ?? true;
 
   set chatNotificationsEnabled(bool val) => _prefsBox?.put(_chatNTFYKey, val);
+
+  bool get notifyOnlyForVerifiedUsers => _prefsBox?.get(_verifyNTFKey) ?? false;
+
+  set notifyOnlyForVerifiedUsers(bool v) => _prefsBox?.put(_verifyNTFKey, v);
 }
