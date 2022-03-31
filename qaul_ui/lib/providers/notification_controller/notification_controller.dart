@@ -1,10 +1,13 @@
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:local_notifications/local_notifications.dart';
 import 'package:meta/meta.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../providers.dart';
 
 class NotificationController<T> {
   NotificationController(this.ref);
@@ -19,6 +22,9 @@ class NotificationController<T> {
   @protected
   User get localUser => _user;
   late final User _user;
+
+  @protected
+  TabType get currentVisibleHomeTab => ref.read(homeScreenControllerProvider.notifier).currentTab;
 
   @protected
   @visibleForOverriding
@@ -40,9 +46,13 @@ class NotificationController<T> {
   @visibleForOverriding
   void updatePersistentCachedData() =>
       throw UnimplementedError('Must be implemented by child class');
+
+  void removeNotifications() => LocalNotifications.instance.removeNotifications();
 }
 
 mixin DataProcessingStrategy<T> {
+  ValueNotifier<int?> newNotificationCount = ValueNotifier(null);
+
   void execute(List<T>? previous, List<T> current) async {
     final queue = Queue<T>()..addAll(entriesToBeProcessed(current));
     if (queue.isEmpty) return;
@@ -51,6 +61,7 @@ mixin DataProcessingStrategy<T> {
       final entry = queue.removeFirst();
       final message = process(entry);
       if (message == null) continue;
+      newNotificationCount.value = (newNotificationCount.value ?? 0) + 1;
       LocalNotifications.instance.displayNotification(message);
       await Future.delayed(const Duration(milliseconds: 500));
     }

@@ -98,7 +98,7 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
       case NetworkTypeFilter.all:
         return SvgPicture.asset(
           'assets/icons/network.svg',
-          color: Theme.of(context).iconTheme.color,
+          color: Colors.white,
         );
     }
   }
