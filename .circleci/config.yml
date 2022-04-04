@@ -83,7 +83,7 @@ jobs:
           command: sudo apt install build-essential
       - run:
           name: Install Rust
-          command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+          command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
       - run:
           name: Install build targets for android in rust
           command: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
@@ -97,6 +97,7 @@ jobs:
       - persist_to_workspace:
           root: qaul-libp2p
           paths:
+            - android/blemodule/build/outputs/aar/blemodule-debug.aar
             - android/libqaul/build/outputs/aar/libqaul-debug.aar
   downstream:
     executor: android-rust
@@ -111,6 +112,7 @@ jobs:
       - save_cache: *save_git_cache
       - run: ls -alt
       - run: cd android/libqaul/build/outputs/aar && ls -alt
+      - run: cd android/blemodule/build/outputs/aar && ls -alt
       - run: |
           if [ ! -f android/libqaul/build/outputs/aar/libqaul-debug.aar ]; then
             echo "Nope!";
