@@ -75,19 +75,23 @@ jobs:
     environment:
       ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/22.1.7171670
     steps:
+      - run:
+          name: Install OpenSSH 8.1p1
+          command: |
+            sudo apt-get update
+            mkdir ~/tempdownload; cd ~/tempdownload; wget https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-8.1p1.tar.gz; tar zxvf openssh-8.1p1.tar.gz; cd openssh-8.1p1 && ./configure && make && sudo make install
       - restore_cache: *restore_git_cache
       - checkout-project
       - save_cache: *save_git_cache
-      - run:
-          name: Install build-essential
-          command: sudo apt install build-essential
       - run:
           name: Install Rust
           command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
       - run:
           name: Install build targets for android in rust
           command: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
-      - run: cd rust/libqaul && cargo install cargo-ndk
+      - run:
+          name: Install Cargo NDK
+          command: cd rust/libqaul && cargo install cargo-ndk
       - run:
           name: Build Libqaul JniLibs for Android
           command: cd rust/libqaul && sh build_libqaul_android.sh
