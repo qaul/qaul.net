@@ -74,6 +74,7 @@ jobs:
     shell: /bin/bash --login -o pipefail
     environment:
       ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/22.1.7171670
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
     steps:
       - restore_cache: *restore_git_cache
       - checkout-project
@@ -88,7 +89,7 @@ jobs:
           command: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
       - run:
           name: Install Cargo NDK
-          command: cd rust/libqaul && env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo install cargo-ndk
+          command: cd rust/libqaul && cargo install cargo-ndk
       - run:
           name: Build Libqaul JniLibs for Android
           command: cd rust/libqaul && sh build_libqaul_android.sh
