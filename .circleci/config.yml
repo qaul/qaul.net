@@ -37,6 +37,10 @@ executors:
       - image: cimg/android:2021.10
     resource_class: large
     <<: *default_flutter_wdir
+  android-rust:
+    docker:
+      - image: cimg/android:2021.10-ndk
+    resource_class: large
 
 jobs:
   # ------------------------------------------------
@@ -62,6 +66,58 @@ jobs:
   # Deploy Jobs
   # ------------------------------------------------
   # #  ---------------------------------------------
+  # #  Rust
+  # #  ---------------------------------------------
+  build-libaqul-android:
+    executor: android-rust
+    working_directory: ~/qaul-libp2p
+    shell: /bin/bash --login -o pipefail
+    environment:
+      ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/22.1.7171670
+    steps:
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
+      - run:
+          name: Install build-essential
+          command: sudo apt install build-essential
+      - run:
+          name: Install Rust
+          command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+      - run:
+          name: Install build targets for android in rust
+          command: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+      - run: cd rust/libqaul && cargo install cargo-ndk
+      - run:
+          name: Build Libqaul JniLibs for Android
+          command: cd rust/libqaul && sh build_libqaul_android.sh
+      - run:
+          name: Build AAR Library
+          command: cd android && sh gradlew assemble
+      - persist_to_workspace:
+          root: qaul-libp2p
+          paths:
+            - android/libqaul/build/outputs/aar/libqaul-debug.aar
+  downstream:
+    executor: android-rust
+    working_directory: ~/qaul-libp2p
+    steps:
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: /tmp/workspace
+
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
+      - run: ls -alt
+      - run: cd android/libqaul/build/outputs/aar && ls -alt
+      - run: |
+          if [ ! -f android/libqaul/build/outputs/aar/libqaul-debug.aar ]; then
+            echo "Nope!";
+          else
+            echo "It worked!";
+          fi
+  # #  ---------------------------------------------
   # #  Android
   # #  ---------------------------------------------
   android-beta-deploy:
@@ -76,6 +132,8 @@ jobs:
       <<: *flutter_version
     shell: /bin/bash --login -o pipefail
     steps:
+      - attach_workspace:
+          at: ~/qaul-libp2p/android/libqaul/build/outputs/aar
       - restore_cache: *restore_git_cache
       - checkout-project
       - save_cache: *save_git_cache
@@ -127,6 +185,12 @@ jobs:
           destination: output
 
 workflows:
+  build-test:
+    jobs:
+      - build-libaqul-android
+      - downstream:
+          requires:
+            - build-libaqul-android
   flutter-ci-cd-workflow:
     jobs:
       - flutter-analyze
