@@ -66,6 +66,3 @@ openssl = { version = "*", features = ["vendored"] }
 
 [target.x86_64-linux-android.dependencies]
 openssl = { version = "*", features = ["vendored"] }
-
-[net]
-git-fetch-with-cli = true
