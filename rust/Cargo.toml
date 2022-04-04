@@ -11,3 +11,5 @@ members = [
     "libp2p_modules/qaul_info",
     "libp2p_modules/qaul_messaging"
 ]
+[net]
+git-fetch-with-cli = true
