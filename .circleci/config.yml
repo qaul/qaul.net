@@ -85,11 +85,8 @@ jobs:
           name: Install build targets for android in rust
           command: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
       - run:
-          name: Add git-fetch-with-cli to $CARGO_HOME/config
-          command: echo "[net]\ngit-fetch-with-cli = true" >> $CARGO_HOME/config
-      - run:
           name: Install Cargo NDK
-          command: cd rust/libqaul && cargo install cargo-ndk
+          command: cd rust/libqaul && env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo install cargo-ndk
       - run:
           name: Build Libqaul JniLibs for Android
           command: cd rust/libqaul && sh build_libqaul_android.sh
