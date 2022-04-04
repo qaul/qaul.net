@@ -37,6 +37,10 @@ executors:
       - image: cimg/android:2021.10
     resource_class: large
     <<: *default_flutter_wdir
+  android-rust:
+    docker:
+      - image: cimg/android:2022.03-ndk
+    resource_class: large
 
 jobs:
   # ------------------------------------------------
@@ -62,6 +66,67 @@ jobs:
   # Deploy Jobs
   # ------------------------------------------------
   # #  ---------------------------------------------
+  # #  Rust
+  # #  ---------------------------------------------
+  build-libaqul-android:
+    executor: android-rust
+    working_directory: ~/qaul-libp2p
+    shell: /bin/bash --login -o pipefail
+    environment:
+      ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/22.1.7171670
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+    steps:
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
+      - run:
+          name: Install Rust
+          command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      - setup-sccache
+      - restore-sccache-cache
+      - run:
+          name: Install build targets for android in rust
+          command: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+      - run:
+          name: Install Cargo NDK
+          command: cd rust/libqaul && cargo install cargo-ndk
+      - run:
+          name: Build Libqaul JniLibs for Android
+          command: cd rust/libqaul && sh build_libqaul_android.sh
+      - save-sccache-cache
+      - restore_cache:
+          key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
+      - run:
+          name: Build AAR Library
+          command: cd android && sh gradlew assemble
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
+      - persist_to_workspace:
+          root: ~/qaul-libp2p
+          paths:
+            - android/blemodule/build/outputs/aar/blemodule-debug.aar
+            - android/libqaul/build/outputs/aar/libqaul-debug.aar
+  downstream:
+    executor: android-rust
+    working_directory: ~/qaul-libp2p
+    steps:
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
+      - attach_workspace:
+          at: ~/qaul-libp2p
+      - run: ls -alt
+      - run: cd android/libqaul/build/outputs/aar && ls -alt
+      - run: cd android/blemodule/build/outputs/aar && ls -alt
+      - run: |
+          if [ ! -f android/libqaul/build/outputs/aar/libqaul-debug.aar ]; then
+            echo "Nope!";
+          else
+            echo "It worked!";
+          fi
+  # #  ---------------------------------------------
   # #  Android
   # #  ---------------------------------------------
   android-beta-deploy:
@@ -76,6 +141,8 @@ jobs:
       <<: *flutter_version
     shell: /bin/bash --login -o pipefail
     steps:
+      - attach_workspace:
+          at: ~/qaul-libp2p/android/libqaul/build/outputs/aar
       - restore_cache: *restore_git_cache
       - checkout-project
       - save_cache: *save_git_cache
@@ -127,6 +194,12 @@ jobs:
           destination: output
 
 workflows:
+  build-test:
+    jobs:
+      - build-libaqul-android
+      - downstream:
+          requires:
+            - build-libaqul-android
   flutter-ci-cd-workflow:
     jobs:
       - flutter-analyze
@@ -249,3 +322,35 @@ commands:
           key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
           paths:
             - ./Pods
+
+  # ------------------------------------------------
+  # Rust-related commands
+  # ------------------------------------------------
+  setup-sccache:
+    description: "Installs and configures sccache as a wrapper for rustc"
+    steps:
+      - run:
+          name: Install sccache
+          command: |
+            cargo install sccache
+            # This configures Rust to use sccache.
+            echo 'export "RUSTC_WRAPPER"="sccache"' >> $BASH_ENV
+            # This is the maximum space sccache cache will use on disk.
+            echo 'export "SCCACHE_CACHE_SIZE"="1G"' >> $BASH_ENV
+            sccache --version
+  restore-sccache-cache:
+    steps:
+      - restore_cache:
+          name: Restore sccache cache
+          key: sccache-cache-stable-{{ arch }}-{{ .Environment.CIRCLE_JOB }}
+  save-sccache-cache:
+    steps:
+      - save_cache:
+          name: Save sccache cache
+          # We use {{ epoch }} to always upload a fresh cache:
+          # Of course, restore_cache will not find this exact key,
+          # but it will fall back to the closest key (aka the most recent).
+          # See https://discuss.circleci.com/t/add-mechanism-to-update-existing-cache-key/9014/13
+          key: sccache-cache-stable-{{ arch }}-{{ .Environment.CIRCLE_JOB }}-{{ epoch }}
+          paths:
+            - "~/.cache/sccache"
