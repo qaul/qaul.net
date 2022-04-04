@@ -39,7 +39,7 @@ executors:
     <<: *default_flutter_wdir
   android-rust:
     docker:
-      - image: cimg/android:2021.10-ndk
+      - image: cimg/android:2022.03-ndk
     resource_class: large
 
 jobs:
@@ -75,11 +75,6 @@ jobs:
     environment:
       ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/22.1.7171670
     steps:
-      - run:
-          name: Install OpenSSH 8.1p1
-          command: |
-            sudo apt-get update
-            mkdir ~/tempdownload; cd ~/tempdownload; wget https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-8.1p1.tar.gz; tar zxvf openssh-8.1p1.tar.gz; cd openssh-8.1p1 && ./configure && make && sudo make install
       - restore_cache: *restore_git_cache
       - checkout-project
       - save_cache: *save_git_cache
