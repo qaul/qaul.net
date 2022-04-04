@@ -79,10 +79,10 @@ jobs:
       - checkout-project
       - save_cache: *save_git_cache
       - setup-sccache
-      - restore-sccache-cache
       - run:
           name: Install Rust
           command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      - restore-sccache-cache
       - run:
           name: Install build targets for android in rust
           command: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
