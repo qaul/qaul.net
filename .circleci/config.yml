@@ -78,10 +78,10 @@ jobs:
       - restore_cache: *restore_git_cache
       - checkout-project
       - save_cache: *save_git_cache
-      - setup-sccache
       - run:
           name: Install Rust
           command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      - setup-sccache
       - restore-sccache-cache
       - run:
           name: Install build targets for android in rust
@@ -93,9 +93,15 @@ jobs:
           name: Build Libqaul JniLibs for Android
           command: cd rust/libqaul && sh build_libqaul_android.sh
       - save-sccache-cache
+      - restore_cache:
+          key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
       - run:
           name: Build AAR Library
           command: cd android && sh gradlew assemble
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
       - persist_to_workspace:
           root: ~/qaul-libp2p
           paths:
