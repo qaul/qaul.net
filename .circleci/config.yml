@@ -85,6 +85,9 @@ jobs:
           name: Install build targets for android in rust
           command: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
       - run:
+          name: Start SSH Agent
+          command: eval `ssh-agent -s` && ssh-add
+      - run:
           name: Install Cargo NDK
           command: cd rust/libqaul && cargo install cargo-ndk
       - run:
