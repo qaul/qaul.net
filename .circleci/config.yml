@@ -108,6 +108,53 @@ jobs:
           paths:
             - android/blemodule/build/outputs/aar/blemodule-debug.aar
             - android/libqaul/build/outputs/aar/libqaul-debug.aar
+  build-libqaul-ios:
+    macos:
+      xcode: 13.0.0
+    working_directory: ~/qaul-libp2p
+    shell: /bin/bash --login -o pipefail
+    environment:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+    steps:
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
+      - run:
+          name: Install Rust
+          command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      - setup-sccache
+      - restore-sccache-cache
+      - run:
+          name: Install build targets for iOS in rust
+          command: rustup target add aarch64-apple-ios x86_64-apple-ios
+      - run:
+          name: Install Cargo Lipo
+          command: cd rust/libqaul && cargo install cargo-lipo
+      - run:
+          name: Build Libqaul *.a Library for iOS
+          command: cd rust/libqaul && sh build_libqaul_ios.sh
+      - save-sccache-cache
+      - persist_to_workspace:
+          root: ~/qaul-libp2p
+          paths:
+              - rust/target/universal/release/liblibqaul.a
+  downstream:
+    executor: android-rust
+    working_directory: ~/qaul-libp2p
+    steps:
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
+      - attach_workspace:
+          at: ~/qaul-libp2p
+      - run: ls -alt
+      - run: cd rust/target/universal/release && ls -alt
+      - run: |
+          if [ ! -f rust/target/universal/release/liblibqaul.a ]; then
+            echo "Nope!";
+          else
+            echo "It worked!";
+          fi
   # #  ---------------------------------------------
   # #  Android
   # #  ---------------------------------------------
@@ -182,6 +229,12 @@ jobs:
           destination: output
 
 workflows:
+  build-test:
+    jobs:
+      - build-libaqul-ios
+      - downstream:
+          requires:
+            - build-libaqul-ios
   flutter-ci-cd-workflow:
     jobs:
       - flutter-analyze
