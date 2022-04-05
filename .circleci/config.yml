@@ -120,8 +120,8 @@ jobs:
       - checkout-project
       - save_cache: *save_git_cache
       - run:
-          name: Install XCode Select Developer Tools
-          command: sudo xcode-select --install
+          name: Install CMake
+          command: brew install cmake
       - run:
           name: Install Rust
           command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
