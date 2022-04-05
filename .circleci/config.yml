@@ -231,10 +231,10 @@ jobs:
 workflows:
   build-test:
     jobs:
-      - build-libaqul-ios
+      - build-libqaul-ios
       - downstream:
           requires:
-            - build-libaqul-ios
+            - build-libqaul-ios
   flutter-ci-cd-workflow:
     jobs:
       - flutter-analyze
