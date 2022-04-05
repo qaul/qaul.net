@@ -120,6 +120,9 @@ jobs:
       - checkout-project
       - save_cache: *save_git_cache
       - run:
+          name: Install XCode Select Developer Tools
+          command: sudo xcode-select --install
+      - run:
           name: Install Rust
           command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
       - setup-sccache
@@ -213,6 +216,14 @@ jobs:
       - restore_cache: *restore_git_cache
       - checkout-project
       - save_cache: *save_git_cache
+      - attach_workspace:
+          at: ~/qaul-libp2p
+      - run:
+          name: Check for presence of *.a Library
+          command: |
+            if [ [ ! -f rust/target/universal/release/liblibqaul.a ] ]; then
+              echo "Libqaul *.a file could not be found. That's probably due an error in persisting files to workspace"; exit 1
+            fi
       - install-flutter-macos:
           version: "$FLUTTER_VERSION"
       - install-flutter-deps
@@ -228,6 +239,9 @@ jobs:
           path: output
           destination: output
 
+# ------------------------------------------------
+# Workflows
+# ------------------------------------------------
 workflows:
   build-test:
     jobs:
@@ -240,6 +254,10 @@ workflows:
       - flutter-analyze
       - flutter-test
       - build-libqaul-android:
+          filters:
+            branches:
+              only: beta
+      - build-libqaul-ios:
           filters:
             branches:
               only: beta
@@ -258,13 +276,17 @@ workflows:
           filters:
             branches:
               only: beta
-#      - ios-beta-deploy:
-#          requires:
-#            - hold
-#          filters:
-#            branches:
-#              only: beta
+      - ios-beta-deploy:
+          requires:
+            - hold
+            - build-libqaul-ios
+          filters:
+            branches:
+              only: beta
 
+# ------------------------------------------------
+# Reusable commands
+# ------------------------------------------------
 commands:
   checkout-project:
     description: "Invokes the checkout CircleCI step, declaring `path` as the root of the project (defined by `checkout_to_project_root` anchor)"
