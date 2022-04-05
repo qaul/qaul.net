@@ -2,18 +2,18 @@
 
 In order to build qaul.net for iOS you need an apple computer.
 
-## Prerequisits
+## Pre-requisites
 
 You need to install the following software
 
 ### XCode, XCode Developer Tools & CocoaPods
 
-XCode
+#### XCode
 
 * Install XCode from the AppStore.
 * Once XCode is installed, open it and accept the license.
 
-XCode Developer Tools
+#### XCode Developer Tools
 
 * After installing XCode, run the following command in a terminal to install the XCode Developer Tools
 
@@ -21,7 +21,7 @@ XCode Developer Tools
 sudo xcode-select --install
 ```
 
-CocoaPods XCode Extension
+#### CocoaPods XCode Extension
 
 CocoaPods is needed by flutter to retrieve the iOS and macOS platform plugin code. Without CocoaPods, plugins will not work on iOS or macOS.
 
@@ -33,16 +33,21 @@ sudo gem install cocoapod
 
 ### Rust
 
-libqaul is written in the programming language Rust
+libqaul is written in the Rust programming language. Follow the steps outlined [here](rust-install.md) to install it.
 
-[Install Rust](rust-install.md)
-
-Install the following additional tools from terminal to compile libqaul for iOS:
-Install the iOS rust targets from Terminal:
+#### Install the iOS rust targets from Terminal:
+> Note: On M1 machines, to run libqaul on an iPhone Simulator, we must also add the following target:
+> 
+> `aarch64-apple-ios-sim`
+> 
+> For more info, check [this doc](https://doc.rust-lang.org/nightly/rustc/platform-support/aarch64-apple-ios-sim.html).
 
 ```sh
 # rust targets for ios
 rustup target add aarch64-apple-ios x86_64-apple-ios
+
+# [Mac M1 machines only]
+rustup target add aarch64-apple-ios-sim
 
 # cargo-lipo subcommand that builds a universal library
 cargo install cargo-lipo
@@ -64,7 +69,7 @@ After installation open it and install the following things:
 
 ### Flutter
 
-[Install Flutter](flutter-install.md)
+The Qaul GUI is built using Flutter. Instructions to have it installed can be found in [this document](flutter-install.md).
 
 ## Build & Run qaul.net iOS App
 
@@ -73,7 +78,7 @@ To build and run the qaul.net desktop app you have to perform the following step
 1) Build libqaul shared library
 2) Build & run the flutter iOS app
 
-### Build libqaul shared Library
+### 1. Build libqaul shared Library
 
 Open a terminal and run the following commands
 
@@ -85,9 +90,13 @@ cd rust/libqaul
 ## for release build do:
 ## cargo lipo --release
 cargo lipo
+
+# [Mac M1 machines only]
+# If you only wish to run libqaul on an iOS Simulator, run this command instead the one above:
+cargo lipo --release --targets aarch64-apple-ios-sim
 ```
 
-### Build & Run qaul app on iOS Simulator or on your iOS Device
+### 2. Build & Run qaul app on iOS Simulator or on your iOS Device
 
 You can build and run the qaul flutter desktop app from the terminal:
 
@@ -95,7 +104,7 @@ You can build and run the qaul flutter desktop app from the terminal:
 # move into the flutter directory
 cd qaul_ui
 
-# build and run the MacOS desktop app
-flutter 
+# build and run the Flutter app
+flutter run
 ```
 
