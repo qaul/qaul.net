@@ -68,6 +68,9 @@ jobs:
   # #  ---------------------------------------------
   # #  Rust
   # #  ---------------------------------------------
+  # # #  -------------------------------------------
+  # # #  (Rust) Android
+  # # #  -------------------------------------------
   build-libqaul-android:
     executor: android-rust
     working_directory: ~/qaul-libp2p
@@ -108,9 +111,48 @@ jobs:
           paths:
             - android/blemodule/build/outputs/aar/blemodule-debug.aar
             - android/libqaul/build/outputs/aar/libqaul-debug.aar
+  # # #  -------------------------------------------
+  # # #  (Rust) iOS
+  # # #  -------------------------------------------
+  build-libqaul-ios:
+    macos:
+      xcode: 13.0.0
+    working_directory: ~/qaul-libp2p
+    shell: /bin/bash --login -o pipefail
+    environment:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+    steps:
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
+      - run:
+          name: Install CMake
+          command: brew install cmake
+      - run:
+          name: Install Rust
+          command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      - setup-sccache
+      - restore-sccache-cache
+      - run:
+          name: Install build targets for iOS in rust
+          command: rustup target add aarch64-apple-ios x86_64-apple-ios
+      - run:
+          name: Install Cargo Lipo
+          command: cd rust/libqaul && cargo install cargo-lipo
+      - run:
+          name: Build Libqaul *.a Library for iOS
+          command: cd rust/libqaul && sh build_libqaul_ios.sh
+      - save-sccache-cache
+      - persist_to_workspace:
+          root: ~/qaul-libp2p
+          paths:
+              - rust/target/universal/release/liblibqaul.a
   # #  ---------------------------------------------
-  # #  Android
+  # #  Flutter
   # #  ---------------------------------------------
+  # # #  -------------------------------------------
+  # # #  (Flutter) Android
+  # # #  -------------------------------------------
   android-beta-deploy:
     executor: android-flutter
     working_directory: ~/qaul-libp2p/qaul_ui/android
@@ -150,9 +192,9 @@ jobs:
       - store_artifacts:
           path: output
           destination: output
-  # #  ---------------------------------------------
-  # #  iOS
-  # #  ---------------------------------------------
+  # # #  -------------------------------------------
+  # # #  (Flutter) iOS
+  # # #  -------------------------------------------
   ios-beta-deploy:
     macos:
       xcode: 13.0.0
@@ -166,6 +208,14 @@ jobs:
       - restore_cache: *restore_git_cache
       - checkout-project
       - save_cache: *save_git_cache
+      - attach_workspace:
+          at: ~/qaul-libp2p
+      - run:
+          name: Check for presence of *.a Library
+          command: |
+            if [ [ ! -f rust/target/universal/release/liblibqaul.a ] ]; then
+              echo "Libqaul *.a file could not be found. That's probably due an error in persisting files to workspace"; exit 1
+            fi
       - install-flutter-macos:
           version: "$FLUTTER_VERSION"
       - install-flutter-deps
@@ -181,37 +231,50 @@ jobs:
           path: output
           destination: output
 
+# ------------------------------------------------
+# Workflows
+# ------------------------------------------------
 workflows:
   flutter-ci-cd-workflow:
     jobs:
       - flutter-analyze
       - flutter-test
-      - build-libqaul-android:
-          filters:
-            branches:
-              only: beta
+      - build-libqaul-android
+#      - build-libqaul-android:
+#          filters:
+#            branches:
+#              only: beta
+      - build-libqaul-ios
+#      - build-libqaul-ios:
+#          filters:
+#            branches:
+#              only: beta
       - hold:
           type: approval
           requires:
             - flutter-test
             - flutter-analyze
-          filters:
-            branches:
-              only: beta
+#          filters:
+#            branches:
+#              only: beta
       - android-beta-deploy:
           requires:
             - hold
             - build-libqaul-android
-          filters:
-            branches:
-              only: beta
-#      - ios-beta-deploy:
-#          requires:
-#            - hold
+#          filters:
+#            branches:
+#              only: beta
+      - ios-beta-deploy:
+          requires:
+            - hold
+            - build-libqaul-ios
 #          filters:
 #            branches:
 #              only: beta
 
+# ------------------------------------------------
+# Reusable commands
+# ------------------------------------------------
 commands:
   checkout-project:
     description: "Invokes the checkout CircleCI step, declaring `path` as the root of the project (defined by `checkout_to_project_root` anchor)"
