@@ -119,11 +119,11 @@ impl ConnectionTable {
     /// enter it into all modules where we are connected to
     pub fn process_received_routing_info( neighbour_id: PeerId, info: Vec<router_net_proto::RoutingInfoEntry> ) {
 
-        for inf in &info{
-            let c: &[u8] = &inf.user;
-            let userid = PeerId::from_bytes(c).unwrap();
-            log::info!("qual process_received_routing_info user={}, hc={}", userid, inf.hc[0]);
-        }
+        // for inf in &info{
+        //     let c: &[u8] = &inf.user;
+        //     let userid = PeerId::from_bytes(c).unwrap();
+        //     log::info!("qual process_received_routing_info user={}, hc={}", userid, inf.hc[0]);
+        // }
         
 
         // try Lan module

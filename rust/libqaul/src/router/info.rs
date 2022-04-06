@@ -191,6 +191,12 @@ impl RouterInfo {
         let routes = RoutingTable::create_routing_info(neighbour);
         let users = Users::get_user_info_table();
 
+        // for entry in &routes.entry{
+        //     let c: &[u8] = &entry.user;
+        //     let userid = PeerId::from_bytes(c).unwrap();
+        //     log::info!("sending routing_info user={}, hc={}", userid, entry.hc[0]);
+        // }
+
         let timestamp = Timestamp::get_timestamp();
 
         let router_info = router_net_proto::RouterInfoMessage {
