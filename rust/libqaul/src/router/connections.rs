@@ -118,6 +118,7 @@ impl ConnectionTable {
     /// process received routing info table
     /// enter it into all modules where we are connected to
     pub fn process_received_routing_info( neighbour_id: PeerId, info: Vec<router_net_proto::RoutingInfoEntry> ) {
+
         // try Lan module
         if let Some(rtt) = Neighbours::get_rtt(&neighbour_id , &ConnectionModule::Lan ){
             Self::fill_received_routing_info(ConnectionModule::Lan, neighbour_id, rtt, info.clone());
