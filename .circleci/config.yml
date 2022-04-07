@@ -4,7 +4,7 @@ version: 2.1
 # Configurations
 # ------------------------------------------------
 flutter_version: &flutter_version
-  FLUTTER_VERSION: "2.8.0"
+  FLUTTER_VERSION: "2.10.4"
 default_flutter_wdir: &default_flutter_wdir
   working_directory: ~/qaul-libp2p/qaul_ui
 flutter_ios_dir: &flutter_ios_dir
@@ -111,6 +111,10 @@ jobs:
           paths:
             - android/blemodule/build/outputs/aar/blemodule-debug.aar
             - android/libqaul/build/outputs/aar/libqaul-debug.aar
+      - store_artifacts:
+          path: android/blemodule/build/outputs/aar
+      - store_artifacts:
+          path: android/libqaul/build/outputs/aar
   # # #  -------------------------------------------
   # # #  (Rust) iOS
   # # #  -------------------------------------------
@@ -147,6 +151,8 @@ jobs:
           root: ~/qaul-libp2p
           paths:
               - rust/target/universal/release/liblibqaul.a
+      - store_artifacts:
+          path: rust/target/universal/release/liblibqaul.a
   # #  ---------------------------------------------
   # #  Flutter
   # #  ---------------------------------------------
