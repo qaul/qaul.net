@@ -4,7 +4,7 @@ version: 2.1
 # Configurations
 # ------------------------------------------------
 flutter_version: &flutter_version
-  FLUTTER_VERSION: "2.8.0"
+  FLUTTER_VERSION: "2.10.4"
 default_flutter_wdir: &default_flutter_wdir
   working_directory: ~/qaul-libp2p/qaul_ui
 flutter_ios_dir: &flutter_ios_dir
@@ -111,6 +111,13 @@ jobs:
           paths:
             - android/blemodule/build/outputs/aar/blemodule-debug.aar
             - android/libqaul/build/outputs/aar/libqaul-debug.aar
+      - when:
+          condition: on_success
+          steps:
+            - store_artifacts:
+                path: android/blemodule/build/outputs/aar
+            - store_artifacts:
+                path: android/libqaul/build/outputs/aar
   # # #  -------------------------------------------
   # # #  (Rust) iOS
   # # #  -------------------------------------------
@@ -147,6 +154,11 @@ jobs:
           root: ~/qaul-libp2p
           paths:
               - rust/target/universal/release/liblibqaul.a
+      - when:
+          condition: on_success
+          steps:
+            - store_artifacts:
+                path: rust/target/universal/release/liblibqaul.a
   # #  ---------------------------------------------
   # #  Flutter
   # #  ---------------------------------------------
@@ -161,7 +173,9 @@ jobs:
       FASTLANE_LANE: upload_beta_playstore
       LANG: en_US.UTF-8
       LC_ALL: en_US.UTF-8
-      SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/google-credentials.json
+      _JAVA_OPTIONS: "-Xmx2048m"
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
+      SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/fastlane/google-credentials.json
       <<: *flutter_version
     shell: /bin/bash --login -o pipefail
     steps:
@@ -173,7 +187,7 @@ jobs:
       - run:
           name: Check for presence of AAR Files
           command: |
-            if [ [ ! -f android/libqaul/build/outputs/aar/libqaul-debug.aar ] || [ ! -f android/blemodule/build/outputs/aar/blemodule-debug.aar ] ]; then
+            if [ ! -f ../../android/libqaul/build/outputs/aar/libqaul-debug.aar ] || [ ! -f ../../android/blemodule/build/outputs/aar/blemodule-debug.aar ]; then
               echo "Libqaul/blemodule AAR file could not be found. That's probably due an error in persisting files to workspace"; exit 1
             fi
       - install-flutter-linux:
@@ -185,7 +199,7 @@ jobs:
       - install-bundler-deps
       - run: echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > app/upload-keystore.jks
       - run: echo "$PLAY_STORE_UPLOAD_KEY_INFO" | base64 --decode > key.properties
-      - run: echo "$PLAY_STORE_JSON_KEY" | base64 --decode > google-credentials.json
+      - run: echo "$PLAY_STORE_JSON_KEY" | base64 --decode > fastlane/google-credentials.json
       - run:
           name: fastlane
           command: bundle exec fastlane $FASTLANE_LANE
@@ -213,7 +227,7 @@ jobs:
       - run:
           name: Check for presence of *.a Library
           command: |
-            if [ [ ! -f rust/target/universal/release/liblibqaul.a ] ]; then
+            if [ ! -f ../../rust/target/universal/release/liblibqaul.a ]; then
               echo "Libqaul *.a file could not be found. That's probably due an error in persisting files to workspace"; exit 1
             fi
       - install-flutter-macos:
@@ -235,42 +249,58 @@ jobs:
 # Workflows
 # ------------------------------------------------
 workflows:
-  flutter-ci-cd-workflow:
+  flutter-test-analyze:
     jobs:
-      - flutter-analyze
       - flutter-test
-      - build-libqaul-android
-#      - build-libqaul-android:
-#          filters:
-#            branches:
-#              only: beta
-      - build-libqaul-ios
-#      - build-libqaul-ios:
-#          filters:
-#            branches:
-#              only: beta
-      - hold:
-          type: approval
+      - flutter-analyze
+  build-and-deploy:
+    jobs:
+      - flutter-test:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - flutter-analyze:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - build-libqaul-android:
+          filters:
+            tags:
+              only:
+                - /^rust_.*/
+                - /^v.*/
+            branches:
+              ignore: /.*/
+      - build-libqaul-ios:
+          filters:
+            tags:
+              only:
+                - /^rust_.*/
+                - /^v.*/
+            branches:
+              ignore: /.*/
+      - android-beta-deploy:
           requires:
             - flutter-test
             - flutter-analyze
-#          filters:
-#            branches:
-#              only: beta
-      - android-beta-deploy:
-          requires:
-            - hold
             - build-libqaul-android
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+#      - ios-beta-deploy:
+#          requires:
+#            - flutter-test
+#            - flutter-analyze
+#            - build-libqaul-ios
 #          filters:
-#            branches:
-#              only: beta
-      - ios-beta-deploy:
-          requires:
-            - hold
-            - build-libqaul-ios
-#          filters:
-#            branches:
-#              only: beta
+#            tags:
+#              only: /^v.*/
 
 # ------------------------------------------------
 # Reusable commands
@@ -320,7 +350,6 @@ commands:
           keys:
             - gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
             - gem-cache-v2-{{ arch }}-
-            - gem-cache-v2-
       - run:
           name: Install Bundle
           command: bundle check || sudo bundle install --path vendor/bundle
@@ -378,7 +407,7 @@ commands:
           key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
       - run:
           name: Install CocoaPods
-          command: bundle exec pod install
+          command: pod install
       - save_cache:
           name: Save CocoaPods cache
           key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
