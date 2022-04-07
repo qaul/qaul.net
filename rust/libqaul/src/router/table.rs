@@ -78,53 +78,6 @@ impl RoutingTable {
         table.table = new_table.table;
     }
 
-    /// create serializable routing info for a specific neighbour
-    // pub fn create_routing_info( neighbour: Option<PeerId> ) -> router_net_proto::RoutingInfoTable {
-    //     let mut table = router_net_proto::RoutingInfoTable {
-    //         entry: Vec::new()
-    //     };
-
-    //     // get access to routing table
-    //     let routing_table = ROUTINGTABLE.get().read().unwrap();
-
-    //     // loop through routing table
-    //     for (user_id, user) in routing_table.table.iter() {
-    //         if user.connections.len() > 0 {
-    //             // get first entry
-    //             if let Some(neighbour_id) = neighbour {
-    //                 // check if neighbour is best connection to it
-    //                 if neighbour_id != user.connections[0].node {
-    //                     let mut hc = Vec::new();
-    //                     hc.push(user.connections[0].hc);
-
-    //                     let table_entry = router_net_proto::RoutingInfoEntry {
-    //                         user: user_id.to_bytes(),
-    //                         rtt: user.connections[0].rtt,
-    //                         hc,
-    //                         pl: user.connections[0].pl,
-    //                     };
-
-    //                     table.entry.push(table_entry);
-    //                 }
-    //             } else {
-    //                 let mut hc = Vec::new();
-    //                 hc.push(user.connections[0].hc);
-    //                 let table_entry = router_net_proto::RoutingInfoEntry {
-    //                     user: user_id.to_bytes(),
-    //                     rtt: user.connections[0].rtt,
-    //                     hc,
-    //                     pl: user.connections[0].pl,
-    //                 };
-
-    //                 table.entry.push(table_entry);
-    //             }
-    //         }
-    //     }
-
-    //     table
-    // }
-
-
     pub fn create_routing_info( neighbour: Option<PeerId> ) -> router_net_proto::RoutingInfoTable {
         let mut table = router_net_proto::RoutingInfoTable {
             entry: Vec::new()
@@ -139,8 +92,8 @@ impl RoutingTable {
                 continue;
             }
 
-            // get first entry
             if let Some(neighbour_id) = neighbour {
+                // find min hc entry
                 let mut min_hc_idx: Option<usize> = None;
                 let mut min_hc: u8 = 255;
                 for i in 0..user.connections.len(){
@@ -153,6 +106,7 @@ impl RoutingTable {
                 if let Some(min_idx) = min_hc_idx{
                     let connection = user.connections.get(min_idx).unwrap();
 
+                    // check min hc entry is asme neighbour node to rescursive exchange routing infomation
                     if neighbour_id != connection.node{
                         let mut hc = Vec::new();
                         hc.push(connection.hc);
@@ -167,6 +121,7 @@ impl RoutingTable {
                     }
                 }
             } else {
+                // find min hc entry
                 let mut min_hc_idx: Option<usize> = None;
                 let mut min_hc: u8 = 255;
                 for i in 0..user.connections.len(){
