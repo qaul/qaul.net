@@ -106,7 +106,7 @@ impl RoutingTable {
                 if let Some(min_idx) = min_hc_idx{
                     let connection = user.connections.get(min_idx).unwrap();
 
-                    // check min hc entry is asme neighbour node to rescursive exchange routing infomation
+                    // check if min hc entry is same neighbour node to rescursive exchange routing infomation
                     if neighbour_id != connection.node{
                         let mut hc = Vec::new();
                         hc.push(connection.hc);
