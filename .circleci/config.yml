@@ -173,6 +173,8 @@ jobs:
       FASTLANE_LANE: upload_beta_playstore
       LANG: en_US.UTF-8
       LC_ALL: en_US.UTF-8
+      _JAVA_OPTIONS: "-Xmx2048m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
       SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/google-credentials.json
       <<: *flutter_version
     shell: /bin/bash --login -o pipefail
@@ -185,7 +187,7 @@ jobs:
       - run:
           name: Check for presence of AAR Files
           command: |
-            if [ [ ! -f android/libqaul/build/outputs/aar/libqaul-debug.aar ] || [ ! -f android/blemodule/build/outputs/aar/blemodule-debug.aar ] ]; then
+            if [ ! -f android/libqaul/build/outputs/aar/libqaul-debug.aar || ! -f android/blemodule/build/outputs/aar/blemodule-debug.aar ]; then
               echo "Libqaul/blemodule AAR file could not be found. That's probably due an error in persisting files to workspace"; exit 1
             fi
       - install-flutter-linux:
@@ -225,7 +227,7 @@ jobs:
       - run:
           name: Check for presence of *.a Library
           command: |
-            if [ [ ! -f rust/target/universal/release/liblibqaul.a ] ]; then
+            if [ ! -f rust/target/universal/release/liblibqaul.a ]; then
               echo "Libqaul *.a file could not be found. That's probably due an error in persisting files to workspace"; exit 1
             fi
       - install-flutter-macos:
@@ -389,7 +391,7 @@ commands:
           key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
       - run:
           name: Install CocoaPods
-          command: bundle exec pod install
+          command: pod install
       - save_cache:
           name: Save CocoaPods cache
           key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
