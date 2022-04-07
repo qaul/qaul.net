@@ -111,10 +111,13 @@ jobs:
           paths:
             - android/blemodule/build/outputs/aar/blemodule-debug.aar
             - android/libqaul/build/outputs/aar/libqaul-debug.aar
-      - store_artifacts:
-          path: android/blemodule/build/outputs/aar
-      - store_artifacts:
-          path: android/libqaul/build/outputs/aar
+      - when:
+          condition: on_success
+          steps:
+            - store_artifacts:
+                path: android/blemodule/build/outputs/aar
+            - store_artifacts:
+                path: android/libqaul/build/outputs/aar
   # # #  -------------------------------------------
   # # #  (Rust) iOS
   # # #  -------------------------------------------
@@ -151,8 +154,11 @@ jobs:
           root: ~/qaul-libp2p
           paths:
               - rust/target/universal/release/liblibqaul.a
-      - store_artifacts:
-          path: rust/target/universal/release/liblibqaul.a
+      - when:
+          condition: on_success
+          steps:
+            - store_artifacts:
+                path: rust/target/universal/release/liblibqaul.a
   # #  ---------------------------------------------
   # #  Flutter
   # #  ---------------------------------------------
@@ -326,7 +332,6 @@ commands:
           keys:
             - gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
             - gem-cache-v2-{{ arch }}-
-            - gem-cache-v2-
       - run:
           name: Install Bundle
           command: bundle check || sudo bundle install --path vendor/bundle
