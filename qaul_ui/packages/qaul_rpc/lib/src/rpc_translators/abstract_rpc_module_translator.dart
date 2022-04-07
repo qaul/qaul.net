@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:meta/meta.dart';
 
+import '../generated/connections/ble/ble_rpc.pb.dart';
 import '../generated/connections/connections.pb.dart';
 import '../generated/node/node.pb.dart';
 import '../generated/node/user_accounts.pb.dart';
@@ -14,13 +15,22 @@ import '../generated/services/chat/chat.pb.dart';
 import '../generated/services/feed/feed.pb.dart';
 import '../models/models.dart';
 
+part 'ble_translator.dart';
+
 part 'chat_translator.dart';
+
 part 'connection_translator.dart';
+
 part 'debug_translator.dart';
+
 part 'feed_translator.dart';
+
 part 'node_translator.dart';
+
 part 'router_translator.dart';
+
 part 'user_accounts_translator.dart';
+
 part 'users_translator.dart';
 
 class UnhandledRpcMessageException implements Exception {
@@ -33,6 +43,9 @@ class UnhandledRpcMessageException implements Exception {
     if (type != null) m += ', thrown by runtimeType: $type';
     return UnhandledRpcMessageException._(m);
   }
+
+  @override
+  String toString() => 'UnhandledRpcMessageException{message: $message}';
 }
 
 abstract class RpcModuleTranslator {
@@ -51,4 +64,9 @@ class RpcTranslatorResponse {
 
   final Modules module;
   final dynamic data;
+
+  @override
+  String toString() {
+    return 'RpcTranslatorResponse{module: $module, data: $data}';
+  }
 }

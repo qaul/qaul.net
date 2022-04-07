@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 
 import '../qaul_rpc.dart';
+import 'generated/connections/ble/ble_rpc.pb.dart';
 import 'generated/connections/connections.pb.dart';
 import 'generated/node/node.pb.dart';
 import 'generated/node/user_accounts.pb.dart';
@@ -184,6 +185,15 @@ class LibqaulWorker {
     final msg = Debug(deleteLibqaulLogsRequest: DeleteLibqaulLogsRequest());
     await _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
   }
+  
+  void sendBleInfoRequest() async {
+    for (final message in [
+      Ble(infoRequest: InfoRequest()).writeToBuffer(),
+      Ble(discoveredRequest: DiscoveredRequest()).writeToBuffer(),
+    ]) {
+      await _encodeAndSendMessage(Modules.BLE, message);
+    }
+  }
 
   // *******************************
   // Private (helper) methods
@@ -265,6 +275,9 @@ class LibqaulWorker {
           _log.info('libqaul log storage path: $path');
           _reader(libqaulLogsStoragePath.state).state = path;
         }
+      } else if (m.module == Modules.BLE) {
+        final resp = await BleTranslator().decodeMessageBytes(m.data);
+        if (resp != null) _processResponse(resp);
       } else {
         throw UnhandledRpcMessageException.value(
             m.toString(), 'LibqaulWorker.receiveResponse');
@@ -325,6 +338,24 @@ class LibqaulWorker {
           }
           return;
         }
+      }
+    }
+    if (resp.module == Modules.BLE) {
+      if (resp.data is BleConnectionStatus) {
+        var newStatus = resp.data as BleConnectionStatus;
+        _log.finer('BLE Module: received new status $newStatus');
+        final currentStatus = _reader(bleStatusProvider);
+        if (currentStatus != null) {
+          newStatus = currentStatus.copyWith(
+            status: newStatus.status,
+            deviceInfo: newStatus.deviceInfo,
+            discoveredNodes: newStatus.discoveredNodes,
+            nodesPendingConfirmation: newStatus.discoveredNodes,
+          );
+          _log.finest('BLE Module: merged status with current status. New Status: $newStatus');
+        }
+        _reader(bleStatusProvider.state).state = newStatus;
+        return;
       }
     }
 

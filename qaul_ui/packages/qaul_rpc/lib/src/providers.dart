@@ -24,3 +24,5 @@ final chatRoomsProvider =
 final currentOpenChatRoom = StateProvider<ChatRoom?>((ref) => null);
 
 final libqaulLogsStoragePath = StateProvider<String?>((ref) => null);
+
+final bleStatusProvider = StateProvider<BleConnectionStatus?>((_) => null);
