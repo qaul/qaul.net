@@ -6,6 +6,8 @@ import 'models/feed_post_list_notifier.dart';
 
 final qaulWorkerProvider = Provider<LibqaulWorker>((ref) => LibqaulWorker(ref.read));
 
+final nodeInfoProvider = StateProvider<NodeInfo?>((_) => null);
+
 final defaultUserProvider = StateProvider<User?>((ref) => null);
 
 final feedMessagesProvider = StateNotifierProvider<FeedPostListNotifier, List<FeedPost>>(

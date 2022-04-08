@@ -251,7 +251,9 @@ class LibqaulWorker {
         if (resp != null) _processResponse(resp);
       } else if (m.module == Modules.NODE) {
         final resp = await NodeTranslator().decodeMessageBytes(m.data);
-        _log.finer('RpcNode node id: ${resp?.data}');
+        if (resp != null && resp.data is NodeInfo) {
+          _reader(nodeInfoProvider.state).state = resp.data;
+        }
       } else if (m.module == Modules.USERACCOUNTS) {
         final resp = await UserAccountsTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);

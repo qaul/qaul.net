@@ -9,9 +9,9 @@ class NodeTranslator extends RpcModuleTranslator {
     final message = Node.fromBuffer(data);
     switch (message.whichMessage()) {
       case Node_Message.info:
-        final nodeInformation = message.ensureInfo();
-        final nodeId = nodeInformation.idBase58;
-        return RpcTranslatorResponse(Modules.NODE, nodeId);
+        final msg = message.ensureInfo();
+        final nodeInfo = NodeInfo(msg.idBase58, msg.addresses);
+        return RpcTranslatorResponse(Modules.NODE, nodeInfo);
       default:
         return super.decodeMessageBytes(data);
     }

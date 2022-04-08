@@ -15,6 +15,7 @@ class UserAccountScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(defaultUserProvider);
+    final nodeInfo = ref.watch(nodeInfoProvider);
     final bleStatus = ref.watch(bleStatusProvider);
 
     final bleData = useMemoized<List<String>>(() {
@@ -27,77 +28,101 @@ class UserAccountScreen extends HookConsumerWidget {
       ];
     }, [bleStatus]);
 
-    final refreshBleStatus = useCallback(
-        () => ref.read(qaulWorkerProvider).sendBleInfoRequest(), []);
+    final refreshConnectionData = useCallback(() {
+      ref.read(qaulWorkerProvider).sendBleInfoRequest();
+      ref.read(qaulWorkerProvider).getNodeInfo();
+    }, []);
 
     final theme = Theme.of(context).textTheme;
     final l18ns = AppLocalizations.of(context);
     return CronTaskDecorator(
       schedule: const Duration(milliseconds: 1500),
-      callback: refreshBleStatus,
-      child: Padding(
+      callback: refreshConnectionData,
+      child: ListView(
         padding: MediaQuery.of(context)
             .viewPadding
             .add(const EdgeInsets.fromLTRB(16, 8, 16, 8)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                UserAvatar.large(),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user != null
-                              ? user.name
-                              : _notFound(l18ns!, l18ns.username),
-                          style: theme.headline6,
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          user != null
-                              ? user.idBase58
-                              : _notFound(l18ns!, l18ns.userID),
-                          style: theme.subtitle2,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+        children: [
+          Row(
+            children: [
+              UserAvatar.large(),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user != null
+                            ? user.name
+                            : _notFound(l18ns!, l18ns.username),
+                        style: theme.headline6,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        user != null
+                            ? user.idBase58
+                            : _notFound(l18ns!, l18ns.userID),
+                        style: theme.subtitle2,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 60),
+          Text('Qaul ${l18ns!.publicKey}', style: theme.headline5),
+          const SizedBox(height: 20),
+          Text(
+            user != null && user.keyBase58 != null
+                ? user.keyBase58!
+                : _notFound(l18ns, l18ns.publicKey),
+          ),
+          const SizedBox(height: 60),
+          Text('Bluetooth Connection Status', style: theme.headline5),
+          const SizedBox(height: 20),
+          if (Platform.isAndroid)
+            ListView.separated(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              itemCount: bleData.length,
+              itemBuilder: (_, i) => Text(bleData[i]),
+              separatorBuilder: (_, __) => const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Divider(),
+              ),
+            )
+          else
+            const Text('Currently not supported'),
+          const SizedBox(height: 60),
+          Text('Node Info', style: theme.headline4),
+          const SizedBox(height: 20),
+          Text('Node ID', style: theme.headline6),
+          const SizedBox(height: 8),
+          Text(nodeInfo?.idBase58 ?? 'Unknown', style: theme.bodyText2!.copyWith(fontSize: 12)),
+          const SizedBox(height: 20),
+          Text('Known Addresses', style: theme.headline6),
+          const SizedBox(height: 8),
+          Table(
+            border: TableBorder.all(),
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: List.generate(
+              nodeInfo?.knownAddresses.length ?? 0,
+              (index) => TableRow(
+                children: [
+                  TableCell(
+                      child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(nodeInfo!.knownAddresses[index]),
+                  )),
+                ],
+              ),
             ),
-            const SizedBox(height: 60),
-            Text('Qaul ${l18ns!.publicKey}', style: theme.headline5),
-            const SizedBox(height: 20),
-            Text(
-              user != null && user.keyBase58 != null
-                  ? user.keyBase58!
-                  : _notFound(l18ns, l18ns.publicKey),
-            ),
-            const SizedBox(height: 60),
-            Text('Bluetooth Connection Status', style: theme.headline5),
-            const SizedBox(height: 20),
-            if (Platform.isAndroid)
-              ListView.separated(
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                itemCount: bleData.length,
-                itemBuilder: (_, i) => Text(bleData[i]),
-                separatorBuilder: (_, __) => const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Divider(),
-                ),
-              )
-            else
-              const Text('Currently not supported'),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
