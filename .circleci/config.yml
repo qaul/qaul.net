@@ -175,7 +175,7 @@ jobs:
       LC_ALL: en_US.UTF-8
       _JAVA_OPTIONS: "-Xmx2048m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
-      SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/google-credentials.json
+      SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/fastlane/google-credentials.json
       <<: *flutter_version
     shell: /bin/bash --login -o pipefail
     steps:
@@ -199,7 +199,7 @@ jobs:
       - install-bundler-deps
       - run: echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > app/upload-keystore.jks
       - run: echo "$PLAY_STORE_UPLOAD_KEY_INFO" | base64 --decode > key.properties
-      - run: echo "$PLAY_STORE_JSON_KEY" | base64 --decode > google-credentials.json
+      - run: echo "$PLAY_STORE_JSON_KEY" | base64 --decode > fastlane/google-credentials.json
       - run:
           name: fastlane
           command: bundle exec fastlane $FASTLANE_LANE
