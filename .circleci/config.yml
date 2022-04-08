@@ -187,7 +187,7 @@ jobs:
       - run:
           name: Check for presence of AAR Files
           command: |
-            if [ ! -f ../../android/libqaul/build/outputs/aar/libqaul-debug.aar || ! -f ../../android/blemodule/build/outputs/aar/blemodule-debug.aar ]; then
+            if [ ! -f ../../android/libqaul/build/outputs/aar/libqaul-debug.aar ] || [ ! -f ../../android/blemodule/build/outputs/aar/blemodule-debug.aar ]; then
               echo "Libqaul/blemodule AAR file could not be found. That's probably due an error in persisting files to workspace"; exit 1
             fi
       - install-flutter-linux:
