@@ -19,7 +19,6 @@
 use libp2p::PeerId;
 use prost::Message;
 use state::Storage;
-use serde::{Serialize, Deserialize};
 use std::{
     collections::HashMap,
     sync::RwLock,
@@ -36,8 +35,8 @@ use crate::{
     node::Node,
     router::{
         neighbours::Neighbours,
-        table::{RoutingTable, RoutingInfoTable},
-        users::{Users, UserInfoTable},
+        table::RoutingTable,
+        users::Users,
         connections::ConnectionTable,
         router_net_proto,
     },
@@ -68,28 +67,6 @@ pub struct Scheduler {
 struct SchedulerEntry {
     /// time of the last send
     timestamp: SystemTime,
-}
-
-/// Serializable routing information message 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
-pub struct RouterInfoMessage {
-    /// node id
-    pub node: Vec<u8>,
-    /// routes information list 
-    pub routes: RoutingInfoTable,
-    /// user information list
-    pub users: UserInfoTable,
-    /// timestamp, when this was generated
-    pub timestamp: u64,
-}
-
-/// Signed message container
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
-pub struct RouterInfoContainer {
-    /// data contains the binary encoded RouterInfoMessage
-    pub data: Vec<u8>,
-    /// signature of RouterInfoMessage
-    pub signature: Vec<u8>,
 }
 
 /// RouterInfo Module

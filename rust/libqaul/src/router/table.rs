@@ -15,7 +15,6 @@ use state::Storage;
 use prost::Message;
 use std::sync::RwLock;
 use std::collections::HashMap;
-use serde::{Serialize, Deserialize};
 
 use crate::connections::ConnectionModule;
 use super::proto;
@@ -286,20 +285,3 @@ impl RoutingTable {
         }
     }
 }
-
-/// Serializable routing structures to send over the network
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct RoutingInfoEntry {
-    /// user id
-    pub user: Vec<u8>,
-    /// round trip time
-    pub rtt: u32,
-    /// hop count
-    pub hc: u8,
-    /// package loss
-    pub pl: f32,
-}
-
-/// serializable routing information to send to neighbours
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct RoutingInfoTable (pub Vec<RoutingInfoEntry>);
