@@ -249,25 +249,45 @@ jobs:
 # Workflows
 # ------------------------------------------------
 workflows:
-  flutter-ci-cd-workflow:
+  build-rust-libraries:
+    jobs:
+      - build-libqaul-android
+          filters:
+            tags:
+              only:
+                - /^rust_.*/
+                - /^v.*/
+            branches:
+              ignore: /.*/
+      - build-libqaul-ios
+          filters:
+            tags:
+              only:
+                - /^rust_.*/
+                - /^v.*/
+            branches:
+              ignore: /.*/
+  flutter-test-and-analyze:
     jobs:
       - flutter-analyze
       - flutter-test
-      - build-libqaul-android
-      - build-libqaul-ios
-      - hold:
-          type: approval
-          requires:
-            - flutter-test
-            - flutter-analyze
+  flutter-deploy:
+    jobs:
       - android-beta-deploy:
           requires:
-            - hold
-            - build-libqaul-android
+            - flutter-test-and-analyze
+            - build-rust-libraries
+          filters:
+            tags:
+              only: /^v.*/
 #      - ios-beta-deploy:
 #          requires:
-#            - hold
+#            - flutter-test
+#            - flutter-analyze
 #            - build-libqaul-ios
+#          filters:
+#            tags:
+#              only: /^v.*/
 
 # ------------------------------------------------
 # Reusable commands
