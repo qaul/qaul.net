@@ -277,6 +277,8 @@ workflows:
           filters:
             tags:
               only: /^v.*/
+            branches:
+              ignore: /.*/
 #      - ios-beta-deploy:
 #          requires:
 #            - flutter-test
