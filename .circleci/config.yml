@@ -249,34 +249,31 @@ jobs:
 # Workflows
 # ------------------------------------------------
 workflows:
-  build-rust-libraries:
+  build-and-deploy:
     jobs:
-      - build-libqaul-android
-          filters:
-            tags:
-              only:
-                - /^rust_.*/
-                - /^v.*/
-            branches:
-              ignore: /.*/
-      - build-libqaul-ios
-          filters:
-            tags:
-              only:
-                - /^rust_.*/
-                - /^v.*/
-            branches:
-              ignore: /.*/
-  flutter-test-and-analyze:
-    jobs:
-      - flutter-analyze
       - flutter-test
-  flutter-deploy:
-    jobs:
+      - flutter-analyze
+      - build-libqaul-android:
+          filters:
+            tags:
+              only:
+                - /^rust_.*/
+                - /^v.*/
+            branches:
+              ignore: /.*/
+      - build-libqaul-ios:
+          filters:
+            tags:
+              only:
+                - /^rust_.*/
+                - /^v.*/
+            branches:
+              ignore: /.*/
       - android-beta-deploy:
           requires:
-            - flutter-test-and-analyze
-            - build-rust-libraries
+            - flutter-test
+            - flutter-analyze
+            - build-libqaul-android
           filters:
             tags:
               only: /^v.*/
