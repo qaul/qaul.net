@@ -67,7 +67,9 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
               ? AlignmentDirectional.topCenter
               : AlignmentDirectional.topStart,
           children: [
-            orientation == Orientation.portrait ? _buildHorizontalBody() : _buildVerticalBody(),
+            orientation == Orientation.portrait
+                ? _buildHorizontalBody()
+                : _buildVerticalBody(),
             orientation == Orientation.portrait
                 ? _buildHorizontalBar(context)
                 : _buildVerticalBar(context),
@@ -176,7 +178,8 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
     );
   }
 
-  Widget _barBackground(BuildContext context, Widget child, {bool vertical = false}) {
+  Widget _barBackground(BuildContext context, Widget child,
+      {bool vertical = false}) {
     final ltr = Directionality.of(context) == TextDirection.ltr;
 
     final barTheme = Theme.of(context).appBarTheme;
@@ -272,7 +275,9 @@ class QaulNavBarItem extends HookConsumerWidget {
             svgPath,
             width: _iconSize,
             height: _iconSize,
-            color: selected.value ? theme.colorScheme.primary : theme.iconTheme.color,
+            color: selected.value
+                ? theme.colorScheme.primary
+                : theme.iconTheme.color,
           ),
           onPressed: () => controller.goToTab(tab),
         ),
@@ -281,7 +286,8 @@ class QaulNavBarItem extends HookConsumerWidget {
 
     if (tab == TabType.feed) {
       return _TabNotificationBadge(
-        notificationCount: ref.read(feedNotificationControllerProvider).newNotificationCount,
+        notificationCount:
+            ref.read(feedNotificationControllerProvider).newNotificationCount,
         onPressed: () {
           controller.goToTab(tab);
           ref.read(feedNotificationControllerProvider).removeNotifications();
@@ -290,7 +296,8 @@ class QaulNavBarItem extends HookConsumerWidget {
       );
     } else if (tab == TabType.chat) {
       return _TabNotificationBadge(
-        notificationCount: ref.read(chatNotificationControllerProvider).newNotificationCount,
+        notificationCount:
+            ref.read(chatNotificationControllerProvider).newNotificationCount,
         onPressed: () {
           controller.goToTab(tab);
           ref.read(feedNotificationControllerProvider).removeNotifications();
@@ -362,10 +369,14 @@ class _TabNotificationBadge extends StatelessWidget {
           children: [
             Badge(
               showBadge: count != null,
-              badgeColor: Theme.of(context).primaryColor,
+              badgeColor: Colors.lightBlue,
               badgeContent: Text(
                 '${count ?? ''}',
-                style: _textStyle(context),
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               position: BadgePosition.bottomEnd(bottom: 8, end: 8),
               child: child,
@@ -381,13 +392,6 @@ class _TabNotificationBadge extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-
-  TextStyle _textStyle(BuildContext context) {
-    final brightness = ThemeData.estimateBrightnessForColor(Theme.of(context).primaryColor);
-    return TextStyle(
-      color: brightness == Brightness.light ? Colors.black : Colors.white,
     );
   }
 }
