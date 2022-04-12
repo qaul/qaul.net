@@ -18,15 +18,15 @@ class LibqaulChannel {
 
   /// instantiate libqaul
   LibqaulChannel(this.read) {
-    _log.finer("LibqaulChannel(this.read)");
+    _log.finest("LibqaulChannel(this.read)");
   }
 
   /// load libqaul
   Future<void> load() async {
-    _log.finer("load()");
+    _log.finest("load()");
     try {
       await libqaulChannel.invokeMethod('libqaulload');
-      _log.finer("libqaulload called");
+      _log.finest("libqaulload called");
     } on PlatformException catch (e) {
       _log.warning("ERROR: Failed to load libqaul: '${e.message}'");
       rethrow;
@@ -35,17 +35,17 @@ class LibqaulChannel {
 
   /// Test Platform Version dummy method
   Future<String> platformVersion() async {
-    _log.finer("platformVersion()");
+    _log.finest("platformVersion()");
 
     //const MethodChannel local_channel = MethodChannel('libqaul');
 
-    _log.finer("platformVersion() channel instantiated");
+    _log.finest("platformVersion() channel instantiated");
 
     String version;
     try {
-      _log.finer("platformVersion() try");
+      _log.finest("platformVersion() try");
       final result = await libqaulChannel.invokeMethod('getPlatformVersion');
-      _log.finer("platformVersion() result: $result");
+      _log.finest("platformVersion() result: $result");
       version = 'Android platform version: $result';
     } on PlatformException catch (e) {
       version = "ERROR: libqaul getPlatformVersion: '${e.message}'";
@@ -136,21 +136,21 @@ class LibqaulChannel {
       final Uint8List? result = await libqaulChannel.invokeMethod('receiveRpcMessage');
 
       if (result == null) {
-        _log.finer("channel receiveRpcMessage: null received");
+        _log.finest("channel receiveRpcMessage: null received");
       } else {
-        _log.finer("channel receiveRpcMessage: received");
+        _log.finest("channel receiveRpcMessage: received");
 
         if (result.isEmpty) {
-          _log.finer("channel receiveRpcMessage: result is empty");
+          _log.finest("channel receiveRpcMessage: result is empty");
           return null;
         }
 
         // check result size
         final size = result.lengthInBytes;
-        _log.finer("channel receiveRpcMessage: $size bytes received");
+        _log.finest("channel receiveRpcMessage: $size bytes received");
 
         if (size == 0) {
-          _log.finer("channel receiveRpcMessage: size == 0");
+          _log.finest("channel receiveRpcMessage: size == 0");
           return null;
         }
 
