@@ -57,7 +57,7 @@ class LibqaulWorker {
         _streamController.add(true);
       }
       _heartbeats.addLast(true);
-      _log.fine('requesting heartbeat to libqaul');
+      _log.finest('requesting heartbeat to libqaul');
       final msg = Debug(heartbeatRequest: HeartbeatRequest());
       _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
     });
@@ -226,7 +226,7 @@ class LibqaulWorker {
       } else if (m.module == Modules.DEBUG) {
         final resp = await DebugTranslator().decodeMessageBytes(m.data);
         if (resp?.data is bool) {
-          _log.fine('libqaul answered a heartbeat request');
+          _log.finest('libqaul answered a heartbeat request');
           _heartbeats.removeFirst();
         }
       } else {
