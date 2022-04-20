@@ -78,6 +78,9 @@ pub struct RoutingInfoEntry {
     //// package loss
     #[prost(float, tag="4")]
     pub pl: f32,
+    //// propagation id
+    #[prost(uint32, tag="5")]
+    pub pgid: u32,
 }
 /// User information table
 #[derive(Clone, PartialEq, ::prost::Message)]

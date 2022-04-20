@@ -57,6 +57,8 @@ message RoutingInfoEntry {
     bytes hc = 3;
     /// package loss
     float pl = 4;
+    /// propagation id
+    uint32 pgid = 5;
 }
 
 // User information table
