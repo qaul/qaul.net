@@ -263,7 +263,6 @@ pub async fn start(storage_path: String) -> () {
                     }
                 }
                 EventType::RoutingTable(_) => {
-                    router::connections::ConnectionTable::handle_propagation_id();
                     // create new routing table
                     router::connections::ConnectionTable::create_routing_table();
                 }

@@ -32,16 +32,6 @@ message RouterInfoMessage {
     uint64 timestamp = 4;
 }
 
-// 
-message Routing {
-    oneof message {
-        UserInfoTable user_info_table = 1;
-        UserInfo user_info = 2;
-        RoutingInfoTable routing_info_table = 3;
-        RoutingInfoEntry routing_info_entry = 4;
-    }
-}
-
 // Routing information to send to neighbours
 message RoutingInfoTable {
     repeated RoutingInfoEntry entry = 1;
@@ -55,8 +45,6 @@ message RoutingInfoEntry {
     uint32 rtt = 2;
     /// hop count
     bytes hc = 3;
-    /// package loss
-    float pl = 4;
     /// propagation id
     uint32 pgid = 5;
 }
@@ -66,9 +54,12 @@ message UserInfoTable {
     repeated UserInfo info = 1;
 }
 
-// User info structure for sending to the  
+// User info structure for sending to the neighbours
 message UserInfo {
+    // user id
     bytes id = 1;
+    // public key of the user
     bytes key = 2;
+    // user name
     string name = 3;
 }

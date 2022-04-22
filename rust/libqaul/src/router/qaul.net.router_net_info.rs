@@ -37,26 +37,6 @@ pub struct RouterInfoMessage {
     #[prost(uint64, tag="4")]
     pub timestamp: u64,
 }
-/// 
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Routing {
-    #[prost(oneof="routing::Message", tags="1, 2, 3, 4")]
-    pub message: ::core::option::Option<routing::Message>,
-}
-/// Nested message and enum types in `Routing`.
-pub mod routing {
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
-    pub enum Message {
-        #[prost(message, tag="1")]
-        UserInfoTable(super::UserInfoTable),
-        #[prost(message, tag="2")]
-        UserInfo(super::UserInfo),
-        #[prost(message, tag="3")]
-        RoutingInfoTable(super::RoutingInfoTable),
-        #[prost(message, tag="4")]
-        RoutingInfoEntry(super::RoutingInfoEntry),
-    }
-}
 /// Routing information to send to neighbours
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RoutingInfoTable {
@@ -75,9 +55,6 @@ pub struct RoutingInfoEntry {
     //// hop count
     #[prost(bytes="vec", tag="3")]
     pub hc: ::prost::alloc::vec::Vec<u8>,
-    //// package loss
-    #[prost(float, tag="4")]
-    pub pl: f32,
     //// propagation id
     #[prost(uint32, tag="5")]
     pub pgid: u32,
@@ -88,13 +65,16 @@ pub struct UserInfoTable {
     #[prost(message, repeated, tag="1")]
     pub info: ::prost::alloc::vec::Vec<UserInfo>,
 }
-/// User info structure for sending to the  
+/// User info structure for sending to the neighbours
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserInfo {
+    /// user id
     #[prost(bytes="vec", tag="1")]
     pub id: ::prost::alloc::vec::Vec<u8>,
+    /// public key of the user
     #[prost(bytes="vec", tag="2")]
     pub key: ::prost::alloc::vec::Vec<u8>,
+    /// user name
     #[prost(string, tag="3")]
     pub name: ::prost::alloc::string::String,
 }
