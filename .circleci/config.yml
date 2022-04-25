@@ -293,14 +293,16 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-#      - ios-beta-deploy:
-#          requires:
-#            - flutter-test
-#            - flutter-analyze
-#            - build-libqaul-ios
-#          filters:
-#            tags:
-#              only: /^v.*/
+      - ios-beta-deploy:
+          requires:
+            - flutter-test
+            - flutter-analyze
+            - build-libqaul-ios
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
 
 # ------------------------------------------------
 # Reusable commands
