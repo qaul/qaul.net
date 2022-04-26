@@ -298,8 +298,8 @@ impl ConnectionTable {
         // iterate over connection table
         for (user_id,user) in connection_table.table.iter_mut() {
 
-            let (b_found, connection_entry) = Self::find_best_connection(user);
-            if b_found{
+            let (b_expired_pgid, connection_entry) = Self::find_best_connection(user);
+            if b_expired_pgid == false {
                 if let Some(connection) = connection_entry{
                     // fill entry into routing table
                     let routing_connection_entry = RoutingConnectionEntry {
@@ -324,6 +324,17 @@ impl ConnectionTable {
                             pgid_update: user.pgid_update,
                             pgid_update_hc: user.pgid_update_hc,
                             connections,
+                        };
+                        table.table.insert(user_id.to_owned(), routing_user_entry);
+                    }                    
+                }else{
+                    if let None = table.table.get(&user.id) {
+                        let routing_user_entry = RoutingUserEntry {
+                            id: user_id.to_owned(),
+                            pgid: user.pgid,
+                            pgid_update: user.pgid_update,
+                            pgid_update_hc: user.pgid_update_hc,
+                            connections: Vec::new(),
                         };
                         table.table.insert(user_id.to_owned(), routing_user_entry);
                     }                    
@@ -380,17 +391,16 @@ impl ConnectionTable {
         // initialize helper variables
         let mut expired_connections: Vec<PeerId> = Vec::new();
         let mut return_entry = None;
-        let mut rtt = u32::MAX;
+        let mut lq = u32::MAX;
 
         //remove user after 5min from last pgid updated
         // if Timestamp::get_timestamp() - user.pgid_update >= (20 * user.pgid_update_hc as u64) * 1000 * 1000{
         //     return None;
         // }
         if Timestamp::get_timestamp() - user.pgid_update >= 300 * 1000{
-            return (false, None);
+            return (true, None);
         }
 
-        let mut b_found = false;
         // create return value
         {
             let mut entry_found = None;
@@ -400,15 +410,14 @@ impl ConnectionTable {
                 let mut expired = true;
 
                 // check if entry is expired
-                // entry expires after 15 seconds
+                // entry expires after 20 seconds
                 let now = Timestamp::get_timestamp();
-                if now - value.last_update < 15 * 1000 * 1000{
+                if now - value.last_update < 20 * 1000{
                     expired = false;
 
-                    if value.rtt < rtt {
-                        rtt = value.rtt;
+                    if value.lq < lq {
+                        lq = value.lq;
                         entry_found = Some(value);
-                        b_found = true;
                     }
                 }
 
@@ -434,7 +443,7 @@ impl ConnectionTable {
             user.connections.remove(&node_id);
         }
 
-        (b_found, return_entry)
+        (false, return_entry)
     }
 
     /// send protobuf RPC connections list
