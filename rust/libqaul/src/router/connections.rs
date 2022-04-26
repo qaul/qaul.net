@@ -297,38 +297,73 @@ impl ConnectionTable {
 
         // iterate over connection table
         for (user_id,user) in connection_table.table.iter_mut() {
-            // find best entry
-            if let Some(connection) = Self::find_best_connection(user) {
-                // fill entry into routing table
-                let routing_connection_entry = RoutingConnectionEntry {
-                    module: conn.clone(),
-                    node: connection.id,
-                    rtt: connection.rtt,
-                    hc: connection.hc,
-                    lq: connection.lq,
-                    propagation_id: user.pgid,
-                };
 
-                // check if user entry already exists hashmap
-                if let Some(routing_user_entry) = table.table.get_mut(&user.id) {
-                    routing_user_entry.connections.push(routing_connection_entry);
-                } else {
-                    let mut connections = Vec::new();
-                    connections.push(routing_connection_entry);
-
-                    let routing_user_entry = RoutingUserEntry {
-                        id: user_id.to_owned(),
-                        pgid: user.pgid,
-                        pgid_update: user.pgid_update,
-                        pgid_update_hc: user.pgid_update_hc,
-                        connections,
+            let (b_found, connection_entry) = Self::find_best_connection(user);
+            if b_found{
+                if let Some(connection) = connection_entry{
+                    // fill entry into routing table
+                    let routing_connection_entry = RoutingConnectionEntry {
+                        module: conn.clone(),
+                        node: connection.id,
+                        rtt: connection.rtt,
+                        hc: connection.hc,
+                        lq: connection.lq,
+                        propagation_id: user.pgid,
                     };
-                    table.table.insert(user_id.to_owned(), routing_user_entry);
+
+                    // check if user entry already exists hashmap
+                    if let Some(routing_user_entry) = table.table.get_mut(&user.id) {
+                        routing_user_entry.connections.push(routing_connection_entry);
+                    } else {
+                        let mut connections = Vec::new();
+                        connections.push(routing_connection_entry);
+
+                        let routing_user_entry = RoutingUserEntry {
+                            id: user_id.to_owned(),
+                            pgid: user.pgid,
+                            pgid_update: user.pgid_update,
+                            pgid_update_hc: user.pgid_update_hc,
+                            connections,
+                        };
+                        table.table.insert(user_id.to_owned(), routing_user_entry);
+                    }                    
                 }
-            } else {
-                // put user for removal as there is no connection in it
+            }else{
                 expired_users.push(user_id.clone());
             }
+
+            // find best entry
+            // if let Some(connection) = Self::find_best_connection(user) {
+            //     // fill entry into routing table
+            //     let routing_connection_entry = RoutingConnectionEntry {
+            //         module: conn.clone(),
+            //         node: connection.id,
+            //         rtt: connection.rtt,
+            //         hc: connection.hc,
+            //         lq: connection.lq,
+            //         propagation_id: user.pgid,
+            //     };
+
+            //     // check if user entry already exists hashmap
+            //     if let Some(routing_user_entry) = table.table.get_mut(&user.id) {
+            //         routing_user_entry.connections.push(routing_connection_entry);
+            //     } else {
+            //         let mut connections = Vec::new();
+            //         connections.push(routing_connection_entry);
+
+            //         let routing_user_entry = RoutingUserEntry {
+            //             id: user_id.to_owned(),
+            //             pgid: user.pgid,
+            //             pgid_update: user.pgid_update,
+            //             pgid_update_hc: user.pgid_update_hc,
+            //             connections,
+            //         };
+            //         table.table.insert(user_id.to_owned(), routing_user_entry);
+            //     }
+            // } else {
+            //     // put user for removal as there is no connection in it
+            //     expired_users.push(user_id.clone());
+            // }
         }
 
         // remove expired users
@@ -341,16 +376,21 @@ impl ConnectionTable {
 
     /// find best entry
     /// and remove all old entries
-    fn find_best_connection(user: &mut UserEntry) -> Option<NeighbourEntry> {
+    fn find_best_connection(user: &mut UserEntry) -> (bool, Option<NeighbourEntry>) {
         // initialize helper variables
         let mut expired_connections: Vec<PeerId> = Vec::new();
         let mut return_entry = None;
         let mut rtt = u32::MAX;
 
-        if Timestamp::get_timestamp() - user.pgid_update >= (20 * user.pgid_update_hc as u64) * 1000 * 1000{
-            return None;
+        //remove user after 5min from last pgid updated
+        // if Timestamp::get_timestamp() - user.pgid_update >= (20 * user.pgid_update_hc as u64) * 1000 * 1000{
+        //     return None;
+        // }
+        if Timestamp::get_timestamp() - user.pgid_update >= 300 * 1000{
+            return (false, None);
         }
 
+        let mut b_found = false;
         // create return value
         {
             let mut entry_found = None;
@@ -368,6 +408,7 @@ impl ConnectionTable {
                     if value.rtt < rtt {
                         rtt = value.rtt;
                         entry_found = Some(value);
+                        b_found = true;
                     }
                 }
 
@@ -393,7 +434,7 @@ impl ConnectionTable {
             user.connections.remove(&node_id);
         }
 
-        return_entry
+        (b_found, return_entry)
     }
 
     /// send protobuf RPC connections list
