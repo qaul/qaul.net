@@ -222,6 +222,7 @@ impl ConnectionTable {
                 if let Some(conn) = user.connections.get_mut(&connection.id){
                     if connection.lq < conn.lq {
                        conn.lq = connection.lq;
+                       conn.last_update = Timestamp::get_timestamp();
                     }
                 }
             }        
@@ -420,7 +421,7 @@ impl ConnectionTable {
                 // check if entry is expired
                 // entry expires after 20 seconds
                 let now = Timestamp::get_timestamp();
-                if now - value.last_update < (20 * 1000 * value.hc as u64){
+                if now - value.last_update < (20 * 1000 * (value.hc as u64)){
                     expired = false;
 
                     if value.lq < lq {
