@@ -128,7 +128,7 @@ impl RouterInfo {
         }
 
         // check if we have to update the propagation ID
-        if propagation_timestamp + 10 * 1000 * 1000 < Timestamp::get_timestamp() {
+        if propagation_timestamp + 10 * 1000 < Timestamp::get_timestamp() {
             propagation_id += 1;
             propagation_timestamp = Timestamp::get_timestamp();
 
