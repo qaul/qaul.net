@@ -99,9 +99,12 @@ impl RoutingTable {
                 continue;
             }
             // QUESTION: How does this work?
-            if Timestamp::get_timestamp() - user.pgid_update >= (15 * user.pgid_update_hc as u64) * 1000 * 1000 {
+            if Timestamp::get_timestamp() - user.pgid_update >= 300 * 1000 {
                 continue;
             }
+            // if Timestamp::get_timestamp() - user.pgid_update >= (20 * user.pgid_update_hc as u64) * 1000 * 1000 {
+            //     continue;
+            // }
 
             // DEPRECATED: use link quality as decision mechanism
             // //choose min hc entry

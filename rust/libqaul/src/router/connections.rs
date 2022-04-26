@@ -212,12 +212,13 @@ impl ConnectionTable {
         // check if user already exists
         if let Some(user) = connection_table.table.get_mut(&user_id) {
             //check alreay exist and pgid is new
-            if connection.hc == 1 || pgid > user.pgid {
+            if (connection.hc == 1 || pgid > user.pgid) ||
+               (pgid == user.pgid && connection.hc < user.pgid_update_hc) {
                 user.pgid = pgid;
                 user.pgid_update = Timestamp::get_timestamp();
                 user.pgid_update_hc = connection.hc;
                 user.connections.insert(connection.id, connection);
-            }            
+            }
         } else {
             let mut connections_map = BTreeMap::new();
             let hc = connection.hc;
