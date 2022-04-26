@@ -347,7 +347,7 @@ impl ConnectionTable {
         let mut return_entry = None;
         let mut rtt = u32::MAX;
 
-        if Timestamp::get_timestamp() - user.pgid_update >= (20 * user.pgid_update_hc as u64) * 1000 {
+        if Timestamp::get_timestamp() - user.pgid_update >= (20 * user.pgid_update_hc as u64) * 1000 * 1000{
             return None;
         }
 
@@ -362,7 +362,7 @@ impl ConnectionTable {
                 // check if entry is expired
                 // entry expires after 15 seconds
                 let now = Timestamp::get_timestamp();
-                if now - value.last_update < 15 * 1000 {
+                if now - value.last_update < 15 * 1000 * 1000{
                     expired = false;
 
                     if value.rtt < rtt {

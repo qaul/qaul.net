@@ -49,7 +49,7 @@ impl Timestamp {
             log::error!("Time is before UNIX_EPOCH");
         }
 
-        // one hour after zero == 360'000 milliseconds
+        // one hour after zero == 3600'000 milliseconds
         60 * 60 * 1000
     }
 }
