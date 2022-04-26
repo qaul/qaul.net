@@ -213,12 +213,19 @@ impl ConnectionTable {
         if let Some(user) = connection_table.table.get_mut(&user_id) {
             //check alreay exist and pgid is new
             if (connection.hc == 1 || pgid > user.pgid) ||
-               (pgid == user.pgid && connection.hc < user.pgid_update_hc) {
+             (pgid == user.pgid && connection.hc < user.pgid_update_hc){
                 user.pgid = pgid;
                 user.pgid_update = Timestamp::get_timestamp();
                 user.pgid_update_hc = connection.hc;
                 user.connections.insert(connection.id, connection);
-            }
+            }else if pgid == user.pgid{
+                if let Some(conn) = user.connections.get_mut(&connection.id){
+                    if connection.lq < conn.lq {
+                       conn.lq = connection.lq;
+                    }
+                }
+            }        
+
         } else {
             let mut connections_map = BTreeMap::new();
             let hc = connection.hc;
@@ -413,7 +420,7 @@ impl ConnectionTable {
                 // check if entry is expired
                 // entry expires after 20 seconds
                 let now = Timestamp::get_timestamp();
-                if now - value.last_update < 20 * 1000{
+                if now - value.last_update < (20 * 1000 * value.hc as u64){
                     expired = false;
 
                     if value.lq < lq {
