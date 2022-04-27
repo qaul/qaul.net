@@ -128,7 +128,7 @@ impl RouterInfo {
         }
 
         // check if we have to update the propagation ID
-        if propagation_timestamp + 10 * 1000 < Timestamp::get_timestamp() {
+        if Timestamp::get_timestamp() >= propagation_timestamp + 10 * 1000 {
             propagation_id += 1;
             propagation_timestamp = Timestamp::get_timestamp();
 
@@ -193,6 +193,7 @@ impl RouterInfo {
         }
     }
 
+
     /// Create routing information for a neighbour node,
     /// encode the information and return the byte code.
     pub fn create(neighbour: Option<PeerId>) -> Vec<u8> {
@@ -200,11 +201,11 @@ impl RouterInfo {
         let node_id = Node::get_id();
         let routes = RoutingTable::create_routing_info(neighbour);
 
-        log::trace!("sending_routing_info count={}", routes.entry.len());
+        log::info!("sending_routing_info count={}", routes.entry.len());
         for inf in &routes.entry{
             let c: &[u8] = &inf.user;
             let userid = PeerId::from_bytes(c).unwrap();
-            log::trace!("qaul sending_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
+            log::info!("qaul sending_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
         }
 
         let users = Users::get_user_info_table();
