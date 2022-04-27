@@ -21,11 +21,11 @@ One can either trigger the **entire workflow** or **only the Step 2**.
 #### Build libqaul Android and iOS binaries
 This task builds both library binaries and store them as artifacts on CircleCI, where you can download them.
 
-To trigger such a task in isolation, one must create an annotated tag starting with the "rust_" prefix.
+To trigger such a task in isolation, one must create an annotated tag starting with the new [SemVer](https://semver.org) and ending with the "-rust" suffix.
 
 ```bash
 # Creates annotated tag
-git tag -a rust_<brief descriptor of your branch> -m '<brief message>'
+git tag -a <SemVer>-rust -m '<brief message>'
 
 # Pushes both commits and annotated tags (available since Git 1.8.3)
 git push --follow-tags
@@ -42,11 +42,11 @@ Search for your pushed tag and, once the pipeline succeeds, you can retrieve the
 
 #### Release Mobile Beta Version
 This task will create a beta release on the Play Store & Testflight, as well as generate the libqaul mobile binaries as artifacts.
-To trigger this workflow, create an annotated tag prefixed by "v". You may use the version described in `qaul_ui/pubspec.yaml` as the release version.
+To trigger this workflow, one must create an annotated tag starting with the new [SemVer](https://semver.org) and ending with the "-flutter" suffix. You may use the version described in `qaul_ui/pubspec.yaml` as the release version.
 
 ```bash
 # Creates annotated tag
-git tag -a v<app version> -m '<brief message>'
+git tag -a <SemVer>-flutter -m '<brief message>'
 
 # Pushes both commits and annotated tags (available since Git 1.8.3)
 git push --follow-tags
