@@ -273,7 +273,13 @@ jobs:
     environment:
       CARGO_NET_GIT_FETCH_WITH_CLI: "true"
     steps:
-      - checkout
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
+      - run:
+          name: Install CMake
+          shell: powershell.exe
+          command: choco install cmake -y; $env:Path+=";$Env:ProgramFiles\CMake\bin"
       - run:
           name: Install Rust
           command: |
@@ -282,11 +288,14 @@ jobs:
             cargo --version
             rustup --version
             rustc --version
+      - setup-sccache
+      - restore-sccache-cache
       - run:
           name: Build dll Libqaul
           command: |
             export PATH="/c/Users/circleci/.cargo/bin:$PATH"
             cd rust && cargo build
+      - save-sccache-cache
       - persist_to_workspace:
           root: ~/qaul-libp2p
           paths:
