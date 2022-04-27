@@ -39,14 +39,14 @@ class _CronTaskDecoratorState extends State<CronTaskDecorator>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     setTimer();
   }
 
   @override
   void dispose() {
     cancelTimer();
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
