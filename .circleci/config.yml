@@ -270,6 +270,8 @@ jobs:
       size: "medium"
       shell: bash.exe
     working_directory: ~/qaul-libp2p
+    environment:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
     steps:
       - checkout
       - run:
@@ -388,25 +390,25 @@ workflows:
       - flutter-test:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+-flutter$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
             branches:
               ignore: /.*/
       - flutter-analyze:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+-flutter$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
             branches:
               ignore: /.*/
       - build-libqaul-android:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+-flutter$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
             branches:
               ignore: /.*/
       - build-libqaul-ios:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+-flutter$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
             branches:
               ignore: /.*/
       - android-beta-deploy:
@@ -416,7 +418,7 @@ workflows:
             - build-libqaul-android
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+-flutter$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
             branches:
               ignore: /.*/
       - ios-beta-deploy:
@@ -426,7 +428,7 @@ workflows:
             - build-libqaul-ios
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+-flutter$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
             branches:
               ignore: /.*/
 
@@ -435,31 +437,31 @@ workflows:
       - build-libqaul-linux:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+-rust$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
       - build-libqaul-android:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+-rust$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
       - build-libqaul-ios:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+-rust$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
       - build-libqaul-macos:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+-rust$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
       - build-libqaul-windows:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+-rust$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
       - publish-github-release:
@@ -471,7 +473,7 @@ workflows:
             - build-libqaul-windows
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+-rust$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
 
