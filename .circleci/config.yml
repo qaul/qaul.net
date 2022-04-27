@@ -279,7 +279,7 @@ jobs:
       - run:
           name: Install CMake
           shell: powershell.exe
-          command: choco install cmake -y; $env:Path+=";$Env:Program Files\CMake\bin"
+          command: choco install cmake -y
       - run:
           name: Install Rust
           command: |
@@ -291,7 +291,7 @@ jobs:
       - run:
           name: Build dll Libqaul
           command: |
-            export PATH="/c/Users/circleci/.cargo/bin:$PATH"
+            export PATH="/c/Users/circleci/.cargo/bin:/c/Program Files/CMake/bin:$PATH"
             cd rust && cargo build
       - persist_to_workspace:
           root: ~/qaul-libp2p
