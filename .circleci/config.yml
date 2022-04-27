@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  win: circleci/windows@4.1
+
 # ------------------------------------------------
 # Configurations
 # ------------------------------------------------
@@ -66,6 +69,7 @@ jobs:
   # Deploy Jobs
   # ------------------------------------------------
   publish-github-release:
+    working_directory: ~/qaul-libp2p
     docker:
       - image: cibuilds/github:0.13
     steps:
@@ -86,6 +90,8 @@ jobs:
             cp rust/target/debug/liblibqaul.dylib ./artifacts/
             # MacOS
             cp rust/target/universal/release/liblibqaul.a ./artifacts/
+            # Windows
+            cp rust/target/debug/libqaul.dll ./artifacts/
       - run:
           name: Publish Release on GitHub
           command: |
@@ -111,7 +117,7 @@ jobs:
       - setup-sccache
       - restore-sccache-cache
       - run:
-          name: Build Libqaul JniLibs for Android
+          name: Build Libqaul for Linux
           command: cd rust && cargo build --release
       - save-sccache-cache
       - persist_to_workspace:
@@ -255,6 +261,34 @@ jobs:
           steps:
             - store_artifacts:
                 path: rust/target/debug/liblibqaul.dylib
+  # # #  -------------------------------------------
+  # # #  (Rust) Windows
+  # # #  -------------------------------------------
+  build-libqaul-windows:
+    executor:
+      name: win/default
+      size: "medium"
+      shell: bash.exe
+    working_directory: ~/qaul-libp2p
+    steps:
+      - checkout
+      - run:
+          name: Install Rust
+          command: |
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+            export PATH="/c/Users/circleci/.cargo/bin:$PATH"
+            cargo --version
+            rustup --version
+            rustc --version
+      - run:
+          name: Build dll Libqaul
+          command: |
+            export PATH="/c/Users/circleci/.cargo/bin:$PATH"
+            cd rust && cargo build
+      - persist_to_workspace:
+          root: ~/qaul-libp2p
+          paths:
+            - rust/target/debug/libqaul.dll
   # #  ---------------------------------------------
   # #  Flutter
   # #  ---------------------------------------------
@@ -422,12 +456,19 @@ workflows:
               only: /^\d+\.\d+\.\d+-rust$/
             branches:
               ignore: /.*/
+      - build-libqaul-windows:
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+-rust$/
+            branches:
+              ignore: /.*/
       - publish-github-release:
           requires:
             - build-libqaul-linux
             - build-libqaul-android
             - build-libqaul-ios
             - build-libqaul-macos
+            - build-libqaul-windows
           filters:
             tags:
               only: /^\d+\.\d+\.\d+-rust$/
