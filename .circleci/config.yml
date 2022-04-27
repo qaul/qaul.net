@@ -288,14 +288,11 @@ jobs:
             cargo --version
             rustup --version
             rustc --version
-      - setup-sccache
-      - restore-sccache-cache
       - run:
           name: Build dll Libqaul
           command: |
             export PATH="/c/Users/circleci/.cargo/bin:$PATH"
             cd rust && cargo build
-      - save-sccache-cache
       - persist_to_workspace:
           root: ~/qaul-libp2p
           paths:
@@ -440,39 +437,38 @@ workflows:
               only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
             branches:
               ignore: /.*/
-
   rust-build-and-deploy:
     jobs:
-      - build-libqaul-linux:
-          filters:
-            tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
-            branches:
-              ignore: /.*/
-      - build-libqaul-android:
-          filters:
-            tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
-            branches:
-              ignore: /.*/
-      - build-libqaul-ios:
-          filters:
-            tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
-            branches:
-              ignore: /.*/
-      - build-libqaul-macos:
-          filters:
-            tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
-            branches:
-              ignore: /.*/
-      - build-libqaul-windows:
-          filters:
-            tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
-            branches:
-              ignore: /.*/
+      - build-libqaul-linux
+#          filters:
+#            tags:
+#              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+#            branches:
+#              ignore: /.*/
+      - build-libqaul-android
+#          filters:
+#            tags:
+#              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+#            branches:
+#              ignore: /.*/
+      - build-libqaul-ios
+#          filters:
+#            tags:
+#              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+#            branches:
+#              ignore: /.*/
+      - build-libqaul-macos
+#          filters:
+#            tags:
+#              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+#            branches:
+#              ignore: /.*/
+      - build-libqaul-windows
+#          filters:
+#            tags:
+#              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+#            branches:
+#              ignore: /.*/
       - publish-github-release:
           requires:
             - build-libqaul-linux
@@ -480,11 +476,11 @@ workflows:
             - build-libqaul-ios
             - build-libqaul-macos
             - build-libqaul-windows
-          filters:
-            tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
-            branches:
-              ignore: /.*/
+#          filters:
+#            tags:
+#              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+#            branches:
+#              ignore: /.*/
 
 # ------------------------------------------------
 # Reusable commands
