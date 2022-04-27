@@ -290,6 +290,7 @@ jobs:
             rustc --version
       - run:
           name: Build dll Libqaul
+          no_output_timeout: 30m
           command: |
             export PATH="/c/Users/circleci/.cargo/bin:/c/Program Files/CMake/bin:$PATH"
             cd rust && cargo build
