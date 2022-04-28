@@ -111,7 +111,6 @@ impl ConnectionTable {
             rtt: 0,
             hc: 0,
             lq: 0,
-            propagation_id: 0,
         });
 
         let routing_user_entry = RoutingUserEntry {
@@ -228,6 +227,10 @@ impl ConnectionTable {
             // }
             let now_ts = Timestamp::get_timestamp();
             if connection.hc == 1 || pgid > user.pgid {
+                if module == ConnectionModule::Internet {
+                    log::info!("receive_inode hc={}, propg_id={}", connection.hc, pgid);
+                }
+
                 user.pgid = pgid;
                 user.pgid_update = now_ts;
                 user.pgid_update_hc = connection.hc;
@@ -338,7 +341,6 @@ impl ConnectionTable {
                         rtt: connection.rtt,
                         hc: connection.hc,
                         lq: connection.lq,
-                        propagation_id: user.pgid,
                     };
 
                     // check if user entry already exists hashmap

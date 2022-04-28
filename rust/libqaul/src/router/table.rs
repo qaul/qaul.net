@@ -56,8 +56,6 @@ pub struct RoutingConnectionEntry {
     pub hc: u8,
     /// link quality
     pub lq: u32,
-    /// propagation id
-    pub propagation_id: u32,
 }
 
 /// Global Routing Table Implementation
