@@ -212,17 +212,39 @@ impl ConnectionTable {
         // check if user already exists
         if let Some(user) = connection_table.table.get_mut(&user_id) {
             //check alreay exist and pgid is new
-            if (connection.hc == 1 || pgid > user.pgid) ||
-             (pgid == user.pgid && connection.hc < user.pgid_update_hc){
+            // if (connection.hc == 1 || pgid > user.pgid) ||
+            //  (pgid == user.pgid && connection.hc < user.pgid_update_hc){
+            //     user.pgid = pgid;
+            //     user.pgid_update = Timestamp::get_timestamp();
+            //     user.pgid_update_hc = connection.hc;
+            //     user.connections.insert(connection.id, connection);
+            // }else if pgid == user.pgid{
+            //     if let Some(conn) = user.connections.get_mut(&connection.id){
+            //         if connection.lq < conn.lq {
+            //            conn.lq = connection.lq;
+            //            conn.last_update = Timestamp::get_timestamp();
+            //         }
+            //     }
+            // }
+            let now_ts = Timestamp::get_timestamp();
+            if connection.hc == 1 || pgid > user.pgid {
                 user.pgid = pgid;
-                user.pgid_update = Timestamp::get_timestamp();
+                user.pgid_update = now_ts;
                 user.pgid_update_hc = connection.hc;
                 user.connections.insert(connection.id, connection);
             }else if pgid == user.pgid{
-                if let Some(conn) = user.connections.get_mut(&connection.id){
+                //check last update
+                if now_ts - user.pgid_update <= (10 * 1000) {
+                    user.pgid_update = now_ts;
+                    if connection.hc < user.pgid_update_hc{
+                        user.pgid_update_hc = connection.hc;
+                    }
+                    user.connections.insert(connection.id, connection);
+                }else if let Some(conn) = user.connections.get_mut(&connection.id){
                     if connection.lq < conn.lq {
-                       conn.lq = connection.lq;
-                       conn.last_update = Timestamp::get_timestamp();
+                        conn.lq = connection.lq;
+                        conn.hc = connection.hc;
+                        conn.last_update = now_ts;
                     }
                 }
             }        
