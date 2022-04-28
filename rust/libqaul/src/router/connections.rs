@@ -234,17 +234,16 @@ impl ConnectionTable {
                 user.connections.insert(connection.id, connection);
             }else if pgid == user.pgid{
                 //check last update
-                if now_ts - user.pgid_update <= (10 * 1000) {
+                if (now_ts - user.pgid_update <= (10 * 1000)) && connection.hc < user.pgid_update_hc {
                     user.pgid_update = now_ts;
-                    if connection.hc < user.pgid_update_hc{
-                        user.pgid_update_hc = connection.hc;
-                    }
+                    user.pgid_update_hc = connection.hc;
                     user.connections.insert(connection.id, connection);
                 }else if let Some(conn) = user.connections.get_mut(&connection.id){
                     if connection.lq < conn.lq {
                         conn.lq = connection.lq;
                         conn.hc = connection.hc;
                         conn.last_update = now_ts;
+                        user.connections.insert(connection.id, connection);
                     }
                 }
             }        
