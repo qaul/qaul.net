@@ -55,7 +55,7 @@ impl Router {
         // create router configuration
         let router_configuration = RouterConfiguration {
             update_interval: 10,
-            hc_penalty: 10000,
+            hc_penalty: 10_000_000,
         };
         let router = Router {
             configuration: router_configuration.clone(),

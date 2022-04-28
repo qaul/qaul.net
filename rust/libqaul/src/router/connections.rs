@@ -266,6 +266,13 @@ impl ConnectionTable {
 
             connection_table.table.insert(user_id, user);
         }
+
+        if module == ConnectionModule::Internet {
+            if let Some(user) = connection_table.table.get_mut(&user_id){
+                log::info!("receive_inode updated hc={}, propg_id={}", user.pgid_update_hc, user.pgid);
+            }            
+        }
+
     }
 
     /// update propagation id for local users
