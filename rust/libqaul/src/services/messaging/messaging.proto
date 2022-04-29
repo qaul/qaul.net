@@ -18,8 +18,16 @@ message Envelope {
     bytes sender_id = 1;
     // the qaul ID of the receiver
     bytes receiver_id = 2;
+    // encrypted message data
+    repeated Data data = 3;
+}
+
+// encrypted message data
+message Data {
+    // message nonce for encryption
+    uint64 nonce = 1;
     // the encrypted message data
-    bytes data = 3;
+    bytes data = 2;
 }
 
 // messaging unified message
@@ -27,7 +35,16 @@ message Messaging {
     oneof message {
         Confirmation confirmation_message = 1;
         ChatMessage chat_message = 2;
+        CryptoService crypto_service = 3;
     }
+}
+
+// Crypto Service Message
+//
+// This message is for crypto specific tasks,
+// such as completing a handshake.
+message CryptoService {
+
 }
 
 // message received confirmation

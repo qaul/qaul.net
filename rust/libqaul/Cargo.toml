@@ -32,16 +32,24 @@ tracing = "0.1.26"
 void = "1.0"
 wasm-timer = "0.2"
 rand = "0.8"
-prost = "0.10"
+prost = "0.10.4"
 libc = "0.2"
 crossbeam-channel = "0.5"
 bs58 = "0.4"
-futures-ticker = "0.0.1"
+futures-ticker = "0.0.2"
 jni = "0.19"
 serde_yaml = "0.8"
 sled = "0.34.7"
 sled-extensions = { version = "0.2", features = ["bincode"] }
 uuid = { version = "0.8.2", features = ["v4"] }
+ed25519-dalek = "1.0.1"
+x25519-dalek = "1.2.0"
+curve25519-dalek = "3.2.0"
+# needs to be the same version as the one used in libp2p-noise:
+# libp2p v0.39.1 => sha2 0.9.1
+sha2 = "0.9.1"
+noise-protocol = { git = "https://github.com/MathJud/noise-rust.git" }
+noise-rust-crypto = { git = "https://github.com/MathJud/noise-rust.git", features = ["use-x25519", "use-chacha20poly1305", "use-sha2"] }
 
 # only for desktop platforms: Linux, Mac, Windows
 directories = "4.0"
@@ -51,7 +59,7 @@ qaul_info = { path = "../libp2p_modules/qaul_info" }
 qaul_messaging = { path = "../libp2p_modules/qaul_messaging" }
 
 [build-dependencies]
-prost-build = "0.10"
+prost-build = "0.10.4"
 
 
 # special setting for android

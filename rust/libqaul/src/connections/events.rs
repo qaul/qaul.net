@@ -35,11 +35,11 @@ pub fn qaul_info_event( event: QaulInfoEvent, _module: ConnectionModule ) {
 /// Handle incoming QaulMessaging behaviour events
 pub fn qaul_messaging_event( event: QaulMessagingEvent, _module: ConnectionModule ) {
     match event {
-        // received a RoutingInfo message
+        // received a messaging message
         QaulMessagingEvent::Message(message) => {
             log::info!("QaulMessagingEvent::Message(QaulMessagingReceived) from {}", message.received_from);
 
-            // forward to router
+            // forward to messaging module
             Messaging::received(message);
         }
     }

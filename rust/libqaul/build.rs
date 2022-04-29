@@ -25,8 +25,8 @@ fn main() {
 	// in order to save them in the data base
 	prost_build.type_attribute("Container", "#[derive(serde::Serialize, serde::Deserialize)]");
 	prost_build.type_attribute("Envelope", "#[derive(serde::Serialize, serde::Deserialize)]");
+	prost_build.type_attribute("Data", "#[derive(serde::Serialize, serde::Deserialize)]");
 	prost_build.type_attribute("Confirmation", "#[derive(serde::Serialize, serde::Deserialize)]");
-	//prost_build.type_attribute("ChatMessage", "#[derive(serde::Serialize, serde::Deserialize)]");
 
 	// compile these protobuf files
 	prost_build.compile_protos(

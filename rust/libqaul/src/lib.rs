@@ -391,7 +391,12 @@ pub async fn start(storage_path: String) -> () {
                                 Ble::send_messaging_message(neighbour_id, data);
                             },
                             ConnectionModule::Local => {
-                                // TODO: deliver it locally
+                                let message = qaul_messaging::types::QaulMessagingReceived {
+                                    received_from: neighbour_id,
+                                    data,
+                                };
+                                // forward to messaging module
+                                Messaging::received(message);
                             },
                             ConnectionModule::None => {
                                 // TODO: DTN behaviour

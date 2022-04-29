@@ -44,7 +44,7 @@ pub struct UserAccounts {
 
 impl UserAccounts {
     pub fn init() {
-        let mut users = UserAccounts { users: Vec::new() };
+        let mut accounts = UserAccounts { users: Vec::new() };
 
         // check if there are users defined in configuration
         let config = Configuration::get();
@@ -67,8 +67,8 @@ impl UserAccounts {
                 error!("------------------------------------");
             }
 
-            // push to users table
-            users.users.push(
+            // push to user accounts table
+            accounts.users.push(
                 UserAccount {
                     name: user.name.clone(),
                     id,
@@ -78,7 +78,7 @@ impl UserAccounts {
         }
 
         // save users to state
-        USERACCOUNTS.set(RwLock::new(users));
+        USERACCOUNTS.set(RwLock::new(accounts));
     }
 
     /// create a new user account with user name

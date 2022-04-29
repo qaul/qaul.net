@@ -10,7 +10,7 @@ use libp2p::{
 };
 use prost::Message;
 use state::Storage;
-use std::{sync::RwLock};
+use std::sync::RwLock;
 use std::collections::BTreeMap;
 use sled_extensions::{
     DbExt,

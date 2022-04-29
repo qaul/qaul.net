@@ -22,14 +22,25 @@ pub struct Envelope {
     /// the qaul ID of the receiver
     #[prost(bytes="vec", tag="2")]
     pub receiver_id: ::prost::alloc::vec::Vec<u8>,
+    /// encrypted message data
+    #[prost(message, repeated, tag="3")]
+    pub data: ::prost::alloc::vec::Vec<Data>,
+}
+/// encrypted message data
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Data {
+    /// message nonce for encryption
+    #[prost(uint64, tag="1")]
+    pub nonce: u64,
     /// the encrypted message data
-    #[prost(bytes="vec", tag="3")]
+    #[prost(bytes="vec", tag="2")]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
 /// messaging unified message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Messaging {
-    #[prost(oneof="messaging::Message", tags="1, 2")]
+    #[prost(oneof="messaging::Message", tags="1, 2, 3")]
     pub message: ::core::option::Option<messaging::Message>,
 }
 /// Nested message and enum types in `Messaging`.
@@ -40,7 +51,16 @@ pub mod messaging {
         ConfirmationMessage(super::Confirmation),
         #[prost(message, tag="2")]
         ChatMessage(super::ChatMessage),
+        #[prost(message, tag="3")]
+        CryptoService(super::CryptoService),
     }
+}
+/// Crypto Service Message
+///
+/// This message is for crypto specific tasks,
+/// such as completing a handshake.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CryptoService {
 }
 /// message received confirmation
 /// 

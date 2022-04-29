@@ -6,9 +6,7 @@
 //! The messaging service is used for sending, receiving and 
 //! relay chat messages.
 
-use libp2p::{
-    PeerId,
-};
+use libp2p::PeerId;
 use prost::Message;
 use state::Storage;
 use std::sync::RwLock;
@@ -19,6 +17,7 @@ use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::router;
 use crate::router::table::RoutingTable;
 use super::chat::Chat;
+use super::crypto::Crypto;
 
 use qaul_messaging::QaulMessagingReceived;
 
@@ -50,16 +49,33 @@ impl Messaging {
 
     /// pack, sign and schedule a message for sending
     pub fn pack_and_send_message(user_account: &UserAccount, receiver: PeerId, data: Vec<u8>) -> Result<Vec<u8>, String> {
-        // TODO: encrypt data
-        let encrypted = data;
-        log::info!("encrypted data len {}", encrypted.len());
-        
+        // encrypt data
+        // TODO: slize data to 64K
+        let (encryption_result, nonce) = Crypto::encrypt(data, user_account.to_owned(), receiver.clone());
+
+        let mut encrypted: Vec<proto::Data> = Vec::new();
+        match encryption_result {
+            Some(encrypted_chunk) => {
+                let data_message = proto::Data{ nonce, data: encrypted_chunk };
+
+                log::info!("data len: {}", data_message.encoded_len());
+
+                encrypted.push(data_message);
+            },
+            None => return Err("Encryption error occurred".to_string()),
+        }
+
+        log::info!("sender_id: {}, receiver_id: {}", user_account.id.to_bytes().len(), receiver.to_bytes().len());
+
         // create envelope
         let envelope = proto::Envelope {
             sender_id: user_account.id.to_bytes(),
             receiver_id: receiver.to_bytes(),
             data: encrypted,
         };
+
+        // debug
+        log::info!("envelope len: {}", envelope.encoded_len());
 
         // encode envelope
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
@@ -157,14 +173,25 @@ impl Messaging {
                         if let Ok(receiver_id) = PeerId::from_bytes(&envelope.receiver_id) {
                             log::info!("messaging envelope.data len = {}", envelope.data.len());
 
-                            // TODO: decrypt data
-                            let data = envelope.data;
-                            log::info!("messaging data len = {}", data.len());
+                            // decrypt data
+                            let mut decrypted: Vec<u8> = Vec::new();
+                            for data_message in envelope.data {
+                                if let Some(mut decrypted_chunk) = Crypto::decrypt(data_message.data, data_message.nonce, receiver_id, sender_id.clone()) {
+                                    decrypted.append(&mut decrypted_chunk);
+                                }
+                                else {
+                                    log::error!("decryption error");
+                                    return;
+                                }
+                            }
 
                             // decode data
-                            match proto::Messaging::decode(&data[..]) {
+                            match proto::Messaging::decode(&decrypted[..]) {
                                 Ok(messaging) => {
                                     match messaging.message {
+                                        Some(proto::messaging::Message::CryptoService(_crypto_service_message)) => {
+                                            // implement crypto re-keying here in the future
+                                        },
                                         Some(proto::messaging::Message::ConfirmationMessage(_confirmation)) => {
                                             // confirm successful send of chat message
 
@@ -182,7 +209,7 @@ impl Messaging {
                                 Err(e) => {
                                     log::error!("Error decoding Messaging Message {} from {} to {}: {}",  bs58::encode(container.signature).into_string(), sender_id.to_base58(), receiver_id.to_base58(), e);
                                 }
-                            }
+                                }
                         }
                         else {
                             log::error!("receiver ID of message {} from {} not valid", bs58::encode(container.signature).into_string(), sender_id.to_base58());
