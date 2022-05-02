@@ -20,7 +20,6 @@ use crate::connections::ConnectionModule;
 use super::proto;
 use crate::rpc::Rpc;
 use crate::router::router_net_proto;
-use crate::utilities::timestamp::Timestamp;
 
 /// mutable state of table
 static ROUTINGTABLE: Storage<RwLock<RoutingTable>> = Storage::new();
@@ -56,6 +55,8 @@ pub struct RoutingConnectionEntry {
     pub hc: u8,
     /// link quality
     pub lq: u32,
+    /// last_update
+    pub last_update: u64,
 }
 
 /// Global Routing Table Implementation
@@ -83,7 +84,7 @@ impl RoutingTable {
 
     /// Create routing information for a specific neighbour node,
     /// to be sent to this neighbour node.
-    pub fn create_routing_info( neighbour: Option<PeerId> ) -> router_net_proto::RoutingInfoTable {
+    pub fn create_routing_info( neighbour: PeerId, last_sent: u64 ) -> router_net_proto::RoutingInfoTable {
         let mut table = router_net_proto::RoutingInfoTable {
             entry: Vec::new()
         };        
@@ -96,28 +97,6 @@ impl RoutingTable {
             if user.connections.len() == 0 {
                 continue;
             }
-            // QUESTION: How does this work?
-            if Timestamp::get_timestamp() - user.pgid_update >= 300 * 1000 {
-                continue;
-            }
-            // if Timestamp::get_timestamp() - user.pgid_update >= (20 * user.pgid_update_hc as u64) * 1000 * 1000 {
-            //     continue;
-            // }
-
-            // DEPRECATED: use link quality as decision mechanism
-            // //choose min hc entry
-            // let mut min_hc_idx: Option<usize> = None;
-            // let mut min_hc: u8 = 255;
-            // for i in 0..user.connections.len(){
-            //     if user.connections[i].hc < min_hc{
-            //         min_hc = user.connections[i].hc;
-            //         min_hc_idx = Some(i);
-            //     }
-            // }
-            // if min_hc_idx == None {
-            //     continue;
-            // }
-            // let min_conn = user.connections.get(min_hc_idx.unwrap()).unwrap();
 
             // choose best link quality
             let mut min_conn = user.connections[0].clone();
@@ -127,34 +106,18 @@ impl RoutingTable {
                 }
             }
 
-            if let Some(neighbour_id) = neighbour {
-                // check if neighbour is best connection to it
-                if neighbour_id != min_conn.node {
-                    let mut hc = Vec::new();
-                    hc.push(min_conn.hc);
+            if neighbour != min_conn.node && min_conn.last_update >= last_sent{
+                let mut hc = Vec::new();
+                hc.push(min_conn.hc);
 
-                    let table_entry = router_net_proto::RoutingInfoEntry {
-                        user: user_id.to_bytes(),
-                        rtt: min_conn.rtt,
-                        hc,
-                        pgid: user.pgid,
-                    };
-                    table.entry.push(table_entry);    
-                }
+                let table_entry = router_net_proto::RoutingInfoEntry {
+                    user: user_id.to_bytes(),
+                    rtt: min_conn.rtt,
+                    hc,
+                    pgid: user.pgid,
+                };
+                table.entry.push(table_entry);
             }
-            // QUESTION: What does this serve for?
-            // else {
-            //     let mut hc = Vec::new();
-            //     hc.push(min_conn.hc);
-                        
-            //     let table_entry = router_net_proto::RoutingInfoEntry {
-            //         user: user_id.to_bytes(),
-            //         rtt: min_conn.rtt,
-            //         hc,
-            //         pgid: user.pgid,
-            //     };
-            //     table.entry.push(table_entry);
-            // }
         }
 
         table

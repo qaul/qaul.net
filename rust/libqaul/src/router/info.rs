@@ -107,6 +107,7 @@ impl RouterInfo {
     /// to send a routing information to.
     pub fn check_scheduler() -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let mut found_neighbour: Option<PeerId> = None;
+        let mut neighbour_last_sent: u64 = 0;
         let mut propagation_id: u32;
         let mut propagation_timestamp: u64; 
 
@@ -118,7 +119,8 @@ impl RouterInfo {
             for (id, time) in scheduler.neighbours.iter() {
                 if time.timestamp + scheduler.interval < SystemTime::now() {
                     found_neighbour = Some(id.clone());
-                    break
+                    neighbour_last_sent = Timestamp::get_timestamp_by(&time.timestamp);
+                    break;
                 }
             }
 
@@ -163,7 +165,7 @@ impl RouterInfo {
                 }
 
                 // create routing information
-                let data = Self::create(Some(node_id.clone()));
+                let data = Self::create(node_id.clone(), neighbour_last_sent);
 
                 // create result
                 return Some((node_id, module, data))
@@ -196,10 +198,10 @@ impl RouterInfo {
 
     /// Create routing information for a neighbour node,
     /// encode the information and return the byte code.
-    pub fn create(neighbour: Option<PeerId>) -> Vec<u8> {
+    pub fn create(neighbour: PeerId, last_sent: u64) -> Vec<u8> {
         // create RouterInfo
         let node_id = Node::get_id();
-        let routes = RoutingTable::create_routing_info(neighbour);
+        let routes = RoutingTable::create_routing_info(neighbour, last_sent);
 
         log::info!("sending_routing_info count={}", routes.entry.len());
         for inf in &routes.entry{
@@ -209,7 +211,6 @@ impl RouterInfo {
         }
 
         let users = Users::get_user_info_table();
-
         let timestamp = Timestamp::get_timestamp();
 
         let router_info = router_net_proto::RouterInfoMessage {

@@ -111,6 +111,7 @@ impl ConnectionTable {
             rtt: 0,
             hc: 0,
             lq: 0,
+            last_update: Timestamp::get_timestamp()
         });
 
         let routing_user_entry = RoutingUserEntry {
@@ -283,6 +284,7 @@ impl ConnectionTable {
             user.pgid = propagation_id;
             // QUESTION: is this of any use?
             user.pgid_update = Timestamp::get_timestamp();
+            user.connections.get_mut(0).unwrap().last_update = Timestamp::get_timestamp();
         }
     }
 
@@ -348,6 +350,7 @@ impl ConnectionTable {
                         rtt: connection.rtt,
                         hc: connection.hc,
                         lq: connection.lq,
+                        last_update: connection.last_update
                     };
 
                     // check if user entry already exists hashmap
