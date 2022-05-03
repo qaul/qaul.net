@@ -250,7 +250,17 @@ impl ConnectionTable {
                         user.connections.insert(connection.id, connection);
                     }
                 }
-            }        
+            }else if pgid < user.pgid {
+                if user.pgid_update_hc == connection.hc {
+                    //reboot node case
+                    if (user.pgid - pgid) > (connection.hc as u32) { 
+                        user.pgid = pgid;
+                        user.pgid_update = now_ts;
+                        user.pgid_update_hc = connection.hc;
+                        user.connections.insert(connection.id, connection);        
+                    }
+                }
+            } 
 
         } else {
             let mut connections_map = BTreeMap::new();
