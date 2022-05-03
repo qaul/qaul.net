@@ -73,6 +73,9 @@ jobs:
     docker:
       - image: cibuilds/github:0.13
     steps:
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
       - attach_workspace:
           at: ~/qaul-libp2p
       - run:
