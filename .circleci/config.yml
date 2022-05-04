@@ -98,7 +98,7 @@ jobs:
       - run:
           name: Install Rust
           command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    - run:
+      - run:
           name: Publish Release on GitHub
           command: |
             VERSION=$(cd rust/libqaul && cargo pkgid | cut -d# -f2 | cut -d: -f2)
