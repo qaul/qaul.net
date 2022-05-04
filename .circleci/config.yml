@@ -97,7 +97,9 @@ jobs:
             cp rust/target/debug/libqaul.dll ./artifacts/
       - run:
           name: Install Rust
-          command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          command: |
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+            echo "export PATH=${HOME}/.cargo/bin:${PATH}" >> $BASH_ENV
       - run:
           name: Publish Release on GitHub
           command: |
@@ -335,7 +337,7 @@ jobs:
             if [ ! -f ../../android/libqaul/build/outputs/aar/libqaul-debug.aar ] || [ ! -f ../../android/blemodule/build/outputs/aar/blemodule-debug.aar ]; then
               echo "Libqaul/blemodule AAR file could not be found. That's probably due an error in persisting files to workspace"; exit 1
             fi
-      - install-flutter-linux:
+      - install-flutter:
           version: "$FLUTTER_VERSION"
       - install-flutter-deps
       - run:
@@ -375,7 +377,7 @@ jobs:
             if [ ! -f ../../rust/target/universal/release/liblibqaul.a ]; then
               echo "Libqaul *.a file could not be found. That's probably due an error in persisting files to workspace"; exit 1
             fi
-      - install-flutter-macos:
+      - install-flutter:
           version: "$FLUTTER_VERSION"
       - install-flutter-deps
       - install-bundler-deps
@@ -389,6 +391,39 @@ jobs:
       - store_artifacts:
           path: output
           destination: output
+  # # #  -------------------------------------------
+  # # #  (Flutter) Windows
+  # # #  -------------------------------------------
+  windows-beta-deploy:
+    executor:
+      name: win/server-2022
+      size: "medium"
+      shell: bash.exe
+    working_directory: ~/qaul-libp2p/qaul_ui
+    environment:
+      <<: *flutter_version
+    shell: /bin/bash --login -o pipefail
+    steps:
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
+      - attach_workspace:
+          at: ~/qaul-libp2p
+      - run:
+          name: Check for presence of *.dll Library
+          command: |
+            if [ ! -f ../../rust/target/debug/libqaul.dll ]; then
+              echo "Libqaul *.dll file could not be found. That's probably due an error in persisting files to workspace"; exit 1
+            fi
+      - install-flutter:
+          version: "$FLUTTER_VERSION"
+      - run:
+          name: Flutter Doctor
+          command: flutter doctor
+      - install-flutter-deps
+      - run:
+          name: Build Flutter Application for Windows
+          command: flutter build windows
 
 # ------------------------------------------------
 # Workflows
@@ -501,6 +536,17 @@ commands:
   # ------------------------------------------------
   # Flutter-related commands
   # ------------------------------------------------
+  install-flutter:
+    description: "Install Flutter SDK & add bin folder to BASH_ENV"
+    parameters:
+      version:
+        type: string
+    steps:
+      - run:
+          name: "Install Flutter"
+          command: |
+            FL_PATH=$(bash <(curl -s https://raw.githubusercontent.com/brenodt/flutter_utilities/main/bin/flinstall) << parameters.version >>)
+            echo "export PATH=${FL_PATH}:${PATH}" >> $BASH_ENV
   install-flutter-deps:
     description: "Install Flutter dependencies"
     parameters:
@@ -545,46 +591,6 @@ commands:
           key: gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
-
-
-  # #  ---------------------------------------------
-  # #  (Flutter) Android-related commands
-  # #  ---------------------------------------------
-  install-flutter-linux:
-    description: "Installs the Linux flutter binary"
-    parameters:
-      version:
-        type: string
-    steps:
-      - run:
-          name: Install Flutter
-          command: |
-            cd && mkdir .flutter-sdk
-            cd .flutter-sdk
-            curl --fail --remote-time --silent --location -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_<< parameters.version >>-stable.tar.xz
-            tar xf flutter_linux_<< parameters.version >>-stable.tar.xz --strip-components=1
-            rm flutter_linux_<< parameters.version >>-stable.tar.xz
-            echo "export PATH=$PATH:`pwd`/bin" >> $BASH_ENV
-
-
-  # #  ---------------------------------------------
-  # #  (Flutter) iOS-related commands
-  # #  ---------------------------------------------
-  install-flutter-macos:
-    description: "Installs the MacOS flutter binary"
-    parameters:
-      version:
-        type: string
-    steps:
-      - run:
-          name: Install Flutter
-          command: |
-            cd && mkdir .flutter-sdk
-            cd .flutter-sdk
-            curl --fail --remote-time --silent --location -O https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_<< parameters.version >>-stable.zip
-            unzip flutter_macos_<< parameters.version >>-stable.zip
-            rm flutter_macos_<< parameters.version >>-stable.zip
-            echo "export PATH=$PATH:`pwd`/flutter/bin" >> $BASH_ENV
 
   install-cocoapods-deps:
     description: "Install Pods dependencies"
