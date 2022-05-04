@@ -71,7 +71,10 @@ jobs:
   publish-github-release:
     working_directory: ~/qaul-libp2p
     docker:
-      - image: cibuilds/github:0.13
+      - image: cimg/rust:1.60.0
+#      - image: cibuilds/github:0.13
+    environment:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
     steps:
       - restore_cache: *restore_git_cache
       - checkout-project
@@ -95,11 +98,20 @@ jobs:
             cp rust/target/universal/release/liblibqaul.a ./artifacts/
             # Windows
             cp rust/target/debug/libqaul.dll ./artifacts/
+#      - run:
+#          name: Install Rust
+#          command: |
+#            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+#            echo "export PATH=${HOME}/.cargo/bin:${PATH}" >> $BASH_ENV
       - run:
-          name: Install Rust
+          name: Install ghr
           command: |
-            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-            echo "export PATH=${HOME}/.cargo/bin:${PATH}" >> $BASH_ENV
+            GHR_VERSION=0.13.0
+            GHR_URL=https://github.com/tcnksm/ghr/releases/download/v${GHR_VERSION}/ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+            wget "$GHR_URL"
+            tar xzf ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+            rm -r ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+            echo "export PATH=ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
       - run:
           name: Publish Release on GitHub
           command: |
