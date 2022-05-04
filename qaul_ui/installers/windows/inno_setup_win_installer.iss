@@ -5,7 +5,9 @@
 #define MyAppVersion "2.0.0"
 #define MyAppPublisher "Qaul"
 #define MyAppURL "https://qaul.net"
-#define MyAppExeName "qaul.exe"
+#define MyAppExeName "qaul.exe"      
+#define MyAppAssetsFolder "assets"
+#define MyAppDependenciesFolder "dependencies"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -20,12 +22,12 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\qaul
 DisableProgramGroupPage=yes
-LicenseFile=C:\Users\55199\development\work\qaul\qaul.net\qaul_ui\assets\license\agpl-3.0.md
+LicenseFile={#MyAppAssetsFolder}\agpl-3.0.md
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputDir=C:\Users\55199\development\work\qaul\qaul.net\qaul_ui\installers
+OutputDir={#SourcePath}
 OutputBaseFilename=qaul
-SetupIconFile=C:\Users\55199\development\work\qaul\qaul.net\qaul_ui\windows\runner\resources\app_icon.ico
+SetupIconFile={#MyAppAssetsFolder}\app_icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -37,11 +39,12 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\55199\development\work\qaul\qaul.net\qaul_ui\build\windows\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\55199\development\work\qaul\qaul.net\qaul_ui\build\windows\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\55199\development\work\qaul\qaul.net\qaul_ui\build\windows\runner\Release\native_context_menu_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\55199\development\work\qaul\qaul.net\qaul_ui\build\windows\runner\Release\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\55199\development\work\qaul\qaul.net\qaul_ui\build\windows\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourcePath}\{#MyAppDependenciesFolder}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}\{#MyAppDependenciesFolder}\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}\{#MyAppDependenciesFolder}\native_context_menu_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}\{#MyAppDependenciesFolder}\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}\{#MyAppDependenciesFolder}\libqaul.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}\{#MyAppDependenciesFolder}\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
