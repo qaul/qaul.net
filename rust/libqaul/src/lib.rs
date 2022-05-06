@@ -25,16 +25,21 @@ mod rpc;
 mod services;
 mod types;
 
+
 use connections::{
     ConnectionModule, Connections,
+    internet::Internet,   
     ble::Ble,
 };
+
 use node::Node;
 use router::{
     flooder,
     info::RouterInfo, 
     Router,
+    neighbours::Neighbours,
 };
+
 use rpc::Rpc;
 use rpc::sys::Sys;
 use services::Services;
@@ -75,6 +80,7 @@ enum EventType {
     Sys(bool),
     Flooding(bool),
     RoutingInfo(bool),
+    ReConnecting(bool),
     RoutingTable(bool),
     Messaging(bool),
 }
@@ -130,6 +136,9 @@ pub async fn start(storage_path: String) -> () {
     // send routing info periodically to neighbours
     let mut routing_info_ticker = Ticker::new(Duration::from_millis(100));
 
+    // try to connect to intertnet neighbour if there is no connection in internet
+    let mut connection_ticker = Ticker::new(Duration::from_millis(1000));
+
     // re-create routing table periodically
     let mut routing_table_ticker = Ticker::new(Duration::from_millis(1000));
 
@@ -149,6 +158,7 @@ pub async fn start(storage_path: String) -> () {
             let sys_fut = sys_ticker.next().fuse();
             let flooding_fut = flooding_ticker.next().fuse();
             let routing_info_fut = routing_info_ticker.next().fuse();
+            let connection_fut = connection_ticker.next().fuse();
             let routing_table_fut = routing_table_ticker.next().fuse();
             let messaging_fut = messaging_ticker.next().fuse();
 
@@ -161,6 +171,7 @@ pub async fn start(storage_path: String) -> () {
                 sys_fut,
                 flooding_fut,
                 routing_info_fut,
+                connection_fut,
                 routing_table_fut,
                 messaging_fut,
             );
@@ -168,16 +179,63 @@ pub async fn start(storage_path: String) -> () {
             select! {
                 lan_event = lan_fut => {
                     log::info!("Unhandled lan connection module event: {:?}", lan_event);
+                    match lan_event.unwrap() {
+                        libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, ..} => {
+                            //remove from neighbour table, after then scheduler will auto remove this neighbour
+                            log::info!("lan connection closed: {:?}", peer_id);
+                            Neighbours::delete(ConnectionModule::Lan, peer_id);
+                        },
+                        libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {                            
+                            //remove from neighbour table, after then scheduler will auto remove this neighbour
+                            log::info!("lan connection banned: {:?}", peer_id);
+                            Neighbours::delete(ConnectionModule::Lan, peer_id);
+                        }
+                        _ => {}
+                    }
                     None
                 },
                 internet_event = internet_fut => {
                     log::info!("Unhandled internet connection module event: {:?}", internet_event);
+                    match internet_event.unwrap() {
+                        libp2p::swarm::SwarmEvent::UnknownPeerUnreachableAddr{address, ..} => {
+                            Internet::add_reconnection(address);
+                        }
+                        libp2p::swarm::SwarmEvent::ConnectionEstablished{endpoint, ..} =>{
+                            //remove from attempting connections
+                            match endpoint{
+                                libp2p::core::ConnectedPoint::Dialer{address} =>{
+                                    Internet::remove_reconnection(address);
+                                }
+                                _ => {}
+                            }                            
+                        }
+                        libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, endpoint, ..} => {
+                            //remove from neighbour table, after then scheduler will auto remove this neighbour
+                            log::info!("internet connection closed: {:?}", peer_id);
+                            Neighbours::delete(ConnectionModule::Internet, peer_id);
+
+                            //add new reconnection
+                            match endpoint{
+                                libp2p::core::ConnectedPoint::Dialer{address} =>{
+                                    Internet::add_reconnection(address);
+                                }
+                                _ => {}
+                            }                            
+                        }
+                        libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {
+                            //remove from neighbour table, after then scheduler will auto remove this neighbour
+                            log::info!("internet connection banned: {:?}", peer_id);
+                            Neighbours::delete(ConnectionModule::Internet, peer_id);
+                        }
+                        _ => {}
+                    }
                     None
                 },
                 _rpc_event = rpc_fut => Some(EventType::Rpc(true)),
                 _sys_event = sys_fut => Some(EventType::Sys(true)),
                 _flooding_event = flooding_fut => Some(EventType::Flooding(true)),
                 _routing_info_event = routing_info_fut => Some(EventType::RoutingInfo(true)),
+                _connection_event = connection_fut => Some(EventType::ReConnecting(true)),
                 _routing_table_event = routing_table_fut => Some(EventType::RoutingTable(true)),
                 _messaging_event = messaging_fut => Some(EventType::Messaging(true)),
             }
@@ -260,6 +318,13 @@ pub async fn start(storage_path: String) -> () {
                             ConnectionModule::Local => {}
                             ConnectionModule::None => {}
                         }
+                    }
+                }
+                EventType::ReConnecting(_) =>{
+                    if let Some(addr) = Internet::check_reconnection() {
+                        log::info!("redial....: {:?}", addr);
+                        Internet::peer_redial(&addr, &mut internet.swarm).await;
+                        Internet::set_redialed(&addr);
                     }
                 }
                 EventType::RoutingTable(_) => {
