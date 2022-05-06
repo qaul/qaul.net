@@ -66,6 +66,15 @@ use qaul_messaging::{
     QaulMessaging,
     QaulMessagingEvent,
 };
+use state::Storage;
+use std::{
+    collections::HashMap,
+    sync::RwLock,
+};
+use crate::utilities::{
+    timestamp::Timestamp,
+};
+
 
 use crate::services::feed::proto_net;
 
@@ -80,6 +89,17 @@ pub struct QaulInternetBehaviour {
     pub response_sender: UnboundedSender<QaulMessage>,
 }
 
+pub struct InternetReConnection{
+    pub address: Multiaddr,
+    pub attempt: u32,
+    pub last_try: u64
+}
+pub struct InternetReConnections {
+    peers: HashMap<Multiaddr, InternetReConnection>,
+}
+static INTERNETRECONNECTIONS: Storage<RwLock<InternetReConnections>> = Storage::new();
+
+
 /// Internet Connection Module of libqaul
 /// 
 /// it creates a libp2p swarm
@@ -92,6 +112,8 @@ impl Internet {
     /// Initialize swarm for Internet overlay connection module
     pub async fn init(auth_keys: AuthenticKeypair<X25519Spec>) -> Self {
         log::info!("Internet.init() start");
+
+        INTERNETRECONNECTIONS.set(RwLock::new(InternetReConnections { peers: HashMap::new() } ));
 
         // create a multi producer, single consumer queue
         let (response_sender, response_rcv) = mpsc::unbounded();
@@ -195,6 +217,7 @@ impl Internet {
         }
     }
 
+   
     /// dial a remote peer
     pub fn peer_dial( addresse: Multiaddr, swarm: &mut Swarm<QaulInternetBehaviour> ) {
         match swarm.dial_addr(addresse.clone()) {
@@ -202,6 +225,52 @@ impl Internet {
             Err(error) => info!("peer {} swarm dial error: {:?}", addresse, error),
         }
     }
+
+    /// set tried time
+    pub fn set_redialed(addresse: &Multiaddr){
+        let mut reconnections = INTERNETRECONNECTIONS.get().write().unwrap();
+        if let Some(peer) = reconnections.peers.get_mut(addresse){
+            peer.last_try = Timestamp::get_timestamp();
+        }
+    }
+
+    /// redial a remote peer
+    pub async fn peer_redial(addresse: &Multiaddr, swarm: &mut Swarm<QaulInternetBehaviour> ){
+        Self::peer_dial(addresse.clone(), swarm);
+    }
+    
+    ///add reconnection
+    pub fn add_reconnection(address: Multiaddr){
+        let mut reconnections = INTERNETRECONNECTIONS.get().write().unwrap();
+        if let Some(peer) = reconnections.peers.get_mut( &address){
+            peer.last_try = Timestamp::get_timestamp();
+        }else{
+            reconnections.peers.insert(address.clone(), 
+                InternetReConnection{address: address.clone(), 
+                                    attempt: 0, 
+                                    last_try: Timestamp::get_timestamp()
+                                }
+            );
+        }
+    }
+
+    pub fn remove_reconnection(address: Multiaddr){
+        let mut reconnections = INTERNETRECONNECTIONS.get().write().unwrap();
+        reconnections.peers.remove(&address);
+    }
+
+    /// check redial
+    pub fn check_reconnection() ->Option<Multiaddr> {
+        let reconnections = INTERNETRECONNECTIONS.get().read().unwrap();
+        let now_ts = Timestamp::get_timestamp();
+        for (addr, peer) in reconnections.peers.iter(){
+            if (now_ts - peer.last_try) > 10000{
+                return Some(addr.clone());
+            }
+        }
+        None
+    }
+
 }
 
 impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
