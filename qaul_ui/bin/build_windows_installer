@@ -1,0 +1,32 @@
+#!/usr/bin/bash
+set -eo pipefail
+
+# Note: this script uses relative paths, so it's meant to be run from within the bin folder.
+
+BUILD_PATH="build/windows/runner/Release"
+INSTALLER_PATH="installers/windows"
+LIBQAUL_DLL="../../rust/target/debug/libqaul.dll"
+
+if [ ! -f "$LIBQAUL_DLL" ]; then
+  echo "Expected to find libqaul.dll at $LIBQAUL_DLL. Please ensure the library exists." >&2
+  exit 1
+fi
+
+if [ ! -d "../${BUILD_PATH}" ]; then flutter build windows; fi
+
+DEPS_PATH="../${INSTALLER_PATH}/dependencies"
+if [ ! -d "../${DEPS_PATH}" ]; then mkdir "$DEPS_PATH"; fi
+
+# copy compiled .exe
+cp "../${BUILD_PATH}/qaul.exe" "$DEPS_PATH"
+# copy libqaul.dll
+cp "$LIBQAUL_DLL" "$DEPS_PATH"
+# copy all *.dll files that flutter bundled with executable
+# TODO: Use find instead of hard-coded values
+cp "../${BUILD_PATH}/flutter_windows.dll" "$DEPS_PATH"
+cp "../${BUILD_PATH}/native_context_menu_plugin.dll" "$DEPS_PATH"
+cp "../${BUILD_PATH}/url_launcher_windows_plugin.dll" "$DEPS_PATH"
+# copy entire data folder
+cp -R "../${BUILD_PATH}/data" "$DEPS_PATH"
+
+iscc "../${INSTALLER_PATH}/inno_setup_win_installer.iss"
