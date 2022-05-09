@@ -24,6 +24,7 @@ use crate::node;
 use crate::router::{
     table::{RoutingTable, RoutingUserEntry, RoutingConnectionEntry},
     neighbours::Neighbours,
+    Users,
 };
 use super::proto;
 use crate::router::router_net_proto;
@@ -129,12 +130,12 @@ impl ConnectionTable {
     /// enter it into all modules where we are connected to
     pub fn process_received_routing_info( neighbour_id: PeerId, info: Vec<router_net_proto::RoutingInfoEntry> ) {
 
-        log::info!("process_received_routing_info count={}", info.len());
-        for inf in &info{
-            let c: &[u8] = &inf.user;
-            let userid = PeerId::from_bytes(c).unwrap();
-            log::info!("receive_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
-        }
+        // log::info!("process_received_routing_info count={}", info.len());
+        // for inf in &info{
+        //     let c: &[u8] = &inf.user;
+        //     let userid = PeerId::from_bytes(c).unwrap();
+        //     log::info!("receive_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
+        // }
 
         // try Lan module
         if let Some(rtt) = Neighbours::get_rtt(&neighbour_id , &ConnectionModule::Lan ){
@@ -209,6 +210,7 @@ impl ConnectionTable {
             ConnectionModule::None => return,
         }        
 
+        let mut updated  = false;
         // check if user already exists
         if let Some(user) = connection_table.table.get_mut(&user_id) {
             //check alreay exist and pgid is new
@@ -235,19 +237,22 @@ impl ConnectionTable {
                 user.pgid = pgid;
                 user.pgid_update = now_ts;
                 user.pgid_update_hc = connection.hc;
-                user.connections.insert(connection.id, connection);
+                user.connections.insert(connection.id, connection); 
+                updated = true;               
             }else if pgid == user.pgid{
                 //check last update
                 if (now_ts - user.pgid_update <= (10 * 1000)) && connection.hc < user.pgid_update_hc {
                     user.pgid_update = now_ts;
                     user.pgid_update_hc = connection.hc;
                     user.connections.insert(connection.id, connection);
+                    updated = true;
                 }else if let Some(conn) = user.connections.get_mut(&connection.id){
                     if connection.lq < conn.lq {
                         conn.lq = connection.lq;
                         conn.hc = connection.hc;
                         conn.last_update = now_ts;
                         user.connections.insert(connection.id, connection);
+                        updated = true;
                     }
                 }
             }else if pgid < user.pgid {
@@ -258,6 +263,7 @@ impl ConnectionTable {
                         user.pgid_update = now_ts;
                         user.pgid_update_hc = connection.hc;
                         user.connections.insert(connection.id, connection);        
+                        updated = true;
                     }
                 }
             } 
@@ -276,14 +282,19 @@ impl ConnectionTable {
             };
 
             connection_table.table.insert(user_id, user);
+            updated = true;
         }
 
-        if module == ConnectionModule::Internet {
-            if let Some(user) = connection_table.table.get_mut(&user_id){
-                log::info!("receive_inode updated hc={}, propg_id={}", user.pgid_update_hc, user.pgid);
-            }            
+        if updated == true{
+            Users::set_updated(&user_id);
         }
 
+        // if module == ConnectionModule::Internet {
+        //     if let Some(user) = connection_table.table.get_mut(&user_id){
+        //         log::info!("receive_inode updated hc={}, propg_id={}", user.pgid_update_hc, user.pgid);
+        //     }
+        // }
+        
     }
 
     /// update propagation id for local users

@@ -128,6 +128,13 @@ impl Users {
         }
     }
 
+    pub fn set_updated(user_id: &PeerId) {
+        let mut store = USERS.get().write().unwrap();
+        if let Some(user) = store.users.get_mut(user_id) {
+            user.last_update = Timestamp::get_timestamp();
+        }
+    }
+
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
     // pub fn get_user_info_table() -> router_net_proto::UserInfoTable {
