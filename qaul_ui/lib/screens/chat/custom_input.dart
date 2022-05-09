@@ -16,36 +16,12 @@ class _CustomInput extends StatefulWidget {
   /// Creates [_CustomInput] widget
   const _CustomInput({
     Key? key,
-    this.isAttachmentUploading,
-    this.onAttachmentPressed,
     required this.onSendPressed,
-    this.onTextChanged,
-    this.onTextFieldTap,
     required this.sendButtonVisibilityMode,
   }) : super(key: key);
 
-  /// See [AttachmentButton.onPressed]
-  final void Function()? onAttachmentPressed;
-
-  /// Whether attachment is uploading. Will replace attachment button with a
-  /// [CircularProgressIndicator]. Since we don't have libraries for
-  /// managing media in dependencies we have no way of knowing if
-  /// something is uploading so you need to set this manually.
-  final bool? isAttachmentUploading;
-
-  /// Will be called on [_CustomSendButton] tap. Has [types.PartialText] which can
-  /// be transformed to [types.TextMessage] and added to the messages list.
   final void Function(types.PartialText) onSendPressed;
 
-  /// Will be called whenever the text inside [TextField] changes
-  final void Function(String)? onTextChanged;
-
-  /// Will be called on [TextField] tap
-  final void Function()? onTextFieldTap;
-
-  /// Controls the visibility behavior of the [_CustomSendButton] based on the
-  /// [TextField] state inside the [_CustomInput] widget.
-  /// Defaults to [SendButtonVisibilityMode.editing].
   final SendButtonVisibilityMode sendButtonVisibilityMode;
 
   @override
@@ -92,23 +68,6 @@ class _CustomInputState extends State<_CustomInput> {
     });
   }
 
-  Widget _leftWidget() {
-    if (widget.isAttachmentUploading == true) {
-      return Container(
-        height: 24,
-        margin: const EdgeInsets.only(right: 16),
-        width: 24,
-        child: const CircularProgressIndicator(
-          backgroundColor: Colors.transparent,
-          strokeWidth: 1.5,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-        ),
-      );
-    } else {
-      return AttachmentButton(onPressed: widget.onAttachmentPressed);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final _query = MediaQuery.of(context);
@@ -153,7 +112,6 @@ class _CustomInputState extends State<_CustomInput> {
                 ),
                 child: Row(
                   children: [
-                    if (widget.onAttachmentPressed != null) _leftWidget(),
                     Expanded(
                       child: TextField(
                         controller: _textController,
@@ -164,8 +122,6 @@ class _CustomInputState extends State<_CustomInput> {
                         keyboardType: TextInputType.multiline,
                         maxLines: 5,
                         minLines: 1,
-                        onChanged: widget.onTextChanged,
-                        onTap: widget.onTextFieldTap,
                         textCapitalization: TextCapitalization.sentences,
                       ),
                     ),

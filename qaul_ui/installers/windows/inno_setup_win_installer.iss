@@ -39,12 +39,12 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#SourcePath}\{#MyAppDependenciesFolder}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}\{#MyAppDependenciesFolder}\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}\{#MyAppDependenciesFolder}\native_context_menu_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}\{#MyAppDependenciesFolder}\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}\{#MyAppDependenciesFolder}\libqaul.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}\{#MyAppDependenciesFolder}\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourcePath}{#MyAppDependenciesFolder}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}{#MyAppDependenciesFolder}\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}{#MyAppDependenciesFolder}\native_context_menu_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}{#MyAppDependenciesFolder}\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}{#MyAppDependenciesFolder}\libqaul.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}{#MyAppDependenciesFolder}\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

@@ -68,11 +68,10 @@ jobs:
   # ------------------------------------------------
   # Deploy Jobs
   # ------------------------------------------------
-  publish-github-release:
+  publish-rust-github-release:
     working_directory: ~/qaul-libp2p
     docker:
       - image: cimg/rust:1.60.0
-#      - image: cibuilds/github:0.13
     environment:
       CARGO_NET_GIT_FETCH_WITH_CLI: "true"
     steps:
@@ -98,15 +97,10 @@ jobs:
             cp rust/target/universal/release/liblibqaul.a ./artifacts/
             # Windows
             cp rust/target/debug/libqaul.dll ./artifacts/
-#      - run:
-#          name: Install Rust
-#          command: |
-#            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-#            echo "export PATH=${HOME}/.cargo/bin:${PATH}" >> $BASH_ENV
       - run:
           name: Install ghr
           command: |
-            GHR_VERSION=0.13.0
+            GHR_VERSION=0.14.0
             GHR_URL=https://github.com/tcnksm/ghr/releases/download/v${GHR_VERSION}/ghr_v${GHR_VERSION}_linux_amd64.tar.gz
             wget "$GHR_URL"
             tar xzf ghr_v${GHR_VERSION}_linux_amd64.tar.gz
@@ -116,7 +110,22 @@ jobs:
           name: Publish Release on GitHub
           command: |
             VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
+            TAG="v${VERSION}-rust"
+            DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
+
+            echo "Version Found: $VERSION"
+            echo "Tag built:     $TAG"
+            echo "Description:\n$DESCRIPTION"
+            echo ""
+
+            ghr -t "${GITHUB_TOKEN}" \
+              -u "${CIRCLE_PROJECT_USERNAME}" \
+              -r "${CIRCLE_PROJECT_REPONAME}" \
+              -c "${CIRCLE_SHA1}" \
+              -n "Rust - v${VERSION}" \
+              -b "${DESCRIPTION}" \
+              -delete \
+              "${TAG}" artifacts/
   # #  ---------------------------------------------
   # #  Rust
   # #  ---------------------------------------------
@@ -146,15 +155,6 @@ jobs:
             - rust/target/release/liblibqaul.so
             - rust/target/release/qaul-cli
             - rust/target/release/qauld
-      - when:
-          condition: on_success
-          steps:
-            - store_artifacts:
-                path: rust/target/release/liblibqaul.so
-            - store_artifacts:
-                path: rust/target/release/qaul-cli
-            - store_artifacts:
-                path: rust/target/release/qauld
   # # #  -------------------------------------------
   # # #  (Rust) Android
   # # #  -------------------------------------------
@@ -198,13 +198,6 @@ jobs:
           paths:
             - android/blemodule/build/outputs/aar/blemodule-debug.aar
             - android/libqaul/build/outputs/aar/libqaul-debug.aar
-      - when:
-          condition: on_success
-          steps:
-            - store_artifacts:
-                path: android/blemodule/build/outputs/aar
-            - store_artifacts:
-                path: android/libqaul/build/outputs/aar
   # # #  -------------------------------------------
   # # #  (Rust) iOS
   # # #  -------------------------------------------
@@ -241,11 +234,6 @@ jobs:
           root: ~/qaul-libp2p
           paths:
               - rust/target/universal/release/liblibqaul.a
-      - when:
-          condition: on_success
-          steps:
-            - store_artifacts:
-                path: rust/target/universal/release/liblibqaul.a
   # # #  -------------------------------------------
   # # #  (Rust) MacOS
   # # #  -------------------------------------------
@@ -276,11 +264,6 @@ jobs:
           root: ~/qaul-libp2p
           paths:
               - rust/target/debug/liblibqaul.dylib
-      - when:
-          condition: on_success
-          steps:
-            - store_artifacts:
-                path: rust/target/debug/liblibqaul.dylib
   # # #  -------------------------------------------
   # # #  (Rust) Windows
   # # #  -------------------------------------------
@@ -341,14 +324,19 @@ jobs:
       - restore_cache: *restore_git_cache
       - checkout-project
       - save_cache: *save_git_cache
-      - attach_workspace:
-          at: ~/qaul-libp2p
       - run:
-          name: Check for presence of AAR Files
+          name: Install Github CLI
           command: |
-            if [ ! -f ../../android/libqaul/build/outputs/aar/libqaul-debug.aar ] || [ ! -f ../../android/blemodule/build/outputs/aar/blemodule-debug.aar ]; then
-              echo "Libqaul/blemodule AAR file could not be found. That's probably due an error in persisting files to workspace"; exit 1
-            fi
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install gh
+      - run:
+          name: Download Libqaul AAR Files from latest Github Release
+          command: |
+            LATEST_TAG=$(gh release list -R https://github.com/brenodt/Qaul-CI-Tests | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+            curl --fail --silent --show-error --create-dirs -H "Authorization: token ${GITHUB_TOKEN}" -o ../../android/blemodule/build/outputs/aar/blemodule-debug.aar "https://github.com/brenodt/Qaul-CI-Tests/releases/download/${LATEST_LAG}/blemodule-debug.aar"
+            curl --fail --silent --show-error --create-dirs -H "Authorization: token ${GITHUB_TOKEN}" -o ../../android/libqaul/build/outputs/aar/libqaul-debug.aar "https://github.com/brenodt/Qaul-CI-Tests/releases/download/${LATEST_LAG}/libqaul-debug.aar"
       - install-flutter:
           version: "$FLUTTER_VERSION"
       - install-flutter-deps
@@ -381,14 +369,14 @@ jobs:
       - restore_cache: *restore_git_cache
       - checkout-project
       - save_cache: *save_git_cache
-      - attach_workspace:
-          at: ~/qaul-libp2p
       - run:
-          name: Check for presence of *.a Library
+          name: Install Github CLI
+          command: brew install gh
+      - run:
+          name: Download Libqaul *.a File from latest Github Release
           command: |
-            if [ ! -f ../../rust/target/universal/release/liblibqaul.a ]; then
-              echo "Libqaul *.a file could not be found. That's probably due an error in persisting files to workspace"; exit 1
-            fi
+            LATEST_TAG=$(gh release list -R https://github.com/brenodt/Qaul-CI-Tests | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+            curl --fail --silent --show-error --create-dirs -o ../../rust/target/universal/release/liblibqaul.a "https://github.com/brenodt/Qaul-CI-Tests/releases/download/${LATEST_LAG}/liblibqaul.a"
       - install-flutter:
           version: "$FLUTTER_VERSION"
       - install-flutter-deps
@@ -404,13 +392,11 @@ jobs:
           path: output
           destination: output
   # # #  -------------------------------------------
-  # # #  (Flutter) Windows
+  # # #  (Flutter) MacOS
   # # #  -------------------------------------------
-  windows-beta-deploy:
-    executor:
-      name: win/server-2022
-      size: "medium"
-      shell: bash.exe
+  macos-flutter-build:
+    macos:
+      xcode: 13.0.0
     working_directory: ~/qaul-libp2p/qaul_ui
     environment:
       <<: *flutter_version
@@ -419,24 +405,106 @@ jobs:
       - restore_cache: *restore_git_cache
       - checkout-project
       - save_cache: *save_git_cache
+      - run:
+          name: Install Github CLI
+          command: brew install gh
+      - run:
+          name: Download Libqaul *.dylib File from latest Github Release
+          command: |
+            LATEST_TAG=$(gh release list -R https://github.com/brenodt/Qaul-CI-Tests | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+            curl --fail --silent --show-error --create-dirs -o ../../rust/target/debug/liblibqaul.dylib "https://github.com/brenodt/Qaul-CI-Tests/releases/download/${LATEST_LAG}/liblibqaul.dylib"
+      - run:
+          name: Install node-appdmg
+          command: |
+            npm install -g appdmg
+            appdmg --version || npx appdmg --version
+      - install-flutter:
+          version: "$FLUTTER_VERSION"
+      - install-flutter-deps
+      - run:
+          name: Build MacOS Application
+          command: |
+            flutter config --enable-macos-desktop
+            flutter build macos
+      - run:
+          name: Build *.dmg File
+          command: |
+            cd installers/macos
+            appdmg ./config.json ./qaul.dmg
+      - store_artifacts:
+          path: installers/macos/qaul.dmg
+  # # #  -------------------------------------------
+  # # #  (Flutter) Windows
+  # # #  -------------------------------------------
+  windows-flutter-build:
+    executor:
+      name: win/server-2022
+      size: "medium"
+      shell: bash.exe
+    working_directory: ~/qaul-libp2p/qaul_ui
+    environment:
+      <<: *flutter_version
+    steps:
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
       - attach_workspace:
           at: ~/qaul-libp2p
       - run:
-          name: Check for presence of *.dll Library
+          name: Install Github CLI
+          command: choco install gh
+      - run:
+          name: Download Libqaul *.dll File from latest Github Release
           command: |
-            if [ ! -f ../../rust/target/debug/libqaul.dll ]; then
-              echo "Libqaul *.dll file could not be found. That's probably due an error in persisting files to workspace"; exit 1
-            fi
+            LATEST_TAG=$(gh release list -R https://github.com/brenodt/Qaul-CI-Tests | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+            curl --fail --silent --show-error --create-dirs -o ../../rust/target/debug/libqaul.dll "https://github.com/brenodt/Qaul-CI-Tests/releases/download/${LATEST_LAG}/libqaul.dll"
       - install-flutter:
           version: "$FLUTTER_VERSION"
-      - run:
-          name: Flutter Doctor
-          command: flutter doctor
       - install-flutter-deps
       - run:
           name: Build Flutter Application for Windows
-          command: flutter build windows
-
+          command: |
+            flutter config --enable-windows-desktop
+            flutter build windows
+      - run:
+          name: Install InnoSetup
+          command: choco install innosetup
+      - run:
+          name: Run iscc
+          command: cd bin && bash build_windows_installer
+      - store_artifacts:
+          path: installers\windows\qaul.exe
+  # # #  -------------------------------------------
+  # # #  (Flutter) Linux
+  # # #  -------------------------------------------
+  linux-flutter-build:
+    docker:
+        - image: snapcore/snapcraft:edge
+    working_directory: ~/qaul-libp2p/qaul_ui
+    environment:
+      <<: *flutter_version
+    steps:
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
+      - run:
+          name: Install Github CLI
+          command: |
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install gh
+      - run:
+          name: Download Libqaul *.so File from latest Github Release
+          command: |
+            LATEST_TAG=$(gh release list -R https://github.com/brenodt/Qaul-CI-Tests | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+            curl --fail --silent --show-error --create-dirs -o ../rust/target/release/liblibqaul.so "https://github.com/brenodt/Qaul-CI-Tests/releases/download/${LATEST_LAG}/liblibqaul.so"
+      - install-flutter:
+          version: "$FLUTTER_VERSION"
+      - install-flutter-deps
+      - run:
+          name: Build Flutter Application for Linux
+          command: cd installers/linux && bash snapbuild
 # ------------------------------------------------
 # Workflows
 # ------------------------------------------------
@@ -447,94 +515,89 @@ workflows:
       - flutter-analyze
   flutter-build-and-deploy:
     jobs:
-      - flutter-test:
+      - flutter-test
+#          filters:
+#            tags:
+#              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+#            branches:
+#              ignore: /.*/
+      - flutter-analyze
+#          filters:
+#            tags:
+#              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+#            branches:
+#              ignore: /.*/
+      - android-beta-deploy:
+          requires:
+            - flutter-test
+            - flutter-analyze
+#          filters:
+#            tags:
+#              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+#            branches:
+#              ignore: /.*/
+      - ios-beta-deploy:
+          requires:
+            - flutter-test
+            - flutter-analyze
+#          filters:
+#            tags:
+#              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+#            branches:
+#              ignore: /.*/
+      - macos-flutter-build:
+          requires:
+            - flutter-test
+            - flutter-analyze
+      - windows-flutter-build:
+          requires:
+            - flutter-test
+            - flutter-analyze
+      # TODO: Add Github Release step for Flutter
+  rust-build-and-deploy:
+    jobs:
+      - build-libqaul-linux:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
-            branches:
-              ignore: /.*/
-      - flutter-analyze:
-          filters:
-            tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
       - build-libqaul-android:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
       - build-libqaul-ios:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
-      - android-beta-deploy:
-          requires:
-            - flutter-test
-            - flutter-analyze
-            - build-libqaul-android
+      - build-libqaul-macos:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
-      - ios-beta-deploy:
-          requires:
-            - flutter-test
-            - flutter-analyze
-            - build-libqaul-ios
+      - build-libqaul-windows:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
-  rust-build-and-deploy:
-    jobs:
-      - build-libqaul-linux
-#          filters:
-#            tags:
-#              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
-#            branches:
-#              ignore: /.*/
-      - build-libqaul-android
-#          filters:
-#            tags:
-#              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
-#            branches:
-#              ignore: /.*/
-      - build-libqaul-ios
-#          filters:
-#            tags:
-#              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
-#            branches:
-#              ignore: /.*/
-      - build-libqaul-macos
-#          filters:
-#            tags:
-#              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
-#            branches:
-#              ignore: /.*/
-      - build-libqaul-windows
-#          filters:
-#            tags:
-#              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
-#            branches:
-#              ignore: /.*/
-      - publish-github-release:
+      - publish-rust-github-release:
           requires:
             - build-libqaul-linux
             - build-libqaul-android
             - build-libqaul-ios
             - build-libqaul-macos
             - build-libqaul-windows
-#          filters:
-#            tags:
-#              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
-#            branches:
-#              ignore: /.*/
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+            branches:
+              ignore: /.*/
 
 # ------------------------------------------------
 # Reusable commands

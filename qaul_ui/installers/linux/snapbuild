@@ -1,0 +1,20 @@
+#! /bin/bash
+
+# required to upgrade ubuntu base due to incompatible libraries
+sed -i "s/xenial/focal/g" /etc/apt/sources.list
+apt update -qq
+apt install -y -qq wget tar unzip zip lib32stdc++6 lib32z1 git clang cmake ninja-build pkg-config libgtk-3-dev curl
+
+flutter config --enable-linux-desktop
+
+cd ../../snap || exit
+
+# ignore current snap version and set to pubspec version
+# "s/version\:\W\+[0-9]\+\.[0-9]\+\.[0-9]\+/version: $VERSION/g" or "s/[0-9]\+\.[0-9]\+\.[0-9]\+/$VERSION/g"
+sed -i "s/version\:\W\+[0-9]\+\.[0-9]\+\.[0-9]\+/version: $VERSION/g" snapcraft.yaml
+echo "$SNAPCRAFT_LOGIN_FILE" | base64 --decode --ignore-garbage > snapcraft.login
+snapcraft login --with snapcraft.login
+set +o pipefail
+snapcraft
+mv ./*.snap "qaul-app-$VERSION.snap"
+snapcraft upload "qaul-app-$VERSION.snap" --release=stable
