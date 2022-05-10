@@ -218,6 +218,10 @@ impl RouterInfo {
         //let users = Users::get_user_info_table_by_ids(&online_users);
         let users = Users::get_user_info_table_by_timestamp(last_sent);
         log::info!("qaul sending_user_info users={}", users.info.len());
+        for user in &users.info{
+            let userid = PeerId::from_bytes(&user.id).unwrap();
+            log::info!("user={}", userid);
+        }
         
 
         let timestamp = Timestamp::get_timestamp();

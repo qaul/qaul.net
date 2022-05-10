@@ -329,7 +329,7 @@ pub async fn start(storage_path: String) -> () {
                 }
                 EventType::RoutingTable(_) => {
                     // create new routing table
-                    router::connections::ConnectionTable::create_routing_table();
+                    router::connections::ConnectionTable::create_routing_table();                    
                 }
                 EventType::Messaging(_) => {
                     // send scheduled messages

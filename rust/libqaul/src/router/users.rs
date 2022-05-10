@@ -58,7 +58,7 @@ impl Users {
                 let id = PeerId::from_bytes(&user.id).unwrap();
                 let key = PublicKey::from_protobuf_encoding(&user.key).unwrap();
                 // fill result into user table
-                users.users.insert( id, User { id, key, name: user.name, verified: user.verified, blocked: user.blocked, last_update: user.last_update } );    
+                users.users.insert( id, User { id, key, name: user.name, verified: user.verified, blocked: user.blocked, last_update: user.last_update, is_local: false } );    
             }
         }
     }
@@ -81,7 +81,7 @@ impl Users {
 
         // add user to the users table
         let mut users = USERS.get().write().unwrap();
-        users.users.insert( id, User { id, key, name, verified, blocked, last_update } );
+        users.users.insert( id, User { id, key, name, verified, blocked, last_update, is_local: false } );
     }
 
     /// add a new user to the users list, and check whether the 
@@ -134,25 +134,31 @@ impl Users {
             user.last_update = Timestamp::get_timestamp();
         }
     }
+    pub fn set_local(user_id: &PeerId) {
+        let mut store = USERS.get().write().unwrap();
+        if let Some(user) = store.users.get_mut(user_id) {
+            user.is_local = true;
+        }
+    }    
 
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
-    pub fn get_user_info_table() -> router_net_proto::UserInfoTable {
-        let store = USERS.get().read().unwrap();
-        let mut users = router_net_proto::UserInfoTable {
-            info: Vec::new(),
-        };
+    // pub fn get_user_info_table() -> router_net_proto::UserInfoTable {
+    //     let store = USERS.get().read().unwrap();
+    //     let mut users = router_net_proto::UserInfoTable {
+    //         info: Vec::new(),
+    //     };
 
-        for (_id, value) in &store.users {
-            let user_info = router_net_proto::UserInfo {
-                id: value.id.to_bytes(),
-                key: value.key.clone().into_protobuf_encoding(),
-                name: value.name.clone(),
-            };
-            users.info.push(user_info);
-        }        
-        users
-    }
+    //     for (_id, value) in &store.users {
+    //         let user_info = router_net_proto::UserInfo {
+    //             id: value.id.to_bytes(),
+    //             key: value.key.clone().into_protobuf_encoding(),
+    //             name: value.name.clone(),
+    //         };
+    //         users.info.push(user_info);
+    //     }        
+    //     users
+    // }
 
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
@@ -163,7 +169,7 @@ impl Users {
         };
         
         for (_id, value) in &store.users {
-            if value.last_update >= last_sent{
+            if value.is_local==true || value.last_update >= last_sent {
                 let user_info = router_net_proto::UserInfo {
                     id: value.id.to_bytes(),
                     key: value.key.clone().into_protobuf_encoding(),
@@ -280,6 +286,7 @@ impl Users {
                                         verified: updated_user.verified,
                                         blocked: updated_user.blocked,
                                         last_update: last_update,
+                                        is_local: false,
                                     };
         
                                     // update list
@@ -341,6 +348,7 @@ pub struct User {
     pub name: String,
     pub verified: bool,
     pub blocked: bool,
+    pub is_local: bool,
     pub last_update: u64,
 }
 

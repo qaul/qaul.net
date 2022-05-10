@@ -102,6 +102,10 @@ impl ConnectionTable {
 
     /// add a new local user to state
     pub fn add_local_user(user_id: PeerId) {
+
+        //set user as local
+        crate::router::users::Users::set_local(&user_id);
+
         let node_id = node::Node::get_id();
         let mut routing_table = LOCAL.get().write().unwrap();
 
@@ -328,7 +332,7 @@ impl ConnectionTable {
         // set table as new active routing table
         RoutingTable::set(table);
     }
-
+    
     /// insert local routes into routing table
     fn local_routes_to_intermediary_table(mut table: RoutingTable) -> RoutingTable {
         // get local routes
