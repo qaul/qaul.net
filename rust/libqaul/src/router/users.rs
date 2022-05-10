@@ -137,43 +137,65 @@ impl Users {
 
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
-    // pub fn get_user_info_table() -> router_net_proto::UserInfoTable {
-    //     let store = USERS.get().read().unwrap();
-    //     let mut users = router_net_proto::UserInfoTable {
-    //         info: Vec::new(),
-    //     };
-
-    //     for (_id, value) in &store.users {
-    //         let user_info = router_net_proto::UserInfo {
-    //             id: value.id.to_bytes(),
-    //             key: value.key.clone().into_protobuf_encoding(),
-    //             name: value.name.clone(),
-    //         };
-    //         users.info.push(user_info);
-    //     }        
-    //     users
-    // }
-
-    /// create and send the user info table for the
-    /// RouterInfo message which is sent regularly to neighbours
-    pub fn get_user_info_table_by_ids(ids: &Vec<PeerId>) -> router_net_proto::UserInfoTable {
+    pub fn get_user_info_table() -> router_net_proto::UserInfoTable {
         let store = USERS.get().read().unwrap();
         let mut users = router_net_proto::UserInfoTable {
             info: Vec::new(),
         };
 
-        for id in ids{
-            if let Some(value) = store.users.get(&id){
+        for (_id, value) in &store.users {
+            let user_info = router_net_proto::UserInfo {
+                id: value.id.to_bytes(),
+                key: value.key.clone().into_protobuf_encoding(),
+                name: value.name.clone(),
+            };
+            users.info.push(user_info);
+        }        
+        users
+    }
+
+    /// create and send the user info table for the
+    /// RouterInfo message which is sent regularly to neighbours
+    pub fn get_user_info_table_by_timestamp(last_sent: u64) -> router_net_proto::UserInfoTable {
+        let store = USERS.get().read().unwrap();
+        let mut users = router_net_proto::UserInfoTable {
+            info: Vec::new(),
+        };
+        
+        for (_id, value) in &store.users {
+            if value.last_update >= last_sent{
                 let user_info = router_net_proto::UserInfo {
                     id: value.id.to_bytes(),
                     key: value.key.clone().into_protobuf_encoding(),
                     name: value.name.clone(),
-                };    
+                };
                 users.info.push(user_info);    
-            }
-        }
+            } 
+        }        
         users
     }    
+
+
+    /// create and send the user info table for the
+    /// RouterInfo message which is sent regularly to neighbours
+    // pub fn get_user_info_table_by_ids(ids: &Vec<PeerId>) -> router_net_proto::UserInfoTable {
+    //     let store = USERS.get().read().unwrap();
+    //     let mut users = router_net_proto::UserInfoTable {
+    //         info: Vec::new(),
+    //     };
+
+    //     for id in ids{
+    //         if let Some(value) = store.users.get(&id){
+    //             let user_info = router_net_proto::UserInfo {
+    //                 id: value.id.to_bytes(),
+    //                 key: value.key.clone().into_protobuf_encoding(),
+    //                 name: value.name.clone(),
+    //             };    
+    //             users.info.push(user_info);    
+    //         }
+    //     }
+    //     users
+    // }    
 
     /// add new users from the received bytes of a UserInfoTable
     pub fn add_user_info_table(users: Vec<router_net_proto::UserInfo>) {
