@@ -204,6 +204,13 @@ impl RouterInfo {
         let node_id = Node::get_id();
         let routes = RoutingTable::create_routing_info(neighbour, last_sent);
 
+        let online_user_ids = RoutingTable::get_online_user_ids(last_sent);
+        log::info!("online users={} routes={}", online_user_ids.len(), routes.entry.len());
+        for online in &online_user_ids{
+            log::info!("online user={}", online);
+        }
+
+
         // log::info!("sending_routing_info count={}", routes.entry.len());
 
         // let mut online_users: Vec<PeerId> = vec![];
@@ -214,9 +221,10 @@ impl RouterInfo {
         //     log::info!("qaul sending_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
         // }
 
+
         //let users = Users::get_user_info_table();
-        //let users = Users::get_user_info_table_by_ids(&online_users);
-        let users = Users::get_user_info_table_by_timestamp(last_sent);
+        let users = Users::get_user_info_table_by_ids(&online_user_ids);
+        //let users = Users::get_user_info_table_by_timestamp(last_sent);
         log::info!("qaul sending_user_info users={}", users.info.len());
         for user in &users.info{
             let userid = PeerId::from_bytes(&user.id).unwrap();

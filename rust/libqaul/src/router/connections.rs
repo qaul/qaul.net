@@ -24,7 +24,6 @@ use crate::node;
 use crate::router::{
     table::{RoutingTable, RoutingUserEntry, RoutingConnectionEntry},
     neighbours::Neighbours,
-    Users,
 };
 use super::proto;
 use crate::router::router_net_proto;
@@ -65,6 +64,8 @@ struct UserEntry {
     pub pgid_update: u64,
     /// DEPRECATED: do we really need this?
     pub pgid_update_hc: u8,
+    //online time
+    pub online_time: u64,
     /// connection entries
     connections: BTreeMap<PeerId, NeighbourEntry>,
 }
@@ -102,28 +103,26 @@ impl ConnectionTable {
 
     /// add a new local user to state
     pub fn add_local_user(user_id: PeerId) {
-
-        //set user as local
-        crate::router::users::Users::set_local(&user_id);
-
         let node_id = node::Node::get_id();
         let mut routing_table = LOCAL.get().write().unwrap();
 
         let mut connections = Vec::new();
+        let now_ts = Timestamp::get_timestamp();
         connections.push(RoutingConnectionEntry {
             module: ConnectionModule::Local,
             node: node_id,
             rtt: 0,
             hc: 0,
             lq: 0,
-            last_update: Timestamp::get_timestamp()
+            last_update: now_ts
         });
 
         let routing_user_entry = RoutingUserEntry {
             id: user_id.to_owned(),
             pgid: 1,
-            pgid_update: Timestamp::get_timestamp(),
+            pgid_update: now_ts,
             pgid_update_hc: 1,
+            online_time: now_ts,
             connections,
         };
 
@@ -214,7 +213,7 @@ impl ConnectionTable {
             ConnectionModule::None => return,
         }        
 
-        let mut updated  = false;
+        let now_ts = Timestamp::get_timestamp();
         // check if user already exists
         if let Some(user) = connection_table.table.get_mut(&user_id) {
             //check alreay exist and pgid is new
@@ -231,8 +230,7 @@ impl ConnectionTable {
             //            conn.last_update = Timestamp::get_timestamp();
             //         }
             //     }
-            // }
-            let now_ts = Timestamp::get_timestamp();
+            // }            
             if connection.hc == 1 || pgid > user.pgid {
                 if module == ConnectionModule::Internet {
                     log::info!("receive_inode hc={}, propg_id={}", connection.hc, pgid);
@@ -242,21 +240,18 @@ impl ConnectionTable {
                 user.pgid_update = now_ts;
                 user.pgid_update_hc = connection.hc;
                 user.connections.insert(connection.id, connection); 
-                updated = true;               
             }else if pgid == user.pgid{
                 //check last update
                 if (now_ts - user.pgid_update <= (10 * 1000)) && connection.hc < user.pgid_update_hc {
                     user.pgid_update = now_ts;
                     user.pgid_update_hc = connection.hc;
                     user.connections.insert(connection.id, connection);
-                    updated = true;
                 }else if let Some(conn) = user.connections.get_mut(&connection.id){
                     if connection.lq < conn.lq {
                         conn.lq = connection.lq;
                         conn.hc = connection.hc;
                         conn.last_update = now_ts;
                         user.connections.insert(connection.id, connection);
-                        updated = true;
                     }
                 }
             }else if pgid < user.pgid {
@@ -267,7 +262,6 @@ impl ConnectionTable {
                         user.pgid_update = now_ts;
                         user.pgid_update_hc = connection.hc;
                         user.connections.insert(connection.id, connection);        
-                        updated = true;
                     }
                 }
             } 
@@ -280,24 +274,14 @@ impl ConnectionTable {
             let user = UserEntry { 
                 id: user_id,
                 pgid: pgid,
-                pgid_update: Timestamp::get_timestamp(),
+                pgid_update: now_ts,
                 pgid_update_hc: hc,
+                online_time: now_ts,
                 connections: connections_map,
             };
 
             connection_table.table.insert(user_id, user);
-            updated = true;
         }
-
-        if updated == true{
-            Users::set_updated(&user_id);
-        }
-        // if module == ConnectionModule::Internet {
-        //     if let Some(user) = connection_table.table.get_mut(&user_id){
-        //         log::info!("receive_inode updated hc={}, propg_id={}", user.pgid_update_hc, user.pgid);
-        //     }
-        // }
-
     }
 
     /// update propagation id for local users
@@ -389,6 +373,7 @@ impl ConnectionTable {
                             pgid: user.pgid,
                             pgid_update: user.pgid_update,
                             pgid_update_hc: user.pgid_update_hc,
+                            online_time: user.online_time,
                             connections,
                         };
                         table.table.insert(user_id.to_owned(), routing_user_entry);
@@ -400,6 +385,7 @@ impl ConnectionTable {
                             pgid: user.pgid,
                             pgid_update: user.pgid_update,
                             pgid_update_hc: user.pgid_update_hc,
+                            online_time: user.online_time,
                             connections: Vec::new(),
                         };
                         table.table.insert(user_id.to_owned(), routing_user_entry);
