@@ -33,6 +33,7 @@ The following commands are available:
   * `account create {User Name}` - create a new user account with the name {User Name}
 * users - Functions for all users known by your node
   * `users list` - display all users known to this router
+  * `users online` - display all online users known to this router
   * `users verify {User ID}` - verify user with {User ID}
   * `users block {User ID}` - block user with {User ID}
 * router
