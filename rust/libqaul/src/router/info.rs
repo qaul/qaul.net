@@ -21,9 +21,11 @@ use prost::Message;
 use state::Storage;
 use std::{
     collections::HashMap,
+    collections::BTreeMap,
     sync::RwLock,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
+
 
 use qaul_info::{
     QaulInfoReceived, 
@@ -205,8 +207,22 @@ impl RouterInfo {
         let routes = RoutingTable::create_routing_info(neighbour, last_sent);
 
         let online_user_ids = RoutingTable::get_online_user_ids(last_sent);
-        log::info!("online users={} routes={}", online_user_ids.len(), routes.entry.len());
-        for online in &online_user_ids{
+        let local_user_ids = ConnectionTable::get_local_users();
+        let mut id_map: BTreeMap<PeerId, bool> = BTreeMap::new();
+        for id in &online_user_ids{
+            id_map.insert(id.clone(), true);
+        }
+        for id in &local_user_ids{
+            id_map.insert(id.clone(), true);
+        }
+
+        let mut user_ids: Vec<PeerId> = vec![];
+        for (id, _) in &id_map{
+            user_ids.push(id.clone());
+        }
+
+        log::info!("online users={} routes={}", user_ids.len(), routes.entry.len());
+        for online in &user_ids{
             log::info!("online user={}", online);
         }
 
@@ -223,7 +239,7 @@ impl RouterInfo {
 
 
         //let users = Users::get_user_info_table();
-        let users = Users::get_user_info_table_by_ids(&online_user_ids);
+        let users = Users::get_user_info_table_by_ids(&user_ids);
         //let users = Users::get_user_info_table_by_timestamp(last_sent);
         log::info!("qaul sending_user_info users={}", users.info.len());
         for user in &users.info{

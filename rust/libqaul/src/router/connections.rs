@@ -101,6 +101,15 @@ impl ConnectionTable {
         }
     }
 
+    pub fn get_local_users() -> Vec<PeerId>{
+        let mut ids: Vec<PeerId> = vec![];
+        let routing_table = LOCAL.get().read().unwrap();
+        for (id, _) in &routing_table.table{
+            ids.push(id.clone());
+        }
+        ids
+    }
+
     /// add a new local user to state
     pub fn add_local_user(user_id: PeerId) {
         let node_id = node::Node::get_id();
