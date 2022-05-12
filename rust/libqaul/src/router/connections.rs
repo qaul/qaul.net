@@ -101,22 +101,17 @@ impl ConnectionTable {
         }
     }
 
-    pub fn get_local_users() -> Vec<PeerId>{
-        let mut ids: Vec<PeerId> = vec![];
-        let routing_table = LOCAL.get().read().unwrap();
-        for (id, _) in &routing_table.table{
-            ids.push(id.clone());
-        }
-        ids
-    }
-
     /// add a new local user to state
     pub fn add_local_user(user_id: PeerId) {
         let node_id = node::Node::get_id();
         let mut routing_table = LOCAL.get().write().unwrap();
 
         let mut connections = Vec::new();
-        let now_ts = Timestamp::get_timestamp();
+
+        //routing table creating is done every 1 seconds. 
+        //by considerate neighbour sending is done before creating routing Table.
+        //we set local user online time forward 3 seconds
+        let now_ts = Timestamp::get_timestamp()  + 3000;
         connections.push(RoutingConnectionEntry {
             module: ConnectionModule::Local,
             node: node_id,
@@ -134,7 +129,6 @@ impl ConnectionTable {
             online_time: now_ts,
             connections,
         };
-
         routing_table.table.insert(user_id, routing_user_entry);
     }
 

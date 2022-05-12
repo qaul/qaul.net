@@ -24,6 +24,9 @@ impl Users {
             cmd if cmd.starts_with("list") => {
                 Self::request_user_list();
             },
+            cmd if cmd.starts_with("online") => {
+                Self::request_online_user_list();
+            },
             // verify a user
             cmd if cmd.starts_with("verify ") => {
                 let user_id = cmd.strip_prefix("verify ").unwrap();
@@ -57,6 +60,23 @@ impl Users {
         // send message
         Rpc::send_message(buf, super::rpc::proto::Modules::Users.into(), "".to_string());
     }
+    
+    fn request_online_user_list() {
+        // create request message
+        let proto_message = proto::Users {
+            message: Some(proto::users::Message::UserOnlineRequest(
+                proto::UserOnlineRequest {}
+            )),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(buf, super::rpc::proto::Modules::Users.into(), "".to_string());
+    }
+
 
     /// create rpc user update message
     fn send_user_update(user_id_base58: &str, verified: bool, blocked: bool) {

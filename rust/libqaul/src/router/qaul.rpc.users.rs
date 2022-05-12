@@ -1,7 +1,7 @@
 /// users rpc message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Users {
-    #[prost(oneof="users::Message", tags="1, 2, 3")]
+    #[prost(oneof="users::Message", tags="1, 2, 3, 4")]
     pub message: ::core::option::Option<users::Message>,
 }
 /// Nested message and enum types in `Users`.
@@ -11,14 +11,20 @@ pub mod users {
         #[prost(message, tag="1")]
         UserRequest(super::UserRequest),
         #[prost(message, tag="2")]
-        UserList(super::UserList),
+        UserOnlineRequest(super::UserOnlineRequest),
         #[prost(message, tag="3")]
+        UserList(super::UserList),
+        #[prost(message, tag="4")]
         UserUpdate(super::UserEntry),
     }
 }
 /// UI request for some users
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserRequest {
+}
+/// UI request for some online users
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UserOnlineRequest {
 }
 /// user list
 #[derive(Clone, PartialEq, ::prost::Message)]

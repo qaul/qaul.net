@@ -6,13 +6,19 @@ package qaul.rpc.users;
 message Users {
     oneof message {
         UserRequest user_request = 1;
-        UserList user_list = 2;
-        UserEntry user_update = 3;
+        UserOnlineRequest user_online_request = 2;        
+        UserList user_list = 3;
+        UserEntry user_update = 4;
     }
 }
 
 // UI request for some users
 message UserRequest {
+
+}
+
+// UI request for some online users
+message UserOnlineRequest {
 
 }
 

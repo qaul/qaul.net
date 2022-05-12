@@ -9,6 +9,13 @@ use libp2p::{
     PeerId,
     identity::PublicKey,
 };
+use crate::{
+    router::{
+        table::RoutingTable,
+    }
+};
+
+
 use prost::Message;
 use serde::{Serialize, Deserialize};
 use state::Storage;
@@ -120,46 +127,6 @@ impl Users {
         }
     }
 
-    /// create and send the user info table for the
-    /// RouterInfo message which is sent regularly to neighbours
-    // pub fn get_user_info_table() -> router_net_proto::UserInfoTable {
-    //     let store = USERS.get().read().unwrap();
-    //     let mut users = router_net_proto::UserInfoTable {
-    //         info: Vec::new(),
-    //     };
-
-    //     for (_id, value) in &store.users {
-    //         let user_info = router_net_proto::UserInfo {
-    //             id: value.id.to_bytes(),
-    //             key: value.key.clone().into_protobuf_encoding(),
-    //             name: value.name.clone(),
-    //         };
-    //         users.info.push(user_info);
-    //     }        
-    //     users
-    // }
-
-    /// create and send the user info table for the
-    /// RouterInfo message which is sent regularly to neighbours
-    // pub fn get_user_info_table_by_timestamp(last_sent: u64) -> router_net_proto::UserInfoTable {
-    //     let store = USERS.get().read().unwrap();
-    //     let mut users = router_net_proto::UserInfoTable {
-    //         info: Vec::new(),
-    //     };
-        
-    //     for (_id, value) in &store.users {
-    //         if value.is_local==true || value.last_update >= last_sent {
-    //             let user_info = router_net_proto::UserInfo {
-    //                 id: value.id.to_bytes(),
-    //                 key: value.key.clone().into_protobuf_encoding(),
-    //                 name: value.name.clone(),
-    //             };
-    //             users.info.push(user_info);    
-    //         } 
-    //     }        
-    //     users
-    // }    
-
 
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
@@ -232,6 +199,75 @@ impl Users {
                             // add entry to list
                             user_list.user.push(user_entry);
                         }
+        
+                        // create message
+                        let proto_message = proto::Users{
+                            message: Some(proto::users::Message::UserList(
+                                user_list)),
+                        };
+        
+                        // encode message
+                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+        
+                        // send message
+                        Rpc::send_message(buf, crate::rpc::proto::Modules::Users.into(), "".to_string(), Vec::new() );
+                    },
+                    Some(proto::users::Message::UserOnlineRequest(_user_online_request)) => {
+                        // get users store
+                        let users = USERS.get().read().unwrap();
+
+                        //get all online user ids by passing last_sent=0
+                        let online_user_ids = RoutingTable::get_online_user_ids(0); 
+        
+                        // fill them into the list
+                        let mut user_list = proto::UserList {
+                            user: Vec::new(),
+                        };
+                        for id in &online_user_ids{
+                            if let Some(user) = users.users.get(&id){
+                                // get RPC key values
+                                let (key_type, key_base58) = Self::get_protobuf_public_key(user.key.clone());
+            
+                                // create user entry message
+                                let user_entry = proto::UserEntry {
+                                    name: user.name.clone(),
+                                    id: id.to_bytes(),
+                                    id_base58: id.to_base58(),
+                                    key: user.key.clone().into_protobuf_encoding(),
+                                    key_type,
+                                    key_base58,
+                                    connectivity: 0,
+                                    verified: user.verified,
+                                    blocked: user.blocked,
+                                };
+            
+                                // add entry to list
+                                user_list.user.push(user_entry);
+                            }
+                        }
+
+
+                        // for (id, user) in &users.users {
+                        //     // get RPC key values
+                        //     let (key_type, key_base58) = Self::get_protobuf_public_key(user.key.clone());
+        
+                        //     // create user entry message
+                        //     let user_entry = proto::UserEntry {
+                        //         name: user.name.clone(),
+                        //         id: id.to_bytes(),
+                        //         id_base58: id.to_base58(),
+                        //         key: user.key.clone().into_protobuf_encoding(),
+                        //         key_type,
+                        //         key_base58,
+                        //         connectivity: 0,
+                        //         verified: user.verified,
+                        //         blocked: user.blocked,
+                        //     };
+        
+                        //     // add entry to list
+                        //     user_list.user.push(user_entry);
+                        // }
         
                         // create message
                         let proto_message = proto::Users{

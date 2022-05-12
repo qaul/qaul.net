@@ -21,7 +21,6 @@ use prost::Message;
 use state::Storage;
 use std::{
     collections::HashMap,
-    collections::BTreeMap,
     sync::RwLock,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
@@ -205,43 +204,20 @@ impl RouterInfo {
         // create RouterInfo
         let node_id = Node::get_id();
         let routes = RoutingTable::create_routing_info(neighbour, last_sent);
-
         let online_user_ids = RoutingTable::get_online_user_ids(last_sent);
-        let local_user_ids = ConnectionTable::get_local_users();
-        let mut id_map: BTreeMap<PeerId, bool> = BTreeMap::new();
-        for id in &online_user_ids{
-            id_map.insert(id.clone(), true);
-        }
-        for id in &local_user_ids{
-            id_map.insert(id.clone(), true);
-        }
 
-        let mut user_ids: Vec<PeerId> = vec![];
-        for (id, _) in &id_map{
-            user_ids.push(id.clone());
-        }
-
-        log::info!("online users={} routes={}", user_ids.len(), routes.entry.len());
-        for online in &user_ids{
+        log::info!("online users={} routes={}", online_user_ids.len(), routes.entry.len());
+        for online in &online_user_ids{
             log::info!("online user={}", online);
         }
 
-
         // log::info!("sending_routing_info count={}", routes.entry.len());
-
-        // let mut online_users: Vec<PeerId> = vec![];
         // for inf in &routes.entry{
         //     let c: &[u8] = &inf.user;
         //     let userid = PeerId::from_bytes(c).unwrap();
-        //     online_users.push(userid.clone());
         //     log::info!("qaul sending_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
         // }
-
-
-        //let users = Users::get_user_info_table();
-        let users = Users::get_user_info_table_by_ids(&user_ids);
-        //let users = Users::get_user_info_table_by_timestamp(last_sent);
-        log::info!("qaul sending_user_info users={}", users.info.len());
+        let users = Users::get_user_info_table_by_ids(&online_user_ids);
         for user in &users.info{
             let userid = PeerId::from_bytes(&user.id).unwrap();
             log::info!("user={}", userid);
