@@ -191,8 +191,7 @@ impl RouterInfo {
             let mut scheduler = SCHEDULER.get().write().unwrap();
             //let interval = scheduler.interval.clone();
             scheduler.neighbours.insert(node_id, SchedulerEntry {
-                //timestamp: SystemTime::now() - interval,
-                timestamp: UNIX_EPOCH,
+                timestamp: SystemTime::now() - interval,
             });
         }
     }
