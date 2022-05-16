@@ -8,6 +8,8 @@ orbs:
 # ------------------------------------------------
 flutter_version: &flutter_version
   FLUTTER_VERSION: "2.10.4"
+repository_url: &repository_url
+  REPO_URL: "https://github.com/brenodt/Qaul-CI-Tests"
 default_flutter_wdir: &default_flutter_wdir
   working_directory: ~/qaul-libp2p/qaul_ui
 flutter_ios_dir: &flutter_ios_dir
@@ -33,7 +35,7 @@ aliases:
 executors:
   flutter:
     docker:
-      - image: cirrusci/flutter:stable
+      - image: cirrusci/flutter:2.10.4
     <<: *default_flutter_wdir
   android-flutter:
     docker:
@@ -319,6 +321,7 @@ jobs:
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
       SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/fastlane/google-credentials.json
       <<: *flutter_version
+      <<: *repository_url
     shell: /bin/bash --login -o pipefail
     steps:
       - restore_cache: *restore_git_cache
@@ -334,9 +337,9 @@ jobs:
       - run:
           name: Download Libqaul AAR Files from latest Github Release
           command: |
-            LATEST_TAG=$(gh release list -R https://github.com/brenodt/Qaul-CI-Tests | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-            curl --fail --silent --show-error --create-dirs -H "Authorization: token ${GITHUB_TOKEN}" -o ../../android/blemodule/build/outputs/aar/blemodule-debug.aar "https://github.com/brenodt/Qaul-CI-Tests/releases/download/${LATEST_LAG}/blemodule-debug.aar"
-            curl --fail --silent --show-error --create-dirs -H "Authorization: token ${GITHUB_TOKEN}" -o ../../android/libqaul/build/outputs/aar/libqaul-debug.aar "https://github.com/brenodt/Qaul-CI-Tests/releases/download/${LATEST_LAG}/libqaul-debug.aar"
+            LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+            gh release download "$LATEST_TAG" --pattern "libqaul-debug.aar" --repo "$REPO_URL" --dir ../../android/libqaul/build/outputs/aar
+            gh release download "$LATEST_TAG" --pattern "blemodule-debug.aar" --repo "$REPO_URL" --dir ../../android/blemodule/build/outputs/aar
       - install-flutter:
           version: "$FLUTTER_VERSION"
       - install-flutter-deps
@@ -375,8 +378,8 @@ jobs:
       - run:
           name: Download Libqaul *.a File from latest Github Release
           command: |
-            LATEST_TAG=$(gh release list -R https://github.com/brenodt/Qaul-CI-Tests | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-            curl --fail --silent --show-error --create-dirs -o ../../rust/target/universal/release/liblibqaul.a "https://github.com/brenodt/Qaul-CI-Tests/releases/download/${LATEST_LAG}/liblibqaul.a"
+            LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+            gh release download "$LATEST_TAG" --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
       - install-flutter:
           version: "$FLUTTER_VERSION"
       - install-flutter-deps
@@ -411,8 +414,8 @@ jobs:
       - run:
           name: Download Libqaul *.dylib File from latest Github Release
           command: |
-            LATEST_TAG=$(gh release list -R https://github.com/brenodt/Qaul-CI-Tests | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-            curl --fail --silent --show-error --create-dirs -o ../../rust/target/debug/liblibqaul.dylib "https://github.com/brenodt/Qaul-CI-Tests/releases/download/${LATEST_LAG}/liblibqaul.dylib"
+            LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+            gh release download "$LATEST_TAG" --pattern "*.dylib" --repo "$REPO_URL" --dir macos
       - run:
           name: Install node-appdmg
           command: |
@@ -426,6 +429,8 @@ jobs:
           command: |
             flutter config --enable-macos-desktop
             flutter build macos
+
+            ls build/macos/Build/Products/Release
       - run:
           name: Build *.dmg File
           command: |
@@ -451,24 +456,25 @@ jobs:
       - attach_workspace:
           at: ~/qaul-libp2p
       - run:
+          name: Install InnoSetup
+          command: choco install innosetup -y
+      - run:
           name: Install Github CLI
-          command: choco install gh
+          command: choco install gh -y
       - run:
           name: Download Libqaul *.dll File from latest Github Release
           command: |
-            LATEST_TAG=$(gh release list -R https://github.com/brenodt/Qaul-CI-Tests | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-            curl --fail --silent --show-error --create-dirs -o ../../rust/target/debug/libqaul.dll "https://github.com/brenodt/Qaul-CI-Tests/releases/download/${LATEST_LAG}/libqaul.dll"
+            export PATH="/c/Program Files/Github CLI:${PATH}"
+            LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+            gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/debug
       - install-flutter:
           version: "$FLUTTER_VERSION"
-      - install-flutter-deps
       - run:
           name: Build Flutter Application for Windows
           command: |
+            export PATH="${HOME}/development/flutter/bin:${PATH}"
             flutter config --enable-windows-desktop
             flutter build windows
-      - run:
-          name: Install InnoSetup
-          command: choco install innosetup
       - run:
           name: Run iscc
           command: cd bin && bash build_windows_installer
@@ -497,8 +503,8 @@ jobs:
       - run:
           name: Download Libqaul *.so File from latest Github Release
           command: |
-            LATEST_TAG=$(gh release list -R https://github.com/brenodt/Qaul-CI-Tests | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-            curl --fail --silent --show-error --create-dirs -o ../rust/target/release/liblibqaul.so "https://github.com/brenodt/Qaul-CI-Tests/releases/download/${LATEST_LAG}/liblibqaul.so"
+            LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+            gh release download "$LATEST_TAG" --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
       - install-flutter:
           version: "$FLUTTER_VERSION"
       - install-flutter-deps
@@ -509,10 +515,10 @@ jobs:
 # Workflows
 # ------------------------------------------------
 workflows:
-  flutter-test-analyze:
-    jobs:
-      - flutter-test
-      - flutter-analyze
+#  flutter-test-analyze:
+#    jobs:
+#      - flutter-test
+#      - flutter-analyze
   flutter-build-and-deploy:
     jobs:
       - flutter-test
@@ -531,20 +537,20 @@ workflows:
           requires:
             - flutter-test
             - flutter-analyze
-#          filters:
-#            tags:
-#              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
-#            branches:
-#              ignore: /.*/
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+            branches:
+              ignore: /.*/
       - ios-beta-deploy:
           requires:
             - flutter-test
             - flutter-analyze
-#          filters:
-#            tags:
-#              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
-#            branches:
-#              ignore: /.*/
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+            branches:
+              ignore: /.*/
       - macos-flutter-build:
           requires:
             - flutter-test
@@ -553,6 +559,11 @@ workflows:
           requires:
             - flutter-test
             - flutter-analyze
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+            branches:
+              ignore: /.*/
       # TODO: Add Github Release step for Flutter
   rust-build-and-deploy:
     jobs:
