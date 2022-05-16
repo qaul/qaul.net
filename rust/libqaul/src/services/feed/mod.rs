@@ -292,6 +292,33 @@ impl Feed {
         feed.last_message = last_message;
     }
 
+
+    pub fn get_latest_message_ids(count: usize) -> Vec<Vec<u8>> {
+        let mut feed_id_list: Vec<Vec<u8>> = Vec::new();
+
+        // get feed message store
+        let feed = FEED.get().read().unwrap();
+        let mut msg_count: usize = count;
+        if feed.last_message < (count as u64) {
+            msg_count = feed.last_message as usize;
+        }
+
+        let first_message = feed.last_message - (msg_count as u64);
+        let first_message_bytes = first_message.to_be_bytes().to_vec();
+        for res in feed.tree.range(first_message_bytes.as_slice()..) {
+            match res {
+                Ok((_id, message)) => {
+                    feed_id_list.push(message.message_id.clone());
+                },
+                Err(e) => {
+                    log::error!("Error retrieving feed message from data base: {}", e);
+                }
+            }
+        }
+        feed_id_list
+    }
+
+
     /// Get messages from data base
     /// 
     /// This function get messages from data base

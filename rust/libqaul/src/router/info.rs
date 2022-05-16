@@ -22,7 +22,7 @@ use state::Storage;
 use std::{
     collections::HashMap,
     sync::RwLock,
-    time::{Duration, SystemTime, UNIX_EPOCH},
+    time::{Duration, SystemTime},
 };
 
 
@@ -189,7 +189,7 @@ impl RouterInfo {
         // if it does not exist add it to scheduler
         if !exists {
             let mut scheduler = SCHEDULER.get().write().unwrap();
-            //let interval = scheduler.interval.clone();
+            let interval = scheduler.interval.clone();
             scheduler.neighbours.insert(node_id, SchedulerEntry {
                 timestamp: SystemTime::now() - interval,
             });
