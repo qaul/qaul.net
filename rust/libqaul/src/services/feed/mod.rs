@@ -294,7 +294,7 @@ impl Feed {
 
 
     pub fn get_latest_message_ids(count: usize) -> Vec<Vec<u8>> {
-        let mut feed_id_list: Vec<Vec<u8>> = Vec::new();
+        let mut ids: Vec<Vec<u8>> = vec![];
 
         // get feed message store
         let feed = FEED.get().read().unwrap();
@@ -308,14 +308,28 @@ impl Feed {
         for res in feed.tree.range(first_message_bytes.as_slice()..) {
             match res {
                 Ok((_id, message)) => {
-                    feed_id_list.push(message.message_id.clone());
+                    ids.push(message.message_id.clone());
                 },
                 Err(e) => {
                     log::error!("Error retrieving feed message from data base: {}", e);
                 }
             }
         }
-        feed_id_list
+        ids
+    }
+
+
+    //return missing feed ids to request to the neighbour
+    pub fn process_received_feed_ids(ids: &Vec<Vec<u8>>) -> Vec<Vec<u8>>{
+        let mut missing_ids: Vec<Vec<u8>> = vec![];
+
+        let feed = FEED.get().read().unwrap();
+        for id in ids{
+            if feed.messages.contains_key(id) == false {
+                missing_ids.push(id.clone());
+            }    
+        }
+        missing_ids
     }
 
 

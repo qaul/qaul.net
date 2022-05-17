@@ -33,8 +33,11 @@ pub struct RouterInfoMessage {
     /// Users information table
     #[prost(message, optional, tag="3")]
     pub users: ::core::option::Option<UserInfoTable>,
+    ///Latest Feed ids table
+    #[prost(message, optional, tag="4")]
+    pub feeds: ::core::option::Option<FeedIdsTable>,
     /// timestamp
-    #[prost(uint64, tag="4")]
+    #[prost(uint64, tag="5")]
     pub timestamp: u64,
 }
 /// Routing information to send to neighbours
@@ -77,4 +80,10 @@ pub struct UserInfo {
     /// user name
     #[prost(string, tag="3")]
     pub name: ::prost::alloc::string::String,
+}
+///Feed ids table
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FeedIdsTable {
+    #[prost(bytes="vec", repeated, tag="1")]
+    pub ids: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
 }

@@ -28,8 +28,10 @@ message RouterInfoMessage {
     RoutingInfoTable routes = 2;
     // Users information table
     UserInfoTable users = 3;
+    //Latest Feed ids table
+    FeedIdsTable feeds = 4;
     // timestamp
-    uint64 timestamp = 4;
+    uint64 timestamp = 5;
 }
 
 // Routing information to send to neighbours
@@ -62,4 +64,9 @@ message UserInfo {
     bytes key = 2;
     // user name
     string name = 3;
+}
+
+//Feed ids table
+message FeedIdsTable {
+    repeated bytes ids = 1;
 }

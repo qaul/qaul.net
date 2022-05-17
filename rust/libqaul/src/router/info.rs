@@ -44,6 +44,10 @@ use crate::{
     utilities::timestamp::Timestamp,
 };
 
+use crate::services::{
+    feed::{Feed},
+};
+
 /// mutable state of Neighbours table per ConnectionModule
 static SCHEDULER: Storage<RwLock<Scheduler>> = Storage::new();
 
@@ -79,6 +83,7 @@ pub struct Scheduler {
 struct SchedulerEntry {
     /// time of the last send
     timestamp: SystemTime,
+    is_first: bool,
 }
 
 /// RouterInfo Module
@@ -109,18 +114,21 @@ impl RouterInfo {
     pub fn check_scheduler() -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let mut found_neighbour: Option<PeerId> = None;
         let mut neighbour_last_sent: u64 = 0;
+        let mut neighbour_is_first: bool = false;
         let mut propagation_id: u32;
-        let mut propagation_timestamp: u64; 
+        let mut propagation_timestamp: u64;
+         
 
         {
             // get state for reading
             let scheduler = SCHEDULER.get().read().unwrap();
 
             // loop over all neighbours
-            for (id, time) in scheduler.neighbours.iter() {
-                if time.timestamp + scheduler.interval < SystemTime::now() {
+            for (id, ctx) in scheduler.neighbours.iter() {
+                if ctx.timestamp + scheduler.interval < SystemTime::now() {
                     found_neighbour = Some(id.clone());
-                    neighbour_last_sent = Timestamp::get_timestamp_by(&time.timestamp);
+                    neighbour_last_sent = Timestamp::get_timestamp_by(&ctx.timestamp);
+                    neighbour_is_first = ctx.is_first;
                     break;
                 }
             }
@@ -163,10 +171,11 @@ impl RouterInfo {
                 // update timer
                 if let Some(entry) = scheduler.neighbours.get_mut(&node_id){
                     entry.timestamp = SystemTime::now();
+                    entry.is_first = false;
                 }
 
                 // create routing information
-                let data = Self::create(node_id.clone(), neighbour_last_sent);
+                let data = Self::create(node_id.clone(), neighbour_last_sent, neighbour_is_first);
 
                 // create result
                 return Some((node_id, module, data))
@@ -192,6 +201,7 @@ impl RouterInfo {
             let interval = scheduler.interval.clone();
             scheduler.neighbours.insert(node_id, SchedulerEntry {
                 timestamp: SystemTime::now() - interval,
+                is_first: true,
             });
         }
     }
@@ -199,7 +209,7 @@ impl RouterInfo {
 
     /// Create routing information for a neighbour node,
     /// encode the information and return the byte code.
-    pub fn create(neighbour: PeerId, last_sent: u64) -> Vec<u8> {
+    pub fn create(neighbour: PeerId, last_sent: u64, is_first: bool) -> Vec<u8> {
         // create RouterInfo
         let node_id = Node::get_id();
         let routes = RoutingTable::create_routing_info(neighbour, last_sent);
@@ -222,13 +232,24 @@ impl RouterInfo {
             log::info!("user={}", userid);
         }
         
+        //create latest Feed ids table
+        let mut feeds = router_net_proto::FeedIdsTable{
+            ids: Vec::new(),
+        };
+
+        if is_first == true{
+            let ids = Feed::get_latest_message_ids(5);
+            for id in ids{
+                feeds.ids.push(id.clone());
+            }
+        }
 
         let timestamp = Timestamp::get_timestamp();
-
         let router_info = router_net_proto::RouterInfoMessage {
             node: node_id.clone().to_bytes(),
             routes: Some(routes),
             users: Some(users),
+            feeds: Some(feeds),
             timestamp,
         };
 
@@ -283,6 +304,7 @@ impl RouterInfo {
                             let messages = message;
                             let users = messages.users;
                             let routes = messages.routes;
+                            let feeds = messages.feeds;
 
                             match users {
                                 Some(router_net_proto::UserInfoTable { info }) => {
@@ -294,6 +316,12 @@ impl RouterInfo {
                             match routes {
                                 Some(router_net_proto::RoutingInfoTable { entry} ) => {
                                     ConnectionTable::process_received_routing_info(received.received_from, entry);
+                                },
+                                _ => {},
+                            }
+                            match feeds{
+                                Some(router_net_proto::FeedIdsTable { ids } ) => {
+                                    Feed::process_received_feed_ids(&ids);
                                 },
                                 _ => {},
                             }
