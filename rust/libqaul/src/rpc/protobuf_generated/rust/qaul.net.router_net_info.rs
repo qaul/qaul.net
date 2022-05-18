@@ -87,3 +87,34 @@ pub struct FeedIdsTable {
     #[prost(bytes="vec", repeated, tag="1")]
     pub ids: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
 }
+/// Router information message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FeedRequstMessage {
+    ///Feed ids table
+    #[prost(message, optional, tag="1")]
+    pub feeds: ::core::option::Option<FeedIdsTable>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FeedResponseMessage {
+    ///Feed ids table
+    #[prost(message, optional, tag="1")]
+    pub feeds: ::core::option::Option<FeedResponseTable>,
+}
+///Feed ids table
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FeedResponseTable {
+    #[prost(message, repeated, tag="1")]
+    pub messages: ::prost::alloc::vec::Vec<FeedMessage>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FeedMessage {
+    //// sender id 
+    #[prost(bytes="vec", repeated, tag="1")]
+    pub sender_id: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+    //// message content
+    #[prost(string, tag="2")]
+    pub content: ::prost::alloc::string::String,
+    //// timestamp in milli seconds
+    #[prost(uint64, tag="3")]
+    pub time: u64,
+}

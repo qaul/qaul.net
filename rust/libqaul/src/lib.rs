@@ -35,6 +35,7 @@ use connections::{
 use node::Node;
 use router::{
     flooder,
+    feed_requester,
     info::RouterInfo, 
     Router,
     neighbours::Neighbours,
@@ -79,6 +80,7 @@ enum EventType {
     Rpc(bool),
     Sys(bool),
     Flooding(bool),
+    FeedRequest(bool),
     RoutingInfo(bool),
     ReConnecting(bool),
     RoutingTable(bool),
@@ -133,6 +135,9 @@ pub async fn start(storage_path: String) -> () {
     // check flooding message queue periodically
     let mut flooding_ticker = Ticker::new(Duration::from_millis(100));
 
+    // check feed request to neighbour
+    let mut feedreq_ticker = Ticker::new(Duration::from_millis(100));
+
     // send routing info periodically to neighbours
     let mut routing_info_ticker = Ticker::new(Duration::from_millis(100));
 
@@ -157,6 +162,7 @@ pub async fn start(storage_path: String) -> () {
             let rpc_fut = rpc_ticker.next().fuse();
             let sys_fut = sys_ticker.next().fuse();
             let flooding_fut = flooding_ticker.next().fuse();
+            let feedreq_fut = feedreq_ticker.next().fuse();            
             let routing_info_fut = routing_info_ticker.next().fuse();
             let connection_fut = connection_ticker.next().fuse();
             let routing_table_fut = routing_table_ticker.next().fuse();
@@ -170,6 +176,7 @@ pub async fn start(storage_path: String) -> () {
                 rpc_fut,
                 sys_fut,
                 flooding_fut,
+                feedreq_fut,
                 routing_info_fut,
                 connection_fut,
                 routing_table_fut,
@@ -234,6 +241,7 @@ pub async fn start(storage_path: String) -> () {
                 _rpc_event = rpc_fut => Some(EventType::Rpc(true)),
                 _sys_event = sys_fut => Some(EventType::Sys(true)),
                 _flooding_event = flooding_fut => Some(EventType::Flooding(true)),
+                _feedreq_event = feedreq_fut => Some(EventType::FeedRequest(true)),
                 _routing_info_event = routing_info_fut => Some(EventType::RoutingInfo(true)),
                 _connection_event = connection_fut => Some(EventType::ReConnecting(true)),
                 _routing_table_event = routing_table_fut => Some(EventType::RoutingTable(true)),
@@ -286,6 +294,40 @@ pub async fn start(storage_path: String) -> () {
                         }
                         if !matches!(msg.incoming_via, ConnectionModule::Ble) {
                             Ble::send_feed_message(msg.topic, msg.message);
+                        }
+                    }
+                }
+                EventType::FeedRequest(_) => {
+                    // send messages in the flooding queue
+                    // get sending queue
+                    let mut feed_requester = feed_requester::FEEDREQUESTER.get().write().unwrap();
+
+                    // loop over messages to send & flood them
+                    while let Some(request) = feed_requester.to_send.pop_front() {
+
+                        let connection_module = Neighbours::is_neighbour(&request.neighbour_id);
+                        if connection_module == ConnectionModule::None {
+                            log::error!("sending feed requests, node is not a neighbour anymore: {:?}", request.neighbour_id);
+                            continue;
+                        }                        
+                        //make data
+                        let data = RouterInfo::create_feed_request(&request.feed_ids);
+                        match connection_module {
+                            ConnectionModule::Lan => lan
+                                .swarm
+                                .behaviour_mut()
+                                .qaul_info
+                                .send_qaul_info_message(request.neighbour_id, data),
+                            ConnectionModule::Internet => internet
+                                .swarm
+                                .behaviour_mut()
+                                .qaul_info
+                                .send_qaul_info_message(request.neighbour_id, data),
+                            ConnectionModule::Ble => {
+                                Ble::send_routing_info(request.neighbour_id, data);
+                            }
+                            ConnectionModule::Local => {}
+                            ConnectionModule::None => {}
                         }
                     }
                 }

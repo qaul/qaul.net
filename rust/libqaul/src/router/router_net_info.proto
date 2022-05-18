@@ -70,3 +70,28 @@ message UserInfo {
 message FeedIdsTable {
     repeated bytes ids = 1;
 }
+
+// Router information message
+message FeedRequstMessage {
+    //Feed ids table
+    FeedIdsTable feeds = 1;
+}
+
+message FeedResponseMessage {
+    //Feed ids table
+    FeedResponseTable feeds = 1;
+}
+
+//Feed ids table
+message FeedResponseTable {
+    repeated FeedMessage messages = 1;
+}
+
+message FeedMessage {
+    /// sender id 
+    repeated bytes sender_id = 1;
+    /// message content
+    string content = 2;
+    /// timestamp in milli seconds
+    uint64 time = 3;
+}

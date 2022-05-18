@@ -13,6 +13,7 @@ use std::sync::RwLock;
 pub mod neighbours;
 pub mod users;
 pub mod flooder;
+pub mod feed_requester;
 pub mod table;
 pub mod connections;
 pub mod info;
@@ -20,6 +21,10 @@ pub mod info;
 use neighbours::Neighbours;
 use users::Users;
 use flooder::Flooder;
+use feed_requester::{
+    FeedRequester,
+    FeedResponser
+};
 use table::RoutingTable;
 use connections::ConnectionTable;
 use info::RouterInfo;
@@ -71,6 +76,12 @@ impl Router {
 
         // initialize flooder queue
         Flooder::init();
+
+        // initialize feed_requester queue
+        FeedRequester::init();
+
+        // initialize feed_requester queue
+        FeedResponser::init();
 
         // initialize the global routing table
         RoutingTable::init();

@@ -47,6 +47,8 @@ use crate::{
 use crate::services::{
     feed::{Feed},
 };
+use crate::feed_requester::FeedRequester;
+
 
 /// mutable state of Neighbours table per ConnectionModule
 static SCHEDULER: Storage<RwLock<Scheduler>> = Storage::new();
@@ -283,6 +285,52 @@ impl RouterInfo {
         buf
     }
 
+    //creating feed request message
+    pub fn create_feed_request(ids: &Vec<Vec<u8>>)-> Vec<u8>{
+
+        let node_id = Node::get_id();
+
+        //create latest Feed ids table
+        let feeds = router_net_proto::FeedIdsTable{
+            ids: ids.clone(),
+        };
+
+        let timestamp = Timestamp::get_timestamp();
+        let router_info = router_net_proto::FeedRequstMessage {
+            feeds: Some(feeds)
+        };
+
+        let mut buf = Vec::with_capacity(router_info.encoded_len());
+        router_info.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        let router_info_proto = router_net_proto::RouterInfoContent {
+            id: node_id.to_bytes(),
+            content: buf,
+            time: timestamp,
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(router_info_proto.encoded_len());
+        router_info_proto.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // sign data
+        let keys = Node::get_keys();
+        let signature = keys.sign(&buf).unwrap();
+
+        // create signed container
+        let router_info_container = router_net_proto::RouterInfoContainer {
+            signature,
+            message: buf,
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(router_info_container.encoded_len());
+        router_info_container.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        buf
+
+    }
+
     /// process received qaul_info message
     pub fn received( received: QaulInfoReceived ) {
         // decode message to structure
@@ -321,7 +369,10 @@ impl RouterInfo {
                             }
                             match feeds{
                                 Some(router_net_proto::FeedIdsTable { ids } ) => {
-                                    Feed::process_received_feed_ids(&ids);
+                                    let missing_ids = Feed::process_received_feed_ids(&ids);
+                                    if missing_ids.len() > 0 {                                        
+                                        FeedRequester::add(&received.received_from, &missing_ids);
+                                    }
                                 },
                                 _ => {},
                             }
