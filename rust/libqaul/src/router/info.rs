@@ -442,12 +442,16 @@ impl RouterInfo {
                             },
                             Some(router_net_proto::RouterInfoModule::FeedRequest) =>{
                                 let message_info = router_net_proto::FeedRequstMessage::decode(&content.content[..]);
+                                log::error!("on received FeedRequest");
                                 if let Ok(message) = message_info {
-                                    match message.feeds {
+                                    match message.feeds {                                        
                                         Some(table) =>{
+                                            log::error!("on received FeedRequest id={}", bs58::encode(&table.ids[0]).into_string());
                                             let feeds = Feed::get_messges_by_ids(&table.ids);
                                             if feeds.len() > 0 {
                                                 FeedResponser::add(&received.received_from, &feeds);
+                                            }else{
+                                                log::error!("on received FeedRequest can't find message"); 
                                             }
                                         },
                                         _ => {}
