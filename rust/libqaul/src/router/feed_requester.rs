@@ -49,15 +49,9 @@ impl FeedRequester {
 
 
 pub static FEEDRESPONSER: Storage<RwLock<FeedResponser>> = Storage::new();
-pub struct FeedMessage {
-    pub sender_id: Vec<u8>,
-    pub content: String,
-    pub time: u64,
-}
-
 pub struct FeedResponse {
     pub neighbour_id: PeerId,
-    pub feeds: Vec<FeedMessage>,
+    pub feeds: Vec<(Vec<u8>, Vec<u8>, String, u64)>,
 }
 
 pub struct FeedResponser {
@@ -72,16 +66,13 @@ impl FeedResponser {
     }
 
     /// Add a message to the ring buffer for sending.
-    pub fn add(neighbour_id: &PeerId, feeds: &Vec<(Vec<u8>, String, u64)>) {
+    pub fn add(neighbour_id: &PeerId, feeds: &Vec<(Vec<u8>, Vec<u8>, String, u64)>) {
         let mut msg = FeedResponse {
             neighbour_id: neighbour_id.clone(),
             feeds: vec![],
         };
-        for (sender_id, content, time) in feeds{
-            let feed = FeedMessage{
-                sender_id: sender_id.clone(), content: content.clone(), time: *time
-            };
-            msg.feeds.push(feed);
+        for (message_id, sender_id, content, time) in feeds{
+            msg.feeds.push((message_id.clone(), sender_id.clone(), content.clone(), *time));
         }
 
         // add it to sending queue

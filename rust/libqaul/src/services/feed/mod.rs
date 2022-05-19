@@ -252,10 +252,61 @@ impl Feed {
                 }  
     }
 
+    //Save message by sync
+    pub fn save_message_by_sync(message_id: &Vec<u8>, sender_id: &Vec<u8>, content: String, time: u64) {
+
+        let feedr = FEED.get().read().unwrap();
+        if feedr.messages.contains_key(message_id) == true {
+            return;
+        }
+
+        let msg_content = proto_net::FeedMessageContent {
+            sender: sender_id.clone(),
+            content: content.clone(),
+            time: time
+        };
+
+        // open feed map for writing
+        let mut feed = FEED.get().write().unwrap();
+
+        // insert message to in memory BTreeMap
+        feed.messages.insert(message_id.clone(), msg_content);
+
+        // create new key
+        let last_message = feed.last_message +1;
+
+        // create timestamp
+        let timestamp_received = timestamp::Timestamp::get_timestamp();
+         
+        //create feed struct for database store
+        let message_data = FeedMessageData {
+            index: last_message,
+            message_id: message_id.clone(),
+            sender_id: sender_id.clone(),
+            timestamp_sent: time,
+            timestamp_received,
+            content: content.clone(),
+        };    
+
+        // save to data base
+        if let Err(e) = feed.tree.insert(&last_message.to_be_bytes(), message_data) {
+            log::error!("Error saving feed message to data base: {}", e);
+        }
+        else {
+            if let Err(e) = feed.tree.flush() {
+                log::error!("Error when flushing data base to disk: {}", e);
+            }
+        }
+
+        // update key
+        feed.last_message = last_message;
+    }
+
+
     /// Save a Message
     /// 
     /// This function saves a new message in the data base and in the in-memory BTreeMap
-    fn save_message (signature: Vec<u8>, message: proto_net::FeedMessageContent) {
+    fn save_message(signature: Vec<u8>, message: proto_net::FeedMessageContent) {
         // open feed map for writing
         let mut feed = FEED.get().write().unwrap();
 
@@ -330,6 +381,17 @@ impl Feed {
             }    
         }
         missing_ids
+    }
+
+    pub fn get_messges_by_ids(ids: &Vec<Vec<u8>>) -> Vec<(Vec<u8>, Vec<u8>, String, u64)>{
+        let mut res: Vec<(Vec<u8>, Vec<u8>, String, u64)> = vec![];
+        let feed = FEED.get().read().unwrap();
+        for id in ids{
+            if let Some(feed) = feed.messages.get(id) {
+                res.push((id.clone(), feed.sender.clone(), feed.content.clone(), feed.time));
+            }
+        }
+        res
     }
 
 

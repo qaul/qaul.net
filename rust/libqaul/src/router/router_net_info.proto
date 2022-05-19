@@ -1,6 +1,13 @@
 syntax = "proto3";
 package qaul.net.router_net_info;
 
+// RouterInfoModule
+enum RouterInfoModule {
+    ROUTER_INFO = 0;
+    FEED_REQUEST = 1;
+    FEED_RESPONSE = 2;
+}
+
 // Router information Container
 message RouterInfoContainer {
     // signature
@@ -13,10 +20,12 @@ message RouterInfoContainer {
 message RouterInfoContent {
     // node id
     bytes id = 1;
+    // RouterInfo Module
+    RouterInfoModule routerInfoModule = 2;
     // message content
-    bytes content = 2;
+    bytes content = 3;
     // timestamp in milli seconds
-    uint64 time = 3;
+    uint64 time = 4;
 }
 
 
@@ -88,10 +97,12 @@ message FeedResponseTable {
 }
 
 message FeedMessage {
+    /// message id 
+    bytes message_id = 1;
     /// sender id 
-    repeated bytes sender_id = 1;
+    bytes sender_id = 2;
     /// message content
-    string content = 2;
+    string content = 3;
     /// timestamp in milli seconds
-    uint64 time = 3;
+    uint64 time = 4;
 }

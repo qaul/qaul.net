@@ -48,6 +48,7 @@ use crate::services::{
     feed::{Feed},
 };
 use crate::feed_requester::FeedRequester;
+use crate::feed_requester::FeedResponser;
 
 
 /// mutable state of Neighbours table per ConnectionModule
@@ -260,6 +261,7 @@ impl RouterInfo {
 
         let router_info_proto = router_net_proto::RouterInfoContent {
             id: node_id.to_bytes(),
+            router_info_module: router_net_proto::RouterInfoModule::RouterInfo as i32,
             content: buf,
             time: timestamp,
         };
@@ -305,6 +307,7 @@ impl RouterInfo {
 
         let router_info_proto = router_net_proto::RouterInfoContent {
             id: node_id.to_bytes(),
+            router_info_module: router_net_proto::RouterInfoModule::FeedRequest as i32, 
             content: buf,
             time: timestamp,
         };
@@ -331,6 +334,63 @@ impl RouterInfo {
 
     }
 
+    //create_feed_response
+    pub fn create_feed_response(messages: &Vec<(Vec<u8>, Vec<u8>, String, u64)>)-> Vec<u8>{
+
+        let node_id = Node::get_id();
+
+        //create latest Feed ids table
+        let mut feeds = router_net_proto::FeedResponseTable{
+            messages: vec![],
+        };
+        for (message_id, sender_id, content, time) in messages{
+            let feed = router_net_proto::FeedMessage{
+                message_id: message_id.clone(),
+                sender_id: sender_id.clone(),
+                content: content.clone(),
+                time: *time
+            };
+            feeds.messages.push(feed);
+        }
+
+        let timestamp = Timestamp::get_timestamp();
+        let router_info = router_net_proto::FeedResponseMessage {
+            feeds: Some(feeds)
+        };
+
+        let mut buf = Vec::with_capacity(router_info.encoded_len());
+        router_info.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        let router_info_proto = router_net_proto::RouterInfoContent {
+            id: node_id.to_bytes(),
+            router_info_module: router_net_proto::RouterInfoModule::FeedResponse as i32,
+            content: buf,
+            time: timestamp,
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(router_info_proto.encoded_len());
+        router_info_proto.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // sign data
+        let keys = Node::get_keys();
+        let signature = keys.sign(&buf).unwrap();
+
+        // create signed container
+        let router_info_container = router_net_proto::RouterInfoContainer {
+            signature,
+            message: buf,
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(router_info_container.encoded_len());
+        router_info_container.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        buf
+
+    }
+
+
     /// process received qaul_info message
     pub fn received( received: QaulInfoReceived ) {
         // decode message to structure
@@ -346,38 +406,74 @@ impl RouterInfo {
 
                 match message_result {
                     Ok(content) => {
-                        let message_info = router_net_proto::RouterInfoMessage::decode(&content.content[..]);
-                        if let Ok(message) = message_info {
-                            // collect users and routes
-                            let messages = message;
-                            let users = messages.users;
-                            let routes = messages.routes;
-                            let feeds = messages.feeds;
-
-                            match users {
-                                Some(router_net_proto::UserInfoTable { info }) => {
-                                    Users::add_user_info_table(info);
-                                },
-                                _ => {},
-                            }
-
-                            match routes {
-                                Some(router_net_proto::RoutingInfoTable { entry} ) => {
-                                    ConnectionTable::process_received_routing_info(received.received_from, entry);
-                                },
-                                _ => {},
-                            }
-                            match feeds{
-                                Some(router_net_proto::FeedIdsTable { ids } ) => {
-                                    let missing_ids = Feed::process_received_feed_ids(&ids);
-                                    if missing_ids.len() > 0 {                                        
-                                        FeedRequester::add(&received.received_from, &missing_ids);
+                        match router_net_proto::RouterInfoModule::from_i32(content.router_info_module) {
+                            Some(router_net_proto::RouterInfoModule::RouterInfo) =>{
+                                let message_info = router_net_proto::RouterInfoMessage::decode(&content.content[..]);
+                                if let Ok(message) = message_info {
+                                    // collect users and routes
+                                    let messages = message;
+                                    let users = messages.users;
+                                    let routes = messages.routes;
+                                    let feeds = messages.feeds;
+        
+                                    match users {
+                                        Some(router_net_proto::UserInfoTable { info }) => {
+                                            Users::add_user_info_table(info);
+                                        },
+                                        _ => {},
                                     }
-                                },
-                                _ => {},
+        
+                                    match routes {
+                                        Some(router_net_proto::RoutingInfoTable { entry} ) => {
+                                            ConnectionTable::process_received_routing_info(received.received_from, entry);
+                                        },
+                                        _ => {},
+                                    }
+                                    match feeds{
+                                        Some(router_net_proto::FeedIdsTable { ids } ) => {
+                                            let missing_ids = Feed::process_received_feed_ids(&ids);
+                                            if missing_ids.len() > 0 {                                        
+                                                FeedRequester::add(&received.received_from, &missing_ids);
+                                            }
+                                        },
+                                        _ => {},
+                                    }
+                                }         
+                            },
+                            Some(router_net_proto::RouterInfoModule::FeedRequest) =>{
+                                let message_info = router_net_proto::FeedRequstMessage::decode(&content.content[..]);
+                                if let Ok(message) = message_info {
+                                    match message.feeds {
+                                        Some(table) =>{
+                                            let feeds = Feed::get_messges_by_ids(&table.ids);
+                                            if feeds.len() > 0 {
+                                                FeedResponser::add(&received.received_from, &feeds);
+                                            }
+                                        },
+                                        _ => {}
+                                    }
+                                    
+                                }
+                            },
+                            Some(router_net_proto::RouterInfoModule::FeedResponse) =>{
+                                let message_info = router_net_proto::FeedResponseMessage::decode(&content.content[..]);
+                                if let Ok(message) = message_info {
+                                    match message.feeds {
+                                        Some(table) =>{
+                                            for feed in table.messages{
+                                                Feed::save_message_by_sync(&feed.message_id, &feed.sender_id, feed.content, feed.time);
+                                            }
+                                        },
+                                        _ => {}
+                                    }
+                                    
+                                }
+                            },
+                            _ =>{
+
                             }
                         }
-                    },
+                   },
                     Err(msg) => {
                         log::error!("RouterInfoContent decode {:?}", msg);
                     },
