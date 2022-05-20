@@ -7,7 +7,7 @@ orbs:
 # Configurations
 # ------------------------------------------------
 flutter_version: &flutter_version
-  FLUTTER_VERSION: "2.10.4"
+  FLUTTER_VERSION: "3.0.1"
 repository_url: &repository_url
   REPO_URL: "https://github.com/brenodt/Qaul-CI-Tests"
 default_flutter_wdir: &default_flutter_wdir
@@ -35,7 +35,7 @@ aliases:
 executors:
   flutter:
     docker:
-      - image: cirrusci/flutter:2.10.4
+      - image: cirrusci/flutter:3.0.1
     <<: *default_flutter_wdir
   android-flutter:
     docker:
@@ -494,12 +494,15 @@ jobs:
       - checkout-project
       - save_cache: *save_git_cache
       - run:
+          name: Install core package dependencies
+          command: apt-get update && apt-get install -y curl apt-transport-https xz-utils
+      - run:
           name: Install Github CLI
           command: |
             curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
             echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
             sudo apt update
-            sudo apt install gh
+            sudo apt install gh -y
       - run:
           name: Download Libqaul *.so File from latest Github Release
           command: |
@@ -510,7 +513,12 @@ jobs:
       - install-flutter-deps
       - run:
           name: Build Flutter Application for Linux
-          command: cd installers/linux && bash snapbuild
+          command: |
+            SNAP_PATH=$(cd installers/linux && bash snapbuild | tail -n1 )
+            echo "Resulting snap file can be found at: $SNAP_PATH"
+      - store_artifacts:
+          path: /root/qaul-libp2p/qaul_ui/qaul-app-2.0.0+3.snap
+
 # ------------------------------------------------
 # Workflows
 # ------------------------------------------------
@@ -555,6 +563,11 @@ workflows:
           requires:
             - flutter-test
             - flutter-analyze
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+            branches:
+              ignore: /.*/
       - windows-flutter-build:
           requires:
             - flutter-test
@@ -564,6 +577,10 @@ workflows:
               only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
             branches:
               ignore: /.*/
+      - linux-flutter-build:
+          requires:
+            - flutter-test
+            - flutter-analyze
       # TODO: Add Github Release step for Flutter
   rust-build-and-deploy:
     jobs:

@@ -35,16 +35,21 @@ dependencies:
   # ********
   font_awesome_flutter: ^10.1.0
   # Responsive UI Support => App Wrapper
-  responsive_framework: ^0.1.4
+  responsive_framework: ^0.2.0
   # Dynamic Theme Control => dark, light mode & so on
-  adaptive_theme: ^2.3.0
+  adaptive_theme: ^3.0.0
   # SVG-support
   flutter_svg: ^0.23.0+1
   # Notification bubbles on icons
   badges: ^2.0.1
   # Dynamic Network View
-  flame: ^1.0.0
-  flame_forge2d: ^0.8.3
+  # flame: ^1.0.0
+  flame:
+    git: 
+      url: https://github.com/flame-engine/flame.git
+      ref: 69214827a0edb563468951256eccecab408f89df 
+      path: packages/flame
+  flame_forge2d: ^0.11.0
   open_simplex_2: ^0.2.1
 
 
@@ -60,7 +65,7 @@ dependencies:
 # TODO: Reinstate once package is fixed. Plugin broke against new Flutter version 2.8
 #  bitsdojo_window: ^0.1.1+1
   # Windows-native Widgets
-  fluent_ui: ^3.5.0
+  fluent_ui: ^3.12.0
   # MacOS-native Widgets
   macos_ui: ^0.10.0+1
 
@@ -69,14 +74,14 @@ dependencies:
   # *******
   collection: ^1.15.0
   equatable: ^2.0.3
-  flutter_hooks: ^0.18.0
+  flutter_hooks: ^0.18.4
+  hooks_riverpod: ^1.0.4
   hive: ^2.0.4
   hive_flutter: ^1.1.0
   intersperse: ^2.0.0
   intl: ^0.17.0
   logging: ^1.0.2
   meta: ^1.7.0
-  riverpod: ^1.0.3
   uni_links: ^0.5.1
   uuid: ^3.0.5
 
@@ -95,7 +100,11 @@ dependencies:
   cupertino_icons: ^1.0.2
 
 dependency_overrides:
-  forge2d: ^0.8.2
+  flame:
+    git: 
+      url: https://github.com/flame-engine/flame.git
+      ref: 69214827a0edb563468951256eccecab408f89df 
+      path: packages/flame
 
 dev_dependencies:
   flutter_test:

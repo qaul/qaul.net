@@ -281,7 +281,7 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
       jointDef.dampingRatio = .2;
       jointDef.frequencyHz = 1.0;
 
-      world.createJoint(jointDef);
+      world.createJoint(DistanceJoint(jointDef));
     }
 
     return body;
