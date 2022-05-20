@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(runner LANGUAGES CXX)
 
 set(BINARY_NAME "qaul")
-set(APPLICATION_ID "net.qaul.qaulapp.qaul_ui")
+set(APPLICATION_ID "net.qaul.qaul")
 
 cmake_policy(SET CMP0063 NEW)
 
