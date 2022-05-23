@@ -318,7 +318,6 @@ pub async fn start(storage_path: String) -> () {
                             continue;
                         }                        
                         //make data
-                        log::error!("send feed request to={}, id={}", request.neighbour_id, bs58::encode(&request.feed_ids[0]).into_string());
                         let data = RouterInfo::create_feed_request(&request.feed_ids);
                         match connection_module {
                             ConnectionModule::Lan => lan
@@ -352,8 +351,6 @@ pub async fn start(storage_path: String) -> () {
                             log::error!("sending feed requests, node is not a neighbour anymore: {:?}", request.neighbour_id);
                             continue;
                         }
-
-                        log::error!("send feed response to={}, id={}", request.neighbour_id, bs58::encode(&request.feeds[0].0).into_string());
 
                         //make data
                         let data = RouterInfo::create_feed_response(&request.feeds);
