@@ -11,7 +11,7 @@
 # build libqaul
 cd ../../rust/libqaul
 #cargo clean
-./build_libqaul_android.sh
+#./build_libqaul_android.sh
 
 # android aar
 cd ../../android
@@ -23,8 +23,9 @@ cd ../../android
 ./gradlew assemble
 
 # copy aar files to flutter
-install -D libqaul/build/outputs/aar/*.aar ../qaul_ui/android/app/libs
-install -D blemodule/build/outputs/aar/*.aar ../qaul_ui/android/app/libs
+mkdir -p ../qaul_ui/android/app/libs
+install -D libqaul/build/outputs/aar/*.aar ../qaul_ui/android/app/libs/
+install -D blemodule/build/outputs/aar/*.aar ../qaul_ui/android/app/libs/
 
 # flutter
 cd ../qaul_ui
