@@ -13,6 +13,11 @@ use futures::{future::FutureExt, pin_mut, select};
 use futures_ticker::Ticker;
 use state::Storage;
 use std::time::Duration;
+use std::fs::File;
+use std::env;
+use filetime::FileTime;
+use std::collections::BTreeMap;
+use crate::utilities::timestamp::Timestamp;
 
 // crate modules
 pub mod api;
@@ -90,14 +95,96 @@ pub async fn start(storage_path: String) -> () {
     let libqaul_rpc_receive = Rpc::init();
     let libqaul_sys_receive = Sys::init();
 
-    // only use the pretty logger on desktop systems
-    #[cfg(not(any(target_os = "android", target_os = "ios")))]
-    pretty_env_logger::init();
-
+    let storage_p = storage_path.clone();
     // initialize storage module.
     // This will initialize configuration & data base
     storage::Storage::init(storage_path);
 
+    //////////////////////////////////logger init////////////////////////////////
+    //prepare logger path
+    let logger_path: String;
+    if storage_p.len() == 0{
+        logger_path = "./logs/".to_string();
+    }else{
+        logger_path = storage_p + "/logs/";
+    }
+    let cur_time_as_ms = Timestamp::get_timestamp();
+    let logger_file = logger_path.clone() + "error_" + &cur_time_as_ms.to_string() + ".log";
+
+    //create log directory
+    std::fs::create_dir_all(logger_path.clone()).unwrap();
+
+    //maintain log files
+    let paths = std::fs::read_dir(logger_path.clone()).unwrap();
+
+    //errror_234324232.log
+    //////////////////////////////////logger init-end////////////////////////////////
+    let mut logfiles: BTreeMap<i64, String> = BTreeMap::new();
+    let mut logfile_times: Vec<i64> = vec![];
+    for path in paths{
+        let filename = String::from(path.as_ref().unwrap().path().to_str().unwrap());
+        let metadata = std::fs::metadata(filename.clone()).unwrap();
+        //print!("path={}", path.unwrap().path().display());
+        let mtime = FileTime::from_last_modification_time(&metadata);
+        //println!("{}", mtime.seconds());
+        logfile_times.push(mtime.seconds());
+        logfiles.insert(mtime.seconds(), filename);
+    }
+    logfile_times.sort();
+
+    if logfile_times.len() > 2{
+        for i in 0..(logfile_times.len() - 2) {
+            if let Some(filename) = logfiles.get(&logfile_times[i]) {
+                std::fs::remove_file(std::path::Path::new(filename)).unwrap();
+            }
+        }    
+    }
+
+    //find rust env var
+    let mut env_log_level = String::from("error");
+    for (key, value) in env::vars() {
+        if key == "RUST_LOG"{
+            env_log_level = value;
+            break;
+        }
+    }
+    #[cfg(target_os = "android")]
+    {
+        let mut level_filter = log::Level::Error;
+        if env_log_level == "warn"{
+            level_filter = log::Level::Warn;
+        }else if  env_log_level == "debug"{
+            level_filter = log::Level::Debug;
+        }else if env_log_level == "info"{
+            level_filter = log::Level::Info;
+        }else if env_log_level == "trace"{
+            level_filter = log::Level::Trace;
+        }        
+        let env_logger = Box::new(android_logger::AndroidLogger::new(Config::default().with_min_level(level_filter)));
+        let w_logger = simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap());
+        multi_log::MultiLogger::init(vec![env_logger, w_logger], log::Level::Info).unwrap();
+    }
+
+    // only use the simple logger on desktop systems
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        let mut level_filter = log::LevelFilter::Error;
+        if env_log_level == "warn"{
+            level_filter = log::LevelFilter::Warn;
+        }else if  env_log_level == "debug"{
+            level_filter = log::LevelFilter::Debug;
+        }else if env_log_level == "info"{
+            level_filter = log::LevelFilter::Info;
+        }else if env_log_level == "trace"{
+            level_filter = log::LevelFilter::Trace;
+        }        
+        let env_logger = Box::new(pretty_env_logger::formatted_builder().filter(None, level_filter).build());
+        let w_logger = simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap());
+        multi_log::MultiLogger::init(vec![env_logger, w_logger], log::Level::Info).unwrap();
+    }
+
+
+    log::error!("this is test");
     // initialize node & user accounts
     Node::init();
 
