@@ -70,6 +70,9 @@ jobs:
   # ------------------------------------------------
   # Deploy Jobs
   # ------------------------------------------------
+  # # #  -------------------------------------------
+  # # #  (Deploy Jobs) Rust
+  # # #  -------------------------------------------
   publish-rust-github-release:
     working_directory: ~/qaul-libp2p
     docker:
@@ -125,6 +128,70 @@ jobs:
               -r "${CIRCLE_PROJECT_REPONAME}" \
               -c "${CIRCLE_SHA1}" \
               -n "Rust - v${VERSION}" \
+              -b "${DESCRIPTION}" \
+              -delete \
+              "${TAG}" artifacts/
+  # # #  -------------------------------------------
+  # # #  (Deploy Jobs) Flutter
+  # # #  -------------------------------------------
+  publish-flutter-github-release:
+    working_directory: ~/qaul-libp2p/qaul_ui
+    docker:
+      - image: cimg/base:2022.05
+    steps:
+      - restore_cache: *restore_git_cache
+      - checkout-project
+      - save_cache: *save_git_cache
+      - attach_workspace:
+          at: ~/qaul-libp2p
+      - run:
+          name: Copy executables to ./artifacts
+          command: |
+            mkdir artifacts
+            # Android
+            #cp build/app/outputs/bundle/release/*.aab ./artifacts/
+            # iOS
+            #cp build/ios/ipa/*.ipa ./artifacts/
+            #cp build/ios/archive/*.xcarchive ./artifacts/
+            # MacOS
+            #cp installers/macos/qaul.dmg ./artifacts/
+            # Windows
+            cp installers/windows/qaul.exe ./artifacts/
+            # Linux
+            cp installers/linux/*.snap ./artifacts/
+      - run:
+          name: Install ghr
+          command: |
+            GHR_VERSION=0.14.0
+            GHR_URL=https://github.com/tcnksm/ghr/releases/download/v${GHR_VERSION}/ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+            wget "$GHR_URL"
+            tar xzf ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+            rm -r ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+            echo "export PATH=ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
+      - run:
+          name: Publish Release on GitHub
+          command: |
+            VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2}')
+            TAG="v${VERSION}-flutter"
+
+            SNAP_FILE=$(find artifacts -maxdepth 1 -name '*.snap' -type f -exec basename {} \; | sed 's/\.snap//')
+            AAB_FILE=$(find artifacts -maxdepth 1 -name '*.aab' -type f -exec basename {} \; | cut -f 1 -d '.')
+            IPA_FILE=$(find artifacts -maxdepth 1 -name '*.ipa' -type f -exec basename {} \; | cut -f 1 -d '.')
+            XCA_FILE=$(find artifacts -maxdepth 1 -name '*.xcarchive' -type f -exec basename {} \; | cut -f 1 -d '.')
+
+            DESCRIPTION=$(cat ../docs/flutter-release-template.md | sed "s/TAGNAME/${TAG}/g" | sed "s/SNAPVERSION/${SNAP_FILE}/g" | sed "s/ANDROIDVERSION/${AAB_FILE}/g" | sed "s/IPAVERSION/${IPA_FILE}/g" | sed "s/XCAVERSION/${XCA_FILE}/g")
+
+            echo "Version Found: $VERSION"
+            echo "Tag built:     $TAG"
+            echo "Description built:"
+            echo "$DESCRIPTION"
+            echo ""
+
+            ghr -t "${GITHUB_TOKEN}" \
+              -u "${CIRCLE_PROJECT_USERNAME}" \
+              -r "${CIRCLE_PROJECT_REPONAME}" \
+              -c "${CIRCLE_SHA1}" \
+              -n "Flutter - v${VERSION}" \
               -b "${DESCRIPTION}" \
               -delete \
               "${TAG}" artifacts/
@@ -353,9 +420,10 @@ jobs:
       - run:
           name: fastlane
           command: bundle exec fastlane $FASTLANE_LANE
-      - store_artifacts:
-          path: output
-          destination: output
+      - persist_to_workspace:
+          root: ~/qaul-libp2p
+          paths:
+            - qaul_ui/build/app/outputs/bundle/release/*.aab
   # # #  -------------------------------------------
   # # #  (Flutter) iOS
   # # #  -------------------------------------------
@@ -367,6 +435,7 @@ jobs:
       FL_OUTPUT_DIR: output
       FASTLANE_LANE: upload_testflight
       <<: *flutter_version
+      <<: *repository_url
     shell: /bin/bash --login -o pipefail
     steps:
       - restore_cache: *restore_git_cache
@@ -394,6 +463,11 @@ jobs:
       - store_artifacts:
           path: output
           destination: output
+      - persist_to_workspace:
+          root: ~/qaul-libp2p
+          paths:
+            - qaul_ui/build/ios/ipa/*.ipa
+            - qaul_ui/build/ios/archive/*.xcarchive
   # # #  -------------------------------------------
   # # #  (Flutter) MacOS
   # # #  -------------------------------------------
@@ -403,6 +477,7 @@ jobs:
     working_directory: ~/qaul-libp2p/qaul_ui
     environment:
       <<: *flutter_version
+      <<: *repository_url
     shell: /bin/bash --login -o pipefail
     steps:
       - restore_cache: *restore_git_cache
@@ -412,6 +487,10 @@ jobs:
           name: Install Github CLI
           command: brew install gh
       - run:
+          # TODO(brenodt): After upgrading flutter to 3.0.1, build fails due to missing arch:
+          # TODO:    /Users/distiller/qaul-libp2p/qaul_ui/macos/Runner.xcodeproj: error:
+          # TODO:      The linked and embedded library 'liblibqaul.dylib' is missing one or more architectures required
+          # TODO:      by this target: arm64. (in target 'Runner' from project 'Runner')
           name: Download Libqaul *.dylib File from latest Github Release
           command: |
             LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
@@ -436,8 +515,10 @@ jobs:
           command: |
             cd installers/macos
             appdmg ./config.json ./qaul.dmg
-      - store_artifacts:
-          path: installers/macos/qaul.dmg
+      - persist_to_workspace:
+          root: ~/qaul-libp2p
+          paths:
+            - qaul_ui/installers/macos/qaul.dmg
   # # #  -------------------------------------------
   # # #  (Flutter) Windows
   # # #  -------------------------------------------
@@ -449,6 +530,7 @@ jobs:
     working_directory: ~/qaul-libp2p/qaul_ui
     environment:
       <<: *flutter_version
+      <<: *repository_url
     steps:
       - restore_cache: *restore_git_cache
       - checkout-project
@@ -464,8 +546,13 @@ jobs:
       - run:
           name: Download Libqaul *.dll File from latest Github Release
           command: |
+            echo "Using repo: $REPO_URL"
+
             export PATH="/c/Program Files/Github CLI:${PATH}"
-            LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+
+            LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | /usr/bin/sort --reverse --version-sort | head -n 1)
+            echo "Found latest tag: $LATEST_TAG"
+
             gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/debug
       - install-flutter:
           version: "$FLUTTER_VERSION"
@@ -478,8 +565,10 @@ jobs:
       - run:
           name: Run iscc
           command: cd bin && bash build_windows_installer
-      - store_artifacts:
-          path: installers\windows\qaul.exe
+      - persist_to_workspace:
+          root: ~/qaul-libp2p
+          paths:
+            - qaul_ui\installers\windows\qaul.exe
   # # #  -------------------------------------------
   # # #  (Flutter) Linux
   # # #  -------------------------------------------
@@ -489,6 +578,7 @@ jobs:
     working_directory: ~/qaul-libp2p/qaul_ui
     environment:
       <<: *flutter_version
+      <<: *repository_url
     steps:
       - restore_cache: *restore_git_cache
       - checkout-project
@@ -516,8 +606,10 @@ jobs:
           command: |
             SNAP_PATH=$(cd installers/linux && bash snapbuild | tail -n1 )
             echo "Resulting snap file can be found at: $SNAP_PATH"
-      - store_artifacts:
-          path: /root/qaul-libp2p/qaul_ui/qaul-app-2.0.0+3.snap
+      - persist_to_workspace:
+          root: ~/qaul-libp2p
+          paths:
+            - qaul_ui/installers/linux/*.snap
 
 # ------------------------------------------------
 # Workflows
@@ -529,25 +621,25 @@ workflows:
 #      - flutter-analyze
   flutter-build-and-deploy:
     jobs:
-      - flutter-test
-#          filters:
-#            tags:
-#              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
-#            branches:
-#              ignore: /.*/
-      - flutter-analyze
-#          filters:
-#            tags:
-#              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
-#            branches:
-#              ignore: /.*/
+      - flutter-test:
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+            branches:
+              ignore: /.*/
+      - flutter-analyze:
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+            branches:
+              ignore: /.*/
       - android-beta-deploy:
           requires:
             - flutter-test
             - flutter-analyze
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+              only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
             branches:
               ignore: /.*/
       - ios-beta-deploy:
@@ -556,7 +648,7 @@ workflows:
             - flutter-analyze
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+              only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
             branches:
               ignore: /.*/
       - macos-flutter-build:
@@ -565,7 +657,7 @@ workflows:
             - flutter-analyze
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+              only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
             branches:
               ignore: /.*/
       - windows-flutter-build:
@@ -574,44 +666,60 @@ workflows:
             - flutter-analyze
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-flutter$/
+              only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
             branches:
               ignore: /.*/
       - linux-flutter-build:
           requires:
             - flutter-test
             - flutter-analyze
-      # TODO: Add Github Release step for Flutter
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+            branches:
+              ignore: /.*/
+      - publish-flutter-github-release:
+          requires:
+            - android-beta-deploy
+            - ios-beta-deploy
+            - macos-flutter-build
+            - windows-flutter-build
+            - linux-flutter-build
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+            branches:
+              ignore: /.*/
   rust-build-and-deploy:
     jobs:
       - build-libqaul-linux:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+              only: /^v\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
       - build-libqaul-android:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+              only: /^v\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
       - build-libqaul-ios:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+              only: /^v\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
       - build-libqaul-macos:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+              only: /^v\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
       - build-libqaul-windows:
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+              only: /^v\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
       - publish-rust-github-release:
@@ -623,7 +731,7 @@ workflows:
             - build-libqaul-windows
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+(\+\d)*-rust$/
+              only: /^v\d+\.\d+\.\d+(\+\d)*-rust$/
             branches:
               ignore: /.*/
 
