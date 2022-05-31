@@ -47,9 +47,9 @@ echo "Building Flutter application..."
 git config --global --add safe.directory /root/development/flutter
 
 snapcraft
-mv ./*.snap "qaul-app-$VERSION.snap"
+mv ./*.snap "installers/linux/qaul-app-$VERSION.snap"
 # TODO cannot upload via CircleCI due to the directive:
 #     - human review required due to 'deny-connection' constraint (interface attributes)
 # snapcraft upload "qaul-app-$VERSION.snap" --release=stable
 
-realpath "qaul-app-$VERSION.snap"
+realpath "installers/linux/qaul-app-$VERSION.snap"
