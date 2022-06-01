@@ -12,6 +12,7 @@
 
 pub mod qaul_id;
 pub mod timestamp;
+pub mod filelogger;
 
 /// utilities module structure
 pub struct Utilities {

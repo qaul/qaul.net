@@ -13,6 +13,13 @@ message Debug {
 
         // libqaul panics immediatly
         Panic panic = 3;
+
+        //log enable
+        LogEnable log_enable = 4;
+
+        //log disable
+        LogDisable log_disable = 5;
+
     }
 }
 
@@ -37,4 +44,21 @@ message HeartbeatResponse {
 //
 // This message is for debugging only.
 message Panic {
+}
+
+
+// LogEnable
+//
+// If libqaul receives this enable message, it
+// start to log error contents into error_xxx.log file.
+//
+message LogEnable {
+}
+
+// LogDisable
+//
+// If libqaul receives this disable message, it
+// stop to log error contents into error_xxx.log file.
+//
+message LogDisable {
 }

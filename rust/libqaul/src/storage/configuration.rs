@@ -103,12 +103,27 @@ impl Default for UserAccount {
     }
 }
 
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct DebugOption {
+    pub log: bool,
+}
+impl Default for DebugOption {
+    fn default() -> Self {
+        DebugOption {
+            log: false,
+        }
+    }
+}
+
+
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Configuration {
     pub node: Node,
     pub lan: Lan,
     pub internet: Internet,
     pub user_accounts: Vec<UserAccount>,
+    pub debug: DebugOption,
 }
 
 impl Default for Configuration {
@@ -118,6 +133,7 @@ impl Default for Configuration {
             lan: Lan::default(),
             internet: Internet::default(),
             user_accounts: Vec::new(),
+            debug: DebugOption::default(),
         }
     }
 }
@@ -150,7 +166,7 @@ impl Configuration {
         // Add configuration options from environment variables (with a prefix of QAUL)
         // e.g. `QAUL_DEBUG=1 ./target/qaul` sets the `debug` key
 
-        // match e.merge(Environment::with_prefix("QAUL")) {
+        // match e.merge(Environment::with_prefix("QAUL")) {CONFIG
         //     Ok(env) => settings = env.clone(),
         //     Err(e) => error!("Environment {:?}", e),
         // }
@@ -165,11 +181,21 @@ impl Configuration {
         config
     }
 
-    /// lend configuration for writing
+    /// lend configuration for writingCONFIG
     pub fn get_mut<'a>() -> RwLockWriteGuard<'a, Configuration> {
         let config_mutable = CONFIG.get().write().unwrap();
         config_mutable
     }
+
+    pub fn enable_debug_log(enable: bool){
+        let mut config_mutable = CONFIG.get().write().unwrap();
+        config_mutable.debug.log = enable; 
+    }
+    pub fn get_debug_log()->bool{
+        let config_mutable = CONFIG.get().read().unwrap();
+        config_mutable.debug.log
+    }
+
 
     /// Returns true/false whether this node has been initialized,
     /// or needs to be created for the first time.

@@ -18,6 +18,7 @@ use std::env;
 use filetime::FileTime;
 use std::collections::BTreeMap;
 use crate::utilities::timestamp::Timestamp;
+use crate::utilities::filelogger::FileLogger;
 
 // crate modules
 pub mod api;
@@ -148,6 +149,8 @@ pub async fn start(storage_path: String) -> () {
             break;
         }
     }
+
+
     #[cfg(target_os = "android")]
     {
         let mut level_filter = log::Level::Error;
@@ -161,8 +164,10 @@ pub async fn start(storage_path: String) -> () {
             level_filter = log::Level::Trace;
         }        
         let env_logger = Box::new(android_logger::AndroidLogger::new(Config::default().with_min_level(level_filter)));
-        let w_logger = simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap());
-        multi_log::MultiLogger::init(vec![env_logger, w_logger], log::Level::Info).unwrap();
+        // let w_logger = simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap());
+        // multi_log::MultiLogger::init(vec![env_logger, w_logger], log::Level::Info).unwrap();
+        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap()));
+        multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info).unwrap();
     }
 
     // only use the simple logger on desktop systems
@@ -179,10 +184,12 @@ pub async fn start(storage_path: String) -> () {
             level_filter = log::LevelFilter::Trace;
         }        
         let env_logger = Box::new(pretty_env_logger::formatted_builder().filter(None, level_filter).build());
-        let w_logger = simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap());
-        multi_log::MultiLogger::init(vec![env_logger, w_logger], log::Level::Info).unwrap();
-    }
+        //let w_logger = simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap());
+        //multi_log::MultiLogger::init(vec![env_logger, w_logger], log::Level::Info).unwrap();
 
+        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap()));
+        multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info).unwrap();
+    }
 
     log::error!("this is test");
     // initialize node & user accounts
