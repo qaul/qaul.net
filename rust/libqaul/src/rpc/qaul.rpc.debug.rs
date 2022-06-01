@@ -2,7 +2,7 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Debug {
     /// message type
-    #[prost(oneof="debug::Message", tags="1, 2, 3")]
+    #[prost(oneof="debug::Message", tags="1, 2, 3, 4, 5")]
     pub message: ::core::option::Option<debug::Message>,
 }
 /// Nested message and enum types in `Debug`.
@@ -19,6 +19,12 @@ pub mod debug {
         /// libqaul panics immediatly
         #[prost(message, tag="3")]
         Panic(super::Panic),
+        ///log enable
+        #[prost(message, tag="4")]
+        LogEnable(super::LogEnable),
+        ///log disable
+        #[prost(message, tag="5")]
+        LogDisable(super::LogDisable),
     }
 }
 /// Request a Heartbeat from Libqaul
@@ -43,4 +49,20 @@ pub struct HeartbeatResponse {
 /// This message is for debugging only.
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Panic {
+}
+/// LogEnable
+///
+/// If libqaul receives this enable message, it
+/// start to log error contents into error_xxx.log file.
+///
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct LogEnable {
+}
+/// LogDisable
+///
+/// If libqaul receives this disable message, it
+/// stop to log error contents into error_xxx.log file.
+///
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct LogDisable {
 }

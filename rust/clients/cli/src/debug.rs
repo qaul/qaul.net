@@ -35,6 +35,14 @@ impl Debug {
             cmd if cmd.starts_with("panic") => {
                 Self::panic();
             },
+            // let libqaul panic
+            cmd if cmd.starts_with("log enable") => {
+                Self::debug_log_enable_send();
+            },
+            // let libqaul panic
+            cmd if cmd.starts_with("log disable") => {
+                Self::debug_log_disable_send();
+            },
             // unknown command
             _ => log::error!("unknown debug command"),
         }
@@ -70,6 +78,38 @@ impl Debug {
 
         // send message
         Rpc::send_message(buf, super::rpc::proto::Modules::Debug.into(), "".to_string());
+    }
+
+    fn debug_log_enable_send(){
+        // create log enable message
+        let proto_message = proto::Debug {
+            message: Some(proto::debug::Message::LogEnable(
+                proto::LogEnable{}
+            )),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(buf, super::rpc::proto::Modules::Debug.into(), "".to_string());
+    }
+
+    fn debug_log_disable_send(){
+        // create log enable message
+        let proto_message = proto::Debug {
+            message: Some(proto::debug::Message::LogDisable(
+                proto::LogDisable{}
+            )),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(buf, super::rpc::proto::Modules::Debug.into(), "".to_string());        
     }
 
     /// send a debugging message to libqaul that
