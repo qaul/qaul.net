@@ -2,7 +2,7 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Debug {
     /// message type
-    #[prost(oneof="debug::Message", tags="1, 2, 3, 4, 5")]
+    #[prost(oneof="debug::Message", tags="1, 2, 3, 4, 5, 6")]
     pub message: ::core::option::Option<debug::Message>,
 }
 /// Nested message and enum types in `Debug`.
@@ -21,10 +21,13 @@ pub mod debug {
         Panic(super::Panic),
         ///log enable
         #[prost(message, tag="4")]
-        LogEnable(super::LogEnable),
-        ///log disable
+        LogToFile(super::LogToFile),
+        ///Storage Path Request
         #[prost(message, tag="5")]
-        LogDisable(super::LogDisable),
+        StoragePathRequest(super::StoragePathRequest),
+        ///Storage Path Response
+        #[prost(message, tag="6")]
+        StoragePathResponse(super::StoragePathResponse),
     }
 }
 /// Request a Heartbeat from Libqaul
@@ -50,19 +53,29 @@ pub struct HeartbeatResponse {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Panic {
 }
-/// LogEnable
+/// LogToFile
 ///
 /// If libqaul receives this enable message, it
-/// start to log error contents into error_xxx.log file.
+/// start or stop to log error contents into error_xxx.log file.
 ///
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct LogEnable {
+pub struct LogToFile {
+    #[prost(bool, tag="1")]
+    pub enable: bool,
 }
-/// LogDisable
+/// StoragePathRequest
 ///
-/// If libqaul receives this disable message, it
-/// stop to log error contents into error_xxx.log file.
+/// Return storage path
 ///
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct LogDisable {
+pub struct StoragePathRequest {
+}
+/// StoragePathResponse
+///
+/// Contains Storage Path
+///
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct StoragePathResponse {
+    #[prost(string, tag="1")]
+    pub storage_path: ::prost::alloc::string::String,
 }
