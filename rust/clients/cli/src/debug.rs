@@ -43,6 +43,9 @@ impl Debug {
             cmd if cmd.starts_with("log disable") => {
                 Self::debug_log_disable_send();
             },
+            cmd if cmd.starts_with("path") => {
+                Self::debug_path_send();
+            },            
             // unknown command
             _ => log::error!("unknown debug command"),
         }
@@ -83,8 +86,8 @@ impl Debug {
     fn debug_log_enable_send(){
         // create log enable message
         let proto_message = proto::Debug {
-            message: Some(proto::debug::Message::LogEnable(
-                proto::LogEnable{}
+            message: Some(proto::debug::Message::LogToFile(
+                proto::LogToFile{enable: true}
             )),
         };
 
@@ -99,11 +102,26 @@ impl Debug {
     fn debug_log_disable_send(){
         // create log enable message
         let proto_message = proto::Debug {
-            message: Some(proto::debug::Message::LogDisable(
-                proto::LogDisable{}
+            message: Some(proto::debug::Message::LogToFile(
+                proto::LogToFile{enable: false}
             )),
         };
 
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(buf, super::rpc::proto::Modules::Debug.into(), "".to_string());        
+    }
+
+    fn debug_path_send(){
+        // create StoragePathRequest
+        let proto_message = proto::Debug {
+            message: Some(proto::debug::Message::StoragePathRequest(
+                proto::StoragePathRequest{}
+            )),
+        };
         // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
@@ -141,7 +159,11 @@ impl Debug {
                     Some(proto::debug::Message::HeartbeatResponse(_heartbeat)) => {
                         // print confirmation
                         println!("Heartbeat response received");
-                    }
+                    },
+                    Some(proto::debug::Message::StoragePathResponse(storage_path_response)) => {
+                        // printout path
+                        println!("Storage Path: {}", storage_path_response.storage_path);
+                    },
                     _ => {
                         log::error!("unprocessable RPC debug message");
                     },

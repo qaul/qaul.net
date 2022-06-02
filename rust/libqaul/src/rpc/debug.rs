@@ -47,24 +47,41 @@ impl Debug {
                         log::error!("Libqaul will panic");
                         panic!("Libqaul panics for debugging reasons");
                     },
-                    Some(proto::debug::Message::LogEnable(_log_enable)) => {
-                        // start log
-                        FileLogger::enable(true);
-                        if Configuration::get_debug_log() == false{
-                            Configuration::enable_debug_log(true);
-                            Configuration::save();
-                            log::error!("starting debug log..");
+                    Some(proto::debug::Message::LogToFile(log_to_file)) => {
+                        if log_to_file.enable {
+                            // start log                            
+                            FileLogger::enable(true);
+                            if Configuration::get_debug_log() == false{
+                                Configuration::enable_debug_log(true);
+                                Configuration::save();
+                                log::error!("starting debug log..");
+                            }    
+                        }else {
+                            // stop log
+                            if Configuration::get_debug_log() == true{
+                                Configuration::enable_debug_log(false);
+                                Configuration::save();
+                                log::error!("stop debug log..");
+                            }
+                            FileLogger::enable(false);
                         }
                     },
-                    Some(proto::debug::Message::LogDisable(_log_disable)) => {
-                        // stop log
-                        if Configuration::get_debug_log() == true{
-                            Configuration::enable_debug_log(false);
-                            Configuration::save();
-                            log::error!("stop debug log..");
-                        }
-                        FileLogger::enable(false);
-                    },
+                    Some(proto::debug::Message::StoragePathRequest(_storage_path_request)) => {
+                        // create and return storage path response message
+                        let path = std::env::current_dir().unwrap(); 
+                        let proto_message = proto::Debug {
+                            message: Some( 
+                                proto::debug::Message::StoragePathResponse(proto::StoragePathResponse {storage_path: path.into_os_string().into_string().unwrap()})
+                            ),
+                        };
+
+                        // encode message
+                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+                        // send message
+                        Rpc::send_message(buf, crate::rpc::proto::Modules::Debug.into(), "".to_string(), Vec::new() );
+                    },     
                     _ => {
                         log::error!("Unhandled RPC Debug Message");
                     },

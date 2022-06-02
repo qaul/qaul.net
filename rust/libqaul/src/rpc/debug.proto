@@ -15,10 +15,13 @@ message Debug {
         Panic panic = 3;
 
         //log enable
-        LogEnable log_enable = 4;
+        LogToFile log_to_file = 4;
 
-        //log disable
-        LogDisable log_disable = 5;
+        //Storage Path Request
+        StoragePathRequest storage_path_request = 5;
+
+        //Storage Path Response
+        StoragePathResponse storage_path_response = 6;
 
     }
 }
@@ -47,18 +50,27 @@ message Panic {
 }
 
 
-// LogEnable
+// LogToFile
 //
 // If libqaul receives this enable message, it
-// start to log error contents into error_xxx.log file.
+// start or stop to log error contents into error_xxx.log file.
 //
-message LogEnable {
+message LogToFile {
+    bool enable =1 ;
 }
 
-// LogDisable
+
+// StoragePathRequest
 //
-// If libqaul receives this disable message, it
-// stop to log error contents into error_xxx.log file.
+// Return storage path
 //
-message LogDisable {
+message StoragePathRequest {
+}
+
+// StoragePathResponse
+//
+// Contains Storage Path
+//
+message StoragePathResponse {
+    string storage_path = 1;
 }
