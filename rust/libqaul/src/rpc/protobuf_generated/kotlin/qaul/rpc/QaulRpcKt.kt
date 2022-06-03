@@ -3,7 +3,7 @@
 
 package qaul.rpc;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeqaulRpc")
 public inline fun qaulRpc(block: qaul.rpc.QaulRpcKt.Dsl.() -> kotlin.Unit): qaul.rpc.QaulRpcOuterClass.QaulRpc =
   qaul.rpc.QaulRpcKt.Dsl._create(qaul.rpc.QaulRpcOuterClass.QaulRpc.newBuilder()).apply { block() }._build()
 public object QaulRpcKt {
@@ -130,3 +130,4 @@ public object QaulRpcKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.QaulRpcOuterClass.QaulRpc.copy(block: qaul.rpc.QaulRpcKt.Dsl.() -> kotlin.Unit): qaul.rpc.QaulRpcOuterClass.QaulRpc =
   qaul.rpc.QaulRpcKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

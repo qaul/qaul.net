@@ -56,6 +56,33 @@ struct Qaul_Rpc_Debug_Debug {
     set {message = .panic(newValue)}
   }
 
+  /// enable/disable logging to file
+  var logToFile: Qaul_Rpc_Debug_LogToFile {
+    get {
+      if case .logToFile(let v)? = message {return v}
+      return Qaul_Rpc_Debug_LogToFile()
+    }
+    set {message = .logToFile(newValue)}
+  }
+
+  /// Storage Path Request
+  var storagePathRequest: Qaul_Rpc_Debug_StoragePathRequest {
+    get {
+      if case .storagePathRequest(let v)? = message {return v}
+      return Qaul_Rpc_Debug_StoragePathRequest()
+    }
+    set {message = .storagePathRequest(newValue)}
+  }
+
+  /// Storage Path Response
+  var storagePathResponse: Qaul_Rpc_Debug_StoragePathResponse {
+    get {
+      if case .storagePathResponse(let v)? = message {return v}
+      return Qaul_Rpc_Debug_StoragePathResponse()
+    }
+    set {message = .storagePathResponse(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   /// message type
@@ -66,6 +93,12 @@ struct Qaul_Rpc_Debug_Debug {
     case heartbeatResponse(Qaul_Rpc_Debug_HeartbeatResponse)
     /// libqaul panics immediatly
     case panic(Qaul_Rpc_Debug_Panic)
+    /// enable/disable logging to file
+    case logToFile(Qaul_Rpc_Debug_LogToFile)
+    /// Storage Path Request
+    case storagePathRequest(Qaul_Rpc_Debug_StoragePathRequest)
+    /// Storage Path Response
+    case storagePathResponse(Qaul_Rpc_Debug_StoragePathResponse)
 
   #if !swift(>=4.1)
     static func ==(lhs: Qaul_Rpc_Debug_Debug.OneOf_Message, rhs: Qaul_Rpc_Debug_Debug.OneOf_Message) -> Bool {
@@ -83,6 +116,18 @@ struct Qaul_Rpc_Debug_Debug {
       }()
       case (.panic, .panic): return {
         guard case .panic(let l) = lhs, case .panic(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.logToFile, .logToFile): return {
+        guard case .logToFile(let l) = lhs, case .logToFile(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.storagePathRequest, .storagePathRequest): return {
+        guard case .storagePathRequest(let l) = lhs, case .storagePathRequest(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.storagePathResponse, .storagePathResponse): return {
+        guard case .storagePathResponse(let l) = lhs, case .storagePathResponse(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -138,6 +183,50 @@ struct Qaul_Rpc_Debug_Panic {
   init() {}
 }
 
+/// LogToFile
+///
+/// If libqaul receives this enable message, it
+/// start or stop to log error contents into error_xxx.log file.
+struct Qaul_Rpc_Debug_LogToFile {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var enable: Bool = false
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// StoragePathRequest
+///
+/// Return storage path
+struct Qaul_Rpc_Debug_StoragePathRequest {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// StoragePathResponse
+///
+/// Contains Storage Path
+struct Qaul_Rpc_Debug_StoragePathResponse {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var storagePath: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "qaul.rpc.debug"
@@ -148,6 +237,9 @@ extension Qaul_Rpc_Debug_Debug: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     1: .standard(proto: "heartbeat_request"),
     2: .standard(proto: "heartbeat_response"),
     3: .same(proto: "panic"),
+    4: .standard(proto: "log_to_file"),
+    5: .standard(proto: "storage_path_request"),
+    6: .standard(proto: "storage_path_response"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -195,6 +287,45 @@ extension Qaul_Rpc_Debug_Debug: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
           self.message = .panic(v)
         }
       }()
+      case 4: try {
+        var v: Qaul_Rpc_Debug_LogToFile?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .logToFile(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .logToFile(v)
+        }
+      }()
+      case 5: try {
+        var v: Qaul_Rpc_Debug_StoragePathRequest?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .storagePathRequest(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .storagePathRequest(v)
+        }
+      }()
+      case 6: try {
+        var v: Qaul_Rpc_Debug_StoragePathResponse?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .storagePathResponse(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .storagePathResponse(v)
+        }
+      }()
       default: break
       }
     }
@@ -217,6 +348,18 @@ extension Qaul_Rpc_Debug_Debug: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     case .panic?: try {
       guard case .panic(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    }()
+    case .logToFile?: try {
+      guard case .logToFile(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    }()
+    case .storagePathRequest?: try {
+      guard case .storagePathRequest(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+    }()
+    case .storagePathResponse?: try {
+      guard case .storagePathResponse(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
     }()
     case nil: break
     }
@@ -282,6 +425,89 @@ extension Qaul_Rpc_Debug_Panic: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
   }
 
   static func ==(lhs: Qaul_Rpc_Debug_Panic, rhs: Qaul_Rpc_Debug_Panic) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Rpc_Debug_LogToFile: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".LogToFile"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "enable"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.enable) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.enable != false {
+      try visitor.visitSingularBoolField(value: self.enable, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Rpc_Debug_LogToFile, rhs: Qaul_Rpc_Debug_LogToFile) -> Bool {
+    if lhs.enable != rhs.enable {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Rpc_Debug_StoragePathRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".StoragePathRequest"
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let _ = try decoder.nextFieldNumber() {
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Rpc_Debug_StoragePathRequest, rhs: Qaul_Rpc_Debug_StoragePathRequest) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Rpc_Debug_StoragePathResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".StoragePathResponse"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "storage_path"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.storagePath) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.storagePath.isEmpty {
+      try visitor.visitSingularStringField(value: self.storagePath, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Rpc_Debug_StoragePathResponse, rhs: Qaul_Rpc_Debug_StoragePathResponse) -> Bool {
+    if lhs.storagePath != rhs.storagePath {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

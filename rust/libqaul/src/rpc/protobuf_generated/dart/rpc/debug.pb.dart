@@ -13,6 +13,9 @@ enum Debug_Message {
   heartbeatRequest, 
   heartbeatResponse, 
   panic, 
+  logToFile, 
+  storagePathRequest, 
+  storagePathResponse, 
   notSet
 }
 
@@ -21,13 +24,19 @@ class Debug extends $pb.GeneratedMessage {
     1 : Debug_Message.heartbeatRequest,
     2 : Debug_Message.heartbeatResponse,
     3 : Debug_Message.panic,
+    4 : Debug_Message.logToFile,
+    5 : Debug_Message.storagePathRequest,
+    6 : Debug_Message.storagePathResponse,
     0 : Debug_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Debug', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3])
+    ..oo(0, [1, 2, 3, 4, 5, 6])
     ..aOM<HeartbeatRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'heartbeatRequest', subBuilder: HeartbeatRequest.create)
     ..aOM<HeartbeatResponse>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'heartbeatResponse', subBuilder: HeartbeatResponse.create)
     ..aOM<Panic>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'panic', subBuilder: Panic.create)
+    ..aOM<LogToFile>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'logToFile', subBuilder: LogToFile.create)
+    ..aOM<StoragePathRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'storagePathRequest', subBuilder: StoragePathRequest.create)
+    ..aOM<StoragePathResponse>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'storagePathResponse', subBuilder: StoragePathResponse.create)
     ..hasRequiredFields = false
   ;
 
@@ -36,6 +45,9 @@ class Debug extends $pb.GeneratedMessage {
     HeartbeatRequest? heartbeatRequest,
     HeartbeatResponse? heartbeatResponse,
     Panic? panic,
+    LogToFile? logToFile,
+    StoragePathRequest? storagePathRequest,
+    StoragePathResponse? storagePathResponse,
   }) {
     final _result = create();
     if (heartbeatRequest != null) {
@@ -46,6 +58,15 @@ class Debug extends $pb.GeneratedMessage {
     }
     if (panic != null) {
       _result.panic = panic;
+    }
+    if (logToFile != null) {
+      _result.logToFile = logToFile;
+    }
+    if (storagePathRequest != null) {
+      _result.storagePathRequest = storagePathRequest;
+    }
+    if (storagePathResponse != null) {
+      _result.storagePathResponse = storagePathResponse;
     }
     return _result;
   }
@@ -105,6 +126,39 @@ class Debug extends $pb.GeneratedMessage {
   void clearPanic() => clearField(3);
   @$pb.TagNumber(3)
   Panic ensurePanic() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  LogToFile get logToFile => $_getN(3);
+  @$pb.TagNumber(4)
+  set logToFile(LogToFile v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasLogToFile() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearLogToFile() => clearField(4);
+  @$pb.TagNumber(4)
+  LogToFile ensureLogToFile() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  StoragePathRequest get storagePathRequest => $_getN(4);
+  @$pb.TagNumber(5)
+  set storagePathRequest(StoragePathRequest v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasStoragePathRequest() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearStoragePathRequest() => clearField(5);
+  @$pb.TagNumber(5)
+  StoragePathRequest ensureStoragePathRequest() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  StoragePathResponse get storagePathResponse => $_getN(5);
+  @$pb.TagNumber(6)
+  set storagePathResponse(StoragePathResponse v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasStoragePathResponse() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearStoragePathResponse() => clearField(6);
+  @$pb.TagNumber(6)
+  StoragePathResponse ensureStoragePathResponse() => $_ensure(5);
 }
 
 class HeartbeatRequest extends $pb.GeneratedMessage {
@@ -192,5 +246,128 @@ class Panic extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static Panic getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Panic>(create);
   static Panic? _defaultInstance;
+}
+
+class LogToFile extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'LogToFile', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
+    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'enable')
+    ..hasRequiredFields = false
+  ;
+
+  LogToFile._() : super();
+  factory LogToFile({
+    $core.bool? enable,
+  }) {
+    final _result = create();
+    if (enable != null) {
+      _result.enable = enable;
+    }
+    return _result;
+  }
+  factory LogToFile.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory LogToFile.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  LogToFile clone() => LogToFile()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  LogToFile copyWith(void Function(LogToFile) updates) => super.copyWith((message) => updates(message as LogToFile)) as LogToFile; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static LogToFile create() => LogToFile._();
+  LogToFile createEmptyInstance() => create();
+  static $pb.PbList<LogToFile> createRepeated() => $pb.PbList<LogToFile>();
+  @$core.pragma('dart2js:noInline')
+  static LogToFile getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<LogToFile>(create);
+  static LogToFile? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get enable => $_getBF(0);
+  @$pb.TagNumber(1)
+  set enable($core.bool v) { $_setBool(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasEnable() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearEnable() => clearField(1);
+}
+
+class StoragePathRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StoragePathRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  StoragePathRequest._() : super();
+  factory StoragePathRequest() => create();
+  factory StoragePathRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StoragePathRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StoragePathRequest clone() => StoragePathRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StoragePathRequest copyWith(void Function(StoragePathRequest) updates) => super.copyWith((message) => updates(message as StoragePathRequest)) as StoragePathRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StoragePathRequest create() => StoragePathRequest._();
+  StoragePathRequest createEmptyInstance() => create();
+  static $pb.PbList<StoragePathRequest> createRepeated() => $pb.PbList<StoragePathRequest>();
+  @$core.pragma('dart2js:noInline')
+  static StoragePathRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StoragePathRequest>(create);
+  static StoragePathRequest? _defaultInstance;
+}
+
+class StoragePathResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StoragePathResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'storagePath')
+    ..hasRequiredFields = false
+  ;
+
+  StoragePathResponse._() : super();
+  factory StoragePathResponse({
+    $core.String? storagePath,
+  }) {
+    final _result = create();
+    if (storagePath != null) {
+      _result.storagePath = storagePath;
+    }
+    return _result;
+  }
+  factory StoragePathResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StoragePathResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StoragePathResponse clone() => StoragePathResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StoragePathResponse copyWith(void Function(StoragePathResponse) updates) => super.copyWith((message) => updates(message as StoragePathResponse)) as StoragePathResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StoragePathResponse create() => StoragePathResponse._();
+  StoragePathResponse createEmptyInstance() => create();
+  static $pb.PbList<StoragePathResponse> createRepeated() => $pb.PbList<StoragePathResponse>();
+  @$core.pragma('dart2js:noInline')
+  static StoragePathResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StoragePathResponse>(create);
+  static StoragePathResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get storagePath => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set storagePath($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasStoragePath() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearStoragePath() => clearField(1);
 }
 

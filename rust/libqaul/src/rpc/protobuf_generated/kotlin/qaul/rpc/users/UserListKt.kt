@@ -3,7 +3,7 @@
 
 package qaul.rpc.users;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeuserList")
 public inline fun userList(block: qaul.rpc.users.UserListKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.UserList =
   qaul.rpc.users.UserListKt.Dsl._create(qaul.rpc.users.UsersOuterClass.UserList.newBuilder()).apply { block() }._build()
 public object UserListKt {
@@ -44,7 +44,8 @@ public object UserListKt {
     @kotlin.jvm.JvmName("addUser")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.UserEntry, UserProxy>.add(value: qaul.rpc.users.UsersOuterClass.UserEntry) {
       _builder.addUser(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.users.UserEntry user = 1;</code>
      * @param value The user to add.
      */
@@ -53,7 +54,8 @@ public object UserListKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.UserEntry, UserProxy>.plusAssign(value: qaul.rpc.users.UsersOuterClass.UserEntry) {
       add(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.users.UserEntry user = 1;</code>
      * @param values The user to add.
      */
@@ -61,7 +63,8 @@ public object UserListKt {
     @kotlin.jvm.JvmName("addAllUser")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.UserEntry, UserProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.users.UsersOuterClass.UserEntry>) {
       _builder.addAllUser(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.users.UserEntry user = 1;</code>
      * @param values The user to add.
      */
@@ -70,7 +73,8 @@ public object UserListKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.UserEntry, UserProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.users.UsersOuterClass.UserEntry>) {
       addAll(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.users.UserEntry user = 1;</code>
      * @param index The index to set the value at.
      * @param value The user to set.
@@ -79,15 +83,19 @@ public object UserListKt {
     @kotlin.jvm.JvmName("setUser")
     public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.UserEntry, UserProxy>.set(index: kotlin.Int, value: qaul.rpc.users.UsersOuterClass.UserEntry) {
       _builder.setUser(index, value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.users.UserEntry user = 1;</code>
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearUser")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.UserEntry, UserProxy>.clear() {
       _builder.clearUser()
-    }}
+    }
+
+  }
 }
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.users.UsersOuterClass.UserList.copy(block: qaul.rpc.users.UserListKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.UserList =
   qaul.rpc.users.UserListKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

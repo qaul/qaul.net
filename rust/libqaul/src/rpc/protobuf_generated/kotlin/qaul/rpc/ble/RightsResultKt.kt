@@ -3,7 +3,7 @@
 
 package qaul.rpc.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializerightsResult")
 public inline fun rightsResult(block: qaul.rpc.ble.RightsResultKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.RightsResult =
   qaul.rpc.ble.RightsResultKt.Dsl._create(qaul.rpc.ble.BleRpc.RightsResult.newBuilder()).apply { block() }._build()
 public object RightsResultKt {
@@ -43,3 +43,4 @@ public object RightsResultKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.ble.BleRpc.RightsResult.copy(block: qaul.rpc.ble.RightsResultKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.RightsResult =
   qaul.rpc.ble.RightsResultKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

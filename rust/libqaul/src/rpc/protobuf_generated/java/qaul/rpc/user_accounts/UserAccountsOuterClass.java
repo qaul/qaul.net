@@ -183,6 +183,8 @@ public final class UserAccountsOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -902,8 +904,9 @@ public final class UserAccountsOuterClass {
         } else {
           if (messageCase_ == 2) {
             createUserAccountBuilder_.mergeFrom(value);
+          } else {
+            createUserAccountBuilder_.setMessage(value);
           }
-          createUserAccountBuilder_.setMessage(value);
         }
         messageCase_ = 2;
         return this;
@@ -1043,8 +1046,9 @@ public final class UserAccountsOuterClass {
         } else {
           if (messageCase_ == 3) {
             defaultUserAccountBuilder_.mergeFrom(value);
+          } else {
+            defaultUserAccountBuilder_.setMessage(value);
           }
-          defaultUserAccountBuilder_.setMessage(value);
         }
         messageCase_ = 3;
         return this;
@@ -1184,8 +1188,9 @@ public final class UserAccountsOuterClass {
         } else {
           if (messageCase_ == 4) {
             myUserAccountBuilder_.mergeFrom(value);
+          } else {
+            myUserAccountBuilder_.setMessage(value);
           }
-          myUserAccountBuilder_.setMessage(value);
         }
         messageCase_ = 4;
         return this;
@@ -1386,6 +1391,8 @@ public final class UserAccountsOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -1982,6 +1989,8 @@ public final class UserAccountsOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -2743,6 +2752,8 @@ public final class UserAccountsOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);

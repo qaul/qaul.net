@@ -3,7 +3,7 @@
 
 package qaul.sys.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializebleDeviceInfo")
 public inline fun bleDeviceInfo(block: qaul.sys.ble.BleDeviceInfoKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceInfo =
   qaul.sys.ble.BleDeviceInfoKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleDeviceInfo.newBuilder()).apply { block() }._build()
 public object BleDeviceInfoKt {
@@ -437,3 +437,4 @@ public object BleDeviceInfoKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.sys.ble.BleOuterClass.BleDeviceInfo.copy(block: qaul.sys.ble.BleDeviceInfoKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceInfo =
   qaul.sys.ble.BleDeviceInfoKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

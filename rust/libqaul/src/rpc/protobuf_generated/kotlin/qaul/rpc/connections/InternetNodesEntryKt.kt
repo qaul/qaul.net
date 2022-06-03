@@ -3,7 +3,7 @@
 
 package qaul.rpc.connections;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeinternetNodesEntry")
 public inline fun internetNodesEntry(block: qaul.rpc.connections.InternetNodesEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry =
   qaul.rpc.connections.InternetNodesEntryKt.Dsl._create(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.newBuilder()).apply { block() }._build()
 public object InternetNodesEntryKt {
@@ -43,3 +43,4 @@ public object InternetNodesEntryKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.copy(block: qaul.rpc.connections.InternetNodesEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry =
   qaul.rpc.connections.InternetNodesEntryKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

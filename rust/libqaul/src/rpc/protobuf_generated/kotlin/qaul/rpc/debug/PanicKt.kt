@@ -3,7 +3,7 @@
 
 package qaul.rpc.debug;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializepanic")
 public inline fun panic(block: qaul.rpc.debug.PanicKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.Panic =
   qaul.rpc.debug.PanicKt.Dsl._create(qaul.rpc.debug.DebugOuterClass.Panic.newBuilder()).apply { block() }._build()
 public object PanicKt {
@@ -26,3 +26,4 @@ public object PanicKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.debug.DebugOuterClass.Panic.copy(block: qaul.rpc.debug.PanicKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.Panic =
   qaul.rpc.debug.PanicKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

@@ -203,6 +203,8 @@ public final class FeedOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -889,8 +891,9 @@ public final class FeedOuterClass {
         } else {
           if (messageCase_ == 1) {
             receivedBuilder_.mergeFrom(value);
+          } else {
+            receivedBuilder_.setMessage(value);
           }
-          receivedBuilder_.setMessage(value);
         }
         messageCase_ = 1;
         return this;
@@ -1066,8 +1069,9 @@ public final class FeedOuterClass {
         } else {
           if (messageCase_ == 2) {
             sendBuilder_.mergeFrom(value);
+          } else {
+            sendBuilder_.setMessage(value);
           }
-          sendBuilder_.setMessage(value);
         }
         messageCase_ = 2;
         return this;
@@ -1243,8 +1247,9 @@ public final class FeedOuterClass {
         } else {
           if (messageCase_ == 3) {
             requestBuilder_.mergeFrom(value);
+          } else {
+            requestBuilder_.setMessage(value);
           }
-          requestBuilder_.setMessage(value);
         }
         messageCase_ = 3;
         return this;
@@ -1479,6 +1484,8 @@ public final class FeedOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -2118,6 +2125,8 @@ public final class FeedOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -3068,6 +3077,8 @@ public final class FeedOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -4584,6 +4595,8 @@ public final class FeedOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);

@@ -3,7 +3,7 @@
 
 package qaul.net.router_net_info;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializerouting")
 public inline fun routing(block: qaul.net.router_net_info.RoutingKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.Routing =
   qaul.net.router_net_info.RoutingKt.Dsl._create(qaul.net.router_net_info.RouterNetInfo.Routing.newBuilder()).apply { block() }._build()
 public object RoutingKt {
@@ -129,3 +129,16 @@ public object RoutingKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.router_net_info.RouterNetInfo.Routing.copy(block: qaul.net.router_net_info.RoutingKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.Routing =
   qaul.net.router_net_info.RoutingKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.net.router_net_info.RouterNetInfo.RoutingOrBuilder.userInfoTableOrNull: qaul.net.router_net_info.RouterNetInfo.UserInfoTable?
+  get() = if (hasUserInfoTable()) getUserInfoTable() else null
+
+val qaul.net.router_net_info.RouterNetInfo.RoutingOrBuilder.userInfoOrNull: qaul.net.router_net_info.RouterNetInfo.UserInfo?
+  get() = if (hasUserInfo()) getUserInfo() else null
+
+val qaul.net.router_net_info.RouterNetInfo.RoutingOrBuilder.routingInfoTableOrNull: qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable?
+  get() = if (hasRoutingInfoTable()) getRoutingInfoTable() else null
+
+val qaul.net.router_net_info.RouterNetInfo.RoutingOrBuilder.routingInfoEntryOrNull: qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry?
+  get() = if (hasRoutingInfoEntry()) getRoutingInfoEntry() else null
+

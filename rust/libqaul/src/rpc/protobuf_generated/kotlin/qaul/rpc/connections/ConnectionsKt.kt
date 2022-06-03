@@ -3,7 +3,7 @@
 
 package qaul.rpc.connections;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeconnections")
 public inline fun connections(block: qaul.rpc.connections.ConnectionsKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.Connections =
   qaul.rpc.connections.ConnectionsKt.Dsl._create(qaul.rpc.connections.ConnectionsOuterClass.Connections.newBuilder()).apply { block() }._build()
 public object ConnectionsKt {
@@ -189,3 +189,16 @@ public object ConnectionsKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.connections.ConnectionsOuterClass.Connections.copy(block: qaul.rpc.connections.ConnectionsKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.Connections =
   qaul.rpc.connections.ConnectionsKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.rpc.connections.ConnectionsOuterClass.ConnectionsOrBuilder.internetNodesRequestOrNull: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest?
+  get() = if (hasInternetNodesRequest()) getInternetNodesRequest() else null
+
+val qaul.rpc.connections.ConnectionsOuterClass.ConnectionsOrBuilder.internetNodesListOrNull: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList?
+  get() = if (hasInternetNodesList()) getInternetNodesList() else null
+
+val qaul.rpc.connections.ConnectionsOuterClass.ConnectionsOrBuilder.internetNodesAddOrNull: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry?
+  get() = if (hasInternetNodesAdd()) getInternetNodesAdd() else null
+
+val qaul.rpc.connections.ConnectionsOuterClass.ConnectionsOrBuilder.internetNodesRemoveOrNull: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry?
+  get() = if (hasInternetNodesRemove()) getInternetNodesRemove() else null
+

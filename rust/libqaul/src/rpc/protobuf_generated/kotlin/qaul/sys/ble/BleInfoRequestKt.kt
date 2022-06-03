@@ -3,7 +3,7 @@
 
 package qaul.sys.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializebleInfoRequest")
 public inline fun bleInfoRequest(block: qaul.sys.ble.BleInfoRequestKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleInfoRequest =
   qaul.sys.ble.BleInfoRequestKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleInfoRequest.newBuilder()).apply { block() }._build()
 public object BleInfoRequestKt {
@@ -26,3 +26,4 @@ public object BleInfoRequestKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.sys.ble.BleOuterClass.BleInfoRequest.copy(block: qaul.sys.ble.BleInfoRequestKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleInfoRequest =
   qaul.sys.ble.BleInfoRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

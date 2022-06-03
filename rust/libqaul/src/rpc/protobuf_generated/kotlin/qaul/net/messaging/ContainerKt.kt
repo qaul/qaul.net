@@ -3,7 +3,7 @@
 
 package qaul.net.messaging;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializecontainer")
 public inline fun container(block: qaul.net.messaging.ContainerKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Container =
   qaul.net.messaging.ContainerKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.Container.newBuilder()).apply { block() }._build()
 public object ContainerKt {
@@ -87,3 +87,7 @@ public object ContainerKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.messaging.MessagingOuterClass.Container.copy(block: qaul.net.messaging.ContainerKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Container =
   qaul.net.messaging.ContainerKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.net.messaging.MessagingOuterClass.ContainerOrBuilder.envelopeOrNull: qaul.net.messaging.MessagingOuterClass.Envelope?
+  get() = if (hasEnvelope()) getEnvelope() else null
+

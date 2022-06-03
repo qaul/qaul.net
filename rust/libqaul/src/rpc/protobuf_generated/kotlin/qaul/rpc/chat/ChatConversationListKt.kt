@@ -3,7 +3,7 @@
 
 package qaul.rpc.chat;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializechatConversationList")
 public inline fun chatConversationList(block: qaul.rpc.chat.ChatConversationListKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatConversationList =
   qaul.rpc.chat.ChatConversationListKt.Dsl._create(qaul.rpc.chat.ChatOuterClass.ChatConversationList.newBuilder()).apply { block() }._build()
 public object ChatConversationListKt {
@@ -61,7 +61,8 @@ public object ChatConversationListKt {
     @kotlin.jvm.JvmName("addMessageList")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.add(value: qaul.rpc.chat.ChatOuterClass.ChatMessage) {
       _builder.addMessageList(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      * @param value The messageList to add.
      */
@@ -70,7 +71,8 @@ public object ChatConversationListKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.plusAssign(value: qaul.rpc.chat.ChatOuterClass.ChatMessage) {
       add(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      * @param values The messageList to add.
      */
@@ -78,7 +80,8 @@ public object ChatConversationListKt {
     @kotlin.jvm.JvmName("addAllMessageList")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatMessage>) {
       _builder.addAllMessageList(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      * @param values The messageList to add.
      */
@@ -87,7 +90,8 @@ public object ChatConversationListKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatMessage>) {
       addAll(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      * @param index The index to set the value at.
      * @param value The messageList to set.
@@ -96,15 +100,19 @@ public object ChatConversationListKt {
     @kotlin.jvm.JvmName("setMessageList")
     public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.set(index: kotlin.Int, value: qaul.rpc.chat.ChatOuterClass.ChatMessage) {
       _builder.setMessageList(index, value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearMessageList")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.clear() {
       _builder.clearMessageList()
-    }}
+    }
+
+  }
 }
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.chat.ChatOuterClass.ChatConversationList.copy(block: qaul.rpc.chat.ChatConversationListKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatConversationList =
   qaul.rpc.chat.ChatConversationListKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

@@ -3,7 +3,7 @@
 
 package qaul.rpc.router;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeconnectionEntry")
 public inline fun connectionEntry(block: qaul.rpc.router.ConnectionEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.ConnectionEntry =
   qaul.rpc.router.ConnectionEntryKt.Dsl._create(qaul.rpc.router.RouterOuterClass.ConnectionEntry.newBuilder()).apply { block() }._build()
 public object ConnectionEntryKt {
@@ -103,3 +103,4 @@ public object ConnectionEntryKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.router.RouterOuterClass.ConnectionEntry.copy(block: qaul.rpc.router.ConnectionEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.ConnectionEntry =
   qaul.rpc.router.ConnectionEntryKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

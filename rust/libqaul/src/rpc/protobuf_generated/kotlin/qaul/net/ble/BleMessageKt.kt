@@ -3,7 +3,7 @@
 
 package qaul.net.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializebleMessage")
 public inline fun bleMessage(block: qaul.net.ble.BleMessageKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.BleMessage =
   qaul.net.ble.BleMessageKt.Dsl._create(qaul.net.ble.BleNet.BleMessage.newBuilder()).apply { block() }._build()
 public object BleMessageKt {
@@ -177,3 +177,7 @@ public object BleMessageKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.ble.BleNet.BleMessage.copy(block: qaul.net.ble.BleMessageKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.BleMessage =
   qaul.net.ble.BleMessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.net.ble.BleNet.BleMessageOrBuilder.identificationOrNull: qaul.net.ble.BleNet.Identification?
+  get() = if (hasIdentification()) getIdentification() else null
+

@@ -3,7 +3,7 @@
 
 package qaul.net.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializenodeIdentification")
 public inline fun nodeIdentification(block: qaul.net.ble.NodeIdentificationKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.NodeIdentification =
   qaul.net.ble.NodeIdentificationKt.Dsl._create(qaul.net.ble.BleNet.NodeIdentification.newBuilder()).apply { block() }._build()
 public object NodeIdentificationKt {
@@ -51,3 +51,4 @@ public object NodeIdentificationKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.ble.BleNet.NodeIdentification.copy(block: qaul.net.ble.NodeIdentificationKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.NodeIdentification =
   qaul.net.ble.NodeIdentificationKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

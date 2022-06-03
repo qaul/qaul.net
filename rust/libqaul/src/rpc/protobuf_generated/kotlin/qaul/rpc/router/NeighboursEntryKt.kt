@@ -3,7 +3,7 @@
 
 package qaul.rpc.router;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeneighboursEntry")
 public inline fun neighboursEntry(block: qaul.rpc.router.NeighboursEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.NeighboursEntry =
   qaul.rpc.router.NeighboursEntryKt.Dsl._create(qaul.rpc.router.RouterOuterClass.NeighboursEntry.newBuilder()).apply { block() }._build()
 public object NeighboursEntryKt {
@@ -76,3 +76,4 @@ public object NeighboursEntryKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.router.RouterOuterClass.NeighboursEntry.copy(block: qaul.rpc.router.NeighboursEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.NeighboursEntry =
   qaul.rpc.router.NeighboursEntryKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

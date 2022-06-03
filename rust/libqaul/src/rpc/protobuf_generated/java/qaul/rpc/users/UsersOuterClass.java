@@ -318,6 +318,8 @@ public final class UsersOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -948,8 +950,9 @@ public final class UsersOuterClass {
         } else {
           if (messageCase_ == 1) {
             userRequestBuilder_.mergeFrom(value);
+          } else {
+            userRequestBuilder_.setMessage(value);
           }
-          userRequestBuilder_.setMessage(value);
         }
         messageCase_ = 1;
         return this;
@@ -1089,8 +1092,9 @@ public final class UsersOuterClass {
         } else {
           if (messageCase_ == 2) {
             userListBuilder_.mergeFrom(value);
+          } else {
+            userListBuilder_.setMessage(value);
           }
-          userListBuilder_.setMessage(value);
         }
         messageCase_ = 2;
         return this;
@@ -1230,8 +1234,9 @@ public final class UsersOuterClass {
         } else {
           if (messageCase_ == 3) {
             userUpdateBuilder_.mergeFrom(value);
+          } else {
+            userUpdateBuilder_.setMessage(value);
           }
-          userUpdateBuilder_.setMessage(value);
         }
         messageCase_ = 3;
         return this;
@@ -1413,6 +1418,8 @@ public final class UsersOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -1874,6 +1881,8 @@ public final class UsersOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -2784,6 +2793,8 @@ public final class UsersOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);

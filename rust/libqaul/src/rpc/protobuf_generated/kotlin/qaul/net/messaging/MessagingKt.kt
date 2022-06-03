@@ -3,7 +3,7 @@
 
 package qaul.net.messaging;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializemessaging")
 public inline fun messaging(block: qaul.net.messaging.MessagingKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Messaging =
   qaul.net.messaging.MessagingKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.Messaging.newBuilder()).apply { block() }._build()
 public object MessagingKt {
@@ -81,3 +81,10 @@ public object MessagingKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.messaging.MessagingOuterClass.Messaging.copy(block: qaul.net.messaging.MessagingKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Messaging =
   qaul.net.messaging.MessagingKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.confirmationMessageOrNull: qaul.net.messaging.MessagingOuterClass.Confirmation?
+  get() = if (hasConfirmationMessage()) getConfirmationMessage() else null
+
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.chatMessageOrNull: qaul.net.messaging.MessagingOuterClass.ChatMessage?
+  get() = if (hasChatMessage()) getChatMessage() else null
+

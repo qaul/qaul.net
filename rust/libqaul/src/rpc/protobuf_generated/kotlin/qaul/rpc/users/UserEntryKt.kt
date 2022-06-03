@@ -3,7 +3,7 @@
 
 package qaul.rpc.users;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeuserEntry")
 public inline fun userEntry(block: qaul.rpc.users.UserEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.UserEntry =
   qaul.rpc.users.UserEntryKt.Dsl._create(qaul.rpc.users.UsersOuterClass.UserEntry.newBuilder()).apply { block() }._build()
 public object UserEntryKt {
@@ -187,3 +187,4 @@ public object UserEntryKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.users.UsersOuterClass.UserEntry.copy(block: qaul.rpc.users.UserEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.UserEntry =
   qaul.rpc.users.UserEntryKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

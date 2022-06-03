@@ -3,7 +3,7 @@
 
 package qaul.rpc.user_accounts;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializedefaultUserAccount")
 public inline fun defaultUserAccount(block: qaul.rpc.user_accounts.DefaultUserAccountKt.Dsl.() -> kotlin.Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount =
   qaul.rpc.user_accounts.DefaultUserAccountKt.Dsl._create(qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount.newBuilder()).apply { block() }._build()
 public object DefaultUserAccountKt {
@@ -67,3 +67,7 @@ public object DefaultUserAccountKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount.copy(block: qaul.rpc.user_accounts.DefaultUserAccountKt.Dsl.() -> kotlin.Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount =
   qaul.rpc.user_accounts.DefaultUserAccountKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccountOrBuilder.myUserAccountOrNull: qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount?
+  get() = if (hasMyUserAccount()) getMyUserAccount() else null
+

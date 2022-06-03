@@ -3,7 +3,7 @@
 
 package qaul.sys.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializebleDirectSend")
 public inline fun bleDirectSend(block: qaul.sys.ble.BleDirectSendKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectSend =
   qaul.sys.ble.BleDirectSendKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleDirectSend.newBuilder()).apply { block() }._build()
 public object BleDirectSendKt {
@@ -126,3 +126,4 @@ public object BleDirectSendKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.sys.ble.BleOuterClass.BleDirectSend.copy(block: qaul.sys.ble.BleDirectSendKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectSend =
   qaul.sys.ble.BleDirectSendKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

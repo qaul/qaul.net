@@ -3,7 +3,7 @@
 
 package qaul.net.router_net_info;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializerouterInfoMessage")
 public inline fun routerInfoMessage(block: qaul.net.router_net_info.RouterInfoMessageKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage =
   qaul.net.router_net_info.RouterInfoMessageKt.Dsl._create(qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage.newBuilder()).apply { block() }._build()
 public object RouterInfoMessageKt {
@@ -148,3 +148,10 @@ public object RouterInfoMessageKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage.copy(block: qaul.net.router_net_info.RouterInfoMessageKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage =
   qaul.net.router_net_info.RouterInfoMessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.net.router_net_info.RouterNetInfo.RouterInfoMessageOrBuilder.routesOrNull: qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable?
+  get() = if (hasRoutes()) getRoutes() else null
+
+val qaul.net.router_net_info.RouterNetInfo.RouterInfoMessageOrBuilder.usersOrNull: qaul.net.router_net_info.RouterNetInfo.UserInfoTable?
+  get() = if (hasUsers()) getUsers() else null
+

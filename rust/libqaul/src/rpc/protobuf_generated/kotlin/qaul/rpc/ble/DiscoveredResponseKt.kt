@@ -3,7 +3,7 @@
 
 package qaul.rpc.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializediscoveredResponse")
 public inline fun discoveredResponse(block: qaul.rpc.ble.DiscoveredResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.DiscoveredResponse =
   qaul.rpc.ble.DiscoveredResponseKt.Dsl._create(qaul.rpc.ble.BleRpc.DiscoveredResponse.newBuilder()).apply { block() }._build()
 public object DiscoveredResponseKt {
@@ -76,3 +76,4 @@ public object DiscoveredResponseKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.ble.BleRpc.DiscoveredResponse.copy(block: qaul.rpc.ble.DiscoveredResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.DiscoveredResponse =
   qaul.rpc.ble.DiscoveredResponseKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

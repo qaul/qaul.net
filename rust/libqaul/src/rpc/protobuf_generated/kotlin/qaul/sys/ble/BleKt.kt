@@ -3,7 +3,7 @@
 
 package qaul.sys.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeble")
 public inline fun ble(block: qaul.sys.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.Ble =
   qaul.sys.ble.BleKt.Dsl._create(qaul.sys.ble.BleOuterClass.Ble.newBuilder()).apply { block() }._build()
 public object BleKt {
@@ -429,3 +429,37 @@ public object BleKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.sys.ble.BleOuterClass.Ble.copy(block: qaul.sys.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.Ble =
   qaul.sys.ble.BleKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.sys.ble.BleOuterClass.BleOrBuilder.infoRequestOrNull: qaul.sys.ble.BleOuterClass.BleInfoRequest?
+  get() = if (hasInfoRequest()) getInfoRequest() else null
+
+val qaul.sys.ble.BleOuterClass.BleOrBuilder.infoResponseOrNull: qaul.sys.ble.BleOuterClass.BleInfoResponse?
+  get() = if (hasInfoResponse()) getInfoResponse() else null
+
+val qaul.sys.ble.BleOuterClass.BleOrBuilder.startRequestOrNull: qaul.sys.ble.BleOuterClass.BleStartRequest?
+  get() = if (hasStartRequest()) getStartRequest() else null
+
+val qaul.sys.ble.BleOuterClass.BleOrBuilder.startResultOrNull: qaul.sys.ble.BleOuterClass.BleStartResult?
+  get() = if (hasStartResult()) getStartResult() else null
+
+val qaul.sys.ble.BleOuterClass.BleOrBuilder.stopRequestOrNull: qaul.sys.ble.BleOuterClass.BleStopRequest?
+  get() = if (hasStopRequest()) getStopRequest() else null
+
+val qaul.sys.ble.BleOuterClass.BleOrBuilder.stopResultOrNull: qaul.sys.ble.BleOuterClass.BleStopResult?
+  get() = if (hasStopResult()) getStopResult() else null
+
+val qaul.sys.ble.BleOuterClass.BleOrBuilder.deviceDiscoveredOrNull: qaul.sys.ble.BleOuterClass.BleDeviceDiscovered?
+  get() = if (hasDeviceDiscovered()) getDeviceDiscovered() else null
+
+val qaul.sys.ble.BleOuterClass.BleOrBuilder.deviceUnavailableOrNull: qaul.sys.ble.BleOuterClass.BleDeviceUnavailable?
+  get() = if (hasDeviceUnavailable()) getDeviceUnavailable() else null
+
+val qaul.sys.ble.BleOuterClass.BleOrBuilder.directSendOrNull: qaul.sys.ble.BleOuterClass.BleDirectSend?
+  get() = if (hasDirectSend()) getDirectSend() else null
+
+val qaul.sys.ble.BleOuterClass.BleOrBuilder.directSendResultOrNull: qaul.sys.ble.BleOuterClass.BleDirectSendResult?
+  get() = if (hasDirectSendResult()) getDirectSendResult() else null
+
+val qaul.sys.ble.BleOuterClass.BleOrBuilder.directReceivedOrNull: qaul.sys.ble.BleOuterClass.BleDirectReceived?
+  get() = if (hasDirectReceived()) getDirectReceived() else null
+

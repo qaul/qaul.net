@@ -3,7 +3,7 @@
 
 package qaul.rpc.chat;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializechatMessageSend")
 public inline fun chatMessageSend(block: qaul.rpc.chat.ChatMessageSendKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatMessageSend =
   qaul.rpc.chat.ChatMessageSendKt.Dsl._create(qaul.rpc.chat.ChatOuterClass.ChatMessageSend.newBuilder()).apply { block() }._build()
 public object ChatMessageSendKt {
@@ -76,3 +76,4 @@ public object ChatMessageSendKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.chat.ChatOuterClass.ChatMessageSend.copy(block: qaul.rpc.chat.ChatMessageSendKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatMessageSend =
   qaul.rpc.chat.ChatMessageSendKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

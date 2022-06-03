@@ -3,7 +3,7 @@
 
 package qaul.net.messaging;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializechatMessage")
 public inline fun chatMessage(block: qaul.net.messaging.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.ChatMessage =
   qaul.net.messaging.ChatMessageKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.ChatMessage.newBuilder()).apply { block() }._build()
 public object ChatMessageKt {
@@ -128,3 +128,4 @@ public object ChatMessageKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.messaging.MessagingOuterClass.ChatMessage.copy(block: qaul.net.messaging.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.ChatMessage =
   qaul.net.messaging.ChatMessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

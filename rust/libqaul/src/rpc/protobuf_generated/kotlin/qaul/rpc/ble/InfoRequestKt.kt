@@ -3,7 +3,7 @@
 
 package qaul.rpc.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeinfoRequest")
 public inline fun infoRequest(block: qaul.rpc.ble.InfoRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.InfoRequest =
   qaul.rpc.ble.InfoRequestKt.Dsl._create(qaul.rpc.ble.BleRpc.InfoRequest.newBuilder()).apply { block() }._build()
 public object InfoRequestKt {
@@ -26,3 +26,4 @@ public object InfoRequestKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.ble.BleRpc.InfoRequest.copy(block: qaul.rpc.ble.InfoRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.InfoRequest =
   qaul.rpc.ble.InfoRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

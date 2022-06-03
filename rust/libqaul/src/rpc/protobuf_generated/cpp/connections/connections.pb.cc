@@ -16,64 +16,68 @@
 #include <google/protobuf/port_def.inc>
 
 PROTOBUF_PRAGMA_INIT_SEG
+
+namespace _pb = ::PROTOBUF_NAMESPACE_ID;
+namespace _pbi = _pb::internal;
+
 namespace qaul {
 namespace rpc {
 namespace connections {
-constexpr Connections::Connections(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+PROTOBUF_CONSTEXPR Connections::Connections(
+    ::_pbi::ConstantInitialized)
   : _oneof_case_{}{}
 struct ConnectionsDefaultTypeInternal {
-  constexpr ConnectionsDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ConnectionsDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~ConnectionsDefaultTypeInternal() {}
   union {
     Connections _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ConnectionsDefaultTypeInternal _Connections_default_instance_;
-constexpr InternetNodesRequest::InternetNodesRequest(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionsDefaultTypeInternal _Connections_default_instance_;
+PROTOBUF_CONSTEXPR InternetNodesRequest::InternetNodesRequest(
+    ::_pbi::ConstantInitialized){}
 struct InternetNodesRequestDefaultTypeInternal {
-  constexpr InternetNodesRequestDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR InternetNodesRequestDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~InternetNodesRequestDefaultTypeInternal() {}
   union {
     InternetNodesRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT InternetNodesRequestDefaultTypeInternal _InternetNodesRequest_default_instance_;
-constexpr InternetNodesList::InternetNodesList(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 InternetNodesRequestDefaultTypeInternal _InternetNodesRequest_default_instance_;
+PROTOBUF_CONSTEXPR InternetNodesList::InternetNodesList(
+    ::_pbi::ConstantInitialized)
   : nodes_()
   , info_(0)
 {}
 struct InternetNodesListDefaultTypeInternal {
-  constexpr InternetNodesListDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR InternetNodesListDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~InternetNodesListDefaultTypeInternal() {}
   union {
     InternetNodesList _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT InternetNodesListDefaultTypeInternal _InternetNodesList_default_instance_;
-constexpr InternetNodesEntry::InternetNodesEntry(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : address_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 InternetNodesListDefaultTypeInternal _InternetNodesList_default_instance_;
+PROTOBUF_CONSTEXPR InternetNodesEntry::InternetNodesEntry(
+    ::_pbi::ConstantInitialized)
+  : address_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
 struct InternetNodesEntryDefaultTypeInternal {
-  constexpr InternetNodesEntryDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR InternetNodesEntryDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~InternetNodesEntryDefaultTypeInternal() {}
   union {
     InternetNodesEntry _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT InternetNodesEntryDefaultTypeInternal _InternetNodesEntry_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 InternetNodesEntryDefaultTypeInternal _InternetNodesEntry_default_instance_;
 }  // namespace connections
 }  // namespace rpc
 }  // namespace qaul
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_connections_2fconnections_2eproto[4];
-static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_connections_2fconnections_2eproto[1];
-static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_connections_2fconnections_2eproto = nullptr;
+static ::_pb::Metadata file_level_metadata_connections_2fconnections_2eproto[4];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_connections_2fconnections_2eproto[1];
+static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_connections_2fconnections_2eproto = nullptr;
 
 const uint32_t TableStruct_connections_2fconnections_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
@@ -82,10 +86,10 @@ const uint32_t TableStruct_connections_2fconnections_2eproto::offsets[] PROTOBUF
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::Connections, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::Connections, message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesRequest, _internal_metadata_),
@@ -109,18 +113,18 @@ const uint32_t TableStruct_connections_2fconnections_2eproto::offsets[] PROTOBUF
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesEntry, address_),
 };
-static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::connections::Connections)},
   { 11, -1, -1, sizeof(::qaul::rpc::connections::InternetNodesRequest)},
   { 17, -1, -1, sizeof(::qaul::rpc::connections::InternetNodesList)},
   { 25, -1, -1, sizeof(::qaul::rpc::connections::InternetNodesEntry)},
 };
 
-static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::connections::_Connections_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::connections::_InternetNodesRequest_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::connections::_InternetNodesList_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::connections::_InternetNodesEntry_default_instance_),
+static const ::_pb::Message* const file_default_instances[] = {
+  &::qaul::rpc::connections::_Connections_default_instance_._instance,
+  &::qaul::rpc::connections::_InternetNodesRequest_default_instance_._instance,
+  &::qaul::rpc::connections::_InternetNodesList_default_instance_._instance,
+  &::qaul::rpc::connections::_InternetNodesEntry_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_connections_2fconnections_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -142,19 +146,21 @@ const char descriptor_table_protodef_connections_2fconnections_2eproto[] PROTOBU
   "\n\021ADD_ERROR_INVALID\020\002\022\022\n\016REMOVE_SUCCESS\020"
   "\005\022\032\n\026REMOVE_ERROR_NOT_FOUND\020\006b\006proto3"
   ;
-static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_connections_2fconnections_2eproto_once;
-const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_connections_2fconnections_2eproto = {
-  false, false, 677, descriptor_table_protodef_connections_2fconnections_2eproto, "connections/connections.proto", 
-  &descriptor_table_connections_2fconnections_2eproto_once, nullptr, 0, 4,
-  schemas, file_default_instances, TableStruct_connections_2fconnections_2eproto::offsets,
-  file_level_metadata_connections_2fconnections_2eproto, file_level_enum_descriptors_connections_2fconnections_2eproto, file_level_service_descriptors_connections_2fconnections_2eproto,
+static ::_pbi::once_flag descriptor_table_connections_2fconnections_2eproto_once;
+const ::_pbi::DescriptorTable descriptor_table_connections_2fconnections_2eproto = {
+    false, false, 677, descriptor_table_protodef_connections_2fconnections_2eproto,
+    "connections/connections.proto",
+    &descriptor_table_connections_2fconnections_2eproto_once, nullptr, 0, 4,
+    schemas, file_default_instances, TableStruct_connections_2fconnections_2eproto::offsets,
+    file_level_metadata_connections_2fconnections_2eproto, file_level_enum_descriptors_connections_2fconnections_2eproto,
+    file_level_service_descriptors_connections_2fconnections_2eproto,
 };
-PROTOBUF_ATTRIBUTE_WEAK const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable* descriptor_table_connections_2fconnections_2eproto_getter() {
+PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_connections_2fconnections_2eproto_getter() {
   return &descriptor_table_connections_2fconnections_2eproto;
 }
 
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_connections_2fconnections_2eproto(&descriptor_table_connections_2fconnections_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_connections_2fconnections_2eproto(&descriptor_table_connections_2fconnections_2eproto);
 namespace qaul {
 namespace rpc {
 namespace connections {
@@ -207,7 +213,7 @@ void Connections::set_allocated_internet_nodes_request(::qaul::rpc::connections:
   clear_message();
   if (internet_nodes_request) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::connections::InternetNodesRequest>::GetOwningArena(internet_nodes_request);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(internet_nodes_request);
     if (message_arena != submessage_arena) {
       internet_nodes_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, internet_nodes_request, submessage_arena);
@@ -222,7 +228,7 @@ void Connections::set_allocated_internet_nodes_list(::qaul::rpc::connections::In
   clear_message();
   if (internet_nodes_list) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::connections::InternetNodesList>::GetOwningArena(internet_nodes_list);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(internet_nodes_list);
     if (message_arena != submessage_arena) {
       internet_nodes_list = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, internet_nodes_list, submessage_arena);
@@ -237,7 +243,7 @@ void Connections::set_allocated_internet_nodes_add(::qaul::rpc::connections::Int
   clear_message();
   if (internet_nodes_add) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::connections::InternetNodesEntry>::GetOwningArena(internet_nodes_add);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(internet_nodes_add);
     if (message_arena != submessage_arena) {
       internet_nodes_add = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, internet_nodes_add, submessage_arena);
@@ -252,7 +258,7 @@ void Connections::set_allocated_internet_nodes_remove(::qaul::rpc::connections::
   clear_message();
   if (internet_nodes_remove) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::connections::InternetNodesEntry>::GetOwningArena(internet_nodes_remove);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(internet_nodes_remove);
     if (message_arena != submessage_arena) {
       internet_nodes_remove = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, internet_nodes_remove, submessage_arena);
@@ -266,9 +272,6 @@ Connections::Connections(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.connections.Connections)
 }
 Connections::Connections(const Connections& from)
@@ -305,9 +308,11 @@ clear_has_message();
 
 Connections::~Connections() {
   // @@protoc_insertion_point(destructor:qaul.rpc.connections.Connections)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void Connections::SharedDtor() {
@@ -317,12 +322,6 @@ inline void Connections::SharedDtor() {
   }
 }
 
-void Connections::ArenaDtor(void* object) {
-  Connections* _this = reinterpret_cast< Connections* >(object);
-  (void)_this;
-}
-void Connections::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void Connections::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -372,11 +371,11 @@ void Connections::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Connections::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Connections::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;
       case 1:
@@ -441,38 +440,34 @@ uint8_t* Connections::_InternalSerialize(
 
   // .qaul.rpc.connections.InternetNodesRequest internet_nodes_request = 1;
   if (_internal_has_internet_nodes_request()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        1, _Internal::internet_nodes_request(this), target, stream);
+      InternalWriteMessage(1, _Internal::internet_nodes_request(this),
+        _Internal::internet_nodes_request(this).GetCachedSize(), target, stream);
   }
 
   // .qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;
   if (_internal_has_internet_nodes_list()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        2, _Internal::internet_nodes_list(this), target, stream);
+      InternalWriteMessage(2, _Internal::internet_nodes_list(this),
+        _Internal::internet_nodes_list(this).GetCachedSize(), target, stream);
   }
 
   // .qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;
   if (_internal_has_internet_nodes_add()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        3, _Internal::internet_nodes_add(this), target, stream);
+      InternalWriteMessage(3, _Internal::internet_nodes_add(this),
+        _Internal::internet_nodes_add(this).GetCachedSize(), target, stream);
   }
 
   // .qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;
   if (_internal_has_internet_nodes_remove()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        4, _Internal::internet_nodes_remove(this), target, stream);
+      InternalWriteMessage(4, _Internal::internet_nodes_remove(this),
+        _Internal::internet_nodes_remove(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.connections.Connections)
@@ -585,7 +580,7 @@ void Connections::InternalSwap(Connections* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Connections::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_connections_2fconnections_2eproto_getter, &descriptor_table_connections_2fconnections_2eproto_once,
       file_level_metadata_connections_2fconnections_2eproto[0]);
 }
@@ -624,7 +619,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*InternetNodesRequest::GetClass
 
 
 ::PROTOBUF_NAMESPACE_ID::Metadata InternetNodesRequest::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_connections_2fconnections_2eproto_getter, &descriptor_table_connections_2fconnections_2eproto_once,
       file_level_metadata_connections_2fconnections_2eproto[1]);
 }
@@ -640,9 +635,6 @@ InternetNodesList::InternetNodesList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
   nodes_(arena) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.connections.InternetNodesList)
 }
 InternetNodesList::InternetNodesList(const InternetNodesList& from)
@@ -659,21 +651,17 @@ info_ = 0;
 
 InternetNodesList::~InternetNodesList() {
   // @@protoc_insertion_point(destructor:qaul.rpc.connections.InternetNodesList)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void InternetNodesList::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void InternetNodesList::ArenaDtor(void* object) {
-  InternetNodesList* _this = reinterpret_cast< InternetNodesList* >(object);
-  (void)_this;
-}
-void InternetNodesList::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void InternetNodesList::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -689,11 +677,11 @@ void InternetNodesList::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* InternetNodesList::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* InternetNodesList::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .qaul.rpc.connections.Info info = 1;
       case 1:
@@ -749,20 +737,20 @@ uint8_t* InternetNodesList::_InternalSerialize(
   // .qaul.rpc.connections.Info info = 1;
   if (this->_internal_info() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteEnumToArray(
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
       1, this->_internal_info(), target);
   }
 
   // repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;
-  for (unsigned int i = 0,
-      n = static_cast<unsigned int>(this->_internal_nodes_size()); i < n; i++) {
-    target = stream->EnsureSpace(target);
+  for (unsigned i = 0,
+      n = static_cast<unsigned>(this->_internal_nodes_size()); i < n; i++) {
+    const auto& repfield = this->_internal_nodes(i);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, this->_internal_nodes(i), target, stream);
+        InternalWriteMessage(2, repfield, repfield.GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.connections.InternetNodesList)
@@ -787,7 +775,7 @@ size_t InternetNodesList::ByteSizeLong() const {
   // .qaul.rpc.connections.Info info = 1;
   if (this->_internal_info() != 0) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::EnumSize(this->_internal_info());
+      ::_pbi::WireFormatLite::EnumSize(this->_internal_info());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -838,7 +826,7 @@ void InternetNodesList::InternalSwap(InternetNodesList* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata InternetNodesList::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_connections_2fconnections_2eproto_getter, &descriptor_table_connections_2fconnections_2eproto_once,
       file_level_metadata_connections_2fconnections_2eproto[2]);
 }
@@ -853,50 +841,43 @@ InternetNodesEntry::InternetNodesEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.connections.InternetNodesEntry)
 }
 InternetNodesEntry::InternetNodesEntry(const InternetNodesEntry& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  address_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  address_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    address_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    address_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_address().empty()) {
-    address_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_address(), 
+    address_.Set(from._internal_address(), 
       GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.connections.InternetNodesEntry)
 }
 
 inline void InternetNodesEntry::SharedCtor() {
-address_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+address_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  address_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  address_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 InternetNodesEntry::~InternetNodesEntry() {
   // @@protoc_insertion_point(destructor:qaul.rpc.connections.InternetNodesEntry)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void InternetNodesEntry::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  address_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  address_.Destroy();
 }
 
-void InternetNodesEntry::ArenaDtor(void* object) {
-  InternetNodesEntry* _this = reinterpret_cast< InternetNodesEntry* >(object);
-  (void)_this;
-}
-void InternetNodesEntry::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void InternetNodesEntry::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -911,19 +892,19 @@ void InternetNodesEntry::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* InternetNodesEntry::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* InternetNodesEntry::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // string address = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_address();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.connections.InternetNodesEntry.address"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.connections.InternetNodesEntry.address"));
         } else
           goto handle_unusual;
         continue;
@@ -967,7 +948,7 @@ uint8_t* InternetNodesEntry::_InternalSerialize(
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.connections.InternetNodesEntry)
@@ -1034,14 +1015,13 @@ void InternetNodesEntry::InternalSwap(InternetNodesEntry* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &address_, lhs_arena,
       &other->address_, rhs_arena
   );
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata InternetNodesEntry::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_connections_2fconnections_2eproto_getter, &descriptor_table_connections_2fconnections_2eproto_once,
       file_level_metadata_connections_2fconnections_2eproto[3]);
 }
@@ -1051,16 +1031,20 @@ void InternetNodesEntry::InternalSwap(InternetNodesEntry* other) {
 }  // namespace rpc
 }  // namespace qaul
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::qaul::rpc::connections::Connections* Arena::CreateMaybeMessage< ::qaul::rpc::connections::Connections >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::connections::Connections*
+Arena::CreateMaybeMessage< ::qaul::rpc::connections::Connections >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::connections::Connections >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::connections::InternetNodesRequest* Arena::CreateMaybeMessage< ::qaul::rpc::connections::InternetNodesRequest >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::connections::InternetNodesRequest*
+Arena::CreateMaybeMessage< ::qaul::rpc::connections::InternetNodesRequest >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::connections::InternetNodesRequest >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::connections::InternetNodesList* Arena::CreateMaybeMessage< ::qaul::rpc::connections::InternetNodesList >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::connections::InternetNodesList*
+Arena::CreateMaybeMessage< ::qaul::rpc::connections::InternetNodesList >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::connections::InternetNodesList >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::connections::InternetNodesEntry* Arena::CreateMaybeMessage< ::qaul::rpc::connections::InternetNodesEntry >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::connections::InternetNodesEntry*
+Arena::CreateMaybeMessage< ::qaul::rpc::connections::InternetNodesEntry >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::connections::InternetNodesEntry >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE

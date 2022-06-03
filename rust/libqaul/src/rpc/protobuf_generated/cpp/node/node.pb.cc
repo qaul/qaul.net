@@ -16,39 +16,43 @@
 #include <google/protobuf/port_def.inc>
 
 PROTOBUF_PRAGMA_INIT_SEG
+
+namespace _pb = ::PROTOBUF_NAMESPACE_ID;
+namespace _pbi = _pb::internal;
+
 namespace qaul {
 namespace rpc {
 namespace node {
-constexpr Node::Node(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+PROTOBUF_CONSTEXPR Node::Node(
+    ::_pbi::ConstantInitialized)
   : _oneof_case_{}{}
 struct NodeDefaultTypeInternal {
-  constexpr NodeDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR NodeDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~NodeDefaultTypeInternal() {}
   union {
     Node _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT NodeDefaultTypeInternal _Node_default_instance_;
-constexpr NodeInformation::NodeInformation(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : id_base58_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeDefaultTypeInternal _Node_default_instance_;
+PROTOBUF_CONSTEXPR NodeInformation::NodeInformation(
+    ::_pbi::ConstantInitialized)
+  : id_base58_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
 struct NodeInformationDefaultTypeInternal {
-  constexpr NodeInformationDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR NodeInformationDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~NodeInformationDefaultTypeInternal() {}
   union {
     NodeInformation _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT NodeInformationDefaultTypeInternal _NodeInformation_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeInformationDefaultTypeInternal _NodeInformation_default_instance_;
 }  // namespace node
 }  // namespace rpc
 }  // namespace qaul
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_node_2fnode_2eproto[2];
-static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_node_2fnode_2eproto = nullptr;
-static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_node_2fnode_2eproto = nullptr;
+static ::_pb::Metadata file_level_metadata_node_2fnode_2eproto[2];
+static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_node_2fnode_2eproto = nullptr;
+static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_node_2fnode_2eproto = nullptr;
 
 const uint32_t TableStruct_node_2fnode_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
@@ -57,8 +61,8 @@ const uint32_t TableStruct_node_2fnode_2eproto::offsets[] PROTOBUF_SECTION_VARIA
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, _internal_metadata_),
@@ -68,14 +72,14 @@ const uint32_t TableStruct_node_2fnode_2eproto::offsets[] PROTOBUF_SECTION_VARIA
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, id_base58_),
 };
-static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::node::Node)},
   { 9, -1, -1, sizeof(::qaul::rpc::node::NodeInformation)},
 };
 
-static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::node::_Node_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::node::_NodeInformation_default_instance_),
+static const ::_pb::Message* const file_default_instances[] = {
+  &::qaul::rpc::node::_Node_default_instance_._instance,
+  &::qaul::rpc::node::_NodeInformation_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_node_2fnode_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -85,19 +89,21 @@ const char descriptor_table_protodef_node_2fnode_2eproto[] PROTOBUF_SECTION_VARI
   "sage\"$\n\017NodeInformation\022\021\n\tid_base58\030\001 \001"
   "(\tb\006proto3"
   ;
-static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_node_2fnode_2eproto_once;
-const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_node_2fnode_2eproto = {
-  false, false, 170, descriptor_table_protodef_node_2fnode_2eproto, "node/node.proto", 
-  &descriptor_table_node_2fnode_2eproto_once, nullptr, 0, 2,
-  schemas, file_default_instances, TableStruct_node_2fnode_2eproto::offsets,
-  file_level_metadata_node_2fnode_2eproto, file_level_enum_descriptors_node_2fnode_2eproto, file_level_service_descriptors_node_2fnode_2eproto,
+static ::_pbi::once_flag descriptor_table_node_2fnode_2eproto_once;
+const ::_pbi::DescriptorTable descriptor_table_node_2fnode_2eproto = {
+    false, false, 170, descriptor_table_protodef_node_2fnode_2eproto,
+    "node/node.proto",
+    &descriptor_table_node_2fnode_2eproto_once, nullptr, 0, 2,
+    schemas, file_default_instances, TableStruct_node_2fnode_2eproto::offsets,
+    file_level_metadata_node_2fnode_2eproto, file_level_enum_descriptors_node_2fnode_2eproto,
+    file_level_service_descriptors_node_2fnode_2eproto,
 };
-PROTOBUF_ATTRIBUTE_WEAK const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable* descriptor_table_node_2fnode_2eproto_getter() {
+PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_node_2fnode_2eproto_getter() {
   return &descriptor_table_node_2fnode_2eproto;
 }
 
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_node_2fnode_2eproto(&descriptor_table_node_2fnode_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_node_2fnode_2eproto(&descriptor_table_node_2fnode_2eproto);
 namespace qaul {
 namespace rpc {
 namespace node {
@@ -118,7 +124,7 @@ void Node::set_allocated_info(::qaul::rpc::node::NodeInformation* info) {
   clear_message();
   if (info) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::node::NodeInformation>::GetOwningArena(info);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(info);
     if (message_arena != submessage_arena) {
       info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, info, submessage_arena);
@@ -132,9 +138,6 @@ Node::Node(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.node.Node)
 }
 Node::Node(const Node& from)
@@ -163,9 +166,11 @@ clear_has_message();
 
 Node::~Node() {
   // @@protoc_insertion_point(destructor:qaul.rpc.node.Node)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void Node::SharedDtor() {
@@ -175,12 +180,6 @@ inline void Node::SharedDtor() {
   }
 }
 
-void Node::ArenaDtor(void* object) {
-  Node* _this = reinterpret_cast< Node* >(object);
-  (void)_this;
-}
-void Node::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void Node::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -216,11 +215,11 @@ void Node::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Node::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Node::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bool get_node_info = 1;
       case 1:
@@ -270,19 +269,18 @@ uint8_t* Node::_InternalSerialize(
   // bool get_node_info = 1;
   if (_internal_has_get_node_info()) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(1, this->_internal_get_node_info(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_get_node_info(), target);
   }
 
   // .qaul.rpc.node.NodeInformation info = 2;
   if (_internal_has_info()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        2, _Internal::info(this), target, stream);
+      InternalWriteMessage(2, _Internal::info(this),
+        _Internal::info(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.node.Node)
@@ -371,7 +369,7 @@ void Node::InternalSwap(Node* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Node::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_node_2fnode_2eproto_getter, &descriptor_table_node_2fnode_2eproto_once,
       file_level_metadata_node_2fnode_2eproto[0]);
 }
@@ -386,50 +384,43 @@ NodeInformation::NodeInformation(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.node.NodeInformation)
 }
 NodeInformation::NodeInformation(const NodeInformation& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  id_base58_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  id_base58_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    id_base58_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    id_base58_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id_base58().empty()) {
-    id_base58_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_id_base58(), 
+    id_base58_.Set(from._internal_id_base58(), 
       GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.node.NodeInformation)
 }
 
 inline void NodeInformation::SharedCtor() {
-id_base58_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+id_base58_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  id_base58_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  id_base58_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 NodeInformation::~NodeInformation() {
   // @@protoc_insertion_point(destructor:qaul.rpc.node.NodeInformation)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void NodeInformation::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  id_base58_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  id_base58_.Destroy();
 }
 
-void NodeInformation::ArenaDtor(void* object) {
-  NodeInformation* _this = reinterpret_cast< NodeInformation* >(object);
-  (void)_this;
-}
-void NodeInformation::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void NodeInformation::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -444,19 +435,19 @@ void NodeInformation::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* NodeInformation::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* NodeInformation::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // string id_base58 = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id_base58();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.node.NodeInformation.id_base58"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.node.NodeInformation.id_base58"));
         } else
           goto handle_unusual;
         continue;
@@ -500,7 +491,7 @@ uint8_t* NodeInformation::_InternalSerialize(
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.node.NodeInformation)
@@ -567,14 +558,13 @@ void NodeInformation::InternalSwap(NodeInformation* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &id_base58_, lhs_arena,
       &other->id_base58_, rhs_arena
   );
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata NodeInformation::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_node_2fnode_2eproto_getter, &descriptor_table_node_2fnode_2eproto_once,
       file_level_metadata_node_2fnode_2eproto[1]);
 }
@@ -584,10 +574,12 @@ void NodeInformation::InternalSwap(NodeInformation* other) {
 }  // namespace rpc
 }  // namespace qaul
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::qaul::rpc::node::Node* Arena::CreateMaybeMessage< ::qaul::rpc::node::Node >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::node::Node*
+Arena::CreateMaybeMessage< ::qaul::rpc::node::Node >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::node::Node >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::node::NodeInformation* Arena::CreateMaybeMessage< ::qaul::rpc::node::NodeInformation >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::node::NodeInformation*
+Arena::CreateMaybeMessage< ::qaul::rpc::node::NodeInformation >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::node::NodeInformation >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE

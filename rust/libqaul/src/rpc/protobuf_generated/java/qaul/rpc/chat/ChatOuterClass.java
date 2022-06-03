@@ -285,6 +285,8 @@ public final class ChatOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -1113,8 +1115,9 @@ public final class ChatOuterClass {
         } else {
           if (messageCase_ == 1) {
             overviewRequestBuilder_.mergeFrom(value);
+          } else {
+            overviewRequestBuilder_.setMessage(value);
           }
-          overviewRequestBuilder_.setMessage(value);
         }
         messageCase_ = 1;
         return this;
@@ -1290,8 +1293,9 @@ public final class ChatOuterClass {
         } else {
           if (messageCase_ == 2) {
             overviewListBuilder_.mergeFrom(value);
+          } else {
+            overviewListBuilder_.setMessage(value);
           }
-          overviewListBuilder_.setMessage(value);
         }
         messageCase_ = 2;
         return this;
@@ -1467,8 +1471,9 @@ public final class ChatOuterClass {
         } else {
           if (messageCase_ == 3) {
             conversationRequestBuilder_.mergeFrom(value);
+          } else {
+            conversationRequestBuilder_.setMessage(value);
           }
-          conversationRequestBuilder_.setMessage(value);
         }
         messageCase_ = 3;
         return this;
@@ -1644,8 +1649,9 @@ public final class ChatOuterClass {
         } else {
           if (messageCase_ == 4) {
             conversationListBuilder_.mergeFrom(value);
+          } else {
+            conversationListBuilder_.setMessage(value);
           }
-          conversationListBuilder_.setMessage(value);
         }
         messageCase_ = 4;
         return this;
@@ -1821,8 +1827,9 @@ public final class ChatOuterClass {
         } else {
           if (messageCase_ == 5) {
             sendBuilder_.mergeFrom(value);
+          } else {
+            sendBuilder_.setMessage(value);
           }
-          sendBuilder_.setMessage(value);
         }
         messageCase_ = 5;
         return this;
@@ -2023,6 +2030,8 @@ public final class ChatOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -2488,6 +2497,8 @@ public final class ChatOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -3386,6 +3397,8 @@ public final class ChatOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -4539,6 +4552,8 @@ public final class ChatOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -5150,6 +5165,8 @@ public final class ChatOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -6100,6 +6117,8 @@ public final class ChatOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -7198,6 +7217,8 @@ public final class ChatOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);

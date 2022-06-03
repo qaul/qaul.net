@@ -16,52 +16,56 @@
 #include <google/protobuf/port_def.inc>
 
 PROTOBUF_PRAGMA_INIT_SEG
+
+namespace _pb = ::PROTOBUF_NAMESPACE_ID;
+namespace _pbi = _pb::internal;
+
 namespace qaul {
 namespace net {
 namespace ble {
-constexpr BleMessage::BleMessage(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+PROTOBUF_CONSTEXPR BleMessage::BleMessage(
+    ::_pbi::ConstantInitialized)
   : _oneof_case_{}{}
 struct BleMessageDefaultTypeInternal {
-  constexpr BleMessageDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR BleMessageDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~BleMessageDefaultTypeInternal() {}
   union {
     BleMessage _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT BleMessageDefaultTypeInternal _BleMessage_default_instance_;
-constexpr Identification::Identification(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleMessageDefaultTypeInternal _BleMessage_default_instance_;
+PROTOBUF_CONSTEXPR Identification::Identification(
+    ::_pbi::ConstantInitialized)
   : node_(nullptr)
   , request_(false){}
 struct IdentificationDefaultTypeInternal {
-  constexpr IdentificationDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR IdentificationDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~IdentificationDefaultTypeInternal() {}
   union {
     Identification _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT IdentificationDefaultTypeInternal _Identification_default_instance_;
-constexpr NodeIdentification::NodeIdentification(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 IdentificationDefaultTypeInternal _Identification_default_instance_;
+PROTOBUF_CONSTEXPR NodeIdentification::NodeIdentification(
+    ::_pbi::ConstantInitialized)
+  : id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
 struct NodeIdentificationDefaultTypeInternal {
-  constexpr NodeIdentificationDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR NodeIdentificationDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~NodeIdentificationDefaultTypeInternal() {}
   union {
     NodeIdentification _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT NodeIdentificationDefaultTypeInternal _NodeIdentification_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeIdentificationDefaultTypeInternal _NodeIdentification_default_instance_;
 }  // namespace ble
 }  // namespace net
 }  // namespace qaul
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_connections_2fble_2fble_5fnet_2eproto[3];
-static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_connections_2fble_2fble_5fnet_2eproto = nullptr;
-static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_connections_2fble_2fble_5fnet_2eproto = nullptr;
+static ::_pb::Metadata file_level_metadata_connections_2fble_2fble_5fnet_2eproto[3];
+static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_connections_2fble_2fble_5fnet_2eproto = nullptr;
+static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_connections_2fble_2fble_5fnet_2eproto = nullptr;
 
 const uint32_t TableStruct_connections_2fble_2fble_5fnet_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
@@ -70,10 +74,10 @@ const uint32_t TableStruct_connections_2fble_2fble_5fnet_2eproto::offsets[] PROT
   PROTOBUF_FIELD_OFFSET(::qaul::net::ble::BleMessage, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
   PROTOBUF_FIELD_OFFSET(::qaul::net::ble::BleMessage, message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::net::ble::Identification, _internal_metadata_),
@@ -91,16 +95,16 @@ const uint32_t TableStruct_connections_2fble_2fble_5fnet_2eproto::offsets[] PROT
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::qaul::net::ble::NodeIdentification, id_),
 };
-static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::net::ble::BleMessage)},
   { 11, -1, -1, sizeof(::qaul::net::ble::Identification)},
   { 19, -1, -1, sizeof(::qaul::net::ble::NodeIdentification)},
 };
 
-static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::net::ble::_BleMessage_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::net::ble::_Identification_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::net::ble::_NodeIdentification_default_instance_),
+static const ::_pb::Message* const file_default_instances[] = {
+  &::qaul::net::ble::_BleMessage_default_instance_._instance,
+  &::qaul::net::ble::_Identification_default_instance_._instance,
+  &::qaul::net::ble::_NodeIdentification_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_connections_2fble_2fble_5fnet_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -113,19 +117,21 @@ const char descriptor_table_protodef_connections_2fble_2fble_5fnet_2eproto[] PRO
   ".ble.NodeIdentification\" \n\022NodeIdentific"
   "ation\022\n\n\002id\030\001 \001(\014b\006proto3"
   ;
-static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_connections_2fble_2fble_5fnet_2eproto_once;
-const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_connections_2fble_2fble_5fnet_2eproto = {
-  false, false, 305, descriptor_table_protodef_connections_2fble_2fble_5fnet_2eproto, "connections/ble/ble_net.proto", 
-  &descriptor_table_connections_2fble_2fble_5fnet_2eproto_once, nullptr, 0, 3,
-  schemas, file_default_instances, TableStruct_connections_2fble_2fble_5fnet_2eproto::offsets,
-  file_level_metadata_connections_2fble_2fble_5fnet_2eproto, file_level_enum_descriptors_connections_2fble_2fble_5fnet_2eproto, file_level_service_descriptors_connections_2fble_2fble_5fnet_2eproto,
+static ::_pbi::once_flag descriptor_table_connections_2fble_2fble_5fnet_2eproto_once;
+const ::_pbi::DescriptorTable descriptor_table_connections_2fble_2fble_5fnet_2eproto = {
+    false, false, 305, descriptor_table_protodef_connections_2fble_2fble_5fnet_2eproto,
+    "connections/ble/ble_net.proto",
+    &descriptor_table_connections_2fble_2fble_5fnet_2eproto_once, nullptr, 0, 3,
+    schemas, file_default_instances, TableStruct_connections_2fble_2fble_5fnet_2eproto::offsets,
+    file_level_metadata_connections_2fble_2fble_5fnet_2eproto, file_level_enum_descriptors_connections_2fble_2fble_5fnet_2eproto,
+    file_level_service_descriptors_connections_2fble_2fble_5fnet_2eproto,
 };
-PROTOBUF_ATTRIBUTE_WEAK const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable* descriptor_table_connections_2fble_2fble_5fnet_2eproto_getter() {
+PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_connections_2fble_2fble_5fnet_2eproto_getter() {
   return &descriptor_table_connections_2fble_2fble_5fnet_2eproto;
 }
 
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_connections_2fble_2fble_5fnet_2eproto(&descriptor_table_connections_2fble_2fble_5fnet_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_connections_2fble_2fble_5fnet_2eproto(&descriptor_table_connections_2fble_2fble_5fnet_2eproto);
 namespace qaul {
 namespace net {
 namespace ble {
@@ -146,7 +152,7 @@ void BleMessage::set_allocated_identification(::qaul::net::ble::Identification* 
   clear_message();
   if (identification) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::net::ble::Identification>::GetOwningArena(identification);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(identification);
     if (message_arena != submessage_arena) {
       identification = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, identification, submessage_arena);
@@ -160,9 +166,6 @@ BleMessage::BleMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.net.ble.BleMessage)
 }
 BleMessage::BleMessage(const BleMessage& from)
@@ -199,9 +202,11 @@ clear_has_message();
 
 BleMessage::~BleMessage() {
   // @@protoc_insertion_point(destructor:qaul.net.ble.BleMessage)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void BleMessage::SharedDtor() {
@@ -211,12 +216,6 @@ inline void BleMessage::SharedDtor() {
   }
 }
 
-void BleMessage::ArenaDtor(void* object) {
-  BleMessage* _this = reinterpret_cast< BleMessage* >(object);
-  (void)_this;
-}
-void BleMessage::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void BleMessage::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -225,15 +224,15 @@ void BleMessage::clear_message() {
 // @@protoc_insertion_point(one_of_clear_start:qaul.net.ble.BleMessage)
   switch (message_case()) {
     case kInfo: {
-      message_.info_.Destroy(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+      message_.info_.Destroy();
       break;
     }
     case kFeed: {
-      message_.feed_.Destroy(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+      message_.feed_.Destroy();
       break;
     }
     case kMessaging: {
-      message_.messaging_.Destroy(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+      message_.messaging_.Destroy();
       break;
     }
     case kIdentification: {
@@ -260,17 +259,17 @@ void BleMessage::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* BleMessage::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* BleMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes info = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_info();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -279,7 +278,7 @@ const char* BleMessage::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_feed();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -288,7 +287,7 @@ const char* BleMessage::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_messaging();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -350,14 +349,13 @@ uint8_t* BleMessage::_InternalSerialize(
 
   // .qaul.net.ble.Identification identification = 4;
   if (_internal_has_identification()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        4, _Internal::identification(this), target, stream);
+      InternalWriteMessage(4, _Internal::identification(this),
+        _Internal::identification(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.net.ble.BleMessage)
@@ -470,7 +468,7 @@ void BleMessage::InternalSwap(BleMessage* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata BleMessage::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_connections_2fble_2fble_5fnet_2eproto_getter, &descriptor_table_connections_2fble_2fble_5fnet_2eproto_once,
       file_level_metadata_connections_2fble_2fble_5fnet_2eproto[0]);
 }
@@ -490,9 +488,6 @@ Identification::Identification(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.net.ble.Identification)
 }
 Identification::Identification(const Identification& from)
@@ -516,9 +511,11 @@ inline void Identification::SharedCtor() {
 
 Identification::~Identification() {
   // @@protoc_insertion_point(destructor:qaul.net.ble.Identification)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void Identification::SharedDtor() {
@@ -526,12 +523,6 @@ inline void Identification::SharedDtor() {
   if (this != internal_default_instance()) delete node_;
 }
 
-void Identification::ArenaDtor(void* object) {
-  Identification* _this = reinterpret_cast< Identification* >(object);
-  (void)_this;
-}
-void Identification::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void Identification::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -550,11 +541,11 @@ void Identification::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Identification::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Identification::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bool request = 1;
       case 1:
@@ -604,19 +595,18 @@ uint8_t* Identification::_InternalSerialize(
   // bool request = 1;
   if (this->_internal_request() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(1, this->_internal_request(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_request(), target);
   }
 
   // .qaul.net.ble.NodeIdentification node = 2;
   if (this->_internal_has_node()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        2, _Internal::node(this), target, stream);
+      InternalWriteMessage(2, _Internal::node(this),
+        _Internal::node(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.net.ble.Identification)
@@ -697,7 +687,7 @@ void Identification::InternalSwap(Identification* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Identification::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_connections_2fble_2fble_5fnet_2eproto_getter, &descriptor_table_connections_2fble_2fble_5fnet_2eproto_once,
       file_level_metadata_connections_2fble_2fble_5fnet_2eproto[1]);
 }
@@ -712,50 +702,43 @@ NodeIdentification::NodeIdentification(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.net.ble.NodeIdentification)
 }
 NodeIdentification::NodeIdentification(const NodeIdentification& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id().empty()) {
-    id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_id(), 
+    id_.Set(from._internal_id(), 
       GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.net.ble.NodeIdentification)
 }
 
 inline void NodeIdentification::SharedCtor() {
-id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+id_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  id_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 NodeIdentification::~NodeIdentification() {
   // @@protoc_insertion_point(destructor:qaul.net.ble.NodeIdentification)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void NodeIdentification::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  id_.Destroy();
 }
 
-void NodeIdentification::ArenaDtor(void* object) {
-  NodeIdentification* _this = reinterpret_cast< NodeIdentification* >(object);
-  (void)_this;
-}
-void NodeIdentification::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void NodeIdentification::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -770,17 +753,17 @@ void NodeIdentification::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* NodeIdentification::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* NodeIdentification::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -821,7 +804,7 @@ uint8_t* NodeIdentification::_InternalSerialize(
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.net.ble.NodeIdentification)
@@ -888,14 +871,13 @@ void NodeIdentification::InternalSwap(NodeIdentification* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &id_, lhs_arena,
       &other->id_, rhs_arena
   );
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata NodeIdentification::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_connections_2fble_2fble_5fnet_2eproto_getter, &descriptor_table_connections_2fble_2fble_5fnet_2eproto_once,
       file_level_metadata_connections_2fble_2fble_5fnet_2eproto[2]);
 }
@@ -905,13 +887,16 @@ void NodeIdentification::InternalSwap(NodeIdentification* other) {
 }  // namespace net
 }  // namespace qaul
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::qaul::net::ble::BleMessage* Arena::CreateMaybeMessage< ::qaul::net::ble::BleMessage >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::net::ble::BleMessage*
+Arena::CreateMaybeMessage< ::qaul::net::ble::BleMessage >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::net::ble::BleMessage >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::net::ble::Identification* Arena::CreateMaybeMessage< ::qaul::net::ble::Identification >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::net::ble::Identification*
+Arena::CreateMaybeMessage< ::qaul::net::ble::Identification >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::net::ble::Identification >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::net::ble::NodeIdentification* Arena::CreateMaybeMessage< ::qaul::net::ble::NodeIdentification >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::net::ble::NodeIdentification*
+Arena::CreateMaybeMessage< ::qaul::net::ble::NodeIdentification >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::net::ble::NodeIdentification >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE

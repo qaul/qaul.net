@@ -3,7 +3,7 @@
 
 package qaul.rpc.node;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializenode")
 public inline fun node(block: qaul.rpc.node.NodeKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.Node =
   qaul.rpc.node.NodeKt.Dsl._create(qaul.rpc.node.NodeOuterClass.Node.newBuilder()).apply { block() }._build()
 public object NodeKt {
@@ -81,3 +81,7 @@ public object NodeKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.node.NodeOuterClass.Node.copy(block: qaul.rpc.node.NodeKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.Node =
   qaul.rpc.node.NodeKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.rpc.node.NodeOuterClass.NodeOrBuilder.infoOrNull: qaul.rpc.node.NodeOuterClass.NodeInformation?
+  get() = if (hasInfo()) getInfo() else null
+

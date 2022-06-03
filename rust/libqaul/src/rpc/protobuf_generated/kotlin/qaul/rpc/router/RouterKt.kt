@@ -3,7 +3,7 @@
 
 package qaul.rpc.router;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializerouter")
 public inline fun router(block: qaul.rpc.router.RouterKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.Router =
   qaul.rpc.router.RouterKt.Dsl._create(qaul.rpc.router.RouterOuterClass.Router.newBuilder()).apply { block() }._build()
 public object RouterKt {
@@ -177,3 +177,22 @@ public object RouterKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.router.RouterOuterClass.Router.copy(block: qaul.rpc.router.RouterKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.Router =
   qaul.rpc.router.RouterKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.rpc.router.RouterOuterClass.RouterOrBuilder.routingTableRequestOrNull: qaul.rpc.router.RouterOuterClass.RoutingTableRequest?
+  get() = if (hasRoutingTableRequest()) getRoutingTableRequest() else null
+
+val qaul.rpc.router.RouterOuterClass.RouterOrBuilder.routingTableOrNull: qaul.rpc.router.RouterOuterClass.RoutingTableList?
+  get() = if (hasRoutingTable()) getRoutingTable() else null
+
+val qaul.rpc.router.RouterOuterClass.RouterOrBuilder.connectionsRequestOrNull: qaul.rpc.router.RouterOuterClass.ConnectionsRequest?
+  get() = if (hasConnectionsRequest()) getConnectionsRequest() else null
+
+val qaul.rpc.router.RouterOuterClass.RouterOrBuilder.connectionsListOrNull: qaul.rpc.router.RouterOuterClass.ConnectionsList?
+  get() = if (hasConnectionsList()) getConnectionsList() else null
+
+val qaul.rpc.router.RouterOuterClass.RouterOrBuilder.neighboursRequestOrNull: qaul.rpc.router.RouterOuterClass.NeighboursRequest?
+  get() = if (hasNeighboursRequest()) getNeighboursRequest() else null
+
+val qaul.rpc.router.RouterOuterClass.RouterOrBuilder.neighboursListOrNull: qaul.rpc.router.RouterOuterClass.NeighboursList?
+  get() = if (hasNeighboursList()) getNeighboursList() else null
+
