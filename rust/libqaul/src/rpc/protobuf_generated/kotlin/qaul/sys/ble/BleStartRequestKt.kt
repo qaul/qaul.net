@@ -3,7 +3,7 @@
 
 package qaul.sys.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializebleStartRequest")
 public inline fun bleStartRequest(block: qaul.sys.ble.BleStartRequestKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartRequest =
   qaul.sys.ble.BleStartRequestKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleStartRequest.newBuilder()).apply { block() }._build()
 public object BleStartRequestKt {
@@ -80,3 +80,4 @@ public object BleStartRequestKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.sys.ble.BleOuterClass.BleStartRequest.copy(block: qaul.sys.ble.BleStartRequestKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartRequest =
   qaul.sys.ble.BleStartRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

@@ -3,7 +3,7 @@
 
 package qaul.rpc.chat;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializechat")
 public inline fun chat(block: qaul.rpc.chat.ChatKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.Chat =
   qaul.rpc.chat.ChatKt.Dsl._create(qaul.rpc.chat.ChatOuterClass.Chat.newBuilder()).apply { block() }._build()
 public object ChatKt {
@@ -213,3 +213,19 @@ public object ChatKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.chat.ChatOuterClass.Chat.copy(block: qaul.rpc.chat.ChatKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.Chat =
   qaul.rpc.chat.ChatKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.overviewRequestOrNull: qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest?
+  get() = if (hasOverviewRequest()) getOverviewRequest() else null
+
+val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.overviewListOrNull: qaul.rpc.chat.ChatOuterClass.ChatOverviewList?
+  get() = if (hasOverviewList()) getOverviewList() else null
+
+val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.conversationRequestOrNull: qaul.rpc.chat.ChatOuterClass.ChatConversationRequest?
+  get() = if (hasConversationRequest()) getConversationRequest() else null
+
+val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.conversationListOrNull: qaul.rpc.chat.ChatOuterClass.ChatConversationList?
+  get() = if (hasConversationList()) getConversationList() else null
+
+val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.sendOrNull: qaul.rpc.chat.ChatOuterClass.ChatMessageSend?
+  get() = if (hasSend()) getSend() else null
+

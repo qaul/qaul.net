@@ -3,7 +3,7 @@
 
 package qaul.rpc.debug;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeheartbeatRequest")
 public inline fun heartbeatRequest(block: qaul.rpc.debug.HeartbeatRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.HeartbeatRequest =
   qaul.rpc.debug.HeartbeatRequestKt.Dsl._create(qaul.rpc.debug.DebugOuterClass.HeartbeatRequest.newBuilder()).apply { block() }._build()
 public object HeartbeatRequestKt {
@@ -26,3 +26,4 @@ public object HeartbeatRequestKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.debug.DebugOuterClass.HeartbeatRequest.copy(block: qaul.rpc.debug.HeartbeatRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.HeartbeatRequest =
   qaul.rpc.debug.HeartbeatRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

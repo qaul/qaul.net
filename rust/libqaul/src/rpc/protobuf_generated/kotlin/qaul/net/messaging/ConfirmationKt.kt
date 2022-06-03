@@ -3,7 +3,7 @@
 
 package qaul.net.messaging;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeconfirmation")
 public inline fun confirmation(block: qaul.net.messaging.ConfirmationKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Confirmation =
   qaul.net.messaging.ConfirmationKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.Confirmation.newBuilder()).apply { block() }._build()
 public object ConfirmationKt {
@@ -76,3 +76,4 @@ public object ConfirmationKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.messaging.MessagingOuterClass.Confirmation.copy(block: qaul.net.messaging.ConfirmationKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Confirmation =
   qaul.net.messaging.ConfirmationKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

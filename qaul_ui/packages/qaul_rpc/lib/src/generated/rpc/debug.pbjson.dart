@@ -15,6 +15,9 @@ const Debug$json = const {
     const {'1': 'heartbeat_request', '3': 1, '4': 1, '5': 11, '6': '.qaul.rpc.debug.HeartbeatRequest', '9': 0, '10': 'heartbeatRequest'},
     const {'1': 'heartbeat_response', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.debug.HeartbeatResponse', '9': 0, '10': 'heartbeatResponse'},
     const {'1': 'panic', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.debug.Panic', '9': 0, '10': 'panic'},
+    const {'1': 'log_to_file', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.debug.LogToFile', '9': 0, '10': 'logToFile'},
+    const {'1': 'storage_path_request', '3': 5, '4': 1, '5': 11, '6': '.qaul.rpc.debug.StoragePathRequest', '9': 0, '10': 'storagePathRequest'},
+    const {'1': 'storage_path_response', '3': 6, '4': 1, '5': 11, '6': '.qaul.rpc.debug.StoragePathResponse', '9': 0, '10': 'storagePathResponse'},
   ],
   '8': const [
     const {'1': 'message'},
@@ -22,7 +25,7 @@ const Debug$json = const {
 };
 
 /// Descriptor for `Debug`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List debugDescriptor = $convert.base64Decode('CgVEZWJ1ZxJPChFoZWFydGJlYXRfcmVxdWVzdBgBIAEoCzIgLnFhdWwucnBjLmRlYnVnLkhlYXJ0YmVhdFJlcXVlc3RIAFIQaGVhcnRiZWF0UmVxdWVzdBJSChJoZWFydGJlYXRfcmVzcG9uc2UYAiABKAsyIS5xYXVsLnJwYy5kZWJ1Zy5IZWFydGJlYXRSZXNwb25zZUgAUhFoZWFydGJlYXRSZXNwb25zZRItCgVwYW5pYxgDIAEoCzIVLnFhdWwucnBjLmRlYnVnLlBhbmljSABSBXBhbmljQgkKB21lc3NhZ2U=');
+final $typed_data.Uint8List debugDescriptor = $convert.base64Decode('CgVEZWJ1ZxJPChFoZWFydGJlYXRfcmVxdWVzdBgBIAEoCzIgLnFhdWwucnBjLmRlYnVnLkhlYXJ0YmVhdFJlcXVlc3RIAFIQaGVhcnRiZWF0UmVxdWVzdBJSChJoZWFydGJlYXRfcmVzcG9uc2UYAiABKAsyIS5xYXVsLnJwYy5kZWJ1Zy5IZWFydGJlYXRSZXNwb25zZUgAUhFoZWFydGJlYXRSZXNwb25zZRItCgVwYW5pYxgDIAEoCzIVLnFhdWwucnBjLmRlYnVnLlBhbmljSABSBXBhbmljEjsKC2xvZ190b19maWxlGAQgASgLMhkucWF1bC5ycGMuZGVidWcuTG9nVG9GaWxlSABSCWxvZ1RvRmlsZRJWChRzdG9yYWdlX3BhdGhfcmVxdWVzdBgFIAEoCzIiLnFhdWwucnBjLmRlYnVnLlN0b3JhZ2VQYXRoUmVxdWVzdEgAUhJzdG9yYWdlUGF0aFJlcXVlc3QSWQoVc3RvcmFnZV9wYXRoX3Jlc3BvbnNlGAYgASgLMiMucWF1bC5ycGMuZGVidWcuU3RvcmFnZVBhdGhSZXNwb25zZUgAUhNzdG9yYWdlUGF0aFJlc3BvbnNlQgkKB21lc3NhZ2U=');
 @$core.Deprecated('Use heartbeatRequestDescriptor instead')
 const HeartbeatRequest$json = const {
   '1': 'HeartbeatRequest',
@@ -44,3 +47,30 @@ const Panic$json = const {
 
 /// Descriptor for `Panic`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List panicDescriptor = $convert.base64Decode('CgVQYW5pYw==');
+@$core.Deprecated('Use logToFileDescriptor instead')
+const LogToFile$json = const {
+  '1': 'LogToFile',
+  '2': const [
+    const {'1': 'enable', '3': 1, '4': 1, '5': 8, '10': 'enable'},
+  ],
+};
+
+/// Descriptor for `LogToFile`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List logToFileDescriptor = $convert.base64Decode('CglMb2dUb0ZpbGUSFgoGZW5hYmxlGAEgASgIUgZlbmFibGU=');
+@$core.Deprecated('Use storagePathRequestDescriptor instead')
+const StoragePathRequest$json = const {
+  '1': 'StoragePathRequest',
+};
+
+/// Descriptor for `StoragePathRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List storagePathRequestDescriptor = $convert.base64Decode('ChJTdG9yYWdlUGF0aFJlcXVlc3Q=');
+@$core.Deprecated('Use storagePathResponseDescriptor instead')
+const StoragePathResponse$json = const {
+  '1': 'StoragePathResponse',
+  '2': const [
+    const {'1': 'storage_path', '3': 1, '4': 1, '5': 9, '10': 'storagePath'},
+  ],
+};
+
+/// Descriptor for `StoragePathResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List storagePathResponseDescriptor = $convert.base64Decode('ChNTdG9yYWdlUGF0aFJlc3BvbnNlEiEKDHN0b3JhZ2VfcGF0aBgBIAEoCVILc3RvcmFnZVBhdGg=');

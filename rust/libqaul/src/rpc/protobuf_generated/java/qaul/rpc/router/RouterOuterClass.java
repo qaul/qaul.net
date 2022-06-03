@@ -393,6 +393,8 @@ public final class RouterOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -1200,8 +1202,9 @@ public final class RouterOuterClass {
         } else {
           if (messageCase_ == 1) {
             routingTableRequestBuilder_.mergeFrom(value);
+          } else {
+            routingTableRequestBuilder_.setMessage(value);
           }
-          routingTableRequestBuilder_.setMessage(value);
         }
         messageCase_ = 1;
         return this;
@@ -1341,8 +1344,9 @@ public final class RouterOuterClass {
         } else {
           if (messageCase_ == 2) {
             routingTableBuilder_.mergeFrom(value);
+          } else {
+            routingTableBuilder_.setMessage(value);
           }
-          routingTableBuilder_.setMessage(value);
         }
         messageCase_ = 2;
         return this;
@@ -1482,8 +1486,9 @@ public final class RouterOuterClass {
         } else {
           if (messageCase_ == 3) {
             connectionsRequestBuilder_.mergeFrom(value);
+          } else {
+            connectionsRequestBuilder_.setMessage(value);
           }
-          connectionsRequestBuilder_.setMessage(value);
         }
         messageCase_ = 3;
         return this;
@@ -1623,8 +1628,9 @@ public final class RouterOuterClass {
         } else {
           if (messageCase_ == 4) {
             connectionsListBuilder_.mergeFrom(value);
+          } else {
+            connectionsListBuilder_.setMessage(value);
           }
-          connectionsListBuilder_.setMessage(value);
         }
         messageCase_ = 4;
         return this;
@@ -1764,8 +1770,9 @@ public final class RouterOuterClass {
         } else {
           if (messageCase_ == 5) {
             neighboursRequestBuilder_.mergeFrom(value);
+          } else {
+            neighboursRequestBuilder_.setMessage(value);
           }
-          neighboursRequestBuilder_.setMessage(value);
         }
         messageCase_ = 5;
         return this;
@@ -1905,8 +1912,9 @@ public final class RouterOuterClass {
         } else {
           if (messageCase_ == 6) {
             neighboursListBuilder_.mergeFrom(value);
+          } else {
+            neighboursListBuilder_.setMessage(value);
           }
-          neighboursListBuilder_.setMessage(value);
         }
         messageCase_ = 6;
         return this;
@@ -2088,6 +2096,8 @@ public final class RouterOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -2552,6 +2562,8 @@ public final class RouterOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -3370,6 +3382,8 @@ public final class RouterOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -4273,6 +4287,8 @@ public final class RouterOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -5045,6 +5061,8 @@ public final class RouterOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -5689,6 +5707,8 @@ public final class RouterOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -7909,6 +7929,8 @@ public final class RouterOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -8892,6 +8914,8 @@ public final class RouterOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -9550,6 +9574,8 @@ public final class RouterOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -10079,6 +10105,8 @@ public final class RouterOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -11552,6 +11580,8 @@ public final class RouterOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);

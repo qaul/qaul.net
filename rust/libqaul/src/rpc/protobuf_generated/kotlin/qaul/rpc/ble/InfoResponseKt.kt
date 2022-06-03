@@ -3,7 +3,7 @@
 
 package qaul.rpc.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeinfoResponse")
 public inline fun infoResponse(block: qaul.rpc.ble.InfoResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.InfoResponse =
   qaul.rpc.ble.InfoResponseKt.Dsl._create(qaul.rpc.ble.BleRpc.InfoResponse.newBuilder()).apply { block() }._build()
 public object InfoResponseKt {
@@ -101,3 +101,4 @@ public object InfoResponseKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.ble.BleRpc.InfoResponse.copy(block: qaul.rpc.ble.InfoResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.InfoResponse =
   qaul.rpc.ble.InfoResponseKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

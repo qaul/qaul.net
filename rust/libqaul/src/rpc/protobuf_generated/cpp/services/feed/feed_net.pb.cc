@@ -16,42 +16,46 @@
 #include <google/protobuf/port_def.inc>
 
 PROTOBUF_PRAGMA_INIT_SEG
+
+namespace _pb = ::PROTOBUF_NAMESPACE_ID;
+namespace _pbi = _pb::internal;
+
 namespace qaul {
 namespace net {
 namespace feed {
-constexpr FeedContainer::FeedContainer(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : signature_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , message_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+PROTOBUF_CONSTEXPR FeedContainer::FeedContainer(
+    ::_pbi::ConstantInitialized)
+  : signature_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , message_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
 struct FeedContainerDefaultTypeInternal {
-  constexpr FeedContainerDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR FeedContainerDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~FeedContainerDefaultTypeInternal() {}
   union {
     FeedContainer _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT FeedContainerDefaultTypeInternal _FeedContainer_default_instance_;
-constexpr FeedMessageContent::FeedMessageContent(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : sender_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , content_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedContainerDefaultTypeInternal _FeedContainer_default_instance_;
+PROTOBUF_CONSTEXPR FeedMessageContent::FeedMessageContent(
+    ::_pbi::ConstantInitialized)
+  : sender_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , content_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
   , time_(uint64_t{0u}){}
 struct FeedMessageContentDefaultTypeInternal {
-  constexpr FeedMessageContentDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR FeedMessageContentDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~FeedMessageContentDefaultTypeInternal() {}
   union {
     FeedMessageContent _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT FeedMessageContentDefaultTypeInternal _FeedMessageContent_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedMessageContentDefaultTypeInternal _FeedMessageContent_default_instance_;
 }  // namespace feed
 }  // namespace net
 }  // namespace qaul
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_services_2ffeed_2ffeed_5fnet_2eproto[2];
-static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_services_2ffeed_2ffeed_5fnet_2eproto = nullptr;
-static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_services_2ffeed_2ffeed_5fnet_2eproto = nullptr;
+static ::_pb::Metadata file_level_metadata_services_2ffeed_2ffeed_5fnet_2eproto[2];
+static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_services_2ffeed_2ffeed_5fnet_2eproto = nullptr;
+static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_services_2ffeed_2ffeed_5fnet_2eproto = nullptr;
 
 const uint32_t TableStruct_services_2ffeed_2ffeed_5fnet_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
@@ -72,14 +76,14 @@ const uint32_t TableStruct_services_2ffeed_2ffeed_5fnet_2eproto::offsets[] PROTO
   PROTOBUF_FIELD_OFFSET(::qaul::net::feed::FeedMessageContent, content_),
   PROTOBUF_FIELD_OFFSET(::qaul::net::feed::FeedMessageContent, time_),
 };
-static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::net::feed::FeedContainer)},
   { 8, -1, -1, sizeof(::qaul::net::feed::FeedMessageContent)},
 };
 
-static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::net::feed::_FeedContainer_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::net::feed::_FeedMessageContent_default_instance_),
+static const ::_pb::Message* const file_default_instances[] = {
+  &::qaul::net::feed::_FeedContainer_default_instance_._instance,
+  &::qaul::net::feed::_FeedMessageContent_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_services_2ffeed_2ffeed_5fnet_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -89,19 +93,21 @@ const char descriptor_table_protodef_services_2ffeed_2ffeed_5fnet_2eproto[] PROT
   "\022\016\n\006sender\030\001 \001(\014\022\017\n\007content\030\002 \001(\t\022\014\n\004tim"
   "e\030\003 \001(\004b\006proto3"
   ;
-static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto_once;
-const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto = {
-  false, false, 175, descriptor_table_protodef_services_2ffeed_2ffeed_5fnet_2eproto, "services/feed/feed_net.proto", 
-  &descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto_once, nullptr, 0, 2,
-  schemas, file_default_instances, TableStruct_services_2ffeed_2ffeed_5fnet_2eproto::offsets,
-  file_level_metadata_services_2ffeed_2ffeed_5fnet_2eproto, file_level_enum_descriptors_services_2ffeed_2ffeed_5fnet_2eproto, file_level_service_descriptors_services_2ffeed_2ffeed_5fnet_2eproto,
+static ::_pbi::once_flag descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto_once;
+const ::_pbi::DescriptorTable descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto = {
+    false, false, 175, descriptor_table_protodef_services_2ffeed_2ffeed_5fnet_2eproto,
+    "services/feed/feed_net.proto",
+    &descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto_once, nullptr, 0, 2,
+    schemas, file_default_instances, TableStruct_services_2ffeed_2ffeed_5fnet_2eproto::offsets,
+    file_level_metadata_services_2ffeed_2ffeed_5fnet_2eproto, file_level_enum_descriptors_services_2ffeed_2ffeed_5fnet_2eproto,
+    file_level_service_descriptors_services_2ffeed_2ffeed_5fnet_2eproto,
 };
-PROTOBUF_ATTRIBUTE_WEAK const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable* descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto_getter() {
+PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto_getter() {
   return &descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto;
 }
 
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_services_2ffeed_2ffeed_5fnet_2eproto(&descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_services_2ffeed_2ffeed_5fnet_2eproto(&descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto);
 namespace qaul {
 namespace net {
 namespace feed {
@@ -116,63 +122,56 @@ FeedContainer::FeedContainer(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.net.feed.FeedContainer)
 }
 FeedContainer::FeedContainer(const FeedContainer& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  signature_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  signature_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    signature_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    signature_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_signature().empty()) {
-    signature_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_signature(), 
+    signature_.Set(from._internal_signature(), 
       GetArenaForAllocation());
   }
-  message_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  message_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    message_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    message_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_message().empty()) {
-    message_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_message(), 
+    message_.Set(from._internal_message(), 
       GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.net.feed.FeedContainer)
 }
 
 inline void FeedContainer::SharedCtor() {
-signature_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+signature_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  signature_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  signature_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-message_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+message_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  message_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  message_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 FeedContainer::~FeedContainer() {
   // @@protoc_insertion_point(destructor:qaul.net.feed.FeedContainer)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void FeedContainer::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  signature_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  message_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  signature_.Destroy();
+  message_.Destroy();
 }
 
-void FeedContainer::ArenaDtor(void* object) {
-  FeedContainer* _this = reinterpret_cast< FeedContainer* >(object);
-  (void)_this;
-}
-void FeedContainer::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void FeedContainer::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -188,17 +187,17 @@ void FeedContainer::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* FeedContainer::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* FeedContainer::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes signature = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_signature();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -207,7 +206,7 @@ const char* FeedContainer::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_message();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -254,7 +253,7 @@ uint8_t* FeedContainer::_InternalSerialize(
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.net.feed.FeedContainer)
@@ -331,19 +330,17 @@ void FeedContainer::InternalSwap(FeedContainer* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &signature_, lhs_arena,
       &other->signature_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &message_, lhs_arena,
       &other->message_, rhs_arena
   );
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata FeedContainer::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto_getter, &descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto_once,
       file_level_metadata_services_2ffeed_2ffeed_5fnet_2eproto[0]);
 }
@@ -358,28 +355,25 @@ FeedMessageContent::FeedMessageContent(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.net.feed.FeedMessageContent)
 }
 FeedMessageContent::FeedMessageContent(const FeedMessageContent& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  sender_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  sender_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    sender_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    sender_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_sender().empty()) {
-    sender_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_sender(), 
+    sender_.Set(from._internal_sender(), 
       GetArenaForAllocation());
   }
-  content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  content_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    content_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    content_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_content().empty()) {
-    content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_content(), 
+    content_.Set(from._internal_content(), 
       GetArenaForAllocation());
   }
   time_ = from.time_;
@@ -387,36 +381,32 @@ FeedMessageContent::FeedMessageContent(const FeedMessageContent& from)
 }
 
 inline void FeedMessageContent::SharedCtor() {
-sender_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+sender_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  sender_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  sender_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+content_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  content_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  content_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 time_ = uint64_t{0u};
 }
 
 FeedMessageContent::~FeedMessageContent() {
   // @@protoc_insertion_point(destructor:qaul.net.feed.FeedMessageContent)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void FeedMessageContent::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  sender_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  content_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  sender_.Destroy();
+  content_.Destroy();
 }
 
-void FeedMessageContent::ArenaDtor(void* object) {
-  FeedMessageContent* _this = reinterpret_cast< FeedMessageContent* >(object);
-  (void)_this;
-}
-void FeedMessageContent::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void FeedMessageContent::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -433,17 +423,17 @@ void FeedMessageContent::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* FeedMessageContent::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* FeedMessageContent::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes sender = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_sender();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -452,9 +442,9 @@ const char* FeedMessageContent::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_content();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.net.feed.FeedMessageContent.content"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.net.feed.FeedMessageContent.content"));
         } else
           goto handle_unusual;
         continue;
@@ -514,11 +504,11 @@ uint8_t* FeedMessageContent::_InternalSerialize(
   // uint64 time = 3;
   if (this->_internal_time() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_time(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(3, this->_internal_time(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.net.feed.FeedMessageContent)
@@ -549,7 +539,7 @@ size_t FeedMessageContent::ByteSizeLong() const {
 
   // uint64 time = 3;
   if (this->_internal_time() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_time());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_time());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -603,12 +593,10 @@ void FeedMessageContent::InternalSwap(FeedMessageContent* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &sender_, lhs_arena,
       &other->sender_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &content_, lhs_arena,
       &other->content_, rhs_arena
   );
@@ -616,7 +604,7 @@ void FeedMessageContent::InternalSwap(FeedMessageContent* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata FeedMessageContent::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto_getter, &descriptor_table_services_2ffeed_2ffeed_5fnet_2eproto_once,
       file_level_metadata_services_2ffeed_2ffeed_5fnet_2eproto[1]);
 }
@@ -626,10 +614,12 @@ void FeedMessageContent::InternalSwap(FeedMessageContent* other) {
 }  // namespace net
 }  // namespace qaul
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::qaul::net::feed::FeedContainer* Arena::CreateMaybeMessage< ::qaul::net::feed::FeedContainer >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::net::feed::FeedContainer*
+Arena::CreateMaybeMessage< ::qaul::net::feed::FeedContainer >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::net::feed::FeedContainer >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::net::feed::FeedMessageContent* Arena::CreateMaybeMessage< ::qaul::net::feed::FeedMessageContent >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::net::feed::FeedMessageContent*
+Arena::CreateMaybeMessage< ::qaul::net::feed::FeedMessageContent >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::net::feed::FeedMessageContent >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE

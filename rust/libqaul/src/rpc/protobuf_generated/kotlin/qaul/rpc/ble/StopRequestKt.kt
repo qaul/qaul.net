@@ -3,7 +3,7 @@
 
 package qaul.rpc.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializestopRequest")
 public inline fun stopRequest(block: qaul.rpc.ble.StopRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.StopRequest =
   qaul.rpc.ble.StopRequestKt.Dsl._create(qaul.rpc.ble.BleRpc.StopRequest.newBuilder()).apply { block() }._build()
 public object StopRequestKt {
@@ -26,3 +26,4 @@ public object StopRequestKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.ble.BleRpc.StopRequest.copy(block: qaul.rpc.ble.StopRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.StopRequest =
   qaul.rpc.ble.StopRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

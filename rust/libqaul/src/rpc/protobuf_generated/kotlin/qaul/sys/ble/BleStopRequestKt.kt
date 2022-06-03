@@ -3,7 +3,7 @@
 
 package qaul.sys.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializebleStopRequest")
 public inline fun bleStopRequest(block: qaul.sys.ble.BleStopRequestKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStopRequest =
   qaul.sys.ble.BleStopRequestKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleStopRequest.newBuilder()).apply { block() }._build()
 public object BleStopRequestKt {
@@ -26,3 +26,4 @@ public object BleStopRequestKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.sys.ble.BleOuterClass.BleStopRequest.copy(block: qaul.sys.ble.BleStopRequestKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStopRequest =
   qaul.sys.ble.BleStopRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

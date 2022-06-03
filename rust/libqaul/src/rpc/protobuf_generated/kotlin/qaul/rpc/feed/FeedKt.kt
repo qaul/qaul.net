@@ -3,7 +3,7 @@
 
 package qaul.rpc.feed;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializefeed")
 public inline fun feed(block: qaul.rpc.feed.FeedKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.Feed =
   qaul.rpc.feed.FeedKt.Dsl._create(qaul.rpc.feed.FeedOuterClass.Feed.newBuilder()).apply { block() }._build()
 public object FeedKt {
@@ -141,3 +141,13 @@ public object FeedKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.feed.FeedOuterClass.Feed.copy(block: qaul.rpc.feed.FeedKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.Feed =
   qaul.rpc.feed.FeedKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.rpc.feed.FeedOuterClass.FeedOrBuilder.receivedOrNull: qaul.rpc.feed.FeedOuterClass.FeedMessageList?
+  get() = if (hasReceived()) getReceived() else null
+
+val qaul.rpc.feed.FeedOuterClass.FeedOrBuilder.sendOrNull: qaul.rpc.feed.FeedOuterClass.SendMessage?
+  get() = if (hasSend()) getSend() else null
+
+val qaul.rpc.feed.FeedOuterClass.FeedOrBuilder.requestOrNull: qaul.rpc.feed.FeedOuterClass.FeedMessageRequest?
+  get() = if (hasRequest()) getRequest() else null
+

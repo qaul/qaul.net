@@ -99,6 +99,87 @@ public final class DebugOuterClass {
      */
     qaul.rpc.debug.DebugOuterClass.PanicOrBuilder getPanicOrBuilder();
 
+    /**
+     * <pre>
+     * enable/disable logging to file
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+     * @return Whether the logToFile field is set.
+     */
+    boolean hasLogToFile();
+    /**
+     * <pre>
+     * enable/disable logging to file
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+     * @return The logToFile.
+     */
+    qaul.rpc.debug.DebugOuterClass.LogToFile getLogToFile();
+    /**
+     * <pre>
+     * enable/disable logging to file
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+     */
+    qaul.rpc.debug.DebugOuterClass.LogToFileOrBuilder getLogToFileOrBuilder();
+
+    /**
+     * <pre>
+     * Storage Path Request
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+     * @return Whether the storagePathRequest field is set.
+     */
+    boolean hasStoragePathRequest();
+    /**
+     * <pre>
+     * Storage Path Request
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+     * @return The storagePathRequest.
+     */
+    qaul.rpc.debug.DebugOuterClass.StoragePathRequest getStoragePathRequest();
+    /**
+     * <pre>
+     * Storage Path Request
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+     */
+    qaul.rpc.debug.DebugOuterClass.StoragePathRequestOrBuilder getStoragePathRequestOrBuilder();
+
+    /**
+     * <pre>
+     * Storage Path Response
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+     * @return Whether the storagePathResponse field is set.
+     */
+    boolean hasStoragePathResponse();
+    /**
+     * <pre>
+     * Storage Path Response
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+     * @return The storagePathResponse.
+     */
+    qaul.rpc.debug.DebugOuterClass.StoragePathResponse getStoragePathResponse();
+    /**
+     * <pre>
+     * Storage Path Response
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+     */
+    qaul.rpc.debug.DebugOuterClass.StoragePathResponseOrBuilder getStoragePathResponseOrBuilder();
+
     public qaul.rpc.debug.DebugOuterClass.Debug.MessageCase getMessageCase();
   }
   /**
@@ -192,6 +273,48 @@ public final class DebugOuterClass {
               messageCase_ = 3;
               break;
             }
+            case 34: {
+              qaul.rpc.debug.DebugOuterClass.LogToFile.Builder subBuilder = null;
+              if (messageCase_ == 4) {
+                subBuilder = ((qaul.rpc.debug.DebugOuterClass.LogToFile) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.debug.DebugOuterClass.LogToFile.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.debug.DebugOuterClass.LogToFile) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 4;
+              break;
+            }
+            case 42: {
+              qaul.rpc.debug.DebugOuterClass.StoragePathRequest.Builder subBuilder = null;
+              if (messageCase_ == 5) {
+                subBuilder = ((qaul.rpc.debug.DebugOuterClass.StoragePathRequest) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.debug.DebugOuterClass.StoragePathRequest.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.debug.DebugOuterClass.StoragePathRequest) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 5;
+              break;
+            }
+            case 50: {
+              qaul.rpc.debug.DebugOuterClass.StoragePathResponse.Builder subBuilder = null;
+              if (messageCase_ == 6) {
+                subBuilder = ((qaul.rpc.debug.DebugOuterClass.StoragePathResponse) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.debug.DebugOuterClass.StoragePathResponse.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.debug.DebugOuterClass.StoragePathResponse) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 6;
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -203,6 +326,8 @@ public final class DebugOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -232,6 +357,9 @@ public final class DebugOuterClass {
       HEARTBEAT_REQUEST(1),
       HEARTBEAT_RESPONSE(2),
       PANIC(3),
+      LOG_TO_FILE(4),
+      STORAGE_PATH_REQUEST(5),
+      STORAGE_PATH_RESPONSE(6),
       MESSAGE_NOT_SET(0);
       private final int value;
       private MessageCase(int value) {
@@ -252,6 +380,9 @@ public final class DebugOuterClass {
           case 1: return HEARTBEAT_REQUEST;
           case 2: return HEARTBEAT_RESPONSE;
           case 3: return PANIC;
+          case 4: return LOG_TO_FILE;
+          case 5: return STORAGE_PATH_REQUEST;
+          case 6: return STORAGE_PATH_RESPONSE;
           case 0: return MESSAGE_NOT_SET;
           default: return null;
         }
@@ -396,6 +527,135 @@ public final class DebugOuterClass {
       return qaul.rpc.debug.DebugOuterClass.Panic.getDefaultInstance();
     }
 
+    public static final int LOG_TO_FILE_FIELD_NUMBER = 4;
+    /**
+     * <pre>
+     * enable/disable logging to file
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+     * @return Whether the logToFile field is set.
+     */
+    @java.lang.Override
+    public boolean hasLogToFile() {
+      return messageCase_ == 4;
+    }
+    /**
+     * <pre>
+     * enable/disable logging to file
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+     * @return The logToFile.
+     */
+    @java.lang.Override
+    public qaul.rpc.debug.DebugOuterClass.LogToFile getLogToFile() {
+      if (messageCase_ == 4) {
+         return (qaul.rpc.debug.DebugOuterClass.LogToFile) message_;
+      }
+      return qaul.rpc.debug.DebugOuterClass.LogToFile.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * enable/disable logging to file
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.debug.DebugOuterClass.LogToFileOrBuilder getLogToFileOrBuilder() {
+      if (messageCase_ == 4) {
+         return (qaul.rpc.debug.DebugOuterClass.LogToFile) message_;
+      }
+      return qaul.rpc.debug.DebugOuterClass.LogToFile.getDefaultInstance();
+    }
+
+    public static final int STORAGE_PATH_REQUEST_FIELD_NUMBER = 5;
+    /**
+     * <pre>
+     * Storage Path Request
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+     * @return Whether the storagePathRequest field is set.
+     */
+    @java.lang.Override
+    public boolean hasStoragePathRequest() {
+      return messageCase_ == 5;
+    }
+    /**
+     * <pre>
+     * Storage Path Request
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+     * @return The storagePathRequest.
+     */
+    @java.lang.Override
+    public qaul.rpc.debug.DebugOuterClass.StoragePathRequest getStoragePathRequest() {
+      if (messageCase_ == 5) {
+         return (qaul.rpc.debug.DebugOuterClass.StoragePathRequest) message_;
+      }
+      return qaul.rpc.debug.DebugOuterClass.StoragePathRequest.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * Storage Path Request
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.debug.DebugOuterClass.StoragePathRequestOrBuilder getStoragePathRequestOrBuilder() {
+      if (messageCase_ == 5) {
+         return (qaul.rpc.debug.DebugOuterClass.StoragePathRequest) message_;
+      }
+      return qaul.rpc.debug.DebugOuterClass.StoragePathRequest.getDefaultInstance();
+    }
+
+    public static final int STORAGE_PATH_RESPONSE_FIELD_NUMBER = 6;
+    /**
+     * <pre>
+     * Storage Path Response
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+     * @return Whether the storagePathResponse field is set.
+     */
+    @java.lang.Override
+    public boolean hasStoragePathResponse() {
+      return messageCase_ == 6;
+    }
+    /**
+     * <pre>
+     * Storage Path Response
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+     * @return The storagePathResponse.
+     */
+    @java.lang.Override
+    public qaul.rpc.debug.DebugOuterClass.StoragePathResponse getStoragePathResponse() {
+      if (messageCase_ == 6) {
+         return (qaul.rpc.debug.DebugOuterClass.StoragePathResponse) message_;
+      }
+      return qaul.rpc.debug.DebugOuterClass.StoragePathResponse.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * Storage Path Response
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.debug.DebugOuterClass.StoragePathResponseOrBuilder getStoragePathResponseOrBuilder() {
+      if (messageCase_ == 6) {
+         return (qaul.rpc.debug.DebugOuterClass.StoragePathResponse) message_;
+      }
+      return qaul.rpc.debug.DebugOuterClass.StoragePathResponse.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -419,6 +679,15 @@ public final class DebugOuterClass {
       if (messageCase_ == 3) {
         output.writeMessage(3, (qaul.rpc.debug.DebugOuterClass.Panic) message_);
       }
+      if (messageCase_ == 4) {
+        output.writeMessage(4, (qaul.rpc.debug.DebugOuterClass.LogToFile) message_);
+      }
+      if (messageCase_ == 5) {
+        output.writeMessage(5, (qaul.rpc.debug.DebugOuterClass.StoragePathRequest) message_);
+      }
+      if (messageCase_ == 6) {
+        output.writeMessage(6, (qaul.rpc.debug.DebugOuterClass.StoragePathResponse) message_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -439,6 +708,18 @@ public final class DebugOuterClass {
       if (messageCase_ == 3) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, (qaul.rpc.debug.DebugOuterClass.Panic) message_);
+      }
+      if (messageCase_ == 4) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, (qaul.rpc.debug.DebugOuterClass.LogToFile) message_);
+      }
+      if (messageCase_ == 5) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, (qaul.rpc.debug.DebugOuterClass.StoragePathRequest) message_);
+      }
+      if (messageCase_ == 6) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, (qaul.rpc.debug.DebugOuterClass.StoragePathResponse) message_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -469,6 +750,18 @@ public final class DebugOuterClass {
           if (!getPanic()
               .equals(other.getPanic())) return false;
           break;
+        case 4:
+          if (!getLogToFile()
+              .equals(other.getLogToFile())) return false;
+          break;
+        case 5:
+          if (!getStoragePathRequest()
+              .equals(other.getStoragePathRequest())) return false;
+          break;
+        case 6:
+          if (!getStoragePathResponse()
+              .equals(other.getStoragePathResponse())) return false;
+          break;
         case 0:
         default:
       }
@@ -495,6 +788,18 @@ public final class DebugOuterClass {
         case 3:
           hash = (37 * hash) + PANIC_FIELD_NUMBER;
           hash = (53 * hash) + getPanic().hashCode();
+          break;
+        case 4:
+          hash = (37 * hash) + LOG_TO_FILE_FIELD_NUMBER;
+          hash = (53 * hash) + getLogToFile().hashCode();
+          break;
+        case 5:
+          hash = (37 * hash) + STORAGE_PATH_REQUEST_FIELD_NUMBER;
+          hash = (53 * hash) + getStoragePathRequest().hashCode();
+          break;
+        case 6:
+          hash = (37 * hash) + STORAGE_PATH_RESPONSE_FIELD_NUMBER;
+          hash = (53 * hash) + getStoragePathResponse().hashCode();
           break;
         case 0:
         default:
@@ -685,6 +990,27 @@ public final class DebugOuterClass {
             result.message_ = panicBuilder_.build();
           }
         }
+        if (messageCase_ == 4) {
+          if (logToFileBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = logToFileBuilder_.build();
+          }
+        }
+        if (messageCase_ == 5) {
+          if (storagePathRequestBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = storagePathRequestBuilder_.build();
+          }
+        }
+        if (messageCase_ == 6) {
+          if (storagePathResponseBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = storagePathResponseBuilder_.build();
+          }
+        }
         result.messageCase_ = messageCase_;
         onBuilt();
         return result;
@@ -745,6 +1071,18 @@ public final class DebugOuterClass {
           }
           case PANIC: {
             mergePanic(other.getPanic());
+            break;
+          }
+          case LOG_TO_FILE: {
+            mergeLogToFile(other.getLogToFile());
+            break;
+          }
+          case STORAGE_PATH_REQUEST: {
+            mergeStoragePathRequest(other.getStoragePathRequest());
+            break;
+          }
+          case STORAGE_PATH_RESPONSE: {
+            mergeStoragePathResponse(other.getStoragePathResponse());
             break;
           }
           case MESSAGE_NOT_SET: {
@@ -889,8 +1227,9 @@ public final class DebugOuterClass {
         } else {
           if (messageCase_ == 1) {
             heartbeatRequestBuilder_.mergeFrom(value);
+          } else {
+            heartbeatRequestBuilder_.setMessage(value);
           }
-          heartbeatRequestBuilder_.setMessage(value);
         }
         messageCase_ = 1;
         return this;
@@ -1066,8 +1405,9 @@ public final class DebugOuterClass {
         } else {
           if (messageCase_ == 2) {
             heartbeatResponseBuilder_.mergeFrom(value);
+          } else {
+            heartbeatResponseBuilder_.setMessage(value);
           }
-          heartbeatResponseBuilder_.setMessage(value);
         }
         messageCase_ = 2;
         return this;
@@ -1243,8 +1583,9 @@ public final class DebugOuterClass {
         } else {
           if (messageCase_ == 3) {
             panicBuilder_.mergeFrom(value);
+          } else {
+            panicBuilder_.setMessage(value);
           }
-          panicBuilder_.setMessage(value);
         }
         messageCase_ = 3;
         return this;
@@ -1324,6 +1665,540 @@ public final class DebugOuterClass {
         messageCase_ = 3;
         onChanged();;
         return panicBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.debug.DebugOuterClass.LogToFile, qaul.rpc.debug.DebugOuterClass.LogToFile.Builder, qaul.rpc.debug.DebugOuterClass.LogToFileOrBuilder> logToFileBuilder_;
+      /**
+       * <pre>
+       * enable/disable logging to file
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+       * @return Whether the logToFile field is set.
+       */
+      @java.lang.Override
+      public boolean hasLogToFile() {
+        return messageCase_ == 4;
+      }
+      /**
+       * <pre>
+       * enable/disable logging to file
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+       * @return The logToFile.
+       */
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.LogToFile getLogToFile() {
+        if (logToFileBuilder_ == null) {
+          if (messageCase_ == 4) {
+            return (qaul.rpc.debug.DebugOuterClass.LogToFile) message_;
+          }
+          return qaul.rpc.debug.DebugOuterClass.LogToFile.getDefaultInstance();
+        } else {
+          if (messageCase_ == 4) {
+            return logToFileBuilder_.getMessage();
+          }
+          return qaul.rpc.debug.DebugOuterClass.LogToFile.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * enable/disable logging to file
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+       */
+      public Builder setLogToFile(qaul.rpc.debug.DebugOuterClass.LogToFile value) {
+        if (logToFileBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          logToFileBuilder_.setMessage(value);
+        }
+        messageCase_ = 4;
+        return this;
+      }
+      /**
+       * <pre>
+       * enable/disable logging to file
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+       */
+      public Builder setLogToFile(
+          qaul.rpc.debug.DebugOuterClass.LogToFile.Builder builderForValue) {
+        if (logToFileBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          logToFileBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 4;
+        return this;
+      }
+      /**
+       * <pre>
+       * enable/disable logging to file
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+       */
+      public Builder mergeLogToFile(qaul.rpc.debug.DebugOuterClass.LogToFile value) {
+        if (logToFileBuilder_ == null) {
+          if (messageCase_ == 4 &&
+              message_ != qaul.rpc.debug.DebugOuterClass.LogToFile.getDefaultInstance()) {
+            message_ = qaul.rpc.debug.DebugOuterClass.LogToFile.newBuilder((qaul.rpc.debug.DebugOuterClass.LogToFile) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 4) {
+            logToFileBuilder_.mergeFrom(value);
+          } else {
+            logToFileBuilder_.setMessage(value);
+          }
+        }
+        messageCase_ = 4;
+        return this;
+      }
+      /**
+       * <pre>
+       * enable/disable logging to file
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+       */
+      public Builder clearLogToFile() {
+        if (logToFileBuilder_ == null) {
+          if (messageCase_ == 4) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 4) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          logToFileBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * enable/disable logging to file
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+       */
+      public qaul.rpc.debug.DebugOuterClass.LogToFile.Builder getLogToFileBuilder() {
+        return getLogToFileFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * enable/disable logging to file
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.LogToFileOrBuilder getLogToFileOrBuilder() {
+        if ((messageCase_ == 4) && (logToFileBuilder_ != null)) {
+          return logToFileBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 4) {
+            return (qaul.rpc.debug.DebugOuterClass.LogToFile) message_;
+          }
+          return qaul.rpc.debug.DebugOuterClass.LogToFile.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * enable/disable logging to file
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.debug.DebugOuterClass.LogToFile, qaul.rpc.debug.DebugOuterClass.LogToFile.Builder, qaul.rpc.debug.DebugOuterClass.LogToFileOrBuilder> 
+          getLogToFileFieldBuilder() {
+        if (logToFileBuilder_ == null) {
+          if (!(messageCase_ == 4)) {
+            message_ = qaul.rpc.debug.DebugOuterClass.LogToFile.getDefaultInstance();
+          }
+          logToFileBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.debug.DebugOuterClass.LogToFile, qaul.rpc.debug.DebugOuterClass.LogToFile.Builder, qaul.rpc.debug.DebugOuterClass.LogToFileOrBuilder>(
+                  (qaul.rpc.debug.DebugOuterClass.LogToFile) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 4;
+        onChanged();;
+        return logToFileBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.debug.DebugOuterClass.StoragePathRequest, qaul.rpc.debug.DebugOuterClass.StoragePathRequest.Builder, qaul.rpc.debug.DebugOuterClass.StoragePathRequestOrBuilder> storagePathRequestBuilder_;
+      /**
+       * <pre>
+       * Storage Path Request
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+       * @return Whether the storagePathRequest field is set.
+       */
+      @java.lang.Override
+      public boolean hasStoragePathRequest() {
+        return messageCase_ == 5;
+      }
+      /**
+       * <pre>
+       * Storage Path Request
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+       * @return The storagePathRequest.
+       */
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.StoragePathRequest getStoragePathRequest() {
+        if (storagePathRequestBuilder_ == null) {
+          if (messageCase_ == 5) {
+            return (qaul.rpc.debug.DebugOuterClass.StoragePathRequest) message_;
+          }
+          return qaul.rpc.debug.DebugOuterClass.StoragePathRequest.getDefaultInstance();
+        } else {
+          if (messageCase_ == 5) {
+            return storagePathRequestBuilder_.getMessage();
+          }
+          return qaul.rpc.debug.DebugOuterClass.StoragePathRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Storage Path Request
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+       */
+      public Builder setStoragePathRequest(qaul.rpc.debug.DebugOuterClass.StoragePathRequest value) {
+        if (storagePathRequestBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          storagePathRequestBuilder_.setMessage(value);
+        }
+        messageCase_ = 5;
+        return this;
+      }
+      /**
+       * <pre>
+       * Storage Path Request
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+       */
+      public Builder setStoragePathRequest(
+          qaul.rpc.debug.DebugOuterClass.StoragePathRequest.Builder builderForValue) {
+        if (storagePathRequestBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          storagePathRequestBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 5;
+        return this;
+      }
+      /**
+       * <pre>
+       * Storage Path Request
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+       */
+      public Builder mergeStoragePathRequest(qaul.rpc.debug.DebugOuterClass.StoragePathRequest value) {
+        if (storagePathRequestBuilder_ == null) {
+          if (messageCase_ == 5 &&
+              message_ != qaul.rpc.debug.DebugOuterClass.StoragePathRequest.getDefaultInstance()) {
+            message_ = qaul.rpc.debug.DebugOuterClass.StoragePathRequest.newBuilder((qaul.rpc.debug.DebugOuterClass.StoragePathRequest) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 5) {
+            storagePathRequestBuilder_.mergeFrom(value);
+          } else {
+            storagePathRequestBuilder_.setMessage(value);
+          }
+        }
+        messageCase_ = 5;
+        return this;
+      }
+      /**
+       * <pre>
+       * Storage Path Request
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+       */
+      public Builder clearStoragePathRequest() {
+        if (storagePathRequestBuilder_ == null) {
+          if (messageCase_ == 5) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 5) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          storagePathRequestBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Storage Path Request
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+       */
+      public qaul.rpc.debug.DebugOuterClass.StoragePathRequest.Builder getStoragePathRequestBuilder() {
+        return getStoragePathRequestFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Storage Path Request
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.StoragePathRequestOrBuilder getStoragePathRequestOrBuilder() {
+        if ((messageCase_ == 5) && (storagePathRequestBuilder_ != null)) {
+          return storagePathRequestBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 5) {
+            return (qaul.rpc.debug.DebugOuterClass.StoragePathRequest) message_;
+          }
+          return qaul.rpc.debug.DebugOuterClass.StoragePathRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Storage Path Request
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.debug.DebugOuterClass.StoragePathRequest, qaul.rpc.debug.DebugOuterClass.StoragePathRequest.Builder, qaul.rpc.debug.DebugOuterClass.StoragePathRequestOrBuilder> 
+          getStoragePathRequestFieldBuilder() {
+        if (storagePathRequestBuilder_ == null) {
+          if (!(messageCase_ == 5)) {
+            message_ = qaul.rpc.debug.DebugOuterClass.StoragePathRequest.getDefaultInstance();
+          }
+          storagePathRequestBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.debug.DebugOuterClass.StoragePathRequest, qaul.rpc.debug.DebugOuterClass.StoragePathRequest.Builder, qaul.rpc.debug.DebugOuterClass.StoragePathRequestOrBuilder>(
+                  (qaul.rpc.debug.DebugOuterClass.StoragePathRequest) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 5;
+        onChanged();;
+        return storagePathRequestBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.debug.DebugOuterClass.StoragePathResponse, qaul.rpc.debug.DebugOuterClass.StoragePathResponse.Builder, qaul.rpc.debug.DebugOuterClass.StoragePathResponseOrBuilder> storagePathResponseBuilder_;
+      /**
+       * <pre>
+       * Storage Path Response
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+       * @return Whether the storagePathResponse field is set.
+       */
+      @java.lang.Override
+      public boolean hasStoragePathResponse() {
+        return messageCase_ == 6;
+      }
+      /**
+       * <pre>
+       * Storage Path Response
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+       * @return The storagePathResponse.
+       */
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.StoragePathResponse getStoragePathResponse() {
+        if (storagePathResponseBuilder_ == null) {
+          if (messageCase_ == 6) {
+            return (qaul.rpc.debug.DebugOuterClass.StoragePathResponse) message_;
+          }
+          return qaul.rpc.debug.DebugOuterClass.StoragePathResponse.getDefaultInstance();
+        } else {
+          if (messageCase_ == 6) {
+            return storagePathResponseBuilder_.getMessage();
+          }
+          return qaul.rpc.debug.DebugOuterClass.StoragePathResponse.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Storage Path Response
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+       */
+      public Builder setStoragePathResponse(qaul.rpc.debug.DebugOuterClass.StoragePathResponse value) {
+        if (storagePathResponseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          storagePathResponseBuilder_.setMessage(value);
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <pre>
+       * Storage Path Response
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+       */
+      public Builder setStoragePathResponse(
+          qaul.rpc.debug.DebugOuterClass.StoragePathResponse.Builder builderForValue) {
+        if (storagePathResponseBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          storagePathResponseBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <pre>
+       * Storage Path Response
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+       */
+      public Builder mergeStoragePathResponse(qaul.rpc.debug.DebugOuterClass.StoragePathResponse value) {
+        if (storagePathResponseBuilder_ == null) {
+          if (messageCase_ == 6 &&
+              message_ != qaul.rpc.debug.DebugOuterClass.StoragePathResponse.getDefaultInstance()) {
+            message_ = qaul.rpc.debug.DebugOuterClass.StoragePathResponse.newBuilder((qaul.rpc.debug.DebugOuterClass.StoragePathResponse) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 6) {
+            storagePathResponseBuilder_.mergeFrom(value);
+          } else {
+            storagePathResponseBuilder_.setMessage(value);
+          }
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <pre>
+       * Storage Path Response
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+       */
+      public Builder clearStoragePathResponse() {
+        if (storagePathResponseBuilder_ == null) {
+          if (messageCase_ == 6) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 6) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          storagePathResponseBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Storage Path Response
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+       */
+      public qaul.rpc.debug.DebugOuterClass.StoragePathResponse.Builder getStoragePathResponseBuilder() {
+        return getStoragePathResponseFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Storage Path Response
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.StoragePathResponseOrBuilder getStoragePathResponseOrBuilder() {
+        if ((messageCase_ == 6) && (storagePathResponseBuilder_ != null)) {
+          return storagePathResponseBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 6) {
+            return (qaul.rpc.debug.DebugOuterClass.StoragePathResponse) message_;
+          }
+          return qaul.rpc.debug.DebugOuterClass.StoragePathResponse.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Storage Path Response
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.debug.DebugOuterClass.StoragePathResponse, qaul.rpc.debug.DebugOuterClass.StoragePathResponse.Builder, qaul.rpc.debug.DebugOuterClass.StoragePathResponseOrBuilder> 
+          getStoragePathResponseFieldBuilder() {
+        if (storagePathResponseBuilder_ == null) {
+          if (!(messageCase_ == 6)) {
+            message_ = qaul.rpc.debug.DebugOuterClass.StoragePathResponse.getDefaultInstance();
+          }
+          storagePathResponseBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.debug.DebugOuterClass.StoragePathResponse, qaul.rpc.debug.DebugOuterClass.StoragePathResponse.Builder, qaul.rpc.debug.DebugOuterClass.StoragePathResponseOrBuilder>(
+                  (qaul.rpc.debug.DebugOuterClass.StoragePathResponse) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 6;
+        onChanged();;
+        return storagePathResponseBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -1444,6 +2319,8 @@ public final class DebugOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -1874,6 +2751,8 @@ public final class DebugOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -2305,6 +3184,8 @@ public final class DebugOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -2670,6 +3551,1519 @@ public final class DebugOuterClass {
 
   }
 
+  public interface LogToFileOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.debug.LogToFile)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>bool enable = 1;</code>
+     * @return The enable.
+     */
+    boolean getEnable();
+  }
+  /**
+   * <pre>
+   * LogToFile
+   * If libqaul receives this enable message, it
+   * start or stop to log error contents into error_xxx.log file.
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.debug.LogToFile}
+   */
+  public static final class LogToFile extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.debug.LogToFile)
+      LogToFileOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use LogToFile.newBuilder() to construct.
+    private LogToFile(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private LogToFile() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new LogToFile();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private LogToFile(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+
+              enable_ = input.readBool();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_LogToFile_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_LogToFile_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.debug.DebugOuterClass.LogToFile.class, qaul.rpc.debug.DebugOuterClass.LogToFile.Builder.class);
+    }
+
+    public static final int ENABLE_FIELD_NUMBER = 1;
+    private boolean enable_;
+    /**
+     * <code>bool enable = 1;</code>
+     * @return The enable.
+     */
+    @java.lang.Override
+    public boolean getEnable() {
+      return enable_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (enable_ != false) {
+        output.writeBool(1, enable_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (enable_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(1, enable_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.debug.DebugOuterClass.LogToFile)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.debug.DebugOuterClass.LogToFile other = (qaul.rpc.debug.DebugOuterClass.LogToFile) obj;
+
+      if (getEnable()
+          != other.getEnable()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ENABLE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getEnable());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.debug.DebugOuterClass.LogToFile prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * LogToFile
+     * If libqaul receives this enable message, it
+     * start or stop to log error contents into error_xxx.log file.
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.debug.LogToFile}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.debug.LogToFile)
+        qaul.rpc.debug.DebugOuterClass.LogToFileOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_LogToFile_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_LogToFile_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.debug.DebugOuterClass.LogToFile.class, qaul.rpc.debug.DebugOuterClass.LogToFile.Builder.class);
+      }
+
+      // Construct using qaul.rpc.debug.DebugOuterClass.LogToFile.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        enable_ = false;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_LogToFile_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.LogToFile getDefaultInstanceForType() {
+        return qaul.rpc.debug.DebugOuterClass.LogToFile.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.LogToFile build() {
+        qaul.rpc.debug.DebugOuterClass.LogToFile result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.LogToFile buildPartial() {
+        qaul.rpc.debug.DebugOuterClass.LogToFile result = new qaul.rpc.debug.DebugOuterClass.LogToFile(this);
+        result.enable_ = enable_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.debug.DebugOuterClass.LogToFile) {
+          return mergeFrom((qaul.rpc.debug.DebugOuterClass.LogToFile)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.debug.DebugOuterClass.LogToFile other) {
+        if (other == qaul.rpc.debug.DebugOuterClass.LogToFile.getDefaultInstance()) return this;
+        if (other.getEnable() != false) {
+          setEnable(other.getEnable());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.debug.DebugOuterClass.LogToFile parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.debug.DebugOuterClass.LogToFile) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private boolean enable_ ;
+      /**
+       * <code>bool enable = 1;</code>
+       * @return The enable.
+       */
+      @java.lang.Override
+      public boolean getEnable() {
+        return enable_;
+      }
+      /**
+       * <code>bool enable = 1;</code>
+       * @param value The enable to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnable(boolean value) {
+        
+        enable_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool enable = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnable() {
+        
+        enable_ = false;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.debug.LogToFile)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.debug.LogToFile)
+    private static final qaul.rpc.debug.DebugOuterClass.LogToFile DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.debug.DebugOuterClass.LogToFile();
+    }
+
+    public static qaul.rpc.debug.DebugOuterClass.LogToFile getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<LogToFile>
+        PARSER = new com.google.protobuf.AbstractParser<LogToFile>() {
+      @java.lang.Override
+      public LogToFile parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new LogToFile(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<LogToFile> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<LogToFile> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.debug.DebugOuterClass.LogToFile getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface StoragePathRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.debug.StoragePathRequest)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * StoragePathRequest
+   * Return storage path
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.debug.StoragePathRequest}
+   */
+  public static final class StoragePathRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.debug.StoragePathRequest)
+      StoragePathRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use StoragePathRequest.newBuilder() to construct.
+    private StoragePathRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private StoragePathRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new StoragePathRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private StoragePathRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_StoragePathRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_StoragePathRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.debug.DebugOuterClass.StoragePathRequest.class, qaul.rpc.debug.DebugOuterClass.StoragePathRequest.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.debug.DebugOuterClass.StoragePathRequest)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.debug.DebugOuterClass.StoragePathRequest other = (qaul.rpc.debug.DebugOuterClass.StoragePathRequest) obj;
+
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.debug.DebugOuterClass.StoragePathRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * StoragePathRequest
+     * Return storage path
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.debug.StoragePathRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.debug.StoragePathRequest)
+        qaul.rpc.debug.DebugOuterClass.StoragePathRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_StoragePathRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_StoragePathRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.debug.DebugOuterClass.StoragePathRequest.class, qaul.rpc.debug.DebugOuterClass.StoragePathRequest.Builder.class);
+      }
+
+      // Construct using qaul.rpc.debug.DebugOuterClass.StoragePathRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_StoragePathRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.StoragePathRequest getDefaultInstanceForType() {
+        return qaul.rpc.debug.DebugOuterClass.StoragePathRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.StoragePathRequest build() {
+        qaul.rpc.debug.DebugOuterClass.StoragePathRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.StoragePathRequest buildPartial() {
+        qaul.rpc.debug.DebugOuterClass.StoragePathRequest result = new qaul.rpc.debug.DebugOuterClass.StoragePathRequest(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.debug.DebugOuterClass.StoragePathRequest) {
+          return mergeFrom((qaul.rpc.debug.DebugOuterClass.StoragePathRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.debug.DebugOuterClass.StoragePathRequest other) {
+        if (other == qaul.rpc.debug.DebugOuterClass.StoragePathRequest.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.debug.DebugOuterClass.StoragePathRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.debug.DebugOuterClass.StoragePathRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.debug.StoragePathRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.debug.StoragePathRequest)
+    private static final qaul.rpc.debug.DebugOuterClass.StoragePathRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.debug.DebugOuterClass.StoragePathRequest();
+    }
+
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<StoragePathRequest>
+        PARSER = new com.google.protobuf.AbstractParser<StoragePathRequest>() {
+      @java.lang.Override
+      public StoragePathRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new StoragePathRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<StoragePathRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<StoragePathRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.debug.DebugOuterClass.StoragePathRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface StoragePathResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.debug.StoragePathResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string storage_path = 1;</code>
+     * @return The storagePath.
+     */
+    java.lang.String getStoragePath();
+    /**
+     * <code>string storage_path = 1;</code>
+     * @return The bytes for storagePath.
+     */
+    com.google.protobuf.ByteString
+        getStoragePathBytes();
+  }
+  /**
+   * <pre>
+   * StoragePathResponse
+   * Contains Storage Path
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.debug.StoragePathResponse}
+   */
+  public static final class StoragePathResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.debug.StoragePathResponse)
+      StoragePathResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use StoragePathResponse.newBuilder() to construct.
+    private StoragePathResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private StoragePathResponse() {
+      storagePath_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new StoragePathResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private StoragePathResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              storagePath_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_StoragePathResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_StoragePathResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.debug.DebugOuterClass.StoragePathResponse.class, qaul.rpc.debug.DebugOuterClass.StoragePathResponse.Builder.class);
+    }
+
+    public static final int STORAGE_PATH_FIELD_NUMBER = 1;
+    private volatile java.lang.Object storagePath_;
+    /**
+     * <code>string storage_path = 1;</code>
+     * @return The storagePath.
+     */
+    @java.lang.Override
+    public java.lang.String getStoragePath() {
+      java.lang.Object ref = storagePath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        storagePath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string storage_path = 1;</code>
+     * @return The bytes for storagePath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStoragePathBytes() {
+      java.lang.Object ref = storagePath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        storagePath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storagePath_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, storagePath_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storagePath_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, storagePath_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.debug.DebugOuterClass.StoragePathResponse)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.debug.DebugOuterClass.StoragePathResponse other = (qaul.rpc.debug.DebugOuterClass.StoragePathResponse) obj;
+
+      if (!getStoragePath()
+          .equals(other.getStoragePath())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + STORAGE_PATH_FIELD_NUMBER;
+      hash = (53 * hash) + getStoragePath().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.debug.DebugOuterClass.StoragePathResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * StoragePathResponse
+     * Contains Storage Path
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.debug.StoragePathResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.debug.StoragePathResponse)
+        qaul.rpc.debug.DebugOuterClass.StoragePathResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_StoragePathResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_StoragePathResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.debug.DebugOuterClass.StoragePathResponse.class, qaul.rpc.debug.DebugOuterClass.StoragePathResponse.Builder.class);
+      }
+
+      // Construct using qaul.rpc.debug.DebugOuterClass.StoragePathResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        storagePath_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_StoragePathResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.StoragePathResponse getDefaultInstanceForType() {
+        return qaul.rpc.debug.DebugOuterClass.StoragePathResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.StoragePathResponse build() {
+        qaul.rpc.debug.DebugOuterClass.StoragePathResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.StoragePathResponse buildPartial() {
+        qaul.rpc.debug.DebugOuterClass.StoragePathResponse result = new qaul.rpc.debug.DebugOuterClass.StoragePathResponse(this);
+        result.storagePath_ = storagePath_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.debug.DebugOuterClass.StoragePathResponse) {
+          return mergeFrom((qaul.rpc.debug.DebugOuterClass.StoragePathResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.debug.DebugOuterClass.StoragePathResponse other) {
+        if (other == qaul.rpc.debug.DebugOuterClass.StoragePathResponse.getDefaultInstance()) return this;
+        if (!other.getStoragePath().isEmpty()) {
+          storagePath_ = other.storagePath_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.debug.DebugOuterClass.StoragePathResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.debug.DebugOuterClass.StoragePathResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object storagePath_ = "";
+      /**
+       * <code>string storage_path = 1;</code>
+       * @return The storagePath.
+       */
+      public java.lang.String getStoragePath() {
+        java.lang.Object ref = storagePath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          storagePath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string storage_path = 1;</code>
+       * @return The bytes for storagePath.
+       */
+      public com.google.protobuf.ByteString
+          getStoragePathBytes() {
+        java.lang.Object ref = storagePath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          storagePath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string storage_path = 1;</code>
+       * @param value The storagePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStoragePath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        storagePath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string storage_path = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStoragePath() {
+        
+        storagePath_ = getDefaultInstance().getStoragePath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string storage_path = 1;</code>
+       * @param value The bytes for storagePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStoragePathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        storagePath_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.debug.StoragePathResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.debug.StoragePathResponse)
+    private static final qaul.rpc.debug.DebugOuterClass.StoragePathResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.debug.DebugOuterClass.StoragePathResponse();
+    }
+
+    public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<StoragePathResponse>
+        PARSER = new com.google.protobuf.AbstractParser<StoragePathResponse>() {
+      @java.lang.Override
+      public StoragePathResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new StoragePathResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<StoragePathResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<StoragePathResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.debug.DebugOuterClass.StoragePathResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_rpc_debug_Debug_descriptor;
   private static final 
@@ -2690,6 +5084,21 @@ public final class DebugOuterClass {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_rpc_debug_Panic_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_debug_LogToFile_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_debug_LogToFile_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_debug_StoragePathRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_debug_StoragePathRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_debug_StoragePathResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_debug_StoragePathResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -2699,13 +5108,21 @@ public final class DebugOuterClass {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\017rpc/debug.proto\022\016qaul.rpc.debug\"\272\001\n\005De" +
+      "\n\017rpc/debug.proto\022\016qaul.rpc.debug\"\366\002\n\005De" +
       "bug\022=\n\021heartbeat_request\030\001 \001(\0132 .qaul.rp" +
       "c.debug.HeartbeatRequestH\000\022?\n\022heartbeat_" +
       "response\030\002 \001(\0132!.qaul.rpc.debug.Heartbea" +
       "tResponseH\000\022&\n\005panic\030\003 \001(\0132\025.qaul.rpc.de" +
-      "bug.PanicH\000B\t\n\007message\"\022\n\020HeartbeatReque" +
-      "st\"\023\n\021HeartbeatResponse\"\007\n\005Panicb\006proto3"
+      "bug.PanicH\000\0220\n\013log_to_file\030\004 \001(\0132\031.qaul." +
+      "rpc.debug.LogToFileH\000\022B\n\024storage_path_re" +
+      "quest\030\005 \001(\0132\".qaul.rpc.debug.StoragePath" +
+      "RequestH\000\022D\n\025storage_path_response\030\006 \001(\013" +
+      "2#.qaul.rpc.debug.StoragePathResponseH\000B" +
+      "\t\n\007message\"\022\n\020HeartbeatRequest\"\023\n\021Heartb" +
+      "eatResponse\"\007\n\005Panic\"\033\n\tLogToFile\022\016\n\006ena" +
+      "ble\030\001 \001(\010\"\024\n\022StoragePathRequest\"+\n\023Stora" +
+      "gePathResponse\022\024\n\014storage_path\030\001 \001(\tb\006pr" +
+      "oto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -2716,7 +5133,7 @@ public final class DebugOuterClass {
     internal_static_qaul_rpc_debug_Debug_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_debug_Debug_descriptor,
-        new java.lang.String[] { "HeartbeatRequest", "HeartbeatResponse", "Panic", "Message", });
+        new java.lang.String[] { "HeartbeatRequest", "HeartbeatResponse", "Panic", "LogToFile", "StoragePathRequest", "StoragePathResponse", "Message", });
     internal_static_qaul_rpc_debug_HeartbeatRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_qaul_rpc_debug_HeartbeatRequest_fieldAccessorTable = new
@@ -2735,6 +5152,24 @@ public final class DebugOuterClass {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_debug_Panic_descriptor,
         new java.lang.String[] { });
+    internal_static_qaul_rpc_debug_LogToFile_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_qaul_rpc_debug_LogToFile_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_debug_LogToFile_descriptor,
+        new java.lang.String[] { "Enable", });
+    internal_static_qaul_rpc_debug_StoragePathRequest_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_qaul_rpc_debug_StoragePathRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_debug_StoragePathRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_qaul_rpc_debug_StoragePathResponse_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_qaul_rpc_debug_StoragePathResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_debug_StoragePathResponse_descriptor,
+        new java.lang.String[] { "StoragePath", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

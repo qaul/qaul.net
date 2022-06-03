@@ -16,69 +16,73 @@
 #include <google/protobuf/port_def.inc>
 
 PROTOBUF_PRAGMA_INIT_SEG
+
+namespace _pb = ::PROTOBUF_NAMESPACE_ID;
+namespace _pbi = _pb::internal;
+
 namespace qaul {
 namespace rpc {
 namespace user_accounts {
-constexpr UserAccounts::UserAccounts(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+PROTOBUF_CONSTEXPR UserAccounts::UserAccounts(
+    ::_pbi::ConstantInitialized)
   : _oneof_case_{}{}
 struct UserAccountsDefaultTypeInternal {
-  constexpr UserAccountsDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR UserAccountsDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~UserAccountsDefaultTypeInternal() {}
   union {
     UserAccounts _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT UserAccountsDefaultTypeInternal _UserAccounts_default_instance_;
-constexpr CreateUserAccount::CreateUserAccount(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserAccountsDefaultTypeInternal _UserAccounts_default_instance_;
+PROTOBUF_CONSTEXPR CreateUserAccount::CreateUserAccount(
+    ::_pbi::ConstantInitialized)
+  : name_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
 struct CreateUserAccountDefaultTypeInternal {
-  constexpr CreateUserAccountDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR CreateUserAccountDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~CreateUserAccountDefaultTypeInternal() {}
   union {
     CreateUserAccount _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT CreateUserAccountDefaultTypeInternal _CreateUserAccount_default_instance_;
-constexpr DefaultUserAccount::DefaultUserAccount(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 CreateUserAccountDefaultTypeInternal _CreateUserAccount_default_instance_;
+PROTOBUF_CONSTEXPR DefaultUserAccount::DefaultUserAccount(
+    ::_pbi::ConstantInitialized)
   : my_user_account_(nullptr)
   , user_account_exists_(false){}
 struct DefaultUserAccountDefaultTypeInternal {
-  constexpr DefaultUserAccountDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DefaultUserAccountDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~DefaultUserAccountDefaultTypeInternal() {}
   union {
     DefaultUserAccount _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DefaultUserAccountDefaultTypeInternal _DefaultUserAccount_default_instance_;
-constexpr MyUserAccount::MyUserAccount(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , id_base58_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , key_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , key_type_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , key_base58_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DefaultUserAccountDefaultTypeInternal _DefaultUserAccount_default_instance_;
+PROTOBUF_CONSTEXPR MyUserAccount::MyUserAccount(
+    ::_pbi::ConstantInitialized)
+  : name_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , id_base58_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , key_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , key_type_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , key_base58_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
 struct MyUserAccountDefaultTypeInternal {
-  constexpr MyUserAccountDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR MyUserAccountDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~MyUserAccountDefaultTypeInternal() {}
   union {
     MyUserAccount _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT MyUserAccountDefaultTypeInternal _MyUserAccount_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MyUserAccountDefaultTypeInternal _MyUserAccount_default_instance_;
 }  // namespace user_accounts
 }  // namespace rpc
 }  // namespace qaul
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_node_2fuser_5faccounts_2eproto[4];
-static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_node_2fuser_5faccounts_2eproto = nullptr;
-static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_node_2fuser_5faccounts_2eproto = nullptr;
+static ::_pb::Metadata file_level_metadata_node_2fuser_5faccounts_2eproto[4];
+static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_node_2fuser_5faccounts_2eproto = nullptr;
+static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_node_2fuser_5faccounts_2eproto = nullptr;
 
 const uint32_t TableStruct_node_2fuser_5faccounts_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
@@ -87,10 +91,10 @@ const uint32_t TableStruct_node_2fuser_5faccounts_2eproto::offsets[] PROTOBUF_SE
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::user_accounts::UserAccounts, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::user_accounts::UserAccounts, message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::user_accounts::CreateUserAccount, _internal_metadata_),
@@ -120,18 +124,18 @@ const uint32_t TableStruct_node_2fuser_5faccounts_2eproto::offsets[] PROTOBUF_SE
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::user_accounts::MyUserAccount, key_type_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::user_accounts::MyUserAccount, key_base58_),
 };
-static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::user_accounts::UserAccounts)},
   { 11, -1, -1, sizeof(::qaul::rpc::user_accounts::CreateUserAccount)},
   { 18, -1, -1, sizeof(::qaul::rpc::user_accounts::DefaultUserAccount)},
   { 26, -1, -1, sizeof(::qaul::rpc::user_accounts::MyUserAccount)},
 };
 
-static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::user_accounts::_UserAccounts_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::user_accounts::_CreateUserAccount_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::user_accounts::_DefaultUserAccount_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::user_accounts::_MyUserAccount_default_instance_),
+static const ::_pb::Message* const file_default_instances[] = {
+  &::qaul::rpc::user_accounts::_UserAccounts_default_instance_._instance,
+  &::qaul::rpc::user_accounts::_CreateUserAccount_default_instance_._instance,
+  &::qaul::rpc::user_accounts::_DefaultUserAccount_default_instance_._instance,
+  &::qaul::rpc::user_accounts::_MyUserAccount_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_node_2fuser_5faccounts_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -152,19 +156,21 @@ const char descriptor_table_protodef_node_2fuser_5faccounts_2eproto[] PROTOBUF_S
   "ey_type\030\005 \001(\t\022\022\n\nkey_base58\030\006 \001(\tb\006proto"
   "3"
   ;
-static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_node_2fuser_5faccounts_2eproto_once;
-const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_node_2fuser_5faccounts_2eproto = {
-  false, false, 601, descriptor_table_protodef_node_2fuser_5faccounts_2eproto, "node/user_accounts.proto", 
-  &descriptor_table_node_2fuser_5faccounts_2eproto_once, nullptr, 0, 4,
-  schemas, file_default_instances, TableStruct_node_2fuser_5faccounts_2eproto::offsets,
-  file_level_metadata_node_2fuser_5faccounts_2eproto, file_level_enum_descriptors_node_2fuser_5faccounts_2eproto, file_level_service_descriptors_node_2fuser_5faccounts_2eproto,
+static ::_pbi::once_flag descriptor_table_node_2fuser_5faccounts_2eproto_once;
+const ::_pbi::DescriptorTable descriptor_table_node_2fuser_5faccounts_2eproto = {
+    false, false, 601, descriptor_table_protodef_node_2fuser_5faccounts_2eproto,
+    "node/user_accounts.proto",
+    &descriptor_table_node_2fuser_5faccounts_2eproto_once, nullptr, 0, 4,
+    schemas, file_default_instances, TableStruct_node_2fuser_5faccounts_2eproto::offsets,
+    file_level_metadata_node_2fuser_5faccounts_2eproto, file_level_enum_descriptors_node_2fuser_5faccounts_2eproto,
+    file_level_service_descriptors_node_2fuser_5faccounts_2eproto,
 };
-PROTOBUF_ATTRIBUTE_WEAK const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable* descriptor_table_node_2fuser_5faccounts_2eproto_getter() {
+PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_node_2fuser_5faccounts_2eproto_getter() {
   return &descriptor_table_node_2fuser_5faccounts_2eproto;
 }
 
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_node_2fuser_5faccounts_2eproto(&descriptor_table_node_2fuser_5faccounts_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_node_2fuser_5faccounts_2eproto(&descriptor_table_node_2fuser_5faccounts_2eproto);
 namespace qaul {
 namespace rpc {
 namespace user_accounts {
@@ -195,7 +201,7 @@ void UserAccounts::set_allocated_create_user_account(::qaul::rpc::user_accounts:
   clear_message();
   if (create_user_account) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::user_accounts::CreateUserAccount>::GetOwningArena(create_user_account);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(create_user_account);
     if (message_arena != submessage_arena) {
       create_user_account = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, create_user_account, submessage_arena);
@@ -210,7 +216,7 @@ void UserAccounts::set_allocated_default_user_account(::qaul::rpc::user_accounts
   clear_message();
   if (default_user_account) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::user_accounts::DefaultUserAccount>::GetOwningArena(default_user_account);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(default_user_account);
     if (message_arena != submessage_arena) {
       default_user_account = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, default_user_account, submessage_arena);
@@ -225,7 +231,7 @@ void UserAccounts::set_allocated_my_user_account(::qaul::rpc::user_accounts::MyU
   clear_message();
   if (my_user_account) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::user_accounts::MyUserAccount>::GetOwningArena(my_user_account);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(my_user_account);
     if (message_arena != submessage_arena) {
       my_user_account = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, my_user_account, submessage_arena);
@@ -239,9 +245,6 @@ UserAccounts::UserAccounts(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.user_accounts.UserAccounts)
 }
 UserAccounts::UserAccounts(const UserAccounts& from)
@@ -278,9 +281,11 @@ clear_has_message();
 
 UserAccounts::~UserAccounts() {
   // @@protoc_insertion_point(destructor:qaul.rpc.user_accounts.UserAccounts)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void UserAccounts::SharedDtor() {
@@ -290,12 +295,6 @@ inline void UserAccounts::SharedDtor() {
   }
 }
 
-void UserAccounts::ArenaDtor(void* object) {
-  UserAccounts* _this = reinterpret_cast< UserAccounts* >(object);
-  (void)_this;
-}
-void UserAccounts::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void UserAccounts::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -343,11 +342,11 @@ void UserAccounts::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* UserAccounts::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* UserAccounts::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bool get_default_user_account = 1;
       case 1:
@@ -413,35 +412,32 @@ uint8_t* UserAccounts::_InternalSerialize(
   // bool get_default_user_account = 1;
   if (_internal_has_get_default_user_account()) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(1, this->_internal_get_default_user_account(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_get_default_user_account(), target);
   }
 
   // .qaul.rpc.user_accounts.CreateUserAccount create_user_account = 2;
   if (_internal_has_create_user_account()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        2, _Internal::create_user_account(this), target, stream);
+      InternalWriteMessage(2, _Internal::create_user_account(this),
+        _Internal::create_user_account(this).GetCachedSize(), target, stream);
   }
 
   // .qaul.rpc.user_accounts.DefaultUserAccount default_user_account = 3;
   if (_internal_has_default_user_account()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        3, _Internal::default_user_account(this), target, stream);
+      InternalWriteMessage(3, _Internal::default_user_account(this),
+        _Internal::default_user_account(this).GetCachedSize(), target, stream);
   }
 
   // .qaul.rpc.user_accounts.MyUserAccount my_user_account = 4;
   if (_internal_has_my_user_account()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        4, _Internal::my_user_account(this), target, stream);
+      InternalWriteMessage(4, _Internal::my_user_account(this),
+        _Internal::my_user_account(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.user_accounts.UserAccounts)
@@ -552,7 +548,7 @@ void UserAccounts::InternalSwap(UserAccounts* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata UserAccounts::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_node_2fuser_5faccounts_2eproto_getter, &descriptor_table_node_2fuser_5faccounts_2eproto_once,
       file_level_metadata_node_2fuser_5faccounts_2eproto[0]);
 }
@@ -567,50 +563,43 @@ CreateUserAccount::CreateUserAccount(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.user_accounts.CreateUserAccount)
 }
 CreateUserAccount::CreateUserAccount(const CreateUserAccount& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  name_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    name_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_name().empty()) {
-    name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_name(), 
+    name_.Set(from._internal_name(), 
       GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.user_accounts.CreateUserAccount)
 }
 
 inline void CreateUserAccount::SharedCtor() {
-name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+name_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  name_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 CreateUserAccount::~CreateUserAccount() {
   // @@protoc_insertion_point(destructor:qaul.rpc.user_accounts.CreateUserAccount)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void CreateUserAccount::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  name_.Destroy();
 }
 
-void CreateUserAccount::ArenaDtor(void* object) {
-  CreateUserAccount* _this = reinterpret_cast< CreateUserAccount* >(object);
-  (void)_this;
-}
-void CreateUserAccount::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void CreateUserAccount::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -625,19 +614,19 @@ void CreateUserAccount::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* CreateUserAccount::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* CreateUserAccount::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // string name = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_name();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.user_accounts.CreateUserAccount.name"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.user_accounts.CreateUserAccount.name"));
         } else
           goto handle_unusual;
         continue;
@@ -681,7 +670,7 @@ uint8_t* CreateUserAccount::_InternalSerialize(
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.user_accounts.CreateUserAccount)
@@ -748,14 +737,13 @@ void CreateUserAccount::InternalSwap(CreateUserAccount* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &name_, lhs_arena,
       &other->name_, rhs_arena
   );
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata CreateUserAccount::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_node_2fuser_5faccounts_2eproto_getter, &descriptor_table_node_2fuser_5faccounts_2eproto_once,
       file_level_metadata_node_2fuser_5faccounts_2eproto[1]);
 }
@@ -775,9 +763,6 @@ DefaultUserAccount::DefaultUserAccount(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.user_accounts.DefaultUserAccount)
 }
 DefaultUserAccount::DefaultUserAccount(const DefaultUserAccount& from)
@@ -801,9 +786,11 @@ inline void DefaultUserAccount::SharedCtor() {
 
 DefaultUserAccount::~DefaultUserAccount() {
   // @@protoc_insertion_point(destructor:qaul.rpc.user_accounts.DefaultUserAccount)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void DefaultUserAccount::SharedDtor() {
@@ -811,12 +798,6 @@ inline void DefaultUserAccount::SharedDtor() {
   if (this != internal_default_instance()) delete my_user_account_;
 }
 
-void DefaultUserAccount::ArenaDtor(void* object) {
-  DefaultUserAccount* _this = reinterpret_cast< DefaultUserAccount* >(object);
-  (void)_this;
-}
-void DefaultUserAccount::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void DefaultUserAccount::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -835,11 +816,11 @@ void DefaultUserAccount::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* DefaultUserAccount::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* DefaultUserAccount::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bool user_account_exists = 1;
       case 1:
@@ -889,19 +870,18 @@ uint8_t* DefaultUserAccount::_InternalSerialize(
   // bool user_account_exists = 1;
   if (this->_internal_user_account_exists() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(1, this->_internal_user_account_exists(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_user_account_exists(), target);
   }
 
   // .qaul.rpc.user_accounts.MyUserAccount my_user_account = 2;
   if (this->_internal_has_my_user_account()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        2, _Internal::my_user_account(this), target, stream);
+      InternalWriteMessage(2, _Internal::my_user_account(this),
+        _Internal::my_user_account(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.user_accounts.DefaultUserAccount)
@@ -982,7 +962,7 @@ void DefaultUserAccount::InternalSwap(DefaultUserAccount* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata DefaultUserAccount::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_node_2fuser_5faccounts_2eproto_getter, &descriptor_table_node_2fuser_5faccounts_2eproto_once,
       file_level_metadata_node_2fuser_5faccounts_2eproto[2]);
 }
@@ -997,115 +977,108 @@ MyUserAccount::MyUserAccount(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.user_accounts.MyUserAccount)
 }
 MyUserAccount::MyUserAccount(const MyUserAccount& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  name_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    name_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_name().empty()) {
-    name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_name(), 
+    name_.Set(from._internal_name(), 
       GetArenaForAllocation());
   }
-  id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id().empty()) {
-    id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_id(), 
+    id_.Set(from._internal_id(), 
       GetArenaForAllocation());
   }
-  id_base58_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  id_base58_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    id_base58_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    id_base58_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id_base58().empty()) {
-    id_base58_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_id_base58(), 
+    id_base58_.Set(from._internal_id_base58(), 
       GetArenaForAllocation());
   }
-  key_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  key_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    key_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    key_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_key().empty()) {
-    key_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_key(), 
+    key_.Set(from._internal_key(), 
       GetArenaForAllocation());
   }
-  key_type_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  key_type_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    key_type_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    key_type_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_key_type().empty()) {
-    key_type_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_key_type(), 
+    key_type_.Set(from._internal_key_type(), 
       GetArenaForAllocation());
   }
-  key_base58_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  key_base58_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    key_base58_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    key_base58_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_key_base58().empty()) {
-    key_base58_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_key_base58(), 
+    key_base58_.Set(from._internal_key_base58(), 
       GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.user_accounts.MyUserAccount)
 }
 
 inline void MyUserAccount::SharedCtor() {
-name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+name_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  name_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+id_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  id_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-id_base58_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+id_base58_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  id_base58_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  id_base58_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-key_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+key_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  key_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  key_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-key_type_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+key_type_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  key_type_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  key_type_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-key_base58_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+key_base58_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  key_base58_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  key_base58_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 MyUserAccount::~MyUserAccount() {
   // @@protoc_insertion_point(destructor:qaul.rpc.user_accounts.MyUserAccount)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void MyUserAccount::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  id_base58_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  key_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  key_type_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  key_base58_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  name_.Destroy();
+  id_.Destroy();
+  id_base58_.Destroy();
+  key_.Destroy();
+  key_type_.Destroy();
+  key_base58_.Destroy();
 }
 
-void MyUserAccount::ArenaDtor(void* object) {
-  MyUserAccount* _this = reinterpret_cast< MyUserAccount* >(object);
-  (void)_this;
-}
-void MyUserAccount::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void MyUserAccount::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -1125,19 +1098,19 @@ void MyUserAccount::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* MyUserAccount::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* MyUserAccount::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // string name = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_name();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.user_accounts.MyUserAccount.name"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.user_accounts.MyUserAccount.name"));
         } else
           goto handle_unusual;
         continue;
@@ -1145,7 +1118,7 @@ const char* MyUserAccount::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_id();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1154,9 +1127,9 @@ const char* MyUserAccount::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_id_base58();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.user_accounts.MyUserAccount.id_base58"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.user_accounts.MyUserAccount.id_base58"));
         } else
           goto handle_unusual;
         continue;
@@ -1164,7 +1137,7 @@ const char* MyUserAccount::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
           auto str = _internal_mutable_key();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1173,9 +1146,9 @@ const char* MyUserAccount::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           auto str = _internal_mutable_key_type();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.user_accounts.MyUserAccount.key_type"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.user_accounts.MyUserAccount.key_type"));
         } else
           goto handle_unusual;
         continue;
@@ -1183,9 +1156,9 @@ const char* MyUserAccount::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
       case 6:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
           auto str = _internal_mutable_key_base58();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.user_accounts.MyUserAccount.key_base58"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.user_accounts.MyUserAccount.key_base58"));
         } else
           goto handle_unusual;
         continue;
@@ -1271,7 +1244,7 @@ uint8_t* MyUserAccount::_InternalSerialize(
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.user_accounts.MyUserAccount)
@@ -1388,39 +1361,33 @@ void MyUserAccount::InternalSwap(MyUserAccount* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &name_, lhs_arena,
       &other->name_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &id_, lhs_arena,
       &other->id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &id_base58_, lhs_arena,
       &other->id_base58_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &key_, lhs_arena,
       &other->key_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &key_type_, lhs_arena,
       &other->key_type_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &key_base58_, lhs_arena,
       &other->key_base58_, rhs_arena
   );
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata MyUserAccount::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_node_2fuser_5faccounts_2eproto_getter, &descriptor_table_node_2fuser_5faccounts_2eproto_once,
       file_level_metadata_node_2fuser_5faccounts_2eproto[3]);
 }
@@ -1430,16 +1397,20 @@ void MyUserAccount::InternalSwap(MyUserAccount* other) {
 }  // namespace rpc
 }  // namespace qaul
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::qaul::rpc::user_accounts::UserAccounts* Arena::CreateMaybeMessage< ::qaul::rpc::user_accounts::UserAccounts >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::user_accounts::UserAccounts*
+Arena::CreateMaybeMessage< ::qaul::rpc::user_accounts::UserAccounts >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::user_accounts::UserAccounts >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::user_accounts::CreateUserAccount* Arena::CreateMaybeMessage< ::qaul::rpc::user_accounts::CreateUserAccount >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::user_accounts::CreateUserAccount*
+Arena::CreateMaybeMessage< ::qaul::rpc::user_accounts::CreateUserAccount >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::user_accounts::CreateUserAccount >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::user_accounts::DefaultUserAccount* Arena::CreateMaybeMessage< ::qaul::rpc::user_accounts::DefaultUserAccount >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::user_accounts::DefaultUserAccount*
+Arena::CreateMaybeMessage< ::qaul::rpc::user_accounts::DefaultUserAccount >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::user_accounts::DefaultUserAccount >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::user_accounts::MyUserAccount* Arena::CreateMaybeMessage< ::qaul::rpc::user_accounts::MyUserAccount >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::user_accounts::MyUserAccount*
+Arena::CreateMaybeMessage< ::qaul::rpc::user_accounts::MyUserAccount >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::user_accounts::MyUserAccount >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE

@@ -3,7 +3,7 @@
 
 package qaul.rpc.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeble")
 public inline fun ble(block: qaul.rpc.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.Ble =
   qaul.rpc.ble.BleKt.Dsl._create(qaul.rpc.ble.BleRpc.Ble.newBuilder()).apply { block() }._build()
 public object BleKt {
@@ -225,3 +225,28 @@ public object BleKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.ble.BleRpc.Ble.copy(block: qaul.rpc.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.Ble =
   qaul.rpc.ble.BleKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.rpc.ble.BleRpc.BleOrBuilder.infoRequestOrNull: qaul.rpc.ble.BleRpc.InfoRequest?
+  get() = if (hasInfoRequest()) getInfoRequest() else null
+
+val qaul.rpc.ble.BleRpc.BleOrBuilder.infoResponseOrNull: qaul.rpc.ble.BleRpc.InfoResponse?
+  get() = if (hasInfoResponse()) getInfoResponse() else null
+
+val qaul.rpc.ble.BleRpc.BleOrBuilder.startRequestOrNull: qaul.rpc.ble.BleRpc.StartRequest?
+  get() = if (hasStartRequest()) getStartRequest() else null
+
+val qaul.rpc.ble.BleRpc.BleOrBuilder.stopRequestOrNull: qaul.rpc.ble.BleRpc.StopRequest?
+  get() = if (hasStopRequest()) getStopRequest() else null
+
+val qaul.rpc.ble.BleRpc.BleOrBuilder.discoveredRequestOrNull: qaul.rpc.ble.BleRpc.DiscoveredRequest?
+  get() = if (hasDiscoveredRequest()) getDiscoveredRequest() else null
+
+val qaul.rpc.ble.BleRpc.BleOrBuilder.discoveredResponseOrNull: qaul.rpc.ble.BleRpc.DiscoveredResponse?
+  get() = if (hasDiscoveredResponse()) getDiscoveredResponse() else null
+
+val qaul.rpc.ble.BleRpc.BleOrBuilder.rightsRequestOrNull: qaul.rpc.ble.BleRpc.RightsRequest?
+  get() = if (hasRightsRequest()) getRightsRequest() else null
+
+val qaul.rpc.ble.BleRpc.BleOrBuilder.rightsResultOrNull: qaul.rpc.ble.BleRpc.RightsResult?
+  get() = if (hasRightsResult()) getRightsResult() else null
+

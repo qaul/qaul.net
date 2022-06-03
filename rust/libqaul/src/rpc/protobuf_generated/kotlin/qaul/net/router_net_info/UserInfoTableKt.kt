@@ -3,7 +3,7 @@
 
 package qaul.net.router_net_info;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeuserInfoTable")
 public inline fun userInfoTable(block: qaul.net.router_net_info.UserInfoTableKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.UserInfoTable =
   qaul.net.router_net_info.UserInfoTableKt.Dsl._create(qaul.net.router_net_info.RouterNetInfo.UserInfoTable.newBuilder()).apply { block() }._build()
 public object UserInfoTableKt {
@@ -44,7 +44,8 @@ public object UserInfoTableKt {
     @kotlin.jvm.JvmName("addInfo")
     public fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.add(value: qaul.net.router_net_info.RouterNetInfo.UserInfo) {
       _builder.addInfo(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      * @param value The info to add.
      */
@@ -53,7 +54,8 @@ public object UserInfoTableKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.plusAssign(value: qaul.net.router_net_info.RouterNetInfo.UserInfo) {
       add(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      * @param values The info to add.
      */
@@ -61,7 +63,8 @@ public object UserInfoTableKt {
     @kotlin.jvm.JvmName("addAllInfo")
     public fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.addAll(values: kotlin.collections.Iterable<qaul.net.router_net_info.RouterNetInfo.UserInfo>) {
       _builder.addAllInfo(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      * @param values The info to add.
      */
@@ -70,7 +73,8 @@ public object UserInfoTableKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.net.router_net_info.RouterNetInfo.UserInfo>) {
       addAll(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      * @param index The index to set the value at.
      * @param value The info to set.
@@ -79,15 +83,19 @@ public object UserInfoTableKt {
     @kotlin.jvm.JvmName("setInfo")
     public operator fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.set(index: kotlin.Int, value: qaul.net.router_net_info.RouterNetInfo.UserInfo) {
       _builder.setInfo(index, value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearInfo")
     public fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.clear() {
       _builder.clearInfo()
-    }}
+    }
+
+  }
 }
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.router_net_info.RouterNetInfo.UserInfoTable.copy(block: qaul.net.router_net_info.UserInfoTableKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.UserInfoTable =
   qaul.net.router_net_info.UserInfoTableKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

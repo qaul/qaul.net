@@ -16,60 +16,99 @@
 #include <google/protobuf/port_def.inc>
 
 PROTOBUF_PRAGMA_INIT_SEG
+
+namespace _pb = ::PROTOBUF_NAMESPACE_ID;
+namespace _pbi = _pb::internal;
+
 namespace qaul {
 namespace rpc {
 namespace debug {
-constexpr Debug::Debug(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+PROTOBUF_CONSTEXPR Debug::Debug(
+    ::_pbi::ConstantInitialized)
   : _oneof_case_{}{}
 struct DebugDefaultTypeInternal {
-  constexpr DebugDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DebugDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~DebugDefaultTypeInternal() {}
   union {
     Debug _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DebugDefaultTypeInternal _Debug_default_instance_;
-constexpr HeartbeatRequest::HeartbeatRequest(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DebugDefaultTypeInternal _Debug_default_instance_;
+PROTOBUF_CONSTEXPR HeartbeatRequest::HeartbeatRequest(
+    ::_pbi::ConstantInitialized){}
 struct HeartbeatRequestDefaultTypeInternal {
-  constexpr HeartbeatRequestDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR HeartbeatRequestDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~HeartbeatRequestDefaultTypeInternal() {}
   union {
     HeartbeatRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT HeartbeatRequestDefaultTypeInternal _HeartbeatRequest_default_instance_;
-constexpr HeartbeatResponse::HeartbeatResponse(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 HeartbeatRequestDefaultTypeInternal _HeartbeatRequest_default_instance_;
+PROTOBUF_CONSTEXPR HeartbeatResponse::HeartbeatResponse(
+    ::_pbi::ConstantInitialized){}
 struct HeartbeatResponseDefaultTypeInternal {
-  constexpr HeartbeatResponseDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR HeartbeatResponseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~HeartbeatResponseDefaultTypeInternal() {}
   union {
     HeartbeatResponse _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT HeartbeatResponseDefaultTypeInternal _HeartbeatResponse_default_instance_;
-constexpr Panic::Panic(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 HeartbeatResponseDefaultTypeInternal _HeartbeatResponse_default_instance_;
+PROTOBUF_CONSTEXPR Panic::Panic(
+    ::_pbi::ConstantInitialized){}
 struct PanicDefaultTypeInternal {
-  constexpr PanicDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR PanicDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~PanicDefaultTypeInternal() {}
   union {
     Panic _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PanicDefaultTypeInternal _Panic_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PanicDefaultTypeInternal _Panic_default_instance_;
+PROTOBUF_CONSTEXPR LogToFile::LogToFile(
+    ::_pbi::ConstantInitialized)
+  : enable_(false){}
+struct LogToFileDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR LogToFileDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~LogToFileDefaultTypeInternal() {}
+  union {
+    LogToFile _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 LogToFileDefaultTypeInternal _LogToFile_default_instance_;
+PROTOBUF_CONSTEXPR StoragePathRequest::StoragePathRequest(
+    ::_pbi::ConstantInitialized){}
+struct StoragePathRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR StoragePathRequestDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~StoragePathRequestDefaultTypeInternal() {}
+  union {
+    StoragePathRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StoragePathRequestDefaultTypeInternal _StoragePathRequest_default_instance_;
+PROTOBUF_CONSTEXPR StoragePathResponse::StoragePathResponse(
+    ::_pbi::ConstantInitialized)
+  : storage_path_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
+struct StoragePathResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR StoragePathResponseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~StoragePathResponseDefaultTypeInternal() {}
+  union {
+    StoragePathResponse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StoragePathResponseDefaultTypeInternal _StoragePathResponse_default_instance_;
 }  // namespace debug
 }  // namespace rpc
 }  // namespace qaul
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_rpc_2fdebug_2eproto[4];
-static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_rpc_2fdebug_2eproto = nullptr;
-static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_rpc_2fdebug_2eproto = nullptr;
+static ::_pb::Metadata file_level_metadata_rpc_2fdebug_2eproto[7];
+static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_rpc_2fdebug_2eproto = nullptr;
+static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_rpc_2fdebug_2eproto = nullptr;
 
 const uint32_t TableStruct_rpc_2fdebug_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
@@ -78,9 +117,12 @@ const uint32_t TableStruct_rpc_2fdebug_2eproto::offsets[] PROTOBUF_SECTION_VARIA
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::debug::Debug, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::debug::Debug, message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::debug::HeartbeatRequest, _internal_metadata_),
@@ -100,43 +142,79 @@ const uint32_t TableStruct_rpc_2fdebug_2eproto::offsets[] PROTOBUF_SECTION_VARIA
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::debug::LogToFile, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::debug::LogToFile, enable_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::debug::StoragePathRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::debug::StoragePathResponse, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::debug::StoragePathResponse, storage_path_),
 };
-static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::debug::Debug)},
-  { 10, -1, -1, sizeof(::qaul::rpc::debug::HeartbeatRequest)},
-  { 16, -1, -1, sizeof(::qaul::rpc::debug::HeartbeatResponse)},
-  { 22, -1, -1, sizeof(::qaul::rpc::debug::Panic)},
+  { 13, -1, -1, sizeof(::qaul::rpc::debug::HeartbeatRequest)},
+  { 19, -1, -1, sizeof(::qaul::rpc::debug::HeartbeatResponse)},
+  { 25, -1, -1, sizeof(::qaul::rpc::debug::Panic)},
+  { 31, -1, -1, sizeof(::qaul::rpc::debug::LogToFile)},
+  { 38, -1, -1, sizeof(::qaul::rpc::debug::StoragePathRequest)},
+  { 44, -1, -1, sizeof(::qaul::rpc::debug::StoragePathResponse)},
 };
 
-static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::debug::_Debug_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::debug::_HeartbeatRequest_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::debug::_HeartbeatResponse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::debug::_Panic_default_instance_),
+static const ::_pb::Message* const file_default_instances[] = {
+  &::qaul::rpc::debug::_Debug_default_instance_._instance,
+  &::qaul::rpc::debug::_HeartbeatRequest_default_instance_._instance,
+  &::qaul::rpc::debug::_HeartbeatResponse_default_instance_._instance,
+  &::qaul::rpc::debug::_Panic_default_instance_._instance,
+  &::qaul::rpc::debug::_LogToFile_default_instance_._instance,
+  &::qaul::rpc::debug::_StoragePathRequest_default_instance_._instance,
+  &::qaul::rpc::debug::_StoragePathResponse_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_rpc_2fdebug_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\017rpc/debug.proto\022\016qaul.rpc.debug\"\272\001\n\005De"
+  "\n\017rpc/debug.proto\022\016qaul.rpc.debug\"\366\002\n\005De"
   "bug\022=\n\021heartbeat_request\030\001 \001(\0132 .qaul.rp"
   "c.debug.HeartbeatRequestH\000\022\?\n\022heartbeat_"
   "response\030\002 \001(\0132!.qaul.rpc.debug.Heartbea"
   "tResponseH\000\022&\n\005panic\030\003 \001(\0132\025.qaul.rpc.de"
-  "bug.PanicH\000B\t\n\007message\"\022\n\020HeartbeatReque"
-  "st\"\023\n\021HeartbeatResponse\"\007\n\005Panicb\006proto3"
+  "bug.PanicH\000\0220\n\013log_to_file\030\004 \001(\0132\031.qaul."
+  "rpc.debug.LogToFileH\000\022B\n\024storage_path_re"
+  "quest\030\005 \001(\0132\".qaul.rpc.debug.StoragePath"
+  "RequestH\000\022D\n\025storage_path_response\030\006 \001(\013"
+  "2#.qaul.rpc.debug.StoragePathResponseH\000B"
+  "\t\n\007message\"\022\n\020HeartbeatRequest\"\023\n\021Heartb"
+  "eatResponse\"\007\n\005Panic\"\033\n\tLogToFile\022\016\n\006ena"
+  "ble\030\001 \001(\010\"\024\n\022StoragePathRequest\"+\n\023Stora"
+  "gePathResponse\022\024\n\014storage_path\030\001 \001(\tb\006pr"
+  "oto3"
   ;
-static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_rpc_2fdebug_2eproto_once;
-const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_rpc_2fdebug_2eproto = {
-  false, false, 280, descriptor_table_protodef_rpc_2fdebug_2eproto, "rpc/debug.proto", 
-  &descriptor_table_rpc_2fdebug_2eproto_once, nullptr, 0, 4,
-  schemas, file_default_instances, TableStruct_rpc_2fdebug_2eproto::offsets,
-  file_level_metadata_rpc_2fdebug_2eproto, file_level_enum_descriptors_rpc_2fdebug_2eproto, file_level_service_descriptors_rpc_2fdebug_2eproto,
+static ::_pbi::once_flag descriptor_table_rpc_2fdebug_2eproto_once;
+const ::_pbi::DescriptorTable descriptor_table_rpc_2fdebug_2eproto = {
+    false, false, 564, descriptor_table_protodef_rpc_2fdebug_2eproto,
+    "rpc/debug.proto",
+    &descriptor_table_rpc_2fdebug_2eproto_once, nullptr, 0, 7,
+    schemas, file_default_instances, TableStruct_rpc_2fdebug_2eproto::offsets,
+    file_level_metadata_rpc_2fdebug_2eproto, file_level_enum_descriptors_rpc_2fdebug_2eproto,
+    file_level_service_descriptors_rpc_2fdebug_2eproto,
 };
-PROTOBUF_ATTRIBUTE_WEAK const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable* descriptor_table_rpc_2fdebug_2eproto_getter() {
+PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_rpc_2fdebug_2eproto_getter() {
   return &descriptor_table_rpc_2fdebug_2eproto;
 }
 
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_rpc_2fdebug_2eproto(&descriptor_table_rpc_2fdebug_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_rpc_2fdebug_2eproto(&descriptor_table_rpc_2fdebug_2eproto);
 namespace qaul {
 namespace rpc {
 namespace debug {
@@ -148,6 +226,9 @@ class Debug::_Internal {
   static const ::qaul::rpc::debug::HeartbeatRequest& heartbeat_request(const Debug* msg);
   static const ::qaul::rpc::debug::HeartbeatResponse& heartbeat_response(const Debug* msg);
   static const ::qaul::rpc::debug::Panic& panic(const Debug* msg);
+  static const ::qaul::rpc::debug::LogToFile& log_to_file(const Debug* msg);
+  static const ::qaul::rpc::debug::StoragePathRequest& storage_path_request(const Debug* msg);
+  static const ::qaul::rpc::debug::StoragePathResponse& storage_path_response(const Debug* msg);
 };
 
 const ::qaul::rpc::debug::HeartbeatRequest&
@@ -162,12 +243,24 @@ const ::qaul::rpc::debug::Panic&
 Debug::_Internal::panic(const Debug* msg) {
   return *msg->message_.panic_;
 }
+const ::qaul::rpc::debug::LogToFile&
+Debug::_Internal::log_to_file(const Debug* msg) {
+  return *msg->message_.log_to_file_;
+}
+const ::qaul::rpc::debug::StoragePathRequest&
+Debug::_Internal::storage_path_request(const Debug* msg) {
+  return *msg->message_.storage_path_request_;
+}
+const ::qaul::rpc::debug::StoragePathResponse&
+Debug::_Internal::storage_path_response(const Debug* msg) {
+  return *msg->message_.storage_path_response_;
+}
 void Debug::set_allocated_heartbeat_request(::qaul::rpc::debug::HeartbeatRequest* heartbeat_request) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_message();
   if (heartbeat_request) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::debug::HeartbeatRequest>::GetOwningArena(heartbeat_request);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(heartbeat_request);
     if (message_arena != submessage_arena) {
       heartbeat_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, heartbeat_request, submessage_arena);
@@ -182,7 +275,7 @@ void Debug::set_allocated_heartbeat_response(::qaul::rpc::debug::HeartbeatRespon
   clear_message();
   if (heartbeat_response) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::debug::HeartbeatResponse>::GetOwningArena(heartbeat_response);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(heartbeat_response);
     if (message_arena != submessage_arena) {
       heartbeat_response = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, heartbeat_response, submessage_arena);
@@ -197,7 +290,7 @@ void Debug::set_allocated_panic(::qaul::rpc::debug::Panic* panic) {
   clear_message();
   if (panic) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::debug::Panic>::GetOwningArena(panic);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(panic);
     if (message_arena != submessage_arena) {
       panic = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, panic, submessage_arena);
@@ -207,13 +300,55 @@ void Debug::set_allocated_panic(::qaul::rpc::debug::Panic* panic) {
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.debug.Debug.panic)
 }
+void Debug::set_allocated_log_to_file(::qaul::rpc::debug::LogToFile* log_to_file) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (log_to_file) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(log_to_file);
+    if (message_arena != submessage_arena) {
+      log_to_file = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, log_to_file, submessage_arena);
+    }
+    set_has_log_to_file();
+    message_.log_to_file_ = log_to_file;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.debug.Debug.log_to_file)
+}
+void Debug::set_allocated_storage_path_request(::qaul::rpc::debug::StoragePathRequest* storage_path_request) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (storage_path_request) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(storage_path_request);
+    if (message_arena != submessage_arena) {
+      storage_path_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, storage_path_request, submessage_arena);
+    }
+    set_has_storage_path_request();
+    message_.storage_path_request_ = storage_path_request;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.debug.Debug.storage_path_request)
+}
+void Debug::set_allocated_storage_path_response(::qaul::rpc::debug::StoragePathResponse* storage_path_response) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (storage_path_response) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(storage_path_response);
+    if (message_arena != submessage_arena) {
+      storage_path_response = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, storage_path_response, submessage_arena);
+    }
+    set_has_storage_path_response();
+    message_.storage_path_response_ = storage_path_response;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.debug.Debug.storage_path_response)
+}
 Debug::Debug(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.debug.Debug)
 }
 Debug::Debug(const Debug& from)
@@ -233,6 +368,18 @@ Debug::Debug(const Debug& from)
       _internal_mutable_panic()->::qaul::rpc::debug::Panic::MergeFrom(from._internal_panic());
       break;
     }
+    case kLogToFile: {
+      _internal_mutable_log_to_file()->::qaul::rpc::debug::LogToFile::MergeFrom(from._internal_log_to_file());
+      break;
+    }
+    case kStoragePathRequest: {
+      _internal_mutable_storage_path_request()->::qaul::rpc::debug::StoragePathRequest::MergeFrom(from._internal_storage_path_request());
+      break;
+    }
+    case kStoragePathResponse: {
+      _internal_mutable_storage_path_response()->::qaul::rpc::debug::StoragePathResponse::MergeFrom(from._internal_storage_path_response());
+      break;
+    }
     case MESSAGE_NOT_SET: {
       break;
     }
@@ -246,9 +393,11 @@ clear_has_message();
 
 Debug::~Debug() {
   // @@protoc_insertion_point(destructor:qaul.rpc.debug.Debug)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void Debug::SharedDtor() {
@@ -258,12 +407,6 @@ inline void Debug::SharedDtor() {
   }
 }
 
-void Debug::ArenaDtor(void* object) {
-  Debug* _this = reinterpret_cast< Debug* >(object);
-  (void)_this;
-}
-void Debug::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void Debug::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -289,6 +432,24 @@ void Debug::clear_message() {
       }
       break;
     }
+    case kLogToFile: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete message_.log_to_file_;
+      }
+      break;
+    }
+    case kStoragePathRequest: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete message_.storage_path_request_;
+      }
+      break;
+    }
+    case kStoragePathResponse: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete message_.storage_path_response_;
+      }
+      break;
+    }
     case MESSAGE_NOT_SET: {
       break;
     }
@@ -307,11 +468,11 @@ void Debug::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Debug::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Debug::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .qaul.rpc.debug.HeartbeatRequest heartbeat_request = 1;
       case 1:
@@ -333,6 +494,30 @@ const char* Debug::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::inte
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_panic(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .qaul.rpc.debug.LogToFile log_to_file = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_log_to_file(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .qaul.rpc.debug.StoragePathRequest storage_path_request = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
+          ptr = ctx->ParseMessage(_internal_mutable_storage_path_request(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .qaul.rpc.debug.StoragePathResponse storage_path_response = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
+          ptr = ctx->ParseMessage(_internal_mutable_storage_path_response(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -368,30 +553,48 @@ uint8_t* Debug::_InternalSerialize(
 
   // .qaul.rpc.debug.HeartbeatRequest heartbeat_request = 1;
   if (_internal_has_heartbeat_request()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        1, _Internal::heartbeat_request(this), target, stream);
+      InternalWriteMessage(1, _Internal::heartbeat_request(this),
+        _Internal::heartbeat_request(this).GetCachedSize(), target, stream);
   }
 
   // .qaul.rpc.debug.HeartbeatResponse heartbeat_response = 2;
   if (_internal_has_heartbeat_response()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        2, _Internal::heartbeat_response(this), target, stream);
+      InternalWriteMessage(2, _Internal::heartbeat_response(this),
+        _Internal::heartbeat_response(this).GetCachedSize(), target, stream);
   }
 
   // .qaul.rpc.debug.Panic panic = 3;
   if (_internal_has_panic()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        3, _Internal::panic(this), target, stream);
+      InternalWriteMessage(3, _Internal::panic(this),
+        _Internal::panic(this).GetCachedSize(), target, stream);
+  }
+
+  // .qaul.rpc.debug.LogToFile log_to_file = 4;
+  if (_internal_has_log_to_file()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(4, _Internal::log_to_file(this),
+        _Internal::log_to_file(this).GetCachedSize(), target, stream);
+  }
+
+  // .qaul.rpc.debug.StoragePathRequest storage_path_request = 5;
+  if (_internal_has_storage_path_request()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(5, _Internal::storage_path_request(this),
+        _Internal::storage_path_request(this).GetCachedSize(), target, stream);
+  }
+
+  // .qaul.rpc.debug.StoragePathResponse storage_path_response = 6;
+  if (_internal_has_storage_path_response()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(6, _Internal::storage_path_response(this),
+        _Internal::storage_path_response(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.debug.Debug)
@@ -426,6 +629,27 @@ size_t Debug::ByteSizeLong() const {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *message_.panic_);
+      break;
+    }
+    // .qaul.rpc.debug.LogToFile log_to_file = 4;
+    case kLogToFile: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *message_.log_to_file_);
+      break;
+    }
+    // .qaul.rpc.debug.StoragePathRequest storage_path_request = 5;
+    case kStoragePathRequest: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *message_.storage_path_request_);
+      break;
+    }
+    // .qaul.rpc.debug.StoragePathResponse storage_path_response = 6;
+    case kStoragePathResponse: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *message_.storage_path_response_);
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -467,6 +691,18 @@ void Debug::MergeFrom(const Debug& from) {
       _internal_mutable_panic()->::qaul::rpc::debug::Panic::MergeFrom(from._internal_panic());
       break;
     }
+    case kLogToFile: {
+      _internal_mutable_log_to_file()->::qaul::rpc::debug::LogToFile::MergeFrom(from._internal_log_to_file());
+      break;
+    }
+    case kStoragePathRequest: {
+      _internal_mutable_storage_path_request()->::qaul::rpc::debug::StoragePathRequest::MergeFrom(from._internal_storage_path_request());
+      break;
+    }
+    case kStoragePathResponse: {
+      _internal_mutable_storage_path_response()->::qaul::rpc::debug::StoragePathResponse::MergeFrom(from._internal_storage_path_response());
+      break;
+    }
     case MESSAGE_NOT_SET: {
       break;
     }
@@ -493,7 +729,7 @@ void Debug::InternalSwap(Debug* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Debug::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_rpc_2fdebug_2eproto_getter, &descriptor_table_rpc_2fdebug_2eproto_once,
       file_level_metadata_rpc_2fdebug_2eproto[0]);
 }
@@ -532,7 +768,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*HeartbeatRequest::GetClassData
 
 
 ::PROTOBUF_NAMESPACE_ID::Metadata HeartbeatRequest::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_rpc_2fdebug_2eproto_getter, &descriptor_table_rpc_2fdebug_2eproto_once,
       file_level_metadata_rpc_2fdebug_2eproto[1]);
 }
@@ -571,7 +807,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*HeartbeatResponse::GetClassDat
 
 
 ::PROTOBUF_NAMESPACE_ID::Metadata HeartbeatResponse::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_rpc_2fdebug_2eproto_getter, &descriptor_table_rpc_2fdebug_2eproto_once,
       file_level_metadata_rpc_2fdebug_2eproto[2]);
 }
@@ -610,9 +846,414 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Panic::GetClassData() const { 
 
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Panic::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_rpc_2fdebug_2eproto_getter, &descriptor_table_rpc_2fdebug_2eproto_once,
       file_level_metadata_rpc_2fdebug_2eproto[3]);
+}
+
+// ===================================================================
+
+class LogToFile::_Internal {
+ public:
+};
+
+LogToFile::LogToFile(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor();
+  // @@protoc_insertion_point(arena_constructor:qaul.rpc.debug.LogToFile)
+}
+LogToFile::LogToFile(const LogToFile& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  enable_ = from.enable_;
+  // @@protoc_insertion_point(copy_constructor:qaul.rpc.debug.LogToFile)
+}
+
+inline void LogToFile::SharedCtor() {
+enable_ = false;
+}
+
+LogToFile::~LogToFile() {
+  // @@protoc_insertion_point(destructor:qaul.rpc.debug.LogToFile)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void LogToFile::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+}
+
+void LogToFile::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void LogToFile::Clear() {
+// @@protoc_insertion_point(message_clear_start:qaul.rpc.debug.LogToFile)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  enable_ = false;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* LogToFile::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // bool enable = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          enable_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* LogToFile::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.debug.LogToFile)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // bool enable = 1;
+  if (this->_internal_enable() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_enable(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.debug.LogToFile)
+  return target;
+}
+
+size_t LogToFile::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:qaul.rpc.debug.LogToFile)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // bool enable = 1;
+  if (this->_internal_enable() != 0) {
+    total_size += 1 + 1;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData LogToFile::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    LogToFile::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*LogToFile::GetClassData() const { return &_class_data_; }
+
+void LogToFile::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<LogToFile *>(to)->MergeFrom(
+      static_cast<const LogToFile &>(from));
+}
+
+
+void LogToFile::MergeFrom(const LogToFile& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.debug.LogToFile)
+  GOOGLE_DCHECK_NE(&from, this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_enable() != 0) {
+    _internal_set_enable(from._internal_enable());
+  }
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void LogToFile::CopyFrom(const LogToFile& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:qaul.rpc.debug.LogToFile)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool LogToFile::IsInitialized() const {
+  return true;
+}
+
+void LogToFile::InternalSwap(LogToFile* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(enable_, other->enable_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata LogToFile::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_rpc_2fdebug_2eproto_getter, &descriptor_table_rpc_2fdebug_2eproto_once,
+      file_level_metadata_rpc_2fdebug_2eproto[4]);
+}
+
+// ===================================================================
+
+class StoragePathRequest::_Internal {
+ public:
+};
+
+StoragePathRequest::StoragePathRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+  // @@protoc_insertion_point(arena_constructor:qaul.rpc.debug.StoragePathRequest)
+}
+StoragePathRequest::StoragePathRequest(const StoragePathRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:qaul.rpc.debug.StoragePathRequest)
+}
+
+
+
+
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData StoragePathRequest::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl,
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl,
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*StoragePathRequest::GetClassData() const { return &_class_data_; }
+
+
+
+
+
+
+
+::PROTOBUF_NAMESPACE_ID::Metadata StoragePathRequest::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_rpc_2fdebug_2eproto_getter, &descriptor_table_rpc_2fdebug_2eproto_once,
+      file_level_metadata_rpc_2fdebug_2eproto[5]);
+}
+
+// ===================================================================
+
+class StoragePathResponse::_Internal {
+ public:
+};
+
+StoragePathResponse::StoragePathResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor();
+  // @@protoc_insertion_point(arena_constructor:qaul.rpc.debug.StoragePathResponse)
+}
+StoragePathResponse::StoragePathResponse(const StoragePathResponse& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  storage_path_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    storage_path_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_storage_path().empty()) {
+    storage_path_.Set(from._internal_storage_path(), 
+      GetArenaForAllocation());
+  }
+  // @@protoc_insertion_point(copy_constructor:qaul.rpc.debug.StoragePathResponse)
+}
+
+inline void StoragePathResponse::SharedCtor() {
+storage_path_.InitDefault();
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  storage_path_.Set("", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+StoragePathResponse::~StoragePathResponse() {
+  // @@protoc_insertion_point(destructor:qaul.rpc.debug.StoragePathResponse)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void StoragePathResponse::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  storage_path_.Destroy();
+}
+
+void StoragePathResponse::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void StoragePathResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:qaul.rpc.debug.StoragePathResponse)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  storage_path_.ClearToEmpty();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* StoragePathResponse::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // string storage_path = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          auto str = _internal_mutable_storage_path();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.debug.StoragePathResponse.storage_path"));
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* StoragePathResponse::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.debug.StoragePathResponse)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string storage_path = 1;
+  if (!this->_internal_storage_path().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_storage_path().data(), static_cast<int>(this->_internal_storage_path().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "qaul.rpc.debug.StoragePathResponse.storage_path");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_storage_path(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.debug.StoragePathResponse)
+  return target;
+}
+
+size_t StoragePathResponse::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:qaul.rpc.debug.StoragePathResponse)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string storage_path = 1;
+  if (!this->_internal_storage_path().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_storage_path());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData StoragePathResponse::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    StoragePathResponse::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*StoragePathResponse::GetClassData() const { return &_class_data_; }
+
+void StoragePathResponse::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<StoragePathResponse *>(to)->MergeFrom(
+      static_cast<const StoragePathResponse &>(from));
+}
+
+
+void StoragePathResponse::MergeFrom(const StoragePathResponse& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.debug.StoragePathResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_storage_path().empty()) {
+    _internal_set_storage_path(from._internal_storage_path());
+  }
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void StoragePathResponse::CopyFrom(const StoragePathResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:qaul.rpc.debug.StoragePathResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool StoragePathResponse::IsInitialized() const {
+  return true;
+}
+
+void StoragePathResponse::InternalSwap(StoragePathResponse* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &storage_path_, lhs_arena,
+      &other->storage_path_, rhs_arena
+  );
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata StoragePathResponse::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_rpc_2fdebug_2eproto_getter, &descriptor_table_rpc_2fdebug_2eproto_once,
+      file_level_metadata_rpc_2fdebug_2eproto[6]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -620,17 +1261,33 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Panic::GetClassData() const { 
 }  // namespace rpc
 }  // namespace qaul
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::Debug* Arena::CreateMaybeMessage< ::qaul::rpc::debug::Debug >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::Debug*
+Arena::CreateMaybeMessage< ::qaul::rpc::debug::Debug >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::debug::Debug >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::HeartbeatRequest* Arena::CreateMaybeMessage< ::qaul::rpc::debug::HeartbeatRequest >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::HeartbeatRequest*
+Arena::CreateMaybeMessage< ::qaul::rpc::debug::HeartbeatRequest >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::debug::HeartbeatRequest >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::HeartbeatResponse* Arena::CreateMaybeMessage< ::qaul::rpc::debug::HeartbeatResponse >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::HeartbeatResponse*
+Arena::CreateMaybeMessage< ::qaul::rpc::debug::HeartbeatResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::debug::HeartbeatResponse >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::Panic* Arena::CreateMaybeMessage< ::qaul::rpc::debug::Panic >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::Panic*
+Arena::CreateMaybeMessage< ::qaul::rpc::debug::Panic >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::debug::Panic >(arena);
+}
+template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::LogToFile*
+Arena::CreateMaybeMessage< ::qaul::rpc::debug::LogToFile >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::rpc::debug::LogToFile >(arena);
+}
+template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::StoragePathRequest*
+Arena::CreateMaybeMessage< ::qaul::rpc::debug::StoragePathRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::rpc::debug::StoragePathRequest >(arena);
+}
+template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::StoragePathResponse*
+Arena::CreateMaybeMessage< ::qaul::rpc::debug::StoragePathResponse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::rpc::debug::StoragePathResponse >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

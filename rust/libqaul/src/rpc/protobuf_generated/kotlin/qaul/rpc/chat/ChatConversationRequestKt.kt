@@ -3,7 +3,7 @@
 
 package qaul.rpc.chat;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializechatConversationRequest")
 public inline fun chatConversationRequest(block: qaul.rpc.chat.ChatConversationRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatConversationRequest =
   qaul.rpc.chat.ChatConversationRequestKt.Dsl._create(qaul.rpc.chat.ChatOuterClass.ChatConversationRequest.newBuilder()).apply { block() }._build()
 public object ChatConversationRequestKt {
@@ -68,3 +68,4 @@ public object ChatConversationRequestKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.chat.ChatOuterClass.ChatConversationRequest.copy(block: qaul.rpc.chat.ChatConversationRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatConversationRequest =
   qaul.rpc.chat.ChatConversationRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

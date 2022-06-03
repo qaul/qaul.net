@@ -3,7 +3,7 @@
 
 package qaul.rpc.chat;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializechatOverview")
 public inline fun chatOverview(block: qaul.rpc.chat.ChatOverviewKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatOverview =
   qaul.rpc.chat.ChatOverviewKt.Dsl._create(qaul.rpc.chat.ChatOuterClass.ChatOverview.newBuilder()).apply { block() }._build()
 public object ChatOverviewKt {
@@ -201,3 +201,4 @@ public object ChatOverviewKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.chat.ChatOuterClass.ChatOverview.copy(block: qaul.rpc.chat.ChatOverviewKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatOverview =
   qaul.rpc.chat.ChatOverviewKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

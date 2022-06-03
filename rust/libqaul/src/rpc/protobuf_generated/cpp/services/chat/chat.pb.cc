@@ -16,125 +16,129 @@
 #include <google/protobuf/port_def.inc>
 
 PROTOBUF_PRAGMA_INIT_SEG
+
+namespace _pb = ::PROTOBUF_NAMESPACE_ID;
+namespace _pbi = _pb::internal;
+
 namespace qaul {
 namespace rpc {
 namespace chat {
-constexpr Chat::Chat(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+PROTOBUF_CONSTEXPR Chat::Chat(
+    ::_pbi::ConstantInitialized)
   : _oneof_case_{}{}
 struct ChatDefaultTypeInternal {
-  constexpr ChatDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ChatDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~ChatDefaultTypeInternal() {}
   union {
     Chat _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ChatDefaultTypeInternal _Chat_default_instance_;
-constexpr ChatOverviewRequest::ChatOverviewRequest(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatDefaultTypeInternal _Chat_default_instance_;
+PROTOBUF_CONSTEXPR ChatOverviewRequest::ChatOverviewRequest(
+    ::_pbi::ConstantInitialized){}
 struct ChatOverviewRequestDefaultTypeInternal {
-  constexpr ChatOverviewRequestDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ChatOverviewRequestDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~ChatOverviewRequestDefaultTypeInternal() {}
   union {
     ChatOverviewRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ChatOverviewRequestDefaultTypeInternal _ChatOverviewRequest_default_instance_;
-constexpr ChatOverviewList::ChatOverviewList(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatOverviewRequestDefaultTypeInternal _ChatOverviewRequest_default_instance_;
+PROTOBUF_CONSTEXPR ChatOverviewList::ChatOverviewList(
+    ::_pbi::ConstantInitialized)
   : overview_list_(){}
 struct ChatOverviewListDefaultTypeInternal {
-  constexpr ChatOverviewListDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ChatOverviewListDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~ChatOverviewListDefaultTypeInternal() {}
   union {
     ChatOverviewList _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ChatOverviewListDefaultTypeInternal _ChatOverviewList_default_instance_;
-constexpr ChatOverview::ChatOverview(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : conversation_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , content_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , last_message_sender_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatOverviewListDefaultTypeInternal _ChatOverviewList_default_instance_;
+PROTOBUF_CONSTEXPR ChatOverview::ChatOverview(
+    ::_pbi::ConstantInitialized)
+  : conversation_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , name_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , content_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , last_message_sender_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
   , last_message_index_(0u)
   , unread_(0)
   , last_message_at_(uint64_t{0u}){}
 struct ChatOverviewDefaultTypeInternal {
-  constexpr ChatOverviewDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ChatOverviewDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~ChatOverviewDefaultTypeInternal() {}
   union {
     ChatOverview _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ChatOverviewDefaultTypeInternal _ChatOverview_default_instance_;
-constexpr ChatConversationRequest::ChatConversationRequest(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : conversation_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatOverviewDefaultTypeInternal _ChatOverview_default_instance_;
+PROTOBUF_CONSTEXPR ChatConversationRequest::ChatConversationRequest(
+    ::_pbi::ConstantInitialized)
+  : conversation_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
   , last_index_(uint64_t{0u}){}
 struct ChatConversationRequestDefaultTypeInternal {
-  constexpr ChatConversationRequestDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ChatConversationRequestDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~ChatConversationRequestDefaultTypeInternal() {}
   union {
     ChatConversationRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ChatConversationRequestDefaultTypeInternal _ChatConversationRequest_default_instance_;
-constexpr ChatConversationList::ChatConversationList(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatConversationRequestDefaultTypeInternal _ChatConversationRequest_default_instance_;
+PROTOBUF_CONSTEXPR ChatConversationList::ChatConversationList(
+    ::_pbi::ConstantInitialized)
   : message_list_()
-  , conversation_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+  , conversation_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
 struct ChatConversationListDefaultTypeInternal {
-  constexpr ChatConversationListDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ChatConversationListDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~ChatConversationListDefaultTypeInternal() {}
   union {
     ChatConversationList _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ChatConversationListDefaultTypeInternal _ChatConversationList_default_instance_;
-constexpr ChatMessage::ChatMessage(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : sender_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , message_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , content_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatConversationListDefaultTypeInternal _ChatConversationList_default_instance_;
+PROTOBUF_CONSTEXPR ChatMessage::ChatMessage(
+    ::_pbi::ConstantInitialized)
+  : sender_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , message_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , content_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
   , index_(0u)
   , status_(0)
   , sent_at_(uint64_t{0u})
   , received_at_(uint64_t{0u}){}
 struct ChatMessageDefaultTypeInternal {
-  constexpr ChatMessageDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ChatMessageDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~ChatMessageDefaultTypeInternal() {}
   union {
     ChatMessage _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ChatMessageDefaultTypeInternal _ChatMessage_default_instance_;
-constexpr ChatMessageSend::ChatMessageSend(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : conversation_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , content_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatMessageDefaultTypeInternal _ChatMessage_default_instance_;
+PROTOBUF_CONSTEXPR ChatMessageSend::ChatMessageSend(
+    ::_pbi::ConstantInitialized)
+  : conversation_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  , content_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
 struct ChatMessageSendDefaultTypeInternal {
-  constexpr ChatMessageSendDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ChatMessageSendDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~ChatMessageSendDefaultTypeInternal() {}
   union {
     ChatMessageSend _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ChatMessageSendDefaultTypeInternal _ChatMessageSend_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatMessageSendDefaultTypeInternal _ChatMessageSend_default_instance_;
 }  // namespace chat
 }  // namespace rpc
 }  // namespace qaul
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_services_2fchat_2fchat_2eproto[8];
-static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_services_2fchat_2fchat_2eproto = nullptr;
-static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_services_2fchat_2fchat_2eproto = nullptr;
+static ::_pb::Metadata file_level_metadata_services_2fchat_2fchat_2eproto[8];
+static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_services_2fchat_2fchat_2eproto = nullptr;
+static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_services_2fchat_2fchat_2eproto = nullptr;
 
 const uint32_t TableStruct_services_2fchat_2fchat_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
@@ -143,11 +147,11 @@ const uint32_t TableStruct_services_2fchat_2fchat_2eproto::offsets[] PROTOBUF_SE
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::Chat, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::Chat, message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::ChatOverviewRequest, _internal_metadata_),
@@ -213,7 +217,7 @@ const uint32_t TableStruct_services_2fchat_2fchat_2eproto::offsets[] PROTOBUF_SE
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::ChatMessageSend, conversation_id_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chat::ChatMessageSend, content_),
 };
-static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::chat::Chat)},
   { 12, -1, -1, sizeof(::qaul::rpc::chat::ChatOverviewRequest)},
   { 18, -1, -1, sizeof(::qaul::rpc::chat::ChatOverviewList)},
@@ -224,15 +228,15 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 67, -1, -1, sizeof(::qaul::rpc::chat::ChatMessageSend)},
 };
 
-static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::chat::_Chat_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::chat::_ChatOverviewRequest_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::chat::_ChatOverviewList_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::chat::_ChatOverview_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::chat::_ChatConversationRequest_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::chat::_ChatConversationList_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::chat::_ChatMessage_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::qaul::rpc::chat::_ChatMessageSend_default_instance_),
+static const ::_pb::Message* const file_default_instances[] = {
+  &::qaul::rpc::chat::_Chat_default_instance_._instance,
+  &::qaul::rpc::chat::_ChatOverviewRequest_default_instance_._instance,
+  &::qaul::rpc::chat::_ChatOverviewList_default_instance_._instance,
+  &::qaul::rpc::chat::_ChatOverview_default_instance_._instance,
+  &::qaul::rpc::chat::_ChatConversationRequest_default_instance_._instance,
+  &::qaul::rpc::chat::_ChatConversationList_default_instance_._instance,
+  &::qaul::rpc::chat::_ChatMessage_default_instance_._instance,
+  &::qaul::rpc::chat::_ChatMessageSend_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_services_2fchat_2fchat_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -263,19 +267,21 @@ const char descriptor_table_protodef_services_2fchat_2fchat_2eproto[] PROTOBUF_S
   "ssageSend\022\027\n\017conversation_id\030\001 \001(\014\022\017\n\007co"
   "ntent\030\002 \001(\tb\006proto3"
   ;
-static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_services_2fchat_2fchat_2eproto_once;
-const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_services_2fchat_2fchat_2eproto = {
-  false, false, 1019, descriptor_table_protodef_services_2fchat_2fchat_2eproto, "services/chat/chat.proto", 
-  &descriptor_table_services_2fchat_2fchat_2eproto_once, nullptr, 0, 8,
-  schemas, file_default_instances, TableStruct_services_2fchat_2fchat_2eproto::offsets,
-  file_level_metadata_services_2fchat_2fchat_2eproto, file_level_enum_descriptors_services_2fchat_2fchat_2eproto, file_level_service_descriptors_services_2fchat_2fchat_2eproto,
+static ::_pbi::once_flag descriptor_table_services_2fchat_2fchat_2eproto_once;
+const ::_pbi::DescriptorTable descriptor_table_services_2fchat_2fchat_2eproto = {
+    false, false, 1019, descriptor_table_protodef_services_2fchat_2fchat_2eproto,
+    "services/chat/chat.proto",
+    &descriptor_table_services_2fchat_2fchat_2eproto_once, nullptr, 0, 8,
+    schemas, file_default_instances, TableStruct_services_2fchat_2fchat_2eproto::offsets,
+    file_level_metadata_services_2fchat_2fchat_2eproto, file_level_enum_descriptors_services_2fchat_2fchat_2eproto,
+    file_level_service_descriptors_services_2fchat_2fchat_2eproto,
 };
-PROTOBUF_ATTRIBUTE_WEAK const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable* descriptor_table_services_2fchat_2fchat_2eproto_getter() {
+PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_services_2fchat_2fchat_2eproto_getter() {
   return &descriptor_table_services_2fchat_2fchat_2eproto;
 }
 
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_services_2fchat_2fchat_2eproto(&descriptor_table_services_2fchat_2fchat_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_services_2fchat_2fchat_2eproto(&descriptor_table_services_2fchat_2fchat_2eproto);
 namespace qaul {
 namespace rpc {
 namespace chat {
@@ -316,7 +322,7 @@ void Chat::set_allocated_overview_request(::qaul::rpc::chat::ChatOverviewRequest
   clear_message();
   if (overview_request) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::chat::ChatOverviewRequest>::GetOwningArena(overview_request);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(overview_request);
     if (message_arena != submessage_arena) {
       overview_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, overview_request, submessage_arena);
@@ -331,7 +337,7 @@ void Chat::set_allocated_overview_list(::qaul::rpc::chat::ChatOverviewList* over
   clear_message();
   if (overview_list) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::chat::ChatOverviewList>::GetOwningArena(overview_list);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(overview_list);
     if (message_arena != submessage_arena) {
       overview_list = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, overview_list, submessage_arena);
@@ -346,7 +352,7 @@ void Chat::set_allocated_conversation_request(::qaul::rpc::chat::ChatConversatio
   clear_message();
   if (conversation_request) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::chat::ChatConversationRequest>::GetOwningArena(conversation_request);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(conversation_request);
     if (message_arena != submessage_arena) {
       conversation_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, conversation_request, submessage_arena);
@@ -361,7 +367,7 @@ void Chat::set_allocated_conversation_list(::qaul::rpc::chat::ChatConversationLi
   clear_message();
   if (conversation_list) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::chat::ChatConversationList>::GetOwningArena(conversation_list);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(conversation_list);
     if (message_arena != submessage_arena) {
       conversation_list = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, conversation_list, submessage_arena);
@@ -376,7 +382,7 @@ void Chat::set_allocated_send(::qaul::rpc::chat::ChatMessageSend* send) {
   clear_message();
   if (send) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::qaul::rpc::chat::ChatMessageSend>::GetOwningArena(send);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(send);
     if (message_arena != submessage_arena) {
       send = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, send, submessage_arena);
@@ -390,9 +396,6 @@ Chat::Chat(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.chat.Chat)
 }
 Chat::Chat(const Chat& from)
@@ -433,9 +436,11 @@ clear_has_message();
 
 Chat::~Chat() {
   // @@protoc_insertion_point(destructor:qaul.rpc.chat.Chat)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void Chat::SharedDtor() {
@@ -445,12 +450,6 @@ inline void Chat::SharedDtor() {
   }
 }
 
-void Chat::ArenaDtor(void* object) {
-  Chat* _this = reinterpret_cast< Chat* >(object);
-  (void)_this;
-}
-void Chat::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void Chat::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -506,11 +505,11 @@ void Chat::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Chat::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Chat::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .qaul.rpc.chat.ChatOverviewRequest overview_request = 1;
       case 1:
@@ -583,46 +582,41 @@ uint8_t* Chat::_InternalSerialize(
 
   // .qaul.rpc.chat.ChatOverviewRequest overview_request = 1;
   if (_internal_has_overview_request()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        1, _Internal::overview_request(this), target, stream);
+      InternalWriteMessage(1, _Internal::overview_request(this),
+        _Internal::overview_request(this).GetCachedSize(), target, stream);
   }
 
   // .qaul.rpc.chat.ChatOverviewList overview_list = 2;
   if (_internal_has_overview_list()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        2, _Internal::overview_list(this), target, stream);
+      InternalWriteMessage(2, _Internal::overview_list(this),
+        _Internal::overview_list(this).GetCachedSize(), target, stream);
   }
 
   // .qaul.rpc.chat.ChatConversationRequest conversation_request = 3;
   if (_internal_has_conversation_request()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        3, _Internal::conversation_request(this), target, stream);
+      InternalWriteMessage(3, _Internal::conversation_request(this),
+        _Internal::conversation_request(this).GetCachedSize(), target, stream);
   }
 
   // .qaul.rpc.chat.ChatConversationList conversation_list = 4;
   if (_internal_has_conversation_list()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        4, _Internal::conversation_list(this), target, stream);
+      InternalWriteMessage(4, _Internal::conversation_list(this),
+        _Internal::conversation_list(this).GetCachedSize(), target, stream);
   }
 
   // .qaul.rpc.chat.ChatMessageSend send = 5;
   if (_internal_has_send()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        5, _Internal::send(this), target, stream);
+      InternalWriteMessage(5, _Internal::send(this),
+        _Internal::send(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.chat.Chat)
@@ -746,7 +740,7 @@ void Chat::InternalSwap(Chat* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Chat::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2fchat_2fchat_2eproto_getter, &descriptor_table_services_2fchat_2fchat_2eproto_once,
       file_level_metadata_services_2fchat_2fchat_2eproto[0]);
 }
@@ -785,7 +779,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*ChatOverviewRequest::GetClassD
 
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ChatOverviewRequest::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2fchat_2fchat_2eproto_getter, &descriptor_table_services_2fchat_2fchat_2eproto_once,
       file_level_metadata_services_2fchat_2fchat_2eproto[1]);
 }
@@ -801,9 +795,6 @@ ChatOverviewList::ChatOverviewList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
   overview_list_(arena) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.chat.ChatOverviewList)
 }
 ChatOverviewList::ChatOverviewList(const ChatOverviewList& from)
@@ -818,21 +809,17 @@ inline void ChatOverviewList::SharedCtor() {
 
 ChatOverviewList::~ChatOverviewList() {
   // @@protoc_insertion_point(destructor:qaul.rpc.chat.ChatOverviewList)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void ChatOverviewList::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void ChatOverviewList::ArenaDtor(void* object) {
-  ChatOverviewList* _this = reinterpret_cast< ChatOverviewList* >(object);
-  (void)_this;
-}
-void ChatOverviewList::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void ChatOverviewList::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -847,11 +834,11 @@ void ChatOverviewList::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* ChatOverviewList::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* ChatOverviewList::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // repeated .qaul.rpc.chat.ChatOverview overview_list = 1;
       case 1:
@@ -896,15 +883,15 @@ uint8_t* ChatOverviewList::_InternalSerialize(
   (void) cached_has_bits;
 
   // repeated .qaul.rpc.chat.ChatOverview overview_list = 1;
-  for (unsigned int i = 0,
-      n = static_cast<unsigned int>(this->_internal_overview_list_size()); i < n; i++) {
-    target = stream->EnsureSpace(target);
+  for (unsigned i = 0,
+      n = static_cast<unsigned>(this->_internal_overview_list_size()); i < n; i++) {
+    const auto& repfield = this->_internal_overview_list(i);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(1, this->_internal_overview_list(i), target, stream);
+        InternalWriteMessage(1, repfield, repfield.GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.chat.ChatOverviewList)
@@ -970,7 +957,7 @@ void ChatOverviewList::InternalSwap(ChatOverviewList* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ChatOverviewList::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2fchat_2fchat_2eproto_getter, &descriptor_table_services_2fchat_2fchat_2eproto_once,
       file_level_metadata_services_2fchat_2fchat_2eproto[2]);
 }
@@ -985,44 +972,41 @@ ChatOverview::ChatOverview(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.chat.ChatOverview)
 }
 ChatOverview::ChatOverview(const ChatOverview& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  conversation_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  conversation_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    conversation_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    conversation_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_conversation_id().empty()) {
-    conversation_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_conversation_id(), 
+    conversation_id_.Set(from._internal_conversation_id(), 
       GetArenaForAllocation());
   }
-  name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  name_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    name_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_name().empty()) {
-    name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_name(), 
+    name_.Set(from._internal_name(), 
       GetArenaForAllocation());
   }
-  content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  content_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    content_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    content_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_content().empty()) {
-    content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_content(), 
+    content_.Set(from._internal_content(), 
       GetArenaForAllocation());
   }
-  last_message_sender_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  last_message_sender_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    last_message_sender_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    last_message_sender_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_last_message_sender_id().empty()) {
-    last_message_sender_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_last_message_sender_id(), 
+    last_message_sender_id_.Set(from._internal_last_message_sender_id(), 
       GetArenaForAllocation());
   }
   ::memcpy(&last_message_index_, &from.last_message_index_,
@@ -1032,21 +1016,21 @@ ChatOverview::ChatOverview(const ChatOverview& from)
 }
 
 inline void ChatOverview::SharedCtor() {
-conversation_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+conversation_id_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  conversation_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  conversation_id_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+name_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  name_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+content_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  content_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  content_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-last_message_sender_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+last_message_sender_id_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  last_message_sender_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  last_message_sender_id_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&last_message_index_) - reinterpret_cast<char*>(this)),
@@ -1056,25 +1040,21 @@ last_message_sender_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::Get
 
 ChatOverview::~ChatOverview() {
   // @@protoc_insertion_point(destructor:qaul.rpc.chat.ChatOverview)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void ChatOverview::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  conversation_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  content_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  last_message_sender_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  conversation_id_.Destroy();
+  name_.Destroy();
+  content_.Destroy();
+  last_message_sender_id_.Destroy();
 }
 
-void ChatOverview::ArenaDtor(void* object) {
-  ChatOverview* _this = reinterpret_cast< ChatOverview* >(object);
-  (void)_this;
-}
-void ChatOverview::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void ChatOverview::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -1095,17 +1075,17 @@ void ChatOverview::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* ChatOverview::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* ChatOverview::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes conversation_id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_conversation_id();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1122,9 +1102,9 @@ const char* ChatOverview::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_name();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.chat.ChatOverview.name"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.chat.ChatOverview.name"));
         } else
           goto handle_unusual;
         continue;
@@ -1148,9 +1128,9 @@ const char* ChatOverview::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
       case 6:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
           auto str = _internal_mutable_content();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.chat.ChatOverview.content"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.chat.ChatOverview.content"));
         } else
           goto handle_unusual;
         continue;
@@ -1158,7 +1138,7 @@ const char* ChatOverview::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
       case 7:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
           auto str = _internal_mutable_last_message_sender_id();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1201,7 +1181,7 @@ uint8_t* ChatOverview::_InternalSerialize(
   // uint32 last_message_index = 2;
   if (this->_internal_last_message_index() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(2, this->_internal_last_message_index(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_last_message_index(), target);
   }
 
   // string name = 3;
@@ -1217,13 +1197,13 @@ uint8_t* ChatOverview::_InternalSerialize(
   // uint64 last_message_at = 4;
   if (this->_internal_last_message_at() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_last_message_at(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(4, this->_internal_last_message_at(), target);
   }
 
   // int32 unread = 5;
   if (this->_internal_unread() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_unread(), target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(5, this->_internal_unread(), target);
   }
 
   // string content = 6;
@@ -1243,7 +1223,7 @@ uint8_t* ChatOverview::_InternalSerialize(
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.chat.ChatOverview)
@@ -1288,17 +1268,17 @@ size_t ChatOverview::ByteSizeLong() const {
 
   // uint32 last_message_index = 2;
   if (this->_internal_last_message_index() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32SizePlusOne(this->_internal_last_message_index());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_last_message_index());
   }
 
   // int32 unread = 5;
   if (this->_internal_unread() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_unread());
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_unread());
   }
 
   // uint64 last_message_at = 4;
   if (this->_internal_last_message_at() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_last_message_at());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_last_message_at());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -1364,22 +1344,18 @@ void ChatOverview::InternalSwap(ChatOverview* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &conversation_id_, lhs_arena,
       &other->conversation_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &name_, lhs_arena,
       &other->name_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &content_, lhs_arena,
       &other->content_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &last_message_sender_id_, lhs_arena,
       &other->last_message_sender_id_, rhs_arena
   );
@@ -1392,7 +1368,7 @@ void ChatOverview::InternalSwap(ChatOverview* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ChatOverview::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2fchat_2fchat_2eproto_getter, &descriptor_table_services_2fchat_2fchat_2eproto_once,
       file_level_metadata_services_2fchat_2fchat_2eproto[3]);
 }
@@ -1407,20 +1383,17 @@ ChatConversationRequest::ChatConversationRequest(::PROTOBUF_NAMESPACE_ID::Arena*
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.chat.ChatConversationRequest)
 }
 ChatConversationRequest::ChatConversationRequest(const ChatConversationRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  conversation_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  conversation_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    conversation_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    conversation_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_conversation_id().empty()) {
-    conversation_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_conversation_id(), 
+    conversation_id_.Set(from._internal_conversation_id(), 
       GetArenaForAllocation());
   }
   last_index_ = from.last_index_;
@@ -1428,31 +1401,27 @@ ChatConversationRequest::ChatConversationRequest(const ChatConversationRequest& 
 }
 
 inline void ChatConversationRequest::SharedCtor() {
-conversation_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+conversation_id_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  conversation_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  conversation_id_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 last_index_ = uint64_t{0u};
 }
 
 ChatConversationRequest::~ChatConversationRequest() {
   // @@protoc_insertion_point(destructor:qaul.rpc.chat.ChatConversationRequest)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void ChatConversationRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  conversation_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  conversation_id_.Destroy();
 }
 
-void ChatConversationRequest::ArenaDtor(void* object) {
-  ChatConversationRequest* _this = reinterpret_cast< ChatConversationRequest* >(object);
-  (void)_this;
-}
-void ChatConversationRequest::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void ChatConversationRequest::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -1468,17 +1437,17 @@ void ChatConversationRequest::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* ChatConversationRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* ChatConversationRequest::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes conversation_id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_conversation_id();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1529,11 +1498,11 @@ uint8_t* ChatConversationRequest::_InternalSerialize(
   // uint64 last_index = 2;
   if (this->_internal_last_index() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_last_index(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(2, this->_internal_last_index(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.chat.ChatConversationRequest)
@@ -1557,7 +1526,7 @@ size_t ChatConversationRequest::ByteSizeLong() const {
 
   // uint64 last_index = 2;
   if (this->_internal_last_index() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_last_index());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_last_index());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -1608,7 +1577,6 @@ void ChatConversationRequest::InternalSwap(ChatConversationRequest* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &conversation_id_, lhs_arena,
       &other->conversation_id_, rhs_arena
   );
@@ -1616,7 +1584,7 @@ void ChatConversationRequest::InternalSwap(ChatConversationRequest* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ChatConversationRequest::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2fchat_2fchat_2eproto_getter, &descriptor_table_services_2fchat_2fchat_2eproto_once,
       file_level_metadata_services_2fchat_2fchat_2eproto[4]);
 }
@@ -1632,51 +1600,44 @@ ChatConversationList::ChatConversationList(::PROTOBUF_NAMESPACE_ID::Arena* arena
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
   message_list_(arena) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.chat.ChatConversationList)
 }
 ChatConversationList::ChatConversationList(const ChatConversationList& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       message_list_(from.message_list_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  conversation_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  conversation_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    conversation_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    conversation_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_conversation_id().empty()) {
-    conversation_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_conversation_id(), 
+    conversation_id_.Set(from._internal_conversation_id(), 
       GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.chat.ChatConversationList)
 }
 
 inline void ChatConversationList::SharedCtor() {
-conversation_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+conversation_id_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  conversation_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  conversation_id_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 ChatConversationList::~ChatConversationList() {
   // @@protoc_insertion_point(destructor:qaul.rpc.chat.ChatConversationList)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void ChatConversationList::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  conversation_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  conversation_id_.Destroy();
 }
 
-void ChatConversationList::ArenaDtor(void* object) {
-  ChatConversationList* _this = reinterpret_cast< ChatConversationList* >(object);
-  (void)_this;
-}
-void ChatConversationList::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void ChatConversationList::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -1692,17 +1653,17 @@ void ChatConversationList::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* ChatConversationList::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* ChatConversationList::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes conversation_id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_conversation_id();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1756,15 +1717,15 @@ uint8_t* ChatConversationList::_InternalSerialize(
   }
 
   // repeated .qaul.rpc.chat.ChatMessage message_list = 2;
-  for (unsigned int i = 0,
-      n = static_cast<unsigned int>(this->_internal_message_list_size()); i < n; i++) {
-    target = stream->EnsureSpace(target);
+  for (unsigned i = 0,
+      n = static_cast<unsigned>(this->_internal_message_list_size()); i < n; i++) {
+    const auto& repfield = this->_internal_message_list(i);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, this->_internal_message_list(i), target, stream);
+        InternalWriteMessage(2, repfield, repfield.GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.chat.ChatConversationList)
@@ -1840,14 +1801,13 @@ void ChatConversationList::InternalSwap(ChatConversationList* other) {
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   message_list_.InternalSwap(&other->message_list_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &conversation_id_, lhs_arena,
       &other->conversation_id_, rhs_arena
   );
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ChatConversationList::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2fchat_2fchat_2eproto_getter, &descriptor_table_services_2fchat_2fchat_2eproto_once,
       file_level_metadata_services_2fchat_2fchat_2eproto[5]);
 }
@@ -1862,36 +1822,33 @@ ChatMessage::ChatMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.chat.ChatMessage)
 }
 ChatMessage::ChatMessage(const ChatMessage& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  sender_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  sender_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    sender_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    sender_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_sender_id().empty()) {
-    sender_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_sender_id(), 
+    sender_id_.Set(from._internal_sender_id(), 
       GetArenaForAllocation());
   }
-  message_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  message_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    message_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    message_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_message_id().empty()) {
-    message_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_message_id(), 
+    message_id_.Set(from._internal_message_id(), 
       GetArenaForAllocation());
   }
-  content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  content_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    content_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    content_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_content().empty()) {
-    content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_content(), 
+    content_.Set(from._internal_content(), 
       GetArenaForAllocation());
   }
   ::memcpy(&index_, &from.index_,
@@ -1901,17 +1858,17 @@ ChatMessage::ChatMessage(const ChatMessage& from)
 }
 
 inline void ChatMessage::SharedCtor() {
-sender_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+sender_id_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  sender_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  sender_id_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-message_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+message_id_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  message_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  message_id_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+content_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  content_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  content_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&index_) - reinterpret_cast<char*>(this)),
@@ -1921,24 +1878,20 @@ content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlre
 
 ChatMessage::~ChatMessage() {
   // @@protoc_insertion_point(destructor:qaul.rpc.chat.ChatMessage)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void ChatMessage::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  sender_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  message_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  content_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  sender_id_.Destroy();
+  message_id_.Destroy();
+  content_.Destroy();
 }
 
-void ChatMessage::ArenaDtor(void* object) {
-  ChatMessage* _this = reinterpret_cast< ChatMessage* >(object);
-  (void)_this;
-}
-void ChatMessage::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void ChatMessage::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -1958,11 +1911,11 @@ void ChatMessage::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* ChatMessage::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* ChatMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint32 index = 1;
       case 1:
@@ -1976,7 +1929,7 @@ const char* ChatMessage::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_sender_id();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1985,7 +1938,7 @@ const char* ChatMessage::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_message_id();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2018,9 +1971,9 @@ const char* ChatMessage::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
       case 7:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
           auto str = _internal_mutable_content();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.chat.ChatMessage.content"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.chat.ChatMessage.content"));
         } else
           goto handle_unusual;
         continue;
@@ -2056,7 +2009,7 @@ uint8_t* ChatMessage::_InternalSerialize(
   // uint32 index = 1;
   if (this->_internal_index() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(1, this->_internal_index(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(1, this->_internal_index(), target);
   }
 
   // bytes sender_id = 2;
@@ -2074,19 +2027,19 @@ uint8_t* ChatMessage::_InternalSerialize(
   // int32 status = 4;
   if (this->_internal_status() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_status(), target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(4, this->_internal_status(), target);
   }
 
   // uint64 sent_at = 5;
   if (this->_internal_sent_at() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(5, this->_internal_sent_at(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(5, this->_internal_sent_at(), target);
   }
 
   // uint64 received_at = 6;
   if (this->_internal_received_at() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(6, this->_internal_received_at(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(6, this->_internal_received_at(), target);
   }
 
   // string content = 7;
@@ -2100,7 +2053,7 @@ uint8_t* ChatMessage::_InternalSerialize(
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.chat.ChatMessage)
@@ -2138,22 +2091,22 @@ size_t ChatMessage::ByteSizeLong() const {
 
   // uint32 index = 1;
   if (this->_internal_index() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32SizePlusOne(this->_internal_index());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_index());
   }
 
   // int32 status = 4;
   if (this->_internal_status() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_status());
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_status());
   }
 
   // uint64 sent_at = 5;
   if (this->_internal_sent_at() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_sent_at());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_sent_at());
   }
 
   // uint64 received_at = 6;
   if (this->_internal_received_at() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_received_at());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_received_at());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -2219,17 +2172,14 @@ void ChatMessage::InternalSwap(ChatMessage* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &sender_id_, lhs_arena,
       &other->sender_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &message_id_, lhs_arena,
       &other->message_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &content_, lhs_arena,
       &other->content_, rhs_arena
   );
@@ -2242,7 +2192,7 @@ void ChatMessage::InternalSwap(ChatMessage* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ChatMessage::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2fchat_2fchat_2eproto_getter, &descriptor_table_services_2fchat_2fchat_2eproto_once,
       file_level_metadata_services_2fchat_2fchat_2eproto[6]);
 }
@@ -2257,63 +2207,56 @@ ChatMessageSend::ChatMessageSend(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.chat.ChatMessageSend)
 }
 ChatMessageSend::ChatMessageSend(const ChatMessageSend& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  conversation_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  conversation_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    conversation_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    conversation_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_conversation_id().empty()) {
-    conversation_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_conversation_id(), 
+    conversation_id_.Set(from._internal_conversation_id(), 
       GetArenaForAllocation());
   }
-  content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  content_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    content_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    content_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_content().empty()) {
-    content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_content(), 
+    content_.Set(from._internal_content(), 
       GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.chat.ChatMessageSend)
 }
 
 inline void ChatMessageSend::SharedCtor() {
-conversation_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+conversation_id_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  conversation_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  conversation_id_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+content_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  content_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  content_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 ChatMessageSend::~ChatMessageSend() {
   // @@protoc_insertion_point(destructor:qaul.rpc.chat.ChatMessageSend)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void ChatMessageSend::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  conversation_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  content_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  conversation_id_.Destroy();
+  content_.Destroy();
 }
 
-void ChatMessageSend::ArenaDtor(void* object) {
-  ChatMessageSend* _this = reinterpret_cast< ChatMessageSend* >(object);
-  (void)_this;
-}
-void ChatMessageSend::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void ChatMessageSend::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
@@ -2329,17 +2272,17 @@ void ChatMessageSend::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* ChatMessageSend::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* ChatMessageSend::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes conversation_id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_conversation_id();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2348,9 +2291,9 @@ const char* ChatMessageSend::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_content();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "qaul.rpc.chat.ChatMessageSend.content"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.chat.ChatMessageSend.content"));
         } else
           goto handle_unusual;
         continue;
@@ -2400,7 +2343,7 @@ uint8_t* ChatMessageSend::_InternalSerialize(
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.chat.ChatMessageSend)
@@ -2477,19 +2420,17 @@ void ChatMessageSend::InternalSwap(ChatMessageSend* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &conversation_id_, lhs_arena,
       &other->conversation_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &content_, lhs_arena,
       &other->content_, rhs_arena
   );
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ChatMessageSend::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2fchat_2fchat_2eproto_getter, &descriptor_table_services_2fchat_2fchat_2eproto_once,
       file_level_metadata_services_2fchat_2fchat_2eproto[7]);
 }
@@ -2499,28 +2440,36 @@ void ChatMessageSend::InternalSwap(ChatMessageSend* other) {
 }  // namespace rpc
 }  // namespace qaul
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::Chat* Arena::CreateMaybeMessage< ::qaul::rpc::chat::Chat >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::Chat*
+Arena::CreateMaybeMessage< ::qaul::rpc::chat::Chat >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::chat::Chat >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatOverviewRequest* Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatOverviewRequest >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatOverviewRequest*
+Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatOverviewRequest >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::chat::ChatOverviewRequest >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatOverviewList* Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatOverviewList >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatOverviewList*
+Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatOverviewList >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::chat::ChatOverviewList >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatOverview* Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatOverview >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatOverview*
+Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatOverview >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::chat::ChatOverview >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatConversationRequest* Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatConversationRequest >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatConversationRequest*
+Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatConversationRequest >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::chat::ChatConversationRequest >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatConversationList* Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatConversationList >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatConversationList*
+Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatConversationList >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::chat::ChatConversationList >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatMessage* Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatMessage >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatMessage*
+Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatMessage >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::chat::ChatMessage >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatMessageSend* Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatMessageSend >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::qaul::rpc::chat::ChatMessageSend*
+Arena::CreateMaybeMessage< ::qaul::rpc::chat::ChatMessageSend >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::chat::ChatMessageSend >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE

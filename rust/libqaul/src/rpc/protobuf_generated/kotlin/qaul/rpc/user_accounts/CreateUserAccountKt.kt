@@ -3,7 +3,7 @@
 
 package qaul.rpc.user_accounts;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializecreateUserAccount")
 public inline fun createUserAccount(block: qaul.rpc.user_accounts.CreateUserAccountKt.Dsl.() -> kotlin.Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount =
   qaul.rpc.user_accounts.CreateUserAccountKt.Dsl._create(qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount.newBuilder()).apply { block() }._build()
 public object CreateUserAccountKt {
@@ -43,3 +43,4 @@ public object CreateUserAccountKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount.copy(block: qaul.rpc.user_accounts.CreateUserAccountKt.Dsl.() -> kotlin.Unit): qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount =
   qaul.rpc.user_accounts.CreateUserAccountKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

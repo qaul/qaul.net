@@ -3,7 +3,7 @@
 
 package qaul.rpc.router;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeconnectionsRequest")
 public inline fun connectionsRequest(block: qaul.rpc.router.ConnectionsRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.ConnectionsRequest =
   qaul.rpc.router.ConnectionsRequestKt.Dsl._create(qaul.rpc.router.RouterOuterClass.ConnectionsRequest.newBuilder()).apply { block() }._build()
 public object ConnectionsRequestKt {
@@ -26,3 +26,4 @@ public object ConnectionsRequestKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.router.RouterOuterClass.ConnectionsRequest.copy(block: qaul.rpc.router.ConnectionsRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.ConnectionsRequest =
   qaul.rpc.router.ConnectionsRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

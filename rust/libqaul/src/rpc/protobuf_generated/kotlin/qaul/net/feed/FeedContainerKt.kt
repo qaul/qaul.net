@@ -3,7 +3,7 @@
 
 package qaul.net.feed;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializefeedContainer")
 public inline fun feedContainer(block: qaul.net.feed.FeedContainerKt.Dsl.() -> kotlin.Unit): qaul.net.feed.FeedNet.FeedContainer =
   qaul.net.feed.FeedContainerKt.Dsl._create(qaul.net.feed.FeedNet.FeedContainer.newBuilder()).apply { block() }._build()
 public object FeedContainerKt {
@@ -76,3 +76,4 @@ public object FeedContainerKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.feed.FeedNet.FeedContainer.copy(block: qaul.net.feed.FeedContainerKt.Dsl.() -> kotlin.Unit): qaul.net.feed.FeedNet.FeedContainer =
   qaul.net.feed.FeedContainerKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

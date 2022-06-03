@@ -3,7 +3,7 @@
 
 package qaul.net.feed;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializefeedMessageContent")
 public inline fun feedMessageContent(block: qaul.net.feed.FeedMessageContentKt.Dsl.() -> kotlin.Unit): qaul.net.feed.FeedNet.FeedMessageContent =
   qaul.net.feed.FeedMessageContentKt.Dsl._create(qaul.net.feed.FeedNet.FeedMessageContent.newBuilder()).apply { block() }._build()
 public object FeedMessageContentKt {
@@ -101,3 +101,4 @@ public object FeedMessageContentKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.feed.FeedNet.FeedMessageContent.copy(block: qaul.net.feed.FeedMessageContentKt.Dsl.() -> kotlin.Unit): qaul.net.feed.FeedNet.FeedMessageContent =
   qaul.net.feed.FeedMessageContentKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

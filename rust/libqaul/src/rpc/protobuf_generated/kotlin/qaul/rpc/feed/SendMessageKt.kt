@@ -3,7 +3,7 @@
 
 package qaul.rpc.feed;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializesendMessage")
 public inline fun sendMessage(block: qaul.rpc.feed.SendMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.SendMessage =
   qaul.rpc.feed.SendMessageKt.Dsl._create(qaul.rpc.feed.FeedOuterClass.SendMessage.newBuilder()).apply { block() }._build()
 public object SendMessageKt {
@@ -43,3 +43,4 @@ public object SendMessageKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.feed.FeedOuterClass.SendMessage.copy(block: qaul.rpc.feed.SendMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.SendMessage =
   qaul.rpc.feed.SendMessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

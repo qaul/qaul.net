@@ -3,7 +3,7 @@
 
 package qaul.net.router_net_info;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializerouterInfoContainer")
 public inline fun routerInfoContainer(block: qaul.net.router_net_info.RouterInfoContainerKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer =
   qaul.net.router_net_info.RouterInfoContainerKt.Dsl._create(qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer.newBuilder()).apply { block() }._build()
 public object RouterInfoContainerKt {
@@ -76,3 +76,4 @@ public object RouterInfoContainerKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer.copy(block: qaul.net.router_net_info.RouterInfoContainerKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer =
   qaul.net.router_net_info.RouterInfoContainerKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

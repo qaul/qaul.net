@@ -3,7 +3,7 @@
 
 package qaul.net.router_net_info;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeroutingInfoEntry")
 public inline fun routingInfoEntry(block: qaul.net.router_net_info.RoutingInfoEntryKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry =
   qaul.net.router_net_info.RoutingInfoEntryKt.Dsl._create(qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry.newBuilder()).apply { block() }._build()
 public object RoutingInfoEntryKt {
@@ -126,3 +126,4 @@ public object RoutingInfoEntryKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry.copy(block: qaul.net.router_net_info.RoutingInfoEntryKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry =
   qaul.net.router_net_info.RoutingInfoEntryKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

@@ -3,7 +3,7 @@
 
 package qaul.net.router_net_info;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeroutingInfoTable")
 public inline fun routingInfoTable(block: qaul.net.router_net_info.RoutingInfoTableKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable =
   qaul.net.router_net_info.RoutingInfoTableKt.Dsl._create(qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable.newBuilder()).apply { block() }._build()
 public object RoutingInfoTableKt {
@@ -44,7 +44,8 @@ public object RoutingInfoTableKt {
     @kotlin.jvm.JvmName("addEntry")
     public fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry, EntryProxy>.add(value: qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry) {
       _builder.addEntry(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.net.router_net_info.RoutingInfoEntry entry = 1;</code>
      * @param value The entry to add.
      */
@@ -53,7 +54,8 @@ public object RoutingInfoTableKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry, EntryProxy>.plusAssign(value: qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry) {
       add(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.net.router_net_info.RoutingInfoEntry entry = 1;</code>
      * @param values The entry to add.
      */
@@ -61,7 +63,8 @@ public object RoutingInfoTableKt {
     @kotlin.jvm.JvmName("addAllEntry")
     public fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry, EntryProxy>.addAll(values: kotlin.collections.Iterable<qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry>) {
       _builder.addAllEntry(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.net.router_net_info.RoutingInfoEntry entry = 1;</code>
      * @param values The entry to add.
      */
@@ -70,7 +73,8 @@ public object RoutingInfoTableKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry, EntryProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry>) {
       addAll(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.net.router_net_info.RoutingInfoEntry entry = 1;</code>
      * @param index The index to set the value at.
      * @param value The entry to set.
@@ -79,15 +83,19 @@ public object RoutingInfoTableKt {
     @kotlin.jvm.JvmName("setEntry")
     public operator fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry, EntryProxy>.set(index: kotlin.Int, value: qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry) {
       _builder.setEntry(index, value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.net.router_net_info.RoutingInfoEntry entry = 1;</code>
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearEntry")
     public fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry, EntryProxy>.clear() {
       _builder.clearEntry()
-    }}
+    }
+
+  }
 }
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable.copy(block: qaul.net.router_net_info.RoutingInfoTableKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable =
   qaul.net.router_net_info.RoutingInfoTableKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

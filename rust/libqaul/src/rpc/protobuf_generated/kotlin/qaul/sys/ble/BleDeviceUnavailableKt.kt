@@ -3,7 +3,7 @@
 
 package qaul.sys.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializebleDeviceUnavailable")
 public inline fun bleDeviceUnavailable(block: qaul.sys.ble.BleDeviceUnavailableKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceUnavailable =
   qaul.sys.ble.BleDeviceUnavailableKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleDeviceUnavailable.newBuilder()).apply { block() }._build()
 public object BleDeviceUnavailableKt {
@@ -53,3 +53,4 @@ public object BleDeviceUnavailableKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.sys.ble.BleOuterClass.BleDeviceUnavailable.copy(block: qaul.sys.ble.BleDeviceUnavailableKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceUnavailable =
   qaul.sys.ble.BleDeviceUnavailableKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

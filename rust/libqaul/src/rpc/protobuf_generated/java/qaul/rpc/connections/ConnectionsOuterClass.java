@@ -444,6 +444,8 @@ public final class ConnectionsOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -1218,8 +1220,9 @@ public final class ConnectionsOuterClass {
         } else {
           if (messageCase_ == 1) {
             internetNodesRequestBuilder_.mergeFrom(value);
+          } else {
+            internetNodesRequestBuilder_.setMessage(value);
           }
-          internetNodesRequestBuilder_.setMessage(value);
         }
         messageCase_ = 1;
         return this;
@@ -1404,8 +1407,9 @@ public final class ConnectionsOuterClass {
         } else {
           if (messageCase_ == 2) {
             internetNodesListBuilder_.mergeFrom(value);
+          } else {
+            internetNodesListBuilder_.setMessage(value);
           }
-          internetNodesListBuilder_.setMessage(value);
         }
         messageCase_ = 2;
         return this;
@@ -1590,8 +1594,9 @@ public final class ConnectionsOuterClass {
         } else {
           if (messageCase_ == 3) {
             internetNodesAddBuilder_.mergeFrom(value);
+          } else {
+            internetNodesAddBuilder_.setMessage(value);
           }
-          internetNodesAddBuilder_.setMessage(value);
         }
         messageCase_ = 3;
         return this;
@@ -1776,8 +1781,9 @@ public final class ConnectionsOuterClass {
         } else {
           if (messageCase_ == 4) {
             internetNodesRemoveBuilder_.mergeFrom(value);
+          } else {
+            internetNodesRemoveBuilder_.setMessage(value);
           }
-          internetNodesRemoveBuilder_.setMessage(value);
         }
         messageCase_ = 4;
         return this;
@@ -1979,6 +1985,8 @@ public final class ConnectionsOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -2499,6 +2507,8 @@ public final class ConnectionsOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -3536,6 +3546,8 @@ public final class ConnectionsOuterClass {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);

@@ -3,7 +3,7 @@
 
 package qaul.sys.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializebleStartResult")
 public inline fun bleStartResult(block: qaul.sys.ble.BleStartResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartResult =
   qaul.sys.ble.BleStartResultKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleStartResult.newBuilder()).apply { block() }._build()
 public object BleStartResultKt {
@@ -101,3 +101,4 @@ public object BleStartResultKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.sys.ble.BleOuterClass.BleStartResult.copy(block: qaul.sys.ble.BleStartResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartResult =
   qaul.sys.ble.BleStartResultKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

@@ -3,7 +3,7 @@
 
 package qaul.rpc.connections;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeinternetNodesList")
 public inline fun internetNodesList(block: qaul.rpc.connections.InternetNodesListKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList =
   qaul.rpc.connections.InternetNodesListKt.Dsl._create(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.newBuilder()).apply { block() }._build()
 public object InternetNodesListKt {
@@ -83,7 +83,8 @@ public object InternetNodesListKt {
     @kotlin.jvm.JvmName("addNodes")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.add(value: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) {
       _builder.addNodes(value)
-    }/**
+    }
+    /**
      * <pre>
      * list of all node multiaddresses that
      * the internet module will try to connect to.
@@ -97,7 +98,8 @@ public object InternetNodesListKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.plusAssign(value: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) {
       add(value)
-    }/**
+    }
+    /**
      * <pre>
      * list of all node multiaddresses that
      * the internet module will try to connect to.
@@ -110,7 +112,8 @@ public object InternetNodesListKt {
     @kotlin.jvm.JvmName("addAllNodes")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry>) {
       _builder.addAllNodes(values)
-    }/**
+    }
+    /**
      * <pre>
      * list of all node multiaddresses that
      * the internet module will try to connect to.
@@ -124,7 +127,8 @@ public object InternetNodesListKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry>) {
       addAll(values)
-    }/**
+    }
+    /**
      * <pre>
      * list of all node multiaddresses that
      * the internet module will try to connect to.
@@ -138,7 +142,8 @@ public object InternetNodesListKt {
     @kotlin.jvm.JvmName("setNodes")
     public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.set(index: kotlin.Int, value: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) {
       _builder.setNodes(index, value)
-    }/**
+    }
+    /**
      * <pre>
      * list of all node multiaddresses that
      * the internet module will try to connect to.
@@ -150,8 +155,11 @@ public object InternetNodesListKt {
     @kotlin.jvm.JvmName("clearNodes")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.clear() {
       _builder.clearNodes()
-    }}
+    }
+
+  }
 }
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.copy(block: qaul.rpc.connections.InternetNodesListKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList =
   qaul.rpc.connections.InternetNodesListKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

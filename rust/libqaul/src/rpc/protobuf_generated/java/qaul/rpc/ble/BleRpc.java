@@ -314,6 +314,8 @@ public final class BleRpc {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -1241,8 +1243,9 @@ public final class BleRpc {
         } else {
           if (messageCase_ == 1) {
             infoRequestBuilder_.mergeFrom(value);
+          } else {
+            infoRequestBuilder_.setMessage(value);
           }
-          infoRequestBuilder_.setMessage(value);
         }
         messageCase_ = 1;
         return this;
@@ -1382,8 +1385,9 @@ public final class BleRpc {
         } else {
           if (messageCase_ == 2) {
             infoResponseBuilder_.mergeFrom(value);
+          } else {
+            infoResponseBuilder_.setMessage(value);
           }
-          infoResponseBuilder_.setMessage(value);
         }
         messageCase_ = 2;
         return this;
@@ -1523,8 +1527,9 @@ public final class BleRpc {
         } else {
           if (messageCase_ == 3) {
             startRequestBuilder_.mergeFrom(value);
+          } else {
+            startRequestBuilder_.setMessage(value);
           }
-          startRequestBuilder_.setMessage(value);
         }
         messageCase_ = 3;
         return this;
@@ -1664,8 +1669,9 @@ public final class BleRpc {
         } else {
           if (messageCase_ == 4) {
             stopRequestBuilder_.mergeFrom(value);
+          } else {
+            stopRequestBuilder_.setMessage(value);
           }
-          stopRequestBuilder_.setMessage(value);
         }
         messageCase_ = 4;
         return this;
@@ -1805,8 +1811,9 @@ public final class BleRpc {
         } else {
           if (messageCase_ == 5) {
             discoveredRequestBuilder_.mergeFrom(value);
+          } else {
+            discoveredRequestBuilder_.setMessage(value);
           }
-          discoveredRequestBuilder_.setMessage(value);
         }
         messageCase_ = 5;
         return this;
@@ -1946,8 +1953,9 @@ public final class BleRpc {
         } else {
           if (messageCase_ == 6) {
             discoveredResponseBuilder_.mergeFrom(value);
+          } else {
+            discoveredResponseBuilder_.setMessage(value);
           }
-          discoveredResponseBuilder_.setMessage(value);
         }
         messageCase_ = 6;
         return this;
@@ -2087,8 +2095,9 @@ public final class BleRpc {
         } else {
           if (messageCase_ == 7) {
             rightsRequestBuilder_.mergeFrom(value);
+          } else {
+            rightsRequestBuilder_.setMessage(value);
           }
-          rightsRequestBuilder_.setMessage(value);
         }
         messageCase_ = 7;
         return this;
@@ -2228,8 +2237,9 @@ public final class BleRpc {
         } else {
           if (messageCase_ == 8) {
             rightsResultBuilder_.mergeFrom(value);
+          } else {
+            rightsResultBuilder_.setMessage(value);
           }
-          rightsResultBuilder_.setMessage(value);
         }
         messageCase_ = 8;
         return this;
@@ -2411,6 +2421,8 @@ public final class BleRpc {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -2898,6 +2910,8 @@ public final class BleRpc {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -3644,6 +3658,8 @@ public final class BleRpc {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -4076,6 +4092,8 @@ public final class BleRpc {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -4506,6 +4524,8 @@ public final class BleRpc {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -4964,6 +4984,8 @@ public final class BleRpc {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -5541,6 +5563,8 @@ public final class BleRpc {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -5978,6 +6002,8 @@ public final class BleRpc {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);

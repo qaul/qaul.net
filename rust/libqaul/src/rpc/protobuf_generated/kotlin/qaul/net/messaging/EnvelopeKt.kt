@@ -3,7 +3,7 @@
 
 package qaul.net.messaging;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeenvelope")
 public inline fun envelope(block: qaul.net.messaging.EnvelopeKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Envelope =
   qaul.net.messaging.EnvelopeKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.Envelope.newBuilder()).apply { block() }._build()
 public object EnvelopeKt {
@@ -101,3 +101,4 @@ public object EnvelopeKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.net.messaging.MessagingOuterClass.Envelope.copy(block: qaul.net.messaging.EnvelopeKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Envelope =
   qaul.net.messaging.EnvelopeKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

@@ -3,7 +3,7 @@
 
 package qaul.rpc.users;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeuserRequest")
 public inline fun userRequest(block: qaul.rpc.users.UserRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.UserRequest =
   qaul.rpc.users.UserRequestKt.Dsl._create(qaul.rpc.users.UsersOuterClass.UserRequest.newBuilder()).apply { block() }._build()
 public object UserRequestKt {
@@ -26,3 +26,4 @@ public object UserRequestKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.users.UsersOuterClass.UserRequest.copy(block: qaul.rpc.users.UserRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.UserRequest =
   qaul.rpc.users.UserRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

@@ -3,7 +3,7 @@
 
 package qaul.sys.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializebleDirectReceived")
 public inline fun bleDirectReceived(block: qaul.sys.ble.BleDirectReceivedKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectReceived =
   qaul.sys.ble.BleDirectReceivedKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleDirectReceived.newBuilder()).apply { block() }._build()
 public object BleDirectReceivedKt {
@@ -76,3 +76,4 @@ public object BleDirectReceivedKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.sys.ble.BleOuterClass.BleDirectReceived.copy(block: qaul.sys.ble.BleDirectReceivedKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectReceived =
   qaul.sys.ble.BleDirectReceivedKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

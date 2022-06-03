@@ -3,7 +3,7 @@
 
 package qaul.sys.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializebleStopResult")
 public inline fun bleStopResult(block: qaul.sys.ble.BleStopResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStopResult =
   qaul.sys.ble.BleStopResultKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleStopResult.newBuilder()).apply { block() }._build()
 public object BleStopResultKt {
@@ -101,3 +101,4 @@ public object BleStopResultKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.sys.ble.BleOuterClass.BleStopResult.copy(block: qaul.sys.ble.BleStopResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStopResult =
   qaul.sys.ble.BleStopResultKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

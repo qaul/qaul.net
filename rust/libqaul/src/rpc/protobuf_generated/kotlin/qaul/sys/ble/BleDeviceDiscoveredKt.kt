@@ -3,7 +3,7 @@
 
 package qaul.sys.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializebleDeviceDiscovered")
 public inline fun bleDeviceDiscovered(block: qaul.sys.ble.BleDeviceDiscoveredKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceDiscovered =
   qaul.sys.ble.BleDeviceDiscoveredKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleDeviceDiscovered.newBuilder()).apply { block() }._build()
 public object BleDeviceDiscoveredKt {
@@ -76,3 +76,4 @@ public object BleDeviceDiscoveredKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.sys.ble.BleOuterClass.BleDeviceDiscovered.copy(block: qaul.sys.ble.BleDeviceDiscoveredKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceDiscovered =
   qaul.sys.ble.BleDeviceDiscoveredKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

@@ -3,7 +3,7 @@
 
 package qaul.rpc.ble;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializestartRequest")
 public inline fun startRequest(block: qaul.rpc.ble.StartRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.StartRequest =
   qaul.rpc.ble.StartRequestKt.Dsl._create(qaul.rpc.ble.BleRpc.StartRequest.newBuilder()).apply { block() }._build()
 public object StartRequestKt {
@@ -26,3 +26,4 @@ public object StartRequestKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.ble.BleRpc.StartRequest.copy(block: qaul.rpc.ble.StartRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.StartRequest =
   qaul.rpc.ble.StartRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

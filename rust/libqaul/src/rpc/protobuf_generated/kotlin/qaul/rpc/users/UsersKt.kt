@@ -3,7 +3,7 @@
 
 package qaul.rpc.users;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeusers")
 public inline fun users(block: qaul.rpc.users.UsersKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.Users =
   qaul.rpc.users.UsersKt.Dsl._create(qaul.rpc.users.UsersOuterClass.Users.newBuilder()).apply { block() }._build()
 public object UsersKt {
@@ -105,3 +105,13 @@ public object UsersKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.users.UsersOuterClass.Users.copy(block: qaul.rpc.users.UsersKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.Users =
   qaul.rpc.users.UsersKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.rpc.users.UsersOuterClass.UsersOrBuilder.userRequestOrNull: qaul.rpc.users.UsersOuterClass.UserRequest?
+  get() = if (hasUserRequest()) getUserRequest() else null
+
+val qaul.rpc.users.UsersOuterClass.UsersOrBuilder.userListOrNull: qaul.rpc.users.UsersOuterClass.UserList?
+  get() = if (hasUserList()) getUserList() else null
+
+val qaul.rpc.users.UsersOuterClass.UsersOrBuilder.userUpdateOrNull: qaul.rpc.users.UsersOuterClass.UserEntry?
+  get() = if (hasUserUpdate()) getUserUpdate() else null
+

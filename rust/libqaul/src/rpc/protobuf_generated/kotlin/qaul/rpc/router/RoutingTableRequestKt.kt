@@ -3,7 +3,7 @@
 
 package qaul.rpc.router;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeroutingTableRequest")
 public inline fun routingTableRequest(block: qaul.rpc.router.RoutingTableRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.RoutingTableRequest =
   qaul.rpc.router.RoutingTableRequestKt.Dsl._create(qaul.rpc.router.RouterOuterClass.RoutingTableRequest.newBuilder()).apply { block() }._build()
 public object RoutingTableRequestKt {
@@ -26,3 +26,4 @@ public object RoutingTableRequestKt {
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.router.RouterOuterClass.RoutingTableRequest.copy(block: qaul.rpc.router.RoutingTableRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.RoutingTableRequest =
   qaul.rpc.router.RoutingTableRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+

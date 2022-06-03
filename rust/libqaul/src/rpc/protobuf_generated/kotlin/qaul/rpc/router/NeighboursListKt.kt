@@ -3,7 +3,7 @@
 
 package qaul.rpc.router;
 
-@kotlin.jvm.JvmSynthetic
+@kotlin.jvm.JvmName("-initializeneighboursList")
 public inline fun neighboursList(block: qaul.rpc.router.NeighboursListKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.NeighboursList =
   qaul.rpc.router.NeighboursListKt.Dsl._create(qaul.rpc.router.RouterOuterClass.NeighboursList.newBuilder()).apply { block() }._build()
 public object NeighboursListKt {
@@ -44,7 +44,8 @@ public object NeighboursListKt {
     @kotlin.jvm.JvmName("addLan")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, LanProxy>.add(value: qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
       _builder.addLan(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
      * @param value The lan to add.
      */
@@ -53,7 +54,8 @@ public object NeighboursListKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, LanProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
       add(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
      * @param values The lan to add.
      */
@@ -61,7 +63,8 @@ public object NeighboursListKt {
     @kotlin.jvm.JvmName("addAllLan")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, LanProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.NeighboursEntry>) {
       _builder.addAllLan(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
      * @param values The lan to add.
      */
@@ -70,7 +73,8 @@ public object NeighboursListKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, LanProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.NeighboursEntry>) {
       addAll(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
      * @param index The index to set the value at.
      * @param value The lan to set.
@@ -79,7 +83,8 @@ public object NeighboursListKt {
     @kotlin.jvm.JvmName("setLan")
     public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, LanProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
       _builder.setLan(index, value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
      */
     @kotlin.jvm.JvmSynthetic
@@ -87,6 +92,8 @@ public object NeighboursListKt {
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, LanProxy>.clear() {
       _builder.clearLan()
     }
+
+
     /**
      * An uninstantiable, behaviorless type to represent the field in
      * generics.
@@ -109,7 +116,8 @@ public object NeighboursListKt {
     @kotlin.jvm.JvmName("addInternet")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, InternetProxy>.add(value: qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
       _builder.addInternet(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
      * @param value The internet to add.
      */
@@ -118,7 +126,8 @@ public object NeighboursListKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, InternetProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
       add(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
      * @param values The internet to add.
      */
@@ -126,7 +135,8 @@ public object NeighboursListKt {
     @kotlin.jvm.JvmName("addAllInternet")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, InternetProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.NeighboursEntry>) {
       _builder.addAllInternet(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
      * @param values The internet to add.
      */
@@ -135,7 +145,8 @@ public object NeighboursListKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, InternetProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.NeighboursEntry>) {
       addAll(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
      * @param index The index to set the value at.
      * @param value The internet to set.
@@ -144,7 +155,8 @@ public object NeighboursListKt {
     @kotlin.jvm.JvmName("setInternet")
     public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, InternetProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
       _builder.setInternet(index, value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
      */
     @kotlin.jvm.JvmSynthetic
@@ -152,6 +164,8 @@ public object NeighboursListKt {
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, InternetProxy>.clear() {
       _builder.clearInternet()
     }
+
+
     /**
      * An uninstantiable, behaviorless type to represent the field in
      * generics.
@@ -174,7 +188,8 @@ public object NeighboursListKt {
     @kotlin.jvm.JvmName("addBle")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>.add(value: qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
       _builder.addBle(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
      * @param value The ble to add.
      */
@@ -183,7 +198,8 @@ public object NeighboursListKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
       add(value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
      * @param values The ble to add.
      */
@@ -191,7 +207,8 @@ public object NeighboursListKt {
     @kotlin.jvm.JvmName("addAllBle")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.NeighboursEntry>) {
       _builder.addAllBle(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
      * @param values The ble to add.
      */
@@ -200,7 +217,8 @@ public object NeighboursListKt {
     @Suppress("NOTHING_TO_INLINE")
     public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.NeighboursEntry>) {
       addAll(values)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
      * @param index The index to set the value at.
      * @param value The ble to set.
@@ -209,15 +227,19 @@ public object NeighboursListKt {
     @kotlin.jvm.JvmName("setBle")
     public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.NeighboursEntry) {
       _builder.setBle(index, value)
-    }/**
+    }
+    /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearBle")
     public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.NeighboursEntry, BleProxy>.clear() {
       _builder.clearBle()
-    }}
+    }
+
+  }
 }
 @kotlin.jvm.JvmSynthetic
 public inline fun qaul.rpc.router.RouterOuterClass.NeighboursList.copy(block: qaul.rpc.router.NeighboursListKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.NeighboursList =
   qaul.rpc.router.NeighboursListKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
