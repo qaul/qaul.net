@@ -14,13 +14,12 @@ message Debug {
         // libqaul panics immediatly
         Panic panic = 3;
 
-        //log enable
+        // enable/disable logging to file
         LogToFile log_to_file = 4;
 
-        //Storage Path Request
+        // Storage Path Request
         StoragePathRequest storage_path_request = 5;
-
-        //Storage Path Response
+        // Storage Path Response
         StoragePathResponse storage_path_response = 6;
 
     }

@@ -19,13 +19,13 @@ pub mod debug {
         /// libqaul panics immediatly
         #[prost(message, tag="3")]
         Panic(super::Panic),
-        ///log enable
+        /// enable/disable logging to file
         #[prost(message, tag="4")]
         LogToFile(super::LogToFile),
-        ///Storage Path Request
+        /// Storage Path Request
         #[prost(message, tag="5")]
         StoragePathRequest(super::StoragePathRequest),
-        ///Storage Path Response
+        /// Storage Path Response
         #[prost(message, tag="6")]
         StoragePathResponse(super::StoragePathResponse),
     }

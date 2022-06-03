@@ -101,8 +101,10 @@ pub async fn start(storage_path: String) -> () {
     // This will initialize configuration & data base
     storage::Storage::init(storage_path);
 
-    //////////////////////////////////logger init////////////////////////////////
-    //prepare logger path
+    // --- initialize logger ---
+    // prepare logger path
+    // the path of the log file follows the following naming convention:
+    // errror_234324232.log
     let logger_path: String;
     if storage_p.len() == 0{
         logger_path = "./logs/".to_string();
@@ -112,14 +114,13 @@ pub async fn start(storage_path: String) -> () {
     let cur_time_as_ms = Timestamp::get_timestamp();
     let logger_file = logger_path.clone() + "error_" + &cur_time_as_ms.to_string() + ".log";
 
-    //create log directory
+    // create log directory
     std::fs::create_dir_all(logger_path.clone()).unwrap();
 
-    //maintain log files
+    // maintain log files
     let paths = std::fs::read_dir(logger_path.clone()).unwrap();
+    // --- logger init-end ---
 
-    //errror_234324232.log
-    //////////////////////////////////logger init-end////////////////////////////////
     let mut logfiles: BTreeMap<i64, String> = BTreeMap::new();
     let mut logfile_times: Vec<i64> = vec![];
     for path in paths{
@@ -141,7 +142,7 @@ pub async fn start(storage_path: String) -> () {
         }    
     }
 
-    //find rust env var
+    // find rust env var
     let mut env_log_level = String::from("error");
     for (key, value) in env::vars() {
         if key == "RUST_LOG"{

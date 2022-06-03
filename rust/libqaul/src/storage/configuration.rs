@@ -103,11 +103,16 @@ impl Default for UserAccount {
     }
 }
 
-
+/// Debugging Configuration Options
+/// 
+/// The following options can be configured:
+/// 
+/// * logging to file
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct DebugOption {
     pub log: bool,
 }
+
 impl Default for DebugOption {
     fn default() -> Self {
         DebugOption {
@@ -116,7 +121,9 @@ impl Default for DebugOption {
     }
 }
 
-
+/// Configuration Structure of libqaul
+/// 
+/// This structure contains the entire configuration of libqaul.
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Configuration {
     pub node: Node,
@@ -166,7 +173,7 @@ impl Configuration {
         // Add configuration options from environment variables (with a prefix of QAUL)
         // e.g. `QAUL_DEBUG=1 ./target/qaul` sets the `debug` key
 
-        // match e.merge(Environment::with_prefix("QAUL")) {CONFIG
+        // match e.merge(Environment::with_prefix("QAUL")) {
         //     Ok(env) => settings = env.clone(),
         //     Err(e) => error!("Environment {:?}", e),
         // }
@@ -181,21 +188,23 @@ impl Configuration {
         config
     }
 
-    /// lend configuration for writingCONFIG
+    /// lend configuration for writing
     pub fn get_mut<'a>() -> RwLockWriteGuard<'a, Configuration> {
         let config_mutable = CONFIG.get().write().unwrap();
         config_mutable
     }
 
-    pub fn enable_debug_log(enable: bool){
+    /// Enable/disable logging to file for debugging
+    pub fn enable_debug_log(enable: bool) {
         let mut config_mutable = CONFIG.get().write().unwrap();
         config_mutable.debug.log = enable; 
     }
-    pub fn get_debug_log()->bool{
+
+    /// Check if logging to file for debugging is enabled
+    pub fn get_debug_log() -> bool {
         let config_mutable = CONFIG.get().read().unwrap();
         config_mutable.debug.log
     }
-
 
     /// Returns true/false whether this node has been initialized,
     /// or needs to be created for the first time.
