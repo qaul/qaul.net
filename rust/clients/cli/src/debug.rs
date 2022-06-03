@@ -35,14 +35,15 @@ impl Debug {
             cmd if cmd.starts_with("panic") => {
                 Self::panic();
             },
-            // let libqaul panic
+            // enable libqaul logging to file
             cmd if cmd.starts_with("log enable") => {
                 Self::debug_log_enable_send();
             },
-            // let libqaul panic
+            // disable libqaul logging to file
             cmd if cmd.starts_with("log disable") => {
                 Self::debug_log_disable_send();
             },
+            // request storage path location
             cmd if cmd.starts_with("path") => {
                 Self::debug_path_send();
             },            

@@ -60,3 +60,6 @@ The following commands are available:
     * This command will probably always return '0', as the messages are checked many times per second by this client.
   * `debug panic` - sends a debug message to libqaul that let's libqaul panic. This function is for testing the crash logger on flutter.
   * `debug heartbeat` - sends a heartbeat request message to libqaul, which is answered with a returning heartbeat message.
+  * `debug log enable` - enable libqaul logging to file.
+  * `debug log disable` - disable libqaul logging to file.
+  * `debug path` - request the storage path from libqaul. This returns a path string with the location where all qaul related data is stored (configuration, databases, logs).
