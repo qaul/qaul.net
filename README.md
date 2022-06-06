@@ -2,6 +2,8 @@
 
 ## Internet Independent Wireless Mesh Communication App
 
+[![CircleCI](https://circleci.com/gh/qaul/qaul.net/tree/main.svg?style=shield)](https://circleci.com/gh/qaul/qaul.net/tree/main)
+
 ![http://qaul.net/](docs/qaul-net.png)
 
 [qaul.net](https://qaul.net)
