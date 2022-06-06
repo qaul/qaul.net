@@ -127,7 +127,13 @@ executors:
             - image: cirrusci/flutter:3.0.1
         working_directory: ~/qaul-libp2p/qaul_ui
 jobs:
-    android-beta-deploy:
+    analyze-flutter:
+        executor: flutter
+        steps:
+            - checkout-project
+            - install-flutter-deps
+            - run: flutter analyze
+    build-and-deploy-flutter-android:
         environment:
             _JAVA_OPTIONS: -Xmx2048m
             FASTLANE_LANE: upload_beta_playstore
@@ -173,6 +179,168 @@ jobs:
                     - qaul_ui/build/app/outputs/bundle/release/*.aab
                 root: ~/qaul-libp2p
         working_directory: ~/qaul-libp2p/qaul_ui/android
+    build-and-deploy-flutter-ios:
+        environment:
+            FASTLANE_LANE: upload_testflight
+            FL_OUTPUT_DIR: output
+            FLUTTER_VERSION: 3.0.1
+            REPO_URL: https://github.com/qaul/qaul.net
+        macos:
+            xcode: 13.0.0
+        shell: /bin/bash --login -o pipefail
+        steps:
+            - checkout-project
+            - run:
+                command: brew install gh
+                name: Install Github CLI
+            - run:
+                command: |
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    gh release download "$LATEST_TAG" --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
+                name: Download Libqaul *.a File from latest Github Release
+            - install-flutter:
+                version: $FLUTTER_VERSION
+            - install-flutter-deps
+            - install-bundler-deps
+            - install-cocoapods-deps
+            - run:
+                command: flutter build ios --release --no-codesign --config-only
+                name: Build Flutter iOS Configuration
+            - run:
+                command: bundle exec fastlane $FASTLANE_LANE
+                name: fastlane
+            - store_artifacts:
+                destination: output
+                path: output
+            - persist_to_workspace:
+                paths:
+                    - qaul_ui/build/ios/ipa/*.ipa
+                    - qaul_ui/build/ios/archive/*.xcarchive
+                root: ~/qaul-libp2p
+        working_directory: ~/qaul-libp2p/qaul_ui/ios
+    build-flutter-linux:
+        docker:
+            - image: snapcore/snapcraft:edge
+        environment:
+            FLUTTER_VERSION: 3.0.1
+            REPO_URL: https://github.com/qaul/qaul.net
+        steps:
+            - checkout-project
+            - run:
+                command: apt-get update && apt-get install -y curl apt-transport-https xz-utils
+                name: Install core package dependencies
+            - run:
+                command: |
+                    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+                    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+                    sudo apt update
+                    sudo apt install gh -y
+                name: Install Github CLI
+            - run:
+                command: |
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    gh release download "$LATEST_TAG" --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
+                name: Download Libqaul *.so File from latest Github Release
+            - install-flutter:
+                version: $FLUTTER_VERSION
+            - install-flutter-deps
+            - run:
+                command: |
+                    SNAP_PATH=$(cd installers/linux && bash snapbuild | tail -n1 )
+                    echo "Resulting snap file can be found at: $SNAP_PATH"
+                name: Build Flutter Application for Linux
+            - persist_to_workspace:
+                paths:
+                    - qaul_ui/installers/linux/*.snap
+                root: ~/qaul-libp2p
+        working_directory: ~/qaul-libp2p/qaul_ui
+    build-flutter-macos:
+        environment:
+            FLUTTER_VERSION: 3.0.1
+            REPO_URL: https://github.com/qaul/qaul.net
+        macos:
+            xcode: 13.0.0
+        shell: /bin/bash --login -o pipefail
+        steps:
+            - checkout-project
+            - run:
+                command: brew install gh
+                name: Install Github CLI
+            - run:
+                command: |
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    gh release download "$LATEST_TAG" --pattern "*.dylib" --repo "$REPO_URL" --dir macos
+                name: Download Libqaul *.dylib File from latest Github Release
+            - run:
+                command: |
+                    npm install -g appdmg
+                    appdmg --version || npx appdmg --version
+                name: Install node-appdmg
+            - install-flutter:
+                version: $FLUTTER_VERSION
+            - install-flutter-deps
+            - run:
+                command: |
+                    flutter config --enable-macos-desktop
+                    flutter build macos
+
+                    ls build/macos/Build/Products/Release
+                name: Build MacOS Application
+            - run:
+                command: |
+                    cd installers/macos
+                    appdmg ./config.json ./qaul.dmg
+                name: Build *.dmg File
+            - persist_to_workspace:
+                paths:
+                    - qaul_ui/installers/macos/qaul.dmg
+                root: ~/qaul-libp2p
+        working_directory: ~/qaul-libp2p/qaul_ui
+    build-flutter-windows:
+        environment:
+            FLUTTER_VERSION: 3.0.1
+            REPO_URL: https://github.com/qaul/qaul.net
+        executor:
+            name: win/server-2022
+            shell: bash.exe
+            size: medium
+        steps:
+            - checkout-project
+            - attach_workspace:
+                at: ~/qaul-libp2p
+            - run:
+                command: choco install innosetup -y
+                name: Install InnoSetup
+            - run:
+                command: choco install gh -y
+                name: Install Github CLI
+            - run:
+                command: |
+                    echo "Using repo: $REPO_URL"
+
+                    export PATH="/c/Program Files/Github CLI:${PATH}"
+
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | /usr/bin/sort --reverse --version-sort | head -n 1)
+                    echo "Found latest tag: $LATEST_TAG"
+
+                    gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/debug
+                name: Download Libqaul *.dll File from latest Github Release
+            - install-flutter:
+                version: $FLUTTER_VERSION
+            - run:
+                command: |
+                    export PATH="${HOME}/development/flutter/bin:${PATH}"
+                    flutter config --enable-windows-desktop
+                    flutter build windows
+                name: Build Flutter Application for Windows
+            - run:
+                command: cd bin && bash build_windows_installer
+                name: Run iscc
+            - persist_to_workspace:
+                paths:
+                    - qaul_ui\installers\windows\qaul.exe
+                root: ~/qaul-libp2p
+        working_directory: ~/qaul-libp2p/qaul_ui
     build-libqaul-android:
         environment:
             ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/22.1.7171670
@@ -320,135 +488,6 @@ jobs:
                     - rust/target/debug/libqaul.dll
                 root: ~/qaul-libp2p
         working_directory: ~/qaul-libp2p
-    flutter-analyze:
-        executor: flutter
-        steps:
-            - checkout-project
-            - install-flutter-deps
-            - run: flutter analyze
-    flutter-test:
-        executor: flutter
-        steps:
-            - checkout-project
-            - install-flutter-deps
-            - run: flutter test
-    ios-beta-deploy:
-        environment:
-            FASTLANE_LANE: upload_testflight
-            FL_OUTPUT_DIR: output
-            FLUTTER_VERSION: 3.0.1
-            REPO_URL: https://github.com/qaul/qaul.net
-        macos:
-            xcode: 13.0.0
-        shell: /bin/bash --login -o pipefail
-        steps:
-            - checkout-project
-            - run:
-                command: brew install gh
-                name: Install Github CLI
-            - run:
-                command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
-                name: Download Libqaul *.a File from latest Github Release
-            - install-flutter:
-                version: $FLUTTER_VERSION
-            - install-flutter-deps
-            - install-bundler-deps
-            - install-cocoapods-deps
-            - run:
-                command: flutter build ios --release --no-codesign --config-only
-                name: Build Flutter iOS Configuration
-            - run:
-                command: bundle exec fastlane $FASTLANE_LANE
-                name: fastlane
-            - store_artifacts:
-                destination: output
-                path: output
-            - persist_to_workspace:
-                paths:
-                    - qaul_ui/build/ios/ipa/*.ipa
-                    - qaul_ui/build/ios/archive/*.xcarchive
-                root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p/qaul_ui/ios
-    linux-flutter-build:
-        docker:
-            - image: snapcore/snapcraft:edge
-        environment:
-            FLUTTER_VERSION: 3.0.1
-            REPO_URL: https://github.com/qaul/qaul.net
-        steps:
-            - checkout-project
-            - run:
-                command: apt-get update && apt-get install -y curl apt-transport-https xz-utils
-                name: Install core package dependencies
-            - run:
-                command: |
-                    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-                    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-                    sudo apt update
-                    sudo apt install gh -y
-                name: Install Github CLI
-            - run:
-                command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
-                name: Download Libqaul *.so File from latest Github Release
-            - install-flutter:
-                version: $FLUTTER_VERSION
-            - install-flutter-deps
-            - run:
-                command: |
-                    SNAP_PATH=$(cd installers/linux && bash snapbuild | tail -n1 )
-                    echo "Resulting snap file can be found at: $SNAP_PATH"
-                name: Build Flutter Application for Linux
-            - persist_to_workspace:
-                paths:
-                    - qaul_ui/installers/linux/*.snap
-                root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p/qaul_ui
-    macos-flutter-build:
-        environment:
-            FLUTTER_VERSION: 3.0.1
-            REPO_URL: https://github.com/qaul/qaul.net
-        macos:
-            xcode: 13.0.0
-        shell: /bin/bash --login -o pipefail
-        steps:
-            - checkout-project
-            - run:
-                command: brew install gh
-                name: Install Github CLI
-            - run:
-                command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "*.dylib" --repo "$REPO_URL" --dir macos
-                name: Download Libqaul *.dylib File from latest Github Release
-            - run:
-                command: |
-                    npm install -g appdmg
-                    appdmg --version || npx appdmg --version
-                name: Install node-appdmg
-            - install-flutter:
-                version: $FLUTTER_VERSION
-            - install-flutter-deps
-            - run:
-                command: |
-                    flutter config --enable-macos-desktop
-                    flutter build macos
-
-                    ls build/macos/Build/Products/Release
-                name: Build MacOS Application
-            - run:
-                command: |
-                    cd installers/macos
-                    appdmg ./config.json ./qaul.dmg
-                name: Build *.dmg File
-            - persist_to_workspace:
-                paths:
-                    - qaul_ui/installers/macos/qaul.dmg
-                root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p/qaul_ui
     publish-flutter-github-release:
         docker:
             - image: cimg/base:2022.05
@@ -564,6 +603,12 @@ jobs:
                       "${TAG}" artifacts/
                 name: Publish Release on GitHub
         working_directory: ~/qaul-libp2p
+    test-flutter:
+        executor: flutter
+        steps:
+            - checkout-project
+            - install-flutter-deps
+            - run: flutter test
     verify-version-flutter:
         docker:
             - image: cimg/base:2022.05
@@ -600,56 +645,11 @@ jobs:
                     fi
                 name: Verify that Git tag matches Rust version
         working_directory: ~/qaul-libp2p
-    windows-flutter-build:
-        environment:
-            FLUTTER_VERSION: 3.0.1
-            REPO_URL: https://github.com/qaul/qaul.net
-        executor:
-            name: win/server-2022
-            shell: bash.exe
-            size: medium
-        steps:
-            - checkout-project
-            - attach_workspace:
-                at: ~/qaul-libp2p
-            - run:
-                command: choco install innosetup -y
-                name: Install InnoSetup
-            - run:
-                command: choco install gh -y
-                name: Install Github CLI
-            - run:
-                command: |
-                    echo "Using repo: $REPO_URL"
-
-                    export PATH="/c/Program Files/Github CLI:${PATH}"
-
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | /usr/bin/sort --reverse --version-sort | head -n 1)
-                    echo "Found latest tag: $LATEST_TAG"
-
-                    gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/debug
-                name: Download Libqaul *.dll File from latest Github Release
-            - install-flutter:
-                version: $FLUTTER_VERSION
-            - run:
-                command: |
-                    export PATH="${HOME}/development/flutter/bin:${PATH}"
-                    flutter config --enable-windows-desktop
-                    flutter build windows
-                name: Build Flutter Application for Windows
-            - run:
-                command: cd bin && bash build_windows_installer
-                name: Run iscc
-            - persist_to_workspace:
-                paths:
-                    - qaul_ui\installers\windows\qaul.exe
-                root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p/qaul_ui
 orbs:
     win: circleci/windows@4.1
 version: 2.1
 workflows:
-    flutter-build-and-deploy:
+    build-and-deploy-flutter:
         jobs:
             - verify-version-flutter:
                 filters:
@@ -657,7 +657,7 @@ workflows:
                         ignore: /.*/
                     tags:
                         only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
-            - flutter-test:
+            - test-flutter:
                 filters:
                     branches:
                         ignore: /.*/
@@ -665,7 +665,7 @@ workflows:
                         only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
                 requires:
                     - verify-version-flutter
-            - flutter-analyze:
+            - analyze-flutter:
                 filters:
                     branches:
                         ignore: /.*/
@@ -673,51 +673,51 @@ workflows:
                         only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
                 requires:
                     - verify-version-flutter
-            - android-beta-deploy:
+            - build-and-deploy-flutter-android:
                 filters:
                     branches:
                         ignore: /.*/
                     tags:
                         only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
                 requires:
-                    - flutter-test
-                    - flutter-analyze
-            - ios-beta-deploy:
+                    - test-flutter
+                    - analyze-flutter
+            - build-and-deploy-flutter-ios:
                 filters:
                     branches:
                         ignore: /.*/
                     tags:
                         only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
                 requires:
-                    - flutter-test
-                    - flutter-analyze
-            - macos-flutter-build:
+                    - test-flutter
+                    - analyze-flutter
+            - build-flutter-macos:
                 filters:
                     branches:
                         ignore: /.*/
                     tags:
                         only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
                 requires:
-                    - flutter-test
-                    - flutter-analyze
-            - windows-flutter-build:
+                    - test-flutter
+                    - analyze-flutter
+            - build-flutter-windows:
                 filters:
                     branches:
                         ignore: /.*/
                     tags:
                         only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
                 requires:
-                    - flutter-test
-                    - flutter-analyze
-            - linux-flutter-build:
+                    - test-flutter
+                    - analyze-flutter
+            - build-flutter-linux:
                 filters:
                     branches:
                         ignore: /.*/
                     tags:
                         only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
                 requires:
-                    - flutter-test
-                    - flutter-analyze
+                    - test-flutter
+                    - analyze-flutter
             - publish-flutter-github-release:
                 filters:
                     branches:
@@ -725,12 +725,12 @@ workflows:
                     tags:
                         only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
                 requires:
-                    - android-beta-deploy
-                    - ios-beta-deploy
-                    - macos-flutter-build
-                    - windows-flutter-build
-                    - linux-flutter-build
-    rust-build-and-deploy:
+                    - build-and-deploy-flutter-android
+                    - build-and-deploy-flutter-ios
+                    - build-flutter-macos
+                    - build-flutter-windows
+                    - build-flutter-linux
+    build-and-deploy-rust:
         jobs:
             - verify-version-rust:
                 filters:
