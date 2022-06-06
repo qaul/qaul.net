@@ -1,0 +1,13 @@
+description: "Install Pods dependencies"
+steps:
+  - restore_cache:
+      name: Restore CocoaPods cache
+      key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
+  - run:
+      name: Install CocoaPods
+      command: pod install
+  - save_cache:
+      name: Save CocoaPods cache
+      key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
+      paths:
+        - ./Pods

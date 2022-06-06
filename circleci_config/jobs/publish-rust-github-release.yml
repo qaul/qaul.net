@@ -1,0 +1,55 @@
+working_directory: ~/qaul-libp2p
+docker:
+  - image: cimg/rust:1.60.0
+environment:
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+steps:
+  - checkout-project
+  - attach_workspace:
+      at: ~/qaul-libp2p
+  - run:
+      name: Copy binaries to ./artifacts
+      command: |
+        mkdir artifacts
+        # Linux
+        cp rust/target/release/liblibqaul.so ./artifacts/
+        cp rust/target/release/qaul-cli ./artifacts/
+        cp rust/target/release/qauld ./artifacts/
+        # Android
+        cp -a android/blemodule/build/outputs/aar/. ./artifacts/
+        cp -a android/libqaul/build/outputs/aar/. ./artifacts/
+        # iOS
+        cp rust/target/debug/liblibqaul.dylib ./artifacts/
+        # MacOS
+        cp rust/target/universal/release/liblibqaul.a ./artifacts/
+        # Windows
+        cp rust/target/debug/libqaul.dll ./artifacts/
+  - run:
+      name: Install ghr
+      command: |
+        GHR_VERSION=0.14.0
+        GHR_URL=https://github.com/tcnksm/ghr/releases/download/v${GHR_VERSION}/ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+        wget "$GHR_URL"
+        tar xzf ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+        rm -r ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+        echo "export PATH=ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
+  - run:
+      name: Publish Release on GitHub
+      command: |
+        VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
+        TAG="v${VERSION}-rust"
+        DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
+
+        echo "Version Found: $VERSION"
+        echo "Tag built:     $TAG"
+        echo "Description:\n$DESCRIPTION"
+        echo ""
+
+        ghr -t "${GITHUB_TOKEN}" \
+          -u "${CIRCLE_PROJECT_USERNAME}" \
+          -r "${CIRCLE_PROJECT_REPONAME}" \
+          -c "${CIRCLE_SHA1}" \
+          -n "Rust - v${VERSION}" \
+          -b "${DESCRIPTION}" \
+          -delete \
+          "${TAG}" artifacts/

@@ -1,0 +1,10 @@
+description: "Install Flutter SDK & add bin folder to BASH_ENV"
+parameters:
+  version:
+    type: string
+steps:
+  - run:
+      name: "Install Flutter"
+      command: |
+        FL_PATH=$(bash <(curl -s https://raw.githubusercontent.com/brenodt/flutter_utilities/main/bin/flinstall) << parameters.version >>)
+        echo "export PATH=${FL_PATH}:${PATH}" >> $BASH_ENV

@@ -1,0 +1,35 @@
+docker:
+  - image: snapcore/snapcraft:edge
+working_directory: ~/qaul-libp2p/qaul_ui
+environment:
+  FLUTTER_VERSION: "3.0.1"
+  REPO_URL: "https://github.com/qaul/qaul.net"
+steps:
+  - checkout-project
+  - run:
+      name: Install core package dependencies
+      command: apt-get update && apt-get install -y curl apt-transport-https xz-utils
+  - run:
+      name: Install Github CLI
+      command: |
+        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+        sudo apt update
+        sudo apt install gh -y
+  - run:
+      name: Download Libqaul *.so File from latest Github Release
+      command: |
+        LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+        gh release download "$LATEST_TAG" --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
+  - install-flutter:
+      version: "$FLUTTER_VERSION"
+  - install-flutter-deps
+  - run:
+      name: Build Flutter Application for Linux
+      command: |
+        SNAP_PATH=$(cd installers/linux && bash snapbuild | tail -n1 )
+        echo "Resulting snap file can be found at: $SNAP_PATH"
+  - persist_to_workspace:
+      root: ~/qaul-libp2p
+      paths:
+        - qaul_ui/installers/linux/*.snap

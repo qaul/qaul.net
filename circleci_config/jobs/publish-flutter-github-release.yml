@@ -1,0 +1,58 @@
+working_directory: ~/qaul-libp2p/qaul_ui
+docker:
+  - image: cimg/base:2022.05
+steps:
+  - checkout-project
+  - attach_workspace:
+      at: ~/qaul-libp2p
+  - run:
+      name: Copy executables to ./artifacts
+      command: |
+        mkdir artifacts
+        # Android
+        cp build/app/outputs/bundle/release/*.aab ./artifacts/
+        # iOS
+        cp build/ios/ipa/*.ipa ./artifacts/
+        cp build/ios/archive/*.xcarchive ./artifacts/
+        # MacOS
+        cp installers/macos/qaul.dmg ./artifacts/
+        # Windows
+        cp installers/windows/qaul.exe ./artifacts/
+        # Linux
+        cp installers/linux/*.snap ./artifacts/
+  - run:
+      name: Install ghr
+      command: |
+        GHR_VERSION=0.14.0
+        GHR_URL=https://github.com/tcnksm/ghr/releases/download/v${GHR_VERSION}/ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+        wget "$GHR_URL"
+        tar xzf ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+        rm -r ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+        echo "export PATH=ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
+  - run:
+      name: Publish Release on GitHub
+      command: |
+        VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2}')
+        TAG="v${VERSION}-flutter"
+
+        SNAP_FILE=$(find artifacts -maxdepth 1 -name '*.snap' -type f -exec basename {} \; | sed 's/\.snap//')
+        AAB_FILE=$(find artifacts -maxdepth 1 -name '*.aab' -type f -exec basename {} \; | cut -f 1 -d '.')
+        IPA_FILE=$(find artifacts -maxdepth 1 -name '*.ipa' -type f -exec basename {} \; | cut -f 1 -d '.')
+        XCA_FILE=$(find artifacts -maxdepth 1 -name '*.xcarchive' -type f -exec basename {} \; | cut -f 1 -d '.')
+
+        DESCRIPTION=$(cat ../docs/flutter-release-template.md | sed "s/TAGNAME/${TAG}/g" | sed "s/SNAPVERSION/${SNAP_FILE}/g" | sed "s/ANDROIDVERSION/${AAB_FILE}/g" | sed "s/IPAVERSION/${IPA_FILE}/g" | sed "s/XCAVERSION/${XCA_FILE}/g")
+
+        echo "Version Found: $VERSION"
+        echo "Tag built:     $TAG"
+        echo "Description built:"
+        echo "$DESCRIPTION"
+        echo ""
+
+        ghr -t "${GITHUB_TOKEN}" \
+          -u "${CIRCLE_PROJECT_USERNAME}" \
+          -r "${CIRCLE_PROJECT_REPONAME}" \
+          -c "${CIRCLE_SHA1}" \
+          -n "Flutter - v${VERSION}" \
+          -b "${DESCRIPTION}" \
+          -delete \
+          "${TAG}" artifacts/

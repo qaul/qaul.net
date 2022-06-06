@@ -1,0 +1,5 @@
+executor: flutter
+steps:
+  - checkout-project
+  - install-flutter-deps
+  - run: flutter analyze

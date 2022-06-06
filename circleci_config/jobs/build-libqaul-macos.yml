@@ -1,0 +1,24 @@
+macos:
+  xcode: 13.0.0
+working_directory: ~/qaul-libp2p
+shell: /bin/bash --login -o pipefail
+environment:
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+steps:
+  - checkout-project
+  - run:
+      name: Install CMake
+      command: brew install cmake
+  - run:
+      name: Install Rust
+      command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  - setup-sccache
+  - restore-sccache-cache
+  - run:
+      name: Build Libqaul *.dylib Library for MacOS
+      command: cd rust && cargo build
+  - save-sccache-cache
+  - persist_to_workspace:
+      root: ~/qaul-libp2p
+      paths:
+        - rust/target/debug/liblibqaul.dylib

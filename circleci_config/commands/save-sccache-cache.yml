@@ -1,0 +1,10 @@
+steps:
+  - save_cache:
+      name: Save sccache cache
+      # We use {{ epoch }} to always upload a fresh cache:
+      # Of course, restore_cache will not find this exact key,
+      # but it will fall back to the closest key (aka the most recent).
+      # See https://discuss.circleci.com/t/add-mechanism-to-update-existing-cache-key/9014/13
+      key: sccache-cache-stable-{{ arch }}-{{ .Environment.CIRCLE_JOB }}-{{ epoch }}
+      paths:
+        - "~/.cache/sccache"
