@@ -1,71 +1,56 @@
+when: << pipeline.parameters.run-flutter-tagged-workflow >>
 jobs:
   - verify-version-flutter:
       filters:
         tags:
-          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
-        branches:
-          ignore: /.*/
+          only: /.*/
   - test-flutter:
       requires:
         - verify-version-flutter
       filters:
         tags:
-          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
-        branches:
-          ignore: /.*/
+          only: /.*/
   - analyze-flutter:
       requires:
         - verify-version-flutter
       filters:
         tags:
-          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
-        branches:
-          ignore: /.*/
+          only: /.*/
   - build-and-deploy-flutter-android:
       requires:
         - test-flutter
         - analyze-flutter
       filters:
         tags:
-          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
-        branches:
-          ignore: /.*/
+          only: /.*/
   - build-and-deploy-flutter-ios:
       requires:
         - test-flutter
         - analyze-flutter
       filters:
         tags:
-          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
-        branches:
-          ignore: /.*/
+          only: /.*/
   - build-flutter-macos:
       requires:
         - test-flutter
         - analyze-flutter
       filters:
         tags:
-          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
-        branches:
-          ignore: /.*/
+          only: /.*/
   - build-flutter-windows:
       requires:
         - test-flutter
         - analyze-flutter
       filters:
         tags:
-          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
-        branches:
-          ignore: /.*/
+          only: /.*/
   - build-flutter-linux:
       requires:
         - test-flutter
         - analyze-flutter
       filters:
         tags:
-          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
-        branches:
-          ignore: /.*/
+          only: /.*/
   - publish-flutter-github-release:
       requires:
         - build-and-deploy-flutter-android
@@ -75,6 +60,4 @@ jobs:
         - build-flutter-linux
       filters:
         tags:
-          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
-        branches:
-          ignore: /.*/
+          only: /.*/

@@ -1,0 +1,12 @@
+run-flutter-workflow:
+  type: boolean
+  default: false
+run-rust-workflow:
+  type: boolean
+  default: false
+run-flutter-tagged-workflow:
+  type: boolean
+  default: false
+run-rust-tagged-workflow:
+  type: boolean
+  default: false

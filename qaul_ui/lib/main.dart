@@ -1,5 +1,3 @@
-// import 'dart:io';
-
 import 'dart:async';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
@@ -11,8 +9,6 @@ import 'package:local_notifications/local_notifications.dart';
 import 'package:logger/logger.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:qaul_rpc/qaul_rpc.dart';
-
-// import 'package:bitsdojo_window/bitsdojo_window.dart';
 
 import 'helpers/navigation_helper.dart';
 import 'helpers/user_prefs_helper.dart';
@@ -37,16 +33,6 @@ void main() async {
 
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
     runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
-
-    // if (Platform.isLinux || Platform.isMacOS) {
-    //   doWhenWindowReady(() {
-    //     const initialSize = Size(1920, 1080);
-    //     appWindow.minSize = const Size(800, 600);
-    //     appWindow.size = initialSize;
-    //     appWindow.alignment = Alignment.center;
-    //     appWindow.show();
-    //   });
-    // }
   }, (error, stack) => Logger.instance.logError(error, stack));
 }
 

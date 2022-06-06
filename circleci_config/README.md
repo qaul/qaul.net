@@ -1,12 +1,13 @@
 # CircleCI Config
 
 This folder follows the [FYAML](https://github.com/CircleCI-Public/fyaml) specs
-to leverage circleci's `pack` CLI command. 
+to leverage circleci's `pack` CLI command. We also make use of dynamic configuration, which allows for
+a finer control over CircleCI's pipelines.
 
 To learn more about it, check:
 > * [CircleCI CLI Docs on `pack`](https://circleci.com/docs/2.0/local-cli/#packing-a-config)
 > * [FYAML Specification](https://github.com/CircleCI-Public/fyaml/blob/master/fyaml-specification.md)
-
+> * [Dynamic Configurations on CircleCI](https://circleci.com/docs/2.0/dynamic-config/)
 
 ## Naming conventions for jobs and workflows
 Jobs and workflows follow the pattern:
