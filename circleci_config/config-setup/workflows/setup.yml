@@ -1,0 +1,31 @@
+jobs:
+  - path-filtering/filter:
+      name: default-setup
+      base-revision: main
+      config-path: .circleci/continue-config.yml
+      mapping: |
+        qaul_ui/.* run-flutter-workflow true
+        rust/.* run-rust-workflow true
+  - continuation/continue:
+      name: tag-setup
+      configuration_path: .circleci/continue-config.yml
+      parameters: /tmp/pipeline-parameters.json
+      pre-steps:
+        - run:
+            name: Define tagged pipeline parameters
+            command: |
+              {
+                echo '{'
+                if [[ "$CIRCLE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\+([0-9])*)+-flutter$ ]]; then
+                  echo '  "run-flutter-tagged-workflow": true'
+                fi
+                if [[ "$CIRCLE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\+([0-9])*)+-rust$ ]]; then
+                  echo '  "run-rust-tagged-workflow": true'
+                fi
+                echo '}'
+              } > /tmp/pipeline-parameters.json
+      filters:
+        tags:
+          only: /.*/
+        branches:
+          ignore: /.*/
