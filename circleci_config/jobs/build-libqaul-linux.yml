@@ -1,0 +1,20 @@
+docker:
+  - image: cimg/rust:1.60.0
+working_directory: ~/qaul-libp2p
+shell: /bin/bash --login -o pipefail
+environment:
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+steps:
+  - checkout-project
+  - setup-sccache
+  - restore-sccache-cache
+  - run:
+      name: Build Libqaul for Linux
+      command: cd rust && cargo build --release
+  - save-sccache-cache
+  - persist_to_workspace:
+      root: ~/qaul-libp2p
+      paths:
+        - rust/target/release/liblibqaul.so
+        - rust/target/release/qaul-cli
+        - rust/target/release/qauld

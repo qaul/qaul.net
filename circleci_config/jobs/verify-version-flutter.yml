@@ -1,0 +1,17 @@
+working_directory: ~/qaul-libp2p/qaul_ui
+docker:
+  - image: cimg/base:2022.05
+environment:
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+steps:
+  - checkout-project
+  - run:
+      name: Verify that Git tag matches Flutter version
+      command: |
+        VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2}')
+        TAG="v${VERSION}-flutter"
+        if [ $TAG != $CIRCLE_TAG ]; then
+          echo "Git tag: $CIRCLE_TAG does not match the version of this app: $TAG"
+          echo "Please update app version at qaul_ui/pubspec.yaml"
+          exit 1
+        fi

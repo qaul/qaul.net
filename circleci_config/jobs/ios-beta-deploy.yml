@@ -1,0 +1,38 @@
+macos:
+  xcode: 13.0.0
+working_directory: ~/qaul-libp2p/qaul_ui/ios
+environment:
+  FL_OUTPUT_DIR: output
+  FASTLANE_LANE: upload_testflight
+  FLUTTER_VERSION: "3.0.1"
+  REPO_URL: "https://github.com/qaul/qaul.net"
+shell: /bin/bash --login -o pipefail
+steps:
+  - checkout-project
+  - run:
+      name: Install Github CLI
+      command: brew install gh
+  - run:
+      name: Download Libqaul *.a File from latest Github Release
+      command: |
+        LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+        gh release download "$LATEST_TAG" --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
+  - install-flutter:
+      version: "$FLUTTER_VERSION"
+  - install-flutter-deps
+  - install-bundler-deps
+  - install-cocoapods-deps
+  - run:
+      name: Build Flutter iOS Configuration
+      command: flutter build ios --release --no-codesign --config-only
+  - run:
+      name: fastlane
+      command: bundle exec fastlane $FASTLANE_LANE
+  - store_artifacts:
+      path: output
+      destination: output
+  - persist_to_workspace:
+      root: ~/qaul-libp2p
+      paths:
+        - qaul_ui/build/ios/ipa/*.ipa
+        - qaul_ui/build/ios/archive/*.xcarchive

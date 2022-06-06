@@ -1,0 +1,13 @@
+flutter:
+  docker:
+    - image: cirrusci/flutter:3.0.1
+  working_directory: ~/qaul-libp2p/qaul_ui
+android-flutter:
+  docker:
+    - image: cimg/android:2021.10
+  resource_class: large
+  working_directory: ~/qaul-libp2p/qaul_ui
+android-rust:
+  docker:
+    - image: cimg/android:2022.03-ndk
+  resource_class: large

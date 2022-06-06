@@ -1,0 +1,31 @@
+executor:
+  name: win/default
+  size: "medium"
+  shell: bash.exe
+working_directory: ~/qaul-libp2p
+environment:
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+steps:
+  - checkout-project
+  - run:
+      name: Install CMake
+      shell: powershell.exe
+      command: choco install cmake -y
+  - run:
+      name: Install Rust
+      command: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        export PATH="/c/Users/circleci/.cargo/bin:$PATH"
+        cargo --version
+        rustup --version
+        rustc --version
+  - run:
+      name: Build dll Libqaul
+      no_output_timeout: 30m
+      command: |
+        export PATH="/c/Users/circleci/.cargo/bin:/c/Program Files/CMake/bin:$PATH"
+        cd rust && cargo build
+  - persist_to_workspace:
+      root: ~/qaul-libp2p
+      paths:
+        - rust/target/debug/libqaul.dll

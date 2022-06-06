@@ -1,0 +1,45 @@
+macos:
+  xcode: 13.0.0
+working_directory: ~/qaul-libp2p/qaul_ui
+environment:
+  FLUTTER_VERSION: "3.0.1"
+  REPO_URL: "https://github.com/qaul/qaul.net"
+shell: /bin/bash --login -o pipefail
+steps:
+  - checkout-project
+  - run:
+      name: Install Github CLI
+      command: brew install gh
+  - run:
+      # TODO(brenodt): After upgrading flutter to 3.0.1, build fails due to missing arch:
+      # TODO:    /Users/distiller/qaul-libp2p/qaul_ui/macos/Runner.xcodeproj: error:
+      # TODO:      The linked and embedded library 'liblibqaul.dylib' is missing one or more architectures required
+      # TODO:      by this target: arm64. (in target 'Runner' from project 'Runner')
+      name: Download Libqaul *.dylib File from latest Github Release
+      command: |
+        LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+        gh release download "$LATEST_TAG" --pattern "*.dylib" --repo "$REPO_URL" --dir macos
+  - run:
+      name: Install node-appdmg
+      command: |
+        npm install -g appdmg
+        appdmg --version || npx appdmg --version
+  - install-flutter:
+      version: "$FLUTTER_VERSION"
+  - install-flutter-deps
+  - run:
+      name: Build MacOS Application
+      command: |
+        flutter config --enable-macos-desktop
+        flutter build macos
+
+        ls build/macos/Build/Products/Release
+  - run:
+      name: Build *.dmg File
+      command: |
+        cd installers/macos
+        appdmg ./config.json ./qaul.dmg
+  - persist_to_workspace:
+      root: ~/qaul-libp2p
+      paths:
+        - qaul_ui/installers/macos/qaul.dmg

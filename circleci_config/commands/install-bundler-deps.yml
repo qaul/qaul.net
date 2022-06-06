@@ -1,0 +1,15 @@
+description: "Install Bundle dependencies"
+steps:
+  - restore_cache:
+      name: Restore Bundle cache
+      keys:
+        - gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
+        - gem-cache-v2-{{ arch }}-
+  - run:
+      name: Install Bundle
+      command: bundle check || sudo bundle install --path vendor/bundle
+  - save_cache:
+      name: Save Bundle cache
+      key: gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
+      paths:
+        - vendor/bundle

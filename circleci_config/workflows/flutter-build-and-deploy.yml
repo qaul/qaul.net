@@ -1,0 +1,80 @@
+jobs:
+  - verify-version-flutter:
+      filters:
+        tags:
+          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+        branches:
+          ignore: /.*/
+  - flutter-test:
+      requires:
+        - verify-version-flutter
+      filters:
+        tags:
+          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+        branches:
+          ignore: /.*/
+  - flutter-analyze:
+      requires:
+        - verify-version-flutter
+      filters:
+        tags:
+          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+        branches:
+          ignore: /.*/
+  - android-beta-deploy:
+      requires:
+        - flutter-test
+        - flutter-analyze
+      filters:
+        tags:
+          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+        branches:
+          ignore: /.*/
+  - ios-beta-deploy:
+      requires:
+        - flutter-test
+        - flutter-analyze
+      filters:
+        tags:
+          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+        branches:
+          ignore: /.*/
+  - macos-flutter-build:
+      requires:
+        - flutter-test
+        - flutter-analyze
+      filters:
+        tags:
+          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+        branches:
+          ignore: /.*/
+  - windows-flutter-build:
+      requires:
+        - flutter-test
+        - flutter-analyze
+      filters:
+        tags:
+          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+        branches:
+          ignore: /.*/
+  - linux-flutter-build:
+      requires:
+        - flutter-test
+        - flutter-analyze
+      filters:
+        tags:
+          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+        branches:
+          ignore: /.*/
+  - publish-flutter-github-release:
+      requires:
+        - android-beta-deploy
+        - ios-beta-deploy
+        - macos-flutter-build
+        - windows-flutter-build
+        - linux-flutter-build
+      filters:
+        tags:
+          only: /^v\d+\.\d+\.\d+(\+\d)*-flutter$/
+        branches:
+          ignore: /.*/
