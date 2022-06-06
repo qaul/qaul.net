@@ -15,3 +15,7 @@ pre-commit:
       root: "qaul_ui/"
       glob: '*.dart'
       run: flutter format --line-length=100 {staged_files} && git add .
+
+    circleci_validate_config:
+      glob: ".circleci/config.yml"
+      run: circleci config validate
