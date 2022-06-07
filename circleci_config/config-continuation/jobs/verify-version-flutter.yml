@@ -1,8 +1,4 @@
-working_directory: ~/qaul-libp2p/qaul_ui
-docker:
-  - image: cimg/base:2022.05
-environment:
-  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+executor: flutter-ubuntu-lean
 steps:
   - checkout-project
   - run:

@@ -1,16 +1,4 @@
-executor: android-flutter
-working_directory: ~/qaul-libp2p/qaul_ui/android
-environment:
-  FL_OUTPUT_DIR: output
-  FASTLANE_LANE: upload_beta_playstore
-  LANG: en_US.UTF-8
-  LC_ALL: en_US.UTF-8
-  _JAVA_OPTIONS: "-Xmx2048m"
-  GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
-  SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/fastlane/google-credentials.json
-  FLUTTER_VERSION: "3.0.1"
-  REPO_URL: "https://github.com/qaul/qaul.net"
-shell: /bin/bash --login -o pipefail
+executor: flutter-android
 steps:
   - checkout-project
   - run:

@@ -113,27 +113,13 @@ commands:
                     sccache --version
                 name: Install sccache
 executors:
-    android-flutter:
-        docker:
-            - image: cimg/android:2021.10
-        resource_class: large
-        working_directory: ~/qaul-libp2p/qaul_ui
-    android-rust:
-        docker:
-            - image: cimg/android:2022.03-ndk
-        resource_class: large
     flutter:
         docker:
             - image: cirrusci/flutter:3.0.1
         working_directory: ~/qaul-libp2p/qaul_ui
-jobs:
-    analyze-flutter:
-        executor: flutter
-        steps:
-            - checkout-project
-            - install-flutter-deps
-            - run: flutter analyze
-    build-and-deploy-flutter-android:
+    flutter-android:
+        docker:
+            - image: cimg/android:2021.10
         environment:
             _JAVA_OPTIONS: -Xmx2048m
             FASTLANE_LANE: upload_beta_playstore
@@ -144,8 +130,70 @@ jobs:
             LC_ALL: en_US.UTF-8
             REPO_URL: https://github.com/qaul/qaul.net
             SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/fastlane/google-credentials.json
-        executor: android-flutter
+        resource_class: large
         shell: /bin/bash --login -o pipefail
+        working_directory: ~/qaul-libp2p/qaul_ui/android
+    flutter-ios:
+        environment:
+            FASTLANE_LANE: upload_testflight
+            FL_OUTPUT_DIR: output
+            FLUTTER_VERSION: 3.0.1
+            REPO_URL: https://github.com/qaul/qaul.net
+        macos:
+            xcode: 13.0.0
+        shell: /bin/bash --login -o pipefail
+        working_directory: ~/qaul-libp2p/qaul_ui/ios
+    flutter-linux:
+        docker:
+            - image: snapcore/snapcraft:edge
+        environment:
+            FLUTTER_VERSION: 3.0.1
+            REPO_URL: https://github.com/qaul/qaul.net
+        working_directory: ~/qaul-libp2p/qaul_ui
+    flutter-macos:
+        environment:
+            FLUTTER_VERSION: 3.0.1
+            REPO_URL: https://github.com/qaul/qaul.net
+        macos:
+            xcode: 13.0.0
+        shell: /bin/bash --login -o pipefail
+        working_directory: ~/qaul-libp2p/qaul_ui
+    flutter-ubuntu-lean:
+        docker:
+            - image: cimg/base:2022.05
+        working_directory: ~/qaul-libp2p/qaul_ui
+    rust-android:
+        docker:
+            - image: cimg/android:2022.03-ndk
+        environment:
+            ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/22.1.7171670
+            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+        resource_class: large
+        shell: /bin/bash --login -o pipefail
+        working_directory: ~/qaul-libp2p
+    rust-linux:
+        docker:
+            - image: cimg/rust:1.60.0
+        environment:
+            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+        shell: /bin/bash --login -o pipefail
+        working_directory: ~/qaul-libp2p
+    rust-macos:
+        environment:
+            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+        macos:
+            xcode: 13.0.0
+        shell: /bin/bash --login -o pipefail
+        working_directory: ~/qaul-libp2p
+jobs:
+    analyze-flutter:
+        executor: flutter
+        steps:
+            - checkout-project
+            - install-flutter-deps
+            - run: flutter analyze
+    build-and-deploy-flutter-android:
+        executor: flutter-android
         steps:
             - checkout-project
             - run:
@@ -178,16 +226,8 @@ jobs:
                 paths:
                     - qaul_ui/build/app/outputs/bundle/release/*.aab
                 root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p/qaul_ui/android
     build-and-deploy-flutter-ios:
-        environment:
-            FASTLANE_LANE: upload_testflight
-            FL_OUTPUT_DIR: output
-            FLUTTER_VERSION: 3.0.1
-            REPO_URL: https://github.com/qaul/qaul.net
-        macos:
-            xcode: 13.0.0
-        shell: /bin/bash --login -o pipefail
+        executor: flutter-ios
         steps:
             - checkout-project
             - run:
@@ -217,13 +257,8 @@ jobs:
                     - qaul_ui/build/ios/ipa/*.ipa
                     - qaul_ui/build/ios/archive/*.xcarchive
                 root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p/qaul_ui/ios
     build-flutter-linux:
-        docker:
-            - image: snapcore/snapcraft:edge
-        environment:
-            FLUTTER_VERSION: 3.0.1
-            REPO_URL: https://github.com/qaul/qaul.net
+        executor: flutter-linux
         steps:
             - checkout-project
             - run:
@@ -253,14 +288,8 @@ jobs:
                 paths:
                     - qaul_ui/installers/linux/*.snap
                 root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p/qaul_ui
     build-flutter-macos:
-        environment:
-            FLUTTER_VERSION: 3.0.1
-            REPO_URL: https://github.com/qaul/qaul.net
-        macos:
-            xcode: 13.0.0
-        shell: /bin/bash --login -o pipefail
+        executor: flutter-macos
         steps:
             - checkout-project
             - run:
@@ -295,7 +324,6 @@ jobs:
                 paths:
                     - qaul_ui/installers/macos/qaul.dmg
                 root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p/qaul_ui
     build-flutter-windows:
         environment:
             FLUTTER_VERSION: 3.0.1
@@ -342,11 +370,7 @@ jobs:
                 root: ~/qaul-libp2p
         working_directory: ~/qaul-libp2p/qaul_ui
     build-libqaul-android:
-        environment:
-            ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/22.1.7171670
-            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
-        executor: android-rust
-        shell: /bin/bash --login -o pipefail
+        executor: rust-android
         steps:
             - checkout-project
             - run:
@@ -378,13 +402,8 @@ jobs:
                     - android/blemodule/build/outputs/aar/blemodule-debug.aar
                     - android/libqaul/build/outputs/aar/libqaul-debug.aar
                 root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p
     build-libqaul-ios:
-        environment:
-            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
-        macos:
-            xcode: 13.0.0
-        shell: /bin/bash --login -o pipefail
+        executor: rust-macos
         steps:
             - checkout-project
             - run:
@@ -409,13 +428,8 @@ jobs:
                 paths:
                     - rust/target/universal/release/liblibqaul.a
                 root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p
     build-libqaul-linux:
-        docker:
-            - image: cimg/rust:1.60.0
-        environment:
-            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
-        shell: /bin/bash --login -o pipefail
+        executor: rust-linux
         steps:
             - checkout-project
             - setup-sccache
@@ -430,13 +444,8 @@ jobs:
                     - rust/target/release/qaul-cli
                     - rust/target/release/qauld
                 root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p
     build-libqaul-macos:
-        environment:
-            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
-        macos:
-            xcode: 13.0.0
-        shell: /bin/bash --login -o pipefail
+        executor: rust-macos
         steps:
             - checkout-project
             - run:
@@ -455,7 +464,6 @@ jobs:
                 paths:
                     - rust/target/debug/liblibqaul.dylib
                 root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p
     build-libqaul-windows:
         environment:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
@@ -489,8 +497,7 @@ jobs:
                 root: ~/qaul-libp2p
         working_directory: ~/qaul-libp2p
     publish-flutter-github-release:
-        docker:
-            - image: cimg/base:2022.05
+        executor: flutter-ubuntu-lean
         steps:
             - checkout-project
             - attach_workspace:
@@ -546,12 +553,8 @@ jobs:
                       -delete \
                       "${TAG}" artifacts/
                 name: Publish Release on GitHub
-        working_directory: ~/qaul-libp2p/qaul_ui
     publish-rust-github-release:
-        docker:
-            - image: cimg/rust:1.60.0
-        environment:
-            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+        executor: rust-linux
         steps:
             - checkout-project
             - attach_workspace:
@@ -602,7 +605,6 @@ jobs:
                       -delete \
                       "${TAG}" artifacts/
                 name: Publish Release on GitHub
-        working_directory: ~/qaul-libp2p
     test-flutter:
         executor: flutter
         steps:
@@ -610,10 +612,7 @@ jobs:
             - install-flutter-deps
             - run: flutter test
     verify-version-flutter:
-        docker:
-            - image: cimg/base:2022.05
-        environment:
-            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+        executor: flutter-ubuntu-lean
         steps:
             - checkout-project
             - run:
@@ -626,12 +625,8 @@ jobs:
                       exit 1
                     fi
                 name: Verify that Git tag matches Flutter version
-        working_directory: ~/qaul-libp2p/qaul_ui
     verify-version-rust:
-        docker:
-            - image: cimg/rust:1.60.0
-        environment:
-            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+        executor: rust-linux
         steps:
             - checkout-project
             - run:
@@ -644,7 +639,6 @@ jobs:
                       exit 1
                     fi
                 name: Verify that Git tag matches Rust version
-        working_directory: ~/qaul-libp2p
 orbs:
     win: circleci/windows@4.1
 parameters:

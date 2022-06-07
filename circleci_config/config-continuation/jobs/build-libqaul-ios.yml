@@ -1,9 +1,4 @@
-macos:
-  xcode: 13.0.0
-working_directory: ~/qaul-libp2p
-shell: /bin/bash --login -o pipefail
-environment:
-  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+executor: rust-macos
 steps:
   - checkout-project
   - run:

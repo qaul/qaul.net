@@ -1,12 +1,4 @@
-macos:
-  xcode: 13.0.0
-working_directory: ~/qaul-libp2p/qaul_ui/ios
-environment:
-  FL_OUTPUT_DIR: output
-  FASTLANE_LANE: upload_testflight
-  FLUTTER_VERSION: "3.0.1"
-  REPO_URL: "https://github.com/qaul/qaul.net"
-shell: /bin/bash --login -o pipefail
+executor: flutter-ios
 steps:
   - checkout-project
   - run:

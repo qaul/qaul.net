@@ -1,9 +1,4 @@
-docker:
-  - image: snapcore/snapcraft:edge
-working_directory: ~/qaul-libp2p/qaul_ui
-environment:
-  FLUTTER_VERSION: "3.0.1"
-  REPO_URL: "https://github.com/qaul/qaul.net"
+executor: flutter-linux
 steps:
   - checkout-project
   - run:
