@@ -1,8 +1,4 @@
-working_directory: ~/qaul-libp2p
-docker:
-  - image: cimg/rust:1.60.0
-environment:
-  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+executor: rust-linux
 steps:
   - checkout-project
   - attach_workspace:

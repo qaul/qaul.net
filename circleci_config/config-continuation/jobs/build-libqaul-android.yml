@@ -1,9 +1,4 @@
-executor: android-rust
-working_directory: ~/qaul-libp2p
-shell: /bin/bash --login -o pipefail
-environment:
-  ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/22.1.7171670
-  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+executor: rust-android
 steps:
   - checkout-project
   - run:
