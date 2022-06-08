@@ -53,7 +53,7 @@ use crate::services::{
     page::{PageMode, PageRequest, PageResponse},
     feed::{Feed},
 };
-use crate::storage::configuration::Configuration;
+
 use crate::connections::{
     ConnectionModule,
     events,
@@ -77,6 +77,9 @@ use crate::utilities::{
 
 
 use crate::services::feed::proto_net;
+use crate::storage::configuration::Configuration;
+use std::time::Duration;
+
 
 #[derive(NetworkBehaviour)]
 pub struct QaulInternetBehaviour {
@@ -156,6 +159,8 @@ impl Internet {
         // * set maximal failures
         let mut ping_config = PingConfig::new();
         ping_config = ping_config.with_keep_alive(true);
+        let config = Configuration::get();        
+        ping_config = ping_config.with_interval(Duration::from_secs(config.routing.ping_neighbour_period));
         //ping_config.with_interval(d: Duration);
         //ping_config.with_timeout(d: Duration);
         //ping_config.with_max_failures(n);
