@@ -198,7 +198,8 @@ impl ConnectionTable {
         let config = super::Router::get_configuration();
 
         // calculate link quality
-        let lq = rtt + (hc as u32 * config.hc_penalty);
+        // `hop_count_penalty` is seconds unit, thus it must be converted micro seconds
+        let lq = rtt + (hc as u32 * (config.hop_count_penalty as u32) * 1000_000);
 
         // return link quality
         lq
@@ -449,10 +450,9 @@ impl ConnectionTable {
         let mut lq = u32::MAX;
 
         //remove user after 5min from last pgid updated
-        // if Timestamp::get_timestamp() - user.pgid_update >= (20 * user.pgid_update_hc as u64) * 1000 * 1000{
-        //     return None;
-        // }
-        if Timestamp::get_timestamp() - user.pgid_update >= 300 * 1000{
+        //config.maintain_period_limit is seconds unit, need to convert into mili seconds
+        let config = super::Router::get_configuration();
+        if Timestamp::get_timestamp() - user.pgid_update >= (config.maintain_period_limit * 1000){
             return (true, None);
         }
 
@@ -465,9 +465,10 @@ impl ConnectionTable {
                 let mut expired = true;
 
                 // check if entry is expired
-                // entry expires after 20 seconds
+                // entry expires after 20 seconds, unit is mili seconds
                 let now = Timestamp::get_timestamp();
-                if now - value.last_update < (20 * 1000 * (value.hc as u64)){
+                //if now - value.last_update < (20 * 1000 * (value.hc as u64)){
+                if now - value.last_update < (2 * (config.sending_table_period * 1000) * (value.hc as u64)){
                     expired = false;
 
                     if value.lq < lq {

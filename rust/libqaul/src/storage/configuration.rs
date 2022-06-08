@@ -103,12 +103,42 @@ impl Default for UserAccount {
     }
 }
 
+/// Routing Configuration Options
+/// 
+/// The following options can be configured:
+/// All units are second
+/// because rtt is measured as micro seconds
+/// * routing options
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct RoutingOptions {
+    //Sending the table every 10 seconds to direct neighbours.
+    pub sending_table_period: u64,
+    //Pinging every neighbour all 5 seconds.
+    pub ping_neighbour_period: u64,
+    //Hop count penalty.
+    pub hop_count_penalty : u64,
+    //How long a route is stored until it is removed.
+    pub maintain_period_limit: u64, 
+}
+
+impl Default for RoutingOptions {
+    fn default() -> Self {
+        RoutingOptions {
+            sending_table_period: 10, //10 seconds, unit seconds
+            ping_neighbour_period: 5, //5  seconds, unit: seconds
+            hop_count_penalty : 10, //10 seconds, unit: second
+            maintain_period_limit: 300, //5min, unit: second
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Configuration {
     pub node: Node,
     pub lan: Lan,
     pub internet: Internet,
     pub user_accounts: Vec<UserAccount>,
+    pub routing: RoutingOptions,
 }
 
 impl Default for Configuration {
@@ -118,6 +148,7 @@ impl Default for Configuration {
             lan: Lan::default(),
             internet: Internet::default(),
             user_accounts: Vec::new(),
+            routing: RoutingOptions::default(),
         }
     }
 }

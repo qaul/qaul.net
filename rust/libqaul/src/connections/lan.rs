@@ -52,6 +52,8 @@ use crate::services::{
     feed::{Feed},
 };
 use crate::storage::configuration::Configuration;
+use std::time::Duration;
+
 use crate::connections::{
     ConnectionModule,
     events,
@@ -126,6 +128,8 @@ impl Lan {
         // * keep connection alive
         let mut ping_config = PingConfig::new();
         ping_config = ping_config.with_keep_alive(true);
+        let config = Configuration::get();
+        ping_config = ping_config.with_interval(Duration::from_secs(config.routing.ping_neighbour_period));        
 
         log::info!("Lan::init() ping_config");
 
