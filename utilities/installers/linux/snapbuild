@@ -14,7 +14,7 @@ flutter config --enable-linux-desktop
 echo ""
 echo "Retrieving application version..."
 
-cd cd ../../../qaul_ui || exit 1
+cd ../../../qaul_ui || exit 1
 
 if [ ! -f pubspec.yaml ]; then
     echo "pubspec.yaml not found!"

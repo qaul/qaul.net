@@ -3,7 +3,7 @@
 
 #define MyAppName "qaul.net"
 #define MyAppVersion "APPVERSIONHERE"
-#define MyAppPublisher "Qaul"
+#define MyAppPublisher "qaul"
 #define MyAppURL "https://qaul.net"
 #define MyAppExeName "qaul.exe"      
 #define MyAppAssetsFolder "assets"
