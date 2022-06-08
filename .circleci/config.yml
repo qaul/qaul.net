@@ -548,17 +548,15 @@ jobs:
           command: |
             flutter config --enable-macos-desktop
             flutter build macos
-
-            ls build/macos/Build/Products/Release
       - run:
           name: Build *.dmg File
           command: |
-            cd installers/macos
+            cd ../utilities/installers/macos
             appdmg ./config.json ./qaul.dmg
       - persist_to_workspace:
           root: ~/qaul-libp2p
           paths:
-            - qaul_ui/installers/macos/qaul.dmg
+            - utilities/installers/macos/qaul.dmg
   # # #  -------------------------------------------
   # # #  (Flutter) Windows
   # # #  -------------------------------------------
@@ -604,11 +602,11 @@ jobs:
             flutter build windows
       - run:
           name: Run iscc
-          command: cd bin && bash build_windows_installer
+          command: cd ..\utilities\installers\windows\bin && bash build_windows_installer
       - persist_to_workspace:
           root: ~/qaul-libp2p
           paths:
-            - qaul_ui\installers\windows\qaul.exe
+            - utilities\installers\windows\qaul.exe
   # # #  -------------------------------------------
   # # #  (Flutter) Linux
   # # #  -------------------------------------------
@@ -644,12 +642,12 @@ jobs:
       - run:
           name: Build Flutter Application for Linux
           command: |
-            SNAP_PATH=$(cd installers/linux && bash snapbuild | tail -n1 )
+            SNAP_PATH=$(cd ../utilities/installers/linux && bash snapbuild | tail -n1 )
             echo "Resulting snap file can be found at: $SNAP_PATH"
       - persist_to_workspace:
           root: ~/qaul-libp2p
           paths:
-            - qaul_ui/installers/linux/*.snap
+            - qaul_ui/*.snap
 
 # ------------------------------------------------
 # Workflows

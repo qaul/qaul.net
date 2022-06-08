@@ -14,7 +14,7 @@ flutter config --enable-linux-desktop
 echo ""
 echo "Retrieving application version..."
 
-cd ../..
+cd cd ../../../qaul_ui || exit 1
 
 if [ ! -f pubspec.yaml ]; then
     echo "pubspec.yaml not found!"
@@ -47,9 +47,9 @@ echo "Building Flutter application..."
 git config --global --add safe.directory /root/development/flutter
 
 snapcraft
-mv ./*.snap "installers/linux/qaul-app-$VERSION.snap"
+mv ./*.snap "qaul-app-$VERSION.snap"
 # TODO cannot upload via CircleCI due to the directive:
 #     - human review required due to 'deny-connection' constraint (interface attributes)
 # snapcraft upload "qaul-app-$VERSION.snap" --release=stable
 
-realpath "installers/linux/qaul-app-$VERSION.snap"
+realpath "qaul-app-$VERSION.snap"

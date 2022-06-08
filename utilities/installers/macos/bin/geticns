@@ -1,6 +1,6 @@
 #! /bin/bash
 
-ICON_PATH="../icon/Icon1024.png"
+ICON_PATH="../../../icon/Icon1024.png"
 ICNS_NAME="app_icon"
 
 mkdir "$ICNS_NAME.iconset"
