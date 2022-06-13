@@ -44,6 +44,7 @@ pub struct ChatUser {
     pub overview: Tree<rpc_proto::ChatOverview>,
     // messages sled data base tree
     pub messages: Tree<rpc_proto::ChatMessage>,
+    pub message_ids: Tree<Vec<u8>>,
 }
 
 /// qaul Chat storage and logic
@@ -66,7 +67,7 @@ impl Chat {
     /// Save a new incoming Message
     /// 
     /// This function saves an incoming chat message in the data base
-    pub fn save_incoming_message (user_id: PeerId, sender_id: PeerId, message: proto::ChatMessage, signature: Vec<u8>) {        
+    pub fn save_incoming_message(user_id: PeerId, sender_id: PeerId, message: proto::ChatMessage, signature: Vec<u8>)-> bool {        
         // create timestamp
         let timestamp = Timestamp::get_timestamp();
 
@@ -79,7 +80,7 @@ impl Chat {
             Ok(chat_overview) => overview = chat_overview,
             Err(e) => {
                 log::error!("{}", e);
-                return;
+                return false;
             }
         }
 
@@ -90,7 +91,7 @@ impl Chat {
         let chat_message = rpc_proto::ChatMessage {
             index: overview.last_message_index,
             sender_id: sender_id.to_bytes(),
-            message_id: signature,
+            message_id: signature.clone(),
             status: 0,
             sent_at: message.sent_at,
             received_at: timestamp,
@@ -98,7 +99,7 @@ impl Chat {
         };
 
         // save message in data base
-        if let Err(e) = db_ref.messages.insert(key, chat_message) {
+        if let Err(e) = db_ref.messages.insert(key.clone(), chat_message) {
             log::error!("Error saving chat message to data base: {}", e);
         }
 
@@ -106,6 +107,17 @@ impl Chat {
         if let Err(e) = db_ref.messages.flush() {
             log::error!("Error chat messages flush: {}", e);
         }
+
+        //save message id in data base
+        if let Err(e) = db_ref.message_ids.insert(signature, key) {
+            log::error!("Error saving chat messageid to data base: {}", e);
+        }
+
+        // flush trees to disk
+        if let Err(e) = db_ref.message_ids.flush() {
+            log::error!("Error chat message_ids flush: {}", e);
+        }
+        true
     }
 
     // send the message
@@ -142,7 +154,7 @@ impl Chat {
     }
 
     // save an outgoing message to the data base
-    fn save_outgoing_message (user_id: PeerId, conversation_id: Vec<u8>, content: String, signature: Vec<u8>) {        
+    fn save_outgoing_message(user_id: PeerId, conversation_id: Vec<u8>, content: String, signature: Vec<u8>) {        
         // create timestamp
         let timestamp = Timestamp::get_timestamp();
 
@@ -166,7 +178,7 @@ impl Chat {
         let message = rpc_proto::ChatMessage {
             index: conversation.last_message_index,
             sender_id: user_id.to_bytes(),
-            message_id: signature,
+            message_id: signature.clone(),
             status: 0,
             sent_at: timestamp,
             received_at: timestamp,
@@ -174,13 +186,43 @@ impl Chat {
         };
 
         // save message in data base
-        if let Err(e) = db_ref.messages.insert(key, message) {
+        if let Err(e) = db_ref.messages.insert(key.clone(), message) {
             log::error!("Error saving chat message to data base: {}", e);
         }
 
         // flush trees to disk
         if let Err(e) = db_ref.messages.flush() {
             log::error!("Error chat messages flush: {}", e);
+        }
+
+        //save message id in data base
+        if let Err(e) = db_ref.message_ids.insert(signature, key) {
+            log::error!("Error saving chat messageid to data base: {}", e);
+        }
+
+        // flush trees to disk
+        if let Err(e) = db_ref.message_ids.flush() {
+            log::error!("Error chat message_ids flush: {}", e);
+        }        
+    }
+
+    pub fn update_confirmation(user_id: PeerId, message_id: Vec<u8>, received_at: u64){
+        // get data base of user account
+        let db_ref = Self::get_user_db_ref(user_id);
+        if let Some(key) = db_ref.message_ids.get(&message_id[..]).unwrap() {
+            if let Some(mut chat_msg) = db_ref.messages.get(&key).unwrap(){
+                chat_msg.status = 2;
+                chat_msg.received_at = received_at;
+
+                // save message in data base
+                if let Err(e) = db_ref.messages.insert(key.clone(), chat_msg) {
+                    log::error!("Error saving chat message to data base: {}", e);
+                }
+                // flush trees to disk
+                if let Err(e) = db_ref.messages.flush() {
+                    log::error!("Error chat messages flush: {}", e);
+                }
+            }    
         }
     }
     
@@ -344,6 +386,7 @@ impl Chat {
                 return ChatUser {
                     overview: chat_user.overview.clone(),
                     messages: chat_user.messages.clone(),
+                    message_ids: chat_user.message_ids.clone(),
                 };
             }
         }
@@ -355,6 +398,7 @@ impl Chat {
         ChatUser {
             overview: chat_user.overview.clone(),
             messages: chat_user.messages.clone(),
+            message_ids: chat_user.message_ids.clone(),            
         }
     }
 
@@ -366,9 +410,11 @@ impl Chat {
         // open trees
         let overview: Tree<rpc_proto::ChatOverview> = db.open_bincode_tree("chat_overview").unwrap();
         let messages: Tree<rpc_proto::ChatMessage> = db.open_bincode_tree("chat_messages").unwrap();
+        let message_ids: Tree<Vec<u8>> = db.open_bincode_tree("chat_message_ids").unwrap();
         let chat_user = ChatUser {
             overview,
             messages,
+            message_ids,
         };
 
         // get chat state for writing
