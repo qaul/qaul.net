@@ -9,11 +9,13 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:mailto/mailto.dart';
 import 'package:neat_periodic_task/neat_periodic_task.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -27,6 +29,8 @@ class EmailLoggingCoordinator {
   static final instance = EmailLoggingCoordinator._();
 
   final _log = Logger('EmailLoggingCoordinator');
+
+  String get _supportEmail => 'debug@qaul.net';
 
   Future<void> initialize() async {
     await _initializeEnabledStatus();
@@ -83,15 +87,20 @@ class EmailLoggingCoordinator {
   bool get loggingEnabled => _enabled;
   bool _enabled = true;
 
-  set loggingEnabled(bool enabled) {
+  void setLoggingEnabled(bool enabled, {Reader? reader}) {
     _enabled = enabled;
     _storeLoggingOption();
+    if (reader != null) _setLibqaulLoggingState(enabled, reader: reader);
   }
 
   void _storeLoggingOption() async {
     _log.fine('updating logging enabled status: $_enabled');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool(_loggingEnabledKey, _enabled);
+  }
+
+  void _setLibqaulLoggingState(bool enabled, {required Reader reader}) async {
+    reader(qaulWorkerProvider).setLibqaulLogging(enabled);
   }
 
   // ***************************************************************************
@@ -115,7 +124,8 @@ class EmailLoggingCoordinator {
   String _buildTitle(Object e) =>
       '${_storageManager.titlePrefix}-${e.runtimeType.toString().trim().replaceAll(' ', '_')}-${DateTime.now().millisecondsSinceEpoch}';
 
-  Future<String> _buildLogContent(Object e, StackTrace? stack, String msg) async {
+  Future<String> _buildLogContent(
+      Object e, StackTrace? stack, String msg) async {
     return '''
 Error/Exception: $e
 
@@ -135,40 +145,72 @@ ${stack ?? 'Not available'}
   // ***************************************************************************
   // API
   // ***************************************************************************
-  Future<void> deleteLogs() async => _storageManager.deleteLogs(await _storageManager.logs);
+  Future<void> deleteLogs() async =>
+      _storageManager.deleteLogs(await _storageManager.logs);
 
-  Future<void> sendLogs() async {
+  Future<void> sendLogs({Reader? reader}) async {
     if (!loggingEnabled) return;
-    (Platform.isAndroid || Platform.isIOS) ? await _sendMobileLogs() : await _sendDesktopLogs();
+    List<FileSystemEntity>? libqaulLogs;
+    if (reader != null && reader(libqaulLogsStoragePath) != null) {
+      libqaulLogs = _getLibqaulLogs(reader(libqaulLogsStoragePath)!);
+    }
+    (Platform.isAndroid || Platform.isIOS)
+        ? await _sendMobileLogs(libqaulAttachments: libqaulLogs)
+        : await _sendDesktopLogs(libqaulAttachments: libqaulLogs);
   }
 
-  Future<void> _sendMobileLogs() async {
+  List<FileSystemEntity> _getLibqaulLogs(String path) =>
+      Directory(path).listSync();
+
+  Future<void> _sendMobileLogs(
+      {List<FileSystemEntity>? libqaulAttachments}) async {
     _log.fine('(MOBILE) sending logs via deafult mail app');
+    var attachments = (await _storageManager.logs).map((e) => e.path).toList();
+    if (libqaulAttachments != null && libqaulAttachments.isNotEmpty) {
+      for (final log in libqaulAttachments) {
+        if (_pathLeadsToLogFile(log)) attachments.add(log.path);
+      }
+    }
     final email = Email(
       body: 'Customer Feedback - Error/Exception Logs',
       subject: 'Customer Feedback - Error/Exception Logs',
-      recipients: ['debug@qaul.net'],
-      attachmentPaths: (await _storageManager.logs).map((e) => e.path).toList(),
+      recipients: [_supportEmail],
+      attachmentPaths: attachments,
       isHTML: false,
     );
     await FlutterEmailSender.send(email);
   }
 
-  Future<void> _sendDesktopLogs() async {
+  Future<void> _sendDesktopLogs(
+      {List<FileSystemEntity>? libqaulAttachments}) async {
     _log.fine('(DESKTOP) sending logs via mailto link');
     final mailtoLink = Mailto(
-      to: ['debug@qaul.net'],
-      body: await _buildDesktopEmail(),
+      to: [_supportEmail],
+      body: await _buildDesktopEmail(libqaulAttachments: libqaulAttachments),
       subject: 'Customer Feedback - Error/Exception Logs',
     );
     await launch('$mailtoLink');
   }
 
-  Future<String> _buildDesktopEmail() async {
+  Future<String> _buildDesktopEmail(
+      {List<FileSystemEntity>? libqaulAttachments}) async {
     var body = 'Customer Feedback - Error/Exception Logs\n\n\n${'#' * 100}\n\n';
     for (final log in (await _storageManager.logs)) {
       body += _storageManager.logContents(log) + '\n${'#' * 100}\n\n';
     }
+    if (libqaulAttachments != null && libqaulAttachments.isNotEmpty) {
+      for (final log in libqaulAttachments) {
+        if (_pathLeadsToLogFile(log)) {
+          body += 'Libqaul log << ${log.path.split('/').last} >>:\n';
+          body += File(log.path).readAsStringSync() + '\n${'#' * 100}\n\n';
+        }
+      }
+    }
     return body;
+  }
+
+  bool _pathLeadsToLogFile(FileSystemEntity log) {
+    return FileSystemEntity.typeSync(log.path) == FileSystemEntityType.file &&
+        log.path.endsWith(".log");
   }
 }

@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../coordinators/email_logging_coordinator/email_logging_coordinator.dart';
 import '../decorators/disabled_state_decorator.dart';
 import '../widgets/widgets.dart';
 
-class SupportScreen extends StatefulWidget {
+class SupportScreen extends StatefulHookConsumerWidget {
   const SupportScreen({Key? key}) : super(key: key);
 
   @override
-  State<SupportScreen> createState() => _SupportScreenState();
+  ConsumerState<SupportScreen> createState() => _SupportScreenState();
 }
 
-class _SupportScreenState extends State<SupportScreen> {
+class _SupportScreenState extends ConsumerState<SupportScreen> {
   EmailLoggingCoordinator get emailLogger => EmailLoggingCoordinator.instance;
 
   @override
@@ -48,7 +49,7 @@ class _SupportScreenState extends State<SupportScreen> {
                             PlatformAwareSwitch(
                               value: emailLogger.loggingEnabled,
                               onChanged: (val) {
-                                emailLogger.loggingEnabled = val;
+                                emailLogger.setLoggingEnabled(val, reader: ref.read);
                                 setState(() {});
                               },
                             ),
@@ -95,7 +96,7 @@ class _SupportScreenState extends State<SupportScreen> {
                           child: Text(hasLogs ? 'Send Logs' : 'No Logs Available'),
                           onPressed: hasLogs
                               ? () async {
-                                  await emailLogger.sendLogs();
+                                  await emailLogger.sendLogs(reader: ref.read);
                                   await emailLogger.deleteLogs();
                                   Navigator.pop(context);
                                 }

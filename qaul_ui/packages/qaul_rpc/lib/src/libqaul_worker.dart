@@ -47,6 +47,9 @@ class LibqaulWorker {
     while (await _lib.initialized() != 1) {
       await Future.delayed(const Duration(milliseconds: 10));
     }
+    // Request Log storage path
+    _getLibqaulLogsStoragePath();
+
     Timer.periodic(const Duration(milliseconds: 100), (_) async {
       final n = await _lib.checkReceiveQueue();
       if (n > 0) _receiveResponse();
@@ -81,47 +84,58 @@ class LibqaulWorker {
   }
 
   Future<void> getUsers() async {
-    await _encodeAndSendMessage(Modules.USERS, Users(userRequest: UserRequest()).writeToBuffer());
+    await _encodeAndSendMessage(
+        Modules.USERS, Users(userRequest: UserRequest()).writeToBuffer());
 
-    _encodeAndSendMessage(
-        Modules.ROUTER, Router(routingTableRequest: RoutingTableRequest()).writeToBuffer());
+    _encodeAndSendMessage(Modules.ROUTER,
+        Router(routingTableRequest: RoutingTableRequest()).writeToBuffer());
   }
 
   Future<void> verifyUser(User u) async {
     var entry = _baseUserEntryFrom(u);
     entry.verified = true;
-    await _encodeAndSendMessage(Modules.USERS, Users(userUpdate: entry).writeToBuffer());
+    await _encodeAndSendMessage(
+        Modules.USERS, Users(userUpdate: entry).writeToBuffer());
   }
 
   Future<void> unverifyUser(User u) async {
     var entry = _baseUserEntryFrom(u);
     entry.verified = false;
-    await _encodeAndSendMessage(Modules.USERS, Users(userUpdate: entry).writeToBuffer());
+    await _encodeAndSendMessage(
+        Modules.USERS, Users(userUpdate: entry).writeToBuffer());
   }
 
   Future<void> blockUser(User u) async {
     final entry = _baseUserEntryFrom(u);
     entry.blocked = true;
-    await _encodeAndSendMessage(Modules.USERS, Users(userUpdate: entry).writeToBuffer());
+    await _encodeAndSendMessage(
+        Modules.USERS, Users(userUpdate: entry).writeToBuffer());
   }
 
   Future<void> unblockUser(User u) async {
     final entry = _baseUserEntryFrom(u);
     entry.blocked = false;
-    await _encodeAndSendMessage(Modules.USERS, Users(userUpdate: entry).writeToBuffer());
+    await _encodeAndSendMessage(
+        Modules.USERS, Users(userUpdate: entry).writeToBuffer());
   }
 
-  Future<void> getNodeInfo() async =>
-      await _encodeAndSendMessage(Modules.NODE, Node(getNodeInfo: true).writeToBuffer());
+  Future<void> getNodeInfo() async => await _encodeAndSendMessage(
+      Modules.NODE, Node(getNodeInfo: true).writeToBuffer());
 
-  Future<void> requestNodes() async => await _encodeAndSendMessage(Modules.CONNECTIONS,
-      Connections(internetNodesRequest: InternetNodesRequest()).writeToBuffer());
+  Future<void> requestNodes() async => await _encodeAndSendMessage(
+      Modules.CONNECTIONS,
+      Connections(internetNodesRequest: InternetNodesRequest())
+          .writeToBuffer());
 
-  Future<void> addNode(String address) async => await _encodeAndSendMessage(Modules.CONNECTIONS,
-      Connections(internetNodesAdd: InternetNodesEntry(address: address)).writeToBuffer());
+  Future<void> addNode(String address) async => await _encodeAndSendMessage(
+      Modules.CONNECTIONS,
+      Connections(internetNodesAdd: InternetNodesEntry(address: address))
+          .writeToBuffer());
 
-  Future<void> removeNode(String address) async => await _encodeAndSendMessage(Modules.CONNECTIONS,
-      Connections(internetNodesRemove: InternetNodesEntry(address: address)).writeToBuffer());
+  Future<void> removeNode(String address) async => await _encodeAndSendMessage(
+      Modules.CONNECTIONS,
+      Connections(internetNodesRemove: InternetNodesEntry(address: address))
+          .writeToBuffer());
 
   Future<void> getDefaultUserAccount() async {
     final message = UserAccounts(getDefaultUserAccount: true);
@@ -159,6 +173,10 @@ class LibqaulWorker {
     await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
   }
 
+  void setLibqaulLogging(bool enabled) async {
+    final msg = Debug(logToFile: LogToFile(enable: enabled));
+    await _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
+  }
   // *******************************
   // Private (helper) methods
   // *******************************
@@ -170,6 +188,11 @@ class LibqaulWorker {
         keyType: u.keyType,
         keyBase58: u.keyBase58,
       );
+
+  void _getLibqaulLogsStoragePath() async {
+    final msg = Debug(storagePathRequest: StoragePathRequest());
+    await _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
+  }
 
   // *******************************
   // Private (control) methods
@@ -229,8 +252,13 @@ class LibqaulWorker {
           _log.finest('libqaul answered a heartbeat request');
           _heartbeats.removeFirst();
         }
+        if (resp?.data is String) {
+          _log.info('libqaul log storage path: ${resp!.data}');
+          _reader(libqaulLogsStoragePath.state).state = resp.data;
+        }
       } else {
-        throw UnhandledRpcMessageException.value(m.toString(), 'LibqaulWorker.receiveResponse');
+        throw UnhandledRpcMessageException.value(
+            m.toString(), 'LibqaulWorker.receiveResponse');
       }
     }
   }
@@ -282,7 +310,8 @@ class LibqaulWorker {
         if (resp.data is ChatRoom) {
           final currentRoom = _reader(currentOpenChatRoom);
 
-          if (currentRoom != null && currentRoom.conversationId.equals(resp.data.conversationId)) {
+          if (currentRoom != null &&
+              currentRoom.conversationId.equals(resp.data.conversationId)) {
             _reader(currentOpenChatRoom.notifier).state = resp.data;
           }
           return;
@@ -291,6 +320,7 @@ class LibqaulWorker {
     }
 
     _log.severe('_processResponse: UnhandledRpcMessageException($resp)');
-    throw UnhandledRpcMessageException.value(resp.toString(), '_processResponse');
+    throw UnhandledRpcMessageException.value(
+        resp.toString(), '_processResponse');
   }
 }
