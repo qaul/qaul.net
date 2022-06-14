@@ -1,28 +1,26 @@
 # CircleCI
-Here's a breakdown of each task that can be currently performed by CircleCI, and how to trigger such task:
+> *The configuration docs can be found [here](circleci-configuration.md)*
 
-1. [Testing/analyzing Flutter codebase](#flutter-test-analyze)
-2. [Building libqaul binaries](#build-libqaul-android-and-ios-binaries)
+Here's a breakdown of each task that can be currently performed by CircleCI, and how to trigger such a task:
+
+1. [Testing/analyzing Flutter codebase](#analyze-and-test-flutter)
+1. [Testing Rust compilation](#build-rust)
+2. [Building libqaul binaries](#build-libqaul-binaries)
 3. [Building and Releasing a new Mobile Version](#release-flutter-version)
 
-### flutter-test-analyze
-This workflow is triggered on each commit pushed to the repo. It runs
+### analyze-and-test-flutter
+This workflow is triggered on each commit pushed to the repo that has changed the contents of `./qaul_ui`. It runs
 `flutter test` and `flutter analyze` in the `./qaul_ui` folder.
 
-### build-and-deploy
-This workflow goes through the following steps:
+### build-rust
+This workflow is triggered on each commit pushed to the repo that has changed the contents of `./rust`.
+It tests that libqaul successfully compiles to the Linux platform.
 
-1. Test/analyze the flutter codebase
-1. Build the Android *.AAR files & iOS *.a files for libqaul
-1. Build and release new beta builds for Android (Play Store) and iOS (Testflight)
+### Build libqaul binaries
+This task builds the library binaries to all platforms and creates a new Github release, where you can download them.
 
-One can either trigger the **entire workflow** or **only the Step 2**.
-
-#### Build libqaul Android and iOS binaries
-This task builds both library binaries and store them as artifacts on CircleCI, where you can download them.
-
-To trigger such a task in isolation, one must create an annotated tag starting with "v" followed by the new [SemVer](https://semver.org) and ending with the "-rust" suffix.
->> Note: You should use the version described in `rust/libqaul/Cargo.toml` as the release version, and update it accordingly
+To trigger such a task, one must create an annotated tag starting with "v" followed by the new [SemVer](https://semver.org) and ending with the "-rust" suffix.
+> Note: You should use the version described in `rust/libqaul/Cargo.toml` as the release version, and update it accordingly. Any diversion between the git tag's version and that of Cargo.toml will fail the pipeline.
 
 ```bash
 # Creates annotated tag
@@ -32,20 +30,12 @@ git tag -a v<SemVer>-rust -m '<brief message>'
 git push --follow-tags
 ```
 
-All pipelines can be seen on the [CircleCI app dashboard](https://app.circleci.com/pipelines/github/qaul/qaul.net?filter=all).
-Search for your pushed tag and, once the pipeline succeeds, you can retrieve the binaries.
-
-1. Click on either `build-libqaul-ios` or `build-libqaul-android` jobs:
-![circleci_workflow.png](images/circleci_workflow.png)
-   
-1. Under the *Artifacts* tab you'll be able to download their respective binaries:
-![circleci_artifacts_tab.png](images/circleci_artifacts_tab.png)
-
-#### Release Flutter Version
+### Release Flutter Version
 This task will create a beta release on the Play Store & Testflight, as well as generate the libqaul mobile binaries.
 In addition, desktop installers and the mobile apps will be added to a new Github Release.
+
 To trigger this workflow, one must create an annotated tag starting with "v" followed by the new [SemVer](https://semver.org) and ending with the "-flutter" suffix.
->> Note: You should use the version described in `qaul_ui/pubspec.yaml` as the release version, and update it accordingly
+> Note: You should use the version described in `qaul_ui/pubspec.yaml` as the release version, and update it accordingly. Any diversion between the git tag's version and that of pubspec.yaml will fail the pipeline.
 
 ```bash
 # Creates annotated tag
