@@ -122,6 +122,9 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
+
   hive_generator: ^1.1.1
   build_runner: ^2.1.4
 
