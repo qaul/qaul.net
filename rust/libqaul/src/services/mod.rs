@@ -16,6 +16,7 @@ pub mod page;
 pub mod feed;
 pub mod messaging;
 pub mod chat;
+pub mod filesharing;
 
 /// qaul Services
 pub struct Services {

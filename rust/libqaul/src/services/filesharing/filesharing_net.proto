@@ -1,0 +1,46 @@
+syntax = "proto3";
+package qaul.net.filesharing;
+
+
+// Qaul FileSharing Network Message
+message FileSharingContainer {
+    // filesharing module
+    FileSharingModules module = 1;
+    // message content
+    bytes message = 2;
+}
+
+// Identification to which module the message shall be 
+// handed to.
+enum FileSharingModules {
+    // file info message
+    INFO = 0;
+    // file data message
+    PACKAGE = 1;
+}
+
+// FileSharing Message Content
+message FileSharingInfo {
+    // file name
+    string file_name = 1;
+    // file size
+    uint32 file_size = 2;
+
+    // file description
+    string file_descr = 3;
+
+    // size per package 
+    uint32 size_per_package = 4;
+
+    // file id
+    bytes  file_id = 5;
+}
+
+message FileSharingData{    
+    // file id
+    bytes  file_id = 1;
+    // package sequence
+    uint32 sequence = 2;
+    // package data
+    bytes data = 3;
+}
