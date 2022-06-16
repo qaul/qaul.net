@@ -34,8 +34,9 @@ message Data {
 message Messaging {
     oneof message {
         Confirmation confirmation_message = 1;
-        ChatMessage chat_message = 2;
-        CryptoService crypto_service = 3;
+        CryptoService crypto_service = 2;
+        ChatMessage chat_message = 3;
+        FileMessage file_message = 4;
     }
 }
 
@@ -70,4 +71,9 @@ message ChatMessage {
     uint64 sent_at = 3;
     // message
     string content = 4;
+}
+
+// chat message
+message FileMessage {
+    bytes content = 1;
 }

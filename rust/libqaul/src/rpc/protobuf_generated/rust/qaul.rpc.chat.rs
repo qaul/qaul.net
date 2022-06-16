@@ -61,8 +61,8 @@ pub struct ChatOverview {
     #[prost(int32, tag="5")]
     pub unread: i32,
     /// preview text of the last message
-    #[prost(string, tag="6")]
-    pub content: ::prost::alloc::string::String,
+    #[prost(bytes="vec", tag="6")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
     /// sender of the last message
     #[prost(bytes="vec", tag="7")]
     pub last_message_sender_id: ::prost::alloc::vec::Vec<u8>,
@@ -110,8 +110,52 @@ pub struct ChatMessage {
     #[prost(uint64, tag="6")]
     pub received_at: u64,
     /// content of the message
-    #[prost(string, tag="7")]
+    #[prost(bytes="vec", tag="7")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
+}
+/// chat message content
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ChatMessageContent {
+    #[prost(oneof="chat_message_content::Content", tags="1, 2")]
+    pub content: ::core::option::Option<chat_message_content::Content>,
+}
+/// Nested message and enum types in `ChatMessageContent`.
+pub mod chat_message_content {
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Content {
+        /// chat content
+        #[prost(message, tag="1")]
+        ChatContent(super::ChatContent),
+        /// file sharing content
+        #[prost(message, tag="2")]
+        FileContent(super::FileShareContent),
+    }
+}
+///chat content 
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ChatContent {
+    ///content
+    #[prost(string, tag="1")]
     pub content: ::prost::alloc::string::String,
+}
+///file sharing content
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FileShareContent {
+    ///file history index in DB
+    #[prost(uint64, tag="1")]
+    pub history_index: u64,
+    ///file identifier
+    #[prost(uint64, tag="2")]
+    pub file_id: u64,
+    ///file name
+    #[prost(string, tag="3")]
+    pub file_name: ::prost::alloc::string::String,
+    ///file size
+    #[prost(uint32, tag="4")]
+    pub file_size: u32,
+    ///file description
+    #[prost(string, tag="5")]
+    pub file_descr: ::prost::alloc::string::String,
 }
 /// send chat message
 #[derive(Clone, PartialEq, ::prost::Message)]

@@ -223,7 +223,26 @@ impl Chat {
                             print!("  {} | ", message.unread);
                             print!("{} | ", message.last_message_index);
                             print!("{} | ", message.last_message_at);
-                            println!("{}", message.content);
+                            match proto::ChatMessageContent::decode(&message.content[..]) {
+                                Ok(chat_message_content) =>{
+                                    match chat_message_content.content{
+                                        Some(proto::chat_message_content::Content::ChatContent(chat_content)) =>{
+                                            println!("  {}", chat_content.content);
+                                        },
+                                        Some(proto::chat_message_content::Content::FileContent(file_content)) =>{
+                                            println!("  {}, {} bytes", file_content.file_name, file_content.file_size);
+                                            println!("  index: {}, id: {}", file_content.history_index, file_content.file_id);
+                                            println!("  description: {}", file_content.file_descr);
+                                        },
+                                        _ =>{
+                                            log::error!("unknown ChatMessageContent");   
+                                        }
+                                    }
+                                },
+                                Err(e) => {
+                                    log::error!("{:?}", e);
+                                },                    
+                            }                            
                             println!("");
                         }
                     }
@@ -251,9 +270,34 @@ impl Chat {
                             print!("{} | ", message.sent_at);
                             println!("{}", bs58::encode(message.sender_id).into_string());
 
-                            println!(" [{}] {}", bs58::encode(message.message_id).into_string(), message.received_at);
+                            if message.message_id.len() > 0{
+                                println!(" [{}] {}", bs58::encode(message.message_id).into_string(), message.received_at);
+                            }else{
+                                println!(" {}", message.received_at);
+                            }                            
 
-                             println!("  {}", message.content);
+                            match proto::ChatMessageContent::decode(&message.content[..]) {
+                                Ok(chat_message_content) =>{
+                                    match chat_message_content.content{
+                                        Some(proto::chat_message_content::Content::ChatContent(chat_content)) =>{
+                                            println!("  {}", chat_content.content);
+                                        },
+                                        Some(proto::chat_message_content::Content::FileContent(file_content)) =>{
+                                            println!("  {}, {} bytes", file_content.file_name, file_content.file_size);
+                                            println!("  index: {}, id: {}", file_content.history_index, file_content.file_id);
+                                            println!("  description: {}", file_content.file_descr);
+                                        },
+                                        _ =>{
+                                            log::error!("unknown ChatMessageContent");   
+                                        }
+                                    }
+                                },
+                                Err(e) => {
+                                    log::error!("{:?}", e);
+                                },                    
+                            }
+
+                            
                             println!("");
                         }
                     }

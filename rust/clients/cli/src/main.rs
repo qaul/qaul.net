@@ -26,6 +26,7 @@ mod feed;
 mod chat;
 mod debug;
 mod ble;
+mod fileshare;
 
 use cli::Cli;
 use rpc::Rpc;

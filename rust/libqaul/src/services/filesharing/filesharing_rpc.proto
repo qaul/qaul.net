@@ -1,0 +1,72 @@
+syntax = "proto3";
+package qaul.rpc.filesharing;
+
+// File sharing service RPC message container
+message FileSharing {
+    // message type
+    oneof message {
+        // request for sending file
+        SendFileRequest send_file_request = 1;
+        // file histories request
+        FileHistoryRequest file_history = 2;
+        //file histories response
+        FileHistoryResponse file_history_response = 3;
+    }
+}
+
+// Send File Request
+message SendFileRequest{
+    // file path name to send
+    string path_name = 1;
+    // conversation id to receive file
+    bytes  conversation_id =2;
+    // description
+    string  description =3;
+}
+
+// File History Request
+message FileHistoryRequest{
+    // offset
+    uint32 offset = 1;
+    // limit
+    uint32 limit = 2;
+}
+
+// File History Entry
+message FileHistoryEntry{
+    // file id
+    uint64 file_id = 1;
+
+    // file name
+    string file_name = 2;
+    // file extension
+    string file_ext = 3;
+    // file size
+    uint32 file_size = 4;
+    // file description
+    string file_descr = 5;
+    // time
+    uint64 time = 6;
+
+    // sent/recv
+    bool sent = 7;
+
+    // peer id
+    string peer_id = 8;
+}
+
+// File History Response
+message FileHistoryResponse{
+    // offset
+    uint32 offset = 1;
+    // limit
+    uint32 limit = 2;
+
+    // limit
+    uint64 total = 3;
+
+    // histories
+    repeated FileHistoryEntry histories = 4;
+}
+
+

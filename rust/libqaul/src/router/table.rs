@@ -218,6 +218,8 @@ impl RoutingTable {
         if let Some(user_entry) = routing_table.table.get(&user_id) {
             let mut compare: Option<&RoutingConnectionEntry> = None;
 
+            //log::error!("found user entry connections = {}", user_entry.connections.len());
+
             // find best route
             for connection in &user_entry.connections {
                 match compare {
@@ -236,7 +238,6 @@ impl RoutingTable {
                 Some(connection) => return Some(connection.to_owned()),
             }
         }
-
         None
     }
 

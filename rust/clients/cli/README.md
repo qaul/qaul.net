@@ -54,6 +54,9 @@ The following commands are available:
   * `chat send {Conversation ID} {Chat Message}` - sends the {Chat Message} to the user with the ID {Conversation ID}
   * `chat overview` - displays an overview of all conversations and the last messages within them
   * `chat conversation {Conversation ID}` - displays all messages of the conversation with the ID {Conversation ID}
+* file sharing
+  * `file send {Conversation ID} {File Path}` - sends a file to the user with the ID {Conversation ID}
+  * `file history 0` - displays the file history for the default user account
 * debug
   * all these commands are for debugging purposes only
   * `debug rpc sent` - displays the number of RPC messages sent to libqaul

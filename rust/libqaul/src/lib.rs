@@ -454,9 +454,10 @@ pub async fn start(storage_path: String) -> () {
                         RouterInfo::check_scheduler()
                     {
                         log::info!(
-                            "sending routing information via {:?} to {:?}",
+                            "sending routing information via {:?} to {:?}, {:?}",
                             connection_module,
-                            neighbour_id
+                            neighbour_id,
+                            Timestamp::get_timestamp()
                         );
                         // send routing information
                         match connection_module {
