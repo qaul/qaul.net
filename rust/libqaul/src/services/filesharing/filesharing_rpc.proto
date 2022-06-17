@@ -7,4 +7,8 @@ message FileSharing {
     string path_name = 1;
     // conversation id to receive file
     bytes  conversation_id =2;
+
+    // description
+    string  description =3;
+
 }

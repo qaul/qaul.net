@@ -20,6 +20,8 @@ use crate::router;
 use crate::router::table::RoutingTable;
 use super::chat::Chat;
 
+use super::filesharing;
+
 use qaul_messaging::QaulMessagingReceived;
 use crate::utilities::timestamp::Timestamp;
 use crate::storage::database::DataBase;
@@ -282,6 +284,9 @@ impl Messaging {
                                                 }
                                             }
                                         },
+                                        Some(proto::messaging::Message::FileMessage(file_message)) => {
+                                            filesharing::FileShare::on_receive_message(sender_id, receiver_id, file_message.content);   
+                                        }
                                         None => {
                                             log::error!("message {} from {} was empty", bs58::encode(container.signature).into_string(), sender_id.to_base58())
                                         }

@@ -29,7 +29,7 @@ pub struct Envelope {
 /// messaging unified message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Messaging {
-    #[prost(oneof="messaging::Message", tags="1, 2")]
+    #[prost(oneof="messaging::Message", tags="1, 2, 3")]
     pub message: ::core::option::Option<messaging::Message>,
 }
 /// Nested message and enum types in `Messaging`.
@@ -40,6 +40,8 @@ pub mod messaging {
         ConfirmationMessage(super::Confirmation),
         #[prost(message, tag="2")]
         ChatMessage(super::ChatMessage),
+        #[prost(message, tag="3")]
+        FileMessage(super::FileMessage),
     }
 }
 /// message received confirmation
@@ -74,4 +76,10 @@ pub struct ChatMessage {
     /// message
     #[prost(string, tag="4")]
     pub content: ::prost::alloc::string::String,
+}
+/// chat message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FileMessage {
+    #[prost(bytes="vec", tag="1")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
 }

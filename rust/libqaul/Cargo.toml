@@ -39,6 +39,7 @@ serde_yaml = "0.8"
 sled = "0.34.7"
 sled-extensions = { version = "0.2", features = ["bincode"] }
 uuid = { version = "0.8.2", features = ["v4"] }
+crc = "^1.0.0"
 
 # only for desktop platforms: Linux, Mac, Windows
 directories = "4.0"
