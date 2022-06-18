@@ -14,7 +14,9 @@ use crossbeam_channel::TryRecvError;
 use futures::executor::block_on;
 use std::{
     thread,
+    path::PathBuf,
 };
+#[cfg(not(target_os = "macos"))]
 use directories::ProjectDirs;
 
 use crate::rpc::Rpc;
@@ -49,32 +51,54 @@ pub fn start(storage_path: String) {
 /// The locations are:
 /// 
 /// * Linux: /home/USERNAME/.config/qaul
-/// * MacOS: /Users/USERNAME/Library/Application Support/net.qaul.qaul
-///   * in flutter app: /Users/USERNAME/Library/Containers/net.qaul.qaulApp/Application Support/net.qaul.qaul
+/// * MacOS container directory: /Users/USERNAME/Library/Containers/net.qaul.qaulApp
 /// * Windows: C:\Users\USERNAME\AppData\Roaming\qaul\qaul\config
 pub fn start_desktop() {
+    let path: PathBuf;
+
     log::info!("start_desktop");
-    // create path
-    if let Some(proj_dirs) = ProjectDirs::from("net", "qaul", "qaul") {
-        // get path
-        let path = proj_dirs.config_dir();
 
-        log::info!("configuration path: {:?}", path);
-
-        // check if path already exists
-        if !path.exists() {
-            log::info!("create path");
-
-            // create path if it does not exist
-            std::fs::create_dir_all(path).unwrap();
+    // create path for macos
+    #[cfg(target_os = "macos")]
+    {
+        match std::env::current_dir() {
+            Ok(dir) => path = dir,
+            Err(e) => {
+                log::error!("{}", e);
+                return;
+            },
         }
+    }
+    // create path on linux and windows
+    #[cfg(not(target_os = "macos"))]
+    {
+        match ProjectDirs::from("net", "qaul", "qaul") {
+            Some(proj_dirs) => path = proj_dirs.config_dir().to_path_buf(),
+            None => {
+                log::error!("Configuration path couldn't be created.");
+                return;
+            }
+        }
+    }
 
-        log::info!("start libqaul");
+    log::info!("configuration path: {:?}", path.as_path());
 
-        // start the library with the path
-        start(path.to_str().unwrap().to_string());
-    } else {
-        log::error!("Configuration path couldn't be created.");
+    // check if path already exists
+    if !path.exists() {
+        log::info!("create path");
+
+        // create path if it does not exist
+        std::fs::create_dir_all(path.as_path()).unwrap();
+    }
+
+    log::info!("start libqaul");
+
+    // start the library with the path
+    match path.to_str() {
+        Some(path_str) => {
+            start(path_str.to_string());
+        },
+        None => log::error!("no path found"),
     }
 }
 
