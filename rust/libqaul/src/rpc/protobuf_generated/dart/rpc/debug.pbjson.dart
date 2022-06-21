@@ -18,6 +18,7 @@ const Debug$json = const {
     const {'1': 'log_to_file', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.debug.LogToFile', '9': 0, '10': 'logToFile'},
     const {'1': 'storage_path_request', '3': 5, '4': 1, '5': 11, '6': '.qaul.rpc.debug.StoragePathRequest', '9': 0, '10': 'storagePathRequest'},
     const {'1': 'storage_path_response', '3': 6, '4': 1, '5': 11, '6': '.qaul.rpc.debug.StoragePathResponse', '9': 0, '10': 'storagePathResponse'},
+    const {'1': 'delete_libqaul_logs_request', '3': 7, '4': 1, '5': 11, '6': '.qaul.rpc.debug.DeleteLibqaulLogsRequest', '9': 0, '10': 'deleteLibqaulLogsRequest'},
   ],
   '8': const [
     const {'1': 'message'},
@@ -25,7 +26,7 @@ const Debug$json = const {
 };
 
 /// Descriptor for `Debug`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List debugDescriptor = $convert.base64Decode('CgVEZWJ1ZxJPChFoZWFydGJlYXRfcmVxdWVzdBgBIAEoCzIgLnFhdWwucnBjLmRlYnVnLkhlYXJ0YmVhdFJlcXVlc3RIAFIQaGVhcnRiZWF0UmVxdWVzdBJSChJoZWFydGJlYXRfcmVzcG9uc2UYAiABKAsyIS5xYXVsLnJwYy5kZWJ1Zy5IZWFydGJlYXRSZXNwb25zZUgAUhFoZWFydGJlYXRSZXNwb25zZRItCgVwYW5pYxgDIAEoCzIVLnFhdWwucnBjLmRlYnVnLlBhbmljSABSBXBhbmljEjsKC2xvZ190b19maWxlGAQgASgLMhkucWF1bC5ycGMuZGVidWcuTG9nVG9GaWxlSABSCWxvZ1RvRmlsZRJWChRzdG9yYWdlX3BhdGhfcmVxdWVzdBgFIAEoCzIiLnFhdWwucnBjLmRlYnVnLlN0b3JhZ2VQYXRoUmVxdWVzdEgAUhJzdG9yYWdlUGF0aFJlcXVlc3QSWQoVc3RvcmFnZV9wYXRoX3Jlc3BvbnNlGAYgASgLMiMucWF1bC5ycGMuZGVidWcuU3RvcmFnZVBhdGhSZXNwb25zZUgAUhNzdG9yYWdlUGF0aFJlc3BvbnNlQgkKB21lc3NhZ2U=');
+final $typed_data.Uint8List debugDescriptor = $convert.base64Decode('CgVEZWJ1ZxJPChFoZWFydGJlYXRfcmVxdWVzdBgBIAEoCzIgLnFhdWwucnBjLmRlYnVnLkhlYXJ0YmVhdFJlcXVlc3RIAFIQaGVhcnRiZWF0UmVxdWVzdBJSChJoZWFydGJlYXRfcmVzcG9uc2UYAiABKAsyIS5xYXVsLnJwYy5kZWJ1Zy5IZWFydGJlYXRSZXNwb25zZUgAUhFoZWFydGJlYXRSZXNwb25zZRItCgVwYW5pYxgDIAEoCzIVLnFhdWwucnBjLmRlYnVnLlBhbmljSABSBXBhbmljEjsKC2xvZ190b19maWxlGAQgASgLMhkucWF1bC5ycGMuZGVidWcuTG9nVG9GaWxlSABSCWxvZ1RvRmlsZRJWChRzdG9yYWdlX3BhdGhfcmVxdWVzdBgFIAEoCzIiLnFhdWwucnBjLmRlYnVnLlN0b3JhZ2VQYXRoUmVxdWVzdEgAUhJzdG9yYWdlUGF0aFJlcXVlc3QSWQoVc3RvcmFnZV9wYXRoX3Jlc3BvbnNlGAYgASgLMiMucWF1bC5ycGMuZGVidWcuU3RvcmFnZVBhdGhSZXNwb25zZUgAUhNzdG9yYWdlUGF0aFJlc3BvbnNlEmkKG2RlbGV0ZV9saWJxYXVsX2xvZ3NfcmVxdWVzdBgHIAEoCzIoLnFhdWwucnBjLmRlYnVnLkRlbGV0ZUxpYnFhdWxMb2dzUmVxdWVzdEgAUhhkZWxldGVMaWJxYXVsTG9nc1JlcXVlc3RCCQoHbWVzc2FnZQ==');
 @$core.Deprecated('Use heartbeatRequestDescriptor instead')
 const HeartbeatRequest$json = const {
   '1': 'HeartbeatRequest',
@@ -74,3 +75,10 @@ const StoragePathResponse$json = const {
 
 /// Descriptor for `StoragePathResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List storagePathResponseDescriptor = $convert.base64Decode('ChNTdG9yYWdlUGF0aFJlc3BvbnNlEiEKDHN0b3JhZ2VfcGF0aBgBIAEoCVILc3RvcmFnZVBhdGg=');
+@$core.Deprecated('Use deleteLibqaulLogsRequestDescriptor instead')
+const DeleteLibqaulLogsRequest$json = const {
+  '1': 'DeleteLibqaulLogsRequest',
+};
+
+/// Descriptor for `DeleteLibqaulLogsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List deleteLibqaulLogsRequestDescriptor = $convert.base64Decode('ChhEZWxldGVMaWJxYXVsTG9nc1JlcXVlc3Q=');

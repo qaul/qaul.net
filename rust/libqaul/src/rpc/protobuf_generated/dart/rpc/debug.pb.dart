@@ -16,6 +16,7 @@ enum Debug_Message {
   logToFile, 
   storagePathRequest, 
   storagePathResponse, 
+  deleteLibqaulLogsRequest, 
   notSet
 }
 
@@ -27,16 +28,18 @@ class Debug extends $pb.GeneratedMessage {
     4 : Debug_Message.logToFile,
     5 : Debug_Message.storagePathRequest,
     6 : Debug_Message.storagePathResponse,
+    7 : Debug_Message.deleteLibqaulLogsRequest,
     0 : Debug_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Debug', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 7])
     ..aOM<HeartbeatRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'heartbeatRequest', subBuilder: HeartbeatRequest.create)
     ..aOM<HeartbeatResponse>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'heartbeatResponse', subBuilder: HeartbeatResponse.create)
     ..aOM<Panic>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'panic', subBuilder: Panic.create)
     ..aOM<LogToFile>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'logToFile', subBuilder: LogToFile.create)
     ..aOM<StoragePathRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'storagePathRequest', subBuilder: StoragePathRequest.create)
     ..aOM<StoragePathResponse>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'storagePathResponse', subBuilder: StoragePathResponse.create)
+    ..aOM<DeleteLibqaulLogsRequest>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'deleteLibqaulLogsRequest', subBuilder: DeleteLibqaulLogsRequest.create)
     ..hasRequiredFields = false
   ;
 
@@ -48,6 +51,7 @@ class Debug extends $pb.GeneratedMessage {
     LogToFile? logToFile,
     StoragePathRequest? storagePathRequest,
     StoragePathResponse? storagePathResponse,
+    DeleteLibqaulLogsRequest? deleteLibqaulLogsRequest,
   }) {
     final _result = create();
     if (heartbeatRequest != null) {
@@ -67,6 +71,9 @@ class Debug extends $pb.GeneratedMessage {
     }
     if (storagePathResponse != null) {
       _result.storagePathResponse = storagePathResponse;
+    }
+    if (deleteLibqaulLogsRequest != null) {
+      _result.deleteLibqaulLogsRequest = deleteLibqaulLogsRequest;
     }
     return _result;
   }
@@ -159,6 +166,17 @@ class Debug extends $pb.GeneratedMessage {
   void clearStoragePathResponse() => clearField(6);
   @$pb.TagNumber(6)
   StoragePathResponse ensureStoragePathResponse() => $_ensure(5);
+
+  @$pb.TagNumber(7)
+  DeleteLibqaulLogsRequest get deleteLibqaulLogsRequest => $_getN(6);
+  @$pb.TagNumber(7)
+  set deleteLibqaulLogsRequest(DeleteLibqaulLogsRequest v) { setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasDeleteLibqaulLogsRequest() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearDeleteLibqaulLogsRequest() => clearField(7);
+  @$pb.TagNumber(7)
+  DeleteLibqaulLogsRequest ensureDeleteLibqaulLogsRequest() => $_ensure(6);
 }
 
 class HeartbeatRequest extends $pb.GeneratedMessage {
@@ -369,5 +387,34 @@ class StoragePathResponse extends $pb.GeneratedMessage {
   $core.bool hasStoragePath() => $_has(0);
   @$pb.TagNumber(1)
   void clearStoragePath() => clearField(1);
+}
+
+class DeleteLibqaulLogsRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DeleteLibqaulLogsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  DeleteLibqaulLogsRequest._() : super();
+  factory DeleteLibqaulLogsRequest() => create();
+  factory DeleteLibqaulLogsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DeleteLibqaulLogsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DeleteLibqaulLogsRequest clone() => DeleteLibqaulLogsRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DeleteLibqaulLogsRequest copyWith(void Function(DeleteLibqaulLogsRequest) updates) => super.copyWith((message) => updates(message as DeleteLibqaulLogsRequest)) as DeleteLibqaulLogsRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static DeleteLibqaulLogsRequest create() => DeleteLibqaulLogsRequest._();
+  DeleteLibqaulLogsRequest createEmptyInstance() => create();
+  static $pb.PbList<DeleteLibqaulLogsRequest> createRepeated() => $pb.PbList<DeleteLibqaulLogsRequest>();
+  @$core.pragma('dart2js:noInline')
+  static DeleteLibqaulLogsRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteLibqaulLogsRequest>(create);
+  static DeleteLibqaulLogsRequest? _defaultInstance;
 }
 

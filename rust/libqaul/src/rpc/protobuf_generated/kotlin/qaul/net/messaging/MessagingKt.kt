@@ -69,6 +69,30 @@ public object MessagingKt {
     public fun hasChatMessage(): kotlin.Boolean {
       return _builder.hasChatMessage()
     }
+
+    /**
+     * <code>.qaul.net.messaging.CryptoService crypto_service = 3;</code>
+     */
+    public var cryptoService: qaul.net.messaging.MessagingOuterClass.CryptoService
+      @JvmName("getCryptoService")
+      get() = _builder.getCryptoService()
+      @JvmName("setCryptoService")
+      set(value) {
+        _builder.setCryptoService(value)
+      }
+    /**
+     * <code>.qaul.net.messaging.CryptoService crypto_service = 3;</code>
+     */
+    public fun clearCryptoService() {
+      _builder.clearCryptoService()
+    }
+    /**
+     * <code>.qaul.net.messaging.CryptoService crypto_service = 3;</code>
+     * @return Whether the cryptoService field is set.
+     */
+    public fun hasCryptoService(): kotlin.Boolean {
+      return _builder.hasCryptoService()
+    }
     public val messageCase: qaul.net.messaging.MessagingOuterClass.Messaging.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
@@ -87,4 +111,7 @@ val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.confirmationMessag
 
 val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.chatMessageOrNull: qaul.net.messaging.MessagingOuterClass.ChatMessage?
   get() = if (hasChatMessage()) getChatMessage() else null
+
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.cryptoServiceOrNull: qaul.net.messaging.MessagingOuterClass.CryptoService?
+  get() = if (hasCryptoService()) getCryptoService() else null
 

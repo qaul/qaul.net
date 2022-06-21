@@ -1,7 +1,6 @@
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+part of 'email_logging_coordinator.dart';
 
-class InfoProvider {
+class _InfoProvider {
   static Future<Map<String, dynamic>> getPackageInfo() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     return {

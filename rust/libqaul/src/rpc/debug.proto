@@ -11,7 +11,7 @@ message Debug {
         // response to the heartbeat request
         HeartbeatResponse heartbeat_response = 2;
 
-        // libqaul panics immediatly
+        // libqaul panics immediately
         Panic panic = 3;
 
         // enable/disable logging to file
@@ -22,6 +22,8 @@ message Debug {
         // Storage Path Response
         StoragePathResponse storage_path_response = 6;
 
+        // Request for library to delete logs
+        DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;
     }
 }
 
@@ -72,4 +74,10 @@ message StoragePathRequest {
 //
 message StoragePathResponse {
     string storage_path = 1;
+}
+
+// DeleteLibqaulLogsRequest
+//
+// Requests for the log folder to be wiped clean
+message DeleteLibqaulLogsRequest {
 }

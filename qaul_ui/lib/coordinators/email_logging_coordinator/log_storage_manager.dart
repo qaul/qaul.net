@@ -1,21 +1,15 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:archive/archive.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:neat_periodic_task/neat_periodic_task.dart';
-import 'package:path_provider/path_provider.dart';
+part of 'email_logging_coordinator.dart';
 
 @immutable
-class LogEntry {
-  const LogEntry(this.title, this.contents);
+class _LogEntry {
+  const _LogEntry(this.title, this.contents);
 
   final String title;
   final String contents;
 }
 
-class StorageManager {
-  StorageManager() {
+class _LogStorageManager {
+  _LogStorageManager() {
     _deleteObsoleteSchedule = NeatPeriodicTaskScheduler(
       interval: const Duration(minutes: 5),
       name: 'delete-obsolete-logs',
@@ -40,6 +34,11 @@ class StorageManager {
     await _deleteSurpassingSizeSchedule.stop();
   }
 
+  // ***************************************************************************
+  // Getters
+  // ***************************************************************************
+  final _log = Logger('LogStorageManager');
+
   /// String identifier used to later find the application's logs.
   String get titlePrefix => 'qaul_log';
 
@@ -49,6 +48,8 @@ class StorageManager {
         : (await getApplicationDocumentsDirectory()).path;
     return '$dir/Logs';
   }
+
+  Future<bool> get isEmpty async => (await logs).map((e) => e.path).isEmpty;
 
   Future<List<FileSystemEntity>> get logs async {
     var path = Directory(await _storeDirectory);
@@ -61,7 +62,7 @@ class StorageManager {
   }
 
   // ***************************************************************************
-  //
+  // Obsolete logs deletion task
   // ***************************************************************************
   late NeatPeriodicTaskScheduler _deleteObsoleteSchedule;
   static const _staleLogPeriod = Duration(days: 14);
@@ -77,7 +78,7 @@ class StorageManager {
   }
 
   // ***************************************************************************
-  //
+  // Surpassing size/maximum number logs deletion task
   // ***************************************************************************
   late NeatPeriodicTaskScheduler _deleteSurpassingSizeSchedule;
   static const _maxSizeInBytes = 200 * 1000; // 200 KB
@@ -97,32 +98,24 @@ class StorageManager {
   }
 
   // ***************************************************************************
-  //
+  // API
   // ***************************************************************************
   Future<void> deleteLogs(Iterable<FileSystemEntity> logs) async {
     for (final log in logs) {
+      _log.info('deleting log ${log.path}');
       await log.delete();
     }
-  }
-
-  DateTime _lastInteraction(FileStat stats) {
-    var access = stats.accessed;
-    var change = stats.changed;
-    var modified = stats.modified;
-    if (access.isAfter(change) && access.isAfter(modified)) return access;
-    if (change.isAfter(access) && change.isAfter(modified)) return change;
-    return modified;
-  }
-
-  Future<void> storeLog(LogEntry log) async {
-    final logBytes = _createCompressedLog(log.contents);
-    if (logBytes == null) return;
-    _storeCompressedLog(logBytes, log.title);
   }
 
   String logContents(FileSystemEntity log) {
     var contents = GZipDecoder().decodeBytes(File(log.path).readAsBytesSync());
     return utf8.decode(contents);
+  }
+
+  Future<void> storeLog(_LogEntry log) async {
+    final logBytes = _createCompressedLog(log.contents);
+    if (logBytes == null) return;
+    _storeCompressedLog(logBytes, log.title);
   }
 
   List<int>? _createCompressedLog(String logContent) {
@@ -132,9 +125,18 @@ class StorageManager {
 
   Future _storeCompressedLog(List<int> logBytes, String logTitle) async {
     final directory = await _storeDirectory;
-    debugPrint('storing log in directory: $directory');
+    _log.info('storing log "$logTitle.gzip" in directory:\n\t$directory');
     final file = File('$directory/$logTitle.gzip');
     file.createSync(recursive: true);
     file.writeAsBytesSync(logBytes);
+  }
+
+  DateTime _lastInteraction(FileStat stats) {
+    var access = stats.accessed;
+    var change = stats.changed;
+    var modified = stats.modified;
+    if (access.isAfter(change) && access.isAfter(modified)) return access;
+    if (change.isAfter(access) && change.isAfter(modified)) return change;
+    return modified;
   }
 }

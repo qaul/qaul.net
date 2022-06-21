@@ -22,3 +22,5 @@ final chatRoomsProvider =
     StateNotifierProvider<ChatRoomListNotifier, List<ChatRoom>>((ref) => ChatRoomListNotifier());
 
 final currentOpenChatRoom = StateProvider<ChatRoom?>((ref) => null);
+
+final libqaulLogsStoragePath = StateProvider<String?>((ref) => null);

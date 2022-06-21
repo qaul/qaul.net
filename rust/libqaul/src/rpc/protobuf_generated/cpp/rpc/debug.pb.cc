@@ -103,10 +103,21 @@ struct StoragePathResponseDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StoragePathResponseDefaultTypeInternal _StoragePathResponse_default_instance_;
+PROTOBUF_CONSTEXPR DeleteLibqaulLogsRequest::DeleteLibqaulLogsRequest(
+    ::_pbi::ConstantInitialized){}
+struct DeleteLibqaulLogsRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR DeleteLibqaulLogsRequestDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~DeleteLibqaulLogsRequestDefaultTypeInternal() {}
+  union {
+    DeleteLibqaulLogsRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DeleteLibqaulLogsRequestDefaultTypeInternal _DeleteLibqaulLogsRequest_default_instance_;
 }  // namespace debug
 }  // namespace rpc
 }  // namespace qaul
-static ::_pb::Metadata file_level_metadata_rpc_2fdebug_2eproto[7];
+static ::_pb::Metadata file_level_metadata_rpc_2fdebug_2eproto[8];
 static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_rpc_2fdebug_2eproto = nullptr;
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_rpc_2fdebug_2eproto = nullptr;
 
@@ -117,6 +128,7 @@ const uint32_t TableStruct_rpc_2fdebug_2eproto::offsets[] PROTOBUF_SECTION_VARIA
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::debug::Debug, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
@@ -162,15 +174,22 @@ const uint32_t TableStruct_rpc_2fdebug_2eproto::offsets[] PROTOBUF_SECTION_VARIA
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::debug::StoragePathResponse, storage_path_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::debug::DeleteLibqaulLogsRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::debug::Debug)},
-  { 13, -1, -1, sizeof(::qaul::rpc::debug::HeartbeatRequest)},
-  { 19, -1, -1, sizeof(::qaul::rpc::debug::HeartbeatResponse)},
-  { 25, -1, -1, sizeof(::qaul::rpc::debug::Panic)},
-  { 31, -1, -1, sizeof(::qaul::rpc::debug::LogToFile)},
-  { 38, -1, -1, sizeof(::qaul::rpc::debug::StoragePathRequest)},
-  { 44, -1, -1, sizeof(::qaul::rpc::debug::StoragePathResponse)},
+  { 14, -1, -1, sizeof(::qaul::rpc::debug::HeartbeatRequest)},
+  { 20, -1, -1, sizeof(::qaul::rpc::debug::HeartbeatResponse)},
+  { 26, -1, -1, sizeof(::qaul::rpc::debug::Panic)},
+  { 32, -1, -1, sizeof(::qaul::rpc::debug::LogToFile)},
+  { 39, -1, -1, sizeof(::qaul::rpc::debug::StoragePathRequest)},
+  { 45, -1, -1, sizeof(::qaul::rpc::debug::StoragePathResponse)},
+  { 52, -1, -1, sizeof(::qaul::rpc::debug::DeleteLibqaulLogsRequest)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -181,10 +200,11 @@ static const ::_pb::Message* const file_default_instances[] = {
   &::qaul::rpc::debug::_LogToFile_default_instance_._instance,
   &::qaul::rpc::debug::_StoragePathRequest_default_instance_._instance,
   &::qaul::rpc::debug::_StoragePathResponse_default_instance_._instance,
+  &::qaul::rpc::debug::_DeleteLibqaulLogsRequest_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_rpc_2fdebug_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\017rpc/debug.proto\022\016qaul.rpc.debug\"\366\002\n\005De"
+  "\n\017rpc/debug.proto\022\016qaul.rpc.debug\"\307\003\n\005De"
   "bug\022=\n\021heartbeat_request\030\001 \001(\0132 .qaul.rp"
   "c.debug.HeartbeatRequestH\000\022\?\n\022heartbeat_"
   "response\030\002 \001(\0132!.qaul.rpc.debug.Heartbea"
@@ -193,18 +213,20 @@ const char descriptor_table_protodef_rpc_2fdebug_2eproto[] PROTOBUF_SECTION_VARI
   "rpc.debug.LogToFileH\000\022B\n\024storage_path_re"
   "quest\030\005 \001(\0132\".qaul.rpc.debug.StoragePath"
   "RequestH\000\022D\n\025storage_path_response\030\006 \001(\013"
-  "2#.qaul.rpc.debug.StoragePathResponseH\000B"
-  "\t\n\007message\"\022\n\020HeartbeatRequest\"\023\n\021Heartb"
-  "eatResponse\"\007\n\005Panic\"\033\n\tLogToFile\022\016\n\006ena"
-  "ble\030\001 \001(\010\"\024\n\022StoragePathRequest\"+\n\023Stora"
-  "gePathResponse\022\024\n\014storage_path\030\001 \001(\tb\006pr"
-  "oto3"
+  "2#.qaul.rpc.debug.StoragePathResponseH\000\022"
+  "O\n\033delete_libqaul_logs_request\030\007 \001(\0132(.q"
+  "aul.rpc.debug.DeleteLibqaulLogsRequestH\000"
+  "B\t\n\007message\"\022\n\020HeartbeatRequest\"\023\n\021Heart"
+  "beatResponse\"\007\n\005Panic\"\033\n\tLogToFile\022\016\n\006en"
+  "able\030\001 \001(\010\"\024\n\022StoragePathRequest\"+\n\023Stor"
+  "agePathResponse\022\024\n\014storage_path\030\001 \001(\t\"\032\n"
+  "\030DeleteLibqaulLogsRequestb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_rpc_2fdebug_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_rpc_2fdebug_2eproto = {
-    false, false, 564, descriptor_table_protodef_rpc_2fdebug_2eproto,
+    false, false, 673, descriptor_table_protodef_rpc_2fdebug_2eproto,
     "rpc/debug.proto",
-    &descriptor_table_rpc_2fdebug_2eproto_once, nullptr, 0, 7,
+    &descriptor_table_rpc_2fdebug_2eproto_once, nullptr, 0, 8,
     schemas, file_default_instances, TableStruct_rpc_2fdebug_2eproto::offsets,
     file_level_metadata_rpc_2fdebug_2eproto, file_level_enum_descriptors_rpc_2fdebug_2eproto,
     file_level_service_descriptors_rpc_2fdebug_2eproto,
@@ -229,6 +251,7 @@ class Debug::_Internal {
   static const ::qaul::rpc::debug::LogToFile& log_to_file(const Debug* msg);
   static const ::qaul::rpc::debug::StoragePathRequest& storage_path_request(const Debug* msg);
   static const ::qaul::rpc::debug::StoragePathResponse& storage_path_response(const Debug* msg);
+  static const ::qaul::rpc::debug::DeleteLibqaulLogsRequest& delete_libqaul_logs_request(const Debug* msg);
 };
 
 const ::qaul::rpc::debug::HeartbeatRequest&
@@ -254,6 +277,10 @@ Debug::_Internal::storage_path_request(const Debug* msg) {
 const ::qaul::rpc::debug::StoragePathResponse&
 Debug::_Internal::storage_path_response(const Debug* msg) {
   return *msg->message_.storage_path_response_;
+}
+const ::qaul::rpc::debug::DeleteLibqaulLogsRequest&
+Debug::_Internal::delete_libqaul_logs_request(const Debug* msg) {
+  return *msg->message_.delete_libqaul_logs_request_;
 }
 void Debug::set_allocated_heartbeat_request(::qaul::rpc::debug::HeartbeatRequest* heartbeat_request) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -345,6 +372,21 @@ void Debug::set_allocated_storage_path_response(::qaul::rpc::debug::StoragePathR
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.debug.Debug.storage_path_response)
 }
+void Debug::set_allocated_delete_libqaul_logs_request(::qaul::rpc::debug::DeleteLibqaulLogsRequest* delete_libqaul_logs_request) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (delete_libqaul_logs_request) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(delete_libqaul_logs_request);
+    if (message_arena != submessage_arena) {
+      delete_libqaul_logs_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, delete_libqaul_logs_request, submessage_arena);
+    }
+    set_has_delete_libqaul_logs_request();
+    message_.delete_libqaul_logs_request_ = delete_libqaul_logs_request;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.debug.Debug.delete_libqaul_logs_request)
+}
 Debug::Debug(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
@@ -378,6 +420,10 @@ Debug::Debug(const Debug& from)
     }
     case kStoragePathResponse: {
       _internal_mutable_storage_path_response()->::qaul::rpc::debug::StoragePathResponse::MergeFrom(from._internal_storage_path_response());
+      break;
+    }
+    case kDeleteLibqaulLogsRequest: {
+      _internal_mutable_delete_libqaul_logs_request()->::qaul::rpc::debug::DeleteLibqaulLogsRequest::MergeFrom(from._internal_delete_libqaul_logs_request());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -447,6 +493,12 @@ void Debug::clear_message() {
     case kStoragePathResponse: {
       if (GetArenaForAllocation() == nullptr) {
         delete message_.storage_path_response_;
+      }
+      break;
+    }
+    case kDeleteLibqaulLogsRequest: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete message_.delete_libqaul_logs_request_;
       }
       break;
     }
@@ -522,6 +574,14 @@ const char* Debug::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
         } else
           goto handle_unusual;
         continue;
+      // .qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
+          ptr = ctx->ParseMessage(_internal_mutable_delete_libqaul_logs_request(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
       default:
         goto handle_unusual;
     }  // switch
@@ -593,6 +653,13 @@ uint8_t* Debug::_InternalSerialize(
         _Internal::storage_path_response(this).GetCachedSize(), target, stream);
   }
 
+  // .qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;
+  if (_internal_has_delete_libqaul_logs_request()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(7, _Internal::delete_libqaul_logs_request(this),
+        _Internal::delete_libqaul_logs_request(this).GetCachedSize(), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -652,6 +719,13 @@ size_t Debug::ByteSizeLong() const {
           *message_.storage_path_response_);
       break;
     }
+    // .qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;
+    case kDeleteLibqaulLogsRequest: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *message_.delete_libqaul_logs_request_);
+      break;
+    }
     case MESSAGE_NOT_SET: {
       break;
     }
@@ -701,6 +775,10 @@ void Debug::MergeFrom(const Debug& from) {
     }
     case kStoragePathResponse: {
       _internal_mutable_storage_path_response()->::qaul::rpc::debug::StoragePathResponse::MergeFrom(from._internal_storage_path_response());
+      break;
+    }
+    case kDeleteLibqaulLogsRequest: {
+      _internal_mutable_delete_libqaul_logs_request()->::qaul::rpc::debug::DeleteLibqaulLogsRequest::MergeFrom(from._internal_delete_libqaul_logs_request());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -1256,6 +1334,45 @@ void StoragePathResponse::InternalSwap(StoragePathResponse* other) {
       file_level_metadata_rpc_2fdebug_2eproto[6]);
 }
 
+// ===================================================================
+
+class DeleteLibqaulLogsRequest::_Internal {
+ public:
+};
+
+DeleteLibqaulLogsRequest::DeleteLibqaulLogsRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+  // @@protoc_insertion_point(arena_constructor:qaul.rpc.debug.DeleteLibqaulLogsRequest)
+}
+DeleteLibqaulLogsRequest::DeleteLibqaulLogsRequest(const DeleteLibqaulLogsRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:qaul.rpc.debug.DeleteLibqaulLogsRequest)
+}
+
+
+
+
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData DeleteLibqaulLogsRequest::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl,
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl,
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*DeleteLibqaulLogsRequest::GetClassData() const { return &_class_data_; }
+
+
+
+
+
+
+
+::PROTOBUF_NAMESPACE_ID::Metadata DeleteLibqaulLogsRequest::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_rpc_2fdebug_2eproto_getter, &descriptor_table_rpc_2fdebug_2eproto_once,
+      file_level_metadata_rpc_2fdebug_2eproto[7]);
+}
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace debug
 }  // namespace rpc
@@ -1288,6 +1405,10 @@ Arena::CreateMaybeMessage< ::qaul::rpc::debug::StoragePathRequest >(Arena* arena
 template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::StoragePathResponse*
 Arena::CreateMaybeMessage< ::qaul::rpc::debug::StoragePathResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::debug::StoragePathResponse >(arena);
+}
+template<> PROTOBUF_NOINLINE ::qaul::rpc::debug::DeleteLibqaulLogsRequest*
+Arena::CreateMaybeMessage< ::qaul::rpc::debug::DeleteLibqaulLogsRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::rpc::debug::DeleteLibqaulLogsRequest >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

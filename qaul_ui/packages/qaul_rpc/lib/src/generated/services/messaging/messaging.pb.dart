@@ -77,7 +77,7 @@ class Envelope extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Envelope', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderId', $pb.PbFieldType.OY)
     ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'receiverId', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
+    ..pc<Data>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.PM, subBuilder: Data.create)
     ..hasRequiredFields = false
   ;
 
@@ -85,7 +85,7 @@ class Envelope extends $pb.GeneratedMessage {
   factory Envelope({
     $core.List<$core.int>? senderId,
     $core.List<$core.int>? receiverId,
-    $core.List<$core.int>? data,
+    $core.Iterable<Data>? data,
   }) {
     final _result = create();
     if (senderId != null) {
@@ -95,7 +95,7 @@ class Envelope extends $pb.GeneratedMessage {
       _result.receiverId = receiverId;
     }
     if (data != null) {
-      _result.data = data;
+      _result.data.addAll(data);
     }
     return _result;
   }
@@ -139,18 +139,74 @@ class Envelope extends $pb.GeneratedMessage {
   void clearReceiverId() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.List<$core.int> get data => $_getN(2);
-  @$pb.TagNumber(3)
-  set data($core.List<$core.int> v) { $_setBytes(2, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasData() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearData() => clearField(3);
+  $core.List<Data> get data => $_getList(2);
+}
+
+class Data extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Data', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
+    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'nonce', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
+  Data._() : super();
+  factory Data({
+    $fixnum.Int64? nonce,
+    $core.List<$core.int>? data,
+  }) {
+    final _result = create();
+    if (nonce != null) {
+      _result.nonce = nonce;
+    }
+    if (data != null) {
+      _result.data = data;
+    }
+    return _result;
+  }
+  factory Data.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Data.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Data clone() => Data()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Data copyWith(void Function(Data) updates) => super.copyWith((message) => updates(message as Data)) as Data; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Data create() => Data._();
+  Data createEmptyInstance() => create();
+  static $pb.PbList<Data> createRepeated() => $pb.PbList<Data>();
+  @$core.pragma('dart2js:noInline')
+  static Data getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Data>(create);
+  static Data? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get nonce => $_getI64(0);
+  @$pb.TagNumber(1)
+  set nonce($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasNonce() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearNonce() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<$core.int> get data => $_getN(1);
+  @$pb.TagNumber(2)
+  set data($core.List<$core.int> v) { $_setBytes(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasData() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearData() => clearField(2);
 }
 
 enum Messaging_Message {
   confirmationMessage, 
   chatMessage, 
+  cryptoService, 
   notSet
 }
 
@@ -158,12 +214,14 @@ class Messaging extends $pb.GeneratedMessage {
   static const $core.Map<$core.int, Messaging_Message> _Messaging_MessageByTag = {
     1 : Messaging_Message.confirmationMessage,
     2 : Messaging_Message.chatMessage,
+    3 : Messaging_Message.cryptoService,
     0 : Messaging_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Messaging', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
-    ..oo(0, [1, 2])
+    ..oo(0, [1, 2, 3])
     ..aOM<Confirmation>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'confirmationMessage', subBuilder: Confirmation.create)
     ..aOM<ChatMessage>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatMessage', subBuilder: ChatMessage.create)
+    ..aOM<CryptoService>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cryptoService', subBuilder: CryptoService.create)
     ..hasRequiredFields = false
   ;
 
@@ -171,6 +229,7 @@ class Messaging extends $pb.GeneratedMessage {
   factory Messaging({
     Confirmation? confirmationMessage,
     ChatMessage? chatMessage,
+    CryptoService? cryptoService,
   }) {
     final _result = create();
     if (confirmationMessage != null) {
@@ -178,6 +237,9 @@ class Messaging extends $pb.GeneratedMessage {
     }
     if (chatMessage != null) {
       _result.chatMessage = chatMessage;
+    }
+    if (cryptoService != null) {
+      _result.cryptoService = cryptoService;
     }
     return _result;
   }
@@ -226,6 +288,46 @@ class Messaging extends $pb.GeneratedMessage {
   void clearChatMessage() => clearField(2);
   @$pb.TagNumber(2)
   ChatMessage ensureChatMessage() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  CryptoService get cryptoService => $_getN(2);
+  @$pb.TagNumber(3)
+  set cryptoService(CryptoService v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasCryptoService() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearCryptoService() => clearField(3);
+  @$pb.TagNumber(3)
+  CryptoService ensureCryptoService() => $_ensure(2);
+}
+
+class CryptoService extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CryptoService', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  CryptoService._() : super();
+  factory CryptoService() => create();
+  factory CryptoService.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CryptoService.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CryptoService clone() => CryptoService()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CryptoService copyWith(void Function(CryptoService) updates) => super.copyWith((message) => updates(message as CryptoService)) as CryptoService; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CryptoService create() => CryptoService._();
+  CryptoService createEmptyInstance() => create();
+  static $pb.PbList<CryptoService> createRepeated() => $pb.PbList<CryptoService>();
+  @$core.pragma('dart2js:noInline')
+  static CryptoService getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CryptoService>(create);
+  static CryptoService? _defaultInstance;
 }
 
 class Confirmation extends $pb.GeneratedMessage {
