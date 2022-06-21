@@ -179,6 +179,12 @@ class LibqaulWorker {
     final msg = Debug(logToFile: LogToFile(enable: enabled));
     await _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
   }
+
+  void deleteLogs() async {
+    final msg = Debug(deleteLibqaulLogsRequest: DeleteLibqaulLogsRequest());
+    await _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
+  }
+
   // *******************************
   // Private (helper) methods
   // *******************************

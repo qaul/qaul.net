@@ -152,8 +152,10 @@ ${stack ?? 'Not available'}
   // ***************************************************************************
   // API
   // ***************************************************************************
-  Future<void> deleteLogs() async =>
-      _storageManager.deleteLogs(await _storageManager.logs);
+  Future<void> deleteLogs({Reader? reader}) async {
+    _storageManager.deleteLogs(await _storageManager.logs);
+    if (reader != null) reader(qaulWorkerProvider).deleteLogs();
+  }
 
   Future<void> sendLogs({Reader? reader}) async {
     if (!loggingEnabled) return;
