@@ -109,7 +109,13 @@ class EmailLoggingCoordinator {
   // ***************************************************************************
   final _storageManager = _LogStorageManager();
 
-  Future<bool> get hasLogsStored async => !(await _storageManager.isEmpty);
+  Future<bool> hasLogsStored({Reader? reader}) async {
+    if (reader != null && reader(libqaulLogsStoragePath) != null) {
+      var libqaulLogs = _getLibqaulLogs(reader(libqaulLogsStoragePath)!);
+      return libqaulLogs.isNotEmpty || !(await _storageManager.isEmpty);
+    }
+    return !(await _storageManager.isEmpty);
+  }
 
   Future<String> get logStorageSize async {
     final size = await _storageManager.logFolderSize;

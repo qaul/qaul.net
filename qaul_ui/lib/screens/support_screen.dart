@@ -30,7 +30,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
         ),
       ),
       body: FutureBuilder<bool>(
-          future: emailLogger.hasLogsStored,
+          future: emailLogger.hasLogsStored(reader: ref.read),
           builder: (context, snapshot) {
             final hasLogs = (snapshot.hasData && snapshot.data == true);
             return Column(
