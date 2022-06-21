@@ -22,13 +22,8 @@ void main() async {
   runZonedGuarded<Future<void>>(() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Initializer.initialize(_container.read);
-    await Hive.initFlutter();
-    await Hive.openBox(UserPrefsHelper.hiveBoxName);
-    await LocalNotifications.instance.initialize();
 
     Logger.root.level = kDebugMode ? Level.CONFIG : Level.FINE;
-
-    await EmailLoggingCoordinator.instance.initialize();
 
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
     runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
@@ -82,7 +77,7 @@ class _CustomProviderScopeState extends State<_CustomProviderScope> {
 
 class Initializer {
   static Future<void> initialize(Reader read) async {
-    await EmailLoggingCoordinator.instance.initialize();
+    await EmailLoggingCoordinator.instance.initialize(reader: read);
 
     await read(qaulWorkerProvider).initialized;
 

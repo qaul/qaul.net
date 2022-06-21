@@ -32,8 +32,8 @@ class EmailLoggingCoordinator {
 
   String get _supportEmail => 'debug@qaul.net';
 
-  Future<void> initialize() async {
-    await _initializeEnabledStatus();
+  Future<void> initialize({Reader? reader}) async {
+    await _initializeEnabledStatus(reader: reader);
 
     _reportLogMessages();
     _reportErrorsCaughtByFlutterFramework();
@@ -76,12 +76,13 @@ class EmailLoggingCoordinator {
   // ***************************************************************************
   static const _loggingEnabledKey = 'loggingEnabledKey';
 
-  Future<void> _initializeEnabledStatus() async {
+  Future<void> _initializeEnabledStatus({Reader? reader}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey(_loggingEnabledKey)) {
       _enabled = prefs.getBool(_loggingEnabledKey) ?? true;
     }
     _log.config('logger initialized with enabled status: $_enabled');
+    if (reader != null) _setLibqaulLoggingState(_enabled, reader: reader);
   }
 
   bool get loggingEnabled => _enabled;
