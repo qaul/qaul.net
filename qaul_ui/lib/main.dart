@@ -32,20 +32,6 @@ void main() async {
 
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
     runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
-
-    // if (Platform.isLinux || Platform.isMacOS) {
-    //   doWhenWindowReady(() {
-    //     const initialSize = Size(1920, 1080);
-    //     appWindow.minSize = const Size(800, 600);
-    //     appWindow.size = initialSize;
-    //     appWindow.alignment = Alignment.center;
-    //     appWindow.show();
-    //   });
-    // }
-    // },
-    //   (error, stack) =>
-    //       Logger.root.severe('Error occurred in root error zone', error, stack),
-    // );
   }, (error, stack) => Logger.root.severe('', error, stack));
 }
 

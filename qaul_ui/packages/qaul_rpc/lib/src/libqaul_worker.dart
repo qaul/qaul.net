@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -20,6 +21,7 @@ import 'generated/services/chat/chat.pb.dart';
 import 'generated/services/feed/feed.pb.dart';
 import 'libqaul/libqaul.dart';
 import 'rpc_translators/abstract_rpc_module_translator.dart';
+import 'utils.dart';
 
 class LibqaulWorker {
   LibqaulWorker(Reader reader) : _reader = reader {
@@ -253,8 +255,9 @@ class LibqaulWorker {
           _heartbeats.removeFirst();
         }
         if (resp?.data is String) {
-          _log.info('libqaul log storage path: ${resp!.data}');
-          _reader(libqaulLogsStoragePath.state).state = resp.data;
+          final path = await findFolderWithFilesOfExtension(Directory(resp!.data), '.log');
+          _log.info('libqaul log storage path: $path');
+          _reader(libqaulLogsStoragePath.state).state = path;
         }
       } else {
         throw UnhandledRpcMessageException.value(
