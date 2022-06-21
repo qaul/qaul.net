@@ -74,7 +74,7 @@ public final class DebugOuterClass {
 
     /**
      * <pre>
-     * libqaul panics immediatly
+     * libqaul panics immediately
      * </pre>
      *
      * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -83,7 +83,7 @@ public final class DebugOuterClass {
     boolean hasPanic();
     /**
      * <pre>
-     * libqaul panics immediatly
+     * libqaul panics immediately
      * </pre>
      *
      * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -92,7 +92,7 @@ public final class DebugOuterClass {
     qaul.rpc.debug.DebugOuterClass.Panic getPanic();
     /**
      * <pre>
-     * libqaul panics immediatly
+     * libqaul panics immediately
      * </pre>
      *
      * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -179,6 +179,33 @@ public final class DebugOuterClass {
      * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
      */
     qaul.rpc.debug.DebugOuterClass.StoragePathResponseOrBuilder getStoragePathResponseOrBuilder();
+
+    /**
+     * <pre>
+     * Request for library to delete logs
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+     * @return Whether the deleteLibqaulLogsRequest field is set.
+     */
+    boolean hasDeleteLibqaulLogsRequest();
+    /**
+     * <pre>
+     * Request for library to delete logs
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+     * @return The deleteLibqaulLogsRequest.
+     */
+    qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest getDeleteLibqaulLogsRequest();
+    /**
+     * <pre>
+     * Request for library to delete logs
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+     */
+    qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequestOrBuilder getDeleteLibqaulLogsRequestOrBuilder();
 
     public qaul.rpc.debug.DebugOuterClass.Debug.MessageCase getMessageCase();
   }
@@ -315,6 +342,20 @@ public final class DebugOuterClass {
               messageCase_ = 6;
               break;
             }
+            case 58: {
+              qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.Builder subBuilder = null;
+              if (messageCase_ == 7) {
+                subBuilder = ((qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 7;
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -360,6 +401,7 @@ public final class DebugOuterClass {
       LOG_TO_FILE(4),
       STORAGE_PATH_REQUEST(5),
       STORAGE_PATH_RESPONSE(6),
+      DELETE_LIBQAUL_LOGS_REQUEST(7),
       MESSAGE_NOT_SET(0);
       private final int value;
       private MessageCase(int value) {
@@ -383,6 +425,7 @@ public final class DebugOuterClass {
           case 4: return LOG_TO_FILE;
           case 5: return STORAGE_PATH_REQUEST;
           case 6: return STORAGE_PATH_RESPONSE;
+          case 7: return DELETE_LIBQAUL_LOGS_REQUEST;
           case 0: return MESSAGE_NOT_SET;
           default: return null;
         }
@@ -487,7 +530,7 @@ public final class DebugOuterClass {
     public static final int PANIC_FIELD_NUMBER = 3;
     /**
      * <pre>
-     * libqaul panics immediatly
+     * libqaul panics immediately
      * </pre>
      *
      * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -499,7 +542,7 @@ public final class DebugOuterClass {
     }
     /**
      * <pre>
-     * libqaul panics immediatly
+     * libqaul panics immediately
      * </pre>
      *
      * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -514,7 +557,7 @@ public final class DebugOuterClass {
     }
     /**
      * <pre>
-     * libqaul panics immediatly
+     * libqaul panics immediately
      * </pre>
      *
      * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -656,6 +699,49 @@ public final class DebugOuterClass {
       return qaul.rpc.debug.DebugOuterClass.StoragePathResponse.getDefaultInstance();
     }
 
+    public static final int DELETE_LIBQAUL_LOGS_REQUEST_FIELD_NUMBER = 7;
+    /**
+     * <pre>
+     * Request for library to delete logs
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+     * @return Whether the deleteLibqaulLogsRequest field is set.
+     */
+    @java.lang.Override
+    public boolean hasDeleteLibqaulLogsRequest() {
+      return messageCase_ == 7;
+    }
+    /**
+     * <pre>
+     * Request for library to delete logs
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+     * @return The deleteLibqaulLogsRequest.
+     */
+    @java.lang.Override
+    public qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest getDeleteLibqaulLogsRequest() {
+      if (messageCase_ == 7) {
+         return (qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) message_;
+      }
+      return qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * Request for library to delete logs
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequestOrBuilder getDeleteLibqaulLogsRequestOrBuilder() {
+      if (messageCase_ == 7) {
+         return (qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) message_;
+      }
+      return qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -687,6 +773,9 @@ public final class DebugOuterClass {
       }
       if (messageCase_ == 6) {
         output.writeMessage(6, (qaul.rpc.debug.DebugOuterClass.StoragePathResponse) message_);
+      }
+      if (messageCase_ == 7) {
+        output.writeMessage(7, (qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) message_);
       }
       unknownFields.writeTo(output);
     }
@@ -720,6 +809,10 @@ public final class DebugOuterClass {
       if (messageCase_ == 6) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, (qaul.rpc.debug.DebugOuterClass.StoragePathResponse) message_);
+      }
+      if (messageCase_ == 7) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(7, (qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) message_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -762,6 +855,10 @@ public final class DebugOuterClass {
           if (!getStoragePathResponse()
               .equals(other.getStoragePathResponse())) return false;
           break;
+        case 7:
+          if (!getDeleteLibqaulLogsRequest()
+              .equals(other.getDeleteLibqaulLogsRequest())) return false;
+          break;
         case 0:
         default:
       }
@@ -800,6 +897,10 @@ public final class DebugOuterClass {
         case 6:
           hash = (37 * hash) + STORAGE_PATH_RESPONSE_FIELD_NUMBER;
           hash = (53 * hash) + getStoragePathResponse().hashCode();
+          break;
+        case 7:
+          hash = (37 * hash) + DELETE_LIBQAUL_LOGS_REQUEST_FIELD_NUMBER;
+          hash = (53 * hash) + getDeleteLibqaulLogsRequest().hashCode();
           break;
         case 0:
         default:
@@ -1011,6 +1112,13 @@ public final class DebugOuterClass {
             result.message_ = storagePathResponseBuilder_.build();
           }
         }
+        if (messageCase_ == 7) {
+          if (deleteLibqaulLogsRequestBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = deleteLibqaulLogsRequestBuilder_.build();
+          }
+        }
         result.messageCase_ = messageCase_;
         onBuilt();
         return result;
@@ -1083,6 +1191,10 @@ public final class DebugOuterClass {
           }
           case STORAGE_PATH_RESPONSE: {
             mergeStoragePathResponse(other.getStoragePathResponse());
+            break;
+          }
+          case DELETE_LIBQAUL_LOGS_REQUEST: {
+            mergeDeleteLibqaulLogsRequest(other.getDeleteLibqaulLogsRequest());
             break;
           }
           case MESSAGE_NOT_SET: {
@@ -1493,7 +1605,7 @@ public final class DebugOuterClass {
           qaul.rpc.debug.DebugOuterClass.Panic, qaul.rpc.debug.DebugOuterClass.Panic.Builder, qaul.rpc.debug.DebugOuterClass.PanicOrBuilder> panicBuilder_;
       /**
        * <pre>
-       * libqaul panics immediatly
+       * libqaul panics immediately
        * </pre>
        *
        * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -1505,7 +1617,7 @@ public final class DebugOuterClass {
       }
       /**
        * <pre>
-       * libqaul panics immediatly
+       * libqaul panics immediately
        * </pre>
        *
        * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -1527,7 +1639,7 @@ public final class DebugOuterClass {
       }
       /**
        * <pre>
-       * libqaul panics immediatly
+       * libqaul panics immediately
        * </pre>
        *
        * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -1547,7 +1659,7 @@ public final class DebugOuterClass {
       }
       /**
        * <pre>
-       * libqaul panics immediatly
+       * libqaul panics immediately
        * </pre>
        *
        * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -1565,7 +1677,7 @@ public final class DebugOuterClass {
       }
       /**
        * <pre>
-       * libqaul panics immediatly
+       * libqaul panics immediately
        * </pre>
        *
        * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -1592,7 +1704,7 @@ public final class DebugOuterClass {
       }
       /**
        * <pre>
-       * libqaul panics immediatly
+       * libqaul panics immediately
        * </pre>
        *
        * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -1615,7 +1727,7 @@ public final class DebugOuterClass {
       }
       /**
        * <pre>
-       * libqaul panics immediatly
+       * libqaul panics immediately
        * </pre>
        *
        * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -1625,7 +1737,7 @@ public final class DebugOuterClass {
       }
       /**
        * <pre>
-       * libqaul panics immediatly
+       * libqaul panics immediately
        * </pre>
        *
        * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -1643,7 +1755,7 @@ public final class DebugOuterClass {
       }
       /**
        * <pre>
-       * libqaul panics immediatly
+       * libqaul panics immediately
        * </pre>
        *
        * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -2199,6 +2311,184 @@ public final class DebugOuterClass {
         messageCase_ = 6;
         onChanged();;
         return storagePathResponseBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest, qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.Builder, qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequestOrBuilder> deleteLibqaulLogsRequestBuilder_;
+      /**
+       * <pre>
+       * Request for library to delete logs
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+       * @return Whether the deleteLibqaulLogsRequest field is set.
+       */
+      @java.lang.Override
+      public boolean hasDeleteLibqaulLogsRequest() {
+        return messageCase_ == 7;
+      }
+      /**
+       * <pre>
+       * Request for library to delete logs
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+       * @return The deleteLibqaulLogsRequest.
+       */
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest getDeleteLibqaulLogsRequest() {
+        if (deleteLibqaulLogsRequestBuilder_ == null) {
+          if (messageCase_ == 7) {
+            return (qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) message_;
+          }
+          return qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.getDefaultInstance();
+        } else {
+          if (messageCase_ == 7) {
+            return deleteLibqaulLogsRequestBuilder_.getMessage();
+          }
+          return qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Request for library to delete logs
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+       */
+      public Builder setDeleteLibqaulLogsRequest(qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest value) {
+        if (deleteLibqaulLogsRequestBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          deleteLibqaulLogsRequestBuilder_.setMessage(value);
+        }
+        messageCase_ = 7;
+        return this;
+      }
+      /**
+       * <pre>
+       * Request for library to delete logs
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+       */
+      public Builder setDeleteLibqaulLogsRequest(
+          qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.Builder builderForValue) {
+        if (deleteLibqaulLogsRequestBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          deleteLibqaulLogsRequestBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 7;
+        return this;
+      }
+      /**
+       * <pre>
+       * Request for library to delete logs
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+       */
+      public Builder mergeDeleteLibqaulLogsRequest(qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest value) {
+        if (deleteLibqaulLogsRequestBuilder_ == null) {
+          if (messageCase_ == 7 &&
+              message_ != qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.getDefaultInstance()) {
+            message_ = qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.newBuilder((qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 7) {
+            deleteLibqaulLogsRequestBuilder_.mergeFrom(value);
+          } else {
+            deleteLibqaulLogsRequestBuilder_.setMessage(value);
+          }
+        }
+        messageCase_ = 7;
+        return this;
+      }
+      /**
+       * <pre>
+       * Request for library to delete logs
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+       */
+      public Builder clearDeleteLibqaulLogsRequest() {
+        if (deleteLibqaulLogsRequestBuilder_ == null) {
+          if (messageCase_ == 7) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 7) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          deleteLibqaulLogsRequestBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Request for library to delete logs
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+       */
+      public qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.Builder getDeleteLibqaulLogsRequestBuilder() {
+        return getDeleteLibqaulLogsRequestFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Request for library to delete logs
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequestOrBuilder getDeleteLibqaulLogsRequestOrBuilder() {
+        if ((messageCase_ == 7) && (deleteLibqaulLogsRequestBuilder_ != null)) {
+          return deleteLibqaulLogsRequestBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 7) {
+            return (qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) message_;
+          }
+          return qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Request for library to delete logs
+       * </pre>
+       *
+       * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest, qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.Builder, qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequestOrBuilder> 
+          getDeleteLibqaulLogsRequestFieldBuilder() {
+        if (deleteLibqaulLogsRequestBuilder_ == null) {
+          if (!(messageCase_ == 7)) {
+            message_ = qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.getDefaultInstance();
+          }
+          deleteLibqaulLogsRequestBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest, qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.Builder, qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequestOrBuilder>(
+                  (qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 7;
+        onChanged();;
+        return deleteLibqaulLogsRequestBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -5064,6 +5354,436 @@ public final class DebugOuterClass {
 
   }
 
+  public interface DeleteLibqaulLogsRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.debug.DeleteLibqaulLogsRequest)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * DeleteLibqaulLogsRequest
+   * Requests for the log folder to be wiped clean
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.debug.DeleteLibqaulLogsRequest}
+   */
+  public static final class DeleteLibqaulLogsRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.debug.DeleteLibqaulLogsRequest)
+      DeleteLibqaulLogsRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DeleteLibqaulLogsRequest.newBuilder() to construct.
+    private DeleteLibqaulLogsRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DeleteLibqaulLogsRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DeleteLibqaulLogsRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private DeleteLibqaulLogsRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_DeleteLibqaulLogsRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_DeleteLibqaulLogsRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.class, qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest other = (qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) obj;
+
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * DeleteLibqaulLogsRequest
+     * Requests for the log folder to be wiped clean
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.debug.DeleteLibqaulLogsRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.debug.DeleteLibqaulLogsRequest)
+        qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_DeleteLibqaulLogsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_DeleteLibqaulLogsRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.class, qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.Builder.class);
+      }
+
+      // Construct using qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_DeleteLibqaulLogsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest getDefaultInstanceForType() {
+        return qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest build() {
+        qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest buildPartial() {
+        qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest result = new qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) {
+          return mergeFrom((qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest other) {
+        if (other == qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.debug.DeleteLibqaulLogsRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.debug.DeleteLibqaulLogsRequest)
+    private static final qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest();
+    }
+
+    public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DeleteLibqaulLogsRequest>
+        PARSER = new com.google.protobuf.AbstractParser<DeleteLibqaulLogsRequest>() {
+      @java.lang.Override
+      public DeleteLibqaulLogsRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new DeleteLibqaulLogsRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<DeleteLibqaulLogsRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DeleteLibqaulLogsRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_rpc_debug_Debug_descriptor;
   private static final 
@@ -5099,6 +5819,11 @@ public final class DebugOuterClass {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_rpc_debug_StoragePathResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_debug_DeleteLibqaulLogsRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_debug_DeleteLibqaulLogsRequest_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -5108,7 +5833,7 @@ public final class DebugOuterClass {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\017rpc/debug.proto\022\016qaul.rpc.debug\"\366\002\n\005De" +
+      "\n\017rpc/debug.proto\022\016qaul.rpc.debug\"\307\003\n\005De" +
       "bug\022=\n\021heartbeat_request\030\001 \001(\0132 .qaul.rp" +
       "c.debug.HeartbeatRequestH\000\022?\n\022heartbeat_" +
       "response\030\002 \001(\0132!.qaul.rpc.debug.Heartbea" +
@@ -5117,12 +5842,14 @@ public final class DebugOuterClass {
       "rpc.debug.LogToFileH\000\022B\n\024storage_path_re" +
       "quest\030\005 \001(\0132\".qaul.rpc.debug.StoragePath" +
       "RequestH\000\022D\n\025storage_path_response\030\006 \001(\013" +
-      "2#.qaul.rpc.debug.StoragePathResponseH\000B" +
-      "\t\n\007message\"\022\n\020HeartbeatRequest\"\023\n\021Heartb" +
-      "eatResponse\"\007\n\005Panic\"\033\n\tLogToFile\022\016\n\006ena" +
-      "ble\030\001 \001(\010\"\024\n\022StoragePathRequest\"+\n\023Stora" +
-      "gePathResponse\022\024\n\014storage_path\030\001 \001(\tb\006pr" +
-      "oto3"
+      "2#.qaul.rpc.debug.StoragePathResponseH\000\022" +
+      "O\n\033delete_libqaul_logs_request\030\007 \001(\0132(.q" +
+      "aul.rpc.debug.DeleteLibqaulLogsRequestH\000" +
+      "B\t\n\007message\"\022\n\020HeartbeatRequest\"\023\n\021Heart" +
+      "beatResponse\"\007\n\005Panic\"\033\n\tLogToFile\022\016\n\006en" +
+      "able\030\001 \001(\010\"\024\n\022StoragePathRequest\"+\n\023Stor" +
+      "agePathResponse\022\024\n\014storage_path\030\001 \001(\t\"\032\n" +
+      "\030DeleteLibqaulLogsRequestb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -5133,7 +5860,7 @@ public final class DebugOuterClass {
     internal_static_qaul_rpc_debug_Debug_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_debug_Debug_descriptor,
-        new java.lang.String[] { "HeartbeatRequest", "HeartbeatResponse", "Panic", "LogToFile", "StoragePathRequest", "StoragePathResponse", "Message", });
+        new java.lang.String[] { "HeartbeatRequest", "HeartbeatResponse", "Panic", "LogToFile", "StoragePathRequest", "StoragePathResponse", "DeleteLibqaulLogsRequest", "Message", });
     internal_static_qaul_rpc_debug_HeartbeatRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_qaul_rpc_debug_HeartbeatRequest_fieldAccessorTable = new
@@ -5170,6 +5897,12 @@ public final class DebugOuterClass {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_debug_StoragePathResponse_descriptor,
         new java.lang.String[] { "StoragePath", });
+    internal_static_qaul_rpc_debug_DeleteLibqaulLogsRequest_descriptor =
+      getDescriptor().getMessageTypes().get(7);
+    internal_static_qaul_rpc_debug_DeleteLibqaulLogsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_debug_DeleteLibqaulLogsRequest_descriptor,
+        new java.lang.String[] { });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

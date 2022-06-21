@@ -61,6 +61,23 @@ struct Qaul_Net_Messaging_Envelope {
   /// the qaul ID of the receiver
   var receiverID: Data = Data()
 
+  /// encrypted message data
+  var data: [Qaul_Net_Messaging_Data] = []
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// encrypted message data
+struct Qaul_Net_Messaging_Data {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// message nonce for encryption
+  var nonce: UInt64 = 0
+
   /// the encrypted message data
   var data: Data = Data()
 
@@ -93,11 +110,20 @@ struct Qaul_Net_Messaging_Messaging {
     set {message = .chatMessage(newValue)}
   }
 
+  var cryptoService: Qaul_Net_Messaging_CryptoService {
+    get {
+      if case .cryptoService(let v)? = message {return v}
+      return Qaul_Net_Messaging_CryptoService()
+    }
+    set {message = .cryptoService(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Message: Equatable {
     case confirmationMessage(Qaul_Net_Messaging_Confirmation)
     case chatMessage(Qaul_Net_Messaging_ChatMessage)
+    case cryptoService(Qaul_Net_Messaging_CryptoService)
 
   #if !swift(>=4.1)
     static func ==(lhs: Qaul_Net_Messaging_Messaging.OneOf_Message, rhs: Qaul_Net_Messaging_Messaging.OneOf_Message) -> Bool {
@@ -113,11 +139,29 @@ struct Qaul_Net_Messaging_Messaging {
         guard case .chatMessage(let l) = lhs, case .chatMessage(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
+      case (.cryptoService, .cryptoService): return {
+        guard case .cryptoService(let l) = lhs, case .cryptoService(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
       default: return false
       }
     }
   #endif
   }
+
+  init() {}
+}
+
+/// Crypto Service Message
+///
+/// This message is for crypto specific tasks,
+/// such as completing a handshake.
+struct Qaul_Net_Messaging_CryptoService {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 }
@@ -229,7 +273,7 @@ extension Qaul_Net_Messaging_Envelope: SwiftProtobuf.Message, SwiftProtobuf._Mes
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularBytesField(value: &self.senderID) }()
       case 2: try { try decoder.decodeSingularBytesField(value: &self.receiverID) }()
-      case 3: try { try decoder.decodeSingularBytesField(value: &self.data) }()
+      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.data) }()
       default: break
       }
     }
@@ -243,7 +287,7 @@ extension Qaul_Net_Messaging_Envelope: SwiftProtobuf.Message, SwiftProtobuf._Mes
       try visitor.visitSingularBytesField(value: self.receiverID, fieldNumber: 2)
     }
     if !self.data.isEmpty {
-      try visitor.visitSingularBytesField(value: self.data, fieldNumber: 3)
+      try visitor.visitRepeatedMessageField(value: self.data, fieldNumber: 3)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -257,11 +301,50 @@ extension Qaul_Net_Messaging_Envelope: SwiftProtobuf.Message, SwiftProtobuf._Mes
   }
 }
 
+extension Qaul_Net_Messaging_Data: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Data"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "nonce"),
+    2: .same(proto: "data"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt64Field(value: &self.nonce) }()
+      case 2: try { try decoder.decodeSingularBytesField(value: &self.data) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.nonce != 0 {
+      try visitor.visitSingularUInt64Field(value: self.nonce, fieldNumber: 1)
+    }
+    if !self.data.isEmpty {
+      try visitor.visitSingularBytesField(value: self.data, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Net_Messaging_Data, rhs: Qaul_Net_Messaging_Data) -> Bool {
+    if lhs.nonce != rhs.nonce {return false}
+    if lhs.data != rhs.data {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Messaging"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "confirmation_message"),
     2: .standard(proto: "chat_message"),
+    3: .standard(proto: "crypto_service"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -296,6 +379,19 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
           self.message = .chatMessage(v)
         }
       }()
+      case 3: try {
+        var v: Qaul_Net_Messaging_CryptoService?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .cryptoService(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .cryptoService(v)
+        }
+      }()
       default: break
       }
     }
@@ -315,6 +411,10 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
       guard case .chatMessage(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     }()
+    case .cryptoService?: try {
+      guard case .cryptoService(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    }()
     case nil: break
     }
     try unknownFields.traverse(visitor: &visitor)
@@ -322,6 +422,25 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
 
   static func ==(lhs: Qaul_Net_Messaging_Messaging, rhs: Qaul_Net_Messaging_Messaging) -> Bool {
     if lhs.message != rhs.message {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Net_Messaging_CryptoService: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".CryptoService"
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let _ = try decoder.nextFieldNumber() {
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Net_Messaging_CryptoService, rhs: Qaul_Net_Messaging_CryptoService) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

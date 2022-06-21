@@ -47,7 +47,7 @@ struct Qaul_Rpc_Debug_Debug {
     set {message = .heartbeatResponse(newValue)}
   }
 
-  /// libqaul panics immediatly
+  /// libqaul panics immediately
   var panic: Qaul_Rpc_Debug_Panic {
     get {
       if case .panic(let v)? = message {return v}
@@ -83,6 +83,15 @@ struct Qaul_Rpc_Debug_Debug {
     set {message = .storagePathResponse(newValue)}
   }
 
+  /// Request for library to delete logs
+  var deleteLibqaulLogsRequest: Qaul_Rpc_Debug_DeleteLibqaulLogsRequest {
+    get {
+      if case .deleteLibqaulLogsRequest(let v)? = message {return v}
+      return Qaul_Rpc_Debug_DeleteLibqaulLogsRequest()
+    }
+    set {message = .deleteLibqaulLogsRequest(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   /// message type
@@ -91,7 +100,7 @@ struct Qaul_Rpc_Debug_Debug {
     case heartbeatRequest(Qaul_Rpc_Debug_HeartbeatRequest)
     /// response to the heartbeat request
     case heartbeatResponse(Qaul_Rpc_Debug_HeartbeatResponse)
-    /// libqaul panics immediatly
+    /// libqaul panics immediately
     case panic(Qaul_Rpc_Debug_Panic)
     /// enable/disable logging to file
     case logToFile(Qaul_Rpc_Debug_LogToFile)
@@ -99,6 +108,8 @@ struct Qaul_Rpc_Debug_Debug {
     case storagePathRequest(Qaul_Rpc_Debug_StoragePathRequest)
     /// Storage Path Response
     case storagePathResponse(Qaul_Rpc_Debug_StoragePathResponse)
+    /// Request for library to delete logs
+    case deleteLibqaulLogsRequest(Qaul_Rpc_Debug_DeleteLibqaulLogsRequest)
 
   #if !swift(>=4.1)
     static func ==(lhs: Qaul_Rpc_Debug_Debug.OneOf_Message, rhs: Qaul_Rpc_Debug_Debug.OneOf_Message) -> Bool {
@@ -128,6 +139,10 @@ struct Qaul_Rpc_Debug_Debug {
       }()
       case (.storagePathResponse, .storagePathResponse): return {
         guard case .storagePathResponse(let l) = lhs, case .storagePathResponse(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.deleteLibqaulLogsRequest, .deleteLibqaulLogsRequest): return {
+        guard case .deleteLibqaulLogsRequest(let l) = lhs, case .deleteLibqaulLogsRequest(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -227,6 +242,19 @@ struct Qaul_Rpc_Debug_StoragePathResponse {
   init() {}
 }
 
+/// DeleteLibqaulLogsRequest
+///
+/// Requests for the log folder to be wiped clean
+struct Qaul_Rpc_Debug_DeleteLibqaulLogsRequest {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "qaul.rpc.debug"
@@ -240,6 +268,7 @@ extension Qaul_Rpc_Debug_Debug: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     4: .standard(proto: "log_to_file"),
     5: .standard(proto: "storage_path_request"),
     6: .standard(proto: "storage_path_response"),
+    7: .standard(proto: "delete_libqaul_logs_request"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -326,6 +355,19 @@ extension Qaul_Rpc_Debug_Debug: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
           self.message = .storagePathResponse(v)
         }
       }()
+      case 7: try {
+        var v: Qaul_Rpc_Debug_DeleteLibqaulLogsRequest?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .deleteLibqaulLogsRequest(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .deleteLibqaulLogsRequest(v)
+        }
+      }()
       default: break
       }
     }
@@ -360,6 +402,10 @@ extension Qaul_Rpc_Debug_Debug: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     case .storagePathResponse?: try {
       guard case .storagePathResponse(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
+    }()
+    case .deleteLibqaulLogsRequest?: try {
+      guard case .deleteLibqaulLogsRequest(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
     }()
     case nil: break
     }
@@ -508,6 +554,25 @@ extension Qaul_Rpc_Debug_StoragePathResponse: SwiftProtobuf.Message, SwiftProtob
 
   static func ==(lhs: Qaul_Rpc_Debug_StoragePathResponse, rhs: Qaul_Rpc_Debug_StoragePathResponse) -> Bool {
     if lhs.storagePath != rhs.storagePath {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Rpc_Debug_DeleteLibqaulLogsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".DeleteLibqaulLogsRequest"
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let _ = try decoder.nextFieldNumber() {
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Rpc_Debug_DeleteLibqaulLogsRequest, rhs: Qaul_Rpc_Debug_DeleteLibqaulLogsRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

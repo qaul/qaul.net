@@ -2,7 +2,7 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Debug {
     /// message type
-    #[prost(oneof="debug::Message", tags="1, 2, 3, 4, 5, 6")]
+    #[prost(oneof="debug::Message", tags="1, 2, 3, 4, 5, 6, 7")]
     pub message: ::core::option::Option<debug::Message>,
 }
 /// Nested message and enum types in `Debug`.
@@ -16,7 +16,7 @@ pub mod debug {
         /// response to the heartbeat request
         #[prost(message, tag="2")]
         HeartbeatResponse(super::HeartbeatResponse),
-        /// libqaul panics immediatly
+        /// libqaul panics immediately
         #[prost(message, tag="3")]
         Panic(super::Panic),
         /// enable/disable logging to file
@@ -28,6 +28,9 @@ pub mod debug {
         /// Storage Path Response
         #[prost(message, tag="6")]
         StoragePathResponse(super::StoragePathResponse),
+        /// Request for library to delete logs
+        #[prost(message, tag="7")]
+        DeleteLibqaulLogsRequest(super::DeleteLibqaulLogsRequest),
     }
 }
 /// Request a Heartbeat from Libqaul
@@ -78,4 +81,10 @@ pub struct StoragePathRequest {
 pub struct StoragePathResponse {
     #[prost(string, tag="1")]
     pub storage_path: ::prost::alloc::string::String,
+}
+/// DeleteLibqaulLogsRequest
+///
+/// Requests for the log folder to be wiped clean
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeleteLibqaulLogsRequest {
 }

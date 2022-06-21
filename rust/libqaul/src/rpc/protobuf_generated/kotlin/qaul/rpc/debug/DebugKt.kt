@@ -96,7 +96,7 @@ public object DebugKt {
 
     /**
      * <pre>
-     * libqaul panics immediatly
+     * libqaul panics immediately
      * </pre>
      *
      * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -110,7 +110,7 @@ public object DebugKt {
       }
     /**
      * <pre>
-     * libqaul panics immediatly
+     * libqaul panics immediately
      * </pre>
      *
      * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -120,7 +120,7 @@ public object DebugKt {
     }
     /**
      * <pre>
-     * libqaul panics immediatly
+     * libqaul panics immediately
      * </pre>
      *
      * <code>.qaul.rpc.debug.Panic panic = 3;</code>
@@ -237,6 +237,42 @@ public object DebugKt {
     public fun hasStoragePathResponse(): kotlin.Boolean {
       return _builder.hasStoragePathResponse()
     }
+
+    /**
+     * <pre>
+     * Request for library to delete logs
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+     */
+    public var deleteLibqaulLogsRequest: qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest
+      @JvmName("getDeleteLibqaulLogsRequest")
+      get() = _builder.getDeleteLibqaulLogsRequest()
+      @JvmName("setDeleteLibqaulLogsRequest")
+      set(value) {
+        _builder.setDeleteLibqaulLogsRequest(value)
+      }
+    /**
+     * <pre>
+     * Request for library to delete logs
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+     */
+    public fun clearDeleteLibqaulLogsRequest() {
+      _builder.clearDeleteLibqaulLogsRequest()
+    }
+    /**
+     * <pre>
+     * Request for library to delete logs
+     * </pre>
+     *
+     * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
+     * @return Whether the deleteLibqaulLogsRequest field is set.
+     */
+    public fun hasDeleteLibqaulLogsRequest(): kotlin.Boolean {
+      return _builder.hasDeleteLibqaulLogsRequest()
+    }
     public val messageCase: qaul.rpc.debug.DebugOuterClass.Debug.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
@@ -267,4 +303,7 @@ val qaul.rpc.debug.DebugOuterClass.DebugOrBuilder.storagePathRequestOrNull: qaul
 
 val qaul.rpc.debug.DebugOuterClass.DebugOrBuilder.storagePathResponseOrNull: qaul.rpc.debug.DebugOuterClass.StoragePathResponse?
   get() = if (hasStoragePathResponse()) getStoragePathResponse() else null
+
+val qaul.rpc.debug.DebugOuterClass.DebugOrBuilder.deleteLibqaulLogsRequestOrNull: qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest?
+  get() = if (hasDeleteLibqaulLogsRequest()) getDeleteLibqaulLogsRequest() else null
 

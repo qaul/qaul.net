@@ -23,6 +23,7 @@
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/arena.h>
 #include <google/protobuf/arenastring.h>
+#include <google/protobuf/generated_message_bases.h>
 #include <google/protobuf/generated_message_util.h>
 #include <google/protobuf/metadata_lite.h>
 #include <google/protobuf/generated_message_reflection.h>
@@ -56,6 +57,12 @@ extern ConfirmationDefaultTypeInternal _Confirmation_default_instance_;
 class Container;
 struct ContainerDefaultTypeInternal;
 extern ContainerDefaultTypeInternal _Container_default_instance_;
+class CryptoService;
+struct CryptoServiceDefaultTypeInternal;
+extern CryptoServiceDefaultTypeInternal _CryptoService_default_instance_;
+class Data;
+struct DataDefaultTypeInternal;
+extern DataDefaultTypeInternal _Data_default_instance_;
 class Envelope;
 struct EnvelopeDefaultTypeInternal;
 extern EnvelopeDefaultTypeInternal _Envelope_default_instance_;
@@ -69,6 +76,8 @@ PROTOBUF_NAMESPACE_OPEN
 template<> ::qaul::net::messaging::ChatMessage* Arena::CreateMaybeMessage<::qaul::net::messaging::ChatMessage>(Arena*);
 template<> ::qaul::net::messaging::Confirmation* Arena::CreateMaybeMessage<::qaul::net::messaging::Confirmation>(Arena*);
 template<> ::qaul::net::messaging::Container* Arena::CreateMaybeMessage<::qaul::net::messaging::Container>(Arena*);
+template<> ::qaul::net::messaging::CryptoService* Arena::CreateMaybeMessage<::qaul::net::messaging::CryptoService>(Arena*);
+template<> ::qaul::net::messaging::Data* Arena::CreateMaybeMessage<::qaul::net::messaging::Data>(Arena*);
 template<> ::qaul::net::messaging::Envelope* Arena::CreateMaybeMessage<::qaul::net::messaging::Envelope>(Arena*);
 template<> ::qaul::net::messaging::Messaging* Arena::CreateMaybeMessage<::qaul::net::messaging::Messaging>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
@@ -365,10 +374,28 @@ class Envelope final :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kDataFieldNumber = 3,
     kSenderIdFieldNumber = 1,
     kReceiverIdFieldNumber = 2,
-    kDataFieldNumber = 3,
   };
+  // repeated .qaul.net.messaging.Data data = 3;
+  int data_size() const;
+  private:
+  int _internal_data_size() const;
+  public:
+  void clear_data();
+  ::qaul::net::messaging::Data* mutable_data(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::messaging::Data >*
+      mutable_data();
+  private:
+  const ::qaul::net::messaging::Data& _internal_data(int index) const;
+  ::qaul::net::messaging::Data* _internal_add_data();
+  public:
+  const ::qaul::net::messaging::Data& data(int index) const;
+  ::qaul::net::messaging::Data* add_data();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::messaging::Data >&
+      data() const;
+
   // bytes sender_id = 1;
   void clear_sender_id();
   const std::string& sender_id() const;
@@ -397,7 +424,144 @@ class Envelope final :
   std::string* _internal_mutable_receiver_id();
   public:
 
-  // bytes data = 3;
+  // @@protoc_insertion_point(class_scope:qaul.net.messaging.Envelope)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::messaging::Data > data_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sender_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr receiver_id_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
+};
+// -------------------------------------------------------------------
+
+class Data final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.messaging.Data) */ {
+ public:
+  inline Data() : Data(nullptr) {}
+  ~Data() override;
+  explicit PROTOBUF_CONSTEXPR Data(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  Data(const Data& from);
+  Data(Data&& from) noexcept
+    : Data() {
+    *this = ::std::move(from);
+  }
+
+  inline Data& operator=(const Data& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Data& operator=(Data&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const Data& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const Data* internal_default_instance() {
+    return reinterpret_cast<const Data*>(
+               &_Data_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    2;
+
+  friend void swap(Data& a, Data& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Data* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Data* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  Data* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<Data>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const Data& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const Data& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Data* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.net.messaging.Data";
+  }
+  protected:
+  explicit Data(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDataFieldNumber = 2,
+    kNonceFieldNumber = 1,
+  };
+  // bytes data = 2;
   void clear_data();
   const std::string& data() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -411,16 +575,24 @@ class Envelope final :
   std::string* _internal_mutable_data();
   public:
 
-  // @@protoc_insertion_point(class_scope:qaul.net.messaging.Envelope)
+  // uint64 nonce = 1;
+  void clear_nonce();
+  uint64_t nonce() const;
+  void set_nonce(uint64_t value);
+  private:
+  uint64_t _internal_nonce() const;
+  void _internal_set_nonce(uint64_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:qaul.net.messaging.Data)
  private:
   class _Internal;
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sender_id_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr receiver_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr data_;
+  uint64_t nonce_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
 };
@@ -472,6 +644,7 @@ class Messaging final :
   enum MessageCase {
     kConfirmationMessage = 1,
     kChatMessage = 2,
+    kCryptoService = 3,
     MESSAGE_NOT_SET = 0,
   };
 
@@ -480,7 +653,7 @@ class Messaging final :
                &_Messaging_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    3;
 
   friend void swap(Messaging& a, Messaging& b) {
     a.Swap(&b);
@@ -553,6 +726,7 @@ class Messaging final :
   enum : int {
     kConfirmationMessageFieldNumber = 1,
     kChatMessageFieldNumber = 2,
+    kCryptoServiceFieldNumber = 3,
   };
   // .qaul.net.messaging.Confirmation confirmation_message = 1;
   bool has_confirmation_message() const;
@@ -590,6 +764,24 @@ class Messaging final :
       ::qaul::net::messaging::ChatMessage* chat_message);
   ::qaul::net::messaging::ChatMessage* unsafe_arena_release_chat_message();
 
+  // .qaul.net.messaging.CryptoService crypto_service = 3;
+  bool has_crypto_service() const;
+  private:
+  bool _internal_has_crypto_service() const;
+  public:
+  void clear_crypto_service();
+  const ::qaul::net::messaging::CryptoService& crypto_service() const;
+  PROTOBUF_NODISCARD ::qaul::net::messaging::CryptoService* release_crypto_service();
+  ::qaul::net::messaging::CryptoService* mutable_crypto_service();
+  void set_allocated_crypto_service(::qaul::net::messaging::CryptoService* crypto_service);
+  private:
+  const ::qaul::net::messaging::CryptoService& _internal_crypto_service() const;
+  ::qaul::net::messaging::CryptoService* _internal_mutable_crypto_service();
+  public:
+  void unsafe_arena_set_allocated_crypto_service(
+      ::qaul::net::messaging::CryptoService* crypto_service);
+  ::qaul::net::messaging::CryptoService* unsafe_arena_release_crypto_service();
+
   void clear_message();
   MessageCase message_case() const;
   // @@protoc_insertion_point(class_scope:qaul.net.messaging.Messaging)
@@ -597,6 +789,7 @@ class Messaging final :
   class _Internal;
   void set_has_confirmation_message();
   void set_has_chat_message();
+  void set_has_crypto_service();
 
   inline bool has_message() const;
   inline void clear_has_message();
@@ -609,10 +802,127 @@ class Messaging final :
       ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
     ::qaul::net::messaging::Confirmation* confirmation_message_;
     ::qaul::net::messaging::ChatMessage* chat_message_;
+    ::qaul::net::messaging::CryptoService* crypto_service_;
   } message_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   uint32_t _oneof_case_[1];
 
+  friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CryptoService final :
+    public ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase /* @@protoc_insertion_point(class_definition:qaul.net.messaging.CryptoService) */ {
+ public:
+  inline CryptoService() : CryptoService(nullptr) {}
+  explicit PROTOBUF_CONSTEXPR CryptoService(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  CryptoService(const CryptoService& from);
+  CryptoService(CryptoService&& from) noexcept
+    : CryptoService() {
+    *this = ::std::move(from);
+  }
+
+  inline CryptoService& operator=(const CryptoService& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline CryptoService& operator=(CryptoService&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const CryptoService& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const CryptoService* internal_default_instance() {
+    return reinterpret_cast<const CryptoService*>(
+               &_CryptoService_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    4;
+
+  friend void swap(CryptoService& a, CryptoService& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(CryptoService* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(CryptoService* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  CryptoService* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<CryptoService>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyFrom;
+  inline void CopyFrom(const CryptoService& from) {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl(this, from);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeFrom;
+  void MergeFrom(const CryptoService& from) {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl(this, from);
+  }
+  public:
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.net.messaging.CryptoService";
+  }
+  protected:
+  explicit CryptoService(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:qaul.net.messaging.CryptoService)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
   friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
 };
 // -------------------------------------------------------------------
@@ -665,7 +975,7 @@ class Confirmation final :
                &_Confirmation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    5;
 
   friend void swap(Confirmation& a, Confirmation& b) {
     a.Swap(&b);
@@ -824,7 +1134,7 @@ class ChatMessage final :
                &_ChatMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    6;
 
   friend void swap(ChatMessage& a, ChatMessage& b) {
     a.Swap(&b);
@@ -1215,42 +1525,106 @@ inline void Envelope::set_allocated_receiver_id(std::string* receiver_id) {
   // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.Envelope.receiver_id)
 }
 
-// bytes data = 3;
+// repeated .qaul.net.messaging.Data data = 3;
+inline int Envelope::_internal_data_size() const {
+  return data_.size();
+}
+inline int Envelope::data_size() const {
+  return _internal_data_size();
+}
 inline void Envelope::clear_data() {
+  data_.Clear();
+}
+inline ::qaul::net::messaging::Data* Envelope::mutable_data(int index) {
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.Envelope.data)
+  return data_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::messaging::Data >*
+Envelope::mutable_data() {
+  // @@protoc_insertion_point(field_mutable_list:qaul.net.messaging.Envelope.data)
+  return &data_;
+}
+inline const ::qaul::net::messaging::Data& Envelope::_internal_data(int index) const {
+  return data_.Get(index);
+}
+inline const ::qaul::net::messaging::Data& Envelope::data(int index) const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.Envelope.data)
+  return _internal_data(index);
+}
+inline ::qaul::net::messaging::Data* Envelope::_internal_add_data() {
+  return data_.Add();
+}
+inline ::qaul::net::messaging::Data* Envelope::add_data() {
+  ::qaul::net::messaging::Data* _add = _internal_add_data();
+  // @@protoc_insertion_point(field_add:qaul.net.messaging.Envelope.data)
+  return _add;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::messaging::Data >&
+Envelope::data() const {
+  // @@protoc_insertion_point(field_list:qaul.net.messaging.Envelope.data)
+  return data_;
+}
+
+// -------------------------------------------------------------------
+
+// Data
+
+// uint64 nonce = 1;
+inline void Data::clear_nonce() {
+  nonce_ = uint64_t{0u};
+}
+inline uint64_t Data::_internal_nonce() const {
+  return nonce_;
+}
+inline uint64_t Data::nonce() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.Data.nonce)
+  return _internal_nonce();
+}
+inline void Data::_internal_set_nonce(uint64_t value) {
+  
+  nonce_ = value;
+}
+inline void Data::set_nonce(uint64_t value) {
+  _internal_set_nonce(value);
+  // @@protoc_insertion_point(field_set:qaul.net.messaging.Data.nonce)
+}
+
+// bytes data = 2;
+inline void Data::clear_data() {
   data_.ClearToEmpty();
 }
-inline const std::string& Envelope::data() const {
-  // @@protoc_insertion_point(field_get:qaul.net.messaging.Envelope.data)
+inline const std::string& Data::data() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.Data.data)
   return _internal_data();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void Envelope::set_data(ArgT0&& arg0, ArgT... args) {
+void Data::set_data(ArgT0&& arg0, ArgT... args) {
  
  data_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.messaging.Envelope.data)
+  // @@protoc_insertion_point(field_set:qaul.net.messaging.Data.data)
 }
-inline std::string* Envelope::mutable_data() {
+inline std::string* Data::mutable_data() {
   std::string* _s = _internal_mutable_data();
-  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.Envelope.data)
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.Data.data)
   return _s;
 }
-inline const std::string& Envelope::_internal_data() const {
+inline const std::string& Data::_internal_data() const {
   return data_.Get();
 }
-inline void Envelope::_internal_set_data(const std::string& value) {
+inline void Data::_internal_set_data(const std::string& value) {
   
   data_.Set(value, GetArenaForAllocation());
 }
-inline std::string* Envelope::_internal_mutable_data() {
+inline std::string* Data::_internal_mutable_data() {
   
   return data_.Mutable(GetArenaForAllocation());
 }
-inline std::string* Envelope::release_data() {
-  // @@protoc_insertion_point(field_release:qaul.net.messaging.Envelope.data)
+inline std::string* Data::release_data() {
+  // @@protoc_insertion_point(field_release:qaul.net.messaging.Data.data)
   return data_.Release();
 }
-inline void Envelope::set_allocated_data(std::string* data) {
+inline void Data::set_allocated_data(std::string* data) {
   if (data != nullptr) {
     
   } else {
@@ -1262,7 +1636,7 @@ inline void Envelope::set_allocated_data(std::string* data) {
     data_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.Envelope.data)
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.Data.data)
 }
 
 // -------------------------------------------------------------------
@@ -1417,6 +1791,80 @@ inline ::qaul::net::messaging::ChatMessage* Messaging::mutable_chat_message() {
   return _msg;
 }
 
+// .qaul.net.messaging.CryptoService crypto_service = 3;
+inline bool Messaging::_internal_has_crypto_service() const {
+  return message_case() == kCryptoService;
+}
+inline bool Messaging::has_crypto_service() const {
+  return _internal_has_crypto_service();
+}
+inline void Messaging::set_has_crypto_service() {
+  _oneof_case_[0] = kCryptoService;
+}
+inline void Messaging::clear_crypto_service() {
+  if (_internal_has_crypto_service()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete message_.crypto_service_;
+    }
+    clear_has_message();
+  }
+}
+inline ::qaul::net::messaging::CryptoService* Messaging::release_crypto_service() {
+  // @@protoc_insertion_point(field_release:qaul.net.messaging.Messaging.crypto_service)
+  if (_internal_has_crypto_service()) {
+    clear_has_message();
+    ::qaul::net::messaging::CryptoService* temp = message_.crypto_service_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    message_.crypto_service_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::qaul::net::messaging::CryptoService& Messaging::_internal_crypto_service() const {
+  return _internal_has_crypto_service()
+      ? *message_.crypto_service_
+      : reinterpret_cast< ::qaul::net::messaging::CryptoService&>(::qaul::net::messaging::_CryptoService_default_instance_);
+}
+inline const ::qaul::net::messaging::CryptoService& Messaging::crypto_service() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.Messaging.crypto_service)
+  return _internal_crypto_service();
+}
+inline ::qaul::net::messaging::CryptoService* Messaging::unsafe_arena_release_crypto_service() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:qaul.net.messaging.Messaging.crypto_service)
+  if (_internal_has_crypto_service()) {
+    clear_has_message();
+    ::qaul::net::messaging::CryptoService* temp = message_.crypto_service_;
+    message_.crypto_service_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Messaging::unsafe_arena_set_allocated_crypto_service(::qaul::net::messaging::CryptoService* crypto_service) {
+  clear_message();
+  if (crypto_service) {
+    set_has_crypto_service();
+    message_.crypto_service_ = crypto_service;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:qaul.net.messaging.Messaging.crypto_service)
+}
+inline ::qaul::net::messaging::CryptoService* Messaging::_internal_mutable_crypto_service() {
+  if (!_internal_has_crypto_service()) {
+    clear_message();
+    set_has_crypto_service();
+    message_.crypto_service_ = CreateMaybeMessage< ::qaul::net::messaging::CryptoService >(GetArenaForAllocation());
+  }
+  return message_.crypto_service_;
+}
+inline ::qaul::net::messaging::CryptoService* Messaging::mutable_crypto_service() {
+  ::qaul::net::messaging::CryptoService* _msg = _internal_mutable_crypto_service();
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.Messaging.crypto_service)
+  return _msg;
+}
+
 inline bool Messaging::has_message() const {
   return message_case() != MESSAGE_NOT_SET;
 }
@@ -1426,6 +1874,10 @@ inline void Messaging::clear_has_message() {
 inline Messaging::MessageCase Messaging::message_case() const {
   return Messaging::MessageCase(_oneof_case_[0]);
 }
+// -------------------------------------------------------------------
+
+// CryptoService
+
 // -------------------------------------------------------------------
 
 // Confirmation
@@ -1647,6 +2099,10 @@ inline void ChatMessage::set_allocated_content(std::string* content) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
