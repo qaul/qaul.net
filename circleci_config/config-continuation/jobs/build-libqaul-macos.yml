@@ -11,9 +11,11 @@ steps:
   - restore-sccache-cache
   - run:
       name: Build Libqaul *.dylib Library for MacOS
-      command: cd rust && cargo build
+      command: |
+        cd rust/libqaul
+        sh build_libqaul_macos.sh release
   - save-sccache-cache
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - rust/target/debug/liblibqaul.dylib
+        - rust/target/release/liblibqaul.dylib

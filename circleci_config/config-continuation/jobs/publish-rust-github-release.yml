@@ -15,7 +15,7 @@ steps:
         cp -a android/blemodule/build/outputs/aar/. ./artifacts/
         cp -a android/libqaul/build/outputs/aar/. ./artifacts/
         # iOS
-        cp rust/target/debug/liblibqaul.dylib ./artifacts/
+        cp rust/target/release/liblibqaul.dylib ./artifacts/
         # MacOS
         cp rust/target/universal/release/liblibqaul.a ./artifacts/
         # Windows
