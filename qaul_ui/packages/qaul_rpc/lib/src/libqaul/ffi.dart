@@ -38,21 +38,8 @@ class LibqaulFfi {
     } else if (Platform.isWindows) {
       // find the library in the rust target build folder
       _lib = DynamicLibrary.open(Platform.script.resolve('libqaul.dll').toFilePath());
-    } else if (Platform.isAndroid) {
-      // version 1: load liblibqaul.so directly, we use version 2 now
-      //   problems:
-      //     libqaul was running in the GUI thread.
-      //     we got some errors from android about execution rights
-      // the android libraries are copied to the android directory after build
-      _lib = DynamicLibrary.open('liblibqaul.so');
-
-      // version 2: load libqaul as AAR library & communicate via system channels
-    } else if (Platform.isIOS) {
-      // no path as library is statically linked library
-      _lib = DynamicLibrary.process();
     } else {
-      // the platform is not known
-      throw ('Platform ${Platform.operatingSystem} not implemented yet.');
+      throw ('Platform ${Platform.operatingSystem} not implemented yet OR is not supported by FFI.');
     }
   }
 

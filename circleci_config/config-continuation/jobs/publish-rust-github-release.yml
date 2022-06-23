@@ -19,7 +19,7 @@ steps:
         # MacOS
         cp rust/target/universal/release/liblibqaul.a ./artifacts/
         # Windows
-        cp rust/target/debug/libqaul.dll ./artifacts/
+        cp rust/target/release/libqaul.dll ./artifacts/
   - run:
       name: Install ghr
       command: |
