@@ -351,7 +351,7 @@ jobs:
                     LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | /usr/bin/sort --reverse --version-sort | head -n 1)
                     echo "Found latest tag: $LATEST_TAG"
 
-                    gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/debug
+                    gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
                 name: Download Libqaul *.dll File from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
@@ -495,7 +495,7 @@ jobs:
                 no_output_timeout: 30m
             - persist_to_workspace:
                 paths:
-                    - rust/target/debug/libqaul.dll
+                    - rust/target/release/libqaul.dll
                 root: ~/qaul-libp2p
         working_directory: ~/qaul-libp2p
     publish-flutter-github-release:
@@ -576,7 +576,7 @@ jobs:
                     # MacOS
                     cp rust/target/universal/release/liblibqaul.a ./artifacts/
                     # Windows
-                    cp rust/target/debug/libqaul.dll ./artifacts/
+                    cp rust/target/release/libqaul.dll ./artifacts/
                 name: Copy binaries to ./artifacts
             - run:
                 command: |

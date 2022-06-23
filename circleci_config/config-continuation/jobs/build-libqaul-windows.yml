@@ -24,8 +24,8 @@ steps:
       no_output_timeout: 30m
       command: |
         export PATH="/c/Users/circleci/.cargo/bin:/c/Program Files/CMake/bin:$PATH"
-        cd rust && cargo build
+        cd rust && cargo build --release
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - rust/target/debug/libqaul.dll
+        - rust/target/release/libqaul.dll
