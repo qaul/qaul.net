@@ -206,8 +206,8 @@ jobs:
             - run:
                 command: |
                     LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "libqaul-debug.aar" --repo "$REPO_URL" --dir ../../android/libqaul/build/outputs/aar
-                    gh release download "$LATEST_TAG" --pattern "blemodule-debug.aar" --repo "$REPO_URL" --dir ../../android/blemodule/build/outputs/aar
+                    gh release download "$LATEST_TAG" --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir app/libs
+                    gh release download "$LATEST_TAG" --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir app/libs
                 name: Download Libqaul AAR Files from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
@@ -399,8 +399,8 @@ jobs:
                     - ~/.gradle
             - persist_to_workspace:
                 paths:
-                    - android/blemodule/build/outputs/aar/blemodule-debug.aar
-                    - android/libqaul/build/outputs/aar/libqaul-debug.aar
+                    - android/blemodule/build/outputs/aar/blemodule-release.aar
+                    - android/libqaul/build/outputs/aar/libqaul-release.aar
                 root: ~/qaul-libp2p
     build-libqaul-ios:
         executor: rust-macos
@@ -490,7 +490,7 @@ jobs:
             - run:
                 command: |
                     export PATH="/c/Users/circleci/.cargo/bin:/c/Program Files/CMake/bin:$PATH"
-                    cd rust && cargo build
+                    cd rust && cargo build --release
                 name: Build dll Libqaul
                 no_output_timeout: 30m
             - persist_to_workspace:

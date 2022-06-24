@@ -15,3 +15,6 @@ key.properties
 #
 **/report.xml
 **/google-credentials.json
+
+# AAR Library dependencies
+app/libs/*

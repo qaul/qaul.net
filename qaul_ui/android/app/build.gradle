@@ -78,9 +78,9 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    //
-//    implementation (name: 'libqaul', ext: 'aar')
-//    implementation fileTree(dir: 'libs', include: ['*.aar'])
-    implementation files('../../../android/libqaul/build/outputs/aar/libqaul-debug.aar')
-    //implementation files('../../../android/libqaul/build/outputs/aar/libqaul-release.aar')
+    debugImplementation (name: 'libqaul-debug', ext: 'aar')
+    releaseImplementation (name: 'libqaul-release', ext: 'aar')
+
+    debugImplementation (name: 'blemodule-debug', ext: 'aar')
+    releaseImplementation (name: 'blemodule-release', ext: 'aar')
 }
