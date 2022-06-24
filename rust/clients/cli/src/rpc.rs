@@ -98,6 +98,9 @@ impl Rpc {
                     Some(proto::Modules::Debug) => {
                         super::debug::Debug::rpc(message.data);
                     },
+                    Some(proto::Modules::Fileshare) => {
+                        super::fileshare::FileShare::rpc(message.data);
+                    },
                     Some(proto::Modules::None) => {},
                     None => {},
                 }

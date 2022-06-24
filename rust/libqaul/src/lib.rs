@@ -425,6 +425,7 @@ pub async fn start(storage_path: String) -> () {
                             connection_module,
                             neighbour_id
                         );
+                        log::error!("sending messaging message dat len={}", data.len());
                         // send messaging message via the best module
                         match connection_module {
                             ConnectionModule::Lan => {

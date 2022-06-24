@@ -31,5 +31,6 @@ impl Services {
         feed::Feed::init();
         messaging::Messaging::init();
         chat::Chat::init();
+        filesharing::FileShare::init();
     }
 }

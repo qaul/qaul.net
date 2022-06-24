@@ -39,4 +39,5 @@ pub enum Modules {
     Debug = 8,
     Chat = 9,
     Ble = 10,
+    Fileshare = 11,
 }

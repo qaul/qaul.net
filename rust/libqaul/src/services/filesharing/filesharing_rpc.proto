@@ -1,14 +1,30 @@
 syntax = "proto3";
 package qaul.rpc.filesharing;
 
-// FileSharing service RPC message container
 message FileSharing {
+    // message type
+    oneof message {
+        // request for sending file
+        SendFileRequest send_file_request = 1;
+        // sending file list
+        SendingFileListRequest sending_file_list = 2;
+        // receiving file list
+        ReceivingFileListRequest receiving_file_list = 3;
+    }
+}
+
+message SendFileRequest{
     // file path name to send
     string path_name = 1;
     // conversation id to receive file
     bytes  conversation_id =2;
-
     // description
     string  description =3;
-
 }
+
+message SendingFileListRequest{
+}
+
+message ReceivingFileListRequest{
+}
+

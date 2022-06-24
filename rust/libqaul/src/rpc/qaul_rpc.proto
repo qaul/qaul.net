@@ -36,4 +36,5 @@ enum Modules {
     DEBUG = 8;
     CHAT = 9;
     BLE = 10;
+    FILESHARE=11;    
 }

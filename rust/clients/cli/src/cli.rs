@@ -14,6 +14,7 @@ use super::feed::Feed;
 use super::chat::Chat;
 use super::debug::Debug;
 use super::ble::Ble;
+use super::fileshare::FileShare;
 
 /// CLI command analizer and processing
 pub struct Cli {}
@@ -57,6 +58,10 @@ impl Cli {
             // debugging functions
             cmd if cmd.starts_with("debug ") => {
                 Debug::cli(cmd.strip_prefix("debug ").unwrap());
+            },
+            // debugging functions
+            cmd if cmd.starts_with("file ") => {
+                FileShare::cli(cmd.strip_prefix("file ").unwrap());
             },
             // unknown command
             _ => log::error!("unknown command"),
