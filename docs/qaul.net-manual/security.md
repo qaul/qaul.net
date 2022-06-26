@@ -1,45 +1,67 @@
 # qaul.net Security Overview
 
-## Cryptographic Key
+## Identification
 
-* Asymmetric Cryptography
-* Key type: Ed25519
+Each entity in qaul has an [Ed25519] keypair and a [qaul ID] which is a hash of the public key.
 
-Each node and each user has their own key pair.
+### Nodes
 
-## qaul id
+Each Node has an [Ed25519] keypair and a [qaul ID].
 
-The qaul id is a multi-hash of the public key
+### Users
 
-* 38 bytes binary representation
-* 52 character string, base58btc (base58 bitcoin) encoded
+Each User can be addressed via it's [qaul ID] which is a hash of it's public [Ed25519] key.
 
-### Small id for BLE Identification Service
+### Message Identification
 
-There is a smaller version of the qaul id of 16 bytes.
-This version is used in situation where it is not feasible to
-send the entire qaul id.
-
-At the moment the small version is used in the BLE identification service.
-
-The small version uses bytes 6-21 of the qaul ID.
-(As bytes 0-5 of a qaul ID are always identical.)
-
-The translation between the small id and qaul id is handled by
-the BLE manager.
-
-## Message Encryption & Signing
-
-Each direct message is encrypted with the public / private keys of the
-communicating users.
+Each message is signed with a [Sha256] cryptographic hash by the sending user.
+Via this hash the identity of the sending user can be verified.
 
 ## Transport Encryption
 
-### TCP
+Every connection between two nodes is encrypted.
 
-The TCP transport between nodes is encrypted via the noise protocol.
-<http://www.noiseprotocol.org>
+### LAN & Internet Connections
 
-### BLE
+The TCP transport channel of the LAN & Internet connections is via the [Noise Protocol] `Noise_XX_25519_ChaChaPoly_Sha256`.
 
-The transport encryption on BLE is provided by the Bluetooth stack.
+`Noise_XX_25519_ChaChaPoly_Sha256` splits down to the following parts:
+
+* [Noise Protocol] - A crypto protocol based on [Diffie-Hellman] key agreement.
+* [XX] - Identifiable handshake, where the static keys of the nodes are exchanged within the handshake.
+* [25519] - Using [Curve25519] eliptic curve keys and X25519 [Diffie-Hellman].
+* [ChaChaPoly] - Using the [ChaCha20] stream cipher with the [Poly1305] message authentication code.
+* [Sha256] - Cryptographic hash.
+
+This is a strong encryption with forward secrecy.
+
+### BLE Connection
+
+The transport encryption on BLE connections is provided by the Bluetooth stack.
+
+## End to End Messaging Encryption
+
+Each direct message to another user, has a strong end to end encryption, using the [Noise Protocol] `Noise_KK_25519_ChaChaPoly_Sha256`.
+
+`Noise_KK_25519_ChaChaPoly_Sha256` splits down to the following parts:
+
+* [Noise Protocol] - A crypto protocol based on [Diffie-Hellman] key agreement.
+* [KK] - Handshake in which both sides know the other parties static key.
+* [25519] - Using [Curve25519] eliptic curve keys and X25519 [Diffie-Hellman].
+* [ChaChaPoly] - Using the [ChaCha20] stream cipher with the [Poly1305] message authentication code.
+* [Sha256] - Cryptographic hash.
+
+This protocol provides **zero-RTT** encryption, meaning that already the first message of a cryptographic hand-shake can contain an encrypted payload.
+
+After the first handshake, this protocol provides strong forward secrecy and allows a secure delay tolerant communication.
+
+[Ed25519]: <https://en.wikipedia.org/wiki/EdDSA#Ed25519>
+[Curve25519][25519]: <https://en.wikipedia.org/wiki/Curve25519>
+[Noise Protocol]: <https://noiseprotocol.org/noise.html>
+[XX]: <https://noiseexplorer.com/patterns/XX/>
+[KK]: <https://noiseexplorer.com/patterns/KK/>
+[ChaCha20][ChaChaPoly]: <https://en.wikipedia.org/wiki/ChaCha20-Poly1305>
+[Poly1305]: <https://en.wikipedia.org/wiki/Poly1305>
+[Sha256]: <https://en.wikipedia.org/wiki/SHA-2>
+[Diffie-Hellman]: <https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange>
+[qaul ID]: qaulId.md
