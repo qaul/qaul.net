@@ -28,8 +28,8 @@ The TCP transport channel of the LAN & Internet connections is via the [Noise Pr
 `Noise_XX_25519_ChaChaPoly_Sha256` splits down to the following parts:
 
 * [Noise Protocol] - A crypto protocol based on [Diffie-Hellman] key agreement.
-* [XX] - Identifiable handshake, where the static keys of the nodes are exchanged within the handshake.
-* [25519][Curve25519] - Using [Curve25519] eliptic curve keys and X25519 [Diffie-Hellman].
+* [XX] - Identifiable handshake, where the static public keys of the nodes are exchanged within the handshake.
+* [25519][Curve25519] - Using [Curve25519] elliptic curve keys and X25519 [Diffie-Hellman].
 * [ChaChaPoly] - Using the [ChaCha20][ChaChaPoly] stream cipher with the [Poly1305] message authentication code.
 * [Sha256] - Cryptographic hash.
 
@@ -46,8 +46,8 @@ Each direct message to another user, has a strong end to end encryption, using t
 `Noise_KK_25519_ChaChaPoly_Sha256` splits down to the following parts:
 
 * [Noise Protocol] - A crypto protocol based on [Diffie-Hellman] key agreement.
-* [KK] - Handshake in which both sides know the other parties static key.
-* [25519][Curve25519] - Using [Curve25519] eliptic curve keys and X25519 [Diffie-Hellman].
+* [KK] - Handshake in which both sides know the other parties static public key.
+* [25519][Curve25519] - Using [Curve25519] elliptic curve keys and X25519 [Diffie-Hellman].
 * [ChaChaPoly] - Using the [ChaCha20][ChaChaPoly] stream cipher with the [Poly1305] message authentication code.
 * [Sha256] - Cryptographic hash.
 
