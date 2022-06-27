@@ -29,8 +29,8 @@ The TCP transport channel of the LAN & Internet connections is via the [Noise Pr
 
 * [Noise Protocol] - A crypto protocol based on [Diffie-Hellman] key agreement.
 * [XX] - Identifiable handshake, where the static keys of the nodes are exchanged within the handshake.
-* [25519] - Using [Curve25519] eliptic curve keys and X25519 [Diffie-Hellman].
-* [ChaChaPoly] - Using the [ChaCha20] stream cipher with the [Poly1305] message authentication code.
+* [25519][Curve25519] - Using [Curve25519] eliptic curve keys and X25519 [Diffie-Hellman].
+* [ChaChaPoly] - Using the [ChaCha20][ChaChaPoly] stream cipher with the [Poly1305] message authentication code.
 * [Sha256] - Cryptographic hash.
 
 This is a strong encryption with forward secrecy.
@@ -47,8 +47,8 @@ Each direct message to another user, has a strong end to end encryption, using t
 
 * [Noise Protocol] - A crypto protocol based on [Diffie-Hellman] key agreement.
 * [KK] - Handshake in which both sides know the other parties static key.
-* [25519] - Using [Curve25519] eliptic curve keys and X25519 [Diffie-Hellman].
-* [ChaChaPoly] - Using the [ChaCha20] stream cipher with the [Poly1305] message authentication code.
+* [25519][Curve25519] - Using [Curve25519] eliptic curve keys and X25519 [Diffie-Hellman].
+* [ChaChaPoly] - Using the [ChaCha20][ChaChaPoly] stream cipher with the [Poly1305] message authentication code.
 * [Sha256] - Cryptographic hash.
 
 This protocol provides **zero-RTT** encryption, meaning that already the first message of a cryptographic hand-shake can contain an encrypted payload.
@@ -56,11 +56,11 @@ This protocol provides **zero-RTT** encryption, meaning that already the first m
 After the first handshake, this protocol provides strong forward secrecy and allows a secure delay tolerant communication.
 
 [Ed25519]: <https://en.wikipedia.org/wiki/EdDSA#Ed25519>
-[Curve25519][25519]: <https://en.wikipedia.org/wiki/Curve25519>
+[Curve25519]: <https://en.wikipedia.org/wiki/Curve25519>
 [Noise Protocol]: <https://noiseprotocol.org/noise.html>
 [XX]: <https://noiseexplorer.com/patterns/XX/>
 [KK]: <https://noiseexplorer.com/patterns/KK/>
-[ChaCha20][ChaChaPoly]: <https://en.wikipedia.org/wiki/ChaCha20-Poly1305>
+[ChaChaPoly]: <https://en.wikipedia.org/wiki/ChaCha20-Poly1305>
 [Poly1305]: <https://en.wikipedia.org/wiki/Poly1305>
 [Sha256]: <https://en.wikipedia.org/wiki/SHA-2>
 [Diffie-Hellman]: <https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange>
