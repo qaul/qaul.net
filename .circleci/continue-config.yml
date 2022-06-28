@@ -497,6 +497,51 @@ jobs:
                     - rust/target/release/libqaul.dll
                 root: ~/qaul-libp2p
         working_directory: ~/qaul-libp2p
+    integration-test-flutter-ios:
+        executor: flutter-ios
+        steps:
+            - checkout-project
+            - run:
+                command: brew install cmake
+                name: Install CMake
+            - run:
+                command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+                name: Install Rust
+            - setup-sccache
+            - restore-sccache-cache
+            - run:
+                command: |
+                    rustup target add x86_64-apple-ios
+                    cd ../../rust/libqaul
+                    cargo install cargo-lipo
+                    cargo lipo --release --targets x86_64-apple-ios
+                name: Build libqaul for ios Simulator
+            - save-sccache-cache
+            - install-flutter:
+                version: $FLUTTER_VERSION
+            - install-flutter-deps
+            - install-bundler-deps
+            - install-cocoapods-deps
+            - run:
+                command: |
+                    brew tap wix/brew
+                    brew install applesimutils
+                name: Install applesimutils
+            - run:
+                command: |
+                    # TODO remove
+                    ls -al
+                    ls ../../rust
+                    ls ../../rust/target
+                    ls ../../rust/target/universal
+                    ls ../../rust/target/universal/release
+
+                    cd ..  # qaul_ui root
+                    ID=$(xcrun simctl list devices | grep "iPhone 13 Pro Max" | head -1 | grep -E -o -i "([0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12})")
+                    xcrun simctl boot "$ID"
+                    flutter devices
+                    applesimutils --byId "$ID" --bundle net.qaul.app --setPermissions notifications=YES
+                    flutter test integration_test -d "$ID" --dart-define=testing_mode=true
     publish-flutter-github-release:
         executor: flutter-ubuntu-lean
         steps:
@@ -661,6 +706,7 @@ workflows:
         jobs:
             - analyze-flutter
             - test-flutter
+            - integration-test-flutter-ios
         when: << pipeline.parameters.run-flutter-workflow >>
     build-and-deploy-flutter:
         jobs:

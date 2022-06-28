@@ -8,7 +8,11 @@ import '../helpers/navigation_helper.dart';
 import '../widgets/widgets.dart';
 
 class CreateAccountScreen extends HookConsumerWidget {
-  CreateAccountScreen({Key? key}) : super(key: key);
+  CreateAccountScreen() : super(key: widgetKey);
+
+  static const widgetKey = ValueKey('SplashScreen');
+
+  static const submitButtonKey = ValueKey('SplashScreen.submitButton');
 
   final _fieldKey = GlobalKey<FormFieldState>();
 
@@ -97,6 +101,7 @@ class CreateAccountScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 12.0),
                   Material(
+                      key: submitButtonKey,
                       type: MaterialType.transparency,
                       child: Ink(
                         decoration: BoxDecoration(

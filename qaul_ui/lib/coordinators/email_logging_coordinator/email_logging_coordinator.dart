@@ -26,13 +26,17 @@ part 'log_storage_manager.dart';
 class EmailLoggingCoordinator {
   EmailLoggingCoordinator._();
 
-  static final instance = EmailLoggingCoordinator._();
+  static final instance = const bool.fromEnvironment('testing_mode', defaultValue: false)
+      ? _NullEmailLoggingCoordinator()
+      : EmailLoggingCoordinator._();
 
   final _log = Logger('EmailLoggingCoordinator');
 
   String get _supportEmail => 'debug@qaul.net';
 
   Future<void> initialize({Reader? reader}) async {
+    _storageManager.initialize();
+
     await _initializeEnabledStatus(reader: reader);
 
     _reportLogMessages();
@@ -222,4 +226,89 @@ ${stack ?? 'Not available'}
     return FileSystemEntity.typeSync(log.path) == FileSystemEntityType.file &&
         log.path.endsWith(".log");
   }
+}
+
+class _NullEmailLoggingCoordinator implements EmailLoggingCoordinator {
+  @override
+  // ignore: prefer_final_fields
+  bool _enabled = true;
+
+  @override
+  Future<String> _buildDesktopEmail(
+          {List<FileSystemEntity>? libqaulAttachments}) async =>
+      '';
+
+  @override
+  Future<String> _buildLogContent(
+          Object e, StackTrace? stack, String msg) async =>
+      '';
+
+  @override
+  String _buildTitle(Object e) => '';
+
+  @override
+  List<FileSystemEntity> _getLibqaulLogs(String path) => [];
+
+  @override
+  Future<void> _initializeEnabledStatus({Reader? reader}) async {}
+
+  @override
+  Logger get _log => throw UnimplementedError();
+
+  @override
+  Future<void> _logError(Object e,
+      {StackTrace? stack, String? message}) async {}
+
+  @override
+  bool _pathLeadsToLogFile(FileSystemEntity log) => false;
+
+  @override
+  void _reportErrorsCaughtByFlutterFramework() {}
+
+  @override
+  void _reportLogMessages() {}
+
+  @override
+  Future<void> _reportUncaughtErrorsOfTheIsolate() async {}
+
+  @override
+  Future<void> _sendDesktopLogs(
+      {List<FileSystemEntity>? libqaulAttachments}) async {}
+
+  @override
+  Future<void> _sendMobileLogs(
+      {List<FileSystemEntity>? libqaulAttachments}) async {}
+
+  @override
+  void _setLibqaulLoggingState(bool enabled, {required Reader reader}) {}
+
+  @override
+  _LogStorageManager get _storageManager => throw UnimplementedError();
+
+  @override
+  void _storeLoggingOption() {}
+
+  @override
+  String get _supportEmail => '';
+
+  @override
+  Future<void> deleteLogs({Reader? reader}) async {}
+
+  @override
+  Future<bool> hasLogsStored({Reader? reader}) async => false;
+
+  @override
+  Future<void> initialize({Reader? reader}) async {}
+
+  @override
+  Future<String> get logStorageSize async => '';
+
+  @override
+  bool get loggingEnabled => false;
+
+  @override
+  Future<void> sendLogs({Reader? reader}) async {}
+
+  @override
+  void setLoggingEnabled(bool enabled, {Reader? reader}) {}
 }

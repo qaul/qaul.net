@@ -6,7 +6,9 @@ import '../helpers/navigation_helper.dart';
 import '../widgets/widgets.dart';
 
 class SplashScreen extends ConsumerWidget {
-  SplashScreen({Key? key}) : super(key: key);
+  SplashScreen() : super(key: widgetKey);
+
+  static const widgetKey = ValueKey('SplashScreen');
 
   final _sendRequestProvider = FutureProvider<String>((ref) async {
     final worker = ref.read(qaulWorkerProvider);
