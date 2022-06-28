@@ -11,7 +11,9 @@ import 'tabs/tab.dart';
 import 'user_account_screen.dart';
 
 class HomeScreen extends HookConsumerWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen() : super(key: widgetKey);
+
+  static const widgetKey = ValueKey('HomeScreen');
 
   bool get _isMobile => Platform.isIOS || Platform.isAndroid;
 

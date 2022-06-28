@@ -2,3 +2,4 @@ when: << pipeline.parameters.run-flutter-workflow >>
 jobs:
   - analyze-flutter
   - test-flutter
+  - integration-test-flutter-ios

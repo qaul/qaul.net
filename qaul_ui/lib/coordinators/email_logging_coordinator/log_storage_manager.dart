@@ -9,7 +9,7 @@ class _LogEntry {
 }
 
 class _LogStorageManager {
-  _LogStorageManager() {
+  void initialize() {
     _deleteObsoleteSchedule = NeatPeriodicTaskScheduler(
       interval: const Duration(minutes: 5),
       name: 'delete-obsolete-logs',
