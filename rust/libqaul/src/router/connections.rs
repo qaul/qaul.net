@@ -194,6 +194,7 @@ impl ConnectionTable {
     /// 
     /// The smaller the value is better is the link quality.
     pub fn calculate_linkquality(rtt: u32, hc: u8) -> u32 {
+        
         // get the router configuration
         let config = super::Router::get_configuration();
 
@@ -234,27 +235,28 @@ impl ConnectionTable {
             //            conn.last_update = Timestamp::get_timestamp();
             //         }
             //     }
-            // }            
-            if connection.hc == 1 || pgid > user.pgid {
-                if module == ConnectionModule::Internet {
-                    log::info!("receive_inode hc={}, propg_id={}", connection.hc, pgid);
-                }
-
+            // }
+            log::error!("receive_inode hc={}, propg_id={}", connection.hc, pgid);
+            
+            if connection.hc == 1 || pgid > user.pgid {                
                 user.pgid = pgid;
                 user.pgid_update = now_ts;
                 user.pgid_update_hc = connection.hc;
+                user.connections.remove(&connection.id);
                 user.connections.insert(connection.id, connection); 
             }else if pgid == user.pgid{
                 //check last update
                 if (now_ts - user.pgid_update <= (10 * 1000)) && connection.hc < user.pgid_update_hc {
                     user.pgid_update = now_ts;
                     user.pgid_update_hc = connection.hc;
+                    user.connections.remove(&connection.id);
                     user.connections.insert(connection.id, connection);
                 }else if let Some(conn) = user.connections.get_mut(&connection.id){
                     if connection.lq < conn.lq {
                         conn.lq = connection.lq;
                         conn.hc = connection.hc;
                         conn.last_update = now_ts;
+                        user.connections.remove(&connection.id);
                         user.connections.insert(connection.id, connection);
                     }
                 }
@@ -265,12 +267,14 @@ impl ConnectionTable {
                         user.pgid = pgid;
                         user.pgid_update = now_ts;
                         user.pgid_update_hc = connection.hc;
+                        user.connections.remove(&connection.id);
                         user.connections.insert(connection.id, connection);        
                     }
                 }
             } 
 
         } else {
+            log::error!("receive_inode_insert hc={}, propg_id={}", connection.hc, pgid);
             let mut connections_map = BTreeMap::new();
             let hc = connection.hc;
             connections_map.insert(connection.id, connection);
@@ -400,8 +404,7 @@ impl ConnectionTable {
             }
 
             // find best entry
-            // if let Some(connection) = Self::find_best_connection(user) {
-            //     // fill entry into routing table
+            // if let Some(connection) = Self::find_best_create_routing_table
             //     let routing_connection_entry = RoutingConnectionEntry {
             //         module: conn.clone(),
             //         node: connection.id,
@@ -414,7 +417,7 @@ impl ConnectionTable {
             //     // check if user entry already exists hashmap
             //     if let Some(routing_user_entry) = table.table.get_mut(&user.id) {
             //         routing_user_entry.connections.push(routing_connection_entry);
-            //     } else {
+            //     } else {create_routing_table
             //         let mut connections = Vec::new();
             //         connections.push(routing_connection_entry);
 
@@ -479,6 +482,7 @@ impl ConnectionTable {
 
                 // put connection for removal if expired
                 if expired {
+                    log::error!("expired entry={},  hc={}", (now - value.last_update), value.hc);
                     expired_connections.push(key.clone());
                 }
             }

@@ -55,6 +55,34 @@ use super::messaging::Messaging;
 pub mod proto_rpc { include!("qaul.rpc.filesharing.rs"); }
 pub mod proto_net { include!("qaul.net.filesharing.rs"); }
 
+pub struct AllFiles{
+    pub db_ref: BTreeMap< Vec<u8>, UserFiles>,
+}
+
+#[derive(Clone)]
+pub struct UserFiles {
+    // in memory BTreeMap
+    pub histories: Tree<FileHistory>,
+
+    // last recent message    
+    pub last_file: u64,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct FileHistory {
+    pub peer_id: Vec<u8>,
+    pub id: u64,
+    pub name: String,
+    pub descr: String,
+    pub extension: String,
+    pub size: u32,
+    pub time: u64,
+    pub sent: bool, // false=> received, true=> sent
+}
+
+/// mutable state of feed messages
+static ALLFILES: Storage<RwLock<AllFiles>> = Storage::new();
+
 
 // /// mutable state for sending files
 static FILESHARE: Storage<RwLock<FileShare>> = Storage::new();
@@ -155,24 +183,180 @@ pub struct FileShareReceive{
 
 
 impl FileShare {
-    /// initialize feed module
+    /// initialize fileshare module
     pub fn init() {
-        // create feed messages state
+        // create file transfer state
         let file_share = FileShare {
             files: BTreeMap::new(),
         };
         FILESHARE.set(RwLock::new(file_share));
 
+        // create file receiver state
         let file_receive = FileShareReceive {
             files: BTreeMap::new(),
         };
         FILERECEIVE.set(RwLock::new(file_receive));
+
+        // create file history state
+        let all_files = AllFiles{
+            db_ref: BTreeMap::new()
+        };
+        ALLFILES.set(RwLock::new(all_files));
+    }
+
+    fn get_db_ref(user_id: &PeerId) -> UserFiles{
+        // check if user data exists
+        {
+            // get chat state
+            let all_files = ALLFILES.get().read().unwrap();
+
+            // check if user ID is in map
+            if let Some(user_files) = all_files.db_ref.get(&user_id.to_bytes()) {
+                return UserFiles {
+                    histories:  user_files.histories.clone(),
+                    last_file: user_files.last_file,
+                };
+            }
+        }
+
+
+        // create user data if it does not exist
+        let user_files = Self::create_userfiles(user_id);
+
+        // return chat_user structure
+        UserFiles {
+            histories: user_files.histories.clone(),
+            last_file: user_files.last_file,
+        }
+    }
+
+    // create user data when it does not exist
+    fn create_userfiles(user_id: &PeerId) -> UserFiles {
+        // get user data base
+        let db = DataBase::get_user_db(user_id.clone());
+
+        // open trees
+        let histories: Tree<FileHistory> = db.open_bincode_tree("file_sharing").unwrap();
+
+        // get last key
+        let last_file: u64;
+        match histories.iter().last() {
+            Some(Ok((ivec, _))) => {
+                let i = ivec.to_vec();
+                match i.try_into() {
+                    Ok(arr) => {
+                        last_file = u64::from_be_bytes(arr);
+                    }
+                    Err(e) => {
+                        log::error!("couldn't convert ivec to u64: {:?}", e);
+                        last_file = 0;
+                    }    
+                }
+            },
+            None => {
+                last_file = 0;
+            },
+            Some(Err(e)) => {
+                log::error!("Sled feed table error: {}", e);
+                last_file = 0;
+            }
+        }
+
+        let user_files = UserFiles {
+            histories,
+            last_file
+        };
+
+        // get chat state for writing
+        let mut all_files = ALLFILES.get().write().unwrap();
+
+        // add user to state
+        all_files.db_ref.insert( user_id.to_bytes(), user_files.clone());
+
+        // return structure
+        user_files
+    }
+
+    
+    fn on_completed(user_id: &PeerId, peer_id: &PeerId, info: &FileShareInfo, sent: bool){
+        let db_ref = Self::get_db_ref(user_id);
+
+        let history = FileHistory{
+            peer_id: peer_id.to_bytes(),
+            id: info.id,
+            name: info.name.clone(),
+            descr: info.descr.clone(),
+            extension: info.extension.clone(),
+            size: info.size,
+            time: timestamp::Timestamp::get_timestamp(),
+            sent
+        };
+        
+        let last_file = db_ref.last_file + 1;
+
+        // save to data base
+        if let Err(e) = db_ref.histories.insert(&last_file.to_be_bytes(), history) {
+            log::error!("Error saving feed message to data base: {}", e);            
+        }
+        else {
+            if let Err(e) = db_ref.histories.flush() {
+                log::error!("Error when flushing data base to disk: {}", e);
+            }
+        }
+
+        //update last_file
+        let mut all_files = ALLFILES.get().write().unwrap();
+
+        // check if user ID is in map
+        if let Some(user_files) = all_files.db_ref.get_mut(&user_id.to_bytes()) {
+            user_files.last_file = last_file;
+        }
     }
 
     fn get_extension_from_filename(filename: &str) -> Option<&str> {
         Path::new(filename)
             .extension()
             .and_then(OsStr::to_str)
+    }
+
+    pub fn file_history(user_account: &UserAccount, history_req: &proto_rpc::FileHistoryRequest)->(u64, Vec<FileHistory>){
+        let db_ref = Self::get_db_ref(&user_account.id);
+
+        let mut histories: Vec<FileHistory> = vec![];
+
+        if history_req.offset as u64 >=  db_ref.last_file{
+            //no histories from offset
+            return (db_ref.last_file, histories);
+        }
+
+        let mut count = history_req.limit;
+        if (history_req.offset + count) as u64 >= db_ref.last_file{
+            count = (db_ref.last_file - (history_req.offset as u64)) as u32;
+        }
+
+        if count == 0{
+            //no histories from offset
+            return (db_ref.last_file, histories);
+        }
+
+        let first_file = db_ref.last_file - ((history_req.offset  + count) as u64) + 1;
+        let end_file = first_file + (count as u64);
+        let first_file_bytes = first_file.to_be_bytes().to_vec();
+        let end_file_bytes = end_file.to_be_bytes().to_vec();
+
+        for res in db_ref.histories.range(first_file_bytes.as_slice()..end_file_bytes.as_slice()) {
+        //for res in db_ref.histories.range(first_file_bytes.as_slice()..) {
+            match res {
+                Ok((_id, message)) => {
+                    histories.push(message.clone());
+                },
+                Err(e) => {
+                    log::error!("Error retrieving file history from data base: {}", e);
+                }
+            }
+        }
+
+        (db_ref.last_file, histories)        
     }
 
     // send the file
@@ -209,7 +393,9 @@ impl FileShare {
 
         //get file id (senderid, receiver_id, filename, size)
         let key_bytes = Self::get_key_from_vec(user_account.id.to_bytes(),
-            sned_file_req.conversation_id.clone(), sned_file_req.path_name.clone(), size);
+            sned_file_req.conversation_id.clone(), 
+            sned_file_req.path_name.clone(), 
+            size, timestamp::Timestamp::get_timestamp());
         let file_id = crc::crc64::checksum_iso(&key_bytes);
 
         //create file descriptor and save in storage
@@ -302,20 +488,19 @@ impl FileShare {
     }
 
     // create DB key from conversation ID
-    fn get_key_from_vec(sender_id: Vec<u8>, conversation_id: Vec<u8>, file_name: String, size: u32) -> Vec<u8> {        
+    fn get_key_from_vec(sender_id: Vec<u8>, conversation_id: Vec<u8>, file_name: String, size: u32, timestamp: u64) -> Vec<u8> {        
         let mut name_bytes = file_name.as_bytes().to_vec();
         let mut size_bytes  = size.to_be_bytes().to_vec();
+        let mut time_bytes  = timestamp.to_be_bytes().to_vec();        
         let mut key_bytes = sender_id;
         let mut conversation_bytes  = conversation_id;
 
         key_bytes.append(&mut conversation_bytes);
         key_bytes.append(&mut name_bytes);
         key_bytes.append(&mut size_bytes);
+        key_bytes.append(&mut time_bytes);
         key_bytes
     }
-
-
-
 
     fn send_file_message_through_message(user_account: &UserAccount, receiver:PeerId, data: &Vec<u8>){
         let snd_message = proto::Messaging{
@@ -375,6 +560,9 @@ impl FileShare {
             file_receive.info.descr = file_info.file_descr.clone();
 
             if Self::check_complete_and_store(&file_receive){
+                //store into database
+                Self::on_completed(&receiver_id, &sender_id, &file_receive.info, false);
+
                 //remove entry
                 file_receiver.files.remove(&file_info.file_id);
 
@@ -478,6 +666,9 @@ impl FileShare {
 
         //check if file receive completed
         if Self::check_complete_and_store(&file_receive){
+            //store into database
+            Self::on_completed(&receiver_id, &sender_id, &file_receive.info, false);
+
             //remove entry
             file_receiver.files.remove(&file_data.file_id);
 
@@ -496,17 +687,24 @@ impl FileShare {
     }
 
 
-    fn on_receive_confirmation_file_info(_user_account: &UserAccount, _sender_id: PeerId, _receiver_id: PeerId, confirm: &proto_net::FileSharingConfirmationFileInfo){
+    fn on_receive_confirmation_file_info(_user_account: &UserAccount, sender_id: PeerId, receiver_id: PeerId, confirm: &proto_net::FileSharingConfirmationFileInfo){
         let mut file_sender = FILESHARE.get().write().unwrap();
         if file_sender.files.contains_key(&confirm.file_id) == false{
             log::info!("file info does not exist! id={}", confirm.file_id);
             return;
         }
         let mut file_info = file_sender.files.get_mut(&confirm.file_id).unwrap();
-        file_info.sent_info = true;        
+        file_info.sent_info = true;    
+        
+        //if file sending completed , we remove the entry
+        if file_info.is_completed() {
+            log::info!("file sent successfully id={}, size={}", file_info.id, file_info.size);
+            Self::on_completed(&receiver_id, &sender_id, file_info, true);            
+            file_sender.files.remove(&confirm.file_id);
+        }
     }
 
-    fn on_receive_confirmation_file_data(_user_account: &UserAccount, _sender_id: PeerId, _receiver_id: PeerId, confirm: &proto_net::FileSharingConfirmation){
+    fn on_receive_confirmation_file_data(_user_account: &UserAccount, sender_id: PeerId, receiver_id: PeerId, confirm: &proto_net::FileSharingConfirmation){
         let mut file_sender = FILESHARE.get().write().unwrap();
         if file_sender.files.contains_key(&confirm.file_id) == false{
             log::info!("file info does not exist! id={}", confirm.file_id);
@@ -521,23 +719,30 @@ impl FileShare {
         //if file sending completed , we remove the entry
         if file_info.is_completed() {
             log::info!("file sent successfully id={}, size={}", file_info.id, file_info.size);
+            Self::on_completed(&receiver_id, &sender_id, file_info, true);
             file_sender.files.remove(&confirm.file_id);
         }
     } 
     
-    fn on_completed(_user_account: &UserAccount, _sender_id: PeerId, _receiver_id: PeerId, completed: &proto_net::FileSharingCompleted){
+    fn on_receive_completed(_user_account: &UserAccount, sender_id: PeerId, receiver_id: PeerId, completed: &proto_net::FileSharingCompleted){
         let mut file_sender = FILESHARE.get().write().unwrap();
         if file_sender.files.contains_key(&completed.file_id){
-            file_sender.files.remove(&completed.file_id);
+            if let Some(info) = file_sender.files.get(&completed.file_id){
+                Self::on_completed(&receiver_id, &sender_id, info, true);
+            }            
+            file_sender.files.remove(&completed.file_id);            
         }
 
         let mut file_receiver = FILERECEIVE.get().write().unwrap();
         if file_receiver.files.contains_key(&completed.file_id){
+            if let Some(info) = file_receiver.files.get(&completed.file_id){
+                Self::on_completed(&receiver_id, &sender_id, &info.info, false);
+            }            
             file_receiver.files.remove(&completed.file_id);
         }
     }     
 
-    fn on_canceled(_user_account: &UserAccount, _sender_id: PeerId, _receiver_id: PeerId, canceled: &proto_net::FileSharingCanceled){
+    fn on_receive_canceled(_user_account: &UserAccount, _sender_id: PeerId, _receiver_id: PeerId, canceled: &proto_net::FileSharingCanceled){
         let mut file_sender = FILESHARE.get().write().unwrap();
         if file_sender.files.contains_key(&canceled.file_id){
             file_sender.files.remove(&canceled.file_id);
@@ -585,11 +790,11 @@ impl FileShare {
                     },
                     Some(proto_net::file_sharing_container::Message::Completed(completed)) => {
                         log::error!("file::on_completed");
-                        Self::on_completed(&user, sender_id, receiver_id, &completed);
+                        Self::on_receive_completed(&user, sender_id, receiver_id, &completed);
                     },
                     Some(proto_net::file_sharing_container::Message::Canceled(canceled)) => {
                         log::error!("file::on_canceled");
-                        Self::on_canceled(&user, sender_id, receiver_id, &canceled);
+                        Self::on_receive_canceled(&user, sender_id, receiver_id, &canceled);
                     },
                     None => {
                         log::error!("file share message from {} was empty", sender_id.to_base58())
@@ -602,8 +807,7 @@ impl FileShare {
         }
     }
 
-
-
+    
     /// Process incoming RPC request messages for file sharing module
     pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
         let my_user_id = PeerId::from_bytes(&user_id).unwrap();
@@ -613,12 +817,54 @@ impl FileShare {
         match proto_rpc::FileSharing::decode(&data[..]) {
             Ok(filesharing) => {
                 match filesharing.message {
-                    Some(proto_rpc::file_sharing::Message::SendFileRequest(sned_req)) => {
+                    Some(proto_rpc::file_sharing::Message::SendFileRequest(send_req)) => {
                         let user_account = UserAccounts::get_by_id(my_user_id).unwrap();
 
                         log::error!("lib->file->rpc->send");
 
-                        Self::send(&user_account, sned_req);
+                        Self::send(&user_account, send_req);
+                    },
+                    Some(proto_rpc::file_sharing::Message::FileHistory(history_req)) => {
+                        let user_account = UserAccounts::get_by_id(my_user_id).unwrap();
+                        log::error!("lib->file->history");
+                        let (total, list) = Self::file_history(&user_account, &history_req);
+
+                        let mut histories: Vec<proto_rpc::FileHistoryEntry> = vec![];
+                        for entry in list{
+                            let file_entry = proto_rpc::FileHistoryEntry{
+                                file_id: entry.id,
+                                file_name: entry.name.clone(),
+                                file_ext: entry.extension.clone(),
+                                file_size: entry.size,
+                                file_descr: entry.descr.clone(),
+                                time: entry.time,
+                                sent: entry.sent,
+                                peer_id: bs58::encode(entry.peer_id).into_string(),
+                            };
+                            histories.push(file_entry);
+                        }
+
+                        // pack message
+                        let proto_message = proto_rpc::FileSharing {
+                            message: Some( 
+                                proto_rpc::file_sharing::Message::FileHistoryResponse(
+                                    proto_rpc::FileHistoryResponse{
+                                        offset: history_req.offset,
+                                        limit: history_req.limit,
+                                        total,
+                                        histories
+                                    }
+                                )
+                            ),
+                        };
+
+                        // encode message
+                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+                        // send message
+                        Rpc::send_message(buf, crate::rpc::proto::Modules::Fileshare.into(), "".to_string(), Vec::new() );
+
                     },
                     _ => {
                         log::error!("Unhandled Protobuf File Message");

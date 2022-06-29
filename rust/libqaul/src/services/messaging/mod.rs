@@ -200,7 +200,7 @@ impl Messaging {
             }
             else {
                 log::error!("No route found to user {}", message.receiver.to_base58());
-
+                
                 // reschedule if no route is found
                 Self::schedule_message(message.receiver, message.container);
             }

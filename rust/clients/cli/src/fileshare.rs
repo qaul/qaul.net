@@ -51,32 +51,27 @@ impl FileShare {
                 else {
                     log::error!("chat send command incorrectly formatted");
                 }
+            },
 
-                //Self::send_file(cmd.strip_prefix("send ").unwrap().to_string());
-            },
             // request feed list
-            cmd if cmd.starts_with("send list") => {
-                // match cmd.strip_prefix("list ") {
-                //     Some(index_str) => {
-                //         if let Ok(index) = index_str.parse::<u64>() {
-                //             // request messages
-                //             Self::request_feed_list(index);
-                //         }
-                //         else {
-                //             log::error!("feed list index is not a valid number");
-                //         }
-                //     },
-                //     None => {
-                //         // request all messages
-                //         Self::request_feed_list(0);
-                //     }
-                // }
-            },
-            cmd if cmd.starts_with("receive list") => {
+            cmd if cmd.starts_with("history ") => {
+                let command_string = cmd.strip_prefix("history ").unwrap().to_string();
+                let mut iter = command_string.split_whitespace();
+
+                let mut offset: i32 = 0;
+                let mut limit: i32 = 10;                
+
+                if let Some(offset_str) = iter.next() {
+                    offset = offset_str.to_string().parse().unwrap();
+                    if let Some(limit_str) = iter.next() {
+                        limit = limit_str.to_string().parse().unwrap();
+                    }
+                }
+                Self::send_file_history_commnad(offset as u32, limit as u32);
 
             },
             // unknown command
-            _ => log::error!("unknown feed command"),
+            _ => log::error!("unknown file command"),
         }
     }
 
@@ -97,7 +92,7 @@ impl FileShare {
         }
     }
 
-    /// create and send feed message via rpc
+    /// send file via rpc
     fn send_file(conversation_id: Vec<u8>, file_name: String, description:String) {
         // create feed send message
         let proto_message = proto::FileSharing {
@@ -118,41 +113,62 @@ impl FileShare {
         Rpc::send_message(buf, super::rpc::proto::Modules::Fileshare.into(), "".to_string());
     }
 
+    /// send file list command via rpc
+    fn send_file_history_commnad(offset: u32, limit: u32){
+        // create feed send message
+        let proto_message = proto::FileSharing {
+            message: Some(proto::file_sharing::Message::FileHistory(
+                proto::FileHistoryRequest{
+                    offset,
+                    limit,
+                }
+            )),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(buf, super::rpc::proto::Modules::Fileshare.into(), "".to_string());        
+    }
+
     /// Process received RPC message
     /// 
     /// Decodes received protobuf encoded binary RPC message
     /// of the feed module.
     pub fn rpc(data: Vec<u8>) {
-        // match proto::Feed::decode(&data[..]) {
-        //     Ok(feed) => {
-        //         match feed.message {
-        //             Some(proto::feed::Message::Received(proto_feedlist)) => {
-        //                 // List header
-        //                 println!("====================================");
-        //                 println!("Received Feed Messages");
-        //                 println!("------------------------------------");
+        match proto::FileSharing::decode(&data[..]) {
+            Ok(file_share) => {
+                match file_share.message {
+                    Some(proto::file_sharing::Message::FileHistoryResponse(proto_file_history)) => {
+                        // List header
+                        println!("====================================");
+                        println!("File Sharing Histories");
+                        println!("------------------------------------");
+                        println!("offset={}, limit={}, total={}", proto_file_history.offset, proto_file_history.limit, proto_file_history.total);
 
-        //                 // print all messages in the feed list
-        //                 for message in proto_feedlist.feed_message {
-        //                     print!{"[{}] ", message.index};
-        //                     println!("Time Sent - {}", message.time_sent);
-        //                     println!("Timestamp Sent - {}", message.timestamp_sent);
-        //                     println!("Time Received - {}", message.time_received);
-        //                     println!("Timestamp Received - {}", message.timestamp_received);
-        //                     println!("Message ID {}", message.message_id_base58);
-        //                     println!("From {}", message.sender_id_base58);
-        //                     println!("\t{}", message.content);
-        //                     println!("");
-        //                 }
-        //             }
-        //             _ => {
-        //                 log::error!("unprocessable RPC feed message");
-        //             },
-        //         }    
-        //     },
-        //     Err(error) => {
-        //         log::error!("{:?}", error);
-        //     },
-        // }
+                        // print all messages in the feed list
+                        for entry in proto_file_history.histories {
+
+                            if entry.sent{
+                                println!("===> [{}] - {}", entry.file_id, entry.file_name);
+                            }else{
+                                println!("<=== [{}] - {}", entry.file_id, entry.file_name);
+                            }                            
+                            println!("\t Time: {}, PeerId: {}", entry.time, entry.peer_id);
+                            println!("\t FileSize: {}, Description: {}", entry.file_size, entry.file_descr);
+                            println!("");
+                        }
+                    }
+                    _ => {
+                        log::error!("unprocessable RPC file message");
+                    },
+                }    
+            },
+            Err(error) => {
+                log::error!("{:?}", error);
+            },
+        }
     }
 }
