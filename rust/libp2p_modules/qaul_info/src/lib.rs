@@ -2,7 +2,7 @@
 // This software is published under the AGPLv3 license.
 
 //! # Qaul Routing Info Behaviour
-//! 
+//!
 //! This module is a libp2p swarm-behaviour module.
 //! It manages and defines the routing info exchange protocol.
 
@@ -10,41 +10,25 @@ pub mod protocol;
 pub mod types;
 
 use libp2p::{
-    core::{
-        Multiaddr, 
-        PeerId, 
-        connection::ConnectionId
-    },
+    core::{connection::ConnectionId, Multiaddr, PeerId},
     swarm::{
-        NetworkBehaviour,
-        NetworkBehaviourAction,
-        IntoProtocolsHandler,
-        PollParameters,
-        OneShotHandler,
-        NotifyHandler,
-    }
+        ConnectionHandler, IntoConnectionHandler, NetworkBehaviour, NetworkBehaviourAction,
+        NotifyHandler, OneShotHandler, PollParameters,
+    },
 };
 use std::{
     collections::VecDeque,
-    task::{Context, Poll}
+    task::{Context, Poll},
 };
 
+pub use crate::types::{QaulInfoData, QaulInfoReceived, QaulInfoSend};
 use protocol::QaulInfoProtocol;
-pub use crate::types::{
-    QaulInfoData,
-    QaulInfoReceived,
-    QaulInfoSend,
-};
 
 /// Network behaviour that handles the qaul_info protocol.
 pub struct QaulInfo {
     /// Events that need to be handed to the outside when polling.
     events: VecDeque<
-        NetworkBehaviourAction<
-            QaulInfoEvent, 
-            //QaulInfoData
-            OneShotHandler<QaulInfoProtocol, QaulInfoData, InnerMessage>,
-        >
+        NetworkBehaviourAction<QaulInfoData, <QaulInfo as NetworkBehaviour>::ConnectionHandler>,
     >,
 
     #[allow(dead_code)]
@@ -68,25 +52,24 @@ impl QaulInfo {
     /// Send a QaulInfoMessage to a specific node
     pub fn send_qaul_info_message(&mut self, node_id: PeerId, data: Vec<u8>) {
         // create event message
-        let message = QaulInfoData {
-            data,
-        };
+        let message = QaulInfoData { data };
 
         // Schedule message for sending
-        self.events.push_back(NetworkBehaviourAction::NotifyHandler {
-            peer_id: node_id,
-            handler: NotifyHandler::Any,
-            event: message,
-        });
+        self.events
+            .push_back(NetworkBehaviourAction::NotifyHandler {
+                peer_id: node_id,
+                handler: NotifyHandler::Any,
+                event: message,
+            });
     }
 }
 
 impl NetworkBehaviour for QaulInfo {
-    //type ProtocolsHandler = OneShotHandler<QaulInfoProtocol, QaulInfoRpc, InnerMessage>;
-    type ProtocolsHandler = OneShotHandler<QaulInfoProtocol, QaulInfoData, InnerMessage>;
+    //type ConnectionHandler = OneShotHandler<QaulInfoProtocol, QaulInfoRpc, InnerMessage>;
+    type ConnectionHandler = OneShotHandler<QaulInfoProtocol, QaulInfoData, InnerMessage>;
     type OutEvent = QaulInfoEvent;
 
-    fn new_handler(&mut self) -> Self::ProtocolsHandler {
+    fn new_handler(&mut self) -> Self::ConnectionHandler {
         Default::default()
     }
 
@@ -94,12 +77,18 @@ impl NetworkBehaviour for QaulInfo {
         Vec::new()
     }
 
-    fn inject_connected(&mut self, _id: &PeerId) {
+    fn inject_connection_established(&mut self, _id: &PeerId) {
         // should we inform qaul router?
     }
 
-    fn inject_disconnected(&mut self, _id: &PeerId) {
-        // should we inform qaul router?
+    fn inject_connection_closed(
+        &mut self,
+        _: &PeerId,
+        _: &ConnectionId,
+        _: &libp2p::core::ConnectedPoint,
+        _: <Self::ConnectionHandler as libp2p::swarm::IntoConnectionHandler>::Handler,
+        _remaining_established: usize,
+    ) {
     }
 
     fn inject_event(
@@ -117,14 +106,12 @@ impl NetworkBehaviour for QaulInfo {
         };
 
         // forward the message to the user
-        self.events.push_back(
-            NetworkBehaviourAction::GenerateEvent(
-                QaulInfoEvent::Message(QaulInfoReceived{
-                    received_from,
-                    data: qaul_info_data.data,
-                })
-            )
-        );
+        self.events.push_back(NetworkBehaviourAction::GenerateEvent(
+            QaulInfoEvent::Message(QaulInfoReceived {
+                received_from,
+                data: qaul_info_data.data,
+            }),
+        ));
     }
 
     fn poll(
@@ -133,8 +120,8 @@ impl NetworkBehaviour for QaulInfo {
         _: &mut impl PollParameters,
     ) -> Poll<
         NetworkBehaviourAction<
-            Self::OutEvent,
-            Self::ProtocolsHandler,
+            <Self::ConnectionHandler as ConnectionHandler>::InEvent,
+            Self::ConnectionHandler,
         >,
     > {
         if let Some(event) = self.events.pop_front() {
@@ -189,14 +176,33 @@ impl NetworkBehaviour for QaulInfo {
 
     fn inject_new_listener(&mut self, _id: libp2p::core::connection::ListenerId) {}
 
-    fn inject_new_listen_addr(&mut self, _id: libp2p::core::connection::ListenerId, _addr: &Multiaddr) {}
-
-    fn inject_expired_listen_addr(&mut self, _id: libp2p::core::connection::ListenerId, _addr: &Multiaddr) {}
-
-    fn inject_listener_error(&mut self, _id: libp2p::core::connection::ListenerId, _err: &(dyn std::error::Error + 'static)) {
+    fn inject_new_listen_addr(
+        &mut self,
+        _id: libp2p::core::connection::ListenerId,
+        _addr: &Multiaddr,
+    ) {
     }
 
-    fn inject_listener_closed(&mut self, _id: libp2p::core::connection::ListenerId, _reason: Result<(), &std::io::Error>) {}
+    fn inject_expired_listen_addr(
+        &mut self,
+        _id: libp2p::core::connection::ListenerId,
+        _addr: &Multiaddr,
+    ) {
+    }
+
+    fn inject_listener_error(
+        &mut self,
+        _id: libp2p::core::connection::ListenerId,
+        _err: &(dyn std::error::Error + 'static),
+    ) {
+    }
+
+    fn inject_listener_closed(
+        &mut self,
+        _id: libp2p::core::connection::ListenerId,
+        _reason: Result<(), &std::io::Error>,
+    ) {
+    }
 
     fn inject_new_external_addr(&mut self, _addr: &Multiaddr) {}
 
@@ -234,6 +240,13 @@ pub enum QaulInfoEvent {
     Message(QaulInfoReceived),
 }
 
+impl IntoConnectionHandler for QaulInfoEvent {
+    type Handler = QaulInfo;
+
+    fn into_handler(self, _: &PeerId) -> Self::Handler {
+        unimplemented!()
+    }
+}
 
 /// Configuration options for the qaul info behaviour
 pub struct QaulInfoConfig {
@@ -243,12 +256,6 @@ pub struct QaulInfoConfig {
 
 impl QaulInfoConfig {
     pub fn new(local_peer_id: PeerId) -> Self {
-        Self {
-            local_peer_id,
-        }
+        Self { local_peer_id }
     }
 }
-
-
-
-
