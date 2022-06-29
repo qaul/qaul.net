@@ -2,7 +2,7 @@
 // This software is published under the AGPLv3 license.
 
 //! # Qaul Messaging Behaviour
-//! 
+//!
 //! This module is a libp2p swarm-behaviour module.
 //! It manages and defines the messaging exchange protocol.
 
@@ -10,37 +10,29 @@ pub mod protocol;
 pub mod types;
 
 use libp2p::{
-    core::{
-        Multiaddr, 
-        PeerId, 
-        connection::ConnectionId
-    },
+    core::{connection::ConnectionId, Multiaddr, PeerId},
     swarm::{
-        NetworkBehaviour,
-        NetworkBehaviourAction,
+        ConnectionHandler, NetworkBehaviour, NetworkBehaviourAction, NotifyHandler, OneShotHandler,
         PollParameters,
-        ProtocolsHandler,
-        OneShotHandler,
-        NotifyHandler,
-    }
+    },
 };
 use std::{
     collections::VecDeque,
-    task::{Context, Poll}
+    task::{Context, Poll},
 };
 
+pub use crate::types::{QaulMessagingData, QaulMessagingReceived, QaulMessagingSend};
 use protocol::QaulMessagingProtocol;
-pub use crate::types::{
-    QaulMessagingData,
-    QaulMessagingReceived,
-    QaulMessagingSend,
-};
 
 /// Network behaviour that handles the qaul_messaging protocol.
 pub struct QaulMessaging {
     /// Events that need to be handed to the outside when polling.
-    events: VecDeque<NetworkBehaviourAction<QaulMessagingData, QaulMessagingEvent>>,
-
+    events: VecDeque<
+        NetworkBehaviourAction<
+            QaulMessagingEvent,
+            <QaulMessaging as NetworkBehaviour>::ConnectionHandler,
+        >,
+    >,
     #[allow(dead_code)]
     config: QaulMessagingConfig,
 }
@@ -62,25 +54,23 @@ impl QaulMessaging {
     /// Send a QaulMessagingMessage to a specific node
     pub fn send_qaul_messaging_message(&mut self, node_id: PeerId, data: Vec<u8>) {
         // create event message
-        let message = QaulMessagingData {
-            data,
-        };
+        let message = QaulMessagingData { data };
 
         // Schedule message for sending
-        self.events.push_back(NetworkBehaviourAction::NotifyHandler {
-            peer_id: node_id,
-            handler: NotifyHandler::Any,
-            event: message,
-        });
+        self.events
+            .push_back(NetworkBehaviourAction::NotifyHandler {
+                peer_id: node_id,
+                handler: NotifyHandler::Any,
+                event: message,
+            });
     }
 }
 
 impl NetworkBehaviour for QaulMessaging {
-    //type ProtocolsHandler = OneShotHandler<QaulMessagingProtocol, QaulMessagingRpc, InnerMessage>;
-    type ProtocolsHandler = OneShotHandler<QaulMessagingProtocol, QaulMessagingData, InnerMessage>;
+    type ConnectionHandler = OneShotHandler<QaulMessagingProtocol, QaulMessagingData, InnerMessage>;
     type OutEvent = QaulMessagingEvent;
 
-    fn new_handler(&mut self) -> Self::ProtocolsHandler {
+    fn new_handler(&mut self) -> Self::ConnectionHandler {
         Default::default()
     }
 
@@ -88,11 +78,25 @@ impl NetworkBehaviour for QaulMessaging {
         Vec::new()
     }
 
-    fn inject_connected(&mut self, _id: &PeerId) {
+    fn inject_connection_established(
+        &mut self,
+        _peer_id: &PeerId,
+        _connection_id: &ConnectionId,
+        _endpoint: &libp2p::core::ConnectedPoint,
+        _failed_addresses: Option<&Vec<Multiaddr>>,
+        _other_established: usize,
+    ) {
         // should we inform qaul messaging?
     }
 
-    fn inject_disconnected(&mut self, _id: &PeerId) {
+    fn inject_connection_closed(
+        &mut self,
+        _: &PeerId,
+        _: &ConnectionId,
+        _: &libp2p::core::ConnectedPoint,
+        _: <Self::ConnectionHandler as libp2p::swarm::IntoConnectionHandler>::Handler,
+        _remaining_established: usize,
+    ) {
         // should we inform qaul messaging?
     }
 
@@ -111,14 +115,12 @@ impl NetworkBehaviour for QaulMessaging {
         };
 
         // forward the message to the user
-        self.events.push_back(
-            NetworkBehaviourAction::GenerateEvent(
-                QaulMessagingEvent::Message(QaulMessagingReceived{
-                    received_from,
-                    data: qaul_messaging_data.data,
-                })
-            )
-        );
+        self.events.push_back(NetworkBehaviourAction::GenerateEvent(
+            QaulMessagingEvent::Message(QaulMessagingReceived {
+                received_from,
+                data: qaul_messaging_data.data,
+            }),
+        ));
     }
 
     fn poll(
@@ -127,8 +129,8 @@ impl NetworkBehaviour for QaulMessaging {
         _: &mut impl PollParameters,
     ) -> Poll<
         NetworkBehaviourAction<
-            <Self::ProtocolsHandler as ProtocolsHandler>::InEvent,
-            Self::OutEvent,
+            <Self::ConnectionHandler as ConnectionHandler>::OutEvent,
+            Self::ConnectionHandler,
         >,
     > {
         if let Some(event) = self.events.pop_front() {
@@ -141,6 +143,7 @@ impl NetworkBehaviour for QaulMessaging {
 
 /// Transmission between the `OneShotHandler` of the protocols handler
 /// and the `QaulMessagingHandler`.
+#[derive(Debug)]
 pub enum InnerMessage {
     /// We received an QaulMessagingMessage from a remote.
     Received(QaulMessagingData),
@@ -169,7 +172,6 @@ pub enum QaulMessagingEvent {
     Message(QaulMessagingReceived),
 }
 
-
 /// Configuration options for the qaul messaging behaviour
 pub struct QaulMessagingConfig {
     /// Peer id of the local node. Used for the source of the messages that we publish.
@@ -178,12 +180,6 @@ pub struct QaulMessagingConfig {
 
 impl QaulMessagingConfig {
     pub fn new(local_peer_id: PeerId) -> Self {
-        Self {
-            local_peer_id,
-        }
+        Self { local_peer_id }
     }
 }
-
-
-
-
