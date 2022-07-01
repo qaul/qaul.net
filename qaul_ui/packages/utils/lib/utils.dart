@@ -11,6 +11,10 @@ import 'package:intl/locale.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 Color colorGenerationStrategy(String first) {
+  // defined using --dart-define=testing_mode=true when running tests
+  if (const bool.fromEnvironment('testing_mode', defaultValue: false)) {
+    return Colors.green;
+  }
   final colors = <Color>[
     ...Colors.primaries.map((e) => e.shade700),
     ...Colors.accents.map((e) => e.shade700)
