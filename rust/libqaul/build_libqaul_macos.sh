@@ -35,6 +35,9 @@ if [ "$(which lipo)" = "" ]; then
 fi
 
 # 2. Compile binaries
+echo "Adding required rust targets..."
+rustup target add x86_64-apple-darwin aarch64-apple-darwin
+
 echo "Compiling MacOS x86_64 library..."
 if [ $release == true ]; then
   cargo build --target=x86_64-apple-darwin "--release"
