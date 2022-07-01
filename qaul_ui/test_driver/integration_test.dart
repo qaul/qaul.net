@@ -1,14 +1,20 @@
 import 'package:integration_test/integration_test_driver.dart';
+// import 'package:integration_test/integration_test_driver_extended.dart';
 
 Future<void> main() {
   return integrationDriver();
 
-  // final FlutterDriver driver = await FlutterDriver.connect();
-  // await integrationDriver(
-  //   driver: driver,
-  //   onScreenshot: (String screenshotName, List<int> screenshotBytes) async {
-  //    // Return false if the screenshot is invalid.
-  //    return true;
+  // return await integrationDriver(
+  //   onScreenshot: (screenshotName, screenshotBytes) async {
+  //     final image = await File('test_results/$screenshotName.png').create(
+  //       // Create the folder "test_results" if it doesn't exist.
+  //       recursive: true,
+  //     );
+  //
+  //     image.writeAsBytesSync(screenshotBytes);
+  //
+  //     // Return false if the screenshot is invalid.
+  //     return true;
   //   },
   // );
 }
