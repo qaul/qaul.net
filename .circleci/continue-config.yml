@@ -502,21 +502,13 @@ jobs:
         steps:
             - checkout-project
             - run:
-                command: brew install cmake
-                name: Install CMake
-            - run:
-                command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-                name: Install Rust
-            - setup-sccache
-            - restore-sccache-cache
+                command: brew install gh
+                name: Install Github CLI
             - run:
                 command: |
-                    rustup target add x86_64-apple-ios
-                    cd ../../rust/libqaul
-                    cargo install cargo-lipo
-                    cargo lipo --release --targets x86_64-apple-ios
-                name: Build libqaul for ios Simulator
-            - save-sccache-cache
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    gh release download "$LATEST_TAG" --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
+                name: Download Libqaul *.a File from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
             - install-flutter-deps
@@ -529,17 +521,12 @@ jobs:
                 name: Install applesimutils
             - run:
                 command: |
-                    # TODO remove
-                    ls -al
-                    ls ../../rust
-                    ls ../../rust/target
-                    ls ../../rust/target/universal
-                    ls ../../rust/target/universal/release
-
                     cd ..  # qaul_ui root
+
+                    ./bin/replace_registrar_flutter_ios.py
+
                     ID=$(xcrun simctl list devices | grep "iPhone 13 Pro Max" | head -1 | grep -E -o -i "([0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12})")
                     xcrun simctl boot "$ID"
-                    flutter devices
                     applesimutils --byId "$ID" --bundle net.qaul.app --setPermissions notifications=YES
                     flutter test integration_test -d "$ID" --dart-define=testing_mode=true
     publish-flutter-github-release:
