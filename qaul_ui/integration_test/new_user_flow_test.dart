@@ -7,7 +7,7 @@ import 'package:qaul_ui/screens/home/home_screen.dart';
 import 'package:qaul_ui/screens/splash_screen.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   Future<void> delay([int milliseconds = 250]) async =>
       await Future<void>.delayed(Duration(milliseconds: milliseconds));
 
@@ -35,8 +35,13 @@ void main() {
       originalOnError(details); // reinstating est framework's error handler
     };
 
+    // This is required prior to taking the screenshot (Android only).
+    await binding.convertFlutterSurfaceToImage();
+
     await tester.pumpAndSettle();
     expect(find.byKey(CreateAccountScreen.widgetKey), findsOneWidget);
+    var bytes = await binding.takeScreenshot('screenshot');
+    await expectLater(bytes, matchesGoldenFile('goldens/createAccountGolden.png'));
 
     final usernameField = find.byType(TextFormField);
     await tester.enterText(usernameField, 'test');
@@ -45,6 +50,10 @@ void main() {
     await tester.tap(find.byKey(CreateAccountScreen.submitButtonKey));
     await tester.pumpAndSettle();
 
+    expect(find.text('An error occurred'), findsNothing);
+
     await tester.tap(find.byKey(HomeScreen.widgetKey));
+    bytes = await binding.takeScreenshot('screenshot');
+    await expectLater(bytes, matchesGoldenFile('goldens/homeScreenGolden.png'));
   });
 }

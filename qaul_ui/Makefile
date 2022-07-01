@@ -10,4 +10,4 @@ generate-app-icon:
 integration-test:
 	@ID=$$(flutter devices | grep ios | cut -d "•" -f 2 | xargs); \
 	applesimutils --byId "$$ID" --bundle net.qaul.app --setPermissions notifications=YES; \
-	flutter test integration_test -d "$$ID" --dart-define=testing_mode=true
+	flutter test integration_test -d "$$ID" --dart-define=testing_mode=true #--update-goldens
