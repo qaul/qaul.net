@@ -34,6 +34,26 @@ sudo gem install cocoapods
 ### Rust
 libqaul is written in the Rust programming language. Follow the steps outlined [here](rust-install.md) to install it.
 
+#### Install Cross-Compile Targets
+
+As MacOS runs on multiple processor architectures, we need to install the rust compile targets for the other processor architectures.
+
+##### On Intel Machines
+
+When you are compiling on a machine with an intel machine you need to install the target for the M1 processor architecture.
+
+```sh
+rustup target add aarch64-apple-darwin
+```
+
+##### On M1 Machines
+
+When you are compiling on a machine with a M1 processor you need to install the target for the intel x86_64 architecture.
+
+```sh
+rustup target add x86_64-apple-darwin
+```
+
 ### Android Studio (Optional)
 
 There are two reasons you might want to install Android Studio:
@@ -69,6 +89,9 @@ cd rust
 
 # build libqaul and the CLI binaries
 cargo build
+
+# copy libqaul to flutter
+cp target/debug/liblibqaul.dylib ../qaul_ui/macos/
 ```
 
 ### 2. Build & Run qaul flutter Desktop App

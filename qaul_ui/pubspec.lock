@@ -14,7 +14,7 @@ packages:
       name: adaptive_theme
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.3.0"
+    version: "3.1.0"
   analyzer:
     dependency: transitive
     description:
@@ -23,7 +23,7 @@ packages:
     source: hosted
     version: "3.2.0"
   archive:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: archive
       url: "https://pub.dartlang.org"
@@ -212,12 +212,12 @@ packages:
     source: hosted
     version: "0.6.8"
   device_info_plus:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: device_info_plus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.1"
+    version: "3.2.4"
   device_info_plus_linux:
     dependency: transitive
     description:
@@ -231,7 +231,7 @@ packages:
       name: device_info_plus_macos
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.2"
+    version: "2.2.3"
   device_info_plus_platform_interface:
     dependency: transitive
     description:
@@ -296,7 +296,7 @@ packages:
     source: hosted
     version: "6.1.2"
   filesize:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: filesize
       url: "https://pub.dartlang.org"
@@ -312,29 +312,38 @@ packages:
   flame:
     dependency: "direct main"
     description:
-      name: flame
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0"
+      path: "packages/flame"
+      ref: "69214827a0edb563468951256eccecab408f89df"
+      resolved-ref: "69214827a0edb563468951256eccecab408f89df"
+      url: "https://github.com/flame-engine/flame.git"
+    source: git
+    version: "1.1.1"
   flame_forge2d:
     dependency: "direct main"
     description:
       name: flame_forge2d
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.3"
+    version: "0.11.0"
   fluent_ui:
     dependency: "direct main"
     description:
       name: fluent_ui
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.7.0"
+    version: "3.12.0"
   flutter:
     dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_app_badger:
+    dependency: transitive
+    description:
+      name: flutter_app_badger
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.4.0"
   flutter_chat_types:
     dependency: transitive
     description:
@@ -350,7 +359,7 @@ packages:
     source: hosted
     version: "1.5.5"
   flutter_email_sender:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_email_sender
       url: "https://pub.dartlang.org"
@@ -362,7 +371,7 @@ packages:
       name: flutter_hooks
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.18.2"
+    version: "0.18.5+1"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
@@ -430,7 +439,7 @@ packages:
       name: flutter_riverpod
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.3"
+    version: "1.0.4"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -448,13 +457,20 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  font_awesome_flutter:
+    dependency: "direct main"
+    description:
+      name: font_awesome_flutter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "10.1.0"
   forge2d:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: forge2d
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.2"
+    version: "0.11.0"
   frontend_server_client:
     dependency: transitive
     description:
@@ -498,12 +514,12 @@ packages:
     source: hosted
     version: "1.1.2"
   hooks_riverpod:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: hooks_riverpod
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.3"
+    version: "1.0.4"
   html:
     dependency: transitive
     description:
@@ -595,13 +611,6 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
-  logger:
-    dependency: "direct main"
-    description:
-      path: "packages/logger"
-      relative: true
-    source: path
-    version: "0.0.1"
   logging:
     dependency: "direct main"
     description:
@@ -617,7 +626,7 @@ packages:
     source: hosted
     version: "0.10.0+1"
   mailto:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: mailto
       url: "https://pub.dartlang.org"
@@ -666,7 +675,7 @@ packages:
     source: hosted
     version: "0.2.0+3"
   neat_periodic_task:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: neat_periodic_task
       url: "https://pub.dartlang.org"
@@ -694,7 +703,7 @@ packages:
     source: hosted
     version: "2.0.2"
   package_info_plus:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: package_info_plus
       url: "https://pub.dartlang.org"
@@ -757,7 +766,7 @@ packages:
     source: hosted
     version: "0.2.1"
   path_provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path_provider
       url: "https://pub.dartlang.org"
@@ -888,7 +897,7 @@ packages:
       name: responsive_framework
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.5"
+    version: "0.2.0"
   retry:
     dependency: transitive
     description:
@@ -897,7 +906,7 @@ packages:
     source: hosted
     version: "3.1.0"
   riverpod:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: riverpod
       url: "https://pub.dartlang.org"
@@ -918,7 +927,7 @@ packages:
     source: hosted
     version: "0.3.0"
   shared_preferences:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: shared_preferences
       url: "https://pub.dartlang.org"
@@ -1119,7 +1128,7 @@ packages:
     source: hosted
     version: "0.1.0"
   url_launcher:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: url_launcher
       url: "https://pub.dartlang.org"
@@ -1238,5 +1247,5 @@ packages:
     source: hosted
     version: "3.1.0"
 sdks:
-  dart: ">=2.17.0-0 <3.0.0"
-  flutter: ">=2.8.0"
+  dart: ">=2.17.0 <3.0.0"
+  flutter: ">=3.0.0"
