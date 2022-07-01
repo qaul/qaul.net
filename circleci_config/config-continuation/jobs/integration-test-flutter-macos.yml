@@ -1,0 +1,26 @@
+executor: flutter-macos
+steps:
+  - checkout-project
+  - run:
+      name: Install Github CLI
+      command: brew install gh
+  - run:
+      name: Download Libqaul *.dylib File from latest Github Release
+      command: |
+        LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+        gh release download "$LATEST_TAG" --pattern "*.dylib" --repo "$REPO_URL" --dir macos
+  - install-flutter:
+      version: "$FLUTTER_VERSION"
+  - install-flutter-deps
+  - run:
+      name: Run integration tests on MacOS
+      command: |
+        flutter config --enable-macos-desktop
+
+        echo "Available devices:"
+        flutter devices && echo "\n"
+
+        flutter test integration_test --dart-define=testing_mode=true -d macos
+  - store_artifacts:
+      path: ~/qaul-libp2p/qaul_ui/integration_test/failures
+

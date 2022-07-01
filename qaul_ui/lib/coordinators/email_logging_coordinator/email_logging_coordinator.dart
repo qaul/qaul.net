@@ -26,9 +26,10 @@ part 'log_storage_manager.dart';
 class EmailLoggingCoordinator {
   EmailLoggingCoordinator._();
 
-  static final instance = const bool.fromEnvironment('testing_mode', defaultValue: false)
-      ? _NullEmailLoggingCoordinator()
-      : EmailLoggingCoordinator._();
+  static final instance =
+      const bool.fromEnvironment('testing_mode', defaultValue: false)
+          ? _NullEmailLoggingCoordinator()
+          : EmailLoggingCoordinator._();
 
   final _log = Logger('EmailLoggingCoordinator');
 
@@ -54,7 +55,8 @@ class EmailLoggingCoordinator {
       if (kDebugMode) debugPrint(message);
 
       if (record.level >= Level.WARNING) {
-        _logError(record.object!, stack: record.stackTrace, message: message);
+        _logError(record.object ?? record,
+            stack: record.stackTrace, message: message);
       }
     });
   }

@@ -2,3 +2,5 @@ version: 2.1
 
 orbs:
   win: circleci/windows@4.1
+  android: circleci/android@2.1.2
+  flutter: circleci/flutter@1.1.0

@@ -6,7 +6,10 @@ import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 abstract class LocalNotifications {
-  static LocalNotifications instance = _LocalNotifications();
+  static LocalNotifications instance =
+      const bool.fromEnvironment('testing_mode', defaultValue: false)
+          ? _NullLocalNotifications()
+          : _LocalNotifications();
 
   Future<bool> initialize();
 
@@ -154,4 +157,21 @@ class _LocalNotifications implements LocalNotifications {
 
   LinuxNotificationDetails? get _linuxDetails =>
       !Platform.isLinux ? null : const LinuxNotificationDetails();
+}
+
+class _NullLocalNotifications implements LocalNotifications {
+  @override
+  Future<void> displayNotification(LocalNotification message) async {}
+
+  @override
+  Future<bool> initialize() => Future.value(false);
+
+  @override
+  Stream<LocalNotification> get onNotificationOpened => throw UnimplementedError();
+
+  @override
+  Future<void> removeNotifications() async {}
+
+  @override
+  Future<bool> requestPermissions() => Future.value(false);
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -6,8 +8,14 @@ import 'package:qaul_ui/screens/create_account_screen.dart';
 import 'package:qaul_ui/screens/home/home_screen.dart';
 import 'package:qaul_ui/screens/splash_screen.dart';
 
+import 'src/screenshot_comparator.dart';
+
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  String? goldenSuffix;
+  if (Platform.isIOS) goldenSuffix = '-ios';
+
   Future<void> delay([int milliseconds = 250]) async =>
       await Future<void>.delayed(Duration(milliseconds: milliseconds));
 
@@ -38,10 +46,14 @@ void main() {
     // This is required prior to taking the screenshot (Android only).
     await binding.convertFlutterSurfaceToImage();
 
+    await tester.pump();
     await tester.pumpAndSettle();
     expect(find.byKey(CreateAccountScreen.widgetKey), findsOneWidget);
-    var bytes = await binding.takeScreenshot('screenshot');
-    await expectLater(bytes, matchesGoldenFile('goldens/createAccountGolden.png'));
+
+    if (goldenSuffix != null) {
+      var bytes = await binding.takeScreenshot('screenshot');
+      await expectGoldenMatches(bytes, 'createAccountGolden$goldenSuffix.png');
+    }
 
     final usernameField = find.byType(TextFormField);
     await tester.enterText(usernameField, 'test');
@@ -53,7 +65,10 @@ void main() {
     expect(find.text('An error occurred'), findsNothing);
 
     await tester.tap(find.byKey(HomeScreen.widgetKey));
-    bytes = await binding.takeScreenshot('screenshot');
-    await expectLater(bytes, matchesGoldenFile('goldens/homeScreenGolden.png'));
+
+    if (goldenSuffix != null) {
+      var bytes = await binding.takeScreenshot('screenshot');
+      await expectGoldenMatches(bytes, 'homeScreenGolden$goldenSuffix.png');
+    }
   });
 }

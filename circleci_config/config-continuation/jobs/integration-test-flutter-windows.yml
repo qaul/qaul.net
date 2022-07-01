@@ -1,0 +1,36 @@
+executor:
+  name: win/server-2022
+  size: "medium"
+  shell: bash.exe
+working_directory: ~/qaul-libp2p/qaul_ui
+environment:
+  FLUTTER_VERSION: "3.0.1"
+  REPO_URL: "https://github.com/qaul/qaul.net"
+steps:
+  - checkout-project
+  - run:
+      name: Install Github CLI
+      command: choco install gh -y
+  - run:
+      name: Download Libqaul *.dll File from latest Github Release
+      command: |
+        echo "Using repo: $REPO_URL"
+
+        export PATH="/c/Program Files/Github CLI:${PATH}"
+
+        LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | /usr/bin/sort --reverse --version-sort | head -n 1)
+        echo "Found latest tag: $LATEST_TAG"
+
+        gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
+  - install-flutter:
+      version: "$FLUTTER_VERSION"
+  - run:
+      name: Run integration tests on Windows
+      command: |
+        export PATH="${HOME}/development/flutter/bin:${PATH}"
+        flutter config --enable-windows-desktop
+
+        echo "Available devices:"
+        flutter devices && echo "\n"
+
+        flutter test integration_test --dart-define=testing_mode=true -d windows

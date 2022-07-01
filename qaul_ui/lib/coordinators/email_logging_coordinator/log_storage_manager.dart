@@ -53,7 +53,7 @@ class _LogStorageManager {
 
   Future<List<FileSystemEntity>> get logs async {
     var path = Directory(await _storeDirectory);
-    return path.listSync().where((file) => file.path.contains(titlePrefix)).toList();
+    return path.list().where((f) => f.path.contains(titlePrefix)).toList();
   }
 
   Future<int> get logFolderSize async {

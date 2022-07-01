@@ -20,12 +20,21 @@ steps:
         brew tap wix/brew
         brew install applesimutils
   - run:
+      name: Run integration tests on iOS Simulator
       command: |
         cd ..  # qaul_ui root
 
         ./bin/replace_registrar_flutter_ios.py
 
         ID=$(xcrun simctl list devices | grep "iPhone 13 Pro Max" | head -1 | grep -E -o -i "([0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12})")
+        echo "Using device ID: $ID"
+
+        echo "Booting simulator..."
         xcrun simctl boot "$ID"
-        applesimutils --byId "$ID" --bundle net.qaul.app --setPermissions notifications=YES
+
+        echo "Available devices:"
+        flutter devices && echo "\n"
+
         flutter test integration_test -d "$ID" --dart-define=testing_mode=true
+  - store_artifacts:
+      path: ~/qaul-libp2p/qaul_ui/integration_test/failures

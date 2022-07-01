@@ -1,0 +1,64 @@
+executor:
+  name: android/android-machine
+  tag: "2021.10.1"
+  resource-class: 2xlarge
+working_directory: ~/qaul-libp2p/qaul_ui
+environment:
+  FLUTTER_VERSION: "3.0.1"
+  REPO_URL: "https://github.com/qaul/qaul.net"
+  _JAVA_OPTIONS: "-Xmx3g"
+steps:
+  - checkout-project
+
+  - run:
+      name: Install Github CLI
+      command: |
+        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+        sudo apt update
+        sudo apt install gh
+  - run:
+      name: Download Libqaul AAR Files from latest Github Release
+      command: |
+        LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "0\.2\.0" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+        gh release download "$LATEST_TAG" --pattern "libqaul-debug.aar" --repo "$REPO_URL" --dir android/app/libs
+        gh release download "$LATEST_TAG" --pattern "blemodule-debug.aar" --repo "$REPO_URL" --dir android/app/libs
+
+        LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+        gh release download "$LATEST_TAG" --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir android/app/libs
+        gh release download "$LATEST_TAG" --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir android/app/libs
+
+  - flutter/install_sdk_and_pub:
+      flutter_version: "$FLUTTER_VERSION"
+  - flutter/install_android_gradle
+  - flutter/install_android_gem
+
+  # Create an AVD named "myavd"
+  - android/create-avd:
+      avd-name: myavd
+      install: true
+      additional-args: "--sdcard 4096M"
+      system-image: system-images;android-29;default;x86
+  # By default, after starting up the emulator, a cache will be restored,
+  # "./gradlew assembleDebugAndroidTest" will be run and then a script
+  # will be run to wait for the emulator to start up.
+  # Specify the "post-emulator-launch-assemble-command" command to override
+  # the gradle command run, or set "wait-for-emulator" to false to disable
+  # waiting for the emulator altogether.
+  - android/start-emulator:
+      avd-name: myavd
+      no-window: true
+      restore-gradle-cache-prefix: v1a
+      post-emulator-launch-assemble-command: ""
+
+  - run:
+      name: Run integration tests on Android Emulator
+      command: |
+        echo "Available devices:"
+        flutter devices && echo "\n"
+
+        sed -i -e 's/-Xmx1536M/-Xmx3g/' android/gradle.properties
+        sed -i -e 's/# //g' android/gradle.properties
+        cat android/gradle.properties
+
+        flutter test integration_test --dart-define=testing_mode=true
