@@ -25,9 +25,9 @@ class CreateAccountScreen extends HookConsumerWidget {
     final worker = ref.read(qaulWorkerProvider);
     await worker.createUserAccount(name);
 
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < 60; i++) {
       await worker.getDefaultUserAccount();
-      await Future.delayed(Duration(milliseconds: 100 * (1 + i)));
+      await Future.delayed(const Duration(milliseconds: 1000));
       final user = ref.read(defaultUserProvider);
       return user != null;
     }

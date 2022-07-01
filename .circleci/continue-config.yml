@@ -497,6 +497,60 @@ jobs:
                     - rust/target/release/libqaul.dll
                 root: ~/qaul-libp2p
         working_directory: ~/qaul-libp2p
+    integration-test-flutter-android:
+        environment:
+            _JAVA_OPTIONS: -Xmx3g
+            FLUTTER_VERSION: 3.0.1
+            REPO_URL: https://github.com/qaul/qaul.net
+        executor:
+            name: android/android-machine
+            resource-class: 2xlarge
+            tag: 2021.10.1
+        steps:
+            - checkout-project
+            - run:
+                command: |
+                    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+                    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+                    sudo apt update
+                    sudo apt install gh
+                name: Install Github CLI
+            - run:
+                command: |
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "0\.2\.0" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    gh release download "$LATEST_TAG" --pattern "libqaul-debug.aar" --repo "$REPO_URL" --dir android/app/libs
+                    gh release download "$LATEST_TAG" --pattern "blemodule-debug.aar" --repo "$REPO_URL" --dir android/app/libs
+
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    gh release download "$LATEST_TAG" --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir android/app/libs
+                    gh release download "$LATEST_TAG" --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir android/app/libs
+                name: Download Libqaul AAR Files from latest Github Release
+            - flutter/install_sdk_and_pub:
+                flutter_version: $FLUTTER_VERSION
+            - flutter/install_android_gradle
+            - flutter/install_android_gem
+            - android/create-avd:
+                additional-args: --sdcard 4096M
+                avd-name: myavd
+                install: true
+                system-image: system-images;android-29;default;x86
+            - android/start-emulator:
+                avd-name: myavd
+                no-window: true
+                post-emulator-launch-assemble-command: ""
+                restore-gradle-cache-prefix: v1a
+            - run:
+                command: |
+                    echo "Available devices:"
+                    flutter devices && echo "\n"
+
+                    sed -i -e 's/-Xmx1536M/-Xmx3g/' android/gradle.properties
+                    sed -i -e 's/# //g' android/gradle.properties
+                    cat android/gradle.properties
+
+                    flutter test integration_test --dart-define=testing_mode=true
+                name: Run integration tests on Android Emulator
+        working_directory: ~/qaul-libp2p/qaul_ui
     integration-test-flutter-ios:
         executor: flutter-ios
         steps:
@@ -526,9 +580,118 @@ jobs:
                     ./bin/replace_registrar_flutter_ios.py
 
                     ID=$(xcrun simctl list devices | grep "iPhone 13 Pro Max" | head -1 | grep -E -o -i "([0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12})")
+                    echo "Using device ID: $ID"
+
+                    echo "Booting simulator..."
                     xcrun simctl boot "$ID"
-                    applesimutils --byId "$ID" --bundle net.qaul.app --setPermissions notifications=YES
+
+                    echo "Available devices:"
+                    flutter devices && echo "\n"
+
                     flutter test integration_test -d "$ID" --dart-define=testing_mode=true
+                name: Run integration tests on iOS Simulator
+            - store_artifacts:
+                path: ~/qaul-libp2p/qaul_ui/integration_test/failures
+    integration-test-flutter-linux:
+        environment:
+            FLUTTER_VERSION: 3.0.1
+            REPO_URL: https://github.com/qaul/qaul.net
+        executor: flutter-ubuntu-lean
+        steps:
+            - checkout-project
+            - run:
+                command: |
+                    sudo apt-get update
+                    sudo apt install -y -qq wget tar unzip zip lib32stdc++6 lib32z1 clang ninja-build pkg-config libgtk-3-dev curl apt-transport-https xz-utils git cmake
+                name: Install core package dependencies
+            - run:
+                command: |
+                    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+                    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+                    sudo apt update
+                    sudo apt install gh -y
+                name: Install Github CLI
+            - run:
+                command: |
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    gh release download "$LATEST_TAG" --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
+                name: Download Libqaul *.so File from latest Github Release
+            - flutter/install_sdk_and_pub:
+                flutter_version: $FLUTTER_VERSION
+            - run:
+                command: |
+                    echo "Available devices:"
+                    flutter devices && echo "\n"
+
+                    flutter config --enable-linux-desktop
+
+                    export DISPLAY=:99
+                    sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+                    flutter test integration_test --dart-define=testing_mode=true -d linux
+                name: Run integration tests on Linux
+    integration-test-flutter-macos:
+        executor: flutter-macos
+        steps:
+            - checkout-project
+            - run:
+                command: brew install gh
+                name: Install Github CLI
+            - run:
+                command: |
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    gh release download "$LATEST_TAG" --pattern "*.dylib" --repo "$REPO_URL" --dir macos
+                name: Download Libqaul *.dylib File from latest Github Release
+            - install-flutter:
+                version: $FLUTTER_VERSION
+            - install-flutter-deps
+            - run:
+                command: |
+                    flutter config --enable-macos-desktop
+
+                    echo "Available devices:"
+                    flutter devices && echo "\n"
+
+                    flutter test integration_test --dart-define=testing_mode=true -d macos
+                name: Run integration tests on MacOS
+            - store_artifacts:
+                path: ~/qaul-libp2p/qaul_ui/integration_test/failures
+    integration-test-flutter-windows:
+        environment:
+            FLUTTER_VERSION: 3.0.1
+            REPO_URL: https://github.com/qaul/qaul.net
+        executor:
+            name: win/server-2022
+            shell: bash.exe
+            size: medium
+        steps:
+            - checkout-project
+            - run:
+                command: choco install gh -y
+                name: Install Github CLI
+            - run:
+                command: |
+                    echo "Using repo: $REPO_URL"
+
+                    export PATH="/c/Program Files/Github CLI:${PATH}"
+
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | /usr/bin/sort --reverse --version-sort | head -n 1)
+                    echo "Found latest tag: $LATEST_TAG"
+
+                    gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
+                name: Download Libqaul *.dll File from latest Github Release
+            - install-flutter:
+                version: $FLUTTER_VERSION
+            - run:
+                command: |
+                    export PATH="${HOME}/development/flutter/bin:${PATH}"
+                    flutter config --enable-windows-desktop
+
+                    echo "Available devices:"
+                    flutter devices && echo "\n"
+
+                    flutter test integration_test --dart-define=testing_mode=true -d windows
+                name: Run integration tests on Windows
+        working_directory: ~/qaul-libp2p/qaul_ui
     publish-flutter-github-release:
         executor: flutter-ubuntu-lean
         steps:
@@ -672,6 +835,8 @@ jobs:
                     fi
                 name: Verify that Git tag matches Rust version
 orbs:
+    android: circleci/android@2.1.2
+    flutter: circleci/flutter@1.1.0
     win: circleci/windows@4.1
 parameters:
     run-flutter-tagged-workflow:
@@ -690,9 +855,18 @@ version: 2.1
 workflows:
     analyze-and-test-flutter:
         jobs:
-            - analyze-flutter
             - test-flutter
-            - integration-test-flutter-ios
+            - analyze-flutter
+            - integration-test-flutter-ios:
+                filters:
+                    branches:
+                        only:
+                            - main
+            - integration-test-flutter-macos:
+                filters:
+                    branches:
+                        only:
+                            - main
         when: << pipeline.parameters.run-flutter-workflow >>
     build-and-deploy-flutter:
         jobs:
