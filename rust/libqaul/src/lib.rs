@@ -21,35 +21,24 @@ use crate::utilities::filelogger::FileLogger;
 
 // crate modules
 pub mod api;
-pub mod storage;
-pub mod utilities;
 mod connections;
 mod node;
 mod router;
 mod rpc;
 mod services;
+pub mod storage;
 mod types;
+pub mod utilities;
 
-
-use connections::{
-    ConnectionModule, Connections,
-    internet::Internet,   
-    ble::Ble,
-};
+use connections::{ble::Ble, internet::Internet, ConnectionModule, Connections};
 
 use node::Node;
-use router::{
-    flooder,
-    feed_requester,
-    info::RouterInfo, 
-    Router,
-    neighbours::Neighbours,
-};
+use router::{feed_requester, flooder, info::RouterInfo, neighbours::Neighbours, Router};
 
-use rpc::Rpc;
 use rpc::sys::Sys;
-use services::Services;
+use rpc::Rpc;
 use services::messaging::Messaging;
+use services::Services;
 
 /// check this when the library finished initializing
 static INITIALIZED: Storage<bool> = Storage::new();
@@ -80,7 +69,7 @@ enum EventType {
 
 /// initialize and start libqaul
 /// and poll all the necessary modules
-/// 
+///
 /// Provide a path where libqaul can save all data.
 pub async fn start(storage_path: String) -> () {
     log::info!("start initializing libqaul");
@@ -105,7 +94,7 @@ pub async fn start(storage_path: String) -> () {
         logger_path = storage_p + "/logs/";
     }
     let cur_time_as_ms = Timestamp::get_timestamp();
-    let logger_file = logger_path.clone() + "error_" + &cur_time_as_ms.to_string() + ".log";
+    let logger_file = logger_path.clone() + "error_" + cur_time_as_ms.to_string().as_str() + ".log";
 
     // create log directory
     std::fs::create_dir_all(logger_path.clone()).unwrap();
@@ -194,7 +183,7 @@ pub async fn start(storage_path: String) -> () {
 
     // initialize services
     Services::init();
-    
+
     // check RPC once every 10 milliseconds
     // TODO: interval is only in unstable. Use it once it is stable.
     //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
@@ -241,7 +230,7 @@ pub async fn start(storage_path: String) -> () {
             let sys_fut = sys_ticker.next().fuse();
             let flooding_fut = flooding_ticker.next().fuse();
             let feedreq_fut = feedreq_ticker.next().fuse();
-            let feedresp_fut = feedresp_ticker.next().fuse();            
+            let feedresp_fut = feedresp_ticker.next().fuse();
             let routing_info_fut = routing_info_ticker.next().fuse();
             let connection_fut = connection_ticker.next().fuse();
             let routing_table_fut = routing_table_ticker.next().fuse();
@@ -272,7 +261,7 @@ pub async fn start(storage_path: String) -> () {
                             log::info!("lan connection closed: {:?}", peer_id);
                             Neighbours::delete(ConnectionModule::Lan, peer_id);
                         },
-                        libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {                            
+                        libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {
                             //remove from neighbour table, after then scheduler will auto remove this neighbour
                             log::info!("lan connection banned: {:?}", peer_id);
                             Neighbours::delete(ConnectionModule::Lan, peer_id);
@@ -284,30 +273,40 @@ pub async fn start(storage_path: String) -> () {
                 internet_event = internet_fut => {
                     log::info!("Unhandled internet connection module event: {:?}", internet_event);
                     match internet_event.unwrap() {
-                        libp2p::swarm::SwarmEvent::UnknownPeerUnreachableAddr{address, ..} => {
-                            Internet::add_reconnection(address);
+                        libp2p::swarm::SwarmEvent::OutgoingConnectionError{error, ..} => {
+                            // Get list of addresses which we failed to connect to
+                            // Since `UnknownPeerUnreachableAddr` error was removed, we need to parse
+                            // list of outgoing connection errors to get list of addresses
+                            match error {
+                                libp2p::swarm::DialError::Transport(unreachable_addrs) => {
+                                    for (addr, _) in unreachable_addrs {
+                                        Internet::add_reconnection(addr);
+                                    }
+                                },
+                                _ => {}
+                            }
                         }
                         libp2p::swarm::SwarmEvent::ConnectionEstablished{endpoint, ..} =>{
                             //remove from attempting connections
                             match endpoint{
-                                libp2p::core::ConnectedPoint::Dialer{address} =>{
+                                libp2p::core::ConnectedPoint::Dialer{address, ..} =>{
                                     Internet::remove_reconnection(address);
                                 }
                                 _ => {}
-                            }                            
+                            }
                         }
                         libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, endpoint, ..} => {
-                            //remove from neighbour table, after then scheduler will auto remove this neighbour
+                            // remove from neighbour table, after then scheduler will auto remove this neighbour
                             log::info!("internet connection closed: {:?}", peer_id);
                             Neighbours::delete(ConnectionModule::Internet, peer_id);
 
-                            //add new reconnection
-                            match endpoint{
-                                libp2p::core::ConnectedPoint::Dialer{address} =>{
+                            // add new reconnection
+                            match endpoint {
+                                libp2p::core::ConnectedPoint::Dialer{address, ..} =>{
                                     Internet::add_reconnection(address);
                                 }
                                 _ => {}
-                            }                            
+                            }
                         }
                         libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {
                             //remove from neighbour table, after then scheduler will auto remove this neighbour
@@ -385,12 +384,14 @@ pub async fn start(storage_path: String) -> () {
 
                     // loop over messages to send & flood them
                     while let Some(request) = feed_requester.to_send.pop_front() {
-
                         let connection_module = Neighbours::is_neighbour(&request.neighbour_id);
                         if connection_module == ConnectionModule::None {
-                            log::error!("sending feed requests, node is not a neighbour anymore: {:?}", request.neighbour_id);
+                            log::error!(
+                                "sending feed requests, node is not a neighbour anymore: {:?}",
+                                request.neighbour_id
+                            );
                             continue;
-                        }                        
+                        }
                         //make data
                         let data = RouterInfo::create_feed_request(&request.feed_ids);
                         match connection_module {
@@ -419,10 +420,12 @@ pub async fn start(storage_path: String) -> () {
 
                     // loop over messages to send & flood them
                     while let Some(request) = feed_responser.to_send.pop_front() {
-
                         let connection_module = Neighbours::is_neighbour(&request.neighbour_id);
                         if connection_module == ConnectionModule::None {
-                            log::error!("sending feed requests, node is not a neighbour anymore: {:?}", request.neighbour_id);
+                            log::error!(
+                                "sending feed requests, node is not a neighbour anymore: {:?}",
+                                request.neighbour_id
+                            );
                             continue;
                         }
 
@@ -479,7 +482,7 @@ pub async fn start(storage_path: String) -> () {
                         }
                     }
                 }
-                EventType::ReConnecting(_) =>{
+                EventType::ReConnecting(_) => {
                     if let Some(addr) = Internet::check_reconnection() {
                         log::info!("redial....: {:?}", addr);
                         Internet::peer_redial(&addr, &mut internet.swarm).await;
@@ -488,7 +491,7 @@ pub async fn start(storage_path: String) -> () {
                 }
                 EventType::RoutingTable(_) => {
                     // create new routing table
-                    router::connections::ConnectionTable::create_routing_table();                    
+                    router::connections::ConnectionTable::create_routing_table();
                 }
                 EventType::Messaging(_) => {
                     // send scheduled messages
@@ -503,22 +506,21 @@ pub async fn start(storage_path: String) -> () {
                         // send messaging message via the best module
                         match connection_module {
                             ConnectionModule::Lan => {
-                                lan
-                                    .swarm
+                                lan.swarm
                                     .behaviour_mut()
                                     .qaul_messaging
                                     .send_qaul_messaging_message(neighbour_id, data);
-                            },
+                            }
                             ConnectionModule::Internet => {
                                 internet
                                     .swarm
                                     .behaviour_mut()
                                     .qaul_messaging
                                     .send_qaul_messaging_message(neighbour_id, data);
-                            },
+                            }
                             ConnectionModule::Ble => {
                                 Ble::send_messaging_message(neighbour_id, data);
-                            },
+                            }
                             ConnectionModule::Local => {
                                 let message = qaul_messaging::types::QaulMessagingReceived {
                                     received_from: neighbour_id,
@@ -530,8 +532,7 @@ pub async fn start(storage_path: String) -> () {
                             ConnectionModule::None => {
                                 // TODO: DTN behaviour
                                 // reschedule it for the moment
-
-                            },
+                            }
                         }
                     }
                 }
@@ -549,4 +550,3 @@ pub async fn start(storage_path: String) -> () {
 pub async fn start_android(storage_path: String) -> () {
     start(storage_path).await
 }
-

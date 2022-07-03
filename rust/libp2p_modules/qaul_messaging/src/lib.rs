@@ -12,8 +12,7 @@ pub mod types;
 use libp2p::{
     core::{connection::ConnectionId, Multiaddr, PeerId},
     swarm::{
-        ConnectionHandler, NetworkBehaviour, NetworkBehaviourAction, NotifyHandler, OneShotHandler,
-        PollParameters,
+        NetworkBehaviour, NetworkBehaviourAction, NotifyHandler, OneShotHandler, PollParameters,
     },
 };
 use std::{
@@ -127,12 +126,7 @@ impl NetworkBehaviour for QaulMessaging {
         &mut self,
         _: &mut Context<'_>,
         _: &mut impl PollParameters,
-    ) -> Poll<
-        NetworkBehaviourAction<
-            <Self::ConnectionHandler as ConnectionHandler>::OutEvent,
-            Self::ConnectionHandler,
-        >,
-    > {
+    ) -> Poll<NetworkBehaviourAction<Self::OutEvent, Self::ConnectionHandler>> {
         if let Some(event) = self.events.pop_front() {
             return Poll::Ready(event);
         }
