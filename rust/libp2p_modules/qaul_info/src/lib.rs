@@ -12,8 +12,8 @@ pub mod types;
 use libp2p::{
     core::{connection::ConnectionId, Multiaddr, PeerId},
     swarm::{
-        ConnectionHandler, IntoConnectionHandler, NetworkBehaviour, NetworkBehaviourAction,
-        NotifyHandler, OneShotHandler, PollParameters,
+        IntoConnectionHandler, NetworkBehaviour, NetworkBehaviourAction, NotifyHandler,
+        OneShotHandler, PollParameters,
     },
 };
 use std::{
@@ -28,7 +28,7 @@ use protocol::QaulInfoProtocol;
 pub struct QaulInfo {
     /// Events that need to be handed to the outside when polling.
     events: VecDeque<
-        NetworkBehaviourAction<QaulInfoData, <QaulInfo as NetworkBehaviour>::ConnectionHandler>,
+        NetworkBehaviourAction<QaulInfoEvent, <QaulInfo as NetworkBehaviour>::ConnectionHandler>,
     >,
 
     #[allow(dead_code)]
@@ -77,20 +77,6 @@ impl NetworkBehaviour for QaulInfo {
         Vec::new()
     }
 
-    fn inject_connection_established(&mut self, _id: &PeerId) {
-        // should we inform qaul router?
-    }
-
-    fn inject_connection_closed(
-        &mut self,
-        _: &PeerId,
-        _: &ConnectionId,
-        _: &libp2p::core::ConnectedPoint,
-        _: <Self::ConnectionHandler as libp2p::swarm::IntoConnectionHandler>::Handler,
-        _remaining_established: usize,
-    ) {
-    }
-
     fn inject_event(
         &mut self,
         received_from: PeerId,
@@ -118,12 +104,7 @@ impl NetworkBehaviour for QaulInfo {
         &mut self,
         _: &mut Context<'_>,
         _: &mut impl PollParameters,
-    ) -> Poll<
-        NetworkBehaviourAction<
-            <Self::ConnectionHandler as ConnectionHandler>::InEvent,
-            Self::ConnectionHandler,
-        >,
-    > {
+    ) -> Poll<NetworkBehaviourAction<Self::OutEvent, Self::ConnectionHandler>> {
         if let Some(event) = self.events.pop_front() {
             return Poll::Ready(event);
         }
@@ -137,6 +118,7 @@ impl NetworkBehaviour for QaulInfo {
         _connection_id: &ConnectionId,
         _endpoint: &libp2p::core::ConnectedPoint,
         _failed_addresses: Option<&Vec<Multiaddr>>,
+        _other_established: usize,
     ) {
     }
 
@@ -145,7 +127,8 @@ impl NetworkBehaviour for QaulInfo {
         _: &PeerId,
         _: &ConnectionId,
         _: &libp2p::core::ConnectedPoint,
-        _: <Self::ProtocolsHandler as IntoProtocolsHandler>::Handler,
+        _: <Self::ConnectionHandler as IntoConnectionHandler>::Handler,
+        _remaining_established: usize,
     ) {
     }
 
@@ -161,7 +144,7 @@ impl NetworkBehaviour for QaulInfo {
     fn inject_dial_failure(
         &mut self,
         _peer_id: Option<PeerId>,
-        _handler: Self::ProtocolsHandler,
+        _handler: Self::ConnectionHandler,
         _error: &libp2p::swarm::DialError,
     ) {
     }
@@ -170,7 +153,7 @@ impl NetworkBehaviour for QaulInfo {
         &mut self,
         _local_addr: &Multiaddr,
         _send_back_addr: &Multiaddr,
-        _handler: Self::ProtocolsHandler,
+        _handler: Self::ConnectionHandler,
     ) {
     }
 
@@ -238,14 +221,6 @@ impl From<()> for InnerMessage {
 pub enum QaulInfoEvent {
     /// A message has been received.
     Message(QaulInfoReceived),
-}
-
-impl IntoConnectionHandler for QaulInfoEvent {
-    type Handler = QaulInfo;
-
-    fn into_handler(self, _: &PeerId) -> Self::Handler {
-        unimplemented!()
-    }
 }
 
 /// Configuration options for the qaul info behaviour

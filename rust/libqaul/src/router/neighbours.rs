@@ -2,32 +2,22 @@
 // This software is published under the AGPLv3 license.
 
 //! Table of all direct neighbour nodes
-//! 
+//!
 //! There is a table per connection module.
 
 use libp2p::PeerId;
-use serde::{Serialize, Deserialize};
-use state::Storage;
 use prost::Message;
-use std::{
-    collections::HashMap,
-    sync::RwLock,
-    time::SystemTime,
-};
-use sled_extensions::{
-    DbExt,
-    bincode::Tree,
-};
+use serde::{Deserialize, Serialize};
+use sled_extensions::{bincode::Tree, DbExt};
+use state::Storage;
+use std::{collections::HashMap, sync::RwLock, time::SystemTime};
 
-use crate::connections::ConnectionModule;
 use super::info::RouterInfo;
 use super::proto;
+use crate::connections::ConnectionModule;
 use crate::rpc::Rpc;
 use crate::storage::database::DataBase;
-use crate::utilities::{
-    timestamp::Timestamp,
-    qaul_id::QaulId,
-};
+use crate::utilities::{qaul_id::QaulId, timestamp::Timestamp};
 
 /// mutable state of Internet neighbour node table
 static INTERNET: Storage<RwLock<Neighbours>> = Storage::new();
@@ -37,7 +27,7 @@ static LAN: Storage<RwLock<Neighbours>> = Storage::new();
 static BLE: Storage<RwLock<Neighbours>> = Storage::new();
 
 /// Data base table of all ever discovered neighbour nodes
-/// 
+///
 /// This table is used to find the node id from the small id
 /// used by the BLE module.
 static NODES: Storage<Tree<Node>> = Storage::new();
@@ -52,7 +42,7 @@ pub struct Node {
 }
 
 /// Neighbours Module State
-/// 
+///
 /// Contains all connected neighbour nodes of a connection module
 /// It represents the per connection module, module state.
 pub struct Neighbours {
@@ -71,15 +61,21 @@ impl Neighbours {
     /// Initialize neighbours module
     pub fn init() {
         // neighbours table for internet connection module
-        let internet = Neighbours { nodes: HashMap::new() };
+        let internet = Neighbours {
+            nodes: HashMap::new(),
+        };
         INTERNET.set(RwLock::new(internet));
 
         // neighbours table for lan connection module
-        let lan = Neighbours { nodes: HashMap::new() };
+        let lan = Neighbours {
+            nodes: HashMap::new(),
+        };
         LAN.set(RwLock::new(lan));
 
         // neighbours table for ble connection module
-        let ble = Neighbours { nodes: HashMap::new() };
+        let ble = Neighbours {
+            nodes: HashMap::new(),
+        };
         BLE.set(RwLock::new(ble));
 
         // get nodes tree from data base and set it to state
@@ -89,10 +85,10 @@ impl Neighbours {
     }
 
     /// update table with a new value
-    /// 
+    ///
     /// If the node already exists, it updates it's rtt value.
     /// If the node does not yet exist, it creates it.
-    pub fn update_node( module: ConnectionModule, node_id: PeerId, rtt: u32 ) {
+    pub fn update_node(module: ConnectionModule, node_id: PeerId, rtt: u32) {
         log::info!("update_node node {:?}", node_id);
         // get table
         let mut neighbours;
@@ -105,14 +101,19 @@ impl Neighbours {
         }
 
         // get node from table
-        let node_option = neighbours.nodes.get_mut( &node_id );
+        let node_option = neighbours.nodes.get_mut(&node_id);
         if let Some(node) = node_option {
-            node.rtt = Self::calculate_rtt( node.rtt , rtt);
+            node.rtt = Self::calculate_rtt(node.rtt, rtt);
             node.updated_at = SystemTime::now();
-        }
-        else {
+        } else {
             log::info!("add node {:?} to neighbours table", node_id);
-            neighbours.nodes.insert( node_id, Neighbour { rtt, updated_at: SystemTime::now() } );
+            neighbours.nodes.insert(
+                node_id,
+                Neighbour {
+                    rtt,
+                    updated_at: SystemTime::now(),
+                },
+            );
 
             // add neighbour in RouterInfo neighbours table
             RouterInfo::add_neighbour(node_id);
@@ -123,7 +124,7 @@ impl Neighbours {
                 let id = node_id.to_bytes();
 
                 // create data base entry
-                let node = Node{
+                let node = Node {
                     id: id.clone(),
                     connected_at: Timestamp::get_timestamp(),
                 };
@@ -131,18 +132,17 @@ impl Neighbours {
                 // save user
                 if let Err(e) = tree.insert(id.as_slice(), node) {
                     log::error!("Error saving node to data base: {}", e);
-                } 
-                else {
+                } else {
                     if let Err(e) = tree.flush() {
                         log::error!("Error when flushing data base to disk: {}", e);
                     }
-                }    
+                }
             }
-        } 
+        }
     }
 
     /// Delete Neighbour
-    pub fn _delete( module: ConnectionModule, node_id: PeerId ) {
+    pub fn delete(module: ConnectionModule, node_id: PeerId) {
         // get table
         let mut neighbours;
         match module {
@@ -154,12 +154,12 @@ impl Neighbours {
         }
 
         // delete entry
-        neighbours.nodes.remove( &node_id );
+        neighbours.nodes.remove(&node_id);
     }
 
     /// Calculate average rtt
-    fn calculate_rtt( _old_rtt: u32, new_rtt: u32 ) -> u32 {
-        // DISCUSSION: how to value history and flatten the curve 
+    fn calculate_rtt(_old_rtt: u32, new_rtt: u32) -> u32 {
+        // DISCUSSION: how to value history and flatten the curve
         //             between different results.
         //             Other possibilities: create small ring buffer with last results
         //(old_rtt * 3 + new_rtt) / 4
@@ -167,10 +167,10 @@ impl Neighbours {
     }
 
     /// get rtt for a neighbour
-    /// returns the round trip time for the neighbour in the 
+    /// returns the round trip time for the neighbour in the
     /// connection module.
     /// If the neighbour does not exist, it returns None.
-    pub fn get_rtt( neighbour_id: &PeerId, module: &ConnectionModule ) -> Option<u32> {
+    pub fn get_rtt(neighbour_id: &PeerId, module: &ConnectionModule) -> Option<u32> {
         // get table
         let neighbours;
         match module {
@@ -183,34 +183,34 @@ impl Neighbours {
 
         // search for neighbour
         if let Some(neighbour) = neighbours.nodes.get(neighbour_id) {
-            return Some(neighbour.rtt)
+            return Some(neighbour.rtt);
         } else {
-            return None
+            return None;
         }
     }
 
     /// Is this node ID a neighbour in any module?
     /// returns the first found module or `None`
-    pub fn is_neighbour( node_id: &PeerId ) -> ConnectionModule {
+    pub fn is_neighbour(node_id: &PeerId) -> ConnectionModule {
         // check if neighbour is in Lan table
         {
             let lan = LAN.get().read().unwrap();
             if lan.nodes.contains_key(node_id) {
-                return ConnectionModule::Lan
+                return ConnectionModule::Lan;
             }
         }
         // check if neighbour exists in Internet table
         {
             let internet = INTERNET.get().read().unwrap();
             if internet.nodes.contains_key(node_id) {
-                return ConnectionModule::Internet
+                return ConnectionModule::Internet;
             }
         }
         // check if neighbour exists in BLE table
         {
             let ble = BLE.get().read().unwrap();
             if ble.nodes.contains_key(node_id) {
-                return ConnectionModule::Ble
+                return ConnectionModule::Ble;
             }
         }
 
@@ -218,7 +218,7 @@ impl Neighbours {
     }
 
     /// Search for a neighbour by it's small qaul ID
-    /// 
+    ///
     /// Returns node if it exists in the data base,
     /// otherwise it returns None.
     pub fn node_from_small_id(small_id: Vec<u8>) -> Option<Node> {
@@ -232,15 +232,15 @@ impl Neighbours {
         let mut result = tree.scan_prefix(prefix);
 
         if let Some(Ok((_key, node))) = result.next() {
-            return Some(node)
+            return Some(node);
         }
 
         None
     }
 
     /// Get a list of all neighbours that are only connected via BLE module
-    /// 
-    /// This function is used to decide to which nodes we need to send the 
+    ///
+    /// This function is used to decide to which nodes we need to send the
     /// flooding information.
     pub fn get_ble_only_nodes() -> Vec<PeerId> {
         let mut nodes: Vec<PeerId> = Vec::new();
@@ -292,7 +292,7 @@ impl Neighbours {
                 });
             }
         }
-        
+
         // fill internet connection module neighbours
         {
             let internet = INTERNET.get().write().unwrap();
@@ -316,7 +316,7 @@ impl Neighbours {
                 });
             }
         }
-        
+
         // create neighbours list message
         let proto_message = proto::Router {
             message: Some(proto::router::Message::NeighboursList(
@@ -324,15 +324,22 @@ impl Neighbours {
                     lan: lan_neighbours,
                     internet: internet_neighbours,
                     ble: ble_neighbours,
-                }
+                },
             )),
         };
 
         // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, crate::rpc::proto::Modules::Router.into(), "".to_string(), Vec::new() );
+        Rpc::send_message(
+            buf,
+            crate::rpc::proto::Modules::Router.into(),
+            "".to_string(),
+            Vec::new(),
+        );
     }
 }

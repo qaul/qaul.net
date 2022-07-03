@@ -22,3 +22,6 @@ android/app/src/main/jniLibs
 
 # MacOS specific
 .DS_Store
+
+# Protobuf generated files
+protobuf_generated

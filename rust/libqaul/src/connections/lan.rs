@@ -2,14 +2,14 @@
 // This software is published under the AGPLv3 license.
 
 //! # LAN Connection Module
-//! 
+//!
 //! **Discover other qaul nodes on the local LAN and connect to them.**
-//! 
+//!
 //! This module advertises the node via mdns in the local network.
 //! By default it listens to all interfaces and connects to a random port.
-//! 
+//!
 //! The module is configured in the configuration file:
-//! 
+//!
 //! ```yaml
 //! [lan]
 //! active = true
@@ -18,52 +18,37 @@
 
 use libp2p::{
     core::upgrade,
-    noise::{NoiseConfig, X25519Spec, AuthenticKeypair},
-    ping::{Ping, PingConfig, PingEvent},
-    tcp::TcpConfig,
-    mplex, yamux,
-    mdns::{Mdns, MdnsConfig, MdnsEvent},
-    Transport,
     floodsub::{Floodsub, FloodsubEvent},
-    swarm::{
-        Swarm, NetworkBehaviourEventProcess,
-    },
-    NetworkBehaviour,
+    mdns::{Mdns, MdnsConfig, MdnsEvent},
+    mplex,
+    noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
+    ping::{Ping, PingConfig, PingEvent},
+    swarm::{NetworkBehaviourEventProcess, Swarm},
+    tcp::TcpConfig,
+    yamux, NetworkBehaviour, Transport,
 };
 // DNS is excluded on mobile, as it is not working there
-#[cfg(not(any(target_os = "android", target_os = "ios")))]
-use libp2p::{
-    dns::DnsConfig,
-    websocket::WsConfig,
-};
-use futures::channel::mpsc;
-use prost::Message;
-use log::info;
 use async_std::task;
+use futures::channel::mpsc;
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+use libp2p::{dns::DnsConfig, websocket::WsConfig};
+use log::info;
 use mpsc::UnboundedReceiver;
+use prost::Message;
 
-use crate::types::QaulMessage;
 use crate::node::Node;
 use crate::services::{
+    feed::Feed,
     page,
     page::{PageMode, PageRequest, PageResponse},
-    feed::{Feed},
 };
 use crate::storage::configuration::Configuration;
+use crate::types::QaulMessage;
 use std::time::Duration;
 
-use crate::connections::{
-    ConnectionModule,
-    events,
-};
-use qaul_info::{
-    QaulInfo,
-    QaulInfoEvent,
-};
-use qaul_messaging::{
-    QaulMessaging,
-    QaulMessagingEvent,
-};
+use crate::connections::{events, ConnectionModule};
+use qaul_info::{QaulInfo, QaulInfoEvent};
+use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 
 use crate::services::feed::proto_net;
 
@@ -79,13 +64,15 @@ pub struct QaulLanBehaviour {
     pub response_sender: mpsc::UnboundedSender<QaulMessage>,
 }
 
+#[derive(Debug)]
 pub enum QaulLanEvent {
     Floodsub(FloodsubEvent),
     Mdns(MdnsEvent),
     Ping(PingEvent),
     QaulInfo(QaulInfoEvent),
+    QaulMessaging(QaulMessagingEvent),
 }
-  
+
 impl From<FloodsubEvent> for QaulLanEvent {
     fn from(event: FloodsubEvent) -> Self {
         Self::Floodsub(event)
@@ -94,24 +81,30 @@ impl From<FloodsubEvent> for QaulLanEvent {
 
 impl From<MdnsEvent> for QaulLanEvent {
     fn from(event: MdnsEvent) -> Self {
-      Self::Mdns(event)
+        Self::Mdns(event)
     }
 }
 
 impl From<PingEvent> for QaulLanEvent {
     fn from(event: PingEvent) -> Self {
-      Self::Ping(event)
+        Self::Ping(event)
     }
 }
 
 impl From<QaulInfoEvent> for QaulLanEvent {
     fn from(event: QaulInfoEvent) -> Self {
-      Self::QaulInfo(event)
+        Self::QaulInfo(event)
+    }
+}
+
+impl From<QaulMessagingEvent> for QaulLanEvent {
+    fn from(event: QaulMessagingEvent) -> Self {
+        Self::QaulMessaging(event)
     }
 }
 
 pub struct Lan {
-    pub swarm: Swarm<QaulLanBehaviour>, 
+    pub swarm: Swarm<QaulLanBehaviour>,
     pub receiver: UnboundedReceiver<QaulMessage>,
 }
 
@@ -122,7 +115,7 @@ impl Lan {
 
         // create a multi producer, single consumer queue
         let (response_sender, response_rcv) = mpsc::unbounded();
-    
+
         log::info!("Lan::init() mpsc channels created");
 
         // TCP transport without DNS resolution on android
@@ -137,7 +130,11 @@ impl Lan {
         let transport = {
             let tcp = TcpConfig::new().nodelay(true);
             let dns_tcp = DnsConfig::system(tcp).await.unwrap();
-            let ws_dns_tcp = WsConfig::new(dns_tcp.clone());
+            let ws_dns_tcp = WsConfig::new(
+                DnsConfig::system(TcpConfig::new().nodelay(true))
+                    .await
+                    .unwrap(),
+            );
             dns_tcp.or_transport(ws_dns_tcp)
         };
 
@@ -146,20 +143,24 @@ impl Lan {
         let transport_upgraded = transport
             .upgrade(upgrade::Version::V1)
             .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
-            .multiplex(upgrade::SelectUpgrade::new(yamux::YamuxConfig::default(), mplex::MplexConfig::default()))
+            .multiplex(upgrade::SelectUpgrade::new(
+                yamux::YamuxConfig::default(),
+                mplex::MplexConfig::default(),
+            ))
             //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
             .boxed();
-        
+
         log::info!("Lan::init() transport_upgraded");
 
-        // create ping configuration 
+        // create ping configuration
         // with customized parameters
         //
         // * keep connection alive
         let mut ping_config = PingConfig::new();
         ping_config = ping_config.with_keep_alive(true);
         let config = Configuration::get();
-        ping_config = ping_config.with_interval(Duration::from_secs(config.routing.ping_neighbour_period));        
+        ping_config =
+            ping_config.with_interval(Duration::from_secs(config.routing.ping_neighbour_period));
 
         log::info!("Lan::init() ping_config");
 
@@ -193,21 +194,22 @@ impl Lan {
         };
 
         log::info!("Lan::init() swarm created");
-            
-        // connect swarm to the listening interface in 
+
+        // connect swarm to the listening interface in
         // the configuration config.lan.listen
         let config = Configuration::get();
         Swarm::listen_on(
             &mut swarm,
-            config.lan.listen
-                .parse()
-                .expect("can get a local socket"),
+            config.lan.listen.parse().expect("can get a local socket"),
         )
         .expect("swarm can be started");
 
         log::info!("Lan::init() swarm connected");
 
-        let lan = Lan { swarm: swarm, receiver: response_rcv };
+        let lan = Lan {
+            swarm: swarm,
+            receiver: response_rcv,
+        };
 
         lan
     }
@@ -215,19 +217,19 @@ impl Lan {
 
 impl NetworkBehaviourEventProcess<QaulInfoEvent> for QaulLanBehaviour {
     fn inject_event(&mut self, event: QaulInfoEvent) {
-        events::qaul_info_event( event, ConnectionModule::Lan );
+        events::qaul_info_event(event, ConnectionModule::Lan);
     }
 }
 
 impl NetworkBehaviourEventProcess<QaulMessagingEvent> for QaulLanBehaviour {
     fn inject_event(&mut self, event: QaulMessagingEvent) {
-        events::qaul_messaging_event( event, ConnectionModule::Lan );
+        events::qaul_messaging_event(event, ConnectionModule::Lan);
     }
 }
 
 impl NetworkBehaviourEventProcess<PingEvent> for QaulLanBehaviour {
     fn inject_event(&mut self, event: PingEvent) {
-        events::ping_event( event, ConnectionModule::Lan );
+        events::ping_event(event, ConnectionModule::Lan);
     }
 }
 
@@ -258,13 +260,13 @@ impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulLanBehaviour {
             FloodsubEvent::Message(msg) => {
                 // feed Message
                 if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
-                    Feed::received( ConnectionModule::Lan, msg.source, resp);
+                    Feed::received(ConnectionModule::Lan, msg.source, resp);
                 }
                 // Pages Messages
                 else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
                     //if resp.receiver == node::get_id_string() {
-                        info!("Response from {}", msg.source);
-                        resp.data.iter().for_each(|r| info!("{:?}", r));
+                    info!("Response from {}", msg.source);
+                    resp.data.iter().for_each(|r| info!("{:?}", r));
                     //}
                 } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
                     match req.mode {
