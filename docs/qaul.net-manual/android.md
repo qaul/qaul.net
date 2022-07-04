@@ -103,11 +103,11 @@ cd android
 
 ```sh
 # create android's deps folder
-mdkir qaul_ui/android/app/libs
+mkdir qaul_ui/android/app/libs
 
 # assuming aar files are at their default spot
 cp android/libqaul/build/outputs/aar/libqaul-debug.aar qaul_ui/android/app/libs
-cp android/libqaul/build/outputs/aar/blemodule-debug.aar qaul_ui/android/app/libs
+cp android/blemodule/build/outputs/aar/blemodule-debug.aar qaul_ui/android/app/libs
 ```
 
 ### Build and Run a debuggable Android Version for your Phone
