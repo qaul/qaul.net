@@ -22,9 +22,9 @@ steps:
   - run:
       name: Build Flutter Application for Linux
       command: |
-        SNAP_PATH=$(cd installers/linux && bash snapbuild | tail -n1 )
+        SNAP_PATH=$(cd ../utilities/installers/linux && bash snapbuild | tail -n1 )
         echo "Resulting snap file can be found at: $SNAP_PATH"
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - qaul_ui/installers/linux/*.snap
+        - qaul_ui/*.snap

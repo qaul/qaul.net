@@ -8,8 +8,6 @@ environment:
   REPO_URL: "https://github.com/qaul/qaul.net"
 steps:
   - checkout-project
-  - attach_workspace:
-      at: ~/qaul-libp2p
   - run:
       name: Install InnoSetup
       command: choco install innosetup -y
@@ -37,8 +35,8 @@ steps:
         flutter build windows
   - run:
       name: Run iscc
-      command: cd bin && bash build_windows_installer
+      command: cd ../utilities/installers/windows/bin && bash build_windows_installer
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - qaul_ui\installers\windows\qaul.exe
+        - utilities\installers\windows\qaul.exe

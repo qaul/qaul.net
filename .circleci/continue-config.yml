@@ -281,12 +281,12 @@ jobs:
             - install-flutter-deps
             - run:
                 command: |
-                    SNAP_PATH=$(cd installers/linux && bash snapbuild | tail -n1 )
+                    SNAP_PATH=$(cd ../utilities/installers/linux && bash snapbuild | tail -n1 )
                     echo "Resulting snap file can be found at: $SNAP_PATH"
                 name: Build Flutter Application for Linux
             - persist_to_workspace:
                 paths:
-                    - qaul_ui/installers/linux/*.snap
+                    - qaul_ui/*.snap
                 root: ~/qaul-libp2p
     build-flutter-macos:
         executor: flutter-macos
@@ -317,12 +317,12 @@ jobs:
                 name: Build MacOS Application
             - run:
                 command: |
-                    cd installers/macos
+                    cd ../utilities/installers/macos
                     appdmg ./config.json ./qaul.dmg
                 name: Build *.dmg File
             - persist_to_workspace:
                 paths:
-                    - qaul_ui/installers/macos/qaul.dmg
+                    - utilities/installers/macos/qaul.dmg
                 root: ~/qaul-libp2p
     build-flutter-windows:
         environment:
@@ -334,8 +334,6 @@ jobs:
             size: medium
         steps:
             - checkout-project
-            - attach_workspace:
-                at: ~/qaul-libp2p
             - run:
                 command: choco install innosetup -y
                 name: Install InnoSetup
@@ -362,11 +360,11 @@ jobs:
                     flutter build windows
                 name: Build Flutter Application for Windows
             - run:
-                command: cd bin && bash build_windows_installer
+                command: cd ../utilities/installers/windows/bin && bash build_windows_installer
                 name: Run iscc
             - persist_to_workspace:
                 paths:
-                    - qaul_ui\installers\windows\qaul.exe
+                    - utilities\installers\windows\qaul.exe
                 root: ~/qaul-libp2p
         working_directory: ~/qaul-libp2p/qaul_ui
     build-libqaul-android:
