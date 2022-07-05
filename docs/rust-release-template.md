@@ -25,4 +25,4 @@ Any *\*.aar* files, namely:
 ### iOS
 *\*.a* and *\*.h* files, namely:
 * [liblibqaul.a](https://github.com/qaul/qaul.net/releases/download/TAGNAME/liblibqaul.a)
-* [libqaul.h](https://github.com/qaul/qaul.net/releases/download/TAGNAME/libqaul.h)
+* [libqaul.h](https://github.com/qaul/qaul.net/blob/main/rust/include/libqaul.h)

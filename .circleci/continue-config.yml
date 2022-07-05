@@ -396,8 +396,10 @@ jobs:
                     - ~/.gradle
             - persist_to_workspace:
                 paths:
-                    - android/blemodule/build/outputs/aar/blemodule-release.aar
+                    - android/libqaul/build/outputs/aar/libqaul-debug.aar
                     - android/libqaul/build/outputs/aar/libqaul-release.aar
+                    - android/blemodule/build/outputs/aar/blemodule-debug.aar
+                    - android/blemodule/build/outputs/aar/blemodule-release.aar
                 root: ~/qaul-libp2p
     build-libqaul-ios:
         executor: rust-macos

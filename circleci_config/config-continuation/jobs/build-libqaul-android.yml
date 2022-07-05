@@ -28,5 +28,7 @@ steps:
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - android/blemodule/build/outputs/aar/blemodule-release.aar
+        - android/libqaul/build/outputs/aar/libqaul-debug.aar
         - android/libqaul/build/outputs/aar/libqaul-release.aar
+        - android/blemodule/build/outputs/aar/blemodule-debug.aar
+        - android/blemodule/build/outputs/aar/blemodule-release.aar
