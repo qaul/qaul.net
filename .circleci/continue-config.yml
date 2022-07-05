@@ -254,8 +254,7 @@ jobs:
                 path: output
             - persist_to_workspace:
                 paths:
-                    - qaul_ui/build/ios/ipa/*.ipa
-                    - qaul_ui/build/ios/archive/*.xcarchive
+                    - qaul_ui/ios/output/gym/Runner.ipa
                 root: ~/qaul-libp2p
     build-flutter-linux:
         executor: flutter-linux

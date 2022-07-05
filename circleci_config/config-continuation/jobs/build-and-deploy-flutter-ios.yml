@@ -26,5 +26,4 @@ steps:
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - qaul_ui/build/ios/ipa/*.ipa
-        - qaul_ui/build/ios/archive/*.xcarchive
+        - qaul_ui/ios/output/gym/Runner.ipa
