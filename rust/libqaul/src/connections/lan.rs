@@ -190,6 +190,7 @@ impl Lan {
 
             log::info!("Lan::init() swarm behaviour floodsub subscribed");
 
+            //Swarm::new(transport_upgraded, behaviour, Node::get_id())
             Swarm::new(transport_upgraded, behaviour, Node::get_id())
         };
 
@@ -235,14 +236,20 @@ impl NetworkBehaviourEventProcess<PingEvent> for QaulLanBehaviour {
 
 impl NetworkBehaviourEventProcess<MdnsEvent> for QaulLanBehaviour {
     fn inject_event(&mut self, event: MdnsEvent) {
+        log::error!("lan MdnsEvent");
+
         match event {
             MdnsEvent::Discovered(discovered_list) => {
+                log::error!("discover event {}", discovered_list.len());
+
                 for (peer, _addr) in discovered_list {
                     info!("MdnsEvent::Discovered, peer {:?} to floodsub added", peer);
                     self.floodsub.add_node_to_partial_view(peer);
                 }
             }
             MdnsEvent::Expired(expired_list) => {
+                log::error!("discover expired event {}", expired_list.len());
+
                 for (peer, _addr) in expired_list {
                     if !self.mdns.has_node(&peer) {
                         info!("MdnsEvent::Expired, peer {:?} from floodsub removed", peer);
