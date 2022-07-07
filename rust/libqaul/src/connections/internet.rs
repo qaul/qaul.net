@@ -25,7 +25,7 @@ use libp2p::{
     mplex,
     noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
     ping::{Ping, PingConfig, PingEvent},
-    swarm::{NetworkBehaviourEventProcess, Swarm},
+    swarm::{Swarm},
     tcp::TcpConfig,
     yamux, Multiaddr, NetworkBehaviour, Transport,
 };
