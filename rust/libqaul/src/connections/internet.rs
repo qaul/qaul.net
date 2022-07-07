@@ -68,6 +68,106 @@ pub struct QaulInternetBehaviour {
     pub response_sender: UnboundedSender<QaulMessage>,
 }
 
+impl QaulInternetBehaviour{
+    pub fn process_events(&mut self, event: QaulInternetEvent){
+        match event {
+            QaulInternetEvent::QaulInfo(ev)=>{
+                self.qaul_info_event(ev);
+            },
+            QaulInternetEvent::QaulMessaging(ev)=>{
+                self.qaul_messaging_event(ev);
+            },
+            QaulInternetEvent::Ping(ev)=>{
+                self.ping_event(ev);
+            },
+            QaulInternetEvent::Identify(ev)=>{
+                self.identify_event(ev);
+            },
+            QaulInternetEvent::Floodsub(ev)=>{
+                self.floodsub_event(ev);
+            },
+        }
+    }
+
+    fn qaul_info_event(&mut self, event: QaulInfoEvent) {
+        events::qaul_info_event(event, ConnectionModule::Internet);
+    }
+    fn qaul_messaging_event(&mut self, event: QaulMessagingEvent) {
+        events::qaul_messaging_event(event, ConnectionModule::Internet);
+    }
+    fn ping_event(&mut self, event: PingEvent) {
+        events::ping_event(event, ConnectionModule::Internet);
+    }
+
+    fn identify_event(&mut self, event: IdentifyEvent) {
+        match event {
+            IdentifyEvent::Received { peer_id, info } => {
+                // add node to floodsub
+                self.floodsub.add_node_to_partial_view(peer_id);
+
+                // print received information
+                info!("IdentifyEvent::Received from {:?}", peer_id);
+                info!("  added peer_id {:?} to floodsub", peer_id);
+                info!("  public key: {:?}", info.public_key);
+                info!("  protocol version: {:?}", info.protocol_version);
+                info!("  agent version: {:?}", info.agent_version);
+                info!("  listen addresses: {:?}", info.listen_addrs);
+                info!("  protocols: {:?}", info.protocols);
+                info!("  observed address: {:?}", info.observed_addr);
+            }
+            IdentifyEvent::Sent { peer_id } => {
+                info!("IdentifyEvent::Sent to {:?}", peer_id);
+            }
+            IdentifyEvent::Pushed { peer_id } => {
+                info!("IdentifyEvent::Pushed {:?}", peer_id);
+            }
+            IdentifyEvent::Error { peer_id, error } => {
+                info!("IdentifyEvent::Error {:?} {:?}", peer_id, error);
+            }
+        }
+    }    
+
+
+    fn floodsub_event(&mut self, event: FloodsubEvent) {
+        match event {
+            FloodsubEvent::Message(msg) => {
+                // feed Message
+                if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
+                    Feed::received(ConnectionModule::Internet, msg.source, resp);
+                }
+                // Pages Messages
+                else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
+                    //if resp.receiver == node::get_id_string() {
+                    info!("Response from {}", msg.source);
+                    resp.data.iter().for_each(|r| info!("{:?}", r));
+                    //}
+                } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
+                    match req.mode {
+                        PageMode::ALL => {
+                            info!("Received All req: {:?} from {:?}", req, msg.source);
+                            page::respond_with_public_pages(
+                                self.response_sender.clone(),
+                                msg.source.to_string(),
+                            );
+                        }
+                        PageMode::One(ref peer_id) => {
+                            if peer_id.to_string() == Node::get_id_string() {
+                                info!("Received req: {:?} from {:?}", req, msg.source);
+                                page::respond_with_public_pages(
+                                    self.response_sender.clone(),
+                                    msg.source.to_string(),
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+            _ => (),
+        }
+    }    
+
+}
+
 pub struct InternetReConnection {
     pub address: Multiaddr,
     pub attempt: u32,
@@ -307,90 +407,92 @@ impl Internet {
     }
 }
 
-impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
-    fn inject_event(&mut self, event: IdentifyEvent) {
-        match event {
-            IdentifyEvent::Received { peer_id, info } => {
-                // add node to floodsub
-                self.floodsub.add_node_to_partial_view(peer_id);
 
-                // print received information
-                info!("IdentifyEvent::Received from {:?}", peer_id);
-                info!("  added peer_id {:?} to floodsub", peer_id);
-                info!("  public key: {:?}", info.public_key);
-                info!("  protocol version: {:?}", info.protocol_version);
-                info!("  agent version: {:?}", info.agent_version);
-                info!("  listen addresses: {:?}", info.listen_addrs);
-                info!("  protocols: {:?}", info.protocols);
-                info!("  observed address: {:?}", info.observed_addr);
-            }
-            IdentifyEvent::Sent { peer_id } => {
-                info!("IdentifyEvent::Sent to {:?}", peer_id);
-            }
-            IdentifyEvent::Pushed { peer_id } => {
-                info!("IdentifyEvent::Pushed {:?}", peer_id);
-            }
-            IdentifyEvent::Error { peer_id, error } => {
-                info!("IdentifyEvent::Error {:?} {:?}", peer_id, error);
-            }
-        }
-    }
-}
 
-impl NetworkBehaviourEventProcess<QaulInfoEvent> for QaulInternetBehaviour {
-    fn inject_event(&mut self, event: QaulInfoEvent) {
-        events::qaul_info_event(event, ConnectionModule::Internet);
-    }
-}
+// impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
+//     fn inject_event(&mut self, event: IdentifyEvent) {
+//         match event {
+//             IdentifyEvent::Received { peer_id, info } => {
+//                 // add node to floodsub
+//                 self.floodsub.add_node_to_partial_view(peer_id);
 
-impl NetworkBehaviourEventProcess<QaulMessagingEvent> for QaulInternetBehaviour {
-    fn inject_event(&mut self, event: QaulMessagingEvent) {
-        events::qaul_messaging_event(event, ConnectionModule::Internet);
-    }
-}
+//                 // print received information
+//                 info!("IdentifyEvent::Received from {:?}", peer_id);
+//                 info!("  added peer_id {:?} to floodsub", peer_id);
+//                 info!("  public key: {:?}", info.public_key);
+//                 info!("  protocol version: {:?}", info.protocol_version);
+//                 info!("  agent version: {:?}", info.agent_version);
+//                 info!("  listen addresses: {:?}", info.listen_addrs);
+//                 info!("  protocols: {:?}", info.protocols);
+//                 info!("  observed address: {:?}", info.observed_addr);
+//             }
+//             IdentifyEvent::Sent { peer_id } => {
+//                 info!("IdentifyEvent::Sent to {:?}", peer_id);
+//             }
+//             IdentifyEvent::Pushed { peer_id } => {
+//                 info!("IdentifyEvent::Pushed {:?}", peer_id);
+//             }
+//             IdentifyEvent::Error { peer_id, error } => {
+//                 info!("IdentifyEvent::Error {:?} {:?}", peer_id, error);
+//             }
+//         }
+//     }
+// }
 
-impl NetworkBehaviourEventProcess<PingEvent> for QaulInternetBehaviour {
-    fn inject_event(&mut self, event: PingEvent) {
-        events::ping_event(event, ConnectionModule::Internet);
-    }
-}
+// impl NetworkBehaviourEventProcess<QaulInfoEvent> for QaulInternetBehaviour {
+//     fn inject_event(&mut self, event: QaulInfoEvent) {
+//         events::qaul_info_event(event, ConnectionModule::Internet);
+//     }
+// }
 
-impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulInternetBehaviour {
-    fn inject_event(&mut self, event: FloodsubEvent) {
-        match event {
-            FloodsubEvent::Message(msg) => {
-                // feed Message
-                if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
-                    Feed::received(ConnectionModule::Internet, msg.source, resp);
-                }
-                // Pages Messages
-                else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
-                    //if resp.receiver == node::get_id_string() {
-                    info!("Response from {}", msg.source);
-                    resp.data.iter().for_each(|r| info!("{:?}", r));
-                    //}
-                } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
-                    match req.mode {
-                        PageMode::ALL => {
-                            info!("Received All req: {:?} from {:?}", req, msg.source);
-                            page::respond_with_public_pages(
-                                self.response_sender.clone(),
-                                msg.source.to_string(),
-                            );
-                        }
-                        PageMode::One(ref peer_id) => {
-                            if peer_id.to_string() == Node::get_id_string() {
-                                info!("Received req: {:?} from {:?}", req, msg.source);
-                                page::respond_with_public_pages(
-                                    self.response_sender.clone(),
-                                    msg.source.to_string(),
-                                );
-                            }
-                        }
-                    }
-                }
-            }
-            _ => (),
-        }
-    }
-}
+// impl NetworkBehaviourEventProcess<QaulMessagingEvent> for QaulInternetBehaviour {
+//     fn inject_event(&mut self, event: QaulMessagingEvent) {
+//         events::qaul_messaging_event(event, ConnectionModule::Internet);
+//     }
+// }
+
+// impl NetworkBehaviourEventProcess<PingEvent> for QaulInternetBehaviour {
+//     fn inject_event(&mut self, event: PingEvent) {
+//         events::ping_event(event, ConnectionModule::Internet);
+//     }
+// }
+
+// impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulInternetBehaviour {
+//     fn inject_event(&mut self, event: FloodsubEvent) {
+//         match event {
+//             FloodsubEvent::Message(msg) => {
+//                 // feed Message
+//                 if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
+//                     Feed::received(ConnectionModule::Internet, msg.source, resp);
+//                 }
+//                 // Pages Messages
+//                 else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
+//                     //if resp.receiver == node::get_id_string() {
+//                     info!("Response from {}", msg.source);
+//                     resp.data.iter().for_each(|r| info!("{:?}", r));
+//                     //}
+//                 } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
+//                     match req.mode {
+//                         PageMode::ALL => {
+//                             info!("Received All req: {:?} from {:?}", req, msg.source);
+//                             page::respond_with_public_pages(
+//                                 self.response_sender.clone(),
+//                                 msg.source.to_string(),
+//                             );
+//                         }
+//                         PageMode::One(ref peer_id) => {
+//                             if peer_id.to_string() == Node::get_id_string() {
+//                                 info!("Received req: {:?} from {:?}", req, msg.source);
+//                                 page::respond_with_public_pages(
+//                                     self.response_sender.clone(),
+//                                     msg.source.to_string(),
+//                                 );
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//             _ => (),
+//         }
+//     }
+// }

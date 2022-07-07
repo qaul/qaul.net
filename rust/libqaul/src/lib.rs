@@ -254,7 +254,7 @@ pub async fn start(storage_path: String) -> () {
 
             select! {
                 lan_event = lan_fut => {
-                    log::info!("Unhandled lan connection module event: {:?}", lan_event);
+                    //log::info!("Unhandled lan connection module event: {:?}", lan_event);
                     match lan_event.unwrap() {
                         libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, ..} => {
                             //remove from neighbour table, after then scheduler will auto remove this neighbour
@@ -265,13 +265,16 @@ pub async fn start(storage_path: String) -> () {
                             //remove from neighbour table, after then scheduler will auto remove this neighbour
                             log::info!("lan connection banned: {:?}", peer_id);
                             Neighbours::delete(ConnectionModule::Lan, peer_id);
+                        },
+                        libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
+                            lan.swarm.behaviour_mut().process_events(behaviour);
                         }
                         _ => {}
                     }
                     None
                 },
                 internet_event = internet_fut => {
-                    log::info!("Unhandled internet connection module event: {:?}", internet_event);
+                    //log::info!("Unhandled internet connection module event: {:?}", internet_event);
                     match internet_event.unwrap() {
                         libp2p::swarm::SwarmEvent::OutgoingConnectionError{error, ..} => {
                             // Get list of addresses which we failed to connect to
@@ -312,7 +315,10 @@ pub async fn start(storage_path: String) -> () {
                             //remove from neighbour table, after then scheduler will auto remove this neighbour
                             log::info!("internet connection banned: {:?}", peer_id);
                             Neighbours::delete(ConnectionModule::Internet, peer_id);
-                        }
+                        },
+                        libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
+                            internet.swarm.behaviour_mut().process_events(behaviour);
+                        }                        
                         _ => {}
                     }
                     None

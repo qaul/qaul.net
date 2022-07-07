@@ -64,6 +64,94 @@ pub struct QaulLanBehaviour {
     pub response_sender: mpsc::UnboundedSender<QaulMessage>,
 }
 
+impl QaulLanBehaviour{
+    pub fn process_events(&mut self, event: QaulLanEvent){
+        match event {
+            QaulLanEvent::QaulInfo(ev)=>{
+                self.qaul_info_event(ev);
+            },
+            QaulLanEvent::QaulMessaging(ev)=>{
+                self.qaul_messaging_event(ev);
+            },
+            QaulLanEvent::Ping(ev)=>{
+                self.ping_event(ev);
+            },
+            QaulLanEvent::Mdns(ev)=>{
+                self.mdsn_event(ev);
+            },
+            QaulLanEvent::Floodsub(ev)=>{
+                self.floodsub_event(ev);
+            },
+        }
+    }
+    fn qaul_info_event(&mut self, event: QaulInfoEvent) {
+        events::qaul_info_event(event, ConnectionModule::Lan);
+    }
+    fn qaul_messaging_event(&mut self, event: QaulMessagingEvent) {
+        events::qaul_messaging_event(event, ConnectionModule::Lan);
+    }
+    fn ping_event(&mut self, event: PingEvent) {
+        events::ping_event(event, ConnectionModule::Lan);
+    }
+    fn mdsn_event(&mut self, event: MdnsEvent) {
+        match event {
+            MdnsEvent::Discovered(discovered_list) => {
+                for (peer, _addr) in discovered_list {
+                    info!("MdnsEvent::Discovered, peer {:?} to floodsub added", peer);
+                    self.floodsub.add_node_to_partial_view(peer);
+                }
+            }
+            MdnsEvent::Expired(expired_list) => {
+                for (peer, _addr) in expired_list {
+                    if !self.mdns.has_node(&peer) {
+                        info!("MdnsEvent::Expired, peer {:?} from floodsub removed", peer);
+                        self.floodsub.remove_node_from_partial_view(&peer);
+                    }
+                }
+            }
+        }
+    }  
+    
+    fn floodsub_event(&mut self, event: FloodsubEvent) {
+        match event {
+            FloodsubEvent::Message(msg) => {
+                // feed Message
+                if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
+                    Feed::received(ConnectionModule::Lan, msg.source, resp);
+                }
+                // Pages Messages
+                else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
+                    //if resp.receiver == node::get_id_string() {
+                    info!("Response from {}", msg.source);
+                    resp.data.iter().for_each(|r| info!("{:?}", r));
+                    //}
+                } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
+                    match req.mode {
+                        PageMode::ALL => {
+                            info!("Received All req: {:?} from {:?}", req, msg.source);
+                            page::respond_with_public_pages(
+                                self.response_sender.clone(),
+                                msg.source.to_string(),
+                            );
+                        }
+                        PageMode::One(ref peer_id) => {
+                            if peer_id.to_string() == Node::get_id_string() {
+                                info!("Received req: {:?} from {:?}", req, msg.source);
+                                page::respond_with_public_pages(
+                                    self.response_sender.clone(),
+                                    msg.source.to_string(),
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+            _ => (),
+        }
+    }
+    
+}
+
 #[derive(Debug)]
 pub enum QaulLanEvent {
     Floodsub(FloodsubEvent),
@@ -216,87 +304,93 @@ impl Lan {
     }
 }
 
-impl NetworkBehaviourEventProcess<QaulInfoEvent> for QaulLanBehaviour {
-    fn inject_event(&mut self, event: QaulInfoEvent) {
-        events::qaul_info_event(event, ConnectionModule::Lan);
-    }
-}
 
-impl NetworkBehaviourEventProcess<QaulMessagingEvent> for QaulLanBehaviour {
-    fn inject_event(&mut self, event: QaulMessagingEvent) {
-        events::qaul_messaging_event(event, ConnectionModule::Lan);
-    }
-}
 
-impl NetworkBehaviourEventProcess<PingEvent> for QaulLanBehaviour {
-    fn inject_event(&mut self, event: PingEvent) {
-        events::ping_event(event, ConnectionModule::Lan);
-    }
-}
+// impl NetworkBehaviourEventProcess<QaulInfoEvent> for QaulLanBehaviour {
+//     fn inject_event(&mut self, event: QaulInfoEvent) {
+//         events::qaul_info_event(event, ConnectionModule::Lan);
+//     }
+// }
 
-impl NetworkBehaviourEventProcess<MdnsEvent> for QaulLanBehaviour {
-    fn inject_event(&mut self, event: MdnsEvent) {
-        log::error!("lan MdnsEvent");
 
-        match event {
-            MdnsEvent::Discovered(discovered_list) => {
-                log::error!("discover event {}", discovered_list.len());
+// impl NetworkBehaviourEventProcess<QaulMessagingEvent> for QaulLanBehaviour {
+//     fn inject_event(&mut self, event: QaulMessagingEvent) {
+//         events::qaul_messaging_event(event, ConnectionModule::Lan);
+//     }
+// }
 
-                for (peer, _addr) in discovered_list {
-                    info!("MdnsEvent::Discovered, peer {:?} to floodsub added", peer);
-                    self.floodsub.add_node_to_partial_view(peer);
-                }
-            }
-            MdnsEvent::Expired(expired_list) => {
-                log::error!("discover expired event {}", expired_list.len());
 
-                for (peer, _addr) in expired_list {
-                    if !self.mdns.has_node(&peer) {
-                        info!("MdnsEvent::Expired, peer {:?} from floodsub removed", peer);
-                        self.floodsub.remove_node_from_partial_view(&peer);
-                    }
-                }
-            }
-        }
-    }
-}
+// impl NetworkBehaviourEventProcess<PingEvent> for QaulLanBehaviour {
+//     fn inject_event(&mut self, event: PingEvent) {
+//         events::ping_event(event, ConnectionModule::Lan);
+//     }
+// }
 
-impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulLanBehaviour {
-    fn inject_event(&mut self, event: FloodsubEvent) {
-        match event {
-            FloodsubEvent::Message(msg) => {
-                // feed Message
-                if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
-                    Feed::received(ConnectionModule::Lan, msg.source, resp);
-                }
-                // Pages Messages
-                else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
-                    //if resp.receiver == node::get_id_string() {
-                    info!("Response from {}", msg.source);
-                    resp.data.iter().for_each(|r| info!("{:?}", r));
-                    //}
-                } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
-                    match req.mode {
-                        PageMode::ALL => {
-                            info!("Received All req: {:?} from {:?}", req, msg.source);
-                            page::respond_with_public_pages(
-                                self.response_sender.clone(),
-                                msg.source.to_string(),
-                            );
-                        }
-                        PageMode::One(ref peer_id) => {
-                            if peer_id.to_string() == Node::get_id_string() {
-                                info!("Received req: {:?} from {:?}", req, msg.source);
-                                page::respond_with_public_pages(
-                                    self.response_sender.clone(),
-                                    msg.source.to_string(),
-                                );
-                            }
-                        }
-                    }
-                }
-            }
-            _ => (),
-        }
-    }
-}
+
+// impl NetworkBehaviourEventProcess<MdnsEvent> for QaulLanBehaviour {
+//     fn inject_event(&mut self, event: MdnsEvent) {
+//         log::error!("lan MdnsEvent");
+
+//         match event {
+//             MdnsEvent::Discovered(discovered_list) => {
+//                 log::error!("discover event {}", discovered_list.len());
+
+//                 for (peer, _addr) in discovered_list {
+//                     info!("MdnsEvent::Discovered, peer {:?} to floodsub added", peer);
+//                     self.floodsub.add_node_to_partial_view(peer);
+//                 }
+//             }
+//             MdnsEvent::Expired(expired_list) => {
+//                 log::error!("discover expired event {}", expired_list.len());
+
+//                 for (peer, _addr) in expired_list {
+//                     if !self.mdns.has_node(&peer) {
+//                         info!("MdnsEvent::Expired, peer {:?} from floodsub removed", peer);
+//                         self.floodsub.remove_node_from_partial_view(&peer);
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
+
+
+// impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulLanBehaviour {
+//     fn inject_event(&mut self, event: FloodsubEvent) {
+//         match event {
+//             FloodsubEvent::Message(msg) => {
+//                 // feed Message
+//                 if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
+//                     Feed::received(ConnectionModule::Lan, msg.source, resp);
+//                 }
+//                 // Pages Messages
+//                 else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
+//                     //if resp.receiver == node::get_id_string() {
+//                     info!("Response from {}", msg.source);
+//                     resp.data.iter().for_each(|r| info!("{:?}", r));
+//                     //}
+//                 } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
+//                     match req.mode {
+//                         PageMode::ALL => {
+//                             info!("Received All req: {:?} from {:?}", req, msg.source);
+//                             page::respond_with_public_pages(
+//                                 self.response_sender.clone(),
+//                                 msg.source.to_string(),
+//                             );
+//                         }
+//                         PageMode::One(ref peer_id) => {
+//                             if peer_id.to_string() == Node::get_id_string() {
+//                                 info!("Received req: {:?} from {:?}", req, msg.source);
+//                                 page::respond_with_public_pages(
+//                                     self.response_sender.clone(),
+//                                     msg.source.to_string(),
+//                                 );
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//             _ => (),
+//         }
+//     }
+// }
