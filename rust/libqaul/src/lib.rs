@@ -14,7 +14,6 @@ use futures_ticker::Ticker;
 use state::Storage;
 use std::time::Duration;
 use std::fs::File;
-use std::env;
 use filetime::FileTime;
 use std::collections::BTreeMap;
 use crate::utilities::timestamp::Timestamp;
@@ -59,21 +58,6 @@ use log::Level;
 extern crate android_logger;
 #[cfg(target_os = "android")]
 use android_logger::Config;
-
-/// Initialize android logger
-/// This sends logs to android logger, otherwise
-/// the logs are not visible on android.
-/// This function is only activated on android OS
-#[cfg(target_os = "android")]
-pub fn initialize_android_logging() {
-    android_logger::init_once(
-        Config::default()
-            // show all logs
-            .with_min_level(Level::Trace), //.with_min_level(Level::Info)
-                                           // display them under the tag 'libqaul'
-                                           //.with_tag("libqaul")
-    );
-}
 
 /// Events of the async loop
 enum EventType {
@@ -142,31 +126,9 @@ pub async fn start(storage_path: String) -> () {
         }    
     }
 
-    // find rust env var
-    let mut env_log_level = String::from("error");
-    for (key, value) in env::vars() {
-        if key == "RUST_LOG"{
-            env_log_level = value;
-            break;
-        }
-    }
-
-
     #[cfg(target_os = "android")]
     {
-        let mut level_filter = log::Level::Error;
-        if env_log_level == "warn"{
-            level_filter = log::Level::Warn;
-        }else if  env_log_level == "debug"{
-            level_filter = log::Level::Debug;
-        }else if env_log_level == "info"{
-            level_filter = log::Level::Info;
-        }else if env_log_level == "trace"{
-            level_filter = log::Level::Trace;
-        }        
-        let env_logger = Box::new(android_logger::AndroidLogger::new(Config::default().with_min_level(level_filter)));
-        // let w_logger = simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap());
-        // multi_log::MultiLogger::init(vec![env_logger, w_logger], log::Level::Info).unwrap();
+        let env_logger = Box::new(android_logger::AndroidLogger::new(Config::default().with_min_level(Level::Info)));
         let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap()));
         multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info).unwrap();
     }
@@ -174,20 +136,28 @@ pub async fn start(storage_path: String) -> () {
     // only use the simple logger on desktop systems
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
+        // find rust env var
+        let mut env_log_level = String::from("error");
+        for (key, value) in std::env::vars() {
+            if key == "RUST_LOG"{
+                env_log_level = value;
+                break;
+            }
+        }
+
+        // define log level
         let mut level_filter = log::LevelFilter::Error;
         if env_log_level == "warn"{
             level_filter = log::LevelFilter::Warn;
-        }else if  env_log_level == "debug"{
+        } else if  env_log_level == "debug" {
             level_filter = log::LevelFilter::Debug;
-        }else if env_log_level == "info"{
+        } else if env_log_level == "info" {
             level_filter = log::LevelFilter::Info;
-        }else if env_log_level == "trace"{
+        } else if env_log_level == "trace" {
             level_filter = log::LevelFilter::Trace;
-        }        
-        let env_logger = Box::new(pretty_env_logger::formatted_builder().filter(None, level_filter).build());
-        //let w_logger = simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap());
-        //multi_log::MultiLogger::init(vec![env_logger, w_logger], log::Level::Info).unwrap();
+        }
 
+        let env_logger = Box::new(pretty_env_logger::formatted_builder().filter(None, level_filter).build());
         let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap()));
         multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info).unwrap();
     }

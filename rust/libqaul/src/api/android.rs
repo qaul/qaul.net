@@ -37,12 +37,6 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_start(
   _: JClass,
   path: JString,
 ) {
-    // initialize logging for android
-    crate::initialize_android_logging();
-
-    // test log
-    log::info!("log::info start");
-
     // get path string
     let android_path: String = env
         .get_string(path)
@@ -51,8 +45,6 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_start(
 
     // start libqaul in an own thread
     super::start_android(android_path);
-
-    log::info!("log::info start end");
 }
 
 /// check if libqaul finished initializing

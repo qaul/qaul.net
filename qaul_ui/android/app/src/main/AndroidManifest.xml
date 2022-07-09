@@ -1,5 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
           package="net.qaul.qaul_app">
 
     <!-- Network Access -->
@@ -11,24 +10,30 @@
     <uses-permission android:name="android.permission.NEARBY_DEVICES"/>
 
     <!-- Bluetooth Permissions -->
+<!--
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
+-->
     <!-- Android 9 or lower -->
+<!--
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="28"/>
+-->
     <!-- Android 10 and higher -->
+<!--
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+-->
     <!-- Android 12 and higher -->
+<!--
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
-
+-->
     <!-- Storage Permissions only needed for Android ...  -->
     <uses-permission android:name="ANDROID.PERMISSION.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="ANDROID.PERMISSION.WRITE_EXTERNAL_STORAGE"/>
 
 
     <application
-            tools:replace="android:label"
             android:label="qaul.net – قول"
             android:name="${applicationName}"
             android:icon="@mipmap/ic_launcher">
