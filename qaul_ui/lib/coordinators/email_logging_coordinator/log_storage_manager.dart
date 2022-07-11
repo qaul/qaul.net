@@ -53,7 +53,7 @@ class _LogStorageManager {
 
   Future<List<FileSystemEntity>> get logs async {
     var path = Directory(await _storeDirectory);
-    return path.listSync().where((file) => file.path.contains(titlePrefix)).toList();
+    return path.list().where((f) => f.path.contains(titlePrefix)).toList();
   }
 
   Future<int> get logFolderSize async {
@@ -86,7 +86,8 @@ class _LogStorageManager {
 
   Future<void> _deleteSurpassingSizeLogs() async {
     final sortedLogs = (await logs)
-      ..sort((a, b) => _lastInteraction(a.statSync()).compareTo(_lastInteraction(b.statSync())));
+      ..sort((a, b) => _lastInteraction(a.statSync())
+          .compareTo(_lastInteraction(b.statSync())));
     while (sortedLogs.length > _maxNumberOfFiles) {
       final oldest = sortedLogs.removeAt(0);
       await oldest.delete();

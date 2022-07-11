@@ -50,7 +50,8 @@ class EmailLoggingCoordinator {
       if (kDebugMode) debugPrint(message);
 
       if (record.level >= Level.WARNING) {
-        _logError(record.object!, stack: record.stackTrace, message: message);
+        _logError(record.object ?? record,
+            stack: record.stackTrace, message: message);
       }
     });
   }
