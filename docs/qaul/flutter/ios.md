@@ -1,6 +1,6 @@
-# Build qaul.net on MacOS
+# Build qaul.net for iOS
 
-In order to build qaul.net on your Apple MacOS machine, follow the steps below.
+In order to build qaul.net for iOS you need an apple computer.
 
 ## Pre-requisites
 
@@ -28,30 +28,29 @@ CocoaPods is needed by flutter to retrieve the iOS and macOS platform plugin cod
 After installing XCode run the following code in your Terminal to install the CocoaPods:
 
 ```sh
-sudo gem install cocoapods
+sudo gem install cocoapod
 ```
 
 ### Rust
-libqaul is written in the Rust programming language. Follow the steps outlined [here](rust-install.md) to install it.
 
-#### Install Cross-Compile Targets
+libqaul is written in the Rust programming language. Follow the steps outlined [here](qaul/rust/rust-install.md) to install it.
 
-As MacOS runs on multiple processor architectures, we need to install the rust compile targets for the other processor architectures.
-
-##### On Intel Machines
-
-When you are compiling on a machine with an intel machine you need to install the target for the M1 processor architecture.
-
-```sh
-rustup target add aarch64-apple-darwin
-```
-
-##### On M1 Machines
-
-When you are compiling on a machine with a M1 processor you need to install the target for the intel x86_64 architecture.
+#### Install the iOS rust targets from Terminal:
+> Note: On M1 machines, to run libqaul on an iPhone Simulator, we must also add the following target:
+> 
+> `aarch64-apple-ios-sim`
+> 
+> For more info, check [this doc](https://doc.rust-lang.org/nightly/rustc/platform-support/aarch64-apple-ios-sim.html).
 
 ```sh
-rustup target add x86_64-apple-darwin
+# rust targets for ios
+rustup target add aarch64-apple-ios x86_64-apple-ios
+
+# [Mac M1 machines only]
+rustup target add aarch64-apple-ios-sim
+
+# cargo-lipo subcommand that builds a universal library
+cargo install cargo-lipo
 ```
 
 ### Android Studio (Optional)
@@ -61,7 +60,7 @@ There are two reasons you might want to install Android Studio:
 1) If you want to develop for Android
 2) There is a nice GUI button to run and test the flutter app within Android Studio
 
-[Install Android Studio](android.md)
+[Install Android Studio](qaul/flutter/android.md)
 
 After installation open it and install the following things:
 
@@ -72,29 +71,32 @@ After installation open it and install the following things:
 
 The Qaul GUI is built using Flutter. Instructions to have it installed can be found in [this document](flutter-install.md).
 
-## Build & Run qaul.net MacOS Desktop App
+## Build & Run qaul.net iOS App
 
 To build and run the qaul.net desktop app you have to perform the following steps:
 
 1) Build libqaul shared library
-2) Build & Run the flutter MacOS desktop app
+2) Build & run the flutter iOS app
 
-### 1. Build libqaul shared Library and CLI binaries
+### 1. Build libqaul shared Library
 
 Open a terminal and run the following commands
 
 ```sh
-# move into the rust folder
-cd rust
+# move into the rust libqaul folder
+cd rust/libqaul
 
-# build libqaul and the CLI binaries
-cargo build
+# build libqaul universal target for ios
+## for release build do:
+## cargo lipo --release
+cargo lipo
 
-# copy libqaul to flutter
-cp target/debug/liblibqaul.dylib ../qaul_ui/macos/
+# [Mac M1 machines only]
+# If you only wish to run libqaul on an iOS Simulator, run this command instead the one above:
+cargo lipo --release --targets aarch64-apple-ios-sim
 ```
 
-### 2. Build & Run qaul flutter Desktop App
+### 2. Build & Run qaul app on iOS Simulator or on your iOS Device
 
 You can build and run the qaul flutter desktop app from the terminal:
 
@@ -102,18 +104,7 @@ You can build and run the qaul flutter desktop app from the terminal:
 # move into the flutter directory
 cd qaul_ui
 
-# build and run the MacOS desktop app in debug mode
-flutter run -d macos
+# build and run the Flutter app
+flutter run
 ```
 
-## Build Distributable MacOS Application
-
-You can build the qaul flutter desktop app from the terminal:
-
-```sh
-# move into the flutter directory
-cd qaul_ui
-
-# build and run the MacOS desktop app
-flutter build macos
-```

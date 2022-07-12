@@ -49,8 +49,8 @@ In order to test and build flutter applications, please install the flutter plug
 
 Check the following resources:
 
-* [Install rust](rust-install.md)
-* [Build rust code](rust-build.md)
+* [Install rust](qaul/rust/rust-install.md)
+* [Build rust code](qaul/rust/rust-build.md)
 
 
 ## Build & Test qaul.net App on your System

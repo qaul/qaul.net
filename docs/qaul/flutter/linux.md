@@ -2,8 +2,8 @@
 
 ## Install Prerequisits
 
-* [Install Rust](rust-install.md)
-* [Install Flutter](flutter-install.md)
+* [Install Rust](qaul/rust/rust-install.md)
+* [Install Flutter](qaul//flutterflutter-install.md)
 
 ## Clone Repository
 
@@ -17,8 +17,8 @@ cd qaul.net
 
 ## Build qaul.net
 
-1) [Build libqaul](rust-build.md)
+1) [Build libqaul](qaul/rust/rust-build.md)
   * Build's libqaul
   * Build's qaul CLI rust applications.
-2) [Build qaul desktop app](flutter-install.md)
+2) [Build qaul desktop app](qaul/flutter/flutter-install.md)
   * Build's the qaul.net flutter app.

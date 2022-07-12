@@ -1,5 +1,5 @@
 # CircleCI Config
-> *The list of available tasks performed by CircleCI can be found [here](circleci.md)*
+> *The list of available tasks performed by CircleCI can be found [here](qaul/tooling/circleci.md)*
 
 The `./circleci_config` folder follows the [FYAML](https://github.com/CircleCI-Public/fyaml) specs
 to leverage circleci's `pack` CLI command.

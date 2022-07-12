@@ -27,12 +27,12 @@ In order to install rust, open the page [rustup.rs](https://rustup.rs) and follo
 
 If you wan't to build and develop for Android OS devices, you need to install 'Android Studio'
 
-[Install Android Studio](android.md)
+[Install Android Studio](qaul/flutter/android.md)
 
 
 ### Install Flutter
 
-[Install Flutter](flutter-install.md)
+[Install Flutter](qaul/flutter/flutter-install.md)
 
 Check your flutter Installation 
 
