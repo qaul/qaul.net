@@ -8,7 +8,6 @@
 
     <!-- Wifi -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.NEARBY_DEVICES"/>
 
     <!-- Bluetooth Permissions -->
 <!--
@@ -28,6 +27,7 @@
 <!--
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+    <uses-permission android:name="android.permission.NEARBY_DEVICES"/>
 -->
     <!-- Storage Permissions only needed for Android ...  -->
     <uses-permission android:name="ANDROID.PERMISSION.READ_EXTERNAL_STORAGE"/>
