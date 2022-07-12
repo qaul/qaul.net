@@ -509,14 +509,13 @@ jobs:
                     # Android
                     cp build/app/outputs/bundle/release/*.aab ./artifacts/
                     # iOS
-                    cp build/ios/ipa/*.ipa ./artifacts/
-                    cp build/ios/archive/*.xcarchive ./artifacts/
+                    cp ios/output/gym/Runner.ipa ./artifacts/
                     # MacOS
-                    cp installers/macos/qaul.dmg ./artifacts/
+                    cp ../utilities/installers/macos/qaul.dmg ./artifacts/
                     # Windows
-                    cp installers/windows/qaul.exe ./artifacts/
+                    cp ../utilities/installers/windows/qaul.exe ./artifacts/
                     # Linux
-                    cp installers/linux/*.snap ./artifacts/
+                    cp *.snap ./artifacts/
                 name: Copy executables to ./artifacts
             - run:
                 command: |
