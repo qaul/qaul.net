@@ -3,7 +3,7 @@
 This guide will build the following libraries and executables:
 
 * `libqaul` - the shared library that runs the heart of qaul.net
-* [qaul-cli](../../rust/clients/cli/README.md) - a CLI testing application for qaul.net
+* [qaul-cli](https://github.com/qaul/qaul.net/blob/main/rust/clients/cli/README.md) - a CLI testing application for qaul.net
 
 ## Build
 
@@ -19,4 +19,4 @@ cargo build
 
 Please have a look at the client `rust/clients/cli`on how to use it.
 
-* [qaul-cli](../../rust/clients/cli/README.md) - a CLI testing application for qaul.net
+* [qaul-cli](https://github.com/qaul/qaul.net/blob/main/rust/clients/cli/README.md) - a CLI testing application for qaul.net

@@ -56,7 +56,7 @@ build the android AAR library, activate them in the settings window:
 
 ### Rust Cross Compilation for Android
 
-Install rust on your computer, see for that [install rust](rust-install.md) documentation.
+Install rust on your computer, see for that [install rust](qaul/rust/rust-install.md) documentation.
 
 Additionally you need to install the build targets for android in rust:
 

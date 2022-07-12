@@ -43,4 +43,4 @@ Your new internet configuration looks like this: `/ip4/0.0.0.0/tcp/9229`
 Now you can enter the address to the node you want to connect to.
 You need to know the network port and the network address and put that into the peers list of your configuration file.
 
-[qaul Configuration file](configuration.md)
+[qaul Configuration file](qaul/rust/configuration.md)

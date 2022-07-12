@@ -4,11 +4,11 @@
 
 [![CircleCI](https://circleci.com/gh/qaul/qaul.net/tree/main.svg?style=shield)](https://circleci.com/gh/qaul/qaul.net/tree/main)
 
-![http://qaul.net/](docs/qaul-net.png)
+![http://qaul.net/](_media/qaul-net.png)
 
 [qaul.net](https://qaul.net)
 
-To install and run qaul.net please see the [Documentation](docs/qaul.net-manual/README.md)
+To install and run qaul.net please see the [Documentation](qaul/README.md).
 
 ## License
 
@@ -25,5 +25,5 @@ Committing and contributing to this project, you agree to transfer the full copy
 
 [Verein zur Förderung von offenen Community-Projekten]: https://ocpa.ch
 [Open Community Project Association]: https://ocpa.ch
-[AGPLv3]: licenses/agpl-3.0.md
-[GNU Affero General Public License version 3 or later]: licenses/agpl-3.0.md
+[AGPLv3]: https://github.com/qaul/qaul.net/blob/main/LICENSE
+[GNU Affero General Public License version 3 or later]: https://github.com/qaul/qaul.net/blob/main/LICENSE

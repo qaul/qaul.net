@@ -1,5 +1,5 @@
 # CircleCI
-> *The configuration docs can be found [here](circleci-configuration.md)*
+> *The configuration docs can be found [here](qaul/tooling/circleci-configuration.md)*
 
 Here's a breakdown of each task that can be currently performed by CircleCI, and how to trigger such a task:
 
@@ -20,7 +20,8 @@ It tests that libqaul successfully compiles to the Linux platform.
 This task builds the library binaries to all platforms and creates a new Github release, where you can download them.
 
 To trigger such a task, one must create an annotated tag starting with "v" followed by the new [SemVer](https://semver.org) and ending with the "-rust" suffix.
-> Note: You should use the version described in `rust/libqaul/Cargo.toml` as the release version, and update it accordingly. Any diversion between the git tag's version and that of Cargo.toml will fail the pipeline.
+
+!> You should use the version described in `rust/libqaul/Cargo.toml` as the release version, and update it accordingly. Any diversion between the git tag's version and that of Cargo.toml **will fail** the pipeline.
 
 ```bash
 # Creates annotated tag
@@ -35,7 +36,8 @@ This task will create a beta release on the Play Store & Testflight, as well as 
 In addition, desktop installers and the mobile apps will be added to a new Github Release.
 
 To trigger this workflow, one must create an annotated tag starting with "v" followed by the new [SemVer](https://semver.org) and ending with the "-flutter" suffix.
-> Note: You should use the version described in `qaul_ui/pubspec.yaml` as the release version, and update it accordingly. Any diversion between the git tag's version and that of pubspec.yaml will fail the pipeline.
+
+!> You should use the version described in `qaul_ui/pubspec.yaml` as the release version, and update it accordingly. Any diversion between the git tag's version and that of pubspec.yaml **will fail** the pipeline.
 
 ```bash
 # Creates annotated tag
