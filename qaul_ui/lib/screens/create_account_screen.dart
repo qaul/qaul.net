@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../helpers/navigation_helper.dart';
@@ -16,6 +17,8 @@ class CreateAccountScreen extends HookConsumerWidget {
 
   final _fieldKey = GlobalKey<FormFieldState>();
 
+  static final _log = Logger('CreateAccountScreen');
+
   static final _usernameProvider = StateProvider<String?>((ref) => null);
 
   final _sendRequestProvider = FutureProvider<bool?>((ref) async {
@@ -23,13 +26,19 @@ class CreateAccountScreen extends HookConsumerWidget {
     if (name == null) return null;
 
     final worker = ref.read(qaulWorkerProvider);
-    await worker.createUserAccount(name);
+    // TODO(brenodt): Decrease logs from config to finer/finest once tested
+    _log.config('Starting create account request...');
 
     for (var i = 0; i < 60; i++) {
+      if (i % 10 == 0) {
+        _log.config('Attempt ${i ~/ 10} - Send createUserAccount to libqaul');
+        await worker.createUserAccount(name);
+      }
       await worker.getDefaultUserAccount();
       await Future.delayed(const Duration(milliseconds: 1000));
       final user = ref.read(defaultUserProvider);
-      return user != null;
+      _log.config('\tAttempt $i - Fetch defaultUserAccount yields "$user"');
+      if (user != null) return true;
     }
     return false;
   });
@@ -55,8 +64,10 @@ class CreateAccountScreen extends HookConsumerWidget {
               context: context,
               builder: (c) {
                 return AlertDialog(
-                  title: Text(AppLocalizations.of(context)!.timeoutErrorMessage),
-                  content: Text(AppLocalizations.of(context)!.genericErrorMessage),
+                  title:
+                      Text(AppLocalizations.of(context)!.timeoutErrorMessage),
+                  content:
+                      Text(AppLocalizations.of(context)!.genericErrorMessage),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -95,6 +106,9 @@ class CreateAccountScreen extends HookConsumerWidget {
                     key: _fieldKey,
                     controller: nameCtrl,
                     validator: (s) => _validateUserName(context, s),
+                    onFieldSubmitted: (_) {
+                      _submitUsername(ref, nameCtrl, loading);
+                    },
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                     ),
@@ -110,13 +124,7 @@ class CreateAccountScreen extends HookConsumerWidget {
                         ),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(80.0),
-                          onTap: () {
-                            var valid = _fieldKey.currentState?.validate();
-                            if (!(valid ?? false)) return;
-
-                            loading.value = true;
-                            ref.read(_usernameProvider.state).state = nameCtrl.text;
-                          },
+                          onTap: () => _submitUsername(ref, nameCtrl, loading),
                           child: const Padding(
                             padding: EdgeInsets.all(20.0),
                             child: Icon(Icons.arrow_forward_ios_rounded),
@@ -146,5 +154,17 @@ class CreateAccountScreen extends HookConsumerWidget {
       return AppLocalizations.of(context)!.fieldRequiredErrorMessage;
     }
     return null;
+  }
+
+  void _submitUsername(
+    WidgetRef ref,
+    TextEditingController nameCtrl,
+    ValueNotifier<bool> loading,
+  ) {
+    var valid = _fieldKey.currentState?.validate() ?? false;
+    if (!valid) return;
+
+    loading.value = true;
+    ref.read(_usernameProvider.state).state = nameCtrl.text;
   }
 }
