@@ -58,6 +58,10 @@ struct NeighbourEntry {
 struct UserEntry {
     /// user id
     id: PeerId,
+    //propagation id
+    pub pgid: u32,
+    pub pgid_update: SystemTime,
+    pub pgid_update_hc: u8,
     /// connection entries
     connections: BTreeMap<PeerId, NeighbourEntry>,
 }
@@ -109,6 +113,9 @@ impl ConnectionTable {
 
         let routing_user_entry = RoutingUserEntry {
             id: user_id.to_owned(),
+            pgid: 1,
+            pgid_update: SystemTime::now(),
+            pgid_update_hc: 1,
             connections: connections,
         };
 
@@ -118,6 +125,13 @@ impl ConnectionTable {
     /// process received routing info table
     /// enter it into all modules where we are connected to
     pub fn process_received_routing_info( neighbour_id: PeerId, info: Vec<router_net_proto::RoutingInfoEntry> ) {
+
+        log::info!("process_received_routing_info count={}", info.len());
+        for inf in &info{
+            let c: &[u8] = &inf.user;
+            let userid = PeerId::from_bytes(c).unwrap();
+            log::info!("receive_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
+        }
 
         // try Lan module
         if let Some(rtt) = Neighbours::get_rtt(&neighbour_id , &ConnectionModule::Lan ){
@@ -155,13 +169,13 @@ impl ConnectionTable {
                 };
 
                 // add it to state
-                Self::add_connection(user_id, neighbour, conn.clone());
+                Self::add_connection(user_id, entry.pgid, neighbour, conn.clone());
             }
         }
     }
 
     /// add connection to local state
-    fn add_connection(user_id: PeerId, connection: NeighbourEntry, module: ConnectionModule) {
+    fn add_connection(user_id: PeerId, pgid: u32, connection: NeighbourEntry, module: ConnectionModule) {
         // get access to the connection table
         let mut connection_table;
         match module {
@@ -174,17 +188,39 @@ impl ConnectionTable {
 
         // check if user already exists
         if let Some(user) = connection_table.table.get_mut(&user_id) {
-            user.connections.insert(connection.id, connection);
+            //check alreay exist and pgid is new
+            if connection.hc == 1 || pgid > user.pgid {
+                user.pgid = pgid;
+                user.pgid_update = SystemTime::now();
+                user.pgid_update_hc = connection.hc;
+                user.connections.insert(connection.id, connection);
+            }            
         } else {
             let mut connections_map = BTreeMap::new();
+            let hc = connection.hc;
             connections_map.insert(connection.id, connection);
 
             let user = UserEntry { 
                 id: user_id,
+                pgid: pgid,
+                pgid_update: SystemTime::now(),
+                pgid_update_hc: hc,
                 connections: connections_map,
             };
 
             connection_table.table.insert(user_id, user);
+        }
+    }
+
+    pub fn handle_propagation_id(){
+        //update local user's propagation id
+        let mut local = LOCAL.get().write().unwrap();
+        for (_user_id, user) in local.table.iter_mut() {
+            let elapsed = user.pgid_update.elapsed().unwrap().as_secs();
+            if elapsed >= 10{
+                user.pgid = user.pgid + 1;
+                user.pgid_update = SystemTime::now();
+            }
         }
     }
 
@@ -259,6 +295,9 @@ impl ConnectionTable {
 
                     let routing_user_entry = RoutingUserEntry {
                         id: user_id.to_owned(),
+                        pgid: user.pgid,
+                        pgid_update: user.pgid_update,
+                        pgid_update_hc: user.pgid_update_hc,
                         connections: connections,
                     };
                     table.table.insert(user_id.to_owned(), routing_user_entry);
@@ -284,6 +323,12 @@ impl ConnectionTable {
         let mut expired_connections: Vec<PeerId> = Vec::new();
         let mut return_entry = None;
         let mut rtt = u32::MAX;
+
+        if let Ok(duration) = user.pgid_update.elapsed() {
+            if duration.as_secs() >= (20 * user.pgid_update_hc as u64){
+                return None;
+            }
+        }
 
         // create return value
         {

@@ -166,6 +166,14 @@ impl RouterInfo {
         // create RouterInfo
         let node_id = Node::get_id();
         let routes = RoutingTable::create_routing_info(neighbour);
+
+        log::info!("sending_routing_info count={}", routes.entry.len());
+        for inf in &routes.entry{
+            let c: &[u8] = &inf.user;
+            let userid = PeerId::from_bytes(c).unwrap();
+            log::info!("qual sending_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
+        }
+
         let users = Users::get_user_info_table();
 
         let timestamp = Timestamp::get_timestamp();
