@@ -172,6 +172,11 @@ extension _MessageExtension on Message {
       text: content,
       author: author.toInternalUser(),
       createdAt: receivedAt.millisecondsSinceEpoch,
+      status: status == MessageStatus.sent
+          ? types.Status.sent
+          : status == MessageStatus.received
+              ? types.Status.delivered
+              : null,
     );
   }
 }
