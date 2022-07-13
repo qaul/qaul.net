@@ -6,7 +6,8 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../widgets/widgets.dart';
 
-typedef SearchUserResultBuilder = Widget Function(BuildContext context, List<User> users);
+typedef SearchUserResultBuilder = Widget Function(
+    BuildContext context, List<User> users);
 
 final _searchKeyProvider = StateProvider.autoDispose<String>((ref) {
   return '';
@@ -14,13 +15,9 @@ final _searchKeyProvider = StateProvider.autoDispose<String>((ref) {
 
 final _userSearchProvider = StateProvider.autoDispose<List<User>>((ref) {
   final defaultUser = ref.watch(defaultUserProvider)!;
-  final chatRooms = ref.watch(chatRoomsProvider);
   final users = ref
       .watch(usersProvider)
-      .where((u) =>
-          !u.id.equals(defaultUser.id) &&
-          !(u.isBlocked ?? false) &&
-          chatRooms.indexWhere((c) => c.conversationId.equals(u.id)).isNegative)
+      .where((u) => !u.id.equals(defaultUser.id) && !(u.isBlocked ?? false))
       .toList()
     ..sort();
 
@@ -31,7 +28,8 @@ final _userSearchProvider = StateProvider.autoDispose<List<User>>((ref) {
 });
 
 class SearchUserDecorator extends HookConsumerWidget {
-  const SearchUserDecorator({Key? key, required this.builder, this.title}) : super(key: key);
+  const SearchUserDecorator({Key? key, required this.builder, this.title})
+      : super(key: key);
   final String? title;
   final SearchUserResultBuilder builder;
 
