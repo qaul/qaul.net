@@ -23,19 +23,27 @@ Future<void> openChat(
   required BuildContext context,
   required User user,
   required User otherUser,
+  VoidCallback? onBackButtonPressed,
 }) {
   return Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => _ChatScreen(room, user, otherUser),
-      ));
+    context,
+    MaterialPageRoute(
+      builder: (context) => ChatScreen(
+        room,
+        user,
+        otherUser,
+        onBackButtonPressed,
+      ),
+    ),
+  );
 }
 
-class _ChatScreen extends StatefulHookConsumerWidget {
-  const _ChatScreen(
+class ChatScreen extends StatefulHookConsumerWidget {
+  const ChatScreen(
     this.room,
     this.user,
-    this.otherUser, {
+    this.otherUser,
+    this.onBackButtonPressed, {
     Key? key,
   }) : super(key: key);
 
@@ -47,11 +55,14 @@ class _ChatScreen extends StatefulHookConsumerWidget {
   /// Someone the default user is having a conversation with
   final User otherUser;
 
+  /// If null, back button will pop the current route.
+  final VoidCallback? onBackButtonPressed;
+
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends ConsumerState<_ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   ChatRoom get room => widget.room;
 
   User get user => widget.user;
@@ -95,7 +106,9 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: DefaultBackButton(onPressed: closeChat),
+        leading: DefaultBackButton(
+          onPressed: widget.onBackButtonPressed ?? closeChat,
+        ),
         title: Row(
           children: [
             UserAvatar.small(badgeEnabled: false, user: otherUser),
@@ -139,7 +152,10 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
   User _author(Message e) => e.senderId.equals(user.id) ? user : otherUser;
 
   List<types.TextMessage>? messages(ChatRoom room) {
-    return room.messages?.sorted().map((e) => e.toInternalMessage(_author(e))).toList();
+    return room.messages
+        ?.sorted()
+        .map((e) => e.toInternalMessage(_author(e)))
+        .toList();
   }
 
   Widget _bubbleBuilder(
@@ -150,11 +166,13 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
     return Builder(builder: (context) {
       return Bubble(
         child: child,
-        color:
-            user.toInternalUser().id != message.author.id || message.type == types.MessageType.image
-                ? const Color(0xfff5f5f7)
-                : Colors.lightBlue.shade700,
-        margin: nextMessageInGroup ? const BubbleEdges.symmetric(horizontal: 6) : null,
+        color: user.toInternalUser().id != message.author.id ||
+                message.type == types.MessageType.image
+            ? const Color(0xfff5f5f7)
+            : Colors.lightBlue.shade700,
+        margin: nextMessageInGroup
+            ? const BubbleEdges.symmetric(horizontal: 6)
+            : null,
         nip: nextMessageInGroup
             ? BubbleNip.no
             : user.toInternalUser().id != message.author.id
