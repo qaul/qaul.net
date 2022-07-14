@@ -7,6 +7,8 @@
 //! qaul router.
 
 use prost::Message;
+use state::Storage;
+use std::sync::RwLock;
 
 pub mod neighbours;
 pub mod users;
@@ -27,14 +29,40 @@ use info::RouterInfo;
 pub mod proto { include!("qaul.rpc.router.rs"); }
 pub mod router_net_proto { include!("qaul.net.router_net_info.rs"); }
 
-/// qaul community router access
-pub struct Router {
+/// mutable state of router, 
+/// used for storing the router configuration
+static ROUTER: Storage<RwLock<Router>> = Storage::new();
 
+/// qaul router configuration
+#[derive(Clone)]
+pub struct RouterConfiguration {
+    /// routing information update interval
+    /// in seconds
+    pub update_interval: u64,
+    /// penalty per hop count in micro seconds
+    pub hc_penalty: u32,
+}
+
+/// qaul community router access
+#[derive(Clone)]
+pub struct Router {
+    pub configuration: RouterConfiguration,
 }
 
 impl Router {
     /// Initialize the qaul router
     pub fn init() {
+        // create router configuration
+        let router_configuration = RouterConfiguration {
+            update_interval: 10,
+            hc_penalty: 10_000_000, //10 seconds
+        };
+        let router = Router {
+            configuration: router_configuration.clone(),
+        };
+        // set configuration to state
+        ROUTER.set(RwLock::new(router));
+
         // initialize direct neighbours table
         Neighbours::init();
 
@@ -54,7 +82,13 @@ impl Router {
         // initialize RouterInfo submodule that 
         // schedules the sending of the routing information
         // to the neighbouring nodes.
-        RouterInfo::init(10);
+        RouterInfo::init(router_configuration.update_interval);
+    }
+
+    /// Get router configuration from state
+    pub fn get_configuration() -> RouterConfiguration {
+        let router = ROUTER.get().read().unwrap();
+        router.configuration.clone()
     }
 
     /// Process incoming RPC request messages and send them to

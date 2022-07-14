@@ -59,6 +59,17 @@ pub struct Scheduler {
     /// interval in which updated routing information
     /// shall be sent to the neighbouring nodes.
     interval: Duration,
+
+    /// propagation ID
+    /// 
+    /// A number that is increased by one 
+    /// on each propagation cycle
+    propagation_id: u32,
+
+    /// propagation update time
+    /// 
+    /// timestamp of the last propagation update
+    propagation_timestamp: u64,
 }
 
 /// An entry for the scheduler neighbour list
@@ -84,6 +95,8 @@ impl RouterInfo {
         let scheduler = Scheduler { 
             neighbours: HashMap::new(),
             interval: Duration::from_secs(interval_seconds),
+            propagation_id: 0,
+            propagation_timestamp: Timestamp::get_timestamp(),
         };
         SCHEDULER.set(RwLock::new(scheduler));
     }
@@ -94,6 +107,9 @@ impl RouterInfo {
     /// to send a routing information to.
     pub fn check_scheduler() -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let mut found_neighbour: Option<PeerId> = None;
+        let mut neighbour_last_sent: u64 = 0;
+        let mut propagation_id: u32;
+        let mut propagation_timestamp: u64; 
 
         {
             // get state for reading
@@ -103,9 +119,28 @@ impl RouterInfo {
             for (id, time) in scheduler.neighbours.iter() {
                 if time.timestamp + scheduler.interval < SystemTime::now() {
                     found_neighbour = Some(id.clone());
-                    break
+                    neighbour_last_sent = Timestamp::get_timestamp_by(&time.timestamp);
+                    break;
                 }
             }
+
+            // get propagation information
+            propagation_id = scheduler.propagation_id;
+            propagation_timestamp = scheduler.propagation_timestamp;
+        }
+
+        // check if we have to update the propagation ID
+        if Timestamp::get_timestamp() >= propagation_timestamp + 10 * 1000 {
+            propagation_id += 1;
+            propagation_timestamp = Timestamp::get_timestamp();
+
+            // get scheduler for writing
+            let mut scheduler = SCHEDULER.get().write().unwrap();
+            scheduler.propagation_id = propagation_id;
+            scheduler.propagation_timestamp = propagation_timestamp;
+
+            // update propagation ID
+            super::connections::ConnectionTable::update_propagation_id(propagation_id);
         }
 
         // process finding
@@ -130,7 +165,7 @@ impl RouterInfo {
                 }
 
                 // create routing information
-                let data = Self::create(Some(node_id.clone()));
+                let data = Self::create(node_id.clone(), neighbour_last_sent);
 
                 // create result
                 return Some((node_id, module, data))
@@ -160,22 +195,22 @@ impl RouterInfo {
         }
     }
 
+
     /// Create routing information for a neighbour node,
     /// encode the information and return the byte code.
-    pub fn create(neighbour: Option<PeerId>) -> Vec<u8> {
+    pub fn create(neighbour: PeerId, last_sent: u64) -> Vec<u8> {
         // create RouterInfo
         let node_id = Node::get_id();
-        let routes = RoutingTable::create_routing_info(neighbour);
+        let routes = RoutingTable::create_routing_info(neighbour, last_sent);
 
         log::info!("sending_routing_info count={}", routes.entry.len());
         for inf in &routes.entry{
             let c: &[u8] = &inf.user;
             let userid = PeerId::from_bytes(c).unwrap();
-            log::info!("qual sending_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
+            log::info!("qaul sending_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
         }
 
         let users = Users::get_user_info_table();
-
         let timestamp = Timestamp::get_timestamp();
 
         let router_info = router_net_proto::RouterInfoMessage {
@@ -197,9 +232,6 @@ impl RouterInfo {
         // encode message
         let mut buf = Vec::with_capacity(router_info_proto.encoded_len());
         router_info_proto.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
-
-        // convert to bytes data
-        //let data = bincode::serialize(&router_info).unwrap();
 
         // sign data
         let keys = Node::get_keys();

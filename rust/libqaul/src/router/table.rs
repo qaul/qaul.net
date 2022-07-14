@@ -15,12 +15,11 @@ use state::Storage;
 use prost::Message;
 use std::sync::RwLock;
 use std::collections::HashMap;
-use std::time::{SystemTime};
 
 use crate::connections::ConnectionModule;
 use super::proto;
 use crate::rpc::Rpc;
-use  crate::router::router_net_proto;
+use crate::router::router_net_proto;
 
 /// mutable state of table
 static ROUTINGTABLE: Storage<RwLock<RoutingTable>> = Storage::new();
@@ -30,9 +29,11 @@ static ROUTINGTABLE: Storage<RwLock<RoutingTable>> = Storage::new();
 pub struct RoutingUserEntry {
     /// user id
     pub id: PeerId,
-    //propagation id
+    /// propagation id
     pub pgid: u32,
-    pub pgid_update: SystemTime,
+    /// propagation id update time
+    pub pgid_update: u64,
+    /// shortest hop count for user within this propagation id
     pub pgid_update_hc: u8,
     /// best routing entry per connection module
     pub connections: Vec<RoutingConnectionEntry>,
@@ -52,11 +53,10 @@ pub struct RoutingConnectionEntry {
     /// hop count
     /// how many hops has the connection
     pub hc: u8,
-    /// Package loss
-    /// how stable is the connection
-    /// this only applies to modules where this is measured
-    /// on all other modules this value is 0
-    pub pl: f32,
+    /// link quality
+    pub lq: u32,
+    /// last_update
+    pub last_update: u64,
 }
 
 /// Global Routing Table Implementation
@@ -82,7 +82,9 @@ impl RoutingTable {
         table.table = new_table.table;
     }
 
-    pub fn create_routing_info( neighbour: Option<PeerId> ) -> router_net_proto::RoutingInfoTable {
+    /// Create routing information for a specific neighbour node,
+    /// to be sent to this neighbour node.
+    pub fn create_routing_info( neighbour: PeerId, last_sent: u64 ) -> router_net_proto::RoutingInfoTable {
         let mut table = router_net_proto::RoutingInfoTable {
             entry: Vec::new()
         };        
@@ -92,93 +94,34 @@ impl RoutingTable {
 
         // loop through routing table
         for (user_id, user) in routing_table.table.iter() {
-            if user.connections.len() ==0 {
-                continue;
-            }
-            if user.pgid_update.elapsed().unwrap().as_secs() >= (15 * user.pgid_update_hc as u64) {
+            if user.connections.len() == 0 {
                 continue;
             }
 
-            //choose min hc entry
-            let mut min_hc_idx: Option<usize> = None;
-            let mut min_hc: u8 = 255;
+            // choose best link quality
+            let mut min_conn = user.connections[0].clone();
             for i in 0..user.connections.len(){
-                if user.connections[i].hc < min_hc{
-                    min_hc = user.connections[i].hc;
-                    min_hc_idx = Some(i);
+                if user.connections[i].lq < min_conn.lq{
+                    min_conn = user.connections[i].clone();
                 }
             }
-            if min_hc_idx == None {
-                continue;
-            }
-            let min_conn = user.connections.get(min_hc_idx.unwrap()).unwrap();
 
-            if let Some(neighbour_id) = neighbour {
-                // check if neighbour is best connection to it
-                if neighbour_id != min_conn.node {
-                    let mut hc = Vec::new();
-                    hc.push(min_conn.hc);
-
-                    let table_entry = router_net_proto::RoutingInfoEntry {
-                        user: user_id.to_bytes(),
-                        rtt: min_conn.rtt,
-                        hc,
-                        pl: min_conn.pl,
-                        pgid: user.pgid,
-                    };
-                    table.entry.push(table_entry);    
-                }
-            } else {
+            if neighbour != min_conn.node && min_conn.last_update >= last_sent{
                 let mut hc = Vec::new();
-                        hc.push(min_conn.hc);
-                        
+                hc.push(min_conn.hc);
+
                 let table_entry = router_net_proto::RoutingInfoEntry {
                     user: user_id.to_bytes(),
                     rtt: min_conn.rtt,
                     hc,
-                    pl: min_conn.pl,
                     pgid: user.pgid,
                 };
                 table.entry.push(table_entry);
             }
-
-            // if user.connections.len() > 0 {
-            //     // get first entry
-            //     if let Some(neighbour_id) = neighbour {
-            //         // check if neighbour is best connection to it
-            //         if neighbour_id != user.connections[0].node {
-            //             let mut hc = Vec::new();
-            //             hc.push(user.connections[0].hc);
-
-            //             let table_entry = router_net_proto::RoutingInfoEntry {
-            //                 user: user_id.to_bytes(),
-            //                 rtt: user.connections[0].rtt,
-            //                 hc,
-            //                 pl: user.connections[0].pl,
-            //                 pgid: user.pgid,
-            //             };
-
-            //             table.entry.push(table_entry);
-            //         }
-            //     } else {
-            //         let mut hc = Vec::new();
-            //                 hc.push(user.connections[0].hc);
-                            
-            //         let table_entry = router_net_proto::RoutingInfoEntry {
-            //             user: user_id.to_bytes(),
-            //             rtt: user.connections[0].rtt,
-            //             hc,
-            //             pl: user.connections[0].pl,
-            //             pgid: user.pgid,
-            //         };
-
-            //         table.entry.push(table_entry);
-            //     }
-            // }
         }
 
         table
-    }    
+    }
 
     /// send protobuf RPC neighbours list
     pub fn rpc_send_routing_table() {

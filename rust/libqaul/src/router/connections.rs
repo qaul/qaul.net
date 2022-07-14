@@ -18,7 +18,6 @@ use prost::Message;
 use std::sync::RwLock;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
-use std::time::{SystemTime, Duration};
 
 use crate::connections::ConnectionModule;
 use crate::node;
@@ -29,6 +28,7 @@ use crate::router::{
 use super::proto;
 use crate::router::router_net_proto;
 use crate::rpc::Rpc;
+use crate::utilities::timestamp::Timestamp;
 
 
 /// Mutable module state
@@ -46,10 +46,10 @@ struct NeighbourEntry {
     rtt: u32,
     /// hop count
     hc: u8,
-    /// package loss
-    pl: f32,
+    /// link quality
+    lq: u32,
     /// time when the node was last updated
-    last_update: SystemTime,
+    last_update: u64,
 }
 
 /// user entry for ConnectionTable
@@ -58,9 +58,11 @@ struct NeighbourEntry {
 struct UserEntry {
     /// user id
     id: PeerId,
-    //propagation id
+    /// propagation id
     pub pgid: u32,
-    pub pgid_update: SystemTime,
+    /// when was the propagation id last updated
+    pub pgid_update: u64,
+    /// DEPRECATED: do we really need this?
     pub pgid_update_hc: u8,
     /// connection entries
     connections: BTreeMap<PeerId, NeighbourEntry>,
@@ -108,15 +110,16 @@ impl ConnectionTable {
             node: node_id,
             rtt: 0,
             hc: 0,
-            pl: 0.0,
+            lq: 0,
+            last_update: Timestamp::get_timestamp()
         });
 
         let routing_user_entry = RoutingUserEntry {
             id: user_id.to_owned(),
             pgid: 1,
-            pgid_update: SystemTime::now(),
+            pgid_update: Timestamp::get_timestamp(),
             pgid_update_hc: 1,
-            connections: connections,
+            connections,
         };
 
         routing_table.table.insert(user_id, routing_user_entry);
@@ -164,14 +167,34 @@ impl ConnectionTable {
                     id: neighbour_id,
                     rtt: entry.rtt +rtt,
                     hc,
-                    pl: entry.pl,
-                    last_update: SystemTime::now(),
+                    lq: Self::calculate_linkquality(entry.rtt +rtt, hc),
+                    last_update: Timestamp::get_timestamp(),
                 };
 
                 // add it to state
                 Self::add_connection(user_id, entry.pgid, neighbour, conn.clone());
             }
         }
+    }
+
+    /// calculate link quality
+    /// 
+    /// returns the calculated link quality for a connection.
+    /// 
+    /// The link quality is currently calculated using the 
+    /// round trip time (rtt) and adding a penalty for each hop
+    /// according hop count (hc).
+    /// 
+    /// The smaller the value is better is the link quality.
+    pub fn calculate_linkquality(rtt: u32, hc: u8) -> u32 {
+        // get the router configuration
+        let config = super::Router::get_configuration();
+
+        // calculate link quality
+        let lq = rtt + (hc as u32 * config.hc_penalty);
+
+        // return link quality
+        lq
     }
 
     /// add connection to local state
@@ -189,12 +212,46 @@ impl ConnectionTable {
         // check if user already exists
         if let Some(user) = connection_table.table.get_mut(&user_id) {
             //check alreay exist and pgid is new
+            // if (connection.hc == 1 || pgid > user.pgid) ||
+            //  (pgid == user.pgid && connection.hc < user.pgid_update_hc){
+            //     user.pgid = pgid;
+            //     user.pgid_update = Timestamp::get_timestamp();
+            //     user.pgid_update_hc = connection.hc;
+            //     user.connections.insert(connection.id, connection);
+            // }else if pgid == user.pgid{
+            //     if let Some(conn) = user.connections.get_mut(&connection.id){
+            //         if connection.lq < conn.lq {
+            //            conn.lq = connection.lq;
+            //            conn.last_update = Timestamp::get_timestamp();
+            //         }
+            //     }
+            // }
+            let now_ts = Timestamp::get_timestamp();
             if connection.hc == 1 || pgid > user.pgid {
+                if module == ConnectionModule::Internet {
+                    log::info!("receive_inode hc={}, propg_id={}", connection.hc, pgid);
+                }
+
                 user.pgid = pgid;
-                user.pgid_update = SystemTime::now();
+                user.pgid_update = now_ts;
                 user.pgid_update_hc = connection.hc;
                 user.connections.insert(connection.id, connection);
-            }            
+            }else if pgid == user.pgid{
+                //check last update
+                if (now_ts - user.pgid_update <= (10 * 1000)) && connection.hc < user.pgid_update_hc {
+                    user.pgid_update = now_ts;
+                    user.pgid_update_hc = connection.hc;
+                    user.connections.insert(connection.id, connection);
+                }else if let Some(conn) = user.connections.get_mut(&connection.id){
+                    if connection.lq < conn.lq {
+                        conn.lq = connection.lq;
+                        conn.hc = connection.hc;
+                        conn.last_update = now_ts;
+                        user.connections.insert(connection.id, connection);
+                    }
+                }
+            }        
+
         } else {
             let mut connections_map = BTreeMap::new();
             let hc = connection.hc;
@@ -203,24 +260,31 @@ impl ConnectionTable {
             let user = UserEntry { 
                 id: user_id,
                 pgid: pgid,
-                pgid_update: SystemTime::now(),
+                pgid_update: Timestamp::get_timestamp(),
                 pgid_update_hc: hc,
                 connections: connections_map,
             };
 
             connection_table.table.insert(user_id, user);
         }
+
+        if module == ConnectionModule::Internet {
+            if let Some(user) = connection_table.table.get_mut(&user_id){
+                log::info!("receive_inode updated hc={}, propg_id={}", user.pgid_update_hc, user.pgid);
+            }            
+        }
+
     }
 
-    pub fn handle_propagation_id(){
+    /// update propagation id for local users
+    pub fn update_propagation_id(propagation_id: u32){
         //update local user's propagation id
         let mut local = LOCAL.get().write().unwrap();
         for (_user_id, user) in local.table.iter_mut() {
-            let elapsed = user.pgid_update.elapsed().unwrap().as_secs();
-            if elapsed >= 10{
-                user.pgid = user.pgid + 1;
-                user.pgid_update = SystemTime::now();
-            }
+            user.pgid = propagation_id;
+            // QUESTION: is this of any use?
+            user.pgid_update = Timestamp::get_timestamp();
+            user.connections.get_mut(0).unwrap().last_update = Timestamp::get_timestamp();
         }
     }
 
@@ -275,37 +339,84 @@ impl ConnectionTable {
 
         // iterate over connection table
         for (user_id,user) in connection_table.table.iter_mut() {
-            // find best entry
-            if let Some(connection) = Self::find_best_connection(user) {
-                // fill entry into routing table
-                let routing_connection_entry = RoutingConnectionEntry {
-                    module: conn.clone(),
-                    node: connection.id,
-                    rtt: connection.rtt,
-                    hc: connection.hc,
-                    pl: connection.pl,
-                };
 
-                // check if user entry already exists hashmap
-                if let Some(routing_user_entry) = table.table.get_mut(&user.id) {
-                    routing_user_entry.connections.push(routing_connection_entry);
-                } else {
-                    let mut connections = Vec::new();
-                    connections.push(routing_connection_entry);
-
-                    let routing_user_entry = RoutingUserEntry {
-                        id: user_id.to_owned(),
-                        pgid: user.pgid,
-                        pgid_update: user.pgid_update,
-                        pgid_update_hc: user.pgid_update_hc,
-                        connections: connections,
+            let (b_expired_pgid, connection_entry) = Self::find_best_connection(user);
+            if b_expired_pgid == false {
+                if let Some(connection) = connection_entry{
+                    // fill entry into routing table
+                    let routing_connection_entry = RoutingConnectionEntry {
+                        module: conn.clone(),
+                        node: connection.id,
+                        rtt: connection.rtt,
+                        hc: connection.hc,
+                        lq: connection.lq,
+                        last_update: connection.last_update
                     };
-                    table.table.insert(user_id.to_owned(), routing_user_entry);
+
+                    // check if user entry already exists hashmap
+                    if let Some(routing_user_entry) = table.table.get_mut(&user.id) {
+                        routing_user_entry.connections.push(routing_connection_entry);
+                    } else {
+                        let mut connections = Vec::new();
+                        connections.push(routing_connection_entry);
+
+                        let routing_user_entry = RoutingUserEntry {
+                            id: user_id.to_owned(),
+                            pgid: user.pgid,
+                            pgid_update: user.pgid_update,
+                            pgid_update_hc: user.pgid_update_hc,
+                            connections,
+                        };
+                        table.table.insert(user_id.to_owned(), routing_user_entry);
+                    }                    
+                }else{
+                    if let None = table.table.get(&user.id) {
+                        let routing_user_entry = RoutingUserEntry {
+                            id: user_id.to_owned(),
+                            pgid: user.pgid,
+                            pgid_update: user.pgid_update,
+                            pgid_update_hc: user.pgid_update_hc,
+                            connections: Vec::new(),
+                        };
+                        table.table.insert(user_id.to_owned(), routing_user_entry);
+                    }                    
                 }
-            } else {
-                // put user for removal as there is no connection in it
+            }else{
                 expired_users.push(user_id.clone());
             }
+
+            // find best entry
+            // if let Some(connection) = Self::find_best_connection(user) {
+            //     // fill entry into routing table
+            //     let routing_connection_entry = RoutingConnectionEntry {
+            //         module: conn.clone(),
+            //         node: connection.id,
+            //         rtt: connection.rtt,
+            //         hc: connection.hc,
+            //         lq: connection.lq,
+            //         propagation_id: user.pgid,
+            //     };
+
+            //     // check if user entry already exists hashmap
+            //     if let Some(routing_user_entry) = table.table.get_mut(&user.id) {
+            //         routing_user_entry.connections.push(routing_connection_entry);
+            //     } else {
+            //         let mut connections = Vec::new();
+            //         connections.push(routing_connection_entry);
+
+            //         let routing_user_entry = RoutingUserEntry {
+            //             id: user_id.to_owned(),
+            //             pgid: user.pgid,
+            //             pgid_update: user.pgid_update,
+            //             pgid_update_hc: user.pgid_update_hc,
+            //             connections,
+            //         };
+            //         table.table.insert(user_id.to_owned(), routing_user_entry);
+            //     }
+            // } else {
+            //     // put user for removal as there is no connection in it
+            //     expired_users.push(user_id.clone());
+            // }
         }
 
         // remove expired users
@@ -318,16 +429,18 @@ impl ConnectionTable {
 
     /// find best entry
     /// and remove all old entries
-    fn find_best_connection(user: &mut UserEntry) -> Option<NeighbourEntry> {
+    fn find_best_connection(user: &mut UserEntry) -> (bool, Option<NeighbourEntry>) {
         // initialize helper variables
         let mut expired_connections: Vec<PeerId> = Vec::new();
         let mut return_entry = None;
-        let mut rtt = u32::MAX;
+        let mut lq = u32::MAX;
 
-        if let Ok(duration) = user.pgid_update.elapsed() {
-            if duration.as_secs() >= (20 * user.pgid_update_hc as u64){
-                return None;
-            }
+        //remove user after 5min from last pgid updated
+        // if Timestamp::get_timestamp() - user.pgid_update >= (20 * user.pgid_update_hc as u64) * 1000 * 1000{
+        //     return None;
+        // }
+        if Timestamp::get_timestamp() - user.pgid_update >= 300 * 1000{
+            return (true, None);
         }
 
         // create return value
@@ -339,14 +452,14 @@ impl ConnectionTable {
                 let mut expired = true;
 
                 // check if entry is expired
-                if let Ok(duration) = value.last_update.elapsed() {
-                    if duration < Duration::new(20, 0) {
-                        expired = false;
+                // entry expires after 20 seconds
+                let now = Timestamp::get_timestamp();
+                if now - value.last_update < (20 * 1000 * (value.hc as u64)){
+                    expired = false;
 
-                        if value.rtt < rtt {
-                            rtt = value.rtt;
-                            entry_found = Some(value);
-                        }
+                    if value.lq < lq {
+                        lq = value.lq;
+                        entry_found = Some(value);
                     }
                 }
 
@@ -361,7 +474,7 @@ impl ConnectionTable {
                     id: entry.id.clone(),
                     rtt: entry.rtt,
                     hc: entry.hc,
-                    pl: entry.pl,
+                    lq: entry.lq,
                     last_update: entry.last_update.clone(),
                 })
             }
@@ -372,7 +485,7 @@ impl ConnectionTable {
             user.connections.remove(&node_id);
         }
 
-        return_entry
+        (false, return_entry)
     }
 
     /// send protobuf RPC connections list
@@ -443,4 +556,3 @@ impl ConnectionTable {
         connections_list
     }
 }
-

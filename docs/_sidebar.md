@@ -21,6 +21,7 @@
             * [About RPC](qaul/rust/rpc.md)
             * [Configuration](qaul/rust/configuration.md)
             * [QaulID](qaul/rust/qaulId.md)
+            * [Qaul Routing Protocol](qaul/rust/routing.md)
             * [Connecting Nodes Statically](qaul/rust/connecting-nodes-statically.md)
             * [Security](qaul/rust/security.md)
             * [Testing](qaul/rust/testing.md)
