@@ -64,6 +64,8 @@ struct UserEntry {
     pub pgid_update: u64,
     /// DEPRECATED: do we really need this?
     pub pgid_update_hc: u8,
+    //online time
+    pub online_time: u64,
     /// connection entries
     connections: BTreeMap<PeerId, NeighbourEntry>,
 }
@@ -105,23 +107,28 @@ impl ConnectionTable {
         let mut routing_table = LOCAL.get().write().unwrap();
 
         let mut connections = Vec::new();
+
+        //routing table creating is done every 1 seconds. 
+        //by considerate neighbour sending is done before creating routing Table.
+        //we set local user online time forward 3 seconds
+        let now_ts = Timestamp::get_timestamp()  + 3000;
         connections.push(RoutingConnectionEntry {
             module: ConnectionModule::Local,
             node: node_id,
             rtt: 0,
             hc: 0,
             lq: 0,
-            last_update: Timestamp::get_timestamp()
+            last_update: now_ts
         });
 
         let routing_user_entry = RoutingUserEntry {
             id: user_id.to_owned(),
             pgid: 1,
-            pgid_update: Timestamp::get_timestamp(),
+            pgid_update: now_ts,
             pgid_update_hc: 1,
+            online_time: now_ts,
             connections,
         };
-
         routing_table.table.insert(user_id, routing_user_entry);
     }
 
@@ -129,12 +136,12 @@ impl ConnectionTable {
     /// enter it into all modules where we are connected to
     pub fn process_received_routing_info( neighbour_id: PeerId, info: Vec<router_net_proto::RoutingInfoEntry> ) {
 
-        log::info!("process_received_routing_info count={}", info.len());
-        for inf in &info{
-            let c: &[u8] = &inf.user;
-            let userid = PeerId::from_bytes(c).unwrap();
-            log::info!("receive_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
-        }
+        // log::info!("process_received_routing_info count={}", info.len());
+        // for inf in &info{
+        //     let c: &[u8] = &inf.user;
+        //     let userid = PeerId::from_bytes(c).unwrap();
+        //     log::info!("receive_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
+        // }
 
         // try Lan module
         if let Some(rtt) = Neighbours::get_rtt(&neighbour_id , &ConnectionModule::Lan ){
@@ -209,6 +216,7 @@ impl ConnectionTable {
             ConnectionModule::None => return,
         }        
 
+        let now_ts = Timestamp::get_timestamp();
         // check if user already exists
         if let Some(user) = connection_table.table.get_mut(&user_id) {
             //check alreay exist and pgid is new
@@ -225,8 +233,7 @@ impl ConnectionTable {
             //            conn.last_update = Timestamp::get_timestamp();
             //         }
             //     }
-            // }
-            let now_ts = Timestamp::get_timestamp();
+            // }            
             if connection.hc == 1 || pgid > user.pgid {
                 if module == ConnectionModule::Internet {
                     log::info!("receive_inode hc={}, propg_id={}", connection.hc, pgid);
@@ -235,7 +242,7 @@ impl ConnectionTable {
                 user.pgid = pgid;
                 user.pgid_update = now_ts;
                 user.pgid_update_hc = connection.hc;
-                user.connections.insert(connection.id, connection);
+                user.connections.insert(connection.id, connection); 
             }else if pgid == user.pgid{
                 //check last update
                 if (now_ts - user.pgid_update <= (10 * 1000)) && connection.hc < user.pgid_update_hc {
@@ -270,20 +277,14 @@ impl ConnectionTable {
             let user = UserEntry { 
                 id: user_id,
                 pgid: pgid,
-                pgid_update: Timestamp::get_timestamp(),
+                pgid_update: now_ts,
                 pgid_update_hc: hc,
+                online_time: now_ts,
                 connections: connections_map,
             };
 
             connection_table.table.insert(user_id, user);
         }
-
-        if module == ConnectionModule::Internet {
-            if let Some(user) = connection_table.table.get_mut(&user_id){
-                log::info!("receive_inode updated hc={}, propg_id={}", user.pgid_update_hc, user.pgid);
-            }            
-        }
-
     }
 
     /// update propagation id for local users
@@ -318,7 +319,7 @@ impl ConnectionTable {
         // set table as new active routing table
         RoutingTable::set(table);
     }
-
+    
     /// insert local routes into routing table
     fn local_routes_to_intermediary_table(mut table: RoutingTable) -> RoutingTable {
         // get local routes
@@ -375,6 +376,7 @@ impl ConnectionTable {
                             pgid: user.pgid,
                             pgid_update: user.pgid_update,
                             pgid_update_hc: user.pgid_update_hc,
+                            online_time: user.online_time,
                             connections,
                         };
                         table.table.insert(user_id.to_owned(), routing_user_entry);
@@ -386,6 +388,7 @@ impl ConnectionTable {
                             pgid: user.pgid,
                             pgid_update: user.pgid_update,
                             pgid_update_hc: user.pgid_update_hc,
+                            online_time: user.online_time,
                             connections: Vec::new(),
                         };
                         table.table.insert(user_id.to_owned(), routing_user_entry);

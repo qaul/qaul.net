@@ -22,8 +22,9 @@ use state::Storage;
 use std::{
     collections::HashMap,
     sync::RwLock,
-    time::{Duration, SystemTime},
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
+
 
 use qaul_info::{
     QaulInfoReceived, 
@@ -188,7 +189,7 @@ impl RouterInfo {
         // if it does not exist add it to scheduler
         if !exists {
             let mut scheduler = SCHEDULER.get().write().unwrap();
-            let interval = scheduler.interval.clone();
+            //let interval = scheduler.interval.clone();
             scheduler.neighbours.insert(node_id, SchedulerEntry {
                 timestamp: SystemTime::now() - interval,
             });
@@ -202,15 +203,26 @@ impl RouterInfo {
         // create RouterInfo
         let node_id = Node::get_id();
         let routes = RoutingTable::create_routing_info(neighbour, last_sent);
+        let online_user_ids = RoutingTable::get_online_user_ids(last_sent);
 
-        log::info!("sending_routing_info count={}", routes.entry.len());
-        for inf in &routes.entry{
-            let c: &[u8] = &inf.user;
-            let userid = PeerId::from_bytes(c).unwrap();
-            log::info!("qaul sending_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
+        log::info!("online users={} routes={}", online_user_ids.len(), routes.entry.len());
+        for online in &online_user_ids{
+            log::info!("online user={}", online);
         }
 
-        let users = Users::get_user_info_table();
+        // log::info!("sending_routing_info count={}", routes.entry.len());
+        // for inf in &routes.entry{
+        //     let c: &[u8] = &inf.user;
+        //     let userid = PeerId::from_bytes(c).unwrap();
+        //     log::info!("qaul sending_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
+        // }
+        let users = Users::get_user_info_table_by_ids(&online_user_ids);
+        for user in &users.info{
+            let userid = PeerId::from_bytes(&user.id).unwrap();
+            log::info!("user={}", userid);
+        }
+        
+
         let timestamp = Timestamp::get_timestamp();
 
         let router_info = router_net_proto::RouterInfoMessage {

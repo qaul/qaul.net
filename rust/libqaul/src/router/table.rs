@@ -35,6 +35,8 @@ pub struct RoutingUserEntry {
     pub pgid_update: u64,
     /// shortest hop count for user within this propagation id
     pub pgid_update_hc: u8,
+    //online time    
+    pub online_time: u64,    
     /// best routing entry per connection module
     pub connections: Vec<RoutingConnectionEntry>,
 }
@@ -121,6 +123,24 @@ impl RoutingTable {
         }
 
         table
+    }
+
+    /// Create routing information for a specific neighbour node,
+    /// to be sent to this neighbour node.
+    pub fn get_online_user_ids(last_sent: u64 ) -> Vec<PeerId> {
+
+        let mut user_ids: Vec<PeerId> = vec![];
+
+        // get access to routing table
+        let routing_table = ROUTINGTABLE.get().read().unwrap();
+
+        // loop through routing table
+        for (user_id, user) in routing_table.table.iter() {
+            if user.online_time >= last_sent {
+                user_ids.push(user_id.clone());
+            }
+        }
+        user_ids
     }
 
     /// send protobuf RPC neighbours list

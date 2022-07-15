@@ -9,6 +9,13 @@ use libp2p::{
     PeerId,
     identity::PublicKey,
 };
+use crate::{
+    router::{
+        table::RoutingTable,
+    }
+};
+
+
 use prost::Message;
 use serde::{Serialize, Deserialize};
 use state::Storage;
@@ -26,6 +33,7 @@ pub mod proto { include!("qaul.rpc.users.rs"); }
 
 /// mutable state of users table
 static USERS: Storage<RwLock<Users>> = Storage::new();
+
 
 /// implementation of all known users for routing references
 pub struct Users {
@@ -53,7 +61,7 @@ impl Users {
                 let id = PeerId::from_bytes(&user.id).unwrap();
                 let key = PublicKey::from_protobuf_encoding(&user.key).unwrap();
                 // fill result into user table
-                users.users.insert( id, User { id, key, name: user.name, verified: user.verified, blocked: user.blocked } );    
+                users.users.insert( id, User { id, key, name: user.name, verified: user.verified, blocked: user.blocked} );    
             }
         }
     }
@@ -63,11 +71,16 @@ impl Users {
     /// This user will be added to the users list in memory and to the data base
     pub fn add( id: PeerId, key: PublicKey, name: String, verified: bool, blocked: bool ) {
         // save user to the data base
-        DbUsers::add_user( UserData { id: id.to_bytes(), key: key.clone().into_protobuf_encoding(), name: name.clone(), verified, blocked} );
+        DbUsers::add_user( UserData { 
+            id: id.to_bytes(), 
+            key: key.clone().into_protobuf_encoding(), 
+            name: name.clone(), 
+            verified, blocked,
+        } );
 
         // add user to the users table
         let mut users = USERS.get().write().unwrap();
-        users.users.insert( id, User { id, key, name, verified, blocked } );
+        users.users.insert( id, User { id, key, name, verified, blocked} );
     }
 
     /// add a new user to the users list, and check whether the 
@@ -114,26 +127,27 @@ impl Users {
         }
     }
 
+
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
-    pub fn get_user_info_table() -> router_net_proto::UserInfoTable {
+    pub fn get_user_info_table_by_ids(ids: &Vec<PeerId>) -> router_net_proto::UserInfoTable {
         let store = USERS.get().read().unwrap();
         let mut users = router_net_proto::UserInfoTable {
             info: Vec::new(),
         };
 
-        for (_id, value) in &store.users {
-            let user_info = router_net_proto::UserInfo {
-                id: value.id.to_bytes(),
-                key: value.key.clone().into_protobuf_encoding(),
-                name: value.name.clone(),
-            };
-
-            users.info.push(user_info);
+        for id in ids{
+            if let Some(value) = store.users.get(&id){
+                let user_info = router_net_proto::UserInfo {
+                    id: value.id.to_bytes(),
+                    key: value.key.clone().into_protobuf_encoding(),
+                    name: value.name.clone(),
+                };    
+                users.info.push(user_info);    
+            }
         }
-        
         users
-    }
+    }    
 
     /// add new users from the received bytes of a UserInfoTable
     pub fn add_user_info_table(users: Vec<router_net_proto::UserInfo>) {
@@ -199,6 +213,75 @@ impl Users {
                         // send message
                         Rpc::send_message(buf, crate::rpc::proto::Modules::Users.into(), "".to_string(), Vec::new() );
                     },
+                    Some(proto::users::Message::UserOnlineRequest(_user_online_request)) => {
+                        // get users store
+                        let users = USERS.get().read().unwrap();
+
+                        //get all online user ids by passing last_sent=0
+                        let online_user_ids = RoutingTable::get_online_user_ids(0); 
+        
+                        // fill them into the list
+                        let mut user_list = proto::UserList {
+                            user: Vec::new(),
+                        };
+                        for id in &online_user_ids{
+                            if let Some(user) = users.users.get(&id){
+                                // get RPC key values
+                                let (key_type, key_base58) = Self::get_protobuf_public_key(user.key.clone());
+            
+                                // create user entry message
+                                let user_entry = proto::UserEntry {
+                                    name: user.name.clone(),
+                                    id: id.to_bytes(),
+                                    id_base58: id.to_base58(),
+                                    key: user.key.clone().into_protobuf_encoding(),
+                                    key_type,
+                                    key_base58,
+                                    connectivity: 0,
+                                    verified: user.verified,
+                                    blocked: user.blocked,
+                                };
+            
+                                // add entry to list
+                                user_list.user.push(user_entry);
+                            }
+                        }
+
+
+                        // for (id, user) in &users.users {
+                        //     // get RPC key values
+                        //     let (key_type, key_base58) = Self::get_protobuf_public_key(user.key.clone());
+        
+                        //     // create user entry message
+                        //     let user_entry = proto::UserEntry {
+                        //         name: user.name.clone(),
+                        //         id: id.to_bytes(),
+                        //         id_base58: id.to_base58(),
+                        //         key: user.key.clone().into_protobuf_encoding(),
+                        //         key_type,
+                        //         key_base58,
+                        //         connectivity: 0,
+                        //         verified: user.verified,
+                        //         blocked: user.blocked,
+                        //     };
+        
+                        //     // add entry to list
+                        //     user_list.user.push(user_entry);
+                        // }
+        
+                        // create message
+                        let proto_message = proto::Users{
+                            message: Some(proto::users::Message::UserList(
+                                user_list)),
+                        };
+        
+                        // encode message
+                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+        
+                        // send message
+                        Rpc::send_message(buf, crate::rpc::proto::Modules::Users.into(), "".to_string(), Vec::new() );
+                    },
                     Some(proto::users::Message::UserUpdate(updated_user)) => {
                         log::info!("UserUpdate protobuf RPC message");
         
@@ -222,7 +305,13 @@ impl Users {
                                     *user_result = user;
 
                                     // save to data base
-                                    DbUsers::add_user( UserData { id: user_id.to_bytes(), key: user_result.key.clone().into_protobuf_encoding(), name: user_result.name.clone(), verified: updated_user.verified, blocked: updated_user.blocked} );
+                                    DbUsers::add_user( UserData { 
+                                        id: user_id.to_bytes(), 
+                                        key: user_result.key.clone().into_protobuf_encoding(), 
+                                        name: user_result.name.clone(),
+                                        verified: updated_user.verified,
+                                        blocked: updated_user.blocked,
+                                    } );
                                 },
                                 None => log::error!("updated user is unknown: {}", user_id.to_base58())
                             }
