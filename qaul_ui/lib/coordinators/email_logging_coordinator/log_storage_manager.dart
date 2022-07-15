@@ -9,7 +9,7 @@ class _LogEntry {
 }
 
 class _LogStorageManager {
-  void initialize() {
+  void initialize() async {
     _deleteObsoleteSchedule = NeatPeriodicTaskScheduler(
       interval: const Duration(minutes: 5),
       name: 'delete-obsolete-logs',
@@ -25,6 +25,7 @@ class _LogStorageManager {
       minCycle: const Duration(minutes: 2),
     );
 
+    await _createLogsFolder();
     _deleteObsoleteSchedule.start();
     _deleteSurpassingSizeSchedule.start();
   }
@@ -32,6 +33,11 @@ class _LogStorageManager {
   void dispose() async {
     await _deleteObsoleteSchedule.stop();
     await _deleteSurpassingSizeSchedule.stop();
+  }
+
+  Future _createLogsFolder() async {
+    final path = await _storeDirectory;
+    await Directory.fromUri(Uri.parse(path)).create(recursive: true);
   }
 
   // ***************************************************************************
@@ -45,7 +51,7 @@ class _LogStorageManager {
   Future<String> get _storeDirectory async {
     final dir = (Platform.isAndroid)
         ? (await getExternalStorageDirectory())!.path
-        : (await getApplicationDocumentsDirectory()).path;
+        : (await getApplicationSupportDirectory()).path;
     return '$dir/Logs';
   }
 
