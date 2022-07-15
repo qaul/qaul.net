@@ -8,7 +8,7 @@
 
 [qaul.net](https://qaul.net)
 
-To install and run qaul.net please see the [Documentation](qaul/README.md).
+To install and run qaul.net please see the [Documentation](http://qaul.github.io/qaul.net/#/).
 
 ## License
 
