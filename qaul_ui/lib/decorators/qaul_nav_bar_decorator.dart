@@ -12,13 +12,17 @@ import '../widgets/widgets.dart';
 
 class QaulNavBarDecorator extends StatefulWidget {
   const QaulNavBarDecorator({Key? key, required this.child}) : super(key: key);
-  final Widget child;
+  /// The [pageViewKey] provided should be used in the tabs view, ensuring state is not
+  /// lost when the window is resized.
+  final Widget Function(GlobalKey pageViewKey) child;
 
   @override
   State<QaulNavBarDecorator> createState() => _QaulNavBarDecoratorState();
 }
 
 class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
+  final _pageViewKey = GlobalKey();
+
   Map<String, String> get _overflowMenuOptions => {
         'settings': AppLocalizations.of(context)!.settings,
         'about': AppLocalizations.of(context)!.about,
@@ -60,22 +64,13 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
 
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(
-      builder: (context, orientation) {
-        return Stack(
-          alignment: orientation == Orientation.portrait
-              ? AlignmentDirectional.topCenter
-              : AlignmentDirectional.topStart,
-          children: [
-            orientation == Orientation.portrait
-                ? _buildHorizontalBody()
-                : _buildVerticalBody(),
-            orientation == Orientation.portrait
-                ? _buildHorizontalBar(context)
-                : _buildVerticalBar(context),
-          ],
-        );
-      },
+    return ResponsiveLayout(
+      mobileBody: Column(
+        children: [_buildHorizontalBar(context), Expanded(child: widget.child(_pageViewKey)),],
+      ),
+      tabletBody: Row(
+        children: [_buildVerticalBar(context), Expanded(child: widget.child(_pageViewKey)),],
+      ),
     );
   }
 
@@ -119,14 +114,6 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
     ];
   }
 
-  Widget _buildHorizontalBody() {
-    final top = MediaQuery.of(context).size.height * .12;
-    return Padding(
-      padding: EdgeInsets.only(top: top),
-      child: widget.child,
-    );
-  }
-
   Widget _buildHorizontalBar(BuildContext context) {
     final safePadding = MediaQuery.of(context).padding.top;
     final safeFraction = safePadding / MediaQuery.of(context).size.height;
@@ -147,15 +134,6 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
         ),
       ),
     );
-  }
-
-  Widget _buildVerticalBody() {
-    final spacing = MediaQuery.of(context).size.width * .12;
-    final pad = Directionality.of(context) == TextDirection.rtl
-        ? EdgeInsets.only(right: spacing)
-        : EdgeInsets.only(left: spacing);
-
-    return Padding(padding: pad, child: widget.child);
   }
 
   Widget _buildVerticalBar(BuildContext context) {

@@ -67,7 +67,7 @@ dependencies:
   # Windows-native Widgets
   fluent_ui: ^3.12.0
   # MacOS-native Widgets
-  macos_ui: ^0.10.0+1
+  macos_ui: ^1.7.0
 
   # *******
   # Business Logic Dependencies

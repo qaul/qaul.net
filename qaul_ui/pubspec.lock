@@ -639,7 +639,7 @@ packages:
       name: macos_ui
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.10.0+1"
+    version: "1.7.0"
   mailto:
     dependency: "direct main"
     description:
@@ -682,13 +682,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.1"
-  native_context_menu:
-    dependency: transitive
-    description:
-      name: native_context_menu
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.0+3"
   neat_periodic_task:
     dependency: "direct main"
     description:

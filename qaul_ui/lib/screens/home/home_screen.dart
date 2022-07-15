@@ -30,7 +30,8 @@ class HomeScreen extends HookConsumerWidget {
       },
       child: Scaffold(
         body: QaulNavBarDecorator(
-          child: PageView(
+          child: (key) => PageView(
+            key: key,
             controller: tabCtrl.pageController,
             allowImplicitScrolling: true,
             physics: _isMobile ? const PageScrollPhysics() : const NeverScrollableScrollPhysics(),
