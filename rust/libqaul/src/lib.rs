@@ -126,9 +126,18 @@ pub async fn start(storage_path: String) -> () {
         }    
     }
 
+    // logging on android with android logger
     #[cfg(target_os = "android")]
     {
         let env_logger = Box::new(android_logger::AndroidLogger::new(Config::default().with_min_level(Level::Info)));
+        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap()));
+        multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info).unwrap();
+    }
+
+    // logging on ios
+    #[cfg(target_os = "ios")]
+    {
+        let env_logger = Box::new(pretty_env_logger::formatted_builder().filter(None, log::LevelFilter::Info).build());
         let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap()));
         multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info).unwrap();
     }
