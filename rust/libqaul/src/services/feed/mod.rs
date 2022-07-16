@@ -101,9 +101,13 @@ pub struct FeedMessageSendContainer {
 pub struct Feed {
     // in memory BTreeMap
     pub messages: BTreeMap< Vec<u8>, proto_net::FeedMessageContent>,
+
+    // sled data base tree for message_id to last index
+    pub tree_ids: Tree<u64>,
+
     // sled data base tree
     pub tree: Tree<FeedMessageData>,
-    // last recent message
+    // last recent message    
     pub last_message: u64,
 }
 
@@ -113,6 +117,7 @@ impl Feed {
         // get database and initialize tree
         let db = DataBase::get_node_db();
         let tree: Tree<FeedMessageData> = db.open_bincode_tree("feed").unwrap();
+        let tree_ids: Tree<u64> = db.open_bincode_tree("feed_id").unwrap();
 
         // get last key
         let last_message: u64;
@@ -142,6 +147,7 @@ impl Feed {
         let feed = Feed {
             messages: BTreeMap::new(),
             tree,
+            tree_ids,
             last_message,
         };
         FEED.set(RwLock::new(feed));
@@ -252,10 +258,67 @@ impl Feed {
                 }  
     }
 
+    //Save message by sync
+    pub fn save_message_by_sync(message_id: &Vec<u8>, sender_id: &Vec<u8>, content: String, time: u64) {
+
+        let mut feed = FEED.get().write().unwrap();
+        if let Some(_index) = feed.tree_ids.get(&message_id[..]).unwrap(){
+            return;
+        }
+
+        let msg_content = proto_net::FeedMessageContent {
+            sender: sender_id.clone(),
+            content: content.clone(),
+            time: time
+        };
+
+        // insert message to in memory BTreeMap
+        feed.messages.insert(message_id.clone(), msg_content);
+
+        // create new key
+        let last_message = feed.last_message +1;
+
+        // create timestamp
+        let timestamp_received = timestamp::Timestamp::get_timestamp();
+         
+        //create feed struct for database store
+        let message_data = FeedMessageData {
+            index: last_message,
+            message_id: message_id.clone(),
+            sender_id: sender_id.clone(),
+            timestamp_sent: time,
+            timestamp_received,
+            content: content.clone(),
+        };    
+
+        // save to data base
+        if let Err(e) = feed.tree.insert(&last_message.to_be_bytes(), message_data) {
+            log::error!("Error saving feed message to data base: {}", e);
+        }
+        else {
+            if let Err(e) = feed.tree.flush() {
+                log::error!("Error when flushing data base to disk: {}", e);
+            }
+        }
+
+        if let Err(e) = feed.tree_ids.insert(&message_id[..], last_message) {
+            log::error!("Error saving feed id to data base: {}", e);            
+        }
+        else {
+            if let Err(e) = feed.tree_ids.flush() {
+                log::error!("Error when flushing data base to disk: {}", e);
+            }
+        }        
+
+        // update key
+        feed.last_message = last_message;
+    }
+
+
     /// Save a Message
     /// 
     /// This function saves a new message in the data base and in the in-memory BTreeMap
-    fn save_message (signature: Vec<u8>, message: proto_net::FeedMessageContent) {
+    fn save_message(signature: Vec<u8>, message: proto_net::FeedMessageContent) {
         // open feed map for writing
         let mut feed = FEED.get().write().unwrap();
 
@@ -280,7 +343,7 @@ impl Feed {
 
         // save to data base
         if let Err(e) = feed.tree.insert(&last_message.to_be_bytes(), message_data) {
-            log::error!("Error saving feed message to data base: {}", e);
+            log::error!("Error saving feed message to data base: {}", e);            
         }
         else {
             if let Err(e) = feed.tree.flush() {
@@ -288,9 +351,76 @@ impl Feed {
             }
         }
 
+
+        if let Err(e) = feed.tree_ids.insert(&signature[..], last_message) {
+            log::error!("Error saving feed id to data base: {}", e);            
+        }
+        else {
+            if let Err(e) = feed.tree_ids.flush() {
+                log::error!("Error when flushing data base to disk: {}", e);
+            }
+        }
+
         // update key
         feed.last_message = last_message;
     }
+
+
+    pub fn get_latest_message_ids(count: usize) -> Vec<Vec<u8>> {
+        let mut ids: Vec<Vec<u8>> = vec![];
+
+        // get feed message store
+        let feed = FEED.get().read().unwrap();
+        let mut msg_count: usize = count;
+        if feed.last_message < (count as u64) {
+            msg_count = feed.last_message as usize;
+        }
+
+        let first_message = feed.last_message - (msg_count as u64);
+        let first_message_bytes = first_message.to_be_bytes().to_vec();
+        for res in feed.tree.range(first_message_bytes.as_slice()..) {
+            match res {
+                Ok((_id, message)) => {
+                    ids.push(message.message_id.clone());
+                },
+                Err(e) => {
+                    log::error!("Error retrieving feed message from data base: {}", e);
+                }
+            }
+        }
+        ids
+    }
+
+
+    //return missing feed ids to request to the neighbour
+    pub fn process_received_feed_ids(ids: &Vec<Vec<u8>>) -> Vec<Vec<u8>>{
+        let mut missing_ids: Vec<Vec<u8>> = vec![];
+
+        let feed = FEED.get().read().unwrap();
+        for id in ids{
+            match feed.tree_ids.get(&id[..]).unwrap() {
+                Some(_index) =>{},
+                _ =>{
+                    missing_ids.push(id.clone());
+                }
+            }
+        }
+        missing_ids
+    }
+
+    pub fn get_messges_by_ids(ids: &Vec<Vec<u8>>) -> Vec<(Vec<u8>, Vec<u8>, String, u64)>{
+        let mut res: Vec<(Vec<u8>, Vec<u8>, String, u64)> = vec![];
+        let feed = FEED.get().read().unwrap();
+        for id in ids{
+            if let Some(index) = feed.tree_ids.get(&id[..]).unwrap() {
+                if let Some(message) = feed.tree.get(index.to_be_bytes()).unwrap(){
+                    res.push((id.clone(), message.sender_id.clone(), message.content.clone(), message.timestamp_sent));
+                }
+            }
+        }
+        res
+    }
+
 
     /// Get messages from data base
     /// 
@@ -314,6 +444,13 @@ impl Feed {
             for res in feed.tree.range(first_message_bytes.as_slice()..) {
                 match res {
                     Ok((_id, message)) => {
+                        
+                        if feed.messages.contains_key(&message.message_id) {
+                            log::error!("key exist");
+                        }else{
+                            log::error!("key find error");
+                        }
+
                         let sender_id_base58 = bs58::encode(message.sender_id.clone()).into_string();
 
                         //create timestamp
