@@ -8,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/protobuf.dart' as pb;
 import 'package:utils/utils.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
 import '../qaul_rpc.dart';
@@ -71,6 +72,23 @@ class LibqaulWorker {
       final msg = Debug(heartbeatRequest: HeartbeatRequest());
       _sendMessage(Modules.DEBUG, msg);
     });
+
+    if (Platform.isAndroid) {
+      final permissions = await [
+        Permission.bluetooth,
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+        Permission.bluetoothAdvertise
+      ].request();
+
+      final stats = <String>[];
+      for (final p in permissions.entries) {
+        stats.add('\n\t· ${p.key}: ${p.value}');
+      }
+      // TODO: (investigate) somehow logging in the "CONFIG" level only is printed to console in debug when using a delay
+      Future.delayed(const Duration(seconds: 5)).then((value) => _log.config(
+          '[Android] Required BLE Permission Statuses: ${stats.join()}'));
+    }
 
     _initialized.complete(true);
   }
@@ -362,5 +380,58 @@ class LibqaulWorker {
       _log.info('libqaul log storage path: $path');
       _reader(libqaulLogsStoragePath.state).state = path;
     }
+    if (resp.module == Modules.USERACCOUNTS) {
+      if (resp.data != null && resp.data is User) {
+        _reader(defaultUserProvider.state).state = resp.data;
+      }
+      return;
+    }
+    if (resp.module == Modules.CHAT) {
+      if (resp.data != null) {
+        if (resp.data is List<ChatRoom>) {
+          final state = _reader(chatRoomsProvider.notifier);
+          for (final room in resp.data) {
+            if (!state.contains(room)) {
+              state.add(room);
+            } else {
+              state.update(room);
+            }
+          }
+          return;
+        }
+        if (resp.data is ChatRoom) {
+          final currentRoom = _reader(currentOpenChatRoom);
+
+          if (currentRoom != null &&
+              currentRoom.conversationId.equals(resp.data.conversationId)) {
+            _reader(currentOpenChatRoom.notifier).state = resp.data;
+          }
+          return;
+        }
+      }
+    }
+    if (resp.module == Modules.BLE) {
+      if (resp.data is BleConnectionStatus) {
+        var newStatus = resp.data as BleConnectionStatus;
+        _log.finer('BLE Module: received new status $newStatus');
+        final currentStatus = _reader(bleStatusProvider);
+        if (currentStatus != null) {
+          newStatus = currentStatus.copyWith(
+            status: newStatus.status,
+            deviceInfo: newStatus.deviceInfo,
+            discoveredNodes: newStatus.discoveredNodes,
+            nodesPendingConfirmation: newStatus.discoveredNodes,
+          );
+          _log.finest(
+              'BLE Module: merged status with current status. New Status: $newStatus');
+        }
+        _reader(bleStatusProvider.state).state = newStatus;
+        return;
+      }
+    }
+
+    _log.severe('_processResponse: UnhandledRpcMessageException($resp)');
+    throw UnhandledRpcMessageException.value(
+        resp.toString(), '_processResponse');
   }
 }
