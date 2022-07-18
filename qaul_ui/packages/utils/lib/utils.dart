@@ -10,6 +10,8 @@ import 'package:intl/intl.dart';
 import 'package:intl/locale.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import 'src/remove_emoji.dart';
+
 Color colorGenerationStrategy(String first) {
   // defined using --dart-define=testing_mode=true when running tests
   if (const bool.fromEnvironment('testing_mode', defaultValue: false)) {
@@ -26,9 +28,15 @@ Color colorGenerationStrategy(String first) {
 /// containing the first letter of the first and last word, respectively, in uppercase.
 ///
 /// If the provided string has no spaces, returns its first two letters - also uppercase.
+///
+/// Note: Filters out emojis, so as not to cause malformed UTF-16 issues. See more here:
+/// * https://github.com/dart-lang/sdk/issues/35798
+/// * https://github.com/flutter/flutter/issues/52306
+/// * https://github.com/flutter/flutter/issues/43302
 String initials(String name) {
+  name = removeEmoji(name);
   if (name.replaceAll(' ', '').length < 2) {
-    throw ArgumentError.value(name, 'Name', 'not enough charactes to form initials string');
+    throw ArgumentError.value(name, 'Name', 'not enough characters to form initials string');
   }
   if (name.contains(' ')) {
     final ws = name.split(' ').where((e) => e.isNotEmpty).toList();

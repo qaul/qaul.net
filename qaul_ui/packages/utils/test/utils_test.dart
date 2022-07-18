@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:utils/src/remove_emoji.dart';
 import 'package:utils/utils.dart';
 
 void main() {
@@ -76,6 +77,19 @@ void main() {
     }
   });
 
+  group('removeEmoji', () {
+    String testDataWithSpace =
+        ' 🤣h😌e🙄l😪l😓o😳🤔👨‍🦰🤶🏿 🧝‍♂️🍝🥘🌯🍦🥂🥂🎂🍰🧁🍨🍧😁w🤷‍♂️o😎r🤪l🤦‍♂️d🐸🤑😆😖🎉🍾🤟🤩😢🐭😡😍📧😄😔😇🧐😈🙁🤓🙂🥱🌬🌫🌨⛈⛈🌨 ';
+
+    test('trimText = true (default) Validation', () {
+      expect(removeEmoji(testDataWithSpace), 'hello world');
+    });
+
+    test('trimText = false (override) Validation', () {
+      expect(removeEmoji(testDataWithSpace, '', false), ' hello world ');
+    });
+  });
+
   group('initials', () {
     const names = <MapEntry<String, String>>[
       MapEntry('Name', 'NA'),
@@ -86,6 +100,9 @@ void main() {
       MapEntry('  NAME NAME MENA ANEM', 'NA'),
       MapEntry('   NAME NAME MENA ANEM   ', 'NA'),
       MapEntry('NE ', 'NE'),
+      MapEntry('l🤣h😌o🙄😪😓😳ggasdf', 'LH'),
+      MapEntry('🤣h😌o🙄😪😓😳ggasdf', 'HO'),
+      MapEntry('🤣h😌🙄😪😓😳ggasdf', 'HG'),
     ];
 
     for (final tc in names) {
