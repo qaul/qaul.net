@@ -356,4 +356,28 @@ void main() {
       ),
     );
   });
+
+  test('Node with cyclic reference drops worst connection', () async {
+    var user = generateUser('user');
+    var child1 = generateUser('child1',
+        connections: const {ConnectionType.internet: ConnectionInfo(ping: 110, hopCount: 1)});
+    var grandchild11 = generateUser('grandchild11', connections: const {
+      ConnectionType.internet: ConnectionInfo(ping: 111, hopCount: 2),
+      ConnectionType.lan: ConnectionInfo(ping: 10, hopCount: 1),
+    });
+    final users = [child1, grandchild11];
+
+    final tree = NetworkNode.fromUserData(user, users, NetworkTypeFilter.all);
+
+    expect(
+      tree,
+      NetworkNode(
+        user: user,
+        children: {
+          toNetworkNode(child1, parent: user),
+          toNetworkNode(grandchild11, parent: user),
+        },
+      ),
+    );
+  });
 }

@@ -54,10 +54,26 @@ class User with EquatableMixin implements Comparable<User> {
   bool get _statusIsNotOffline => status != ConnectionStatus.offline;
 
   bool get _typesAreNotEmpty => (availableTypes?.isNotEmpty ?? false);
+
+  User copyWith({required Map<ConnectionType, ConnectionInfo> availableTypes}) {
+    return User(
+      name: name,
+      id: id,
+      idBase58: idBase58,
+      key: key,
+      keyType: keyType,
+      keyBase58: keyBase58,
+      availableTypes: availableTypes,
+      isBlocked: isBlocked,
+      isVerified: isVerified,
+      status: status,
+    );
+  }
 }
 
 class ConnectionInfo extends Equatable {
-  const ConnectionInfo({this.ping, this.hopCount, this.nodeID, this.nodeIDBase58});
+  const ConnectionInfo(
+      {this.ping, this.hopCount, this.nodeID, this.nodeIDBase58});
 
   final int? ping;
   final int? hopCount;

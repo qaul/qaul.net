@@ -28,6 +28,10 @@ class NetworkNode extends Equatable {
         ? [filter]
         : NetworkTypeFilter.values.where(typeIsNotAll).toList();
 
+    if (filter == NetworkTypeFilter.all) {
+      users = _filterOutRepeatingConnections(users);
+    }
+
     final unstructured = _assignParentToChildNodes(root, users, options);
     return _buildNetworkNodeListRecursively(rootNode, allNodes: unstructured);
   }
@@ -51,14 +55,47 @@ class NetworkNode extends Equatable {
     return unstructured;
   }
 
+  static List<User> _filterOutRepeatingConnections(List<User> users) {
+    bool connectionIsBetter(MapEntry<ConnectionType, ConnectionInfo> entry,
+        {required MapEntry<ConnectionType, ConnectionInfo> reference}) =>
+        (entry.value.hopCount ?? -1) < (reference.value.hopCount ?? -1) ||
+            (entry.value.ping ?? -1) < (reference.value.ping ?? -1);
+
+    final out = <User>[];
+    for (final usr in users) {
+      if (usr.availableTypes?.keys.length == 1) {
+        out.add(usr);
+        continue;
+      }
+
+      MapEntry<ConnectionType, ConnectionInfo>? bestConnection;
+      for (final MapEntry<ConnectionType, ConnectionInfo> entry
+      in (usr.availableTypes?.entries ?? const Iterable.empty())) {
+        if (bestConnection == null) {
+          bestConnection = entry;
+          continue;
+        }
+        if (!connectionIsBetter(entry, reference: bestConnection)) continue;
+
+        bestConnection = entry;
+      }
+      if (bestConnection == null) continue;
+
+      out.add(usr.copyWith(availableTypes: {}..addEntries([bestConnection])));
+    }
+    return out;
+  }
+
   static List<NetworkNode> _prepareUnstructuredNetworkNodes(
     User root,
     List<User> users,
     ConnectionType filter,
   ) {
-    final immediateChildren =
-        users.where((element) => element.availableTypes![filter]!.hopCount! == 1);
-    final out = immediateChildren.map((e) => NetworkNode(user: e, parentId: root.id)).toList();
+    final immediateChildren = users
+        .where((element) => element.availableTypes![filter]!.hopCount! == 1);
+    final out = immediateChildren
+        .map((e) => NetworkNode(user: e, parentId: root.id))
+        .toList();
     if (out.isEmpty) return out;
 
     final remainingUsers = [...users]
@@ -74,7 +111,8 @@ class NetworkNode extends Equatable {
 
       remainingUsers.removeWhere(hopCountMatchesHops);
 
-      final possibleParents = users.where((e) => e.availableTypes![filter]!.hopCount! == hops - 1);
+      final possibleParents =
+          users.where((e) => e.availableTypes![filter]!.hopCount! == hops - 1);
       for (final user in usersWithNHops) {
         num smallestDistance = double.infinity;
         User? mostProbableParent;
