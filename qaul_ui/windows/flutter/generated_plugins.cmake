@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   native_context_menu
+  permission_handler_windows
   url_launcher_windows
 )
 

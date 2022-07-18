@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
 import '../qaul_rpc.dart';
@@ -67,6 +68,23 @@ class LibqaulWorker {
       final msg = Debug(heartbeatRequest: HeartbeatRequest());
       _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
     });
+
+    if (Platform.isAndroid) {
+      final permissions = await [
+        Permission.bluetooth,
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+        Permission.bluetoothAdvertise
+      ].request();
+
+      final stats = <String>[];
+      for (final p in permissions.entries) {
+        stats.add('\n\t· ${p.key}: ${p.value}');
+      }
+      // TODO: (investigate) somehow logging in the "CONFIG" level only is printed to console in debug when using a delay
+      Future.delayed(const Duration(seconds: 5)).then((value) => _log.config(
+          '[Android] Required BLE Permission Statuses: ${stats.join()}'));
+    }
 
     _initialized.complete(true);
   }
@@ -185,7 +203,7 @@ class LibqaulWorker {
     final msg = Debug(deleteLibqaulLogsRequest: DeleteLibqaulLogsRequest());
     await _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
   }
-  
+
   void sendBleInfoRequest() async {
     for (final message in [
       Ble(infoRequest: InfoRequest()).writeToBuffer(),
@@ -273,7 +291,8 @@ class LibqaulWorker {
           _heartbeats.removeFirst();
         }
         if (resp?.data is String) {
-          final path = await findFolderWithFilesOfExtension(Directory(resp!.data), '.log');
+          final path = await findFolderWithFilesOfExtension(
+              Directory(resp!.data), '.log');
           _log.info('libqaul log storage path: $path');
           _reader(libqaulLogsStoragePath.state).state = path;
         }
@@ -354,7 +373,8 @@ class LibqaulWorker {
             discoveredNodes: newStatus.discoveredNodes,
             nodesPendingConfirmation: newStatus.discoveredNodes,
           );
-          _log.finest('BLE Module: merged status with current status. New Status: $newStatus');
+          _log.finest(
+              'BLE Module: merged status with current status. New Status: $newStatus');
         }
         _reader(bleStatusProvider.state).state = newStatus;
         return;
