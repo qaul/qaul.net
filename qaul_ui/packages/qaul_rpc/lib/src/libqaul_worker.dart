@@ -73,23 +73,6 @@ class LibqaulWorker {
       _sendMessage(Modules.DEBUG, msg);
     });
 
-    if (Platform.isAndroid) {
-      final permissions = await [
-        Permission.bluetooth,
-        Permission.bluetoothScan,
-        Permission.bluetoothConnect,
-        Permission.bluetoothAdvertise
-      ].request();
-
-      final stats = <String>[];
-      for (final p in permissions.entries) {
-        stats.add('\n\t· ${p.key}: ${p.value}');
-      }
-      // TODO: (investigate) somehow logging in the "CONFIG" level only is printed to console in debug when using a delay
-      Future.delayed(const Duration(seconds: 5)).then((value) => _log.config(
-          '[Android] Required BLE Permission Statuses: ${stats.join()}'));
-    }
-
     _initialized.complete(true);
   }
 
@@ -427,6 +410,31 @@ class LibqaulWorker {
         }
         _reader(bleStatusProvider.state).state = newStatus;
         return;
+      } else if (resp.data is BleRightsRequest) {
+        if (Platform.isAndroid) {
+          final permissions = await [
+            Permission.bluetooth,
+            Permission.bluetoothScan,
+            Permission.bluetoothConnect,
+            Permission.bluetoothAdvertise
+          ].request();
+
+          final stats = <String>[];
+          for (final p in permissions.entries) {
+            stats.add('\n\t· ${p.key}: ${p.value}');
+          }
+          Future.delayed(const Duration(seconds: 5)).then((value) => _log.config(
+              '[Android] Required BLE Permission Statuses: ${stats.join()}'));
+
+          final msg = Ble(
+            rightsResult: RightsResult(
+                rightsGranted: permissions.values
+                    .where((p) => p != PermissionStatus.granted)
+                    .isEmpty),
+          );
+          await _encodeAndSendMessage(Modules.FEED, msg.writeToBuffer());
+          return;
+        }
       }
     }
 
