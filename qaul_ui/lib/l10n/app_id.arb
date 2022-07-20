@@ -61,5 +61,6 @@
   "notFoundErrorMessage": "Tidak Ditemukan",
   "noneAvailableMessage": "Tidak Ada yang Tersedia",
   "invalidIPMessage": "IP Salah",
-  "invalidPortMessage": "Portal Salah"
+  "invalidPortMessage": "Portal Salah",
+  "usernameLengthMessage": "Nama pengguna harus memiliki minimal 2 karakter."
 }

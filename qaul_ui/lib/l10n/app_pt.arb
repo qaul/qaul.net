@@ -61,5 +61,6 @@
   "notFoundErrorMessage": "Não Encontrado",
   "noneAvailableMessage": "Nenhum Disponível",
   "invalidIPMessage": "IP Inválido",
-  "invalidPortMessage": "Porta Inválida"
+  "invalidPortMessage": "Porta Inválida",
+  "usernameLengthMessage": "Seu nome deve conter no mínimo 2 caracteres."
 }

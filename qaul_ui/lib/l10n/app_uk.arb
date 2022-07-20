@@ -61,5 +61,6 @@
   "notFoundErrorMessage": "не знайдено",
   "noneAvailableMessage": "Доступних нема",
   "invalidIPMessage": "Хибна IP-адреса",
-  "invalidPortMessage": "Хибний порт"
+  "invalidPortMessage": "Хибний порт",
+  "usernameLengthMessage": "Ім'я користувача повинно містити принаймні 2 символи."
 }

@@ -61,5 +61,6 @@
   "notFoundErrorMessage": "not found",
   "noneAvailableMessage": "None available",
   "invalidIPMessage": "Invalid IP",
-  "invalidPortMessage": "Invalid Port"
+  "invalidPortMessage": "Invalid Port",
+  "usernameLengthMessage": "Username must have at least 2 characters."
 }

@@ -152,6 +152,8 @@ class CreateAccountScreen extends HookConsumerWidget {
   String? _validateUserName(BuildContext context, String? value) {
     if (value == null || value.isEmpty) {
       return AppLocalizations.of(context)!.fieldRequiredErrorMessage;
+    } if (value.length < 2) {
+      return AppLocalizations.of(context)!.usernameLengthMessage;
     }
     return null;
   }
