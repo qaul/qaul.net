@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:utils/src/remove_emoji.dart';
+import 'package:utils/src/emoji_string_manipulator.dart';
 import 'package:utils/utils.dart';
 
 void main() {
@@ -100,9 +100,9 @@ void main() {
       MapEntry('  NAME NAME MENA ANEM', 'NA'),
       MapEntry('   NAME NAME MENA ANEM   ', 'NA'),
       MapEntry('NE ', 'NE'),
-      MapEntry('l🤣h😌o🙄😪😓😳ggasdf', 'LH'),
-      MapEntry('🤣h😌o🙄😪😓😳ggasdf', 'HO'),
-      MapEntry('🤣h😌🙄😪😓😳ggasdf', 'HG'),
+      MapEntry('l🤣h😌o🙄😪😓😳ggasdf', '🤣'),
+      MapEntry('😌🤣h😌o🙄😪😓😳ggasdf', '😌'),
+      MapEntry('😳🤣h😌🙄😪😓😳ggasdf', '😳'),
     ];
 
     for (final tc in names) {

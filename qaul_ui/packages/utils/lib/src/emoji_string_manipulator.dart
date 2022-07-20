@@ -14,3 +14,11 @@ String removeEmoji(String text, [String word = '', bool trimText = true]) =>
     trimText
         ? text.replaceAll(RegExp(emojiRegex), word).trim()
         : text.replaceAll(RegExp(emojiRegex), word);
+
+bool hasEmojis(String text) => text.contains(RegExp(emojiRegex));
+
+String? retrieveFirstEmoji(String text) {
+  final match = RegExp(emojiRegex).firstMatch(text);
+  if (match == null) return null;
+  return match[0];
+}

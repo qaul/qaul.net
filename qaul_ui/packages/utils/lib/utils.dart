@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:intl/locale.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import 'src/remove_emoji.dart';
+import 'src/emoji_string_manipulator.dart';
 
 Color colorGenerationStrategy(String first) {
   // defined using --dart-define=testing_mode=true when running tests
@@ -34,7 +34,11 @@ Color colorGenerationStrategy(String first) {
 /// * https://github.com/flutter/flutter/issues/52306
 /// * https://github.com/flutter/flutter/issues/43302
 String initials(String name) {
-  name = removeEmoji(name);
+  if (hasEmojis(name)) {
+    final emoji = retrieveFirstEmoji(name);
+    if (emoji != null) return emoji;
+    name = removeEmoji(name);
+  }
   if (name.replaceAll(' ', '').length < 2) {
     throw ArgumentError.value(name, 'Name', 'not enough characters to form initials string');
   }
