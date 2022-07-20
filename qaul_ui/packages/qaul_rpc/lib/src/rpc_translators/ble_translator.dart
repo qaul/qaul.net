@@ -1,5 +1,7 @@
 part of 'abstract_rpc_module_translator.dart';
 
+class BleRightsRequest {}
+
 class BleTranslator extends RpcModuleTranslator {
   @override
   Modules get type => Modules.BLE;
@@ -23,7 +25,9 @@ class BleTranslator extends RpcModuleTranslator {
           discoveredNodes: msg.nodesCount,
           nodesPendingConfirmation: msg.toConfirmCount,
         );
-        return RpcTranslatorResponse(type, status);
+        return RpcTranslatorResponse(Modules.BLE, status);
+      case Ble_Message.rightsRequest:
+        return RpcTranslatorResponse(Modules.BLE, BleRightsRequest());
       default:
         return super.decodeMessageBytes(data, reader);
     }
